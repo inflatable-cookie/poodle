@@ -12094,8 +12094,13 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
 /// AgentQuestion reaches the production compat adapter, renderer, and backend.
 #[test]
 fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
-    use gpui::{AnyElement, IntoElement};
-    use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
+    use crate::node_compat::IntoCompatNode;
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::agent_question::{
+        toggle_question_selection, AgentQuestionItem, AgentQuestionOption,
+    };
+    use poodle_node::{NodeKind, NodeToggled};
     use poodle_specs::{AgentQuestionSpec, ControlDensity, ControlSize};
 
     fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {
@@ -12129,10 +12134,13 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
         .with_size(ControlSize::Sm)
         .with_density(ControlDensity::Compact);
     let theme_provider = theme();
-    let rendered = poodle_render::agent_question(
-        &spec,
-        &RenderContext::new(&theme_provider),
-        poodle_render::AgentQuestionHandlers::default(),
+    let rendered = crate::node_compat::AgentQuestion::from_spec(spec.clone(), &theme_provider)
+        .with_instance_id("counterexample")
+        .into_compat_node();
+    assert_eq!(
+        rendered.runtime_id.as_deref(),
+        Some("agent-question:counterexample"),
+        "the compat facade must carry caller identity into the renderer"
     );
     assert_eq!(
         rendered.roles.get("size").map(String::as_str),
@@ -12149,13 +12157,36 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
         Some("false"),
         "the production question root must expose the active choice mode"
     );
+    assert_eq!(
+        rendered.children.len(),
+        5,
+        "batch progress, header, prompt, options, then dismiss"
+    );
+    let progress = &rendered.children[0];
+    assert_eq!(
+        progress.children[0]
+            .children
+            .iter()
+            .map(|dot| dot.roles.get("state").map(String::as_str))
+            .collect::<Vec<_>>(),
+        [Some("current"), Some("pending")]
+    );
+    assert_eq!(progress.children[1].intrinsic_text(), Some("1 of 2"));
+    assert_eq!(progress.children[1].style.line_height, Some(1.5));
 
     let prompt = rendered
         .find(&|node| node.intrinsic_text() == Some("Where should the question appear?"))
         .expect("prompt");
     assert!(prompt.style.text_wrap, "the prompt composes production Text");
     assert_eq!(prompt.style.line_height, Some(1.5));
+    assert_eq!(
+        prompt.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.primary"))
+    );
 
+    let unselected = rendered
+        .find(&|node| node.a11y.label.as_deref() == Some("Inline in the transcript"))
+        .expect("unselected option");
     let selected = rendered
         .find(&|node| node.a11y.label.as_deref() == Some("Above the composer"))
         .expect("selected option");
@@ -12171,41 +12202,371 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
         Some("compact")
     );
     assert!(selected.style.focus_ring.is_some());
+    assert_eq!(selected.style.descriptor.layout.width, LayoutSizing::Grow);
+    assert_eq!(selected.style.descriptor.layout.height, LayoutSizing::Fit);
+    assert_eq!(selected.a11y.selected, Some(true));
+    assert_eq!(selected.a11y.toggled, Some(NodeToggled::True));
+    assert_eq!(unselected.a11y.selected, Some(false));
+    assert_eq!(unselected.a11y.toggled, Some(NodeToggled::False));
+    assert_eq!(
+        selected.roles.get("selected").map(String::as_str),
+        Some("true")
+    );
+    assert_eq!(
+        unselected.roles.get("selected").map(String::as_str),
+        Some("false")
+    );
+    assert_eq!(
+        selected.style.descriptor.border.color,
+        theme_provider.resolve_color("color.accent.base"),
+        "selected borders resolve the contracted accent token"
+    );
+    assert_eq!(
+        unselected.style.descriptor.background,
+        Some(theme_provider.resolve_color("color.background.elevated")),
+        "unselected options resolve the contracted elevated fill"
+    );
+    let option_label = selected
+        .find(&|node| node.intrinsic_text() == Some("Above the composer"))
+        .expect("production option label");
+    assert!(option_label.style.text_wrap);
+    assert_eq!(option_label.style.line_height, Some(1.5));
+    assert_eq!(option_label.style.text_weight, Some(600));
+    assert_eq!(
+        option_label.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.primary"))
+    );
+    let description = unselected
+        .find(&|node| node.intrinsic_text() == Some("Keep it beside the agent turn."))
+        .expect("production option description");
+    assert!(description.style.text_wrap);
+    assert_eq!(
+        description.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.secondary"))
+    );
+    let options = rendered
+        .find(&|node| node.a11y.role == Some(NodeRole::RadioGroup))
+        .expect("single-select options");
+    assert_eq!(options.a11y.label.as_deref(), Some("Where should the question appear?"));
+    assert_eq!(options.children.len(), 2);
+    assert!(
+        options
+            .find(&|node| matches!(node.kind, NodeKind::Icon { .. }))
+            .is_none(),
+        "single-select options do not paint checkbox glyphs"
+    );
+    let dismiss = rendered
+        .find(&|node| {
+            node.runtime_id.as_deref()
+                == Some("agent-question:counterexample:dismiss")
+        })
+        .expect("dismiss control");
+    assert_eq!(
+        dismiss.roles.get("variant").map(String::as_str),
+        Some("ghost"),
+        "dismiss composes production Button"
+    );
+    assert_eq!(
+        dismiss.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.secondary"))
+    );
+
+    let multi = crate::node_compat::AgentQuestion::from_spec(
+        AgentQuestionSpec::new(vec![question(true)])
+            .with_selections(vec!["inline".to_owned()])
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact),
+        &theme_provider,
+    )
+    .with_instance_id("multi")
+    .into_compat_node();
+    assert_eq!(
+        multi.roles.get("multi-select").map(String::as_str),
+        Some("true")
+    );
+    let multi_options = multi
+        .find(&|node| node.a11y.role == Some(NodeRole::Group))
+        .expect("multi-select options");
+    assert_eq!(multi_options.children.len(), 2);
+    assert!(multi_options.children.iter().all(|option| {
+        option.a11y.role == Some(NodeRole::CheckBox)
+            && option.find(&|node| matches!(node.kind, NodeKind::Icon { .. })).is_some()
+    }));
+    assert!(spec.submits_on_select());
+    assert!(!AgentQuestionSpec::new(vec![question(true)]).submits_on_select());
+
+    let pending = crate::node_compat::AgentQuestion::from_spec(
+        AgentQuestionSpec::new(vec![question(false)]).with_active_index(1),
+        &theme_provider,
+    )
+    .with_instance_id("pending")
+    .into_compat_node();
+    assert!(
+        pending
+            .find(&|node| node.a11y.role == Some(NodeRole::Button))
+            .is_none(),
+        "a question with no active item is inert"
+    );
 
     run_headless(|cx| {
-        #[derive(Default)]
         struct QuestionHost {
-            selections: Vec<String>,
+            left: Vec<String>,
+            right: Vec<String>,
+            right_active: usize,
+            right_enabled: bool,
+            refuse_left: bool,
             events: Vec<String>,
         }
 
-        let host = Arc::new(Mutex::new(QuestionHost::default()));
+        fn selections(host: &QuestionHost, scope: &str) -> Vec<String> {
+            match scope {
+                "left" => host.left.clone(),
+                "right" => host.right.clone(),
+                other => panic!("unknown AgentQuestion scope {other}"),
+            }
+        }
+
+        fn element(
+            host: &Arc<Mutex<QuestionHost>>,
+            scope: &'static str,
+            theme_provider: &GpuiThemeProvider,
+        ) -> AnyElement {
+            let (current, active, enabled) = {
+                let host = host.lock().expect("question host");
+                (
+                    selections(&host, scope),
+                    if scope == "right" { host.right_active } else { 0 },
+                    scope == "left" || host.right_enabled,
+                )
+            };
+            let item = question(scope == "right");
+            let mut question_element = crate::node_compat::AgentQuestion::from_spec(
+                AgentQuestionSpec::new(vec![item.clone()])
+                    .with_active_index(active)
+                    .with_selections(current)
+                    .with_dismissible(scope == "right")
+                    .with_size(ControlSize::Sm)
+                    .with_density(ControlDensity::Compact),
+                theme_provider,
+            )
+            .with_instance_id(scope);
+
+            if enabled {
+                let select_host = Arc::clone(host);
+                question_element = question_element.on_select(Arc::new(move |value| {
+                    let mut host = select_host.lock().expect("question host");
+                    host.events.push(format!("{scope}:select:{value}"));
+                    if scope == "left" && host.refuse_left {
+                        return;
+                    }
+                    let current = selections(&host, scope);
+                    let next = toggle_question_selection(Some(&item), &current, value);
+                    match scope {
+                        "left" => host.left = next,
+                        "right" => host.right = next,
+                        _ => unreachable!(),
+                    }
+                }));
+            }
+
+            let dismiss_host = Arc::clone(host);
+            question_element
+                .on_dismiss(Arc::new(move |id| {
+                    let mut host = dismiss_host.lock().expect("question host");
+                    host.events.push(format!("{scope}:dismiss:{id}"));
+                    if scope == "right" {
+                        host.right_active = 1;
+                    }
+                }))
+                .into_element()
+        }
+
+        let host = Arc::new(Mutex::new(QuestionHost {
+            left: Vec::new(),
+            right: Vec::new(),
+            right_active: 0,
+            right_enabled: true,
+            refuse_left: true,
+            events: Vec::new(),
+        }));
         let build: Rc<dyn Fn() -> AnyElement> = {
             let host = Arc::clone(&host);
             let theme_provider = theme();
             Rc::new(move || {
-                let selections = host.lock().expect("question host").selections.clone();
-                let select_host = Arc::clone(&host);
-                crate::node_compat::AgentQuestion::from_spec(
-                    AgentQuestionSpec::new(vec![question(false)]).with_selections(selections),
-                    &theme_provider,
-                )
-                .on_select(Arc::new(move |value| {
-                    let mut host = select_host.lock().expect("question host");
-                    host.events.push(value.to_owned());
-                    host.selections = vec![value.to_owned()];
-                }))
-                .into_element()
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(24.0))
+                    .child(element(&host, "left", &theme_provider))
+                    .child(element(&host, "right", &theme_provider))
+                    .into_any_element()
             })
         };
 
-        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 240.0);
-        driver.pointer_activate_id("agent-question-option-composer");
-        assert_eq!(
-            host.lock().expect("question host").events,
-            ["composer"],
-            "mounted pointer input reaches the exact option callback"
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        let left_root = "agent-question:left";
+        let right_root = "agent-question:right";
+        let left_inline = poodle_render::agent_question_option_focus_id(Some("left"), "inline");
+        let left_composer =
+            poodle_render::agent_question_option_focus_id(Some("left"), "composer");
+        let right_inline =
+            poodle_render::agent_question_option_focus_id(Some("right"), "inline");
+        let right_composer =
+            poodle_render::agent_question_option_focus_id(Some("right"), "composer");
+        let right_dismiss = poodle_render::agent_question_dismiss_focus_id(Some("right"));
+        for id in [
+            left_root,
+            right_root,
+            &left_inline,
+            &left_composer,
+            &right_inline,
+            &right_composer,
+            &right_dismiss,
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "the IntoElement path must paint {id} through the GPUI backend"
+            );
+        }
+
+        let left_bounds =
+            poodle_gpui_node_backend::bounds_for(left_root).expect("left question bounds");
+        let right_bounds =
+            poodle_gpui_node_backend::bounds_for(right_root).expect("right question bounds");
+        assert!(left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0));
+        assert!(right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0));
+        assert!(
+            left_bounds.origin.y + left_bounds.size.height <= right_bounds.origin.y,
+            "duplicate questions keep authored vertical order without overlap"
         );
+        for (name, id, root) in [
+            ("left inline", &left_inline, left_bounds),
+            ("left composer", &left_composer, left_bounds),
+            ("right inline", &right_inline, right_bounds),
+            ("right composer", &right_composer, right_bounds),
+            ("right dismiss", &right_dismiss, right_bounds),
+        ] {
+            let bounds = poodle_gpui_node_backend::bounds_for(id).expect("control bounds");
+            assert!(
+                bounds.origin.x >= root.origin.x
+                    && bounds.origin.x + bounds.size.width <= root.origin.x + root.size.width
+                    && bounds.origin.y >= root.origin.y
+                    && bounds.origin.y + bounds.size.height <= root.origin.y + root.size.height,
+                "{name} stays contained in its own question root"
+            );
+        }
+
+        driver.wait_for_focus_handle(&left_inline);
+        driver.wait_for_focus_handle(&right_inline);
+        driver.focus_element(&left_inline);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_inline),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_inline),
+            Some(false),
+            "duplicate option values keep caller-scoped focus handles"
+        );
+
+        driver.pointer_activate_id(&left_composer);
+        {
+            let host = host.lock().expect("question host");
+            assert_eq!(host.events.as_slice(), ["left:select:composer"]);
+            assert!(host.left.is_empty(), "host refusal leaves selection pending");
+            assert!(host.right.is_empty());
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(&left_composer).is_some());
+
+        host.lock().expect("question host").refuse_left = false;
+        driver.keyboard_activate(&left_composer);
+        {
+            let host = host.lock().expect("question host");
+            assert_eq!(
+                host.events.as_slice(),
+                ["left:select:composer", "left:select:composer"]
+            );
+            assert_eq!(host.left, ["composer"]);
+            assert!(host.right.is_empty());
+        }
+        driver.pointer_activate_id(&left_inline);
+        assert_eq!(
+            host.lock().expect("question host").left,
+            ["inline"],
+            "single-select replaces the previous value"
+        );
+
+        driver.pointer_activate_id(&right_inline);
+        driver.keyboard_activate(&right_composer);
+        assert_eq!(
+            host.lock().expect("question host").right,
+            ["inline", "composer"],
+            "multi-select preserves authored option order and never collapses to one value"
+        );
+        driver.pointer_activate_id(&right_inline);
+        assert_eq!(
+            host.lock().expect("question host").right,
+            ["composer"],
+            "multi-select toggles only the activated value"
+        );
+
+        driver.pointer_activate_id(&right_dismiss);
+        {
+            let host = host.lock().expect("question host");
+            assert_eq!(
+                host.events.last().map(String::as_str),
+                Some("right:dismiss:placement"),
+                "dismiss forwards the exact active question id"
+            );
+            assert_eq!(host.right_active, 1);
+            assert_eq!(
+                host.events.as_slice(),
+                [
+                    "left:select:composer",
+                    "left:select:composer",
+                    "left:select:inline",
+                    "right:select:inline",
+                    "right:select:composer",
+                    "right:select:inline",
+                    "right:dismiss:placement",
+                ],
+                "mounted callbacks keep exact instance, action, value, and question identity"
+            );
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(right_root).is_none(),
+            "host-owned batch advancement rebuilds the resolved question away"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(left_root).is_some(),
+            "right dismissal cannot remove the left instance"
+        );
+
+        {
+            let mut host = host.lock().expect("question host");
+            host.right_active = 0;
+            host.right_enabled = false;
+            host.right.clear();
+        }
+        driver.draw_frame();
+        let event_count = host.lock().expect("question host").events.len();
+        driver.pointer_activate_id(&right_composer);
+        driver.keyboard_activate(&right_composer);
+        {
+            let host = host.lock().expect("question host");
+            assert_eq!(host.events.len(), event_count);
+            assert!(
+                host.right.is_empty(),
+                "an unwired native question remains inert under mounted pointer and keyboard input"
+            );
+        }
+
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"structure.identity.button"));
+        assert!(channels.contains(&"content.text-icon.text"));
+        assert!(channels.contains(&"semantic.token-roles.received"));
+        assert!(channels.contains(&"accessibility.projection.received"));
         assert!(
             driver.mounted_observation().is_valid(),
             "the proof must paint and dispatch input through the mounted backend"

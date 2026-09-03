@@ -1075,17 +1075,37 @@ impl AgentQuestion {
         self.handlers.on_select = Some(handler);
         self
     }
+
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::agent_question(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        )
+    }
+}
+
+impl IntoCompatNode for AgentQuestion {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
 }
 
 impl IntoElement for AgentQuestion {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_question(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
