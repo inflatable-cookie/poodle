@@ -29545,11 +29545,11 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             &[
                 "mount caller-scoped controlled AgentChatInput instances through node_compat::AgentChatInput::from_spec(...).into_element() in HeadlessDriver",
                 "dispatch pointer and keyboard edits, focus changes, submits, stops, and disabled activations through the GPUI test platform",
-                "refuse one controlled edit without rebuilding, then accept it only through an explicit host-owned rebuild",
+                "submit refused and accepted controlled edit proposals, rebuilding the production factory from unchanged or updated host-owned value and selection",
             ],
             &[
                 "production TextInput and Button composition preserves exact AgentChatInput-owned token, data, placeholder, status, and disabled metadata",
-                "mounted painted value remains unchanged after host refusal and changes only after the accepted host rebuild",
+                "host refusal rebuilds the mounted production path from unchanged controlled value and selection, while acceptance rebuilds it from updated host-owned state",
                 "submit eligibility and exact callback payload order cover empty, allow-empty, read-only, disabled, idle, and busy states",
                 "the real mount box and parent bounds contain ordered non-overlapping fields, attachments, editors, toolbars, actions, footers, and sibling instances",
                 "caller-scoped instances isolate focus, draft, callbacks, runtime identity, and bounds while disabled pointer input cannot focus or activate the production control",
