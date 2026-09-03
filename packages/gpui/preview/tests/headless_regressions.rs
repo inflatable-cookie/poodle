@@ -32584,27 +32584,685 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
 /// Dialog/TextInput tree, and mounted GPUI backend with caller-scoped identity.
 #[test]
 fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_host_spec() {
-    use gpui::IntoElement;
-    use poodle_specs::{CommandActionItem, CommandPaletteSpec};
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{CursorHint, FontFamily, LayoutDirection, LayoutSizing, NodeKind, NodeRole};
+    use poodle_render::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
+    use poodle_specs::{
+        CommandActionItem, CommandPaletteSpec, ControlDensity, ControlSize, DiscoveryState,
+    };
+
+    fn actions() -> Vec<CommandActionItem> {
+        vec![
+            CommandActionItem::new("open", "Open File")
+                .with_group("File")
+                .with_shortcut("Cmd+O"),
+            CommandActionItem::new("locked", "Locked command")
+                .with_group("File")
+                .with_disabled(true),
+            CommandActionItem::new("save", "Save")
+                .with_group("File")
+                .with_shortcut("Cmd+S")
+                .with_badge("New"),
+            CommandActionItem::new("toggle", "Toggle terminal")
+                .with_group("View")
+                .with_shortcut("Cmd+`"),
+        ]
+    }
+
+    let theme_provider = theme();
+    let proof_spec = CommandPaletteSpec::new(actions())
+        .with_open(true)
+        .with_title("Workspace commands")
+        .with_description("Search every available action.")
+        .with_invocation_hint("Cmd+K")
+        .with_active_action_id("open")
+        .with_size(ControlSize::Sm)
+        .with_density(ControlDensity::Compact);
+    let proof = node_compat::CommandPalette::from_spec(proof_spec.clone(), &theme_provider)
+        .with_id("proof")
+        .on_select(Arc::new(|_| {}))
+        .on_query_change(Arc::new(|_| {}))
+        .on_active_change(Arc::new(|_| {}))
+        .on_close(Arc::new(|| {}))
+        .into_compat_node();
+
+    assert_eq!(
+        proof.runtime_id.as_deref(),
+        Some("command-palette:proof:overlay")
+    );
+    assert_eq!(proof.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(proof.a11y.label.as_deref(), Some("Workspace commands"));
+    assert_eq!(
+        proof.a11y.described_by.as_deref(),
+        Some("command-palette:proof:description")
+    );
+    assert_eq!(
+        proof.roles.get("dependency").map(String::as_str),
+        Some("dialog"),
+        "the modal shell must come through production Dialog composition"
+    );
+    assert!(proof.style.overlay);
+    assert_eq!(
+        proof.style.descriptor.background,
+        Some(theme_provider.resolve_color("color.background.overlay"))
+    );
+    assert_eq!(proof.children.len(), 1);
+
+    let dialog = &proof.children[0];
+    assert_eq!(
+        dialog.runtime_id.as_deref(),
+        Some("command-palette:proof:dialog")
+    );
+    assert_eq!(
+        dialog.roles.get("dependency").map(String::as_str),
+        Some("dialog")
+    );
+    assert_eq!(
+        dialog.interaction.dismiss_layer.as_deref(),
+        Some("command-palette:proof:layer")
+    );
+    assert!(dialog.interaction.on_dismiss.is_some());
+    assert!(dialog.interaction.on_activate.is_some());
+    assert_eq!(
+        dialog.style.descriptor.layout.direction,
+        LayoutDirection::Column
+    );
+    assert_eq!(
+        dialog.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(45.0))
+    );
+    assert_eq!(dialog.style.max_width, Some(rem_to_px(45.0)));
+    assert_eq!(dialog.style.max_height, Some(rem_to_px(52.5)));
+    assert_eq!(
+        dialog.style.descriptor.layout.spacing.padding.left,
+        rem_to_px(panel_space_x_rem(ControlDensity::Compact))
+    );
+    assert_eq!(
+        dialog.style.descriptor.layout.spacing.padding.top,
+        rem_to_px(panel_space_y_rem(ControlDensity::Compact))
+    );
+    assert_eq!(
+        dialog.style.descriptor.background,
+        Some(theme_provider.resolve_color("color.background.elevated"))
+    );
+    assert_eq!(dialog.style.descriptor.border.width, 1.0);
+    let border = theme_provider.resolve_color("color.border.default");
+    assert_eq!(
+        dialog.style.descriptor.border.color,
+        poodle_render::color::with_alpha(border, border.3 * 0.42)
+    );
+    assert_eq!(
+        dialog.style.descriptor.corner_radii.top_left,
+        theme_provider.resolve_radius("radius.surface") + rem_to_px(0.125)
+    );
+    assert_eq!(
+        dialog.style.descriptor.shadow,
+        Some(poodle_tokens::typed::semantic::ELEVATION_DIALOG)
+    );
+    assert_eq!(dialog.children.len(), 4, "header, query, status, results");
+
+    let header = &dialog.children[0];
+    assert_eq!(
+        header.runtime_id.as_deref(),
+        Some("command-palette:proof:header")
+    );
+    assert_eq!(header.style.descriptor.layout.direction, LayoutDirection::Row);
+    assert!(proof.has_text("Workspace commands"));
+    assert!(proof.has_text("Search every available action."));
+    let hint = proof
+        .find(&|node| node.runtime_id.as_deref() == Some("command-palette:proof:hint"))
+        .expect("invocation hint");
+    assert_eq!(hint.children[0].style.font_family, Some(FontFamily::Mono));
+    let close = proof
+        .find(&|node| node.runtime_id.as_deref() == Some("command-palette:proof:close"))
+        .expect("close control");
+    assert_eq!(close.a11y.role, Some(NodeRole::Button));
+    assert_eq!(close.a11y.label.as_deref(), Some("Close command palette"));
+    assert!(close.interaction.on_activate.is_some());
+
+    let query_id = "poodle-input-command-palette:proof:query";
+    let query = proof
+        .find(&|node| node.id.as_deref() == Some(query_id))
+        .expect("production TextInput query");
+    assert!(matches!(
+        &query.kind,
+        NodeKind::Input { value, placeholder }
+            if value.is_empty() && placeholder == "Search commands, panels, and actions"
+    ));
+    assert_eq!(query.a11y.role, Some(NodeRole::TextInput));
+    assert_eq!(query.a11y.label.as_deref(), Some("Search commands"));
+    assert_eq!(
+        query.a11y.described_by.as_deref(),
+        Some("command-palette:proof:status")
+    );
+    assert_eq!(
+        query.roles.get("dependency").map(String::as_str),
+        Some("text-input"),
+        "query must be the production TextInput, not a painted text row"
+    );
+    assert_eq!(query.roles.get("type").map(String::as_str), Some("search"));
+    assert!(query.interaction.on_edit_key.is_some());
+    assert!(query.interaction.on_submit.is_some());
+    assert!(query.interaction.on_cancel.is_some());
+    assert!(query.interaction.on_key.is_some());
+
+    let status = &dialog.children[2];
+    assert_eq!(
+        status.runtime_id.as_deref(),
+        Some("command-palette:proof:status")
+    );
+    assert_eq!(status.a11y.role, Some(NodeRole::Status));
+    assert_eq!(
+        status.intrinsic_text(),
+        Some("3 commands available. Active command: Open File.")
+    );
+    let results = &dialog.children[3];
+    assert_eq!(
+        results.runtime_id.as_deref(),
+        Some("command-palette:proof:results")
+    );
+    assert_eq!(results.a11y.role, Some(NodeRole::ListBox));
+    assert_eq!(results.a11y.label.as_deref(), Some("Command results"));
+    let active = proof
+        .find(&|node| {
+            node.runtime_id.as_deref() == Some("command-palette:proof:action:open")
+        })
+        .expect("active action");
+    assert_eq!(active.a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(active.a11y.selected, Some(true));
+    assert_eq!(active.a11y.tab_index, Some(0));
+    let disabled = proof
+        .find(&|node| {
+            node.runtime_id.as_deref() == Some("command-palette:proof:action:locked")
+        })
+        .expect("disabled action");
+    assert!(disabled.interaction.disabled);
+    assert!(!disabled.interaction.focusable);
+    assert_eq!(disabled.a11y.tab_index, Some(-1));
+    assert_eq!(disabled.style.descriptor.cursor, CursorHint::NotAllowed);
+    assert!(disabled.interaction.on_activate.is_none());
+    assert_eq!(disabled.children.len(), 1, "disabled row has title and no shortcut");
+    assert!(proof.has_text("New"));
+    assert!(proof.has_text("Cmd+S"));
+
+    for (scope, state, status_copy, results_copy) in [
+        (
+            "loading",
+            DiscoveryState::Loading,
+            "Loading commands.",
+            "Searching\u{2026}",
+        ),
+        (
+            "empty",
+            DiscoveryState::Empty,
+            "No commands are available in this workspace.",
+            "No matching commands",
+        ),
+        (
+            "no-results",
+            DiscoveryState::NoResults,
+            "No commands match \"zzz\".",
+            "No matching commands",
+        ),
+    ] {
+        let state_node = node_compat::CommandPalette::from_spec(
+            CommandPaletteSpec::new(if state == DiscoveryState::Empty {
+                Vec::new()
+            } else {
+                actions()
+            })
+            .with_open(true)
+            .with_query(if state == DiscoveryState::NoResults {
+                "zzz"
+            } else {
+                ""
+            })
+            .with_state(state),
+            &theme_provider,
+        )
+        .with_id(scope)
+        .into_compat_node();
+        assert!(state_node.has_text(status_copy), "{scope} status copy");
+        assert!(state_node.has_text(results_copy), "{scope} results structure");
+        let results_id = format!("command-palette:{scope}:results");
+        assert!(
+            state_node
+                .find(&|node| node.runtime_id.as_deref() == Some(results_id.as_str()))
+                .is_some(),
+            "{scope} keeps a named results region"
+        );
+    }
+
+    #[derive(Clone)]
+    struct PaletteState {
+        scope: &'static str,
+        open: bool,
+        query: String,
+        filtered: Vec<CommandActionItem>,
+        discovery: DiscoveryState,
+        active: Option<String>,
+        accept_query: bool,
+        accept_close: bool,
+    }
+
+    struct PaletteHost {
+        states: Mutex<Vec<PaletteState>>,
+        events: Mutex<Vec<String>>,
+    }
+
+    impl PaletteHost {
+        fn state(&self, scope: &str) -> PaletteState {
+            self.states
+                .lock()
+                .expect("palette states")
+                .iter()
+                .find(|state| state.scope == scope)
+                .cloned()
+                .unwrap_or_else(|| panic!("{scope} palette state"))
+        }
+
+        fn mutate(&self, scope: &str, change: impl FnOnce(&mut PaletteState)) {
+            let mut states = self.states.lock().expect("palette states");
+            let state = states
+                .iter_mut()
+                .find(|state| state.scope == scope)
+                .unwrap_or_else(|| panic!("{scope} palette state"));
+            change(state);
+        }
+
+        fn note(&self, event: String) {
+            self.events.lock().expect("palette events").push(event);
+        }
+
+        fn take_events(&self) -> Vec<String> {
+            std::mem::take(&mut *self.events.lock().expect("palette events"))
+        }
+    }
+
+    fn filtered_actions(query: &str) -> Vec<CommandActionItem> {
+        let needle = query.to_ascii_lowercase();
+        actions()
+            .into_iter()
+            .filter(|action| {
+                needle.is_empty()
+                    || action.title.to_ascii_lowercase().contains(&needle)
+                    || action
+                        .keywords
+                        .iter()
+                        .any(|keyword| keyword.to_ascii_lowercase().contains(&needle))
+            })
+            .collect()
+    }
+
+    fn palette_element(
+        host: &Arc<PaletteHost>,
+        scope: &'static str,
+        theme_provider: &GpuiThemeProvider,
+    ) -> AnyElement {
+        let state = host.state(scope);
+        let mut spec = CommandPaletteSpec::new(state.filtered.clone())
+            .with_open(state.open)
+            .with_title("Workspace commands")
+            .with_description("Search every available action.")
+            .with_invocation_hint("Cmd+K")
+            .with_query(state.query.clone());
+        spec.state = state.discovery;
+        spec.active_action_id = state.active.clone();
+
+        let query_host = Arc::clone(host);
+        let active_host = Arc::clone(host);
+        let select_host = Arc::clone(host);
+        let close_host = Arc::clone(host);
+        node_compat::CommandPalette::from_spec(spec, theme_provider)
+            .with_id(scope)
+            .on_query_change(Arc::new(move |next| {
+                query_host.note(format!("{scope}/query:{next}"));
+                let next = next.to_string();
+                query_host.mutate(scope, |state| {
+                    if !state.accept_query {
+                        return;
+                    }
+                    state.query = next.clone();
+                    state.filtered = filtered_actions(&next);
+                    state.discovery = if state.filtered.is_empty() {
+                        DiscoveryState::NoResults
+                    } else {
+                        DiscoveryState::Ready
+                    };
+                    state.active = state
+                        .filtered
+                        .iter()
+                        .find(|action| !action.is_disabled)
+                        .map(|action| action.id.clone());
+                });
+            }))
+            .on_active_change(Arc::new(move |next| {
+                active_host.note(format!(
+                    "{scope}/active:{}",
+                    next.unwrap_or("none")
+                ));
+                active_host.mutate(scope, |state| {
+                    state.active = next.map(str::to_owned);
+                });
+            }))
+            .on_select(Arc::new(move |id| {
+                select_host.note(format!("{scope}/select:{id}"));
+            }))
+            .on_close(Arc::new(move || {
+                close_host.note(format!("{scope}/close"));
+                close_host.mutate(scope, |state| {
+                    if state.accept_close {
+                        state.open = false;
+                    }
+                });
+            }))
+            .into_element()
+    }
 
     run_headless(|cx| {
-        let theme_provider = theme();
-        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
-            node_compat::CommandPalette::from_spec(
-                CommandPaletteSpec::new(vec![CommandActionItem::new("save", "Save")])
-                    .with_open(true),
-                &theme_provider,
-            )
-            .with_id("counterexample")
-            .into_element()
+        let host = Arc::new(PaletteHost {
+            states: Mutex::new(vec![
+                PaletteState {
+                    scope: "subject",
+                    open: true,
+                    query: String::new(),
+                    filtered: actions(),
+                    discovery: DiscoveryState::Ready,
+                    active: Some("open".to_string()),
+                    accept_query: false,
+                    accept_close: false,
+                },
+                PaletteState {
+                    scope: "witness",
+                    open: true,
+                    query: String::new(),
+                    filtered: actions(),
+                    discovery: DiscoveryState::Ready,
+                    active: Some("open".to_string()),
+                    accept_query: true,
+                    accept_close: false,
+                },
+            ]),
+            events: Mutex::new(Vec::new()),
         });
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme();
+            Rc::new(move || {
+                let mut row = div()
+                    .id(FIXTURE_ID)
+                    .relative()
+                    .w(px(1584.0))
+                    .h(px(620.0));
+                // Keep the controlled subject above the duplicate witness in
+                // GPUI's overlay stack while painting them in separate slots.
+                // The witness becomes interactive after the subject closes.
+                for (scope, left) in [("witness", 804.0), ("subject", 0.0)] {
+                    let state = host.state(scope);
+                    let mut slot = div()
+                        .relative()
+                        .absolute()
+                        .left(px(left))
+                        .top(px(0.0))
+                        .w(px(780.0))
+                        .h(px(600.0));
+                    if state.open {
+                        slot = slot.child(palette_element(&host, scope, &theme_provider));
+                    }
+                    row = row.child(slot);
+                }
+                row.into_any_element()
+            })
+        };
 
-        let _driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
-        assert!(
-            poodle_gpui_node_backend::bounds_for("command-palette:counterexample:overlay")
-                .is_some(),
-            "the production CommandPalette IntoElement path must paint caller-scoped overlay identity"
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 1600.0, 640.0);
+        let subject_overlay = "command-palette:subject:overlay";
+        let subject_dialog = "command-palette:subject:dialog";
+        let subject_header = "command-palette:subject:header";
+        let subject_title = "command-palette:subject:title";
+        let subject_description = "command-palette:subject:description";
+        let subject_hint = "command-palette:subject:hint";
+        let subject_close = "command-palette:subject:close";
+        let subject_query = "poodle-input-command-palette:subject:query";
+        let subject_status = "command-palette:subject:status";
+        let subject_results = "command-palette:subject:results";
+        let subject_open = "command-palette:subject:action:open";
+        let subject_locked = "command-palette:subject:action:locked";
+        let subject_save = "command-palette:subject:action:save";
+        let subject_toggle = "command-palette:subject:action:toggle";
+        let witness_overlay = "command-palette:witness:overlay";
+        let witness_dialog = "command-palette:witness:dialog";
+        let witness_query = "poodle-input-command-palette:witness:query";
+        let witness_open = "command-palette:witness:action:open";
+        for id in [
+            subject_overlay,
+            subject_dialog,
+            subject_header,
+            subject_title,
+            subject_description,
+            subject_hint,
+            subject_close,
+            subject_query,
+            subject_status,
+            subject_results,
+            subject_open,
+            subject_locked,
+            subject_save,
+            subject_toggle,
+            witness_overlay,
+            witness_dialog,
+            witness_query,
+            witness_open,
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "the production CommandPalette IntoElement path must paint {id}"
+            );
+        }
+
+        let mount_bounds = driver.mount_box_bounds();
+        let subject_overlay_bounds =
+            poodle_gpui_node_backend::bounds_for(subject_overlay).expect("subject overlay bounds");
+        let subject_dialog_bounds =
+            poodle_gpui_node_backend::bounds_for(subject_dialog).expect("subject dialog bounds");
+        let header_bounds =
+            poodle_gpui_node_backend::bounds_for(subject_header).expect("subject header bounds");
+        let query_bounds =
+            poodle_gpui_node_backend::bounds_for(subject_query).expect("subject query bounds");
+        let status_bounds =
+            poodle_gpui_node_backend::bounds_for(subject_status).expect("subject status bounds");
+        let results_bounds =
+            poodle_gpui_node_backend::bounds_for(subject_results).expect("subject results bounds");
+        let witness_overlay_bounds =
+            poodle_gpui_node_backend::bounds_for(witness_overlay).expect("witness overlay bounds");
+        let witness_dialog_bounds =
+            poodle_gpui_node_backend::bounds_for(witness_dialog).expect("witness dialog bounds");
+        for (name, bounds) in [
+            ("subject overlay", subject_overlay_bounds),
+            ("subject dialog", subject_dialog_bounds),
+            ("header", header_bounds),
+            ("query", query_bounds),
+            ("status", status_bounds),
+            ("results", results_bounds),
+            ("witness overlay", witness_overlay_bounds),
+            ("witness dialog", witness_dialog_bounds),
+        ] {
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "{name} has positive mounted geometry"
+            );
+        }
+        assert!(bounds_contain(mount_bounds, subject_overlay_bounds));
+        assert!(bounds_contain(subject_overlay_bounds, subject_dialog_bounds));
+        assert!(bounds_contain(subject_dialog_bounds, header_bounds));
+        assert!(bounds_contain(subject_dialog_bounds, query_bounds));
+        assert!(bounds_contain(subject_dialog_bounds, status_bounds));
+        assert!(bounds_contain(subject_dialog_bounds, results_bounds));
+        assert!(header_bounds.bottom() <= query_bounds.top());
+        assert!(query_bounds.bottom() <= status_bounds.top());
+        assert!(status_bounds.bottom() <= results_bounds.top());
+        assert!(bounds_contain(mount_bounds, witness_overlay_bounds));
+        assert!(bounds_contain(witness_overlay_bounds, witness_dialog_bounds));
+        assert!(subject_overlay_bounds.right() <= witness_overlay_bounds.left());
+
+        let dialog_snapshot = poodle_gpui_node_backend::painted_node_for(subject_dialog)
+            .expect("Dialog dependency reached backend paint");
+        assert_eq!(
+            dialog_snapshot.roles.get("dependency").map(String::as_str),
+            Some("dialog")
         );
+        let query_snapshot = poodle_gpui_node_backend::painted_node_for(subject_query)
+            .expect("TextInput dependency reached backend paint");
+        assert_eq!(query_snapshot.a11y_role, Some(NodeRole::TextInput));
+        assert_eq!(
+            query_snapshot.roles.get("dependency").map(String::as_str),
+            Some("text-input")
+        );
+        let locked_snapshot = poodle_gpui_node_backend::painted_node_for(subject_locked)
+            .expect("disabled result reached backend paint");
+        assert_eq!(locked_snapshot.a11y_role, Some(NodeRole::ListBoxOption));
+        assert_eq!(locked_snapshot.style.cursor, CursorHint::NotAllowed);
+        assert!(poodle_gpui_node_backend::focus_handle_for(subject_locked).is_none());
+
+        driver.wait_for_focus_handle(subject_query);
+        driver.wait_for_focus_handle(witness_query);
+        driver.focus_element(subject_query);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(subject_query),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(witness_query),
+            Some(false),
+            "duplicate palettes keep caller-scoped input focus identity"
+        );
+
+        host.take_events();
+        driver.dispatch_key_raw("down");
+        assert_eq!(host.state("subject").active.as_deref(), Some("save"));
+        assert_eq!(host.take_events(), ["subject/active:save"]);
+        driver.dispatch_key_raw("end");
+        assert_eq!(host.state("subject").active.as_deref(), Some("toggle"));
+        driver.dispatch_key_raw("down");
+        assert_eq!(host.state("subject").active.as_deref(), Some("open"));
+        driver.dispatch_key_raw("up");
+        assert_eq!(host.state("subject").active.as_deref(), Some("toggle"));
+        driver.dispatch_key_raw("home");
+        assert_eq!(host.state("subject").active.as_deref(), Some("open"));
+        assert_eq!(host.state("witness").active.as_deref(), Some("open"));
+        assert_eq!(
+            host.take_events(),
+            [
+                "subject/active:toggle",
+                "subject/active:open",
+                "subject/active:toggle",
+                "subject/active:open",
+            ]
+        );
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.take_events(), ["subject/select:open"]);
+        assert!(host.state("subject").open, "activation does not dismiss");
+
+        driver.dispatch_key_raw("v");
+        assert_eq!(host.take_events(), ["subject/query:v"]);
+        assert_eq!(host.state("subject").query, "");
+        assert!(
+            poodle_gpui_node_backend::bounds_for(subject_open).is_some(),
+            "a refused controlled query rebuild keeps the previous results"
+        );
+        host.mutate("subject", |state| state.accept_query = true);
+        driver.dispatch_key_raw("v");
+        assert_eq!(host.take_events(), ["subject/query:v"]);
+        assert_eq!(host.state("subject").query, "v");
+        assert_eq!(host.state("subject").active.as_deref(), Some("save"));
+        assert!(poodle_gpui_node_backend::bounds_for(subject_open).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(subject_save).is_some());
+        assert!(
+            poodle_gpui_node_backend::painted_node_for(subject_status)
+                .expect("filtered status paint")
+                .texts
+                .iter()
+                .any(|text| text == "1 command available. Active command: Save.")
+        );
+
+        driver.dispatch_key_raw("z");
+        assert_eq!(host.take_events(), ["subject/query:vz"]);
+        assert_eq!(host.state("subject").discovery, DiscoveryState::NoResults);
+        assert_eq!(host.state("subject").active, None);
+        assert!(poodle_gpui_node_backend::bounds_for(subject_save).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(subject_results).is_some());
+        assert!(
+            poodle_gpui_node_backend::painted_node_for(subject_results)
+                .expect("no-results region paint")
+                .texts
+                .iter()
+                .any(|text| text == "No matching commands")
+        );
+
+        let clear_id = "poodle-input-command-palette:subject:query-clear";
+        assert!(poodle_gpui_node_backend::bounds_for(clear_id).is_some());
+        driver.pointer_activate_id(clear_id);
+        assert_eq!(host.take_events(), ["subject/query:"]);
+        assert_eq!(host.state("subject").query, "");
+        assert_eq!(host.state("subject").discovery, DiscoveryState::Ready);
+        assert_eq!(host.state("subject").active.as_deref(), Some("open"));
+        assert!(poodle_gpui_node_backend::bounds_for(subject_locked).is_some());
+
+        host.take_events();
+        driver.pointer_activate_id(subject_locked);
+        assert!(host.take_events().is_empty(), "disabled result is inert");
+        assert_eq!(host.state("subject").active.as_deref(), Some("open"));
+        driver.pointer_activate_id(subject_save);
+        assert_eq!(
+            host.take_events(),
+            ["subject/active:save", "subject/select:save"]
+        );
+        assert_eq!(host.state("subject").active.as_deref(), Some("save"));
+        assert!(host.state("subject").open, "selection stays separate from dismissal");
+
+        driver.pointer_activate_id(subject_close);
+        assert_eq!(host.take_events(), ["subject/close"]);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(subject_dialog).is_some(),
+            "a refused controlled close keeps the production dialog mounted"
+        );
+        driver.pointer_press(payload_frac(subject_overlay, 0.01, 0.01));
+        driver.pointer_release(payload_frac(subject_overlay, 0.01, 0.01));
+        assert_eq!(host.take_events(), ["subject/close"]);
+        assert!(host.state("subject").open);
+
+        host.mutate("subject", |state| state.accept_close = true);
+        driver.focus_element(subject_query);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(host.take_events(), ["subject/close"]);
+        assert!(!host.state("subject").open);
+        assert!(poodle_gpui_node_backend::bounds_for(subject_overlay).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(subject_query).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(witness_overlay).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(witness_query).is_some());
+
+        driver.focus_element(witness_query);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.take_events(), ["witness/select:open"]);
+        assert_eq!(host.state("witness").active.as_deref(), Some("open"));
+        assert!(host.state("witness").open);
+        assert!(driver.mounted_observation().is_valid());
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        for channel in [
+            "semantic.token-roles.received",
+            "accessibility.projection.received",
+            "structure.identity.input",
+            "overlay.intent.painted",
+        ] {
+            assert!(
+                probe_channels.contains(&channel),
+                "production backend must observe {channel}"
+            );
+        }
     });
 }
 
