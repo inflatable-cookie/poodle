@@ -1,8 +1,9 @@
 # g16.085 — Nucleus ModelPicker M1 Receipt
 
-Status: preparation-ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.062`, completed Select receipt; serial finalization
 follows the latest merged Nucleus receipt
 Governing refs: `nucleus-gpui-parity-programme.md`,
@@ -12,11 +13,18 @@ Handoff: `../../handoffs/20260903-180000-g16-085-nucleus-model-picker-receipt.md
 
 ## Goal
 
-Prepare the first named production-path mounted proof for Nucleus
-`ModelPicker`. Pause before shared evidence. After the orchestrator supplies the
-latest cohort identity, finalize one terminal `M1` receipt.
+Produce the first named production-path mounted proof and one terminal `M1`
+receipt for Nucleus `ModelPicker` at a committed runtime source.
 
-## Preparation Boundary
+## Completed
+
+- Runtime source `3bbbd0f51359bf562b8228b1f3fe27cd9853e18f`
+  emits the terminal ModelPicker receipt from the stable named mounted test.
+- All 22 cohort receipts pin that exact runtime source. The generated ledger
+  advances only ModelPicker from missing to mounted: 22 mounted, 153 missing.
+- The result is M1 only. It does not infer A1 or V1.
+
+## Fixed Boundary
 
 - Mount through the production `node_compat::ModelPicker` `IntoElement` path
   and the element-backed `HeadlessDriver`; renderer-only construction is not
@@ -29,11 +37,14 @@ latest cohort identity, finalize one terminal `M1` receipt.
   introduce provider policy or persistence, or broaden the public API.
 - Commit a biting counterexample before any repair. A bounded generalized
   native repair is allowed only when the mounted production proof fails.
-- During preparation, do not edit manifest, receipts, ledger, g16 front doors,
-  or claim M1 completion. Push a draft PR and pause.
-- On resume, rebase onto the latest receipt merge, set the expected test,
-  commit runtime source, emit the cohort after the terminal assertion, update
-  this card and one log, and run full boards.
+- The preparation-accepted head
+  `fe40f06f80010e3eafb3f53369ecff35dcaeb6c1` was rebased in full onto
+  `231939cb3174ac1c76e6ad3eea66e723509e886d`, preserving both committed
+  counterexamples before their repairs.
+- The production dialog keeps resolved overlay elevation on its one real
+  dialog Surface. Its child is a neutral Panel, not a second dialog.
+- Shared evidence contains the complete 22-receipt cohort pinned to the
+  runtime source. No g16 front door changes in this card.
 
 ## Review Oracle
 
@@ -52,12 +63,13 @@ latest cohort identity, finalize one terminal `M1` receipt.
 
 ## Validation
 
-Preparation: focused ModelPicker spec/machine/render/backend and named mounted
-tests plus `git diff --check`. Finalization adds `effigy regressions:native`,
-receipt/ledger tests, `effigy check:parity-evidence-ledger`, `effigy ci:rust`,
-`effigy ci:native`, and `effigy docs:check`. Never run windowed or native-
-visual selectors.
+Focused ModelPicker spec, render, mounted, and backend checks passed after the
+rebase. Final validation ran `effigy regressions:native`, receipt and ledger
+tests, `effigy check:parity-evidence-ledger`, `effigy ci:rust`,
+`effigy ci:native`, `effigy docs:check`, and `git diff --check`. No windowed or
+native-visual selector ran.
 
 ## Continuation
 
-Pause after preparation. Shared receipt production and merge remain serial.
+Pause for terminal M1 re-review. Merge and g16 front-door closeout remain with
+the orchestrator. Do not start another receipt card.

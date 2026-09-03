@@ -23907,6 +23907,488 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
     });
 }
 
+/// ModelPicker reaches the production compat adapter, renderer, Select-backed
+/// model choice, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{
+        ControlDensity, ControlSize, ModelAxisValue, ModelCapabilityAxis, ModelOption,
+        ModelPickerSpec, ModelPickerVariant, ModelSelection,
+    };
+
+    fn spec(open: bool) -> ModelPickerSpec {
+        ModelPickerSpec::new()
+            .with_models(vec![
+                ModelOption::new("atlas", "Atlas 3")
+                    .with_group("Atlas")
+                    .with_description("Primary provider model")
+                    .with_badge("Featured")
+                    .with_icon("sparkles")
+                    .with_axes(vec!["effort".into(), "fast".into()]),
+                ModelOption::new("atlas-mini", "Atlas Mini")
+                    .with_group("Atlas")
+                    .with_axes(Vec::new()),
+                ModelOption::new("retired", "Retired Model")
+                    .with_group("Unavailable")
+                    .with_disabled(true),
+            ])
+            .with_axes(vec![
+                ModelCapabilityAxis::select(
+                    "effort",
+                    "Effort",
+                    vec![
+                        poodle_specs::ModelAxisOption::new("low", "Low"),
+                        poodle_specs::ModelAxisOption::new("high", "High"),
+                    ],
+                )
+                .with_default_value(ModelAxisValue::Text("low".into())),
+                ModelCapabilityAxis::toggle("fast", "Fast mode")
+                    .with_labels("Fast", "Normal"),
+            ])
+            .with_value(
+                ModelSelection::new("atlas")
+                    .with_axis("effort", ModelAxisValue::Text("high".into()))
+                    .with_axis("fast", ModelAxisValue::Flag(true)),
+            )
+            .with_variant(ModelPickerVariant::Outlined)
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact)
+            .with_dismiss_on_outside_interact(false)
+            .with_open(open)
+    }
+
+    fn root_id(scope: &str) -> String {
+        format!("model-picker:{scope}")
+    }
+
+    fn trigger_id(scope: &str) -> String {
+        poodle_render::select_trigger_focus_id(&root_id(scope))
+    }
+
+    fn option_id(scope: &str, value: &str) -> String {
+        poodle_render::select_option_id(&root_id(scope), value)
+    }
+
+    fn dialog_role_count(node: &Node) -> usize {
+        usize::from(node.a11y.role == Some(NodeRole::Dialog))
+            + node.children.iter().map(dialog_role_count).sum::<usize>()
+    }
+
+    // Structural bite: the compat path must preserve its caller identity and
+    // the production Select structure, rather than painting lookalike rows.
+    let proof = node_compat::ModelPicker::from_spec(spec(true), &theme(), "proof")
+        .into_compat_node();
+    assert_eq!(proof.runtime_id.as_deref(), Some("model-picker:proof"));
+    assert_eq!(
+        proof.roles.get("dependency").map(String::as_str),
+        Some("select")
+    );
+    assert_eq!(proof.roles.get("size").map(String::as_str), Some("sm"));
+    assert_eq!(
+        proof.roles.get("density").map(String::as_str),
+        Some("compact")
+    );
+    assert_eq!(
+        proof.roles.get("variant").map(String::as_str),
+        Some("outlined")
+    );
+    assert_eq!(proof.roles.get("open").map(String::as_str), Some("true"));
+    let proof_trigger_id = trigger_id("proof");
+    let proof_trigger = proof
+        .find(&|node| node.runtime_id.as_deref() == Some(proof_trigger_id.as_str()))
+        .expect("production Select trigger");
+    assert_eq!(proof_trigger.a11y.role, Some(NodeRole::ComboBox));
+    assert_eq!(
+        proof_trigger.a11y.label.as_deref(),
+        Some("Model: Atlas 3, High · Fast")
+    );
+    assert!(proof_trigger.has_text("Atlas 3"));
+    assert!(proof_trigger.has_text("High · Fast"));
+    assert!(proof_trigger.has_text("sparkles"));
+    assert!(proof_trigger.has_text("chevron-down"));
+    let proof_list_id = format!("select:{}:listbox", root_id("proof"));
+    let proof_list = proof
+        .find(&|node| node.runtime_id.as_deref() == Some(proof_list_id.as_str()))
+        .expect("production Select model list");
+    assert_eq!(proof_list.a11y.role, Some(NodeRole::RadioGroup));
+    assert_eq!(proof_list.a11y.label.as_deref(), Some("Model"));
+    assert_eq!(
+        proof_list.roles.get("dependency").map(String::as_str),
+        Some("select")
+    );
+    for (value, selected, disabled) in [
+        ("atlas", true, false),
+        ("atlas-mini", false, false),
+        ("retired", false, true),
+    ] {
+        let id = option_id("proof", value);
+        let row = proof
+            .find(&|node| node.runtime_id.as_deref() == Some(id.as_str()))
+            .unwrap_or_else(|| panic!("production Select row {value}"));
+        assert_eq!(row.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(row.a11y.selected, Some(selected));
+        assert_eq!(row.interaction.disabled, disabled);
+    }
+    assert!(proof.has_text("Atlas"), "provider group label reaches render");
+    assert!(proof.has_text("Unavailable"));
+    assert!(proof.has_text("Featured"));
+    let proof_dialog = proof
+        .find(&|node| node.runtime_id.as_deref() == Some("model-picker:proof:dialog"))
+        .expect("ModelPicker dialog");
+    let expected_theme = theme();
+    assert_eq!(proof_dialog.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(proof_dialog.a11y.label.as_deref(), Some("Model"));
+    assert_eq!(
+        (
+            proof_dialog.style.descriptor.shadow,
+            dialog_role_count(&proof),
+        ),
+        (
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY),
+            1,
+        ),
+        "the real ModelPicker surface must retain elevation.overlay and contain one neutral panel"
+    );
+    assert_eq!(
+        proof_dialog.style.descriptor.background,
+        Some(expected_theme.resolve_color("color.background.elevated"))
+    );
+    assert_eq!(
+        proof_dialog.style.descriptor.border.color,
+        expected_theme.resolve_color("color.border.subtle")
+    );
+    assert_eq!(
+        proof_dialog.style.descriptor.corner_radii.top_left,
+        expected_theme.resolve_radius("radius.surface")
+    );
+    assert!(
+        proof
+            .find(&|node| node.runtime_id.as_deref()
+                == Some("segmented:model-picker:proof:axis:effort:option:low"))
+            .is_some(),
+        "the select axis composes production SegmentedControl metadata"
+    );
+    assert!(
+        proof
+            .find(&|node| node.runtime_id.as_deref()
+                == Some("model-picker:proof:axis:fast:toggle"))
+            .is_some(),
+        "the toggle axis composes production Switch metadata"
+    );
+
+    run_headless(|cx| {
+        struct PickerHost {
+            left: ModelPickerSpec,
+            right: ModelPickerSpec,
+            refuse_left_model: bool,
+            events: Vec<String>,
+        }
+
+        fn current<'a>(host: &'a PickerHost, scope: &str) -> &'a ModelPickerSpec {
+            match scope {
+                "left" => &host.left,
+                "right" => &host.right,
+                other => panic!("unknown ModelPicker scope {other}"),
+            }
+        }
+
+        fn current_mut<'a>(host: &'a mut PickerHost, scope: &str) -> &'a mut ModelPickerSpec {
+            match scope {
+                "left" => &mut host.left,
+                "right" => &mut host.right,
+                other => panic!("unknown ModelPicker scope {other}"),
+            }
+        }
+
+        fn element(
+            host: &Arc<Mutex<PickerHost>>,
+            scope: &'static str,
+            theme_provider: &GpuiThemeProvider,
+        ) -> AnyElement {
+            let picker_spec = current(&host.lock().expect("picker host"), scope).clone();
+            let change_host = Arc::clone(host);
+            let open_host = Arc::clone(host);
+            node_compat::ModelPicker::from_spec(picker_spec, theme_provider, scope)
+                .on_change(Arc::new(move |next| {
+                    let mut host = change_host.lock().expect("picker host");
+                    host.events.push(format!("{scope}:change:{next}"));
+                    if scope == "left" && host.refuse_left_model && next == "atlas-mini" {
+                        return;
+                    }
+                    let picker = current_mut(&mut host, scope);
+                    if picker.models.iter().any(|model| model.value == next) {
+                        picker.value.model = next.to_owned();
+                    } else if matches!(next, "low" | "high") {
+                        picker.value = picker
+                            .value
+                            .clone()
+                            .with_axis("effort", ModelAxisValue::Text(next.to_owned()));
+                    } else if matches!(next, "true" | "false") {
+                        picker.value = picker.value.clone().with_axis(
+                            "fast",
+                            ModelAxisValue::Flag(next == "true"),
+                        );
+                    } else {
+                        panic!("unexpected ModelPicker callback value {next}");
+                    }
+                    picker.value = picker.resolved_selection();
+                }))
+                .on_open_change(Arc::new(move |open| {
+                    let mut host = open_host.lock().expect("picker host");
+                    host.events.push(format!("{scope}:open:{open}"));
+                    current_mut(&mut host, scope).is_open = open;
+                }))
+                .into_element()
+        }
+
+        let host = Arc::new(Mutex::new(PickerHost {
+            left: spec(false),
+            right: spec(false),
+            refuse_left_model: true,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme();
+            Rc::new(move || {
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(24.0))
+                    .child(element(&host, "left", &theme_provider))
+                    .child(element(&host, "right", &theme_provider))
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 900.0);
+        let left_trigger = trigger_id("left");
+        let right_trigger = trigger_id("right");
+        let left_root = root_id("left");
+        let right_root = root_id("right");
+        for id in [&left_root, &right_root, &left_trigger, &right_trigger] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "the production ModelPicker IntoElement path must paint {id}"
+            );
+        }
+        driver.wait_for_focus_handle(&left_trigger);
+        driver.wait_for_focus_handle(&right_trigger);
+        driver.focus_element(&left_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_trigger),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_trigger),
+            Some(false),
+            "duplicate trigger content keeps caller-scoped Select focus identity"
+        );
+
+        // Keyboard input opens through the adapter callback. The host rebuild
+        // is what makes the dialog exist.
+        driver.keyboard_activate(&left_trigger);
+        driver.draw_frame();
+        assert!(host.lock().expect("picker host").left.is_open);
+        assert_eq!(
+            host.lock().expect("picker host").events,
+            ["left:open:true"]
+        );
+        let left_dialog = "model-picker:left:dialog";
+        let left_list = format!("select:{}:listbox", root_id("left"));
+        let left_atlas = option_id("left", "atlas");
+        let left_mini = option_id("left", "atlas-mini");
+        let left_retired = option_id("left", "retired");
+        let left_effort_low = "segmented:model-picker:left:axis:effort:option:low";
+        let left_fast = "model-picker:left:axis:fast:toggle";
+        for id in [
+            left_dialog,
+            left_list.as_str(),
+            left_atlas.as_str(),
+            left_mini.as_str(),
+            left_retired.as_str(),
+            left_effort_low,
+            left_fast,
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "mounted open picker paints {id}"
+            );
+        }
+        let mount_bounds = driver.mount_box_bounds();
+        let left_bounds = poodle_gpui_node_backend::bounds_for(&left_root).expect("left root");
+        let right_bounds = poodle_gpui_node_backend::bounds_for(&right_root).expect("right root");
+        let dialog_bounds =
+            poodle_gpui_node_backend::bounds_for(left_dialog).expect("left dialog");
+        let list_bounds = poodle_gpui_node_backend::bounds_for(&left_list).expect("left list");
+        assert!(bounds_contain(mount_bounds, left_bounds));
+        assert!(bounds_contain(mount_bounds, right_bounds));
+        assert!(bounds_contain(left_bounds, dialog_bounds));
+        assert!(bounds_contain(dialog_bounds, list_bounds));
+        assert!(
+            left_bounds.bottom() <= right_bounds.top(),
+            "duplicate ModelPickers keep authored order without overlap"
+        );
+        for id in [&left_atlas, &left_mini, &left_retired] {
+            assert!(
+                bounds_contain(
+                    list_bounds,
+                    poodle_gpui_node_backend::bounds_for(id).expect("model row bounds")
+                ),
+                "model row {id} stays inside the production Select list"
+            );
+        }
+
+        // Axis callbacks stay ordered and controlled. The host applies them,
+        // then the next production build paints the accepted state.
+        driver.pointer_activate_id(left_effort_low);
+        driver.draw_frame();
+        driver.pointer_activate_id(left_fast);
+        driver.draw_frame();
+        {
+            let host = host.lock().expect("picker host");
+            assert_eq!(
+                host.left.value.axis("effort"),
+                Some(&ModelAxisValue::Text("low".into()))
+            );
+            assert_eq!(
+                host.left.value.axis("fast"),
+                Some(&ModelAxisValue::Flag(false))
+            );
+            assert_eq!(
+                host.events,
+                ["left:open:true", "left:change:low", "left:change:false"]
+            );
+            assert_eq!(host.right.value.model, "atlas");
+            assert_eq!(
+                host.right.value.axis("effort"),
+                Some(&ModelAxisValue::Text("high".into()))
+            );
+        }
+
+        // An unavailable model is inert. The first enabled proposal is then
+        // deliberately refused: callback records it, unchanged host state is
+        // rebuilt, and the mounted selected row stays Atlas.
+        driver.pointer_activate_id(&left_retired);
+        driver.draw_frame();
+        assert_eq!(host.lock().expect("picker host").events.len(), 3);
+        driver.pointer_activate_id(&left_mini);
+        driver.draw_frame();
+        {
+            let host = host.lock().expect("picker host");
+            assert_eq!(host.left.value.model, "atlas");
+            assert_eq!(
+                host.events,
+                [
+                    "left:open:true",
+                    "left:change:low",
+                    "left:change:false",
+                    "left:change:atlas-mini",
+                ]
+            );
+        }
+        let atlas_snapshot = poodle_gpui_node_backend::painted_node_for(&left_atlas)
+            .expect("selected Atlas row paint");
+        assert_eq!(
+            atlas_snapshot.roles.get("selected").map(String::as_str),
+            Some("true"),
+            "refused proposal cannot repaint controlled selection"
+        );
+
+        host.lock().expect("picker host").refuse_left_model = false;
+        driver.pointer_activate_id(&left_mini);
+        driver.draw_frame();
+        {
+            let host = host.lock().expect("picker host");
+            assert_eq!(host.left.value, ModelSelection::new("atlas-mini"));
+            assert!(host.left.is_open, "model selection keeps the picker open");
+            assert_eq!(host.right.value.model, "atlas");
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(left_effort_low).is_none(),
+            "accepted provider switch drops axes that the new model does not expose"
+        );
+        let left_trigger_snapshot = poodle_gpui_node_backend::painted_node_for(&left_trigger)
+            .expect("rebuilt left trigger");
+        assert!(left_trigger_snapshot.texts.iter().any(|text| text == "Atlas Mini"));
+        assert!(left_trigger_snapshot.texts.iter().all(|text| text != "Low"));
+
+        // The refusal flag is adapter-owned and exact: outside input does not
+        // close or emit, while Escape does close through mounted keyboard input.
+        let before_outside = host.lock().expect("picker host").events.len();
+        driver.pointer_press(point(px(8.0), px(8.0)));
+        driver.pointer_release(point(px(8.0), px(8.0)));
+        driver.draw_frame();
+        assert!(host.lock().expect("picker host").left.is_open);
+        assert_eq!(host.lock().expect("picker host").events.len(), before_outside);
+        driver.focus_element(&left_trigger);
+        driver.dispatch_key_press("escape");
+        driver.draw_frame();
+        assert!(!host.lock().expect("picker host").left.is_open);
+
+        // The duplicate instance opens through pointer input and never gains
+        // left callbacks or state. Its identical content keeps distinct ids.
+        driver.pointer_activate_id(&right_trigger);
+        driver.draw_frame();
+        assert!(host.lock().expect("picker host").right.is_open);
+        let right_atlas = option_id("right", "atlas");
+        let right_mini = option_id("right", "atlas-mini");
+        assert!(poodle_gpui_node_backend::bounds_for(&right_atlas).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&right_mini).is_some());
+        assert_ne!(left_atlas, right_atlas);
+        driver.pointer_activate_id(&right_mini);
+        driver.draw_frame();
+        {
+            let host = host.lock().expect("picker host");
+            assert_eq!(host.left.value.model, "atlas-mini");
+            assert_eq!(host.right.value, ModelSelection::new("atlas-mini"));
+            assert_eq!(
+                host.events,
+                [
+                    "left:open:true",
+                    "left:change:low",
+                    "left:change:false",
+                    "left:change:atlas-mini",
+                    "left:change:atlas-mini",
+                    "left:open:false",
+                    "right:open:true",
+                    "right:change:atlas-mini",
+                ],
+                "mounted callbacks remain exact, ordered, and caller-scoped"
+            );
+        }
+
+        let observation = driver.mounted_observation();
+        assert!(
+            observation.is_valid(),
+            "terminal proof painted and dispatched through the mounted production path"
+        );
+
+        nucleus_receipts::emit_if_configured(
+            "ModelPicker",
+            "nucleus.agent.model-picker",
+            observation,
+            &[
+                "mount duplicate controlled ModelPicker instances through node_compat::ModelPicker::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch mounted keyboard open and Escape plus pointer model and capability-axis selection while rebuilding from host-owned state",
+                "dispatch mounted pointer input through unavailable, refused, accepted, and outside-dismiss-refused paths across caller-scoped instances",
+            ],
+            &[
+                "production Select, SegmentedControl, and Switch composition preserves trigger, provider and model labels, selected and unavailable states, capability axes, exact token metadata, overlay elevation, and one-dialog surface anatomy",
+                "mounted roots, dialog, Select list, and model rows have positive extents, authored non-overlapping order, and real mount or production-parent containment",
+                "axis changes, model refusal and acceptance, Escape close, and host-owned rebuilds preserve the exact ordered callback and state trace",
+                "unavailable model input is inert and outside interaction remains refused without changing the controlled selection or callback stream",
+                "duplicate caller identities keep focus, runtime ids, callbacks, state, and geometry isolated",
+                "backend mounted observation confirms production render, paint, and GPUI input dispatch after every terminal assertion",
+            ],
+        );
+    });
+}
+
 /// g16.019. A production Select listbox that exceeds `size.menu.maxHeight`
 /// clips option rows past the cap. Short menus stay content-sized; this
 /// case is the long-menu half of that contract.

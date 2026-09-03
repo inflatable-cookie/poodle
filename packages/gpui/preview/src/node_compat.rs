@@ -634,6 +634,8 @@ pub(crate) struct ModelPicker {
     spec: ModelPickerSpec,
     theme: GpuiThemeProvider,
     instance_id: String,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 pub(crate) struct PickerShell {
@@ -2692,6 +2694,8 @@ impl ModelPicker {
             spec,
             theme: theme.clone(),
             instance_id: instance_id.into(),
+            on_change: None,
+            on_open_change: None,
         }
     }
 
@@ -2705,8 +2709,51 @@ impl ModelPicker {
         self
     }
 
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_open_change = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::model_picker(&self.spec, &RenderContext::new(&self.theme), &self.instance_id, None)
+        let trigger_id = poodle_render::select_trigger_focus_id(&format!(
+            "model-picker:{}",
+            self.instance_id
+        ));
+        let is_open = self.spec.is_open;
+        let is_disabled = self.spec.is_disabled;
+        let dismiss_on_outside = self.spec.dismiss_on_outside_interact;
+        let mut node = poodle_render::model_picker(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            &self.instance_id,
+            self.on_change,
+        );
+        if let Some(handler) = self.on_open_change {
+            if !is_disabled {
+                let trigger = node
+                    .children
+                    .first_mut()
+                    .filter(|trigger| trigger.runtime_id.as_deref() == Some(trigger_id.as_str()))
+                    .expect("ModelPicker renderer keeps the composed Select trigger first");
+                let activate = Arc::clone(&handler);
+                trigger.interaction.on_activate = Some(Arc::new(move || activate(!is_open)));
+                if is_open {
+                    let cancel = Arc::clone(&handler);
+                    trigger.interaction.on_cancel = Some(Arc::new(move || cancel(false)));
+                    trigger.interaction.on_dismiss = Some(Arc::new(move |reason| {
+                        if reason != poodle_node::DismissReason::Outside || dismiss_on_outside {
+                            handler(false);
+                        }
+                    }));
+                }
+            }
+        }
+        node
     }
 }
 
