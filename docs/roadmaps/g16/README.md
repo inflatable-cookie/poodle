@@ -122,16 +122,16 @@ stay maintained; backend admission is not part of the first card.
 85. [085 — Nucleus ModelPicker M1 receipt](085-nucleus-model-picker-m1.md) — complete in PR #191 after one preparation repair/re-review round; production adapter, Select composition, controlled selection/refusal, overlay tokens, geometry, and caller-scoped identity now carry a terminal M1 receipt
 86. [086 — Nucleus StatusIndicator M1 receipt](086-nucleus-status-indicator-m1.md) — complete in PR #192; production adapter, Icon/Text composition, exact status/reason tokens, inertness, geometry, rebuilds, and caller-scoped identity now carry a terminal M1 receipt
 87. [087 — Nucleus Callout M1 receipt](087-nucleus-callout-m1.md) — preparation-ready; build one production mounted callout proof in parallel, then pause before shared receipt files
-88. [088 — Nucleus ConfirmAction M1 receipt](088-nucleus-confirm-action-m1.md) — preparation-ready; build one production mounted confirmation proof in parallel, then pause before shared receipt files
+88. [088 — Nucleus ConfirmAction M1 receipt](088-nucleus-confirm-action-m1.md) — complete in PR #193 after one preparation repair/re-review round; production Dialog/Button composition, independent dismissal axes, refusal, disabled/pending posture, containment, and caller-scoped identity now carry a terminal M1 receipt
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
 `g16.053`–`g16.086` are complete. The mounted Nucleus cohort is 23/29.
-`g16.087` and `g16.088` prepare Callout and ConfirmAction without touching
-shared receipt files. Finalization remains serial on the latest native source
-identity.
+`g16.088` is complete. The mounted Nucleus cohort is 24/29. `g16.087` has an
+accepted Callout preparation and is the next serial finalization lane on the
+latest native source identity.
 Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
