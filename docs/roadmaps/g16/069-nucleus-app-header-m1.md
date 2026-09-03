@@ -1,6 +1,6 @@
 # g16.069 — Nucleus AppHeader M1 Receipt
 
-Status: in-review
+Status: complete
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`, completed `g16.068`
@@ -11,6 +11,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/icon.md`, `../../contracts/components/text.md`
 Log: `../../logs/2026-09/20260903-g16-069-nucleus-app-header-receipt.md`
 PR: https://github.com/inflatable-cookie/poodle/pull/175
+Merged: `bbdebbfa0f55cf0fd895c524ec0f5bbb074a65fd`
 
 ## Goal
 

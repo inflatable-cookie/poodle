@@ -1,6 +1,6 @@
 # g16.069 — Nucleus AppHeader M1 Receipt
 
-Status: in-review
+Status: complete
 Date: 2026-09-03
 Card: `docs/roadmaps/g16/069-nucleus-app-header-m1.md`
 Handoff: `/Users/tom/Dev/projects/poodle/docs/handoffs/20260903-034145-g16-069-nucleus-app-header-receipt.md`
@@ -15,6 +15,7 @@ Branch: `feature/g16-069-nucleus-app-header-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-069-nucleus-app-header-receipt`
 Planning base: `a6b3a8e41` (`origin/main`)
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/175
+Merged: `bbdebbfa0f55cf0fd895c524ec0f5bbb074a65fd`
 
 ## Outcome
 
