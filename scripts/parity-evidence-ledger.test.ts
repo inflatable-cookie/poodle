@@ -29,11 +29,11 @@ describe("g16.001 parity evidence ledger", () => {
 
   it("keeps an expected mounted test missing until a receipt exists", () => {
     const ledger = generateLedgerMarkdown(root);
-    const switchRow = ledger.split("\n").find((line) => line.startsWith("| Switch |"));
-    expect(switchRow).toContain("expected `docs/roadmaps/g16/nucleus-parity-manifest.json#nucleus.settings.switch`");
-    expect(switchRow).toContain("no validated M1 receipt");
+    const calloutRow = ledger.split("\n").find((line) => line.startsWith("| Callout |"));
+    expect(calloutRow).toContain("expected `docs/roadmaps/g16/nucleus-parity-manifest.json#nucleus.settings.callout`");
+    expect(calloutRow).toContain("no validated M1 receipt");
     expect(ledger).toContain(
-      "| Switch | `packages/gpui/preview/tests/headless_regressions.rs#switch_toggle_readonly_and_disabled_rebuild_the_host_spec` | expected only |",
+      "| Callout | `packages/gpui/preview/tests/headless_regressions.rs#callout_dismiss_rebuilds_the_host_spec_through_mounted_input` | expected only |",
     );
   });
 

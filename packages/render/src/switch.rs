@@ -42,44 +42,34 @@ pub fn switch(
     let label_size = rem_to_px(switch_label_font_rem(effective_size));
 
     // Contract resolution order per side: hex override → tone token → default.
-    let off_track_color: ColorValue = spec
-        .left_tone
-        .color_token()
-        .map(|t| ctx.theme().resolve_color(t))
+    let off_color_override = spec.off_color.as_deref().and_then(hex_color);
+    let on_color_override = spec.on_color.as_deref().and_then(hex_color);
+
+    let off_tone_color = off_color_override
+        .or_else(|| {
+            spec.left_tone
+                .color_token()
+                .map(|token| ctx.theme().resolve_color(token))
+        })
         .unwrap_or(text_primary);
-    let on_track_color: ColorValue = spec
-        .right_tone
-        .color_token()
-        .map(|t| ctx.theme().resolve_color(t))
-        .unwrap_or(accent_base);
-    let off_tone_color = spec
-        .left_tone
-        .color_token()
-        .map(|token| ctx.theme().resolve_color(token))
-        .unwrap_or(text_primary);
-    let on_tone_color = spec
-        .right_tone
-        .color_token()
-        .map(|token| ctx.theme().resolve_color(token))
+
+    let on_tone_color = on_color_override
+        .or_else(|| {
+            spec.right_tone
+                .color_token()
+                .map(|token| ctx.theme().resolve_color(token))
+        })
         .unwrap_or(accent_base);
 
     // Contract §8 mixes.
     // The established GPUI recipe treats explicit hex values as the final
     // track fill; only tone/default colours are mixed with the surface.
-    let off_track = spec
-        .off_color
-        .as_deref()
-        .and_then(hex_color)
-        .unwrap_or_else(|| mix_srgb(off_track_color, surface, 0.18));
-    let on_track = spec
-        .on_color
-        .as_deref()
-        .and_then(hex_color)
-        .unwrap_or_else(|| mix_srgb(on_track_color, surface, 0.24));
+    let off_track = off_color_override.unwrap_or_else(|| mix_srgb(off_tone_color, surface, 0.18));
+    let on_track = on_color_override.unwrap_or_else(|| mix_srgb(on_tone_color, surface, 0.24));
     let track_fill = if is_checked { on_track } else { off_track };
     let track_border = if is_checked {
         mix_srgb(on_tone_color, border_default, 0.58)
-    } else if spec.left_tone != poodle_specs::SwitchTone::Default {
+    } else if off_color_override.is_some() || spec.left_tone != poodle_specs::SwitchTone::Default {
         mix_srgb(off_tone_color, border_default, 0.58)
     } else {
         border_default
@@ -312,5 +302,72 @@ mod tests {
         assert!(node.interaction.disabled);
         assert!(node.interaction.on_activate.is_none());
         assert!(node.style.focus.is_none());
+    }
+
+    #[test]
+    fn custom_colors_take_precedence_over_tones() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let border_default = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_BORDER_DEFAULT);
+        let node = switch(
+            &SwitchSpec::new()
+                .with_checked(true)
+                .with_on_color("#22c55e")
+                .with_right_tone(poodle_specs::SwitchTone::Danger)
+                .with_off_color("#cbd5e1")
+                .with_left_tone(poodle_specs::SwitchTone::Warning),
+            &ctx,
+            None,
+        );
+        let green = hex_color("#22c55e").unwrap();
+        let expected_on_border = mix_srgb(green, border_default, 0.58);
+        let track = &node.children[0];
+        let thumb = &track.children[0];
+        assert_eq!(thumb.style.descriptor.background, Some(green));
+        assert_eq!(track.style.descriptor.background, Some(green));
+        assert_eq!(track.style.descriptor.border.color, expected_on_border);
+
+        let off_node = switch(
+            &SwitchSpec::new()
+                .with_checked(false)
+                .with_on_color("#22c55e")
+                .with_right_tone(poodle_specs::SwitchTone::Danger)
+                .with_off_color("#cbd5e1")
+                .with_left_tone(poodle_specs::SwitchTone::Warning),
+            &ctx,
+            None,
+        );
+        let off_hex = hex_color("#cbd5e1").unwrap();
+        let expected_off_border = mix_srgb(off_hex, border_default, 0.58);
+        let off_track = &off_node.children[0];
+        let off_thumb = &off_track.children[0];
+        assert_eq!(off_thumb.style.descriptor.background, Some(off_hex));
+        assert_eq!(off_track.style.descriptor.background, Some(off_hex));
+        assert_eq!(off_track.style.descriptor.border.color, expected_off_border);
+    }
+
+    #[test]
+    fn dual_labels_and_fallback_aria_names() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let dual = switch(
+            &SwitchSpec::new()
+                .with_checked(false)
+                .with_left_label("Off")
+                .with_right_label("On"),
+            &ctx,
+            None,
+        );
+        assert_eq!(dual.a11y.label.as_deref(), Some("Off / On"));
+        assert_eq!(dual.children.len(), 3);
+
+        let explicit_aria = switch(
+            &SwitchSpec::new()
+                .with_aria_label("Power switch")
+                .with_label("Power"),
+            &ctx,
+            None,
+        );
+        assert_eq!(explicit_aria.a11y.label.as_deref(), Some("Power switch"));
     }
 }

@@ -1,0 +1,66 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Switch",
+  "scenario_id": "nucleus.settings.switch",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "f12cf2a84b0dab16e871255dd5b949c3786a840d",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount controlled Switch instances through node_compat::Switch::from_spec(...).into_element() in HeadlessDriver",
+    "pointer activate unselected, selected, dual-label, read-only, and disabled switches through GPUI platform dispatch",
+    "keyboard toggle focused switch with Space and Enter keys",
+    "mount composed duplicate Switch instances to prove focus and callback isolation"
+  ],
+  "assertions": [
+    "production render path resolves root switch role, direction, size ladder geometry, track styling, and density gap",
+    "track and thumb resolve exact geometry, position offsets, corner radii, drop shadows, and focus patch",
+    "custom colors take precedence over semantic tones for track fill, thumb color, and border styling",
+    "accessible names resolve correctly from explicit aria-label, visible label, and dual-label fallback composition",
+    "pointer and keyboard input update checked state through controlled host rebuild while disabled switch suppresses focus handles and ignores pointer dispatch",
+    "read-only switch receives focus without committing mutations on pointer or keyboard activation",
+    "disabled switch suppresses focus handles, applies disabled opacity, and ignores pointer dispatch",
+    "two composed duplicate-content instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
