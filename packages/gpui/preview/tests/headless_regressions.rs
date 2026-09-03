@@ -12385,7 +12385,7 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
             theme_provider: &GpuiThemeProvider,
             rendered: &Arc<Mutex<Option<Node>>>,
         ) -> AnyElement {
-            let (selected, _disabled) = {
+            let (selected, disabled) = {
                 let host = host.lock().expect("question host");
                 (host.disabled_selected, host.disabled_gate)
             };
@@ -12397,6 +12397,7 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
                     .with_variant(ButtonVariant::Secondary)
                     .with_size(ControlSize::Sm)
                     .with_density(ControlDensity::Compact)
+                    .with_disabled(disabled)
                     .with_pressed(selected),
                 &RenderContext::new(theme_provider),
                 Some(Arc::new(move || {
