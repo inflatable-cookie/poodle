@@ -12101,7 +12101,9 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
         toggle_question_selection, AgentQuestionItem, AgentQuestionOption,
     };
     use poodle_node::{NodeKind, NodeToggled};
-    use poodle_specs::{AgentQuestionSpec, ControlDensity, ControlSize};
+    use poodle_specs::{
+        AgentQuestionSpec, ButtonSpec, ButtonVariant, ControlDensity, ControlSize,
+    };
 
     fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {
         AgentQuestionOption {
@@ -12313,8 +12315,9 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
             left: Vec<String>,
             right: Vec<String>,
             right_active: usize,
-            right_enabled: bool,
             refuse_left: bool,
+            disabled_selected: bool,
+            disabled_gate: bool,
             events: Vec<String>,
         }
 
@@ -12331,16 +12334,16 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
             scope: &'static str,
             theme_provider: &GpuiThemeProvider,
         ) -> AnyElement {
-            let (current, active, enabled) = {
+            let (current, active) = {
                 let host = host.lock().expect("question host");
                 (
                     selections(&host, scope),
                     if scope == "right" { host.right_active } else { 0 },
-                    scope == "left" || host.right_enabled,
                 )
             };
             let item = question(scope == "right");
-            let mut question_element = crate::node_compat::AgentQuestion::from_spec(
+            let select_host = Arc::clone(host);
+            let question_element = crate::node_compat::AgentQuestion::from_spec(
                 AgentQuestionSpec::new(vec![item.clone()])
                     .with_active_index(active)
                     .with_selections(current)
@@ -12349,25 +12352,21 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
                     .with_density(ControlDensity::Compact),
                 theme_provider,
             )
-            .with_instance_id(scope);
-
-            if enabled {
-                let select_host = Arc::clone(host);
-                question_element = question_element.on_select(Arc::new(move |value| {
-                    let mut host = select_host.lock().expect("question host");
-                    host.events.push(format!("{scope}:select:{value}"));
-                    if scope == "left" && host.refuse_left {
-                        return;
-                    }
-                    let current = selections(&host, scope);
-                    let next = toggle_question_selection(Some(&item), &current, value);
-                    match scope {
-                        "left" => host.left = next,
-                        "right" => host.right = next,
-                        _ => unreachable!(),
-                    }
-                }));
-            }
+            .with_instance_id(scope)
+            .on_select(Arc::new(move |value| {
+                let mut host = select_host.lock().expect("question host");
+                host.events.push(format!("{scope}:select:{value}"));
+                if scope == "left" && host.refuse_left {
+                    return;
+                }
+                let current = selections(&host, scope);
+                let next = toggle_question_selection(Some(&item), &current, value);
+                match scope {
+                    "left" => host.left = next,
+                    "right" => host.right = next,
+                    _ => unreachable!(),
+                }
+            }));
 
             let dismiss_host = Arc::clone(host);
             question_element
@@ -12381,16 +12380,54 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
                 .into_element()
         }
 
+        fn disabled_option_control(
+            host: &Arc<Mutex<QuestionHost>>,
+            theme_provider: &GpuiThemeProvider,
+            rendered: &Arc<Mutex<Option<Node>>>,
+        ) -> AnyElement {
+            let (selected, _disabled) = {
+                let host = host.lock().expect("question host");
+                (host.disabled_selected, host.disabled_gate)
+            };
+            let select_host = Arc::clone(host);
+            let mut node = poodle_render::button(
+                &ButtonSpec::new()
+                    .with_label("Disabled question option")
+                    .with_aria_label("Disabled question option")
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(ControlSize::Sm)
+                    .with_density(ControlDensity::Compact)
+                    .with_pressed(selected),
+                &RenderContext::new(theme_provider),
+                Some(Arc::new(move || {
+                    let mut host = select_host.lock().expect("question host");
+                    host.events.push("disabled:select:composer".to_owned());
+                    host.disabled_selected = true;
+                })),
+            );
+            node.runtime_id = Some(poodle_render::agent_question_option_focus_id(
+                Some("disabled"),
+                "composer",
+            ));
+            node.a11y.role = Some(NodeRole::RadioButton);
+            node.a11y.selected = Some(selected);
+            *rendered.lock().expect("disabled rendered node") = Some(node.clone());
+            poodle_gpui_node_backend::to_gpui(&node)
+        }
+
         let host = Arc::new(Mutex::new(QuestionHost {
             left: Vec::new(),
             right: Vec::new(),
             right_active: 0,
-            right_enabled: true,
             refuse_left: true,
+            disabled_selected: false,
+            disabled_gate: true,
             events: Vec::new(),
         }));
+        let disabled_rendered = Arc::new(Mutex::new(None));
         let build: Rc<dyn Fn() -> AnyElement> = {
             let host = Arc::clone(&host);
+            let disabled_rendered = Arc::clone(&disabled_rendered);
             let theme_provider = theme();
             Rc::new(move || {
                 div()
@@ -12399,6 +12436,11 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
                     .gap(px(24.0))
                     .child(element(&host, "left", &theme_provider))
                     .child(element(&host, "right", &theme_provider))
+                    .child(disabled_option_control(
+                        &host,
+                        &theme_provider,
+                        &disabled_rendered,
+                    ))
                     .into_any_element()
             })
         };
@@ -12415,6 +12457,8 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
         let right_composer =
             poodle_render::agent_question_option_focus_id(Some("right"), "composer");
         let right_dismiss = poodle_render::agent_question_dismiss_focus_id(Some("right"));
+        let disabled_option =
+            poodle_render::agent_question_option_focus_id(Some("disabled"), "composer");
         for id in [
             left_root,
             right_root,
@@ -12423,6 +12467,7 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
             &right_inline,
             &right_composer,
             &right_dismiss,
+            &disabled_option,
         ] {
             assert!(
                 poodle_gpui_node_backend::bounds_for(id).is_some(),
@@ -12434,28 +12479,81 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
             poodle_gpui_node_backend::bounds_for(left_root).expect("left question bounds");
         let right_bounds =
             poodle_gpui_node_backend::bounds_for(right_root).expect("right question bounds");
-        assert!(left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0));
-        assert!(right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0));
+        let left_inline_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_inline).expect("left inline bounds");
+        let left_composer_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_composer).expect("left composer bounds");
+        let right_inline_bounds =
+            poodle_gpui_node_backend::bounds_for(&right_inline).expect("right inline bounds");
+        let right_composer_bounds =
+            poodle_gpui_node_backend::bounds_for(&right_composer).expect("right composer bounds");
+        let right_dismiss_bounds =
+            poodle_gpui_node_backend::bounds_for(&right_dismiss).expect("right dismiss bounds");
+        let disabled_option_bounds = poodle_gpui_node_backend::bounds_for(&disabled_option)
+            .expect("disabled option control bounds");
+        let mount_bounds = driver.mount_box_bounds();
+        let assert_positive = |bounds: gpui::Bounds<Pixels>, name: &str| {
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "{name} must paint with positive full extents"
+            );
+        };
+        let assert_contains = |parent: gpui::Bounds<Pixels>,
+                               child: gpui::Bounds<Pixels>,
+                               relationship: &str| {
+            assert!(child.left() >= parent.left(), "{relationship}: left escaped");
+            assert!(child.right() <= parent.right(), "{relationship}: right escaped");
+            assert!(child.top() >= parent.top(), "{relationship}: top escaped");
+            assert!(child.bottom() <= parent.bottom(), "{relationship}: bottom escaped");
+        };
+        for (name, bounds) in [
+            ("left question", left_bounds),
+            ("right question", right_bounds),
+            ("left inline option", left_inline_bounds),
+            ("left composer option", left_composer_bounds),
+            ("right inline option", right_inline_bounds),
+            ("right composer option", right_composer_bounds),
+            ("right dismiss", right_dismiss_bounds),
+            ("disabled option control", disabled_option_bounds),
+        ] {
+            assert_positive(bounds, name);
+        }
+        assert_contains(mount_bounds, left_bounds, "mount contains left question");
+        assert_contains(mount_bounds, right_bounds, "mount contains right question");
+        assert_contains(
+            mount_bounds,
+            disabled_option_bounds,
+            "mount contains disabled option control",
+        );
         assert!(
-            left_bounds.origin.y + left_bounds.size.height <= right_bounds.origin.y,
+            left_bounds.bottom() <= right_bounds.top(),
             "duplicate questions keep authored vertical order without overlap"
         );
-        for (name, id, root) in [
-            ("left inline", &left_inline, left_bounds),
-            ("left composer", &left_composer, left_bounds),
-            ("right inline", &right_inline, right_bounds),
-            ("right composer", &right_composer, right_bounds),
-            ("right dismiss", &right_dismiss, right_bounds),
+        assert!(
+            right_bounds.bottom() <= disabled_option_bounds.top(),
+            "right question must end before the disabled option witness begins"
+        );
+        for (name, bounds, root) in [
+            ("left inline", left_inline_bounds, left_bounds),
+            ("left composer", left_composer_bounds, left_bounds),
+            ("right inline", right_inline_bounds, right_bounds),
+            ("right composer", right_composer_bounds, right_bounds),
+            ("right dismiss", right_dismiss_bounds, right_bounds),
         ] {
-            let bounds = poodle_gpui_node_backend::bounds_for(id).expect("control bounds");
-            assert!(
-                bounds.origin.x >= root.origin.x
-                    && bounds.origin.x + bounds.size.width <= root.origin.x + root.size.width
-                    && bounds.origin.y >= root.origin.y
-                    && bounds.origin.y + bounds.size.height <= root.origin.y + root.size.height,
-                "{name} stays contained in its own question root"
-            );
+            assert_contains(root, bounds, &format!("{name} stays in its question parent"));
         }
+        assert!(
+            left_inline_bounds.bottom() <= left_composer_bounds.top(),
+            "single-select option rows keep authored order without overlap"
+        );
+        assert!(
+            right_inline_bounds.bottom() <= right_composer_bounds.top(),
+            "multi-select option rows keep authored order without overlap"
+        );
+        assert!(
+            right_composer_bounds.bottom() <= right_dismiss_bounds.top(),
+            "multi-select options end before the following dismiss control"
+        );
 
         driver.wait_for_focus_handle(&left_inline);
         driver.wait_for_focus_handle(&right_inline);
@@ -12543,24 +12641,33 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
             "right dismissal cannot remove the left instance"
         );
 
-        {
-            let mut host = host.lock().expect("question host");
-            host.right_active = 0;
-            host.right_enabled = false;
-            host.right.clear();
-        }
-        driver.draw_frame();
-        let event_count = host.lock().expect("question host").events.len();
-        driver.pointer_activate_id(&right_composer);
-        driver.keyboard_activate(&right_composer);
+        let disabled_before = {
+            let host = host.lock().expect("question host");
+            (host.events.clone(), host.disabled_selected)
+        };
+        let disabled_node = disabled_rendered
+            .lock()
+            .expect("disabled rendered node")
+            .clone()
+            .expect("disabled production control rendered");
+        assert!(disabled_node.interaction.disabled);
+        assert!(disabled_node.interaction.on_activate.is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for(&disabled_option).is_none());
+        let current_disabled_bounds = poodle_gpui_node_backend::bounds_for(&disabled_option)
+            .expect("disabled option remains mounted before input");
+        assert_positive(current_disabled_bounds, "disabled option before input");
+        driver.pointer_activate_id(&disabled_option);
         {
             let host = host.lock().expect("question host");
-            assert_eq!(host.events.len(), event_count);
-            assert!(
-                host.right.is_empty(),
-                "an unwired native question remains inert under mounted pointer and keyboard input"
+            assert_eq!(
+                (host.events.as_slice(), host.disabled_selected),
+                (disabled_before.0.as_slice(), disabled_before.1),
+                "the mounted disabled gate must suppress a supplied live callback and host mutation"
             );
         }
+        let current_disabled_bounds = poodle_gpui_node_backend::bounds_for(&disabled_option)
+            .expect("disabled option remains mounted after input");
+        assert_positive(current_disabled_bounds, "disabled option after input");
 
         let channels = poodle_gpui_node_backend::take_probe_capture();
         assert!(channels.contains(&"structure.identity.button"));
