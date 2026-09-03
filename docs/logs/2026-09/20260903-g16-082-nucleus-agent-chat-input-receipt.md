@@ -8,7 +8,7 @@ Branch: `feature/g16-082-nucleus-agent-chat-input-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-082-nucleus-agent-chat-input-receipt`
 Planning base: `068bb7f3b95340954142a71b896bf70c3b8b5892` (`origin/main`)
 Preparation-accepted head: `ef50f365e91f9dba749eaf69172411a0508fb969`
-Runtime source: `a00be5c662a034bd8ca1a4278cdd7ee2be5e3c12`
+Runtime source: `e632700bf5768744475f91ebc6f20e3c8c35f0d9`
 PR: `#188`
 
 ## Outcome
@@ -21,7 +21,7 @@ only after its terminal eligibility, disabled, callback-order, and mounted
 observation assertions.
 
 All 19 receipts and the manifest pin runtime source
-`a00be5c662a034bd8ca1a4278cdd7ee2be5e3c12`. The generated ledger advances
+`e632700bf5768744475f91ebc6f20e3c8c35f0d9`. The generated ledger advances
 only AgentChatInput's GPUI mounted-behaviour cell: 19 mounted, 156 missing. M1
 does not infer A1 or V1.
 
@@ -29,8 +29,9 @@ does not infer A1 or V1.
 
 - Caller-scoped `node_compat::AgentChatInput::from_spec(...).into_element()`
   instances compose the production TextInput and Button renderers.
-- Refused controlled input leaves the mounted backend-painted value unchanged;
-  the accepted edit appears only after an explicit host rebuild.
+- Refused and accepted controlled edit proposals both rebuild the production
+  factory. Refusal rebuilds unchanged host value and selection, leaving mounted
+  paint unchanged; acceptance rebuilds updated host state.
 - Pointer and keyboard input prove exact change, selection, focus, submit, and
   stop ordering for idle, empty, allow-empty, read-only, disabled, and busy
   postures.
@@ -62,6 +63,12 @@ text and descendant-focus observation, corrected shared renderer metadata and
 tokens, used actual extents, and replaced the disabled keyboard claim with
 focus suppression plus a live-sink pointer oracle.
 
+Review at `15a104d425caea1f1d07309286d07d12816e5d82` found one remaining receipt
+wording overclaim. Runtime commit
+`e632700bf5768744475f91ebc6f20e3c8c35f0d9` narrows the emitted action and
+assertion to the two production-factory rebuilds proved by the fixture. It does
+not change the fixture or production behavior.
+
 ## Receipt identity
 
 | Field | Value |
@@ -72,7 +79,7 @@ focus suppression plus a live-sink pointer oracle.
 | Proof level | `M1` |
 | Runtime | `gpui-headless` |
 | Command | `effigy regressions:native` |
-| Source commit | `a00be5c662a034bd8ca1a4278cdd7ee2be5e3c12` |
+| Source commit | `e632700bf5768744475f91ebc6f20e3c8c35f0d9` |
 | Outcome | `passed` |
 
 ## Validation
@@ -99,8 +106,10 @@ Required boards completed before this log update:
 - `effigy ci:rust` — clean.
 - `effigy ci:native` — clean.
 
-Exact-state `effigy docs:check` and `git diff --check` are the final handoff
-gates after this log update.
+The review repair reran the named mounted fixture (1 passed),
+`effigy regressions:native` (189 passed), both receipt and ledger tests (8 and
+6 passed), the 176-row ledger check, and exact-state `effigy docs:check`.
+`git diff --check` is the final handoff gate after this log update.
 
 ## Limits
 

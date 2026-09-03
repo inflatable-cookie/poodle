@@ -19,7 +19,7 @@ Produce the first named production-path mounted proof for Nucleus
 runtime source.
 
 Completed at runtime source
-`a00be5c662a034bd8ca1a4278cdd7ee2be5e3c12`. The 19-receipt cohort shares that
+`e632700bf5768744475f91ebc6f20e3c8c35f0d9`. The 19-receipt cohort shares that
 identity, and the generated ledger advances only AgentChatInput from missing to
 mounted. M1 does not infer A1 or V1.
 
@@ -35,9 +35,10 @@ mounted. M1 does not infer A1 or V1.
   placeholder, disabled/read-only/loading posture, submit eligibility, mounted
   focus/input, exact callback payload/order, token metadata, ordering,
   containment, and caller-scoped duplicate-instance identity.
-- Host state owns the controlled value and submission result. Submission does
-  not clear or persist text unless the host rebuilds that state. Refusal and
-  pending posture remain stable.
+- Host state owns the controlled value, selection, and submission result. Both
+  refused and accepted edit proposals rebuild the production factory. Refusal
+  rebuilds unchanged host state and preserves mounted paint; acceptance
+  rebuilds updated host state. Submission does not clear text on its own.
 - Drive mounted pointer and keyboard input. Do not call transitions or handlers
   directly after mount. Do not infer OS IME, multiline browser geometry, or
   Nucleus agent orchestration.
@@ -55,7 +56,7 @@ mounted. M1 does not infer A1 or V1.
 | --- | --- | --- |
 | Production adapter owns execution | mount renderer Node directly | adapter identity/lifecycle assertion fails |
 | Dependencies are real | replace TextInput or Button with raw nodes | metadata or mounted input proof fails |
-| Controlled ownership is real | clear value on callback without host rebuild | painted value disagrees with host state |
+| Controlled ownership is real | apply a refused proposal during rebuild | mounted paint changes despite unchanged host state |
 | Submit eligibility is exact | submit empty/disabled/loading input | callback trace gains a forbidden payload |
 | Input is mounted | invoke submit/change handler directly | mounted observation is absent |
 | Callback order is exact | submit before terminal value change | ordered trace fails |
@@ -75,5 +76,5 @@ and `effigy docs:check`. Never run windowed or native-visual selectors.
 
 ## Continuation
 
-Pause for preparation-to-M1 re-review. Merge and g16 front-door closeout remain
-with the orchestrator; this card does not start another receipt.
+Pause for M1 re-review. Merge and g16 front-door closeout remain with the
+orchestrator; this card does not start another receipt.
