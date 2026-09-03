@@ -31772,6 +31772,494 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
     });
 }
 
+/// The portable DetailItem contract reaches a caller-scoped production Node
+/// before mounting: defaults, exact structure, and layout tokens cannot be
+/// repaired inside the test fixture.
+#[test]
+fn detail_item_scoped_node_matches_contract_defaults_structure_and_tokens() {
+    use node_compat::IntoCompatNode;
+    use poodle_specs::{ButtonSpec, ButtonVariant, DetailItemLayout, DetailItemPresentation, DetailItemSpec};
+
+    fn child_ids(node: &Node) -> Vec<&str> {
+        node.children
+            .iter()
+            .map(|child| child.id.as_deref().expect("identified DetailItem child"))
+            .collect()
+    }
+
+    let theme_provider = theme();
+    let action = node_compat::Button::from_spec(
+        ButtonSpec::new()
+            .with_label("Refresh")
+            .with_variant(ButtonVariant::Secondary)
+            .with_size(ControlSize::Sm),
+        &theme_provider,
+    )
+    .with_id("detail-item-counterexample-action");
+
+    // Caller scope is supplied in arrange/act, before the biting assertion.
+    let default_stacked = node_compat::DetailItem::from_spec(
+        DetailItemSpec::new("Workspace")
+            .with_description("Current workspace identity")
+            .with_empty_text("Not configured")
+            .with_layout(DetailItemLayout::Stacked)
+            .with_density(ControlDensity::Comfortable),
+        &theme_provider,
+    )
+    .with_instance_id("counterexample")
+    .with_action(action)
+    .into_compat_node();
+
+    assert_eq!(default_stacked.id.as_deref(), Some("detail-item:counterexample"));
+    assert_eq!(
+        default_stacked.roles.get("presentation").map(String::as_str),
+        Some("surface"),
+        "portable default must match the contract and Svelte surface default"
+    );
+    assert_eq!(
+        child_ids(&default_stacked),
+        [
+            "detail-item:counterexample:label-block",
+            "detail-item:counterexample:content",
+        ],
+        "surface-stacked root owns label block then content row"
+    );
+    assert_eq!(
+        child_ids(&default_stacked.children[0]),
+        [
+            "detail-item:counterexample:label",
+            "detail-item:counterexample:supporting",
+        ],
+        "label block owns label then supporting text"
+    );
+    assert_eq!(
+        child_ids(&default_stacked.children[1]),
+        [
+            "detail-item:counterexample:value",
+            "detail-item:counterexample:action",
+        ],
+        "content row owns value then action"
+    );
+    assert_eq!(default_stacked.style.descriptor.layout.spacing.gap, 4.0);
+    assert_eq!(default_stacked.children[1].style.descriptor.layout.spacing.gap, 4.0);
+
+    for (density, scope, expected_gap) in [
+        (ControlDensity::Compact, "compact-gap", 2.0),
+        (ControlDensity::Default, "default-gap", 3.0),
+        (ControlDensity::Comfortable, "comfortable-gap", 4.0),
+    ] {
+        let density_node = node_compat::DetailItem::from_spec(
+            DetailItemSpec::new("Density")
+                .with_layout(DetailItemLayout::Stacked)
+                .with_density(density),
+            &theme_provider,
+        )
+        .with_instance_id(scope)
+        .into_compat_node();
+        let expected_id = format!("detail-item:{scope}");
+        let content = density_node
+            .children
+            .iter()
+            .find(|child| child.roles.get("part").map(String::as_str) == Some("content"))
+            .expect("surface-stacked DetailItem content row");
+
+        assert_eq!(density_node.id.as_deref(), Some(expected_id.as_str()));
+        assert_eq!(
+            (
+                density_node.style.descriptor.layout.spacing.gap,
+                content.style.descriptor.layout.spacing.gap,
+            ),
+            (expected_gap, expected_gap),
+            "surface-stacked root and content gaps follow the exact density ladder"
+        );
+    }
+
+    let simple_inline = poodle_render::detail_item(
+        &DetailItemSpec::new("Workspace")
+            .with_value("Poodle")
+            .with_presentation(DetailItemPresentation::Simple),
+        &RenderContext::new(&theme_provider),
+    );
+    assert_eq!(
+        format!("{:?}", simple_inline.style.descriptor.layout.alignment.cross),
+        "Baseline",
+        "simple inline DetailItem uses baseline alignment"
+    );
+    assert_eq!(simple_inline.style.descriptor.background, None);
+    assert_eq!(simple_inline.style.descriptor.layout.spacing.padding.left, 0.0);
+    assert_eq!(simple_inline.style.descriptor.layout.spacing.padding.top, 0.0);
+}
+
+/// DetailItem reaches the production compat adapter, renderer, composed Text
+/// tree, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_backend() {
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ButtonSpec, ButtonVariant, DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec};
+
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+    struct ItemState {
+        left_advanced: bool,
+        right_advanced: bool,
+    }
+
+    #[derive(Debug, Default)]
+    struct Host {
+        state: ItemState,
+        events: Vec<String>,
+    }
+
+    fn part_id(scope: &str, part: &str) -> String {
+        format!("detail-item:{scope}:{part}")
+    }
+
+    fn action_id(scope: &str) -> String {
+        format!("poodle-btn-detail-item-{scope}-action")
+    }
+
+    fn element(host: &Arc<Mutex<Host>>, scope: &'static str, theme: &GpuiThemeProvider) -> AnyElement {
+        let advanced = {
+            let host = host.lock().expect("DetailItem host");
+            if scope == "left" { host.state.left_advanced } else { host.state.right_advanced }
+        };
+        let spec = match (scope, advanced) {
+            ("left", false) => DetailItemSpec::new("Workspace")
+                .with_description("Current workspace identity")
+                .with_value("Poodle design system with a deliberately long mounted value")
+                .with_truncate_value(true)
+                .with_aria_label("Workspace detail")
+                .with_presentation(DetailItemPresentation::Surface)
+                .with_span(DetailItemSpan::Full)
+                .with_density(ControlDensity::Compact),
+            ("left", true) => DetailItemSpec::new("Workspace")
+                .with_description("Current workspace identity")
+                .with_value("Poodle design system")
+                .with_aria_label("Workspace detail")
+                .with_layout(DetailItemLayout::Stacked)
+                .with_presentation(DetailItemPresentation::Surface)
+                .with_span(DetailItemSpan::Half)
+                .with_density(ControlDensity::Comfortable),
+            ("right", false) => DetailItemSpec::new("Workspace")
+                .with_empty_text("Not configured")
+                .with_aria_label("Workspace detail witness")
+                .with_layout(DetailItemLayout::Stacked)
+                .with_density(ControlDensity::Comfortable),
+            ("right", true) => DetailItemSpec::new("Workspace")
+                .with_description("Host supplied configuration")
+                .with_value("Configured")
+                .with_aria_label("Workspace detail witness")
+                .with_presentation(DetailItemPresentation::Simple)
+                .with_span(DetailItemSpan::Full)
+                .with_density(ControlDensity::Compact),
+            _ => panic!("unknown DetailItem scope"),
+        };
+        let action_host = Arc::clone(host);
+        let action = node_compat::Button::from_spec(
+            ButtonSpec::new()
+                .with_label("Refresh")
+                .with_variant(ButtonVariant::Secondary)
+                .with_size(ControlSize::Sm),
+            theme,
+        )
+        .with_id(format!("detail-item-{scope}-action"))
+        .on_click(Arc::new(move || {
+            let mut host = action_host.lock().expect("DetailItem host");
+            host.events.push(format!("{scope}:refresh"));
+            if scope == "left" { host.state.left_advanced = true } else { host.state.right_advanced = true }
+        }));
+
+        node_compat::DetailItem::from_spec(spec, theme)
+            .with_instance_id(scope)
+            .with_action(action)
+            .into_element()
+    }
+
+    fn snapshot(scope: &str, part: &str) -> poodle_gpui_node_backend::PaintedNodeSnapshot {
+        poodle_gpui_node_backend::painted_node_for(&part_id(scope, part))
+            .unwrap_or_else(|| panic!("mounted DetailItem {scope} {part}"))
+    }
+
+    fn text_snapshot(scope: &str, part: &str, expected: &str) -> poodle_gpui_node_backend::PaintedNodeSnapshot {
+        let snapshot = snapshot(scope, part);
+        assert_eq!(snapshot.texts, [expected]);
+        assert_eq!(snapshot.roles.get("dependency").map(String::as_str), Some("text"));
+        snapshot
+    }
+
+    fn assert_mounted_geometry(
+        mount: gpui::Bounds<gpui::Pixels>,
+        scope: &str,
+        surface_stacked: bool,
+        supporting_present: bool,
+    ) -> gpui::Bounds<gpui::Pixels> {
+        let root = poodle_gpui_node_backend::bounds_for(&format!("detail-item:{scope}"))
+            .unwrap_or_else(|| panic!("mounted DetailItem {scope}"));
+        let label_block = poodle_gpui_node_backend::bounds_for(&part_id(scope, "label-block"))
+            .unwrap_or_else(|| panic!("mounted DetailItem {scope} label block"));
+        let label = poodle_gpui_node_backend::bounds_for(&part_id(scope, "label"))
+            .unwrap_or_else(|| panic!("mounted DetailItem {scope} label"));
+        let value = poodle_gpui_node_backend::bounds_for(&part_id(scope, "value"))
+            .unwrap_or_else(|| panic!("mounted DetailItem {scope} value"));
+        let action = poodle_gpui_node_backend::bounds_for(&part_id(scope, "action"))
+            .unwrap_or_else(|| panic!("mounted DetailItem {scope} action"));
+
+        assert!(bounds_contain(mount, root), "{scope} root escapes mount");
+        assert!(bounds_contain(root, label_block), "{scope} label block escapes root");
+        assert!(bounds_contain(label_block, label), "{scope} label escapes label block");
+        if supporting_present {
+            let supporting = poodle_gpui_node_backend::bounds_for(&part_id(scope, "supporting"))
+                .unwrap_or_else(|| panic!("mounted DetailItem {scope} supporting"));
+            assert!(bounds_contain(label_block, supporting), "{scope} supporting text escapes label block");
+            assert!(label.bottom() <= supporting.top(), "{scope} label must precede supporting text");
+        } else {
+            assert!(poodle_gpui_node_backend::bounds_for(&part_id(scope, "supporting")).is_none());
+        }
+
+        if surface_stacked {
+            let content = poodle_gpui_node_backend::bounds_for(&part_id(scope, "content"))
+                .unwrap_or_else(|| panic!("mounted DetailItem {scope} content"));
+            assert!(bounds_contain(root, content), "{scope} content escapes root");
+            assert!(bounds_contain(content, value), "{scope} value escapes content row");
+            assert!(bounds_contain(content, action), "{scope} action escapes content row");
+            assert!(label_block.bottom() <= content.top(), "{scope} label block must precede content row");
+            assert!(value.right() <= action.left(), "{scope} value must precede and not overlap action");
+        } else {
+            assert!(bounds_contain(root, value), "{scope} value escapes root");
+            assert!(bounds_contain(root, action), "{scope} action escapes root");
+            assert!(label_block.right() <= value.left(), "{scope} label block must precede and not overlap value");
+            assert!(value.right() <= action.left(), "{scope} value must precede and not overlap action");
+        }
+        root
+    }
+
+    fn assert_mounted_pair_geometry(
+        mount: gpui::Bounds<gpui::Pixels>,
+        left_surface_stacked: bool,
+        right_surface_stacked: bool,
+        right_supporting_present: bool,
+    ) {
+        let left = assert_mounted_geometry(mount, "left", left_surface_stacked, true);
+        let right = assert_mounted_geometry(
+            mount,
+            "right",
+            right_surface_stacked,
+            right_supporting_present,
+        );
+        assert!(left.bottom() <= right.top(), "duplicate DetailItem roots overlap or reorder");
+    }
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let host = Arc::new(Mutex::new(Host::default()));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme_provider.clone();
+            Rc::new(move || {
+                div()
+                    .w_full()
+                    .flex()
+                    .flex_col()
+                    .gap(px(24.0))
+                    .child(element(&host, "left", &theme_provider))
+                    .child(element(&host, "right", &theme_provider))
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 320.0);
+        for mounted_id in [
+            "detail-item:left".to_owned(),
+            part_id("left", "label-block"),
+            part_id("left", "label"),
+            part_id("left", "supporting"),
+            part_id("left", "value"),
+            part_id("left", "action"),
+            action_id("left"),
+            "detail-item:right".to_owned(),
+            part_id("right", "label-block"),
+            part_id("right", "label"),
+            part_id("right", "value"),
+            part_id("right", "action"),
+            action_id("right"),
+        ] {
+            assert!(poodle_gpui_node_backend::bounds_for(&mounted_id).is_some(), "production DetailItem IntoElement must paint {mounted_id}");
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(&part_id("right", "supporting")).is_none());
+
+        let left = poodle_gpui_node_backend::painted_node_for("detail-item:left").expect("left DetailItem");
+        assert_eq!(left.roles.get("component").map(String::as_str), Some("detail-item"));
+        assert_eq!(left.roles.get("layout").map(String::as_str), Some("inline"));
+        assert_eq!(left.roles.get("presentation").map(String::as_str), Some("surface"));
+        assert_eq!(left.roles.get("density").map(String::as_str), Some("compact"));
+        assert_eq!(left.roles.get("span").map(String::as_str), Some("full"));
+        assert_eq!(left.roles.get("truncate").map(String::as_str), Some("true"));
+        assert_eq!(left.a11y_label.as_deref(), Some("Workspace detail"));
+        assert_eq!(left.style.layout.direction, LayoutDirection::Row);
+        assert_eq!(left.style.layout.alignment.cross, poodle_node::CrossAxisAlignment::Center);
+        assert_eq!(left.style.layout.spacing.gap, 8.0);
+        assert_eq!(left.style.layout.spacing.padding.left, 12.0);
+        assert_eq!(left.style.layout.spacing.padding.top, 8.0);
+        assert_eq!(left.style.background, Some(poodle_render::color::mix_srgb(
+            theme_provider.resolve_color("color.background.surface"),
+            theme_provider.resolve_color("color.text.primary"),
+            0.93,
+        )));
+        assert_eq!(left.style.corner_radii.top_left, theme_provider.resolve_radius("radius.surface") - 1.0);
+
+        let label = text_snapshot("left", "label", "Workspace");
+        assert_eq!(label.style.text_color, Some(theme_provider.resolve_color("color.text.secondary")));
+        assert_eq!(label.text_size, Some(theme_provider.resolve_space("typography.label.size")));
+        assert_eq!(label.line_height, Some(
+            theme_provider.resolve_space("typography.label.lineHeight")
+                / theme_provider.resolve_space("typography.label.size")
+        ));
+        let supporting = text_snapshot("left", "supporting", "Current workspace identity");
+        assert_eq!(supporting.style.text_color, Some(theme_provider.resolve_color("color.text.secondary")));
+        assert_eq!(supporting.text_size, Some(12.0));
+        assert_eq!(supporting.line_height, Some(1.5));
+        let value = text_snapshot("left", "value", "Poodle design system with a deliberately long mounted value");
+        assert_eq!(value.roles.get("value-kind").map(String::as_str), Some("text"));
+        assert_eq!(value.style.text_color, Some(theme_provider.resolve_color("color.text.primary")));
+        assert_eq!(value.text_size, Some(theme_provider.resolve_space("typography.body.size")));
+        assert_eq!(value.line_height, Some(
+            theme_provider.resolve_space("typography.body.lineHeight")
+                / theme_provider.resolve_space("typography.body.size")
+        ));
+        assert_eq!(value.text_weight, Some(400));
+        assert!(value.text_ellipsis && value.no_wrap && !value.text_wrap);
+
+        let right = poodle_gpui_node_backend::painted_node_for("detail-item:right")
+            .filter(|node| node.roles.get("presentation").map(String::as_str) == Some("surface"))
+            .expect("caller-scoped default DetailItem identity must paint the contract surface");
+        assert_eq!(right.roles.get("layout").map(String::as_str), Some("stacked"));
+        assert_eq!(right.roles.get("density").map(String::as_str), Some("comfortable"));
+        assert_eq!(right.style.background, Some(poodle_render::color::mix_srgb(
+            theme_provider.resolve_color("color.background.surface"),
+            theme_provider.resolve_color("color.text.primary"),
+            0.93,
+        )));
+        assert_eq!(right.style.layout.direction, LayoutDirection::Column);
+        assert_eq!(right.style.layout.alignment.cross, poodle_node::CrossAxisAlignment::Start);
+        assert_eq!(right.style.layout.spacing.gap, 4.0);
+        assert_eq!(right.style.layout.spacing.padding.left, 16.0);
+        assert_eq!(right.style.layout.spacing.padding.top, 12.0);
+        let right_content = snapshot("right", "content");
+        assert_eq!(right_content.style.layout.spacing.gap, 4.0);
+        let right_label = text_snapshot("right", "label", "Workspace");
+        assert_eq!(right_label.style.text_color, Some(theme_provider.resolve_color("color.text.tertiary")));
+        assert_eq!(right_label.text_size, Some(12.0));
+        assert_eq!(right_label.line_height, Some(1.35));
+        let empty = text_snapshot("right", "value", "Not configured");
+        assert_eq!(empty.roles.get("value-kind").map(String::as_str), Some("empty"));
+        assert_eq!(empty.style.text_color, Some(theme_provider.resolve_color("color.text.primary")));
+        assert_eq!(empty.text_size, Some(16.0));
+        assert_eq!(empty.line_height, Some(
+            theme_provider.resolve_space("typography.body.lineHeight") / 16.0
+        ));
+        assert_eq!(empty.text_weight, Some(600));
+
+        let left_bounds = poodle_gpui_node_backend::bounds_for("detail-item:left").unwrap();
+        let right_bounds = poodle_gpui_node_backend::bounds_for("detail-item:right").unwrap();
+        let label_bounds = poodle_gpui_node_backend::bounds_for(&part_id("left", "label-block")).unwrap();
+        let value_bounds = poodle_gpui_node_backend::bounds_for(&part_id("left", "value")).unwrap();
+        let action_bounds = poodle_gpui_node_backend::bounds_for(&part_id("left", "action")).unwrap();
+        assert!(bounds_contain(driver.mount_box_bounds(), left_bounds));
+        assert!(bounds_contain(left_bounds, label_bounds));
+        assert!(bounds_contain(left_bounds, value_bounds));
+        assert!(bounds_contain(left_bounds, action_bounds));
+        assert!(label_bounds.right() <= value_bounds.left());
+        assert!(value_bounds.right() <= action_bounds.left());
+        assert!(left_bounds.bottom() <= right_bounds.top());
+        assert_mounted_pair_geometry(driver.mount_box_bounds(), false, true, false);
+
+        for inert_id in ["detail-item:left".to_owned(), part_id("left", "label"), part_id("left", "value")] {
+            assert!(poodle_gpui_node_backend::focus_handle_for(&inert_id).is_none());
+        }
+        driver.pointer_activate_id(&part_id("left", "value"));
+        assert_eq!(host.lock().expect("DetailItem host").state, ItemState::default());
+
+        driver.wait_for_focus_handle(&action_id("left"));
+        driver.wait_for_focus_handle(&action_id("right"));
+        driver.focus_element(&action_id("left"));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&action_id("left")), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&action_id("right")), Some(false));
+
+        driver.pointer_activate_id(&action_id("left"));
+        assert_eq!(host.lock().expect("DetailItem host").state, ItemState { left_advanced: true, right_advanced: false });
+        let rebuilt = poodle_gpui_node_backend::painted_node_for("detail-item:left").expect("rebuilt left DetailItem");
+        assert_eq!(rebuilt.roles.get("layout").map(String::as_str), Some("stacked"));
+        assert_eq!(rebuilt.roles.get("density").map(String::as_str), Some("comfortable"));
+        assert_eq!(rebuilt.roles.get("span").map(String::as_str), Some("half"));
+        assert_eq!(rebuilt.roles.get("truncate").map(String::as_str), Some("false"));
+        assert_eq!(rebuilt.style.layout.spacing.gap, 4.0);
+        assert!(poodle_gpui_node_backend::bounds_for(&part_id("left", "content")).is_some());
+        let rebuilt_label = text_snapshot("left", "label", "Workspace");
+        assert_eq!(rebuilt_label.style.text_color, Some(theme_provider.resolve_color("color.text.tertiary")));
+        assert_eq!(rebuilt_label.text_size, Some(12.0));
+        assert_eq!(rebuilt_label.line_height, Some(1.35));
+        let rebuilt_value = text_snapshot("left", "value", "Poodle design system");
+        assert_eq!(rebuilt_value.style.text_color, Some(theme_provider.resolve_color("color.text.primary")));
+        assert_eq!(rebuilt_value.text_size, Some(16.0));
+        assert_eq!(rebuilt_value.line_height, Some(
+            theme_provider.resolve_space("typography.body.lineHeight") / 16.0
+        ));
+        assert_eq!(rebuilt_value.text_weight, Some(600));
+        assert!(rebuilt_value.text_wrap && !rebuilt_value.text_ellipsis);
+        assert!(poodle_gpui_node_backend::bounds_for("detail-item:left").unwrap().size.width < left_bounds.size.width);
+        text_snapshot("right", "value", "Not configured");
+        assert_mounted_pair_geometry(driver.mount_box_bounds(), true, true, false);
+
+        driver.keyboard_activate(&action_id("right"));
+        let host = host.lock().expect("DetailItem host");
+        assert_eq!(host.state, ItemState { left_advanced: true, right_advanced: true });
+        assert_eq!(host.events, ["left:refresh", "right:refresh"]);
+        drop(host);
+        let right = poodle_gpui_node_backend::painted_node_for("detail-item:right").expect("rebuilt right DetailItem");
+        assert_eq!(right.roles.get("layout").map(String::as_str), Some("inline"));
+        assert_eq!(right.roles.get("presentation").map(String::as_str), Some("simple"));
+        assert_eq!(right.style.layout.alignment.cross, poodle_node::CrossAxisAlignment::Baseline);
+        assert_eq!(right.style.background, None);
+        assert_eq!(right.style.layout.spacing.padding.left, 0.0);
+        assert_eq!(right.style.layout.spacing.padding.top, 0.0);
+        assert_eq!(right.roles.get("span").map(String::as_str), Some("full"));
+        text_snapshot("right", "supporting", "Host supplied configuration");
+        text_snapshot("right", "value", "Configured");
+        text_snapshot("left", "value", "Poodle design system");
+        assert_mounted_pair_geometry(driver.mount_box_bounds(), true, false, true);
+
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        for channel in ["structure.identity.container", "structure.identity.button", "content.text-icon.text", "semantic.token-roles.received"] {
+            assert!(channels.contains(&channel), "backend receives {channel}");
+        }
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "DetailItem",
+            "nucleus.settings.detail-item",
+            observation,
+            &[
+                "mount duplicate caller-scoped controlled DetailItem instances through node_compat::DetailItem::from_spec(...).into_element() in a 640x320 HeadlessDriver host",
+                "compose production Text label, supporting, and value nodes with a real Button action through the shared renderer and compatibility adapter",
+                "dispatch mounted pointer input to the inert value and interactive left action paths",
+                "dispatch mounted keyboard activation to the duplicate right action path",
+                "rebuild both host-owned instances across surface inline, surface stacked, and simple inline presentations",
+            ],
+            &[
+                "portable defaults, explicit presentations, layouts, spans, densities, truncation, empty values, and accessibility labels reach exact mounted metadata",
+                "production Text and Button dependencies preserve exact label, supporting, value, and action structure plus typography, color, line-height, weight, and truncation recipes",
+                "surface background, radius, padding, alignment, and stacked gaps stay exact while simple inline remains baseline with no surface chrome",
+                "both duplicate roots and their children remain contained, ordered, and non-overlapping initially and after every host rebuild",
+                "the value and root remain inert while pointer and keyboard action callbacks rebuild only their owning instance",
+                "caller-scoped runtime ids, focus, callbacks, controlled state, and geometry remain isolated across duplicate instances",
+            ],
+        );
+    });
+}
+
 #[derive(Clone)]
 struct AgentChatInputState {
     id: String,

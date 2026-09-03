@@ -125,6 +125,7 @@ pub enum CrossAxisAlignment {
     Start,
     Center,
     End,
+    Baseline,
     Stretch,
 }
 

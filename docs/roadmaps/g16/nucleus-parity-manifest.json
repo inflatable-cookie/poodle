@@ -17,7 +17,7 @@
   "resolution": {
     "package": "poodle-gpui-preview",
     "version": "0.3.0",
-    "source_commit": "cd2f2e13888dba5dcd507cb65e7f63a03e840f03",
+    "source_commit": "91bcb4367068d31d9be5a6844baf2b2b7f51baa7",
     "lockfile": "packages/gpui/preview/Cargo.lock",
     "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
     "distribution": "workspace",
@@ -300,7 +300,7 @@
         "text"
       ],
       "expected_selector": "effigy regressions:native",
-      "expected_test": null
+      "expected_test": "detail_item_structure_states_actions_and_identity_rebuild_through_mounted_backend"
     },
     {
       "id": "command-palette",

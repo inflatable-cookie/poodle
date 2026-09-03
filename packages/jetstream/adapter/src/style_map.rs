@@ -203,6 +203,7 @@ pub fn map_layout(intent: &LayoutIntent) -> taffy::Style {
         CrossAxisAlignment::Start => Some(AlignItems::FlexStart),
         CrossAxisAlignment::Center => Some(AlignItems::Center),
         CrossAxisAlignment::End => Some(AlignItems::FlexEnd),
+        CrossAxisAlignment::Baseline => Some(AlignItems::Baseline),
         CrossAxisAlignment::Stretch => Some(AlignItems::Stretch),
     };
 

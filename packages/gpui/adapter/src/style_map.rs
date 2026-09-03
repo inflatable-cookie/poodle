@@ -143,6 +143,7 @@ pub enum GpuiAlignItems {
     Start,
     Center,
     End,
+    Baseline,
     Stretch,
 }
 
@@ -283,6 +284,7 @@ fn map_align(cross: CrossAxisAlignment) -> GpuiAlignItems {
         CrossAxisAlignment::Start => GpuiAlignItems::Start,
         CrossAxisAlignment::Center => GpuiAlignItems::Center,
         CrossAxisAlignment::End => GpuiAlignItems::End,
+        CrossAxisAlignment::Baseline => GpuiAlignItems::Baseline,
         CrossAxisAlignment::Stretch => GpuiAlignItems::Stretch,
     }
 }
@@ -439,6 +441,10 @@ mod tests {
         let style = map_layout(&layout);
         assert_eq!(style.justify_content, GpuiJustifyContent::SpaceBetween);
         assert_eq!(style.align_items, GpuiAlignItems::Center);
+
+        let baseline = LayoutIntent::new()
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Baseline);
+        assert_eq!(map_layout(&baseline).align_items, GpuiAlignItems::Baseline);
     }
 
     #[test]
