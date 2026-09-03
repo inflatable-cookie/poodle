@@ -31,7 +31,7 @@
 //! cleanup, Tab traversal, and that window's tooltip overlay — onto a root
 //! element for the same two hosts. Tooltip prepare, sweep, and paint are
 //! keyed by `AnyWindowHandle`; a frame in one window cannot cancel or paint
-//! another window's tooltip.
+//! another window's tooltip or discard its live focus handles.
 
 use std::cell::RefCell;
 
@@ -84,7 +84,7 @@ thread_local! {
 /// (machine effects from event dispatch) must survive until the next frame's
 /// paint applies them. [`overlay_frame_end`] drops whatever was never
 /// applied.
-pub fn overlay_frame_begin() {
+fn overlay_frame_begin_common() {
     // Safety net for a previous cycle that never called overlay_frame_end.
     // Same-frame lost-host cancel is overlay_frame_end after this paint.
     crate::interaction::sweep_lost_continuous_host();
@@ -96,15 +96,20 @@ pub fn overlay_frame_begin() {
     // must not survive it.
     crate::clear_painted_rings();
     super::clear_painted_inset_shadows();
-    crate::prepare_focus_identity_frame();
     crate::interaction::prepare_continuous_value_frame();
+}
+
+pub fn overlay_frame_begin() {
+    overlay_frame_begin_common();
+    crate::prepare_focus_identity_frame();
 }
 
 /// Begin a rendered frame for one window. Production roots call this instead
 /// of the unscoped overlay begin so tooltip prepare and close-binding belong
 /// to that window only.
 pub fn overlay_frame_begin_for(handle: AnyWindowHandle, cx: &mut App) {
-    overlay_frame_begin();
+    overlay_frame_begin_common();
+    crate::prepare_focus_identity_frame_for(handle);
     crate::tooltip::prepare_tooltip_frame(handle);
     crate::tooltip::bind_window_teardown(handle, cx);
 }
@@ -114,16 +119,21 @@ pub fn overlay_frame_begin_for(handle: AnyWindowHandle, cx: &mut App) {
 /// Production hosts defer [`overlay_frame_end_for`] to the end of the same
 /// effect cycle as [`overlay_frame_begin_for`] so removal cancels without a
 /// next-frame delay.
-pub fn overlay_frame_end() {
+fn overlay_frame_end_common() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
-    crate::sweep_unpainted_focus_identities();
     crate::interaction::sweep_lost_continuous_host();
+}
+
+pub fn overlay_frame_end() {
+    crate::sweep_unpainted_focus_identities();
+    overlay_frame_end_common();
 }
 
 /// End a rendered frame for one window. Sweeps only that window's unpainted
 /// tooltip so another window's pending or visible state survives this paint.
 pub fn overlay_frame_end_for(handle: AnyWindowHandle) {
-    overlay_frame_end();
+    crate::sweep_unpainted_focus_identities_for(handle);
+    overlay_frame_end_common();
     crate::tooltip::sweep_unpainted_tooltips(handle);
 }
 

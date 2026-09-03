@@ -27,10 +27,11 @@ use std::time::Duration;
 
 use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
-    AnyElement, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId, Hsla,
-    InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
-    MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta, ScrollWheelEvent, SharedString,
-    Stateful, StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
+    AnyElement, AnyWindowHandle, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId,
+    Hsla, InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent,
+    MouseMoveEvent, MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta,
+    ScrollWheelEvent, SharedString, Stateful, StatefulInteractiveElement, StyleRefinement, Styled,
+    StyledImage, Window,
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, CrossAxisAlignment,
@@ -220,6 +221,7 @@ pub fn reset_focus_registry() {
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().clear());
     FOCUS_STATES.with(|states| states.borrow_mut().clear());
     PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow_mut().clear());
+    FOCUS_IDENTITY_WINDOWS.with(|windows| windows.borrow_mut().clear());
     FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
     interaction::reset_continuous_value_session();
     tooltip::reset_tooltip_registry();
@@ -756,11 +758,16 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
         RefCell::new(std::collections::HashMap::new());
-    /// Tracked focus identities that reached paint in this frame. Handles
-    /// survive the next build so they can be reattached, then disappear at
-    /// frame end if their owning node did not paint.
-    static PAINTED_FOCUS_IDENTITIES: RefCell<std::collections::HashSet<String>> =
-        RefCell::new(std::collections::HashSet::new());
+    /// Tracked focus identities that reached paint in each window's current
+    /// frame. A window may finish its frame while another live window is
+    /// between build and paint, so the frame observation cannot be global.
+    static PAINTED_FOCUS_IDENTITIES: RefCell<std::collections::HashMap<AnyWindowHandle, std::collections::HashSet<String>>> =
+        RefCell::new(std::collections::HashMap::new());
+    /// Last window to paint each focus identity. Runtime ids are caller scoped;
+    /// this ownership is what keeps one window's lost-host sweep from reaching
+    /// another live window's handles and state.
+    static FOCUS_IDENTITY_WINDOWS: RefCell<std::collections::HashMap<String, AnyWindowHandle>> =
+        RefCell::new(std::collections::HashMap::new());
     // What the ring paint pass last painted per element id. Written only from
     // the real paint pass; absent means no ring is on screen.
     static PAINTED_RINGS: RefCell<std::collections::HashMap<String, PaintedRing>> =
@@ -857,13 +864,64 @@ pub(crate) fn prepare_focus_identity_frame() {
     PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow_mut().clear());
 }
 
+pub(crate) fn prepare_focus_identity_frame_for(handle: AnyWindowHandle) {
+    PAINTED_FOCUS_IDENTITIES.with(|ids| {
+        ids.borrow_mut().remove(&handle);
+    });
+}
+
+pub(crate) fn record_painted_focus_identity(handle: AnyWindowHandle, id: &str) {
+    PAINTED_FOCUS_IDENTITIES.with(|ids| {
+        ids.borrow_mut()
+            .entry(handle)
+            .or_default()
+            .insert(id.to_owned());
+    });
+    FOCUS_IDENTITY_WINDOWS.with(|windows| {
+        windows.borrow_mut().insert(id.to_owned(), handle);
+    });
+}
+
 pub(crate) fn sweep_unpainted_focus_identities() {
-    let painted = PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow().clone());
+    let painted = PAINTED_FOCUS_IDENTITIES.with(|windows| {
+        windows
+            .borrow()
+            .values()
+            .flat_map(|ids| ids.iter().cloned())
+            .collect::<std::collections::HashSet<_>>()
+    });
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().retain(|id, _| painted.contains(id)));
     FOCUS_STATES.with(|states| states.borrow_mut().retain(|id, _| painted.contains(id)));
+    FOCUS_IDENTITY_WINDOWS.with(|windows| {
+        windows.borrow_mut().retain(|id, _| painted.contains(id));
+    });
     FOCUSED_FIELD.with(|focused| {
         let mut focused = focused.borrow_mut();
         if focused.as_deref().is_some_and(|id| !painted.contains(id)) {
+            *focused = None;
+        }
+    });
+}
+
+pub(crate) fn sweep_unpainted_focus_identities_for(handle: AnyWindowHandle) {
+    let painted = PAINTED_FOCUS_IDENTITIES
+        .with(|windows| windows.borrow().get(&handle).cloned().unwrap_or_default());
+    let stale = FOCUS_IDENTITY_WINDOWS.with(|windows| {
+        windows
+            .borrow()
+            .iter()
+            .filter(|(id, owner)| **owner == handle && !painted.contains(*id))
+            .map(|(id, _)| id.clone())
+            .collect::<std::collections::HashSet<_>>()
+    });
+    FOCUS_HANDLES.with(|handles| handles.borrow_mut().retain(|id, _| !stale.contains(id)));
+    FOCUS_STATES.with(|states| states.borrow_mut().retain(|id, _| !stale.contains(id)));
+    FOCUS_IDENTITY_WINDOWS.with(|windows| {
+        windows.borrow_mut().retain(|id, _| !stale.contains(id));
+    });
+    FOCUSED_FIELD.with(|focused| {
+        let mut focused = focused.borrow_mut();
+        if focused.as_deref().is_some_and(|id| stale.contains(id)) {
             *focused = None;
         }
     });

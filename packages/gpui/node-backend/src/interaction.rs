@@ -223,9 +223,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         el = el.child(
             gpui::canvas(
                 move |_bounds, window, cx| {
-                    PAINTED_FOCUS_IDENTITIES.with(|ids| {
-                        ids.borrow_mut().insert(id.clone());
-                    });
+                    record_painted_focus_identity(window.window_handle(), &id);
                     let mut created = false;
                     let handle = FOCUS_HANDLES.with(|handles| {
                         let mut handles = handles.borrow_mut();
