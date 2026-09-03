@@ -1,9 +1,9 @@
 # g16.079 — Nucleus Switch M1 Receipt
 
-Status: preparation-ready; receipt finalization blocked on merged `g16.078`
+Status: finalization-ready; production proof prepared in draft PR #183
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
-Depends on: completed `g16.062`; receipt finalization depends on merged `g16.078`
+Depends on: completed `g16.062`, completed `g16.078`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`, `nucleus-parity-manifest.json`,
 `parity-evidence-ledger.md`, `../../contracts/components/switch.md`
