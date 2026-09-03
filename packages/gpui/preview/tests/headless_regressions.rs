@@ -11826,10 +11826,10 @@ fn selection_segment_options() -> Vec<poodle_specs::SegmentedControlOption> {
 /// mounted tree. Emits the terminal M1 execution receipt.
 #[test]
 fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
-    use poodle_node::{
-        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-        MainAxisAlignment, NodeRole, NodeToggled, ShadowLayer, StylePatch,
-    };
+        use poodle_node::{
+            CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+            MainAxisAlignment, NodeKind, NodeRole, NodeToggled, ShadowLayer, StylePatch,
+        };
     use poodle_render::color::{mix_srgb, with_alpha, TRANSPARENT};
     use poodle_render::presentation::{control_height_rem, control_space_x_rem, rem_to_px};
     use poodle_specs::{
@@ -11890,6 +11890,11 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert_eq!(initial_node.children.len(), 3);
 
         let seg_grid = initial_node.children.iter().find(|n| n.id.as_deref() == Some("segmented:grid")).expect("grid segment");
+        assert!(
+            matches!(&seg_grid.kind, NodeKind::Button { label } if label == "Grid"),
+            "seg_grid must be a Button carrying label 'Grid'"
+        );
+        assert_eq!(seg_grid.intrinsic_text(), Some("Grid"));
         assert_eq!(seg_grid.runtime_id.as_deref(), Some("segmented:view:option:grid"));
         assert_eq!(seg_grid.a11y.role, Some(NodeRole::RadioButton));
         assert_eq!(seg_grid.a11y.selected, Some(true));
@@ -11919,6 +11924,11 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         }));
 
         let seg_list = initial_node.children.iter().find(|n| n.id.as_deref() == Some("segmented:list")).expect("list segment");
+        assert!(
+            matches!(&seg_list.kind, NodeKind::Button { label } if label == "List"),
+            "seg_list must be a Button carrying label 'List'"
+        );
+        assert_eq!(seg_list.intrinsic_text(), Some("List"));
         assert_eq!(seg_list.runtime_id.as_deref(), Some("segmented:view:option:list"));
         assert_eq!(seg_list.a11y.role, Some(NodeRole::RadioButton));
         assert_eq!(seg_list.a11y.selected, Some(false));
@@ -11933,6 +11943,11 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert!(seg_list.style.focus.is_none());
 
         let seg_table = initial_node.children.iter().find(|n| n.id.as_deref() == Some("segmented:table")).expect("table segment");
+        assert!(
+            matches!(&seg_table.kind, NodeKind::Button { label } if label == "Table"),
+            "seg_table must be a Button carrying label 'Table'"
+        );
+        assert_eq!(seg_table.intrinsic_text(), Some("Table"));
         assert_eq!(seg_table.runtime_id.as_deref(), Some("segmented:view:option:table"));
         assert_eq!(seg_table.a11y.role, Some(NodeRole::RadioButton));
         assert_eq!(seg_table.a11y.selected, Some(false));
@@ -12148,39 +12163,64 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
             "disabled option click is inert"
         );
 
-        // ── 5. Directional Keyboard Navigation (Skipping & Wrapping) ───────
-        driver.wait_for_focus_handle(&subject_table);
-        driver.focus_element(&subject_table);
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
-
-        driver.dispatch_key_raw("right");
+        // Pointer select grid back to establish known baseline at index 0 for keyboard tests
+        driver.pointer_activate_id(&subject_grid);
         assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid"]);
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
         assert!(segment_selected(&mounted.lock().unwrap(), "view", "grid"));
+        assert!(!segment_selected(&mounted.lock().unwrap(), "view", "table"));
 
-        driver.dispatch_key_raw("left");
+        // ── 5. Directional Keyboard Navigation (Skipping & Wrapping) ───────
+        driver.wait_for_focus_handle(&subject_grid);
+        driver.focus_element(&subject_grid);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+
+        // 5a. Forward disabled skip: Grid (index 0) -> Right skips disabled List (index 1) -> Table (index 2)
+        driver.dispatch_key_raw("right");
         assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table"]);
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
         assert!(segment_selected(&mounted.lock().unwrap(), "view", "table"));
 
-        driver.dispatch_key_raw("down");
+        // 5b. Forward edge wrap: Table (index 2) -> Right wraps to Grid (index 0)
+        driver.dispatch_key_raw("right");
         assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid"]);
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+        assert!(segment_selected(&mounted.lock().unwrap(), "view", "grid"));
 
-        driver.dispatch_key_raw("up");
+        // 5c. Backward edge wrap: Grid (index 0) -> Left wraps to Table (index 2)
+        driver.dispatch_key_raw("left");
         assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table"]);
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
+        assert!(segment_selected(&mounted.lock().unwrap(), "view", "table"));
 
-        driver.dispatch_key_raw("home");
+        // 5d. Backward disabled skip: Table (index 2) -> Left skips disabled List (index 1) -> Grid (index 0)
+        driver.dispatch_key_raw("left");
         assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid"]);
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+        assert!(segment_selected(&mounted.lock().unwrap(), "view", "grid"));
 
-        driver.dispatch_key_raw("end");
+        // 5e. Down arrow: same directional semantics as Right (skips disabled List)
+        driver.dispatch_key_raw("down");
         assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid", "table"]);
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
 
+        // 5f. Up arrow: same directional semantics as Left (skips disabled List)
+        driver.dispatch_key_raw("up");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid", "table", "grid"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+
+        // 5g. End key: jumps directly to last enabled option (Table)
+        driver.dispatch_key_raw("end");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid", "table", "grid", "table"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
+
+        // 5h. Home key: jumps directly to first enabled option (Grid)
+        driver.dispatch_key_raw("home");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid", "table", "grid", "table", "grid"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+
+        // 5i. Escape key: inert, does not change selection
         driver.dispatch_key_raw("escape");
-        assert_eq!(subject_payloads.lock().unwrap().len(), 7);
+        assert_eq!(subject_payloads.lock().unwrap().len(), 10);
 
         // ── 6. Disabled Group Verification ────────────────────────────────
         let disabled_table = segment_option_id("disabled-view", "table");
@@ -12189,7 +12229,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
             "disabled group options must not register focus handles"
         );
         driver.pointer_activate_id(&disabled_table);
-        assert_eq!(subject_payloads.lock().unwrap().len(), 7);
+        assert_eq!(subject_payloads.lock().unwrap().len(), 10);
         assert!(witness_payloads.lock().unwrap().is_empty());
 
         // ── 7. Two Composed Instances Focus & Callback Isolation ───────────
@@ -12210,7 +12250,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert_eq!(witness_payloads.lock().unwrap().as_slice(), ["table"]);
         assert_eq!(
             subject_payloads.lock().unwrap().len(),
-            7,
+            10,
             "Subject handler count must not change when witness is keyboard navigated"
         );
 
@@ -12218,7 +12258,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert_eq!(witness_payloads.lock().unwrap().as_slice(), ["table", "table"]);
         assert_eq!(
             subject_payloads.lock().unwrap().len(),
-            7,
+            10,
             "Subject handler count must not change when witness is pointer clicked"
         );
 
@@ -12245,7 +12285,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
                 "each segment resolves radiobutton role, selected/toggled state, roving tab stop, typography, truncation, and focus patch",
                 "pointer and keyboard input update selected value through controlled host rebuild while disabled and same-value clicks remain inert",
                 "roving keyboard navigation skips disabled segments, wraps at boundaries, and transfers backend focus handle state",
-                "mounted bounds confirm positive dimensions, horizontal segment ordering, equal-width layout, and track child containment",
+                "mounted bounds confirm positive dimensions, horizontal segment ordering, and track child containment",
                 "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers",
             ],
         );
