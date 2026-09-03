@@ -1736,6 +1736,88 @@ async function candidateCargoScopeFalsificationPlant(
   }
 }
 
+const ORDINARY_CARGO_PLANT_MANIFEST = "packages/gpui/node-backend/Cargo.toml";
+const ordinaryCargoPlantBase = [
+  "[package]",
+  'name = "poodle-gpui-node-backend"',
+  'version = "0.2.3"',
+  'edition = "2021"',
+  'license = "MIT"',
+  "publish = false",
+  "",
+  "[dependencies]",
+  'poodle-ir = { version = "0.2.3", path = "../../contracts/ir" }',
+  'tinyvec = "1.12.0"',
+  "",
+].join("\n");
+
+async function ordinaryCargoScopeFalsificationPlant(
+  kind: "version" | "publish" | "registry" | "source" | "patch" | "replace",
+): Promise<void> {
+  const plantRoot = mkdtempSync(join(runRoot, "ordinary-cargo-scope-plant-"));
+  try {
+    await run(["git", "init", "--quiet", plantRoot], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "config", "user.email", "poodle-certification@example.invalid"],
+      repoRoot,
+    );
+    await run(
+      ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
+      repoRoot,
+    );
+    const manifestPath = join(plantRoot, ...ORDINARY_CARGO_PLANT_MANIFEST.split("/"));
+    mkdirSync(join(manifestPath, ".."), { recursive: true });
+    await Bun.write(manifestPath, `${ordinaryCargoPlantBase}\n`);
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "ordinary cargo scope base"],
+      repoRoot,
+    );
+    const plantBaseCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "ordinary cargo falsification base commit",
+    );
+    const plantedManifest = {
+      version: ordinaryCargoPlantBase.replace('version = "0.2.3"', 'version = "0.3.0"'),
+      publish: ordinaryCargoPlantBase.replace("publish = false", "publish = true"),
+      registry: ordinaryCargoPlantBase.replace(
+        'license = "MIT"',
+        'registry = "https://registry.example.invalid"',
+      ),
+      source: ordinaryCargoPlantBase.replace(
+        'tinyvec = "1.12.0"',
+        'tinyvec = { version = "1.12.0", source = "registry+https://evil.example.invalid" }',
+      ),
+      patch: `${ordinaryCargoPlantBase}\n[patch.crates-io]\ntinyvec = { path = "vendor/tinyvec" }\n`,
+      replace: `${ordinaryCargoPlantBase}\n[replace]\n"tinyvec:1.12.0" = { path = "vendor/tinyvec" }\n`,
+    }[kind];
+    await Bun.write(
+      manifestPath,
+      plantedManifest.endsWith("\n") ? plantedManifest : `${plantedManifest}\n`,
+    );
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "ordinary cargo planted mutation"],
+      repoRoot,
+    );
+    const plantProofCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "ordinary cargo falsification proof commit",
+    );
+    const acceptedScope = await assertInstalledScope(
+      plantRoot,
+      plantBaseCommit,
+      plantProofCommit,
+      "ordinary",
+    );
+    throw new Error(
+      `ordinary Cargo guard accepted planted content: ${acceptedScope.changedPaths.join(", ")}`,
+    );
+  } finally {
+    rmSync(plantRoot, { recursive: true, force: true });
+  }
+}
+
 async function candidateEvidenceHeadFalsificationPlant(): Promise<void> {
   const plantRoot = mkdtempSync(join(runRoot, "evidence-head-plant-"));
   try {
@@ -1871,6 +1953,30 @@ const falsificationReceipts = [
   await expectedFailure(
     "ordinary scope rejects a registry surface",
     () => scopeFalsificationPlant("ordinary", "scripts/publish/release.ts"),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects a Cargo package version mutation",
+    () => ordinaryCargoScopeFalsificationPlant("version"),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects Cargo publication content",
+    () => ordinaryCargoScopeFalsificationPlant("publish"),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects Cargo registry content",
+    () => ordinaryCargoScopeFalsificationPlant("registry"),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects Cargo source replacement",
+    () => ordinaryCargoScopeFalsificationPlant("source"),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects Cargo patch content",
+    () => ordinaryCargoScopeFalsificationPlant("patch"),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects Cargo replace content",
+    () => ordinaryCargoScopeFalsificationPlant("replace"),
   ),
   await expectedFailure(
     "candidate scope rejects an unauthorized source path",

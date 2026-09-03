@@ -11,8 +11,12 @@ members, export targets, build receipts, CSS/parser edges, browser and SSR
 lanes, the Svelte `5.56.8` floor, the visible `5.38.6` below-floor failure,
 declarations under Bundler and NodeNext, and the frozen 176-name roster.
 Ordinary source-only and empty `origin/main` ranges are valid. Workflow,
-release, version, and registry/publish ranges fail before build/pack. Ordinary
-runs emit no certification receipt or receipt hash.
+release, package-manager version, and registry/publish ranges fail before
+build/pack. Ordinary Cargo classification is content-aware: `[package]` and
+`[workspace.package]` version mutations stay forbidden, as do publication,
+registry, source, `[patch]`, and `[replace]` content. Dependency requirements,
+features, and lock resolution are not version surfaces. Ordinary runs emit no
+certification receipt or receipt hash.
 
 Exact certification requires `POODLE_WEB_PACK_INSTALL_SCOPE_MODE=strict` and
 keeps the g16.059 writable allowlist, non-empty range, receipt bytes, and
