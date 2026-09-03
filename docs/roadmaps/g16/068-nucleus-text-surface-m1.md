@@ -1,6 +1,6 @@
 # g16.068 — Nucleus Text And Surface M1 Receipts
 
-Status: ready
+Status: in-review
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`
@@ -9,6 +9,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/text.md`,
 `../../contracts/components/surface.md`
+Log: `../../logs/2026-09/20260903-g16-068-nucleus-text-surface-receipts.md`
 
 ## Goal
 
