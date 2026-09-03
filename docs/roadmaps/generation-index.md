@@ -62,7 +62,8 @@ Updated: 2026-09-03
     `34fb80b40bc840a31959bf44b496f24d27c12a3f`; the mounted Nucleus cohort is
     24/29.
   - Ready frontier: finalize preparation-accepted `g16.087` Callout against the
-    latest merged cohort identity.
+    latest merged cohort identity while `g16.089` DetailItem and `g16.090`
+    CommandPalette prepare without shared evidence.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -79,7 +80,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: finalize and review `g16.087` without overlapping shared receipt
+  - Next move: finalize and review `g16.087`, then serially consume accepted
+    `g16.089` and `g16.090` preparations without overlapping shared receipt
     files; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
