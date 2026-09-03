@@ -110,13 +110,14 @@ stay maintained; backend admission is not part of the first card.
 73. [073 — Nucleus Menu M1 receipt](073-nucleus-menu-m1.md) — complete; merged in PR #179 with one production panel fixture, mounted command-list input, single-entry tab posture, controlled checked-state rebuild, and one M1 receipt
 74. [074 — Nucleus Dialog M1 receipt](074-nucleus-dialog-m1.md) — complete; merged in PR #180 after three exact-head review rounds with real Dialog adapter dispatch, independent backdrop/Escape policy, controlled refusal/close, and one M1 receipt
 75. [075 — Nucleus Popover M1 receipt](075-nucleus-popover-m1.md) — complete; merged in PR #181 with the production Popover adapter, nested and sibling layer isolation, mounted dismissal/focus/geometry proofs, and one M1 receipt
-76. [076 — Nucleus Select M1 receipt](076-nucleus-select-m1.md) — ready; strengthen the retained two-instance Select fixture into one production adapter receipt over the merged Popover boundary
+76. [076 — Nucleus Select M1 receipt](076-nucleus-select-m1.md) — complete; merged in PR #182 with production adapter execution, paired-instance isolation, mounted search/navigation/dismissal proofs, and one M1 receipt
+77. [077 — Nucleus TextInput M1 receipt](077-nucleus-text-input-m1.md) — ready; convert the retained controlled-editing fixture into one production adapter receipt and unblock three dependent Nucleus rows
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.075` are complete. `g16.076` is the next ready small Nucleus
+`g16.053`–`g16.076` are complete. `g16.077` is the next ready small Nucleus
 receipt child; later receipt cards remain serial on its exact native source
 identity. Release mutation remains
 separately gated.
