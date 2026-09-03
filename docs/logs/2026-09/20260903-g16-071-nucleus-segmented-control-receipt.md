@@ -13,6 +13,7 @@ Branch: `feature/g16-071-nucleus-segmented-control-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-071-nucleus-segmented-control-receipt`
 Planning base: `44d23b1ac` (`origin/main`)
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/177
+Merged: `4870647bc52060b0b2d4493e2755adc11381b53b`
 
 ## Outcome
 

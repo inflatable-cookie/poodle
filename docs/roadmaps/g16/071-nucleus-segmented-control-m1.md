@@ -1,6 +1,6 @@
 # g16.071 — Nucleus SegmentedControl M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.070`
@@ -10,6 +10,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/segmented-control.md`
 Log: `../../logs/2026-09/20260903-g16-071-nucleus-segmented-control-receipt.md`
 PR: https://github.com/inflatable-cookie/poodle/pull/177
+Merged: `4870647bc52060b0b2d4493e2755adc11381b53b`
 Handoff: `../../handoffs/20260903-050013-g16-071-nucleus-segmented-control-receipt.md`
 
 ## Goal
