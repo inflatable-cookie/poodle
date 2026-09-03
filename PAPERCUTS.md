@@ -5,6 +5,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — `FORCE_COLOR=1` (Paseo/agent default) makes packed `tsc` colorize
+  HistoryEntry/Slider/Tree negative diagnostics, so
+  `test/package-install/web-preview.ts` `includes(PACKED_TYPE_PROOF_DIAGNOSTIC)`
+  fails even when the uncolored text matches. Unset `FORCE_COLOR` for the
+  selector, or strip ANSI before the exact-diagnostic check. Hit while running
+  g16.094 `effigy test:web-pack-install`.
+
 - 2026-09-03 — `effigy graph explore` waited its full 120-second budget on a
   worktree-local `refresh.lock`, then failed without identifying the refresh
   owner or offering a read-only stale-index fallback. Agent navigation stalled
