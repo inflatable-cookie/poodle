@@ -1,0 +1,74 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "TextInput",
+  "scenario_id": "nucleus.settings.text-input",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "69d3afbc0ff65878320d5a6b0f5bc33ad78786c4",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount controlled TextInput fields through node_compat::TextInput::from_spec(...).into_element() into HeadlessDriver",
+    "focus field through mounted pointer press on value node and observe backend focus gain and caret initialization",
+    "dispatch keyboard navigation, character input, Shift-extend selection, and overwrite typing through GPUI test platform",
+    "test scalar maxLength enforcement with astral Unicode characters and verify saturation rejects excess input",
+    "dispatch Enter and Escape keys and observe submit and cancel callbacks without value mutation",
+    "test search clear button and verify ordered value-before-clear callbacks",
+    "verify disabled field lacks focus handle and remains inert to pointer and keyboard events",
+    "verify read-only field accepts focus and selection while suppressing value mutations",
+    "mount two equal-valued fields with caller-owned ids and verify isolated focus, selection, and undo history",
+    "blur field and observe single focus loss callback with state preservation and silent unmount"
+  ],
+  "assertions": [
+    "production render path resolves TextInput role, aria labels, described-by, invalid state, affixes, icons, character counter, and validation indicators",
+    "layout geometry resolves control height, density padding, gaps, corner radius, borders, surface colors, focus rings, and text styling",
+    "mounted bounds confirm positive dimensions, cursor hints, and value node containment within field bounds",
+    "two equal-valued fields maintain separate instance identities, focus handles, carets, selections, and undo histories",
+    "pointer and keyboard inputs update value and selection through host-owned rebuilds while placeholder text remains separate from value",
+    "scalar maxLength accurately limits character count across multi-byte astral Unicode scalars",
+    "search clear executes value change before clear command in strict sequence",
+    "disabled state completely suppresses focus handles, clicks, keystrokes, and commands",
+    "read-only state permits focus and selection while preserving immutable field value",
+    "blur reports focus loss exactly once and unmounting completes silently"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}

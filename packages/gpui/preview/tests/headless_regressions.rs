@@ -14646,6 +14646,7 @@ impl TextFieldState {
 struct TextFieldHost {
     fields: Mutex<Vec<TextFieldState>>,
     log: Mutex<Vec<String>>,
+    mounted_nodes: Mutex<std::collections::HashMap<String, poodle_node::Node>>,
 }
 
 impl TextFieldHost {
@@ -14653,6 +14654,7 @@ impl TextFieldHost {
         Arc::new(Self {
             fields: Mutex::new(fields),
             log: Mutex::new(Vec::new()),
+            mounted_nodes: Mutex::new(std::collections::HashMap::new()),
         })
     }
 
@@ -14673,6 +14675,21 @@ impl TextFieldHost {
     fn take_log(&self) -> Vec<String> {
         std::mem::take(&mut *self.log.lock().expect("log"))
     }
+
+    fn stash_node(&self, name: &str, node: poodle_node::Node) {
+        self.mounted_nodes
+            .lock()
+            .expect("mounted_nodes")
+            .insert(name.to_owned(), node);
+    }
+
+    fn mounted_node(&self, name: &str) -> Option<poodle_node::Node> {
+        self.mounted_nodes
+            .lock()
+            .expect("mounted_nodes")
+            .get(name)
+            .cloned()
+    }
 }
 
 /// The element ids the backend keys focus, bounds and history by. Derived from
@@ -14687,50 +14704,132 @@ fn field_clear_id(name: &str) -> String {
     format!("poodle-input-{name}-clear")
 }
 
+/// The node the backend actually painted for a field, read back out of the
+/// rebuilt tree.
+fn mounted_field(host: &Arc<TextFieldHost>, name: &str) -> poodle_node::Node {
+    host.mounted_node(name)
+        .unwrap_or_else(|| panic!("{name} is mounted"))
+}
+
+fn mounted_text(host: &Arc<TextFieldHost>, name: &str) -> String {
+    let value = mounted_field(host, name)
+        .find(&|node| node.id.as_deref() == Some(field_value_id(name).as_str()))
+        .cloned()
+        .unwrap_or_else(|| panic!("{name} has a value node"));
+    match &value.kind {
+        poodle_node::NodeKind::Text { content } => content.clone(),
+        _ => panic!("{name}'s value node is text, so the field root stays the only input"),
+    }
+}
+
 /// Rebuild the whole mounted tree from host state. Every callback ends here,
 /// so nothing an assertion reads was written by the test: the value and the
 /// caret in the tree are the ones the host stored and handed back as props.
-fn text_field_tree(host: &Arc<TextFieldHost>, mounted: &Arc<Mutex<Node>>) -> Node {
-    let provider = theme();
-    let ctx = RenderContext::new(&provider);
-    let states = host.fields.lock().expect("fields").clone();
-
-    let mut column = Node::container();
-    column.id = Some(FIXTURE_ID.to_owned());
-    column.style.descriptor.layout.direction = LayoutDirection::Column;
-    column.style.descriptor.layout.spacing.gap = 8.0;
-    column.style.descriptor.layout.width = LayoutSizing::Fixed(360.0);
-
-    for state in &states {
-        let mut spec = poodle_specs::TextInputSpec::new()
-            .with_id(&state.name)
-            .with_aria_label(&state.name)
-            .with_value(&state.value)
-            .with_selection(state.selection.0, state.selection.1)
-            .with_is_focused(state.is_focused)
-            .with_type(&state.input_type)
-            .with_disabled(state.is_disabled)
-            .with_read_only(state.is_read_only);
-        if let Some(placeholder) = &state.placeholder {
-            spec = spec.with_placeholder(placeholder);
-        }
-        if let Some(max) = state.max_length {
-            spec = spec.with_max_length(max);
-        }
-        column = column.child(poodle_render::text_input_with_handlers(
-            &spec,
-            &ctx,
-            text_field_handlers(host, mounted, &state.name),
-        ));
+fn text_field_element(host: &Arc<TextFieldHost>, name: &str) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    use node_compat::IntoCompatNode;
+    let state = host.field(name);
+    let mut spec = poodle_specs::TextInputSpec::new()
+        .with_id(&state.name)
+        .with_aria_label(&state.name)
+        .with_value(&state.value)
+        .with_selection(state.selection.0, state.selection.1)
+        .with_is_focused(state.is_focused)
+        .with_type(&state.input_type)
+        .with_disabled(state.is_disabled)
+        .with_read_only(state.is_read_only);
+    if let Some(placeholder) = &state.placeholder {
+        spec = spec.with_placeholder(placeholder);
     }
-    column
+    if let Some(max) = state.max_length {
+        spec = spec.with_max_length(max);
+    }
+
+    let (change_host, change_name) = (Arc::clone(host), state.name.clone());
+    let (select_host, select_name) = (Arc::clone(host), state.name.clone());
+    let (focus_host, focus_name) = (Arc::clone(host), state.name.clone());
+    let (submit_host, submit_name) = (Arc::clone(host), state.name.clone());
+    let (cancel_host, cancel_name) = (Arc::clone(host), state.name.clone());
+    let (clear_host, clear_name) = (Arc::clone(host), state.name.clone());
+
+    let builder = node_compat::TextInput::from_spec(spec, &theme())
+        .on_change(move |value: &str| {
+            let value = value.to_owned();
+            text_field_mutate(
+                &change_host,
+                &change_name,
+                format!("{change_name}/change:{value}"),
+                |field| field.value = value,
+            );
+        })
+        .on_selection_change(Arc::new(move |start: usize, end: usize| {
+            text_field_mutate(
+                &select_host,
+                &select_name,
+                format!("{select_name}/select:{start}-{end}"),
+                |field| field.selection = (start, end),
+            );
+        }))
+        .on_focus_change(Arc::new(move |focused: bool| {
+            text_field_mutate(
+                &focus_host,
+                &focus_name,
+                format!("{focus_name}/focus:{focused}"),
+                |field| field.is_focused = focused,
+            );
+        }))
+        .on_submit(Arc::new(move || {
+            text_field_mutate(
+                &submit_host,
+                &submit_name,
+                format!("{submit_name}/submit"),
+                |_| {},
+            );
+        }))
+        .on_cancel(Arc::new(move || {
+            text_field_mutate(
+                &cancel_host,
+                &cancel_name,
+                format!("{cancel_name}/cancel"),
+                |_| {},
+            );
+        }))
+        .on_clear(Arc::new(move || {
+            text_field_mutate(
+                &clear_host,
+                &clear_name,
+                format!("{clear_name}/clear"),
+                |_| {},
+            );
+        }));
+
+    let compat_node = builder.clone().into_compat_node();
+    host.stash_node(name, compat_node);
+    builder.into_element()
 }
 
-/// Store one reported result and rebuild. The mutation and the rebuild are
-/// separated so the fields lock is never held across the rebuild.
-fn text_field_apply(
+fn text_field_container(host: &Arc<TextFieldHost>) -> gpui::AnyElement {
+    use gpui::{div, px, IntoElement, ParentElement, Styled};
+    let names: Vec<String> = host
+        .fields
+        .lock()
+        .expect("fields")
+        .iter()
+        .map(|f| f.name.clone())
+        .collect();
+    let mut root = div()
+        .id(FIXTURE_ID)
+        .flex_col()
+        .gap(px(8.0))
+        .w(px(360.0));
+    for name in names {
+        root = root.child(text_field_element(host, &name));
+    }
+    root.into_any_element()
+}
+
+fn text_field_mutate(
     host: &Arc<TextFieldHost>,
-    mounted: &Arc<Mutex<Node>>,
     name: &str,
     entry: String,
     mutate: impl FnOnce(&mut TextFieldState),
@@ -14744,151 +14843,248 @@ fn text_field_apply(
         mutate(field);
     }
     host.log.lock().expect("log").push(entry);
-    let next = text_field_tree(host, mounted);
-    *mounted.lock().expect("mount") = next;
-}
-
-fn text_field_handlers(
-    host: &Arc<TextFieldHost>,
-    mounted: &Arc<Mutex<Node>>,
-    name: &str,
-) -> poodle_render::TextInputHandlers {
-    macro_rules! sink {
-        () => {{
-            (Arc::clone(host), Arc::clone(mounted), name.to_owned())
-        }};
-    }
-    let (change_host, change_mount, change_name) = sink!();
-    let (select_host, select_mount, select_name) = sink!();
-    let (focus_host, focus_mount, focus_name) = sink!();
-    let (submit_host, submit_mount, submit_name) = sink!();
-    let (cancel_host, cancel_mount, cancel_name) = sink!();
-    let (clear_host, clear_mount, clear_name) = sink!();
-
-    poodle_render::TextInputHandlers {
-        on_change: Some(Arc::new(move |value: &str| {
-            let value = value.to_owned();
-            text_field_apply(
-                &change_host,
-                &change_mount,
-                &change_name,
-                format!("{change_name}/change:{value}"),
-                |field| field.value = value,
-            );
-        })),
-        on_selection_change: Some(Arc::new(move |start: usize, end: usize| {
-            text_field_apply(
-                &select_host,
-                &select_mount,
-                &select_name,
-                format!("{select_name}/select:{start}-{end}"),
-                |field| field.selection = (start, end),
-            );
-        })),
-        on_focus_change: Some(Arc::new(move |focused: bool| {
-            text_field_apply(
-                &focus_host,
-                &focus_mount,
-                &focus_name,
-                format!("{focus_name}/focus:{focused}"),
-                |field| field.is_focused = focused,
-            );
-        })),
-        on_submit: Some(Arc::new(move || {
-            text_field_apply(
-                &submit_host,
-                &submit_mount,
-                &submit_name,
-                format!("{submit_name}/submit"),
-                |_| {},
-            );
-        })),
-        on_cancel: Some(Arc::new(move || {
-            text_field_apply(
-                &cancel_host,
-                &cancel_mount,
-                &cancel_name,
-                format!("{cancel_name}/cancel"),
-                |_| {},
-            );
-        })),
-        on_clear: Some(Arc::new(move || {
-            text_field_apply(
-                &clear_host,
-                &clear_mount,
-                &clear_name,
-                format!("{clear_name}/clear"),
-                |_| {},
-            );
-        })),
-    }
 }
 
 fn mount_text_fields<'a>(
     cx: &'a mut TestAppContext,
     host: &Arc<TextFieldHost>,
-) -> (HeadlessDriver<'a>, Arc<Mutex<Node>>) {
-    let mounted = Arc::new(Mutex::new(Node::container()));
-    *mounted.lock().expect("mount") = text_field_tree(host, &mounted);
-    let driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
-    (driver, mounted)
+) -> HeadlessDriver<'a> {
+    let host = Arc::clone(host);
+    let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || text_field_container(&host));
+    HeadlessDriver::new_element_in_box(cx, build, 420.0, 300.0)
 }
 
-/// The node the backend actually painted for a field, read back out of the
-/// rebuilt tree.
-fn mounted_field(mounted: &Arc<Mutex<Node>>, name: &str) -> Node {
-    mounted
-        .lock()
-        .expect("mount")
-        .find(&|node| node.id.as_deref() == Some(field_id(name).as_str()))
-        .cloned()
-        .unwrap_or_else(|| panic!("{name} is mounted"))
-}
-
-fn mounted_text(mounted: &Arc<Mutex<Node>>, name: &str) -> String {
-    let value = mounted
-        .lock()
-        .expect("mount")
-        .find(&|node| node.id.as_deref() == Some(field_value_id(name).as_str()))
-        .cloned()
-        .unwrap_or_else(|| panic!("{name} has a value node"));
-    match &value.kind {
-        poodle_node::NodeKind::Text { content } => content.clone(),
-        _ => panic!("{name}'s value node is text, so the field root stays the only input"),
-    }
-}
-
-/// g16.007. TextInput core controlled editing through the real GPUI node,
-/// backend and input path: focus is the backend's, the edit rules are shared
-/// Rust's, and the value and caret are the host's — restated as props on every
-/// frame. Nothing here invokes a handler, a transition or a renderer directly
+/// g16.007 / g16.077. TextInput core controlled editing through the real GPUI
+/// adapter (`node_compat::TextInput::from_spec(...).into_element()`), renderer,
+/// node, backend, and input path: focus is the backend's, edit rules are shared
+/// Rust's, and value and caret are the host's — restated as props on every
+/// frame. Nothing here invokes a handler, a transition, or a renderer directly
 /// after mount.
 ///
 /// Deliberately not claimed: multiline layout, slug source/generation,
-/// validation timing, OS input methods, and NumberInput's value model.
+/// validation timing, OS input methods, NumberInput's value model, A1 tree, or
+/// V1 pixels.
 #[test]
 fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
-    // ── Editing one controlled field ───────────────────────────────────────
+    use node_compat::IntoCompatNode;
+    use poodle_node::{CursorHint, LayoutSizing, NodeRole};
+    use poodle_render::color::with_alpha;
+    use poodle_specs::{TextInputSpec, ValidationState};
+
+    // ── 0. Production renderer composition (no mount) ──────────────────────
+    {
+        let full_spec = TextInputSpec::new()
+            .with_id("proof")
+            .with_aria_label("Proof input")
+            .with_description_id("proof-help")
+            .with_placeholder("Enter query")
+            .with_value("banana")
+            .with_prefix("$")
+            .with_suffix("USD")
+            .with_leading_icon("search")
+            .with_trailing_icon("sparkle")
+            .with_show_char_count(true)
+            .with_max_length(10)
+            .with_required(true)
+            .with_validation_state(ValidationState::Invalid);
+
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let control_height = ctx.theme().resolve_space(full_spec.control_height_token());
+        let inline_padding = ctx.theme().resolve_space(full_spec.horizontal_padding_token());
+        let radius = ctx.theme().resolve_radius(full_spec.radius_token());
+        let surface_raw = ctx.theme().resolve_color(full_spec.fill_token());
+        let surface_bg = with_alpha(surface_raw, surface_raw.3 * 0.82);
+        let border_color = ctx.theme().resolve_color(full_spec.border_token());
+        let hover_border = with_alpha(border_color, border_color.3 * 0.92);
+        let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
+
+        let node = poodle_render::text_input_with_handlers(
+            &full_spec,
+            &ctx,
+            poodle_render::TextInputHandlers::default(),
+        );
+
+        assert_eq!(node.id.as_deref(), Some("poodle-input-proof"));
+        assert_eq!(node.a11y.role, Some(NodeRole::TextInput));
+        assert_eq!(node.a11y.label.as_deref(), Some("Proof input"));
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(node.roles.get("density").map(String::as_str), Some("default"));
+        assert_eq!(node.roles.get("validation").map(String::as_str), Some("invalid"));
+        assert_eq!(node.roles.get("type").map(String::as_str), Some("text"));
+        assert_eq!(node.style.descriptor.background, Some(surface_bg));
+        assert_eq!(
+            node.style.descriptor.border.color,
+            ctx.theme().resolve_color("color.status.danger")
+        );
+        assert_eq!(node.style.descriptor.corner_radii.top_left, radius);
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(control_height)
+        );
+        assert_eq!(
+            node.style.descriptor.layout.spacing.padding.left,
+            inline_padding
+        );
+        assert_eq!(
+            node.style.descriptor.layout.spacing.padding.right,
+            inline_padding
+        );
+        assert_eq!(node.style.descriptor.cursor, CursorHint::Default);
+        assert_eq!(
+            node.style.focus.as_ref().and_then(|p| p.border_color),
+            Some(focus_ring)
+        );
+        assert_eq!(
+            node.style.hover.as_ref().and_then(|p| p.border_color),
+            Some(hover_border)
+        );
+
+        // Subtree adornments
+        assert!(node
+            .find(&|n| n.id.as_deref() == Some("text-input-prefix"))
+            .is_some());
+        assert!(node
+            .find(&|n| n.id.as_deref() == Some("text-input-suffix"))
+            .is_some());
+        assert!(node
+            .find(&|n| n.id.as_deref() == Some("text-input-leading"))
+            .is_some());
+        assert!(node
+            .find(&|n| n.id.as_deref() == Some("text-input-trailing"))
+            .is_some());
+        assert!(node
+            .find(&|n| n.id.as_deref() == Some("text-input-char-count"))
+            .is_some());
+        assert!(node.has_text("6/10"));
+        let validation_icon = node
+            .find(&|n| n.id.as_deref() == Some("text-input-validation"))
+            .expect("validation icon");
+        assert_eq!(
+            validation_icon.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color("color.status.danger"))
+        );
+
+        // Search clear button
+        let search_spec = TextInputSpec::new()
+            .with_id("search-proof")
+            .with_type("search")
+            .with_value("query")
+            .with_show_clear_button(true);
+        let search_node = poodle_render::text_input_with_handlers(
+            &search_spec,
+            &ctx,
+            poodle_render::TextInputHandlers::default(),
+        );
+        let clear_button = search_node
+            .find(&|n| n.id.as_deref() == Some("poodle-input-search-proof-clear"))
+            .expect("clear button");
+        assert_eq!(clear_button.a11y.role, Some(NodeRole::Button));
+        assert_eq!(clear_button.a11y.label.as_deref(), Some("Clear search query"));
+        assert!(clear_button.interaction.focusable);
+
+        // Disabled and ReadOnly
+        let disabled_spec = TextInputSpec::new()
+            .with_id("disabled-proof")
+            .with_disabled(true);
+        let disabled_node = poodle_render::text_input_with_handlers(
+            &disabled_spec,
+            &ctx,
+            poodle_render::TextInputHandlers::default(),
+        );
+        assert!(disabled_node.interaction.disabled);
+        assert_eq!(
+            disabled_node.style.descriptor.cursor,
+            CursorHint::NotAllowed
+        );
+        assert_eq!(
+            disabled_node.style.descriptor.opacity,
+            ctx.theme()
+                .resolve_opacity(disabled_spec.disabled_opacity_token())
+        );
+        assert!(disabled_node.style.focus.is_none());
+
+        // NodeCompat wrapper produces equivalent structure
+        let compat = node_compat::TextInput::from_spec(full_spec.clone(), &theme_provider);
+        let compat_node = compat.into_compat_node();
+        assert_eq!(compat_node.id.as_deref(), Some("poodle-input-proof"));
+        assert_eq!(compat_node.a11y.role, Some(NodeRole::TextInput));
+        assert_eq!(compat_node.a11y.label.as_deref(), Some("Proof input"));
+        assert_eq!(compat_node.a11y.described_by.as_deref(), Some("proof-help"));
+        assert_eq!(compat_node.a11y.invalid, Some(true));
+        assert_eq!(compat_node.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(compat_node.roles.get("density").map(String::as_str), Some("default"));
+        assert_eq!(compat_node.roles.get("validation").map(String::as_str), Some("invalid"));
+        assert_eq!(compat_node.roles.get("type").map(String::as_str), Some("text"));
+        assert!(matches!(
+            &compat_node.kind,
+            poodle_node::NodeKind::Input { value, placeholder } if value == "banana" && placeholder == "Enter query"
+        ));
+        assert_eq!(
+            compat_node.caret.as_ref().map(|c| c.selection),
+            Some((0, 0))
+        );
+        assert_eq!(
+            compat_node.caret.as_ref().map(|c| c.showing_placeholder),
+            Some(false)
+        );
+        let body_size = ctx.theme().resolve_space(full_spec.body_size_token());
+        let body_line_height =
+            ctx.theme().resolve_space(full_spec.body_line_height_token()) / body_size;
+        let text_primary = ctx.theme().resolve_color(full_spec.text_color_token());
+        assert_eq!(compat_node.style.text_size, Some(body_size));
+        assert_eq!(compat_node.style.line_height, Some(body_line_height));
+        assert_eq!(
+            compat_node.style.descriptor.text_color,
+            Some(text_primary)
+        );
+    }
+
+    // ── 1. Controlled editing, scalar maxLength, placeholder, and blur ──────
     run_headless(|cx| {
         let host = TextFieldHost::new(vec![
             TextFieldState::new("name", "kick").limited(6),
             TextFieldState::new("note", "").with_placeholder("Describe it"),
+            TextFieldState::new("astral", "").limited(2),
         ]);
-        let (mut driver, mounted) = mount_text_fields(cx, &host);
+        let mut driver = mount_text_fields(cx, &host);
         driver.wait_for_focus_handle(&field_id("name"));
+        driver.wait_for_focus_handle(&field_id("note"));
+        driver.wait_for_focus_handle(&field_id("astral"));
+
+        // Positive mounted bounds and containment
+        let name_bounds = poodle_gpui_node_backend::bounds_for(&field_id("name"))
+            .expect("name bounds");
+        let name_val_bounds = poodle_gpui_node_backend::bounds_for(&field_value_id("name"))
+            .expect("name value bounds");
+        let width: f32 = name_bounds.size.width.into();
+        let height: f32 = name_bounds.size.height.into();
+        assert!(width > 0.0 && height > 0.0, "mounted field has positive dimensions");
+        assert!(
+            name_val_bounds.left() >= name_bounds.left()
+                && name_val_bounds.right() <= name_bounds.right()
+                && name_val_bounds.top() >= name_bounds.top()
+                && name_val_bounds.bottom() <= name_bounds.bottom(),
+            "value node is contained within field root"
+        );
 
         // A field starts unfocused with a collapsed caret, and the placeholder
-        // is drawn as text while being declared as *not* the value — without
-        // that flag one layer down cannot tell the prompt from what was typed.
+        // is drawn as text while being declared as *not* the value.
         assert!(!host.field("name").is_focused);
-        assert_eq!(mounted_text(&mounted, "note"), "Describe it");
+        assert_eq!(host.field("name").selection, (0, 0));
+        assert_eq!(host.field("note").value, "");
+        assert_eq!(mounted_text(&host, "note"), "Describe it");
         assert_eq!(
-            mounted_field(&mounted, "note")
+            mounted_field(&host, "note")
                 .find(&|node| node.id.as_deref() == Some(field_value_id("note").as_str()))
                 .and_then(|node| node.caret)
                 .map(|caret| caret.showing_placeholder),
             Some(true)
         );
+        assert!(matches!(
+            &mounted_field(&host, "note").kind,
+            poodle_node::NodeKind::Input { value, placeholder } if value.is_empty() && placeholder == "Describe it"
+        ));
 
         // Pointer focus: the press reaches the real focus handle, the backend
         // reports the gain, and the rebuilt spec draws the caret where the
@@ -14915,12 +15111,21 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         driver.dispatch_key_raw("r");
         assert_eq!(host.field("name").value, "kicker");
         assert_eq!(host.field("name").selection, (6, 6));
-        assert_eq!(mounted_text(&mounted, "name"), "kicker");
+        assert_eq!(mounted_text(&host, "name"), "kicker");
+        assert_eq!(
+            mounted_field(&host, "name")
+                .find(&|node| node.id.as_deref() == Some(field_value_id("name").as_str()))
+                .and_then(|node| node.caret)
+                .map(|caret| caret.showing_placeholder),
+            Some(false)
+        );
+        assert!(matches!(
+            &mounted_field(&host, "name").kind,
+            poodle_node::NodeKind::Input { value, placeholder } if value == "kicker" && placeholder.is_empty()
+        ));
 
         // The field is now at its declared limit: the key is consumed, and the
-        // host is told nothing at all. The whole log, not a filtered view of
-        // it — a rejected edit that still reports its unchanged caret is
-        // indistinguishable from an accepted one.
+        // host is told nothing at all.
         host.take_log();
         driver.dispatch_key_raw("s");
         assert_eq!(host.field("name").value, "kicker");
@@ -14950,6 +15155,7 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         driver.dispatch_key_raw("p");
         assert_eq!(host.field("name").value, "per");
         assert_eq!(host.field("name").selection, (1, 1));
+        assert_eq!(mounted_text(&host, "name"), "per");
 
         // Deletion in both directions.
         driver.dispatch_key_raw("backspace");
@@ -14957,6 +15163,7 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         driver.dispatch_key_raw("delete");
         assert_eq!(host.field("name").value, "r");
         assert_eq!(host.field("name").selection, (0, 0));
+        assert_eq!(mounted_text(&host, "name"), "r");
 
         // Commands report without touching the controlled value.
         host.take_log();
@@ -14966,20 +15173,48 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         assert_eq!(host.field("name").value, "r");
         assert_eq!(host.field("name").selection, (0, 0));
 
+        // Unicode scalar maxLength vector with astral character "🎉"
+        // (U+1F389: 1 Unicode scalar value, 2 UTF-16 code units).
+        driver.pointer_press(payload_frac(&field_value_id("astral"), 0.0, 0.5));
+        driver.pointer_release(payload_frac(&field_value_id("astral"), 0.0, 0.5));
+        assert!(host.field("astral").is_focused);
+        host.take_log();
+        driver.dispatch_key_raw("🎉");
+        assert_eq!(host.field("astral").value, "🎉");
+        assert_eq!(host.field("astral").value.chars().count(), 1);
+        assert_eq!(host.field("astral").selection, (1, 1));
+        driver.dispatch_key_raw("✨");
+        assert_eq!(host.field("astral").value, "🎉✨");
+        assert_eq!(host.field("astral").value.chars().count(), 2);
+        assert_eq!(host.field("astral").selection, (2, 2));
+        host.take_log();
+        driver.dispatch_key_raw("🚀");
+        assert_eq!(host.field("astral").value, "🎉✨");
+        assert_eq!(
+            host.take_log(),
+            Vec::<String>::new(),
+            "astral character scalar limit rejects insertion when full"
+        );
+
         // The placeholder is never the value: typing into an empty field
         // reports the typed character alone.
         driver.pointer_press(payload_frac(&field_value_id("note"), 0.0, 0.5));
         driver.pointer_release(payload_frac(&field_value_id("note"), 0.0, 0.5));
+        assert_eq!(host.field("note").value, "");
         driver.dispatch_key_raw("a");
         assert_eq!(host.field("note").value, "a");
-        assert_eq!(mounted_text(&mounted, "note"), "a");
+        assert_eq!(mounted_text(&host, "note"), "a");
         assert_eq!(
-            mounted_field(&mounted, "note")
+            mounted_field(&host, "note")
                 .find(&|node| node.id.as_deref() == Some(field_value_id("note").as_str()))
                 .and_then(|node| node.caret)
                 .map(|caret| caret.showing_placeholder),
             Some(false)
         );
+        assert!(matches!(
+            &mounted_field(&host, "note").kind,
+            poodle_node::NodeKind::Input { value, placeholder } if value == "a" && placeholder == "Describe it"
+        ));
 
         // Focus moving on reports the loss once, and the rebuild drops the
         // focus state without touching the value or the caret.
@@ -15000,29 +15235,36 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         );
     });
 
-    // ── Search clear, disabled, and read-only ──────────────────────────────
+    // ── 2. Search clear, disabled, and read-only ───────────────────────────
     run_headless(|cx| {
         let host = TextFieldHost::new(vec![
             TextFieldState::new("query", "kick").searchable(),
             TextFieldState::new("locked", "sealed").searchable().disabled(),
             TextFieldState::new("frozen", "fixed").searchable().read_only(),
         ]);
-        let (mut driver, mounted) = mount_text_fields(cx, &host);
+        let mut driver = mount_text_fields(cx, &host);
         driver.wait_for_focus_handle(&field_id("query"));
 
         // Only a search field with a value, enabled and writable, offers the
         // clear control at all.
-        assert!(mounted_field(&mounted, "query")
-            .find(&|node| node.id.as_deref() == Some(field_clear_id("query").as_str()))
-            .is_some());
-        for inert in ["locked", "frozen"] {
-            assert!(
-                mounted_field(&mounted, inert)
-                    .find(&|node| node.id.as_deref() == Some(field_clear_id(inert).as_str()))
-                    .is_none(),
-                "{inert} offers no clear control"
-            );
-        }
+        let clear_bounds = poodle_gpui_node_backend::bounds_for(&field_clear_id("query"));
+        assert!(clear_bounds.is_some(), "query clear button paints with bounds");
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&field_clear_id("locked")).is_none(),
+            "locked offers no clear control"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&field_clear_id("frozen")).is_none(),
+            "frozen offers no clear control"
+        );
+        assert_eq!(mounted_text(&host, "query"), "kick");
+        assert_eq!(mounted_text(&host, "locked"), "sealed");
+        assert_eq!(mounted_text(&host, "frozen"), "fixed");
+        assert!(mounted_field(&host, "locked").interaction.disabled);
+        assert_eq!(
+            mounted_field(&host, "locked").style.descriptor.cursor,
+            CursorHint::NotAllowed
+        );
 
         // Clearing is two signals in one order: the empty value first, then
         // the command. Both kinds of host see the field empty.
@@ -15039,10 +15281,9 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
             vec!["query/change:".to_string(), "query/clear".to_string()]
         );
         assert_eq!(host.field("query").value, "");
+        assert_eq!(mounted_text(&host, "query"), "");
         assert!(
-            mounted_field(&mounted, "query")
-                .find(&|node| node.id.as_deref() == Some(field_clear_id("query").as_str()))
-                .is_none(),
+            poodle_gpui_node_backend::bounds_for(&field_clear_id("query")).is_none(),
             "an empty search field has nothing to clear"
         );
 
@@ -15052,11 +15293,11 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
             poodle_gpui_node_backend::focus_handle_for(&field_id("locked")).is_none(),
             "a disabled field is not focusable"
         );
-        assert!(mounted_field(&mounted, "locked").interaction.disabled);
         host.take_log();
         driver.pointer_activate_id(&field_id("locked"));
         driver.dispatch_key_raw("x");
         driver.dispatch_key_raw("enter");
+        driver.dispatch_key_raw("escape");
         assert_eq!(host.field("locked").value, "sealed");
         assert_eq!(
             host.take_log()
@@ -15098,13 +15339,13 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         );
     });
 
-    // ── Two fields with equal values keep their own identity ───────────────
+    // ── 3. Two fields with equal values keep their own identity ────────────
     run_headless(|cx| {
         let host = TextFieldHost::new(vec![
             TextFieldState::new("left", "same"),
             TextFieldState::new("right", "same"),
         ]);
-        let (mut driver, _mounted) = mount_text_fields(cx, &host);
+        let mut driver = mount_text_fields(cx, &host);
         driver.wait_for_focus_handle(&field_id("left"));
         driver.wait_for_focus_handle(&field_id("right"));
 
@@ -15123,6 +15364,8 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         driver.dispatch_key_raw("x");
         assert_eq!(host.field("left").value, "samex");
         assert_eq!(host.field("right").value, "same");
+        assert_eq!(mounted_text(&host, "left"), "samex");
+        assert_eq!(mounted_text(&host, "right"), "same");
 
         driver.focus_element(&field_id("right"));
         driver.dispatch_key_raw("home");
@@ -15131,6 +15374,8 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         assert_eq!(host.field("left").value, "samex");
         assert_eq!(host.field("left").selection, (5, 5));
         assert_eq!(host.field("right").selection, (1, 1));
+        assert_eq!(mounted_text(&host, "left"), "samex");
+        assert_eq!(mounted_text(&host, "right"), "ysame");
 
         // Undo history is per field too — the backend keys it by the value
         // node's id, which is derived from the field's own.
@@ -15141,6 +15386,53 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
             host.field("right").value,
             "ysame",
             "one field's undo leaves the other alone"
+        );
+        assert_eq!(mounted_text(&host, "left"), "same");
+        assert_eq!(mounted_text(&host, "right"), "ysame");
+
+        // Final independent-field assertions
+        assert_eq!(host.field("left").value, "same");
+        assert_eq!(host.field("right").value, "ysame");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("left")),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("right")),
+            Some(false)
+        );
+
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "TextInput",
+            "nucleus.settings.text-input",
+            observation,
+            &[
+                "mount controlled TextInput fields through node_compat::TextInput::from_spec(...).into_element() into HeadlessDriver",
+                "focus field through mounted pointer press on value node and observe backend focus gain and caret initialization",
+                "dispatch keyboard navigation, character input, Shift-extend selection, and overwrite typing through GPUI test platform",
+                "test scalar maxLength enforcement with astral Unicode characters and verify saturation rejects excess input",
+                "dispatch Enter and Escape keys and observe submit and cancel callbacks without value mutation",
+                "test search clear button and verify ordered value-before-clear callbacks",
+                "verify disabled field lacks focus handle and remains inert to pointer and keyboard events",
+                "verify read-only field accepts focus and selection while suppressing value mutations",
+                "mount two equal-valued fields with caller-owned ids and verify isolated focus, selection, and undo history",
+                "blur field and observe single focus loss callback with state preservation and silent unmount",
+            ],
+            &[
+                "production render path resolves TextInput role, aria labels, described-by, invalid state, affixes, icons, character counter, and validation indicators",
+                "layout geometry resolves control height, density padding, gaps, corner radius, borders, surface colors, focus rings, and text styling",
+                "mounted bounds confirm positive dimensions, cursor hints, and value node containment within field bounds",
+                "two equal-valued fields maintain separate instance identities, focus handles, carets, selections, and undo histories",
+                "pointer and keyboard inputs update value and selection through host-owned rebuilds while placeholder text remains separate from value",
+                "scalar maxLength accurately limits character count across multi-byte astral Unicode scalars",
+                "search clear executes value change before clear command in strict sequence",
+                "disabled state completely suppresses focus handles, clicks, keystrokes, and commands",
+                "read-only state permits focus and selection while preserving immutable field value",
+                "blur reports focus loss exactly once and unmounting completes silently",
+            ],
         );
     });
 }
@@ -15546,7 +15838,7 @@ fn text_input_submits_on_enter_and_traverses_on_tab() {
             TextFieldState::new("first", "kick"),
             TextFieldState::new("second", "snare"),
         ]);
-        let (mut driver, _mounted) = mount_text_fields(cx, &host);
+        let mut driver = mount_text_fields(cx, &host);
         driver.wait_for_focus_handle(&field_id("first"));
         driver.wait_for_focus_handle(&field_id("second"));
         driver.focus_element(&field_id("first"));
@@ -15622,7 +15914,7 @@ fn blur_clears_the_painted_field_state_and_keeps_its_undo_history() {
     // ── Composite: the value is a derived child ────────────────────────────
     run_headless(|cx| {
         let host = TextFieldHost::new(vec![TextFieldState::new("name", "kick")]);
-        let (mut driver, _mounted) = mount_text_fields(cx, &host);
+        let mut driver = mount_text_fields(cx, &host);
         driver.wait_for_focus_handle(&field_id("name"));
         driver.focus_element(&field_id("name"));
         driver.dispatch_key_raw("end");
