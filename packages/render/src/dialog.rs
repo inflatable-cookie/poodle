@@ -258,12 +258,11 @@ fn backdrop(
     }
 
     // Dismiss layer registration for Escape and outside dismissal stack.
+    // The panel surface is the containment boundary (contract §8 / Dialog.svelte);
+    // the full-screen backdrop is not part of the layer so outside clicks can fire.
     let layer_id = "poodle-dialog-layer".to_string();
-    root.interaction.dismiss_layer = Some(layer_id.clone());
-    panel.interaction.dismiss_layer = Some(layer_id);
-
-    // Inside clicks on the panel must not trigger backdrop dismissal when close is wired.
     if on_request_close.is_some() {
+        panel.interaction.dismiss_layer = Some(layer_id);
         panel.interaction.on_activate = Some(Arc::new(|| {}));
     }
 
@@ -274,16 +273,14 @@ fn backdrop(
 
     if let Some(handler) = on_request_close {
         let dismiss_on_escape = spec.dismiss_on_escape;
-        let dismiss_on_outside = spec.dismiss_on_outside_interact;
-        root.interaction.on_dismiss = Some(Arc::new(move |reason| match reason {
-            poodle_node::DismissReason::Escape if dismiss_on_escape => {
-                handler();
-            }
-            poodle_node::DismissReason::Outside if dismiss_on_outside => {
-                handler();
-            }
-            _ => {}
-        }));
+        if dismiss_on_escape {
+            panel.interaction.on_dismiss = Some(Arc::new(move |reason| match reason {
+                poodle_node::DismissReason::Escape if dismiss_on_escape => {
+                    handler();
+                }
+                _ => {}
+            }));
+        }
     }
 
     let mut root = root.child(panel);
@@ -333,18 +330,12 @@ mod tests {
         assert_eq!(node.id.as_deref(), Some("poodle-dialog-backdrop"));
         assert!(node.style.overlay);
         assert_eq!(node.a11y.role, Some(NodeRole::Dialog));
-        assert_eq!(
-            node.interaction.dismiss_layer.as_deref(),
-            Some("poodle-dialog-layer")
-        );
+        assert!(node.interaction.dismiss_layer.is_none());
 
         assert_eq!(node.children.len(), 1);
         let panel = &node.children[0];
         assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
-        assert_eq!(
-            panel.interaction.dismiss_layer.as_deref(),
-            Some("poodle-dialog-layer")
-        );
+        assert!(panel.interaction.dismiss_layer.is_none());
         assert!(panel.interaction.on_activate.is_none());
 
         let with_close = dialog(
@@ -354,7 +345,12 @@ mod tests {
             None,
             Some(Arc::new(|| {})),
         );
-        assert!(with_close.children[0].interaction.on_activate.is_some());
+        let with_close_panel = &with_close.children[0];
+        assert_eq!(
+            with_close_panel.interaction.dismiss_layer.as_deref(),
+            Some("poodle-dialog-layer")
+        );
+        assert!(with_close_panel.interaction.on_activate.is_some());
     }
 
     #[test]
@@ -374,23 +370,27 @@ mod tests {
 
         let node = dialog(&spec, &ctx, vec![], None, Some(on_close));
 
-        // Backdrop activation
+        // Backdrop activation on root
         assert!(node.interaction.on_activate.is_some());
         if let Some(act) = &node.interaction.on_activate {
             act();
             assert_eq!(call_count.load(Ordering::SeqCst), 1);
         }
 
-        // On dismiss (Escape)
-        assert!(node.interaction.on_dismiss.is_some());
-        if let Some(dismiss) = &node.interaction.on_dismiss {
+        // On dismiss (Escape) on panel
+        let panel = &node.children[0];
+        assert!(panel.interaction.on_dismiss.is_some());
+        if let Some(dismiss) = &panel.interaction.on_dismiss {
             dismiss(poodle_node::DismissReason::Escape);
             assert_eq!(call_count.load(Ordering::SeqCst), 2);
-
-            // Outside interact is disabled by default
-            dismiss(poodle_node::DismissReason::Outside);
-            assert_eq!(call_count.load(Ordering::SeqCst), 2);
         }
+
+        // Escape disabled omits dismissal
+        let escape_disabled_spec = DialogSpec::new()
+            .with_dismiss_on_escape(false);
+        let escape_disabled_node = dialog(&escape_disabled_spec, &ctx, vec![], None, Some(Arc::new(|| {})));
+        let escape_disabled_panel = &escape_disabled_node.children[0];
+        assert!(escape_disabled_panel.interaction.on_dismiss.is_none());
     }
 
     #[test]

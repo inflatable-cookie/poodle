@@ -60,6 +60,28 @@ mod nucleus_receipts;
 #[path = "../src/block_slider_host.rs"]
 mod block_slider_host;
 
+mod app_state {
+    #[derive(Clone, Debug)]
+    pub enum NodeSpecimenEvent {
+        FileBrowse {
+            key: String,
+            spec: poodle_gpui_node_backend::file_capability::SingleFilePickSpec,
+            failed_message: Option<String>,
+        },
+        SetToggle {
+            key: String,
+            value: bool,
+        },
+        SetValue {
+            key: String,
+            value: String,
+        },
+    }
+}
+
+#[path = "../src/node_compat.rs"]
+mod node_compat;
+
 // The preview-local axis decision (g15.019). Pure data, no GPUI: which axis
 // tabs a specimen page publishes, and which tab a retained selection resolves
 // to once the available set shrinks.
@@ -23690,6 +23712,89 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
 // ── g16.074 Nucleus Dialog mounted parity ────────────────────────────
 
 #[test]
+fn nearest_clickable_ancestor_stops_propagation_symmetrically() {
+    use poodle_node::{LayoutSizing, Node};
+
+    run_headless(|cx| {
+        let parent_regular_clicks = Arc::new(Mutex::new(0usize));
+        let child_modified_clicks = Arc::new(Mutex::new(0usize));
+        let p_reg_sink = Arc::clone(&parent_regular_clicks);
+        let c_mod_sink = Arc::clone(&child_modified_clicks);
+
+        // Case 1: Modified child inside regular parent
+        let mut child_mod = Node::container();
+        child_mod.id = Some("modified-child".to_string());
+        child_mod.style.descriptor.layout.direction = LayoutDirection::Row;
+        child_mod.style.descriptor.layout.width = LayoutSizing::Fixed(50.0);
+        child_mod.style.descriptor.layout.height = LayoutSizing::Fixed(50.0);
+        child_mod.interaction.on_activate_modified = Some(Arc::new(move |_mods| {
+            *c_mod_sink.lock().unwrap() += 1;
+        }));
+
+        let mut parent_reg = Node::container();
+        parent_reg.id = Some("regular-parent".to_string());
+        parent_reg.style.descriptor.layout.direction = LayoutDirection::Row;
+        parent_reg.style.descriptor.layout.width = LayoutSizing::Fixed(200.0);
+        parent_reg.style.descriptor.layout.height = LayoutSizing::Fixed(100.0);
+        parent_reg.interaction.on_activate = Some(Arc::new(move || {
+            *p_reg_sink.lock().unwrap() += 1;
+        }));
+        let parent_reg = parent_reg.child(child_mod);
+
+        let mounted = Arc::new(Mutex::new(parent_reg));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 200.0, 200.0);
+
+        // Click modified child: only child modified handler fires, does not bubble to regular parent
+        driver.pointer_activate_id("modified-child");
+        assert_eq!(*child_modified_clicks.lock().unwrap(), 1);
+        assert_eq!(*parent_regular_clicks.lock().unwrap(), 0);
+
+        // Click regular parent outside child: parent handler fires
+        driver.pointer_activate_id("regular-parent");
+        assert_eq!(*child_modified_clicks.lock().unwrap(), 1);
+        assert_eq!(*parent_regular_clicks.lock().unwrap(), 1);
+
+        // Case 2: Regular child inside modified parent (reverse symmetry)
+        let parent_mod_clicks = Arc::new(Mutex::new(0usize));
+        let child_reg_clicks = Arc::new(Mutex::new(0usize));
+        let p_mod_sink = Arc::clone(&parent_mod_clicks);
+        let c_reg_sink = Arc::clone(&child_reg_clicks);
+
+        let mut child_reg = Node::container();
+        child_reg.id = Some("regular-child".to_string());
+        child_reg.style.descriptor.layout.direction = LayoutDirection::Row;
+        child_reg.style.descriptor.layout.width = LayoutSizing::Fixed(50.0);
+        child_reg.style.descriptor.layout.height = LayoutSizing::Fixed(50.0);
+        child_reg.interaction.on_activate = Some(Arc::new(move || {
+            *c_reg_sink.lock().unwrap() += 1;
+        }));
+
+        let mut parent_mod = Node::container();
+        parent_mod.id = Some("modified-parent".to_string());
+        parent_mod.style.descriptor.layout.direction = LayoutDirection::Row;
+        parent_mod.style.descriptor.layout.width = LayoutSizing::Fixed(200.0);
+        parent_mod.style.descriptor.layout.height = LayoutSizing::Fixed(100.0);
+        parent_mod.interaction.on_activate_modified = Some(Arc::new(move |_mods| {
+            *p_mod_sink.lock().unwrap() += 1;
+        }));
+        let parent_mod = parent_mod.child(child_reg);
+
+        *mounted.lock().unwrap() = parent_mod;
+        driver.draw_frame();
+
+        // Click regular child: only child regular handler fires, does not bubble to modified parent
+        driver.pointer_activate_id("regular-child");
+        assert_eq!(*child_reg_clicks.lock().unwrap(), 1);
+        assert_eq!(*parent_mod_clicks.lock().unwrap(), 0);
+
+        // Click modified parent outside child: parent modified handler fires
+        driver.pointer_activate_id("modified-parent");
+        assert_eq!(*child_reg_clicks.lock().unwrap(), 1);
+        assert_eq!(*parent_mod_clicks.lock().unwrap(), 1);
+    });
+}
+
+#[test]
 fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
     use poodle_node::{
         CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
@@ -23700,7 +23805,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         size_font_rem,
     };
     use poodle_specs::{
-        ButtonSpec, ButtonVariant, DialogKind, DialogSpec, DialogWidth, PaddingScale,
+        ButtonSpec, ButtonVariant, ControlSize, DialogKind, DialogSpec, DialogWidth, PaddingScale,
         SemanticControlSizeRole, SurfaceBorder, SurfaceSpec, SurfaceTone,
     };
     use poodle_tokens::semantic;
@@ -23740,6 +23845,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         let close_dim = rem_to_px(control_height_rem(chrome_size));
 
         // ── 1. Production Spec & Token Structure Proof ─────────────────────
+        // 1a. Production Surface Dependency Proof
         let surface_spec = SurfaceSpec::new()
             .with_tone(SurfaceTone::Panel)
             .with_border(SurfaceBorder::Subtle)
@@ -23751,24 +23857,152 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         );
         body_surface.id = Some("dialog-body-surface".to_string());
 
+        let base_surface = ctx.theme().resolve_color("color.background.surface");
+        let base_border_subtle = ctx.theme().resolve_color("color.border.subtle");
+        let expected_surface_bg = poodle_render::color::with_alpha(base_surface, base_surface.3 * 0.96);
+        let expected_surface_border = poodle_render::color::with_alpha(base_border_subtle, base_border_subtle.3 * 0.74);
+        let expected_surface_border_width = ctx.theme().resolve_border_width("border.width.default");
+        let expected_surface_radius = ctx.theme().resolve_radius("radius.surface");
+        let expected_surface_pad_x = ctx.theme().resolve_space(surface_spec.resolved_padding().horizontal.unwrap());
+        let expected_surface_pad_y = ctx.theme().resolve_space(surface_spec.resolved_padding().vertical.unwrap());
+
+        assert_eq!(
+            body_surface.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Production Surface must declare Row layout"
+        );
+        assert_eq!(
+            body_surface.style.descriptor.background,
+            Some(expected_surface_bg),
+            "Production Surface must carry 96% alpha panel tone background"
+        );
+        assert_eq!(
+            body_surface.style.descriptor.border.color,
+            expected_surface_border,
+            "Production Surface must carry 74% alpha subtle border color"
+        );
+        assert_eq!(
+            body_surface.style.descriptor.border.width,
+            expected_surface_border_width,
+            "Production Surface must resolve default border width (1.0px)"
+        );
+        assert_eq!(
+            body_surface.style.descriptor.corner_radii.top_left,
+            expected_surface_radius,
+            "Production Surface must carry radius.surface"
+        );
+        assert_eq!(
+            body_surface.style.descriptor.layout.spacing.padding.left,
+            expected_surface_pad_x,
+            "Production Surface must resolve Md horizontal padding"
+        );
+        assert_eq!(
+            body_surface.style.descriptor.layout.spacing.padding.top,
+            expected_surface_pad_y,
+            "Production Surface must resolve Md vertical padding"
+        );
+        assert_eq!(body_surface.children.len(), 1);
+        match &body_surface.children[0].kind {
+            NodeKind::Text { content } => assert_eq!(content, "Dataset: telemetry-log-2026.parquet"),
+            _ => panic!("body_surface child must be text node"),
+        }
+
+        // 1b. Production Button Dependencies Proof (Disabled, Secondary, Primary)
         let disabled_btn_spec = ButtonSpec::new()
             .with_label("Locked")
             .with_variant(ButtonVariant::Ghost)
             .with_disabled(true);
         let mut disabled_btn = poodle_render::button(&disabled_btn_spec, &ctx, None);
         disabled_btn.id = Some("dialog-disabled-btn".to_string());
+        assert_eq!(disabled_btn.a11y.role, Some(NodeRole::Button));
+        assert_eq!(disabled_btn.a11y.tab_index, None);
+        assert!(disabled_btn.interaction.disabled);
+        assert_eq!(disabled_btn.style.descriptor.cursor, CursorHint::NotAllowed);
+        assert_eq!(
+            disabled_btn.style.descriptor.opacity,
+            ctx.theme().resolve_opacity(disabled_btn_spec.disabled_opacity_token())
+        );
+        assert_eq!(
+            disabled_btn.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(control_height_rem(ControlSize::Md)))
+        );
+        assert_eq!(
+            disabled_btn.roles.get("variant").map(String::as_str),
+            Some("ghost"),
+            "Production Button must declare ghost variant in semantic roles"
+        );
+        match &disabled_btn.kind {
+            NodeKind::Button { label } => assert_eq!(label, "Locked"),
+            _ => panic!("disabled_btn kind must be Button carrying label"),
+        }
 
         let cancel_btn_spec = ButtonSpec::new()
             .with_label("Cancel")
             .with_variant(ButtonVariant::Secondary);
         let mut cancel_btn = poodle_render::button(&cancel_btn_spec, &ctx, None);
         cancel_btn.id = Some("dialog-cancel-btn".to_string());
+        assert_eq!(cancel_btn.a11y.role, Some(NodeRole::Button));
+        assert_eq!(cancel_btn.a11y.tab_index, Some(0));
+        assert!(cancel_btn.interaction.focusable);
+        assert!(!cancel_btn.interaction.disabled);
+        assert_eq!(cancel_btn.style.descriptor.cursor, CursorHint::Pointer);
+        assert_eq!(
+            cancel_btn.style.descriptor.background,
+            Some(poodle_render::color::mix_srgb(
+                ctx.theme().resolve_color("color.background.surface"),
+                ctx.theme().resolve_color("color.text.primary"),
+                0.88
+            ))
+        );
+        assert_eq!(
+            cancel_btn.style.descriptor.border.color,
+            ctx.theme().resolve_color("color.border.default")
+        );
+        assert!(cancel_btn.style.hover.is_some());
+        assert!(cancel_btn.style.focus_ring.is_some());
+        assert_eq!(
+            cancel_btn.style.focus_ring.as_ref().unwrap().color,
+            ctx.theme().resolve_color(cancel_btn_spec.focus_ring_color_token())
+        );
+        assert_eq!(
+            cancel_btn.roles.get("variant").map(String::as_str),
+            Some("secondary"),
+            "Production Button must declare secondary variant in semantic roles"
+        );
+        match &cancel_btn.kind {
+            NodeKind::Button { label } => assert_eq!(label, "Cancel"),
+            _ => panic!("cancel_btn kind must be Button carrying label"),
+        }
 
         let confirm_btn_spec = ButtonSpec::new()
             .with_label("Export")
             .with_variant(ButtonVariant::Primary);
         let mut confirm_btn = poodle_render::button(&confirm_btn_spec, &ctx, None);
         confirm_btn.id = Some("dialog-confirm-btn".to_string());
+        assert_eq!(confirm_btn.a11y.role, Some(NodeRole::Button));
+        assert_eq!(confirm_btn.a11y.tab_index, Some(0));
+        assert!(confirm_btn.interaction.focusable);
+        assert!(!confirm_btn.interaction.disabled);
+        assert_eq!(confirm_btn.style.descriptor.cursor, CursorHint::Pointer);
+        assert_eq!(
+            confirm_btn.style.descriptor.background,
+            Some(ctx.theme().resolve_color("color.accent.base"))
+        );
+        assert!(confirm_btn.style.hover.is_some());
+        assert!(confirm_btn.style.focus_ring.is_some());
+        assert_eq!(
+            confirm_btn.style.focus_ring.as_ref().unwrap().color,
+            ctx.theme().resolve_color(confirm_btn_spec.focus_ring_color_token())
+        );
+        assert_eq!(
+            confirm_btn.roles.get("variant").map(String::as_str),
+            Some("primary"),
+            "Production Button must declare primary variant in semantic roles"
+        );
+        match &confirm_btn.kind {
+            NodeKind::Button { label } => assert_eq!(label, "Export"),
+            _ => panic!("confirm_btn kind must be Button carrying label"),
+        }
 
         let mut actions_container = Node::container();
         actions_container.id = Some("dialog-actions-container".to_string());
@@ -23779,6 +24013,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             .child(cancel_btn)
             .child(confirm_btn);
 
+        // 1c. Production Dialog Node Tree Construction
         let initial_node = poodle_render::dialog(
             &spec,
             &ctx,
@@ -23787,7 +24022,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             Some(Arc::new(|| {})),
         );
 
-        // 1a. Root Backdrop
+        // 1d. Root Backdrop
         assert_eq!(initial_node.id.as_deref(), Some("poodle-dialog-backdrop"));
         assert_eq!(initial_node.a11y.role, Some(NodeRole::Dialog));
         assert!(initial_node.style.overlay);
@@ -23817,9 +24052,31 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             MainAxisAlignment::Center
         );
         assert_eq!(initial_node.children.len(), 1);
+        assert!(
+            initial_node.interaction.dismiss_layer.is_none(),
+            "Backdrop must NOT register dismiss layer; panel surface is the containment boundary"
+        );
+        assert!(
+            initial_node.interaction.on_activate.is_some(),
+            "Backdrop must carry on_activate when dismiss_on_backdrop is true"
+        );
 
-        // 1b. Surface Panel
+        // 1e. Surface Panel
         let panel = &initial_node.children[0];
+        assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
+        assert_eq!(
+            panel.interaction.dismiss_layer.as_deref(),
+            Some("poodle-dialog-layer"),
+            "Panel surface must register poodle-dialog-layer"
+        );
+        assert!(
+            panel.interaction.on_dismiss.is_some(),
+            "Panel surface must carry on_dismiss handler for Escape/Outside"
+        );
+        assert!(
+            panel.interaction.on_activate.is_some(),
+            "Panel surface must carry inert on_activate to absorb inside clicks"
+        );
         assert_eq!(panel.style.descriptor.background, Some(surface_fill));
         assert_eq!(panel.style.descriptor.border.width, 1.0);
         assert_eq!(panel.style.descriptor.border.color, border_color);
@@ -23862,7 +24119,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         );
         assert_eq!(panel.children.len(), 3);
 
-        // 1c. Header Row
+        // 1f. Header Row
         let header_row = &panel.children[0];
         assert_eq!(
             header_row.style.descriptor.layout.direction,
@@ -23931,7 +24188,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         assert!(matches!(&close_icon.kind, NodeKind::Icon { name, .. } if name == "x"));
         assert_eq!(close_icon.style.descriptor.text_color, Some(muted_color));
 
-        // 1d. Body Container
+        // 1g. Body Container
         let body_container = &panel.children[1];
         assert_eq!(
             body_container.style.descriptor.layout.direction,
@@ -23943,7 +24200,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         let body_node = &body_container.children[0];
         assert_eq!(body_node.id.as_deref(), Some("dialog-body-surface"));
 
-        // 1e. Actions Row
+        // 1h. Actions Row
         let actions_row = &panel.children[2];
         assert_eq!(
             actions_row.style.descriptor.layout.direction,
@@ -23973,6 +24230,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         let refuse_close = Arc::new(Mutex::new(false));
         let dismiss_on_backdrop_state = Arc::new(Mutex::new(true));
         let dismiss_on_escape_state = Arc::new(Mutex::new(true));
+        let dismiss_on_outside_state = Arc::new(Mutex::new(false));
         let close_requests = Arc::new(Mutex::new(Vec::<&'static str>::new()));
         let action_events = Arc::new(Mutex::new(Vec::<&'static str>::new()));
 
@@ -23984,6 +24242,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             refuse_close: &Arc<Mutex<bool>>,
             dismiss_on_backdrop_state: &Arc<Mutex<bool>>,
             dismiss_on_escape_state: &Arc<Mutex<bool>>,
+            dismiss_on_outside_state: &Arc<Mutex<bool>>,
             close_requests: &Arc<Mutex<Vec<&'static str>>>,
             action_events: &Arc<Mutex<Vec<&'static str>>>,
             mounted: &Arc<Mutex<Node>>,
@@ -24002,6 +24261,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 .with_width(DialogWidth::Md)
                 .with_dismiss_on_backdrop(*dismiss_on_backdrop_state.lock().unwrap())
                 .with_dismiss_on_escape(*dismiss_on_escape_state.lock().unwrap())
+                .with_dismiss_on_outside_interact(*dismiss_on_outside_state.lock().unwrap())
                 .with_role(DialogKind::Dialog);
 
             let surface_spec = SurfaceSpec::new()
@@ -24070,20 +24330,23 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             let refuse_sink = Arc::clone(refuse_close);
             let b_state = Arc::clone(dismiss_on_backdrop_state);
             let e_state = Arc::clone(dismiss_on_escape_state);
+            let o_state = Arc::clone(dismiss_on_outside_state);
             let a_sink = Arc::clone(action_events);
             let m_sink = Arc::clone(mounted);
             let theme_for_rebuild = theme();
+            let theme_for_closure = theme_for_rebuild.clone();
 
             let on_request_close = Arc::new(move || {
                 close_sink.lock().unwrap().push("request-close");
                 if !*refuse_sink.lock().unwrap() {
                     *open_sink.lock().unwrap() = false;
                     let next = build_dialog_host(
-                        &RenderContext::new(&theme_for_rebuild),
+                        &RenderContext::new(&theme_for_closure),
                         &open_sink,
                         &refuse_sink,
                         &b_state,
                         &e_state,
+                        &o_state,
                         &close_sink,
                         &a_sink,
                         &m_sink,
@@ -24092,13 +24355,11 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 }
             });
 
-            poodle_render::dialog(
-                &spec,
-                ctx,
-                vec![body_surface],
-                Some(actions_container),
-                Some(on_request_close),
-            )
+            crate::node_compat::Dialog::from_spec(spec, &theme_for_rebuild)
+                .with_content(body_surface)
+                .with_actions(actions_container)
+                .on_request_close(on_request_close)
+                .into_node()
         }
 
         *mounted.lock().unwrap() = build_dialog_host(
@@ -24107,6 +24368,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             &refuse_close,
             &dismiss_on_backdrop_state,
             &dismiss_on_escape_state,
+            &dismiss_on_outside_state,
             &close_requests,
             &action_events,
             &mounted,
@@ -24206,12 +24468,14 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
 
         // 4b. Backdrop click with dismiss_on_backdrop: false -> inert
         *dismiss_on_backdrop_state.lock().unwrap() = false;
+        *dismiss_on_escape_state.lock().unwrap() = true;
         *mounted.lock().unwrap() = build_dialog_host(
             &ctx,
             &is_open,
             &refuse_close,
             &dismiss_on_backdrop_state,
             &dismiss_on_escape_state,
+            &dismiss_on_outside_state,
             &close_requests,
             &action_events,
             &mounted,
@@ -24227,14 +24491,26 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             "Backdrop click when dismiss_on_backdrop=false must be inert"
         );
 
-        // 4c. Backdrop click with dismiss_on_backdrop: true -> emits request_close
+        // 4c. Escape key with dismiss_on_backdrop: false and dismiss_on_escape: true -> emits request_close
+        // (Proves that Escape functions independently through the real GPUI Dialog compat path)
+        driver.dispatch_key("escape");
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            2,
+            "Escape key when dismiss_on_escape=true must emit on_request_close even when dismiss_on_backdrop=false"
+        );
+
+        // 4d. Backdrop click with dismiss_on_backdrop: true and dismiss_on_escape: false -> emits request_close
+        // (Proves that Backdrop click functions independently through the real GPUI Dialog compat path)
         *dismiss_on_backdrop_state.lock().unwrap() = true;
+        *dismiss_on_escape_state.lock().unwrap() = false;
         *mounted.lock().unwrap() = build_dialog_host(
             &ctx,
             &is_open,
             &refuse_close,
             &dismiss_on_backdrop_state,
             &dismiss_on_escape_state,
+            &dismiss_on_outside_state,
             &close_requests,
             &action_events,
             &mounted,
@@ -24244,31 +24520,19 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         driver.pointer_release(backdrop_point);
         assert_eq!(
             close_requests.lock().unwrap().len(),
-            2,
+            3,
             "Backdrop click when dismiss_on_backdrop=true must emit on_request_close"
         );
 
-        // 4d. Escape key with dismiss_on_escape: false -> inert
-        *dismiss_on_escape_state.lock().unwrap() = false;
-        *mounted.lock().unwrap() = build_dialog_host(
-            &ctx,
-            &is_open,
-            &refuse_close,
-            &dismiss_on_backdrop_state,
-            &dismiss_on_escape_state,
-            &close_requests,
-            &action_events,
-            &mounted,
-        );
-        driver.draw_frame();
+        // 4e. Escape key with dismiss_on_escape: false -> inert
         driver.dispatch_key("escape");
         assert_eq!(
             close_requests.lock().unwrap().len(),
-            2,
-            "Escape key when dismiss_on_escape=false must be inert"
+            3,
+            "Escape key when dismiss_on_escape=false must be inert even when dismiss_on_backdrop=true"
         );
 
-        // 4e. Escape key with dismiss_on_escape: true -> emits request_close
+        // 4f. Inside panel click with dismiss_on_backdrop: true and dismiss_on_escape: true -> inert
         *dismiss_on_escape_state.lock().unwrap() = true;
         *mounted.lock().unwrap() = build_dialog_host(
             &ctx,
@@ -24276,16 +24540,17 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             &refuse_close,
             &dismiss_on_backdrop_state,
             &dismiss_on_escape_state,
+            &dismiss_on_outside_state,
             &close_requests,
             &action_events,
             &mounted,
         );
         driver.draw_frame();
-        driver.dispatch_key("escape");
+        driver.pointer_activate_id("dialog-body-surface");
         assert_eq!(
             close_requests.lock().unwrap().len(),
             3,
-            "Escape key when dismiss_on_escape=true must emit on_request_close"
+            "Inside panel click must be spared by layer containment and not bubble to backdrop dismissal"
         );
 
         // ── 5. Controlled Host Rebuild & Refusal Stability ─────────────────
@@ -24333,26 +24598,25 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             "nucleus.navigation.dialog",
             observation,
             &[
-                "mount controlled Dialog modal with title, description, close affordance, body Surface, and action Buttons through HeadlessDriver",
+                "mount controlled Dialog modal with title, description, close affordance, body Surface, and action Buttons through GPUI Dialog compat adapter into HeadlessDriver",
                 "verify pointer activation inside panel does not trigger backdrop dismissal",
                 "pointer activate disabled action and verify inertness",
                 "pointer activate Cancel and Confirm action buttons and verify callback traces",
                 "pointer activate close button and verify request close emission",
-                "test backdrop click dismissal policy with false and true postures",
-                "test Escape key dismissal policy with false and true postures",
+                "test independent dismissal axes: backdrop click (false/true) and Escape key (false/true) through GPUI Dialog compat adapter",
                 "verify host refusal leaves Dialog mounted without duplicate emission",
                 "verify accepted close triggers host rebuild unmounting Dialog backdrop, surface, and controls",
             ],
             &[
-                "production render path resolves root backdrop role, overlay posture, backdrop fill, panel elevated background, border, surface radius, shadow, md width preset, max height, padding, and section spacing",
+                "production render path and GPUI Dialog compat adapter resolve root backdrop role, overlay posture, backdrop fill, panel elevated background, border, surface radius, shadow, md width preset, max height, padding, and section spacing",
                 "header resolves title typography with heading weight, description typography with text.secondary color, and close affordance with chrome size and pointer cursor",
-                "body composes production Surface with panel tone and subtle border",
+                "body composes production Surface with panel tone, subtle border, padding scale, and background alpha",
                 "actions compose production Buttons with secondary, primary, and disabled states",
                 "mounted layout bounds confirm positive dimensions, panel containment within backdrop, and child containment within panel",
                 "inside panel clicks are absorbed and never bubble to backdrop dismissal",
                 "disabled action button remains inert to pointer activation",
                 "Cancel and Confirm action buttons dispatch callbacks through the mounted backend",
-                "dismissal axes remain independent: close button always requests close, backdrop respects dismiss_on_backdrop, and Escape respects dismiss_on_escape",
+                "dismissal axes remain strictly independent in GPUI Dialog compat adapter: close button always requests close, backdrop respects dismiss_on_backdrop, and Escape respects dismiss_on_escape",
                 "host refusal preserves mounted Dialog state and subsequent interactions",
                 "accepted close rebuilds host tree without Dialog, removing backdrop, surface, and chrome from the mounted backend",
             ],
