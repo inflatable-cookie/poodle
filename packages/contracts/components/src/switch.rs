@@ -187,3 +187,107 @@ impl SwitchSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn defaults_match_the_contract() {
+        let spec = SwitchSpec::default();
+        assert_eq!(spec.checked, None);
+        assert!(!spec.default_checked);
+        assert!(!spec.is_disabled);
+        assert!(!spec.is_read_only);
+        assert_eq!(spec.name, None);
+        assert_eq!(spec.label, None);
+        assert_eq!(spec.left_label, None);
+        assert_eq!(spec.right_label, None);
+        assert_eq!(spec.aria_label, None);
+        assert_eq!(spec.on_color, None);
+        assert_eq!(spec.off_color, None);
+        assert_eq!(spec.left_tone, SwitchTone::Default);
+        assert_eq!(spec.right_tone, SwitchTone::Primary);
+        assert_eq!(spec.size, None);
+        assert_eq!(spec.size_role, SemanticControlSizeRole::Control);
+        assert_eq!(spec.density, None);
+        assert!(!spec.is_dual_label());
+        assert!(!spec.current_checked());
+        assert_eq!(spec.track_fill_token(), semantic::COLOR_BACKGROUND_SURFACE);
+    }
+
+    #[test]
+    fn builders_cover_the_public_prop_surface() {
+        let spec = SwitchSpec::new()
+            .with_checked(true)
+            .with_default_checked(false)
+            .with_name("theme-toggle")
+            .with_label("Dark theme")
+            .with_left_label("Light")
+            .with_right_label("Dark")
+            .with_aria_label("Select application theme")
+            .with_on_color("#22c55e")
+            .with_off_color("#cbd5e1")
+            .with_left_tone(SwitchTone::Warning)
+            .with_right_tone(SwitchTone::Success)
+            .with_disabled(true)
+            .with_read_only(true)
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Prominent)
+            .with_density(ControlDensity::Comfortable);
+
+        assert_eq!(spec.checked, Some(true));
+        assert!(!spec.default_checked);
+        assert_eq!(spec.name.as_deref(), Some("theme-toggle"));
+        assert_eq!(spec.label.as_deref(), Some("Dark theme"));
+        assert_eq!(spec.left_label.as_deref(), Some("Light"));
+        assert_eq!(spec.right_label.as_deref(), Some("Dark"));
+        assert_eq!(spec.aria_label.as_deref(), Some("Select application theme"));
+        assert_eq!(spec.on_color.as_deref(), Some("#22c55e"));
+        assert_eq!(spec.off_color.as_deref(), Some("#cbd5e1"));
+        assert_eq!(spec.left_tone, SwitchTone::Warning);
+        assert_eq!(spec.right_tone, SwitchTone::Success);
+        assert!(spec.is_disabled);
+        assert!(spec.is_read_only);
+        assert_eq!(spec.size, Some(ControlSize::Lg));
+        assert_eq!(spec.size_role, SemanticControlSizeRole::Prominent);
+        assert_eq!(spec.density, Some(ControlDensity::Comfortable));
+        assert!(spec.is_dual_label());
+        assert!(spec.current_checked());
+        assert_eq!(spec.track_fill_token(), semantic::COLOR_ACCENT_BASE);
+    }
+
+    #[test]
+    fn current_checked_resolves_default_when_controlled_is_absent() {
+        let uncontrolled = SwitchSpec::new().with_default_checked(true);
+        assert!(uncontrolled.current_checked());
+        assert_eq!(uncontrolled.track_fill_token(), semantic::COLOR_ACCENT_BASE);
+
+        let controlled = SwitchSpec::new()
+            .with_default_checked(true)
+            .with_checked(false);
+        assert!(!controlled.current_checked());
+        assert_eq!(controlled.track_fill_token(), semantic::COLOR_BACKGROUND_SURFACE);
+    }
+
+    #[test]
+    fn dual_label_mode_derives_from_either_side() {
+        let left_only = SwitchSpec::new().with_left_label("Off");
+        assert!(left_only.is_dual_label());
+
+        let right_only = SwitchSpec::new().with_right_label("On");
+        assert!(right_only.is_dual_label());
+
+        let single = SwitchSpec::new().with_label("Power");
+        assert!(!single.is_dual_label());
+    }
+
+    #[test]
+    fn switch_tone_color_tokens_map_to_semantics() {
+        assert_eq!(SwitchTone::Default.color_token(), None);
+        assert_eq!(SwitchTone::Primary.color_token(), Some(semantic::COLOR_ACCENT_BASE));
+        assert_eq!(SwitchTone::Success.color_token(), Some(semantic::COLOR_STATUS_SUCCESS));
+        assert_eq!(SwitchTone::Warning.color_token(), Some(semantic::COLOR_STATUS_WARNING));
+        assert_eq!(SwitchTone::Danger.color_token(), Some(semantic::COLOR_STATUS_DANGER));
+    }
+}

@@ -13172,90 +13172,564 @@ fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
     });
 }
 
-/// Switch activation, readonly, and disabled match Checkbox's binary rules
-/// through the real mounted tree. The host rebuilds from the emitted next value.
+/// g16.079: Switch activation, readonly, disabled, dual labels, tone/color precedence,
+/// and independent instance focus identity through the mounted adapter tree.
+/// Emits the terminal M1 execution receipt.
 #[test]
 fn switch_toggle_readonly_and_disabled_rebuild_the_host_spec() {
-    use poodle_node::NodeToggled;
-    use poodle_specs::SwitchSpec;
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_node::{
+        ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing,
+        NodePosition, NodeRole, NodeToggled, ShadowLayer, StylePatch,
+    };
+    use poodle_render::color::{hex_color, mix_srgb};
+    use poodle_render::presentation::{
+        rem_to_px, switch_label_font_rem, switch_thumb_rem, switch_track_h_rem, switch_track_w_rem,
+        switch_travel_rem,
+    };
+    use poodle_specs::{ControlSize, SwitchSpec, SwitchTone};
+    use poodle_tokens::semantic;
+    use std::rc::Rc;
+    use std::sync::{Arc, Mutex};
 
     run_headless(|cx| {
-        fn build(
-            checked: bool,
-            mounted: Arc<Mutex<Node>>,
-            payloads: Arc<Mutex<Vec<bool>>>,
-        ) -> Node {
-            let mount = Arc::clone(&mounted);
-            let sink = Arc::clone(&payloads);
-            let mut node = poodle_render::switch(
-                &SwitchSpec::new()
-                    .with_checked(checked)
-                    .with_label("Dark mode"),
-                &RenderContext::new(&theme()),
-                Some(Arc::new(move |next| {
-                    sink.lock().unwrap().push(next);
-                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
-                })),
-            );
-            node.id = Some(FIXTURE_ID.to_owned());
-            node
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+
+        let surface_color = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_SURFACE);
+        let border_default = ctx.theme().resolve_color(semantic::COLOR_BORDER_DEFAULT);
+        let text_primary = ctx.theme().resolve_color(semantic::COLOR_TEXT_PRIMARY);
+        let text_secondary = ctx.theme().resolve_color(semantic::COLOR_TEXT_SECONDARY);
+        let accent_base = ctx.theme().resolve_color(semantic::COLOR_ACCENT_BASE);
+        let focus_ring = ctx.theme().resolve_color(semantic::COLOR_ACCENT_FOCUS_RING);
+        let disabled_opacity = ctx.theme().resolve_opacity(semantic::STATE_OPACITY_DISABLED);
+        let gap = ctx.theme().resolve_space(semantic::SPACE_INLINE_SM);
+
+        let expected_track_width = rem_to_px(switch_track_w_rem(ControlSize::Md));
+        let expected_track_height = rem_to_px(switch_track_h_rem(ControlSize::Md));
+        let expected_track_padding = rem_to_px(0.125);
+        let expected_thumb_size = rem_to_px(switch_thumb_rem(ControlSize::Md));
+        let expected_thumb_travel = rem_to_px(switch_travel_rem(ControlSize::Md));
+        let expected_border_width = rem_to_px(0.0625);
+        let expected_label_font_size = rem_to_px(switch_label_font_rem(ControlSize::Md));
+
+        let expected_off_track = mix_srgb(text_primary, surface_color, 0.18);
+        let expected_on_track = mix_srgb(accent_base, surface_color, 0.24);
+        let expected_on_border = mix_srgb(accent_base, border_default, 0.58);
+
+        // ── 1. Production Spec & Token Structure Proof ─────────────────────
+        let subject_spec = SwitchSpec::new()
+            .with_checked(false)
+            .with_label("Dark mode");
+
+        let initial_node = poodle_render::switch(&subject_spec, &ctx, None);
+        assert_eq!(initial_node.a11y.role, Some(NodeRole::Switch));
+        assert_eq!(initial_node.a11y.label.as_deref(), Some("Dark mode"));
+        assert_eq!(initial_node.a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(initial_node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(initial_node.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(initial_node.style.descriptor.layout.spacing.gap, gap);
+        assert!(initial_node.interaction.focusable);
+        assert_eq!(initial_node.style.descriptor.cursor, CursorHint::Pointer);
+        assert_eq!(initial_node.style.focus, Some(StylePatch {
+            border_color: Some(focus_ring),
+            background: None,
+            text_color: None,
+            opacity: None,
+        }));
+        assert_eq!(initial_node.children.len(), 2);
+
+        // Track checks
+        let track = &initial_node.children[0];
+        assert_eq!(track.position, NodePosition::Relative);
+        assert_eq!(track.style.descriptor.layout.width, LayoutSizing::Fixed(expected_track_width));
+        assert_eq!(track.style.descriptor.layout.height, LayoutSizing::Fixed(expected_track_height));
+        assert_eq!(track.style.descriptor.corner_radii.top_left, expected_track_height / 2.0);
+        assert_eq!(track.style.descriptor.corner_radii.top_right, expected_track_height / 2.0);
+        assert_eq!(track.style.descriptor.corner_radii.bottom_right, expected_track_height / 2.0);
+        assert_eq!(track.style.descriptor.corner_radii.bottom_left, expected_track_height / 2.0);
+        assert_eq!(track.style.descriptor.background, Some(expected_off_track));
+        assert_eq!(track.style.descriptor.border.width, expected_border_width);
+        assert_eq!(track.style.descriptor.border.color, border_default);
+        assert!(track.style.flex_none);
+        assert_eq!(track.style.shadow_layers, vec![ShadowLayer {
+            offset_x: 0.0,
+            offset_y: 0.0,
+            blur: 0.0,
+            spread: rem_to_px(0.0625),
+            color: ColorValue(1.0, 1.0, 1.0, 0.08),
+            inset: false,
+        }]);
+        assert_eq!(track.children.len(), 1);
+
+        // Thumb checks
+        let thumb = &track.children[0];
+        assert_eq!(thumb.position, NodePosition::Absolute {
+            top: Some(expected_track_padding),
+            left: Some(expected_track_padding),
+            right: None,
+            bottom: None,
+        });
+        assert_eq!(thumb.style.descriptor.layout.width, LayoutSizing::Fixed(expected_thumb_size));
+        assert_eq!(thumb.style.descriptor.layout.height, LayoutSizing::Fixed(expected_thumb_size));
+        assert_eq!(thumb.style.descriptor.corner_radii.top_left, expected_thumb_size / 2.0);
+        assert_eq!(thumb.style.descriptor.corner_radii.top_right, expected_thumb_size / 2.0);
+        assert_eq!(thumb.style.descriptor.corner_radii.bottom_right, expected_thumb_size / 2.0);
+        assert_eq!(thumb.style.descriptor.corner_radii.bottom_left, expected_thumb_size / 2.0);
+        assert_eq!(thumb.style.descriptor.background, Some(text_primary));
+        assert_eq!(thumb.style.shadow_layers, vec![ShadowLayer {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.125),
+            blur: rem_to_px(0.5),
+            spread: 0.0,
+            color: ColorValue(0.0, 0.0, 0.0, 0.18),
+            inset: false,
+        }]);
+
+        // Label checks
+        let label = &initial_node.children[1];
+        assert_eq!(label.intrinsic_text(), Some("Dark mode"));
+        assert_eq!(label.style.descriptor.text_color, Some(text_primary));
+        assert_eq!(label.style.text_size, Some(expected_label_font_size));
+        assert_eq!(label.style.text_weight, Some(500));
+
+        // Checked state proof
+        let on_spec = SwitchSpec::new()
+            .with_checked(true)
+            .with_label("Dark mode");
+        let on_node = poodle_render::switch(&on_spec, &ctx, None);
+        assert_eq!(on_node.a11y.toggled, Some(NodeToggled::True));
+        let on_track = &on_node.children[0];
+        assert_eq!(on_track.style.descriptor.background, Some(expected_on_track));
+        assert_eq!(on_track.style.descriptor.border.color, expected_on_border);
+        let on_thumb = &on_track.children[0];
+        assert_eq!(on_thumb.position, NodePosition::Absolute {
+            top: Some(expected_track_padding),
+            left: Some(expected_track_padding + expected_thumb_travel),
+            right: None,
+            bottom: None,
+        });
+        assert_eq!(on_thumb.style.descriptor.background, Some(accent_base));
+
+        // Dual-label mode proof
+        let dual_spec = SwitchSpec::new()
+            .with_checked(false)
+            .with_left_label("Off")
+            .with_right_label("On");
+        let dual_node = poodle_render::switch(&dual_spec, &ctx, None);
+        assert_eq!(dual_node.a11y.label.as_deref(), Some("Off / On"));
+        assert_eq!(dual_node.children.len(), 3);
+        let mut inactive_tint = text_secondary;
+        inactive_tint.3 *= 0.85;
+        assert_eq!(dual_node.children[0].intrinsic_text(), Some("Off"));
+        assert_eq!(dual_node.children[0].style.descriptor.text_color, Some(text_primary));
+        assert_eq!(dual_node.children[2].intrinsic_text(), Some("On"));
+        assert_eq!(dual_node.children[2].style.descriptor.text_color, Some(inactive_tint));
+
+        // Explicit aria_label precedence proof
+        let aria_spec = SwitchSpec::new()
+            .with_aria_label("Custom accessible name")
+            .with_label("Visible label");
+        let aria_node = poodle_render::switch(&aria_spec, &ctx, None);
+        assert_eq!(aria_node.a11y.label.as_deref(), Some("Custom accessible name"));
+
+        // Custom color over semantic tone precedence proof
+        let custom_spec = SwitchSpec::new()
+            .with_checked(true)
+            .with_on_color("#22c55e")
+            .with_right_tone(SwitchTone::Danger)
+            .with_off_color("#cbd5e1")
+            .with_left_tone(SwitchTone::Warning);
+        let custom_node = poodle_render::switch(&custom_spec, &ctx, None);
+        let expected_green = hex_color("#22c55e").expect("valid green hex");
+        let expected_custom_on_border = mix_srgb(expected_green, border_default, 0.58);
+        let custom_track = &custom_node.children[0];
+        let custom_thumb = &custom_track.children[0];
+        assert_eq!(
+            custom_thumb.style.descriptor.background,
+            Some(expected_green),
+            "custom on_color must take precedence over right_tone on thumb background"
+        );
+        assert_eq!(
+            custom_track.style.descriptor.background,
+            Some(expected_green),
+            "custom on_color must take precedence on track background"
+        );
+        assert_eq!(
+            custom_track.style.descriptor.border.color,
+            expected_custom_on_border,
+            "custom on_color must take precedence on track border"
+        );
+
+        let custom_off_spec = SwitchSpec::new()
+            .with_checked(false)
+            .with_on_color("#22c55e")
+            .with_right_tone(SwitchTone::Danger)
+            .with_off_color("#cbd5e1")
+            .with_left_tone(SwitchTone::Warning);
+        let custom_off_node = poodle_render::switch(&custom_off_spec, &ctx, None);
+        let expected_off_hex = hex_color("#cbd5e1").expect("valid off hex");
+        let expected_custom_off_border = mix_srgb(expected_off_hex, border_default, 0.58);
+        let custom_off_track = &custom_off_node.children[0];
+        let custom_off_thumb = &custom_off_track.children[0];
+        assert_eq!(
+            custom_off_thumb.style.descriptor.background,
+            Some(expected_off_hex),
+            "custom off_color must take precedence over left_tone on thumb background"
+        );
+        assert_eq!(
+            custom_off_track.style.descriptor.background,
+            Some(expected_off_hex),
+            "custom off_color must take precedence on track background"
+        );
+        assert_eq!(
+            custom_off_track.style.descriptor.border.color,
+            expected_custom_off_border,
+            "custom off_color must take precedence on track border"
+        );
+
+        // Disabled spec & token structure proof
+        let disabled_spec = SwitchSpec::new()
+            .with_disabled(true)
+            .with_label("Disabled switch");
+        let disabled_node = poodle_render::switch(&disabled_spec, &ctx, None);
+        assert!(!disabled_node.interaction.focusable, "disabled switch is not focusable");
+        assert!(disabled_node.interaction.disabled, "disabled switch interaction.disabled is true");
+        assert_eq!(
+            disabled_node.style.descriptor.opacity,
+            disabled_opacity,
+            "disabled switch uses disabled_opacity"
+        );
+        assert!(disabled_node.style.focus.is_none(), "disabled switch has no focus patch");
+
+        // ── 2. Controlled Multi-Instance Mount via node_compat::Switch ────
+        struct SwitchHostState {
+            subject_checked: bool,
+            witness_checked: bool,
+            readonly_checked: bool,
+            disabled_checked: bool,
+            dual_checked: bool,
         }
 
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&payloads));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
-        driver.wait_for_focus_handle(FIXTURE_ID);
-        driver.pointer_activate();
-        assert_eq!(payloads.lock().unwrap().as_slice(), [true]);
-        assert_eq!(
-            checkbox_toggled(&mounted.lock().unwrap()),
-            Some(NodeToggled::True)
+        let host = Arc::new(Mutex::new(SwitchHostState {
+            subject_checked: false,
+            witness_checked: false,
+            readonly_checked: true,
+            disabled_checked: false,
+            dual_checked: false,
+        }));
+
+        let subject_payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let witness_payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let readonly_payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let disabled_payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let dual_payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let subject_payloads = Arc::clone(&subject_payloads);
+            let witness_payloads = Arc::clone(&witness_payloads);
+            let readonly_payloads = Arc::clone(&readonly_payloads);
+            let disabled_payloads = Arc::clone(&disabled_payloads);
+            let dual_payloads = Arc::clone(&dual_payloads);
+            let theme_provider = theme();
+            Rc::new(move || {
+                let state = host.lock().unwrap();
+
+                let sub_sink = Arc::clone(&subject_payloads);
+                let sub_host = Arc::clone(&host);
+                let subject_el = crate::node_compat::Switch::from_spec(
+                    SwitchSpec::new()
+                        .with_checked(state.subject_checked)
+                        .with_label("Dark mode"),
+                    &theme_provider,
+                )
+                .with_id("subject")
+                .on_change(Arc::new(move |next| {
+                    sub_sink.lock().unwrap().push(next);
+                    sub_host.lock().unwrap().subject_checked = next;
+                }))
+                .into_element();
+
+                let wit_sink = Arc::clone(&witness_payloads);
+                let wit_host = Arc::clone(&host);
+                let witness_el = crate::node_compat::Switch::from_spec(
+                    SwitchSpec::new()
+                        .with_checked(state.witness_checked)
+                        .with_label("Dark mode"),
+                    &theme_provider,
+                )
+                .with_id("witness")
+                .on_change(Arc::new(move |next| {
+                    wit_sink.lock().unwrap().push(next);
+                    wit_host.lock().unwrap().witness_checked = next;
+                }))
+                .into_element();
+
+                let ro_sink = Arc::clone(&readonly_payloads);
+                let readonly_el = crate::node_compat::Switch::from_spec(
+                    SwitchSpec::new()
+                        .with_checked(state.readonly_checked)
+                        .with_read_only(true)
+                        .with_label("Locked"),
+                    &theme_provider,
+                )
+                .with_id("readonly")
+                .on_change(Arc::new(move |next| {
+                    ro_sink.lock().unwrap().push(next);
+                }))
+                .into_element();
+
+                let dis_sink = Arc::clone(&disabled_payloads);
+                let dis_host = Arc::clone(&host);
+                let disabled_el = crate::node_compat::Switch::from_spec(
+                    SwitchSpec::new()
+                        .with_checked(state.disabled_checked)
+                        .with_disabled(true)
+                        .with_label("Off"),
+                    &theme_provider,
+                )
+                .with_id("disabled")
+                .on_change(Arc::new(move |next| {
+                    dis_sink.lock().unwrap().push(next);
+                    dis_host.lock().unwrap().disabled_checked = next;
+                }))
+                .into_element();
+
+                let dual_sink = Arc::clone(&dual_payloads);
+                let dual_host = Arc::clone(&host);
+                let dual_el = crate::node_compat::Switch::from_spec(
+                    SwitchSpec::new()
+                        .with_checked(state.dual_checked)
+                        .with_left_label("Off")
+                        .with_right_label("On"),
+                    &theme_provider,
+                )
+                .with_id("dual")
+                .on_change(Arc::new(move |next| {
+                    dual_sink.lock().unwrap().push(next);
+                    dual_host.lock().unwrap().dual_checked = next;
+                }))
+                .into_element();
+
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(16.0))
+                    .child(subject_el)
+                    .child(witness_el)
+                    .child(readonly_el)
+                    .child(disabled_el)
+                    .child(dual_el)
+                    .into_any_element()
+            })
+        };
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 400.0, 300.0);
+
+        let subject_id = "poodle-switch-subject";
+        let witness_id = "poodle-switch-witness";
+        let readonly_id = "poodle-switch-readonly";
+        let disabled_id = "poodle-switch-disabled";
+        let dual_id = "poodle-switch-dual";
+
+        // ── 3. Mounted Bounds & Geometry Proof ────────────────────────────
+        let sub_bounds = poodle_gpui_node_backend::bounds_for(subject_id).expect("subject bounds");
+        let wit_bounds = poodle_gpui_node_backend::bounds_for(witness_id).expect("witness bounds");
+        let ro_bounds = poodle_gpui_node_backend::bounds_for(readonly_id).expect("readonly bounds");
+        let dis_bounds = poodle_gpui_node_backend::bounds_for(disabled_id).expect("disabled bounds");
+        let dual_bounds = poodle_gpui_node_backend::bounds_for(dual_id).expect("dual bounds");
+
+        assert!(sub_bounds.size.width > px(0.0) && sub_bounds.size.height > px(0.0));
+        assert!(wit_bounds.size.width > px(0.0) && wit_bounds.size.height > px(0.0));
+        assert!(ro_bounds.size.width > px(0.0) && ro_bounds.size.height > px(0.0));
+        assert!(dis_bounds.size.width > px(0.0) && dis_bounds.size.height > px(0.0));
+        assert!(dual_bounds.size.width > px(0.0) && dual_bounds.size.height > px(0.0));
+
+        // Ordering: vertical stack from top to bottom with non-overlapping bounds
+        assert!(
+            sub_bounds.origin.y + sub_bounds.size.height <= wit_bounds.origin.y,
+            "subject stacks above witness without overlap ({} + {} <= {})",
+            sub_bounds.origin.y,
+            sub_bounds.size.height,
+            wit_bounds.origin.y,
         );
+        assert!(
+            wit_bounds.origin.y + wit_bounds.size.height <= ro_bounds.origin.y,
+            "witness stacks above readonly without overlap ({} + {} <= {})",
+            wit_bounds.origin.y,
+            wit_bounds.size.height,
+            ro_bounds.origin.y,
+        );
+        assert!(
+            ro_bounds.origin.y + ro_bounds.size.height <= dis_bounds.origin.y,
+            "readonly stacks above disabled without overlap ({} + {} <= {})",
+            ro_bounds.origin.y,
+            ro_bounds.size.height,
+            dis_bounds.origin.y,
+        );
+        assert!(
+            dis_bounds.origin.y + dis_bounds.size.height <= dual_bounds.origin.y,
+            "disabled stacks above dual without overlap ({} + {} <= {})",
+            dis_bounds.origin.y,
+            dis_bounds.size.height,
+            dual_bounds.origin.y,
+        );
+
+        // Containment: all instances stay within the production mount box (32, 32) + (400, 300)
+        let mount_box_left = px(headless_driver::MOUNT_BOX_LEFT);
+        let mount_box_top = px(headless_driver::MOUNT_BOX_TOP);
+        let mount_box_right = mount_box_left + px(400.0);
+        let mount_box_bottom = mount_box_top + px(300.0);
+        for (name, bounds) in [
+            ("subject", sub_bounds),
+            ("witness", wit_bounds),
+            ("readonly", ro_bounds),
+            ("disabled", dis_bounds),
+            ("dual", dual_bounds),
+        ] {
+            assert!(
+                bounds.origin.x >= mount_box_left,
+                "{name} origin.x ({}) >= mount box left ({})",
+                bounds.origin.x,
+                mount_box_left,
+            );
+            assert!(
+                bounds.origin.y >= mount_box_top,
+                "{name} origin.y ({}) >= mount box top ({})",
+                bounds.origin.y,
+                mount_box_top,
+            );
+            assert!(
+                bounds.origin.x + bounds.size.width <= mount_box_right,
+                "{name} contained within mount box right ({} + {} <= {})",
+                bounds.origin.x,
+                bounds.size.width,
+                mount_box_right,
+            );
+            assert!(
+                bounds.origin.y + bounds.size.height <= mount_box_bottom,
+                "{name} contained within mount box bottom ({} + {} <= {})",
+                bounds.origin.y,
+                bounds.size.height,
+                mount_box_bottom,
+            );
+        }
+
+        // ── 4. Instance & Focus Handle Isolation ──────────────────────────
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(disabled_id).is_none(),
+            "disabled switch must not register a focus handle"
+        );
+        driver.wait_for_focus_handle(subject_id);
+        driver.wait_for_focus_handle(witness_id);
+        driver.wait_for_focus_handle(readonly_id);
+        driver.wait_for_focus_handle(dual_id);
+
+        driver.focus_element(subject_id);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_id), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(witness_id), Some(false));
+
+        driver.focus_element(witness_id);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(witness_id), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_id), Some(false));
+
+        // ── 5. Mounted Pointer Activation & Controlled Host Rebuild ───────
+        driver.pointer_activate_id(subject_id);
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), [true]);
+        assert!(witness_payloads.lock().unwrap().is_empty(), "witness must stay unchanged");
+        assert!(host.lock().unwrap().subject_checked);
+
+        driver.pointer_activate_id(witness_id);
+        assert_eq!(witness_payloads.lock().unwrap().as_slice(), [true]);
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), [true], "subject must stay unchanged");
+        assert!(host.lock().unwrap().witness_checked);
+
+        driver.pointer_activate_id(subject_id);
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), [true, false]);
+        assert_eq!(witness_payloads.lock().unwrap().as_slice(), [true]);
+        assert!(!host.lock().unwrap().subject_checked);
+
+        // ── 6. Keyboard Toggle Parity (Space & Enter) ─────────────────────
+        driver.focus_element(subject_id);
+        driver.dispatch_key_raw("space");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), [true, false, true]);
+        assert!(host.lock().unwrap().subject_checked);
+        assert_eq!(witness_payloads.lock().unwrap().as_slice(), [true]);
+
         driver.dispatch_key_raw("enter");
-        assert_eq!(payloads.lock().unwrap().as_slice(), [true, false]);
-    });
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), [true, false, true, false]);
+        assert!(!host.lock().unwrap().subject_checked);
+        assert_eq!(witness_payloads.lock().unwrap().as_slice(), [true]);
 
-    run_headless(|cx| {
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let sink = Arc::clone(&payloads);
-        let mut node = poodle_render::switch(
-            &SwitchSpec::new()
-                .with_checked(true)
-                .with_read_only(true)
-                .with_label("Locked"),
-            &RenderContext::new(&theme()),
-            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        // ── 7. Disabled Inertia & Read-Only Focus Reversion ───────────────
+        driver.pointer_activate_id(disabled_id);
+        assert!(
+            disabled_payloads.lock().unwrap().is_empty(),
+            "disabled switch must not emit on pointer activation"
         );
-        node.id = Some(FIXTURE_ID.to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
-        driver.wait_for_focus_handle(FIXTURE_ID);
-        driver.keyboard_key(FIXTURE_ID, "space");
-        driver.pointer_activate();
-        assert!(payloads.lock().unwrap().is_empty());
+        assert!(
+            !host.lock().unwrap().disabled_checked,
+            "disabled host state must stay unchanged"
+        );
+
+        // Disabled instance has no focus handle, so focus_element no-ops and it cannot be focused
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
-            Some(true)
+            poodle_gpui_node_backend::focus_state_for(disabled_id),
+            None,
+            "disabled switch has no focus handle and cannot be focused"
         );
-    });
+        driver.focus_element(disabled_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(disabled_id),
+            None,
+            "focus_element on disabled switch is inert"
+        );
 
-    run_headless(|cx| {
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let sink = Arc::clone(&payloads);
-        let mut node = poodle_render::switch(
-            &SwitchSpec::new()
-                .with_checked(false)
-                .with_disabled(true)
-                .with_label("Off"),
-            &RenderContext::new(&theme()),
-            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        driver.focus_element(readonly_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(readonly_id),
+            Some(true),
+            "read-only switch stays focusable"
         );
-        node.id = Some("switch-disabled".to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
-        driver.draw_frame();
-        assert!(poodle_gpui_node_backend::focus_handle_for("switch-disabled").is_none());
-        driver.pointer_activate();
-        assert!(payloads.lock().unwrap().is_empty());
+        driver.pointer_activate_id(readonly_id);
+        driver.dispatch_key_raw("space");
+        driver.dispatch_key_raw("enter");
+        assert!(readonly_payloads.lock().unwrap().is_empty(), "read-only switch must not emit");
+
+        // ── 8. Dual-Label Toggle ──────────────────────────────────────────
+        driver.wait_for_focus_handle(dual_id);
+        driver.pointer_activate_id(dual_id);
+        assert_eq!(dual_payloads.lock().unwrap().as_slice(), [true]);
+        assert!(host.lock().unwrap().dual_checked);
+
+        driver.focus_element(dual_id);
+        driver.dispatch_key_raw("space");
+        assert_eq!(dual_payloads.lock().unwrap().as_slice(), [true, false]);
+        assert!(!host.lock().unwrap().dual_checked);
+
+        // ── 9. Terminal Receipt Emission ──────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "Switch",
+            "nucleus.settings.switch",
+            driver.mounted_observation(),
+            &[
+                "mount controlled Switch instances through node_compat::Switch::from_spec(...).into_element() in HeadlessDriver",
+                "pointer activate unselected, selected, dual-label, read-only, and disabled switches through GPUI platform dispatch",
+                "keyboard toggle focused switch with Space and Enter keys",
+                "mount composed duplicate Switch instances to prove focus and callback isolation",
+            ],
+            &[
+                "production render path resolves root switch role, direction, size ladder geometry, track styling, and density gap",
+                "track and thumb resolve exact geometry, position offsets, corner radii, drop shadows, and focus patch",
+                "custom colors take precedence over semantic tones for track fill, thumb color, and border styling",
+                "accessible names resolve correctly from explicit aria-label, visible label, and dual-label fallback composition",
+                "pointer and keyboard input update checked state through controlled host rebuild while disabled switch suppresses focus handles and ignores pointer dispatch",
+                "read-only switch receives focus without committing mutations on pointer or keyboard activation",
+                "disabled switch suppresses focus handles, applies disabled opacity, and ignores pointer dispatch",
+                "two composed duplicate-content instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers",
+            ],
+        );
     });
 }
 
