@@ -29533,7 +29533,29 @@ fn toast_host_controlled_composition_actions_and_identity_through_mounted_backen
             trace_before_teardown,
             "terminal input cannot reach either removed host or cross their callbacks"
         );
-        assert!(driver.mounted_observation().is_valid());
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "ToastHost",
+            "nucleus.attention.toast-host",
+            observation,
+            &[
+                "mount duplicate caller-scoped controlled ToastHost instances through node_compat::ToastHost::from_spec(...).into_element() in a 720x520 HeadlessDriver host",
+                "compose production Toast rows with real secondary Button actions, dismiss controls, and Icon glyphs through the shared renderer and GPUI adapter",
+                "dispatch mounted pointer and keyboard activation across duplicate toast ids, inert actions, dismiss controls, and controlled host rebuilds",
+                "advance deterministic headless time while the native controlled host owns no timeout clock",
+                "empty both controlled queues while a duplicate-host dismiss control owns focus, redraw, and dispatch terminal keyboard input",
+            ],
+            &[
+                "all four placements retain authored one-rem edges, a 28rem host cap, exact stack direction, ordered non-overlap, containment, and rejection of shifted or double-inset geometry",
+                "info, success, warning, and danger rows preserve exact fill, border, accent, elevation, focus, spacing, size, density, and size-role tokens through mounted production composition",
+                "secondary Button actions and dismiss Icon controls remain contained, reachable, and caller-scoped while duplicate toast ids never cross callbacks",
+                "controlled replacement retains same-id focus identity, explicit removal stays host-local, and advancing time cannot remove rows or manufacture callbacks",
+                "terminal empty queues clear both hosts and every row, action, dismiss, Icon, focus, ring, and backend identity before further input",
+            ],
+        );
     });
 }
 
