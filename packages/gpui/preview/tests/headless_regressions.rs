@@ -44,9 +44,10 @@ use poodle_render::{
     TabsHandlers, ToastStackHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
-    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
-    HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation, PopoverSpec, RangeSliderSpec,
-    RatingSpec, SkeletonSpec, SliderAppearance, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
+    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, ControlDensity,
+    ControlSize, FaderSpec, HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation,
+    PopoverSpec, RangeSliderSpec, RatingSpec, SelectSpec, SkeletonSpec, SliderAppearance,
+    SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
     TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
 };
@@ -19105,200 +19106,578 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
     });
 }
 
-/// g16.019. Two independently scoped Selects open, choose, type, clear, and
-/// dismiss through real GPUI pointer and keyboard dispatch with host-owned
-/// rebuilds. Pointer proof uses production option identity, not a test-only
-/// ring or id stamp.
-#[test]
-fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
-    use poodle_render::{
-        select, select_option_id, select_search_focus_id, select_trigger_focus_id, SelectHandlers,
-    };
-    use poodle_specs::{ChoiceOption, SelectSpec};
+/// Host-owned Select state for the g16.076 M1 fixture. Duplicate-content
+/// siblings keep caller-scoped identities, specs, and callback streams.
+#[derive(Clone)]
+struct NucleusSelectInstance {
+    spec: SelectSpec,
+    values: Vec<String>,
+    queries: Vec<String>,
+    opens: Vec<bool>,
+    effects: Vec<String>,
+    transitions: usize,
+}
 
-    #[derive(Clone)]
-    struct Instance {
-        spec: SelectSpec,
-        values: Vec<String>,
-        queries: Vec<String>,
-        opens: Vec<bool>,
-        transitions: usize,
+#[derive(Clone)]
+struct NucleusSelectHost {
+    left: NucleusSelectInstance,
+    right: NucleusSelectInstance,
+}
+
+fn nucleus_select_fruit() -> Vec<ChoiceOption> {
+    vec![
+        ChoiceOption::new("apple", "Apple"),
+        ChoiceOption::new("banana", "Banana"),
+        ChoiceOption::new("cherry", "Cherry"),
+        {
+            let mut spinach = ChoiceOption::new("spinach", "Spinach");
+            spinach.is_disabled = true;
+            spinach.group = Some("Vegetables".to_owned());
+            spinach
+        },
+    ]
+}
+
+fn nucleus_select_apply(
+    scope: &str,
+    instance: &mut NucleusSelectInstance,
+    result: poodle_render::SelectTransitionResult,
+) {
+    instance.transitions += 1;
+    let previous_query = instance.spec.search_query.clone();
+    instance.spec = instance.spec.clone().applying_context(&result.context);
+    if let Some((start, end)) = result.search_selection {
+        instance.spec.search_selection_start = start;
+        instance.spec.search_selection_end = end;
+    } else if instance.spec.search_query != previous_query {
+        let len = instance
+            .spec
+            .search_query
+            .as_deref()
+            .unwrap_or("")
+            .chars()
+            .count();
+        instance.spec.search_selection_start = len;
+        instance.spec.search_selection_end = len;
     }
-
-    #[derive(Clone)]
-    struct Host {
-        left: Instance,
-        right: Instance,
-    }
-
-    fn fruit() -> Vec<ChoiceOption> {
-        vec![
-            ChoiceOption::new("apple", "Apple"),
-            ChoiceOption::new("banana", "Banana"),
-            ChoiceOption::new("cherry", "Cherry"),
-            {
-                let mut spinach = ChoiceOption::new("spinach", "Spinach");
-                spinach.is_disabled = true;
-                spinach.group = Some("Vegetables".to_owned());
-                spinach
-            },
-        ]
-    }
-
-    fn apply_result(instance: &mut Instance, result: poodle_render::SelectTransitionResult) {
-        instance.transitions += 1;
-        let previous_query = instance.spec.search_query.clone();
-        instance.spec = instance.spec.clone().applying_context(&result.context);
-        if let Some((start, end)) = result.search_selection {
-            instance.spec.search_selection_start = start;
-            instance.spec.search_selection_end = end;
-        } else if instance.spec.search_query != previous_query {
-            let len = instance
-                .spec
-                .search_query
-                .as_deref()
-                .unwrap_or("")
-                .chars()
-                .count();
-            instance.spec.search_selection_start = len;
-            instance.spec.search_selection_end = len;
-        }
-        for effect in result.effects {
-            match effect {
-                poodle_render::SelectEffect::OpenChanged { open } => instance.opens.push(open),
-                poodle_render::SelectEffect::QueryChanged { query } => instance.queries.push(query),
-                poodle_render::SelectEffect::ValueChanged { value } => instance.values.push(value),
+    for effect in result.effects {
+        match &effect {
+            poodle_render::SelectEffect::OpenChanged { open } => {
+                instance.opens.push(*open);
+                instance.effects.push(format!("open:{open}"));
+                if *open && instance.spec.searchable {
+                    poodle_gpui_node_backend::request_focus(&poodle_render::select_search_focus_id(
+                        scope,
+                    ));
+                } else if !*open {
+                    poodle_gpui_node_backend::request_focus(
+                        &poodle_render::select_trigger_focus_id(scope),
+                    );
+                }
+            }
+            poodle_render::SelectEffect::QueryChanged { query } => {
+                instance.queries.push(query.clone());
+                instance.effects.push(format!("query:{query}"));
+            }
+            poodle_render::SelectEffect::ValueChanged { value } => {
+                instance.values.push(value.clone());
+                instance.effects.push(format!("value:{value}"));
             }
         }
     }
+}
 
-    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
-        let state = host.lock().expect("host lock").clone();
-        let mut root = Node::container();
-        root.style.descriptor.layout.direction = LayoutDirection::Column;
-        root.style.descriptor.layout.spacing.gap = 24.0;
-
-        for (scope, instance) in [("left", state.left), ("right", state.right)] {
-            let host_i = Arc::clone(&host);
-            let mount_i = Arc::clone(&mounted);
-            let is_left = scope == "left";
-            let handlers = SelectHandlers::new(scope).on_transition(Arc::new(move |result| {
-                let mut host = host_i.lock().expect("host lock");
-                if is_left {
-                    apply_result(&mut host.left, result);
-                } else {
-                    apply_result(&mut host.right, result);
-                }
-                let request_search = if is_left {
-                    host.left.spec.searchable && host.left.spec.current_open()
-                } else {
-                    host.right.spec.searchable && host.right.spec.current_open()
-                };
-                drop(host);
-                if request_search {
-                    poodle_gpui_node_backend::request_focus(&select_search_focus_id(scope));
-                }
-                *mount_i.lock().expect("mount lock") =
-                    build(Arc::clone(&host_i), Arc::clone(&mount_i));
-            }));
-            root = root.child(select(
-                &instance.spec,
-                &RenderContext::new(&theme()),
-                &handlers,
-            ));
+fn nucleus_select_element(
+    host: &Arc<Mutex<NucleusSelectHost>>,
+    scope: &'static str,
+) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    let spec = {
+        let state = host.lock().expect("host lock");
+        if scope == "left" {
+            state.left.spec.clone()
+        } else {
+            state.right.spec.clone()
         }
-        root
+    };
+    let change = Arc::clone(host);
+    node_compat::Select::from_spec(spec, &theme(), scope)
+        .on_transition(Arc::new(move |result| {
+            let mut state = change.lock().expect("host lock");
+            if scope == "left" {
+                nucleus_select_apply(scope, &mut state.left, result);
+            } else {
+                nucleus_select_apply(scope, &mut state.right, result);
+            }
+        }))
+        .into_element()
+}
+
+fn nucleus_select_pair(host: &Arc<Mutex<NucleusSelectHost>>) -> gpui::AnyElement {
+    use gpui::{IntoElement, ParentElement, Styled};
+    gpui::div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(nucleus_select_element(host, "left"))
+        .child(nucleus_select_element(host, "right"))
+        .into_any_element()
+}
+
+fn nucleus_select_one(
+    spec: SelectSpec,
+    scope: &'static str,
+    on_transition: Arc<dyn Fn(poodle_render::SelectTransitionResult) + Send + Sync>,
+) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    node_compat::Select::from_spec(spec, &theme(), scope)
+        .on_transition(on_transition)
+        .into_element()
+}
+
+/// g16.019 / g16.076. Two independently scoped Selects open, choose, type,
+/// clear, and dismiss through the production adapter `IntoElement` path with
+/// host-owned rebuilds. Pointer proof uses production option identity. The
+/// fixture emits the Select M1 receipt only after the terminal assertion.
+#[test]
+fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
+    use poodle_node::NodeRole;
+    use poodle_render::color::with_alpha;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_render::{select, SelectHandlers};
+
+    // ── 0. Production renderer composition (no mount) ──────────────────────
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let fill = ctx.theme().resolve_color("color.background.elevated");
+        let surface = ctx.theme().resolve_color("color.background.surface");
+        let border_default = ctx.theme().resolve_color("color.border.default");
+        let radius = ctx.theme().resolve_radius("radius.control");
+        let surface_radius = ctx.theme().resolve_radius("radius.surface");
+        let max_height = ctx.theme().resolve_space("size.menu.maxHeight");
+        let spec = SelectSpec::new(nucleus_select_fruit())
+            .with_open(true)
+            .with_value("banana")
+            .with_highlighted_value("apple")
+            .with_menu_min_width("12rem")
+            .with_aria_label("Proof fruit");
+        let node = select(&spec, &ctx, &SelectHandlers::new("proof"));
+        let trigger = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:trigger"))
+            .expect("trigger");
+        assert_eq!(trigger.a11y.role, Some(NodeRole::ComboBox));
+        assert_eq!(trigger.a11y.expanded, Some(true));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some("select:proof:listbox")
+        );
+        assert_eq!(trigger.a11y.label.as_deref(), Some("Proof fruit"));
+        assert_eq!(
+            trigger.style.descriptor.background,
+            Some(with_alpha(surface, surface.3 * 0.82))
+        );
+        assert_eq!(
+            trigger.style.descriptor.border.color,
+            with_alpha(border_default, border_default.3 * 0.72)
+        );
+        assert_eq!(trigger.style.descriptor.corner_radii.top_left, radius);
+        assert!(node.has_text("chevron-down"));
+        let listbox = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:listbox"))
+            .expect("listbox");
+        assert_eq!(listbox.a11y.role, Some(NodeRole::ListBox));
+        assert_eq!(listbox.style.descriptor.background, Some(fill));
+        assert_eq!(
+            listbox.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+        );
+        assert_eq!(
+            listbox.style.descriptor.corner_radii.top_left,
+            surface_radius
+        );
+        assert_eq!(listbox.style.min_width, Some(rem_to_px(12.0)));
+        assert_eq!(listbox.style.max_height, Some(max_height));
+        assert!(listbox.style.overlay);
+        let group = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:group-Vegetables"))
+            .expect("group");
+        assert_eq!(group.a11y.role, Some(NodeRole::Group));
+        assert_eq!(group.a11y.label.as_deref(), Some("Vegetables"));
+        let banana = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:option:banana"))
+            .expect("selected option");
+        assert_eq!(banana.a11y.selected, Some(true));
+        assert!(banana.has_text("check"));
+        let spinach = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:option:spinach"))
+            .expect("disabled option");
+        assert!(spinach.interaction.disabled);
+        assert!(spinach.interaction.on_activate.is_none());
+        let closed = select(
+            &SelectSpec::new(nucleus_select_fruit()),
+            &ctx,
+            &SelectHandlers::new("closed"),
+        );
+        assert!(closed
+            .find(&|n| n.runtime_id.as_deref() == Some("select:closed:listbox"))
+            .is_none());
+        let mut locked_spec = SelectSpec::new(nucleus_select_fruit()).with_open(true);
+        locked_spec.is_disabled = true;
+        let locked = select(&locked_spec, &ctx, &SelectHandlers::new("locked"));
+        assert!(locked.interaction.disabled);
+        assert!(locked.interaction.on_activate.is_none());
+        assert!(
+            locked
+                .find(&|n| n.runtime_id.as_deref() == Some("select:locked:listbox"))
+                .is_none(),
+            "disabled never mounts the listbox"
+        );
     }
 
+    // ── 1. Whole-control disablement is inert when mounted ─────────────────
     run_headless(|cx| {
-        let left = Instance {
-            spec: SelectSpec::new(fruit())
-                .with_placeholder("Left fruit")
-                .with_clearable(true),
-            values: Vec::new(),
-            queries: Vec::new(),
-            opens: Vec::new(),
-            transitions: 0,
-        };
-        let mut right_spec = SelectSpec::new(fruit())
-            .with_placeholder("Right fruit")
-            .with_searchable(true)
-            .with_freeform(true);
-        right_spec.searchable = true;
-        right_spec.freeform = true;
-        let right = Instance {
-            spec: right_spec,
-            values: Vec::new(),
-            queries: Vec::new(),
-            opens: Vec::new(),
-            transitions: 0,
-        };
-        let host = Arc::new(Mutex::new(Host { left, right }));
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        let seen = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&seen);
+        let mut spec = SelectSpec::new(nucleus_select_fruit()).with_placeholder("Locked fruit");
+        spec.is_disabled = true;
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            let sink = Arc::clone(&sink);
+            nucleus_select_one(
+                spec.clone(),
+                "locked",
+                Arc::new(move |_| {
+                    *sink.lock().expect("sink") += 1;
+                }),
+            )
+        });
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 360.0, 120.0);
+        let trigger = poodle_render::select_trigger_focus_id("locked");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&trigger).is_some(),
+            "disabled trigger still paints"
+        );
+        driver.pointer_activate_id(&trigger);
+        assert_eq!(*seen.lock().expect("sink"), 0);
+        assert!(poodle_gpui_node_backend::bounds_for("select:locked:listbox").is_none());
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 0);
+    });
 
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 420.0);
-        let left_trigger = select_trigger_focus_id("left");
-        let left_banana = select_option_id("left", "banana");
-        let left_spinach = select_option_id("left", "spinach");
-        let right_trigger = select_trigger_focus_id("right");
-        let right_search = select_search_focus_id("right");
+    // ── 2. Highlight revalidates after disablement while open ──────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(SelectSpec::new(nucleus_select_fruit())
+            .with_searchable(true)
+            .with_placeholder("Live fruit")));
+        let values = Arc::new(Mutex::new(Vec::<String>::new()));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            let values = Arc::clone(&values);
+            Rc::new(move || {
+                let spec = host.lock().expect("host lock").clone();
+                let host_i = Arc::clone(&host);
+                let values_i = Arc::clone(&values);
+                nucleus_select_one(
+                    spec,
+                    "live",
+                    Arc::new(move |result| {
+                        let mut spec = host_i.lock().expect("host lock");
+                        let next = spec.clone().applying_context(&result.context);
+                        let opened = result.effects.iter().any(|effect| {
+                            matches!(
+                                effect,
+                                poodle_render::SelectEffect::OpenChanged { open: true }
+                            )
+                        });
+                        for effect in result.effects {
+                            if let poodle_render::SelectEffect::ValueChanged { value } = effect {
+                                values_i.lock().expect("values").push(value);
+                            }
+                        }
+                        *spec = next;
+                        drop(spec);
+                        if opened {
+                            poodle_gpui_node_backend::request_focus(
+                                &poodle_render::select_search_focus_id("live"),
+                            );
+                        }
+                    }),
+                )
+            })
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 360.0, 280.0);
+        let trigger = poodle_render::select_trigger_focus_id("live");
+        driver.wait_for_focus_handle(&trigger);
+        driver.pointer_activate_id(&trigger);
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&poodle_render::select_search_focus_id("live"));
+        driver.focus_element(&poodle_render::select_search_focus_id("live"));
+        {
+            host.lock().expect("host lock").is_disabled = true;
+        }
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("select:live:listbox").is_none(),
+            "disablement while open unmounts the listbox"
+        );
+        assert!(
+            values.lock().expect("values").is_empty(),
+            "disablement while open emits no value"
+        );
+        assert!(
+            host.lock().expect("host lock").current_open(),
+            "host-owned open state survives disablement"
+        );
+        {
+            host.lock().expect("host lock").is_disabled = false;
+        }
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&poodle_render::select_search_focus_id("live"));
+        driver.focus_element(&poodle_render::select_search_focus_id("live"));
+        {
+            let mut spec = host.lock().expect("host lock");
+            spec.highlighted_value = Some("cherry".to_owned());
+            if let Some(option) = spec
+                .options
+                .iter_mut()
+                .find(|option| option.value == "cherry")
+            {
+                option.is_disabled = true;
+            }
+            let (next, _) = poodle_headless::select::select_transition(
+                spec.select_context(),
+                poodle_headless::select::SelectEvent::OptionsChanged {
+                    options: spec.select_context().options,
+                },
+            );
+            *spec = spec.clone().applying_context(&next);
+            assert_ne!(spec.highlighted_value.as_deref(), Some("cherry"));
+        }
+        driver.draw_frame();
+        driver.focus_element(&poodle_render::select_search_focus_id("live"));
+        driver.dispatch_key_raw("enter");
+        assert!(
+            values
+                .lock()
+                .expect("values")
+                .iter()
+                .all(|value| value != "cherry"),
+            "a stale highlighted value must not commit after machine revalidation"
+        );
+    });
+
+    // ── 3. Long-menu overflow through the production adapter ───────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new((
+            SelectSpec::new(
+                (0..20)
+                    .map(|index| ChoiceOption::new(format!("{index}"), format!("Option {index}")))
+                    .collect(),
+            ),
+            Vec::<String>::new(),
+        )));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || {
+                let spec = host.lock().expect("host lock").0.clone();
+                let host_i = Arc::clone(&host);
+                nucleus_select_one(
+                    spec,
+                    "long",
+                    Arc::new(move |result| {
+                        let mut state = host_i.lock().expect("host lock");
+                        state.0 = state.0.clone().applying_context(&result.context);
+                        for effect in result.effects {
+                            if let poodle_render::SelectEffect::ValueChanged { value } = effect {
+                                state.1.push(value);
+                            }
+                        }
+                    }),
+                )
+            })
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 280.0, 420.0);
+        let trigger = poodle_render::select_trigger_focus_id("long");
+        let first = poodle_render::select_option_id("long", "0");
+        let last = poodle_render::select_option_id("long", "19");
+        let listbox = "select:long:listbox";
+        driver.wait_for_focus_handle(&trigger);
+        driver.pointer_activate_id(&trigger);
+        driver.draw_frame();
+        let listbox_bounds =
+            poodle_gpui_node_backend::bounds_for(listbox).expect("long listbox bounds");
+        let max_height = {
+            let theme_provider = theme();
+            let ctx = RenderContext::new(&theme_provider);
+            ctx.theme().resolve_space("size.menu.maxHeight")
+        };
+        let height: f32 = listbox_bounds.size.height.into();
+        assert!(
+            height <= max_height + 1.0,
+            "a long menu must cap at size.menu.maxHeight"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(&first).is_some());
+        driver.pointer_activate_id(&last);
+        assert!(
+            host.lock().expect("host lock").1.is_empty(),
+            "a row past max_height does not activate"
+        );
+        if !host.lock().expect("host lock").0.current_open() {
+            driver.pointer_activate_id(&trigger);
+            driver.draw_frame();
+        }
+        driver.scroll_vertical_id(listbox, -800.0);
+        driver.pointer_activate_id(&last);
+        assert_eq!(
+            host.lock().expect("host lock").1.last().map(String::as_str),
+            Some("19")
+        );
+    });
+
+    // ── 4. Two-instance mounted adapter evidence ───────────────────────────
+    run_headless(|cx| {
+        let left = NucleusSelectInstance {
+            spec: SelectSpec::new(nucleus_select_fruit())
+                .with_placeholder("Left fruit")
+                .with_default_value("apple")
+                .with_clearable(true)
+                .with_menu_min_width("12rem"),
+            values: Vec::new(),
+            queries: Vec::new(),
+            opens: Vec::new(),
+            effects: Vec::new(),
+            transitions: 0,
+        };
+        let right = NucleusSelectInstance {
+            spec: SelectSpec::new(nucleus_select_fruit())
+                .with_placeholder("Right fruit")
+                .with_searchable(true)
+                .with_freeform(true),
+            values: Vec::new(),
+            queries: Vec::new(),
+            opens: Vec::new(),
+            effects: Vec::new(),
+            transitions: 0,
+        };
+        let host = Arc::new(Mutex::new(NucleusSelectHost { left, right }));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || nucleus_select_pair(&host))
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 360.0, 420.0);
+        let left_trigger = poodle_render::select_trigger_focus_id("left");
+        let left_banana = poodle_render::select_option_id("left", "banana");
+        let left_spinach = poodle_render::select_option_id("left", "spinach");
+        let right_trigger = poodle_render::select_trigger_focus_id("right");
+        let right_search = poodle_render::select_search_focus_id("right");
         driver.wait_for_focus_handle(&left_trigger);
         driver.wait_for_focus_handle(&right_trigger);
+        assert_ne!(left_trigger, right_trigger);
 
         driver.pointer_activate_id(&left_trigger);
         assert_eq!(host.lock().expect("host lock").left.opens, [true]);
         driver.draw_frame();
         let listbox = "select:left:listbox";
+        let trigger_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_trigger).expect("left trigger bounds");
+        let listbox_bounds =
+            poodle_gpui_node_backend::bounds_for(listbox).expect("open panel records containment bounds");
+        assert!(trigger_bounds.size.width > px(0.0) && trigger_bounds.size.height > px(0.0));
+        assert!(listbox_bounds.size.width > px(0.0) && listbox_bounds.size.height > px(0.0));
+        let banana_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_banana).expect("left banana bounds");
         assert!(
-            poodle_gpui_node_backend::bounds_for(listbox).is_some(),
-            "open panel records containment bounds"
+            banana_bounds.origin.x >= listbox_bounds.origin.x
+                && banana_bounds.origin.y >= listbox_bounds.origin.y
+                && banana_bounds.origin.x + banana_bounds.size.width
+                    <= listbox_bounds.origin.x + listbox_bounds.size.width
+                && banana_bounds.origin.y + banana_bounds.size.height
+                    <= listbox_bounds.origin.y + listbox_bounds.size.height,
+            "option rows stay contained in the listbox"
         );
         let group_header = "select:left:group-Vegetables";
-        assert!(
-            poodle_gpui_node_backend::bounds_for(group_header).is_some(),
-            "group header is a real painted target"
-        );
+        assert!(poodle_gpui_node_backend::bounds_for(group_header).is_some());
         driver.pointer_activate_id(group_header);
         {
             let host = host.lock().expect("host lock");
-            assert!(
-                host.left.spec.current_open(),
-                "a click on a group header is inside the layer"
-            );
+            assert!(host.left.spec.current_open());
             assert!(host.left.values.is_empty());
+            assert!(host.right.values.is_empty());
+            assert!(host.right.opens.is_empty());
         }
-        assert!(
-            poodle_gpui_node_backend::bounds_for(&left_spinach).is_some(),
-            "disabled deferred option still paints"
-        );
+        assert!(poodle_gpui_node_backend::bounds_for(&left_spinach).is_some());
         driver.pointer_activate_id(&left_spinach);
         {
             let host = host.lock().expect("host lock");
             assert!(host.left.values.is_empty(), "disabled option is inert");
             assert!(host.left.spec.current_open());
         }
-        assert!(
-            poodle_gpui_node_backend::bounds_for(&left_banana).is_some(),
-            "left deferred option is a real pointer target"
-        );
         driver.pointer_activate_id(&left_banana);
         {
             let host = host.lock().expect("host lock");
             assert_eq!(host.left.values, ["banana"]);
             assert!(!host.left.spec.current_open());
             assert!(host.right.values.is_empty());
+            assert!(host.right.effects.iter().all(|entry| !entry.starts_with("value:")));
         }
+        driver.wait_for_focus_handle(&left_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_trigger),
+            Some(true),
+            "non-searchable close restores the matching trigger"
+        );
 
         driver.pointer_activate_id(&left_trigger);
+        driver.draw_frame();
         assert!(host.lock().expect("host lock").left.spec.current_open());
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.left.spec.highlighted_value.as_deref(),
+                Some("banana"),
+                "reopening highlights the committed value"
+            );
+        }
+
+        host.lock().expect("host lock").right.spec.open = Some(true);
+        driver.draw_frame();
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 2);
+        assert_ne!(
+            poodle_gpui_node_backend::layer_for_element(listbox).as_deref(),
+            poodle_gpui_node_backend::layer_for_element("select:right:listbox").as_deref()
+        );
+        {
+            let host = host.lock().expect("host lock");
+            assert!(host.left.spec.current_open(), "host-opening the sibling must not dismiss the left layer");
+            assert_eq!(host.left.values, ["banana"]);
+            assert!(host.right.values.is_empty());
+        }
+        host.lock().expect("host lock").right.spec.open = Some(false);
+        driver.draw_frame();
+        {
+            let host = host.lock().expect("host lock");
+            assert!(
+                host.left.spec.current_open(),
+                "closing the sibling through host state must not dismiss the left layer"
+            );
+            assert!(!host.right.spec.current_open());
+            assert_eq!(host.left.values, ["banana"]);
+        }
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
         driver.pointer_press(point(px(8.0), px(8.0)));
         driver.pointer_release(point(px(8.0), px(8.0)));
         {
             let host = host.lock().expect("host lock");
             assert!(!host.left.spec.current_open(), "outside pointer closes");
             assert_eq!(host.left.values, ["banana"]);
+            assert!(!host.right.spec.current_open());
         }
+        driver.wait_for_focus_handle(&left_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_trigger),
+            Some(true),
+            "outside dismissal restores the closed instance trigger"
+        );
 
         driver.pointer_activate_id(&right_trigger);
         assert!(host.lock().expect("host lock").right.spec.current_open());
@@ -19312,6 +19691,7 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 Some("apple"),
                 "open searchable starts on the first option"
             );
+            assert!(!host.left.spec.current_open());
         }
         driver.dispatch_key_raw("end");
         {
@@ -19346,6 +19726,13 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 (3, 3)
             );
             assert!(host.right.values.is_empty());
+            assert!(
+                host.left
+                    .queries
+                    .iter()
+                    .all(|query| query != "ban" && query != "bxan"),
+                "search queries must not cross instances"
+            );
         }
         driver.dispatch_key_raw("shift-left");
         driver.dispatch_key_raw("shift-left");
@@ -19410,39 +19797,35 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 "pointer placement moves the search caret"
             );
         }
-        driver.dispatch_key_raw("enter");
+        // Key-up synthesizes a trigger click after close restores focus.
+        driver.dispatch_key_press("enter");
         {
             let host = host.lock().expect("host lock");
             assert_eq!(host.right.values, ["banana"]);
             assert!(!host.right.spec.current_open());
             assert_eq!(host.left.values, ["banana"]);
         }
+        driver.wait_for_focus_handle(&right_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_trigger),
+            Some(true),
+            "searchable close restores the matching trigger, not the sibling"
+        );
 
         let left_clear = "select:left:clear";
         driver.wait_for_focus_handle(&left_trigger);
-        assert!(
-            poodle_gpui_node_backend::bounds_for(left_clear).is_some()
-                || mounted
-                    .lock()
-                    .expect("mount lock")
-                    .find(&|n| n.runtime_id.as_deref() == Some(left_clear))
-                    .is_some()
+        assert!(poodle_gpui_node_backend::bounds_for(left_clear).is_some());
+        driver.pointer_activate_id(left_clear);
+        assert_eq!(
+            host.lock()
+                .expect("host lock")
+                .left
+                .values
+                .last()
+                .map(String::as_str),
+            Some("apple"),
+            "clear restores the authored default"
         );
-        if poodle_gpui_node_backend::bounds_for(left_clear).is_some() {
-            driver.pointer_activate_id(left_clear);
-            assert_eq!(
-                host.lock()
-                    .expect("host lock")
-                    .left
-                    .values
-                    .last()
-                    .map(String::as_str),
-                Some("")
-            );
-        }
-
-        driver.keyboard_key(&right_trigger, "escape");
-        assert!(!host.lock().expect("host lock").right.spec.current_open());
 
         driver.pointer_activate_id(&right_trigger);
         driver.wait_for_focus_handle(&right_search);
@@ -19452,6 +19835,30 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
         }
         driver.dispatch_key_raw("z");
         driver.dispatch_key_raw("z");
+        {
+            let host = host.lock().expect("host lock");
+            assert!(
+                host.right.spec.highlighted_value.is_none(),
+                "zz matches no option, so Enter can commit freeform"
+            );
+        }
+        driver.dispatch_key_press("enter");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.right.values.last().map(String::as_str), Some("zz"));
+            assert!(!host.right.spec.current_open());
+            assert_eq!(host.right.spec.search_query.as_deref(), Some("zz"));
+            assert!(host.left.effects.iter().all(|entry| !entry.contains("zz")));
+        }
+
+        driver.pointer_activate_id(&right_trigger);
+        driver.wait_for_focus_handle(&right_search);
+        driver.focus_element(&right_search);
+        for _ in 0..16 {
+            driver.dispatch_key_raw("backspace");
+        }
+        driver.dispatch_key_raw("y");
+        driver.dispatch_key_raw("y");
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&right_search),
             Some(true),
@@ -19466,10 +19873,46 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 before_blur + 1,
                 "control blur emits one transition result"
             );
-            assert_eq!(host.right.values.last().map(String::as_str), Some("zz"));
+            assert_eq!(host.right.values.last().map(String::as_str), Some("yy"));
             assert!(!host.right.spec.current_open());
-            assert_eq!(host.right.spec.search_query.as_deref(), Some("zz"));
+            assert_eq!(host.right.spec.search_query.as_deref(), Some("yy"));
+            assert!(host.left.effects.iter().all(|entry| !entry.contains("yy")));
         }
+
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            0,
+            "terminal assertion: searchable freeform close left no live layer"
+        );
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "Select",
+            "nucleus.navigation.select",
+            observation,
+            &[
+                "mount two duplicate-content Select instances through node_compat::Select::from_spec(...).into_element() into HeadlessDriver",
+                "activate the non-searchable trigger through mounted pointer input and observe the listbox, group header, and disabled option paint",
+                "activate a disabled option and observe no value change; activate an enabled option and observe a host-owned rebuild",
+                "open both instances through host-owned state and observe independent layers, listbox ids, and callback streams",
+                "dispatch Escape and an outside press and observe scoped dismissal plus matching trigger focus restoration",
+                "edit the searchable instance through the production text-input path: Home/End, query filtering, caret/selection movement, option commit, freeform Enter, and freeform blur commit",
+                "clear the non-searchable instance and observe the authored default",
+                "mount a disabled Select and observe no callback, listbox, or layer",
+                "disable the highlighted option while open and observe machine revalidation that refuses a stale commit",
+                "mount a long menu through the adapter and observe max-height capping plus wheel-scroll activation of the last row",
+            ],
+            &[
+                "the production renderer composition owns combobox/listbox relationships, group labeling, selected/highlighted/disabled option metadata, chevron and check Icon metadata, and overlay token styling",
+                "mounted listboxes record positive bounds, overlay width floors, and option containment without a pixel claim",
+                "two duplicate-content instances keep runtime ids, queries, values, focus, callbacks, and dismiss layers separate",
+                "disabled whole-control and disabled-option paths are inert; a stale highlighted option cannot commit after OptionsChanged revalidation",
+                "search editing, caret movement, freeform Enter/blur commit, clear-to-authored-default, and ordered effect streams are host-owned rebuilds driven by mounted input",
+                "Escape and outside dismissal restore the matching instance trigger; opening one instance through host state does not dismiss the other",
+                "a long menu caps at size.menu.maxHeight and only activates overflow rows after mounted wheel scrolling",
+            ],
+        );
     });
 }
 

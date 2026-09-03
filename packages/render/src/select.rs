@@ -358,7 +358,7 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     // container in both states; carry that floor on the returned root.
     let root_min_width = ctx.theme().resolve_space("size.select.minWidth");
 
-    if !spec.current_open() {
+    if !spec.current_open() || spec.is_disabled {
         let mut trigger = trigger;
         trigger.style.min_width = Some(root_min_width);
         return trigger;
@@ -456,7 +456,7 @@ fn build_trigger(
             opacity: None,
         });
     }
-    let open = spec.current_open();
+    let open = spec.current_open() && !is_disabled;
     let searchable_editor = spec.searchable && open;
     stamp_identity(&mut el, select_trigger_focus_id(&handlers.instance_scope));
     if let Some(label) = spec.aria_label.as_deref() {
@@ -464,6 +464,7 @@ fn build_trigger(
     }
     el.a11y.role = Some(NodeRole::ComboBox);
     el.a11y.expanded = Some(open);
+    el.a11y.controls = Some(select_part_id(&handlers.instance_scope, "listbox"));
     el.interaction.focusable = !is_disabled && !searchable_editor;
     if el.interaction.focusable {
         el.style.focus_ring = Some(standard_focus_ring(ctx));
@@ -695,6 +696,8 @@ fn build_panel(
                     &mut header,
                     select_part_id(&handlers.instance_scope, &format!("group-{name}")),
                 );
+                header.a11y.role = Some(NodeRole::Group);
+                header.a11y.label = Some(name.clone());
                 header.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
                 panel = panel.child(header);
             }
@@ -1169,6 +1172,15 @@ mod tests {
         let node = select(&spec, &ctx, &handlers);
         assert!(node.interaction.on_activate.is_none());
         assert!(node.interaction.disabled);
+        let open_disabled = SelectSpec {
+            is_disabled: true,
+            ..SelectSpec::new(fruit_options()).with_open(true)
+        };
+        let node = select(&open_disabled, &ctx, &handlers);
+        assert!(node.interaction.disabled);
+        assert!(node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:disabled:listbox"))
+            .is_none());
     }
 
     #[test]
@@ -1234,6 +1246,91 @@ mod tests {
         assert!(left
             .find(&|n| n.runtime_id.as_deref() == Some("select:two:trigger"))
             .is_none());
+    }
+
+    #[test]
+    fn open_composition_owns_exact_structure_tokens_and_option_metadata() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let fill = ctx.theme().resolve_color("color.background.elevated");
+        let surface = ctx.theme().resolve_color("color.background.surface");
+        let border_default = ctx.theme().resolve_color("color.border.default");
+        let radius = ctx.theme().resolve_radius("radius.control");
+        let surface_radius = ctx.theme().resolve_radius("radius.surface");
+        let max_height = ctx.theme().resolve_space("size.menu.maxHeight");
+        let mut spinach = ChoiceOption::new("spinach", "Spinach");
+        spinach.is_disabled = true;
+        spinach.group = Some("Vegetables".to_owned());
+        let spec = SelectSpec::new(vec![
+            ChoiceOption::new("apple", "Apple"),
+            ChoiceOption::new("banana", "Banana"),
+            spinach,
+        ])
+        .with_open(true)
+        .with_value("banana")
+        .with_highlighted_value("apple")
+        .with_menu_min_width("12rem");
+        let node = select(&spec, &ctx, &SelectHandlers::new("proof"));
+        let trigger = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:trigger"))
+            .expect("trigger");
+        assert_eq!(trigger.a11y.role, Some(NodeRole::ComboBox));
+        assert_eq!(trigger.a11y.expanded, Some(true));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some("select:proof:listbox")
+        );
+        assert_eq!(
+            trigger.style.descriptor.background,
+            Some(with_alpha(surface, surface.3 * 0.82))
+        );
+        assert_eq!(
+            trigger.style.descriptor.border.color,
+            with_alpha(border_default, border_default.3 * 0.72)
+        );
+        assert_eq!(trigger.style.descriptor.corner_radii.top_left, radius);
+        assert!(node.has_text("chevron-down"));
+        let listbox = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:listbox"))
+            .expect("listbox");
+        assert_eq!(listbox.a11y.role, Some(NodeRole::ListBox));
+        assert_eq!(listbox.style.descriptor.background, Some(fill));
+        assert_eq!(
+            listbox.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+        );
+        assert_eq!(listbox.style.descriptor.corner_radii.top_left, surface_radius);
+        assert_eq!(listbox.style.min_width, Some(rem_to_px(12.0)));
+        assert_eq!(listbox.style.max_height, Some(max_height));
+        assert!(listbox.style.overlay);
+        assert_eq!(
+            listbox.interaction.dismiss_layer.as_deref(),
+            trigger.interaction.dismiss_layer.as_deref()
+        );
+        let group = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:group-Vegetables"))
+            .expect("group");
+        assert_eq!(group.a11y.role, Some(NodeRole::Group));
+        assert_eq!(group.a11y.label.as_deref(), Some("Vegetables"));
+        assert!(node.has_text("Vegetables"));
+        let banana = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:option:banana"))
+            .expect("selected option");
+        assert_eq!(banana.a11y.role, Some(NodeRole::ListBoxOption));
+        assert_eq!(banana.a11y.selected, Some(true));
+        assert!(banana.has_text("Banana"));
+        assert!(banana.has_text("check"));
+        let apple = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:option:apple"))
+            .expect("highlighted option");
+        assert_eq!(apple.a11y.selected, Some(false));
+        assert!(apple.style.descriptor.background.is_some());
+        let spinach_row = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:proof:option:spinach"))
+            .expect("disabled option");
+        assert!(spinach_row.interaction.disabled);
+        assert!(spinach_row.interaction.on_activate.is_none());
+        assert_eq!(spinach_row.a11y.selected, Some(false));
     }
 
     #[test]
