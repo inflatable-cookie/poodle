@@ -3894,6 +3894,39 @@ fn attach_bridge(
 }
 
 
+/// g16.091 review counterexample. A frame may retire only the focus identities
+/// owned by its own window. The background window stays live after its driver
+/// is dropped, so mounting a second window must not discard its focus handle.
+#[test]
+fn one_window_focus_sweep_cannot_drop_another_live_windows_handle() {
+    run_headless(|cx| {
+        let background_trace = Arc::new(Mutex::new(Vec::new()));
+        {
+            let node = Arc::new(Mutex::new(scoped_drag_tree("focus-bg", &background_trace)));
+            let mut background = HeadlessDriver::new(cx, node);
+            background.wait_for_focus_handle("focus-bg-source");
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for("focus-bg-source").is_some(),
+                "the background window owns a tracked focus handle before another window paints"
+            );
+        }
+
+        let foreground_trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(scoped_drag_tree("focus-fg", &foreground_trace)));
+        let mut foreground = HeadlessDriver::new(cx, node);
+        foreground.draw_frame();
+
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("focus-bg-source").is_some(),
+            "a foreground frame must not sweep a live background window's focus handle"
+        );
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("focus-fg-source").is_some(),
+            "the foreground frame still owns its own tracked focus handle"
+        );
+    });
+}
+
 /// g16.026, carried from g16.025. **Two windows, no false cancel.**
 ///
 /// This is the counterexample that sank the first attempt. That version kept a
