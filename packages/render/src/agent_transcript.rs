@@ -13,8 +13,8 @@ use std::sync::Arc;
 use poodle_headless::agent_transcript::TranscriptBlock;
 use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
-    AgentMessageSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ButtonSpec, ChangedFilesSpec,
-    ToolCallGroupSpec,
+    AgentMessageSpec, AgentPlanRecordSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ButtonSpec,
+    ChangedFilesSpec, TextSpec, TextTone, ToolCallGroupSpec,
 };
 
 use crate::agent_message::agent_message;
@@ -90,6 +90,51 @@ pub struct AgentTranscriptHandlers {
     pub on_subagent_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the group id when a subagent group's click-through is used.
     pub on_subagent_open: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope for the transcript, its blocks, and every
+    /// nested interactive record.
+    pub instance_id: Option<String>,
+}
+
+pub fn agent_transcript_root_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-transcript:{scope}"),
+        None => "agent-transcript".to_owned(),
+    }
+}
+
+pub fn agent_transcript_block_id(
+    instance_id: Option<&str>,
+    kind: &str,
+    item_id: &str,
+) -> String {
+    format!(
+        "{}:block:{kind}:{item_id}",
+        agent_transcript_root_id(instance_id)
+    )
+}
+
+fn posture(spec: &AgentTranscriptSpec) -> &'static str {
+    use poodle_headless::agent_transcript::{ToolCallStatus, TranscriptItem};
+
+    if spec.items.is_empty() {
+        "empty"
+    } else if spec.items.iter().any(|item| {
+        matches!(
+            item,
+            TranscriptItem::ToolCall(call) if call.status == ToolCallStatus::Error
+        )
+    }) {
+        "error"
+    } else if spec.items.iter().any(|item| match item {
+        TranscriptItem::Activity(activity) => activity.spinning.unwrap_or(true),
+        TranscriptItem::Message(message) => message.is_streaming,
+        TranscriptItem::ToolCall(call) => call.status == ToolCallStatus::Running,
+        _ => false,
+    }) {
+        "loading"
+    } else {
+        "content"
+    }
 }
 
 pub fn agent_transcript(
@@ -105,6 +150,7 @@ pub fn agent_transcript(
     let block_gap = rem_to_px(spec.block_gap_rem(density));
 
     let mut root = Node::container();
+    root.runtime_id = Some(agent_transcript_root_id(handlers.instance_id.as_deref()));
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -119,9 +165,24 @@ pub fn agent_transcript(
     // `Log` is the role for append-only output.
     root.a11y.role = Some(NodeRole::Log);
     root.a11y.label = Some(spec.aria_label.clone());
+    root.roles.insert("posture".to_owned(), posture(spec).to_owned());
+    root.roles
+        .insert("empty".to_owned(), spec.is_empty().to_string());
+    root.roles.insert(
+        "virtualized".to_owned(),
+        spec.is_virtualized.to_string(),
+    );
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{base_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
 
     let activity_text = |content: String| -> Node {
-        let mut t = Node::text(content);
+        let mut t = crate::text::text(&TextSpec::new(content).with_tone(TextTone::Secondary), ctx);
         t.style.text_size = Some(font_size);
         t.style.descriptor.text_color = Some(activity_color);
         t
@@ -132,6 +193,8 @@ pub fn agent_transcript(
     }
 
     for block in spec.rendered_blocks() {
+        let block_kind = block.kind();
+        let block_id = block.id().to_owned();
         match block {
             TranscriptBlock::Message(message) => {
                 let mut message_spec = AgentMessageSpec::new(message.markdown.clone())
@@ -141,7 +204,20 @@ pub fn agent_transcript(
                 if let Some(role) = message.role {
                     message_spec = message_spec.with_role(role);
                 }
-                root = root.child(agent_message(&message_spec, ctx));
+                let role = message_spec.role.as_str().to_owned();
+                let mut child = agent_message(&message_spec, ctx);
+                child.runtime_id = Some(agent_transcript_block_id(
+                    handlers.instance_id.as_deref(),
+                    block_kind,
+                    &block_id,
+                ));
+                child.roles.insert("kind".to_owned(), block_kind.to_owned());
+                child.roles.insert("role".to_owned(), role);
+                child.roles.insert(
+                    "status".to_owned(),
+                    if message.is_streaming { "streaming" } else { "complete" }.to_owned(),
+                );
+                root = root.child(child);
             }
             TranscriptBlock::ToolRun(run) => {
                 let group = ToolCallGroupSpec::new(run.id.clone(), run.calls.clone())
@@ -153,9 +229,20 @@ pub fn agent_transcript(
                 let group_handlers = ToolCallGroupHandlers {
                     on_toggle: handlers.on_tool_run_toggle.as_ref().map(Arc::clone),
                     on_call_toggle: handlers.on_tool_call_toggle.as_ref().map(Arc::clone),
-                    instance_id: None,
+                    instance_id: handlers.instance_id.as_deref().map(|scope| {
+                        format!("{scope}:transcript-run:{}", run.id)
+                    }),
                 };
-                root = root.child(tool_call_group(&group, ctx, group_handlers));
+                let status = group.status().as_str().to_owned();
+                let mut child = tool_call_group(&group, ctx, group_handlers);
+                child.runtime_id = Some(agent_transcript_block_id(
+                    handlers.instance_id.as_deref(),
+                    block_kind,
+                    &block_id,
+                ));
+                child.roles.insert("kind".to_owned(), block_kind.to_owned());
+                child.roles.insert("status".to_owned(), status);
+                root = root.child(child);
             }
             TranscriptBlock::ChangedFiles(changed) => {
                 let card = ChangedFilesSpec::new(changed.id.clone(), changed.files.clone())
@@ -166,16 +253,34 @@ pub fn agent_transcript(
                 let card_handlers = ChangedFilesHandlers {
                     on_toggle: handlers.on_changed_files_toggle.as_ref().map(Arc::clone),
                     on_file_select: handlers.on_file_select.as_ref().map(Arc::clone),
-                    instance_id: None,
+                    instance_id: handlers.instance_id.as_deref().map(|scope| {
+                        format!("{scope}:transcript-files:{}", changed.id)
+                    }),
                 };
-                root = root.child(changed_files(&card, ctx, card_handlers));
+                let mut child = changed_files(&card, ctx, card_handlers);
+                child.runtime_id = Some(agent_transcript_block_id(
+                    handlers.instance_id.as_deref(),
+                    block_kind,
+                    &block_id,
+                ));
+                child.roles.insert("kind".to_owned(), block_kind.to_owned());
+                root = root.child(child);
             }
             TranscriptBlock::AnsweredQuestion(record) => {
                 if let Some(answer) = record.answer.clone() {
+                    let outcome = answer.outcome.as_str().to_owned();
                     let card = AgentQuestionRecordSpec::new(record.question.clone(), answer)
                         .with_size(base_size)
                         .with_density(density);
-                    root = root.child(agent_question_record(&card, ctx));
+                    let mut child = agent_question_record(&card, ctx);
+                    child.runtime_id = Some(agent_transcript_block_id(
+                        handlers.instance_id.as_deref(),
+                        block_kind,
+                        &block_id,
+                    ));
+                    child.roles.insert("kind".to_owned(), block_kind.to_owned());
+                    child.roles.insert("status".to_owned(), outcome);
+                    root = root.child(child);
                 }
             }
             // A provider-owned child's work renders live in the transcript —
@@ -200,18 +305,49 @@ pub fn agent_transcript(
                         let id = group_id.clone();
                         Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
                     }),
-                    instance_id: None,
+                    instance_id: handlers.instance_id.as_deref().map(|scope| {
+                        format!("{scope}:transcript-subagent:{}", group.id)
+                    }),
                 };
-                root = root.child(crate::agent_subagent::agent_subagent(
+                let mut child = crate::agent_subagent::agent_subagent(
                     &card,
                     ctx,
                     group_handlers,
+                );
+                child.runtime_id = Some(agent_transcript_block_id(
+                    handlers.instance_id.as_deref(),
+                    block_kind,
+                    &block_id,
                 ));
+                child.roles.insert("kind".to_owned(), block_kind.to_owned());
+                root = root.child(child);
             }
-            // Decided plans are retained in the shared transcript contract;
-            // this renderer has no plan-card primitive yet, so keep the
-            // record in the grouping stream without adding a visual block.
-            TranscriptBlock::DecidedPlan(_) => {}
+            TranscriptBlock::DecidedPlan(record) => {
+                let mut card = AgentPlanRecordSpec::new(record.plan, record.status);
+                if let Some(decided_at) = record.decided_at {
+                    card = card.with_decided_at(decided_at);
+                }
+                let mut child = crate::agent_plan_record::agent_plan_record(
+                    &card,
+                    ctx,
+                    crate::agent_plan_record::AgentPlanRecordHandlers {
+                        instance_id: handlers.instance_id.as_deref().map(|scope| {
+                            format!("{scope}:transcript-plan:{block_id}")
+                        }),
+                        ..crate::agent_plan_record::AgentPlanRecordHandlers::default()
+                    },
+                );
+                child.runtime_id = Some(agent_transcript_block_id(
+                    handlers.instance_id.as_deref(),
+                    block_kind,
+                    &block_id,
+                ));
+                child.roles.insert("kind".to_owned(), block_kind.to_owned());
+                child
+                    .roles
+                    .insert("status".to_owned(), record.status.as_str().to_owned());
+                root = root.child(child);
+            }
             TranscriptBlock::Activity(_) => {}
         }
     }
@@ -219,7 +355,22 @@ pub fn agent_transcript(
     // The activity footer sits outside the block flow so it stays under the
     // transcript rather than scrolling as a block of its own.
     if let Some(label) = spec.activity_label() {
-        root = root.child(activity_text(label.to_string()));
+        let mut activity = activity_text(label.to_string());
+        activity.runtime_id = Some(format!(
+            "{}:activity",
+            agent_transcript_root_id(handlers.instance_id.as_deref())
+        ));
+        activity.roles.insert("kind".to_owned(), "activity".to_owned());
+        activity.roles.insert(
+            "status".to_owned(),
+            if posture(spec) == "loading" {
+                "loading"
+            } else {
+                "terminal"
+            }
+            .to_owned(),
+        );
+        root = root.child(activity);
     }
 
     root

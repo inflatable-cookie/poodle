@@ -6428,30 +6428,411 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
 }
 
 /// AgentTranscript reaches the production compat adapter, renderer, and
-/// mounted backend with a stable root identity.
+/// mounted backend. The fixture keeps records host-owned, distinguishes every
+/// posture, scopes duplicate instances, and drives both disclosure and scroll
+/// input through GPUI rather than calling handlers directly.
 #[test]
 fn agent_transcript_records_rebuild_through_production_mounted_input() {
-    use gpui::IntoElement;
-    use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage};
+    use crate::node_compat::IntoCompatNode;
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_headless::agent_question::{
+        AgentQuestionAnswer, AgentQuestionItem, AgentQuestionOption, AgentQuestionOutcome,
+    };
+    use poodle_headless::agent_transcript::{
+        ToolCallStatus, TranscriptActivity, TranscriptAnsweredQuestion, TranscriptDecidedPlan,
+        TranscriptItem, TranscriptMessage, TranscriptRole, TranscriptToolCall,
+    };
+    use poodle_specs::{ControlDensity, ControlSize};
+
+    fn message(id: &str, role: TranscriptRole, markdown: impl Into<String>) -> TranscriptItem {
+        TranscriptItem::Message(TranscriptMessage {
+            id: id.to_owned(),
+            role: Some(role),
+            markdown: markdown.into(),
+            ..Default::default()
+        })
+    }
+
+    fn call(id: &str, status: ToolCallStatus) -> TranscriptItem {
+        TranscriptItem::ToolCall(TranscriptToolCall {
+            id: id.to_owned(),
+            label: "Ran command".to_owned(),
+            detail: Some(format!("effigy {id}")),
+            status,
+            output: Some(format!("{id}: output")),
+            ..Default::default()
+        })
+    }
+
+    fn answered_question() -> TranscriptItem {
+        TranscriptItem::AnsweredQuestion(TranscriptAnsweredQuestion {
+            id: "record-question".to_owned(),
+            question: AgentQuestionItem {
+                id: "question".to_owned(),
+                header: Some("Review".to_owned()),
+                prompt: "Ship this preparation?".to_owned(),
+                options: vec![
+                    AgentQuestionOption {
+                        value: "yes".to_owned(),
+                        label: "Yes".to_owned(),
+                        description: None,
+                    },
+                    AgentQuestionOption {
+                        value: "no".to_owned(),
+                        label: "No".to_owned(),
+                        description: None,
+                    },
+                ],
+                allow_multiple: false,
+            },
+            answer: Some(AgentQuestionAnswer {
+                question_id: "question".to_owned(),
+                outcome: AgentQuestionOutcome::Selected,
+                values: vec!["yes".to_owned()],
+                text: String::new(),
+            }),
+        })
+    }
+
+    fn decided_plan() -> TranscriptItem {
+        TranscriptItem::DecidedPlan(TranscriptDecidedPlan {
+            id: "record-plan".to_owned(),
+            plan: "## Preparation\n\nMount the production adapter.".to_owned(),
+            status: AgentPlanStatus::Accepted,
+            decided_at: Some("16:35".to_owned()),
+        })
+    }
+
+    let theme_provider = theme();
+    let static_spec = AgentTranscriptSpec::new(vec![
+        message("operator", TranscriptRole::User, "Run the mounted proof."),
+        call("run-first", ToolCallStatus::Success),
+        call("run-last", ToolCallStatus::Error),
+        answered_question(),
+        decided_plan(),
+        TranscriptItem::Activity(TranscriptActivity {
+            id: "terminal".to_owned(),
+            label: "Turn failed".to_owned(),
+            spinning: Some(false),
+        }),
+    ])
+    .with_size(ControlSize::Sm)
+    .with_density(ControlDensity::Compact);
+    let rendered = crate::node_compat::AgentTranscript::from_spec(static_spec, &theme_provider)
+        .with_instance_id("counterexample")
+        .into_compat_node();
+    assert_eq!(
+        rendered.runtime_id.as_deref(),
+        Some("agent-transcript:counterexample")
+    );
+    assert_eq!(rendered.a11y.role, Some(NodeRole::Log));
+    assert_eq!(rendered.a11y.label.as_deref(), Some("Conversation"));
+    assert_eq!(rendered.roles.get("posture").map(String::as_str), Some("error"));
+    assert_eq!(rendered.roles.get("size").map(String::as_str), Some("sm"));
+    assert_eq!(
+        rendered.roles.get("density").map(String::as_str),
+        Some("compact")
+    );
+    assert_eq!(
+        rendered
+            .children
+            .iter()
+            .map(|child| child.roles.get("kind").map(String::as_str))
+            .collect::<Vec<_>>(),
+        [
+            Some("message"),
+            Some("tool-run"),
+            Some("answered-question"),
+            Some("decided-plan"),
+            Some("activity"),
+        ],
+        "message and record blocks keep authored order before the activity footer"
+    );
+    assert_eq!(
+        rendered.children[0].roles.get("role").map(String::as_str),
+        Some("user")
+    );
+    assert_eq!(
+        rendered.children[1].roles.get("status").map(String::as_str),
+        Some("error")
+    );
+    assert_eq!(
+        rendered.children[2].roles.get("status").map(String::as_str),
+        Some("selected")
+    );
+    assert_eq!(
+        rendered.children[3].roles.get("status").map(String::as_str),
+        Some("accepted")
+    );
+    assert_eq!(
+        rendered.children[4].roles.get("status").map(String::as_str),
+        Some("terminal")
+    );
+    for record in [
+        "Run the mounted proof.",
+        "Ship this preparation?",
+        "Accepted",
+        "## Preparation Mount the production adapter.",
+        "Turn failed",
+    ] {
+        assert!(
+            rendered.texts().iter().any(|text| *text == record),
+            "production composition keeps the {record:?} record"
+        );
+    }
+    let user_message = &rendered.children[0];
+    assert_eq!(
+        user_message.style.descriptor.background,
+        Some(theme_provider.resolve_color("color.background.elevated")),
+        "the user message composes its contracted Surface treatment"
+    );
+    assert_eq!(
+        user_message.style.descriptor.corner_radii.top_left,
+        theme_provider.resolve_radius("radius.surface")
+    );
+    let activity = &rendered.children[4];
+    assert!(activity.style.text_wrap, "activity copy composes production Text");
+    assert_eq!(activity.style.line_height, Some(1.5));
+    assert_eq!(activity.style.text_weight, Some(400));
+
+    for (spec, expected) in [
+        (AgentTranscriptSpec::default(), "empty"),
+        (
+            AgentTranscriptSpec::new(vec![TranscriptItem::Activity(TranscriptActivity {
+                id: "working".to_owned(),
+                label: "Working".to_owned(),
+                spinning: None,
+            })]),
+            "loading",
+        ),
+        (
+            AgentTranscriptSpec::new(vec![call("failed", ToolCallStatus::Error)]),
+            "error",
+        ),
+        (
+            AgentTranscriptSpec::new(vec![message(
+                "done",
+                TranscriptRole::Assistant,
+                "Complete",
+            )]),
+            "content",
+        ),
+    ] {
+        let node = crate::node_compat::AgentTranscript::from_spec(spec, &theme_provider)
+            .into_compat_node();
+        assert_eq!(
+            node.roles.get("posture").map(String::as_str),
+            Some(expected),
+            "{expected} posture stays structurally distinct"
+        );
+    }
 
     run_headless(|cx| {
+        #[derive(Default)]
+        struct TranscriptHost {
+            left_expanded: bool,
+            right_expanded: bool,
+            events: Vec<String>,
+        }
+
+        fn expanded(host: &TranscriptHost, scope: &str) -> bool {
+            match scope {
+                "left" => host.left_expanded,
+                "right" => host.right_expanded,
+                other => panic!("unknown transcript scope {other}"),
+            }
+        }
+
+        fn element(
+            host: &Arc<Mutex<TranscriptHost>>,
+            scope: &'static str,
+            theme_provider: &GpuiThemeProvider,
+        ) -> AnyElement {
+            let is_expanded = expanded(&host.lock().expect("transcript host"), scope);
+            let spec = AgentTranscriptSpec::new(vec![
+                message("same-message", TranscriptRole::User, "Shared answer"),
+                call("same-run", ToolCallStatus::Success),
+                call("same-last", ToolCallStatus::Success),
+                answered_question(),
+                decided_plan(),
+                TranscriptItem::Activity(TranscriptActivity {
+                    id: "same-terminal".to_owned(),
+                    label: "Turn complete".to_owned(),
+                    spinning: Some(false),
+                }),
+            ])
+            .with_expanded_tool_runs(if is_expanded {
+                vec!["same-run".to_owned()]
+            } else {
+                Vec::new()
+            });
+            let toggle_host = Arc::clone(host);
+            crate::node_compat::AgentTranscript::from_spec(spec, theme_provider)
+                .with_instance_id(scope)
+                .on_tool_run_toggle(Arc::new(move |run_id| {
+                    let mut host = toggle_host.lock().expect("transcript host");
+                    host.events.push(format!("{scope}:{run_id}"));
+                    match scope {
+                        "left" => host.left_expanded = !host.left_expanded,
+                        "right" => host.right_expanded = !host.right_expanded,
+                        other => panic!("unknown transcript scope {other}"),
+                    }
+                }))
+                .into_element()
+        }
+
+        let host = Arc::new(Mutex::new(TranscriptHost::default()));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme();
+            Rc::new(move || {
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(20.0))
+                    .child(element(&host, "left", &theme_provider))
+                    .child(element(&host, "right", &theme_provider))
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 620.0);
+        let left_root = "agent-transcript:left";
+        let right_root = "agent-transcript:right";
+        let left_toggle = "tool-call-group:left:transcript-run:same-run:toggle:same-run";
+        let right_toggle = "tool-call-group:right:transcript-run:same-run:toggle:same-run";
+        for id in [left_root, right_root, left_toggle, right_toggle] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "the IntoElement path must paint {id} through the GPUI backend"
+            );
+        }
+        let left_bounds = poodle_gpui_node_backend::bounds_for(left_root).expect("left root");
+        let right_bounds = poodle_gpui_node_backend::bounds_for(right_root).expect("right root");
+        assert!(left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0));
+        assert!(right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0));
+        assert!(
+            left_bounds.bottom() <= right_bounds.top(),
+            "duplicate transcripts keep authored order without overlap"
+        );
+        assert!(
+            bounds_contain(
+                left_bounds,
+                poodle_gpui_node_backend::bounds_for(left_toggle).expect("left toggle"),
+            ),
+            "left disclosure stays inside its transcript root"
+        );
+        assert!(
+            bounds_contain(
+                right_bounds,
+                poodle_gpui_node_backend::bounds_for(right_toggle).expect("right toggle"),
+            ),
+            "right disclosure stays inside its transcript root"
+        );
+
+        driver.wait_for_focus_handle(left_toggle);
+        driver.wait_for_focus_handle(right_toggle);
+        driver.focus_element(left_toggle);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(left_toggle), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(right_toggle),
+            Some(false),
+            "duplicate records keep caller-scoped focus handles"
+        );
+        driver.keyboard_activate(left_toggle);
+        {
+            let host = host.lock().expect("transcript host");
+            assert_eq!(host.events.as_slice(), ["left:same-run"]);
+            assert!(host.left_expanded);
+            assert!(!host.right_expanded);
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(left_toggle),
+            Some(true),
+            "host-owned rebuild keeps focus on the same disclosure"
+        );
+        driver.pointer_activate_id(right_toggle);
+        {
+            let host = host.lock().expect("transcript host");
+            assert_eq!(host.events.as_slice(), ["left:same-run", "right:same-run"]);
+            assert!(host.left_expanded);
+            assert!(host.right_expanded);
+        }
+
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"structure.identity.container"));
+        assert!(channels.contains(&"content.text-icon.text"));
+        assert!(channels.contains(&"surface.channels.background"));
+        assert!(channels.contains(&"semantic.token-roles.received"));
+        assert!(channels.contains(&"accessibility.projection.received"));
+        assert!(
+            driver.mounted_observation().is_valid(),
+            "the proof must paint and dispatch input through the mounted backend"
+        );
+    });
+
+    run_headless(|cx| {
+        let items = Rc::new(RefCell::new(
+            (0..24)
+                .map(|index| {
+                    message(
+                        &format!("scroll-{index}"),
+                        TranscriptRole::Assistant,
+                        format!("Transcript block {index} is tall enough to require bounded overflow."),
+                    )
+                })
+                .collect::<Vec<_>>(),
+        ));
+        let scroll = poodle_gpui_node_backend::TrackedScrollState::new();
+        let build_items = Rc::clone(&items);
+        let build_scroll = scroll.clone();
         let theme_provider = theme();
         let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
             crate::node_compat::AgentTranscript::from_spec(
-                AgentTranscriptSpec::new(vec![TranscriptItem::Message(TranscriptMessage {
-                    id: "answer".to_owned(),
-                    markdown: "Mounted through the production adapter.".to_owned(),
-                    ..Default::default()
-                })]),
+                AgentTranscriptSpec::new(build_items.borrow().clone()),
                 &theme_provider,
             )
+            .with_instance_id("scroll")
+            .with_scroll_state(build_scroll.clone())
             .into_element()
         });
 
-        let _driver = HeadlessDriver::new_element_in_box(cx, build, 420.0, 180.0);
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 420.0, 180.0);
         assert!(
-            poodle_gpui_node_backend::bounds_for("agent-transcript").is_some(),
+            poodle_gpui_node_backend::bounds_for("agent-transcript:scroll").is_some(),
             "the production adapter must carry stable AgentTranscript identity into the mounted backend"
+        );
+        assert!(scroll.max_offset_y() > 0.0, "the adapter viewport must overflow");
+        assert!(scroll.is_pinned(), "initial render follows the latest record");
+
+        driver.scroll_vertical(180.0);
+        assert!(!scroll.is_pinned(), "mounted wheel input detaches the reader");
+        let detached_offset = scroll.offset_y();
+        items.borrow_mut().push(message(
+            "appended",
+            TranscriptRole::Assistant,
+            "A host-owned appended record.",
+        ));
+        driver.draw_frame();
+        assert_eq!(
+            scroll.offset_y(),
+            detached_offset,
+            "a host rebuild must not pull a detached reader to the latest record"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("agent-transcript:scroll:jump-control").is_some(),
+            "detached posture mounts the renderer-owned jump control"
+        );
+        driver.pointer_activate_id("agent-transcript:scroll:jump-control");
+        driver.draw_frame();
+        assert!(scroll.is_pinned(), "jump input re-arms following");
+        assert!(scroll.remaining_to_bottom() <= 0.5, "jump reaches the bottom");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("agent-transcript:scroll:jump-control").is_none(),
+            "the jump control leaves the mounted tree once pinned"
         );
     });
 }

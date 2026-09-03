@@ -13,7 +13,7 @@
 
 use poodle_markdown::{parse_markdown, MdBlock, MdInline};
 use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node};
-use poodle_specs::AgentMessageSpec;
+use poodle_specs::{AgentMessageSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
@@ -193,11 +193,29 @@ pub fn agent_message(spec: &AgentMessageSpec, ctx: &RenderContext<'_>) -> Node {
 
     let blocks = parse_markdown(&spec.markdown);
     let mut root = render_blocks(&blocks, &style);
+    root.roles
+        .insert("role".to_owned(), spec.role.as_str().to_owned());
+    root.roles.insert(
+        "streaming".to_owned(),
+        spec.is_streaming.to_string(),
+    );
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{base_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
 
     if spec.is_user() {
         let surface = ctx.theme().resolve_color(spec.user_surface_token());
         let radius = ctx.theme().resolve_radius(spec.radius_token());
-        let mut bubble = Node::container();
+        let surface_spec = SurfaceSpec::new()
+            .with_tone(SurfaceTone::Elevated)
+            .with_border(SurfaceBorder::None)
+            .with_padding(PaddingScale::None);
+        let mut bubble = crate::surface::surface(&surface_spec, ctx, vec![root]);
         {
             let s = &mut bubble.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
@@ -215,7 +233,22 @@ pub fn agent_message(spec: &AgentMessageSpec, ctx: &RenderContext<'_>) -> Node {
             c.bottom_left = radius;
             s.descriptor.background = Some(surface);
         }
-        root = bubble.child(root);
+        bubble
+            .roles
+            .insert("role".to_owned(), spec.role.as_str().to_owned());
+        bubble.roles.insert(
+            "streaming".to_owned(),
+            spec.is_streaming.to_string(),
+        );
+        bubble.roles.insert(
+            "size".to_owned(),
+            format!("{base_size:?}").to_ascii_lowercase(),
+        );
+        bubble.roles.insert(
+            "density".to_owned(),
+            format!("{density:?}").to_ascii_lowercase(),
+        );
+        root = bubble;
     }
 
     root
