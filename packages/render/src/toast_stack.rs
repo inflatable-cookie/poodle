@@ -3,21 +3,24 @@
 //! Contract: `docs/contracts/components/toast-stack.md`
 //! Ported from: `packages/jetstream/components/src/toast_stack.rs`.
 //!
-//! Each toast: leading tone accent bar, title + optional message + optional
-//! action chip, dismiss ×, tone-tinted gradient fill over the tint,
-//! elevation-overlay shadow, and a one-shot enter animation keyed by the
-//! toast's stable id (fade + rise; completion persists across rebuilds).
+//! Each toast: leading tone accent bar, title + optional message, optional
+//! Button action, Icon-backed dismiss button, tone-tinted gradient fill, and
+//! elevation-overlay shadow. Authored rows paint at the settled endpoint.
 
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
-    TextAlign,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node, NodePosition,
+    NodeRole, StylePatch,
 };
-use poodle_specs::{ControlDensity, ControlSize, ToastPosition, ToastStackSpec};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, ToastPosition, ToastStackSpec,
+};
 
-use crate::color::{mix_srgb, WHITE};
+use crate::button::button;
+use crate::color::{mix_srgb, with_alpha, TRANSPARENT, WHITE};
 use crate::context::RenderContext;
+use crate::icon::icon;
 use crate::presentation::rem_to_px;
 
 /// Host callbacks: dismiss and action, each carrying the toast's id.
@@ -25,6 +28,23 @@ use crate::presentation::rem_to_px;
 pub struct ToastStackHandlers {
     pub on_dismiss: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Toast ids are queue-local, so duplicate
+    /// hosts may legitimately render the same id without sharing backend
+    /// focus, hit-test, or element state.
+    pub instance_id: Option<String>,
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("toast-host:{scope}:{part}"))
+}
+
+fn position_role(position: ToastPosition) -> &'static str {
+    match position {
+        ToastPosition::TopRight => "top-right",
+        ToastPosition::TopLeft => "top-left",
+        ToastPosition::BottomRight => "bottom-right",
+        ToastPosition::BottomLeft => "bottom-left",
+    }
 }
 
 /// Per-size title font-size in rem (contract §8 size table).
@@ -59,6 +79,15 @@ fn dismiss_size_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// Per-size dismiss top/right inset in rem (contract §8 size table).
+fn dismiss_inset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm | ControlSize::Md => 0.375,
+        ControlSize::Lg | ControlSize::Xl => 0.5,
+    }
+}
+
 /// Density toast-padding multiplier (contract §8 density table).
 fn density_pad_scale(density: ControlDensity) -> f32 {
     match density {
@@ -86,12 +115,20 @@ pub fn toast_stack(
     let title_px = rem_to_px(title_font_rem(effective_size));
     let message_px = rem_to_px(message_font_rem(effective_size));
     let dismiss_px = rem_to_px(dismiss_size_rem(effective_size));
+    let dismiss_inset = rem_to_px(dismiss_inset_rem(effective_size));
+    let instance_id = handlers.instance_id.as_deref();
 
     // Contract §8 toast padding = space-panel-x scaled by density.
     let base_pad = ctx.theme().resolve_space(spec.padding_token());
     let pad = base_pad * density_pad_scale(density);
-    // Contract §7 stack gap + toast internal gap = space-stack-sm token.
-    let stack_gap = ctx.theme().resolve_space(spec.gap_token());
+    // Contract §8: comfortable widens the stack gap to space-stack-lg;
+    // compact and default retain space-stack-sm.
+    let stack_gap = match density {
+        ControlDensity::Comfortable => ctx.theme().resolve_space("space.stack.lg"),
+        ControlDensity::Compact | ControlDensity::Default => {
+            ctx.theme().resolve_space(spec.gap_token())
+        }
+    };
     let item_gap = ctx.theme().resolve_space(spec.gap_token());
 
     let elevated = ctx.theme().resolve_color(spec.fill_token());
@@ -102,8 +139,24 @@ pub fn toast_stack(
     let title_color = ctx.theme().resolve_color(spec.title_color_token());
     let message_color = ctx.theme().resolve_color(spec.message_color_token());
     let dismiss_color = ctx.theme().resolve_color(spec.dismiss_color_token());
+    let dismiss_hover_color = ctx.theme().resolve_color(spec.title_color_token());
+    let dismiss_hover_fill =
+        with_alpha(ctx.theme().resolve_color("color.background.surface"), 0.60);
 
     let mut el = Node::container();
+    el.runtime_id = scoped(instance_id, "stack");
+    el.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "position".to_owned(),
+        position_role(spec.position).to_owned(),
+    );
     {
         let s = &mut el.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -152,12 +205,17 @@ pub fn toast_stack(
 
         // Leading tone accent bar — contract §8: 0.1875rem (3px), full height.
         let mut accent_bar = Node::container();
+        accent_bar.position = NodePosition::Absolute {
+            top: Some(0.0),
+            right: None,
+            bottom: Some(0.0),
+            left: Some(0.0),
+        };
         {
             let s = &mut accent_bar.style;
             // Explicit Row (see switch.rs).
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(0.1875));
-            s.self_stretch = true;
             s.descriptor.background = Some(accent_bar_color);
         }
 
@@ -181,50 +239,90 @@ pub fn toast_stack(
             msg.style.text_size = Some(message_px);
             content = content.child(msg);
         }
-        // Optional action affordance (secondary-button-styled chip).
+        // Optional action affordance — the contract-owned Button primitive.
         if let Some(action) = &toast.action_label {
-            let mut chip = Node::text(action.as_str());
-            {
-                let s = &mut chip.style;
-                s.descriptor.text_color = Some(title_color);
-                s.text_size = Some(message_px);
-                s.text_weight = Some(600);
-                s.descriptor.border.width = 1.0;
-                s.descriptor.border.color = toast_border;
-                let padc = &mut s.descriptor.layout.spacing.padding;
-                padc.left = rem_to_px(0.5);
-                padc.right = rem_to_px(0.5);
-                padc.top = rem_to_px(0.25);
-                padc.bottom = rem_to_px(0.25);
-            }
-            all_corners(&mut chip, radius);
-
-            if let Some(handler) = &handlers.on_action {
+            let on_click = handlers.on_action.as_ref().map(|handler| {
                 let handler = Arc::clone(handler);
                 let id = toast.id.clone();
-                chip.style.descriptor.cursor = CursorHint::Pointer;
-                chip.interaction.on_activate = Some(Arc::new(move || handler(&id)));
-            }
+                Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
+            });
+            let mut action_button = button(
+                &ButtonSpec::new()
+                    .with_label(action.as_str())
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(effective_size)
+                    .with_density(density),
+                ctx,
+                on_click,
+            );
+            action_button.id = Some(format!("poodle-toast-action-{}", toast.id));
+            action_button.runtime_id = scoped(instance_id, &format!("toast:{}:action", toast.id));
+            action_button
+                .roles
+                .insert("dependency".to_owned(), "button".to_owned());
 
-            content = content.child(chip);
+            let mut actions = Node::container();
+            actions.runtime_id = scoped(instance_id, &format!("toast:{}:actions", toast.id));
+            actions
+                .roles
+                .insert("part".to_owned(), "actions".to_owned());
+            actions.style.descriptor.layout.spacing.margin.top = rem_to_px(0.25);
+            content = content.child(actions.child(action_button));
         }
 
-        // Dismiss affordance — × glyph in a sized square.
-        let mut dismiss = Node::text("\u{00d7}");
+        // Dismiss affordance — a native button containing the real Icon
+        // primitive. It stays a focus stop without a handler, matching a web
+        // button whose event has no listener while keeping activation inert.
+        let dismiss_aria = format!("Dismiss {}", toast.title);
+        let mut dismiss_icon = icon(&IconSpec::new("x"), ctx);
+        dismiss_icon.runtime_id = scoped(instance_id, &format!("toast:{}:dismiss-icon", toast.id));
+        dismiss_icon.style.descriptor.text_color = Some(dismiss_color);
+        dismiss_icon
+            .roles
+            .insert("dependency".to_owned(), "icon".to_owned());
+
+        let mut dismiss = Node::button("");
+        dismiss.id = Some(format!("poodle-toast-dismiss-{}", toast.id));
+        dismiss.runtime_id = scoped(instance_id, &format!("toast:{}:dismiss", toast.id));
+        dismiss.position = NodePosition::Absolute {
+            top: Some(dismiss_inset),
+            right: Some(dismiss_inset),
+            left: None,
+            bottom: None,
+        };
+        dismiss.a11y.role = Some(NodeRole::Button);
+        dismiss.a11y.label = Some(dismiss_aria);
+        dismiss.a11y.tab_index = Some(0);
+        dismiss.interaction.focusable = true;
+        dismiss.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
         {
             let s = &mut dismiss.style;
-            s.descriptor.text_color = Some(dismiss_color);
-            s.text_size = Some(dismiss_px);
             s.descriptor.layout.width = LayoutSizing::Fixed(dismiss_px);
             s.descriptor.layout.height = LayoutSizing::Fixed(dismiss_px);
-            s.text_align = Some(TextAlign::Center);
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = poodle_node::MainAxisAlignment::Center;
+            s.descriptor.background = Some(TRANSPARENT);
+            s.descriptor.border.width = 0.0;
+            s.descriptor.cursor = CursorHint::Pointer;
+            s.hover = Some(StylePatch {
+                background: Some(dismiss_hover_fill),
+                border_color: None,
+                text_color: Some(dismiss_hover_color),
+                opacity: None,
+            });
         }
+        all_corners(&mut dismiss, ctx.theme().resolve_radius("radius.sm"));
         if let Some(handler) = &handlers.on_dismiss {
             let handler = Arc::clone(handler);
             let id = toast.id.clone();
-            dismiss.style.descriptor.cursor = CursorHint::Pointer;
             dismiss.interaction.on_activate = Some(Arc::new(move || handler(&id)));
         }
+        let dismiss = dismiss.child(dismiss_icon);
 
         // Toast box: tinted fill + fade gradient, tone border,
         // elevation-overlay shadow, clipped. Danger projects Alert; other
@@ -237,6 +335,11 @@ pub fn toast_stack(
         });
         toast_el.position = NodePosition::Relative;
         toast_el.id = Some(format!("poodle-toast-{}", toast.id));
+        toast_el.runtime_id = scoped(instance_id, &format!("toast:{}", toast.id));
+        toast_el.roles.insert(
+            "tone".to_owned(),
+            format!("{:?}", toast.tone).to_ascii_lowercase(),
+        );
         {
             let s = &mut toast_el.style;
             s.descriptor.background = Some(bg_tinted);
@@ -282,12 +385,17 @@ pub fn toast_stack(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::Toast;
+    use poodle_node::NodeKind;
+    use poodle_specs::{Toast, ToastTone};
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
 
     #[test]
     fn preloaded_items_do_not_enter() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = ToastStackSpec::new().with_toasts(vec![Toast::new("save", "Saved")]);
         let node = toast_stack(&spec, &ctx, ToastStackHandlers::default());
@@ -302,8 +410,7 @@ mod tests {
 
     #[test]
     fn danger_uses_alert_and_other_tones_stay_list_items() {
-        let theme =
-            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = ToastStackSpec::new().with_toasts(vec![
             Toast::new("ok", "Saved").with_tone(poodle_specs::ToastTone::Success),
@@ -318,5 +425,120 @@ mod tests {
             .expect("danger toast");
         assert_eq!(success.a11y.role, Some(NodeRole::ListItem));
         assert_eq!(danger.a11y.role, Some(NodeRole::Alert));
+    }
+
+    #[test]
+    fn contract_components_callbacks_and_scope_stay_distinct() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let action_seen = Arc::clone(&seen);
+        let dismiss_seen = Arc::clone(&seen);
+        let node = toast_stack(
+            &ToastStackSpec::new()
+                .with_toasts(vec![Toast::new("job", "Publishing")
+                    .with_tone(ToastTone::Warning)
+                    .with_action_label("Retry")])
+                .with_size(ControlSize::Lg)
+                .with_density(ControlDensity::Comfortable),
+            &ctx,
+            ToastStackHandlers {
+                on_action: Some(Arc::new(move |id| {
+                    action_seen
+                        .lock()
+                        .expect("seen lock")
+                        .push(format!("action:{id}"));
+                })),
+                on_dismiss: Some(Arc::new(move |id| {
+                    dismiss_seen
+                        .lock()
+                        .expect("seen lock")
+                        .push(format!("dismiss:{id}"));
+                })),
+                instance_id: Some("subject".to_owned()),
+            },
+        );
+
+        assert_eq!(node.runtime_id.as_deref(), Some("toast-host:subject:stack"));
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("lg"));
+        assert_eq!(
+            node.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+
+        let toast = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-job"))
+            .expect("toast row");
+        assert_eq!(
+            toast.runtime_id.as_deref(),
+            Some("toast-host:subject:toast:job")
+        );
+        assert_eq!(toast.roles.get("tone").map(String::as_str), Some("warning"));
+
+        let action = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-action-job"))
+            .expect("action button");
+        assert!(matches!(action.kind, NodeKind::Button { .. }));
+        assert_eq!(
+            action.roles.get("dependency").map(String::as_str),
+            Some("button")
+        );
+        assert_eq!(
+            action.runtime_id.as_deref(),
+            Some("toast-host:subject:toast:job:action")
+        );
+
+        let dismiss = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-dismiss-job"))
+            .expect("dismiss button");
+        assert!(matches!(dismiss.kind, NodeKind::Button { .. }));
+        assert!(dismiss.interaction.focusable);
+        assert_eq!(dismiss.a11y.tab_index, Some(0));
+        assert_eq!(dismiss.a11y.label.as_deref(), Some("Dismiss Publishing"));
+        assert_eq!(
+            dismiss.runtime_id.as_deref(),
+            Some("toast-host:subject:toast:job:dismiss")
+        );
+        let icon = dismiss
+            .find(&|node| matches!(&node.kind, NodeKind::Icon { name, .. } if name == "x"))
+            .expect("dismiss icon");
+        assert_eq!(
+            icon.roles.get("dependency").map(String::as_str),
+            Some("icon")
+        );
+
+        (action
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("action handler"))();
+        (dismiss
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("dismiss handler"))();
+        assert_eq!(
+            seen.lock().expect("seen lock").as_slice(),
+            ["action:job", "dismiss:job"]
+        );
+    }
+
+    #[test]
+    fn unavailable_action_is_reachable_but_inert() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = toast_stack(
+            &ToastStackSpec::new().with_toasts(vec![
+                Toast::new("job", "Publishing").with_action_label("Unavailable")
+            ]),
+            &ctx,
+            ToastStackHandlers::default(),
+        );
+        let action = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-action-job"))
+            .expect("action button");
+        assert!(action.interaction.focusable);
+        assert_eq!(action.a11y.tab_index, Some(0));
+        assert!(action.interaction.on_activate.is_none());
     }
 }

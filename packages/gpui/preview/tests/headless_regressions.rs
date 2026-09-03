@@ -29038,37 +29038,159 @@ fn toast_host_controlled_composition_actions_and_identity_through_mounted_backen
     use poodle_specs::{ToastHostPlacement, ToastHostSpec};
 
     run_headless(|cx| {
+        let left_toasts = Arc::new(Mutex::new(vec![
+            Toast::new("job", "Publishing").with_action_label("Retry"),
+            Toast::new("saved", "Saved").with_tone(ToastTone::Success),
+        ]));
+        let right_toasts = Arc::new(Mutex::new(vec![
+            Toast::new("job", "Rate limited")
+                .with_tone(ToastTone::Warning)
+                .with_action_label("Unavailable"),
+            Toast::new("blocked", "Publishing failed").with_tone(ToastTone::Danger),
+        ]));
+        let trace = Arc::new(Mutex::new(Vec::<String>::new()));
         let theme_provider = theme();
-        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
-            div()
-                .relative()
-                .size_full()
-                .child(
-                    node_compat::ToastHost::from_spec(
-                        ToastHostSpec::new().with_placement(ToastHostPlacement::TopStart),
-                        &theme_provider,
+        let build = {
+            let left_toasts = Arc::clone(&left_toasts);
+            let right_toasts = Arc::clone(&right_toasts);
+            let trace = Arc::clone(&trace);
+            Rc::new(move || {
+                let left_action_trace = Arc::clone(&trace);
+                let left_dismiss_trace = Arc::clone(&trace);
+                let right_dismiss_trace = Arc::clone(&trace);
+                div()
+                    .relative()
+                    .size_full()
+                    .child(
+                        node_compat::ToastHost::from_spec(
+                            ToastHostSpec::new()
+                                .with_placement(ToastHostPlacement::TopStart)
+                                .with_size(ControlSize::Xs)
+                                .with_density(ControlDensity::Compact),
+                            &theme_provider,
+                        )
+                        .with_instance_id("left")
+                        .on_action(Arc::new(move |id| {
+                            left_action_trace
+                                .lock()
+                                .expect("trace lock")
+                                .push(format!("left/action:{id}"));
+                        }))
+                        .on_dismiss(Arc::new(move |id| {
+                            left_dismiss_trace
+                                .lock()
+                                .expect("trace lock")
+                                .push(format!("left/dismiss:{id}"));
+                        }))
+                        .toasts(left_toasts.lock().expect("left queue lock").clone()),
                     )
-                    .toasts(vec![Toast::new("job", "Publishing")]),
-                )
-                .child(
-                    node_compat::ToastHost::from_spec(
-                        ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
-                        &theme_provider,
+                    .child(
+                        node_compat::ToastHost::from_spec(
+                            ToastHostSpec::new()
+                                .with_placement(ToastHostPlacement::BottomEnd)
+                                .with_size(ControlSize::Xl)
+                                .with_density(ControlDensity::Comfortable),
+                            &theme_provider,
+                        )
+                        .with_instance_id("right")
+                        .on_dismiss(Arc::new(move |id| {
+                            right_dismiss_trace
+                                .lock()
+                                .expect("trace lock")
+                                .push(format!("right/dismiss:{id}"));
+                        }))
+                        // Deliberately no action handler: the rendered Button
+                        // remains reachable but activation is inert.
+                        .toasts(right_toasts.lock().expect("right queue lock").clone()),
                     )
-                    .toasts(vec![Toast::new("job", "Publishing")]),
-                )
-                .into_any_element()
-        });
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
 
-        let _driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        let bounds = |id: &str| {
+            poodle_gpui_node_backend::bounds_for(id)
+                .unwrap_or_else(|| panic!("mounted bounds for {id}"))
+        };
+        let left_host = bounds("toast-host:left");
+        let right_host = bounds("toast-host:right");
         assert!(
-            poodle_gpui_node_backend::bounds_for("toast-host:left").is_some(),
-            "left ToastHost must paint its caller-scoped production identity"
+            left_host.origin.x < right_host.origin.x && left_host.origin.y < right_host.origin.y,
+            "top-start and bottom-end hosts must occupy distinct exact quadrants"
+        );
+
+        let left_job = bounds("toast-host:left:toast:job");
+        let left_saved = bounds("toast-host:left:toast:saved");
+        assert!(
+            left_job.origin.y < left_saved.origin.y,
+            "controlled queue order must be retained in mounted geometry"
         );
         assert!(
-            poodle_gpui_node_backend::bounds_for("toast-host:right").is_some(),
-            "right ToastHost must not alias the left mount"
+            bounds("toast-host:left:toast:job:dismiss-icon").size.width > px(0.0),
+            "the real Icon dependency must paint inside dismiss"
         );
+        assert!(
+            bounds("toast-host:right:toast:job:action").size.height
+                > bounds("toast-host:left:toast:job:action").size.height,
+            "forwarded xl/comfortable and xs/compact axes must reach Button geometry"
+        );
+
+        driver.pointer_activate_id("toast-host:left:toast:job:action");
+        driver.wait_for_focus_handle("toast-host:left:toast:job:dismiss");
+        driver.keyboard_activate("toast-host:left:toast:job:dismiss");
+        driver.pointer_activate_id("toast-host:right:toast:job:action");
+        driver.keyboard_activate("toast-host:right:toast:job:action");
+        driver.pointer_activate_id("toast-host:right:toast:job:dismiss");
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["left/action:job", "left/dismiss:job", "right/dismiss:job"],
+            "pointer, keyboard, inert action, and duplicate-id callbacks stay exact and isolated"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:job").is_some(),
+            "callbacks request changes; they do not mutate the controlled queue"
+        );
+
+        driver.focus_element("toast-host:left:toast:job:action");
+        *left_toasts.lock().expect("left queue lock") = vec![
+            Toast::new("job", "Published")
+                .with_tone(ToastTone::Success)
+                .with_action_label("Open"),
+            Toast::new("fresh", "New version").with_tone(ToastTone::Info),
+        ];
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:left:toast:job:action"),
+            Some(true),
+            "same-id controlled field replacement retains Button runtime identity"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:saved").is_none()
+                && poodle_gpui_node_backend::bounds_for("toast-host:left:toast:fresh").is_some(),
+            "accepted host rebuild applies controlled remove and add"
+        );
+
+        let trace_before_time = trace.lock().expect("trace lock").clone();
+        driver.advance_clock(std::time::Duration::from_secs(60));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:job").is_some(),
+            "deterministic time cannot remove a controlled native row; native render owns no clock"
+        );
+        assert_eq!(
+            *trace.lock().expect("trace lock"),
+            trace_before_time,
+            "advancing the headless clock must not manufacture a dismiss callback"
+        );
+
+        left_toasts.lock().expect("left queue lock").remove(0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:job").is_none()
+                && poodle_gpui_node_backend::bounds_for("toast-host:right:toast:job").is_some(),
+            "removing the left duplicate cannot remove the right host's row"
+        );
+        assert!(driver.mounted_observation().is_valid());
     });
 }
 
