@@ -8,14 +8,16 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole, StylePatch,
+    NodeKind, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    CallOutSpec, ControlSize, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
+    CallOutSpec, CalloutAnnounceMode, ControlSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone,
+    SpinnerVariant, StatusTone,
 };
 
 use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
+use crate::icon::icon;
 use crate::presentation::{
     panel_space_x_rem, rem_to_px, resolve_supporting_visual_size, size_font_rem,
 };
@@ -29,6 +31,9 @@ pub const CALLOUT_DISMISS_ID: &str = "poodle-callout-dismiss";
 #[derive(Default)]
 pub struct CalloutHandlers {
     pub on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Contract-owned actions snippet, built through the production render
+    /// context before the renderer stamps the actions region.
+    pub actions: Option<SlotBuilder<'static>>,
     /// Stable native instance scope. Two dismissible callouts would otherwise
     /// share one backend focus handle.
     pub instance_id: Option<String>,
@@ -46,6 +51,31 @@ fn scoped(instance_id: Option<&str>, semantic: &str) -> Option<String> {
     instance_id.map(|scope| format!("callout:{scope}:{semantic}"))
 }
 
+fn component_root_id(instance_id: Option<&str>) -> Option<String> {
+    instance_id.map(|scope| format!("callout:{scope}"))
+}
+
+fn callout_icon(
+    name: &str,
+    size: f32,
+    color: poodle_node::ColorValue,
+    ctx: &RenderContext<'_>,
+) -> Node {
+    let mut node = icon(&IconSpec::new(name), ctx);
+    let NodeKind::Icon {
+        size: rendered_size,
+        ..
+    } = &mut node.kind
+    else {
+        unreachable!("Icon renderer must return NodeKind::Icon");
+    };
+    *rendered_size = size;
+    node.style.descriptor.text_color = Some(color);
+    node.roles
+        .insert("dependency".to_owned(), "icon".to_owned());
+    node
+}
+
 /// Contract §6 icon map. Pending renders a spinner, not an icon.
 fn tone_icon(tone: StatusTone) -> &'static str {
     match tone {
@@ -60,17 +90,38 @@ fn tone_icon(tone: StatusTone) -> &'static str {
 pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHandlers) -> Node {
     let theme = ctx.theme();
     let on_dismiss = handlers.on_dismiss;
+    let actions = handlers.actions;
     let instance_id = handlers.instance_id;
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+    let title_font = if effective_size == ControlSize::Sm {
+        rem_to_px(0.75)
+    } else {
+        font_size
+    };
+    let message_font = if effective_size == ControlSize::Sm {
+        rem_to_px(0.6875)
+    } else {
+        font_size
+    };
+    let default_icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));
+    let icon_glyph = if effective_size == ControlSize::Sm {
+        rem_to_px(0.5625)
+    } else {
+        default_icon_glyph
+    };
 
     let pad_x = rem_to_px(panel_space_x_rem(density));
     let pad_y = rem_to_px(0.625);
-    let gap = theme.resolve_space("space.inline.md");
+    let root_gap = if effective_size == ControlSize::Sm {
+        rem_to_px(0.5)
+    } else {
+        theme.resolve_space("space.inline.md")
+    };
+    let body_gap = theme.resolve_space("space.inline.md");
     let content_gap = theme.resolve_space("space.inline.sm");
 
     let tone_color = theme.resolve_color(spec.tone_color_token());
@@ -110,6 +161,23 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     };
 
     let mut el = Node::container();
+    el.runtime_id = component_root_id(instance_id.as_deref());
+    el.roles.insert(
+        "tone".to_owned(),
+        format!("{:?}", spec.tone).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "fill".to_owned(),
+        format!("{:?}", spec.fill).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
     {
         let s = &mut el.style;
         s.descriptor.background = Some(fill);
@@ -130,17 +198,19 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         s.descriptor.layout.spacing.padding.bottom = pad_y;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = gap;
+        s.descriptor.layout.spacing.gap = root_gap;
         s.fill_width = true;
     }
 
     // ── Body: icon badge + content ──
     let mut body = Node::container();
+    body.runtime_id = scoped(instance_id.as_deref(), "body");
+    body.roles.insert("part".to_owned(), "body".to_owned());
     {
         let s = &mut body.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        s.descriptor.layout.spacing.gap = gap;
+        s.descriptor.layout.spacing.gap = body_gap;
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
 
@@ -153,6 +223,10 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         ControlSize::Xl => 2.125,
     });
     let mut badge = Node::container();
+    badge.runtime_id = scoped(instance_id.as_deref(), "icon-badge");
+    badge
+        .roles
+        .insert("part".to_owned(), "icon-badge".to_owned());
     {
         let s = &mut badge.style;
         s.descriptor.layout.width = LayoutSizing::Fixed(badge_size);
@@ -186,20 +260,31 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         if let Some(surface) = solid_surface {
             pending_spinner.style.descriptor.text_color = Some(surface.foreground);
         }
+        pending_spinner.runtime_id = scoped(instance_id.as_deref(), "spinner");
+        pending_spinner
+            .roles
+            .insert("dependency".to_owned(), "spinner".to_owned());
         badge = badge.child(pending_spinner);
     } else {
-        let mut icon = Node::icon(tone_icon(spec.tone), icon_glyph);
-        icon.style.descriptor.text_color = Some(
+        let mut icon = callout_icon(
+            tone_icon(spec.tone),
+            icon_glyph,
             solid_surface
                 .map(|surface| surface.foreground)
                 .unwrap_or(tone_color),
+            ctx,
         );
+        icon.runtime_id = scoped(instance_id.as_deref(), "icon");
         badge = badge.child(icon);
     }
     body = body.child(badge);
 
     // Content column — title + message.
     let mut content = Node::container();
+    content.runtime_id = scoped(instance_id.as_deref(), "content");
+    content
+        .roles
+        .insert("part".to_owned(), "content".to_owned());
     {
         let s = &mut content.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -209,31 +294,58 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     }
     if let Some(ref title) = spec.title {
         let mut t = Node::text(title);
+        t.runtime_id = scoped(instance_id.as_deref(), "title");
+        t.roles.insert("part".to_owned(), "title".to_owned());
         t.style.descriptor.text_color = Some(
             solid_surface
                 .map(|surface| surface.foreground)
                 .unwrap_or(text_primary),
         );
-        t.style.text_size = Some(font_size);
+        t.style.text_size = Some(title_font);
         t.style.text_weight = Some(600);
         content = content.child(t);
     }
     if let Some(ref message) = spec.content {
         let mut m = Node::text(message);
+        m.runtime_id = scoped(instance_id.as_deref(), "message");
+        m.roles.insert("part".to_owned(), "message".to_owned());
         m.style.descriptor.text_color = Some(
             solid_surface
                 .map(|surface| surface.foreground)
                 .unwrap_or(text_secondary),
         );
-        m.style.text_size = Some(font_size);
+        m.style.text_size = Some(message_font);
         content = content.child(m);
     }
     body = body.child(content);
     el = el.child(body);
 
+    // ── Actions region ──
+    if let Some(build_actions) = actions {
+        let mut actions = build_actions(ctx);
+        actions.runtime_id = scoped(instance_id.as_deref(), "actions");
+        actions
+            .roles
+            .insert("part".to_owned(), "actions".to_owned());
+        {
+            let s = &mut actions.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::End;
+            s.descriptor.layout.spacing.gap = content_gap;
+            s.flex_wrap = true;
+            s.flex_shrink_zero = true;
+        }
+        el = el.child(actions);
+    }
+
     // ── Dismiss control (ghost "x") ──
     if spec.dismissible {
-        let dismiss_size = rem_to_px(1.75);
+        let dismiss_size = if effective_size == ControlSize::Sm {
+            rem_to_px(1.5)
+        } else {
+            rem_to_px(1.75)
+        };
         let control_radius = theme.resolve_radius("radius.control");
         let dismiss_radius = (control_radius - border_width).max(0.0);
         let mut dismiss = Node::container();
@@ -241,6 +353,9 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         dismiss.runtime_id = scoped(instance_id.as_deref(), CALLOUT_DISMISS_ID);
         dismiss.a11y.role = Some(NodeRole::Button);
         dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        dismiss
+            .roles
+            .insert("part".to_owned(), "dismiss".to_owned());
         dismiss.interaction.focusable = true;
         dismiss.style.focus = Some(StylePatch {
             background: None,
@@ -261,12 +376,15 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
             s.descriptor.cursor = CursorHint::Pointer;
         }
-        let mut x = Node::icon("x", icon_glyph);
-        x.style.descriptor.text_color = Some(
+        let mut x = callout_icon(
+            "x",
+            icon_glyph,
             solid_surface
                 .map(|surface| surface.foreground)
                 .unwrap_or(text_secondary),
+            ctx,
         );
+        x.runtime_id = scoped(instance_id.as_deref(), "dismiss-icon");
         dismiss = dismiss.child(x);
 
         if let Some(handler) = &on_dismiss {
@@ -279,7 +397,11 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
-    el.a11y.role = Some(NodeRole::Alert);
+    el.a11y.role = match spec.announce_mode {
+        CalloutAnnounceMode::None => None,
+        CalloutAnnounceMode::Polite => Some(NodeRole::Status),
+        CalloutAnnounceMode::Assertive => Some(NodeRole::Alert),
+    };
     el
 }
 
