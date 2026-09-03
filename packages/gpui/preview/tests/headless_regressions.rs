@@ -6529,7 +6529,7 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
     );
     assert_eq!(rendered.a11y.role, Some(NodeRole::Log));
     assert_eq!(rendered.a11y.label.as_deref(), Some("Conversation"));
-    assert_eq!(rendered.roles.get("posture").map(String::as_str), Some("error"));
+    assert_eq!(rendered.roles.get("empty").map(String::as_str), Some("false"));
     assert_eq!(rendered.roles.get("size").map(String::as_str), Some("sm"));
     assert_eq!(
         rendered.roles.get("density").map(String::as_str),
@@ -6566,10 +6566,6 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         rendered.children[3].roles.get("status").map(String::as_str),
         Some("accepted")
     );
-    assert_eq!(
-        rendered.children[4].roles.get("status").map(String::as_str),
-        Some("terminal")
-    );
     for record in [
         "Run the mounted proof.",
         "Ship this preparation?",
@@ -6593,41 +6589,86 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         theme_provider.resolve_radius("radius.surface")
     );
     let activity = &rendered.children[4];
-    assert!(activity.style.text_wrap, "activity copy composes production Text");
-    assert_eq!(activity.style.line_height, Some(1.5));
-    assert_eq!(activity.style.text_weight, Some(400));
+    assert_eq!(activity.children.len(), 1, "terminal activity omits Spinner");
+    let activity_label = &activity.children[0];
+    assert!(activity_label.style.text_wrap, "activity copy composes production Text");
+    assert_eq!(activity_label.style.line_height, Some(1.5));
+    assert_eq!(activity_label.style.text_weight, Some(400));
 
-    for (spec, expected) in [
-        (AgentTranscriptSpec::default(), "empty"),
-        (
-            AgentTranscriptSpec::new(vec![TranscriptItem::Activity(TranscriptActivity {
-                id: "working".to_owned(),
-                label: "Working".to_owned(),
-                spinning: None,
-            })]),
-            "loading",
-        ),
-        (
-            AgentTranscriptSpec::new(vec![call("failed", ToolCallStatus::Error)]),
-            "error",
-        ),
-        (
-            AgentTranscriptSpec::new(vec![message(
-                "done",
-                TranscriptRole::Assistant,
-                "Complete",
-            )]),
-            "content",
-        ),
-    ] {
-        let node = crate::node_compat::AgentTranscript::from_spec(spec, &theme_provider)
-            .into_compat_node();
-        assert_eq!(
-            node.roles.get("posture").map(String::as_str),
-            Some(expected),
-            "{expected} posture stays structurally distinct"
-        );
-    }
+    let empty = crate::node_compat::AgentTranscript::from_spec(
+        AgentTranscriptSpec::default(),
+        &theme_provider,
+    )
+    .into_compat_node();
+    assert_eq!(empty.roles.get("empty").map(String::as_str), Some("true"));
+    let empty_state = &empty.children[0];
+    let empty_fill = theme_provider.resolve_color("color.background.surface");
+    assert_eq!(
+        empty_state.style.descriptor.background,
+        Some(ColorValue(
+            empty_fill.0,
+            empty_fill.1,
+            empty_fill.2,
+            empty_fill.3 * 0.76,
+        ))
+    );
+    assert!(empty_state.style.border_dashed);
+    assert_eq!(
+        empty_state.style.descriptor.border.color,
+        theme_provider.resolve_color("color.border.default")
+    );
+    assert_eq!(empty_state.style.descriptor.border.width, 1.0);
+    assert_eq!(
+        empty_state.style.descriptor.corner_radii.top_left,
+        (theme_provider.resolve_radius("radius.surface") - 2.0).max(0.0)
+    );
+    assert_eq!(empty_state.a11y.label.as_deref(), Some("No messages yet"));
+    assert_eq!(empty_state.children.len(), 2);
+    assert!(matches!(
+        &empty_state.children[0].children[0].kind,
+        NodeKind::Icon { name, .. } if name == "inbox"
+    ));
+
+    let loading = crate::node_compat::AgentTranscript::from_spec(
+        AgentTranscriptSpec::new(vec![TranscriptItem::Activity(TranscriptActivity {
+            id: "working".to_owned(),
+            label: "Working".to_owned(),
+            spinning: None,
+        })]),
+        &theme_provider,
+    )
+    .into_compat_node();
+    let loading_footer = &loading.children[0];
+    assert_eq!(loading_footer.children.len(), 2);
+    let loading_spinner = &loading_footer.children[0];
+    assert_eq!(loading_spinner.children.len(), 3);
+    assert!(loading_spinner.children.iter().all(|dot| {
+        dot.style.descriptor.layout.width == LayoutSizing::Fixed(4.0)
+            && dot.style.descriptor.layout.height == LayoutSizing::Fixed(4.0)
+            && dot.style.descriptor.background
+                == Some(theme_provider.resolve_color("color.text.secondary"))
+    }));
+
+    let error = crate::node_compat::AgentTranscript::from_spec(
+        AgentTranscriptSpec::new(vec![call("failed", ToolCallStatus::Error)]),
+        &theme_provider,
+    )
+    .into_compat_node();
+    assert_eq!(error.children[0].roles.get("status").map(String::as_str), Some("error"));
+    let content = crate::node_compat::AgentTranscript::from_spec(
+        AgentTranscriptSpec::new(vec![message(
+            "done",
+            TranscriptRole::Assistant,
+            "Complete",
+        )]),
+        &theme_provider,
+    )
+    .into_compat_node();
+    assert_eq!(content.children[0].roles.get("kind").map(String::as_str), Some("message"));
+    assert_eq!(
+        content.children[0].roles.get("status").map(String::as_str),
+        Some("complete")
+    );
 
     run_headless(|cx| {
         #[derive(Default)]
@@ -6702,9 +6743,11 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 620.0);
         let left_root = "agent-transcript:left";
         let right_root = "agent-transcript:right";
+        let left_user = "agent-transcript:left:block:message:same-message";
+        let right_user = "agent-transcript:right:block:message:same-message";
         let left_toggle = "tool-call-group:left:transcript-run:same-run:toggle:same-run";
         let right_toggle = "tool-call-group:right:transcript-run:same-run:toggle:same-run";
-        for id in [left_root, right_root, left_toggle, right_toggle] {
+        for id in [left_root, right_root, left_user, right_user, left_toggle, right_toggle] {
             assert!(
                 poodle_gpui_node_backend::bounds_for(id).is_some(),
                 "the IntoElement path must paint {id} through the GPUI backend"
@@ -6717,6 +6760,20 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         assert!(
             left_bounds.bottom() <= right_bounds.top(),
             "duplicate transcripts keep authored order without overlap"
+        );
+        assert!(
+            bounds_contain(
+                left_bounds,
+                poodle_gpui_node_backend::bounds_for(left_user).expect("left user Surface"),
+            ),
+            "left production Surface stays inside its transcript root"
+        );
+        assert!(
+            bounds_contain(
+                right_bounds,
+                poodle_gpui_node_backend::bounds_for(right_user).expect("right user Surface"),
+            ),
+            "right production Surface stays inside its transcript root"
         );
         assert!(
             bounds_contain(
@@ -6852,6 +6909,8 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
     struct MountedPostureFacts {
         empty_state: bool,
         empty_contained: bool,
+        empty_removed: bool,
+        loading_activity: bool,
         loading_spinner: bool,
         loading_label: bool,
         loading_contained: bool,
@@ -6892,18 +6951,25 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
 
         let spinner_id = "agent-transcript:dependencies:activity-spinner";
         let label_id = "agent-transcript:dependencies:activity-label";
+        let activity_bounds =
+            poodle_gpui_node_backend::bounds_for("agent-transcript:dependencies:activity");
         let spinner_bounds = poodle_gpui_node_backend::bounds_for(spinner_id);
         let label_bounds = poodle_gpui_node_backend::bounds_for(label_id);
         let channels = poodle_gpui_node_backend::take_probe_capture();
         let mut facts = mounted_result.lock().expect("mounted facts");
         facts.empty_state = empty_bounds.is_some();
         facts.empty_contained = empty_bounds.is_some_and(|bounds| bounds_contain(root_bounds, bounds));
+        facts.empty_removed = poodle_gpui_node_backend::bounds_for(empty_id).is_none();
+        facts.loading_activity = activity_bounds.is_some();
         facts.loading_spinner = spinner_bounds.is_some();
         facts.loading_label = label_bounds.is_some();
-        facts.loading_contained = spinner_bounds
+        facts.loading_contained = activity_bounds
+            .zip(spinner_bounds)
             .zip(label_bounds)
-            .is_some_and(|(spinner, label)| {
-                bounds_contain(root_bounds, spinner) && bounds_contain(root_bounds, label)
+            .is_some_and(|((activity, spinner), label)| {
+                bounds_contain(root_bounds, activity)
+                    && bounds_contain(activity, spinner)
+                    && bounds_contain(activity, label)
             });
         facts.dependency_channels = channels.contains(&"surface.channels.background")
             && channels.contains(&"content.text-icon.icon")
@@ -6930,10 +6996,14 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
 
     let mounted = mounted.lock().expect("mounted facts");
     let mut blockers = Vec::new();
-    if !mounted.empty_state || !mounted.empty_contained {
+    if !mounted.empty_state || !mounted.empty_contained || !mounted.empty_removed {
         blockers.push("empty posture did not mount the contained production EmptyState");
     }
-    if !mounted.loading_spinner || !mounted.loading_label || !mounted.loading_contained {
+    if !mounted.loading_activity
+        || !mounted.loading_spinner
+        || !mounted.loading_label
+        || !mounted.loading_contained
+    {
         blockers.push("loading posture did not mount the contained production Spinner and Text");
     }
     if !mounted.dependency_channels || !mounted.mounted {
@@ -6946,7 +7016,9 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
     {
         blockers.push("user AgentMessage lost its exact elevated fill or surface radius");
     }
-    if user_message.style.descriptor.shadow.is_some() {
+    if user_message.style.descriptor.shadow.is_some()
+        || !user_message.style.shadow_layers.is_empty()
+    {
         blockers.push("user AgentMessage retained Surface elevation shadow absent from its contract");
     }
     if user_message.style.descriptor.layout.direction != LayoutDirection::Row

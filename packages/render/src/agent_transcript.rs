@@ -10,18 +10,19 @@
 
 use std::sync::Arc;
 
-use poodle_headless::agent_transcript::TranscriptBlock;
-use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_headless::agent_transcript::{TranscriptBlock, TranscriptItem};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
-    AgentMessageSpec, AgentPlanRecordSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ButtonSpec,
-    ChangedFilesSpec, TextSpec, TextTone, ToolCallGroupSpec,
+    AgentMessageSpec, AgentPlanRecordSpec, AgentQuestionRecordSpec, AgentTranscriptSpec,
+    ButtonSpec, ChangedFilesSpec, ControlSize, EmptyStateSpec, SpinnerSize, SpinnerSpec,
+    SpinnerTone, SpinnerVariant, TextSpec, TextTone, ToolCallGroupSpec,
 };
 
 use crate::agent_message::agent_message;
 use crate::agent_question_record::agent_question_record;
 use crate::changed_files::{changed_files, ChangedFilesHandlers};
 use crate::context::RenderContext;
-use crate::presentation::rem_to_px;
+use crate::presentation::{rem_to_px, resolve_supporting_visual_size};
 use crate::tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 
 /// Build the renderer-owned jump-to-latest control.
@@ -113,30 +114,6 @@ pub fn agent_transcript_block_id(
     )
 }
 
-fn posture(spec: &AgentTranscriptSpec) -> &'static str {
-    use poodle_headless::agent_transcript::{ToolCallStatus, TranscriptItem};
-
-    if spec.items.is_empty() {
-        "empty"
-    } else if spec.items.iter().any(|item| {
-        matches!(
-            item,
-            TranscriptItem::ToolCall(call) if call.status == ToolCallStatus::Error
-        )
-    }) {
-        "error"
-    } else if spec.items.iter().any(|item| match item {
-        TranscriptItem::Activity(activity) => activity.spinning.unwrap_or(true),
-        TranscriptItem::Message(message) => message.is_streaming,
-        TranscriptItem::ToolCall(call) => call.status == ToolCallStatus::Running,
-        _ => false,
-    }) {
-        "loading"
-    } else {
-        "content"
-    }
-}
-
 pub fn agent_transcript(
     spec: &AgentTranscriptSpec,
     ctx: &RenderContext<'_>,
@@ -165,7 +142,6 @@ pub fn agent_transcript(
     // `Log` is the role for append-only output.
     root.a11y.role = Some(NodeRole::Log);
     root.a11y.label = Some(spec.aria_label.clone());
-    root.roles.insert("posture".to_owned(), posture(spec).to_owned());
     root.roles
         .insert("empty".to_owned(), spec.is_empty().to_string());
     root.roles.insert(
@@ -189,7 +165,17 @@ pub fn agent_transcript(
     };
 
     if spec.is_empty() {
-        return root.child(activity_text(spec.empty_label.clone()));
+        let mut empty = crate::empty_state::empty_state(
+            &EmptyStateSpec::new(spec.empty_label.clone())
+                .with_aria_label(spec.empty_label.clone())
+                .with_density(density),
+            ctx,
+        );
+        empty.runtime_id = Some(format!(
+            "{}:empty-state",
+            agent_transcript_root_id(handlers.instance_id.as_deref())
+        ));
+        return root.child(empty);
     }
 
     for block in spec.rendered_blocks() {
@@ -354,23 +340,45 @@ pub fn agent_transcript(
 
     // The activity footer sits outside the block flow so it stays under the
     // transcript rather than scrolling as a block of its own.
-    if let Some(label) = spec.activity_label() {
-        let mut activity = activity_text(label.to_string());
-        activity.runtime_id = Some(format!(
-            "{}:activity",
-            agent_transcript_root_id(handlers.instance_id.as_deref())
-        ));
-        activity.roles.insert("kind".to_owned(), "activity".to_owned());
-        activity.roles.insert(
-            "status".to_owned(),
-            if posture(spec) == "loading" {
-                "loading"
-            } else {
-                "terminal"
-            }
-            .to_owned(),
-        );
-        root = root.child(activity);
+    if let Some(activity) = spec.items.iter().rev().find_map(|item| match item {
+        TranscriptItem::Activity(activity) => Some(activity),
+        _ => None,
+    }) {
+        let root_id = agent_transcript_root_id(handlers.instance_id.as_deref());
+        let mut footer = Node::container();
+        footer.runtime_id = Some(format!("{root_id}:activity"));
+        footer.style.descriptor.layout.direction = LayoutDirection::Row;
+        footer.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        footer.style.descriptor.layout.spacing.gap = rem_to_px(0.5);
+        footer.style.descriptor.layout.spacing.margin.top = block_gap;
+        footer
+            .roles
+            .insert("kind".to_owned(), "activity".to_owned());
+
+        if activity.spinning.unwrap_or(true) {
+            let spinner_size = match resolve_supporting_visual_size(base_size) {
+                ControlSize::Xs => SpinnerSize::Xs,
+                ControlSize::Sm => SpinnerSize::Sm,
+                ControlSize::Md => SpinnerSize::Md,
+                ControlSize::Lg => SpinnerSize::Lg,
+                ControlSize::Xl => SpinnerSize::Xl,
+            };
+            let mut spinner = crate::spinner::spinner(
+                &SpinnerSpec::new()
+                    .with_variant(SpinnerVariant::Dots)
+                    .with_size(spinner_size)
+                    .with_tone(SpinnerTone::Muted)
+                    .with_density(density),
+                ctx,
+            );
+            spinner.runtime_id = Some(format!("{root_id}:activity-spinner"));
+            footer = footer.child(spinner);
+        }
+
+        let mut label = activity_text(activity.label.clone());
+        label.runtime_id = Some(format!("{root_id}:activity-label"));
+        footer = footer.child(label);
+        root = root.child(footer);
     }
 
     root

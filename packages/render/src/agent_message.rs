@@ -13,7 +13,7 @@
 
 use poodle_markdown::{parse_markdown, MdBlock, MdInline};
 use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node};
-use poodle_specs::{AgentMessageSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
+use poodle_specs::{AgentMessageSpec, PaddingScale, SurfaceBorder, SurfaceSpec};
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
@@ -211,14 +211,15 @@ pub fn agent_message(spec: &AgentMessageSpec, ctx: &RenderContext<'_>) -> Node {
     if spec.is_user() {
         let surface = ctx.theme().resolve_color(spec.user_surface_token());
         let radius = ctx.theme().resolve_radius(spec.radius_token());
+        // AgentMessage owns an elevated fill without elevation. Start from the
+        // production Surface shell that carries no shadow, then apply the
+        // message contract's exact fill, radius, and inset.
         let surface_spec = SurfaceSpec::new()
-            .with_tone(SurfaceTone::Elevated)
             .with_border(SurfaceBorder::None)
             .with_padding(PaddingScale::None);
         let mut bubble = crate::surface::surface(&surface_spec, ctx, vec![root]);
         {
             let s = &mut bubble.style;
-            s.descriptor.layout.direction = LayoutDirection::Column;
             s.fill_width = true;
             let pad = &mut s.descriptor.layout.spacing.padding;
             let inset = rem_to_px(spec.padding_inset_rem(density));
