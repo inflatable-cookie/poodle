@@ -182,7 +182,9 @@ impl PopoverSpec {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::Dimension;
+    use crate::types::{
+        Dimension, OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth,
+    };
 
     #[test]
     fn portable_width_bound_accepts_rem() {
@@ -195,5 +197,86 @@ mod tests {
     fn portable_width_bound_rejects_css_extensions() {
         let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("320px"));
         let _ = spec.effective_surface_min_width_rem();
+    }
+
+    #[test]
+    fn defaults_match_the_contract() {
+        // Contract §3: `open` null (uncontrolled), `defaultOpen` false,
+        // placement bottom-start, offset 8, outside dismissal on,
+        // first-focusable initial focus, no label, no block, enabled,
+        // content-driven surface width, contract default width bounds.
+        let spec = PopoverSpec::default();
+        assert_eq!(spec.open, None);
+        assert!(!spec.default_open);
+        assert_eq!(spec.placement, OverlayPlacement::BottomStart);
+        assert_eq!(spec.offset, 8.0);
+        assert!(spec.dismiss_on_outside_interact);
+        assert_eq!(spec.initial_focus, PopoverInitialFocus::FirstFocusable);
+        assert_eq!(spec.aria_label, None);
+        assert!(!spec.block);
+        assert!(!spec.disabled);
+        assert_eq!(spec.surface_width, PopoverSurfaceWidth::Content);
+        assert_eq!(spec.surface_min_width, None);
+        assert_eq!(spec.surface_max_width, None);
+    }
+
+    #[test]
+    fn builders_cover_the_public_prop_surface() {
+        let spec = PopoverSpec::new()
+            .with_open(false)
+            .with_default_open(true)
+            .with_placement(OverlayPlacement::TopEnd)
+            .with_offset(14.0)
+            .with_dismiss_on_outside_interact(false)
+            .with_initial_focus(PopoverInitialFocus::None)
+            .with_aria_label("Quick settings")
+            .with_block(true)
+            .with_disabled(true)
+            .with_surface_width(PopoverSurfaceWidth::Trigger);
+        assert_eq!(spec.open, Some(false));
+        assert!(spec.default_open);
+        assert_eq!(spec.placement, OverlayPlacement::TopEnd);
+        assert_eq!(spec.offset, 14.0);
+        assert!(!spec.dismiss_on_outside_interact);
+        assert_eq!(spec.initial_focus, PopoverInitialFocus::None);
+        assert_eq!(spec.aria_label.as_deref(), Some("Quick settings"));
+        assert!(spec.block);
+        assert!(spec.disabled);
+        assert_eq!(spec.surface_width, PopoverSurfaceWidth::Trigger);
+    }
+
+    #[test]
+    fn current_open_prefers_the_controlled_value() {
+        let uncontrolled = PopoverSpec::new().with_default_open(true);
+        assert!(uncontrolled.current_open());
+        let controlled_closed = PopoverSpec::new().with_default_open(true).with_open(false);
+        assert!(!controlled_closed.current_open());
+        let controlled_open = PopoverSpec::new().with_open(true);
+        assert!(controlled_open.current_open());
+    }
+
+    #[test]
+    fn surface_token_recipes_match_the_contract() {
+        // Contract §8: background = background-elevated; border = border-subtle
+        // at 74%; shadow = the overlay elevation recipe.
+        let spec = PopoverSpec::new();
+        assert_eq!(spec.surface_fill_token(), semantic::COLOR_BACKGROUND_ELEVATED);
+        assert_eq!(spec.surface_border_token(), semantic::COLOR_BORDER_SUBTLE);
+        assert_eq!(spec.surface_border_alpha(), 0.74);
+        assert_eq!(spec.shadow_token(), semantic::ELEVATION_OVERLAY);
+    }
+
+    #[test]
+    fn effective_width_bounds_fall_back_to_contract_rems() {
+        // Contract §7/§8: default surface min-width 14rem, max-width 24rem
+        // (the portable arm of `min(24rem, 90vw)`), both overridable.
+        let spec = PopoverSpec::new();
+        assert_eq!(spec.effective_surface_min_width_rem(), 14.0);
+        assert_eq!(spec.effective_surface_max_width_rem(), 24.0);
+        let overridden = PopoverSpec::new()
+            .with_surface_min_width(Dimension::new("20rem"))
+            .with_surface_max_width(Dimension::new("20rem"));
+        assert_eq!(overridden.effective_surface_min_width_rem(), 20.0);
+        assert_eq!(overridden.effective_surface_max_width_rem(), 20.0);
     }
 }
