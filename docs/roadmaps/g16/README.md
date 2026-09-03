@@ -102,13 +102,14 @@ stay maintained; backend admission is not part of the first card.
 65. [065 — Tabs native tooltip parity](065-tabs-native-tooltip-parity.md) — complete; merged in PR #172 with paired-value tooltip identity and paired 300ms lifecycle parity
 66. [066 — GPUI Node tooltip lifecycle runtime](066-gpui-node-tooltip-lifecycle-runtime.md) — complete; merged in PR #171 with a window-scoped 300ms lifecycle and production teardown
 67. [067 — Nucleus Icon and IconButton M1 receipts](067-nucleus-icon-icon-button-m1.md) — complete; merged in PR #173 with exact execution-backed M1 receipts
-68. [068 — Nucleus Text and Surface M1 receipts](068-nucleus-text-surface-m1.md) — ready; one styled-only mounted composite with separate exact receipts
+68. [068 — Nucleus Text and Surface M1 receipts](068-nucleus-text-surface-m1.md) — complete; merged in PR #174 with exact token, mounted-layout, and separate execution-backed M1 receipts
+69. [069 — Nucleus AppHeader M1 receipt](069-nucleus-app-header-m1.md) — ready; one production shell-header fixture over the proven Icon and Text prerequisites
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.067` are complete. `g16.068` is the next ready small Nucleus
+`g16.053`–`g16.068` are complete. `g16.069` is the next ready small Nucleus
 receipt child; later receipt cards remain serial on its exact native source
 identity. Release mutation remains
 separately gated.

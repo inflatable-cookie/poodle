@@ -1,6 +1,6 @@
 # g16.068 — Nucleus Text and Surface M1 Receipts
 
-Status: in-review
+Status: complete — merged in PR #174 at `a6b3a8e41`
 Date: 2026-09-03
 Card: `docs/roadmaps/g16/068-nucleus-text-surface-m1.md`
 Handoff: `/Users/tom/Dev/projects/poodle/docs/handoffs/20260903-031500-g16-068-nucleus-text-surface-receipts.md`
@@ -14,6 +14,7 @@ Branch: `feature/g16-068-nucleus-text-surface-receipts`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-068-nucleus-text-surface-receipts`
 Planning base: `91f039cd9` (`origin/main`)
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/174
+Merge commit: `a6b3a8e41`
 
 ## Outcome
 

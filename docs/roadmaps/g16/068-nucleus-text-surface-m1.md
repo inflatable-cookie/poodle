@@ -1,6 +1,6 @@
 # g16.068 — Nucleus Text And Surface M1 Receipts
 
-Status: in-review
+Status: complete — merged in PR #174 at `a6b3a8e41`
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`
