@@ -29,8 +29,9 @@ pub struct AgentPlanHandlers {
     pub on_revise: Option<Arc<dyn Fn() + Send + Sync>>,
     /// Fires when the plan is dismissed.
     pub on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
-    /// Stable native instance scope. Two pending plans would otherwise share
-    /// one backend focus handle per action.
+    /// Stable native instance scope for the root and each action. Two pending
+    /// plans would otherwise share backend identity and one focus handle per
+    /// action.
     pub instance_id: Option<String>,
 }
 

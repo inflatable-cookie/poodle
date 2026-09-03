@@ -11030,6 +11030,21 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
         "markdown heading stays visually distinct from its description"
     );
 
+    let action_row = &pending.children[1];
+    assert_eq!(action_row.children.len(), 3);
+    assert_eq!(
+        action_row
+            .children
+            .iter()
+            .map(|button| button.runtime_id.as_deref())
+            .collect::<Vec<_>>(),
+        [
+            Some("agent-plan:counterexample:accept"),
+            Some("agent-plan:counterexample:revise"),
+            Some("agent-plan:counterexample:dismiss"),
+        ],
+        "decision affordances keep their authored order"
+    );
     for (name, label, variant) in [
         ("accept", "Accept plan", "primary"),
         ("revise", "Revise", "secondary"),
@@ -11059,6 +11074,10 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
         .with_instance_id("settled")
         .into_compat_node();
     assert_eq!(settled.children.len(), 2, "body then settled status");
+    assert_eq!(
+        settled.roles.get("status").map(String::as_str),
+        Some("accepted")
+    );
     assert!(
         settled
             .find(&|node| node.a11y.role == Some(NodeRole::Button))
@@ -11071,6 +11090,10 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     assert!(badge.style.text_wrap, "status composes production Text");
     assert_eq!(badge.style.line_height, Some(1.5));
     assert_eq!(badge.style.text_weight, Some(500));
+    assert_eq!(
+        badge.roles.get("status").map(String::as_str),
+        Some("accepted")
+    );
 
     run_headless(|cx| {
         struct PlanHost {
@@ -11186,6 +11209,19 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
         assert!(
             left_bounds.origin.y + left_bounds.size.height <= right_bounds.origin.y,
             "duplicate plans keep authored vertical order without overlap"
+        );
+        let left_accept_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_accept).expect("left accept bounds");
+        let left_revise_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_revise).expect("left revise bounds");
+        let left_dismiss_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_dismiss).expect("left dismiss bounds");
+        assert!(
+            left_accept_bounds.origin.x + left_accept_bounds.size.width
+                <= left_revise_bounds.origin.x
+                && left_revise_bounds.origin.x + left_revise_bounds.size.width
+                    <= left_dismiss_bounds.origin.x,
+            "mounted decision affordances keep accept, revise, dismiss order"
         );
         for (name, action_id, root) in [
             ("left accept", &left_accept, left_bounds),
