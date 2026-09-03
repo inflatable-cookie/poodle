@@ -3,11 +3,46 @@
 //! Contract: `docs/contracts/components/detail-item.md`
 //! Ported from: `packages/jetstream/components/src/detail_item.rs`.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
-use poodle_specs::{DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec};
+use poodle_node::{CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, Node};
+use poodle_specs::{
+    DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec, TextSpec, TextWeight,
+};
 
+use crate::color::mix_srgb;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
+use crate::text;
+
+fn part(node: &mut Node, name: &str) {
+    node.roles.insert("part".to_owned(), name.to_owned());
+}
+
+/// Compose the production Text primitive with DetailItem-owned typography.
+fn detail_text(
+    content: &str,
+    part_name: &str,
+    color: poodle_node::ColorValue,
+    size: f32,
+    weight: TextWeight,
+    line_height: f32,
+    ctx: &RenderContext<'_>,
+) -> Node {
+    let mut node = text(&TextSpec::new(content).with_weight(weight), ctx);
+    part(&mut node, part_name);
+    node.roles
+        .insert("dependency".to_owned(), "text".to_owned());
+    node.style.descriptor.text_color = Some(color);
+    node.style.text_size = Some(size);
+    node.style.text_weight = Some(match weight {
+        TextWeight::Normal => 400,
+        TextWeight::Medium => 500,
+        TextWeight::Semibold => 600,
+        TextWeight::Bold => 700,
+    });
+    node.style.font_family = Some(FontFamily::Sans);
+    node.style.line_height = Some(line_height);
+    node
+}
 
 pub fn detail_item(spec: &DetailItemSpec, ctx: &RenderContext<'_>) -> Node {
     detail_item_with_slots(spec, ctx, None, None)
@@ -26,8 +61,8 @@ pub fn detail_item_with_slots(
     let value_color = theme.resolve_color(spec.value_color_token());
     let desc_color = theme.resolve_color(spec.description_color_token());
     let tertiary_color = theme.resolve_color(spec.stacked_label_color_token());
-    let bg = theme.resolve_color(spec.background_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let surface = theme.resolve_color(spec.background_token());
+    let radius = (theme.resolve_radius(spec.radius_token()) - rem_to_px(0.0625)).max(0.0);
 
     let label_font = theme.resolve_space(spec.label_size_token());
     let value_font = theme.resolve_space(spec.value_size_token());
@@ -55,16 +90,29 @@ pub fn detail_item_with_slots(
 
     // ── Label block ──
     let mut label_block = Node::container();
+    part(&mut label_block, "label-block");
     label_block.style.descriptor.layout.direction = LayoutDirection::Column;
     label_block.style.descriptor.layout.spacing.gap = row_gap;
-    let mut l = Node::text(&spec.label);
-    l.style.descriptor.text_color = Some(eff_label_color);
-    l.style.text_size = Some(eff_label_font);
+    let l = detail_text(
+        &spec.label,
+        "label",
+        eff_label_color,
+        eff_label_font,
+        TextWeight::Normal,
+        rem_to_px(1.0) / eff_label_font,
+        ctx,
+    );
     label_block = label_block.child(l);
     if let Some(ref desc) = spec.description {
-        let mut d = Node::text(desc);
-        d.style.descriptor.text_color = Some(desc_color);
-        d.style.text_size = Some(desc_font);
+        let d = detail_text(
+            desc,
+            "supporting",
+            desc_color,
+            desc_font,
+            TextWeight::Normal,
+            1.5,
+            ctx,
+        );
         label_block = label_block.child(d);
     }
     if !is_stacked {
@@ -75,32 +123,87 @@ pub fn detail_item_with_slots(
     // ── Value: slot > text > em-dash placeholder ──
     let value_block = if let Some(content) = value_content {
         let mut wrap = Node::container();
+        part(&mut wrap, "value");
+        wrap.roles
+            .insert("value-kind".to_owned(), "custom".to_owned());
         // Explicit Row (see switch.rs), preemptively — this slot path has no
         // old-tier caller in the fixtures but the same silent-Row shape.
         wrap.style.descriptor.layout.direction = LayoutDirection::Row;
         wrap.style.descriptor.layout.width = LayoutSizing::Grow;
+        wrap.style.min_width = Some(0.0);
         wrap.child(content)
     } else if let Some(ref value) = spec.value {
-        let mut v = Node::text(value);
-        v.style.descriptor.text_color = Some(value_color);
-        v.style.text_size = Some(eff_value_font);
-        v.style.text_weight = Some(value_weight);
+        let weight = if value_weight == 600 {
+            TextWeight::Semibold
+        } else {
+            TextWeight::Normal
+        };
+        let mut v = detail_text(
+            value,
+            "value",
+            value_color,
+            eff_value_font,
+            weight,
+            rem_to_px(1.25) / eff_value_font,
+            ctx,
+        );
+        v.roles.insert("value-kind".to_owned(), "text".to_owned());
         v.style.descriptor.layout.width = LayoutSizing::Grow;
+        v.style.min_width = Some(0.0);
         if spec.truncate_value {
             v.style.text_ellipsis = true;
+            v.style.text_wrap = false;
             v.style.no_wrap = true;
         }
         v
     } else {
-        let mut v = Node::text(&spec.empty_text);
-        v.style.descriptor.text_color = Some(desc_color);
-        v.style.text_size = Some(eff_value_font);
+        let weight = if value_weight == 600 {
+            TextWeight::Semibold
+        } else {
+            TextWeight::Normal
+        };
+        let mut v = detail_text(
+            &spec.empty_text,
+            "value",
+            desc_color,
+            eff_value_font,
+            weight,
+            rem_to_px(1.25) / eff_value_font,
+            ctx,
+        );
+        v.roles.insert("value-kind".to_owned(), "empty".to_owned());
         v.style.descriptor.layout.width = LayoutSizing::Grow;
+        v.style.min_width = Some(0.0);
         v
     };
 
     // ── Root ──
     let mut el = Node::container();
+    el.roles
+        .insert("component".to_owned(), "detail-item".to_owned());
+    el.roles.insert(
+        "layout".to_owned(),
+        if is_stacked { "stacked" } else { "inline" }.to_owned(),
+    );
+    el.roles.insert(
+        "presentation".to_owned(),
+        if is_surface { "surface" } else { "simple" }.to_owned(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "span".to_owned(),
+        match spec.span {
+            Some(DetailItemSpan::Full) => "full",
+            Some(DetailItemSpan::Half) => "half",
+            None => "none",
+        }
+        .to_owned(),
+    );
+    el.roles
+        .insert("truncate".to_owned(), spec.truncate_value.to_string());
     {
         let s = &mut el.style;
         if is_stacked {
@@ -115,7 +218,7 @@ pub fn detail_item_with_slots(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
         }
         if is_surface {
-            s.descriptor.background = Some(bg);
+            s.descriptor.background = Some(mix_srgb(surface, value_color, 0.93));
             s.descriptor.corner_radii.top_left = radius;
             s.descriptor.corner_radii.top_right = radius;
             s.descriptor.corner_radii.bottom_right = radius;
@@ -128,19 +231,43 @@ pub fn detail_item_with_slots(
         if matches!(spec.span, Some(DetailItemSpan::Full)) {
             s.self_stretch = true;
         }
+        if matches!(spec.span, Some(DetailItemSpan::Half)) {
+            s.width_pct = Some(0.5);
+        } else {
+            s.fill_width = true;
+        }
     }
 
-    el = el.child(label_block).child(value_block);
-
-    if let Some(action_el) = action {
+    let action = action.map(|action_el| {
         let mut slot = Node::container();
+        part(&mut slot, "action");
         {
             let s = &mut slot.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.flex_shrink_zero = true;
         }
-        el = el.child(slot.child(action_el));
+        slot.child(action_el)
+    });
+
+    el = el.child(label_block);
+    if is_surface_stacked {
+        let mut content = Node::container();
+        part(&mut content, "content");
+        content.style.descriptor.layout.direction = LayoutDirection::Row;
+        content.style.descriptor.layout.spacing.gap = row_gap;
+        content.style.descriptor.layout.width = LayoutSizing::Grow;
+        content.style.min_width = Some(0.0);
+        content = content.child(value_block);
+        if let Some(action) = action {
+            content = content.child(action);
+        }
+        el = el.child(content);
+    } else {
+        el = el.child(value_block);
+        if let Some(action) = action {
+            el = el.child(action);
+        }
     }
 
     if let Some(label) = spec.aria_label.as_deref() {

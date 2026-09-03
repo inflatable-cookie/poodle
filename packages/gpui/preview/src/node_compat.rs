@@ -7592,6 +7592,7 @@ fn placement_index(placement: OverlayPlacement) -> usize {
 pub(crate) struct DetailItem {
     spec: DetailItemSpec,
     theme: GpuiThemeProvider,
+    instance_id: Option<String>,
     value_content: Option<poodle_node::Node>,
     action: Option<poodle_node::Node>,
 }
@@ -7601,9 +7602,15 @@ impl DetailItem {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: None,
             value_content: None,
             action: None,
         }
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
     }
 
     pub(crate) fn with_value_content(mut self, content: impl IntoCompatNode) -> Self {
@@ -7617,13 +7624,37 @@ impl DetailItem {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::detail_item_with_slots(
+        let mut node = poodle_render::detail_item_with_slots(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.value_content,
             self.action,
-        )
+        );
+        if let Some(instance_id) = self.instance_id {
+            stamp_detail_item_identity(&mut node, &instance_id);
+        }
+        node
     }
+}
+
+fn stamp_detail_item_identity(node: &mut poodle_node::Node, instance_id: &str) {
+    fn stamp(node: &mut poodle_node::Node, id: String) {
+        node.id = Some(id.clone());
+        node.runtime_id = Some(id);
+    }
+
+    fn stamp_parts(node: &mut poodle_node::Node, root_id: &str) {
+        if let Some(part) = node.roles.get("part").cloned() {
+            stamp(node, format!("{root_id}:{part}"));
+        }
+        for child in &mut node.children {
+            stamp_parts(child, root_id);
+        }
+    }
+
+    let root_id = format!("detail-item:{instance_id}");
+    stamp(node, root_id.clone());
+    stamp_parts(node, &root_id);
 }
 
 impl IntoCompatNode for DetailItem {
