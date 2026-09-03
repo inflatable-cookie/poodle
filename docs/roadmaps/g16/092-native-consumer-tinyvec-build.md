@@ -27,6 +27,13 @@ an alloc-only configuration and fails because the crate cannot resolve the
   broaden package/public API behavior.
 - Keep component implementations, Nucleus receipts/manifest/ledger, releases,
   workflows, and sibling repositories out of scope.
+- Because `packages/gpui/preview/Cargo.lock` and the receipt emitter's compiled
+  lock digest are evidence identity, finish in two commits: C1 contains the
+  dependency repair plus updated compiled lock digest; run the full native
+  receipt command from C1. C2 may change only the manifest, the complete
+  receipt cohort, generated ledger, this card, and one execution log to record
+  the freshly observed C1 identity. Carried-forward or hash-only receipts are
+  invalid.
 
 ## Review Oracle
 
@@ -39,9 +46,10 @@ an alloc-only configuration and fails because the crate cannot resolve the
 
 ## Validation
 
-Run the focused fresh-consumer script, `effigy ci:native`, the relevant Rust
-board, `effigy docs:check`, and `git diff --check origin/main...HEAD`. Never run
-windowed/native-visual or release selectors.
+Run the focused fresh-consumer script, `effigy regressions:native` from C1,
+receipt and ledger validation, `effigy ci:native`, `effigy ci:web`, the
+relevant Rust board, `effigy docs:check`, and `git diff --check
+origin/main...HEAD`. Never run windowed/native-visual or release selectors.
 
 ## Continuation
 

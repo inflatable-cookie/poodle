@@ -21,6 +21,8 @@ launcher-provided worktree. Read AGENTS, Northstar, repo Effigy, the ToastHost
 review record, the consumer script, and relevant manifests/locks. Reproduce the
 clean Rust 1.95 tinyvec failure, commit a biting counterexample before the
 smallest supported dependency/feature repair, run the specified gates, push a
-PR, and stop for orchestrator review. Do not edit component source, shared
-Nucleus evidence, workflows/releases, sibling repositories, or run
-windowed/native-visual selectors. Never merge.
+PR, and stop for orchestrator review. The card's exact two-commit evidence
+exception is authorized: update the compiled lock digest in C1, emit the full
+cohort from C1, then commit only its manifest/receipts/ledger/card/log evidence
+in C2. Do not edit component source, workflows/releases, sibling repositories,
+or run windowed/native-visual selectors. Never merge.
