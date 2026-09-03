@@ -46,8 +46,9 @@ use poodle_render::{
 use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, ControlDensity,
     ControlSize, FaderSpec, HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation,
-    PopoverSpec, RangeSliderSpec, RatingSpec, SelectSpec, SkeletonSpec, SliderAppearance,
-    SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
+    PopoverSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec, SelectSpec, SkeletonSpec,
+    SliderAppearance, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
+    TabVariant,
     TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
 };
@@ -13752,13 +13753,6 @@ fn radio_option_id(scope: &str, value: &str) -> String {
     format!("radio:{scope}:option:{value}")
 }
 
-fn radio_selected(node: &Node, scope: &str, value: &str) -> bool {
-    let id = radio_option_id(scope, value);
-    node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
-        .and_then(|n| n.a11y.selected)
-        .unwrap_or(false)
-}
-
 fn selection_radio_options() -> Vec<poodle_specs::ChoiceOption> {
     vec![
         poodle_specs::ChoiceOption::new("free", "Free"),
@@ -13767,169 +13761,919 @@ fn selection_radio_options() -> Vec<poodle_specs::ChoiceOption> {
     ]
 }
 
-/// RadioGroup exclusive selection, orientation-aware arrows, wrap, disabled
-/// skip, disabled-group inertia, and independent instance focus identity
-/// through the mounted tree.
+fn radio_plan_options() -> Vec<poodle_specs::ChoiceOption> {
+    vec![
+        poodle_specs::ChoiceOption::new("free", "Free"),
+        poodle_specs::ChoiceOption::new("pro", "Pro"),
+        poodle_specs::ChoiceOption::new("enterprise", "Enterprise"),
+    ]
+}
+
+/// Host-owned RadioGroup state for the g16.078 M1 fixture. Duplicate-content
+/// siblings keep caller-scoped specs and callback streams.
+#[derive(Clone)]
+struct NucleusRadioHost {
+    spec: RadioGroupSpec,
+    values: Vec<String>,
+}
+
+fn nucleus_radio_host(spec: RadioGroupSpec) -> Arc<Mutex<NucleusRadioHost>> {
+    Arc::new(Mutex::new(NucleusRadioHost {
+        spec,
+        values: Vec::new(),
+    }))
+}
+
+fn nucleus_radio_element(
+    host: &Arc<Mutex<NucleusRadioHost>>,
+    scope: &'static str,
+) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    let spec = host.lock().expect("host lock").spec.clone();
+    let change = Arc::clone(host);
+    node_compat::RadioGroup::from_spec(spec, &theme(), scope)
+        .on_change(Arc::new(move |next: &str| {
+            let mut state = change.lock().expect("host lock");
+            state.spec.value = Some(next.to_string());
+            state.values.push(next.to_string());
+        }))
+        .into_element()
+}
+
+fn nucleus_radio_pair(
+    left: &Arc<Mutex<NucleusRadioHost>>,
+    right: &Arc<Mutex<NucleusRadioHost>>,
+) -> gpui::AnyElement {
+    use gpui::{IntoElement, ParentElement, Styled};
+    gpui::div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(nucleus_radio_element(left, "left"))
+        .child(nucleus_radio_element(right, "right"))
+        .into_any_element()
+}
+
+fn radio_find_option<'a>(node: &'a Node, value: &str) -> &'a Node {
+    let id = format!("radio:{value}");
+    node.find(&|n| n.id.as_deref() == Some(id.as_str()))
+        .unwrap_or_else(|| panic!("option row {value:?} exists"))
+}
+
+fn radio_indicator<'a>(node: &'a Node, value: &str) -> &'a Node {
+    &radio_find_option(node, value).children[0]
+}
+
+fn radio_label<'a>(node: &'a Node, value: &str) -> &'a Node {
+    &radio_find_option(node, value).children[1]
+}
+
+/// g16.003 / g16.078. RadioGroup exclusive selection, orientation-aware
+/// arrows, wrap, disabled skip, same-value and group-disabled inertia,
+/// caller-scoped duplicate-instance focus identity, and controlled host
+/// rebuilds through the production adapter `IntoElement` path. Emits the
+/// terminal M1 execution receipt.
 #[test]
 fn radio_group_exclusive_focus_identity_and_disabled_paths() {
-    use poodle_specs::{ChoiceOption, Orientation, RadioGroupSpec};
+    use poodle_node::{
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
+        NodeKind, NodeRole, NodeToggled,
+    };
+    use poodle_render::color::hex_color;
+    use poodle_render::presentation::{rem_to_px, size_font_rem};
+    use poodle_specs::{ControlDensity, ControlSize, Orientation};
 
-    run_headless(|cx| {
-        fn build(
-            value: &str,
-            mounted: Arc<Mutex<Node>>,
-            payloads: Arc<Mutex<Vec<String>>>,
-        ) -> Node {
-            let mount = Arc::clone(&mounted);
-            let sink = Arc::clone(&payloads);
-            let mut spec = RadioGroupSpec::new(selection_radio_options());
-            spec.value = Some(value.to_string());
-            let mut node = poodle_render::radio_group(
-                &spec,
-                &RenderContext::new(&theme()),
-                RadioGroupHandlers::new("plan").on_change(Arc::new(move |next: &str| {
-                    sink.lock().unwrap().push(next.to_string());
-                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
-                })),
+    // ── 0. Production spec/token structure proof (unmounted) ───────────────
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+
+        let accent = ctx.theme().resolve_color("color.accent.base");
+        let border_default = ctx.theme().resolve_color("color.border.default");
+        let surface = ctx.theme().resolve_color("color.background.surface");
+        let text_primary = ctx.theme().resolve_color("color.text.primary");
+        let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
+        let ring_width = ctx.theme().resolve_border_width("border.width.focus");
+        let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
+        let stack_sm = ctx.theme().resolve_space("space.stack.sm");
+        let stack_lg = ctx.theme().resolve_space("space.stack.lg");
+        let inline_sm = ctx.theme().resolve_space("space.inline.sm");
+        let inline_md = ctx.theme().resolve_space("space.inline.md");
+        let icon_md = ctx.theme().resolve_space("size.icon.md");
+        // Contract §8 md geometry: indicator 1.125rem, dot 0.5rem, border
+        // 0.0625rem, ring 2px at a 0.125rem offset; md label ladder font.
+        let indicator_md = rem_to_px(1.125);
+        let dot_md = rem_to_px(0.5);
+        let border_px = rem_to_px(0.0625);
+        let ring_offset = rem_to_px(0.125);
+        let font_md = rem_to_px(size_font_rem(ControlSize::Md));
+        assert_eq!(icon_md, 16.0, "the md icon token anchors the ladder");
+        assert_eq!(indicator_md, 18.0);
+        assert_eq!(dot_md, 8.0);
+        assert_eq!(border_px, 1.0);
+        assert_eq!(ring_width, 2.0);
+        assert_eq!(font_md, rem_to_px(0.8125));
+
+        let mut spec = RadioGroupSpec::new(radio_plan_options()).with_value("pro");
+        spec.aria_label = Some("Plan".to_string());
+        spec.name = Some("form-plan".to_string());
+        let node = poodle_render::radio_group(
+            &spec,
+            &ctx,
+            RadioGroupHandlers::new("plan").on_change(Arc::new(|_: &str| {})),
+        );
+
+        assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
+        assert_eq!(node.a11y.label.as_deref(), Some("Plan"));
+        assert_eq!(node.a11y.orientation.as_deref(), Some("vertical"));
+        assert_eq!(
+            node.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(node.style.descriptor.layout.spacing.gap, stack_sm);
+        assert_eq!(node.children.len(), 3);
+        for (index, value) in ["free", "pro", "enterprise"].iter().enumerate() {
+            assert_eq!(
+                node.children[index].id.as_deref(),
+                Some(format!("radio:{value}").as_str()),
+                "options render in authored order"
             );
-            node.id = Some(FIXTURE_ID.to_owned());
-            node
         }
 
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build("free", Arc::clone(&mounted), Arc::clone(&payloads));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let free = radio_find_option(&node, "free");
+        assert_eq!(free.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(free.a11y.label.as_deref(), Some("Free"));
+        assert_eq!(free.a11y.selected, Some(false));
+        assert_eq!(free.a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(free.a11y.tab_index, Some(-1));
+        assert_eq!(
+            free.runtime_id.as_deref(),
+            Some("radio:plan:option:free"),
+            "runtime identity is caller-scoped, never the web form name"
+        );
+        assert!(
+            free.runtime_id.as_deref().is_none_or(|id| !id.contains("form-plan")),
+            "the web form name must not drive native identity"
+        );
+        assert!(free.interaction.focusable);
+        assert!(!free.interaction.disabled);
+        assert!(free.interaction.on_activate.is_some());
+        assert!(free.interaction.on_key.is_some());
+        assert_eq!(free.style.descriptor.cursor, CursorHint::Pointer);
+        assert_eq!(
+            free.style.focus_ring,
+            Some(FocusRing {
+                color: focus_ring,
+                width: ring_width,
+                offset: ring_offset,
+            })
+        );
+        assert_eq!(free.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(
+            free.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(free.style.descriptor.layout.spacing.gap, inline_sm);
+        assert_eq!(free.children.len(), 2);
+
+        let free_indicator = &free.children[0];
+        assert_eq!(
+            free_indicator.style.descriptor.layout.width,
+            LayoutSizing::Fixed(indicator_md)
+        );
+        assert_eq!(
+            free_indicator.style.descriptor.layout.height,
+            LayoutSizing::Fixed(indicator_md)
+        );
+        assert_eq!(free_indicator.style.descriptor.corner_radii.top_left, indicator_md * 0.5);
+        assert_eq!(
+            free_indicator.style.descriptor.corner_radii.bottom_right,
+            indicator_md * 0.5
+        );
+        assert_eq!(free_indicator.style.descriptor.background, Some(surface));
+        assert_eq!(free_indicator.style.descriptor.border.width, border_px);
+        assert_eq!(free_indicator.style.descriptor.border.color, border_default);
+        assert_eq!(
+            free_indicator.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            free_indicator.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(
+            free_indicator.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center
+        );
+        assert!(
+            free_indicator.children.is_empty(),
+            "an unselected option paints no dot"
+        );
+
+        let free_label = &free.children[1];
+        assert!(
+            matches!(&free_label.kind, NodeKind::Text { content } if content == "Free"),
+            "the visible option name is the row's text label"
+        );
+        assert_eq!(free_label.style.text_size, Some(font_md));
+        assert_eq!(
+            free_label.style.descriptor.text_color,
+            Some(text_primary)
+        );
+
+        let pro = radio_find_option(&node, "pro");
+        assert_eq!(pro.a11y.selected, Some(true));
+        assert_eq!(pro.a11y.toggled, Some(NodeToggled::True));
+        assert_eq!(pro.a11y.tab_index, Some(0), "the selected option is the single tab stop");
+        assert!(
+            pro.interaction.on_activate.is_none(),
+            "re-picking the selected option is inert"
+        );
+        assert!(pro.interaction.on_key.is_some());
+        let pro_indicator = radio_indicator(&node, "pro");
+        assert_eq!(pro_indicator.style.descriptor.border.color, accent);
+        assert_eq!(pro_indicator.children.len(), 1, "the selected option paints one dot");
+        let pro_dot = &pro_indicator.children[0];
+        assert_eq!(
+            pro_dot.style.descriptor.layout.width,
+            LayoutSizing::Fixed(dot_md)
+        );
+        assert_eq!(
+            pro_dot.style.descriptor.layout.height,
+            LayoutSizing::Fixed(dot_md)
+        );
+        assert_eq!(pro_dot.style.descriptor.corner_radii.top_left, dot_md * 0.5);
+        assert_eq!(pro_dot.style.descriptor.background, Some(accent));
+
+        let enterprise = radio_find_option(&node, "enterprise");
+        assert_eq!(enterprise.a11y.tab_index, Some(-1));
+        assert_eq!(
+            enterprise.runtime_id.as_deref(),
+            Some("radio:plan:option:enterprise")
+        );
+        assert!(enterprise.interaction.on_activate.is_some());
+        assert_eq!(enterprise.a11y.selected, Some(false));
+
+        // A caller-supplied custom color wins over the accent for the
+        // selected indicator border and dot only.
+        let custom = hex_color("#14b8a6").expect("custom hex parses");
+        let custom_spec = RadioGroupSpec::new(radio_plan_options())
+            .with_value("pro")
+            .with_selected_color("#14b8a6");
+        let custom_node =
+            poodle_render::radio_group(&custom_spec, &ctx, RadioGroupHandlers::new("custom"));
+        let custom_indicator = radio_indicator(&custom_node, "pro");
+        assert_eq!(custom_indicator.style.descriptor.border.color, custom);
+        assert_eq!(
+            custom_indicator.children[0].style.descriptor.background,
+            Some(custom)
+        );
+        assert_eq!(
+            radio_indicator(&custom_node, "free").style.descriptor.border.color,
+            border_default,
+            "unselected options never take the selected color"
+        );
+
+        // An option-level accessible-name override wins over the label.
+        let mut named_options = radio_plan_options();
+        named_options[2].aria_label = Some("Enterprise tier".to_string());
+        let named_node = poodle_render::radio_group(
+            &RadioGroupSpec::new(named_options).with_value("free"),
+            &ctx,
+            RadioGroupHandlers::new("named"),
+        );
+        assert_eq!(
+            radio_find_option(&named_node, "enterprise").a11y.label.as_deref(),
+            Some("Enterprise tier")
+        );
+        assert!(
+            matches!(
+                &radio_label(&named_node, "enterprise").kind,
+                NodeKind::Text { content } if content == "Enterprise"
+            ),
+            "the override never replaces the visible label"
+        );
+
+        // Unknown values fall back to the first enabled option as the stop.
+        let unknown = poodle_render::radio_group(
+            &RadioGroupSpec::new(radio_plan_options()).with_value("missing"),
+            &ctx,
+            RadioGroupHandlers::new("unknown"),
+        );
+        assert_eq!(radio_find_option(&unknown, "free").a11y.tab_index, Some(0));
+
+        // A disabled selected option falls back to the first enabled option.
+        let disabled_selected = poodle_render::radio_group(
+            &RadioGroupSpec::new(selection_radio_options()).with_value("pro"),
+            &ctx,
+            RadioGroupHandlers::new("disabled-selected"),
+        );
+        assert_eq!(
+            radio_find_option(&disabled_selected, "free").a11y.tab_index,
+            Some(0)
+        );
+
+        // Disabled option structure: dimmed, unfocusable, no ring or wiring.
+        let mixed = poodle_render::radio_group(
+            &RadioGroupSpec::new(selection_radio_options()).with_value("free"),
+            &ctx,
+            RadioGroupHandlers::new("mixed"),
+        );
+        let mixed_pro = radio_find_option(&mixed, "pro");
+        assert!(mixed_pro.interaction.disabled);
+        assert!(!mixed_pro.interaction.focusable);
+        assert_eq!(mixed_pro.a11y.tab_index, Some(-1));
+        assert_eq!(mixed_pro.a11y.selected, Some(false));
+        assert!(mixed_pro.style.focus_ring.is_none());
+        assert!(mixed_pro.interaction.on_activate.is_none());
+        assert!(mixed_pro.interaction.on_key.is_none());
+        assert_eq!(
+            mixed_pro.style.descriptor.opacity, disabled_opacity,
+            "the disabled option dims with state.opacity.disabled"
+        );
+        assert_eq!(mixed_pro.style.descriptor.cursor, CursorHint::Default);
+        assert_eq!(
+            radio_find_option(&mixed, "enterprise").style.descriptor.opacity,
+            1.0,
+            "only the disabled option dims"
+        );
+
+        // Disabled group: root dims once; every row is inert and unstyled.
+        let locked = poodle_render::radio_group(
+            &RadioGroupSpec {
+                is_disabled: true,
+                ..RadioGroupSpec::new(radio_plan_options()).with_value("pro")
+            },
+            &ctx,
+            RadioGroupHandlers::new("locked"),
+        );
+        assert_eq!(
+            locked.style.descriptor.opacity, disabled_opacity,
+            "a disabled group dims at the root"
+        );
+        for value in ["free", "pro", "enterprise"] {
+            let row = radio_find_option(&locked, value);
+            assert!(row.interaction.disabled, "{value}");
+            assert!(!row.interaction.focusable, "{value}");
+            assert_eq!(row.a11y.tab_index, Some(-1), "{value}");
+            assert!(row.style.focus_ring.is_none(), "{value}");
+            assert!(row.interaction.on_activate.is_none(), "{value}");
+            assert!(row.interaction.on_key.is_none(), "{value}");
+            assert_eq!(
+                row.style.descriptor.opacity, 1.0,
+                "group dimming is one root opacity, not per-row {value}"
+            );
+        }
+
+        // Orientation flips layout direction, gap, and the a11y orientation.
+        let mut horizontal = RadioGroupSpec::new(radio_plan_options())
+            .with_value("pro")
+            .with_orientation(Orientation::Horizontal);
+        horizontal.aria_label = Some("Plan size".to_string());
+        let horizontal_node = poodle_render::radio_group(
+            &horizontal,
+            &ctx,
+            RadioGroupHandlers::new("size"),
+        );
+        assert_eq!(
+            horizontal_node.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            horizontal_node.style.descriptor.layout.spacing.gap,
+            inline_md,
+            "horizontal gap is space.inline.md"
+        );
+        assert_eq!(
+            horizontal_node.a11y.orientation.as_deref(),
+            Some("horizontal")
+        );
+        assert_eq!(
+            horizontal_node.a11y.label.as_deref(),
+            Some("Plan size")
+        );
+
+        // Density overrides the orientation gap on the group root.
+        let comfortable = poodle_render::radio_group(
+            &RadioGroupSpec::new(radio_plan_options())
+                .with_value("free")
+                .with_density(ControlDensity::Comfortable),
+            &ctx,
+            RadioGroupHandlers::new("comfortable"),
+        );
+        assert_eq!(
+            comfortable.style.descriptor.layout.spacing.gap,
+            stack_lg,
+            "comfortable density resolves space.stack.lg"
+        );
+    }
+
+    // ── 1. Controlled vertical mount through the production adapter ───────
+    run_headless(|cx| {
+        let host = nucleus_radio_host(
+            RadioGroupSpec::new(selection_radio_options()).with_value("free"),
+        );
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || nucleus_radio_element(&host, "plan"))
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 360.0, 260.0);
 
         let free = radio_option_id("plan", "free");
         let pro = radio_option_id("plan", "pro");
         let enterprise = radio_option_id("plan", "enterprise");
         driver.wait_for_focus_handle(&free);
-        driver.pointer_activate_id(&enterprise);
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise"]);
-        assert!(radio_selected(
-            &mounted.lock().unwrap(),
-            "plan",
-            "enterprise"
-        ));
+        driver.wait_for_focus_handle(&enterprise);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&pro).is_none(),
+            "a disabled option registers no focus handle"
+        );
 
+        // Positive bounds, vertical stacking order, and containment inside
+        // the group root (the adapter carries the root identity).
+        let plan_bounds =
+            poodle_gpui_node_backend::bounds_for("plan").expect("group root bounds");
+        assert!(plan_bounds.size.width > px(0.0) && plan_bounds.size.height > px(0.0));
+        let free_bounds = poodle_gpui_node_backend::bounds_for(&free).expect("free bounds");
+        let pro_bounds = poodle_gpui_node_backend::bounds_for(&pro).expect("pro bounds");
+        let enterprise_bounds =
+            poodle_gpui_node_backend::bounds_for(&enterprise).expect("enterprise bounds");
+        for (name, bounds) in [
+            ("free", free_bounds),
+            ("pro", pro_bounds),
+            ("enterprise", enterprise_bounds),
+        ] {
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "mounted {name} row has positive bounds"
+            );
+            assert!(
+                bounds.origin.x >= plan_bounds.origin.x
+                    && bounds.origin.x + bounds.size.width
+                        <= plan_bounds.origin.x + plan_bounds.size.width
+                    && bounds.origin.y >= plan_bounds.origin.y
+                    && bounds.origin.y + bounds.size.height
+                        <= plan_bounds.origin.y + plan_bounds.size.height,
+                "mounted {name} row stays contained in the group root"
+            );
+        }
+        assert!(
+            free_bounds.origin.y + free_bounds.size.height <= pro_bounds.origin.y
+                && pro_bounds.origin.y + pro_bounds.size.height <= enterprise_bounds.origin.y,
+            "vertical rows stack in authored order"
+        );
+
+        // Pointer selection through the real hit path with host rebuild.
+        driver.pointer_activate_id(&enterprise);
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.values.as_slice(), ["enterprise"]);
+            assert_eq!(host.spec.current_value(), Some("enterprise"));
+        }
         driver.pointer_activate_id(&enterprise);
         assert_eq!(
-            payloads.lock().unwrap().as_slice(),
+            host.lock().expect("host lock").values.as_slice(),
             ["enterprise"],
-            "same-value selection is inert"
+            "same-value pointer selection is inert"
         );
         driver.pointer_activate_id(&pro);
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise"]);
+        assert_eq!(
+            host.lock().expect("host lock").values.as_slice(),
+            ["enterprise"],
+            "pointer selection on the disabled option is inert"
+        );
 
-        driver.wait_for_focus_handle(&enterprise);
+        // Painted activation wiring follows the controlled rebuild: the row
+        // that the host now reports selected is inert under Space, and an
+        // unselected row still activates.
         driver.focus_element(&enterprise);
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            host.lock().expect("host lock").values.as_slice(),
+            ["enterprise"],
+            "Space on the mounted selected row is inert"
+        );
+        driver.focus_element(&free);
+        driver.dispatch_key_raw("space");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.values.as_slice(), ["enterprise", "free"]);
+            assert_eq!(host.spec.current_value(), Some("free"));
+        }
+
+        // Arrow navigation skips the disabled option and wraps; the cross
+        // axis stays inert.
+        driver.focus_element(&free);
         driver.dispatch_key_raw("right");
         assert_eq!(
-            payloads.lock().unwrap().as_slice(),
-            ["enterprise"],
-            "unrelated-axis arrows are inert"
+            host.lock().expect("host lock").values.as_slice(),
+            ["enterprise", "free"],
+            "unrelated-axis arrows are inert on a vertical group"
         );
         driver.dispatch_key_raw("down");
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise", "free"]);
-        assert!(radio_selected(&mounted.lock().unwrap(), "plan", "free"));
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.values.as_slice(), ["enterprise", "free", "enterprise"]);
+            assert_eq!(host.spec.current_value(), Some("enterprise"));
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&enterprise),
+            Some(true),
+            "ArrowDown skips the disabled row and lands on the next enabled option"
+        );
+        driver.dispatch_key_raw("down");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.values.as_slice(),
+                ["enterprise", "free", "enterprise", "free"],
+                "down from the last enabled option wraps to the first"
+            );
+        }
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&free), Some(true));
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            host.lock().expect("host lock").values.as_slice(),
+            ["enterprise", "free", "enterprise", "free", "enterprise"],
+            "up from the first enabled option wraps to the last"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&enterprise),
+            Some(true)
+        );
+
+        // Home/End jump to the first/last enabled option.
+        driver.focus_element(&free);
+        driver.dispatch_key_raw("end");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.spec.current_value(),
+                Some("enterprise"),
+                "End jumps to the last enabled option, skipping the disabled row"
+            );
+            assert_eq!(host.values.len(), 6);
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&enterprise),
+            Some(true)
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            host.lock().expect("host lock").values.len(),
+            6,
+            "End on the last enabled option is inert"
+        );
+        driver.dispatch_key_raw("home");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.spec.current_value(),
+                Some("free"),
+                "Home jumps to the first enabled option"
+            );
+            assert_eq!(host.values.len(), 7);
+        }
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&free), Some(true));
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            host.lock().expect("host lock").values.len(),
+            7,
+            "Home on the first enabled option is inert"
+        );
+
+        // Focus retention across further host rebuilds.
+        driver.draw_frame();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&free),
+            Some(true),
+            "roving focus survives controlled rebuilds"
+        );
     });
 
+    // ── 2. Horizontal mount: axis-exact arrows with wrap ───────────────────
     run_headless(|cx| {
-        fn build(
-            value: &str,
-            mounted: Arc<Mutex<Node>>,
-            payloads: Arc<Mutex<Vec<String>>>,
-        ) -> Node {
-            let mount = Arc::clone(&mounted);
-            let sink = Arc::clone(&payloads);
-            let spec = RadioGroupSpec::new(vec![
+        let host = nucleus_radio_host(
+            RadioGroupSpec::new(vec![
                 ChoiceOption::new("sm", "Small"),
                 ChoiceOption::new("md", "Medium"),
                 ChoiceOption::new("lg", "Large"),
             ])
-            .with_value(value)
-            .with_orientation(Orientation::Horizontal);
-            let mut node = poodle_render::radio_group(
-                &spec,
-                &RenderContext::new(&theme()),
-                RadioGroupHandlers::new("size").on_change(Arc::new(move |next: &str| {
-                    sink.lock().unwrap().push(next.to_string());
-                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
-                })),
-            );
-            node.id = Some(FIXTURE_ID.to_owned());
-            node
-        }
+            .with_value("lg")
+            .with_orientation(Orientation::Horizontal),
+        );
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || nucleus_radio_element(&host, "size"))
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 140.0);
 
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build("lg", Arc::clone(&mounted), Arc::clone(&payloads));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
-        let lg = radio_option_id("size", "lg");
         let sm = radio_option_id("size", "sm");
-        driver.wait_for_focus_handle(&lg);
+        let md = radio_option_id("size", "md");
+        let lg = radio_option_id("size", "lg");
+        for id in [&sm, &md, &lg] {
+            driver.wait_for_focus_handle(id);
+        }
+        let size_bounds =
+            poodle_gpui_node_backend::bounds_for("size").expect("group root bounds");
+        let sm_bounds = poodle_gpui_node_backend::bounds_for(&sm).expect("sm bounds");
+        let md_bounds = poodle_gpui_node_backend::bounds_for(&md).expect("md bounds");
+        let lg_bounds = poodle_gpui_node_backend::bounds_for(&lg).expect("lg bounds");
+        for (name, bounds) in [
+            ("sm", sm_bounds),
+            ("md", md_bounds),
+            ("lg", lg_bounds),
+        ] {
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "mounted {name} row has positive bounds"
+            );
+            assert!(
+                bounds.origin.x >= size_bounds.origin.x
+                    && bounds.origin.x + bounds.size.width
+                        <= size_bounds.origin.x + size_bounds.size.width
+                    && bounds.origin.y >= size_bounds.origin.y
+                    && bounds.origin.y + bounds.size.height
+                        <= size_bounds.origin.y + size_bounds.size.height,
+                "mounted {name} row stays contained in the group root"
+            );
+        }
+        assert!(
+            sm_bounds.origin.x + sm_bounds.size.width <= md_bounds.origin.x
+                && md_bounds.origin.x + md_bounds.size.width <= lg_bounds.origin.x,
+            "horizontal rows flow in authored order"
+        );
+
         driver.focus_element(&lg);
         driver.dispatch_key_raw("down");
         assert!(
-            payloads.lock().unwrap().is_empty(),
+            host.lock().expect("host lock").values.is_empty(),
             "vertical arrows are inert on a horizontal group"
         );
         driver.dispatch_key_raw("right");
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["sm"]);
-        assert!(radio_selected(&mounted.lock().unwrap(), "size", "sm"));
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.values.as_slice(), ["sm"]);
+            assert_eq!(host.spec.current_value(), Some("sm"));
+        }
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&sm), Some(true));
+        driver.dispatch_key_raw("left");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.values.as_slice(), ["sm", "lg"]);
+            assert_eq!(host.spec.current_value(), Some("lg"));
+        }
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            host.lock().expect("host lock").values.len(),
+            2,
+            "End on the last option of a horizontal group is inert"
+        );
+        driver.focus_element(&sm);
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            host.lock().expect("host lock").values.as_slice(),
+            ["sm", "lg", "lg"],
+            "End jumps across a horizontal group"
+        );
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&lg), Some(true));
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            host.lock().expect("host lock").values.as_slice(),
+            ["sm", "lg", "lg", "sm"],
+            "Home jumps across a horizontal group"
+        );
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&sm), Some(true));
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            host.lock().expect("host lock").values.len(),
+            4,
+            "Home on the first option is inert"
+        );
     });
 
+    // ── 3. Disabled group: no focus handles and no callback ────────────────
     run_headless(|cx| {
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let sink = Arc::clone(&payloads);
-        let spec = RadioGroupSpec {
+        let host = nucleus_radio_host(RadioGroupSpec {
             is_disabled: true,
             ..RadioGroupSpec::new(selection_radio_options()).with_value("free")
+        });
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || nucleus_radio_element(&host, "locked"))
         };
-        let mut node = poodle_render::radio_group(
-            &spec,
-            &RenderContext::new(&theme()),
-            RadioGroupHandlers::new("disabled-plan").on_change(Arc::new(move |next: &str| {
-                sink.lock().unwrap().push(next.to_string())
-            })),
-        );
-        node.id = Some(FIXTURE_ID.to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 360.0, 200.0);
         driver.draw_frame();
-        driver.pointer_activate_id(&radio_option_id("disabled-plan", "enterprise"));
-        assert!(payloads.lock().unwrap().is_empty());
+        for value in ["free", "pro", "enterprise"] {
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(&radio_option_id("locked", value))
+                    .is_none(),
+                "a disabled group registers no focus handle for {value}"
+            );
+        }
+        let enterprise = radio_option_id("locked", "enterprise");
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&enterprise).is_some(),
+            "disabled rows still paint hit targets"
+        );
+        driver.pointer_activate_id(&enterprise);
+        driver.pointer_activate_id(&radio_option_id("locked", "free"));
+        assert!(
+            host.lock().expect("host lock").values.is_empty(),
+            "pointer selection on a disabled group is inert"
+        );
     });
 
+    // ── 4. Duplicate-content instances + terminal receipt ─────────────────
     run_headless(|cx| {
-        let picker = |scope: &str| {
-            poodle_render::radio_group(
-                &RadioGroupSpec::new(vec![
-                    ChoiceOption::new("free", "Free"),
-                    ChoiceOption::new("pro", "Pro"),
-                ])
-                .with_value("free"),
-                &RenderContext::new(&theme()),
-                RadioGroupHandlers::new(scope),
-            )
+        let left = nucleus_radio_host(
+            RadioGroupSpec::new(radio_plan_options())
+                .with_value("free")
+                .with_orientation(Orientation::Vertical),
+        );
+        let right = nucleus_radio_host(
+            RadioGroupSpec::new(radio_plan_options())
+                .with_value("free")
+                .with_orientation(Orientation::Vertical),
+        );
+        let pair_build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let left = Arc::clone(&left);
+            let right = Arc::clone(&right);
+            Rc::new(move || nucleus_radio_pair(&left, &right))
         };
-        let mut node = Node::container()
-            .child(picker("left"))
-            .child(picker("right"));
-        node.id = Some(FIXTURE_ID.to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
-        let left = radio_option_id("left", "free");
-        let right = radio_option_id("right", "free");
-        driver.wait_for_focus_handle(&left);
-        driver.wait_for_focus_handle(&right);
-        driver.focus_element(&left);
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        let mut driver = HeadlessDriver::new_element_in_box(cx, pair_build, 420.0, 300.0);
+
+        for (scope, value) in [
+            ("left", "free"),
+            ("left", "pro"),
+            ("left", "enterprise"),
+            ("right", "free"),
+            ("right", "pro"),
+            ("right", "enterprise"),
+        ] {
+            driver.wait_for_focus_handle(&radio_option_id(scope, value));
+        }
+        let left_free = radio_option_id("left", "free");
+        let left_pro = radio_option_id("left", "pro");
+        let right_free = radio_option_id("right", "free");
+        let right_pro = radio_option_id("right", "pro");
+        let right_enterprise = radio_option_id("right", "enterprise");
+
+        // Bounds: each group root contains its rows; the second instance
+        // sits below the first.
+        let left_bounds = poodle_gpui_node_backend::bounds_for("left").expect("left root bounds");
+        let right_bounds =
+            poodle_gpui_node_backend::bounds_for("right").expect("right root bounds");
+        assert!(left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0));
+        assert!(right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0));
+        assert!(
+            left_bounds.origin.y + left_bounds.size.height <= right_bounds.origin.y,
+            "composed instances stay stacked and separate"
+        );
+        for (name, id, root) in [
+            ("left free", &left_free, &left_bounds),
+            ("right free", &right_free, &right_bounds),
+        ] {
+            let row = poodle_gpui_node_backend::bounds_for(id).expect("row bounds");
+            assert!(
+                row.origin.x >= root.origin.x
+                    && row.origin.x + row.size.width <= root.origin.x + root.size.width
+                    && row.origin.y >= root.origin.y
+                    && row.origin.y + row.size.height <= root.origin.y + root.size.height,
+                "{name} stays contained in its own group root"
+            );
+        }
+
+        // Focus identity is caller-scoped even with identical option values.
+        driver.focus_element(&left_free);
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&right),
+            poodle_gpui_node_backend::focus_state_for(&left_free),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_free),
             Some(false),
-            "two mounted groups keep independent focus identity"
+            "focusing the left instance must not focus the right"
+        );
+        driver.focus_element(&right_free);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_free),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_free),
+            Some(false)
+        );
+
+        // Pointer and Space selection stay inside the originating instance.
+        driver.focus_element(&right_pro);
+        driver.dispatch_key_raw("space");
+        {
+            let right = right.lock().expect("right host");
+            assert_eq!(right.values.as_slice(), ["pro"]);
+            assert_eq!(right.spec.current_value(), Some("pro"));
+        }
+        assert!(left.lock().expect("left host").values.is_empty());
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            right.lock().expect("right host").values.as_slice(),
+            ["pro"],
+            "Space on the newly selected row is inert after the rebuild"
+        );
+        driver.focus_element(&left_pro);
+        driver.dispatch_key_raw("space");
+        {
+            let left = left.lock().expect("left host");
+            assert_eq!(left.values.as_slice(), ["pro"]);
+            assert_eq!(left.spec.current_value(), Some("pro"));
+        }
+        assert_eq!(
+            right.lock().expect("right host").values.as_slice(),
+            ["pro"],
+            "left selection must not touch the right callback stream"
+        );
+
+        // Roving navigation on one instance never moves the other.
+        driver.focus_element(&right_enterprise);
+        driver.dispatch_key_raw("home");
+        {
+            let right = right.lock().expect("right host");
+            assert_eq!(right.values.as_slice(), ["pro", "free"]);
+            assert_eq!(right.spec.current_value(), Some("free"));
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_free),
+            Some(true)
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            right.lock().expect("right host").values.as_slice(),
+            ["pro", "free", "enterprise"],
+            "End moves only the focused instance"
+        );
+        assert_eq!(left.lock().expect("left host").values.as_slice(), ["pro"]);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_free),
+            Some(false),
+            "right navigation must not steal left focus"
+        );
+
+        // Painted selected wiring stays per-instance after rebuilds.
+        driver.focus_element(&left_pro);
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            left.lock().expect("left host").values.as_slice(),
+            ["pro"],
+            "Space on the left selected row is inert"
+        );
+        driver.focus_element(&left_free);
+        driver.dispatch_key_raw("space");
+        {
+            let left = left.lock().expect("left host");
+            assert_eq!(left.values.as_slice(), ["pro", "free"]);
+            assert_eq!(left.spec.current_value(), Some("free"));
+        }
+        assert_eq!(
+            right.lock().expect("right host").values.as_slice(),
+            ["pro", "free", "enterprise"],
+            "left selection must not touch the right callback stream"
+        );
+
+        // Terminal assertion: both instances still own their independent
+        // state after every mounted interaction.
+        {
+            let left = left.lock().expect("left host");
+            let right = right.lock().expect("right host");
+            assert_eq!(left.values.as_slice(), ["pro", "free"]);
+            assert_eq!(left.spec.current_value(), Some("free"));
+            assert_eq!(right.values.as_slice(), ["pro", "free", "enterprise"]);
+            assert_eq!(right.spec.current_value(), Some("enterprise"));
+        }
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "RadioGroup",
+            "nucleus.settings.radio-group",
+            observation,
+            &[
+                "mount a controlled vertical RadioGroup with one disabled option through node_compat::RadioGroup::from_spec(...).into_element() into HeadlessDriver",
+                "pointer activate enabled and disabled options through GPUI platform dispatch",
+                "activate focused options with Space through keyboard dispatch and observe the controlled host rebuild",
+                "navigate roving focus with Arrow Up/Down, Home, End, and wraparound across enabled options",
+                "mount a horizontal RadioGroup and observe orientation-exact arrows with wraparound",
+                "mount a group-disabled RadioGroup and observe no focus handles or callback",
+                "mount two duplicate-content RadioGroup instances and observe independent focus and callback streams",
+            ],
+            &[
+                "the production render path resolves radiogroup role, aria label, orientation, and per-option radiobutton names, selected/toggled state, and single roving tab stop",
+                "indicator and dot production structure carries exact sizes, radii, surface fill, border widths, and selected accent or caller custom color precedence; label typography and text color resolve from tokens",
+                "mounted pointer and Space selection update the host-owned spec through rebuilds while same-value selection and disabled options remain inert",
+                "roving navigation skips disabled options, wraps at boundaries, and retains backend focus across rebuilds; Home/End jump to the first/last enabled option",
+                "mounted bounds confirm positive dimensions, vertical stacking and horizontal ordering, and containment inside each group root",
+                "two duplicate-content instances keep separate runtime IDs, focus handles, and callback streams",
+            ],
         );
     });
 }
