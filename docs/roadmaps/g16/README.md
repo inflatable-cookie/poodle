@@ -128,7 +128,7 @@ stay maintained; backend admission is not part of the first card.
 91. [091 — Nucleus ToastHost M1 receipt](091-nucleus-toast-host-m1.md) — complete in PR #197 after preparation repair and a cross-window focus-lifecycle repair; production adapter, exact placement/tokens, controlled lifecycle, duplicate teardown, and one terminal M1 receipt advance the cohort to 28/29
 92. [092 — Native consumer tinyvec build repair](092-native-consumer-tinyvec-build.md) — ready; restore the inherited Rust 1.95 fresh-consumer gate without weakening its negative controls
 93. [093 — Nucleus MessageCenter M1 receipt](093-nucleus-message-center-m1.md) — preparation-ready; build the final production mounted receipt proof in parallel with g16.092, then pause before shared evidence
-94. [094 — Ordinary Cargo scope classification repair](094-ordinary-cargo-scope-classification.md) — ready; distinguish dependency-only Cargo changes from package-version mutations without changing strict or candidate certification
+94. [094 — Ordinary Cargo scope classification repair](094-ordinary-cargo-scope-classification.md) — complete in PR #200; ordinary installed smoke now distinguishes dependency-only Cargo changes from package-version mutations without changing strict or candidate certification
 
 ## Parallel Continuation
 
@@ -139,9 +139,8 @@ ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
 `g16.089`–`g16.091` are complete. The mounted Nucleus cohort is 28/29.
 `g16.092` repairs the inherited native fresh-consumer dependency gate while
 `g16.093` prepares MessageCenter without touching shared receipt files.
-`g16.094` first repairs the ordinary installed-smoke scope classifier that
-currently blocks dependency-only Cargo changes. MessageCenter finalization
-remains serial after `g16.094` and `g16.092` merge.
+`g16.094` is complete. `g16.092` now rebases and proves its full web gate;
+MessageCenter finalization remains serial after `g16.092` merges.
 Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their

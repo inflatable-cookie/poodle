@@ -1,6 +1,6 @@
 # g16.094 — Ordinary Cargo Scope Classification Repair
 
-Status: complete — awaiting orchestrator review
+Status: complete — merged in PR #200 as `f7ae38d9f7e644de6d39de43363dd77bbf75f842`
 Type: installed-smoke routing repair
 Opened: 2026-09-04
 Depends on: merged `g16.061`; reproduced ordinary-mode rejection on PR #199
@@ -62,5 +62,5 @@ native-visual selectors.
 
 ## Continuation
 
-After exact-head review and merge, rebase PR #199 and require its full
-`ci:web` to pass before merging g16.092. No certification re-stamp is required.
+Rebase PR #199 and require its full `ci:web` to pass before merging g16.092.
+No certification re-stamp is required.

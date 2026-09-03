@@ -73,10 +73,12 @@ Updated: 2026-09-03
   - Completed: `g16.091` ToastHost merged in PR #197 at
     `4a615e99046fa9e6dc14801ef1e6f60760336fc2`; the mounted Nucleus cohort is
     28/29.
+  - Completed: `g16.094` ordinary Cargo scope classification merged in PR #200
+    at `f7ae38d9f7e644de6d39de43363dd77bbf75f842`; dependency-only Cargo changes
+    no longer inherit release-version treatment in ordinary installed smoke.
   - Ready frontier: `g16.093` MessageCenter preparation is accepted and paused.
-    `g16.092` repairs the inherited Rust 1.95 fresh-consumer dependency gate but
-    waits for `g16.094`, a bounded ordinary installed-smoke Cargo scope repair.
-    Finalization remains serial after both repairs merge.
+    `g16.092` now rebases onto merged `g16.094` and must pass its full web gate.
+    Finalization remains serial after that repair merges.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -93,8 +95,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: merge `g16.094`, rebase and merge `g16.092`, then finalize the
-    accepted final MessageCenter receipt serially; the
+  - Next move: rebase and merge `g16.092`, then finalize the accepted final
+    MessageCenter receipt serially; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
