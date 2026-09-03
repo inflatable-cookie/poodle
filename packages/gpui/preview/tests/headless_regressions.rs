@@ -18942,13 +18942,17 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
 #[test]
 fn editable_label_live_draft_stays_off_the_committed_value() {
     use node_compat::IntoCompatNode;
-    use poodle_node::{CursorHint, NodeKind, NodeRole};
+    use poodle_node::{CursorHint, FontFamily, NodeKind, NodeRole};
     use poodle_specs::{EditableLabelActivation, EditableLabelSpec};
 
     // Production wrapper and renderer structure. These nodes are built by the
     // same adapter object whose IntoElement path is mounted below.
     let provider = theme();
     let ctx = RenderContext::new(&provider);
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let label_line_height =
+        ctx.theme().resolve_space("typography.label.lineHeight") / label_size;
+    let label_weight = poodle_tokens::typed::semantic::TYPOGRAPHY_LABEL_WEIGHT as u16;
     let display_spec = EditableLabelSpec::new()
         .with_value("Kick")
         .with_show_edit_icon(true);
@@ -18972,7 +18976,18 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
     assert!(display.style.descriptor.layout.spacing.padding.left > 0.0);
     assert_eq!(display.children.len(), 2, "label text plus edit icon");
     assert_eq!(display.children[0].intrinsic_text(), Some("Kick"));
-    assert_eq!(display.children[0].style.text_size, Some(13.0));
+    assert_eq!(display.children[0].style.text_size, Some(label_size));
+    assert_eq!(display.children[0].style.text_weight, Some(label_weight));
+    assert_eq!(
+        display.children[0].style.line_height,
+        Some(label_line_height)
+    );
+    assert_eq!(
+        display.children[0].style.font_family,
+        Some(FontFamily::Sans),
+        "label-family projects as explicit sans metadata; the GPUI root supplies Inter"
+    );
+    assert!(!display.children[0].style.text_italic);
 
     let editing_spec = EditableLabelSpec::new()
         .with_value("Kick")
@@ -19005,7 +19020,11 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
     assert!(editing.interaction.on_cancel.is_some());
     assert!(editing.interaction.on_focus_change.is_some());
     assert!(editing.style.fill_width);
-    assert_eq!(editing.style.text_size, Some(13.0));
+    assert_eq!(editing.style.text_size, Some(label_size));
+    assert_eq!(editing.style.text_weight, Some(label_weight));
+    assert_eq!(editing.style.line_height, Some(label_line_height));
+    assert_eq!(editing.style.font_family, Some(FontFamily::Sans));
+    assert!(!editing.style.text_italic);
     assert!(editing.style.focus.is_some());
 
     let empty = node_compat::EditableLabel::from_spec(
@@ -19020,6 +19039,17 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
         empty.children[0].style.descriptor.text_color,
         Some(ctx.theme().resolve_color("color.text.secondary"))
     );
+    assert_eq!(empty.children[0].style.text_size, Some(label_size));
+    assert_eq!(empty.children[0].style.text_weight, Some(label_weight));
+    assert_eq!(
+        empty.children[0].style.line_height,
+        Some(label_line_height)
+    );
+    assert_eq!(
+        empty.children[0].style.font_family,
+        Some(FontFamily::Sans)
+    );
+    assert!(empty.children[0].style.text_italic);
 
     let disabled = node_compat::EditableLabel::from_spec(
         EditableLabelSpec::new().with_value("Locked").with_disabled(true),
@@ -19134,41 +19164,76 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
         assert!(!host.label("disabled").editing);
     });
 
-    // Enter, Space, single-click, and programmatic entry boundaries. The
-    // default select-on-focus path selects the full committed value.
+    // Default single/double-click, EnterOrSpace pointer/keyboard, and
+    // programmatic boundaries. The default select-on-focus path selects the
+    // full committed value.
     run_headless(|cx| {
         let host = MountedLabelHost::new(vec![
-            MountedLabelState::new("enter", "Same"),
-            MountedLabelState::new("space", "Same"),
-            MountedLabelState::new("click", "Same")
+            MountedLabelState::new("default-pointer", "Same"),
+            MountedLabelState::new("enter-key", "Same")
+                .activation(EditableLabelActivation::EnterOrSpace),
+            MountedLabelState::new("space-key", "Same")
+                .activation(EditableLabelActivation::EnterOrSpace),
+            MountedLabelState::new("single-click", "Same")
                 .activation(EditableLabelActivation::EnterOrSpace),
             MountedLabelState::new("programmatic", "Same")
                 .activation(EditableLabelActivation::Programmatic),
         ]);
-        let mut driver = mount_labels(cx, &host, 300.0);
+        let mut driver = mount_labels(cx, &host, 340.0);
 
-        let enter_id = mounted_label_id("enter");
+        let default_pointer_id = mounted_label_id("default-pointer");
+        driver.wait_for_focus_handle(&default_pointer_id);
+        driver.pointer_activate_id(&default_pointer_id);
+        assert!(!host.label("default-pointer").editing);
+        assert_eq!(host.take_log(), Vec::<String>::new());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&default_pointer_id),
+            Some(true),
+            "default single-click may focus but cannot enter editing"
+        );
+        let bounds = poodle_gpui_node_backend::bounds_for(&default_pointer_id)
+            .expect("default double-click label bounds");
+        driver.pointer_press_details(bounds.center(), 2, Modifiers::none());
+        driver.pointer_release_details(bounds.center(), 2, Modifiers::none());
+        assert!(host.label("default-pointer").editing);
+        assert_eq!(host.label("default-pointer").selection, (0, 4));
+        assert_eq!(host.take_log(), vec!["default-pointer/start"]);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&default_pointer_id),
+            Some(true)
+        );
+        driver.dispatch_key_raw("escape");
+        host.take_log();
+
+        let enter_id = mounted_label_id("enter-key");
         driver.wait_for_focus_handle(&enter_id);
         driver.focus_element(&enter_id);
         driver.dispatch_key_raw("enter");
-        assert!(host.label("enter").editing);
-        assert_eq!(host.label("enter").selection, (0, 4));
-        assert_eq!(host.take_log(), vec!["enter/start"]);
+        assert!(host.label("enter-key").editing);
+        assert_eq!(host.label("enter-key").selection, (0, 4));
+        assert_eq!(host.take_log(), vec!["enter-key/start"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&enter_id), Some(true));
         driver.dispatch_key_raw("escape");
         host.take_log();
 
-        let space_id = mounted_label_id("space");
+        let space_id = mounted_label_id("space-key");
+        driver.wait_for_focus_handle(&space_id);
         driver.focus_element(&space_id);
         driver.dispatch_key_raw("space");
-        assert!(host.label("space").editing);
-        assert_eq!(host.take_log(), vec!["space/start"]);
+        assert!(host.label("space-key").editing);
+        assert_eq!(host.label("space-key").selection, (0, 4));
+        assert_eq!(host.take_log(), vec!["space-key/start"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&space_id), Some(true));
         driver.dispatch_key_raw("escape");
         host.take_log();
 
-        let click_id = mounted_label_id("click");
+        let click_id = mounted_label_id("single-click");
+        driver.wait_for_focus_handle(&click_id);
         driver.pointer_activate_id(&click_id);
-        assert!(host.label("click").editing);
-        assert_eq!(host.take_log(), vec!["click/start"]);
+        assert!(host.label("single-click").editing);
+        assert_eq!(host.label("single-click").selection, (0, 4));
+        assert_eq!(host.take_log(), vec!["single-click/start"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&click_id), Some(true));
         driver.dispatch_key_raw("escape");
         host.take_log();
 
