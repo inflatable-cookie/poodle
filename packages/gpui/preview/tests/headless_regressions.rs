@@ -4606,6 +4606,12 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
             assert!(close_two.interaction.focusable);
             assert_eq!(close_two.style.descriptor.cursor, CursorHint::Pointer);
             assert_eq!(close_two.runtime_id.as_deref(), Some("tabs:mounted:close:two"));
+            let expected_icon_muted = ctx.theme().resolve_color("color.icon.muted");
+            let expected_icon_sm = ctx.theme().resolve_space("size.icon.sm");
+            let close_two_icon = close_two
+                .find(&|n| matches!(&n.kind, NodeKind::Icon { name, size } if name == "x" && *size == expected_icon_sm))
+                .expect("close button must contain 'x' icon with size.icon.sm");
+            assert_eq!(close_two_icon.style.descriptor.text_color, Some(expected_icon_muted));
 
             // Tab "three" (unselected, closable)
             let tab_three = tab_at(&root, "tabs:mounted:tab:three");
@@ -4618,6 +4624,10 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
                 .find(&|n| n.a11y.label.as_deref() == Some("Close Three"))
                 .expect("closable tab 'three' must render close button");
             assert_eq!(close_three.runtime_id.as_deref(), Some("tabs:mounted:close:three"));
+            let close_three_icon = close_three
+                .find(&|n| matches!(&n.kind, NodeKind::Icon { name, size } if name == "x" && *size == expected_icon_sm))
+                .expect("close button must contain 'x' icon with size.icon.sm");
+            assert_eq!(close_three_icon.style.descriptor.text_color, Some(expected_icon_muted));
 
             // Panel "one"
             let panel = root
@@ -4931,36 +4941,60 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
 
     // ── Phase 3: Vertical Orientation Mode ────────────────────────────────
     run_headless(|cx| {
-        let mut spec = TabsSpec::new(definitions())
-            .with_value("one")
-            .with_orientation(Orientation::Vertical);
-        spec.orientation = Orientation::Vertical;
+        fn build_vertical(
+            value: &str,
+            mounted: &Arc<Mutex<Node>>,
+            live: &Arc<Mutex<String>>,
+        ) -> Node {
+            let live_state = Arc::clone(live);
+            let mount = Arc::clone(mounted);
+            let rebuild = {
+                let live_state = Arc::clone(&live_state);
+                let mount = Arc::clone(&mount);
+                move |next: String| {
+                    *live_state.lock().expect("state lock") = next.clone();
+                    *mount.lock().expect("mount lock") = build_vertical(&next, &mount, &live_state);
+                }
+            };
+            let mut spec = TabsSpec::new(definitions())
+                .with_value(value)
+                .with_orientation(Orientation::Vertical);
+            spec.orientation = Orientation::Vertical;
+            let mut node = poodle_render::tabs_with_handlers(
+                &spec,
+                &RenderContext::new(&theme()),
+                TabsHandlers {
+                    on_change: Some({
+                        let rebuild = rebuild.clone();
+                        Arc::new(move |next_val: &str| {
+                            rebuild(next_val.to_owned());
+                        })
+                    }),
+                    instance_id: Some("vertical".into()),
+                    focused_value: Some(value.to_owned()),
+                    ..TabsHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
         let live = Arc::new(Mutex::new("one".to_string()));
-        let sink = Arc::clone(&live);
-        let mut node = poodle_render::tabs_with_handlers(
-            &spec,
-            &RenderContext::new(&theme()),
-            TabsHandlers {
-                on_change: Some(Arc::new(move |value: &str| {
-                    *sink.lock().unwrap() = value.to_owned();
-                })),
-                instance_id: Some("vertical".into()),
-                focused_value: Some("one".into()),
-                ..TabsHandlers::default()
-            },
-        );
-        node.id = Some(FIXTURE_ID.to_owned());
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build_vertical("one", &mounted, &live);
 
         {
-            let list = node
+            let root = mounted.lock().unwrap();
+            let list = root
                 .find(&|n| n.a11y.role == Some(NodeRole::TabList))
                 .expect("vertical tablist");
             assert_eq!(list.a11y.orientation.as_deref(), Some("vertical"));
             assert_eq!(list.style.descriptor.layout.direction, LayoutDirection::Column);
         }
 
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 120.0, 240.0);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 240.0);
         driver.wait_for_focus_handle("tabs:vertical:tab:one");
+        driver.wait_for_focus_handle("tabs:vertical:tab:two");
 
         let one_b = poodle_gpui_node_backend::bounds_for("tabs:vertical:tab:one").expect("one bounds");
         let skip_b = poodle_gpui_node_backend::bounds_for("tabs:vertical:tab:skip").expect("skip bounds");
@@ -4970,13 +5004,17 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
 
         // Horizontal arrows are inert in vertical tabs
         driver.keyboard_key("tabs:vertical:tab:one", "right");
-        assert_eq!(live.lock().unwrap().as_str(), "one");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Right arrow in vertical tabs must be inert");
         driver.keyboard_key("tabs:vertical:tab:one", "left");
-        assert_eq!(live.lock().unwrap().as_str(), "one");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Left arrow in vertical tabs must be inert");
 
         // Down arrow skips disabled "skip" and selects "two"
         driver.keyboard_key("tabs:vertical:tab:one", "down");
         assert_eq!(live.lock().unwrap().as_str(), "two", "Down arrow in vertical tabs selects next enabled tab");
+
+        // Up arrow skips disabled "skip" and selects "one"
+        driver.keyboard_key("tabs:vertical:tab:two", "up");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Up arrow in vertical tabs selects previous enabled tab");
     });
 
     // ── Phase 4: Pointer Drag-and-Drop Reorder Lifecycle & Self-Drop Rejection ──
@@ -5135,6 +5173,16 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
 
         let source = payload_frac("tabs:drag:tab:one", 0.5, 0.5);
         driver.pointer_press(source);
+
+        // Sub-threshold movement (< 4px) does not arm drag start
+        driver.pointer_drag(point(px(f32::from(source.x) + 1.0), source.y));
+        assert!(
+            starts.lock().unwrap().is_empty(),
+            "Sub-threshold movement must not arm drag start"
+        );
+        assert!(live.lock().unwrap().drag.is_none());
+
+        // Crossing the movement threshold arms drag start
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
         assert_eq!(*starts.lock().unwrap(), vec!["one".to_string()]);
         assert_eq!(live.lock().unwrap().drag.as_deref(), Some("one"));
@@ -5389,7 +5437,7 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         observation.expect("mounted observation recorded from primary driver"),
         &[
             "mount controlled Tabs with panel, disabled tab, closable tabs, and reorder through HeadlessDriver",
-            "pointer activate tabs, verify same-value and disabled inertia, and activate close button",
+            "pointer activate tabs, verify disabled tab inertia, and activate close button",
             "keyboard navigate roving focus across tabs with directional arrows, disabled skip, Home, End, and axis isolation",
             "dispatch manual activation mode where arrow keys move focus and Enter/Space commits selection",
             "dispatch vertical orientation mode verifying vertical arrow navigation and horizontal key inertness",
@@ -5401,10 +5449,10 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
             "each tab resolves tab role, accessible name, intrinsic text, selected state, roving tab index, focus ring, controls target, and disabled opacity",
             "tab panel resolves tabpanel role, labelled_by association, focusable tab index, and active panel text",
             "closable tabs render accessible close buttons with icon and distinct pointer activation",
-            "pointer and keyboard navigation update selected tab and panel via controlled host rebuild while disabled and same-value clicks remain inert",
+            "pointer and keyboard navigation update selected tab and panel via controlled host rebuild while disabled tab clicks remain inert",
             "roving focus skips disabled tabs in both directions, jumps to boundaries with Home/End, and maintains axis constraints",
             "manual activation decouples focus movement from value changes until explicit commit",
-            "pointer drag-and-drop handles drag start, drop target hovering, self-drop rejection, reorder commit, and Escape cancellation",
+            "pointer drag-and-drop handles sub-threshold inertness, drag start, drop target hovering, self-drop rejection, reorder commit, and Escape cancellation",
             "mounted bounds confirm positive dimensions, horizontal/vertical tab ordering, child containment, and panel placement",
             "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers",
         ],
