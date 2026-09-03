@@ -18,7 +18,7 @@ use std::time::Duration;
 
 use gpui::{
     deferred, div, px, AnyElement, AnyWindowHandle, App, InteractiveElement, IntoElement,
-    ParentElement, SharedString, Styled, Task, Window,
+    ParentElement, SharedString, Styled, Subscription, Task, Window,
 };
 
 use crate::record_probe_channel;
@@ -67,16 +67,23 @@ thread_local! {
     static WINDOW_TOOLTIPS: RefCell<HashMap<AnyWindowHandle, WindowTooltipState>> =
         RefCell::new(HashMap::new());
 
-    /// Last painted tooltip per window, rebuilt each frame.
+    /// Last painted tooltip per window, rebuilt each frame for that window.
     static PAINTED_TOOLTIPS: RefCell<HashMap<AnyWindowHandle, PaintedTooltip>> =
+        RefCell::new(HashMap::new());
+
+    /// Production close observers. Stored apart from tooltip state so a
+    /// teardown that runs inside `on_window_closed` does not drop its own
+    /// subscription mid-notify.
+    static WINDOW_TEARDOWNS: RefCell<HashMap<AnyWindowHandle, Subscription>> =
         RefCell::new(HashMap::new());
 }
 
 /// Reset all tooltip state across all windows. Called at test teardown or
-/// when the focus/backend registries are reset.
+/// when the focus/backend registries are reset. This is not window teardown.
 pub fn reset_tooltip_registry() {
     WINDOW_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
     PAINTED_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
+    WINDOW_TEARDOWNS.with(|cell| cell.borrow_mut().clear());
 }
 
 /// The painted tooltip for the first active window, or `None` if no tooltip
@@ -130,24 +137,68 @@ pub(crate) fn record_painted_tooltip(
     });
 }
 
-/// Frame boundary hook: called from `overlay_frame_begin()` at the start of
-/// every render frame.
-pub(crate) fn prepare_tooltip_frame() {
-    PAINTED_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
+/// Bind production window-close cleanup the first time this window renders.
+/// `reset_focus_registry` is not this path.
+pub(crate) fn bind_window_teardown(handle: AnyWindowHandle, cx: &mut App) {
+    let already_bound = WINDOW_TEARDOWNS.with(|cell| cell.borrow().contains_key(&handle));
+    if already_bound {
+        return;
+    }
+    let subscription = cx.on_window_closed(move |app| {
+        if handle.update(app, |_, _, _| {}).is_err() {
+            teardown_window_tooltips(handle);
+        }
+    });
+    WINDOW_TEARDOWNS.with(|cell| {
+        cell.borrow_mut().insert(handle, subscription);
+    });
+}
+
+/// Production window teardown: drop pending timers, visible state, and the
+/// last painted receipt for this handle. A later timer fire is inert.
+pub fn teardown_window_tooltips(handle: AnyWindowHandle) {
+    let had_activity = WINDOW_TOOLTIPS.with(|cell| {
+        cell.borrow_mut().remove(&handle).map(|mut state| {
+            let active = state.target_id.is_some() || state.task.is_some() || state.is_visible;
+            state.reset();
+            active
+        })
+    });
+    PAINTED_TOOLTIPS.with(|cell| {
+        cell.borrow_mut().remove(&handle);
+    });
+    if had_activity == Some(true) {
+        record_probe_channel("tooltip.lifecycle.teardown");
+    }
+}
+
+/// Whether this window currently owns pending or visible tooltip state.
+pub fn tooltip_runtime_owns_window(handle: AnyWindowHandle) -> bool {
     WINDOW_TOOLTIPS.with(|cell| {
-        for state in cell.borrow_mut().values_mut() {
+        cell.borrow().get(&handle).is_some_and(|state| {
+            state.target_id.is_some() || state.task.is_some() || state.is_visible
+        })
+    })
+}
+
+/// Frame boundary hook: called from `overlay_frame_begin_for` for one window.
+pub(crate) fn prepare_tooltip_frame(handle: AnyWindowHandle) {
+    PAINTED_TOOLTIPS.with(|cell| {
+        cell.borrow_mut().remove(&handle);
+    });
+    WINDOW_TOOLTIPS.with(|cell| {
+        if let Some(state) = cell.borrow_mut().get_mut(&handle) {
             state.painted_this_frame = false;
         }
     });
 }
 
-/// Frame boundary hook: called from `overlay_frame_end()` at the end of
-/// every render frame. Cancels tooltips whose targets were not painted in
-/// this frame (removal from tree).
-pub(crate) fn sweep_unpainted_tooltips() {
+/// Frame boundary hook: called from `overlay_frame_end_for` for one window.
+/// Cancels that window's tooltip when its target was not painted this frame.
+pub(crate) fn sweep_unpainted_tooltips(handle: AnyWindowHandle) {
     WINDOW_TOOLTIPS.with(|cell| {
         let mut map = cell.borrow_mut();
-        for state in map.values_mut() {
+        if let Some(state) = map.get_mut(&handle) {
             if state.target_id.is_some() && !state.painted_this_frame {
                 record_probe_channel("tooltip.lifecycle.removed");
                 state.reset();
@@ -364,25 +415,21 @@ pub(crate) fn on_timer_fired(
     }
 }
 
-/// Build the active tooltip element if one is currently visible and has recorded bounds.
-pub(crate) fn render_active_tooltip() -> Option<AnyElement> {
+/// Build this window's active tooltip element, if it is visible and has bounds.
+pub(crate) fn render_active_tooltip(handle: AnyWindowHandle) -> Option<AnyElement> {
     let active_info = WINDOW_TOOLTIPS.with(|cell| {
         let map = cell.borrow();
-        for state in map.values() {
-            if !state.is_visible {
-                continue;
-            }
-            let (Some(target_id), Some(text)) = (&state.target_id, &state.text) else {
-                continue;
-            };
-            let bounds = state
-                .target_bounds
-                .or_else(|| crate::layers::bounds_for(target_id));
-            if let Some(bounds) = bounds {
-                return Some((target_id.clone(), text.clone(), bounds));
-            }
+        let state = map.get(&handle)?;
+        if !state.is_visible {
+            return None;
         }
-        None
+        let (Some(target_id), Some(text)) = (&state.target_id, &state.text) else {
+            return None;
+        };
+        let bounds = state
+            .target_bounds
+            .or_else(|| crate::layers::bounds_for(target_id));
+        bounds.map(|bounds| (target_id.clone(), text.clone(), bounds))
     })?;
 
     let (target_id, text, bounds) = active_info;

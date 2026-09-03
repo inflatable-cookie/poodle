@@ -20105,66 +20105,200 @@ fn gpui_node_tooltip_generation_supersession_paint_authority_and_disabled() {
     });
 }
 
-/// g16.066. Window isolation: tooltips are owned per mounted window and never shared.
+/// g16.066. Overlapping two-window isolation: both windows stay alive.
+/// A frame, timer, or dismiss in B must not cancel or paint A's tooltip.
 #[test]
-fn gpui_node_tooltip_window_isolation() {
-    use poodle_gpui_node_backend::{painted_tooltip_for, TOOLTIP_DELAY};
+fn gpui_node_tooltip_overlapping_two_window_isolation() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip_for, TOOLTIP_DELAY,
+    };
+
+    fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
+        let mut btn = Node::button(label);
+        btn.id = Some(id.into());
+        btn.tooltip = Some(tooltip.into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        btn
+    }
 
     run_headless(|cx| {
-        let mut btn1 = Node::button("Window 1 Button");
-        btn1.id = Some("win1-btn".into());
-        btn1.tooltip = Some("Window 1 Tooltip".into());
-        btn1.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
-        btn1.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        let mut cx_b = cx.clone();
+        let mounted_a = Arc::new(Mutex::new(tooltip_button(
+            "win1-btn",
+            "Window 1 Button",
+            "Window 1 Tooltip",
+        )));
+        let mounted_b = Arc::new(Mutex::new(tooltip_button(
+            "win2-btn",
+            "Window 2 Button",
+            "Window 2 Tooltip",
+        )));
+        let mut driver_a = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted_a), 400.0, 300.0);
+        let mut driver_b =
+            HeadlessDriver::new_in_box(&mut cx_b, Arc::clone(&mounted_b), 400.0, 300.0);
 
-        let handle1;
-        {
-            let mounted1 = Arc::new(Mutex::new(btn1));
-            let mut driver1 = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted1), 400.0, 300.0);
-            handle1 = driver1.with_window(|w, _cx| w.window_handle());
+        let handle_a = driver_a.with_window(|w, _cx| w.window_handle());
+        let handle_b = driver_b.with_window(|w, _cx| w.window_handle());
+        assert!(
+            handle_a != handle_b,
+            "overlapping windows must have distinct handles"
+        );
 
-            let center1 = poodle_gpui_node_backend::bounds_for("win1-btn")
-                .expect("bounds for win1-btn")
-                .center();
+        driver_a.draw_frame();
+        let center_a = poodle_gpui_node_backend::bounds_for("win1-btn")
+            .expect("bounds for win1-btn")
+            .center();
+        driver_a.pointer_hover(center_a);
+        assert!(
+            is_tooltip_pending("win1-btn"),
+            "window A must start its own pending timer"
+        );
 
-            driver1.pointer_hover(center1);
-            driver1.advance_clock(TOOLTIP_DELAY);
-            driver1.draw_frame();
+        driver_b.draw_frame();
+        let center_b = poodle_gpui_node_backend::bounds_for("win2-btn")
+            .expect("bounds for win2-btn")
+            .center();
+        driver_b.pointer_hover(center_b);
+        assert!(
+            is_tooltip_pending("win1-btn"),
+            "window B's frame must not sweep window A's pending timer"
+        );
+        assert!(
+            is_tooltip_pending("win2-btn"),
+            "window B must start its own pending timer while A is still alive"
+        );
 
-            let painted1 = painted_tooltip_for(handle1).expect("window 1 painted tooltip");
-            assert_eq!(painted1.target_id, "win1-btn");
-            assert_eq!(painted1.text, "Window 1 Tooltip");
-        }
+        driver_a.advance_clock(TOOLTIP_DELAY);
+        driver_a.draw_frame();
+        driver_b.draw_frame();
 
-        let mut btn2 = Node::button("Window 2 Button");
-        btn2.id = Some("win2-btn".into());
-        btn2.tooltip = Some("Window 2 Tooltip".into());
-        btn2.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
-        btn2.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        let painted_a = painted_tooltip_for(handle_a)
+            .expect("window A tooltip must survive window B's overlapping paint");
+        let painted_b = painted_tooltip_for(handle_b).expect("window B painted tooltip");
+        assert_eq!(painted_a.target_id, "win1-btn");
+        assert_eq!(painted_a.text, "Window 1 Tooltip");
+        assert_eq!(painted_b.target_id, "win2-btn");
+        assert_eq!(painted_b.text, "Window 2 Tooltip");
 
-        {
-            let mounted2 = Arc::new(Mutex::new(btn2));
-            let mut driver2 = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted2), 400.0, 300.0);
-            let handle2 = driver2.with_window(|w, _cx| w.window_handle());
-            assert!(handle1 != handle2, "second window must have distinct handle");
+        driver_b.pointer_hover(point(px(10.0), px(10.0)));
+        assert!(!is_tooltip_visible("win2-btn"), "dismissing B must hide B");
+        driver_a.draw_frame();
+        let painted_a_after_b_dismiss = painted_tooltip_for(handle_a)
+            .expect("dismissing B must not hide A's visible tooltip");
+        assert_eq!(painted_a_after_b_dismiss.text, "Window 1 Tooltip");
+        assert!(
+            painted_tooltip_for(handle_b).is_none(),
+            "B's tooltip must stay gone after A paints"
+        );
+    });
+}
 
-            assert!(
-                painted_tooltip_for(handle2).is_none(),
-                "window 2 must not inherit tooltip"
-            );
+/// g16.066. Production window teardown clears pending and visible tooltip
+/// state and blocks late paint. The path is `Window::remove_window`, not
+/// `reset_focus_registry`.
+#[test]
+fn gpui_node_tooltip_window_teardown_clears_pending_visible_and_blocks_late_paint() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip_for, tooltip_runtime_owns_window,
+        TOOLTIP_DELAY,
+    };
 
-            let center2 = poodle_gpui_node_backend::bounds_for("win2-btn")
-                .expect("bounds for win2-btn")
-                .center();
+    fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
+        let mut btn = Node::button(label);
+        btn.id = Some(id.into());
+        btn.tooltip = Some(tooltip.into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        btn
+    }
 
-            driver2.pointer_hover(center2);
-            driver2.advance_clock(TOOLTIP_DELAY);
-            driver2.draw_frame();
+    run_headless(|cx| {
+        let mut cx_live = cx.clone();
+        let mut cx_witness = cx.clone();
 
-            let painted2 = painted_tooltip_for(handle2).expect("window 2 painted tooltip");
-            assert_eq!(painted2.target_id, "win2-btn");
-            assert_eq!(painted2.text, "Window 2 Tooltip");
-        }
+        let mounted_pending = Arc::new(Mutex::new(tooltip_button(
+            "pending-btn",
+            "Pending",
+            "Pending Tooltip",
+        )));
+        let mounted_live = Arc::new(Mutex::new(tooltip_button(
+            "live-btn",
+            "Live",
+            "Live Tooltip",
+        )));
+        let mounted_witness = Arc::new(Mutex::new(tooltip_button(
+            "witness-btn",
+            "Witness",
+            "Witness Tooltip",
+        )));
+
+        let mut driver_pending =
+            HeadlessDriver::new_in_box(cx, Arc::clone(&mounted_pending), 400.0, 300.0);
+        let mut driver_live =
+            HeadlessDriver::new_in_box(&mut cx_live, Arc::clone(&mounted_live), 400.0, 300.0);
+        let handle_pending = driver_pending.with_window(|w, _cx| w.window_handle());
+        let handle_live = driver_live.with_window(|w, _cx| w.window_handle());
+
+        driver_pending.draw_frame();
+        let pending_center = poodle_gpui_node_backend::bounds_for("pending-btn")
+            .expect("bounds for pending-btn")
+            .center();
+        driver_pending.pointer_hover(pending_center);
+        assert!(is_tooltip_pending("pending-btn"));
+        assert!(tooltip_runtime_owns_window(handle_pending));
+
+        driver_pending.close_window();
+        assert!(
+            !is_tooltip_pending("pending-btn"),
+            "pending tooltip must die on window close"
+        );
+        assert!(
+            !tooltip_runtime_owns_window(handle_pending),
+            "closed window must not retain tooltip runtime state"
+        );
+        assert!(painted_tooltip_for(handle_pending).is_none());
+
+        driver_pending.advance_clock(TOOLTIP_DELAY + std::time::Duration::from_millis(200));
+        driver_live.draw_frame();
+        assert!(
+            !is_tooltip_visible("pending-btn"),
+            "closed pending tooltip must not paint after its timer would have fired"
+        );
+        assert!(painted_tooltip_for(handle_pending).is_none());
+
+        driver_live.draw_frame();
+        let live_center = poodle_gpui_node_backend::bounds_for("live-btn")
+            .expect("bounds for live-btn")
+            .center();
+        driver_live.pointer_hover(live_center);
+        driver_live.advance_clock(TOOLTIP_DELAY);
+        driver_live.draw_frame();
+        let painted_live = painted_tooltip_for(handle_live).expect("live window visible tooltip");
+        assert_eq!(painted_live.text, "Live Tooltip");
+        assert!(tooltip_runtime_owns_window(handle_live));
+
+        driver_live.close_window();
+        assert!(
+            !is_tooltip_visible("live-btn"),
+            "visible tooltip must die on window close"
+        );
+        assert!(!tooltip_runtime_owns_window(handle_live));
+        assert!(painted_tooltip_for(handle_live).is_none());
+
+        let mut driver_witness =
+            HeadlessDriver::new_in_box(&mut cx_witness, Arc::clone(&mounted_witness), 400.0, 300.0);
+        driver_witness.draw_frame();
+        driver_witness.advance_clock(TOOLTIP_DELAY);
+        driver_witness.draw_frame();
+        assert!(
+            painted_tooltip_for(handle_live).is_none(),
+            "a later window's frames must not resurrect the torn-down visible tooltip"
+        );
+        assert!(
+            painted_tooltip_for(handle_pending).is_none(),
+            "a later window's frames must not resurrect the torn-down pending tooltip"
+        );
     });
 }
 

@@ -412,11 +412,13 @@ impl Render for PreviewRoot {
         // The overlay host's frame boundary: the layer registry, bounds, and
         // focus queue are rebuilt once per rendered frame, not per converted
         // component — the same boundary the headless test driver uses.
-        // overlay_frame_end is deferred to the end of this effect cycle so a
-        // removed continuous-value host cancels in the same frame.
-        poodle_gpui_node_backend::overlay_frame_begin();
-        cx.defer(|_cx| {
-            poodle_gpui_node_backend::overlay_frame_end();
+        // overlay_frame_end_for is deferred to the end of this effect cycle so a
+        // removed continuous-value host cancels in the same frame. Tooltip
+        // prepare/sweep bind to this window's handle.
+        let window_handle = window.window_handle();
+        poodle_gpui_node_backend::overlay_frame_begin_for(window_handle, cx);
+        cx.defer(move |_cx| {
+            poodle_gpui_node_backend::overlay_frame_end_for(window_handle);
         });
         // Apply interactions node-backed specimens reported since the last frame.
         let specimen_changed = self.state.drain_node_events();
@@ -516,6 +518,7 @@ impl Render for PreviewRoot {
             // Each section is given an explicit pixel height so overflow_y_scroll
             // containers get a definite content-mask for hit testing.
             .child(self.render_section_content(content_h, cx)),
+            window_handle,
         )
         })
         })

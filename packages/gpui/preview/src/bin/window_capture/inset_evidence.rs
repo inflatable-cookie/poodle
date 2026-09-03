@@ -217,13 +217,14 @@ struct InsetEvidenceRoot {
 }
 
 impl Render for InsetEvidenceRoot {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // The same frame boundary the preview and the headless driver use:
         // the layer, bounds, and painted-band registries are rebuilt once per
-        // rendered frame.
-        poodle_gpui_node_backend::overlay_frame_begin();
-        cx.defer(|_cx| {
-            poodle_gpui_node_backend::overlay_frame_end();
+        // rendered frame. Tooltip prepare/sweep bind to this window's handle.
+        let window_handle = window.window_handle();
+        poodle_gpui_node_backend::overlay_frame_begin_for(window_handle, cx);
+        cx.defer(move |_cx| {
+            poodle_gpui_node_backend::overlay_frame_end_for(window_handle);
         });
         poodle_gpui_node_backend::reset_element_ids();
         let element: AnyElement = poodle_gpui_node_backend::to_gpui(&self.node);
@@ -238,6 +239,7 @@ impl Render for InsetEvidenceRoot {
                 .text_color(self.text)
                 .font_family("Inter")
                 .child(element),
+            window_handle,
         )
     }
 }

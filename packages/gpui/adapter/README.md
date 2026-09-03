@@ -69,8 +69,11 @@ cleanup, and the drag provider census are all document-level defaults, so an
 application opts into them once at its root:
 
 ```rust
-poodle_gpui_node_backend::overlay_frame_begin();   // once per rendered frame
-cx.defer(|_cx| poodle_gpui_node_backend::overlay_frame_end()); // same cycle: lost-host cancel
+poodle_gpui_node_backend::overlay_frame_begin_for(window.window_handle(), cx);
+cx.defer({
+    let handle = window.window_handle();
+    move |_cx| poodle_gpui_node_backend::overlay_frame_end_for(handle)
+});
 poodle_gpui_node_backend::reset_element_ids();     // once per rendered frame
 
 // One host per window, one provider per drag scope. Both are ordinary values
@@ -79,6 +82,7 @@ poodle_gpui_node_backend::drag_drop_window_host(&self.drag_host, || {
     poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
         poodle_gpui_node_backend::attach_overlay_host(
             div().size_full().child(poodle_gpui_node_backend::to_gpui(&node)),
+            window.window_handle(),
         )
     })
 })
@@ -86,7 +90,9 @@ poodle_gpui_node_backend::drag_drop_window_host(&self.drag_host, || {
 
 `attach_overlay_host` is named for the overlay dismissal it started with and
 now also carries Tab traversal — GPUI owns `focus_next`/`focus_prev` but binds
-no key to them. Wrap the one root element, not each component.
+no key to them. Wrap the one root element, not each component. Pass the
+window handle so this window's tooltip overlay cannot paint another window's
+tooltip.
 
 `DragDropWindowHost` is the census of the drag providers mounted in **this**
 window. A provider can only close a session during its own per-frame sweep, so

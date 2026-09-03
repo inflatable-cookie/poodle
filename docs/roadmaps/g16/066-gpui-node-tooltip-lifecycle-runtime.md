@@ -57,15 +57,18 @@ and window key path are the authority. Stale timers and events are inert.
 | Terminal paths converge | leave only cancels pending | visible/focused cases leak |
 | Generation is exact | A timer fires after B hover | A never paints |
 | Paint is authority | target removed while pending | no late tooltip |
-| Window ownership is isolated | hover in two windows | independent lifecycle receipts |
+| Window ownership is isolated | hover in two live windows | overlapping mounts; B's frame does not cancel A's pending/visible tooltip |
+| Teardown is production | `reset_focus_registry` as close | `remove_window` clears pending and visible; later frames do not paint |
 | Existing consumers survive | fix only Tabs | IconButton and SegmentedControl regressions stay green |
 
 ## Writable Scope
 
 `poodle-gpui-node-backend` tooltip interaction/paint/runtime, focused backend
 tests, mounted GPUI tooltip fixtures, Tooltip contract wording if needed, this
-card, one log, and new papercuts. No Tabs projection, public Node field, web
-Tooltip behavior, Nucleus source, visual lab, Jetstream, workflow, release, or
+card, one log, and new papercuts. Nucleus receipt/manifest/ledger refresh is
+allowed only after this runtime is committed, via the real
+`effigy regressions:native` selector. No Tabs projection, public Node field,
+web Tooltip behavior, visual lab, Jetstream, workflow, release, or
 windowed/native-visual selector.
 
 ## Validation

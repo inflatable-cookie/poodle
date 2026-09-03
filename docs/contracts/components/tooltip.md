@@ -246,8 +246,10 @@ and exposes the resolved value via `data-placement`.
   component) is owned by `poodle-gpui-node-backend`: 300ms open delay on
   hover or focus, immediate dismiss on pointer leave, focus departure,
   Escape, disablement, removal, teardown, or target supersession, and one
-  pending or visible tooltip per mounted window. GPUI 0.2.2 `.tooltip()` is
-  not used.
+  pending or visible tooltip per mounted window. Frame begin, end, and
+  overlay paint are keyed to that window's handle. Window close tears the
+  runtime down; `reset_focus_registry` is not the production teardown path.
+  GPUI 0.2.2 `.tooltip()` is not used.
 - bubble sizing: max-width 16rem, padding 0.375rem 0.5rem
 - border-radius must use the reduced calculation:
   control-radius minus 0.125rem

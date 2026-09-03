@@ -85,9 +85,10 @@ component-level, and an application has to opt into them **once**, at its root:
   drag provider that stopped rendering and closes it down.
 
 The first two live on `attach_overlay_host`, whose name predates the traversal
-it now also carries. Its companion, `overlay_frame_begin`, marks the frame
-boundary the layer registry, painted bounds, and focus queue are rebuilt at.
-Defer `overlay_frame_end` to the end of the same effect cycle so a removed
+it now also carries. Its companion, `overlay_frame_begin_for`, marks the frame
+boundary the layer registry, painted bounds, and focus queue are rebuilt at,
+and scopes tooltip prepare to the window being rendered. Defer
+`overlay_frame_end_for` to the end of the same effect cycle so a removed
 control cancels in the removal frame.
 
 The third is `drag_drop_window_host`, wrapped around the same root. A
@@ -137,10 +138,11 @@ the next frame, which the controller wakes for itself.
 use gpui::{div, Context, IntoElement, ParentElement, Render, Styled, Window};
 
 impl Render for AppRoot {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let window_handle = window.window_handle();
         // Once per rendered frame, before any node is converted.
-        poodle_gpui_node_backend::overlay_frame_begin();
-        cx.defer(|_cx| poodle_gpui_node_backend::overlay_frame_end());
+        poodle_gpui_node_backend::overlay_frame_begin_for(window_handle, cx);
+        cx.defer(move |_cx| poodle_gpui_node_backend::overlay_frame_end_for(window_handle));
         // Restart the generated-id counter so a node that declares no id keeps
         // the same ElementId across the frames a real click spans.
         poodle_gpui_node_backend::reset_element_ids();
@@ -155,6 +157,7 @@ impl Render for AppRoot {
                     div()
                         .size_full()
                         .child(poodle_gpui_node_backend::to_gpui(&self.node_tree())),
+                    window_handle,
                 )
             })
         })

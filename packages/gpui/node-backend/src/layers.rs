@@ -24,15 +24,20 @@
 //!
 //! The registry is frame-scoped, and the frame boundary is the host's render
 //! pass — not an individual tree conversion, because a real page converts
-//! many components independently per frame. [`overlay_frame_begin`] is called
-//! once at the start of each rendered frame by both the production preview
-//! root and the headless conformance driver; [`attach_overlay_host`] wires
-//! the window-level key and pointer listeners — dismissal, payload cleanup,
-//! and Tab traversal — onto a root element for the same two hosts.
+//! many components independently per frame. [`overlay_frame_begin_for`] is
+//! called once at the start of each rendered frame by both the production
+//! preview root and the headless conformance driver; [`attach_overlay_host`]
+//! wires the window-level key and pointer listeners — dismissal, payload
+//! cleanup, Tab traversal, and that window's tooltip overlay — onto a root
+//! element for the same two hosts. Tooltip prepare, sweep, and paint are
+//! keyed by `AnyWindowHandle`; a frame in one window cannot cancel or paint
+//! another window's tooltip.
 
 use std::cell::RefCell;
 
-use gpui::{App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point};
+use gpui::{
+    AnyWindowHandle, App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point,
+};
 use poodle_node::{DismissHandler, DismissReason};
 
 /// One registered overlay layer for the current frame.
@@ -83,7 +88,6 @@ pub fn overlay_frame_begin() {
     // Safety net for a previous cycle that never called overlay_frame_end.
     // Same-frame lost-host cancel is overlay_frame_end after this paint.
     crate::interaction::sweep_lost_continuous_host();
-    crate::tooltip::prepare_tooltip_frame();
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
     ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());
@@ -95,14 +99,30 @@ pub fn overlay_frame_begin() {
     crate::interaction::prepare_continuous_value_frame();
 }
 
+/// Begin a rendered frame for one window. Production roots call this instead
+/// of the unscoped overlay begin so tooltip prepare and close-binding belong
+/// to that window only.
+pub fn overlay_frame_begin_for(handle: AnyWindowHandle, cx: &mut App) {
+    overlay_frame_begin();
+    crate::tooltip::prepare_tooltip_frame(handle);
+    crate::tooltip::bind_window_teardown(handle, cx);
+}
+
 /// End a rendered frame: drop unused focus requests, then cancel a
 /// continuous-value gesture whose owner was not rebuilt in this paint.
-/// Production hosts defer this to the end of the same effect cycle as
-/// [`overlay_frame_begin`] so removal cancels without a next-frame delay.
+/// Production hosts defer [`overlay_frame_end_for`] to the end of the same
+/// effect cycle as [`overlay_frame_begin_for`] so removal cancels without a
+/// next-frame delay.
 pub fn overlay_frame_end() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
     crate::interaction::sweep_lost_continuous_host();
-    crate::tooltip::sweep_unpainted_tooltips();
+}
+
+/// End a rendered frame for one window. Sweeps only that window's unpainted
+/// tooltip so another window's pending or visible state survives this paint.
+pub fn overlay_frame_end_for(handle: AnyWindowHandle) {
+    overlay_frame_end();
+    crate::tooltip::sweep_unpainted_tooltips(handle);
 }
 
 /// Queue a focus request for the element with this id. The target element's
@@ -294,7 +314,7 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
 /// traversal itself (`focus_next`/`focus_prev` over the frame's tab stops) but
 /// binds no key to it, so the window host is where the gesture meets the
 /// machinery — the one place a browser also puts it.
-pub fn attach_overlay_host<E>(el: E) -> E
+pub fn attach_overlay_host<E>(el: E, window_handle: AnyWindowHandle) -> E
 where
     E: gpui::InteractiveElement + gpui::ParentElement + 'static,
 {
@@ -324,7 +344,7 @@ where
             },
         );
 
-    if let Some(tooltip_node) = crate::tooltip::render_active_tooltip() {
+    if let Some(tooltip_node) = crate::tooltip::render_active_tooltip(window_handle) {
         el = el.child(tooltip_node);
     }
 

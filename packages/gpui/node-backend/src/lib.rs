@@ -53,7 +53,8 @@ pub mod file_capability;
 
 pub use tooltip::{
     is_tooltip_pending, is_tooltip_visible, painted_tooltip, painted_tooltip_for,
-    reset_tooltip_registry, PaintedTooltip, TOOLTIP_DELAY,
+    reset_tooltip_registry, teardown_window_tooltips, tooltip_runtime_owns_window, PaintedTooltip,
+    TOOLTIP_DELAY,
 };
 pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState};
 
@@ -65,7 +66,8 @@ pub use drag::{
 use interaction::apply_listeners;
 pub use layers::{
     attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, layer_for_element,
-    open_layer_count, overlay_frame_begin, overlay_frame_end, request_focus, spared_layer_ids_at,
+    open_layer_count, overlay_frame_begin, overlay_frame_begin_for, overlay_frame_end,
+    overlay_frame_end_for, request_focus, spared_layer_ids_at,
 };
 use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,

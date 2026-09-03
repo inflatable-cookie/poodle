@@ -65,13 +65,15 @@ impl Focusable for HeadlessRoot {
 }
 
 impl Render for HeadlessRoot {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // Same production frame lifetime as PreviewRoot: begin at render,
         // end after this effect cycle so a removed continuous-value host
-        // cancels in the removal frame without a next-frame delay.
-        poodle_gpui_node_backend::overlay_frame_begin();
-        cx.defer(|_cx| {
-            poodle_gpui_node_backend::overlay_frame_end();
+        // cancels in the removal frame without a next-frame delay. Tooltip
+        // prepare/sweep/render are keyed to this window's handle.
+        let window_handle = window.window_handle();
+        poodle_gpui_node_backend::overlay_frame_begin_for(window_handle, cx);
+        cx.defer(move |_cx| {
+            poodle_gpui_node_backend::overlay_frame_end_for(window_handle);
         });
         // The same per-frame reset the production root performs
         // (`main.rs`): without it, generated element ids mint fresh every
@@ -122,6 +124,7 @@ impl Render for HeadlessRoot {
                             .justify_center()
                             .child(content),
                     ),
+                    window_handle,
                 )
             })
         })
@@ -313,8 +316,18 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.run_until_parked();
     }
 
-    /// Same production frame lifetime as the preview root: `overlay_frame_begin`
-    /// during render and `overlay_frame_end` deferred to the end of this cycle.
+    /// Close this window through GPUI's production removal path. Fires the
+    /// backend's window-closed tooltip teardown; does not call
+    /// `reset_focus_registry`.
+    pub fn close_window(&mut self) {
+        self.cx.update(|window, _cx| {
+            window.remove_window();
+        });
+        self.cx.run_until_parked();
+    }
+
+    /// Same production frame lifetime as the preview root: `overlay_frame_begin_for`
+    /// during render and `overlay_frame_end_for` deferred to the end of this cycle.
     pub fn draw_preview_frame(&mut self) {
         self.paint_frame();
     }
