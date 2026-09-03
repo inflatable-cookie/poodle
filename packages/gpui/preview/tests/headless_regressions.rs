@@ -6656,7 +6656,26 @@ fn status_indicator_status_reason_tokens_and_identity_rebuild_through_mounted_ba
         ] {
             assert!(channels.contains(&channel), "backend receives {channel}");
         }
-        assert!(driver.mounted_observation().is_valid());
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+
+        nucleus_receipts::emit_if_configured(
+            "StatusIndicator",
+            "nucleus.agent.status-indicator",
+            observation,
+            &[
+                "mount duplicate StatusIndicator instances through node_compat::StatusIndicator::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch mounted pointer input through the inert indicator before rebuilding one caller-scoped instance across every status, size, and density posture",
+            ],
+            &[
+                "production Icon dot and Text label composition preserves exact status, reason, typography, tone, size, density, glow, and wrap metadata",
+                "all six statuses, five sizes, and three densities survive host-owned rebuilds while the duplicate instance remains unchanged",
+                "duplicate mounted roots have positive extents, preserve authored order, and begin inside the real mount while dot and label stay contained by their production roots on every rebuild",
+                "root, Icon dot, and Text label stay outside the focus chain and mounted pointer input cannot mutate the inert host-owned spec",
+                "caller-scoped identities keep duplicate metadata, runtime ids, state rebuilds, and geometry isolated",
+                "backend mounted observation confirms production render, paint, and GPUI input dispatch after every terminal assertion",
+            ],
+        );
     });
 }
 
