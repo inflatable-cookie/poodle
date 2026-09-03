@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "AgentPlan",
-  "scenario_id": "nucleus.agent.agent-plan",
+  "component": "AgentQuestion",
+  "scenario_id": "nucleus.agent.agent-question",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,15 +46,16 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount duplicate controlled AgentPlan instances through node_compat::AgentPlan::from_spec(...).into_element() in HeadlessDriver",
-    "dispatch refused and accepted pointer or keyboard decisions through the GPUI test platform",
-    "rebuild host-owned pending, accepted, dismissed, and revised states through the production adapter path"
+    "mount duplicate controlled AgentQuestion instances through node_compat::AgentQuestion::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch pointer and keyboard choices plus dismissal through the mounted GPUI test platform while rebuilding from host-owned selections",
+    "dispatch mounted pointer input at a production Button option carrying a live callback and host-state sink while its disabled gate is active"
   ],
   "assertions": [
-    "production AgentMessage, Text, and Button composition preserves plan records, decision order, semantics, and exact contract-owned resting, hover, focus, radius, spacing, and status tokens",
-    "mounted roots and decision affordances have positive ordered bounds contained within their caller-scoped plan",
-    "refused acceptance remains pending while accepted, dismissed, and revised decisions rebuild before painted affordances disappear",
+    "production Text and Button composition preserves prompt, option, selection, progress, dismissal, accessibility, and exact token metadata",
+    "mounted question roots, option rows, dismissal, and disabled witness have positive full extents, authored non-overlapping order, and real mount or production-parent containment",
+    "single-select replacement, multi-select toggling, refusal, dismissal, and host-owned rebuilds preserve exact callback and state traces",
     "duplicate caller identities keep focus, callbacks, state, and bounds isolated",
+    "the mounted disabled production Button suppresses its supplied live callback and host mutation; removing the disabled gate makes this oracle fail",
     "backend probe channels and mounted observation confirm production render, accessibility, token, paint, and GPUI input dispatch"
   ],
   "outcome": "passed",

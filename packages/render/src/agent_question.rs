@@ -6,8 +6,10 @@
 use std::sync::Arc;
 
 use poodle_headless::agent_question::QuestionProgressState;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
-use poodle_specs::AgentQuestionSpec;
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole, NodeToggled};
+use poodle_specs::{
+    AgentQuestionSpec, ButtonSpec, ButtonVariant, TextSize, TextSpec, TextTone, TextWeight,
+};
 
 use crate::color::{mix_srgb, TRANSPARENT};
 use crate::context::RenderContext;
@@ -23,6 +25,26 @@ pub struct AgentQuestionHandlers {
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the question's id when the dismiss control is used.
     pub on_dismiss: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope for the root and its controls. Duplicate
+    /// questions can share option values, so question ids alone are not enough
+    /// to keep backend focus and input state separate.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one question option.
+pub fn agent_question_option_focus_id(instance_id: Option<&str>, value: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-question:{scope}:option:{value}"),
+        None => format!("agent-question-option-{value}"),
+    }
+}
+
+/// The backend-state id of the optional dismiss control.
+pub fn agent_question_dismiss_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-question:{scope}:dismiss"),
+        None => "agent-question-dismiss".to_owned(),
+    }
 }
 
 pub fn agent_question(
@@ -70,9 +92,43 @@ pub fn agent_question(
     };
 
     let mut root = Node::container();
+    root.runtime_id = handlers
+        .instance_id
+        .as_deref()
+        .map(|scope| format!("agent-question:{scope}"));
     root.style.descriptor.layout.direction = LayoutDirection::Column;
     root.style.fill_width = true;
     root.style.descriptor.layout.spacing.gap = gap;
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{base_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "multi-select".to_owned(),
+        spec.is_multi_select().to_string(),
+    );
+
+    let text = |content: &str,
+                tone: TextTone,
+                size: TextSize,
+                weight: TextWeight,
+                resolved_size: f32,
+                color| {
+        let mut node = crate::text::text(
+            &TextSpec::new(content)
+                .with_tone(tone)
+                .with_size(size)
+                .with_weight(weight),
+            ctx,
+        );
+        node.style.text_size = Some(resolved_size);
+        node.style.descriptor.text_color = Some(color);
+        node
+    };
 
     if spec.shows_progress() {
         let progress = spec.progress();
@@ -100,14 +156,21 @@ pub fn agent_question(
                 s.descriptor.background = Some(if answered { accent } else { border });
             }
             all_radius(&mut dot, 999.0);
+            dot.roles
+                .insert("state".to_owned(), state.as_str().to_owned());
             dots = dots.child(dot);
         }
 
         // The dots are a picture of the label; the label carries the fact for
         // anyone who cannot see them.
-        let mut label = Node::text(spec.resolved_progress_label());
-        label.style.text_size = Some(font_size);
-        label.style.descriptor.text_color = Some(progress_color);
+        let label = text(
+            &spec.resolved_progress_label(),
+            TextTone::Secondary,
+            TextSize::Xs,
+            TextWeight::Normal,
+            font_size,
+            progress_color,
+        );
         let mut row = Node::container();
         row.style.descriptor.layout.direction = LayoutDirection::Row;
         row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
@@ -116,15 +179,25 @@ pub fn agent_question(
     }
 
     if let Some(header) = &question.header {
-        let mut h = Node::text(header.clone());
-        h.style.text_size = Some(font_size * 0.85);
-        h.style.descriptor.text_color = Some(progress_color);
+        let h = text(
+            header,
+            TextTone::Secondary,
+            TextSize::Xs,
+            TextWeight::Semibold,
+            font_size * 0.85,
+            progress_color,
+        );
         root = root.child(h);
     }
 
-    let mut prompt = Node::text(question.prompt.clone());
-    prompt.style.text_size = Some(prompt_size);
-    prompt.style.descriptor.text_color = Some(prompt_color);
+    let prompt = text(
+        &question.prompt,
+        TextTone::Default,
+        TextSize::Md,
+        TextWeight::Normal,
+        prompt_size,
+        prompt_color,
+    );
     let mut root = root.child(prompt);
 
     // The question and its answers are separate units, so the step between them
@@ -145,10 +218,14 @@ pub fn agent_question(
     for (index, option) in question.options.iter().enumerate() {
         let selected = spec.is_selected(&option.value);
 
-        let mut label = Node::text(option.label.clone());
-        label.style.text_size = Some(font_size);
-        label.style.text_weight = Some(600);
-        label.style.descriptor.text_color = Some(label_color);
+        let label = text(
+            &option.label,
+            TextTone::Default,
+            TextSize::Sm,
+            TextWeight::Semibold,
+            font_size,
+            label_color,
+        );
 
         let mut body = Node::container();
         {
@@ -161,23 +238,56 @@ pub fn agent_question(
         let mut body = body.child(label);
 
         if let Some(description) = &option.description {
-            let mut d = Node::text(description.clone());
-            d.style.text_size = Some(font_size);
-            d.style.descriptor.text_color = Some(description_color);
+            let d = text(
+                description,
+                TextTone::Secondary,
+                TextSize::Sm,
+                TextWeight::Normal,
+                font_size,
+                description_color,
+            );
             body = body.child(d);
         }
 
-        let mut row = Node::button("");
+        let on_click = handlers.on_select.as_ref().map(|handler| {
+            let handler = Arc::clone(handler);
+            let value = option.value.clone();
+            Arc::new(move || handler(&value)) as Arc<dyn Fn() + Send + Sync>
+        });
+        let button_spec = ButtonSpec::new()
+            .with_label("")
+            .with_aria_label(option.label.clone())
+            .with_variant(ButtonVariant::Secondary)
+            .with_size(base_size)
+            .with_density(density)
+            .with_pressed(selected);
+        let mut row = crate::button::button(&button_spec, ctx, on_click);
+        row.id = Some(format!("agent-question-option-{}", option.value));
+        row.runtime_id = Some(agent_question_option_focus_id(
+            handlers.instance_id.as_deref(),
+            &option.value,
+        ));
         row.a11y.label = Some(option.label.clone());
         row.a11y.role = Some(if spec.is_multi_select() {
             NodeRole::CheckBox
         } else {
             NodeRole::RadioButton
         });
+        row.a11y.selected = Some(selected);
+        row.a11y.toggled = Some(if selected {
+            NodeToggled::True
+        } else {
+            NodeToggled::False
+        });
+        row.roles
+            .insert("selected".to_owned(), selected.to_string());
         {
             let s = &mut row.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.fill_width = true;
+            s.descriptor.layout.width = LayoutSizing::Grow;
+            s.descriptor.layout.height = LayoutSizing::Fit;
+            s.min_width = None;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
             s.descriptor.layout.spacing.gap = rem_to_px(0.5);
             let pad = &mut s.descriptor.layout.spacing.padding;
@@ -188,9 +298,9 @@ pub fn agent_question(
             s.descriptor.border.width = hairline;
             s.descriptor.border.color = if selected { accent } else { TRANSPARENT };
             s.descriptor.background = Some(if selected { selected_fill } else { option_fill });
+            s.descriptor.text_color = Some(label_color);
         }
         all_radius(&mut row, radius);
-        row.interaction.focusable = true;
 
         // Only multi-select shows a check, so the mode is visible before the
         // first click rather than inferred after it.
@@ -204,17 +314,15 @@ pub fn agent_question(
         row = row.child(body);
 
         if let Some(shortcut) = spec.shortcut_for(index) {
-            let mut key = Node::text(format!("{shortcut}"));
-            key.style.text_size = Some(font_size * 0.9);
-            key.style.descriptor.text_color = Some(shortcut_color);
+            let key = text(
+                &shortcut.to_string(),
+                TextTone::Secondary,
+                TextSize::Xs,
+                TextWeight::Normal,
+                font_size * 0.9,
+                shortcut_color,
+            );
             row = row.child(key);
-        }
-
-        if let Some(handler) = &handlers.on_select {
-            let handler = Arc::clone(handler);
-            let value = option.value.clone();
-            row.style.descriptor.cursor = CursorHint::Pointer;
-            row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
         }
 
         options = options.child(row);
@@ -223,22 +331,24 @@ pub fn agent_question(
     root = root.child(options);
 
     if spec.is_dismissible {
-        let mut dismiss = Node::button("");
-        dismiss.a11y.label = Some(spec.dismiss_label.clone());
-        dismiss.a11y.role = Some(NodeRole::Button);
-        dismiss.style.descriptor.background = Some(TRANSPARENT);
-        dismiss.interaction.focusable = true;
-
-        let mut label = Node::text(spec.dismiss_label.clone());
-        label.style.text_size = Some(font_size);
-        label.style.descriptor.text_color = Some(dismiss_color);
-        let mut dismiss = dismiss.child(label);
-
-        if let Some(handler) = handlers.on_dismiss {
+        let on_click = handlers.on_dismiss.map(|handler| {
             let id = question.id.clone();
-            dismiss.style.descriptor.cursor = CursorHint::Pointer;
-            dismiss.interaction.on_activate = Some(Arc::new(move || handler(&id)));
-        }
+            Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
+        });
+        let button_spec = ButtonSpec::new()
+            .with_label(spec.dismiss_label.clone())
+            .with_aria_label(spec.dismiss_label.clone())
+            .with_variant(ButtonVariant::Ghost)
+            .with_size(base_size)
+            .with_density(density);
+        let mut dismiss = crate::button::button(&button_spec, ctx, on_click);
+        dismiss.id = Some("agent-question-dismiss".to_owned());
+        dismiss.runtime_id = Some(agent_question_dismiss_focus_id(
+            handlers.instance_id.as_deref(),
+        ));
+        dismiss.style.descriptor.background = Some(TRANSPARENT);
+        dismiss.style.descriptor.text_color = Some(dismiss_color);
+        dismiss.style.text_size = Some(font_size);
 
         root = root.child(dismiss);
     }
