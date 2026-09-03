@@ -22,7 +22,7 @@ use std::sync::{Arc, Mutex};
 // Explicit import only: `use gpui::*` would glob in gpui's `test` proc macro
 // and shadow the built-in `#[test]` attribute (gpui-macros 0.2.2's `test`
 // crashes on current rustc).
-use gpui::{point, px, Modifiers, Pixels, Point, TestAppContext};
+use gpui::{point, px, InteractiveElement, IntoElement, Modifiers, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::audio::{AudioValueLaw, KnobDragMode, XYPadVisualState};
 use poodle_headless::time_input::{
@@ -24230,28 +24230,23 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         let refuse_close = Arc::new(Mutex::new(false));
         let dismiss_on_backdrop_state = Arc::new(Mutex::new(true));
         let dismiss_on_escape_state = Arc::new(Mutex::new(true));
-        let dismiss_on_outside_state = Arc::new(Mutex::new(false));
         let close_requests = Arc::new(Mutex::new(Vec::<&'static str>::new()));
         let action_events = Arc::new(Mutex::new(Vec::<&'static str>::new()));
 
-        let mounted = Arc::new(Mutex::new(Node::container()));
-
-        fn build_dialog_host(
-            ctx: &RenderContext<'_>,
+        fn build_dialog_element(
             is_open: &Arc<Mutex<bool>>,
             refuse_close: &Arc<Mutex<bool>>,
             dismiss_on_backdrop_state: &Arc<Mutex<bool>>,
             dismiss_on_escape_state: &Arc<Mutex<bool>>,
-            dismiss_on_outside_state: &Arc<Mutex<bool>>,
             close_requests: &Arc<Mutex<Vec<&'static str>>>,
             action_events: &Arc<Mutex<Vec<&'static str>>>,
-            mounted: &Arc<Mutex<Node>>,
-        ) -> Node {
+        ) -> gpui::AnyElement {
             if !*is_open.lock().unwrap() {
-                let mut empty = Node::container();
-                empty.id = Some("unmounted-host".to_string());
-                return empty;
+                return gpui::div().id("unmounted-host").into_any_element();
             }
+
+            let theme_provider = theme();
+            let ctx = RenderContext::new(&theme_provider);
 
             let spec = DialogSpec::new()
                 .with_title("Confirm Dataset Export")
@@ -24261,7 +24256,6 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 .with_width(DialogWidth::Md)
                 .with_dismiss_on_backdrop(*dismiss_on_backdrop_state.lock().unwrap())
                 .with_dismiss_on_escape(*dismiss_on_escape_state.lock().unwrap())
-                .with_dismiss_on_outside_interact(*dismiss_on_outside_state.lock().unwrap())
                 .with_role(DialogKind::Dialog);
 
             let surface_spec = SurfaceSpec::new()
@@ -24270,7 +24264,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 .with_padding(PaddingScale::Md);
             let mut body_surface = poodle_render::surface(
                 &surface_spec,
-                ctx,
+                &ctx,
                 vec![Node::text("Dataset: telemetry-log-2026.parquet")],
             );
             body_surface.id = Some("dialog-body-surface".to_string());
@@ -24282,7 +24276,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 .with_disabled(true);
             let mut disabled_btn = poodle_render::button(
                 &disabled_btn_spec,
-                ctx,
+                &ctx,
                 Some(Arc::new(move || {
                     actions_sink_disabled.lock().unwrap().push("disabled");
                 })),
@@ -24295,7 +24289,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 .with_variant(ButtonVariant::Secondary);
             let mut cancel_btn = poodle_render::button(
                 &cancel_btn_spec,
-                ctx,
+                &ctx,
                 Some(Arc::new(move || {
                     actions_sink_cancel.lock().unwrap().push("cancel");
                 })),
@@ -24308,7 +24302,7 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
                 .with_variant(ButtonVariant::Primary);
             let mut confirm_btn = poodle_render::button(
                 &confirm_btn_spec,
-                ctx,
+                &ctx,
                 Some(Arc::new(move || {
                     actions_sink_confirm.lock().unwrap().push("confirm");
                 })),
@@ -24328,53 +24322,42 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             let close_sink = Arc::clone(close_requests);
             let open_sink = Arc::clone(is_open);
             let refuse_sink = Arc::clone(refuse_close);
-            let b_state = Arc::clone(dismiss_on_backdrop_state);
-            let e_state = Arc::clone(dismiss_on_escape_state);
-            let o_state = Arc::clone(dismiss_on_outside_state);
-            let a_sink = Arc::clone(action_events);
-            let m_sink = Arc::clone(mounted);
-            let theme_for_rebuild = theme();
-            let theme_for_closure = theme_for_rebuild.clone();
 
             let on_request_close = Arc::new(move || {
                 close_sink.lock().unwrap().push("request-close");
                 if !*refuse_sink.lock().unwrap() {
                     *open_sink.lock().unwrap() = false;
-                    let next = build_dialog_host(
-                        &RenderContext::new(&theme_for_closure),
-                        &open_sink,
-                        &refuse_sink,
-                        &b_state,
-                        &e_state,
-                        &o_state,
-                        &close_sink,
-                        &a_sink,
-                        &m_sink,
-                    );
-                    *m_sink.lock().unwrap() = next;
                 }
             });
 
-            crate::node_compat::Dialog::from_spec(spec, &theme_for_rebuild)
+            use gpui::IntoElement;
+            crate::node_compat::Dialog::from_spec(spec, &theme_provider)
                 .with_content(body_surface)
                 .with_actions(actions_container)
                 .on_request_close(on_request_close)
-                .into_node()
+                .into_element()
         }
 
-        *mounted.lock().unwrap() = build_dialog_host(
-            &ctx,
-            &is_open,
-            &refuse_close,
-            &dismiss_on_backdrop_state,
-            &dismiss_on_escape_state,
-            &dismiss_on_outside_state,
-            &close_requests,
-            &action_events,
-            &mounted,
-        );
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let is_open = Arc::clone(&is_open);
+            let refuse_close = Arc::clone(&refuse_close);
+            let dismiss_on_backdrop_state = Arc::clone(&dismiss_on_backdrop_state);
+            let dismiss_on_escape_state = Arc::clone(&dismiss_on_escape_state);
+            let close_requests = Arc::clone(&close_requests);
+            let action_events = Arc::clone(&action_events);
+            Rc::new(move || {
+                build_dialog_element(
+                    &is_open,
+                    &refuse_close,
+                    &dismiss_on_backdrop_state,
+                    &dismiss_on_escape_state,
+                    &close_requests,
+                    &action_events,
+                )
+            })
+        };
 
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 800.0, 600.0);
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
 
         let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
             .expect("poodle-dialog-backdrop bounds must exist");
@@ -24469,17 +24452,6 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         // 4b. Backdrop click with dismiss_on_backdrop: false -> inert
         *dismiss_on_backdrop_state.lock().unwrap() = false;
         *dismiss_on_escape_state.lock().unwrap() = true;
-        *mounted.lock().unwrap() = build_dialog_host(
-            &ctx,
-            &is_open,
-            &refuse_close,
-            &dismiss_on_backdrop_state,
-            &dismiss_on_escape_state,
-            &dismiss_on_outside_state,
-            &close_requests,
-            &action_events,
-            &mounted,
-        );
         driver.draw_frame();
         // Click backdrop outside panel (top-left margin)
         let backdrop_point = gpui::point(gpui::px(40.0), gpui::px(40.0));
@@ -24504,17 +24476,6 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         // (Proves that Backdrop click functions independently through the real GPUI Dialog compat path)
         *dismiss_on_backdrop_state.lock().unwrap() = true;
         *dismiss_on_escape_state.lock().unwrap() = false;
-        *mounted.lock().unwrap() = build_dialog_host(
-            &ctx,
-            &is_open,
-            &refuse_close,
-            &dismiss_on_backdrop_state,
-            &dismiss_on_escape_state,
-            &dismiss_on_outside_state,
-            &close_requests,
-            &action_events,
-            &mounted,
-        );
         driver.draw_frame();
         driver.pointer_press(backdrop_point);
         driver.pointer_release(backdrop_point);
@@ -24534,17 +24495,6 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
 
         // 4f. Inside panel click with dismiss_on_backdrop: true and dismiss_on_escape: true -> inert
         *dismiss_on_escape_state.lock().unwrap() = true;
-        *mounted.lock().unwrap() = build_dialog_host(
-            &ctx,
-            &is_open,
-            &refuse_close,
-            &dismiss_on_backdrop_state,
-            &dismiss_on_escape_state,
-            &dismiss_on_outside_state,
-            &close_requests,
-            &action_events,
-            &mounted,
-        );
         driver.draw_frame();
         driver.pointer_activate_id("dialog-body-surface");
         assert_eq!(

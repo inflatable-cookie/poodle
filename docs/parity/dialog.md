@@ -25,7 +25,8 @@ Robust impl; all token-resolved.
 
 - [x] Shadow — already token-resolved via `theme_ext::elevation_dialog_shadow()` (typed `ELEVATION_DIALOG`); the prior raw-HSLA stack referenced by the stale line numbers no longer exists in the code.
 - [x] Backdrop fill now resolves `spec.backdrop_fill_token()` (`color.background.overlay`) instead of the `hsla(0,0,0,0.5)` literal.
-- accepted: no ARIA (gpui has no accessibility API) — role/aria-modal not emitted; focus trap is platform-owned (Tier 3).
+- [x] Escape dismissal is backend-owned through overlay dismiss layers.
+- accepted: outside-interact, A1 (focus trapping, accessibility tree, modal background suppression, initial focus, focus restoration), and nested modal stacks remain unproved.
 
 ## Jetstream gap (vs Svelte + contract)
 

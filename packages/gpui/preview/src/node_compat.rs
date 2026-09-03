@@ -1988,7 +1988,7 @@ impl IntoElement for Dialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        native_dialog_element(self.into_node())
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -6238,8 +6238,63 @@ impl IntoElement for ConfirmAction {
     }
 }
 
-fn native_dialog_element(node: poodle_node::Node) -> AnyElement {
-    poodle_gpui_node_backend::to_gpui(&node)
+fn native_dialog_element(mut node: poodle_node::Node) -> AnyElement {
+    if matches!(node.position, poodle_node::NodePosition::Absolute { .. }) {
+        return native_dialog_backdrop(node);
+    }
+
+    let Some(backdrop_index) = node
+        .children
+        .iter()
+        .rposition(|child| matches!(child.position, poodle_node::NodePosition::Absolute { .. }))
+    else {
+        return poodle_gpui_node_backend::to_gpui(&node);
+    };
+    let backdrop = node.children.remove(backdrop_index);
+    let mut host = div();
+    for child in &node.children {
+        host = host.child(poodle_gpui_node_backend::to_gpui(child));
+    }
+    host.child(native_dialog_backdrop(backdrop))
+        .into_any_element()
+}
+
+fn native_dialog_backdrop(mut node: poodle_node::Node) -> AnyElement {
+    let Some(panel) = node.children.pop() else {
+        return poodle_gpui_node_backend::to_gpui(&node);
+    };
+    let fill = node
+        .style
+        .descriptor
+        .background
+        .map(poodle_gpui_node_backend::color)
+        .unwrap_or_else(gpui::transparent_black);
+    let dismiss = node.interaction.on_activate;
+    let mut backdrop = div()
+        .id("poodle-dialog-backdrop")
+        .absolute()
+        .inset_0()
+        .bg(fill)
+        .flex()
+        .items_center()
+        .justify_center()
+        .occlude()
+        .child(poodle_gpui_node_backend::to_gpui(&panel));
+    if let Some(dismiss) = dismiss {
+        let click = dismiss.clone();
+        backdrop = backdrop
+            .on_click(move |_event, _window, cx| {
+                click();
+                cx.refresh_windows();
+            })
+            .on_key_down(move |event: &KeyDownEvent, _window, cx| {
+                if event.keystroke.key == "escape" {
+                    dismiss();
+                    cx.refresh_windows();
+                }
+            });
+    }
+    backdrop.into_any_element()
 }
 
 fn native_alert_dialog_spacing(
