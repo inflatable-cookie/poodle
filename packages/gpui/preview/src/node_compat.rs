@@ -3818,6 +3818,7 @@ impl IntoElement for ListCard {
 /// Preview bridge for the first form-control slice. It keeps the old
 /// constructor shape while the stored value and interaction intent now flow
 /// through `poodle-render` and the node backend.
+#[derive(Clone)]
 pub(crate) struct TextInput {
     spec: TextInputSpec,
     theme: GpuiThemeProvider,
