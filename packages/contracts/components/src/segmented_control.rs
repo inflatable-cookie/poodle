@@ -238,4 +238,3 @@ mod tests {
         assert_eq!(explicit.tooltip_text(), Some("Switch to custom view"));
     }
 }
-
