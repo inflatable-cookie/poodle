@@ -7,6 +7,7 @@ Depends on: merged `g16.061`; reproduced ordinary-mode rejection on PR #199
 Governing refs: `059-installed-web-distribution-certification.md`, `061-installed-web-smoke-certification-routing.md`, `092-native-consumer-tinyvec-build.md`
 Handoff: `../../handoffs/20260904-001500-g16-094-ordinary-cargo-scope-classification.md`
 Proof commits: `9b14cf5ed` (plants), `3f9ef94d5` (classifier)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/200
 Execution log: `../../logs/2026-09/20260904-g16-094-ordinary-cargo-scope-classification.md`
 
 ## Goal

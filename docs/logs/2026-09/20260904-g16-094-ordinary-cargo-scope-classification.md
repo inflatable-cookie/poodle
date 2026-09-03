@@ -11,6 +11,7 @@ PR #199 exact-head review
 Branch: `fix/g16-094-ordinary-cargo-scope`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-094-ordinary-cargo-scope`
 Base: `origin/main` at `d7cd34aa14e8b240fd259a697994e98444deab7a`
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/200
 
 ## Outcome
 
