@@ -23907,6 +23907,77 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
     });
 }
 
+/// ModelPicker reaches the production compat adapter, renderer, Select-backed
+/// model choice, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
+    use gpui::IntoElement;
+    use poodle_specs::{
+        ModelAxisValue, ModelCapabilityAxis, ModelOption, ModelPickerSpec, ModelSelection,
+    };
+
+    fn spec() -> ModelPickerSpec {
+        ModelPickerSpec::new()
+            .with_models(vec![
+                ModelOption::new("atlas", "Atlas 3")
+                    .with_group("Atlas")
+                    .with_description("Primary provider model")
+                    .with_axes(vec!["effort".into(), "fast".into()]),
+                ModelOption::new("atlas-mini", "Atlas Mini")
+                    .with_group("Atlas")
+                    .with_axes(Vec::new()),
+                ModelOption::new("retired", "Retired Model")
+                    .with_group("Unavailable")
+                    .with_disabled(true),
+            ])
+            .with_axes(vec![
+                ModelCapabilityAxis::select(
+                    "effort",
+                    "Effort",
+                    vec![
+                        poodle_specs::ModelAxisOption::new("low", "Low"),
+                        poodle_specs::ModelAxisOption::new("high", "High"),
+                    ],
+                )
+                .with_default_value(ModelAxisValue::Text("low".into())),
+                ModelCapabilityAxis::toggle("fast", "Fast mode")
+                    .with_labels("Fast", "Normal"),
+            ])
+            .with_value(
+                ModelSelection::new("atlas")
+                    .with_axis("effort", ModelAxisValue::Text("high".into()))
+                    .with_axis("fast", ModelAxisValue::Flag(true)),
+            )
+            .with_open(true)
+    }
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            node_compat::ModelPicker::from_spec(
+                spec(),
+                &theme_provider,
+                "counterexample",
+            )
+            .into_element()
+        });
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 480.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("model-picker:counterexample").is_some(),
+            "the production ModelPicker IntoElement path must paint caller-scoped adapter identity"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(
+                "select:model-picker:counterexample:trigger"
+            )
+            .is_some(),
+            "the mounted model choice must retain production Select dependency identity"
+        );
+    });
+}
+
 /// g16.019. A production Select listbox that exceeds `size.menu.maxHeight`
 /// clips option rows past the cap. Short menus stay content-sized; this
 /// case is the long-menu half of that contract.
