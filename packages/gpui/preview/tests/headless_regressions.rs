@@ -30731,6 +30731,510 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
     });
 }
 
+/// ConfirmAction reaches the production compat adapter, renderer, composed
+/// Dialog/Button tree, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_spec() {
+    use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ConfirmActionSpec, ControlDensity, ControlSize, StatusTone};
+
+    fn spec(open: bool, tone: StatusTone) -> ConfirmActionSpec {
+        ConfirmActionSpec::new(
+            "Delete workspace?",
+            "This action cannot be undone.",
+            "Delete workspace",
+            "Keep workspace",
+        )
+        .with_trigger_label("Delete")
+        .with_tone(tone)
+        .with_size(ControlSize::Sm)
+        .with_density(ControlDensity::Compact)
+        .with_open(open)
+    }
+
+    fn id(scope: &str, part: &str) -> String {
+        format!("confirm-action:{scope}:{part}")
+    }
+
+    // The renderer proof makes the Dialog/Button dependencies and token
+    // metadata explicit. The mounted half below proves this same composition
+    // crosses the production compatibility adapter and backend.
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let danger = poodle_render::confirm_action(
+        &spec(false, StatusTone::Danger),
+        &ctx,
+        poodle_render::ConfirmActionHandlers::default(),
+    );
+    assert!(matches!(&danger.kind, NodeKind::Button { label } if label == "Delete"));
+    assert_eq!(danger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(danger.roles.get("variant").map(String::as_str), Some("secondary"));
+    assert_eq!(danger.roles.get("tone").map(String::as_str), Some("danger"));
+    assert_eq!(danger.roles.get("size").map(String::as_str), Some("sm"));
+    assert_eq!(danger.roles.get("density").map(String::as_str), Some("compact"));
+
+    let ordinary = poodle_render::confirm_action(
+        &spec(false, StatusTone::Warning),
+        &ctx,
+        poodle_render::ConfirmActionHandlers::default(),
+    );
+    assert_eq!(ordinary.roles.get("tone").map(String::as_str), Some("default"));
+
+    let body = Node::text("Workspace: alpha");
+    let open = poodle_render::confirm_action::confirm_action_with_slots_state(
+        &spec(true, StatusTone::Danger),
+        &ctx,
+        None,
+        Some(body),
+        false,
+        "Deleting\u{2026}",
+        poodle_render::ConfirmActionHandlers::default(),
+    );
+    assert_eq!(open.a11y.role, Some(NodeRole::AlertDialog));
+    assert!(open.has_text("Delete workspace?"));
+    assert!(open.has_text("This action cannot be undone."));
+    assert!(open.has_text("Workspace: alpha"));
+    let cancel = open
+        .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Keep workspace"))
+        .expect("ConfirmAction composes the cancel Button");
+    let confirm = open
+        .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Delete workspace"))
+        .expect("ConfirmAction composes the confirm Button");
+    assert_eq!(cancel.roles.get("variant").map(String::as_str), Some("ghost"));
+    assert_eq!(confirm.roles.get("variant").map(String::as_str), Some("primary"));
+    assert_eq!(confirm.roles.get("tone").map(String::as_str), Some("danger"));
+
+    let pending = poodle_render::confirm_action::confirm_action_with_slots_state(
+        &spec(true, StatusTone::Danger),
+        &ctx,
+        None,
+        None,
+        true,
+        "Deleting\u{2026}",
+        poodle_render::ConfirmActionHandlers::default(),
+    );
+    assert!(
+        pending
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Deleting\u{2026}"))
+            .is_some(),
+        "pending composition swaps the confirm label"
+    );
+    for label in ["Keep workspace", "Deleting\u{2026}"] {
+        let button = pending
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label: current } if current == label))
+            .unwrap_or_else(|| panic!("pending action {label}"));
+        assert!(button.interaction.disabled, "pending {label} is inert");
+        assert!(button.interaction.on_activate.is_none());
+    }
+    assert!(
+        pending
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-close"))
+            .is_none(),
+        "pending AlertDialog dependency removes its close affordance"
+    );
+
+    run_headless(|cx| {
+        #[derive(Clone)]
+        struct ActionState {
+            open: bool,
+            working: bool,
+            accept_close: bool,
+            tone: StatusTone,
+        }
+
+        struct Host {
+            left: ActionState,
+            right: ActionState,
+            events: Vec<String>,
+        }
+
+        fn state(host: &Host, scope: &str) -> ActionState {
+            match scope {
+                "left" => host.left.clone(),
+                "right" => host.right.clone(),
+                other => panic!("unknown ConfirmAction scope {other}"),
+            }
+        }
+
+        fn state_mut<'a>(host: &'a mut Host, scope: &str) -> &'a mut ActionState {
+            match scope {
+                "left" => &mut host.left,
+                "right" => &mut host.right,
+                other => panic!("unknown ConfirmAction scope {other}"),
+            }
+        }
+
+        fn element(host: &Arc<Mutex<Host>>, scope: &'static str) -> AnyElement {
+            let current = state(&host.lock().expect("ConfirmAction host"), scope);
+            let trigger_host = Arc::clone(host);
+            let confirm_host = Arc::clone(host);
+            let cancel_host = Arc::clone(host);
+            let mut content = Node::text(format!("Workspace: {scope}"));
+            content.id = Some(id(scope, "body"));
+
+            node_compat::ConfirmAction::from_spec(spec(current.open, current.tone), &theme())
+                .with_id(scope)
+                .with_content(content)
+                .working(current.working)
+                .working_label("Deleting\u{2026}")
+                .on_trigger(Arc::new(move || {
+                    let mut host = trigger_host.lock().expect("ConfirmAction host");
+                    host.events.push(format!("{scope}:trigger"));
+                    state_mut(&mut host, scope).open = true;
+                }))
+                .on_confirm(Arc::new(move || {
+                    let mut host = confirm_host.lock().expect("ConfirmAction host");
+                    host.events.push(format!("{scope}:confirm"));
+                    let action = state_mut(&mut host, scope);
+                    if action.accept_close {
+                        action.open = false;
+                    }
+                }))
+                .on_cancel(Arc::new(move || {
+                    let mut host = cancel_host.lock().expect("ConfirmAction host");
+                    host.events.push(format!("{scope}:cancel"));
+                    let action = state_mut(&mut host, scope);
+                    if action.accept_close {
+                        action.open = false;
+                    }
+                }))
+                .into_element()
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            left: ActionState {
+                open: false,
+                working: false,
+                accept_close: false,
+                tone: StatusTone::Danger,
+            },
+            right: ActionState {
+                open: false,
+                working: false,
+                accept_close: true,
+                tone: StatusTone::Warning,
+            },
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || {
+                div()
+                    // Match a production application host: the modal's
+                    // absolute inset resolves against this mounted box.
+                    .relative()
+                    .size_full()
+                    .flex()
+                    .flex_col()
+                    .gap(px(24.0))
+                    .child(element(&host, "left"))
+                    .child(element(&host, "right"))
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let left_trigger = id("left", "trigger");
+        let right_trigger = id("right", "trigger");
+        for trigger in [&left_trigger, &right_trigger] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(trigger).is_some(),
+                "production ConfirmAction IntoElement paints {trigger}"
+            );
+            driver.wait_for_focus_handle(trigger);
+        }
+        driver.focus_element(&left_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_trigger),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_trigger),
+            Some(false),
+            "duplicate labels keep caller-scoped focus identity"
+        );
+        let left_closed = poodle_gpui_node_backend::painted_node_for(&left_trigger)
+            .expect("left trigger reaches mounted backend");
+        let right_closed = poodle_gpui_node_backend::painted_node_for(&right_trigger)
+            .expect("right trigger reaches mounted backend");
+        assert_eq!(left_closed.roles.get("variant").map(String::as_str), Some("secondary"));
+        assert_eq!(left_closed.roles.get("tone").map(String::as_str), Some("danger"));
+        assert_eq!(right_closed.roles.get("tone").map(String::as_str), Some("default"));
+        assert_eq!(left_closed.roles.get("size").map(String::as_str), Some("sm"));
+        assert_eq!(left_closed.roles.get("density").map(String::as_str), Some("compact"));
+        assert_eq!(
+            left_closed.style.background,
+            Some(poodle_render::color::mix_srgb(
+                theme().resolve_color("color.status.danger"),
+                theme().resolve_color("color.background.surface"),
+                0.16,
+            )),
+            "destructive trigger uses the production secondary danger recipe"
+        );
+
+        // Pointer input opens only the left instance through the adapter
+        // callback and host-owned rebuild.
+        driver.pointer_activate_id(&left_trigger);
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(!host.lock().expect("ConfirmAction host").right.open);
+        assert_eq!(host.lock().expect("ConfirmAction host").events, ["left:trigger"]);
+
+        let left_backdrop = id("left", "backdrop");
+        let left_surface = id("left", "surface");
+        let left_body = id("left", "body");
+        let left_cancel = id("left", "cancel");
+        let left_confirm = id("left", "confirm");
+        let left_close = id("left", "close");
+        for part in [
+            &left_backdrop,
+            &left_surface,
+            &left_body,
+            &left_cancel,
+            &left_confirm,
+            &left_close,
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(part).is_some(),
+                "open ConfirmAction paints {part}"
+            );
+        }
+        let surface_snapshot = poodle_gpui_node_backend::painted_node_for(&left_surface)
+            .expect("Dialog surface reaches mounted backend");
+        for text in [
+            "Delete workspace?",
+            "This action cannot be undone.",
+            "Workspace: left",
+            "Keep workspace",
+            "Delete workspace",
+        ] {
+            assert!(
+                surface_snapshot.texts.iter().any(|mounted| mounted == text),
+                "mounted Dialog/Button composition carries {text:?}"
+            );
+        }
+        assert_eq!(
+            surface_snapshot.style.background,
+            Some(theme().resolve_color("color.background.elevated"))
+        );
+        assert_eq!(
+            surface_snapshot.style.border.color,
+            theme().resolve_color("color.border.default")
+        );
+        assert_eq!(
+            surface_snapshot.style.corner_radii.top_left,
+            theme().resolve_radius("radius.surface")
+        );
+        let mounted_cancel = poodle_gpui_node_backend::painted_node_for(&left_cancel)
+            .expect("cancel Button reaches mounted backend");
+        let mounted_confirm = poodle_gpui_node_backend::painted_node_for(&left_confirm)
+            .expect("confirm Button reaches mounted backend");
+        assert_eq!(mounted_cancel.a11y_role, Some(NodeRole::Button));
+        assert_eq!(mounted_confirm.a11y_role, Some(NodeRole::Button));
+        assert_eq!(mounted_cancel.roles.get("variant").map(String::as_str), Some("ghost"));
+        assert_eq!(mounted_confirm.roles.get("variant").map(String::as_str), Some("primary"));
+        assert_eq!(mounted_confirm.roles.get("tone").map(String::as_str), Some("danger"));
+
+        let mount_bounds = driver.mount_box_bounds();
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for(&left_backdrop).unwrap();
+        let surface_bounds = poodle_gpui_node_backend::bounds_for(&left_surface).unwrap();
+        let body_bounds = poodle_gpui_node_backend::bounds_for(&left_body).unwrap();
+        let cancel_bounds = poodle_gpui_node_backend::bounds_for(&left_cancel).unwrap();
+        let confirm_bounds = poodle_gpui_node_backend::bounds_for(&left_confirm).unwrap();
+        for bounds in [mount_bounds, backdrop_bounds, surface_bounds] {
+            assert!(bounds.size.width > px(0.0) && bounds.size.height > px(0.0));
+        }
+        assert_eq!(
+            backdrop_bounds, mount_bounds,
+            "production backdrop fills the exact mounted host box"
+        );
+        assert!(bounds_contain(mount_bounds, backdrop_bounds));
+        assert!(bounds_contain(backdrop_bounds, surface_bounds));
+        for bounds in [body_bounds, cancel_bounds, confirm_bounds] {
+            assert!(bounds_contain(surface_bounds, bounds));
+        }
+        assert!(body_bounds.bottom() <= cancel_bounds.top());
+        let actions_overlap = cancel_bounds.left() < confirm_bounds.right()
+            && confirm_bounds.left() < cancel_bounds.right()
+            && cancel_bounds.top() < confirm_bounds.bottom()
+            && confirm_bounds.top() < cancel_bounds.bottom();
+        assert!(
+            !actions_overlap,
+            "cancel {cancel_bounds:?} and confirm {confirm_bounds:?} must not overlap"
+        );
+        assert!(
+            cancel_bounds.right() <= confirm_bounds.left()
+                || cancel_bounds.bottom() <= confirm_bounds.top(),
+            "cancel remains before confirm across row or wrapped layout"
+        );
+        driver.wait_for_focus_handle(&left_confirm);
+        driver.focus_element(&left_confirm);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_confirm),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_trigger),
+            Some(false)
+        );
+
+        // Confirm, cancel, backdrop, and Escape are separate mounted inputs.
+        // The host refuses each request, so every route can be observed on
+        // the same instance without an implicit close masking later axes.
+        driver.pointer_activate_id(&left_confirm);
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            ["left:trigger", "left:confirm"],
+            "confirm emits exactly once before the host refuses close"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
+        driver.pointer_activate_id(&left_cancel);
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            ["left:trigger", "left:confirm", "left:cancel"],
+            "cancel button emits exactly once before the host refuses close"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
+        let outside_surface = point(
+            mount_bounds.right() - px(8.0),
+            mount_bounds.bottom() - px(8.0),
+        );
+        driver.pointer_press(outside_surface);
+        driver.pointer_release(outside_surface);
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            [
+                "left:trigger",
+                "left:confirm",
+                "left:cancel",
+                "left:cancel",
+            ],
+            "backdrop emits exactly once before the host refuses close"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
+        driver.focus_element(&left_confirm);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            [
+                "left:trigger",
+                "left:confirm",
+                "left:cancel",
+                "left:cancel",
+                "left:cancel",
+            ],
+            "each refusal route emits once and in mounted input order"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
+        // Pending host state rebuilds the composed AlertDialog with disabled
+        // actions and no close/dismiss route. Pointer and keyboard input are
+        // inert and cannot add callbacks.
+        host.lock().expect("ConfirmAction host").left.working = true;
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for(&left_cancel).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_confirm).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_close).is_none());
+        let before_pending = host.lock().expect("ConfirmAction host").events.clone();
+        driver.pointer_activate_id(&left_cancel);
+        driver.pointer_activate_id(&left_confirm);
+        driver.pointer_press(outside_surface);
+        driver.pointer_release(outside_surface);
+        driver.focus_element(&left_confirm);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            before_pending,
+            "pending cancel, confirm, backdrop, and Escape stay inert"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+
+        // Accepted keyboard confirm closes through the host rebuild and
+        // restores the closed trigger identity without claiming A1 focus
+        // trapping or restoration semantics.
+        {
+            let mut host = host.lock().expect("ConfirmAction host");
+            host.left.working = false;
+            host.left.accept_close = true;
+        }
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&left_confirm);
+        driver.keyboard_activate(&left_confirm);
+        assert!(!host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_trigger).is_some());
+
+        // The duplicate warning instance opens independently through keyboard
+        // input, keeps ordinary Button tone metadata, and accepts cancellation
+        // without touching the left instance.
+        driver.wait_for_focus_handle(&right_trigger);
+        driver.keyboard_activate(&right_trigger);
+        assert!(host.lock().expect("ConfirmAction host").right.open);
+        let right_confirm = id("right", "confirm");
+        let right_surface = id("right", "surface");
+        let warning_confirm = poodle_gpui_node_backend::painted_node_for(&right_confirm)
+            .expect("warning confirm Button reaches mounted backend");
+        assert_eq!(warning_confirm.roles.get("tone").map(String::as_str), Some("default"));
+        assert!(poodle_gpui_node_backend::bounds_for(&right_surface).is_some());
+        driver.pointer_activate_id(&id("right", "cancel"));
+        let state = host.lock().expect("ConfirmAction host");
+        assert!(!state.left.open);
+        assert!(!state.right.open);
+        assert_eq!(
+            state.events,
+            [
+                "left:trigger",
+                "left:confirm",
+                "left:cancel",
+                "left:cancel",
+                "left:cancel",
+                "left:confirm",
+                "right:trigger",
+                "right:cancel",
+            ],
+            "duplicate instances keep callback and controlled state ownership isolated"
+        );
+        drop(state);
+
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "ConfirmAction",
+            "nucleus.settings.confirm-action",
+            observation,
+            &[
+                "mount caller-scoped controlled ConfirmAction instances through node_compat::ConfirmAction::from_spec(...).into_element() in an 800x600 HeadlessDriver host",
+                "open destructive and ordinary instances with mounted pointer and keyboard activation through the GPUI test platform",
+                "drive confirm, cancel button, backdrop, and Escape as separate mounted inputs while the host refuses each close request",
+                "rebuild pending state and dispatch cancel, confirm, backdrop, and Escape input to prove every route remains inert",
+                "accept keyboard confirm and pointer cancel through host-owned rebuilds that unmount each Dialog independently",
+            ],
+            &[
+                "production ConfirmAction composes Dialog and Button nodes with exact title, description, body, action labels, alert-dialog role, variants, tone, size, and density metadata",
+                "destructive trigger and confirm actions resolve the production danger recipes while an ordinary warning request resolves default action tone",
+                "the positive 800x600 mount, backdrop, and surface bounds preserve exact mount-to-backdrop equality and mount-to-backdrop-to-surface containment",
+                "body and action bounds remain contained by the surface, ordered, and non-overlapping",
+                "confirm, cancel button, backdrop, and Escape each emit exactly one callback in mounted input order and immediate host refusal leaves the Dialog mounted",
+                "pending state disables both actions, removes the close affordance, and suppresses all pointer and Escape callbacks",
+                "accepted host rebuilds close the selected instance, restore its closed trigger path, and preserve sibling focus, callback, state, and runtime identity isolation",
+            ],
+        );
+    });
+}
+
 #[derive(Clone)]
 struct AgentChatInputState {
     id: String,
