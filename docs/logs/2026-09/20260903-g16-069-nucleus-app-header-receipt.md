@@ -14,6 +14,7 @@ Governing refs: `docs/roadmaps/g16/nucleus-gpui-parity-programme.md`,
 Branch: `feature/g16-069-nucleus-app-header-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-069-nucleus-app-header-receipt`
 Planning base: `a6b3a8e41` (`origin/main`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/175
 
 ## Outcome
 

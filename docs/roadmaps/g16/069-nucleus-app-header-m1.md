@@ -10,6 +10,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/app-header.md`,
 `../../contracts/components/icon.md`, `../../contracts/components/text.md`
 Log: `../../logs/2026-09/20260903-g16-069-nucleus-app-header-receipt.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/175
 
 ## Goal
 
