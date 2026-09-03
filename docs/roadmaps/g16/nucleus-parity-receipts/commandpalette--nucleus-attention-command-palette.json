@@ -1,0 +1,67 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "CommandPalette",
+  "scenario_id": "nucleus.attention.command-palette",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "cd2f2e13888dba5dcd507cb65e7f63a03e840f03",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount caller-scoped controlled CommandPalette instances through node_compat::CommandPalette::from_spec(...).into_element() in a 1600x640 HeadlessDriver host",
+    "compose Dialog, TextInput, and ActionDiscoveryPanel-owned ready, loading, empty, and no-results states through the production renderer and node_compat adapter",
+    "dispatch mounted keyboard navigation across enabled actions while preserving disabled skip and wrap",
+    "refuse an exact active-selection proposal through an unchanged host rebuild, then accept the later proposal and activate through mounted keyboard input",
+    "dispatch mounted query edits, disabled and enabled pointer activation, close-button dismissal, backdrop dismissal, and Escape dismissal through controlled host rebuilds",
+    "activate the duplicate witness palette after the subject unmounts"
+  ],
+  "assertions": [
+    "production CommandPalette composition preserves Dialog, TextInput, ActionDiscoveryPanel, EmptyState, Skeleton, Eyebrow, list, ListCard-equivalent row, and trailing-chip structure",
+    "loading renders five two-Skeleton rows while empty and no-results preserve distinct production EmptyState anatomy and copy",
+    "active rows resolve the exact 18% accent fill and 22% inset ring; badge chips use 16% accent fill with uppercase label treatment; shortcut chips use 76% surface fill with monospace treatment",
+    "a refused controlled active proposal keeps the old selected roving row and Enter target before an accepted proposal rebuilds to the new selection",
+    "disabled navigation and pointer activation remain inert while enabled navigation skips and wraps exactly",
+    "query, activation, close button, backdrop, and Escape remain separate controlled axes with refusal and acceptance proved through mounted input",
+    "positive mounted bounds preserve containment and ordering while caller-scoped runtime ids, focus, callbacks, controlled state, and geometry remain isolated across duplicate instances"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
