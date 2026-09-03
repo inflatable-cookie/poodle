@@ -1,6 +1,6 @@
 # g16.066 — GPUI Node Tooltip Lifecycle Runtime
 
-Status: implemented — awaiting orchestrator review
+Status: complete — merged in PR #171 at `6d2711372`
 Date: 2026-09-03
 Card: `docs/roadmaps/g16/066-gpui-node-tooltip-lifecycle-runtime.md`
 Handoff: `docs/handoffs/20260902-234015-g16-066-gpui-tooltip-runtime.md`

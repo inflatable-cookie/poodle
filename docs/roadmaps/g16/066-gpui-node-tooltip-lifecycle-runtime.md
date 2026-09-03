@@ -1,6 +1,6 @@
 # g16.066 — GPUI Node Tooltip Lifecycle Runtime
 
-Status: implementation-complete — PR pending orchestrator review
+Status: complete — merged in PR #171 at `6d2711372`
 Type: shared native backend repair
 Opened: 2026-09-02
 Implemented: 2026-09-03
