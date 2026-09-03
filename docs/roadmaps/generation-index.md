@@ -42,14 +42,15 @@ Updated: 2026-09-03
     parallel proof preparation and independent exact-head review; `079` merged
     in PR #183 after two repair/re-review rounds; `080` merged in PR #186 after
     one repair/re-review round; `081` merged in PR #187 after a preparation
-    token-recipe repair and independent finalization review
+    token-recipe repair and independent finalization review; `082` merged in
+    PR #188 after preparation repair and one final receipt-claim correction
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: finalize `g16.082` AgentChatInput against the merged 18/29
-    cohort identity. Prepare `g16.083` AgentTranscript and `g16.084`
-    AgentQuestion in parallel, but pause both before shared evidence. Receipt
-    emission, cohort refresh, exact-head review, and merge remain serial.
+  - Ready frontier: re-review the repaired `g16.083` AgentTranscript and
+    `g16.084` AgentQuestion preparations. Finalize the first accepted proof
+    against the merged 19/29 cohort identity. Receipt emission, cohort refresh,
+    exact-head review, and merge remain serial.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -66,8 +67,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: review and serially finalize `g16.082`; prepare `g16.083` and
-    `g16.084` while the
+  - Next move: choose the first accepted `g16.083`/`g16.084` proof for serial
+    finalization while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
