@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — complete through `g16.061`; Nucleus GPUI parity continuation
+Status: active — complete through `g16.074`; Nucleus GPUI parity continuation
 promoted from the accepted 29-component switch target
 Posture: strict-ready
 Opened: 2026-08-25
@@ -108,13 +108,14 @@ stay maintained; backend admission is not part of the first card.
 71. [071 — Nucleus SegmentedControl M1 receipt](071-nucleus-segmented-control-m1.md) — complete; merged in PR #177 with production exclusive semantics, mounted pointer/keyboard input, isolated identity, and one M1 receipt
 72. [072 — Nucleus Tabs M1 receipt](072-nucleus-tabs-m1.md) — complete; merged in PR #178 with production tab relationships, mounted selection/close/reorder input, activation and axis proofs, isolated identity, and one M1 receipt
 73. [073 — Nucleus Menu M1 receipt](073-nucleus-menu-m1.md) — complete; merged in PR #179 with one production panel fixture, mounted command-list input, single-entry tab posture, controlled checked-state rebuild, and one M1 receipt
-74. [074 — Nucleus Dialog M1 receipt](074-nucleus-dialog-m1.md) — ready; establish one mounted production modal fixture for Nucleus-shaped title, body, actions, close, backdrop, Escape, and controlled host rebuild behavior
+74. [074 — Nucleus Dialog M1 receipt](074-nucleus-dialog-m1.md) — complete; merged in PR #180 after three exact-head review rounds with real Dialog adapter dispatch, independent backdrop/Escape policy, controlled refusal/close, and one M1 receipt
+75. [075 — Nucleus Popover M1 receipt](075-nucleus-popover-m1.md) — ready; strengthen the existing nested-overlay fixture into one production Popover adapter receipt with mounted toggle, dismissal, focus, geometry, and instance isolation
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.073` are complete. `g16.074` is the next ready small Nucleus
+`g16.053`–`g16.074` are complete. `g16.075` is the next ready small Nucleus
 receipt child; later receipt cards remain serial on its exact native source
 identity. Release mutation remains
 separately gated.
