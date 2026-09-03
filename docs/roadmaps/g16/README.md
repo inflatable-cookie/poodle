@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — complete through `g16.074`; Nucleus GPUI parity continuation
+Status: active — complete through `g16.079`; Nucleus GPUI parity continuation
 promoted from the accepted 29-component switch target
 Posture: strict-ready
 Opened: 2026-08-25
@@ -113,17 +113,17 @@ stay maintained; backend admission is not part of the first card.
 76. [076 — Nucleus Select M1 receipt](076-nucleus-select-m1.md) — complete; merged in PR #182 with production adapter execution, paired-instance isolation, mounted search/navigation/dismissal proofs, and one M1 receipt
 77. [077 — Nucleus TextInput M1 receipt](077-nucleus-text-input-m1.md) — complete; merged in PR #184 with production adapter execution, mounted controlled-editing and paired-identity proofs, semantic projection repair, and one M1 receipt
 78. [078 — Nucleus RadioGroup M1 receipt](078-nucleus-radio-group-m1.md) — complete; merged in PR #185 with production adapter execution, mounted exclusive/roving input, caller-scoped identity, and one M1 receipt
-79. [079 — Nucleus Switch M1 receipt](079-nucleus-switch-m1.md) — finalization-ready; rebase the prepared production proof onto the merged RadioGroup identity, emit the cohort, and run full boards
+79. [079 — Nucleus Switch M1 receipt](079-nucleus-switch-m1.md) — complete; merged in PR #183 with production adapter execution, mounted pointer and controlled-state proofs, disabled focus suppression, exact custom-color precedence, and one M1 receipt
+80. [080 — Nucleus EditableLabel M1 receipt](080-nucleus-editable-label-m1.md) — ready; strengthen the retained mounted edit-session proof over the completed TextInput dependency and emit the next serial cohort
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.078` are complete. `g16.079` is the active receipt finalization
-lane with a prepared production proof. Receipt emission, cohort refresh,
-review, and merge remain serial
-on the latest native source identity
-identity. Release mutation remains
+`g16.053`–`g16.079` are complete. `g16.080` is the active Nucleus receipt card,
+compiled from the refreshed 16/29 mounted cohort. Receipt emission, cohort
+refresh, review, and merge remain serial on the latest native source identity.
+Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
 explicit serial or external gates. Completed `g16.054` does not inherit release

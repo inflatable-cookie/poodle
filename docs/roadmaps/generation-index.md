@@ -39,13 +39,15 @@ Updated: 2026-09-03
     review rounds; `075` merged in PR #181 after independent exact-head review;
     `076` merged in PR #182 after one repair/re-review round; `077` merged in
     PR #184 after one repair/re-review round; `078` merged in PR #185 after
-    parallel proof preparation and independent exact-head review
+    parallel proof preparation and independent exact-head review; `079` merged
+    in PR #183 after two repair/re-review rounds
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: finalize the prepared `g16.079` Switch proof against the
-    merged RadioGroup identity. Receipt emission, cohort refresh, exact-head
-    review, and merge remain serial; do not emit competing receipt cohorts.
+  - Ready frontier: execute `g16.080` EditableLabel against the merged
+    TextInput and 16/29 mounted cohort identity. Receipt emission, cohort
+    refresh, exact-head review, and merge remain serial; do not emit competing
+    receipt cohorts.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -62,7 +64,7 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: resume, finalize, and review `g16.079` while the
+  - Next move: dispatch, review, and merge `g16.080` while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
