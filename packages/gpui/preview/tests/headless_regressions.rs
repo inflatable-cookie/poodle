@@ -29153,6 +29153,151 @@ fn toast_host_all_placements_are_exact_ordered_and_contained_when_mounted() {
     });
 }
 
+/// g16.091. Resolved ToastHost presentation must survive the production
+/// adapter and real backend paint; role-only renderer metadata is insufficient.
+#[test]
+fn toast_host_exact_tones_composition_axes_and_focus_reach_mounted_paint() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::mix_srgb;
+    use poodle_specs::{SemanticControlSizeRole, ToastHostPlacement, ToastHostSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build_theme = theme_provider.clone();
+        let build = Rc::new(move || {
+            div()
+                .relative()
+                .size_full()
+                .child(
+                    node_compat::ToastHost::from_spec(
+                        ToastHostSpec::new()
+                            .with_placement(ToastHostPlacement::TopStart)
+                            .with_size_role(SemanticControlSizeRole::Prominent)
+                            .with_density(ControlDensity::Comfortable),
+                        &build_theme,
+                    )
+                    .with_instance_id("tokens")
+                    .toasts(vec![
+                        Toast::new("info", "Information")
+                            .with_tone(ToastTone::Info)
+                            .with_action_label("Inspect"),
+                        Toast::new("success", "Published")
+                            .with_tone(ToastTone::Success)
+                            .with_action_label("Inspect"),
+                        Toast::new("warning", "Rate limited")
+                            .with_tone(ToastTone::Warning)
+                            .with_action_label("Inspect"),
+                        Toast::new("danger", "Publishing failed")
+                            .with_tone(ToastTone::Danger)
+                            .with_action_label("Inspect"),
+                    ]),
+                )
+                .into_any_element()
+        }) as Rc<dyn Fn() -> gpui::AnyElement>;
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 640.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let _channels = poodle_gpui_node_backend::take_probe_capture();
+
+        let stack = poodle_gpui_node_backend::painted_node_for("toast-host:tokens:stack")
+            .expect("mounted ToastStack paint");
+        assert_eq!(stack.roles.get("size").map(String::as_str), Some("lg"));
+        assert_eq!(
+            stack.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(
+            stack.style.layout.spacing.gap,
+            theme_provider.resolve_space("space.stack.lg")
+        );
+
+        let elevated = theme_provider.resolve_color("color.background.elevated");
+        let border_default = theme_provider.resolve_color("color.border.default");
+        let pad = theme_provider.resolve_space("space.panel.x") * 1.25;
+        for (id, tone_token) in [
+            ("info", "color.status.info"),
+            ("success", "color.status.success"),
+            ("warning", "color.status.warning"),
+            ("danger", "color.status.danger"),
+        ] {
+            let row_id = format!("toast-host:tokens:toast:{id}");
+            let row = poodle_gpui_node_backend::painted_node_for(&row_id)
+                .unwrap_or_else(|| panic!("mounted {id} row paint"));
+            let tone = theme_provider.resolve_color(tone_token);
+            let fill = mix_srgb(tone, elevated, 0.12);
+            assert_eq!(row.style.background, Some(fill));
+            assert_eq!(row.style.border.width, 1.0);
+            assert_eq!(
+                row.style.border.color,
+                mix_srgb(tone, border_default, 0.34)
+            );
+            assert_eq!(
+                row.style.shadow,
+                Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+            );
+            assert_eq!(row.style.layout.spacing.padding.left, pad);
+            assert_eq!(row.style.layout.spacing.padding.top, pad);
+            assert_eq!(row.style.layout.spacing.padding.bottom, pad);
+            assert_eq!(
+                row.style.layout.spacing.padding.right,
+                pad + poodle_render::presentation::rem_to_px(1.75)
+            );
+
+            let accent_id = format!("toast-host:tokens:toast:{id}:accent");
+            let accent = poodle_gpui_node_backend::painted_node_for(&accent_id)
+                .unwrap_or_else(|| panic!("mounted {id} accent paint"));
+            assert_eq!(
+                accent.style.background,
+                Some(mix_srgb(tone, ColorValue(1.0, 1.0, 1.0, 1.0), 0.94))
+            );
+            assert_eq!(
+                accent.style.layout.width,
+                LayoutSizing::Fixed(poodle_render::presentation::rem_to_px(0.1875))
+            );
+
+            let action_id = format!("toast-host:tokens:toast:{id}:action");
+            let action = poodle_gpui_node_backend::painted_node_for(&action_id)
+                .unwrap_or_else(|| panic!("mounted {id} secondary Button paint"));
+            assert_eq!(
+                action.roles.get("dependency").map(String::as_str),
+                Some("button")
+            );
+            assert_eq!(
+                action.roles.get("variant").map(String::as_str),
+                Some("secondary")
+            );
+            assert_eq!(action.roles.get("size").map(String::as_str), Some("lg"));
+            assert_eq!(
+                action.roles.get("density").map(String::as_str),
+                Some("comfortable")
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::bounds_for(&action_id)
+                    .expect("mounted Button bounds")
+                    .size
+                    .height,
+                px(44.0)
+            );
+        }
+
+        let dismiss_id = "toast-host:tokens:toast:danger:dismiss";
+        driver.wait_for_focus_handle(dismiss_id);
+        driver.focus_element(dismiss_id);
+        let painted_ring = poodle_gpui_node_backend::painted_ring_for(dismiss_id)
+            .expect("focused dismiss paints its ring");
+        assert_eq!(
+            painted_ring.ring,
+            FocusRing {
+                color: theme_provider.resolve_color("color.accent.focusRing"),
+                width: theme_provider.resolve_border_width("border.width.focus"),
+                offset: poodle_render::presentation::rem_to_px(0.125),
+            }
+        );
+    });
+}
+
 /// g16.091. Duplicate production ToastHost mounts must retain caller-scoped
 /// identity even when their controlled queues reuse the same toast id.
 #[test]
