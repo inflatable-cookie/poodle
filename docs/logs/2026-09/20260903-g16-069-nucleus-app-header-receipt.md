@@ -28,7 +28,7 @@ grow column), accessible label resolution (title fallback and aria-label overrid
 mounted child containment, stable region ordering, inert non-focusable root, and
 backend probe channels. The manifest, existing receipts (Button, Icon, IconButton,
 Surface, Text), and new AppHeader receipt pin the exact runtime source commit
-`3256d11da8799429eaba55e22dabe4c526f77695`. The ledger records 6 mounted Nucleus rows.
+`290f9490d7963481d981e4d57aa315a507b7526f`. The ledger records 6 mounted Nucleus rows.
 
 ## What landed
 
@@ -36,12 +36,12 @@ Surface, Text), and new AppHeader receipt pin the exact runtime source commit
   - `packages/contracts/components/src/app_header.rs`: added unit tests validating default and builder properties, semantic token mapping (`background_token`, `border_token`, `title_color_token`, `subtitle_color_token`), size ladder resolution across all `ControlSize` variants (`min_height_rem`, `title_size_rem`, `subtitle_size_rem`), density ladder resolution across `ControlDensity` variants (`gap_rem`, `region_gap_rem`, `pad_y_rem`, `pad_x_rem`), and `effective_size_resolution` under `SemanticControlSizeRole`.
   - `packages/render/src/app_header.rs`: added unit tests covering token styling (background panel, bottom border width 1.0, fill-width, row layout), size ladder rendering, density ladder rendering, custom identity slot replacing default title group, accessible label fallback to title, explicit `aria_label` override, and scoped `SlotBuilder` context passing.
 - Headless Regressions:
-  - `packages/gpui/preview/tests/headless_regressions.rs`: added `app_header_resolves_structure_token_styling_and_layout_through_mounted_backend` which exercises AppHeader spec/render token and layout resolution, center presence structural differences, mounts a centered custom-identity fixture with Icon and Text children, captures backend probe channels (`structure.identity.container`, `content.text-icon.text`, `content.text-icon.icon`, `surface.channels.background`, `surface.channels.border`), checks element bounds (`bounds_for`) for positive dimensions, child containment, and region ordering, confirms the styled-only root remains outside the focus chain, and terminally emits the `nucleus.shell.app-header` M1 receipt.
+  - `packages/gpui/preview/tests/headless_regressions.rs`: added `app_header_resolves_structure_token_styling_and_layout_through_mounted_backend` which exercises AppHeader spec/render token and layout resolution, center presence structural differences, mounts a centered custom-identity fixture with Icon and Text children, asserts component-specific identity Icon (`NodeKind::Icon`, name, size, aria-label, primary tint) and Text (`NodeKind::Text`, content, size, weight, line-height, text-wrap, tone color) metadata from their production renderers, captures backend probe channels (`structure.identity.container`, `content.text-icon.text`, `content.text-icon.icon`, `surface.channels.background`, `surface.channels.border`, `content.typography.size`, `content.typography.weight`), checks element bounds (`bounds_for`) for positive dimensions, child containment, and region ordering, confirms the styled-only root remains outside the focus chain, and terminally emits the `nucleus.shell.app-header` M1 receipt.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/appheader--nucleus-shell-app-header.json`
-  - Refreshed existing receipts for `Button`, `Icon`, `IconButton`, `Surface`, `Text` with source commit `3256d11da8799429eaba55e22dabe4c526f77695`.
+  - Refreshed existing receipts for `Button`, `Icon`, `IconButton`, `Surface`, `Text` with source commit `290f9490d7963481d981e4d57aa315a507b7526f`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated AppHeader `expected_test` to `app_header_resolves_structure_token_styling_and_layout_through_mounted_backend` and updated `source_commit` to `3256d11da8799429eaba55e22dabe4c526f77695`.
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated AppHeader `expected_test` to `app_header_resolves_structure_token_styling_and_layout_through_mounted_backend` and updated `source_commit` to `290f9490d7963481d981e4d57aa315a507b7526f`.
   - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts`; reports 6 mounted rows (AppHeader, Button, Icon, IconButton, Surface, Text).
 
 ## Review oracle falsification
@@ -49,7 +49,8 @@ Surface, Text), and new AppHeader receipt pin the exact runtime source commit
 | Invariant | Smallest counterexample | Required proof / Observed failure |
 | --- | --- | --- |
 | Production renderer owns the shell | substitute a raw container for AppHeader | exact shell metadata and structure assertions fail |
-| Proven dependencies remain real | replace the identity Icon or Text with raw nodes | component-specific Node metadata/probe assertions fail |
+| Proven identity Icon remains real | substitute raw `Node::icon` for identity `poodle_render::icon` | `assertion 'left == right' failed: Identity icon must retain spec aria_label via production renderer (left: None, right: Some("Application Search"))` |
+| Proven identity Text remains real | substitute raw `Node::text` for identity `poodle_render::text` | `assertion 'left == right' failed: Identity text must carry tone color resolved by production renderer (left: None, right: Some(ColorValue(0.93333334, 0.9490196, 0.9647059, 1.0)))` |
 | Center presence owns grouping | group the no-center regions or flatten the centered trailing column | child order, count, sizing, or containment assertion fails |
 | Size and density are exact | collapse two size or density steps | exact min-height, typography, padding, or gap assertion fails |
 | Labeling is contract-owned | remove title fallback or explicit override | exact Node label assertion fails |
