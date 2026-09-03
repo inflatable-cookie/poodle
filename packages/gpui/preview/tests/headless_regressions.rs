@@ -6427,6 +6427,258 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
     });
 }
 
+#[test]
+fn status_indicator_status_reason_tokens_and_identity_rebuild_through_mounted_backend() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{StatusIndicatorSpec, StatusTone};
+
+    #[derive(Clone, Debug, PartialEq)]
+    struct Host {
+        status: StatusTone,
+        size: ControlSize,
+        density: ControlDensity,
+        label: String,
+        reason: String,
+    }
+
+    fn status_key(status: StatusTone) -> &'static str {
+        match status {
+            StatusTone::Neutral => "neutral",
+            StatusTone::Info => "info",
+            StatusTone::Success => "success",
+            StatusTone::Warning => "warning",
+            StatusTone::Danger => "danger",
+            StatusTone::Pending => "pending",
+        }
+    }
+
+    fn control_size_key(size: ControlSize) -> &'static str {
+        match size {
+            ControlSize::Xs => "xs",
+            ControlSize::Sm => "sm",
+            ControlSize::Md => "md",
+            ControlSize::Lg => "lg",
+            ControlSize::Xl => "xl",
+        }
+    }
+
+    fn control_density_key(density: ControlDensity) -> &'static str {
+        match density {
+            ControlDensity::Compact => "compact",
+            ControlDensity::Default => "default",
+            ControlDensity::Comfortable => "comfortable",
+        }
+    }
+
+    fn element(
+        host: &Rc<RefCell<Host>>,
+        scope: &'static str,
+        theme_provider: &GpuiThemeProvider,
+    ) -> AnyElement {
+        let host = host.borrow().clone();
+        node_compat::StatusIndicator::from_spec(
+            StatusIndicatorSpec::new()
+                .with_status(host.status)
+                .with_size(host.size)
+                .with_density(host.density)
+                .with_label(host.label)
+                .with_aria_label(host.reason),
+            theme_provider,
+        )
+        .with_instance_id(scope)
+        .into_element()
+    }
+
+    fn assert_instance(
+        scope: &str,
+        host: &Host,
+        theme_provider: &GpuiThemeProvider,
+    ) -> gpui::Bounds<Pixels> {
+        let root_id = format!("status-indicator:{scope}");
+        let dot_id = format!("{root_id}:dot");
+        let label_id = format!("{root_id}:label");
+        let root = poodle_gpui_node_backend::painted_node_for(&root_id).expect("painted root");
+        let dot = poodle_gpui_node_backend::painted_node_for(&dot_id).expect("painted Icon dot");
+        let label =
+            poodle_gpui_node_backend::painted_node_for(&label_id).expect("painted Text label");
+
+        let spec = StatusIndicatorSpec::new()
+            .with_status(host.status)
+            .with_size(host.size)
+            .with_density(host.density);
+        let color = theme_provider.resolve_color(spec.status_color_token());
+        let dot_size =
+            poodle_render::presentation::rem_to_px(spec.dot_size_rem_for(host.size));
+        let gap = poodle_render::presentation::rem_to_px(
+            spec.gap_rem_for(host.size, host.density),
+        );
+        let label_size =
+            poodle_render::presentation::rem_to_px(spec.label_font_size_rem_for(host.size));
+
+        assert_eq!(
+            root.roles.get("status").map(String::as_str),
+            Some(status_key(host.status))
+        );
+        assert_eq!(
+            root.roles.get("size").map(String::as_str),
+            Some(control_size_key(host.size))
+        );
+        assert_eq!(
+            root.roles.get("density").map(String::as_str),
+            Some(control_density_key(host.density))
+        );
+        assert_eq!(
+            root.roles.get("typography").map(String::as_str),
+            Some("default")
+        );
+        assert_eq!(root.a11y_label.as_deref(), Some(host.reason.as_str()));
+        assert_eq!(root.style.layout.spacing.gap, gap);
+
+        assert_eq!(dot.texts, ["dot"]);
+        assert_eq!(dot.style.background, Some(color));
+        assert_eq!(dot.style.text_color, Some(color));
+        assert_eq!(dot.style.layout.width, LayoutSizing::Fixed(dot_size));
+        assert_eq!(dot.style.layout.height, LayoutSizing::Fixed(dot_size));
+        assert_eq!(dot.shadow_layers.len(), 1);
+        assert_eq!(dot.shadow_layers[0].spread, 2.0);
+        assert_eq!(
+            dot.shadow_layers[0].color,
+            ColorValue(color.0, color.1, color.2, color.3 * 0.18)
+        );
+
+        assert_eq!(label.texts, [host.label.as_str()]);
+        assert_eq!(
+            label.style.text_color,
+            Some(theme_provider.resolve_color(spec.label_color_token()))
+        );
+        assert_eq!(label.text_size, Some(label_size));
+        assert_eq!(label.text_weight, Some(600));
+        assert_eq!(label.line_height, Some(1.3));
+        assert!(label.text_wrap, "label must come from the Text primitive");
+
+        let root_bounds = poodle_gpui_node_backend::bounds_for(&root_id).expect("root bounds");
+        let dot_bounds = poodle_gpui_node_backend::bounds_for(&dot_id).expect("dot bounds");
+        let label_bounds = poodle_gpui_node_backend::bounds_for(&label_id).expect("label bounds");
+        assert!(root_bounds.size.width > px(0.0) && root_bounds.size.height > px(0.0));
+        assert_eq!(dot_bounds.size.width, px(dot_size));
+        assert_eq!(dot_bounds.size.height, px(dot_size));
+        assert!(bounds_contain(root_bounds, dot_bounds));
+        assert!(bounds_contain(root_bounds, label_bounds));
+        assert!(dot_bounds.right() <= label_bounds.left());
+        for id in [&root_id, &dot_id, &label_id] {
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+                "{id} stays inert"
+            );
+        }
+        root_bounds
+    }
+
+    run_headless(|cx| {
+        let initial = Host {
+            status: StatusTone::Neutral,
+            size: ControlSize::Xs,
+            density: ControlDensity::Default,
+            label: "Waiting".to_owned(),
+            reason: "No worker has started".to_owned(),
+        };
+        let left = Rc::new(RefCell::new(initial.clone()));
+        let right = Rc::new(RefCell::new(initial.clone()));
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let left = Rc::clone(&left);
+            let right = Rc::clone(&right);
+            let theme_provider = theme_provider.clone();
+            Rc::new(move || {
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(20.0))
+                    .child(element(&left, "left", &theme_provider))
+                    .child(element(&right, "right", &theme_provider))
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 320.0, 180.0);
+        let mut left_bounds = assert_instance("left", &initial, &theme_provider);
+        let right_bounds = assert_instance("right", &initial, &theme_provider);
+        assert!(bounds_contain(driver.mount_box_bounds(), left_bounds));
+        assert!(bounds_contain(driver.mount_box_bounds(), right_bounds));
+        assert!(left_bounds.bottom() <= right_bounds.top());
+
+        driver.pointer_activate_id("status-indicator:left");
+        driver.draw_frame();
+        assert_eq!(
+            *left.borrow(),
+            initial,
+            "pointer input cannot mutate an inert indicator"
+        );
+
+        let cases = [
+            (StatusTone::Info, ControlSize::Sm, ControlDensity::Compact),
+            (StatusTone::Success, ControlSize::Md, ControlDensity::Default),
+            (
+                StatusTone::Warning,
+                ControlSize::Lg,
+                ControlDensity::Comfortable,
+            ),
+            (StatusTone::Danger, ControlSize::Xl, ControlDensity::Compact),
+            (
+                StatusTone::Pending,
+                ControlSize::Xl,
+                ControlDensity::Comfortable,
+            ),
+        ];
+        for (index, (status, size, density)) in cases.into_iter().enumerate() {
+            let next = Host {
+                status,
+                size,
+                density,
+                label: format!("Phase {index}"),
+                reason: format!("Contract reason {index}"),
+            };
+            *left.borrow_mut() = next.clone();
+            driver.draw_frame();
+            left_bounds = assert_instance("left", &next, &theme_provider);
+            assert_instance("right", &initial, &theme_provider);
+            assert!(left_bounds.bottom() <= right_bounds.top());
+        }
+
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        for channel in [
+            "structure.identity.container",
+            "content.text-icon.icon",
+            "content.text-icon.text",
+            "semantic.token-roles.received",
+        ] {
+            assert!(channels.contains(&channel), "backend receives {channel}");
+        }
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+
+        nucleus_receipts::emit_if_configured(
+            "StatusIndicator",
+            "nucleus.agent.status-indicator",
+            observation,
+            &[
+                "mount duplicate StatusIndicator instances through node_compat::StatusIndicator::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch mounted pointer input through the inert indicator before rebuilding one caller-scoped instance across every status, size, and density posture",
+            ],
+            &[
+                "production Icon dot and Text label composition preserves exact status, reason, typography, tone, size, density, glow, and wrap metadata",
+                "all six statuses, five sizes, and three densities survive host-owned rebuilds while the duplicate instance remains unchanged",
+                "duplicate mounted roots have positive extents, preserve authored order, and begin inside the real mount while dot and label stay contained by their production roots on every rebuild",
+                "root, Icon dot, and Text label stay outside the focus chain and mounted pointer input cannot mutate the inert host-owned spec",
+                "caller-scoped identities keep duplicate metadata, runtime ids, state rebuilds, and geometry isolated",
+                "backend mounted observation confirms production render, paint, and GPUI input dispatch after every terminal assertion",
+            ],
+        );
+    });
+}
+
 /// AgentTranscript reaches the production compat adapter, renderer, and
 /// mounted backend. The fixture keeps records host-owned, distinguishes every
 /// posture, scopes duplicate instances, and drives both disclosure and scroll

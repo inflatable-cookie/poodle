@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "SegmentedControl",
-  "scenario_id": "nucleus.navigation.segmented-control",
+  "component": "StatusIndicator",
+  "scenario_id": "nucleus.agent.status-indicator",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,18 +46,16 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount controlled SegmentedControl with one disabled option through HeadlessDriver",
-    "pointer activate unselected, selected, and disabled segments through GPUI platform dispatch",
-    "keyboard navigate roving focus across enabled segments with arrow keys, Home, End, and wraparound",
-    "mount two composed SegmentedControl instances to prove focus and callback isolation"
+    "mount duplicate StatusIndicator instances through node_compat::StatusIndicator::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch mounted pointer input through the inert indicator before rebuilding one caller-scoped instance across every status, size, and density posture"
   ],
   "assertions": [
-    "production render path resolves root radiogroup role, direction, size ladder height, track styling, and density padding/gaps",
-    "each segment resolves radiobutton role, selected/toggled state, roving tab stop, typography, truncation, and focus patch",
-    "pointer and keyboard input update selected value through controlled host rebuild while disabled and same-value clicks remain inert",
-    "roving keyboard navigation skips disabled segments, wraps at boundaries, and transfers backend focus handle state",
-    "mounted bounds confirm positive dimensions, horizontal segment ordering, and track child containment",
-    "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers"
+    "production Icon dot and Text label composition preserves exact status, reason, typography, tone, size, density, glow, and wrap metadata",
+    "all six statuses, five sizes, and three densities survive host-owned rebuilds while the duplicate instance remains unchanged",
+    "duplicate mounted roots have positive extents, preserve authored order, and begin inside the real mount while dot and label stay contained by their production roots on every rebuild",
+    "root, Icon dot, and Text label stay outside the focus chain and mounted pointer input cannot mutate the inert host-owned spec",
+    "caller-scoped identities keep duplicate metadata, runtime ids, state rebuilds, and geometry isolated",
+    "backend mounted observation confirms production render, paint, and GPUI input dispatch after every terminal assertion"
   ],
   "outcome": "passed",
   "artifact_paths": []
