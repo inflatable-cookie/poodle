@@ -36,8 +36,9 @@ use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, CrossAxisAlignment,
     CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeAnimation, NodeContinuousValueEvent, NodeDragEvent, NodeDragPhase,
-    NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition, NodeWheelEvent,
-    ResolvedIconGeometryFrame, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
+    NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition, NodeRole, NodeWheelEvent,
+    ResolvedIconGeometryFrame, ScrubAxis, ScrubPhase, SelectGranularity, ShadowLayer,
+    StyleDescriptor, StylePatch, TextAlign,
 };
 
 mod drag;
@@ -78,11 +79,46 @@ thread_local! {
     static PROBE_ACTIVE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     static PROBE_CHANNELS: RefCell<std::collections::BTreeSet<&'static str>> =
         RefCell::new(std::collections::BTreeSet::new());
+    static PROBE_NODES: RefCell<std::collections::HashMap<String, PaintedNodeSnapshot>> =
+        RefCell::new(std::collections::HashMap::new());
+}
+
+/// Renderer-owned facts carried by one identified node that reached the real
+/// GPUI paint pass while a bounded probe was active. Like [`bounds_for`], this
+/// is observation only: it cannot change conversion, layout, or paint.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PaintedNodeSnapshot {
+    pub roles: std::collections::BTreeMap<String, String>,
+    pub texts: Vec<String>,
+    pub a11y_role: Option<NodeRole>,
+    pub a11y_label: Option<String>,
+    pub style: StyleDescriptor,
+    pub shadow_layers: Vec<ShadowLayer>,
+    pub child_layout_directions: Vec<LayoutDirection>,
+}
+
+impl PaintedNodeSnapshot {
+    fn from_node(node: &Node) -> Self {
+        Self {
+            roles: node.roles.clone(),
+            texts: node.texts().into_iter().map(str::to_owned).collect(),
+            a11y_role: node.a11y.role,
+            a11y_label: node.a11y.label.clone(),
+            style: node.style.descriptor.clone(),
+            shadow_layers: node.style.shadow_layers.clone(),
+            child_layout_directions: node
+                .children
+                .iter()
+                .map(|child| child.style.descriptor.layout.direction)
+                .collect(),
+        }
+    }
 }
 
 /// Begin a bounded receipt for the real backend channel walk.
 pub fn begin_probe_capture() {
     PROBE_CHANNELS.with(|channels| channels.borrow_mut().clear());
+    PROBE_NODES.with(|nodes| nodes.borrow_mut().clear());
     PROBE_ACTIVE.with(|active| active.set(true));
 }
 
@@ -99,6 +135,24 @@ pub(crate) fn record_probe_channel(channel: &'static str) {
             channels.borrow_mut().insert(channel);
         });
     }
+}
+
+pub(crate) fn probe_node_snapshot(node: &Node) -> Option<PaintedNodeSnapshot> {
+    PROBE_ACTIVE
+        .with(|active| active.get())
+        .then(|| PaintedNodeSnapshot::from_node(node))
+}
+
+pub(crate) fn record_painted_node(id: &str, snapshot: PaintedNodeSnapshot) {
+    PROBE_NODES.with(|nodes| {
+        nodes.borrow_mut().insert(id.to_owned(), snapshot);
+    });
+}
+
+/// Facts for an identified node that painted during the current bounded
+/// probe. Absence means the node did not reach that production paint pass.
+pub fn painted_node_for(id: &str) -> Option<PaintedNodeSnapshot> {
+    PROBE_NODES.with(|nodes| nodes.borrow().get(id).cloned())
 }
 
 /// sRGB passthrough — the exact conversion the old GPUI tier performed.

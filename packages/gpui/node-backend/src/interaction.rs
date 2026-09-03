@@ -435,6 +435,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         .dismiss_layer
         .clone()
         .or_else(crate::current_dismiss_layer);
+    let painted_node = crate::probe_node_snapshot(node);
     let in_dismiss_layer = layer_id.is_some();
     if let Some(layer) = layer_id {
         let element_id = id.to_owned();
@@ -445,6 +446,9 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         let canvas = gpui::canvas(
             move |bounds, _window, _cx| {
                 super::layers::record_bounds(&element_id, &layer, bounds);
+                if let Some(snapshot) = painted_node.clone() {
+                    super::record_painted_node(&element_id, snapshot);
+                }
             },
             |_, _, _, _| {},
         )
@@ -462,6 +466,9 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
             gpui::canvas(
                 move |bounds, _window, _cx| {
                     super::layers::record_element_bounds(&element_id, bounds);
+                    if let Some(snapshot) = painted_node.clone() {
+                        super::record_painted_node(&element_id, snapshot);
+                    }
                 },
                 |_, _, _, _| {},
             )

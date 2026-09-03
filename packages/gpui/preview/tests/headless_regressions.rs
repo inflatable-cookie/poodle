@@ -6433,7 +6433,6 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
 /// input through GPUI rather than calling handlers directly.
 #[test]
 fn agent_transcript_records_rebuild_through_production_mounted_input() {
-    use crate::node_compat::IntoCompatNode;
     use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
     use poodle_adapter::ThemeProvider;
     use poodle_headless::agent_plan::AgentPlanStatus;
@@ -6505,177 +6504,34 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         })
     }
 
-    let theme_provider = theme();
-    let static_spec = AgentTranscriptSpec::new(vec![
-        message("operator", TranscriptRole::User, "Run the mounted proof."),
-        call("run-first", ToolCallStatus::Success),
-        call("run-last", ToolCallStatus::Error),
-        answered_question(),
-        decided_plan(),
-        TranscriptItem::Activity(TranscriptActivity {
-            id: "terminal".to_owned(),
-            label: "Turn failed".to_owned(),
-            spinning: Some(false),
-        }),
-    ])
-    .with_size(ControlSize::Sm)
-    .with_density(ControlDensity::Compact);
-    let rendered = crate::node_compat::AgentTranscript::from_spec(static_spec, &theme_provider)
-        .with_instance_id("counterexample")
-        .into_compat_node();
-    assert_eq!(
-        rendered.runtime_id.as_deref(),
-        Some("agent-transcript:counterexample")
-    );
-    assert_eq!(rendered.a11y.role, Some(NodeRole::Log));
-    assert_eq!(rendered.a11y.label.as_deref(), Some("Conversation"));
-    assert_eq!(rendered.roles.get("empty").map(String::as_str), Some("false"));
-    assert_eq!(rendered.roles.get("size").map(String::as_str), Some("sm"));
-    assert_eq!(
-        rendered.roles.get("density").map(String::as_str),
-        Some("compact")
-    );
-    assert_eq!(
-        rendered
-            .children
-            .iter()
-            .map(|child| child.roles.get("kind").map(String::as_str))
-            .collect::<Vec<_>>(),
-        [
-            Some("message"),
-            Some("tool-run"),
-            Some("answered-question"),
-            Some("decided-plan"),
-            Some("activity"),
-        ],
-        "message and record blocks keep authored order before the activity footer"
-    );
-    assert_eq!(
-        rendered.children[0].roles.get("role").map(String::as_str),
-        Some("user")
-    );
-    assert_eq!(
-        rendered.children[1].roles.get("status").map(String::as_str),
-        Some("error")
-    );
-    assert_eq!(
-        rendered.children[2].roles.get("status").map(String::as_str),
-        Some("selected")
-    );
-    assert_eq!(
-        rendered.children[3].roles.get("status").map(String::as_str),
-        Some("accepted")
-    );
-    for record in [
-        "Run the mounted proof.",
-        "Ship this preparation?",
-        "Accepted",
-        "## Preparation Mount the production adapter.",
-        "Turn failed",
-    ] {
-        assert!(
-            rendered.texts().iter().any(|text| *text == record),
-            "production composition keeps the {record:?} record"
-        );
-    }
-    let user_message = &rendered.children[0];
-    assert_eq!(
-        user_message.style.descriptor.background,
-        Some(theme_provider.resolve_color("color.background.elevated")),
-        "the user message composes its contracted Surface treatment"
-    );
-    assert_eq!(
-        user_message.style.descriptor.corner_radii.top_left,
-        theme_provider.resolve_radius("radius.surface")
-    );
-    let activity = &rendered.children[4];
-    assert_eq!(activity.children.len(), 1, "terminal activity omits Spinner");
-    let activity_label = &activity.children[0];
-    assert!(activity_label.style.text_wrap, "activity copy composes production Text");
-    assert_eq!(activity_label.style.line_height, Some(1.5));
-    assert_eq!(activity_label.style.text_weight, Some(400));
-
-    let empty = crate::node_compat::AgentTranscript::from_spec(
-        AgentTranscriptSpec::default(),
-        &theme_provider,
-    )
-    .into_compat_node();
-    assert_eq!(empty.roles.get("empty").map(String::as_str), Some("true"));
-    let empty_state = &empty.children[0];
-    let empty_fill = theme_provider.resolve_color("color.background.surface");
-    assert_eq!(
-        empty_state.style.descriptor.background,
-        Some(ColorValue(
-            empty_fill.0,
-            empty_fill.1,
-            empty_fill.2,
-            empty_fill.3 * 0.76,
-        ))
-    );
-    assert!(empty_state.style.border_dashed);
-    assert_eq!(
-        empty_state.style.descriptor.border.color,
-        theme_provider.resolve_color("color.border.default")
-    );
-    assert_eq!(empty_state.style.descriptor.border.width, 1.0);
-    assert_eq!(
-        empty_state.style.descriptor.corner_radii.top_left,
-        (theme_provider.resolve_radius("radius.surface") - 2.0).max(0.0)
-    );
-    assert_eq!(empty_state.a11y.label.as_deref(), Some("No messages yet"));
-    assert_eq!(empty_state.children.len(), 2);
-    assert!(matches!(
-        &empty_state.children[0].children[0].kind,
-        NodeKind::Icon { name, .. } if name == "inbox"
-    ));
-
-    let loading = crate::node_compat::AgentTranscript::from_spec(
-        AgentTranscriptSpec::new(vec![TranscriptItem::Activity(TranscriptActivity {
-            id: "working".to_owned(),
-            label: "Working".to_owned(),
-            spinning: None,
-        })]),
-        &theme_provider,
-    )
-    .into_compat_node();
-    let loading_footer = &loading.children[0];
-    assert_eq!(loading_footer.children.len(), 2);
-    let loading_spinner = &loading_footer.children[0];
-    assert_eq!(loading_spinner.children.len(), 3);
-    assert!(loading_spinner.children.iter().all(|dot| {
-        dot.style.descriptor.layout.width == LayoutSizing::Fixed(4.0)
-            && dot.style.descriptor.layout.height == LayoutSizing::Fixed(4.0)
-            && dot.style.descriptor.background
-                == Some(theme_provider.resolve_color("color.text.secondary"))
-    }));
-
-    let error = crate::node_compat::AgentTranscript::from_spec(
-        AgentTranscriptSpec::new(vec![call("failed", ToolCallStatus::Error)]),
-        &theme_provider,
-    )
-    .into_compat_node();
-    assert_eq!(error.children[0].roles.get("status").map(String::as_str), Some("error"));
-    let content = crate::node_compat::AgentTranscript::from_spec(
-        AgentTranscriptSpec::new(vec![message(
-            "done",
-            TranscriptRole::Assistant,
-            "Complete",
-        )]),
-        &theme_provider,
-    )
-    .into_compat_node();
-    assert_eq!(content.children[0].roles.get("kind").map(String::as_str), Some("message"));
-    assert_eq!(
-        content.children[0].roles.get("status").map(String::as_str),
-        Some("complete")
-    );
-
     run_headless(|cx| {
-        #[derive(Default)]
         struct TranscriptHost {
             left_expanded: bool,
             right_expanded: bool,
             events: Vec<String>,
+            items: Vec<TranscriptItem>,
+        }
+
+        impl Default for TranscriptHost {
+            fn default() -> Self {
+                Self {
+                    left_expanded: false,
+                    right_expanded: false,
+                    events: Vec::new(),
+                    items: vec![
+                        message("same-message", TranscriptRole::User, "Shared answer"),
+                        call("same-run", ToolCallStatus::Success),
+                        call("same-last", ToolCallStatus::Success),
+                        answered_question(),
+                        decided_plan(),
+                        TranscriptItem::Activity(TranscriptActivity {
+                            id: "same-terminal".to_owned(),
+                            label: "Turn complete".to_owned(),
+                            spinning: Some(false),
+                        }),
+                    ],
+                }
+            }
         }
 
         fn expanded(host: &TranscriptHost, scope: &str) -> bool {
@@ -6691,19 +6547,13 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
             scope: &'static str,
             theme_provider: &GpuiThemeProvider,
         ) -> AnyElement {
-            let is_expanded = expanded(&host.lock().expect("transcript host"), scope);
-            let spec = AgentTranscriptSpec::new(vec![
-                message("same-message", TranscriptRole::User, "Shared answer"),
-                call("same-run", ToolCallStatus::Success),
-                call("same-last", ToolCallStatus::Success),
-                answered_question(),
-                decided_plan(),
-                TranscriptItem::Activity(TranscriptActivity {
-                    id: "same-terminal".to_owned(),
-                    label: "Turn complete".to_owned(),
-                    spinning: Some(false),
-                }),
-            ])
+            let host_guard = host.lock().expect("transcript host");
+            let is_expanded = expanded(&host_guard, scope);
+            let items = host_guard.items.clone();
+            drop(host_guard);
+            let spec = AgentTranscriptSpec::new(items)
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact)
             .with_expanded_tool_runs(if is_expanded {
                 vec!["same-run".to_owned()]
             } else {
@@ -6755,11 +6605,109 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         }
         let left_bounds = poodle_gpui_node_backend::bounds_for(left_root).expect("left root");
         let right_bounds = poodle_gpui_node_backend::bounds_for(right_root).expect("right root");
+        let mount_bounds = driver.mount_box_bounds();
         assert!(left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0));
         assert!(right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0));
+        assert!(bounds_contain(mount_bounds, left_bounds));
+        assert!(bounds_contain(mount_bounds, right_bounds));
         assert!(
             left_bounds.bottom() <= right_bounds.top(),
             "duplicate transcripts keep authored order without overlap"
+        );
+
+        let block_suffixes = [
+            "block:message:same-message",
+            "block:tool-run:same-run",
+            "block:answered-question:record-question",
+            "block:decided-plan:record-plan",
+            "activity",
+        ];
+        let expected_roles = [
+            ("message", Some("user"), Some("complete")),
+            ("tool-run", None, Some("success")),
+            ("answered-question", None, Some("selected")),
+            ("decided-plan", None, Some("accepted")),
+            ("activity", None, None),
+        ];
+        let expected_content = [
+            "Shared answer",
+            "Ran command",
+            "Ship this preparation?",
+            "## Preparation Mount the production adapter.",
+            "Turn complete",
+        ];
+        for (scope, root, parent_bounds) in
+            [("left", left_root, left_bounds), ("right", right_root, right_bounds)]
+        {
+            let root_snapshot = poodle_gpui_node_backend::painted_node_for(root)
+                .unwrap_or_else(|| panic!("{scope} transcript reached paint"));
+            assert_eq!(root_snapshot.a11y_role, Some(NodeRole::Log));
+            assert_eq!(root_snapshot.a11y_label.as_deref(), Some("Conversation"));
+            assert_eq!(root_snapshot.roles.get("empty").map(String::as_str), Some("false"));
+            assert_eq!(root_snapshot.roles.get("size").map(String::as_str), Some("sm"));
+            assert_eq!(
+                root_snapshot.roles.get("density").map(String::as_str),
+                Some("compact")
+            );
+
+            let mut previous = None;
+            for (((suffix, (kind, role, status)), content), index) in block_suffixes
+                .iter()
+                .zip(expected_roles)
+                .zip(expected_content)
+                .zip(0..)
+            {
+                let id = format!("agent-transcript:{scope}:{suffix}");
+                let bounds = poodle_gpui_node_backend::bounds_for(&id)
+                    .unwrap_or_else(|| panic!("mounted block {index} painted as {id}"));
+                assert!(
+                    bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                    "mounted block {index} has positive extents: {bounds:?}"
+                );
+                assert!(
+                    bounds_contain(parent_bounds, bounds),
+                    "mounted block {index} stays inside {scope} production parent"
+                );
+                if let Some(previous) = previous {
+                    assert!(
+                        previous <= bounds.top(),
+                        "mounted block {index} follows the previous block without overlap"
+                    );
+                }
+                previous = Some(bounds.bottom());
+
+                let snapshot = poodle_gpui_node_backend::painted_node_for(&id)
+                    .unwrap_or_else(|| panic!("mounted block {index} facts painted as {id}"));
+                assert_eq!(snapshot.roles.get("kind").map(String::as_str), Some(kind));
+                assert_eq!(snapshot.roles.get("role").map(String::as_str), role);
+                assert_eq!(snapshot.roles.get("status").map(String::as_str), status);
+                assert!(
+                    snapshot.texts.iter().any(|text| text == content),
+                    "mounted block {index} keeps exact production content {content:?}: {:?}",
+                    snapshot.texts
+                );
+            }
+        }
+
+        let expected_theme = theme();
+        let user_snapshot = poodle_gpui_node_backend::painted_node_for(left_user)
+            .expect("mounted user AgentMessage facts");
+        assert_eq!(
+            user_snapshot.style.background,
+            Some(expected_theme.resolve_color("color.background.elevated"))
+        );
+        let surface_radius = expected_theme.resolve_radius("radius.surface");
+        assert_eq!(user_snapshot.style.corner_radii.top_left, surface_radius);
+        assert_eq!(user_snapshot.style.corner_radii.top_right, surface_radius);
+        assert_eq!(user_snapshot.style.corner_radii.bottom_right, surface_radius);
+        assert_eq!(user_snapshot.style.corner_radii.bottom_left, surface_radius);
+        assert_eq!(user_snapshot.style.shadow, None);
+        assert!(user_snapshot.shadow_layers.is_empty());
+        assert_eq!(user_snapshot.style.layout.direction, LayoutDirection::Row);
+        assert_eq!(
+            user_snapshot.child_layout_directions,
+            [LayoutDirection::Column],
+            "raw-node substitution must fail the mounted Surface composition proof"
         );
         assert!(
             bounds_contain(
@@ -6817,6 +6765,33 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
             assert_eq!(host.events.as_slice(), ["left:same-run", "right:same-run"]);
             assert!(host.left_expanded);
             assert!(host.right_expanded);
+        }
+
+        host.lock().expect("transcript host").items.push(message(
+            "appended",
+            TranscriptRole::Assistant,
+            "Host appended record",
+        ));
+        driver.draw_frame();
+        for scope in ["left", "right"] {
+            let plan_id = format!("agent-transcript:{scope}:block:decided-plan:record-plan");
+            let appended_id = format!("agent-transcript:{scope}:block:message:appended");
+            let activity_id = format!("agent-transcript:{scope}:activity");
+            let plan = poodle_gpui_node_backend::bounds_for(&plan_id).expect("mounted plan");
+            let appended = poodle_gpui_node_backend::bounds_for(&appended_id)
+                .unwrap_or_else(|| panic!("host rebuild paints {appended_id}"));
+            let activity =
+                poodle_gpui_node_backend::bounds_for(&activity_id).expect("mounted activity");
+            assert!(
+                plan.bottom() <= appended.top() && appended.bottom() <= activity.top(),
+                "host-appended runtime id keeps record order before terminal activity"
+            );
+            let snapshot = poodle_gpui_node_backend::painted_node_for(&appended_id)
+                .expect("host-appended mounted facts");
+            assert_eq!(snapshot.roles.get("kind").map(String::as_str), Some("message"));
+            assert_eq!(snapshot.roles.get("role").map(String::as_str), Some("assistant"));
+            assert_eq!(snapshot.roles.get("status").map(String::as_str), Some("complete"));
+            assert!(snapshot.texts.iter().any(|text| text == "Host appended record"));
         }
 
         let channels = poodle_gpui_node_backend::take_probe_capture();
