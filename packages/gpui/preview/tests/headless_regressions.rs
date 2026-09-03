@@ -22957,7 +22957,7 @@ fn gpui_node_tooltip_probe_channels() {
 #[test]
 fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
     use poodle_node::{
-        CursorHint, LayoutDirection, LayoutSizing,
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
         NodeKind, NodeRole, NodeToggled, StylePatch,
     };
     use poodle_render::color::{mix_srgb, with_alpha};
@@ -23034,6 +23034,11 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
             - rem_to_px(0.125))
         .max(0.0);
         let min_width = ctx.theme().resolve_space("size.menu.minWidth");
+        let expected_icon_size = ctx.theme().resolve_space(
+            poodle_specs::IconSpec::new("check")
+                .with_size(poodle_specs::IconSize::from(effective_size))
+                .size_token(),
+        );
 
         // ── 1. Production Spec & Token Structure Proof ─────────────────────
         let mut menu_spec = MenuSpec::new(generic_menu_entries(true, false, false));
@@ -23271,7 +23276,22 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         assert_eq!(item_dark.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
         assert_eq!(item_dark.children.len(), 2);
         let check_icon = &item_dark.children[0];
-        assert!(matches!(&check_icon.kind, NodeKind::Icon { name, size } if name == "check" && *size == font_size));
+        assert!(matches!(&check_icon.kind, NodeKind::Icon { name, size } if name == "check" && *size == expected_icon_size));
+        assert_eq!(
+            check_icon.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Icon must carry LayoutDirection::Row from production icon renderer"
+        );
+        assert_eq!(
+            check_icon.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Icon must carry CrossAxisAlignment::Center from production icon renderer"
+        );
+        assert_eq!(
+            check_icon.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Icon must carry MainAxisAlignment::Center from production icon renderer"
+        );
         assert_eq!(
             check_icon.style.descriptor.text_color,
             Some(accent_color)
@@ -23296,12 +23316,16 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         let spacer_notif = &item_notif.children[0];
         assert!(matches!(&spacer_notif.kind, NodeKind::Container));
         assert_eq!(
+            spacer_notif.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
             spacer_notif.style.descriptor.layout.width,
-            LayoutSizing::Fixed(font_size)
+            LayoutSizing::Fixed(expected_icon_size)
         );
         assert_eq!(
             spacer_notif.style.descriptor.layout.height,
-            LayoutSizing::Fixed(font_size)
+            LayoutSizing::Fixed(expected_icon_size)
         );
 
         // Row 7: Radio Option ("high_contrast")
@@ -23470,7 +23494,27 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         driver.draw_frame();
         let rebuilt_notif = mounted.lock().unwrap().children[6].clone();
         assert_eq!(rebuilt_notif.a11y.toggled, Some(NodeToggled::True));
-        assert!(matches!(&rebuilt_notif.children[0].kind, NodeKind::Icon { name, .. } if name == "check"));
+        let notif_check = &rebuilt_notif.children[0];
+        assert!(matches!(&notif_check.kind, NodeKind::Icon { name, size } if name == "check" && *size == expected_icon_size));
+        assert_eq!(
+            notif_check.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Rebuilt checkbox Icon must carry LayoutDirection::Row"
+        );
+        assert_eq!(
+            notif_check.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Rebuilt checkbox Icon must carry CrossAxisAlignment::Center"
+        );
+        assert_eq!(
+            notif_check.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Rebuilt checkbox Icon must carry MainAxisAlignment::Center"
+        );
+        assert_eq!(
+            notif_check.style.descriptor.text_color,
+            Some(accent_color)
+        );
 
         // 4c. Radio toggle false -> true
         driver.pointer_activate_id("menu-item:high_contrast");
@@ -23489,7 +23533,22 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         let rebuilt_hc = mounted.lock().unwrap().children[7].clone();
         assert_eq!(rebuilt_hc.a11y.toggled, Some(NodeToggled::True));
         let radio_check = &rebuilt_hc.children[0];
-        assert!(matches!(&radio_check.kind, NodeKind::Icon { name, size } if name == "check" && *size == font_size));
+        assert!(matches!(&radio_check.kind, NodeKind::Icon { name, size } if name == "check" && *size == expected_icon_size));
+        assert_eq!(
+            radio_check.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Rebuilt radio Icon must carry LayoutDirection::Row"
+        );
+        assert_eq!(
+            radio_check.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Rebuilt radio Icon must carry CrossAxisAlignment::Center"
+        );
+        assert_eq!(
+            radio_check.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Rebuilt radio Icon must carry MainAxisAlignment::Center"
+        );
         assert_eq!(
             radio_check.style.descriptor.text_color,
             Some(accent_color)

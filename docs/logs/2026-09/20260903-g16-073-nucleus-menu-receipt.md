@@ -43,7 +43,7 @@ SplitView, Surface, Tabs, Text), and the new Menu receipt pin the exact runtime 
 - Contracts:
   - `packages/contracts/components/src/menu.rs`: added unit tests validating default spec and builder methods (`open`, `default_open`, `placement`, `dismiss_on_outside_interact`, `aria_label`, `size`, `size_role`, `density`, item counts, and semantic token resolvers) and `MenuEntry` builders/properties (`value`, `label`, `disabled`, `checked`, `shortcut_label`, `kind`, `destructive`).
 - Renderer:
-  - `packages/render/src/menu.rs`: implemented roving focus keyboard navigation via `poodle_headless::menu::{menu_list_navigate, MenuListMove}`, focus highlight style patches matching hover state per contract §8, non-focusable disabled/separator items with `tab_index = -1` and `cursor: not-allowed`, and single-entry focusable enabled items with `tab_index = 0` for the first enabled item and `tab_index = -1` for all subsequent enabled items. Added renderer unit tests for disabled item focusability/activation suppression, roving key navigation skipping disabled items and separators, and single-entry tab-stop assignment.
+  - `packages/render/src/menu.rs`: implemented roving focus keyboard navigation via `poodle_headless::menu::{menu_list_navigate, MenuListMove}`, focus highlight style patches matching hover state per contract §8, non-focusable disabled/separator items with `tab_index = -1` and `cursor: not-allowed`, single-entry focusable enabled items with `tab_index = 0` for the first enabled item and `tab_index = -1` for all subsequent enabled items, and routed checked action, checkbox, and radio indicators through the production `crate::icon::icon(&IconSpec, ...)` seam with contract-honest size, row direction, centered alignment, and accent text color. Added renderer unit tests for disabled item focusability/activation suppression, roving key navigation skipping disabled items and separators, single-entry tab-stop assignment, and production icon layout/alignment/token metadata.
 - Headless Regressions:
   - `packages/gpui/preview/tests/headless_regressions.rs`: added `menu_items_semantics_activation_and_identity_rebuild_the_host_spec` across 6 phases:
     1. Production Spec & Token Structure Proof: root menu node tokens, layout, single-entry tab posture, and children semantics for action, disabled, separator, destructive, shortcut, checkbox, and radio items.
@@ -67,7 +67,7 @@ SplitView, Surface, Tabs, Text), and the new Menu receipt pin the exact runtime 
 | Flat Nucleus shape is honest | omit destructive item danger styling | `text_color must match danger_color` |
 | Single-entry tab posture is exact | assign tab_index=0 to every enabled item | `Menu must have exactly one single tab_index=0 entry stop` fails |
 | Selectable semantics are exact | collapse checkbox/radio into action rows | `role must be MenuItemCheckBox` fails |
-| Icon dependency is real | replace check icon with text glyph or omit radio check icon | `matches!(&radio_check.kind, NodeKind::Icon { name, size } if name == "check" ...)` fails |
+| Icon dependency is real | substitute raw Node::icon bypassing production Icon renderer | `assertion 'left == right' failed, left: Column, right: Row` / `Icon must carry LayoutDirection::Row from production icon renderer` fails |
 | Input is mounted | invoke handlers directly | mounted observation or callback trace is absent |
 | Controlled rebuild is real | omit host rebuild closure on checkbox/radio toggle | checked toggle state remains stale |
 | Disabled and separator paths are inert | arm disabled/separator row with click | callback trace receives unexpected value |
@@ -80,8 +80,8 @@ SplitView, Surface, Tabs, Text), and the new Menu receipt pin the exact runtime 
 ## Validation
 
 Focused:
-- `cargo test --manifest-path packages/contracts/components/Cargo.toml --lib menu::` — 8 passed
-- `cargo test --manifest-path packages/render/Cargo.toml menu` — 16 passed
+- `cargo test --manifest-path packages/contracts/components/Cargo.toml --lib menu::` — 4 passed
+- `cargo test --manifest-path packages/render/Cargo.toml menu` — 17 passed
 - `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions menu_items_semantics_activation_and_identity_rebuild_the_host_spec` — passed
 - `bun test scripts/nucleus-parity-receipts.test.ts` — 8 passed
 - `bun test scripts/parity-evidence-ledger.test.ts` — 6 passed

@@ -12,10 +12,11 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeKey, NodeModifiers, NodeRole, NodeToggled, StylePatch,
 };
-use poodle_specs::{ControlDensity, ControlSize, MenuItemKind, MenuSpec};
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, MenuItemKind, MenuSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
+use crate::icon::icon;
 use crate::presentation::{control_height_rem, rem_to_px};
 
 fn roving_key_handler(
@@ -57,6 +58,10 @@ pub fn menu(
     });
     let item_min_height = rem_to_px(control_height_rem(effective_size));
     let meta_font_size = ctx.theme().resolve_space("typography.caption.size");
+
+    let icon_size = IconSize::from(effective_size);
+    let check_icon_spec = IconSpec::new("check").with_size(icon_size);
+    let check_icon_size = ctx.theme().resolve_space(check_icon_spec.size_token());
 
     let item_px = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
@@ -170,7 +175,7 @@ pub fn menu(
 
         // Trailing: a check (action kind only) or the mono shortcut hint.
         if matches!(entry.kind, MenuItemKind::Action) && entry.is_checked {
-            let mut check = Node::icon("check", font_size);
+            let mut check = icon(&check_icon_spec, ctx);
             check.style.descriptor.text_color = Some(accent_color);
             item = item.child(check);
         } else if let Some(ref shortcut) = entry.shortcut_label {
@@ -243,17 +248,16 @@ pub fn menu(
             }
             MenuItemKind::Checkbox | MenuItemKind::Radio => {
                 // Leading check or a blank spacer keeping labels aligned.
-                let check_size = font_size;
                 let leading = if entry.is_checked {
-                    let mut c = Node::icon("check", check_size);
+                    let mut c = icon(&check_icon_spec, ctx);
                     c.style.descriptor.text_color = Some(accent_color);
                     c
                 } else {
                     let mut s = Node::container();
                     // Explicit Row (see switch.rs).
                     s.style.descriptor.layout.direction = LayoutDirection::Row;
-                    s.style.descriptor.layout.width = LayoutSizing::Fixed(check_size);
-                    s.style.descriptor.layout.height = LayoutSizing::Fixed(check_size);
+                    s.style.descriptor.layout.width = LayoutSizing::Fixed(check_icon_size);
+                    s.style.descriptor.layout.height = LayoutSizing::Fixed(check_icon_size);
                     s
                 };
                 let mut item = build_item(entry, Some(leading), idx);
@@ -474,5 +478,77 @@ mod tests {
             assert_eq!(child.a11y.tab_index, Some(-1));
             assert!(!child.interaction.focusable);
         }
+    }
+
+    #[test]
+    fn checked_items_render_production_icon_metadata() {
+        use poodle_node::NodeKind;
+
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let accent = ctx.theme().resolve_color("color.accent.base");
+
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("action_checked", "Checked Action")
+                .with_checked(true),
+            poodle_specs::MenuEntry::new("checkbox_checked", "Checked Box")
+                .with_kind(MenuItemKind::Checkbox)
+                .with_checked(true),
+            poodle_specs::MenuEntry::new("radio_checked", "Checked Radio")
+                .with_kind(MenuItemKind::Radio)
+                .with_checked(true),
+        ]);
+        let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+        let expected_icon_size = ctx.theme().resolve_space(
+            IconSpec::new("check")
+                .with_size(IconSize::from(effective_size))
+                .size_token(),
+        );
+        let node = menu(&spec, &ctx, None);
+
+        // Action checked has trailing check icon
+        let action_item = node.find(&|n| n.id.as_deref() == Some("menu-item:action_checked")).unwrap();
+        let action_icon = action_item.children.iter().find(|c| matches!(c.kind, NodeKind::Icon { .. })).unwrap();
+        match &action_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "check");
+                assert_eq!(*size, expected_icon_size);
+            }
+            _ => panic!("expected NodeKind::Icon"),
+        }
+        assert_eq!(action_icon.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(action_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(action_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(action_icon.style.descriptor.text_color, Some(accent));
+
+        // Checkbox checked has leading check icon
+        let cb_item = node.find(&|n| n.id.as_deref() == Some("menu-item:checkbox_checked")).unwrap();
+        let cb_icon = &cb_item.children[0];
+        match &cb_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "check");
+                assert_eq!(*size, expected_icon_size);
+            }
+            _ => panic!("expected NodeKind::Icon"),
+        }
+        assert_eq!(cb_icon.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(cb_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(cb_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(cb_icon.style.descriptor.text_color, Some(accent));
+
+        // Radio checked has leading check icon
+        let radio_item = node.find(&|n| n.id.as_deref() == Some("menu-item:radio_checked")).unwrap();
+        let radio_icon = &radio_item.children[0];
+        match &radio_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "check");
+                assert_eq!(*size, expected_icon_size);
+            }
+            _ => panic!("expected NodeKind::Icon"),
+        }
+        assert_eq!(radio_icon.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(radio_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(radio_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(radio_icon.style.descriptor.text_color, Some(accent));
     }
 }
