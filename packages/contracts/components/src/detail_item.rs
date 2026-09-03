@@ -144,10 +144,14 @@ impl DetailItemSpec {
         }
     }
 
-    /// Surface+stacked gap in rem. Contract §8 fixes this composite gap at
-    /// 0.25rem independently of the root row-gap density ladder.
-    pub fn surface_stacked_gap_rem(&self) -> f32 {
-        0.25
+    /// Surface+stacked gap in rem for the resolved density. Contract §8:
+    /// compact 0.125, default 0.1875, comfortable 0.25.
+    pub fn surface_stacked_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
+            ControlDensity::Compact => 0.125,
+            ControlDensity::Default => 0.1875,
+            ControlDensity::Comfortable => 0.25,
+        }
     }
 
     /// Surface horizontal padding in rem for the resolved density. Contract

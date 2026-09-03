@@ -72,7 +72,7 @@ pub fn detail_item_with_slots(
 
     let row_gap = rem_to_px(spec.row_gap_rem(density));
     let inline_gap = rem_to_px(spec.inline_gap_rem(density));
-    let surface_stacked_gap = rem_to_px(spec.surface_stacked_gap_rem());
+    let surface_stacked_gap = rem_to_px(spec.surface_stacked_gap_rem(density));
     let pad_x = rem_to_px(spec.surface_padding_x_rem(density));
     let pad_y = rem_to_px(spec.surface_padding_y_rem(density));
 
