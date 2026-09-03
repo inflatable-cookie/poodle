@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "8d3cc4ff85f2a534a5ea6adbb76891023d17ae7b",
+  "source_commit": "87d616b1476f233d813c11ab9920794554680560",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
   "lock_resolution": [
@@ -46,26 +46,25 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount controlled Dialog modal with title, description, close affordance, body Surface, and action Buttons through HeadlessDriver",
+    "mount controlled Dialog modal with title, description, close affordance, body Surface, and action Buttons through GPUI Dialog compat adapter into HeadlessDriver",
     "verify pointer activation inside panel does not trigger backdrop dismissal",
     "pointer activate disabled action and verify inertness",
     "pointer activate Cancel and Confirm action buttons and verify callback traces",
     "pointer activate close button and verify request close emission",
-    "test backdrop click dismissal policy with false and true postures",
-    "test Escape key dismissal policy with false and true postures",
+    "test independent dismissal axes: backdrop click (false/true) and Escape key (false/true) through GPUI Dialog compat adapter",
     "verify host refusal leaves Dialog mounted without duplicate emission",
     "verify accepted close triggers host rebuild unmounting Dialog backdrop, surface, and controls"
   ],
   "assertions": [
-    "production render path resolves root backdrop role, overlay posture, backdrop fill, panel elevated background, border, surface radius, shadow, md width preset, max height, padding, and section spacing",
+    "production render path and GPUI Dialog compat adapter resolve root backdrop role, overlay posture, backdrop fill, panel elevated background, border, surface radius, shadow, md width preset, max height, padding, and section spacing",
     "header resolves title typography with heading weight, description typography with text.secondary color, and close affordance with chrome size and pointer cursor",
-    "body composes production Surface with panel tone and subtle border",
+    "body composes production Surface with panel tone, subtle border, padding scale, and background alpha",
     "actions compose production Buttons with secondary, primary, and disabled states",
     "mounted layout bounds confirm positive dimensions, panel containment within backdrop, and child containment within panel",
     "inside panel clicks are absorbed and never bubble to backdrop dismissal",
     "disabled action button remains inert to pointer activation",
     "Cancel and Confirm action buttons dispatch callbacks through the mounted backend",
-    "dismissal axes remain independent: close button always requests close, backdrop respects dismiss_on_backdrop, and Escape respects dismiss_on_escape",
+    "dismissal axes remain strictly independent in GPUI Dialog compat adapter: close button always requests close, backdrop respects dismiss_on_backdrop, and Escape respects dismiss_on_escape",
     "host refusal preserves mounted Dialog state and subsequent interactions",
     "accepted close rebuilds host tree without Dialog, removing backdrop, surface, and chrome from the mounted backend"
   ],
