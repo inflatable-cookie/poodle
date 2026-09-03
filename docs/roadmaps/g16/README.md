@@ -106,13 +106,14 @@ stay maintained; backend admission is not part of the first card.
 69. [069 — Nucleus AppHeader M1 receipt](069-nucleus-app-header-m1.md) — complete; merged in PR #175 with one production shell-header fixture over the proven Icon and Text prerequisites
 70. [070 — Nucleus SplitView M1 receipt](070-nucleus-split-view-m1.md) — complete; merged in PR #176 with production structure, independent divider identity, mounted keyboard resize/collapse input, and one M1 receipt
 71. [071 — Nucleus SegmentedControl M1 receipt](071-nucleus-segmented-control-m1.md) — complete; merged in PR #177 with production exclusive semantics, mounted pointer/keyboard input, isolated identity, and one M1 receipt
-72. [072 — Nucleus Tabs M1 receipt](072-nucleus-tabs-m1.md) — ready; strengthen the existing mounted Tabs regression with exact structure, controlled input, reorder, close, identity, and terminal receipt emission
+72. [072 — Nucleus Tabs M1 receipt](072-nucleus-tabs-m1.md) — complete; merged in PR #178 with production tab relationships, mounted selection/close/reorder input, activation and axis proofs, isolated identity, and one M1 receipt
+73. [073 — Nucleus Menu M1 receipt](073-nucleus-menu-m1.md) — ready; establish one mounted production panel fixture for Nucleus-shaped action, disabled, separator, danger, shortcut, and checked-item behavior
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.071` are complete. `g16.072` is the next ready small Nucleus
+`g16.053`–`g16.072` are complete. `g16.073` is the next ready small Nucleus
 receipt child; later receipt cards remain serial on its exact native source
 identity. Release mutation remains
 separately gated.

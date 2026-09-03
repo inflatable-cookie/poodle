@@ -34,11 +34,11 @@ Updated: 2026-09-02
     merged in PR #151; `062` merged in PR #170; `063` and `064` merged in PRs
     #167 and #168; `066` merged in PR #171; `065` merged in PR #172; `067`
     merged in PR #173; `068` merged in PR #174; `069` merged in PR #175;
-    `070` merged in PR #176; `071` merged in PR #177
+    `070` merged in PR #176; `071` merged in PR #177; `072` merged in PR #178
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: `g16.072`, the Tabs M1 receipt child. Later
+  - Ready frontier: `g16.073`, the Menu M1 receipt child. Later
     Nucleus receipt cards remain serial on its exact native source identity;
     do not dispatch an NP tranche as one batch.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
@@ -57,7 +57,7 @@ Updated: 2026-09-02
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: dispatch and review `g16.072` while the
+  - Next move: dispatch and review `g16.073` while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.

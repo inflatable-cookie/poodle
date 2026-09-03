@@ -1,6 +1,6 @@
 # g16.072 — Nucleus Tabs M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.065`, completed `g16.071`
@@ -10,6 +10,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/tabs.md`
 Log: `../../logs/2026-09/20260903-g16-072-nucleus-tabs-receipt.md`
 PR: https://github.com/inflatable-cookie/poodle/pull/178
+Merged: `99978c1ec581dd5fdd1c5534941b1e6f4a052d47`
 Handoff: `../../handoffs/20260903-054548-g16-072-nucleus-tabs-receipt.md`
 
 ## Goal

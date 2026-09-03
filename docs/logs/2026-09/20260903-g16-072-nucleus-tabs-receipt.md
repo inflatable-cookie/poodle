@@ -13,6 +13,7 @@ Branch: `feature/g16-072-nucleus-tabs-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-072-nucleus-tabs-receipt`
 Planning base: `ec62f0a03` (`origin/main`)
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/178
+Merged: `99978c1ec581dd5fdd1c5534941b1e6f4a052d47`
 
 ## Outcome
 
