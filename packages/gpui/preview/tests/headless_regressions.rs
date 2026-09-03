@@ -11434,6 +11434,24 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
             driver.mounted_observation().is_valid(),
             "the proof must paint and dispatch input through the mounted backend"
         );
+
+        nucleus_receipts::emit_if_configured(
+            "AgentPlan",
+            "nucleus.agent.agent-plan",
+            driver.mounted_observation(),
+            &[
+                "mount duplicate controlled AgentPlan instances through node_compat::AgentPlan::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch refused and accepted pointer or keyboard decisions through the GPUI test platform",
+                "rebuild host-owned pending, accepted, dismissed, and revised states through the production adapter path",
+            ],
+            &[
+                "production AgentMessage, Text, and Button composition preserves plan records, decision order, semantics, and exact contract-owned resting, hover, focus, radius, spacing, and status tokens",
+                "mounted roots and decision affordances have positive ordered bounds contained within their caller-scoped plan",
+                "refused acceptance remains pending while accepted, dismissed, and revised decisions rebuild before painted affordances disappear",
+                "duplicate caller identities keep focus, callbacks, state, and bounds isolated",
+                "backend probe channels and mounted observation confirm production render, accessibility, token, paint, and GPUI input dispatch",
+            ],
+        );
     });
 }
 
