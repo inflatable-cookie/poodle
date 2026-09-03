@@ -41,14 +41,14 @@ Updated: 2026-09-03
     PR #184 after one repair/re-review round; `078` merged in PR #185 after
     parallel proof preparation and independent exact-head review; `079` merged
     in PR #183 after two repair/re-review rounds; `080` merged in PR #186 after
-    one repair/re-review round
+    one repair/re-review round; `081` merged in PR #187 after a preparation
+    token-recipe repair and independent finalization review
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: prepare `g16.081` AgentPlan and `g16.082` AgentChatInput
-    production proofs in parallel. Finalize only one accepted proof at a time
-    against the merged 17/29 cohort identity. Receipt emission, cohort refresh,
-    exact-head review, and merge remain serial.
+  - Ready frontier: complete preparation review for `g16.082` AgentChatInput,
+    then finalize it against the merged 18/29 cohort identity. Receipt emission,
+    cohort refresh, exact-head review, and merge remain serial.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -65,8 +65,7 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: review the prepared `g16.081` and `g16.082` proofs, then finalize
-    one serially while the
+  - Next move: review and serially finalize `g16.082` while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.

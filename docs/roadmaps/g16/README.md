@@ -115,18 +115,17 @@ stay maintained; backend admission is not part of the first card.
 78. [078 — Nucleus RadioGroup M1 receipt](078-nucleus-radio-group-m1.md) — complete; merged in PR #185 with production adapter execution, mounted exclusive/roving input, caller-scoped identity, and one M1 receipt
 79. [079 — Nucleus Switch M1 receipt](079-nucleus-switch-m1.md) — complete; merged in PR #183 with production adapter execution, mounted pointer and controlled-state proofs, disabled focus suppression, exact custom-color precedence, and one M1 receipt
 80. [080 — Nucleus EditableLabel M1 receipt](080-nucleus-editable-label-m1.md) — complete; merged in PR #186 after one repair/re-review round with production edit-session execution, exact activation/focus/trim/typography proofs, and one M1 receipt
-81. [081 — Nucleus AgentPlan M1 receipt](081-nucleus-agent-plan-m1.md) — preparation-ready; strengthen the retained mounted decision proof in parallel, then pause before shared receipt files
+81. [081 — Nucleus AgentPlan M1 receipt](081-nucleus-agent-plan-m1.md) — complete; merged in PR #187 after preparation repair and exact-head finalization review with production decision execution, exact Button recipe tokens, and one M1 receipt
 82. [082 — Nucleus AgentChatInput M1 receipt](082-nucleus-agent-chat-input-m1.md) — preparation-ready; build one production mounted composer proof in parallel, then pause before shared receipt files
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.080` are complete. `g16.081` and `g16.082` are independent
-production-proof preparation lanes. The first accepted prepared proof becomes
-the next serial receipt finalization lane; neither may emit competing shared
-evidence. Receipt refresh, review, and merge remain serial on the latest native
-source identity.
+`g16.053`–`g16.081` are complete. `g16.082` is the remaining production-proof
+preparation lane. After preparation acceptance it becomes the next serial
+receipt finalization lane against the 18/29 mounted cohort. Receipt refresh,
+review, and merge remain serial on the latest native source identity.
 Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
