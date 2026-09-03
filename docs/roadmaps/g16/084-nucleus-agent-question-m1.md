@@ -1,8 +1,9 @@
 # g16.084 — Nucleus AgentQuestion M1 Receipt
 
-Status: preparation-ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.062`, completed Text and Button receipts; serial
 finalization follows the latest merged Nucleus receipt
 Governing refs: `nucleus-gpui-parity-programme.md`,
@@ -13,11 +14,16 @@ Handoff: `../../handoffs/20260903-163600-g16-084-nucleus-agent-question-receipt.
 
 ## Goal
 
-Prepare the first named production-path mounted proof for Nucleus
-`AgentQuestion`. Pause before shared evidence. After the orchestrator supplies
-the latest cohort identity, finalize one terminal `M1` receipt.
+Produce the first named production-path mounted proof for Nucleus
+`AgentQuestion`, then emit one terminal `M1` receipt at the exact committed
+runtime source.
 
-## Preparation Boundary
+Completed at runtime source
+`bb477fb28d0e7618c2f5dadc8c6e2b0a64944d0a`. The 21-receipt cohort shares that
+identity, and the generated ledger advances only AgentQuestion from missing to
+mounted. M1 does not infer A1 or V1.
+
+## Fixed Boundary
 
 - Create one stable mounted test through
   `node_compat::AgentQuestion::from_spec(...).into_element()` and the
@@ -29,13 +35,20 @@ the latest cohort identity, finalize one terminal `M1` receipt.
 - Drive mounted pointer and keyboard input. Do not call handlers directly or
   introduce transcript approval orchestration, Nucleus data, persistence, or a
   generic approval API.
-- Commit a biting counterexample before any repair. A bounded generalized native
-  repair is allowed only when the mounted production proof fails.
-- During preparation, do not edit manifest, receipts, ledger, g16 front doors,
-  or claim M1 completion. Push a draft PR and pause.
-- On resume, rebase onto the latest receipt merge, set the expected test, commit
-  runtime source, emit the cohort after the terminal assertion, update this card
-  and one log, and run full boards.
+- Positive full extents prove authored option-row order and non-overlap. Every
+  option stays inside its production question parent, and both question roots
+  plus the disabled witness stay inside the real mount.
+- The disabled witness is a mounted production Button with a supplied live
+  callback and host-state sink. Real pointer dispatch stays inert only while
+  the disabled gate is present.
+- Preparation committed both biting counterexamples before their generalized
+  native repairs and was independently accepted at
+  `992867b9632e620fd6828f1cf5acd4a4bc4c7599`.
+- Finalization rebased the complete preparation batch onto
+  `10e7c22f9c822d3fb957d5d320f923107dcf215e`, retained the counterexamples and
+  accepted proof, then re-emitted all 21 receipts at the committed runtime
+  source. No Nucleus data, approval orchestration, persistence, A1, or V1
+  entered the proof.
 
 ## Review Oracle
 
@@ -62,4 +75,5 @@ visual selectors.
 
 ## Continuation
 
-Pause after preparation. Shared receipt production and merge remain serial.
+Pause for M1 re-review. Merge and g16 front-door closeout remain with the
+orchestrator; this card does not start another receipt.
