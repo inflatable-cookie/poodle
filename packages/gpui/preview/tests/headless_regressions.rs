@@ -10966,6 +10966,7 @@ fn dock_region_hovered_tab_policy_and_static_insert_run_through_mounted_input() 
 fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     use crate::node_compat::IntoCompatNode;
     use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::agent_plan::AgentPlanStatus;
     use poodle_specs::{AgentPlanSpec, ControlDensity, ControlSize};
 
@@ -10984,9 +10985,13 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
             .unwrap_or_else(|| panic!("missing {scope} {name} action"))
     }
 
-    let pending = crate::node_compat::AgentPlan::from_spec(spec(AgentPlanStatus::Pending), &theme())
-        .with_instance_id("counterexample")
-        .into_compat_node();
+    let theme_provider = theme();
+    let pending = crate::node_compat::AgentPlan::from_spec(
+        spec(AgentPlanStatus::Pending),
+        &theme_provider,
+    )
+    .with_instance_id("counterexample")
+    .into_compat_node();
     assert_eq!(
         pending.runtime_id.as_deref(),
         Some("agent-plan:counterexample"),
@@ -11003,6 +11008,10 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     assert_eq!(
         pending.roles.get("density").map(String::as_str),
         Some("compact")
+    );
+    assert_eq!(
+        pending.style.descriptor.layout.spacing.gap, 6.0,
+        "compact AgentPlan uses the contracted 0.375rem root gap"
     );
     assert_eq!(pending.children.len(), 2, "body then pending actions");
     let rendered_plan = pending.children[0].texts();
@@ -11033,6 +11042,10 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     let action_row = &pending.children[1];
     assert_eq!(action_row.children.len(), 3);
     assert_eq!(
+        action_row.style.descriptor.layout.spacing.gap, 6.0,
+        "compact AgentPlan uses the contracted 0.375rem action gap"
+    );
+    assert_eq!(
         action_row
             .children
             .iter()
@@ -11045,17 +11058,100 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
         ],
         "decision affordances keep their authored order"
     );
-    for (name, label, variant) in [
-        ("accept", "Accept plan", "primary"),
-        ("revise", "Revise", "secondary"),
-        ("dismiss", "Dismiss plan", "ghost"),
+    let transparent = ColorValue(0.0, 0.0, 0.0, 0.0);
+    let accent = theme_provider.resolve_color("color.accent.base");
+    let accent_hover = theme_provider.resolve_color("color.accent.hover");
+    let border_subtle = theme_provider.resolve_color("color.border.subtle");
+    let text_inverse = theme_provider.resolve_color("color.text.inverse");
+    let text_primary = theme_provider.resolve_color("color.text.primary");
+    let text_secondary = theme_provider.resolve_color("color.text.secondary");
+    let control_radius = theme_provider.resolve_radius("radius.control");
+    let focus_color = theme_provider.resolve_color("color.accent.focusRing");
+    let focus_width = theme_provider.resolve_border_width("border.width.focus");
+    for (
+        name,
+        label,
+        variant,
+        fill,
+        border,
+        text,
+        hover_fill,
+        hover_border,
+        hover_text,
+    ) in [
+        (
+            "accept",
+            "Accept plan",
+            "primary",
+            accent,
+            transparent,
+            text_inverse,
+            accent_hover,
+            transparent,
+            text_inverse,
+        ),
+        (
+            "revise",
+            "Revise",
+            "secondary",
+            transparent,
+            border_subtle,
+            text_secondary,
+            transparent,
+            border_subtle,
+            text_primary,
+        ),
+        (
+            "dismiss",
+            "Dismiss plan",
+            "ghost",
+            transparent,
+            transparent,
+            text_secondary,
+            transparent,
+            transparent,
+            text_primary,
+        ),
     ] {
         let button = action(&pending, "counterexample", name);
         assert_eq!(button.a11y.label.as_deref(), Some(label));
         assert_eq!(button.a11y.role, Some(NodeRole::Button));
         assert_eq!(button.a11y.tab_index, Some(0));
         assert!(button.interaction.focusable);
-        assert!(button.style.focus_ring.is_some());
+        assert_eq!(button.style.descriptor.background, Some(fill));
+        assert_eq!(button.style.descriptor.border.width, 1.0);
+        assert_eq!(button.style.descriptor.border.color, border);
+        assert_eq!(button.style.descriptor.text_color, Some(text));
+        let radii = button.style.descriptor.corner_radii;
+        assert_eq!(
+            [
+                radii.top_left,
+                radii.top_right,
+                radii.bottom_right,
+                radii.bottom_left,
+            ],
+            [control_radius; 4]
+        );
+        let focus_ring = button.style.focus_ring.expect("production Button focus ring");
+        assert_eq!(focus_ring.color, focus_color);
+        assert_eq!(focus_ring.width, focus_width);
+        assert_eq!(focus_ring.offset, 2.0);
+        let hover = button.style.hover.expect("production Button hover recipe");
+        assert_eq!(
+            hover.background.unwrap_or(fill),
+            hover_fill,
+            "{name} hover fill must resolve from the AgentPlan contract"
+        );
+        assert_eq!(
+            hover.border_color.unwrap_or(border),
+            hover_border,
+            "{name} hover border must resolve from the AgentPlan contract"
+        );
+        assert_eq!(
+            hover.text_color.unwrap_or(text),
+            hover_text,
+            "{name} hover text must resolve from the AgentPlan contract"
+        );
         assert_eq!(button.style.text_weight, Some(500));
         assert_eq!(button.style.line_height, Some(1.0));
         assert_eq!(
@@ -11070,9 +11166,12 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
         );
     }
 
-    let settled = crate::node_compat::AgentPlan::from_spec(spec(AgentPlanStatus::Accepted), &theme())
-        .with_instance_id("settled")
-        .into_compat_node();
+    let settled = crate::node_compat::AgentPlan::from_spec(
+        spec(AgentPlanStatus::Accepted),
+        &theme_provider,
+    )
+    .with_instance_id("settled")
+    .into_compat_node();
     assert_eq!(settled.children.len(), 2, "body then settled status");
     assert_eq!(
         settled.roles.get("status").map(String::as_str),
@@ -11090,6 +11189,11 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     assert!(badge.style.text_wrap, "status composes production Text");
     assert_eq!(badge.style.line_height, Some(1.5));
     assert_eq!(badge.style.text_weight, Some(500));
+    assert_eq!(
+        badge.style.descriptor.text_color,
+        Some(text_secondary),
+        "the settled badge uses the contracted secondary text token"
+    );
     assert_eq!(
         badge.roles.get("status").map(String::as_str),
         Some("accepted")
