@@ -24362,9 +24362,29 @@ fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
             );
         }
 
+        let observation = driver.mounted_observation();
         assert!(
-            driver.mounted_observation().is_valid(),
+            observation.is_valid(),
             "terminal proof painted and dispatched through the mounted production path"
+        );
+
+        nucleus_receipts::emit_if_configured(
+            "ModelPicker",
+            "nucleus.agent.model-picker",
+            observation,
+            &[
+                "mount duplicate controlled ModelPicker instances through node_compat::ModelPicker::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch mounted keyboard open and Escape plus pointer model and capability-axis selection while rebuilding from host-owned state",
+                "dispatch mounted pointer input through unavailable, refused, accepted, and outside-dismiss-refused paths across caller-scoped instances",
+            ],
+            &[
+                "production Select, SegmentedControl, and Switch composition preserves trigger, provider and model labels, selected and unavailable states, capability axes, exact token metadata, overlay elevation, and one-dialog surface anatomy",
+                "mounted roots, dialog, Select list, and model rows have positive extents, authored non-overlapping order, and real mount or production-parent containment",
+                "axis changes, model refusal and acceptance, Escape close, and host-owned rebuilds preserve the exact ordered callback and state trace",
+                "unavailable model input is inert and outside interaction remains refused without changing the controlled selection or callback stream",
+                "duplicate caller identities keep focus, runtime ids, callbacks, state, and geometry isolated",
+                "backend mounted observation confirms production render, paint, and GPUI input dispatch after every terminal assertion",
+            ],
         );
     });
 }
