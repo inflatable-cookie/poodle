@@ -32587,7 +32587,9 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
     use gpui::{div, px, AnyElement, IntoElement, ParentElement, Styled};
     use node_compat::IntoCompatNode;
     use poodle_adapter::ThemeProvider;
-    use poodle_node::{CursorHint, FontFamily, LayoutDirection, LayoutSizing, NodeKind, NodeRole};
+    use poodle_node::{
+        CursorHint, FontFamily, LayoutDirection, LayoutSizing, Node, NodeKind, NodeRole,
+    };
     use poodle_render::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
     use poodle_specs::{
         CommandActionItem, CommandPaletteSpec, ControlDensity, ControlSize, DiscoveryState,
@@ -32765,6 +32767,27 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
     );
     assert_eq!(results.a11y.role, Some(NodeRole::ListBox));
     assert_eq!(results.a11y.label.as_deref(), Some("Command results"));
+    assert_eq!(
+        results.roles.get("dependency").map(String::as_str),
+        Some("action-discovery-panel"),
+        "results must use the production ActionDiscoveryPanel composition"
+    );
+    assert_eq!(results.children.len(), 2, "File and View groups");
+    let file_group = &results.children[0];
+    assert_eq!(file_group.roles.get("part").map(String::as_str), Some("group"));
+    assert_eq!(file_group.children.len(), 2, "Eyebrow then list");
+    let file_eyebrow = &file_group.children[0];
+    assert_eq!(file_eyebrow.intrinsic_text(), Some("FILE"));
+    assert_eq!(file_eyebrow.style.font_family, Some(FontFamily::Sans));
+    assert_eq!(file_eyebrow.style.text_weight, Some(600));
+    assert_eq!(
+        file_eyebrow.roles.get("dependency").map(String::as_str),
+        Some("eyebrow")
+    );
+    let file_list = &file_group.children[1];
+    assert_eq!(file_list.a11y.role, Some(NodeRole::ListBox));
+    assert_eq!(file_list.roles.get("part").map(String::as_str), Some("list"));
+    assert_eq!(file_list.children.len(), 3);
     let active = proof
         .find(&|node| {
             node.runtime_id.as_deref() == Some("command-palette:proof:action:open")
@@ -32773,6 +32796,24 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
     assert_eq!(active.a11y.role, Some(NodeRole::ListBoxOption));
     assert_eq!(active.a11y.selected, Some(true));
     assert_eq!(active.a11y.tab_index, Some(0));
+    assert_eq!(
+        active.roles.get("equivalent").map(String::as_str),
+        Some("list-card")
+    );
+    let accent = theme_provider.resolve_color("color.accent.base");
+    let elevated = theme_provider.resolve_color("color.background.elevated");
+    assert_eq!(
+        active.style.descriptor.background,
+        Some(poodle_render::color::mix_srgb(accent, elevated, 0.18))
+    );
+    assert_eq!(active.style.shadow_layers.len(), 1);
+    let active_ring = &active.style.shadow_layers[0];
+    assert!(active_ring.inset);
+    assert_eq!(active_ring.spread, rem_to_px(0.0625));
+    assert_eq!(
+        active_ring.color,
+        poodle_render::color::with_alpha(accent, accent.3 * 0.22)
+    );
     let disabled = proof
         .find(&|node| {
             node.runtime_id.as_deref() == Some("command-palette:proof:action:locked")
@@ -32784,56 +32825,137 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
     assert_eq!(disabled.style.descriptor.cursor, CursorHint::NotAllowed);
     assert!(disabled.interaction.on_activate.is_none());
     assert_eq!(disabled.children.len(), 1, "disabled row has title and no shortcut");
-    assert!(proof.has_text("New"));
-    assert!(proof.has_text("Cmd+S"));
+    let save = proof
+        .find(&|node| node.runtime_id.as_deref() == Some("command-palette:proof:action:save"))
+        .expect("save action");
+    let trailing = &save.children[1];
+    assert_eq!(trailing.roles.get("part").map(String::as_str), Some("trailing"));
+    assert_eq!(trailing.children.len(), 2, "badge then shortcut chips");
+    let badge = &trailing.children[0];
+    assert_eq!(badge.roles.get("part").map(String::as_str), Some("badge"));
+    assert_eq!(
+        badge.style.descriptor.background,
+        Some(poodle_render::color::with_alpha(accent, accent.3 * 0.16))
+    );
+    let badge_label = &badge.children[0];
+    assert_eq!(badge_label.intrinsic_text(), Some("NEW"));
+    assert_eq!(badge_label.style.text_weight, Some(600));
+    assert_eq!(badge_label.style.letter_spacing_em, Some(0.03));
+    let shortcut = &trailing.children[1];
+    assert_eq!(shortcut.roles.get("part").map(String::as_str), Some("shortcut"));
+    let surface = theme_provider.resolve_color("color.background.surface");
+    assert_eq!(
+        shortcut.style.descriptor.background,
+        Some(poodle_render::color::with_alpha(surface, surface.3 * 0.76))
+    );
+    let shortcut_label = &shortcut.children[0];
+    assert_eq!(shortcut_label.intrinsic_text(), Some("Cmd+S"));
+    assert_eq!(shortcut_label.style.font_family, Some(FontFamily::Mono));
+    assert_eq!(shortcut_label.style.text_weight, Some(600));
 
-    for (scope, state, status_copy, results_copy) in [
-        (
-            "loading",
-            DiscoveryState::Loading,
-            "Loading commands.",
-            "Searching\u{2026}",
-        ),
-        (
-            "empty",
-            DiscoveryState::Empty,
-            "No commands are available in this workspace.",
-            "No matching commands",
-        ),
-        (
-            "no-results",
-            DiscoveryState::NoResults,
-            "No commands match \"zzz\".",
-            "No matching commands",
-        ),
-    ] {
-        let state_node = node_compat::CommandPalette::from_spec(
-            CommandPaletteSpec::new(if state == DiscoveryState::Empty {
-                Vec::new()
-            } else {
-                actions()
-            })
-            .with_open(true)
-            .with_query(if state == DiscoveryState::NoResults {
-                "zzz"
-            } else {
-                ""
-            })
-            .with_state(state),
-            &theme_provider,
+    fn discovery_proof(
+        scope: &str,
+        state: DiscoveryState,
+        query: &str,
+        actions: Vec<CommandActionItem>,
+        theme_provider: &GpuiThemeProvider,
+    ) -> Node {
+        node_compat::CommandPalette::from_spec(
+            CommandPaletteSpec::new(actions)
+                .with_open(true)
+                .with_query(query)
+                .with_state(state),
+            theme_provider,
         )
         .with_id(scope)
-        .into_compat_node();
-        assert!(state_node.has_text(status_copy), "{scope} status copy");
-        assert!(state_node.has_text(results_copy), "{scope} results structure");
-        let results_id = format!("command-palette:{scope}:results");
-        assert!(
-            state_node
-                .find(&|node| node.runtime_id.as_deref() == Some(results_id.as_str()))
-                .is_some(),
-            "{scope} keeps a named results region"
-        );
+        .into_compat_node()
     }
+
+    fn discovery_results<'a>(node: &'a Node, scope: &str) -> &'a Node {
+        let results_id = format!("command-palette:{scope}:results");
+        node.find(&|child| child.runtime_id.as_deref() == Some(results_id.as_str()))
+            .unwrap_or_else(|| panic!("{scope} results"))
+    }
+
+    let loading = discovery_proof(
+        "loading",
+        DiscoveryState::Loading,
+        "",
+        actions(),
+        &theme_provider,
+    );
+    assert!(loading.has_text("Loading commands."));
+    let loading_results = discovery_results(&loading, "loading");
+    assert_eq!(
+        loading_results.roles.get("dependency").map(String::as_str),
+        Some("action-discovery-panel")
+    );
+    let loading_state = &loading_results.children[0];
+    assert_eq!(
+        loading_state.roles.get("part").map(String::as_str),
+        Some("loading-state")
+    );
+    assert_eq!(loading_state.style.min_height, Some(rem_to_px(10.0)));
+    let skeletons = &loading_state.children[0];
+    assert_eq!(skeletons.children.len(), 5, "five loading rows");
+    for row in &skeletons.children {
+        assert_eq!(row.children.len(), 2, "two Skeleton cells per loading row");
+        for cell in &row.children {
+            assert_eq!(cell.children.len(), 1);
+            assert_eq!(
+                cell.children[0]
+                    .roles
+                    .get("dependency")
+                    .map(String::as_str),
+                Some("skeleton")
+            );
+        }
+    }
+
+    let empty = discovery_proof(
+        "empty",
+        DiscoveryState::Empty,
+        "",
+        Vec::new(),
+        &theme_provider,
+    );
+    assert!(empty.has_text("No commands are available in this workspace."));
+    let empty_state = &discovery_results(&empty, "empty").children[0];
+    assert_eq!(
+        empty_state.roles.get("dependency").map(String::as_str),
+        Some("empty-state")
+    );
+    assert_eq!(empty_state.roles.get("state").map(String::as_str), Some("empty"));
+    assert!(empty_state.style.border_dashed);
+    assert!(empty_state.has_text("No actions available"));
+    assert!(empty_state.has_text("No actions are available in this context."));
+    assert!(empty_state.find(&|child| {
+        matches!(&child.kind, NodeKind::Icon { name, .. } if name == "inbox")
+    }).is_some());
+
+    let no_results = discovery_proof(
+        "no-results",
+        DiscoveryState::NoResults,
+        "zzz",
+        actions(),
+        &theme_provider,
+    );
+    assert!(no_results.has_text("No commands match \"zzz\"."));
+    let no_results_state = &discovery_results(&no_results, "no-results").children[0];
+    assert_eq!(
+        no_results_state.roles.get("dependency").map(String::as_str),
+        Some("empty-state")
+    );
+    assert_eq!(
+        no_results_state.roles.get("state").map(String::as_str),
+        Some("no-results")
+    );
+    assert!(no_results_state.style.border_dashed);
+    assert!(no_results_state.has_text("No matching actions"));
+    assert!(no_results_state.has_text("No actions match the current search."));
+    assert!(no_results_state.find(&|child| {
+        matches!(&child.kind, NodeKind::Icon { name, .. } if name == "search")
+    }).is_some());
 
     #[derive(Clone)]
     struct PaletteState {
@@ -32844,6 +32966,7 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         discovery: DiscoveryState,
         active: Option<String>,
         accept_query: bool,
+        accept_active: bool,
         accept_close: bool,
     }
 
@@ -32944,7 +33067,9 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
                     next.unwrap_or("none")
                 ));
                 active_host.mutate(scope, |state| {
-                    state.active = next.map(str::to_owned);
+                    if state.accept_active {
+                        state.active = next.map(str::to_owned);
+                    }
                 });
             }))
             .on_select(Arc::new(move |id| {
@@ -32972,6 +33097,7 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
                     discovery: DiscoveryState::Ready,
                     active: Some("open".to_string()),
                     accept_query: false,
+                    accept_active: false,
                     accept_close: false,
                 },
                 PaletteState {
@@ -32982,6 +33108,7 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
                     discovery: DiscoveryState::Ready,
                     active: Some("open".to_string()),
                     accept_query: true,
+                    accept_active: true,
                     accept_close: false,
                 },
             ]),
@@ -33142,8 +33269,37 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
 
         host.take_events();
         driver.dispatch_key_raw("down");
-        assert_eq!(host.state("subject").active.as_deref(), Some("save"));
+        assert_eq!(host.state("subject").active.as_deref(), Some("open"));
         assert_eq!(host.take_events(), ["subject/active:save"]);
+        let refused_open = poodle_gpui_node_backend::painted_node_for(subject_open)
+            .expect("refused active row remains painted");
+        let refused_save = poodle_gpui_node_backend::painted_node_for(subject_save)
+            .expect("proposed row remains painted");
+        assert_eq!(refused_open.shadow_layers.len(), 1);
+        assert!(refused_save.shadow_layers.is_empty());
+        driver.focus_element(subject_query);
+        driver.focus_next_tab_stop();
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_open), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_save), Some(false));
+        driver.focus_element(subject_query);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.take_events(), ["subject/select:open"]);
+
+        host.mutate("subject", |state| state.accept_active = true);
+        driver.dispatch_key_raw("down");
+        assert_eq!(host.take_events(), ["subject/active:save"]);
+        assert_eq!(host.state("subject").active.as_deref(), Some("save"));
+        let accepted_save = poodle_gpui_node_backend::painted_node_for(subject_save)
+            .expect("accepted active row repaints");
+        let accepted_open = poodle_gpui_node_backend::painted_node_for(subject_open)
+            .expect("previous row repaints inactive");
+        assert_eq!(accepted_save.shadow_layers.len(), 1);
+        assert!(accepted_open.shadow_layers.is_empty());
+        driver.focus_element(subject_query);
+        driver.focus_next_tab_stop();
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_open), Some(false));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_save), Some(true));
+        driver.focus_element(subject_query);
         driver.dispatch_key_raw("end");
         assert_eq!(host.state("subject").active.as_deref(), Some("toggle"));
         driver.dispatch_key_raw("down");
