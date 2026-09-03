@@ -23686,3 +23686,676 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         );
     });
 }
+
+// ── g16.074 Nucleus Dialog mounted parity ────────────────────────────
+
+#[test]
+fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
+    use poodle_node::{
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+        MainAxisAlignment, NodeKind, NodePosition, NodeRole,
+    };
+    use poodle_render::presentation::{
+        control_height_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+        size_font_rem,
+    };
+    use poodle_specs::{
+        ButtonSpec, ButtonVariant, DialogKind, DialogSpec, DialogWidth, PaddingScale,
+        SemanticControlSizeRole, SurfaceBorder, SurfaceSpec, SurfaceTone,
+    };
+    use poodle_tokens::semantic;
+
+    run_headless(|cx| {
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+
+        let backdrop_fill = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_OVERLAY);
+        let surface_fill = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_ELEVATED);
+        let border_color = ctx.theme().resolve_color(semantic::COLOR_BORDER_DEFAULT);
+        let radius = ctx.theme().resolve_radius(semantic::RADIUS_SURFACE);
+        let title_color = ctx.theme().resolve_color(semantic::COLOR_TEXT_PRIMARY);
+        let desc_color = ctx.theme().resolve_color("color.text.secondary");
+        let muted_color = ctx.theme().resolve_color("color.text.secondary");
+
+        let spec = DialogSpec::new()
+            .with_title("Confirm Dataset Export")
+            .with_description("Review configuration before exporting this dataset.")
+            .with_show_close_button(true)
+            .with_close_label("Close dialog")
+            .with_width(DialogWidth::Md)
+            .with_role(DialogKind::Dialog);
+
+        let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+        let density = ctx.resolve_density(spec.density);
+        let title_font = rem_to_px(1.0_f32.max(size_font_rem(effective_size) + 0.1875));
+        let body_font = rem_to_px(size_font_rem(effective_size));
+        let space_x = rem_to_px(panel_space_x_rem(density));
+        let space_y = rem_to_px(panel_space_y_rem(density));
+
+        let header_gap = rem_to_px(0.375);
+        let header_mb = ctx.theme().resolve_space("space.stack.md");
+        let actions_gap = ctx.theme().resolve_space("space.inline.sm");
+        let actions_mt = ctx.theme().resolve_space("space.stack.lg");
+        let chrome_size = resolve_semantic_size(effective_size, SemanticControlSizeRole::Chrome);
+        let close_dim = rem_to_px(control_height_rem(chrome_size));
+
+        // ── 1. Production Spec & Token Structure Proof ─────────────────────
+        let surface_spec = SurfaceSpec::new()
+            .with_tone(SurfaceTone::Panel)
+            .with_border(SurfaceBorder::Subtle)
+            .with_padding(PaddingScale::Md);
+        let mut body_surface = poodle_render::surface(
+            &surface_spec,
+            &ctx,
+            vec![Node::text("Dataset: telemetry-log-2026.parquet")],
+        );
+        body_surface.id = Some("dialog-body-surface".to_string());
+
+        let disabled_btn_spec = ButtonSpec::new()
+            .with_label("Locked")
+            .with_variant(ButtonVariant::Ghost)
+            .with_disabled(true);
+        let mut disabled_btn = poodle_render::button(&disabled_btn_spec, &ctx, None);
+        disabled_btn.id = Some("dialog-disabled-btn".to_string());
+
+        let cancel_btn_spec = ButtonSpec::new()
+            .with_label("Cancel")
+            .with_variant(ButtonVariant::Secondary);
+        let mut cancel_btn = poodle_render::button(&cancel_btn_spec, &ctx, None);
+        cancel_btn.id = Some("dialog-cancel-btn".to_string());
+
+        let confirm_btn_spec = ButtonSpec::new()
+            .with_label("Export")
+            .with_variant(ButtonVariant::Primary);
+        let mut confirm_btn = poodle_render::button(&confirm_btn_spec, &ctx, None);
+        confirm_btn.id = Some("dialog-confirm-btn".to_string());
+
+        let mut actions_container = Node::container();
+        actions_container.id = Some("dialog-actions-container".to_string());
+        actions_container.style.descriptor.layout.direction = LayoutDirection::Row;
+        actions_container.style.descriptor.layout.spacing.gap = actions_gap;
+        actions_container = actions_container
+            .child(disabled_btn)
+            .child(cancel_btn)
+            .child(confirm_btn);
+
+        let initial_node = poodle_render::dialog(
+            &spec,
+            &ctx,
+            vec![body_surface],
+            Some(actions_container),
+            Some(Arc::new(|| {})),
+        );
+
+        // 1a. Root Backdrop
+        assert_eq!(initial_node.id.as_deref(), Some("poodle-dialog-backdrop"));
+        assert_eq!(initial_node.a11y.role, Some(NodeRole::Dialog));
+        assert!(initial_node.style.overlay);
+        assert_eq!(
+            initial_node.position,
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            }
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            initial_node.style.descriptor.background,
+            Some(backdrop_fill)
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center
+        );
+        assert_eq!(initial_node.children.len(), 1);
+
+        // 1b. Surface Panel
+        let panel = &initial_node.children[0];
+        assert_eq!(panel.style.descriptor.background, Some(surface_fill));
+        assert_eq!(panel.style.descriptor.border.width, 1.0);
+        assert_eq!(panel.style.descriptor.border.color, border_color);
+        assert_eq!(panel.style.descriptor.corner_radii.top_left, radius);
+        assert_eq!(panel.style.descriptor.corner_radii.top_right, radius);
+        assert_eq!(panel.style.descriptor.corner_radii.bottom_right, radius);
+        assert_eq!(panel.style.descriptor.corner_radii.bottom_left, radius);
+        assert_eq!(
+            panel.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(panel.style.max_height, Some(rem_to_px(42.0)));
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Hidden
+        );
+        assert_eq!(
+            panel.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_DIALOG)
+        );
+        assert_eq!(
+            panel.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(34.0))
+        );
+        assert_eq!(
+            panel.style.descriptor.layout.spacing.padding.top,
+            space_y
+        );
+        assert_eq!(
+            panel.style.descriptor.layout.spacing.padding.bottom,
+            space_y
+        );
+        assert_eq!(
+            panel.style.descriptor.layout.spacing.padding.left,
+            space_x
+        );
+        assert_eq!(
+            panel.style.descriptor.layout.spacing.padding.right,
+            space_x
+        );
+        assert_eq!(panel.children.len(), 3);
+
+        // 1c. Header Row
+        let header_row = &panel.children[0];
+        assert_eq!(
+            header_row.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            header_row.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Start
+        );
+        assert_eq!(
+            header_row.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::SpaceBetween
+        );
+        assert_eq!(header_row.style.descriptor.layout.spacing.gap, actions_gap);
+        assert_eq!(
+            header_row.style.descriptor.layout.spacing.margin.bottom,
+            header_mb
+        );
+        assert_eq!(header_row.children.len(), 2);
+
+        let header_col = &header_row.children[0];
+        assert_eq!(
+            header_col.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(header_col.style.descriptor.layout.spacing.gap, header_gap);
+        assert_eq!(
+            header_col.style.descriptor.layout.width,
+            LayoutSizing::Grow
+        );
+        assert_eq!(header_col.children.len(), 2);
+
+        let title_node = &header_col.children[0];
+        assert!(matches!(&title_node.kind, NodeKind::Text { content } if content == "Confirm Dataset Export"));
+        assert_eq!(title_node.style.descriptor.text_color, Some(title_color));
+        assert_eq!(title_node.style.text_size, Some(title_font));
+        assert_eq!(title_node.style.text_weight, Some(600));
+
+        let desc_node = &header_col.children[1];
+        assert!(matches!(&desc_node.kind, NodeKind::Text { content } if content == "Review configuration before exporting this dataset."));
+        assert_eq!(desc_node.style.descriptor.text_color, Some(desc_color));
+        assert_eq!(desc_node.style.text_size, Some(body_font));
+
+        let close_btn_node = &header_row.children[1];
+        assert_eq!(close_btn_node.id.as_deref(), Some("poodle-dialog-close"));
+        assert_eq!(close_btn_node.a11y.label.as_deref(), Some("Close dialog"));
+        assert!(close_btn_node.interaction.focusable);
+        assert_eq!(
+            close_btn_node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(close_dim)
+        );
+        assert_eq!(
+            close_btn_node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(close_dim)
+        );
+        assert_eq!(
+            close_btn_node.style.descriptor.cursor,
+            CursorHint::Pointer
+        );
+        assert_eq!(
+            close_btn_node.style.focus.as_ref().and_then(|f| f.border_color),
+            Some(ctx.theme().resolve_color("color.accent.focusRing"))
+        );
+        assert_eq!(close_btn_node.children.len(), 1);
+        let close_icon = &close_btn_node.children[0];
+        assert!(matches!(&close_icon.kind, NodeKind::Icon { name, .. } if name == "x"));
+        assert_eq!(close_icon.style.descriptor.text_color, Some(muted_color));
+
+        // 1d. Body Container
+        let body_container = &panel.children[1];
+        assert_eq!(
+            body_container.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(body_container.style.min_width, Some(0.0));
+        assert!(body_container.style.self_stretch);
+        assert_eq!(body_container.children.len(), 1);
+        let body_node = &body_container.children[0];
+        assert_eq!(body_node.id.as_deref(), Some("dialog-body-surface"));
+
+        // 1e. Actions Row
+        let actions_row = &panel.children[2];
+        assert_eq!(
+            actions_row.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            actions_row.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::End
+        );
+        assert_eq!(actions_row.style.descriptor.layout.spacing.gap, actions_gap);
+        assert_eq!(
+            actions_row.style.descriptor.layout.spacing.margin.top,
+            actions_mt
+        );
+        assert!(actions_row.style.self_stretch);
+        assert_eq!(actions_row.children.len(), 1);
+
+        let actions_group = &actions_row.children[0];
+        assert_eq!(actions_group.id.as_deref(), Some("dialog-actions-container"));
+        assert_eq!(actions_group.children.len(), 3);
+        assert_eq!(actions_group.children[0].id.as_deref(), Some("dialog-disabled-btn"));
+        assert_eq!(actions_group.children[1].id.as_deref(), Some("dialog-cancel-btn"));
+        assert_eq!(actions_group.children[2].id.as_deref(), Some("dialog-confirm-btn"));
+
+        // ── 2. Mounted Host Setup & Layout Containment ─────────────────────
+        let is_open = Arc::new(Mutex::new(true));
+        let refuse_close = Arc::new(Mutex::new(false));
+        let dismiss_on_backdrop_state = Arc::new(Mutex::new(true));
+        let dismiss_on_escape_state = Arc::new(Mutex::new(true));
+        let close_requests = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let action_events = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+
+        fn build_dialog_host(
+            ctx: &RenderContext<'_>,
+            is_open: &Arc<Mutex<bool>>,
+            refuse_close: &Arc<Mutex<bool>>,
+            dismiss_on_backdrop_state: &Arc<Mutex<bool>>,
+            dismiss_on_escape_state: &Arc<Mutex<bool>>,
+            close_requests: &Arc<Mutex<Vec<&'static str>>>,
+            action_events: &Arc<Mutex<Vec<&'static str>>>,
+            mounted: &Arc<Mutex<Node>>,
+        ) -> Node {
+            if !*is_open.lock().unwrap() {
+                let mut empty = Node::container();
+                empty.id = Some("unmounted-host".to_string());
+                return empty;
+            }
+
+            let spec = DialogSpec::new()
+                .with_title("Confirm Dataset Export")
+                .with_description("Review configuration before exporting this dataset.")
+                .with_show_close_button(true)
+                .with_close_label("Close dialog")
+                .with_width(DialogWidth::Md)
+                .with_dismiss_on_backdrop(*dismiss_on_backdrop_state.lock().unwrap())
+                .with_dismiss_on_escape(*dismiss_on_escape_state.lock().unwrap())
+                .with_role(DialogKind::Dialog);
+
+            let surface_spec = SurfaceSpec::new()
+                .with_tone(SurfaceTone::Panel)
+                .with_border(SurfaceBorder::Subtle)
+                .with_padding(PaddingScale::Md);
+            let mut body_surface = poodle_render::surface(
+                &surface_spec,
+                ctx,
+                vec![Node::text("Dataset: telemetry-log-2026.parquet")],
+            );
+            body_surface.id = Some("dialog-body-surface".to_string());
+
+            let actions_sink_disabled = Arc::clone(action_events);
+            let disabled_btn_spec = ButtonSpec::new()
+                .with_label("Locked")
+                .with_variant(ButtonVariant::Ghost)
+                .with_disabled(true);
+            let mut disabled_btn = poodle_render::button(
+                &disabled_btn_spec,
+                ctx,
+                Some(Arc::new(move || {
+                    actions_sink_disabled.lock().unwrap().push("disabled");
+                })),
+            );
+            disabled_btn.id = Some("dialog-disabled-btn".to_string());
+
+            let actions_sink_cancel = Arc::clone(action_events);
+            let cancel_btn_spec = ButtonSpec::new()
+                .with_label("Cancel")
+                .with_variant(ButtonVariant::Secondary);
+            let mut cancel_btn = poodle_render::button(
+                &cancel_btn_spec,
+                ctx,
+                Some(Arc::new(move || {
+                    actions_sink_cancel.lock().unwrap().push("cancel");
+                })),
+            );
+            cancel_btn.id = Some("dialog-cancel-btn".to_string());
+
+            let actions_sink_confirm = Arc::clone(action_events);
+            let confirm_btn_spec = ButtonSpec::new()
+                .with_label("Export")
+                .with_variant(ButtonVariant::Primary);
+            let mut confirm_btn = poodle_render::button(
+                &confirm_btn_spec,
+                ctx,
+                Some(Arc::new(move || {
+                    actions_sink_confirm.lock().unwrap().push("confirm");
+                })),
+            );
+            confirm_btn.id = Some("dialog-confirm-btn".to_string());
+
+            let mut actions_container = Node::container();
+            actions_container.id = Some("dialog-actions-container".to_string());
+            actions_container.style.descriptor.layout.direction = LayoutDirection::Row;
+            actions_container.style.descriptor.layout.spacing.gap =
+                ctx.theme().resolve_space("space.inline.sm");
+            actions_container = actions_container
+                .child(disabled_btn)
+                .child(cancel_btn)
+                .child(confirm_btn);
+
+            let close_sink = Arc::clone(close_requests);
+            let open_sink = Arc::clone(is_open);
+            let refuse_sink = Arc::clone(refuse_close);
+            let b_state = Arc::clone(dismiss_on_backdrop_state);
+            let e_state = Arc::clone(dismiss_on_escape_state);
+            let a_sink = Arc::clone(action_events);
+            let m_sink = Arc::clone(mounted);
+            let theme_for_rebuild = theme();
+
+            let on_request_close = Arc::new(move || {
+                close_sink.lock().unwrap().push("request-close");
+                if !*refuse_sink.lock().unwrap() {
+                    *open_sink.lock().unwrap() = false;
+                    let next = build_dialog_host(
+                        &RenderContext::new(&theme_for_rebuild),
+                        &open_sink,
+                        &refuse_sink,
+                        &b_state,
+                        &e_state,
+                        &close_sink,
+                        &a_sink,
+                        &m_sink,
+                    );
+                    *m_sink.lock().unwrap() = next;
+                }
+            });
+
+            poodle_render::dialog(
+                &spec,
+                ctx,
+                vec![body_surface],
+                Some(actions_container),
+                Some(on_request_close),
+            )
+        }
+
+        *mounted.lock().unwrap() = build_dialog_host(
+            &ctx,
+            &is_open,
+            &refuse_close,
+            &dismiss_on_backdrop_state,
+            &dismiss_on_escape_state,
+            &close_requests,
+            &action_events,
+            &mounted,
+        );
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 800.0, 600.0);
+
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("poodle-dialog-backdrop bounds must exist");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("poodle-dialog-surface bounds must exist");
+        let close_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-close")
+            .expect("poodle-dialog-close bounds must exist");
+        let body_bounds = poodle_gpui_node_backend::bounds_for("dialog-body-surface")
+            .expect("dialog-body-surface bounds must exist");
+        let disabled_btn_bounds = poodle_gpui_node_backend::bounds_for("dialog-disabled-btn")
+            .expect("dialog-disabled-btn bounds must exist");
+        let cancel_btn_bounds = poodle_gpui_node_backend::bounds_for("dialog-cancel-btn")
+            .expect("dialog-cancel-btn bounds must exist");
+        let confirm_btn_bounds = poodle_gpui_node_backend::bounds_for("dialog-confirm-btn")
+            .expect("dialog-confirm-btn bounds must exist");
+
+        // Positive bounds
+        assert!(backdrop_bounds.size.width > gpui::px(0.0) && backdrop_bounds.size.height > gpui::px(0.0));
+        assert!(surface_bounds.size.width > gpui::px(0.0) && surface_bounds.size.height > gpui::px(0.0));
+        assert!(close_bounds.size.width > gpui::px(0.0) && close_bounds.size.height > gpui::px(0.0));
+        assert!(body_bounds.size.width > gpui::px(0.0) && body_bounds.size.height > gpui::px(0.0));
+        assert!(disabled_btn_bounds.size.width > gpui::px(0.0) && disabled_btn_bounds.size.height > gpui::px(0.0));
+        assert!(cancel_btn_bounds.size.width > gpui::px(0.0) && cancel_btn_bounds.size.height > gpui::px(0.0));
+        assert!(confirm_btn_bounds.size.width > gpui::px(0.0) && confirm_btn_bounds.size.height > gpui::px(0.0));
+
+        // Containment
+        assert!(surface_bounds.origin.x >= backdrop_bounds.origin.x);
+        assert!(surface_bounds.origin.y >= backdrop_bounds.origin.y);
+        assert!(surface_bounds.origin.x + surface_bounds.size.width <= backdrop_bounds.origin.x + backdrop_bounds.size.width);
+        assert!(surface_bounds.origin.y + surface_bounds.size.height <= backdrop_bounds.origin.y + backdrop_bounds.size.height);
+
+        assert!(close_bounds.origin.x >= surface_bounds.origin.x);
+        assert!(close_bounds.origin.y >= surface_bounds.origin.y);
+        assert!(body_bounds.origin.x >= surface_bounds.origin.x);
+        assert!(body_bounds.origin.y >= surface_bounds.origin.y);
+        assert!(cancel_btn_bounds.origin.x >= surface_bounds.origin.x);
+        assert!(confirm_btn_bounds.origin.x >= surface_bounds.origin.x);
+
+        // Vertical order: close/header above body, body above actions
+        assert!(close_bounds.origin.y < body_bounds.origin.y);
+        assert!(body_bounds.origin.y < cancel_btn_bounds.origin.y);
+        assert!(body_bounds.origin.y < confirm_btn_bounds.origin.y);
+
+        // ── 3. Pointer Activation & Inside Click Containment ───────────────
+        // 3a. Inside click on body surface must not trigger backdrop close
+        driver.pointer_activate_id("dialog-body-surface");
+        assert!(
+            close_requests.lock().unwrap().is_empty(),
+            "Click inside dialog surface must not trigger backdrop dismissal"
+        );
+        assert!(
+            action_events.lock().unwrap().is_empty(),
+            "Click on body surface must not fire action buttons"
+        );
+
+        // 3b. Pointer click on disabled action button must be inert
+        driver.pointer_activate_id("dialog-disabled-btn");
+        assert!(
+            action_events.lock().unwrap().is_empty(),
+            "Disabled button must be inert to pointer activation"
+        );
+
+        // 3c. Pointer click on Cancel button
+        driver.pointer_activate_id("dialog-cancel-btn");
+        assert_eq!(
+            action_events.lock().unwrap().as_slice(),
+            ["cancel"],
+            "Cancel button must fire action callback"
+        );
+
+        // 3d. Pointer click on Confirm button
+        driver.pointer_activate_id("dialog-confirm-btn");
+        assert_eq!(
+            action_events.lock().unwrap().as_slice(),
+            ["cancel", "confirm"],
+            "Confirm button must fire action callback"
+        );
+
+        // ── 4. Dismissal Axes Independence Matrix ──────────────────────────
+        // Refuse close during policy testing so dialog stays mounted
+        *refuse_close.lock().unwrap() = true;
+
+        // 4a. Close button always requests close
+        driver.wait_for_focus_handle("poodle-dialog-close");
+        driver.pointer_activate_id("poodle-dialog-close");
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            1,
+            "Close button click must emit on_request_close"
+        );
+
+        // 4b. Backdrop click with dismiss_on_backdrop: false -> inert
+        *dismiss_on_backdrop_state.lock().unwrap() = false;
+        *mounted.lock().unwrap() = build_dialog_host(
+            &ctx,
+            &is_open,
+            &refuse_close,
+            &dismiss_on_backdrop_state,
+            &dismiss_on_escape_state,
+            &close_requests,
+            &action_events,
+            &mounted,
+        );
+        driver.draw_frame();
+        // Click backdrop outside panel (top-left margin)
+        let backdrop_point = gpui::point(gpui::px(40.0), gpui::px(40.0));
+        driver.pointer_press(backdrop_point);
+        driver.pointer_release(backdrop_point);
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            1,
+            "Backdrop click when dismiss_on_backdrop=false must be inert"
+        );
+
+        // 4c. Backdrop click with dismiss_on_backdrop: true -> emits request_close
+        *dismiss_on_backdrop_state.lock().unwrap() = true;
+        *mounted.lock().unwrap() = build_dialog_host(
+            &ctx,
+            &is_open,
+            &refuse_close,
+            &dismiss_on_backdrop_state,
+            &dismiss_on_escape_state,
+            &close_requests,
+            &action_events,
+            &mounted,
+        );
+        driver.draw_frame();
+        driver.pointer_press(backdrop_point);
+        driver.pointer_release(backdrop_point);
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            2,
+            "Backdrop click when dismiss_on_backdrop=true must emit on_request_close"
+        );
+
+        // 4d. Escape key with dismiss_on_escape: false -> inert
+        *dismiss_on_escape_state.lock().unwrap() = false;
+        *mounted.lock().unwrap() = build_dialog_host(
+            &ctx,
+            &is_open,
+            &refuse_close,
+            &dismiss_on_backdrop_state,
+            &dismiss_on_escape_state,
+            &close_requests,
+            &action_events,
+            &mounted,
+        );
+        driver.draw_frame();
+        driver.dispatch_key("escape");
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            2,
+            "Escape key when dismiss_on_escape=false must be inert"
+        );
+
+        // 4e. Escape key with dismiss_on_escape: true -> emits request_close
+        *dismiss_on_escape_state.lock().unwrap() = true;
+        *mounted.lock().unwrap() = build_dialog_host(
+            &ctx,
+            &is_open,
+            &refuse_close,
+            &dismiss_on_backdrop_state,
+            &dismiss_on_escape_state,
+            &close_requests,
+            &action_events,
+            &mounted,
+        );
+        driver.draw_frame();
+        driver.dispatch_key("escape");
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            3,
+            "Escape key when dismiss_on_escape=true must emit on_request_close"
+        );
+
+        // ── 5. Controlled Host Rebuild & Refusal Stability ─────────────────
+        // 5a. Refusal stability: dialog remains mounted and visible
+        assert!(
+            poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop").is_some(),
+            "Refused close must keep backdrop mounted"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_some(),
+            "Refused close must keep surface mounted"
+        );
+
+        // 5b. Accepted close: host rebuilds without dialog
+        *refuse_close.lock().unwrap() = false;
+        driver.pointer_activate_id("poodle-dialog-close");
+        assert_eq!(
+            close_requests.lock().unwrap().len(),
+            4,
+            "Accepted close must emit request-close once"
+        );
+        assert!(
+            !*is_open.lock().unwrap(),
+            "Accepted close must update host open state to false"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop").is_none(),
+            "Accepted close must unmount backdrop from backend"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none(),
+            "Accepted close must unmount surface from backend"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("poodle-dialog-close").is_none(),
+            "Accepted close must unmount close button from backend"
+        );
+
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        // ── 6. Terminal Receipt Emission ───────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "Dialog",
+            "nucleus.navigation.dialog",
+            observation,
+            &[
+                "mount controlled Dialog modal with title, description, close affordance, body Surface, and action Buttons through HeadlessDriver",
+                "verify pointer activation inside panel does not trigger backdrop dismissal",
+                "pointer activate disabled action and verify inertness",
+                "pointer activate Cancel and Confirm action buttons and verify callback traces",
+                "pointer activate close button and verify request close emission",
+                "test backdrop click dismissal policy with false and true postures",
+                "test Escape key dismissal policy with false and true postures",
+                "verify host refusal leaves Dialog mounted without duplicate emission",
+                "verify accepted close triggers host rebuild unmounting Dialog backdrop, surface, and controls",
+            ],
+            &[
+                "production render path resolves root backdrop role, overlay posture, backdrop fill, panel elevated background, border, surface radius, shadow, md width preset, max height, padding, and section spacing",
+                "header resolves title typography with heading weight, description typography with text.secondary color, and close affordance with chrome size and pointer cursor",
+                "body composes production Surface with panel tone and subtle border",
+                "actions compose production Buttons with secondary, primary, and disabled states",
+                "mounted layout bounds confirm positive dimensions, panel containment within backdrop, and child containment within panel",
+                "inside panel clicks are absorbed and never bubble to backdrop dismissal",
+                "disabled action button remains inert to pointer activation",
+                "Cancel and Confirm action buttons dispatch callbacks through the mounted backend",
+                "dismissal axes remain independent: close button always requests close, backdrop respects dismiss_on_backdrop, and Escape respects dismiss_on_escape",
+                "host refusal preserves mounted Dialog state and subsequent interactions",
+                "accepted close rebuilds host tree without Dialog, removing backdrop, surface, and chrome from the mounted backend",
+            ],
+        );
+    });
+}
