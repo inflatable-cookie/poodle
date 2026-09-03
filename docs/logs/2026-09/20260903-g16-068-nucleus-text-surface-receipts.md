@@ -13,6 +13,7 @@ Governing refs: `docs/roadmaps/g16/nucleus-gpui-parity-programme.md`,
 Branch: `feature/g16-068-nucleus-text-surface-receipts`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-068-nucleus-text-surface-receipts`
 Planning base: `91f039cd9` (`origin/main`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/174
 
 ## Outcome
 
