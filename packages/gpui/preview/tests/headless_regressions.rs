@@ -30731,6 +30731,38 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
     });
 }
 
+/// ConfirmAction reaches the production compat adapter, renderer, composed
+/// Dialog/Button tree, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_spec() {
+    use gpui::IntoElement;
+    use poodle_specs::ConfirmActionSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            node_compat::ConfirmAction::from_spec(
+                ConfirmActionSpec::new(
+                    "Delete workspace?",
+                    "This action cannot be undone.",
+                    "Delete workspace",
+                    "Keep workspace",
+                )
+                .with_trigger_label("Delete"),
+                &theme_provider,
+            )
+            .into_element()
+        });
+
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 360.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("confirm-action:counterexample:trigger")
+                .is_some(),
+            "the production ConfirmAction IntoElement path must paint caller-scoped trigger identity"
+        );
+    });
+}
+
 #[derive(Clone)]
 struct AgentChatInputState {
     id: String,
