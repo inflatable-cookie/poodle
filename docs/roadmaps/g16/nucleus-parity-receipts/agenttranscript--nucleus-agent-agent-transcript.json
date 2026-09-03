@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "AgentChatInput",
-  "scenario_id": "nucleus.agent.agent-chat-input",
+  "component": "AgentTranscript",
+  "scenario_id": "nucleus.agent.agent-transcript",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,16 +46,16 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount caller-scoped controlled AgentChatInput instances through node_compat::AgentChatInput::from_spec(...).into_element() in HeadlessDriver",
-    "dispatch pointer and keyboard edits, focus changes, submits, stops, and disabled activations through the GPUI test platform",
-    "submit refused and accepted controlled edit proposals, rebuilding the production factory from unchanged or updated host-owned value and selection"
+    "mount caller-scoped AgentTranscript instances through node_compat::AgentTranscript::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding from host-owned records",
+    "replace an empty transcript with a spinning activity through the production factory and observe the mounted dependency structures"
   ],
   "assertions": [
-    "production TextInput and Button composition preserves exact AgentChatInput-owned token, data, placeholder, status, and disabled metadata",
-    "host refusal rebuilds the mounted production path from unchanged controlled value and selection, while acceptance rebuilds it from updated host-owned state",
-    "submit eligibility and exact callback payload order cover empty, allow-empty, read-only, disabled, idle, and busy states",
-    "the real mount box and parent bounds contain ordered non-overlapping fields, attachments, editors, toolbars, actions, footers, and sibling instances",
-    "caller-scoped instances isolate focus, draft, callbacks, runtime identity, and bounds while disabled pointer input cannot focus or activate the production control"
+    "production Text, Surface, EmptyState, and Spinner composition preserves the accepted contract-owned structure and token treatment",
+    "the user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
+    "authored record order, roles, statuses, transcript containment, child geometry, and caller-scoped duplicate identity remain exact",
+    "host rebuilds preserve scoped disclosure state and detached scroll position while mounted keyboard, pointer, wheel, and jump input take effect",
+    "empty and loading rebuilds mount the real contained EmptyState and Spinner plus Text structures before terminal receipt emission"
   ],
   "outcome": "passed",
   "artifact_paths": []

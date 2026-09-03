@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "e632700bf5768744475f91ebc6f20e3c8c35f0d9",
+  "source_commit": "2d14d7e6afa25976cd475afb6b60542027b47216",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
   "lock_resolution": [
