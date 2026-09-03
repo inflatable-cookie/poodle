@@ -19664,6 +19664,24 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
             assert_eq!(host.left.values, ["banana"]);
         }
         assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        driver.wait_for_focus_handle(&left_trigger);
+        driver.focus_element(&left_trigger);
+        driver.dispatch_key_press("escape");
+        {
+            let host = host.lock().expect("host lock");
+            assert!(!host.left.spec.current_open(), "Escape closes the remaining instance");
+            assert_eq!(host.left.values, ["banana"]);
+            assert!(!host.right.spec.current_open());
+        }
+        driver.wait_for_focus_handle(&left_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_trigger),
+            Some(true),
+            "Escape restores the matching trigger"
+        );
+        driver.pointer_activate_id(&left_trigger);
+        driver.draw_frame();
+        assert!(host.lock().expect("host lock").left.spec.current_open());
         driver.pointer_press(point(px(8.0), px(8.0)));
         driver.pointer_release(point(px(8.0), px(8.0)));
         {
