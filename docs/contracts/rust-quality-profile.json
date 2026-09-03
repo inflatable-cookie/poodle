@@ -1,0 +1,34 @@
+{
+  "deviations_file": "docs/contracts/rust-quality-deviations.json",
+  "exclusions": {
+    "generated": [],
+    "vendored": []
+  },
+  "language": "rust",
+  "msrv": {
+    "cargo_manifests": [
+      "packages/codegen/Cargo.toml",
+      "packages/contracts/adapter/Cargo.toml",
+      "packages/contracts/components/Cargo.toml",
+      "packages/contracts/events/Cargo.toml",
+      "packages/contracts/headless/Cargo.toml",
+      "packages/contracts/ir/Cargo.toml",
+      "packages/contracts/layout/Cargo.toml",
+      "packages/contracts/markdown/Cargo.toml",
+      "packages/contracts/node/Cargo.toml",
+      "packages/contracts/style/Cargo.toml",
+      "packages/contracts/tokens/Cargo.toml",
+      "packages/gpui/adapter/Cargo.toml",
+      "packages/gpui/node-backend/Cargo.toml",
+      "packages/gpui/preview/Cargo.toml",
+      "packages/jetstream/adapter/Cargo.toml",
+      "packages/jetstream/preview/Cargo.toml",
+      "packages/render/Cargo.toml"
+    ],
+    "source": "repository_policy",
+    "toolchain_policy_paths": [],
+    "when_unresolved": "stop"
+  },
+  "profile": "strict",
+  "schema_version": "1.0.0"
+}
