@@ -56,8 +56,9 @@ Boards:
 - `effigy ci:native` — pass, including 181 headless regressions
 - `effigy regressions:native` re-emitted the Button receipt at `5a7a8f2a0`
   because `packages/render` is in Nucleus SOURCE_PATHS
-
-Pending after the receipt pin: `effigy ci:web`, `effigy docs:check`.
+- `effigy ci:web` — pass after the receipt pin
+- `effigy docs:check` — pass
+- `git diff --check origin/main...HEAD` — pass
 
 ## Limits
 
