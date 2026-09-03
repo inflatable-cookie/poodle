@@ -534,6 +534,14 @@ pub fn text_input_with_handlers(
     if let Some(label) = spec.aria_label.as_deref() {
         root.a11y.label = Some(label.to_string());
     }
+    if let Some(described_by) = spec.described_by() {
+        root.a11y.described_by = Some(described_by);
+    }
+    if spec.validation_state == ValidationState::Invalid {
+        root.a11y.invalid = Some(true);
+    } else if spec.validation_state == ValidationState::Pending {
+        root.a11y.busy = Some(true);
+    }
     root.a11y.role = Some(NodeRole::TextInput);
     root.roles.insert(
         "size".to_owned(),
@@ -885,5 +893,31 @@ mod tests {
         let children = &node.children[0].children;
         assert_eq!(children[0].style.border_right_width, Some(1.0));
         assert_eq!(children[2].style.border_left_width, Some(1.0));
+    }
+
+    #[test]
+    fn a11y_projects_described_by_invalid_and_busy_states() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = text_input(
+            &TextInputSpec::new()
+                .with_id("test-described")
+                .with_description_id("help-id")
+                .with_validation_state(ValidationState::Invalid),
+            &ctx,
+            None,
+        );
+        assert_eq!(node.a11y.described_by.as_deref(), Some("help-id"));
+        assert_eq!(node.a11y.invalid, Some(true));
+
+        let pending = text_input(
+            &TextInputSpec::new()
+                .with_id("test-pending")
+                .with_validation_state(ValidationState::Pending),
+            &ctx,
+            None,
+        );
+        assert_eq!(pending.a11y.busy, Some(true));
+        assert_eq!(pending.a11y.invalid, None);
     }
 }
