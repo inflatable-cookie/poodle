@@ -19595,6 +19595,35 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                     <= listbox_bounds.origin.y + listbox_bounds.size.height,
             "option rows stay contained in the listbox"
         );
+        driver.wait_for_focus_handle(&left_trigger);
+        driver.focus_element(&left_trigger);
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.left.spec.highlighted_value.as_deref(),
+                Some("apple"),
+                "open non-searchable starts on the first enabled option"
+            );
+        }
+        driver.dispatch_key_raw("down");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.left.spec.highlighted_value.as_deref(),
+                Some("banana"),
+                "ArrowDown moves the non-searchable highlight"
+            );
+            assert!(host.left.spec.current_open());
+        }
+        driver.dispatch_key_raw("end");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.left.spec.highlighted_value.as_deref(),
+                Some("cherry"),
+                "End skips the disabled option and lands on the last enabled row"
+            );
+        }
         let group_header = "select:left:group-Vegetables";
         assert!(poodle_gpui_node_backend::bounds_for(group_header).is_some());
         driver.pointer_activate_id(group_header);
@@ -19652,36 +19681,33 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
             assert_eq!(host.left.values, ["banana"]);
             assert!(host.right.values.is_empty());
         }
-        host.lock().expect("host lock").right.spec.open = Some(false);
-        driver.draw_frame();
-        {
-            let host = host.lock().expect("host lock");
-            assert!(
-                host.left.spec.current_open(),
-                "closing the sibling through host state must not dismiss the left layer"
-            );
-            assert!(!host.right.spec.current_open());
-            assert_eq!(host.left.values, ["banana"]);
-        }
-        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
         driver.wait_for_focus_handle(&left_trigger);
         driver.focus_element(&left_trigger);
         driver.dispatch_key_press("escape");
         {
             let host = host.lock().expect("host lock");
-            assert!(!host.left.spec.current_open(), "Escape closes the remaining instance");
+            assert!(
+                host.left.spec.current_open(),
+                "Escape must spare the focused sibling when it is not innermost"
+            );
+            assert!(
+                !host.right.spec.current_open(),
+                "Escape must close only the innermost Select layer"
+            );
             assert_eq!(host.left.values, ["banana"]);
-            assert!(!host.right.spec.current_open());
         }
-        driver.wait_for_focus_handle(&left_trigger);
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        driver.wait_for_focus_handle(&right_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_trigger),
+            Some(true),
+            "innermost close restores that instance trigger"
+        );
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&left_trigger),
-            Some(true),
-            "Escape restores the matching trigger"
+            Some(false),
+            "the remaining open instance does not steal restoration"
         );
-        driver.pointer_activate_id(&left_trigger);
-        driver.draw_frame();
-        assert!(host.lock().expect("host lock").left.spec.current_open());
         driver.pointer_press(point(px(8.0), px(8.0)));
         driver.pointer_release(point(px(8.0), px(8.0)));
         {
@@ -19729,6 +19755,16 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 Some("apple"),
                 "Home highlights the first enabled option through a host rebuild"
             );
+        }
+        driver.dispatch_key_raw("down");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("banana"),
+                "ArrowDown after Home moves the searchable highlight"
+            );
+            assert!(host.right.spec.current_open());
         }
         driver.dispatch_key_raw("b");
         driver.dispatch_key_raw("a");
@@ -19914,8 +19950,9 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 "activate the non-searchable trigger through mounted pointer input and observe the listbox, group header, and disabled option paint",
                 "activate a disabled option and observe no value change; activate an enabled option and observe a host-owned rebuild",
                 "open both instances through host-owned state and observe independent layers, listbox ids, and callback streams",
-                "dispatch Escape and an outside press and observe scoped dismissal plus matching trigger focus restoration",
-                "edit the searchable instance through the production text-input path: Home/End, query filtering, caret/selection movement, option commit, freeform Enter, and freeform blur commit",
+                "keep two live layers, focus one trigger, and observe Escape close only the innermost instance with scoped restoration",
+                "dispatch an outside press and observe scoped dismissal plus matching trigger focus restoration",
+                "edit the searchable instance through the production text-input path: Home/End, Arrow navigation, query filtering, caret/selection movement, option commit, freeform Enter, and freeform blur commit",
                 "clear the non-searchable instance and observe the authored default",
                 "mount a disabled Select and observe no callback, listbox, or layer",
                 "disable the highlighted option while open and observe machine revalidation that refuses a stale commit",
@@ -19926,8 +19963,8 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
                 "mounted listboxes record positive bounds, overlay width floors, and option containment without a pixel claim",
                 "two duplicate-content instances keep runtime ids, queries, values, focus, callbacks, and dismiss layers separate",
                 "disabled whole-control and disabled-option paths are inert; a stale highlighted option cannot commit after OptionsChanged revalidation",
-                "search editing, caret movement, freeform Enter/blur commit, clear-to-authored-default, and ordered effect streams are host-owned rebuilds driven by mounted input",
-                "Escape and outside dismissal restore the matching instance trigger; opening one instance through host state does not dismiss the other",
+                "search editing, Arrow/Home/End navigation, caret movement, freeform Enter/blur commit, clear-to-authored-default, and ordered effect streams are host-owned rebuilds driven by mounted input",
+                "Escape dismisses only the innermost live Select layer and restores that instance trigger; opening one instance through host state does not dismiss the other",
                 "a long menu caps at size.menu.maxHeight and only activates overflow rows after mounted wheel scrolling",
             ],
         );
