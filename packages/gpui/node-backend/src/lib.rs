@@ -54,8 +54,7 @@ pub mod file_capability;
 pub use tooltip::{
     is_tooltip_pending, is_tooltip_visible, painted_tooltip, painted_tooltip_for,
     reset_tooltip_registry, teardown_window_tooltips, tooltip_runtime_owns_window,
-    tooltip_runtime_window_count, tooltip_teardown_binding_count, tooltip_teardown_runs_for,
-    PaintedTooltip, TOOLTIP_DELAY,
+    tooltip_runtime_window_count, tooltip_teardown_binding_count, PaintedTooltip, TOOLTIP_DELAY,
 };
 pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState};
 

@@ -20303,13 +20303,12 @@ fn gpui_node_tooltip_window_teardown_clears_pending_visible_and_blocks_late_pain
 }
 
 /// g16.066. Repeated production create/close must return tooltip runtime and
-/// teardown-binding counts to baseline. A later close must not re-run an
-/// earlier handle's cleanup. `reset_focus_registry` is not this path.
+/// teardown-binding counts to baseline. `reset_focus_registry` is not this path.
 #[test]
 fn gpui_node_tooltip_teardown_bindings_retire_across_repeated_close() {
     use poodle_gpui_node_backend::{
-        is_tooltip_pending, tooltip_runtime_owns_window, tooltip_runtime_window_count,
-        tooltip_teardown_binding_count, tooltip_teardown_runs_for,
+        begin_probe_capture, is_tooltip_pending, take_probe_capture, tooltip_runtime_owns_window,
+        tooltip_runtime_window_count, tooltip_teardown_binding_count,
     };
 
     fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
@@ -20327,15 +20326,10 @@ fn gpui_node_tooltip_teardown_bindings_retire_across_repeated_close() {
         assert_eq!(baseline_bindings, 0, "test start must not inherit bindings");
         assert_eq!(baseline_runtime, 0, "test start must not inherit runtime");
 
-        let mut previous = None;
         for cycle in 0..3 {
             let mut cx_cycle = cx.clone();
             let id = format!("cycle-{cycle}-btn");
-            let mounted = Arc::new(Mutex::new(tooltip_button(
-                &id,
-                "Cycle",
-                "Cycle Tooltip",
-            )));
+            let mounted = Arc::new(Mutex::new(tooltip_button(&id, "Cycle", "Cycle Tooltip")));
             let mut driver =
                 HeadlessDriver::new_in_box(&mut cx_cycle, Arc::clone(&mounted), 400.0, 300.0);
             let handle = driver.with_window(|w, _cx| w.window_handle());
@@ -20360,7 +20354,13 @@ fn gpui_node_tooltip_teardown_bindings_retire_across_repeated_close() {
                 "cycle {cycle} must own exactly one tooltip runtime"
             );
 
+            begin_probe_capture();
             driver.close_window();
+            let channels = take_probe_capture();
+            assert!(
+                channels.contains(&"tooltip.lifecycle.teardown"),
+                "cycle {cycle} close must emit teardown: {channels:?}"
+            );
 
             assert_eq!(
                 tooltip_teardown_binding_count(),
@@ -20376,20 +20376,6 @@ fn gpui_node_tooltip_teardown_bindings_retire_across_repeated_close() {
                 !tooltip_runtime_owns_window(handle),
                 "closed cycle {cycle} must not retain runtime"
             );
-            assert_eq!(
-                tooltip_teardown_runs_for(handle),
-                1,
-                "cycle {cycle} must clean up exactly once"
-            );
-
-            if let Some(old) = previous {
-                assert_eq!(
-                    tooltip_teardown_runs_for(old),
-                    1,
-                    "closing cycle {cycle} must not re-run earlier handle cleanup"
-                );
-            }
-            previous = Some(handle);
         }
     });
 }

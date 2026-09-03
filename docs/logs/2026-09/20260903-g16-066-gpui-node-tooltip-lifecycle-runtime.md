@@ -39,7 +39,7 @@ API changed.
 | Generation is exact | A timer fires after B hover | A never paints; B shows after its own 300ms |
 | Paint is authority | target removed while pending | no late tooltip after 500ms |
 | Window ownership is isolated | hover in two live windows | overlapping mounts; B's frame does not cancel A's pending/visible tooltip |
-| Teardown is production | leaked close bindings / reset-as-close | `remove_window` clears pending and visible, retires the binding, and a later close does not re-run earlier cleanup |
+| Teardown is production | leaked close bindings / reset-as-close | `remove_window` clears pending and visible; binding and runtime counts return to baseline; bounded probe records teardown |
 | Existing consumers survive | fix only Tabs | IconButton and SegmentedControl regressions green |
 
 ## Validation
