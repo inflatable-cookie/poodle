@@ -1,8 +1,9 @@
 # g16.082 — Nucleus AgentChatInput M1 Receipt
 
-Status: preparation-ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.062`, completed Button and TextInput receipts; serial
 finalization follows the latest merged Nucleus receipt
 Governing refs: `nucleus-gpui-parity-programme.md`,
@@ -13,14 +14,20 @@ Handoff: `../../handoffs/20260903-133100-g16-082-nucleus-agent-chat-input-receip
 
 ## Goal
 
-Prepare the first named production-path mounted proof for Nucleus
-`AgentChatInput`. Pause before shared evidence. After the orchestrator supplies
-the latest merged cohort identity, finalize one terminal `M1` receipt.
+Produce the first named production-path mounted proof for Nucleus
+`AgentChatInput`, then emit one terminal `M1` receipt at the exact committed
+runtime source.
 
-## Preparation Boundary
+Completed at runtime source
+`a00be5c662a034bd8ca1a4278cdd7ee2be5e3c12`. The 19-receipt cohort shares that
+identity, and the generated ledger advances only AgentChatInput from missing to
+mounted. M1 does not infer A1 or V1.
 
-- Add one stable expected test name to the manifest only during finalization;
-  preparation may create the named test but must not edit the manifest.
+## Fixed Boundary
+
+- The manifest names only the retained
+  `agent_chat_input_mounted_input_and_action_follow_host_state` fixture for this
+  card.
 - Mount `node_compat::AgentChatInput::from_spec(...).into_element()` through the
   element-backed `HeadlessDriver`; renderer-only Node construction is not
   adapter evidence.
@@ -36,11 +43,11 @@ the latest merged cohort identity, finalize one terminal `M1` receipt.
   Nucleus agent orchestration.
 - Commit a biting counterexample before any repair. A bounded native repair is
   allowed only when the production mounted proof fails.
-- During preparation, do not edit the Nucleus manifest, receipts, generated
-  ledger, g16 front doors, or claim M1 completion. Push a draft PR and pause.
-- On orchestrator resume, rebase onto the latest receipt merge, set the expected
-  test, revalidate, commit runtime source, emit the cohort, update this card and
-  one log, then run full receipt boards. Merge remains orchestrator-owned.
+- Preparation did not edit the Nucleus manifest, receipts, generated ledger,
+  or g16 front doors and stopped at an independently accepted draft PR.
+- Finalization rebased onto the latest receipt merge and orchestration-doc head,
+  revalidated, committed the terminal emitter, and emitted the 19-receipt
+  cohort. Merge and g16 front-door closeout remain orchestrator-owned.
 
 ## Review Oracle
 
@@ -60,13 +67,13 @@ the latest merged cohort identity, finalize one terminal `M1` receipt.
 
 ## Validation
 
-Preparation: focused AgentChatInput spec/machine/render/backend and named
-mounted tests plus `git diff --check`. Finalization adds
+Focused AgentChatInput spec/machine/render/backend and named mounted tests plus
+`git diff --check`. Finalization adds
 `effigy regressions:native`, receipt/ledger tests,
 `effigy check:parity-evidence-ledger`, `effigy ci:rust`, `effigy ci:native`,
 and `effigy docs:check`. Never run windowed or native-visual selectors.
 
 ## Continuation
 
-Pause after preparation. The orchestrator selects finalization order from the
-latest merged cohort; shared receipt production remains serial.
+Pause for preparation-to-M1 re-review. Merge and g16 front-door closeout remain
+with the orchestrator; this card does not start another receipt.
