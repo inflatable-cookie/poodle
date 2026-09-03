@@ -30977,12 +30977,20 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         assert!(!host.lock().expect("ConfirmAction host").right.open);
         assert_eq!(host.lock().expect("ConfirmAction host").events, ["left:trigger"]);
 
+        let left_backdrop = id("left", "backdrop");
         let left_surface = id("left", "surface");
         let left_body = id("left", "body");
         let left_cancel = id("left", "cancel");
         let left_confirm = id("left", "confirm");
         let left_close = id("left", "close");
-        for part in [&left_surface, &left_body, &left_cancel, &left_confirm, &left_close] {
+        for part in [
+            &left_backdrop,
+            &left_surface,
+            &left_body,
+            &left_cancel,
+            &left_confirm,
+            &left_close,
+        ] {
             assert!(
                 poodle_gpui_node_backend::bounds_for(part).is_some(),
                 "open ConfirmAction paints {part}"
@@ -31024,11 +31032,21 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         assert_eq!(mounted_confirm.roles.get("variant").map(String::as_str), Some("primary"));
         assert_eq!(mounted_confirm.roles.get("tone").map(String::as_str), Some("danger"));
 
+        let mount_bounds = driver.mount_box_bounds();
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for(&left_backdrop).unwrap();
         let surface_bounds = poodle_gpui_node_backend::bounds_for(&left_surface).unwrap();
         let body_bounds = poodle_gpui_node_backend::bounds_for(&left_body).unwrap();
         let cancel_bounds = poodle_gpui_node_backend::bounds_for(&left_cancel).unwrap();
         let confirm_bounds = poodle_gpui_node_backend::bounds_for(&left_confirm).unwrap();
-        assert!(surface_bounds.size.width > px(0.0) && surface_bounds.size.height > px(0.0));
+        for bounds in [mount_bounds, backdrop_bounds, surface_bounds] {
+            assert!(bounds.size.width > px(0.0) && bounds.size.height > px(0.0));
+        }
+        assert_eq!(
+            backdrop_bounds, mount_bounds,
+            "production backdrop fills the exact mounted host box"
+        );
+        assert!(bounds_contain(mount_bounds, backdrop_bounds));
+        assert!(bounds_contain(backdrop_bounds, surface_bounds));
         for bounds in [body_bounds, cancel_bounds, confirm_bounds] {
             assert!(bounds_contain(surface_bounds, bounds));
         }
@@ -31061,10 +31079,42 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         // The host refuses each request, so every route can be observed on
         // the same instance without an implicit close masking later axes.
         driver.pointer_activate_id(&left_confirm);
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            ["left:trigger", "left:confirm"],
+            "confirm emits exactly once before the host refuses close"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
         driver.pointer_activate_id(&left_cancel);
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            ["left:trigger", "left:confirm", "left:cancel"],
+            "cancel button emits exactly once before the host refuses close"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
         let outside_surface = point(px(40.0), px(40.0));
         driver.pointer_press(outside_surface);
         driver.pointer_release(outside_surface);
+        assert_eq!(
+            host.lock().expect("ConfirmAction host").events,
+            [
+                "left:trigger",
+                "left:confirm",
+                "left:cancel",
+                "left:cancel",
+            ],
+            "backdrop emits exactly once before the host refuses close"
+        );
+        assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
+
         driver.focus_element(&left_confirm);
         driver.dispatch_key_raw("escape");
         assert_eq!(
@@ -31079,6 +31129,7 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
             "each refusal route emits once and in mounted input order"
         );
         assert!(host.lock().expect("ConfirmAction host").left.open);
+        assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
         assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
 
         // Pending host state rebuilds the composed AlertDialog with disabled
