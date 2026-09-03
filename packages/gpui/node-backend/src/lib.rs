@@ -1002,7 +1002,7 @@ mod ime;
 mod input_text;
 
 pub use ime::{mark_composing, take_composing};
-pub use input_text::{painted_text_state_for, PaintedTextState};
+pub use input_text::{painted_text_for, painted_text_state_for, PaintedTextState};
 pub use measured_node::{measured_node_element, shaped_block_advance, ShapedAdvance};
 
 #[cfg(test)]

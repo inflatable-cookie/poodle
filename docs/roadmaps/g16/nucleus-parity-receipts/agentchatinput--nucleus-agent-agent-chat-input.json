@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "AgentPlan",
-  "scenario_id": "nucleus.agent.agent-plan",
+  "component": "AgentChatInput",
+  "scenario_id": "nucleus.agent.agent-chat-input",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,16 +46,16 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount duplicate controlled AgentPlan instances through node_compat::AgentPlan::from_spec(...).into_element() in HeadlessDriver",
-    "dispatch refused and accepted pointer or keyboard decisions through the GPUI test platform",
-    "rebuild host-owned pending, accepted, dismissed, and revised states through the production adapter path"
+    "mount caller-scoped controlled AgentChatInput instances through node_compat::AgentChatInput::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch pointer and keyboard edits, focus changes, submits, stops, and disabled activations through the GPUI test platform",
+    "submit refused and accepted controlled edit proposals, rebuilding the production factory from unchanged or updated host-owned value and selection"
   ],
   "assertions": [
-    "production AgentMessage, Text, and Button composition preserves plan records, decision order, semantics, and exact contract-owned resting, hover, focus, radius, spacing, and status tokens",
-    "mounted roots and decision affordances have positive ordered bounds contained within their caller-scoped plan",
-    "refused acceptance remains pending while accepted, dismissed, and revised decisions rebuild before painted affordances disappear",
-    "duplicate caller identities keep focus, callbacks, state, and bounds isolated",
-    "backend probe channels and mounted observation confirm production render, accessibility, token, paint, and GPUI input dispatch"
+    "production TextInput and Button composition preserves exact AgentChatInput-owned token, data, placeholder, status, and disabled metadata",
+    "host refusal rebuilds the mounted production path from unchanged controlled value and selection, while acceptance rebuilds it from updated host-owned state",
+    "submit eligibility and exact callback payload order cover empty, allow-empty, read-only, disabled, idle, and busy states",
+    "the real mount box and parent bounds contain ordered non-overlapping fields, attachments, editors, toolbars, actions, footers, and sibling instances",
+    "caller-scoped instances isolate focus, draft, callbacks, runtime identity, and bounds while disabled pointer input cannot focus or activate the production control"
   ],
   "outcome": "passed",
   "artifact_paths": []

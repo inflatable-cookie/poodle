@@ -243,6 +243,14 @@ impl<'a> HeadlessDriver<'a> {
         driver
     }
 
+    /// The exact host box used to lay out the mounted production element.
+    pub fn mount_box_bounds(&self) -> Bounds<Pixels> {
+        Bounds {
+            origin: point(px(MOUNT_BOX_LEFT), px(MOUNT_BOX_TOP)),
+            size: size(px(self.box_width), px(self.box_height)),
+        }
+    }
+
     /// The mount host's drag controller — the one every source and target in
     /// a mounted node tree registers with.
     pub fn drag(&mut self) -> poodle_gpui_node_backend::DragDropController {

@@ -823,11 +823,19 @@ pub(crate) struct BulkActionBar {
 pub(crate) struct AgentChatInput {
     spec: AgentChatInputSpec,
     theme: GpuiThemeProvider,
+    instance_id: Option<String>,
+    selection: (usize, usize),
+    is_focused: bool,
     question_children: Vec<poodle_node::Node>,
     plan_children: Vec<poodle_node::Node>,
     toolbar_children: Vec<poodle_node::Node>,
     footer_children: Vec<poodle_node::Node>,
     handlers: poodle_render::AgentChatInputHandlers,
+    on_value_change: Option<poodle_node::TextChangeHandler>,
+    on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    on_submit: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_stop: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 pub(crate) struct FilterBuilder {
@@ -1571,12 +1579,69 @@ impl AgentChatInput {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: None,
+            selection: (0, 0),
+            is_focused: false,
             question_children: Vec::new(),
             plan_children: Vec::new(),
             toolbar_children: Vec::new(),
             footer_children: Vec::new(),
             handlers: poodle_render::AgentChatInputHandlers::default(),
+            on_value_change: None,
+            on_selection_change: None,
+            on_focus_change: None,
+            on_submit: None,
+            on_stop: None,
         }
+    }
+
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.instance_id = Some(id.into());
+        self
+    }
+
+    pub(crate) fn with_selection(mut self, start: usize, end: usize) -> Self {
+        self.selection = (start, end);
+        self
+    }
+
+    pub(crate) fn with_is_focused(mut self, focused: bool) -> Self {
+        self.is_focused = focused;
+        self
+    }
+
+    pub(crate) fn on_value_change(
+        mut self,
+        handler: impl Fn(&str) + Send + Sync + 'static,
+    ) -> Self {
+        self.on_value_change = Some(Arc::new(handler));
+        self
+    }
+
+    pub(crate) fn on_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.on_selection_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_focus_change(
+        mut self,
+        handler: Arc<dyn Fn(bool) + Send + Sync>,
+    ) -> Self {
+        self.on_focus_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_submit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_stop(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_stop = Some(handler);
+        self
     }
 
     pub(crate) fn question_child(mut self, child: impl IntoCompatNode) -> Self {
@@ -1608,21 +1673,272 @@ impl AgentChatInput {
         self.spec.density = Some(density);
         self
     }
+
+    fn into_node(self) -> poodle_node::Node {
+        let Self {
+            spec,
+            theme,
+            instance_id,
+            selection,
+            is_focused,
+            question_children,
+            plan_children,
+            toolbar_children,
+            footer_children,
+            mut handlers,
+            on_value_change,
+            on_selection_change,
+            on_focus_change,
+            on_submit,
+            on_stop,
+        } = self;
+
+        let Some(instance_id) = instance_id else {
+            return poodle_render::agent_chat_input(
+                &spec,
+                &RenderContext::new(&theme),
+                question_children,
+                plan_children,
+                toolbar_children,
+                footer_children,
+                handlers,
+            );
+        };
+
+        let submit_value = spec.value.clone();
+        handlers.on_action = if spec.is_busy() {
+            on_stop.clone().map(|handler| {
+                Arc::new(move || handler()) as Arc<dyn Fn() + Send + Sync>
+            })
+        } else if spec.can_submit() {
+            on_submit.clone().map(move |handler| {
+                Arc::new(move || handler(&submit_value)) as Arc<dyn Fn() + Send + Sync>
+            })
+        } else {
+            None
+        };
+
+        let has_question = spec.status == poodle_specs::AgentChatStatus::Questioning
+            && !question_children.is_empty();
+        let has_plan = spec.status == poodle_specs::AgentChatStatus::ReviewingPlan
+            && !plan_children.is_empty();
+        let ctx = RenderContext::new(&theme);
+        let mut node = poodle_render::agent_chat_input(
+            &spec,
+            &ctx,
+            question_children,
+            plan_children,
+            toolbar_children,
+            footer_children,
+            handlers,
+        );
+        node.id = Some(format!("agent-chat-input:{instance_id}"));
+
+        let mut editor_spec = TextInputSpec::new()
+            .with_id(format!("agent-chat-input-{instance_id}-editor"))
+            .with_aria_label(&spec.aria_label)
+            .with_value(&spec.value)
+            .with_placeholder(spec.effective_placeholder())
+            .with_selection(selection.0, selection.1)
+            .with_is_focused(is_focused)
+            .with_disabled(spec.is_disabled)
+            .with_read_only(spec.is_read_only)
+            .with_size_role(spec.size_role);
+        if let Some(max_length) = spec.max_length {
+            editor_spec = editor_spec.with_max_length(max_length);
+        }
+        if let Some(size) = spec.size {
+            editor_spec = editor_spec.with_size(size);
+        }
+        if let Some(density) = spec.density {
+            editor_spec = editor_spec.with_density(density);
+        }
+
+        let submit_spec = spec.clone();
+        let input_submit = on_submit.map(|handler| {
+            Arc::new(move || {
+                let intent = submit_spec.resolve_submit_intent(
+                    poodle_specs::ComposerKey::Enter,
+                    poodle_specs::ComposerKeyModifiers::default(),
+                );
+                if submit_spec.accepts_submit(intent) {
+                    handler(&submit_spec.value);
+                }
+            }) as Arc<dyn Fn() + Send + Sync>
+        });
+        let input_cancel = if spec.is_busy() {
+            on_stop.map(|handler| Arc::new(move || handler()) as Arc<dyn Fn() + Send + Sync>)
+        } else {
+            None
+        };
+        let mut editor = poodle_render::text_input_with_handlers(
+            &editor_spec,
+            &ctx,
+            poodle_render::TextInputHandlers {
+                on_change: on_value_change,
+                on_selection_change,
+                on_focus_change,
+                on_submit: input_submit,
+                on_cancel: input_cancel,
+                on_clear: None,
+            },
+        );
+        let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+        let line_height = poodle_render::presentation::rem_to_px(spec.editor_font_rem(effective_size))
+            * 1.5;
+        editor.style.descriptor.background = None;
+        editor.style.descriptor.border.width = 0.0;
+        editor.style.descriptor.layout.height = poodle_node::LayoutSizing::Constrained {
+            min: Some(line_height * spec.min_rows.max(1) as f32),
+            max: Some(line_height * spec.max_rows.max(spec.min_rows.max(1)) as f32),
+        };
+        editor.style.descriptor.layout.spacing.padding = poodle_node::LayoutEdges::ZERO;
+        editor.style.hover = None;
+        editor.style.focus = None;
+        editor.style.font_family = Some(poodle_node::FontFamily::Sans);
+        editor.style.text_size = Some(poodle_render::presentation::rem_to_px(
+            spec.editor_font_rem(effective_size),
+        ));
+        editor.style.descriptor.text_color =
+            Some(ctx.theme().resolve_color(spec.text_token()));
+        let editor_value_id = format!("poodle-input-agent-chat-input-{instance_id}-editor-value");
+        let editor_value = editor
+            .children
+            .first_mut()
+            .and_then(|inner| {
+                inner
+                    .children
+                    .iter_mut()
+                    .find(|child| child.id.as_deref() == Some(editor_value_id.as_str()))
+            })
+            .expect("AgentChatInput TextInput value");
+        let editor_color = if spec.value.is_empty() {
+            let base = ctx.theme().resolve_color(spec.placeholder_token());
+            poodle_render::color::with_alpha(
+                base,
+                base.3
+                    * ctx
+                        .theme()
+                        .resolve_opacity(spec.placeholder_opacity_token())
+                    * spec.placeholder_opacity_ratio(),
+            )
+        } else {
+            ctx.theme().resolve_color(spec.text_token())
+        };
+        editor_value.style.descriptor.text_color = Some(editor_color);
+        editor_value.style.font_family = Some(poodle_node::FontFamily::Sans);
+        editor_value.style.text_size = Some(poodle_render::presentation::rem_to_px(
+            spec.editor_font_rem(effective_size),
+        ));
+
+        let editor_index = usize::from(has_question)
+            + usize::from(has_plan)
+            + usize::from(!spec.attachments.is_empty());
+        let field = node.children.first_mut().expect("AgentChatInput field");
+        field.id = Some(format!("agent-chat-input:{instance_id}:field"));
+        if !spec.attachments.is_empty() {
+            let attachments_index = usize::from(has_question) + usize::from(has_plan);
+            let attachments = &mut field.children[attachments_index];
+            attachments.id = Some(format!("agent-chat-input:{instance_id}:attachments"));
+            for (attachment, attachment_spec) in
+                attachments.children.iter_mut().zip(spec.attachments.iter())
+            {
+                attachment.id = Some(format!(
+                    "agent-chat-input:{instance_id}:attachment:{}",
+                    attachment_spec.id
+                ));
+            }
+        }
+        field.children[editor_index] = editor;
+
+        let toolbar = field.children.last_mut().expect("AgentChatInput toolbar");
+        toolbar.id = Some(format!("agent-chat-input:{instance_id}:toolbar"));
+        let leading = toolbar
+            .children
+            .first_mut()
+            .expect("AgentChatInput leading controls");
+        leading.id = Some(format!("agent-chat-input:{instance_id}:leading"));
+        let trailing = toolbar
+            .children
+            .last_mut()
+            .expect("AgentChatInput trailing controls");
+        trailing.id = Some(format!("agent-chat-input:{instance_id}:trailing"));
+        let mut action_spec = ButtonSpec::new()
+            .with_variant(poodle_specs::ButtonVariant::Primary)
+            .with_leading_icon(spec.action_icon())
+            .with_aria_label(spec.action_aria_label())
+            .with_disabled(!spec.can_submit())
+            .with_size(effective_size)
+            .with_density(ctx.resolve_density(spec.density));
+        if spec.is_busy() {
+            action_spec = action_spec.with_tone(poodle_specs::ButtonTone::Danger);
+        }
+        let mut action = poodle_render::button(
+            &action_spec,
+            &ctx,
+            trailing.children.last().and_then(|current| {
+                current.interaction.on_activate.clone()
+            }),
+        );
+        let action_box = poodle_render::presentation::rem_to_px(spec.action_size_rem(effective_size));
+        action.id = Some(format!("agent-chat-input:{instance_id}:action"));
+        action.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(action_box);
+        action.style.descriptor.layout.height = poodle_node::LayoutSizing::Fixed(action_box);
+        action.style.descriptor.layout.spacing.padding = poodle_node::LayoutEdges::ZERO;
+        action.style.descriptor.border.width = 0.0;
+        action.style.min_width = None;
+        action.style.descriptor.corner_radii.top_left = action_box * 0.5;
+        action.style.descriptor.corner_radii.top_right = action_box * 0.5;
+        action.style.descriptor.corner_radii.bottom_right = action_box * 0.5;
+        action.style.descriptor.corner_radii.bottom_left = action_box * 0.5;
+        action.style.descriptor.background =
+            Some(ctx.theme().resolve_color(spec.action_fill_token()));
+        action.style.descriptor.text_color =
+            Some(ctx.theme().resolve_color(spec.action_text_token()));
+        action.style.hover = Some(poodle_node::StylePatch {
+            background: Some(poodle_render::color::mix_srgb(
+                ctx.theme().resolve_color(spec.action_fill_token()),
+                poodle_render::color::WHITE,
+                0.88,
+            )),
+            border_color: None,
+            text_color: None,
+            opacity: None,
+        });
+        action.style.focus_ring = None;
+        action
+            .roles
+            .insert("state".to_owned(), spec.action_state().to_owned());
+        if let Some(icon) = action.children.iter_mut().find_map(|wrapper| {
+            wrapper
+                .children
+                .iter_mut()
+                .find(|child| matches!(&child.kind, poodle_node::NodeKind::Icon { .. }))
+        }) {
+            icon.style.descriptor.text_color =
+                Some(ctx.theme().resolve_color(spec.action_text_token()));
+        }
+        *trailing.children.last_mut().expect("AgentChatInput action") = action;
+
+        if node.children.len() > 1 {
+            node.children[1].id = Some(format!("agent-chat-input:{instance_id}:footer"));
+        }
+
+        node
+    }
 }
 
 impl IntoElement for AgentChatInput {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_chat_input(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.question_children,
-            self.plan_children,
-            self.toolbar_children,
-            self.footer_children,
-            self.handlers,
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+impl IntoCompatNode for AgentChatInput {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
     }
 }
 

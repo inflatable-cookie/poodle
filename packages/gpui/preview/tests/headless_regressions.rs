@@ -28749,3 +28749,845 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         );
     });
 }
+
+#[derive(Clone)]
+struct AgentChatInputState {
+    id: String,
+    value: String,
+    selection: (usize, usize),
+    focused: bool,
+    status: poodle_specs::AgentChatStatus,
+    disabled: bool,
+    read_only: bool,
+    allow_empty_submit: bool,
+    accept_edits: bool,
+    detailed_structure: bool,
+}
+
+impl AgentChatInputState {
+    fn new(id: &str, value: &str) -> Self {
+        Self {
+            id: id.to_owned(),
+            value: value.to_owned(),
+            selection: (0, 0),
+            focused: false,
+            status: poodle_specs::AgentChatStatus::Idle,
+            disabled: false,
+            read_only: false,
+            allow_empty_submit: false,
+            accept_edits: true,
+            detailed_structure: false,
+        }
+    }
+}
+
+struct AgentChatInputHost {
+    states: Mutex<Vec<AgentChatInputState>>,
+    log: Mutex<Vec<String>>,
+    builds: Mutex<Vec<String>>,
+}
+
+impl AgentChatInputHost {
+    fn new(states: Vec<AgentChatInputState>) -> Arc<Self> {
+        Arc::new(Self {
+            states: Mutex::new(states),
+            log: Mutex::new(Vec::new()),
+            builds: Mutex::new(Vec::new()),
+        })
+    }
+
+    fn state(&self, id: &str) -> AgentChatInputState {
+        self.states
+            .lock()
+            .expect("agent chat states")
+            .iter()
+            .find(|state| state.id == id)
+            .unwrap_or_else(|| panic!("AgentChatInput {id:?} exists"))
+            .clone()
+    }
+
+    fn mutate(&self, id: &str, update: impl FnOnce(&mut AgentChatInputState)) {
+        let mut states = self.states.lock().expect("agent chat states");
+        let state = states
+            .iter_mut()
+            .find(|state| state.id == id)
+            .unwrap_or_else(|| panic!("AgentChatInput {id:?} exists"));
+        update(state);
+    }
+
+    fn note(&self, entry: impl Into<String>) {
+        self.log.lock().expect("agent chat log").push(entry.into());
+    }
+
+    fn take_log(&self) -> Vec<String> {
+        std::mem::take(&mut *self.log.lock().expect("agent chat log"))
+    }
+
+    fn built(&self, id: &str) {
+        self.builds
+            .lock()
+            .expect("agent chat builds")
+            .push(id.to_owned());
+    }
+
+    fn build_count(&self, id: &str) -> usize {
+        self.builds
+            .lock()
+            .expect("agent chat builds")
+            .iter()
+            .filter(|built| built.as_str() == id)
+            .count()
+    }
+}
+
+fn agent_chat_editor_id(id: &str) -> String {
+    format!("poodle-input-agent-chat-input-{id}-editor")
+}
+
+fn agent_chat_editor_value_id(id: &str) -> String {
+    format!("{}-value", agent_chat_editor_id(id))
+}
+
+fn agent_chat_action_id(id: &str) -> String {
+    format!("agent-chat-input:{id}:action")
+}
+
+fn agent_chat_part_id(id: &str, part: &str) -> String {
+    format!("agent-chat-input:{id}:{part}")
+}
+
+fn agent_chat_input_builder(
+    host: &Arc<AgentChatInputHost>,
+    id: &str,
+) -> node_compat::AgentChatInput {
+    let state = host.state(id);
+    let mut spec = poodle_specs::AgentChatInputSpec::new()
+        .with_value(&state.value)
+        .with_placeholder("Describe the change")
+        .with_status(state.status)
+        .with_disabled(state.disabled)
+        .with_read_only(state.read_only)
+        .with_allow_empty_submit(state.allow_empty_submit)
+        .with_max_length(48)
+        .with_context(32.0, 128.0);
+    if state.detailed_structure {
+        spec = spec.with_attachments(vec![
+            poodle_specs::AgentChatAttachment::new("trace", "trace.txt")
+                .with_kind("text")
+                .with_icon("paperclip"),
+        ]);
+    }
+
+    let change_host = Arc::clone(host);
+    let change_id = state.id.clone();
+    let select_host = Arc::clone(host);
+    let select_id = state.id.clone();
+    let focus_host = Arc::clone(host);
+    let focus_id = state.id.clone();
+    let submit_host = Arc::clone(host);
+    let submit_id = state.id.clone();
+    let stop_host = Arc::clone(host);
+    let stop_id = state.id.clone();
+
+    let mut input = node_compat::AgentChatInput::from_spec(spec, &theme())
+        .with_id(&state.id)
+        .with_selection(state.selection.0, state.selection.1)
+        .with_is_focused(state.focused)
+        .on_value_change(move |next: &str| {
+            change_host.note(format!("{change_id}/change:{next}"));
+            change_host.mutate(&change_id, |state| {
+                if state.accept_edits {
+                    state.value = next.to_owned();
+                }
+            });
+        })
+        .on_selection_change(Arc::new(move |start, end| {
+            select_host.note(format!("{select_id}/select:{start}-{end}"));
+            select_host.mutate(&select_id, |state| {
+                if state.accept_edits {
+                    state.selection = (start, end);
+                }
+            });
+        }))
+        .on_focus_change(Arc::new(move |focused| {
+            focus_host.note(format!("{focus_id}/focus:{focused}"));
+            focus_host.mutate(&focus_id, |state| state.focused = focused);
+        }))
+        .on_submit(Arc::new(move |value| {
+            submit_host.note(format!("{submit_id}/submit:{value}"));
+        }))
+        .on_stop(Arc::new(move || {
+            stop_host.note(format!("{stop_id}/stop"));
+        }));
+    if state.detailed_structure {
+        input = input
+            .toolbar_child(Node::text("Model"))
+            .footer_child(Node::text("main"));
+    }
+    input
+}
+
+fn agent_chat_input_element(host: &Arc<AgentChatInputHost>, id: &str) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    host.built(id);
+    agent_chat_input_builder(host, id).into_element()
+}
+
+fn agent_chat_input_container(host: &Arc<AgentChatInputHost>) -> gpui::AnyElement {
+    use gpui::{div, px, IntoElement, ParentElement, Styled};
+    let ids = host
+        .states
+        .lock()
+        .expect("agent chat states")
+        .iter()
+        .map(|state| state.id.clone())
+        .collect::<Vec<_>>();
+    let mut root = div()
+        .id(FIXTURE_ID)
+        .flex()
+        .flex_col()
+        .gap(px(12.0))
+        .w(px(560.0));
+    for id in ids {
+        root = root.child(agent_chat_input_element(host, &id));
+    }
+    root.into_any_element()
+}
+
+/// g16.082. AgentChatInput mounts through the production compatibility
+/// adapter, composes the real TextInput and Button renderers, and keeps value,
+/// selection, focus, and terminal effects under caller-scoped host ownership.
+#[test]
+fn agent_chat_input_mounted_input_and_action_follow_host_state() {
+    use node_compat::IntoCompatNode;
+    use poodle_node::{CursorHint, FontFamily, NodeRole};
+    use poodle_render::color::with_alpha;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{
+        AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlDensity, ControlSize,
+    };
+
+    // Production adapter composition and token metadata before mount.
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = AgentChatInputSpec::new()
+            .with_value("Inspect the failing gate")
+            .with_placeholder("Describe the change")
+            .with_attachments(vec![
+                AgentChatAttachment::new("trace", "trace.txt")
+                    .with_kind("text")
+                    .with_icon("paperclip"),
+                AgentChatAttachment::new("preview", "preview.png")
+                    .with_kind("image")
+                    .with_thumbnail("preview.png"),
+            ])
+            .with_context(32.0, 128.0)
+            .with_size(ControlSize::Md)
+            .with_density(ControlDensity::Comfortable);
+        let node = node_compat::AgentChatInput::from_spec(spec.clone(), &theme_provider)
+            .with_id("proof")
+            .with_selection(4, 4)
+            .toolbar_child(Node::text("Model"))
+            .footer_child(Node::text("main"))
+            .into_compat_node();
+
+        assert_eq!(node.id.as_deref(), Some("agent-chat-input:proof"));
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(
+            node.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(node.roles.get("status").map(String::as_str), Some("idle"));
+        assert_eq!(node.roles.get("disabled").map(String::as_str), Some("false"));
+        assert_eq!(node.children.len(), 2, "field precedes the optional footer");
+        let field = &node.children[0];
+        assert_eq!(field.id.as_deref(), Some("agent-chat-input:proof:field"));
+        assert_eq!(field.children.len(), 3, "attachments, editor, then toolbar");
+        let (pad_y, pad_x) = spec.field_padding_rem(ControlSize::Md);
+        assert_eq!(
+            field.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.field_fill_token()))
+        );
+        assert_eq!(
+            field.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.field_border_token())
+        );
+        assert_eq!(field.style.descriptor.border.width, 1.0);
+        assert_eq!(
+            field.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5
+        );
+        assert_eq!(
+            field.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(pad_y)
+        );
+        assert_eq!(
+            field.style.descriptor.layout.spacing.padding.left,
+            rem_to_px(pad_x)
+        );
+        let field_ring = field
+            .style
+            .focus_ring
+            .expect("field owns the contract focus-within ring");
+        assert_eq!(
+            field_ring.color,
+            ctx.theme().resolve_color(spec.focus_ring_color_token())
+        );
+        assert_eq!(
+            field_ring.width,
+            ctx.theme()
+                .resolve_border_width(spec.focus_ring_width_token())
+        );
+        assert_eq!(field_ring.offset, rem_to_px(0.0625));
+        assert!(field.style.focus_ring_within);
+
+        let attachments = &field.children[0];
+        assert_eq!(
+            attachments.id.as_deref(),
+            Some("agent-chat-input:proof:attachments")
+        );
+        assert_eq!(attachments.children.len(), 2);
+        let chip = &attachments.children[0];
+        assert_eq!(chip.roles.get("kind").map(String::as_str), Some("text"));
+        assert_eq!(chip.roles.get("variant").map(String::as_str), Some("chip"));
+        assert_eq!(
+            chip.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.attachment_fill_token()))
+        );
+        assert_eq!(
+            chip.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+        assert_eq!(
+            chip.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.attachment_radius_token())
+        );
+        let thumbnail = &attachments.children[1];
+        assert_eq!(thumbnail.roles.get("kind").map(String::as_str), Some("image"));
+        assert_eq!(
+            thumbnail.roles.get("variant").map(String::as_str),
+            Some("thumbnail")
+        );
+
+        let editor = &field.children[1];
+        assert_eq!(editor.id.as_deref(), Some(agent_chat_editor_id("proof").as_str()));
+        assert_eq!(editor.a11y.role, Some(NodeRole::TextInput));
+        assert_eq!(editor.a11y.label.as_deref(), Some("Message"));
+        assert_eq!(editor.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(
+            editor.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(editor.style.descriptor.background, None);
+        assert_eq!(editor.style.descriptor.border.width, 0.0);
+        assert_eq!(editor.style.descriptor.cursor, CursorHint::Default);
+        assert_eq!(editor.style.font_family, Some(FontFamily::Sans));
+        assert_eq!(
+            editor.style.text_size,
+            Some(rem_to_px(spec.editor_font_rem(ControlSize::Md)))
+        );
+        assert_eq!(editor.style.focus, None, "field owns focus treatment");
+        assert!(matches!(
+            &editor.kind,
+            NodeKind::Input { value, placeholder }
+                if value == "Inspect the failing gate" && placeholder == "Describe the change"
+        ));
+        assert_eq!(
+            editor.caret.as_ref().map(|caret| caret.selection),
+            Some((4, 4))
+        );
+
+        let toolbar = field.children.last().expect("toolbar");
+        assert_eq!(toolbar.id.as_deref(), Some("agent-chat-input:proof:toolbar"));
+        assert!(toolbar.has_text("Model"));
+        let leading = &toolbar.children[0];
+        assert_eq!(
+            leading.id.as_deref(),
+            Some("agent-chat-input:proof:leading")
+        );
+        assert_eq!(
+            leading.roles.get("dividers").map(String::as_str),
+            Some("true")
+        );
+        let action = node
+            .find(&|child| child.id.as_deref() == Some(agent_chat_action_id("proof").as_str()))
+            .expect("production Button action");
+        assert_eq!(action.a11y.role, Some(NodeRole::Button));
+        assert_eq!(action.a11y.label.as_deref(), Some("Send"));
+        assert_eq!(action.roles.get("variant").map(String::as_str), Some("primary"));
+        assert_eq!(action.roles.get("tone").map(String::as_str), Some("default"));
+        assert_eq!(action.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(action.roles.get("state").map(String::as_str), Some("submit"));
+        assert_eq!(
+            action.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.action_fill_token()))
+        );
+        assert_eq!(
+            action
+                .style
+                .hover
+                .as_ref()
+                .and_then(|patch| patch.background),
+            Some(poodle_render::color::mix_srgb(
+                ctx.theme().resolve_color(spec.action_fill_token()),
+                poodle_render::color::WHITE,
+                0.88,
+            ))
+        );
+        assert_eq!(action.style.focus_ring, None, "field owns the only ring");
+        assert!(action.find(&|child| {
+            matches!(&child.kind, NodeKind::Icon { name, .. } if name == "arrow-up")
+        }).is_some());
+        let action_icon = action
+            .find(&|child| matches!(&child.kind, NodeKind::Icon { name, .. } if name == "arrow-up"))
+            .expect("submit icon");
+        assert_eq!(
+            action_icon.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(spec.action_text_token()))
+        );
+
+        let footer = &node.children[1];
+        assert_eq!(footer.id.as_deref(), Some("agent-chat-input:proof:footer"));
+        assert_eq!(
+            footer.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.footer_fill_token()))
+        );
+        assert_eq!(
+            footer.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+
+        let empty = node_compat::AgentChatInput::from_spec(
+            AgentChatInputSpec::new().with_placeholder("Ask Poodle"),
+            &theme(),
+        )
+        .with_id("empty")
+        .into_compat_node();
+        let empty_editor = empty
+            .find(&|child| child.id.as_deref() == Some(agent_chat_editor_id("empty").as_str()))
+            .expect("empty production TextInput");
+        assert!(matches!(
+            &empty_editor.kind,
+            NodeKind::Input { value, placeholder } if value.is_empty() && placeholder == "Ask Poodle"
+        ));
+        assert_eq!(
+            empty_editor
+                .find(&|child| {
+                    child.id.as_deref() == Some(agent_chat_editor_value_id("empty").as_str())
+                })
+                .and_then(|value| value.caret)
+                .map(|caret| caret.showing_placeholder),
+            Some(true)
+        );
+        let placeholder = empty_editor
+            .find(&|child| {
+                child.id.as_deref() == Some(agent_chat_editor_value_id("empty").as_str())
+            })
+            .expect("painted placeholder node");
+        let placeholder_base = ctx.theme().resolve_color(spec.placeholder_token());
+        assert_eq!(
+            placeholder.style.descriptor.text_color,
+            Some(with_alpha(
+                placeholder_base,
+                placeholder_base.3
+                    * ctx.theme().resolve_opacity(spec.placeholder_opacity_token())
+                    * spec.placeholder_opacity_ratio(),
+            ))
+        );
+        let empty_action = empty
+            .find(&|child| child.id.as_deref() == Some(agent_chat_action_id("empty").as_str()))
+            .expect("empty action");
+        assert!(empty_action.interaction.disabled);
+        assert!(empty_action.interaction.on_activate.is_none());
+
+        let allowed_empty = node_compat::AgentChatInput::from_spec(
+            AgentChatInputSpec::new().with_allow_empty_submit(true),
+            &theme(),
+        )
+        .with_id("allowed-empty")
+        .into_compat_node();
+        assert!(!allowed_empty
+            .find(&|child| {
+                child.id.as_deref() == Some(agent_chat_action_id("allowed-empty").as_str())
+            })
+            .expect("allowed-empty action")
+            .interaction
+            .disabled);
+
+        let read_only = node_compat::AgentChatInput::from_spec(
+            AgentChatInputSpec::new()
+                .with_value("Locked")
+                .with_read_only(true),
+            &theme(),
+        )
+        .with_id("read-only")
+        .into_compat_node();
+        let read_only_editor = read_only
+            .find(&|child| {
+                child.id.as_deref() == Some(agent_chat_editor_id("read-only").as_str())
+            })
+            .expect("read-only editor");
+        assert!(read_only_editor.interaction.focusable);
+        assert!(read_only_editor.interaction.on_edit_key.is_none());
+        assert!(!read_only
+            .find(&|child| {
+                child.id.as_deref() == Some(agent_chat_action_id("read-only").as_str())
+            })
+            .expect("read-only action")
+            .interaction
+            .disabled);
+
+        let busy = node_compat::AgentChatInput::from_spec(
+            AgentChatInputSpec::new().with_status(AgentChatStatus::Busy),
+            &theme(),
+        )
+        .with_id("busy")
+        .into_compat_node();
+        let busy_action = busy
+            .find(&|child| child.id.as_deref() == Some(agent_chat_action_id("busy").as_str()))
+            .expect("busy action");
+        assert!(!busy_action.interaction.disabled, "stop stays available while busy");
+        assert_eq!(busy_action.a11y.label.as_deref(), Some("Stop"));
+        assert_eq!(busy_action.roles.get("tone").map(String::as_str), Some("danger"));
+        assert_eq!(busy_action.roles.get("state").map(String::as_str), Some("stop"));
+        assert!(busy_action.find(&|child| {
+            matches!(&child.kind, NodeKind::Icon { name, .. } if name == "square")
+        }).is_some());
+    }
+
+    run_headless(|cx| {
+        let mut subject = AgentChatInputState::new("subject", "Draft");
+        subject.detailed_structure = true;
+        let host = AgentChatInputHost::new(vec![
+            subject,
+            AgentChatInputState::new("witness", "Draft"),
+        ]);
+        let mounted_host = Arc::clone(&host);
+        let build: Rc<dyn Fn() -> gpui::AnyElement> =
+            Rc::new(move || agent_chat_input_container(&mounted_host));
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 360.0);
+
+        for id in ["subject", "witness"] {
+            driver.wait_for_focus_handle(&agent_chat_editor_id(id));
+        }
+
+        let root_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:subject")
+            .expect("subject root bounds");
+        let witness_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:witness")
+            .expect("witness root bounds");
+        let field_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:subject:field")
+            .expect("subject field bounds");
+        let attachment_bounds = poodle_gpui_node_backend::bounds_for(
+            &agent_chat_part_id("subject", "attachments"),
+        )
+        .expect("subject attachment bounds");
+        let attachment_item_bounds =
+            poodle_gpui_node_backend::bounds_for("agent-chat-input:subject:attachment:trace")
+                .expect("subject attachment item bounds");
+        let editor_bounds = poodle_gpui_node_backend::bounds_for(&agent_chat_editor_id("subject"))
+            .expect("subject editor bounds");
+        let toolbar_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "toolbar"))
+                .expect("subject toolbar bounds");
+        let leading_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "leading"))
+                .expect("subject leading bounds");
+        let trailing_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "trailing"))
+                .expect("subject trailing bounds");
+        let action_bounds = poodle_gpui_node_backend::bounds_for(&agent_chat_action_id("subject"))
+            .expect("subject action bounds");
+        let footer_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "footer"))
+                .expect("subject footer bounds");
+        let mount_bounds = driver.mount_box_bounds();
+        let assert_contains = |parent: gpui::Bounds<Pixels>,
+                               child: gpui::Bounds<Pixels>,
+                               relationship: &str| {
+            assert!(child.left() >= parent.left(), "{relationship}: left escaped");
+            assert!(child.right() <= parent.right(), "{relationship}: right escaped");
+            assert!(child.top() >= parent.top(), "{relationship}: top escaped");
+            assert!(child.bottom() <= parent.bottom(), "{relationship}: bottom escaped");
+        };
+        assert_contains(mount_bounds, root_bounds, "mount contains subject root");
+        assert_contains(mount_bounds, witness_bounds, "mount contains witness root");
+        assert_contains(root_bounds, field_bounds, "root contains field");
+        assert_contains(root_bounds, footer_bounds, "root contains footer");
+        assert_contains(field_bounds, attachment_bounds, "field contains attachments");
+        assert_contains(
+            attachment_bounds,
+            attachment_item_bounds,
+            "attachments contain each attachment item",
+        );
+        assert_contains(field_bounds, editor_bounds, "field contains editor");
+        assert_contains(field_bounds, toolbar_bounds, "field contains toolbar");
+        assert_contains(toolbar_bounds, leading_bounds, "toolbar contains leading");
+        assert_contains(toolbar_bounds, trailing_bounds, "toolbar contains trailing");
+        assert_contains(trailing_bounds, action_bounds, "trailing contains action");
+        assert!(
+            attachment_bounds.bottom() <= editor_bounds.top(),
+            "attachments must end before the editor begins"
+        );
+        assert!(
+            editor_bounds.bottom() <= toolbar_bounds.top(),
+            "editor must end before the toolbar begins"
+        );
+        assert!(
+            leading_bounds.right() <= trailing_bounds.left(),
+            "leading and trailing toolbar regions must not overlap"
+        );
+        assert!(
+            field_bounds.bottom() <= footer_bounds.top(),
+            "field must end before the optional footer begins"
+        );
+        assert!(
+            root_bounds.bottom() <= witness_bounds.top(),
+            "mounted sibling inputs must not overlap"
+        );
+
+        driver.pointer_activate_id(&agent_chat_editor_id("subject"));
+        assert!(host.state("subject").focused);
+        assert!(!host.state("witness").focused);
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(&agent_chat_part_id("subject", "field"))
+                .is_some(),
+            "the mounted field paints its focus-within ring"
+        );
+        host.take_log();
+        driver.dispatch_key_raw("end");
+        assert_eq!(host.state("subject").selection, (5, 5));
+        host.take_log();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
+                .as_deref(),
+            Some("Draft")
+        );
+
+        host.mutate("subject", |state| state.accept_edits = false);
+        let builds_before_refusal = host.build_count("subject");
+        driver.dispatch_key_raw("!");
+        assert!(
+            host.build_count("subject") > builds_before_refusal,
+            "the mounted production factory rebuilt after the refused proposal"
+        );
+        assert_eq!(host.state("subject").value, "Draft");
+        assert_eq!(host.state("subject").selection, (5, 5));
+        assert_eq!(
+            host.take_log(),
+            vec!["subject/change:Draft!", "subject/select:6-6"],
+            "the adapter reports the proposal while the host can refuse both controlled props"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
+                .as_deref(),
+            Some("Draft"),
+            "host refusal leaves the mounted painted control unchanged"
+        );
+
+        host.mutate("subject", |state| state.accept_edits = true);
+        let builds_before_acceptance = host.build_count("subject");
+        driver.dispatch_key_raw("!");
+        assert!(
+            host.build_count("subject") > builds_before_acceptance,
+            "acceptance becomes visible only through a host-authored rebuild"
+        );
+        assert_eq!(host.state("subject").value, "Draft!");
+        assert_eq!(host.state("subject").selection, (6, 6));
+        assert_eq!(
+            host.take_log(),
+            vec!["subject/change:Draft!", "subject/select:6-6"],
+            "accepted edits report value before the terminal selection"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
+                .as_deref(),
+            Some("Draft!"),
+            "the accepted host rebuild paints the next controlled value"
+        );
+
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.take_log(), vec!["subject/submit:Draft!"]);
+        assert_eq!(host.state("subject").value, "Draft!", "submit never clears host value");
+        driver.pointer_activate_id(&agent_chat_action_id("subject"));
+        assert_eq!(
+            host.take_log(),
+            vec!["subject/focus:false", "subject/submit:Draft!"],
+            "action focus leaves the editor before the exact submit payload"
+        );
+
+        driver.pointer_activate_id(&agent_chat_editor_id("witness"));
+        host.take_log();
+        driver.dispatch_key_raw("end");
+        host.take_log();
+        driver.dispatch_key_raw("?");
+        assert_eq!(host.state("witness").value, "Draft?");
+        assert_eq!(host.state("subject").value, "Draft!");
+        assert_eq!(
+            host.take_log(),
+            vec!["witness/change:Draft?", "witness/select:6-6"],
+            "equal-valued duplicate instances keep callbacks caller-scoped"
+        );
+
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+    });
+
+    run_headless(|cx| {
+        let mut read_only = AgentChatInputState::new("read-only", "Locked");
+        read_only.read_only = true;
+        let mut disabled = AgentChatInputState::new("disabled", "Unavailable");
+        disabled.disabled = true;
+        let mut busy = AgentChatInputState::new("busy", "");
+        busy.status = AgentChatStatus::Busy;
+        let mut allowed_empty = AgentChatInputState::new("allowed-empty", "");
+        allowed_empty.allow_empty_submit = true;
+        let host = AgentChatInputHost::new(vec![
+            AgentChatInputState::new("empty", ""),
+            allowed_empty,
+            read_only,
+            disabled,
+            busy,
+        ]);
+        let mounted_host = Arc::clone(&host);
+        let build: Rc<dyn Fn() -> gpui::AnyElement> =
+            Rc::new(move || agent_chat_input_container(&mounted_host));
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 600.0);
+
+        for id in ["empty", "allowed-empty", "read-only", "busy"] {
+            driver.wait_for_focus_handle(&agent_chat_editor_id(id));
+        }
+
+        driver.pointer_activate_id(&agent_chat_action_id("empty"));
+        driver.pointer_activate_id(&agent_chat_editor_id("empty"));
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert!(host.take_log().is_empty(), "empty submit stays ineligible");
+
+        driver.pointer_activate_id(&agent_chat_editor_id("allowed-empty"));
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.take_log(), vec!["allowed-empty/submit:"]);
+        driver.pointer_activate_id(&agent_chat_action_id("allowed-empty"));
+        assert_eq!(
+            host.take_log(),
+            vec!["allowed-empty/focus:false", "allowed-empty/submit:"],
+            "allow-empty is the exact exception for both submit paths"
+        );
+
+        for _ in 0..16 {
+            driver.dispatch_key_raw("tab");
+            if poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("read-only"))
+                == Some(true)
+            {
+                break;
+            }
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("read-only")),
+            Some(true),
+            "read-only keeps a real mounted focus stop"
+        );
+        host.take_log();
+        driver.dispatch_key_raw("x");
+        assert_eq!(host.state("read-only").value, "Locked");
+        assert!(host.take_log().is_empty(), "read-only suppresses mutation");
+        driver.pointer_activate_id(&agent_chat_action_id("read-only"));
+        assert_eq!(
+            host.take_log(),
+            vec!["read-only/focus:false", "read-only/submit:Locked"]
+        );
+
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&agent_chat_editor_id("disabled")).is_none(),
+            "a disabled editor does not register a focus handle"
+        );
+        driver.pointer_activate_id(&agent_chat_editor_id("allowed-empty"));
+        host.take_log();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("allowed-empty")),
+            Some(true)
+        );
+        driver.pointer_activate_id(&agent_chat_editor_id("disabled"));
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&agent_chat_editor_id("disabled")).is_none(),
+            "disabled pointer activation cannot create a focus target"
+        );
+        assert!(!host.state("disabled").focused);
+        assert_eq!(host.take_log(), vec!["allowed-empty/focus:false"]);
+        driver.pointer_activate_id(&agent_chat_action_id("disabled"));
+        assert_eq!(host.state("disabled").value, "Unavailable");
+        assert!(
+            host.take_log().is_empty(),
+            "the mounted disabled action remains inert"
+        );
+
+        driver.pointer_activate_id(&agent_chat_editor_id("busy"));
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert!(host.take_log().is_empty(), "busy Enter never becomes submit");
+        driver.dispatch_key_raw("escape");
+        assert_eq!(host.take_log(), vec!["busy/stop"]);
+        driver.pointer_activate_id(&agent_chat_action_id("busy"));
+        assert_eq!(
+            host.take_log(),
+            vec!["busy/focus:false", "busy/stop"],
+            "busy action blur precedes the stop callback"
+        );
+
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+
+        nucleus_receipts::emit_if_configured(
+            "AgentChatInput",
+            "nucleus.agent.agent-chat-input",
+            observation,
+            &[
+                "mount caller-scoped controlled AgentChatInput instances through node_compat::AgentChatInput::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch pointer and keyboard edits, focus changes, submits, stops, and disabled activations through the GPUI test platform",
+                "submit refused and accepted controlled edit proposals, rebuilding the production factory from unchanged or updated host-owned value and selection",
+            ],
+            &[
+                "production TextInput and Button composition preserves exact AgentChatInput-owned token, data, placeholder, status, and disabled metadata",
+                "host refusal rebuilds the mounted production path from unchanged controlled value and selection, while acceptance rebuilds it from updated host-owned state",
+                "submit eligibility and exact callback payload order cover empty, allow-empty, read-only, disabled, idle, and busy states",
+                "the real mount box and parent bounds contain ordered non-overlapping fields, attachments, editors, toolbars, actions, footers, and sibling instances",
+                "caller-scoped instances isolate focus, draft, callbacks, runtime identity, and bounds while disabled pointer input cannot focus or activate the production control",
+            ],
+        );
+    });
+}
+
+/// Backend routing oracle for disabled pointer semantics. Production
+/// components normally remove an unavailable callback before this boundary;
+/// this adversarial node keeps a live sink so an accidental backend dispatch
+/// cannot pass as proof merely because there was nothing to call.
+#[test]
+fn disabled_pointer_routing_blocks_a_live_activation_sink() {
+    run_headless(|cx| {
+        let activations = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&activations);
+        let mut node = Node::button("Disabled routing oracle");
+        node.id = Some("disabled-live-sink".to_owned());
+        node.interaction.focusable = true;
+        node.interaction.disabled = true;
+        node.interaction.on_activate = Some(Arc::new(move || {
+            *sink.lock().expect("disabled sink lock") += 1;
+        }));
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, mounted);
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for("disabled-live-sink").is_some(),
+            "the oracle must expose a real mounted pointer target"
+        );
+        driver.pointer_activate_id("disabled-live-sink");
+        assert_eq!(*activations.lock().expect("activation lock"), 0);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("disabled-live-sink").is_none(),
+            "disabled routing cannot manufacture a focus target"
+        );
+
+        assert!(driver.mounted_observation().is_valid());
+    });
+}

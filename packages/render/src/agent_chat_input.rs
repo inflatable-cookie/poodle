@@ -9,12 +9,12 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeKind,
+    CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeKind, StylePatch,
 };
 use poodle_specs::{AgentChatInputSpec, AgentChatStatus, MeterShape, MeterSpec};
 
-use crate::color::with_alpha;
+use crate::color::{mix_srgb, with_alpha, WHITE};
 use crate::context::RenderContext;
 use crate::meter::meter;
 use crate::presentation::rem_to_px;
@@ -68,6 +68,7 @@ pub fn agent_chat_input(
     let divider = ctx.theme().resolve_color(spec.divider_token());
     let surface = ctx.theme().resolve_color(spec.field_fill_token());
     let elevated = ctx.theme().resolve_color(spec.attachment_fill_token());
+    let footer_fill = ctx.theme().resolve_color(spec.footer_fill_token());
     let action_fill = ctx.theme().resolve_color(spec.action_fill_token());
     let action_text = ctx.theme().resolve_color(spec.action_text_token());
     let field_radius = ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5;
@@ -98,8 +99,24 @@ pub fn agent_chat_input(
         s.descriptor.border.width = 1.0;
         s.descriptor.border.color = border;
         s.descriptor.background = Some(surface);
+        s.hover = Some(StylePatch {
+            background: None,
+            border_color: Some(mix_srgb(border, text_primary, 0.78)),
+            text_color: None,
+            opacity: None,
+        });
     }
     all_radius(&mut field, field_radius);
+    if !spec.is_disabled {
+        field.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            width: ctx
+                .theme()
+                .resolve_border_width(spec.focus_ring_width_token()),
+            offset: rem_to_px(0.0625),
+        });
+        field.style.focus_ring_within = true;
+    }
 
     let attention_region = |children: Vec<Node>| {
         let mut region = Node::container();
@@ -123,7 +140,7 @@ pub fn agent_chat_input(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.flex_wrap = true;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = rem_to_px(0.375);
+            s.descriptor.layout.spacing.gap = gap;
         }
         let thumb = rem_to_px(spec.attachment_thumb_rem(effective_size));
         for attachment in spec.attachments.iter() {
@@ -141,11 +158,19 @@ pub fn agent_chat_input(
                     s.descriptor.layout.width = LayoutSizing::Fixed(thumb);
                     s.descriptor.layout.height = LayoutSizing::Fixed(thumb);
                     s.flex_none = true;
+                    s.descriptor.border.width = 1.0;
+                    s.descriptor.border.color = divider;
+                    s.descriptor.background = Some(elevated);
                     if attachment.is_disabled {
                         s.descriptor.opacity = disabled_opacity;
                     }
                 }
                 all_radius(&mut tile, chip_radius);
+                if let Some(kind) = &attachment.kind {
+                    tile.roles.insert("kind".to_owned(), kind.clone());
+                }
+                tile.roles
+                    .insert("variant".to_owned(), "thumbnail".to_owned());
                 chips = chips.child(tile);
                 continue;
             }
@@ -166,6 +191,11 @@ pub fn agent_chat_input(
                 s.descriptor.background = Some(elevated);
             }
             all_radius(&mut chip, chip_radius);
+            if let Some(kind) = &attachment.kind {
+                chip.roles.insert("kind".to_owned(), kind.clone());
+            }
+            chip.roles
+                .insert("variant".to_owned(), "chip".to_owned());
 
             if let Some(icon) = &attachment.icon {
                 let mut glyph = Node::icon(icon, rem_to_px(0.75));
@@ -216,6 +246,7 @@ pub fn agent_chat_input(
         s.min_height = Some(line_height * spec.visible_rows() as f32);
         s.descriptor.text_color = Some(if is_empty { placeholder } else { text_primary });
         s.text_size = Some(editor_font);
+        s.font_family = Some(FontFamily::Sans);
     }
     field = field.child(editor);
 
@@ -229,6 +260,10 @@ pub fn agent_chat_input(
         s.descriptor.layout.width = LayoutSizing::Grow;
         s.min_width = Some(0.0);
     }
+    leading.roles.insert(
+        "dividers".to_owned(),
+        spec.toolbar_dividers.to_string(),
+    );
     for (index, child) in toolbar_children.into_iter().enumerate() {
         // Hairline dividers between leading children (contract §8).
         if index > 0 && spec.toolbar_dividers {
@@ -285,6 +320,15 @@ pub fn agent_chat_input(
     let mut glyph = Node::icon(spec.action_icon(), action_box * 0.5);
     glyph.style.descriptor.text_color = Some(action_text);
     let mut action = action.child(glyph);
+    action
+        .roles
+        .insert("state".to_owned(), spec.action_state().to_owned());
+    action.style.hover = Some(StylePatch {
+        background: Some(mix_srgb(action_fill, WHITE, 0.88)),
+        border_color: None,
+        text_color: None,
+        opacity: None,
+    });
     if !spec.can_submit() {
         action.style.descriptor.opacity = disabled_opacity;
     } else if let Some(handler) = &handlers.on_action {
@@ -329,9 +373,17 @@ pub fn agent_chat_input(
             pad.bottom = pad_y;
             s.descriptor.border.width = 1.0;
             s.descriptor.border.color = divider;
-            s.descriptor.background = Some(elevated);
+            s.descriptor.background = Some(footer_fill);
+            s.descriptor.text_color = Some(text_secondary);
+            s.text_size = Some(rem_to_px(0.8125));
         }
-        all_radius(&mut footer, chip_radius);
+        footer.style.descriptor.layout.spacing.padding.top =
+            pad_y + ctx.theme().resolve_radius(spec.field_radius_token());
+        footer.style.border_top_width = Some(0.0);
+        footer.style.descriptor.corner_radii.bottom_right =
+            ctx.theme().resolve_radius(spec.field_radius_token());
+        footer.style.descriptor.corner_radii.bottom_left =
+            ctx.theme().resolve_radius(spec.field_radius_token());
         for child in footer_children {
             footer = footer.child(child);
         }
@@ -345,6 +397,18 @@ pub fn agent_chat_input(
     if !spec.aria_label.is_empty() {
         root.a11y.label = Some(spec.aria_label.clone());
     }
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
+    root.roles
+        .insert("status".to_owned(), spec.status.as_str().to_owned());
+    root.roles
+        .insert("disabled".to_owned(), spec.is_disabled.to_string());
 
     root
 }
@@ -353,6 +417,7 @@ pub fn agent_chat_input(
 mod tests {
     use super::*;
     use poodle_node::NodeKind;
+    use poodle_specs::{AgentChatAttachment, ControlDensity, ControlSize};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -390,5 +455,195 @@ mod tests {
         let idle = render_with_status(AgentChatStatus::Idle);
         assert!(!has_text(&idle, "question region"));
         assert!(!has_text(&idle, "plan region"));
+    }
+
+    #[test]
+    fn contract_tokens_and_data_metadata_are_exact() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = AgentChatInputSpec::new()
+            .with_value("Draft")
+            .with_attachments(vec![
+                AgentChatAttachment::new("trace", "trace.txt")
+                    .with_kind("text")
+                    .with_icon("paperclip"),
+                AgentChatAttachment::new("preview", "preview.png")
+                    .with_kind("image")
+                    .with_thumbnail("preview.png"),
+            ])
+            .with_size(ControlSize::Md)
+            .with_density(ControlDensity::Comfortable);
+        let node = agent_chat_input(
+            &spec,
+            &ctx,
+            Vec::new(),
+            Vec::new(),
+            vec![Node::text("Model"), Node::text("Mode")],
+            vec![Node::text("main")],
+            AgentChatInputHandlers::default(),
+        );
+
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(
+            node.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(node.roles.get("status").map(String::as_str), Some("idle"));
+        assert_eq!(node.roles.get("disabled").map(String::as_str), Some("false"));
+
+        let field = &node.children[0];
+        let (pad_y, pad_x) = spec.field_padding_rem(ControlSize::Md);
+        assert_eq!(
+            field.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.field_fill_token()))
+        );
+        assert_eq!(
+            field.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.field_border_token())
+        );
+        assert_eq!(
+            field.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5
+        );
+        assert_eq!(field.style.descriptor.layout.spacing.padding.top, rem_to_px(pad_y));
+        assert_eq!(field.style.descriptor.layout.spacing.padding.left, rem_to_px(pad_x));
+        assert_eq!(
+            field.style.hover.as_ref().and_then(|patch| patch.border_color),
+            Some(mix_srgb(
+                ctx.theme().resolve_color(spec.field_border_token()),
+                ctx.theme().resolve_color(spec.text_token()),
+                0.78,
+            ))
+        );
+        let ring = field.style.focus_ring.expect("field focus-within ring");
+        assert_eq!(ring.color, ctx.theme().resolve_color(spec.focus_ring_color_token()));
+        assert_eq!(
+            ring.width,
+            ctx.theme().resolve_border_width(spec.focus_ring_width_token())
+        );
+        assert_eq!(ring.offset, rem_to_px(0.0625));
+        assert!(field.style.focus_ring_within);
+
+        let attachments = &field.children[0];
+        assert_eq!(
+            attachments.style.descriptor.layout.spacing.gap,
+            rem_to_px(spec.toolbar_gap_rem(ControlSize::Md))
+                * spec.density_gap_scale(ControlDensity::Comfortable)
+        );
+        let chip = &attachments.children[0];
+        assert_eq!(chip.roles.get("kind").map(String::as_str), Some("text"));
+        assert_eq!(chip.roles.get("variant").map(String::as_str), Some("chip"));
+        assert_eq!(
+            chip.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.attachment_fill_token()))
+        );
+        assert_eq!(
+            chip.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+        assert_eq!(
+            chip.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.attachment_radius_token())
+        );
+        let thumbnail = &attachments.children[1];
+        assert_eq!(thumbnail.roles.get("kind").map(String::as_str), Some("image"));
+        assert_eq!(
+            thumbnail.roles.get("variant").map(String::as_str),
+            Some("thumbnail")
+        );
+        assert_eq!(
+            thumbnail.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.attachment_fill_token()))
+        );
+        assert_eq!(
+            thumbnail.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+        assert_eq!(
+            thumbnail.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.attachment_radius_token())
+        );
+
+        let editor = &field.children[1];
+        assert!(matches!(
+            &editor.kind,
+            NodeKind::Text { content } if content == "Draft"
+        ));
+        assert_eq!(editor.style.font_family, Some(FontFamily::Sans));
+        assert_eq!(
+            editor.style.text_size,
+            Some(rem_to_px(spec.editor_font_rem(ControlSize::Md)))
+        );
+        assert_eq!(
+            editor.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(spec.text_token()))
+        );
+
+        let toolbar = field.children.last().expect("toolbar");
+        let leading = &toolbar.children[0];
+        assert_eq!(
+            leading.roles.get("dividers").map(String::as_str),
+            Some("true")
+        );
+        let divider = &leading.children[1];
+        assert_eq!(
+            divider.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.divider_token()))
+        );
+        let action = toolbar.children[1].children.last().expect("action");
+        assert_eq!(action.roles.get("state").map(String::as_str), Some("submit"));
+        assert_eq!(
+            action.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.action_fill_token()))
+        );
+        assert_eq!(
+            action.style.hover.as_ref().and_then(|patch| patch.background),
+            Some(mix_srgb(
+                ctx.theme().resolve_color(spec.action_fill_token()),
+                WHITE,
+                0.88,
+            ))
+        );
+        assert_eq!(
+            action.children[0].style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(spec.action_text_token()))
+        );
+
+        let footer = &node.children[1];
+        assert_eq!(
+            footer.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.footer_fill_token()))
+        );
+        assert_eq!(
+            footer.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+        assert_eq!(footer.style.border_top_width, Some(0.0));
+        assert_eq!(
+            footer.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(spec.secondary_token()))
+        );
+        assert_eq!(footer.style.descriptor.corner_radii.top_left, 0.0);
+        assert_eq!(
+            footer.style.descriptor.corner_radii.bottom_left,
+            ctx.theme().resolve_radius(spec.field_radius_token())
+        );
+
+        let disabled_spec = spec.with_disabled(true);
+        let disabled = agent_chat_input(
+            &disabled_spec,
+            &ctx,
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            AgentChatInputHandlers::default(),
+        );
+        assert_eq!(disabled.roles.get("disabled").map(String::as_str), Some("true"));
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            ctx.theme().resolve_opacity(disabled_spec.disabled_opacity_token())
+        );
+        assert!(disabled.children[0].style.focus_ring.is_none());
     }
 }

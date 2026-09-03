@@ -517,12 +517,12 @@ pub fn text_input_with_handlers(
         // keystroke at the focusable root.
         root.interaction.on_select_range = value_select.clone();
         root.interaction.on_text_change = on_change;
-        // Focus is reported by the backend, which is the only thing that knows
-        // it. An earlier pass latched this on activation, so it could report a
-        // gain and never a loss — a field kept its caret after focus moved on.
-        root.interaction.on_focus_change = handlers.on_focus_change.clone();
     }
     if !spec.is_disabled {
+        // Read-only fields still participate in focus and selection. Report
+        // both focus directions for them too; only mutation channels are
+        // withheld above.
+        root.interaction.on_focus_change = handlers.on_focus_change.clone();
         root.interaction.on_submit = handlers.on_submit.clone();
         root.interaction.on_cancel = handlers.on_cancel.clone();
     }
@@ -741,6 +741,26 @@ mod tests {
             Some(callback),
         );
         assert!(read_only.interaction.on_text_change.is_none());
+    }
+
+    #[test]
+    fn read_only_keeps_focus_reporting_without_mutation_channels() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = text_input_with_handlers(
+            &TextInputSpec::new().with_read_only(true),
+            &ctx,
+            TextInputHandlers {
+                on_focus_change: Some(Arc::new(|_| {})),
+                ..TextInputHandlers::default()
+            },
+        );
+
+        assert!(node.interaction.focusable);
+        assert!(node.interaction.on_focus_change.is_some());
+        assert!(node.interaction.on_edit_key.is_none());
+        assert!(node.interaction.on_edit_insert.is_none());
+        assert!(node.interaction.on_text_change.is_none());
     }
 
     /// `maxLength` is spent before the host hears anything, and a rejected
