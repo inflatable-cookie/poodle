@@ -60,7 +60,7 @@ and `git diff --check origin/main...HEAD`. No windowed or release selector.
 
 - Tooltip bubble chrome is the previous hardcoded native styling, not the
   web Tooltip overlay recipe. Tabs projection stays `g16.065`.
-- Nucleus receipts must be re-emitted from `effigy regressions:native` after
-  this runtime commit; that pin is a follow-up docs commit, not an
-  orchestrator text edit. No windowed or release selector was run. Merge
-  remains orchestrator-owned.
+- Nucleus receipts were re-emitted from `effigy regressions:native` after
+  runtime commit `a8821d652`. Manifest, Button receipt, and ledger pin that
+  source identity. No windowed or release selector was run. Merge remains
+  orchestrator-owned.
