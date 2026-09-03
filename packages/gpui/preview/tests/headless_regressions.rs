@@ -22,7 +22,7 @@ use std::sync::{Arc, Mutex};
 // Explicit import only: `use gpui::*` would glob in gpui's `test` proc macro
 // and shadow the built-in `#[test]` attribute (gpui-macros 0.2.2's `test`
 // crashes on current rustc).
-use gpui::{point, px, InteractiveElement, IntoElement, Modifiers, Pixels, Point, TestAppContext};
+use gpui::{point, px, InteractiveElement, Modifiers, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::audio::{AudioValueLaw, KnobDragMode, XYPadVisualState};
 use poodle_headless::time_input::{
@@ -6425,46 +6425,1035 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
     });
 }
 
-/// g14.005 retained regression. GPUI forbids starting a second deferred draw
-/// while it is painting the first. A popover nested inside another popover is
-/// therefore painted inside the enclosing deferred scope rather than calling
-/// `defer_draw` again. This must execute a real paint: converting the tree
-/// alone cannot catch the backend panic.
+/// Host-owned open state and trace for one nested popover pair. The outer
+/// composition routes through the node_compat adapter machine; the inner
+/// composition rides the renderer-node path with host handlers, exactly like
+/// a host that mounts overlays inside content.
+#[derive(Clone, Default)]
+struct NucleusNestedHost {
+    outer_open: bool,
+    inner_open: bool,
+    trace: Vec<String>,
+}
+/// Host-owned open state for every mounted popover row: one open flag per
+/// instance scope (duplicate siblings, disabled, fixed width, focus
+/// strategies), plus the shared open-change trace. Every callback names its
+/// scope, so state and traces can never cross instances.
+#[derive(Clone, Default)]
+struct NucleusPopoverHost {
+    open: std::collections::HashMap<String, bool>,
+    trace: Vec<String>,
+}
+/// Renderer-node nested Popover: the inner overlay of the retained nested
+/// composition. Same composition and layer scoping as the adapter path; the
+/// host owns open state and rebuilds it through the frame.
+fn nucleus_inner_popover_node(
+    host: &Arc<Mutex<NucleusNestedHost>>,
+    theme: &GpuiThemeProvider,
+) -> Node {
+    let open = host.lock().expect("host lock").inner_open;
+    let ctx = RenderContext::new(theme);
+    let toggle_host = Arc::clone(host);
+    let dismiss_host = Arc::clone(host);
+    poodle_render::popover(
+        &PopoverSpec::new().with_open(open).with_aria_label("Inner options"),
+        &ctx,
+        &poodle_render::PopoverHandlers {
+            on_activate: Some(Arc::new(move || {
+                let mut state = toggle_host.lock().expect("host lock");
+                let next = !state.inner_open;
+                state.inner_open = next;
+                state.trace.push(format!("inner:open:{next}"));
+            })),
+            on_dismiss: Some(Arc::new(move |reason| {
+                let mut state = dismiss_host.lock().expect("host lock");
+                state.inner_open = false;
+                state.trace.push(format!("inner:dismiss:{reason:?}"));
+            })),
+            instance_id: Some("inner".to_owned()),
+        },
+        Some(Node::text("Inner trigger")),
+        Some(Node::text("Inner panel")),
+    )
+}
+/// Column content for the nested outer popover: a heading plus the inner
+/// popover composition. The inner trigger is the first focusable descendant,
+/// so the outer machine's first-focusable effect has a mounted witness.
+fn nucleus_nested_content(host: &Arc<Mutex<NucleusNestedHost>>, theme: &GpuiThemeProvider) -> Node {
+    let mut column = Node::container();
+    column.style.descriptor.layout.direction = LayoutDirection::Column;
+    column.style.descriptor.layout.spacing.gap = 8.0;
+    use poodle_adapter::ThemeProvider;
+    let mut heading = Node::text("Outer panel");
+    heading.style.text_size = Some(14.0);
+    heading.style.text_weight = Some(700);
+    heading.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    column = column.child(heading).child(nucleus_inner_popover_node(host, theme));
+    column
+}
+/// One mounted adapter Popover for the nested window. The trigger text stays
+/// generic; every part identity is scoped under `nested`.
+fn nucleus_nested_element(host: &Arc<Mutex<NucleusNestedHost>>) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    let open = host.lock().expect("host lock").outer_open;
+    let theme = theme();
+    let change = Arc::clone(host);
+    crate::node_compat::Popover::from_spec(
+        PopoverSpec::new()
+            .with_open(open)
+            .with_offset(11.0)
+            .with_aria_label("Outer settings"),
+        &theme,
+    )
+    .with_instance_id("nested")
+    .on_open_change(Arc::new(move |open| {
+        let mut state = change.lock().expect("host lock");
+        state.outer_open = open;
+        state.trace.push(format!("outer:open:{open}"));
+    }))
+    .with_trigger(Node::text("Outer trigger"))
+    .with_content(nucleus_nested_content(&Arc::clone(host), &theme))
+    .into_element()
+}
+/// Shared body content for sibling and focus instances: a production Surface
+/// (panel tone, subtle border, Md padding) above a production Button. Content
+/// values are identical across instances; ids and callbacks stay scoped.
+fn nucleus_popover_content(
+    scope: &str,
+    theme: &GpuiThemeProvider,
+    clicks: Arc<Mutex<Vec<String>>>,
+) -> Node {
+    let ctx = RenderContext::new(theme);
+    let body_spec = poodle_specs::SurfaceSpec::new()
+        .with_tone(poodle_specs::SurfaceTone::Panel)
+        .with_border(poodle_specs::SurfaceBorder::Subtle)
+        .with_padding(poodle_specs::PaddingScale::Md);
+    let mut body = poodle_render::surface(&body_spec, &ctx, vec![Node::text("Same content")]);
+    body.id = Some(format!("{scope}:body-surface"));
+    let sink = Arc::clone(&clicks);
+    let scope_owned = scope.to_owned();
+    let button_spec = poodle_specs::ButtonSpec::new()
+        .with_label("Apply")
+        .with_variant(poodle_specs::ButtonVariant::Secondary);
+    let mut button = poodle_render::button(&button_spec, &ctx, Some(Arc::new(move || {
+        sink.lock().expect("click sink").push(scope_owned.clone());
+    })));
+    button.id = Some(format!("{scope}:popover-apply"));
+    let mut column = Node::container();
+    column.style.descriptor.layout.direction = LayoutDirection::Column;
+    column.style.descriptor.layout.spacing.gap = 8.0;
+    column.child(body).child(button)
+}
+/// One mounted adapter Popover instance: generic trigger label, scoped
+/// instance identity, host-owned open state, and the contract's strategy
+/// knobs. `fixed_width_rem` pins both surface width bounds when supplied.
+fn nucleus_popover_element(
+    host: &Arc<Mutex<NucleusPopoverHost>>,
+    scope: &'static str,
+    trigger_label: &'static str,
+    clicks: Arc<Mutex<Vec<String>>>,
+    open: bool,
+    disabled: bool,
+    initial_focus: poodle_specs::PopoverInitialFocus,
+    offset: f32,
+    fixed_width_rem: Option<f32>,
+) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    let theme = theme();
+    let change = Arc::clone(host);
+    let mut spec = PopoverSpec::new()
+        .with_open(open)
+        .with_offset(offset)
+        .with_initial_focus(initial_focus);
+    if disabled {
+        spec = spec.with_disabled(true);
+    }
+    if let Some(rem) = fixed_width_rem {
+        spec = spec
+            .with_surface_min_width(poodle_specs::Dimension::new(format!("{rem}rem")))
+            .with_surface_max_width(poodle_specs::Dimension::new(format!("{rem}rem")));
+    }
+    let scope_tag = scope;
+    let content = nucleus_popover_content(scope, &theme, Arc::clone(&clicks));
+    crate::node_compat::Popover::from_spec(spec, &theme)
+        .with_instance_id(scope)
+        .on_open_change(Arc::new(move |open| {
+            let mut state = change.lock().expect("host lock");
+            state.open.insert(scope_tag.to_owned(), open);
+            state.trace.push(format!("{scope_tag}:open:{open}"));
+        }))
+        .with_trigger(Node::text(trigger_label))
+        .with_content(content)
+        .into_element()
+}
+
+/// One row of mounted Popover elements from an element factory.
+fn nucleus_popover_row(gap: f32, elements: Vec<gpui::AnyElement>) -> gpui::AnyElement {
+    use gpui::{IntoElement, ParentElement, Styled};
+    let mut row = gpui::div().flex().flex_row().gap(px(gap));
+    for element in elements {
+        row = row.child(element);
+    }
+    row.into_any_element()
+}
+/// g16.075 retained regression and M1 receipt fixture. GPUI forbids starting
+/// a second deferred draw while it is painting the first, so a popover nested
+/// inside another popover paints inside the enclosing deferred scope. The
+/// regression is executed through the real adapter (`into_element`), machine,
+/// node backend, and test platform — a real paint, not a tree conversion.
+///
+/// The fixture then proves the Popover M1 profile mounted: controlled
+/// host-owned rebuilds, exact trigger/surface metadata and geometry, nested
+/// inner-first dismissal, sibling isolation, disabled inertia, initial-focus
+/// strategies at the mounted focus-handle boundary, and per-instance trigger
+/// restoration — emitting the receipt only after the terminal assertion.
 #[test]
 fn a_nested_popover_paints_without_nesting_deferred_draws() {
-    run_headless(|cx| {
-        let theme = theme();
-        let ctx = RenderContext::new(&theme);
-        let inner = poodle_render::popover(
-            &PopoverSpec::new().with_open(true),
-            &ctx,
-            &poodle_render::PopoverHandlers {
-                on_activate: None,
-                on_dismiss: Some(Arc::new(|_| {})),
-                instance_id: Some("nested-paint:inner".to_owned()),
-            },
-            Some(Node::text("Inner trigger")),
-            Some(Node::text("Inner panel")),
-        );
-        let outer = poodle_render::popover(
-            &PopoverSpec::new().with_open(true),
-            &ctx,
-            &poodle_render::PopoverHandlers {
-                on_activate: None,
-                on_dismiss: Some(Arc::new(|_| {})),
-                instance_id: Some("nested-paint:outer".to_owned()),
-            },
-            Some(Node::text("Outer trigger")),
-            Some(Node::container().child(inner)),
-        );
-        let node = Arc::new(Mutex::new(outer));
-        let mut driver = HeadlessDriver::new(cx, node);
+    use poodle_node::NodeRole;
+    use poodle_render::color::with_alpha;
+    use poodle_render::presentation::rem_to_px;
+    // ── 0. Production renderer composition proof (no mount) ────────────────
+    // The adapter and every mounted phase run through these nodes; proving the
+    // renderer-owned structure, token profile, and metadata here keeps the
+    // mounted phases focused on behavior and geometry.
+    {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let fill = ctx.theme().resolve_color("color.background.elevated");
+        let border_base = ctx.theme().resolve_color("color.border.subtle");
+        let border = with_alpha(border_base, border_base.3 * 0.74);
+        let border_width = ctx.theme().resolve_space("border.width.default");
+        let radius = ctx.theme().resolve_radius("radius.surface");
+        let pad_x = ctx.theme().resolve_space("space.panel.x");
+        let pad_y = ctx.theme().resolve_space("space.panel.y");
+        let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
+        let handlers = poodle_render::PopoverHandlers {
+            on_activate: Some(Arc::new(|| {})),
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("proof".to_owned()),
+        };
+        let spec = PopoverSpec::new()
+            .with_open(true)
+            .with_offset(11.0)
+            .with_aria_label("Proof settings");
 
-        driver.draw_frame();
+        let node = poodle_render::popover(
+            &spec,
+            &ctx,
+            &handlers,
+            Some(Node::text("Open")),
+            Some(Node::text("Panel body")),
+        );
+        assert_eq!(node.roles.get("placement").map(String::as_str), Some("bottom-start"));
+        assert_eq!(node.roles.get("surfaceWidth").map(String::as_str), Some("content"));
+        assert_eq!(node.style.descriptor.layout.width, LayoutSizing::Fixed(96.0));
+        assert_eq!(node.style.descriptor.layout.height, LayoutSizing::Fixed(32.0));
+        assert_eq!(node.position, NodePosition::Relative);
+        assert_eq!(node.children.len(), 2, "open composition carries trigger + surface");
+        let trigger = &node.children[0];
+        assert_eq!(trigger.id.as_deref(), Some("popover-trigger"));
+        assert_eq!(trigger.runtime_id.as_deref(), Some("proof:popover-trigger"));
+        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+        assert_eq!(trigger.a11y.expanded, Some(true));
+        assert_eq!(trigger.a11y.controls.as_deref(), Some("proof:popover-surface"));
+        assert_eq!(trigger.a11y.tab_index, Some(0));
+        assert_eq!(trigger.a11y.label.as_deref(), Some("Open"));
+        assert!(trigger.interaction.focusable);
+        assert!(!trigger.interaction.disabled);
+        assert!(trigger.interaction.on_activate.is_some());
+        assert!(trigger.interaction.on_dismiss.is_some());
+        assert_eq!(trigger.interaction.dismiss_layer.as_deref(), Some("popover-layer:proof"));
+        assert_eq!(
+            trigger.style.focus.as_ref().and_then(|patch| patch.border_color),
+            Some(focus_ring),
+            "the trigger focus patch uses the accent focus ring"
+        );
+        let positioned = &node.children[1];
+        assert_eq!(
+            positioned.position,
+            NodePosition::Absolute {
+                top: Some(32.0 + 11.0),
+                left: Some(0.0),
+                right: None,
+                bottom: None,
+            }
+        );
+        let surface = &positioned.children[0];
+        assert_eq!(surface.id.as_deref(), Some("popover-surface"));
+        assert_eq!(surface.runtime_id.as_deref(), Some("proof:popover-surface"));
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Proof settings"));
+        assert_eq!(surface.a11y.tab_index, Some(-1));
+        assert_eq!(surface.interaction.dismiss_layer.as_deref(), Some("popover-layer:proof"));
+        assert_eq!(surface.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(surface.style.descriptor.background, Some(fill));
+        assert_eq!(surface.style.descriptor.border.color, border);
+        assert_eq!(surface.style.descriptor.border.width, border_width);
+        assert_eq!(surface.style.descriptor.corner_radii.top_left, radius);
+        assert_eq!(surface.style.min_width, Some(rem_to_px(14.0)));
+        assert_eq!(surface.style.max_width, Some(rem_to_px(24.0)));
+        assert_eq!(
+            surface.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+        );
+        assert_eq!(surface.style.shadow_layers.len(), 1);
+        let inset = &surface.style.shadow_layers[0];
+        assert!(inset.inset);
+        assert_eq!(inset.color, ColorValue(1.0, 1.0, 1.0, 0.08));
+        assert_eq!(inset.offset_y, rem_to_px(0.0625));
+        assert!(surface.style.overlay);
+        let padded = &surface.children[0];
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.left, pad_x);
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.right, pad_x);
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.top, pad_y);
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.bottom, pad_y);
+        assert_eq!(padded.children.len(), 1);
+        // Closed, disabled, and surface-width variants gate the surface.
+        let closed = poodle_render::popover(
+            &PopoverSpec::new(),
+            &ctx,
+            &handlers,
+            Some(Node::text("Open")),
+            Some(Node::text("Panel body")),
+        );
+        assert_eq!(closed.children.len(), 1, "closed composition mounts no surface");
+        let disabled = poodle_render::popover(
+            &PopoverSpec::new().with_open(true).with_disabled(true),
+            &ctx,
+            &handlers,
+            Some(Node::text("Open")),
+            Some(Node::text("Panel body")),
+        );
+        assert_eq!(disabled.children.len(), 1, "disabled never mounts the surface");
+        assert!(disabled.children[0].interaction.disabled);
+        assert_eq!(disabled.children[0].a11y.tab_index, Some(-1));
+        // Content initial-focus: the surface itself becomes the focus target
+        // inside the full composition (the surface-only helper does not own
+        // the focus policy).
+        let content_mode = poodle_render::popover(
+            &PopoverSpec::new()
+                .with_open(true)
+                .with_initial_focus(poodle_specs::PopoverInitialFocus::Content),
+            &ctx,
+            &handlers,
+            Some(Node::text("Open")),
+            Some(Node::text("Panel body")),
+        );
+        let content_surface = &content_mode.children[1].children[0];
+        assert_eq!(content_surface.a11y.tab_index, Some(0));
+        assert!(content_surface.interaction.focusable);
+        assert!(content_surface.style.focus.is_some());
+    }
+    // ── 1. Nested composition, mounted, driven by real input ───────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(NucleusNestedHost::default()));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            Rc::new(move || nucleus_nested_element(&host))
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let outer_trigger = "nested:popover-trigger";
+        let outer_surface = "nested:popover-surface";
+        let inner_trigger = "inner:popover-trigger";
+        let inner_surface = "inner:popover-surface";
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            0,
+            "nothing is open on the first frame"
+        );
+        driver.wait_for_focus_handle(outer_trigger);
+        // 1a. Open the outer popover through the mounted trigger.
+        driver.pointer_activate_id(outer_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(state.trace.as_slice(), ["outer:open:true"]);
+            assert!(state.outer_open);
+        }
+        let trigger_bounds = poodle_gpui_node_backend::bounds_for(outer_trigger)
+            .expect("outer trigger bounds exist after open");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for(outer_surface)
+            .expect("outer surface bounds exist after open");
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            1,
+            "one open layer after the outer popover opens"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::layer_for_element(outer_surface).as_deref(),
+            Some("popover-layer:nested")
+        );
+        assert!(trigger_bounds.size.width > px(0.0) && trigger_bounds.size.height > px(0.0));
+        assert!(surface_bounds.size.width > px(0.0) && surface_bounds.size.height > px(0.0));
+        // Bottom-start placement with the authored offset: separation on the
+        // vertical axis, start alignment on the horizontal axis.
+        let gap = surface_bounds.origin.y - (trigger_bounds.origin.y + trigger_bounds.size.height);
+        let gap_px: f32 = gap.into();
+        assert!(
+            gap_px > 0.0,
+            "the surface must be separated from the trigger on the placement axis"
+        );
+        assert!((gap_px - 11.0).abs() < 0.5, "the authored offset is the exact gap");
+        let start_delta: f32 = (surface_bounds.origin.x - trigger_bounds.origin.x).into();
+        assert!(
+            start_delta.abs() < 0.5,
+            "bottom-start keeps the surface start-aligned with the trigger"
+        );
+        let surface_width_px: f32 = surface_bounds.size.width.into();
+        assert!(
+            surface_width_px >= rem_to_px(14.0) - 0.5
+                && surface_width_px <= rem_to_px(24.0) + 0.5,
+            "mounted surface width respects the 14rem/24rem bounds"
+        );
+        // 1b. First-focusable handoff: the outer machine moves focus into the
+        // content, whose first focusable descendant is the nested trigger.
+        driver.wait_for_focus_handle(inner_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(inner_trigger),
+            Some(true),
+            "opening with first-focusable must hand focus to the nested trigger"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(outer_trigger),
+            Some(false),
+            "the trigger must yield focus while the surface is open"
+        );
+        // 1c. Open the inner popover from inside the outer surface: two scoped
+        // layers paint without a nested deferred draw (retained regression).
+        let inner_trigger_bounds = poodle_gpui_node_backend::bounds_for(inner_trigger)
+            .expect("inner trigger bounds exist inside the outer surface");
+        assert!(
+            inner_trigger_bounds.origin.x >= surface_bounds.origin.x
+                && inner_trigger_bounds.origin.y >= surface_bounds.origin.y
+                && inner_trigger_bounds.origin.x + inner_trigger_bounds.size.width
+                    <= surface_bounds.origin.x + surface_bounds.size.width
+                && inner_trigger_bounds.origin.y + inner_trigger_bounds.size.height
+                    <= surface_bounds.origin.y + surface_bounds.size.height,
+            "the nested composition is contained within the outer surface"
+        );
+        driver.pointer_activate_id(inner_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(
+                state.trace.as_slice(),
+                ["outer:open:true", "inner:open:true"]
+            );
+            assert!(state.inner_open);
+        }
         assert_eq!(
             poodle_gpui_node_backend::open_layer_count(),
             2,
-            "the outer and nested popover must both survive the paint",
+            "the nested pair survives the paint as two distinct layers"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(inner_surface).is_some(),
+            "the inner surface must be mounted and painted"
+        );
+        // 1d. Escape dismisses only the inner layer first.
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(!state.inner_open, "Escape must close the inner popover");
+            assert!(state.outer_open, "Escape must not close the outer popover");
+            assert_eq!(
+                state.trace.last().map(String::as_str),
+                Some("inner:dismiss:Escape"),
+                "the renderer-node inner layer records its escape dismissal"
+            );
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(inner_surface).is_none(),
+            "the inner surface must unmount"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(outer_surface).is_some(),
+            "the outer surface must stay mounted"
+        );
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        // 1e. Reopen the inner popover, then press a point inside the outer
+        // surface but outside the inner one: only the inner layer dismisses.
+        driver.pointer_activate_id(inner_trigger);
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 2);
+        let surface_bounds = poodle_gpui_node_backend::bounds_for(outer_surface)
+            .expect("outer surface bounds exist");
+        let outside_inner = point(
+            surface_bounds.origin.x + px(3.0),
+            surface_bounds.origin.y + px(10.0),
+        );
+        driver.pointer_press(outside_inner);
+        driver.pointer_release(outside_inner);
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(
+                !state.inner_open,
+                "an outer-surface press must close the inner popover (trace={:?})",
+                state.trace,
+            );
+            assert!(state.outer_open, "an outer-surface press must spare the outer popover");
+            assert!(
+                state.trace.iter().any(|entry| entry == "inner:dismiss:Outside"),
+                "the inner layer must record an outside dismissal (trace={:?})",
+                state.trace,
+            );
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(inner_surface).is_none(),
+            "inner-only dismissal unmounts the inner surface"
+        );
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        // 1f. Escape closes the outer layer and restores the outer trigger.
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock");
+            assert!(!state.outer_open, "Escape must close the outer popover");
+            assert_eq!(state.trace.last().map(String::as_str), Some("outer:open:false"));
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(outer_surface).is_none(),
+            "accepted close must unmount the outer surface"
+        );
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 0);
+        driver.wait_for_focus_handle(outer_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(outer_trigger),
+            Some(true),
+            "outer dismissal must restore the matching trigger"
+        );
+    });
+
+    // ── 2. Sibling isolation with duplicate content, mounted ──────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(NucleusPopoverHost::default()));
+        let clicks = Arc::new(Mutex::new(Vec::<String>::new()));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            let clicks = Arc::clone(&clicks);
+            Rc::new(move || {
+                let state = host.lock().expect("host lock").clone();
+                let open_of =
+                    |scope: &str| state.open.get(scope).copied().unwrap_or(false);
+                nucleus_popover_row(200.0, vec![
+                    nucleus_popover_element(
+                        &host,
+                        "left",
+                        "Left trigger",
+                        Arc::clone(&clicks),
+                        open_of("left"),
+                        false,
+                        poodle_specs::PopoverInitialFocus::FirstFocusable,
+                        8.0,
+                        None,
+                    ),
+                    nucleus_popover_element(
+                        &host,
+                        "right",
+                        "Right trigger",
+                        Arc::clone(&clicks),
+                        open_of("right"),
+                        false,
+                        poodle_specs::PopoverInitialFocus::FirstFocusable,
+                        8.0,
+                        None,
+                    ),
+                ])
+            })
+        };
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let left_trigger = "left:popover-trigger";
+        let left_surface = "left:popover-surface";
+        let left_apply = "left:popover-apply";
+        let right_trigger = "right:popover-trigger";
+        let right_surface = "right:popover-surface";
+        let right_apply = "right:popover-apply";
+        driver.wait_for_focus_handle(left_trigger);
+        driver.wait_for_focus_handle(right_trigger);
+
+        let is_open = |host: &Arc<Mutex<NucleusPopoverHost>>, scope: &str| {
+            host.lock()
+                .expect("host lock")
+                .open
+                .get(scope)
+                .copied()
+                .unwrap_or(false)
+        };
+
+        // 2a. Both sibling instances mount open with duplicate authored
+        // content; layers, bounds, and callbacks stay scoped.
+        host.lock()
+            .expect("host lock")
+            .open
+            .insert("left".to_owned(), true);
+        host.lock()
+            .expect("host lock")
+            .open
+            .insert("right".to_owned(), true);
+        driver.draw_frame();
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 2);
+        let left_bounds = poodle_gpui_node_backend::bounds_for(left_surface)
+            .expect("left surface bounds exist");
+        let right_bounds = poodle_gpui_node_backend::bounds_for(right_surface)
+            .expect("right surface bounds exist");
+        assert_eq!(
+            poodle_gpui_node_backend::layer_for_element(left_surface).as_deref(),
+            Some("popover-layer:left")
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::layer_for_element(right_surface).as_deref(),
+            Some("popover-layer:right")
+        );
+        assert!(left_bounds.size.width > px(0.0) && right_bounds.size.width > px(0.0));
+        assert!(
+            left_bounds.origin.x + left_bounds.size.width < right_bounds.origin.x,
+            "sibling surfaces occupy separate horizontal bands"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(left_apply).is_some()
+                && poodle_gpui_node_backend::bounds_for(right_apply).is_some(),
+            "duplicate content mounts per-instance apply targets"
+        );
+        assert!(
+            host.lock().expect("host lock").trace.is_empty(),
+            "controlled mounting emits no spurious open-change callbacks"
+        );
+
+        // 2b. Escape dismisses the innermost sibling layer (right, converted
+        // last) and leaves the left layer mounted.
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(!is_open(&host, "right"), "Escape must close the innermost sibling");
+            assert!(is_open(&host, "left"), "Escape must spare the other sibling");
+            assert_eq!(
+                state.trace.as_slice(),
+                ["right:open:false"],
+                "exactly the innermost sibling emits an accepted close"
+            );
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(right_surface).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(left_surface).is_some());
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        driver.wait_for_focus_handle(right_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(right_trigger),
+            Some(true),
+            "closing a sibling restores that sibling's own trigger"
+        );
+
+        // 2c. Clicking inside the left surface fires only the left callback
+        // and never dismisses the left layer.
+        driver.pointer_activate_id(left_apply);
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(is_open(&host, "left"), "an inside click must not dismiss the layer");
+            assert_eq!(
+                state.trace.as_slice(),
+                ["right:open:false"],
+                "inside clicks emit no open-change callback"
+            );
+        }
+        assert_eq!(clicks.lock().expect("click sink").as_slice(), ["left"]);
+
+        // 2d. Pointer on the right trigger is outside the left layer: the
+        // press dismisses the left surface, and the release opens the right
+        // instance with its own scoped state.
+        driver.pointer_activate_id(right_trigger);
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(!is_open(&host, "left"), "an outside press must close the left sibling");
+            assert!(is_open(&host, "right"), "the right trigger must open its own popover");
+            assert_eq!(
+                state.trace.as_slice(),
+                ["right:open:false", "left:open:false", "right:open:true"]
+            );
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(left_surface).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(right_surface).is_some());
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        driver.wait_for_focus_handle(right_apply);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(right_apply),
+            Some(true),
+            "the right machine hands focus to the right content button"
+        );
+
+        // 2e. The right callback fires independently of the left stream.
+        driver.pointer_activate_id(right_apply);
+        assert_eq!(clicks.lock().expect("click sink").as_slice(), ["left", "right"]);
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(is_open(&host, "right"), "an inside click must keep the right layer open");
+            assert_eq!(
+                state.trace.last().map(String::as_str),
+                Some("right:open:true"),
+                "inside clicks keep the layer open"
+            );
+        }
+
+        // 2f. An empty outside press dismisses the remaining layer.
+        driver.pointer_press(point(px(60.0), px(560.0)));
+        driver.pointer_release(point(px(60.0), px(560.0)));
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(!is_open(&host, "right"), "an outside press must close the right popover");
+            assert_eq!(state.trace.last().map(String::as_str), Some("right:open:false"));
+        }
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 0);
+    });
+
+    // ── 3. Disabled inertia and authored fixed width, mounted ─────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(NucleusPopoverHost::default()));
+        let clicks = Arc::new(Mutex::new(Vec::<String>::new()));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            let clicks = Arc::clone(&clicks);
+            Rc::new(move || {
+                let state = host.lock().expect("host lock").clone();
+                let open_of =
+                    |scope: &str| state.open.get(scope).copied().unwrap_or(false);
+                nucleus_popover_row(200.0, vec![
+                    nucleus_popover_element(
+                        &host,
+                        "fixed",
+                        "Fixed trigger",
+                        Arc::clone(&clicks),
+                        open_of("fixed"),
+                        false,
+                        poodle_specs::PopoverInitialFocus::FirstFocusable,
+                        8.0,
+                        Some(20.0),
+                    ),
+                    nucleus_popover_element(
+                        &host,
+                        "locked",
+                        "Locked trigger",
+                        Arc::clone(&clicks),
+                        open_of("locked"),
+                        true,
+                        poodle_specs::PopoverInitialFocus::FirstFocusable,
+                        8.0,
+                        None,
+                    ),
+                ])            })
+        };
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let locked_trigger = "locked:popover-trigger";
+        let locked_surface = "locked:popover-surface";
+        let fixed_trigger = "fixed:popover-trigger";
+        let fixed_surface = "fixed:popover-surface";
+        driver.wait_for_focus_handle(fixed_trigger);
+
+        // 3a. Disabled trigger: mounted pointer input stays inert — no
+        // surface, no callback, no layer.
+        driver.pointer_activate_id(locked_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert!(state.trace.is_empty(), "disabled trigger must not emit callbacks");
+            assert!(
+                !state.open.contains_key("locked"),
+                "disabled trigger must never open"
+            );
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(locked_surface).is_none(),
+            "disabled trigger must never mount a surface"
+        );
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 0);
+
+        // 3b. Fixed-width instance: open it and measure the exact authored
+        // width and the offset gap at the mounted boundary.
+        driver.pointer_activate_id(fixed_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert!(state.open.get("fixed").copied().unwrap_or(false));
+            assert_eq!(state.trace.as_slice(), ["fixed:open:true"]);
+        }
+        let trigger_bounds = poodle_gpui_node_backend::bounds_for(fixed_trigger)
+            .expect("fixed trigger bounds exist");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for(fixed_surface)
+            .expect("fixed surface bounds exist");
+        let surface_width_px: f32 = surface_bounds.size.width.into();
+        assert!(
+            (surface_width_px - rem_to_px(20.0)).abs() < 0.5,
+            "pinned 20rem bounds must resolve to the exact mounted width"
+        );
+        let gap = surface_bounds.origin.y - (trigger_bounds.origin.y + trigger_bounds.size.height);
+        let gap_px: f32 = gap.into();
+        assert!(
+            (gap_px - 8.0).abs() < 0.5,
+            "the default offset applies as the mounted gap"
+        );
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(state.trace.last().map(String::as_str), Some("fixed:open:false"));
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(fixed_surface).is_none());
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 0);
+    });
+
+    // ── 4. Initial-focus strategies, scoped restoration, terminal receipt ─
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(NucleusPopoverHost::default()));
+        let clicks = Arc::new(Mutex::new(Vec::<String>::new()));
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let host = Arc::clone(&host);
+            let clicks = Arc::clone(&clicks);
+            Rc::new(move || {
+                let state = host.lock().expect("host lock").clone();
+                let open_of =
+                    |scope: &str| state.open.get(scope).copied().unwrap_or(false);
+                nucleus_popover_row(90.0, vec![
+                    nucleus_popover_element(
+                        &host,
+                        "content",
+                        "Content trigger",
+                        Arc::clone(&clicks),
+                        open_of("content"),
+                        false,
+                        poodle_specs::PopoverInitialFocus::Content,
+                        8.0,
+                        None,
+                    ),
+                    nucleus_popover_element(
+                        &host,
+                        "first",
+                        "First trigger",
+                        Arc::clone(&clicks),
+                        open_of("first"),
+                        false,
+                        poodle_specs::PopoverInitialFocus::FirstFocusable,
+                        8.0,
+                        None,
+                    ),
+                    nucleus_popover_element(
+                        &host,
+                        "none",
+                        "None trigger",
+                        Arc::clone(&clicks),
+                        open_of("none"),
+                        false,
+                        poodle_specs::PopoverInitialFocus::None,
+                        8.0,
+                        None,
+                    ),
+                ])
+            })
+        };
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let content_trigger = "content:popover-trigger";
+        let content_surface = "content:popover-surface";
+        let first_trigger = "first:popover-trigger";
+        let first_surface = "first:popover-surface";
+        let first_apply = "first:popover-apply";
+        let none_trigger = "none:popover-trigger";
+        let none_surface = "none:popover-surface";
+        let none_apply = "none:popover-apply";
+        driver.wait_for_focus_handle(content_trigger);
+        driver.wait_for_focus_handle(first_trigger);
+        driver.wait_for_focus_handle(none_trigger);
+
+        let is_open = |host: &Arc<Mutex<NucleusPopoverHost>>, scope: &str| {
+            host.lock()
+                .expect("host lock")
+                .open
+                .get(scope)
+                .copied()
+                .unwrap_or(false)
+        };
+
+        // 4a. Content strategy: the surface itself receives focus.
+        driver.pointer_activate_id(content_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(state.trace.as_slice(), ["content:open:true"]);
+        }
+        let content_bounds = poodle_gpui_node_backend::bounds_for(content_surface)
+            .expect("content surface bounds exist");
+        let content_trigger_bounds = poodle_gpui_node_backend::bounds_for(content_trigger)
+            .expect("content trigger bounds exist");
+        let content_width_px: f32 = content_bounds.size.width.into();
+        assert!(
+            content_width_px >= rem_to_px(14.0) - 0.5
+                && content_width_px <= rem_to_px(24.0) + 0.5,
+            "the default width bounds hold at the mounted boundary"
+        );
+        let gap = content_bounds.origin.y
+            - (content_trigger_bounds.origin.y + content_trigger_bounds.size.height);
+        let gap_px: f32 = gap.into();
+        assert!((gap_px - 8.0).abs() < 0.5, "the default offset is the mounted gap");
+        driver.wait_for_focus_handle(content_surface);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(content_surface),
+            Some(true),
+            "content strategy must focus the surface itself"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(content_trigger),
+            Some(false),
+            "content strategy must yield the trigger"
+        );
+
+        // 4b. Content close restores the content trigger.
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(state.trace.last().map(String::as_str), Some("content:open:false"));
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(content_surface).is_none());
+        driver.wait_for_focus_handle(content_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(content_trigger),
+            Some(true),
+            "closing after a content-mode handoff restores the matching trigger"
+        );
+
+        // 4c. First-focusable strategy: the first focusable content
+        // descendant receives focus; the surface stays out of the chain.
+        driver.pointer_activate_id(first_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(state.trace.last().map(String::as_str), Some("first:open:true"));
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(first_surface).is_some());
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(first_surface).is_none(),
+            "first-focusable mode must not make the surface a focus target"
+        );
+        driver.wait_for_focus_handle(first_apply);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(first_apply),
+            Some(true),
+            "first-focusable strategy must focus the first focusable descendant"
+        );
+
+        // 4d. First-focusable close restores the first trigger.
+        driver.dispatch_key("escape");
+        assert!(poodle_gpui_node_backend::bounds_for(first_surface).is_none());
+        driver.wait_for_focus_handle(first_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(first_trigger),
+            Some(true),
+            "closing after a descendant handoff restores the matching trigger"
+        );
+
+        // 4e. None strategy: focus stays on the trigger; nothing inside the
+        // surface receives a focus request.
+        driver.pointer_activate_id(none_trigger);
+        {
+            let state = host.lock().expect("host lock");
+            assert_eq!(state.trace.last().map(String::as_str), Some("none:open:true"));
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(none_surface).is_some());
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(none_surface).is_none(),
+            "none mode must not make the surface a focus target"
+        );
+        driver.wait_for_focus_handle(none_apply);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(none_trigger),
+            Some(true),
+            "none strategy must leave focus on the trigger"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(none_apply),
+            Some(false),
+            "none strategy must not move focus into the content"
+        );
+
+        // 4f. Two concurrent sibling surfaces on one row: registration order
+        // decides innermost, and Escape dismisses only that sibling while the
+        // other stays mounted (scoped restoration, never a cross-stream one).
+        host.lock()
+            .expect("host lock")
+            .open
+            .insert("first".to_owned(), true);
+        driver.draw_frame();
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 2);
+        assert!(poodle_gpui_node_backend::bounds_for(first_surface).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(none_surface).is_some());
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(!is_open(&host, "none"), "Escape must close the innermost sibling");
+            assert!(is_open(&host, "first"), "Escape must spare the sibling surface");
+            assert_eq!(state.trace.last().map(String::as_str), Some("none:open:false"));
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(none_surface).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(first_surface).is_some());
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 1);
+        driver.wait_for_focus_handle(none_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(none_trigger),
+            Some(true),
+            "restoration targets the closed sibling's own trigger"
+        );
+
+        // 4g. The remaining sibling closes by Escape and restores its own
+        // trigger; the mounted tree is fully dismissed.
+        driver.dispatch_key("escape");
+        {
+            let state = host.lock().expect("host lock").clone();
+            assert!(!is_open(&host, "first"));
+            assert_eq!(state.trace.last().map(String::as_str), Some("first:open:false"));
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(first_surface).is_none());
+        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 0);
+        driver.wait_for_focus_handle(first_trigger);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(first_trigger),
+            Some(true),
+            "the final close restores the first trigger"
+        );
+
+        // ── 5. Terminal receipt emission ───────────────────────────────────
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            0,
+            "terminal assertion: every mounted layer is dismissed"
+        );
+        assert!(host.lock().expect("host lock").trace.iter().all(|entry| {
+            entry.ends_with(":open:false") || entry.ends_with(":open:true")
+        }));
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "Popover",
+            "nucleus.navigation.popover",
+            observation,
+            &[
+                "mount nested, sibling, disabled, fixed-width, and focus-strategy Popover compositions through node_compat::Popover::from_spec(...).into_element() into HeadlessDriver",
+                "activate the outer trigger through mounted pointer input and observe the nested surface open with its authored bottom-start offset gap",
+                "activate the nested inner trigger inside the outer surface and observe two scoped layers paint without a nested deferred draw",
+                "dispatch Escape and observe inner-first dismissal that leaves the outer surface mounted",
+                "press inside the outer surface but outside the inner surface and observe inner-only outside dismissal",
+                "close the outer surface by Escape and observe the outer trigger regains backend focus",
+                "mount duplicate-content sibling instances open and observe independent layers, bounds, and callbacks; Escape dismisses the innermost sibling only",
+                "activate a sibling trigger while another sibling is open and observe outside dismissal of the open layer followed by scoped activation",
+                "activate a disabled trigger and observe no surface, no callback, and no layer",
+                "open an authored 20rem fixed-width instance and observe the exact mounted width and offset gap",
+                "open content / first-focusable / none initial-focus instances and observe exact mounted focus-handle targets",
+                "close every focus-strategy instance and observe restoration to the matching per-instance trigger",
+            ],
+            &[
+                "the production renderer composition owns trigger disclosure metadata, dialog surface role and name, instance-scoped runtime identity, dismiss layers, and placement / surface-width roles",
+                "the popover surface resolves the contract token profile: elevated fill, border-subtle at 74% alpha, default border width, surface radius, overlay elevation plus inset highlight, and panel padding",
+                "mounted surfaces record positive bounds separated from their triggers by the exact authored offset on the declared placement axis, start-aligned on the cross axis",
+                "mounted surface width respects the 14rem/24rem bounds, and a pinned 20rem min/max pair resolves to the exact mounted width",
+                "opening an inner Popover inside an outer surface paints two scoped layers without nesting a deferred draw",
+                "Escape dismisses the innermost layer first; an outside press inside the outer surface but outside the inner surface dismisses only the inner layer",
+                "accepted dismissal unmounts only the intended surface through the host rebuild, and the layer count returns to zero",
+                "duplicate-valued sibling instances keep runtime ids, callbacks, bounds, and layer state separate under concurrent mounting",
+                "a pointer press outside an open sibling's layer dismisses it, then the sibling trigger opens its own scoped surface",
+                "disabled trigger input is inert: no callback, no surface, no layer",
+                "content initial focus lands on the surface itself, first-focusable lands on the first focusable descendant, and none moves no focus; only the matching trigger's focus handle is restored on close",
+                "controlled host-owned open state drives every surface presence transition through the mounted rebuild",
+            ],
         );
     });
 }

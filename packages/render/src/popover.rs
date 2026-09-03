@@ -259,3 +259,307 @@ fn kebab_case_debug<T: std::fmt::Debug>(value: T) -> String {
 fn trigger_label(trigger: Option<&Node>) -> Option<String> {
     trigger.and_then(|node| node.intrinsic_text().map(str::to_owned))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{ColorValue, NodePosition};
+    use poodle_specs::{OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
+
+    struct TestTheme;
+    impl ThemeProvider for TestTheme {
+        fn resolve_color(&self, _: &str) -> ColorValue {
+            ColorValue(0.1, 0.2, 0.3, 1.0)
+        }
+        fn resolve_space(&self, _: &str) -> f32 {
+            8.0
+        }
+        fn resolve_border_width(&self, _: &str) -> f32 {
+            1.0
+        }
+        fn resolve_radius(&self, _: &str) -> f32 {
+            6.0
+        }
+        fn resolve_opacity(&self, _: &str) -> f32 {
+            1.0
+        }
+    }
+
+    fn handlers(instance: Option<&str>) -> PopoverHandlers {
+        PopoverHandlers {
+            on_activate: Some(std::sync::Arc::new(|| {})),
+            on_dismiss: Some(std::sync::Arc::new(|_| {})),
+            instance_id: instance.map(str::to_owned),
+        }
+    }
+
+    /// Contract §8 surface profile: elevated fill, border-subtle at 74%,
+    /// default border width, surface radius, overlay elevation plus the inset
+    /// top highlight, panel padding, and the 14rem/24rem width bounds.
+    #[test]
+    fn surface_carries_the_contract_token_profile() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+        let spec = PopoverSpec::new()
+            .with_open(true)
+            .with_aria_label("Quick settings");
+        let surface = popover_surface(&spec, &ctx, Some(Node::text("Body")));
+
+        assert_eq!(surface.id.as_deref(), Some(POPOVER_SURFACE_ID));
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Quick settings"));
+        assert_eq!(
+            surface.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            surface.style.descriptor.background,
+            Some(ColorValue(0.1, 0.2, 0.3, 1.0)),
+            "surface fill must be background-elevated"
+        );
+        assert_eq!(
+            surface.style.descriptor.border.width,
+            8.0,
+            "border must use the default border width resolved as a space"
+        );
+        assert_eq!(
+            surface.style.descriptor.border.color,
+            with_alpha(ColorValue(0.1, 0.2, 0.3, 1.0), 0.74),
+            "border-subtle must render at 74% alpha"
+        );
+        for corner in [
+            surface.style.descriptor.corner_radii.top_left,
+            surface.style.descriptor.corner_radii.top_right,
+            surface.style.descriptor.corner_radii.bottom_left,
+            surface.style.descriptor.corner_radii.bottom_right,
+        ] {
+            assert_eq!(corner, 6.0, "surface radius must be radius.surface");
+        }
+        assert_eq!(
+            surface.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY),
+            "surface must carry the overlay elevation recipe"
+        );
+        assert_eq!(surface.style.shadow_layers.len(), 1);
+        let inset = &surface.style.shadow_layers[0];
+        assert!(inset.inset, "the top highlight is an inset band");
+        assert_eq!(inset.color, ColorValue(1.0, 1.0, 1.0, 0.08));
+        assert_eq!(inset.offset_y, rem_to_px(0.0625));
+        assert_eq!(inset.offset_x, 0.0);
+        assert_eq!(inset.blur, 0.0);
+        assert_eq!(inset.spread, 0.0);
+        assert_eq!(
+            surface.style.min_width,
+            Some(rem_to_px(14.0)),
+            "min-width must default to 14rem"
+        );
+        assert_eq!(
+            surface.style.max_width,
+            Some(rem_to_px(24.0)),
+            "max-width must default to 24rem"
+        );
+        assert!(surface.style.overlay, "surface must render as an overlay");
+        assert_eq!(surface.children.len(), 1);
+        let padded = &surface.children[0];
+        assert_eq!(
+            padded.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.left, 8.0);
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.right, 8.0);
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.top, 8.0);
+        assert_eq!(padded.style.descriptor.layout.spacing.padding.bottom, 8.0);
+        assert_eq!(padded.children.len(), 1);
+    }
+
+    /// The open composition must carry trigger disclosure metadata, scoped
+    /// runtime identity, the floating position on the authored placement, the
+    /// conditional dialog surface on the shared layer, and the placement /
+    /// surface-width roles on the wrapper.
+    #[test]
+    fn open_composition_owns_trigger_surface_and_roles() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+        let spec = PopoverSpec::new()
+            .with_open(true)
+            .with_offset(11.0)
+            .with_aria_label("Outer settings");
+        let node = popover(
+            &spec,
+            &ctx,
+            &handlers(Some("alpha")),
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+
+        assert_eq!(node.style.descriptor.layout.width, LayoutSizing::Fixed(96.0));
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(32.0)
+        );
+        assert_eq!(node.position, NodePosition::Relative);
+        assert_eq!(node.roles.get("placement").map(String::as_str), Some("bottom-start"));
+        assert_eq!(node.roles.get("surfaceWidth").map(String::as_str), Some("content"));
+
+        assert_eq!(node.children.len(), 2, "open composition has trigger + surface");
+        let trigger = &node.children[0];
+        assert_eq!(trigger.id.as_deref(), Some(POPOVER_TRIGGER_ID));
+        assert_eq!(trigger.runtime_id.as_deref(), Some("alpha:popover-trigger"));
+        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+        assert_eq!(trigger.a11y.expanded, Some(true));
+        assert_eq!(trigger.a11y.controls.as_deref(), Some("alpha:popover-surface"));
+        assert_eq!(trigger.a11y.tab_index, Some(0));
+        assert_eq!(trigger.a11y.label.as_deref(), Some("Open"));
+        assert!(trigger.interaction.focusable);
+        assert!(!trigger.interaction.disabled);
+        assert!(trigger.interaction.on_activate.is_some());
+        assert!(trigger.interaction.on_dismiss.is_some());
+        assert_eq!(
+            trigger.interaction.dismiss_layer.as_deref(),
+            Some("popover-layer:alpha"),
+            "the open trigger joins the instance-scoped layer"
+        );
+        assert!(trigger.style.focus.is_some(), "trigger declares a focus patch");
+
+        let positioned = &node.children[1];
+        assert_eq!(
+            positioned.position,
+            NodePosition::Absolute {
+                top: Some(32.0 + 11.0),
+                left: Some(0.0),
+                right: None,
+                bottom: None,
+            },
+            "bottom-start placement anchors below the trigger with the authored offset"
+        );
+        assert_eq!(positioned.children.len(), 1);
+        let surface = &positioned.children[0];
+        assert_eq!(surface.id.as_deref(), Some(POPOVER_SURFACE_ID));
+        assert_eq!(surface.runtime_id.as_deref(), Some("alpha:popover-surface"));
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Outer settings"));
+        assert_eq!(
+            surface.interaction.dismiss_layer.as_deref(),
+            Some("popover-layer:alpha")
+        );
+    }
+
+    #[test]
+    fn closed_disabled_and_trigger_width_variants_gate_the_surface() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+
+        let closed = popover(
+            &PopoverSpec::new(),
+            &ctx,
+            &handlers(None),
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+        assert_eq!(closed.children.len(), 1, "closed composition has no surface");
+        assert!(closed.children[0].interaction.on_dismiss.is_none());
+        assert!(closed.children[0].interaction.dismiss_layer.is_none());
+
+        let disabled = popover(
+            &PopoverSpec::new().with_open(true).with_disabled(true),
+            &ctx,
+            &handlers(None),
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+        assert_eq!(disabled.children.len(), 1, "disabled never mounts the surface");
+        assert!(disabled.children[0].interaction.disabled);
+        assert_eq!(disabled.children[0].a11y.tab_index, Some(-1));
+        assert_eq!(disabled.children[0].a11y.expanded, Some(false));
+
+        let trigger_width = popover(
+            &PopoverSpec::new()
+                .with_open(true)
+                .with_surface_width(PopoverSurfaceWidth::Trigger),
+            &ctx,
+            &handlers(None),
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+        let surface = &trigger_width.children[1].children[0];
+        assert_eq!(
+            surface.style.min_width,
+            None,
+            "trigger width overrides the 14rem floor"
+        );
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(96.0),
+            "the surface pins to the composition's trigger width"
+        );
+    }
+
+    #[test]
+    fn initial_focus_strategies_gate_surface_focusability() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+        let handlers = handlers(None);
+
+        // First-focusable (default): the surface is not a focus target.
+        let first_focusable = popover(
+            &PopoverSpec::new().with_open(true),
+            &ctx,
+            &handlers,
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+        let surface = &first_focusable.children[1].children[0];
+        assert_eq!(surface.a11y.tab_index, Some(-1));
+        assert!(!surface.interaction.focusable);
+        assert!(surface.style.focus.is_none());
+
+        // Content: the surface itself is the focus target and its focused
+        // state must be backend-observable.
+        let content_mode = popover(
+            &PopoverSpec::new()
+                .with_open(true)
+                .with_initial_focus(PopoverInitialFocus::Content),
+            &ctx,
+            &handlers,
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+        let surface = &content_mode.children[1].children[0];
+        assert_eq!(surface.a11y.tab_index, Some(0));
+        assert!(surface.interaction.focusable);
+        assert!(
+            surface.style.focus.is_some(),
+            "content mode must make the surface's focused state observable"
+        );
+    }
+
+    #[test]
+    fn authored_width_bounds_override_the_contract_defaults() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+        let spec = PopoverSpec::new()
+            .with_open(true)
+            .with_surface_min_width(poodle_specs::Dimension::new("20rem"))
+            .with_surface_max_width(poodle_specs::Dimension::new("20rem"));
+        let surface = popover_surface(&spec, &ctx, Some(Node::text("Panel")));
+        assert_eq!(surface.style.min_width, Some(rem_to_px(20.0)));
+        assert_eq!(surface.style.max_width, Some(rem_to_px(20.0)));
+    }
+
+    #[test]
+    fn placement_roles_kebab_case_like_web_data_attributes() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+        let node = popover(
+            &PopoverSpec::new()
+                .with_open(true)
+                .with_placement(OverlayPlacement::RightEnd),
+            &ctx,
+            &handlers(None),
+            Some(Node::text("Open")),
+            Some(Node::text("Panel")),
+        );
+        assert_eq!(node.roles.get("placement").map(String::as_str), Some("right-end"));
+    }
+}

@@ -1,6 +1,6 @@
 # g16.075 — Nucleus Popover M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.068`, completed `g16.074`
@@ -9,8 +9,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/popover.md`, `../../contracts/components/surface.md`,
 `../../architecture/002-anchored-overlays.md`
-Log: pending
-PR: pending
+Log: `../../logs/2026-09/20260903-g16-075-nucleus-popover-receipt.md`
+PR: `https://github.com/inflatable-cookie/poodle/pull/181`
 Handoff: `../../handoffs/20260903-081000-g16-075-nucleus-popover-receipt.md`
 
 ## Goal

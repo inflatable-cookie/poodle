@@ -261,39 +261,48 @@ pub fn spared_layer_ids_at(position: Point<Pixels>) -> Vec<String> {
     })
 }
 
+/// Consume the layer's record before its dismissal handler runs. The
+/// registry is frame-scoped, but a single pointer interaction can reach more
+/// than one listener (the window host and every layer member under the
+/// pointer), so an already-dismissed layer must never dismiss twice.
+fn consume_layer(handler: Option<DismissHandler>, reason: DismissReason) {
+    if let Some(handler) = handler {
+        handler(reason);
+    }
+}
+
 /// Escape: the innermost (last-registered) layer dismisses.
 pub fn dismiss_innermost(cx: &mut App) {
     let handler = LAYERS.with(|layers| {
-        layers
-            .borrow()
-            .last()
-            .and_then(|record| record.handler.clone())
+        let mut layers = layers.borrow_mut();
+        layers.pop().and_then(|record| record.handler)
     });
-    if let Some(handler) = handler {
-        handler(DismissReason::Escape);
-        cx.refresh_windows();
-    }
+    consume_layer(handler, DismissReason::Escape);
+    cx.refresh_windows();
 }
 
 /// An outside pointer interaction at a position: every layer that neither
 /// contains the position nor is an ancestor of a layer that does, innermost
-/// first (the shared dismiss-stack contract).
+/// first (the shared dismiss-stack contract). Dismissed records are removed
+/// from the registry immediately so a second listener for the same press
+/// (the window host plus layer members that share the layer id) cannot
+/// dismiss the same layer twice.
 pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
     let to_dismiss: Vec<Option<DismissHandler>> = LAYERS.with(|layers| {
-        let layers = layers.borrow();
+        let mut layers = layers.borrow_mut();
         let spared = spared_by_ancestry(&layers, position);
-
-        layers
-            .iter()
-            .rev()
-            .filter(|record| !spared.contains(&record.id))
-            .map(|record| record.handler.clone())
-            .collect()
+        let mut handlers = Vec::new();
+        let mut index = layers.len();
+        while index > 0 {
+            index -= 1;
+            if !spared.contains(&layers[index].id) {
+                handlers.push(layers.remove(index).handler);
+            }
+        }
+        handlers
     });
     for handler in to_dismiss {
-        if let Some(handler) = handler {
-            handler(DismissReason::Outside);
-        }
+        consume_layer(handler, DismissReason::Outside);
     }
     cx.refresh_windows();
 }
