@@ -1,6 +1,6 @@
 # g16.076 — Nucleus Select M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.073`, completed `g16.075`
@@ -9,6 +9,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/select.md`, `../../contracts/components/popover.md`,
 `../../architecture/002-anchored-overlays.md`
+Log: `../../logs/2026-09/20260903-g16-076-nucleus-select-receipt.md`
 Handoff: `../../handoffs/20260903-091200-g16-076-nucleus-select-receipt.md`
 
 ## Goal
@@ -112,4 +113,5 @@ gap instead of weakening the receipt.
 ## Continuation
 
 After merge, compile the next dependency-ready Nucleus M1 receipt tranche from
-the refreshed identity. Receipt-producing merges remain serial.
+the refreshed identity `939ce87c818e9abd4a759cd3d12af7ed4e41f94d`.
+Receipt-producing merges remain serial.

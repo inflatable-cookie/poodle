@@ -5,6 +5,26 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-03 — Two open Select instances cannot take a focused Escape the way
+  nested Popovers can. Focusing the searchable sibling blurs the other
+  trigger and `emit_blur` closes it; Escape on the still-focused trigger
+  closes that instance rather than the innermost overlay. g16.076 host-closes
+  the sibling, then proves Escape and outside press on the remaining instance.
+  Hit while converting g16.076.
+
+- 2026-09-03 — `HeadlessDriver::pointer_activate_id` on a missing runtime id
+  falls through to `pointer_activate_at(0.92)` and can toggle whatever control
+  sits there. A vanished Select option after disable-while-open looked like a
+  click on the listbox row and reopened or toggled the trigger. Assert the
+  bounds are gone, then do not click the missing id. Hit while converting
+  g16.076.
+
+- 2026-09-03 — `dispatch_key_raw("enter")` always sends key-up. GPUI synthesizes
+  a click from Enter/Space on key-up for the focused element. Select close
+  restores the trigger during key-down, so the matching key-up reopens the
+  menu. Use `dispatch_key_press("enter")` when the close path restores focus
+  in the same keystroke. Hit while converting g16.076.
+
 - 2026-09-02 — `effigy ci:web` `test:components` (`bunx vitest run`) includes
   `react-preview`, which resolves `@inflatable-cookie/poodle-react` from the
   workspace symlink to `packages/react/components` **dist exports**. `react:package`
