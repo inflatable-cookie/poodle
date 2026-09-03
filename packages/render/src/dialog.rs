@@ -262,8 +262,10 @@ fn backdrop(
     root.interaction.dismiss_layer = Some(layer_id.clone());
     panel.interaction.dismiss_layer = Some(layer_id);
 
-    // Inside clicks on the panel must not trigger backdrop dismissal.
-    panel.interaction.on_activate = Some(Arc::new(|| {}));
+    // Inside clicks on the panel must not trigger backdrop dismissal when close is wired.
+    if on_request_close.is_some() {
+        panel.interaction.on_activate = Some(Arc::new(|| {}));
+    }
 
     if let (true, Some(handler)) = (spec.effective_dismiss_on_backdrop(), &on_request_close) {
         let handler = Arc::clone(handler);
@@ -343,7 +345,16 @@ mod tests {
             panel.interaction.dismiss_layer.as_deref(),
             Some("poodle-dialog-layer")
         );
-        assert!(panel.interaction.on_activate.is_some());
+        assert!(panel.interaction.on_activate.is_none());
+
+        let with_close = dialog(
+            &spec,
+            &ctx,
+            vec![Node::text("Body content")],
+            None,
+            Some(Arc::new(|| {})),
+        );
+        assert!(with_close.children[0].interaction.on_activate.is_some());
     }
 
     #[test]
