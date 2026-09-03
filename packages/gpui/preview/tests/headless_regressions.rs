@@ -23972,6 +23972,11 @@ fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
         poodle_render::select_option_id(&root_id(scope), value)
     }
 
+    fn dialog_role_count(node: &Node) -> usize {
+        usize::from(node.a11y.role == Some(NodeRole::Dialog))
+            + node.children.iter().map(dialog_role_count).sum::<usize>()
+    }
+
     // Structural bite: the compat path must preserve its caller identity and
     // the production Select structure, rather than painting lookalike rows.
     let proof = node_compat::ModelPicker::from_spec(spec(true), &theme(), "proof")
@@ -24036,6 +24041,17 @@ fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
     let expected_theme = theme();
     assert_eq!(proof_dialog.a11y.role, Some(NodeRole::Dialog));
     assert_eq!(proof_dialog.a11y.label.as_deref(), Some("Model"));
+    assert_eq!(
+        (
+            proof_dialog.style.descriptor.shadow,
+            dialog_role_count(&proof),
+        ),
+        (
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY),
+            1,
+        ),
+        "the real ModelPicker surface must retain elevation.overlay and contain one neutral panel"
+    );
     assert_eq!(
         proof_dialog.style.descriptor.background,
         Some(expected_theme.resolve_color("color.background.elevated"))
