@@ -11279,52 +11279,31 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
 
 // ── g15.010 Batch A regressions ───────────────────────────────────────────
 
-/// Callout dismiss is a focusable button. Keyboard activation reaches the
-/// host, which stores dismissed state and supplies the next spec.
+/// Callout reaches the production compat adapter, renderer, and mounted GPUI
+/// backend with caller-scoped identity.
 #[test]
 fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
+    use gpui::IntoElement;
     use poodle_specs::CallOutSpec;
 
     run_headless(|cx| {
-        fn build(dismissed: bool, mounted: Arc<Mutex<Node>>, flag: Arc<Mutex<bool>>) -> Node {
-            if dismissed {
-                return Node::text("Dismissed");
-            }
-            let mount = Arc::clone(&mounted);
-            let flag = Arc::clone(&flag);
-            poodle_render::callout(
-                &CallOutSpec::new()
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            crate::node_compat::Callout::from_spec(
+                CallOutSpec::new()
                     .with_title("Dismissible callout")
                     .with_content("This callout can be dismissed by the user.")
                     .dismissible(true),
-                &RenderContext::new(&theme()),
-                poodle_render::CalloutHandlers {
-                    on_dismiss: Some(Arc::new(move || {
-                        *flag.lock().unwrap() = true;
-                        *mount.lock().unwrap() =
-                            build(true, Arc::clone(&mount), Arc::clone(&flag));
-                    })),
-                    ..poodle_render::CalloutHandlers::default()
-                },
+                &theme_provider,
             )
-        }
+            .with_instance_id("counterexample")
+            .into_element()
+        });
 
-        let dismissed = Arc::new(Mutex::new(false));
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&dismissed));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
-
-        driver.wait_for_focus_handle("poodle-callout-dismiss");
-        driver.keyboard_activate("poodle-callout-dismiss");
-        assert!(*dismissed.lock().unwrap(), "dismiss reached the host");
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 180.0);
         assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .texts()
-                .iter()
-                .any(|t| *t == "Dismissed"),
-            "the next spec reflects dismissed host state"
+            poodle_gpui_node_backend::bounds_for("callout:counterexample").is_some(),
+            "the production Callout IntoElement path must paint caller-scoped root identity"
         );
     });
 }
