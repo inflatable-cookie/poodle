@@ -115,11 +115,11 @@ Focused:
 
 Required boards:
 - `effigy regressions:native` — 187 passed (all 13 receipts emitted at runtime commit `939ce87c8`)
-- `effigy check:parity-evidence-ledger` — pending closeout
-- `effigy ci:rust` — pending closeout
-- `effigy ci:native` — pending closeout
-- `effigy docs:check` — pending closeout
-- `git diff --check origin/main...HEAD` — pending closeout
+- `effigy check:parity-evidence-ledger` — passed (176 component evidence rows)
+- `effigy ci:rust` — passed
+- `effigy ci:native` — passed
+- `effigy docs:check` — passed
+- `git diff --check origin/main...HEAD` — clean
 
 No windowed or native-visual selectors were run.
 
