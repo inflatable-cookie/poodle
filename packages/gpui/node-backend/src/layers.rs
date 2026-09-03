@@ -83,6 +83,7 @@ pub fn overlay_frame_begin() {
     // Safety net for a previous cycle that never called overlay_frame_end.
     // Same-frame lost-host cancel is overlay_frame_end after this paint.
     crate::interaction::sweep_lost_continuous_host();
+    crate::tooltip::prepare_tooltip_frame();
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
     ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());
@@ -101,6 +102,7 @@ pub fn overlay_frame_begin() {
 pub fn overlay_frame_end() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
     crate::interaction::sweep_lost_continuous_host();
+    crate::tooltip::sweep_unpainted_tooltips();
 }
 
 /// Queue a focus request for the element with this id. The target element's
@@ -294,28 +296,37 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
 /// machinery — the one place a browser also puts it.
 pub fn attach_overlay_host<E>(el: E) -> E
 where
-    E: gpui::InteractiveElement + 'static,
+    E: gpui::InteractiveElement + gpui::ParentElement + 'static,
 {
-    el.on_mouse_down(
-        MouseButton::Left,
-        move |event: &MouseDownEvent, _window, cx| {
-            dismiss_layers_at(event.position, cx);
-        },
-    )
-    .on_key_down(
-        move |event: &KeyDownEvent, window, cx| match event.keystroke.key.as_str() {
-            "escape" => {
-                dismiss_innermost(cx);
-            }
-            "tab" => {
-                if event.keystroke.modifiers.shift {
-                    window.focus_prev();
-                } else {
-                    window.focus_next();
+    let mut el = el
+        .on_mouse_down(
+            MouseButton::Left,
+            move |event: &MouseDownEvent, window, cx| {
+                crate::tooltip::dismiss_tooltip(window, cx);
+                dismiss_layers_at(event.position, cx);
+            },
+        )
+        .on_key_down(
+            move |event: &KeyDownEvent, window, cx| match event.keystroke.key.as_str() {
+                "escape" => {
+                    crate::tooltip::dismiss_tooltip(window, cx);
+                    dismiss_innermost(cx);
                 }
-                cx.refresh_windows();
-            }
-            _ => {}
-        },
-    )
+                "tab" => {
+                    if event.keystroke.modifiers.shift {
+                        window.focus_prev();
+                    } else {
+                        window.focus_next();
+                    }
+                    cx.refresh_windows();
+                }
+                _ => {}
+            },
+        );
+
+    if let Some(tooltip_node) = crate::tooltip::render_active_tooltip() {
+        el = el.child(tooltip_node);
+    }
+
+    el
 }

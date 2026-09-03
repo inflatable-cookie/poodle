@@ -1,7 +1,7 @@
 # Tooltip
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-03
 
 ## 1. Purpose
 
@@ -242,6 +242,12 @@ and exposes the resolved value via `data-placement`.
 - expected crate/module surface: `poodle_gpui::primitives::tooltip`
 - GPUI implementation must choose native help-text exposure and dismissal
   behavior that preserves non-focusable descriptive semantics
+- `Node.tooltip` (the node-vocabulary string, not the Tooltip overlay
+  component) is owned by `poodle-gpui-node-backend`: 300ms open delay on
+  hover or focus, immediate dismiss on pointer leave, focus departure,
+  Escape, disablement, removal, teardown, or target supersession, and one
+  pending or visible tooltip per mounted window. GPUI 0.2.2 `.tooltip()` is
+  not used.
 - bubble sizing: max-width 16rem, padding 0.375rem 0.5rem
 - border-radius must use the reduced calculation:
   control-radius minus 0.125rem

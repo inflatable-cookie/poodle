@@ -84,7 +84,7 @@ fn tooltip_forces_element_state() {
     node.tooltip = Some("Save".into());
     assert!(
         needs_state(&node),
-        "a tooltip must take the stateful path so GPUI can attach .tooltip()"
+        "a tooltip must take the stateful path so the backend can attach its lifecycle runtime"
     );
     node.tooltip = Some(String::new());
     assert!(!needs_state(&node), "an empty tooltip is not a tooltip");
@@ -425,7 +425,10 @@ fn the_painted_text_key_follows_the_node_that_draws_the_value() {
     let mut inert = Node::container();
     inert.id = Some("code-input-row".into());
     let inert = inert.child(Node::text("1")).child(Node::text("2"));
-    assert_eq!(input_text::painted_key(&inert, "code-input-row"), "code-input-row");
+    assert_eq!(
+        input_text::painted_key(&inert, "code-input-row"),
+        "code-input-row"
+    );
 }
 
 /// The helper resolves an element id the way the rest of the backend does, so
@@ -475,4 +478,43 @@ fn blur_clears_transient_text_state_and_keeps_undo_history() {
         Some("kick".to_owned()),
         "history survives the focus excursion"
     );
+}
+
+#[test]
+fn tooltip_contract_delay_is_300ms() {
+    assert_eq!(
+        crate::tooltip::TOOLTIP_DELAY,
+        std::time::Duration::from_millis(300),
+        "Poodle tooltip open delay contract is exactly 300ms"
+    );
+}
+
+#[test]
+fn tooltip_state_reset_increments_generation_and_clears_fields() {
+    let mut state = crate::tooltip::WindowTooltipState {
+        target_id: Some("target-1".into()),
+        text: Some("Tooltip text".into()),
+        target_bounds: Some(gpui::Bounds {
+            origin: gpui::point(gpui::px(10.0), gpui::px(20.0)),
+            size: gpui::size(gpui::px(100.0), gpui::px(40.0)),
+        }),
+        generation: 41,
+        is_visible: true,
+        is_hovered: true,
+        is_focused: true,
+        painted_this_frame: true,
+        task: None,
+    };
+
+    state.reset();
+
+    assert_eq!(state.target_id, None);
+    assert_eq!(state.text, None);
+    assert_eq!(state.target_bounds, None);
+    assert_eq!(state.generation, 42);
+    assert!(!state.is_visible);
+    assert!(!state.is_hovered);
+    assert!(!state.is_focused);
+    assert!(!state.painted_this_frame);
+    assert!(state.task.is_none());
 }

@@ -1,17 +1,27 @@
 # g16.066 — GPUI Node Tooltip Lifecycle Runtime
 
-Status: queued — launch after `g16.062` merges
+Status: implementation-complete — PR pending orchestrator review
 Type: shared native backend repair
 Opened: 2026-09-02
+Implemented: 2026-09-03
 Depends on: current `Node.tooltip` contract; `g16.062` only for merge ordering
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `065-tabs-native-tooltip-parity.md`, `../../contracts/components/tooltip.md`
+Log: `../../logs/2026-09/20260903-g16-066-gpui-node-tooltip-lifecycle-runtime.md`
 
 ## Goal
 
 Give every non-empty `Node.tooltip` one Poodle-owned GPUI lifecycle: show after
 300ms, hide on pointer leave, focus departure, Escape, disablement, removal,
 teardown, or supersession. Keep the existing string field and component APIs.
+
+## Outcome
+
+`poodle-gpui-node-backend` no longer maps `Node.tooltip` through GPUI 0.2.2
+`.tooltip()`. One window-keyed runtime owns the 300ms timer, generation
+supersession, paint-authority sweep, and overlay bubble. Empty strings stay
+inert. IconButton and SegmentedControl keep their tooltip text and ordinary
+activation/focus behavior. No public Node or component API changed.
 
 ## Fixed Boundary
 

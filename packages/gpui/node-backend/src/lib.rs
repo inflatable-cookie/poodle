@@ -27,7 +27,7 @@ use std::time::Duration;
 
 use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
-    AnyElement, AnyView, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId, Hsla,
+    AnyElement, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId, Hsla,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
     MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta, ScrollWheelEvent, SharedString,
     Stateful, StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
@@ -40,24 +40,29 @@ use poodle_node::{
     ResolvedIconGeometryFrame, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
-mod measured_node;
 mod drag;
 mod inset_shadow;
 mod interaction;
 mod layers;
+mod measured_node;
 mod style;
+mod tooltip;
 mod tracked_scroll;
 
 pub mod file_capability;
 
+pub use tooltip::{
+    is_tooltip_pending, is_tooltip_visible, painted_tooltip, painted_tooltip_for,
+    reset_tooltip_registry, PaintedTooltip, TOOLTIP_DELAY,
+};
 pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState};
 
-use interaction::apply_listeners;
 pub use drag::{
     drag_drop_provider, drag_drop_window_host, DragAnnouncementEvent, DragDropController,
-    DragDropSnapshot, DragDropTargetPosture, DragDropWindowHost,
-    DragPreviewSnapshot, NativeDragPayload, ANNOUNCEMENT_LOG_LIMIT, GPUI_DRAG_CAPABILITIES,
+    DragDropSnapshot, DragDropTargetPosture, DragDropWindowHost, DragPreviewSnapshot,
+    NativeDragPayload, ANNOUNCEMENT_LOG_LIMIT, GPUI_DRAG_CAPABILITIES,
 };
+use interaction::apply_listeners;
 pub use layers::{
     attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, layer_for_element,
     open_layer_count, overlay_frame_begin, overlay_frame_end, request_focus, spared_layer_ids_at,
@@ -146,6 +151,7 @@ pub fn reset_focus_registry() {
     FOCUS_STATES.with(|states| states.borrow_mut().clear());
     FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
     interaction::reset_continuous_value_session();
+    tooltip::reset_tooltip_registry();
 }
 
 /// Per-frame counter for gesture-drag identities.
@@ -620,7 +626,7 @@ fn needs_state(node: &Node) -> bool {
         || node.style.active.is_some()
         || node.style.descriptor.layout.overflow_x == LayoutOverflow::Scroll
         || node.style.descriptor.layout.overflow_y == LayoutOverflow::Scroll
-        // GPUI `.tooltip()` lives on StatefulInteractiveElement.
+        // Node tooltips need element state for bounds, hover/focus lifecycle, and overlay.
         || node.tooltip.as_deref().is_some_and(|text| !text.is_empty())
         // Overlay surfaces must be stateful so they can occlude hit-testing
         // and record containment bounds. `runtime_id` is a stable identity
@@ -814,6 +820,8 @@ fn tracks_focus(node: &Node) -> bool {
     node.interaction.on_focus_change.is_some()
         || node.style.focus_ring.is_some()
         || (node.interaction.focusable && node.style.focus.is_some())
+        || (node.interaction.focusable
+            && node.tooltip.as_deref().is_some_and(|text| !text.is_empty()))
         // A source that opted into keyboard pickup must be observably focused,
         // or the controller can never tell which source a Space or Enter
         // belongs to and the keyboard route silently does nothing.
