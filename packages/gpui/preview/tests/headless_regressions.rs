@@ -32580,6 +32580,34 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
     });
 }
 
+/// CommandPalette reaches the production compat adapter, renderer, composed
+/// Dialog/TextInput tree, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_host_spec() {
+    use gpui::IntoElement;
+    use poodle_specs::{CommandActionItem, CommandPaletteSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            node_compat::CommandPalette::from_spec(
+                CommandPaletteSpec::new(vec![CommandActionItem::new("save", "Save")])
+                    .with_open(true),
+                &theme_provider,
+            )
+            .with_id("counterexample")
+            .into_element()
+        });
+
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("command-palette:counterexample:overlay")
+                .is_some(),
+            "the production CommandPalette IntoElement path must paint caller-scoped overlay identity"
+        );
+    });
+}
+
 /// Backend routing oracle for disabled pointer semantics. Production
 /// components normally remove an unavailable callback before this boundary;
 /// this adversarial node keeps a live sink so an accidental backend dispatch
