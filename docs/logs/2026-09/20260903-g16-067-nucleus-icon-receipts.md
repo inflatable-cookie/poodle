@@ -1,6 +1,6 @@
 # g16.067 — Nucleus Icon and IconButton M1 Receipts
 
-Status: complete
+Status: complete — merged in PR #173 at `91f039cd9`
 Date: 2026-09-03
 Card: `docs/roadmaps/g16/067-nucleus-icon-icon-button-m1.md`
 Handoff: `docs/handoffs/20260903-025000-g16-067-nucleus-icon-receipts.md`

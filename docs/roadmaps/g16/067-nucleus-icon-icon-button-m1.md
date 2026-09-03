@@ -1,6 +1,6 @@
 # g16.067 — Nucleus Icon And IconButton M1 Receipts
 
-Status: ready
+Status: complete — merged in PR #173 at `91f039cd9`
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.066`
