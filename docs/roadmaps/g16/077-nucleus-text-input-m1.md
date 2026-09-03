@@ -34,8 +34,9 @@ mounted regression into exact receipt evidence without widening TextInput.
   edit history, callbacks, and composition identity separate.
 - Prove disabled inertia; read-only focus/selection with mutation suppression;
   placeholder/value separation; exact scalar `maxLength`; validation,
-  required, described-by, label, value, and selection projection at the Node
-  boundary. Do not infer an accessibility tree from Node metadata.
+  described-by, validation, label, value, and selection projection available
+  in the Node vocabulary. `required` has no Node channel and is not an M1
+  claim. Do not infer an accessibility tree from Node metadata.
 - Preserve ordered value-before-clear effects, one submit/cancel callback per
   input, and exactly one blur transition. Teardown is silent. Existing focused
   clipboard, undo/redo, caret paint, and IME tests remain regression evidence,

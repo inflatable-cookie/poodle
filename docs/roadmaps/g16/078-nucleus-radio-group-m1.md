@@ -1,9 +1,9 @@
 # g16.078 — Nucleus RadioGroup M1 Receipt
 
-Status: preparation-ready; receipt finalization blocked on merged `g16.077`
+Status: finalization-ready; production proof prepared in draft PR #185
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
-Depends on: completed `g16.062`; receipt finalization depends on merged `g16.077`
+Depends on: completed `g16.062`, completed `g16.077`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`, `nucleus-parity-manifest.json`,
 `parity-evidence-ledger.md`, `../../contracts/components/radio-group.md`

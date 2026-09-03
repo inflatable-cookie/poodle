@@ -111,17 +111,17 @@ stay maintained; backend admission is not part of the first card.
 74. [074 — Nucleus Dialog M1 receipt](074-nucleus-dialog-m1.md) — complete; merged in PR #180 after three exact-head review rounds with real Dialog adapter dispatch, independent backdrop/Escape policy, controlled refusal/close, and one M1 receipt
 75. [075 — Nucleus Popover M1 receipt](075-nucleus-popover-m1.md) — complete; merged in PR #181 with the production Popover adapter, nested and sibling layer isolation, mounted dismissal/focus/geometry proofs, and one M1 receipt
 76. [076 — Nucleus Select M1 receipt](076-nucleus-select-m1.md) — complete; merged in PR #182 with production adapter execution, paired-instance isolation, mounted search/navigation/dismissal proofs, and one M1 receipt
-77. [077 — Nucleus TextInput M1 receipt](077-nucleus-text-input-m1.md) — ready; convert the retained controlled-editing fixture into one production adapter receipt and unblock three dependent Nucleus rows
-78. [078 — Nucleus RadioGroup M1 receipt](078-nucleus-radio-group-m1.md) — preparation-ready in parallel with 077; production proof may advance, but receipt finalization waits for the latest merged cohort identity
+77. [077 — Nucleus TextInput M1 receipt](077-nucleus-text-input-m1.md) — complete; merged in PR #184 with production adapter execution, mounted controlled-editing and paired-identity proofs, semantic projection repair, and one M1 receipt
+78. [078 — Nucleus RadioGroup M1 receipt](078-nucleus-radio-group-m1.md) — finalization-ready; rebase the prepared production proof onto the merged TextInput identity, emit the cohort, and run full boards
 79. [079 — Nucleus Switch M1 receipt](079-nucleus-switch-m1.md) — preparation-ready in parallel with 077; production proof may advance, but receipt finalization waits for 078's merged cohort identity
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.076` are complete. `g16.077` is the active receipt finalization
-lane. `g16.078` and `g16.079` may prepare independent production proofs in
-parallel, but receipt emission, cohort refresh, review, and merge remain serial
+`g16.053`–`g16.077` are complete. `g16.078` is the active receipt finalization
+lane. `g16.079` has a prepared production proof, but receipt emission, cohort
+refresh, review, and merge remain serial
 on the latest native source identity
 identity. Release mutation remains
 separately gated.
