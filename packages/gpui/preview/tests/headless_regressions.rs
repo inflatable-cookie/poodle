@@ -6427,6 +6427,35 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
     });
 }
 
+/// AgentTranscript reaches the production compat adapter, renderer, and
+/// mounted backend with a stable root identity.
+#[test]
+fn agent_transcript_records_rebuild_through_production_mounted_input() {
+    use gpui::IntoElement;
+    use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            crate::node_compat::AgentTranscript::from_spec(
+                AgentTranscriptSpec::new(vec![TranscriptItem::Message(TranscriptMessage {
+                    id: "answer".to_owned(),
+                    markdown: "Mounted through the production adapter.".to_owned(),
+                    ..Default::default()
+                })]),
+                &theme_provider,
+            )
+            .into_element()
+        });
+
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 420.0, 180.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("agent-transcript").is_some(),
+            "the production adapter must carry stable AgentTranscript identity into the mounted backend"
+        );
+    });
+}
+
 /// Host-owned open state and trace for one nested popover pair. The outer
 /// composition routes through the node_compat adapter machine; the inner
 /// composition rides the renderer-node path with host handlers, exactly like
