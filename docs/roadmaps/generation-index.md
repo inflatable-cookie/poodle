@@ -36,8 +36,9 @@ Updated: 2026-09-02
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: compile small Nucleus receipt cards from the validated
-    29-component cohort gaps; do not dispatch an NP tranche as one batch.
+  - Ready frontier: `g16.067`, the Icon + IconButton M1 receipt child. Later
+    Nucleus receipt cards remain serial on its exact native source identity;
+    do not dispatch an NP tranche as one batch.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -54,7 +55,7 @@ Updated: 2026-09-02
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: compile and dispatch the first small Nucleus receipt cards while the
+  - Next move: dispatch and review `g16.067` while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.

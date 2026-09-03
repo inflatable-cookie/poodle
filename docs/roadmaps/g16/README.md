@@ -101,13 +101,15 @@ stay maintained; backend admission is not part of the first card.
 64. [064 — Slider negative-half rounding parity](064-slider-negative-half-rounding-parity.md) — complete; merged in PR #168 with one shared low-level quantization law and paired transition vectors
 65. [065 — Tabs native tooltip parity](065-tabs-native-tooltip-parity.md) — complete; merged in PR #172 with paired-value tooltip identity and paired 300ms lifecycle parity
 66. [066 — GPUI Node tooltip lifecycle runtime](066-gpui-node-tooltip-lifecycle-runtime.md) — complete; merged in PR #171 with a window-scoped 300ms lifecycle and production teardown
+67. [067 — Nucleus Icon and IconButton M1 receipts](067-nucleus-icon-icon-button-m1.md) — ready; first small NP-1 child, with IconProvider as setup and exact execution-backed receipts
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.066` are complete. The next ready work is small Nucleus receipt
-cards compiled from the validated cohort gaps. Release mutation remains
+`g16.053`–`g16.066` are complete. `g16.067` is the first ready small Nucleus
+receipt child; later receipt cards remain serial on its exact native source
+identity. Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
 explicit serial or external gates. Completed `g16.054` does not inherit release
