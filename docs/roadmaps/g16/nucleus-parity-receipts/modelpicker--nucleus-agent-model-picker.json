@@ -1,0 +1,63 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "3bbbd0f51359bf562b8228b1f3fe27cd9853e18f",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount duplicate controlled ModelPicker instances through node_compat::ModelPicker::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch mounted keyboard open and Escape plus pointer model and capability-axis selection while rebuilding from host-owned state",
+    "dispatch mounted pointer input through unavailable, refused, accepted, and outside-dismiss-refused paths across caller-scoped instances"
+  ],
+  "assertions": [
+    "production Select, SegmentedControl, and Switch composition preserves trigger, provider and model labels, selected and unavailable states, capability axes, exact token metadata, overlay elevation, and one-dialog surface anatomy",
+    "mounted roots, dialog, Select list, and model rows have positive extents, authored non-overlapping order, and real mount or production-parent containment",
+    "axis changes, model refusal and acceptance, Escape close, and host-owned rebuilds preserve the exact ordered callback and state trace",
+    "unavailable model input is inert and outside interaction remains refused without changing the controlled selection or callback stream",
+    "duplicate caller identities keep focus, runtime ids, callbacks, state, and geometry isolated",
+    "backend mounted observation confirms production render, paint, and GPUI input dispatch after every terminal assertion"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
