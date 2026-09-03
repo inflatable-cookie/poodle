@@ -165,6 +165,22 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     if node.interaction.request_focus {
         super::layers::request_focus(id);
     }
+    // A pointer press that lands inside a dismissable layer must still run
+    // the shared outside-dismissal check when the layer's own subtree does
+    // not contain the position. gpui 0.2.2 does not route pointer events
+    // over deferred overlay content to window-level (root) listeners, so the
+    // window host alone cannot dismiss a nested layer from a press inside
+    // the enclosing overlay. Every layer member therefore observes presses
+    // in the capture phase, where activation and click-synthesis handlers
+    // cannot suppress the dismissal. Dismissed records are consumed by
+    // `dismiss_layers_at`, so the extra listeners never dismiss twice.
+    if node.interaction.dismiss_layer.is_some() {
+        el = el.capture_any_mouse_down(|event, _window, cx| {
+            if event.button == MouseButton::Left {
+                super::layers::dismiss_layers_at(event.position, cx);
+            }
+        });
+    }
     // A disabled control is not focusable: gpui would otherwise take focus on
     // pointer-down, and a browser never focuses a disabled control. The focus
     // tracking canvas below still attaches (the patch may exist), so blur and

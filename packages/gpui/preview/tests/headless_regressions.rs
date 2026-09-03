@@ -6588,9 +6588,9 @@ fn nucleus_popover_element(
 }
 
 /// One row of mounted Popover elements from an element factory.
-fn nucleus_popover_row(elements: Vec<gpui::AnyElement>) -> gpui::AnyElement {
+fn nucleus_popover_row(gap: f32, elements: Vec<gpui::AnyElement>) -> gpui::AnyElement {
     use gpui::{IntoElement, ParentElement, Styled};
-    let mut row = gpui::div().flex().flex_row().gap(px(90.0));
+    let mut row = gpui::div().flex().flex_row().gap(px(gap));
     for element in elements {
         row = row.child(element);
     }
@@ -6879,16 +6879,14 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
             surface_bounds.origin.x + px(3.0),
             surface_bounds.origin.y + px(10.0),
         );
-        let spared_before = poodle_gpui_node_backend::spared_layer_ids_at(outside_inner);
         driver.pointer_press(outside_inner);
         driver.pointer_release(outside_inner);
         {
             let state = host.lock().expect("host lock").clone();
             assert!(
                 !state.inner_open,
-                "an outer-surface press must close the inner popover (trace={:?} spared={:?})",
+                "an outer-surface press must close the inner popover (trace={:?})",
                 state.trace,
-                spared_before,
             );
             assert!(state.outer_open, "an outer-surface press must spare the outer popover");
             assert!(
@@ -6933,7 +6931,7 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
                 let state = host.lock().expect("host lock").clone();
                 let open_of =
                     |scope: &str| state.open.get(scope).copied().unwrap_or(false);
-                nucleus_popover_row(vec![
+                nucleus_popover_row(200.0, vec![
                     nucleus_popover_element(
                         &host,
                         "left",
@@ -7113,18 +7111,7 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
                 let state = host.lock().expect("host lock").clone();
                 let open_of =
                     |scope: &str| state.open.get(scope).copied().unwrap_or(false);
-                nucleus_popover_row(vec![
-                    nucleus_popover_element(
-                        &host,
-                        "locked",
-                        "Locked trigger",
-                        Arc::clone(&clicks),
-                        open_of("locked"),
-                        true,
-                        poodle_specs::PopoverInitialFocus::FirstFocusable,
-                        8.0,
-                        None,
-                    ),
+                nucleus_popover_row(200.0, vec![
                     nucleus_popover_element(
                         &host,
                         "fixed",
@@ -7136,8 +7123,18 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
                         8.0,
                         Some(20.0),
                     ),
-                ])
-            })
+                    nucleus_popover_element(
+                        &host,
+                        "locked",
+                        "Locked trigger",
+                        Arc::clone(&clicks),
+                        open_of("locked"),
+                        true,
+                        poodle_specs::PopoverInitialFocus::FirstFocusable,
+                        8.0,
+                        None,
+                    ),
+                ])            })
         };
 
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
@@ -7209,7 +7206,7 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
                 let state = host.lock().expect("host lock").clone();
                 let open_of =
                     |scope: &str| state.open.get(scope).copied().unwrap_or(false);
-                nucleus_popover_row(vec![
+                nucleus_popover_row(90.0, vec![
                     nucleus_popover_element(
                         &host,
                         "content",
