@@ -114,5 +114,5 @@ gap instead of weakening the receipt.
 ## Continuation
 
 After merge, compile the next dependency-ready Nucleus M1 receipt tranche from
-the refreshed identity `939ce87c818e9abd4a759cd3d12af7ed4e41f94d`.
+the refreshed identity `232ae3b73f0e068f1f59690cc8e2f942546dcec2`.
 Receipt-producing merges remain serial.
