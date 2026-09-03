@@ -251,14 +251,16 @@ fn wire_open_keys(
         node.interaction.on_cancel = Some(Arc::new(move || {
             emit_select(&spec_cancel, &handlers_cancel, SelectEvent::Close);
         }));
-        let spec_blur = spec.clone();
-        let handlers_blur = handlers.clone();
-        node.interaction.on_focus_change = Some(Arc::new(move |focused| {
-            if focused {
-                return;
-            }
-            emit_blur(&spec_blur, &handlers_blur);
-        }));
+        if spec.searchable {
+            let spec_blur = spec.clone();
+            let handlers_blur = handlers.clone();
+            node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+                if focused {
+                    return;
+                }
+                emit_blur(&spec_blur, &handlers_blur);
+            }));
+        }
     }
 }
 
