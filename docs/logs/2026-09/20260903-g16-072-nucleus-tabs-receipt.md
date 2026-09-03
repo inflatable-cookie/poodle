@@ -12,7 +12,7 @@ Governing refs: `docs/roadmaps/g16/nucleus-gpui-parity-programme.md`,
 Branch: `feature/g16-072-nucleus-tabs-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-072-nucleus-tabs-receipt`
 Planning base: `ec62f0a03` (`origin/main`)
-Worker PR: pending
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/178
 
 ## Outcome
 
