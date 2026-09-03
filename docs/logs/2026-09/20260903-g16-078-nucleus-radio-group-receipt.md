@@ -111,13 +111,13 @@ Focused:
 
 Required boards:
 - `effigy regressions:native` — 187 passed (all 15 receipts emitted at runtime commit `7343e25a8`)
-- `bun test scripts/nucleus-parity-receipts.test.ts` — pending closeout
-- `bun test scripts/parity-evidence-ledger.test.ts` — pending closeout
-- `effigy check:parity-evidence-ledger` — pending closeout
-- `effigy ci:rust` — pending closeout
-- `effigy ci:native` — pending closeout
-- `effigy docs:check` — pending closeout
-- `git diff --check origin/main...HEAD` — pending closeout
+- `bun test scripts/nucleus-parity-receipts.test.ts` — 8 passed
+- `bun test scripts/parity-evidence-ledger.test.ts` — 6 passed
+- `effigy check:parity-evidence-ledger` — passed (176 component evidence rows)
+- `effigy ci:rust` — passed
+- `effigy ci:native` — passed
+- `effigy docs:check` — passed
+- `git diff --check origin/main...HEAD` — clean
 
 No windowed or native-visual selectors were run.
 
