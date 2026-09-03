@@ -66,6 +66,7 @@ Updated: 2026-09-03
     25/29.
   - Ready frontier: prepare and review `g16.089` DetailItem and `g16.090`
     CommandPalette without shared evidence, then finalize them serially.
+    `g16.091` may prepare ToastHost in parallel; MessageCenter stays gated on it.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
