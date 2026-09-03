@@ -3973,6 +3973,7 @@ dependencies = [
  "gpui",
  "poodle-headless",
  "poodle-node",
+ "tinyvec",
 ]
 
 [[package]]
