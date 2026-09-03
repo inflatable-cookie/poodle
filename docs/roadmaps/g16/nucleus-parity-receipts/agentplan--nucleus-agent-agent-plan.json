@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Icon",
-  "scenario_id": "nucleus.shell.icon",
+  "component": "AgentPlan",
+  "scenario_id": "nucleus.agent.agent-plan",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,14 +46,16 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "install icon provider and render Icon through poodle_render",
-    "pointer hover dispatch through HeadlessDriver"
+    "mount duplicate controlled AgentPlan instances through node_compat::AgentPlan::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch refused and accepted pointer or keyboard decisions through the GPUI test platform",
+    "rebuild host-owned pending, accepted, dismissed, and revised states through the production adapter path"
   ],
   "assertions": [
-    "production render path emits NodeKind::Icon with named SVG path handoff and token size",
-    "text_color tint matches the resolved theme value",
-    "explicit accessible label is preserved on the mounted node",
-    "mounted bounds and content.text-icon.icon probe channel confirm production backend layout"
+    "production AgentMessage, Text, and Button composition preserves plan records, decision order, semantics, and exact contract-owned resting, hover, focus, radius, spacing, and status tokens",
+    "mounted roots and decision affordances have positive ordered bounds contained within their caller-scoped plan",
+    "refused acceptance remains pending while accepted, dismissed, and revised decisions rebuild before painted affordances disappear",
+    "duplicate caller identities keep focus, callbacks, state, and bounds isolated",
+    "backend probe channels and mounted observation confirm production render, accessibility, token, paint, and GPUI input dispatch"
   ],
   "outcome": "passed",
   "artifact_paths": []
