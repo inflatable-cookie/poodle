@@ -9,7 +9,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/menu.md`, `../../contracts/components/icon.md`
 Log: `../../logs/2026-09/20260903-g16-073-nucleus-menu-receipt.md`
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/179
 Handoff: `../../handoffs/20260903-064013-g16-073-nucleus-menu-receipt.md`
 
 ## Goal
