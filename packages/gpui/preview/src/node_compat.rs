@@ -32,7 +32,7 @@ use poodle_specs::{
     HoverCardSpec, IconButtonSpec, IconSpec, InlineListSectionSpec, LicenceActivationSpec,
     LicenceSeatsSpec, LicenceStatusSpec, ListCardCounterSpec, ListCardSpec, ListContainerSpec,
     ListGridSpec, LogListSpec, MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec,
-    MediaPreviewSpec, MediaThumbnailSpec, MenuSpec, MenubarSpec, MetaBarSpec, MetaItemSpec,
+    MediaPreviewSpec, MediaThumbnailSpec, MenuSpec, MenubarSpec, MessageCenterSpec, MetaBarSpec, MetaItemSpec,
     MeterSpec, MetricTileSpec, ModelPickerSpec, NavCardSpec, NavigationMenuSpec, NumberInputSpec,
     OrderBySpec, OverlayPlacement, PageHeaderSpec, PageLoadingSpec, PaginationSpec,
     PaginationSummarySpec, PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec,
@@ -855,6 +855,11 @@ pub(crate) struct ToastHost {
     handlers: poodle_render::ToastStackHandlers,
 }
 
+pub(crate) struct MessageCenter {
+    spec: MessageCenterSpec,
+    theme: GpuiThemeProvider,
+}
+
 pub(crate) struct DebugDialog {
     spec: DebugDialogSpec,
     theme: GpuiThemeProvider,
@@ -1665,6 +1670,27 @@ impl IntoElement for ToastHost {
             &RenderContext::new(&self.theme),
             &self.stack_spec,
             self.handlers,
+        ))
+    }
+}
+
+impl MessageCenter {
+    pub(crate) fn from_spec(spec: MessageCenterSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for MessageCenter {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::message_center(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            poodle_render::MessageCenterHandlers::default(),
         ))
     }
 }

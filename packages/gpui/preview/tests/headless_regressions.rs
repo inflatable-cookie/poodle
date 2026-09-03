@@ -29592,6 +29592,48 @@ fn toast_host_controlled_composition_actions_and_identity_through_mounted_backen
     });
 }
 
+/// g16.093. Duplicate production MessageCenter mounts must retain caller-scoped
+/// identity even when their item ids reuse the same values.
+#[test]
+fn message_center_composition_open_progress_and_identity_through_mounted_backend() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_specs::{MessageCenterItem, MessageCenterSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            div()
+                .relative()
+                .size_full()
+                .child(node_compat::MessageCenter::from_spec(
+                    MessageCenterSpec::new(vec![
+                        MessageCenterItem::new("job", "Mix preview").with_read(true),
+                    ])
+                    .with_open(true),
+                    &theme_provider,
+                ))
+                .child(node_compat::MessageCenter::from_spec(
+                    MessageCenterSpec::new(vec![
+                        MessageCenterItem::new("job", "Mix preview").with_read(true),
+                    ])
+                    .with_open(true),
+                    &theme_provider,
+                ))
+                .into_any_element()
+        });
+
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left").is_some(),
+            "left MessageCenter must paint its caller-scoped production identity"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:right").is_some(),
+            "right MessageCenter must not alias the left mount"
+        );
+    });
+}
+
 /// g16.047. Native danger projects Alert; success stays ListItem. Drawing the
 /// node tree does not claim GPUI assistive-technology parity.
 #[test]
