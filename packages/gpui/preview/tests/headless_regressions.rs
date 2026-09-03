@@ -813,6 +813,464 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
     });
 }
 
+/// g16.069: AppHeader mounts through production poodle_render, Node,
+/// and GPUI backend paths. Proof covers exact shell metadata (background 94% alpha,
+/// 1.0px bottom border, min-height, fill-width, size and density ladders,
+/// title/subtitle typography, label fallback/override), structural presence-driven
+/// layout switching (flat root regions vs symmetric grow trailing column), child
+/// containment of composed Icon and Text dependencies, and styled-only root inertness.
+/// Harmless pointer input is dispatched over the tree and the M1 receipt is emitted
+/// at the terminal boundary.
+#[test]
+fn app_header_resolves_structure_token_styling_and_layout_through_mounted_backend() {
+    use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment};
+    use poodle_specs::{
+        AppHeaderSpec, ControlDensity, ControlSize, IconProviderSpec, IconSize, IconSpec, TextSize,
+        TextSpec, TextWeight,
+    };
+    use poodle_tokens::semantic;
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        // ── 1. Variant, Token & Metadata Verification for AppHeader ─────────
+        let panel_color = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_PANEL);
+        let expected_bg = poodle_render::color::with_alpha(panel_color, panel_color.3 * 0.94);
+        let expected_border = ctx.theme().resolve_color(semantic::COLOR_BORDER_SUBTLE);
+        let title_color = ctx.theme().resolve_color(semantic::COLOR_TEXT_PRIMARY);
+        let subtitle_color = ctx.theme().resolve_color(semantic::COLOR_TEXT_SECONDARY);
+
+        let default_node = poodle_render::app_header(
+            &AppHeaderSpec::new().with_title("Poodle Shell"),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(
+            default_node.style.descriptor.background,
+            Some(expected_bg),
+            "AppHeader must resolve exact panel background with 94% alpha"
+        );
+        assert_eq!(
+            default_node.style.border_bottom_width,
+            Some(1.0),
+            "AppHeader must resolve 1.0px bottom border"
+        );
+        assert_eq!(
+            default_node.style.descriptor.border.color,
+            expected_border,
+            "AppHeader must resolve subtle border color"
+        );
+        assert!(default_node.style.fill_width, "AppHeader must have fill_width true");
+        assert_eq!(
+            default_node.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            default_node.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+
+        // Size ladder (min_height, title typography, subtitle typography)
+        for (size, expected_min_h, expected_title_sz, expected_sub_sz) in [
+            (ControlSize::Xs, 36.0, 13.0, 11.0),
+            (ControlSize::Sm, 40.0, 14.0, 11.5),
+            (ControlSize::Md, 44.0, 15.0, 12.0),
+            (ControlSize::Lg, 48.0, 16.0, 13.0),
+            (ControlSize::Xl, 52.0, 17.0, 14.0),
+        ] {
+            let spec = AppHeaderSpec::new()
+                .with_title("App Title")
+                .with_subtitle("App Subtitle")
+                .with_size(size);
+            let node = poodle_render::app_header(&spec, &ctx, None, None, None, None);
+            assert_eq!(node.style.min_height, Some(expected_min_h));
+
+            let identity_region = &node.children[0];
+            let title_group = &identity_region.children[0];
+            assert_eq!(title_group.children.len(), 2);
+
+            let t_node = &title_group.children[0];
+            assert_eq!(t_node.style.descriptor.text_color, Some(title_color));
+            assert_eq!(t_node.style.text_size, Some(expected_title_sz));
+            assert_eq!(t_node.style.text_weight, Some(600));
+            assert_eq!(t_node.style.line_height, Some(1.2));
+            assert!(t_node.style.no_wrap);
+
+            let st_node = &title_group.children[1];
+            assert_eq!(st_node.style.descriptor.text_color, Some(subtitle_color));
+            assert_eq!(st_node.style.text_size, Some(expected_sub_sz));
+            assert_eq!(st_node.style.line_height, Some(1.2));
+            assert!(st_node.style.no_wrap);
+            assert!(st_node.style.text_ellipsis);
+        }
+
+        // Density ladder (grid gap, region gap, padding block/inline)
+        for (density, expected_gap, expected_region_gap, expected_pad_y, expected_pad_x) in [
+            (ControlDensity::Compact, 10.0, 6.0, 4.0, 14.0),
+            (ControlDensity::Default, 16.0, 8.0, 6.0, 16.0),
+            (ControlDensity::Comfortable, 16.0, 10.0, 8.0, 18.0),
+        ] {
+            let spec = AppHeaderSpec::new()
+                .with_title("Density App")
+                .with_density(density);
+            let node = poodle_render::app_header(&spec, &ctx, None, None, None, None);
+            assert_eq!(node.style.descriptor.layout.spacing.gap, expected_gap);
+            let pad = &node.style.descriptor.layout.spacing.padding;
+            assert_eq!(pad.top, expected_pad_y);
+            assert_eq!(pad.bottom, expected_pad_y);
+            assert_eq!(pad.left, expected_pad_x);
+            assert_eq!(pad.right, expected_pad_x);
+
+            let identity_region = &node.children[0];
+            assert_eq!(
+                identity_region.style.descriptor.layout.spacing.gap,
+                expected_region_gap
+            );
+        }
+
+        // Accessibility & Labeling
+        let title_label = poodle_render::app_header(
+            &AppHeaderSpec::new().with_title("Fallback Title"),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(title_label.a11y.label.as_deref(), Some("Fallback Title"));
+
+        let override_label = poodle_render::app_header(
+            &AppHeaderSpec::new()
+                .with_title("Fallback Title")
+                .with_aria_label("Explicit Label"),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(override_label.a11y.label.as_deref(), Some("Explicit Label"));
+
+        let bare_header = poodle_render::app_header(
+            &AppHeaderSpec::new(),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(bare_header.a11y.label, None);
+
+        // Structural presence: without center (flat) vs with center (symmetric trailing column)
+        let uncentered = poodle_render::app_header(
+            &AppHeaderSpec::new().with_title("Uncentered"),
+            &ctx,
+            None,
+            None,
+            Some(Box::new(|_| Node::text("act"))),
+            Some(Box::new(|_| Node::text("util"))),
+        );
+        assert_eq!(uncentered.children.len(), 3, "identity + actions + utility flat");
+        let uncentered_util = &uncentered.children[2];
+        assert!(
+            !matches!(
+                uncentered_util.style.descriptor.layout.width,
+                LayoutSizing::Grow
+            ),
+            "uncentered utility region must not grow"
+        );
+        assert_eq!(
+            uncentered_util.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::End
+        );
+
+        let centered = poodle_render::app_header(
+            &AppHeaderSpec::new().with_title("Centered").with_center(true),
+            &ctx,
+            None,
+            Some(Box::new(|_| Node::text("center"))),
+            Some(Box::new(|_| Node::text("act"))),
+            Some(Box::new(|_| Node::text("util"))),
+        );
+        assert_eq!(centered.children.len(), 3, "identity + center + trailing");
+        let trailing = &centered.children[2];
+        assert!(
+            matches!(trailing.style.descriptor.layout.width, LayoutSizing::Grow),
+            "trailing column must grow symmetrically with identity"
+        );
+        assert_eq!(
+            trailing.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::End
+        );
+        assert_eq!(trailing.children.len(), 2, "actions + utility inside trailing");
+
+        // ── 2. Production Mounted Centered Custom-Identity Composite ─────────
+        let identity_slot: poodle_render::SlotBuilder<'static> = Box::new(|scope| {
+            let mut row = Node::container();
+            row.id = Some("nucleus-app-header-custom-identity".to_owned());
+            row.style.descriptor.layout.direction = LayoutDirection::Row;
+            row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            row.style.descriptor.layout.spacing.gap = 8.0;
+
+            let icon_spec = IconSpec::new("search")
+                .with_size(IconSize::Sm)
+                .with_aria_label("Application Search");
+            let mut icon_node = poodle_render::icon(&icon_spec, scope);
+            icon_node.id = Some("nucleus-app-header-identity-icon".to_owned());
+
+            let expected_icon_size =
+                scope.theme().resolve_space(poodle_tokens::semantic::SIZE_ICON_SM);
+            let expected_icon_tint = scope.theme().resolve_color("color.icon.primary");
+            assert_eq!(
+                icon_node.a11y.label.as_deref(),
+                Some("Application Search"),
+                "Identity icon must retain spec aria_label via production renderer"
+            );
+            assert_eq!(
+                icon_node.style.descriptor.text_color,
+                Some(expected_icon_tint),
+                "Identity icon must carry explicit primary tint resolved by production renderer"
+            );
+            match &icon_node.kind {
+                NodeKind::Icon { name, size } => {
+                    assert_eq!(name, "search", "Identity icon must name the glyph");
+                    assert_eq!(
+                        *size, expected_icon_size,
+                        "Identity icon must match resolved token size"
+                    );
+                }
+                _ => panic!("Identity icon must emit NodeKind::Icon from poodle_render::icon"),
+            }
+
+            let text_spec = TextSpec::new("Poodle Nucleus")
+                .with_weight(TextWeight::Semibold)
+                .with_size(TextSize::Sm);
+            let mut text_node = poodle_render::text(&text_spec, scope);
+            text_node.id = Some("nucleus-app-header-identity-text".to_owned());
+
+            let expected_text_color = scope.theme().resolve_color(text_spec.color_token());
+            assert_eq!(
+                text_node.style.descriptor.text_color,
+                Some(expected_text_color),
+                "Identity text must carry tone color resolved by production renderer"
+            );
+            assert_eq!(
+                text_node.style.text_size,
+                Some(13.0),
+                "Identity text must carry resolved Sm font size (13px) from production renderer"
+            );
+            assert_eq!(
+                text_node.style.text_weight,
+                Some(600),
+                "Identity text must carry Semibold weight (600) from production renderer"
+            );
+            assert_eq!(
+                text_node.style.line_height,
+                Some(1.5),
+                "Identity text must carry normal line height (1.5) from production renderer"
+            );
+            assert!(
+                text_node.style.text_wrap,
+                "Identity text must carry text_wrap enabled from production renderer"
+            );
+            match &text_node.kind {
+                NodeKind::Text { content } => {
+                    assert_eq!(
+                        content, "Poodle Nucleus",
+                        "Identity text must match authored content"
+                    );
+                }
+                _ => panic!("Identity text must emit NodeKind::Text from poodle_render::text"),
+            }
+
+            row.child(icon_node).child(text_node)
+        });
+
+        let center_slot: poodle_render::SlotBuilder<'static> = Box::new(|scope| {
+            let text_spec = TextSpec::new("Workspace Overview")
+                .with_weight(TextWeight::Normal)
+                .with_size(TextSize::Sm);
+            let mut text_node = poodle_render::text(&text_spec, scope);
+            text_node.id = Some("nucleus-app-header-center-text".to_owned());
+            text_node
+        });
+
+        let actions_slot: poodle_render::SlotBuilder<'static> = Box::new(|scope| {
+            let text_spec = TextSpec::new("Deploy")
+                .with_weight(TextWeight::Medium)
+                .with_size(TextSize::Sm);
+            let mut text_node = poodle_render::text(&text_spec, scope);
+            text_node.id = Some("nucleus-app-header-actions-text".to_owned());
+            text_node
+        });
+
+        let utility_slot: poodle_render::SlotBuilder<'static> = Box::new(|scope| {
+            let icon_spec = IconSpec::new("search").with_size(IconSize::Sm);
+            let mut icon_node = poodle_render::icon(&icon_spec, scope);
+            icon_node.id = Some("nucleus-app-header-utility-icon".to_owned());
+            icon_node
+        });
+
+        let spec = AppHeaderSpec::new()
+            .with_center(true)
+            .with_aria_label("Nucleus Application Shell");
+
+        let mut header_node = poodle_render::app_header(
+            &spec,
+            &ctx,
+            Some(identity_slot),
+            Some(center_slot),
+            Some(actions_slot),
+            Some(utility_slot),
+        );
+        header_node.id = Some("nucleus-app-header-fixture".to_owned());
+
+        let provider_spec = IconProviderSpec::new();
+        let root = poodle_render::icon_provider(&provider_spec, &ctx, Some(header_node));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 800.0, 100.0);
+        driver.draw_frame();
+
+        // Harmless pointer hover dispatch across the mounted header container
+        driver.pointer_hover(point(px(40.0), px(20.0)));
+        driver.draw_frame();
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            probe_channels.contains(&"structure.identity.container"),
+            "Backend must receive structure.identity.container probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.text-icon.text"),
+            "Backend must receive content.text-icon.text probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.text-icon.icon"),
+            "Backend must receive content.text-icon.icon probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.background"),
+            "Backend must receive surface.channels.background probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.border"),
+            "Backend must receive surface.channels.border probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.size"),
+            "Backend must receive content.typography.size probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.weight"),
+            "Backend must receive content.typography.weight probe channel"
+        );
+
+        // ── 3. Mounted Layout, Positive Dimensions & Child Containment ──────
+        let header_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-app-header-fixture")
+                .expect("mounted header bounds");
+        let identity_icon_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-app-header-identity-icon")
+                .expect("mounted identity icon bounds");
+        let identity_text_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-app-header-identity-text")
+                .expect("mounted identity text bounds");
+        let center_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-app-header-center-text")
+                .expect("mounted center bounds");
+        let actions_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-app-header-actions-text")
+                .expect("mounted actions bounds");
+        let utility_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-app-header-utility-icon")
+                .expect("mounted utility bounds");
+
+        assert!(
+            header_bounds.size.width > px(0.0) && header_bounds.size.height >= px(40.0),
+            "header must have positive dimensions and satisfy min-height (min 44px including border, 43px inner bounds at Md): got {:?}",
+            header_bounds
+        );
+        assert!(identity_icon_bounds.size.width > px(0.0) && identity_icon_bounds.size.height > px(0.0));
+        assert!(identity_text_bounds.size.width > px(0.0) && identity_text_bounds.size.height > px(0.0));
+        assert!(center_bounds.size.width > px(0.0) && center_bounds.size.height > px(0.0));
+        assert!(actions_bounds.size.width > px(0.0) && actions_bounds.size.height > px(0.0));
+        assert!(utility_bounds.size.width > px(0.0) && utility_bounds.size.height > px(0.0));
+
+        // Child containment proof: all slot children remain inside the header bounds
+        for (name, bounds) in [
+            ("identity icon", identity_icon_bounds),
+            ("identity text", identity_text_bounds),
+            ("center text", center_bounds),
+            ("actions text", actions_bounds),
+            ("utility icon", utility_bounds),
+        ] {
+            assert!(
+                bounds.left() >= header_bounds.left()
+                    && bounds.right() <= header_bounds.right()
+                    && bounds.top() >= header_bounds.top()
+                    && bounds.bottom() <= header_bounds.bottom(),
+                "mounted {name} bounds must be contained within parent header bounds"
+            );
+        }
+
+        // Stable region ordering proof: left-to-right monotonic sequence
+        assert!(
+            identity_icon_bounds.left() <= identity_text_bounds.left(),
+            "identity icon must precede identity text"
+        );
+        assert!(
+            identity_text_bounds.right() <= center_bounds.left(),
+            "identity region must precede center region"
+        );
+        assert!(
+            center_bounds.right() <= actions_bounds.left(),
+            "center region must precede actions region"
+        );
+        assert!(
+            actions_bounds.right() <= utility_bounds.left(),
+            "actions region must precede utility region"
+        );
+
+        // ── 4. Focus & Inertness Proof ─────────────────────────────────────
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("nucleus-app-header-fixture").is_none(),
+            "styled-only app header root must not create a focus handle"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("nucleus-app-header-fixture"),
+            None,
+            "app header root must stay outside the focus chain"
+        );
+        assert!(poodle_gpui_node_backend::focus_handle_for("nucleus-app-header-identity-icon").is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for("nucleus-app-header-identity-text").is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for("nucleus-app-header-center-text").is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for("nucleus-app-header-actions-text").is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for("nucleus-app-header-utility-icon").is_none());
+
+        // ── 5. Terminal Receipt Emission ───────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "AppHeader",
+            "nucleus.shell.app-header",
+            driver.mounted_observation(),
+            &[
+                "render AppHeader with centered custom-identity composite through poodle_render",
+                "pointer hover dispatch through HeadlessDriver",
+            ],
+            &[
+                "production render path resolves shell background, bottom border, size ladder min-height, typography, density padding/gaps, fill-width posture, and aria-label fallback/override",
+                "presence of center slot switches layout from flat root regions to symmetric grow trailing column",
+                "mounted bounds confirm child containment, positive dimensions, stable region ordering, and non-focusable styled-only root",
+            ],
+        );
+    });
+}
+
 /// g15.041: Button disclosure targets (contract §3 `controls`) ride the same
 /// renderer-neutral node channel as IconButton's — a Button built with
 /// `with_controls(...)` mounts through the real backend carrying

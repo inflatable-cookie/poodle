@@ -363,4 +363,186 @@ mod tests {
         );
         assert_eq!(node.a11y.label.as_deref(), Some("Finch"));
     }
+
+    #[test]
+    fn app_header_exact_tokens_and_root_styling() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = AppHeaderSpec::new().with_title("Studio");
+        let node = app_header(&spec, &ctx, None, None, None, None);
+
+        let panel_color = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_BACKGROUND_PANEL);
+        let expected_bg = with_alpha(panel_color, panel_color.3 * 0.94);
+        let expected_border = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_BORDER_SUBTLE);
+
+        assert_eq!(node.style.descriptor.background, Some(expected_bg));
+        assert_eq!(node.style.border_bottom_width, Some(1.0));
+        assert_eq!(node.style.descriptor.border.color, expected_border);
+        assert!(node.style.fill_width);
+        assert_eq!(node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(node.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+    }
+
+    #[test]
+    fn app_header_size_ladder_and_typography() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let title_color = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_TEXT_PRIMARY);
+        let subtitle_color = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_TEXT_SECONDARY);
+
+        for (size, expected_min_h, expected_title_sz, expected_sub_sz) in [
+            (ControlSize::Xs, 36.0, 13.0, 11.0),
+            (ControlSize::Sm, 40.0, 14.0, 11.5),
+            (ControlSize::Md, 44.0, 15.0, 12.0),
+            (ControlSize::Lg, 48.0, 16.0, 13.0),
+            (ControlSize::Xl, 52.0, 17.0, 14.0),
+        ] {
+            let spec = AppHeaderSpec::new()
+                .with_title("Main App")
+                .with_subtitle("Workspace")
+                .with_size(size);
+            let node = app_header(&spec, &ctx, None, None, None, None);
+
+            assert_eq!(node.style.min_height, Some(expected_min_h));
+
+            // Identity region -> Title group -> [Title text, Subtitle text]
+            let identity_region = &node.children[0];
+            let title_group = &identity_region.children[0];
+            assert_eq!(title_group.children.len(), 2);
+
+            let title_node = &title_group.children[0];
+            assert_eq!(title_node.style.descriptor.text_color, Some(title_color));
+            assert_eq!(title_node.style.text_size, Some(expected_title_sz));
+            assert_eq!(title_node.style.text_weight, Some(600));
+            assert_eq!(title_node.style.line_height, Some(1.2));
+            assert!(title_node.style.no_wrap);
+
+            let subtitle_node = &title_group.children[1];
+            assert_eq!(subtitle_node.style.descriptor.text_color, Some(subtitle_color));
+            assert_eq!(subtitle_node.style.text_size, Some(expected_sub_sz));
+            assert_eq!(subtitle_node.style.line_height, Some(1.2));
+            assert!(subtitle_node.style.no_wrap);
+            assert!(subtitle_node.style.text_ellipsis);
+        }
+    }
+
+    #[test]
+    fn app_header_density_ladder_and_spacing() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        for (density, expected_gap, expected_region_gap, expected_pad_y, expected_pad_x) in [
+            (ControlDensity::Compact, 10.0, 6.0, 4.0, 14.0),
+            (ControlDensity::Default, 16.0, 8.0, 6.0, 16.0),
+            (ControlDensity::Comfortable, 16.0, 10.0, 8.0, 18.0),
+        ] {
+            let spec = AppHeaderSpec::new()
+                .with_title("App")
+                .with_density(density);
+            let node = app_header(&spec, &ctx, None, None, None, None);
+
+            assert_eq!(node.style.descriptor.layout.spacing.gap, expected_gap);
+            let pad = &node.style.descriptor.layout.spacing.padding;
+            assert_eq!(pad.top, expected_pad_y);
+            assert_eq!(pad.bottom, expected_pad_y);
+            assert_eq!(pad.left, expected_pad_x);
+            assert_eq!(pad.right, expected_pad_x);
+
+            let identity_region = &node.children[0];
+            assert_eq!(identity_region.style.descriptor.layout.spacing.gap, expected_region_gap);
+        }
+    }
+
+    #[test]
+    fn app_header_custom_identity_slot_replaces_default_title_group() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = AppHeaderSpec::new()
+            .with_title("Ignored Title")
+            .with_subtitle("Ignored Subtitle");
+        let custom_identity = text_slot("custom-brand-logo");
+        let node = app_header(&spec, &ctx, custom_identity, None, None, None);
+
+        assert_eq!(node.children.len(), 1);
+        let identity_region = &node.children[0];
+        assert_eq!(identity_region.children.len(), 1);
+        assert_eq!(identity_region.children[0].texts(), vec!["custom-brand-logo"]);
+        assert!(!node.texts().contains(&"Ignored Title"));
+        assert!(!node.texts().contains(&"Ignored Subtitle"));
+    }
+
+    #[test]
+    fn app_header_accessible_label_resolution() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        // Fallback to title
+        let title_only = app_header(
+            &AppHeaderSpec::new().with_title("My DAW"),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(title_only.a11y.label.as_deref(), Some("My DAW"));
+
+        // Explicit aria-label overrides title
+        let override_label = app_header(
+            &AppHeaderSpec::new()
+                .with_title("My DAW")
+                .with_aria_label("Custom Shell Header"),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(override_label.a11y.label.as_deref(), Some("Custom Shell Header"));
+
+        // Custom identity with explicit aria_label and no title
+        let custom_with_label = app_header(
+            &AppHeaderSpec::new().with_aria_label("Branded Shell Header"),
+            &ctx,
+            text_slot("logo"),
+            None,
+            None,
+            None,
+        );
+        assert_eq!(custom_with_label.a11y.label.as_deref(), Some("Branded Shell Header"));
+
+        // Neither title nor aria_label
+        let bare = app_header(
+            &AppHeaderSpec::new(),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(bare.a11y.label, None);
+    }
+
+    #[test]
+    fn app_header_slot_builders_receive_scoped_context() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = AppHeaderSpec::new()
+            .with_size(ControlSize::Lg)
+            .with_density(ControlDensity::Compact);
+
+        let mut observed_size = None;
+        let mut observed_density = None;
+
+        let slot: Option<SlotBuilder<'_>> = Some(Box::new(|scope| {
+            observed_size = Some(scope.resolve_size(None, poodle_specs::SemanticControlSizeRole::Control));
+            observed_density = Some(scope.resolve_density(None));
+            Node::text("scoped-slot")
+        }));
+
+        let _ = app_header(&spec, &ctx, slot, None, None, None);
+
+        assert_eq!(observed_size, Some(ControlSize::Lg));
+        assert_eq!(observed_density, Some(ControlDensity::Compact));
+    }
 }

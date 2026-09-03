@@ -1,6 +1,6 @@
 # g16.069 — Nucleus AppHeader M1 Receipt
 
-Status: ready
+Status: in-review
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`, completed `g16.068`
@@ -9,6 +9,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/app-header.md`,
 `../../contracts/components/icon.md`, `../../contracts/components/text.md`
+Log: `../../logs/2026-09/20260903-g16-069-nucleus-app-header-receipt.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/175
 
 ## Goal
 
@@ -59,7 +61,8 @@ receipts. Keep native accessibility and visual acceptance separate.
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
 | Production renderer owns the shell | substitute a raw container for AppHeader | exact shell metadata and structure assertions fail |
-| Proven dependencies remain real | replace the identity Icon or Text with raw nodes | component-specific Node metadata/probe assertions fail |
+| Proven identity Icon remains real | substitute raw `Node::icon` for identity `poodle_render::icon` | `Identity icon must retain spec aria_label via production renderer` fails (`left: None`, `right: Some("Application Search")`) |
+| Proven identity Text remains real | substitute raw `Node::text` for identity `poodle_render::text` | `Identity text must carry tone color resolved by production renderer` fails (`left: None`, `right: Some(...)`) |
 | Center presence owns grouping | group the no-center regions or flatten the centered trailing column | child order, count, sizing, or containment assertion fails |
 | Size and density are exact | collapse two size or density steps | exact min-height, typography, padding, or gap assertion fails |
 | Labeling is contract-owned | remove title fallback or explicit override | exact Node label assertion fails |

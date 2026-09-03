@@ -220,3 +220,118 @@ impl AppHeaderSpec {
 fn resolve_semantic_size(size: ControlSize, role: SemanticControlSizeRole) -> ControlSize {
     crate::types::resolve_semantic_control_size(size, role)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn app_header_spec_defaults_and_builder_methods() {
+        let spec = AppHeaderSpec::new();
+        assert_eq!(spec.title, None);
+        assert_eq!(spec.subtitle, None);
+        assert_eq!(spec.is_drag_region, false);
+        assert_eq!(spec.aria_label, None);
+        assert_eq!(spec.size, None);
+        assert_eq!(spec.size_role, SemanticControlSizeRole::Control);
+        assert_eq!(spec.density, None);
+        assert_eq!(spec.center, false);
+        assert_eq!(spec.primary_action_count, 0);
+        assert_eq!(spec.utility_item_count, 0);
+        assert!(!spec.is_utility_heavy());
+
+        let configured = AppHeaderSpec::new()
+            .with_title("Poodle Studio")
+            .with_subtitle("v1.0")
+            .with_drag_region(true)
+            .with_aria_label("Main Header")
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Chrome)
+            .with_density(ControlDensity::Comfortable)
+            .with_center(true)
+            .with_primary_action_count(2)
+            .with_utility_item_count(3);
+
+        assert_eq!(configured.title.as_deref(), Some("Poodle Studio"));
+        assert_eq!(configured.subtitle.as_deref(), Some("v1.0"));
+        assert!(configured.is_drag_region);
+        assert_eq!(configured.aria_label.as_deref(), Some("Main Header"));
+        assert_eq!(configured.size, Some(ControlSize::Lg));
+        assert_eq!(configured.size_role, SemanticControlSizeRole::Chrome);
+        assert_eq!(configured.density, Some(ControlDensity::Comfortable));
+        assert!(configured.center);
+        assert_eq!(configured.primary_action_count, 2);
+        assert_eq!(configured.utility_item_count, 3);
+        assert!(configured.is_utility_heavy());
+    }
+
+    #[test]
+    fn app_header_semantic_tokens() {
+        let spec = AppHeaderSpec::new();
+        assert_eq!(spec.background_token(), semantic::COLOR_BACKGROUND_PANEL);
+        assert_eq!(spec.border_token(), semantic::COLOR_BORDER_SUBTLE);
+        assert_eq!(spec.title_color_token(), semantic::COLOR_TEXT_PRIMARY);
+        assert_eq!(spec.subtitle_color_token(), semantic::COLOR_TEXT_SECONDARY);
+    }
+
+    #[test]
+    fn app_header_size_and_typography_ladders() {
+        let spec = AppHeaderSpec::new();
+        // Min-height ladder in rem
+        assert_eq!(spec.min_height_rem(ControlSize::Xs), 2.25);
+        assert_eq!(spec.min_height_rem(ControlSize::Sm), 2.5);
+        assert_eq!(spec.min_height_rem(ControlSize::Md), 2.75);
+        assert_eq!(spec.min_height_rem(ControlSize::Lg), 3.0);
+        assert_eq!(spec.min_height_rem(ControlSize::Xl), 3.25);
+
+        // Title size ladder in rem
+        assert_eq!(spec.title_size_rem(ControlSize::Xs), 0.8125);
+        assert_eq!(spec.title_size_rem(ControlSize::Sm), 0.875);
+        assert_eq!(spec.title_size_rem(ControlSize::Md), 0.9375);
+        assert_eq!(spec.title_size_rem(ControlSize::Lg), 1.0);
+        assert_eq!(spec.title_size_rem(ControlSize::Xl), 1.0625);
+
+        // Subtitle size ladder in rem
+        assert_eq!(spec.subtitle_size_rem(ControlSize::Xs), 0.6875);
+        assert_eq!(spec.subtitle_size_rem(ControlSize::Sm), 0.71875);
+        assert_eq!(spec.subtitle_size_rem(ControlSize::Md), 0.75);
+        assert_eq!(spec.subtitle_size_rem(ControlSize::Lg), 0.8125);
+        assert_eq!(spec.subtitle_size_rem(ControlSize::Xl), 0.875);
+    }
+
+    #[test]
+    fn app_header_density_ladder() {
+        let spec = AppHeaderSpec::new();
+        // Inter-region gap
+        assert_eq!(spec.gap_rem(ControlDensity::Compact), 0.625);
+        assert_eq!(spec.gap_rem(ControlDensity::Default), 1.0);
+        assert_eq!(spec.gap_rem(ControlDensity::Comfortable), 1.0);
+
+        // Intra-region gap
+        assert_eq!(spec.region_gap_rem(ControlDensity::Compact), 0.375);
+        assert_eq!(spec.region_gap_rem(ControlDensity::Default), 0.5);
+        assert_eq!(spec.region_gap_rem(ControlDensity::Comfortable), 0.625);
+
+        // Vertical padding
+        assert_eq!(spec.pad_y_rem(ControlDensity::Compact), 0.25);
+        assert_eq!(spec.pad_y_rem(ControlDensity::Default), 0.375);
+        assert_eq!(spec.pad_y_rem(ControlDensity::Comfortable), 0.5);
+
+        // Horizontal padding
+        assert_eq!(spec.pad_x_rem(ControlDensity::Compact), 0.875);
+        assert_eq!(spec.pad_x_rem(ControlDensity::Default), 1.0);
+        assert_eq!(spec.pad_x_rem(ControlDensity::Comfortable), 1.125);
+    }
+
+    #[test]
+    fn app_header_effective_size_resolution() {
+        let spec_control = AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Control);
+        assert_eq!(spec_control.effective_size(ControlSize::Md), ControlSize::Md);
+
+        let spec_chrome = AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Chrome);
+        assert_eq!(spec_chrome.effective_size(ControlSize::Md), ControlSize::Sm);
+
+        let spec_prominent = AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Prominent);
+        assert_eq!(spec_prominent.effective_size(ControlSize::Md), ControlSize::Lg);
+    }
+}
