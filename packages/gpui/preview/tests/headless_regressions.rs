@@ -12091,6 +12091,128 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     });
 }
 
+/// AgentQuestion reaches the production compat adapter, renderer, and backend.
+#[test]
+fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
+    use poodle_specs::{AgentQuestionSpec, ControlDensity, ControlSize};
+
+    fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {
+        AgentQuestionOption {
+            value: value.to_owned(),
+            label: label.to_owned(),
+            description: description.map(str::to_owned),
+        }
+    }
+
+    fn question(allow_multiple: bool) -> AgentQuestionItem {
+        AgentQuestionItem {
+            id: "placement".to_owned(),
+            header: Some("Placement".to_owned()),
+            prompt: "Where should the question appear?".to_owned(),
+            options: vec![
+                option(
+                    "inline",
+                    "Inline in the transcript",
+                    Some("Keep it beside the agent turn."),
+                ),
+                option("composer", "Above the composer", None),
+            ],
+            allow_multiple,
+        }
+    }
+
+    let spec = AgentQuestionSpec::new(vec![question(false), question(true)])
+        .with_selections(vec!["composer".to_owned()])
+        .with_dismissible(true)
+        .with_size(ControlSize::Sm)
+        .with_density(ControlDensity::Compact);
+    let theme_provider = theme();
+    let rendered = poodle_render::agent_question(
+        &spec,
+        &RenderContext::new(&theme_provider),
+        poodle_render::AgentQuestionHandlers::default(),
+    );
+    assert_eq!(
+        rendered.roles.get("size").map(String::as_str),
+        Some("sm"),
+        "the production question root must expose its resolved size"
+    );
+    assert_eq!(
+        rendered.roles.get("density").map(String::as_str),
+        Some("compact"),
+        "the production question root must expose its resolved density"
+    );
+    assert_eq!(
+        rendered.roles.get("multi-select").map(String::as_str),
+        Some("false"),
+        "the production question root must expose the active choice mode"
+    );
+
+    let prompt = rendered
+        .find(&|node| node.intrinsic_text() == Some("Where should the question appear?"))
+        .expect("prompt");
+    assert!(prompt.style.text_wrap, "the prompt composes production Text");
+    assert_eq!(prompt.style.line_height, Some(1.5));
+
+    let selected = rendered
+        .find(&|node| node.a11y.label.as_deref() == Some("Above the composer"))
+        .expect("selected option");
+    assert_eq!(selected.a11y.role, Some(NodeRole::RadioButton));
+    assert_eq!(
+        selected.roles.get("variant").map(String::as_str),
+        Some("secondary"),
+        "question options compose production Button"
+    );
+    assert_eq!(selected.roles.get("size").map(String::as_str), Some("sm"));
+    assert_eq!(
+        selected.roles.get("density").map(String::as_str),
+        Some("compact")
+    );
+    assert!(selected.style.focus_ring.is_some());
+
+    run_headless(|cx| {
+        #[derive(Default)]
+        struct QuestionHost {
+            selections: Vec<String>,
+            events: Vec<String>,
+        }
+
+        let host = Arc::new(Mutex::new(QuestionHost::default()));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme();
+            Rc::new(move || {
+                let selections = host.lock().expect("question host").selections.clone();
+                let select_host = Arc::clone(&host);
+                crate::node_compat::AgentQuestion::from_spec(
+                    AgentQuestionSpec::new(vec![question(false)]).with_selections(selections),
+                    &theme_provider,
+                )
+                .on_select(Arc::new(move |value| {
+                    let mut host = select_host.lock().expect("question host");
+                    host.events.push(value.to_owned());
+                    host.selections = vec![value.to_owned()];
+                }))
+                .into_element()
+            })
+        };
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 240.0);
+        driver.pointer_activate_id("agent-question-option-composer");
+        assert_eq!(
+            host.lock().expect("question host").events,
+            ["composer"],
+            "mounted pointer input reaches the exact option callback"
+        );
+        assert!(
+            driver.mounted_observation().is_valid(),
+            "the proof must paint and dispatch input through the mounted backend"
+        );
+    });
+}
+
 /// AgentPlanRecord disclosure travels through mounted keyboard input.
 #[test]
 fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
