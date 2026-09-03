@@ -118,7 +118,7 @@ stay maintained; backend admission is not part of the first card.
 81. [081 — Nucleus AgentPlan M1 receipt](081-nucleus-agent-plan-m1.md) — complete; merged in PR #187 after preparation repair and exact-head finalization review with production decision execution, exact Button recipe tokens, and one M1 receipt
 82. [082 — Nucleus AgentChatInput M1 receipt](082-nucleus-agent-chat-input-m1.md) — complete; merged in PR #188 after preparation repair and one final receipt-claim correction with production composer execution and one M1 receipt
 83. [083 — Nucleus AgentTranscript M1 receipt](083-nucleus-agent-transcript-m1.md) — complete; merged in PR #190 after two preparation repair rounds and exact-head M1 review with real posture/dependency structure, mounted record geometry, and one M1 receipt
-84. [084 — Nucleus AgentQuestion M1 receipt](084-nucleus-agent-question-m1.md) — preparation-ready; build one production mounted question proof in parallel, then pause before shared receipt files
+84. [084 — Nucleus AgentQuestion M1 receipt](084-nucleus-agent-question-m1.md) — complete in PR #189; production adapter, controlled question choices, disabled/refusal behavior, geometry, and caller-scoped identity now carry a terminal M1 receipt
 85. [085 — Nucleus ModelPicker M1 receipt](085-nucleus-model-picker-m1.md) — preparation-ready; build one production mounted picker proof in parallel, then pause before shared receipt files
 86. [086 — Nucleus StatusIndicator M1 receipt](086-nucleus-status-indicator-m1.md) — preparation-ready; build one production mounted status proof in parallel, then pause before shared receipt files
 
@@ -126,10 +126,10 @@ stay maintained; backend admission is not part of the first card.
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.083` are complete. `g16.084` has an accepted production proof and
-is the next serial receipt finalization lane against the 20/29 mounted cohort.
-Receipt refresh, review, and merge remain serial on the latest native source
-identity.
+`g16.053`–`g16.084` are complete. The mounted Nucleus cohort is 21/29.
+`g16.085` and `g16.086` prepare independent ModelPicker and StatusIndicator
+proofs without touching shared receipt files; their finalization remains serial
+on the latest native source identity.
 Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
