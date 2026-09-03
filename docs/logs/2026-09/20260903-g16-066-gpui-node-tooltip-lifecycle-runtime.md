@@ -39,7 +39,7 @@ API changed.
 | Generation is exact | A timer fires after B hover | A never paints; B shows after its own 300ms |
 | Paint is authority | target removed while pending | no late tooltip after 500ms |
 | Window ownership is isolated | hover in two live windows | overlapping mounts; B's frame does not cancel A's pending/visible tooltip |
-| Teardown is production | `reset_focus_registry` as close | `remove_window` clears pending and visible; later frames do not paint |
+| Teardown is production | leaked close bindings / reset-as-close | `remove_window` clears pending and visible, retires the binding, and a later close does not re-run earlier cleanup |
 | Existing consumers survive | fix only Tabs | IconButton and SegmentedControl regressions green |
 
 ## Validation
@@ -47,8 +47,8 @@ API changed.
 Focused:
 
 - `cargo test --manifest-path packages/gpui/node-backend/Cargo.toml --lib` — 51 pass
-- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions gpui_node_tooltip` — 5 pass
-  (`overlapping_two_window_isolation` and `window_teardown_clears_pending_visible_and_blocks_late_paint` included)
+- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions gpui_node_tooltip` — 6 pass
+  (`overlapping_two_window_isolation`, `window_teardown_clears_pending_visible_and_blocks_late_paint`, and `teardown_bindings_retire_across_repeated_close` included)
 - `icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard` — pass
 - `segmented_control_exclusive_focus_identity_and_disabled_paths` — pass
 - `overlay_layers_survive_independent_conversions_within_one_frame` — pass

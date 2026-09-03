@@ -58,7 +58,7 @@ and window key path are the authority. Stale timers and events are inert.
 | Generation is exact | A timer fires after B hover | A never paints |
 | Paint is authority | target removed while pending | no late tooltip |
 | Window ownership is isolated | hover in two live windows | overlapping mounts; B's frame does not cancel A's pending/visible tooltip |
-| Teardown is production | `reset_focus_registry` as close | `remove_window` clears pending and visible; later frames do not paint |
+| Teardown is production | leaked close bindings / reset-as-close | `remove_window` clears pending and visible, retires the binding, and a later close does not re-run earlier cleanup |
 | Existing consumers survive | fix only Tabs | IconButton and SegmentedControl regressions stay green |
 
 ## Writable Scope

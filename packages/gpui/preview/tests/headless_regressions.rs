@@ -20302,6 +20302,98 @@ fn gpui_node_tooltip_window_teardown_clears_pending_visible_and_blocks_late_pain
     });
 }
 
+/// g16.066. Repeated production create/close must return tooltip runtime and
+/// teardown-binding counts to baseline. A later close must not re-run an
+/// earlier handle's cleanup. `reset_focus_registry` is not this path.
+#[test]
+fn gpui_node_tooltip_teardown_bindings_retire_across_repeated_close() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, tooltip_runtime_owns_window, tooltip_runtime_window_count,
+        tooltip_teardown_binding_count, tooltip_teardown_runs_for,
+    };
+
+    fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
+        let mut btn = Node::button(label);
+        btn.id = Some(id.into());
+        btn.tooltip = Some(tooltip.into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        btn
+    }
+
+    run_headless(|cx| {
+        let baseline_bindings = tooltip_teardown_binding_count();
+        let baseline_runtime = tooltip_runtime_window_count();
+        assert_eq!(baseline_bindings, 0, "test start must not inherit bindings");
+        assert_eq!(baseline_runtime, 0, "test start must not inherit runtime");
+
+        let mut previous = None;
+        for cycle in 0..3 {
+            let mut cx_cycle = cx.clone();
+            let id = format!("cycle-{cycle}-btn");
+            let mounted = Arc::new(Mutex::new(tooltip_button(
+                &id,
+                "Cycle",
+                "Cycle Tooltip",
+            )));
+            let mut driver =
+                HeadlessDriver::new_in_box(&mut cx_cycle, Arc::clone(&mounted), 400.0, 300.0);
+            let handle = driver.with_window(|w, _cx| w.window_handle());
+
+            driver.draw_frame();
+            let center = poodle_gpui_node_backend::bounds_for(&id)
+                .expect("cycle button bounds")
+                .center();
+            driver.pointer_hover(center);
+            assert!(
+                is_tooltip_pending(&id),
+                "cycle {cycle} must start a pending tooltip"
+            );
+            assert_eq!(
+                tooltip_teardown_binding_count(),
+                baseline_bindings + 1,
+                "cycle {cycle} must add exactly one close binding"
+            );
+            assert_eq!(
+                tooltip_runtime_window_count(),
+                baseline_runtime + 1,
+                "cycle {cycle} must own exactly one tooltip runtime"
+            );
+
+            driver.close_window();
+
+            assert_eq!(
+                tooltip_teardown_binding_count(),
+                baseline_bindings,
+                "cycle {cycle} close must retire its binding"
+            );
+            assert_eq!(
+                tooltip_runtime_window_count(),
+                baseline_runtime,
+                "cycle {cycle} close must drop tooltip runtime"
+            );
+            assert!(
+                !tooltip_runtime_owns_window(handle),
+                "closed cycle {cycle} must not retain runtime"
+            );
+            assert_eq!(
+                tooltip_teardown_runs_for(handle),
+                1,
+                "cycle {cycle} must clean up exactly once"
+            );
+
+            if let Some(old) = previous {
+                assert_eq!(
+                    tooltip_teardown_runs_for(old),
+                    1,
+                    "closing cycle {cycle} must not re-run earlier handle cleanup"
+                );
+            }
+            previous = Some(handle);
+        }
+    });
+}
+
 /// g16.066. Tooltip probe channels receipt: verify lifecycle probe emissions.
 #[test]
 fn gpui_node_tooltip_probe_channels() {

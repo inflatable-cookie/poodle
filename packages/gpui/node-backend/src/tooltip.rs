@@ -73,8 +73,13 @@ thread_local! {
 
     /// Production close observers. Stored apart from tooltip state so a
     /// teardown that runs inside `on_window_closed` does not drop its own
-    /// subscription mid-notify.
+    /// subscription mid-notify. Drop happens on a deferred effect after that
+    /// notify returns.
     static WINDOW_TEARDOWNS: RefCell<HashMap<AnyWindowHandle, Subscription>> =
+        RefCell::new(HashMap::new());
+
+    /// How many times production close actually cleaned this handle.
+    static WINDOW_TEARDOWN_RUNS: RefCell<HashMap<AnyWindowHandle, u32>> =
         RefCell::new(HashMap::new());
 }
 
@@ -84,6 +89,7 @@ pub fn reset_tooltip_registry() {
     WINDOW_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
     PAINTED_TOOLTIPS.with(|cell| cell.borrow_mut().clear());
     WINDOW_TEARDOWNS.with(|cell| cell.borrow_mut().clear());
+    WINDOW_TEARDOWN_RUNS.with(|cell| cell.borrow_mut().clear());
 }
 
 /// The painted tooltip for the first active window, or `None` if no tooltip
@@ -146,11 +152,29 @@ pub(crate) fn bind_window_teardown(handle: AnyWindowHandle, cx: &mut App) {
     }
     let subscription = cx.on_window_closed(move |app| {
         if handle.update(app, |_, _, _| {}).is_err() {
+            record_teardown_run(handle);
             teardown_window_tooltips(handle);
+            // Drop after this notify finishes. SubscriberSet::retain has the
+            // callback list taken; dropping here would unsubscribe mid-notify.
+            app.defer(move |_app| {
+                drop_teardown_binding(handle);
+            });
         }
     });
     WINDOW_TEARDOWNS.with(|cell| {
         cell.borrow_mut().insert(handle, subscription);
+    });
+}
+
+fn record_teardown_run(handle: AnyWindowHandle) {
+    WINDOW_TEARDOWN_RUNS.with(|cell| {
+        *cell.borrow_mut().entry(handle).or_insert(0) += 1;
+    });
+}
+
+fn drop_teardown_binding(handle: AnyWindowHandle) {
+    WINDOW_TEARDOWNS.with(|cell| {
+        cell.borrow_mut().remove(&handle);
     });
 }
 
@@ -179,6 +203,27 @@ pub fn tooltip_runtime_owns_window(handle: AnyWindowHandle) -> bool {
             state.target_id.is_some() || state.task.is_some() || state.is_visible
         })
     })
+}
+
+/// Windows that currently own pending or visible tooltip state.
+pub fn tooltip_runtime_window_count() -> usize {
+    WINDOW_TOOLTIPS.with(|cell| {
+        cell.borrow()
+            .values()
+            .filter(|state| state.target_id.is_some() || state.task.is_some() || state.is_visible)
+            .count()
+    })
+}
+
+/// Live production close bindings. Must return to baseline after `remove_window`.
+pub fn tooltip_teardown_binding_count() -> usize {
+    WINDOW_TEARDOWNS.with(|cell| cell.borrow().len())
+}
+
+/// Times production close cleaned this handle. A later window's close must
+/// not increment an already-closed handle.
+pub fn tooltip_teardown_runs_for(handle: AnyWindowHandle) -> u32 {
+    WINDOW_TEARDOWN_RUNS.with(|cell| cell.borrow().get(&handle).copied().unwrap_or(0))
 }
 
 /// Frame boundary hook: called from `overlay_frame_begin_for` for one window.
