@@ -1,0 +1,78 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Popover",
+  "scenario_id": "nucleus.navigation.popover",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "744006ec4f9de27f46ec8389bac5da907bc20434",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount nested, sibling, disabled, fixed-width, and focus-strategy Popover compositions through node_compat::Popover::from_spec(...).into_element() into HeadlessDriver",
+    "activate the outer trigger through mounted pointer input and observe the nested surface open with its authored bottom-start offset gap",
+    "activate the nested inner trigger inside the outer surface and observe two scoped layers paint without a nested deferred draw",
+    "dispatch Escape and observe inner-first dismissal that leaves the outer surface mounted",
+    "press inside the outer surface but outside the inner surface and observe inner-only outside dismissal",
+    "close the outer surface by Escape and observe the outer trigger regains backend focus",
+    "mount duplicate-content sibling instances open and observe independent layers, bounds, and callbacks; Escape dismisses the innermost sibling only",
+    "activate a sibling trigger while another sibling is open and observe outside dismissal of the open layer followed by scoped activation",
+    "activate a disabled trigger and observe no surface, no callback, and no layer",
+    "open an authored 20rem fixed-width instance and observe the exact mounted width and offset gap",
+    "open content / first-focusable / none initial-focus instances and observe exact mounted focus-handle targets",
+    "close every focus-strategy instance and observe restoration to the matching per-instance trigger"
+  ],
+  "assertions": [
+    "the production renderer composition owns trigger disclosure metadata, dialog surface role and name, instance-scoped runtime identity, dismiss layers, and placement / surface-width roles",
+    "the popover surface resolves the contract token profile: elevated fill, border-subtle at 74% alpha, default border width, surface radius, overlay elevation plus inset highlight, and panel padding",
+    "mounted surfaces record positive bounds separated from their triggers by the exact authored offset on the declared placement axis, start-aligned on the cross axis",
+    "mounted surface width respects the 14rem/24rem bounds, and a pinned 20rem min/max pair resolves to the exact mounted width",
+    "opening an inner Popover inside an outer surface paints two scoped layers without nesting a deferred draw",
+    "Escape dismisses the innermost layer first; an outside press inside the outer surface but outside the inner surface dismisses only the inner layer",
+    "accepted dismissal unmounts only the intended surface through the host rebuild, and the layer count returns to zero",
+    "duplicate-valued sibling instances keep runtime ids, callbacks, bounds, and layer state separate under concurrent mounting",
+    "a pointer press outside an open sibling's layer dismisses it, then the sibling trigger opens its own scoped surface",
+    "disabled trigger input is inert: no callback, no surface, no layer",
+    "content initial focus lands on the surface itself, first-focusable lands on the first focusable descendant, and none moves no focus; only the matching trigger's focus handle is restored on close",
+    "controlled host-owned open state drives every surface presence transition through the mounted rebuild"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
