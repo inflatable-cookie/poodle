@@ -31772,6 +31772,31 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
     });
 }
 
+/// DetailItem reaches the production compat adapter, renderer, composed Text
+/// tree, and mounted GPUI backend with caller-scoped identity.
+#[test]
+fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_backend() {
+    use gpui::IntoElement;
+    use poodle_specs::DetailItemSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            node_compat::DetailItem::from_spec(
+                DetailItemSpec::new("Workspace").with_value("Poodle"),
+                &theme_provider,
+            )
+            .into_element()
+        });
+
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 180.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("detail-item:counterexample").is_some(),
+            "the production DetailItem IntoElement path must paint caller-scoped root identity"
+        );
+    });
+}
+
 #[derive(Clone)]
 struct AgentChatInputState {
     id: String,
