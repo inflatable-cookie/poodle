@@ -133,3 +133,67 @@ impl MenuSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_spec_and_builder_methods() {
+        let items = vec![
+            MenuEntry::new("new", "New file"),
+            MenuEntry::new("print", "Print…").with_disabled(true),
+            MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+            MenuEntry::new("check", "Checked")
+                .with_kind(MenuItemKind::Checkbox)
+                .with_checked(true),
+        ];
+        let spec = MenuSpec::new(items)
+            .with_open(true)
+            .with_default_open(false)
+            .with_placement(OverlayPlacement::BottomEnd)
+            .with_dismiss_on_outside_interact(false)
+            .with_aria_label("File actions")
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Chrome)
+            .with_density(ControlDensity::Compact);
+
+        assert!(spec.open.unwrap());
+        assert!(!spec.default_open);
+        assert!(spec.current_open());
+        assert_eq!(spec.placement, OverlayPlacement::BottomEnd);
+        assert!(!spec.dismiss_on_outside_interact);
+        assert_eq!(spec.aria_label.as_deref(), Some("File actions"));
+        assert_eq!(spec.size, Some(ControlSize::Lg));
+        assert_eq!(spec.size_role, SemanticControlSizeRole::Chrome);
+        assert_eq!(spec.density, Some(ControlDensity::Compact));
+        assert_eq!(spec.actionable_item_count(), 2);
+        assert_eq!(spec.checked_item_count(), 1);
+        assert_eq!(spec.surface_fill_token(), semantic::COLOR_BACKGROUND_ELEVATED);
+        assert_eq!(spec.shadow_token(), semantic::ELEVATION_OVERLAY);
+        assert_eq!(spec.overlay_border_token(), semantic::COLOR_BORDER_DEFAULT);
+        assert_eq!(spec.overlay_radius_token(), semantic::RADIUS_SURFACE);
+        assert_eq!(spec.item_text_token(), semantic::COLOR_TEXT_PRIMARY);
+        assert_eq!(spec.item_highlight_token(), semantic::COLOR_ACCENT_BASE);
+        assert_eq!(spec.separator_color_token(), semantic::COLOR_BORDER_SUBTLE);
+        assert_eq!(spec.disabled_opacity_token(), semantic::STATE_OPACITY_DISABLED);
+    }
+
+    #[test]
+    fn menu_entry_builders_and_properties() {
+        let entry = MenuEntry::new("delete", "Delete")
+            .with_disabled(false)
+            .with_checked(false)
+            .with_shortcut_label("⌘D")
+            .with_kind(MenuItemKind::Action)
+            .with_destructive(true);
+
+        assert_eq!(entry.value, "delete");
+        assert_eq!(entry.label, "Delete");
+        assert!(!entry.is_disabled);
+        assert!(!entry.is_checked);
+        assert_eq!(entry.shortcut_label.as_deref(), Some("⌘D"));
+        assert_eq!(entry.kind, MenuItemKind::Action);
+        assert!(entry.is_destructive);
+    }
+}

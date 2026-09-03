@@ -7,15 +7,39 @@
 
 use std::sync::Arc;
 
+use poodle_headless::menu::{menu_list_navigate, MenuListMove};
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole, NodeToggled, StylePatch,
+    NodeKey, NodeModifiers, NodeRole, NodeToggled, StylePatch,
 };
 use poodle_specs::{ControlDensity, ControlSize, MenuItemKind, MenuSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
 use crate::presentation::{control_height_rem, rem_to_px};
+
+fn roving_key_handler(
+    disabled_map: &[bool],
+    item_ids: &[String],
+    current_idx: usize,
+) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
+    let disabled = disabled_map.to_vec();
+    let ids = item_ids.to_vec();
+    Some(Arc::new(move |key, _modifiers| {
+        let mv = match key {
+            NodeKey::ArrowDown => MenuListMove::Next,
+            NodeKey::ArrowUp => MenuListMove::Prev,
+            NodeKey::Home => MenuListMove::First,
+            NodeKey::End => MenuListMove::Last,
+            _ => return None,
+        };
+        let next_idx = menu_list_navigate(&disabled, current_idx, mv);
+        if next_idx == current_idx {
+            return None;
+        }
+        Some(ids[next_idx].clone())
+    }))
+}
 
 pub fn menu(
     spec: &MenuSpec,
@@ -86,8 +110,19 @@ pub fn menu(
         s.overlay = true;
     }
 
+    let disabled_map: Vec<bool> = spec
+        .items
+        .iter()
+        .map(|entry| matches!(entry.kind, MenuItemKind::Separator) || entry.is_disabled)
+        .collect();
+    let item_ids: Vec<String> = spec
+        .items
+        .iter()
+        .map(|entry| format!("menu-item:{}", entry.value))
+        .collect();
+
     // One item body shared by all three interactive kinds.
-    let build_item = |entry: &poodle_specs::MenuEntry, leading: Option<Node>| -> Node {
+    let build_item = |entry: &poodle_specs::MenuEntry, leading: Option<Node>, idx: usize| -> Node {
         let label_color = if entry.is_destructive {
             danger_color
         } else {
@@ -96,6 +131,7 @@ pub fn menu(
 
         let mut item = Node::container();
         item.id = Some(format!("menu-item:{}", entry.value));
+        item.runtime_id = Some(format!("menu-item:{}", entry.value));
         {
             let s = &mut item.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -112,7 +148,6 @@ pub fn menu(
             s.descriptor.corner_radii.bottom_right = item_radius;
             s.descriptor.corner_radii.bottom_left = item_radius;
         }
-        item.interaction.focusable = true;
 
         if let Some(lead) = leading {
             item = item.child(lead);
@@ -142,12 +177,19 @@ pub fn menu(
 
         if entry.is_disabled {
             item.style.descriptor.opacity = disabled_opacity;
+            item.style.descriptor.cursor = CursorHint::NotAllowed;
+            item.interaction.disabled = true;
+            item.interaction.focusable = false;
+            item.a11y.tab_index = Some(-1);
         } else {
             let hover = if entry.is_destructive {
                 danger_hover_tint
             } else {
                 hover_tint
             };
+            item.interaction.disabled = false;
+            item.interaction.focusable = true;
+            item.a11y.tab_index = Some(0);
             item.style.descriptor.cursor = CursorHint::Pointer;
             item.style.hover = Some(StylePatch {
                 background: Some(hover),
@@ -155,6 +197,13 @@ pub fn menu(
                 text_color: None,
                 opacity: None,
             });
+            item.style.focus = Some(StylePatch {
+                background: Some(hover),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            });
+            item.interaction.on_key = roving_key_handler(&disabled_map, &item_ids, idx);
             if let Some(handler) = &on_action {
                 let handler = Arc::clone(handler);
                 let value = entry.value.clone();
@@ -164,7 +213,7 @@ pub fn menu(
         item
     };
 
-    for entry in &spec.items {
+    for (idx, entry) in spec.items.iter().enumerate() {
         match entry.kind {
             MenuItemKind::Separator => {
                 let mut sep = Node::container();
@@ -177,6 +226,9 @@ pub fn menu(
                     s.descriptor.layout.spacing.margin.top = separator_my;
                     s.descriptor.layout.spacing.margin.bottom = separator_my;
                 }
+                sep.interaction.disabled = true;
+                sep.interaction.focusable = false;
+                sep.a11y.tab_index = Some(-1);
                 sep.a11y.role = Some(NodeRole::Splitter);
                 el = el.child(sep);
             }
@@ -195,7 +247,7 @@ pub fn menu(
                     s.style.descriptor.layout.height = LayoutSizing::Fixed(check_size);
                     s
                 };
-                let mut item = build_item(entry, Some(leading));
+                let mut item = build_item(entry, Some(leading), idx);
                 item.a11y.role = Some(match entry.kind {
                     MenuItemKind::Radio => NodeRole::MenuItemRadio,
                     _ => NodeRole::MenuItemCheckBox,
@@ -208,7 +260,7 @@ pub fn menu(
                 el = el.child(item);
             }
             MenuItemKind::Action => {
-                let mut item = build_item(entry, None);
+                let mut item = build_item(entry, None, idx);
                 item.a11y.role = Some(NodeRole::MenuItem);
                 el = el.child(item);
             }
@@ -254,5 +306,105 @@ mod tests {
         let refusing = MenuSpec::default().with_dismiss_on_outside_interact(false);
         let node = menu(&refusing, &ctx, None);
         assert!(node.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn disabled_items_are_not_focusable_and_lack_activation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("enabled", "Enabled"),
+            poodle_specs::MenuEntry::new("disabled", "Disabled").with_disabled(true),
+            poodle_specs::MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+        ]);
+        let node = menu(&spec, &ctx, Some(Arc::new(|_| {})));
+
+        let enabled_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:enabled"))
+            .expect("enabled item");
+        assert!(enabled_item.interaction.focusable);
+        assert!(!enabled_item.interaction.disabled);
+        assert_eq!(enabled_item.a11y.tab_index, Some(0));
+        assert!(enabled_item.style.hover.is_some());
+        assert!(enabled_item.style.focus.is_some());
+        assert!(enabled_item.interaction.on_activate.is_some());
+        assert!(enabled_item.interaction.on_key.is_some());
+
+        let disabled_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:disabled"))
+            .expect("disabled item");
+        assert!(!disabled_item.interaction.focusable);
+        assert!(disabled_item.interaction.disabled);
+        assert_eq!(disabled_item.a11y.tab_index, Some(-1));
+        assert!(disabled_item.style.hover.is_none());
+        assert!(disabled_item.style.focus.is_none());
+        assert!(disabled_item.interaction.on_activate.is_none());
+        assert!(disabled_item.interaction.on_key.is_none());
+
+        let sep = node
+            .find(&|n| n.a11y.role == Some(NodeRole::Splitter))
+            .expect("separator");
+        assert!(!sep.interaction.focusable);
+        assert!(sep.interaction.disabled);
+        assert_eq!(sep.a11y.tab_index, Some(-1));
+    }
+
+    #[test]
+    fn roving_key_navigation_skips_disabled_and_separators() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("first", "First"),
+            poodle_specs::MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("disabled", "Disabled").with_disabled(true),
+            poodle_specs::MenuEntry::new("last", "Last"),
+        ]);
+        let node = menu(&spec, &ctx, None);
+
+        let first = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:first"))
+            .expect("first item");
+        let first_key = first.interaction.on_key.as_ref().expect("key handler");
+
+        // ArrowDown from first skips sep and disabled, lands on last
+        assert_eq!(
+            first_key(NodeKey::ArrowDown, NodeModifiers::default()),
+            Some("menu-item:last".into())
+        );
+        // ArrowUp from first wraps to last
+        assert_eq!(
+            first_key(NodeKey::ArrowUp, NodeModifiers::default()),
+            Some("menu-item:last".into())
+        );
+        // End lands on last
+        assert_eq!(
+            first_key(NodeKey::End, NodeModifiers::default()),
+            Some("menu-item:last".into())
+        );
+
+        let last = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:last"))
+            .expect("last item");
+        let last_key = last.interaction.on_key.as_ref().expect("key handler");
+
+        // ArrowDown from last wraps to first
+        assert_eq!(
+            last_key(NodeKey::ArrowDown, NodeModifiers::default()),
+            Some("menu-item:first".into())
+        );
+        // ArrowUp from last skips disabled and sep, lands on first
+        assert_eq!(
+            last_key(NodeKey::ArrowUp, NodeModifiers::default()),
+            Some("menu-item:first".into())
+        );
+        // Home lands on first
+        assert_eq!(
+            last_key(NodeKey::Home, NodeModifiers::default()),
+            Some("menu-item:first".into())
+        );
+
+        // Space, ArrowLeft, and other non-navigation keys are inert for roving
+        assert_eq!(last_key(NodeKey::Space, NodeModifiers::default()), None);
+        assert_eq!(last_key(NodeKey::ArrowLeft, NodeModifiers::default()), None);
     }
 }
