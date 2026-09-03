@@ -267,6 +267,92 @@ fn a_pointer_press_reaches_the_backend_listener_once() {
     });
 }
 
+/// g16.067: Icon mounts through the production render path and backend,
+/// proving its named SVG path handoff, token size, primary tint, explicit
+/// accessible label, and mounted layout reach the backend.
+#[test]
+fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend() {
+    use poodle_specs::{IconProviderSpec, IconSize, IconSpec};
+    use poodle_tokens::semantic;
+
+    fn icon_asset_exists(name: &str) -> bool {
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../render/assets/icons")
+            .join(format!("{name}.svg"))
+            .is_file()
+    }
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let icon_name = "search";
+        assert!(
+            icon_asset_exists(icon_name),
+            "Icon fixture requires a real registered icon asset on disk"
+        );
+
+        let spec = IconSpec::new(icon_name)
+            .with_size(IconSize::Lg)
+            .with_aria_label("Search documents");
+        let expected_size = ctx.theme().resolve_space(semantic::SIZE_ICON_LG);
+        let expected_tint = ctx.theme().resolve_color("color.icon.primary");
+
+        let mut node = poodle_render::icon(&spec, &ctx);
+        node.id = Some(FIXTURE_ID.to_owned());
+        assert_eq!(node.a11y.label.as_deref(), Some("Search documents"));
+        assert_eq!(
+            node.style.descriptor.text_color,
+            Some(expected_tint),
+            "Icon must carry explicit primary tint"
+        );
+        match &node.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, icon_name);
+                assert_eq!(*size, expected_size);
+            }
+            _ => panic!("poodle_render::icon must emit NodeKind::Icon"),
+        }
+
+        // Wrap with the normal IconProvider prerequisite setup.
+        let provider_spec = IconProviderSpec::new();
+        let root = poodle_render::icon_provider(&provider_spec, &ctx, Some(node));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.draw_frame();
+        // Dispatch test-platform pointer input over the mounted icon box.
+        driver.pointer_hover(point(px(40.0), px(40.0)));
+        driver.draw_frame();
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            probe_channels.contains(&"content.text-icon.icon"),
+            "Backend must receive content.text-icon.icon probe channel on production path"
+        );
+
+        let bounds = poodle_gpui_node_backend::bounds_for(FIXTURE_ID).expect("mounted icon bounds");
+        assert_eq!(f32::from(bounds.size.width), expected_size);
+        assert_eq!(f32::from(bounds.size.height), expected_size);
+
+        nucleus_receipts::emit_if_configured(
+            "Icon",
+            "nucleus.shell.icon",
+            driver.mounted_observation(),
+            &[
+                "install icon provider and render Icon through poodle_render",
+                "pointer hover dispatch through HeadlessDriver",
+            ],
+            &[
+                "production render path emits NodeKind::Icon with named SVG path handoff and token size",
+                "text_color tint matches the resolved theme value",
+                "explicit accessible label is preserved on the mounted node",
+                "mounted bounds and content.text-icon.icon probe channel confirm production backend layout",
+            ],
+        );
+    });
+}
+
 /// g15.041: Button disclosure targets (contract §3 `controls`) ride the same
 /// renderer-neutral node channel as IconButton's — a Button built with
 /// `with_controls(...)` mounts through the real backend carrying
@@ -14146,6 +14232,8 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             .unwrap_or_else(|| panic!("{id}"))
     }
 
+    let mut observation = None;
+
     // ── Command, tooltip projection, semantics, inert skips ──────────────
     run_headless(|cx| {
         let clicks = Arc::new(Mutex::new(Vec::<String>::new()));
@@ -14268,6 +14356,11 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             "command-only activation must not manufacture a pressed change"
         );
 
+        driver.focus_element("icon-command");
+        driver.dispatch_key_raw("enter");
+        driver.dispatch_key_raw("space");
+        assert_eq!(*clicks.lock().expect("click lock"), ["Add", "Add", "Add"]);
+
         for id in ["icon-disabled", "icon-loading"] {
             if poodle_gpui_node_backend::bounds_for(id).is_some() {
                 driver.pointer_activate_id(id);
@@ -14276,8 +14369,76 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
                 poodle_gpui_node_backend::focus_handle_for(id).is_none(),
                 "{id} must not become a sequential stop"
             );
+            assert!(
+                !poodle_gpui_node_backend::is_tooltip_pending(id),
+                "{id} must not start a pending tooltip timer"
+            );
         }
-        assert_eq!(*clicks.lock().expect("click lock"), ["Add"]);
+        assert_eq!(*clicks.lock().expect("click lock"), ["Add", "Add", "Add"]);
+
+        // ── Merged 300ms tooltip lifecycle ──────────────────────────────
+        driver.pointer_hover(payload_frac("icon-tooltip", 0.5, 0.5));
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_pending("icon-tooltip"),
+            "hover must start a pending tooltip timer"
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_tooltip().is_none(),
+            "tooltip must not paint before the 300ms delay"
+        );
+        driver.advance_clock(std::time::Duration::from_millis(299));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_pending("icon-tooltip"),
+            "tooltip must stay pending at 299ms"
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_tooltip().is_none(),
+            "tooltip must stay absent at 299ms"
+        );
+        driver.advance_clock(std::time::Duration::from_millis(1));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_visible("icon-tooltip"),
+            "tooltip must become visible at 300ms"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip().map(|p| p.text).as_deref(),
+            Some("Save document")
+        );
+
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        driver.draw_frame();
+        assert!(
+            !poodle_gpui_node_backend::is_tooltip_visible("icon-tooltip"),
+            "pointer leave must hide visible tooltip"
+        );
+        assert!(poodle_gpui_node_backend::painted_tooltip().is_none());
+
+        driver.pointer_hover(payload_frac("icon-fallback", 0.5, 0.5));
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_pending("icon-fallback"),
+            "fallback tooltip must start a pending timer"
+        );
+        driver.advance_clock(poodle_gpui_node_backend::TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_visible("icon-fallback"),
+            "fallback tooltip must paint at 300ms"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip().map(|p| p.text).as_deref(),
+            Some("Close"),
+            "fallback tooltip uses aria-label when explicit tooltip is absent"
+        );
+
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+        assert!(
+            !poodle_gpui_node_backend::is_tooltip_visible("icon-fallback"),
+            "Escape must dismiss visible tooltip"
+        );
+        assert!(poodle_gpui_node_backend::painted_tooltip().is_none());
 
         driver.focus_element("icon-before");
         driver.focus_next_tab_stop();
@@ -14306,6 +14467,8 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             Some(true),
             "disabled and loading targets are skipped"
         );
+
+        observation = Some(driver.mounted_observation());
     });
 
     // ── Controlled toggle: Enter then Space rebuild the host spec ────────
@@ -14443,6 +14606,23 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             "the host rebuilds from the reported inverse"
         );
     });
+
+    nucleus_receipts::emit_if_configured(
+        "IconButton",
+        "nucleus.shell.icon-button",
+        observation.expect("mounted observation recorded from first scenario"),
+        &[
+            "mount IconButton through HeadlessDriver",
+            "pointer activate, keyboard activate, and hover dispatch through GPUI platform",
+            "controlled and seeded toggle rebuilds through dispatched keyboard input",
+        ],
+        &[
+            "pointer and keyboard activation fire listeners through real hit testing and focus dispatch",
+            "controlled and seeded toggle states rebuild host tree",
+            "disabled and loading states remain inert",
+            "300ms tooltip lifecycle resolves explicit and fallback text through dispatched hover and timing",
+        ],
+    );
 }
 
 /// Collapsible disclosure travels through mounted pointer and keyboard input.

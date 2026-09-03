@@ -9,6 +9,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/icon.md`,
 `../../contracts/components/icon-button.md`
+Log: `../../logs/2026-09/20260903-g16-067-nucleus-icon-receipts.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/173
 
 ## Goal
 
@@ -18,12 +20,15 @@ paths. Treat `IconProvider` as fixture setup, not a thirtieth rendered row.
 
 ## Fixed Boundary
 
-- One mounted Icon scenario installs the normal icon registry/provider path,
-  renders a named icon through `poodle_render`, and proves its resolved glyph,
-  token size, tint, and explicit accessible label reach the painted backend.
+- One mounted Icon scenario installs the normal icon provider path,
+  renders a named icon through `poodle_render`, and proves its named SVG
+  path handoff, token size, primary tint, explicit accessible label, and
+  mounted layout reach the backend.
 - The existing mounted IconButton scenario remains the interaction authority.
   It must prove pointer and keyboard activation, toggle state, disabled
-  inertness, and the merged 300ms tooltip lifecycle through dispatched input.
+  inertness, and the merged 300ms tooltip lifecycle through dispatched input,
+  with receipt emission occurring only at the terminal boundary after all
+  claimed sub-scenarios pass.
 - Emit one deterministic `M1` receipt per manifest row only after its named
   mounted test passes inside `effigy regressions:native`.
 - Refresh the manifest resolution, all existing receipts, and the generated
@@ -35,12 +40,16 @@ paths. Treat `IconProvider` as fixture setup, not a thirtieth rendered row.
 
 - `Icon` has a named mounted test and a validated receipt for
   `nucleus.shell.icon`.
-- The Icon fixture uses the ordinary registry/provider setup and production
-  render/backend path; a directly constructed GPUI SVG is not evidence.
-- `IconButton` has a validated receipt for `nucleus.shell.icon-button` tied to
-  its mounted pointer/keyboard test.
-- Removing the icon registry entry, bypassing the render path, skipping input
-  dispatch, or emitting either receipt without executing its test fails.
+- The Icon fixture uses the ordinary provider setup and production
+  render/backend path; a directly constructed GPUI SVG is not evidence. Proof
+  bounds cover named SVG path handoff, token geometry/tint metadata, and
+  mounted layout under headless execution.
+- `IconButton` has a validated receipt for `nucleus.shell.icon-button` emitted
+  only at the terminal boundary after all activation, toggle, and tooltip
+  sub-scenarios pass.
+- Removing the icon asset file on disk, bypassing the render path, skipping
+  input dispatch, failing a late toggle rebuild, or emitting either receipt
+  without executing its test fails.
 - The Nucleus denominator remains 29 plus the non-rendered IconProvider
   prerequisite. Button remains mounted and no other row advances.
 
@@ -48,10 +57,12 @@ paths. Treat `IconProvider` as fixture setup, not a thirtieth rendered row.
 
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
-| Icon uses the production path | paint an SVG directly in the fixture | receipt observation or mounted assertion fails |
+| Icon uses the production path | bypass render or paint direct SVG | probe channel or mounted assertion fails |
+| Icon claims match headless bounds | claim decoded asset paint in unit context | assertions explicitly bounded to named SVG path handoff, token metadata, and mounted layout |
 | Provider is setup only | emit an IconProvider receipt or row 30 | manifest/ledger validation fails |
-| Registry is real | omit the named icon from the installed registry | mounted Icon proof fails before receipt emission |
+| Asset presence is verified | omit the named icon file from disk | filesystem precondition fails before backend handoff |
 | IconButton input is dispatched | call its handler directly | production observation or action proof fails |
+| IconButton receipt is terminal | fail controlled or seeded toggle sub-scenario | test panics before terminal receipt emission; stale or missing receipt fails validation |
 | Receipt means execution | write either JSON file without running its test | emitter/validator counterexample rejects it |
 | Evidence identity is exact | keep the prior Button source SHA | receipt validation fails after source movement |
 | Levels stay separate | label either receipt A1 or V1 | schema validation fails |

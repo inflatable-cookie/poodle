@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Button",
-  "scenario_id": "nucleus.shell.button",
+  "component": "IconButton",
+  "scenario_id": "nucleus.shell.icon-button",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,11 +46,15 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount Button through HeadlessDriver",
-    "pointer press and release through GPUI dispatch"
+    "mount IconButton through HeadlessDriver",
+    "pointer activate, keyboard activate, and hover dispatch through GPUI platform",
+    "controlled and seeded toggle rebuilds through dispatched keyboard input"
   ],
   "assertions": [
-    "the mounted Button listener fired exactly once"
+    "pointer and keyboard activation fire listeners through real hit testing and focus dispatch",
+    "controlled and seeded toggle states rebuild host tree",
+    "disabled and loading states remain inert",
+    "300ms tooltip lifecycle resolves explicit and fallback text through dispatched hover and timing"
   ],
   "outcome": "passed",
   "artifact_paths": []
