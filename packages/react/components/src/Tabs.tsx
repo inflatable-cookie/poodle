@@ -201,7 +201,7 @@ export function Tabs({
   const pendingFocusGenerationRef = useRef(0);
   const focusTransferTimerRef = useRef<number | null>(null);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tooltipPendingIndex = useRef<number | null>(null);
+  const tooltipPendingValue = useRef<string | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
   const lastSyncedValue = useRef<string | null>(null);
@@ -210,7 +210,7 @@ export function Tabs({
   const [uncontrolledValue, setUncontrolledValue] = useState<string | null>(defaultValue);
   const [renderedItems, setRenderedItems] = useState<TabItem[]>(items);
   const [focusIndex, setFocusIndex] = useState(0);
-  const [tooltipIndex, setTooltipIndex] = useState<number | null>(null);
+  const [tooltipValue, setTooltipValue] = useState<string | null>(null);
   // The hovered tab is promoted to state so the portalled tooltip can be
   // positioned against it.
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
@@ -223,9 +223,8 @@ export function Tabs({
   const [indicatorSnap, setIndicatorSnap] = useState(false);
 
   useEffect(() => {
-    const value = tooltipIndex === null ? undefined : renderedItems[tooltipIndex]?.value;
-    setTooltipAnchor(value ? (tabRefs.current[value] ?? null) : null);
-  }, [tooltipIndex, renderedItems]);
+    setTooltipAnchor(tooltipValue ? (tabRefs.current[tooltipValue] ?? null) : null);
+  }, [tooltipValue, renderedItems]);
   const [collapsedByOverflow, setCollapsedByOverflow] = useState(false);
   /** How many entries of `shed` are currently given up. */
   const [shedCount, setShedCount] = useState(0);
@@ -482,33 +481,36 @@ export function Tabs({
   }
 
   function scheduleTooltip(index: number): void {
-    if (!hasTooltips || renderedItems[index]?.disabled === true) {
+    const item = renderedItems[index];
+    if (!hasTooltips || item?.disabled === true || item === undefined) {
       dismissTooltip();
       return;
     }
     clearTooltip();
-    tooltipPendingIndex.current = index;
+    tooltipPendingValue.current = item.value;
     tooltipTimer.current = setTimeout(() => {
-      tooltipPendingIndex.current = null;
-      setTooltipIndex(index);
+      const pending = tooltipPendingValue.current;
+      tooltipPendingValue.current = null;
+      setTooltipValue(pending);
     }, 300);
   }
 
   function dismissTooltip(): void {
     clearTooltip();
-    tooltipPendingIndex.current = null;
-    setTooltipIndex(null);
+    tooltipPendingValue.current = null;
+    setTooltipValue(null);
   }
 
   useEffect(() => clearTooltip, []);
 
   useLayoutEffect(() => {
-    const target = tooltipIndex ?? tooltipPendingIndex.current;
-    if (target === null) return;
-    if (renderedItems[target]?.disabled === true) {
+    const value = tooltipValue ?? tooltipPendingValue.current;
+    if (value === null) return;
+    const live = renderedItems.find((item) => item.value === value);
+    if (live === undefined || live.disabled === true) {
       dismissTooltip();
     }
-  }, [renderedItems, tooltipIndex]);
+  }, [renderedItems, tooltipValue]);
 
   // ── Overflow collapse ──
 
@@ -920,7 +922,7 @@ export function Tabs({
                 }}
                 content={tabContent(item)}
                 tooltip={
-                  hasTooltips && item.disabled !== true && tooltipIndex === index ? (
+                  hasTooltips && item.disabled !== true && tooltipValue === item.value ? (
                     <AnchoredSurface
                       tag="span"
                       anchor={tooltipAnchor}

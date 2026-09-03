@@ -18,6 +18,10 @@ function withDisabled(value: string, disabled: boolean) {
   return items.map((item) => (item.value === value ? { ...item, disabled } : item));
 }
 
+function withoutValue(value: string) {
+  return items.filter((item) => item.value !== value);
+}
+
 afterEach(() => {
   vi.useRealTimers();
 });
@@ -193,6 +197,33 @@ describe("Tabs tooltips (react)", () => {
     rerender(<Tabs items={withDisabled("search", true)} defaultValue="explorer" showTooltips />);
     expect(tooltip()).toBeNull();
     rerender(<Tabs items={items} defaultValue="explorer" showTooltips />);
+    expect(tooltip()).toBeNull();
+  });
+
+  it("cancels a pending tooltip when that tab is removed", () => {
+    vi.useFakeTimers();
+    const { container, rerender } = render(
+      <Tabs items={items} defaultValue="explorer" showTooltips />,
+    );
+    fireEvent.mouseEnter(itemOf(container, "search"));
+    advance(100);
+    rerender(<Tabs items={withoutValue("search")} defaultValue="explorer" showTooltips />);
+    expect(tabOf(container, "git")).toBeTruthy();
+    expect(tooltip()).toBeNull();
+    advance(300);
+    expect(tooltip()).toBeNull();
+  });
+
+  it("hides a visible tooltip immediately when that tab is removed", () => {
+    vi.useFakeTimers();
+    const { container, rerender } = render(
+      <Tabs items={items} defaultValue="explorer" showTooltips />,
+    );
+    fireEvent.mouseEnter(itemOf(container, "search"));
+    advance(300);
+    expect(tooltip()?.textContent?.trim()).toBe("Search");
+    rerender(<Tabs items={withoutValue("search")} defaultValue="explorer" showTooltips />);
+    expect(tabOf(container, "git")).toBeTruthy();
     expect(tooltip()).toBeNull();
   });
 });

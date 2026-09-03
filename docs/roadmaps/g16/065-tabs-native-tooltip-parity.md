@@ -45,6 +45,7 @@ input. Keep web drag behavior and `focusOnValueChange` unchanged.
 | False stays inert | adapter shows tooltip from label alone | negative mounted proof fails |
 | Disabled stays inert | web schedules a disabled tab | paired Svelte/React disabled proofs fail |
 | Live disablement cancels | paint-gate only while Search is pending or visible | paired rerender proofs rematerialize Search |
+| Removal follows identity | index-latched timer paints Git after Search is removed | paired rerender proofs show Git or a late tooltip |
 | Horizontal focus matches native | `onFocus` only schedules when vertical | paired 299/300ms keyboard proofs fail |
 | Web semantics survive | native fix changes web drag/focus | focused paired Tabs suites fail |
 
