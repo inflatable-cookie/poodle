@@ -21,8 +21,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, Node, NodeRole,
-    StylePatch, TextChangeHandler,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection, Node,
+    NodeRole, StylePatch, TextChangeHandler,
 };
 use poodle_specs::{
     ControlDensity, ControlSize, EditableLabelActivation, EditableLabelSpec, EditableLabelVariant,
@@ -139,6 +139,9 @@ pub fn editable_label_with_handlers(
     let placeholder_color = ctx.theme().resolve_color(spec.placeholder_color_token());
     let radius = ctx.theme().resolve_radius(spec.radius_token());
     let font_size = rem_to_px(font_rem(effective_size));
+    let font_weight = poodle_tokens::typed::semantic::TYPOGRAPHY_LABEL_WEIGHT as u16;
+    let line_height =
+        ctx.theme().resolve_space("typography.label.lineHeight") / font_size;
 
     let base_pad_y = ctx.theme().resolve_space("space.control.y");
     let base_pad_x = ctx.theme().resolve_space("space.control.x");
@@ -176,6 +179,9 @@ pub fn editable_label_with_handlers(
             s.fill_width = true;
             s.descriptor.text_color = Some(text_color);
             s.text_size = Some(font_size);
+            s.text_weight = Some(font_weight);
+            s.line_height = Some(line_height);
+            s.font_family = Some(FontFamily::Sans);
             if is_flush {
                 // Flush editing: bottom accent border only, no fill of its own
                 // (the backend's input default applies).
@@ -335,6 +341,10 @@ pub fn editable_label_with_handlers(
         let mut label = Node::text(&display_text);
         label.style.descriptor.text_color = Some(text_col);
         label.style.text_size = Some(font_size);
+        label.style.text_weight = Some(font_weight);
+        label.style.line_height = Some(line_height);
+        label.style.font_family = Some(FontFamily::Sans);
+        label.style.text_italic = is_empty;
         let mut row = row.child(label);
 
         if spec.show_edit_icon && !spec.is_disabled {
