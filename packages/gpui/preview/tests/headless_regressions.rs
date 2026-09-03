@@ -11826,7 +11826,8 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         );
         assert!(poodle_gpui_node_backend::bounds_for(witness_root).is_some());
         assert!(poodle_gpui_node_backend::bounds_for(inert_root).is_some());
-        assert!(driver.mounted_observation().is_valid());
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
 
         let probe_channels = poodle_gpui_node_backend::take_probe_capture();
         for channel in [
@@ -11839,6 +11840,29 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
                 "production backend must observe {channel}"
             );
         }
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "Callout",
+            "nucleus.settings.callout",
+            observation,
+            &[
+                "mount caller-scoped controlled Callout instances through node_compat::Callout::from_spec(...).into_element() in a 560x360 HeadlessDriver host",
+                "compose one live Button action and one disabled Button action through the production renderer and node_compat adapter",
+                "activate the live and disabled actions through mounted pointer input",
+                "request dismissal through mounted pointer input while the host refuses the controlled rebuild, then accept through mounted keyboard input",
+                "activate the duplicate witness dismissal through mounted keyboard input after the subject unmounts",
+            ],
+            &[
+                "production Callout composition preserves exact body, actions, dismiss part order and metadata with real Icon and Button dependencies",
+                "the ControlSize::Sm ladder resolves exact 8px root gap, 9px status icon, 12px title, 11px message, and 24px dismiss geometry",
+                "warning tint, announcement role, labels, density, padding, border, radius, and color token metadata remain exact",
+                "positive mounted bounds preserve mount containment, internal containment, part ordering, and duplicate-instance separation",
+                "the live Button action emits exactly one callback while the disabled Button action remains inert",
+                "a refused controlled dismissal remains mounted and an accepted host rebuild removes only the subject Callout",
+                "caller-scoped runtime ids, focus, callbacks, controlled visibility, and geometry remain isolated across duplicate instances",
+            ],
+        );
     });
 }
 
