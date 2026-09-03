@@ -28761,6 +28761,7 @@ struct AgentChatInputState {
     read_only: bool,
     allow_empty_submit: bool,
     accept_edits: bool,
+    detailed_structure: bool,
 }
 
 impl AgentChatInputState {
@@ -28775,6 +28776,7 @@ impl AgentChatInputState {
             read_only: false,
             allow_empty_submit: false,
             accept_edits: true,
+            detailed_structure: false,
         }
     }
 }
@@ -28782,6 +28784,7 @@ impl AgentChatInputState {
 struct AgentChatInputHost {
     states: Mutex<Vec<AgentChatInputState>>,
     log: Mutex<Vec<String>>,
+    builds: Mutex<Vec<String>>,
 }
 
 impl AgentChatInputHost {
@@ -28789,6 +28792,7 @@ impl AgentChatInputHost {
         Arc::new(Self {
             states: Mutex::new(states),
             log: Mutex::new(Vec::new()),
+            builds: Mutex::new(Vec::new()),
         })
     }
 
@@ -28818,6 +28822,22 @@ impl AgentChatInputHost {
     fn take_log(&self) -> Vec<String> {
         std::mem::take(&mut *self.log.lock().expect("agent chat log"))
     }
+
+    fn built(&self, id: &str) {
+        self.builds
+            .lock()
+            .expect("agent chat builds")
+            .push(id.to_owned());
+    }
+
+    fn build_count(&self, id: &str) -> usize {
+        self.builds
+            .lock()
+            .expect("agent chat builds")
+            .iter()
+            .filter(|built| built.as_str() == id)
+            .count()
+    }
 }
 
 fn agent_chat_editor_id(id: &str) -> String {
@@ -28832,12 +28852,16 @@ fn agent_chat_action_id(id: &str) -> String {
     format!("agent-chat-input:{id}:action")
 }
 
+fn agent_chat_part_id(id: &str, part: &str) -> String {
+    format!("agent-chat-input:{id}:{part}")
+}
+
 fn agent_chat_input_builder(
     host: &Arc<AgentChatInputHost>,
     id: &str,
 ) -> node_compat::AgentChatInput {
     let state = host.state(id);
-    let spec = poodle_specs::AgentChatInputSpec::new()
+    let mut spec = poodle_specs::AgentChatInputSpec::new()
         .with_value(&state.value)
         .with_placeholder("Describe the change")
         .with_status(state.status)
@@ -28846,6 +28870,13 @@ fn agent_chat_input_builder(
         .with_allow_empty_submit(state.allow_empty_submit)
         .with_max_length(48)
         .with_context(32.0, 128.0);
+    if state.detailed_structure {
+        spec = spec.with_attachments(vec![
+            poodle_specs::AgentChatAttachment::new("trace", "trace.txt")
+                .with_kind("text")
+                .with_icon("paperclip"),
+        ]);
+    }
 
     let change_host = Arc::clone(host);
     let change_id = state.id.clone();
@@ -28858,7 +28889,7 @@ fn agent_chat_input_builder(
     let stop_host = Arc::clone(host);
     let stop_id = state.id.clone();
 
-    node_compat::AgentChatInput::from_spec(spec, &theme())
+    let mut input = node_compat::AgentChatInput::from_spec(spec, &theme())
         .with_id(&state.id)
         .with_selection(state.selection.0, state.selection.1)
         .with_is_focused(state.focused)
@@ -28887,11 +28918,18 @@ fn agent_chat_input_builder(
         }))
         .on_stop(Arc::new(move || {
             stop_host.note(format!("{stop_id}/stop"));
-        }))
+        }));
+    if state.detailed_structure {
+        input = input
+            .toolbar_child(Node::text("Model"))
+            .footer_child(Node::text("main"));
+    }
+    input
 }
 
 fn agent_chat_input_element(host: &Arc<AgentChatInputHost>, id: &str) -> gpui::AnyElement {
     use gpui::IntoElement;
+    host.built(id);
     agent_chat_input_builder(host, id).into_element()
 }
 
@@ -28916,32 +28954,38 @@ fn agent_chat_input_container(host: &Arc<AgentChatInputHost>) -> gpui::AnyElemen
     root.into_any_element()
 }
 
-fn agent_chat_input_node(host: &Arc<AgentChatInputHost>, id: &str) -> Node {
-    use node_compat::IntoCompatNode;
-    agent_chat_input_builder(host, id).into_compat_node()
-}
-
 /// g16.082. AgentChatInput mounts through the production compatibility
 /// adapter, composes the real TextInput and Button renderers, and keeps value,
 /// selection, focus, and terminal effects under caller-scoped host ownership.
 #[test]
 fn agent_chat_input_mounted_input_and_action_follow_host_state() {
     use node_compat::IntoCompatNode;
-    use poodle_node::{CursorHint, NodeRole};
+    use poodle_node::{CursorHint, FontFamily, NodeRole};
+    use poodle_render::color::with_alpha;
+    use poodle_render::presentation::rem_to_px;
     use poodle_specs::{
         AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ControlDensity, ControlSize,
     };
 
     // Production adapter composition and token metadata before mount.
     {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
         let spec = AgentChatInputSpec::new()
             .with_value("Inspect the failing gate")
             .with_placeholder("Describe the change")
-            .with_attachments(vec![AgentChatAttachment::new("trace", "trace.txt")])
+            .with_attachments(vec![
+                AgentChatAttachment::new("trace", "trace.txt")
+                    .with_kind("text")
+                    .with_icon("paperclip"),
+                AgentChatAttachment::new("preview", "preview.png")
+                    .with_kind("image")
+                    .with_thumbnail("preview.png"),
+            ])
             .with_context(32.0, 128.0)
             .with_size(ControlSize::Md)
             .with_density(ControlDensity::Comfortable);
-        let node = node_compat::AgentChatInput::from_spec(spec.clone(), &theme())
+        let node = node_compat::AgentChatInput::from_spec(spec.clone(), &theme_provider)
             .with_id("proof")
             .with_selection(4, 4)
             .toolbar_child(Node::text("Model"))
@@ -28949,11 +28993,77 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             .into_compat_node();
 
         assert_eq!(node.id.as_deref(), Some("agent-chat-input:proof"));
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(
+            node.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
         assert_eq!(node.roles.get("status").map(String::as_str), Some("idle"));
+        assert_eq!(node.roles.get("disabled").map(String::as_str), Some("false"));
         assert_eq!(node.children.len(), 2, "field precedes the optional footer");
         let field = &node.children[0];
         assert_eq!(field.id.as_deref(), Some("agent-chat-input:proof:field"));
         assert_eq!(field.children.len(), 3, "attachments, editor, then toolbar");
+        let (pad_y, pad_x) = spec.field_padding_rem(ControlSize::Md);
+        assert_eq!(
+            field.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.field_fill_token()))
+        );
+        assert_eq!(
+            field.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.field_border_token())
+        );
+        assert_eq!(field.style.descriptor.border.width, 1.0);
+        assert_eq!(
+            field.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5
+        );
+        assert_eq!(
+            field.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(pad_y)
+        );
+        assert_eq!(
+            field.style.descriptor.layout.spacing.padding.left,
+            rem_to_px(pad_x)
+        );
+        let field_ring = field
+            .style
+            .focus_ring
+            .expect("field owns the contract focus-within ring");
+        assert_eq!(
+            field_ring.color,
+            ctx.theme().resolve_color(spec.focus_ring_color_token())
+        );
+        assert_eq!(field_ring.offset, rem_to_px(0.0625));
+
+        let attachments = &field.children[0];
+        assert_eq!(
+            attachments.id.as_deref(),
+            Some("agent-chat-input:proof:attachments")
+        );
+        assert_eq!(attachments.children.len(), 2);
+        let chip = &attachments.children[0];
+        assert_eq!(chip.roles.get("kind").map(String::as_str), Some("text"));
+        assert_eq!(chip.roles.get("variant").map(String::as_str), Some("chip"));
+        assert_eq!(
+            chip.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.attachment_fill_token()))
+        );
+        assert_eq!(
+            chip.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+        assert_eq!(
+            chip.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.attachment_radius_token())
+        );
+        let thumbnail = &attachments.children[1];
+        assert_eq!(thumbnail.roles.get("kind").map(String::as_str), Some("image"));
+        assert_eq!(
+            thumbnail.roles.get("variant").map(String::as_str),
+            Some("thumbnail")
+        );
+
         let editor = &field.children[1];
         assert_eq!(editor.id.as_deref(), Some(agent_chat_editor_id("proof").as_str()));
         assert_eq!(editor.a11y.role, Some(NodeRole::TextInput));
@@ -28966,6 +29076,12 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         assert_eq!(editor.style.descriptor.background, None);
         assert_eq!(editor.style.descriptor.border.width, 0.0);
         assert_eq!(editor.style.descriptor.cursor, CursorHint::Default);
+        assert_eq!(editor.style.font_family, Some(FontFamily::Sans));
+        assert_eq!(
+            editor.style.text_size,
+            Some(rem_to_px(spec.editor_font_rem(ControlSize::Md)))
+        );
+        assert_eq!(editor.style.focus, None, "field owns focus treatment");
         assert!(matches!(
             &editor.kind,
             NodeKind::Input { value, placeholder }
@@ -28979,6 +29095,15 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         let toolbar = field.children.last().expect("toolbar");
         assert_eq!(toolbar.id.as_deref(), Some("agent-chat-input:proof:toolbar"));
         assert!(toolbar.has_text("Model"));
+        let leading = &toolbar.children[0];
+        assert_eq!(
+            leading.id.as_deref(),
+            Some("agent-chat-input:proof:leading")
+        );
+        assert_eq!(
+            leading.roles.get("dividers").map(String::as_str),
+            Some("true")
+        );
         let action = node
             .find(&|child| child.id.as_deref() == Some(agent_chat_action_id("proof").as_str()))
             .expect("production Button action");
@@ -28987,9 +29112,33 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         assert_eq!(action.roles.get("variant").map(String::as_str), Some("primary"));
         assert_eq!(action.roles.get("tone").map(String::as_str), Some("default"));
         assert_eq!(action.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(action.roles.get("state").map(String::as_str), Some("submit"));
+        assert_eq!(
+            action.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.action_fill_token()))
+        );
+        assert_eq!(action.style.focus_ring, None, "field owns the only ring");
         assert!(action.find(&|child| {
             matches!(&child.kind, NodeKind::Icon { name, .. } if name == "arrow-up")
         }).is_some());
+        let action_icon = action
+            .find(&|child| matches!(&child.kind, NodeKind::Icon { name, .. } if name == "arrow-up"))
+            .expect("submit icon");
+        assert_eq!(
+            action_icon.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(spec.action_text_token()))
+        );
+
+        let footer = &node.children[1];
+        assert_eq!(footer.id.as_deref(), Some("agent-chat-input:proof:footer"));
+        assert_eq!(
+            footer.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.footer_fill_token()))
+        );
+        assert_eq!(
+            footer.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
 
         let empty = node_compat::AgentChatInput::from_spec(
             AgentChatInputSpec::new().with_placeholder("Ask Poodle"),
@@ -29012,6 +29161,21 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
                 .and_then(|value| value.caret)
                 .map(|caret| caret.showing_placeholder),
             Some(true)
+        );
+        let placeholder = empty_editor
+            .find(&|child| {
+                child.id.as_deref() == Some(agent_chat_editor_value_id("empty").as_str())
+            })
+            .expect("painted placeholder node");
+        let placeholder_base = ctx.theme().resolve_color(spec.placeholder_token());
+        assert_eq!(
+            placeholder.style.descriptor.text_color,
+            Some(with_alpha(
+                placeholder_base,
+                placeholder_base.3
+                    * ctx.theme().resolve_opacity(spec.placeholder_opacity_token())
+                    * spec.placeholder_opacity_ratio(),
+            ))
         );
         let empty_action = empty
             .find(&|child| child.id.as_deref() == Some(agent_chat_action_id("empty").as_str()))
@@ -29068,6 +29232,7 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         assert!(!busy_action.interaction.disabled, "stop stays available while busy");
         assert_eq!(busy_action.a11y.label.as_deref(), Some("Stop"));
         assert_eq!(busy_action.roles.get("tone").map(String::as_str), Some("danger"));
+        assert_eq!(busy_action.roles.get("state").map(String::as_str), Some("stop"));
         assert!(busy_action.find(&|child| {
             matches!(&child.kind, NodeKind::Icon { name, .. } if name == "square")
         }).is_some());
@@ -29082,8 +29247,10 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         busy.status = AgentChatStatus::Busy;
         let mut allowed_empty = AgentChatInputState::new("allowed-empty", "");
         allowed_empty.allow_empty_submit = true;
+        let mut subject = AgentChatInputState::new("subject", "Draft");
+        subject.detailed_structure = true;
         let host = AgentChatInputHost::new(vec![
-            AgentChatInputState::new("subject", "Draft"),
+            subject,
             AgentChatInputState::new("witness", "Draft"),
             AgentChatInputState::new("empty", ""),
             allowed_empty,
@@ -29111,30 +29278,86 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             .expect("subject root bounds");
         let field_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:subject:field")
             .expect("subject field bounds");
+        let attachment_bounds = poodle_gpui_node_backend::bounds_for(
+            &agent_chat_part_id("subject", "attachments"),
+        )
+        .expect("subject attachment bounds");
         let editor_bounds = poodle_gpui_node_backend::bounds_for(&agent_chat_editor_id("subject"))
             .expect("subject editor bounds");
+        let toolbar_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "toolbar"))
+                .expect("subject toolbar bounds");
+        let leading_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "leading"))
+                .expect("subject leading bounds");
+        let trailing_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "trailing"))
+                .expect("subject trailing bounds");
         let action_bounds = poodle_gpui_node_backend::bounds_for(&agent_chat_action_id("subject"))
             .expect("subject action bounds");
-        assert!(f32::from(root_bounds.size.width) > 0.0);
-        assert!(f32::from(root_bounds.size.height) > 0.0);
-        for child in [field_bounds, editor_bounds, action_bounds] {
-            assert!(child.left() >= root_bounds.left());
-            assert!(child.right() <= root_bounds.right());
-            assert!(child.top() >= root_bounds.top());
-            assert!(child.bottom() <= root_bounds.bottom());
-        }
-        assert!(editor_bounds.top() < action_bounds.top(), "editor precedes toolbar action");
+        let footer_bounds =
+            poodle_gpui_node_backend::bounds_for(&agent_chat_part_id("subject", "footer"))
+                .expect("subject footer bounds");
+        let mount_bounds = driver.mount_box_bounds();
+        let assert_contains = |parent: gpui::Bounds<Pixels>,
+                               child: gpui::Bounds<Pixels>,
+                               relationship: &str| {
+            assert!(child.left() >= parent.left(), "{relationship}: left escaped");
+            assert!(child.right() <= parent.right(), "{relationship}: right escaped");
+            assert!(child.top() >= parent.top(), "{relationship}: top escaped");
+            assert!(child.bottom() <= parent.bottom(), "{relationship}: bottom escaped");
+        };
+        assert_contains(mount_bounds, root_bounds, "mount contains root");
+        assert_contains(root_bounds, field_bounds, "root contains field");
+        assert_contains(root_bounds, footer_bounds, "root contains footer");
+        assert_contains(field_bounds, attachment_bounds, "field contains attachments");
+        assert_contains(field_bounds, editor_bounds, "field contains editor");
+        assert_contains(field_bounds, toolbar_bounds, "field contains toolbar");
+        assert_contains(toolbar_bounds, leading_bounds, "toolbar contains leading");
+        assert_contains(toolbar_bounds, trailing_bounds, "toolbar contains trailing");
+        assert_contains(trailing_bounds, action_bounds, "trailing contains action");
+        assert!(
+            attachment_bounds.bottom() <= editor_bounds.top(),
+            "attachments must end before the editor begins"
+        );
+        assert!(
+            editor_bounds.bottom() <= toolbar_bounds.top(),
+            "editor must end before the toolbar begins"
+        );
+        assert!(
+            leading_bounds.right() <= trailing_bounds.left(),
+            "leading and trailing toolbar regions must not overlap"
+        );
+        assert!(
+            field_bounds.bottom() <= footer_bounds.top(),
+            "field must end before the optional footer begins"
+        );
 
         driver.pointer_activate_id(&agent_chat_editor_id("subject"));
         assert!(host.state("subject").focused);
         assert!(!host.state("witness").focused);
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(&agent_chat_part_id("subject", "field"))
+                .is_some(),
+            "the mounted field paints its focus-within ring"
+        );
         host.take_log();
         driver.dispatch_key_raw("end");
         assert_eq!(host.state("subject").selection, (5, 5));
         host.take_log();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
+                .as_deref(),
+            Some("Draft")
+        );
 
         host.mutate("subject", |state| state.accept_edits = false);
+        let builds_before_refusal = host.build_count("subject");
         driver.dispatch_key_raw("!");
+        assert!(
+            host.build_count("subject") > builds_before_refusal,
+            "the mounted production factory rebuilt after the refused proposal"
+        );
         assert_eq!(host.state("subject").value, "Draft");
         assert_eq!(host.state("subject").selection, (5, 5));
         assert_eq!(
@@ -29142,24 +29365,32 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             vec!["subject/change:Draft!", "subject/select:6-6"],
             "the adapter reports the proposal while the host can refuse both controlled props"
         );
-        assert!(matches!(
-            &agent_chat_input_node(&host, "subject")
-                .find(&|node| {
-                    node.id.as_deref() == Some(agent_chat_editor_id("subject").as_str())
-                })
-                .expect("subject editor")
-                .kind,
-            NodeKind::Input { value, .. } if value == "Draft"
-        ));
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
+                .as_deref(),
+            Some("Draft"),
+            "host refusal leaves the mounted painted control unchanged"
+        );
 
         host.mutate("subject", |state| state.accept_edits = true);
+        let builds_before_acceptance = host.build_count("subject");
         driver.dispatch_key_raw("!");
+        assert!(
+            host.build_count("subject") > builds_before_acceptance,
+            "acceptance becomes visible only through a host-authored rebuild"
+        );
         assert_eq!(host.state("subject").value, "Draft!");
         assert_eq!(host.state("subject").selection, (6, 6));
         assert_eq!(
             host.take_log(),
             vec!["subject/change:Draft!", "subject/select:6-6"],
             "accepted edits report value before the terminal selection"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_for(&agent_chat_editor_value_id("subject"))
+                .as_deref(),
+            Some("Draft!"),
+            "the accepted host rebuild paints the next controlled value"
         );
 
         driver.dispatch_key_raw("enter");
@@ -29222,11 +29453,28 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         driver.pointer_activate_id(&agent_chat_action_id("read-only"));
         assert_eq!(host.take_log(), vec!["read-only/submit:Locked"]);
 
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&agent_chat_editor_id("disabled")).is_none(),
+            "a disabled editor does not register a focus handle"
+        );
+        driver.pointer_activate_id(&agent_chat_editor_id("subject"));
+        host.take_log();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("subject")),
+            Some(true)
+        );
         driver.pointer_activate_id(&agent_chat_editor_id("disabled"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("subject")),
+            Some(true),
+            "disabled editor pointer activation cannot steal focus"
+        );
         driver.pointer_activate_id(&agent_chat_action_id("disabled"));
-        driver.dispatch_key_raw("x");
         assert_eq!(host.state("disabled").value, "Unavailable");
-        assert!(host.take_log().is_empty(), "disabled editor and action stay inert");
+        assert!(
+            host.take_log().is_empty(),
+            "the mounted disabled action has a live submit sink but remains inert"
+        );
 
         driver.pointer_activate_id(&agent_chat_editor_id("busy"));
         host.take_log();

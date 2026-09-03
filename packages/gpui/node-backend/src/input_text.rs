@@ -320,6 +320,14 @@ pub fn painted_text_state_for(id: &str) -> PaintedTextState {
     }
 }
 
+/// The exact text shaped for a painted input value in the current frame.
+///
+/// This is a read-only mounted-regression channel. It reports the backend's
+/// paint input and never participates in editing or host-state ownership.
+pub fn painted_text_for(id: &str) -> Option<String> {
+    MEASURED.with(|measured| measured.borrow().get(id).map(|line| line.text.clone()))
+}
+
 /// Drop a field's cached measurement. Called when a field loses focus so a
 /// stale line cannot answer a click on whatever replaced it.
 pub(crate) fn forget(id: &str) {

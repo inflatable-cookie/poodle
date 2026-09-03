@@ -353,6 +353,8 @@ pub fn agent_chat_input(
 mod tests {
     use super::*;
     use poodle_node::NodeKind;
+    use poodle_specs::{AgentChatAttachment, ControlDensity, ControlSize};
+    use poodle_tokens::semantic;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -390,5 +392,136 @@ mod tests {
         let idle = render_with_status(AgentChatStatus::Idle);
         assert!(!has_text(&idle, "question region"));
         assert!(!has_text(&idle, "plan region"));
+    }
+
+    #[test]
+    fn contract_tokens_and_data_metadata_are_exact() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = AgentChatInputSpec::new()
+            .with_value("Draft")
+            .with_attachments(vec![
+                AgentChatAttachment::new("trace", "trace.txt")
+                    .with_kind("text")
+                    .with_icon("paperclip"),
+                AgentChatAttachment::new("preview", "preview.png")
+                    .with_kind("image")
+                    .with_thumbnail("preview.png"),
+            ])
+            .with_size(ControlSize::Md)
+            .with_density(ControlDensity::Comfortable);
+        let node = agent_chat_input(
+            &spec,
+            &ctx,
+            Vec::new(),
+            Vec::new(),
+            vec![Node::text("Model"), Node::text("Mode")],
+            vec![Node::text("main")],
+            AgentChatInputHandlers::default(),
+        );
+
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("md"));
+        assert_eq!(
+            node.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(node.roles.get("status").map(String::as_str), Some("idle"));
+        assert_eq!(node.roles.get("disabled").map(String::as_str), Some("false"));
+
+        let field = &node.children[0];
+        let (pad_y, pad_x) = spec.field_padding_rem(ControlSize::Md);
+        assert_eq!(
+            field.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.field_fill_token()))
+        );
+        assert_eq!(
+            field.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.field_border_token())
+        );
+        assert_eq!(
+            field.style.descriptor.corner_radii.top_left,
+            ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5
+        );
+        assert_eq!(field.style.descriptor.layout.spacing.padding.top, rem_to_px(pad_y));
+        assert_eq!(field.style.descriptor.layout.spacing.padding.left, rem_to_px(pad_x));
+        let ring = field.style.focus_ring.expect("field focus-within ring");
+        assert_eq!(ring.color, ctx.theme().resolve_color(spec.focus_ring_color_token()));
+        assert_eq!(
+            ring.width,
+            ctx.theme().resolve_border_width(semantic::BORDER_WIDTH_FOCUS)
+        );
+        assert_eq!(ring.offset, rem_to_px(0.0625));
+
+        let attachments = &field.children[0];
+        assert_eq!(
+            attachments.style.descriptor.layout.spacing.gap,
+            rem_to_px(spec.toolbar_gap_rem(ControlSize::Md))
+                * spec.density_gap_scale(ControlDensity::Comfortable)
+        );
+        let chip = &attachments.children[0];
+        assert_eq!(chip.roles.get("kind").map(String::as_str), Some("text"));
+        assert_eq!(chip.roles.get("variant").map(String::as_str), Some("chip"));
+        assert_eq!(
+            chip.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.attachment_fill_token()))
+        );
+        assert_eq!(
+            chip.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+        let thumbnail = &attachments.children[1];
+        assert_eq!(thumbnail.roles.get("kind").map(String::as_str), Some("image"));
+        assert_eq!(
+            thumbnail.roles.get("variant").map(String::as_str),
+            Some("thumbnail")
+        );
+
+        let toolbar = field.children.last().expect("toolbar");
+        let leading = &toolbar.children[0];
+        assert_eq!(
+            leading.roles.get("dividers").map(String::as_str),
+            Some("true")
+        );
+        let divider = &leading.children[1];
+        assert_eq!(
+            divider.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.divider_token()))
+        );
+        let action = toolbar.children[1].children.last().expect("action");
+        assert_eq!(action.roles.get("state").map(String::as_str), Some("submit"));
+        assert_eq!(
+            action.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.action_fill_token()))
+        );
+        assert_eq!(
+            action.children[0].style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(spec.action_text_token()))
+        );
+
+        let footer = &node.children[1];
+        assert_eq!(
+            footer.style.descriptor.background,
+            Some(ctx.theme().resolve_color(spec.footer_fill_token()))
+        );
+        assert_eq!(
+            footer.style.descriptor.border.color,
+            ctx.theme().resolve_color(spec.divider_token())
+        );
+
+        let disabled_spec = spec.with_disabled(true);
+        let disabled = agent_chat_input(
+            &disabled_spec,
+            &ctx,
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            Vec::new(),
+            AgentChatInputHandlers::default(),
+        );
+        assert_eq!(disabled.roles.get("disabled").map(String::as_str), Some("true"));
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            ctx.theme().resolve_opacity(disabled_spec.disabled_opacity_token())
+        );
     }
 }
