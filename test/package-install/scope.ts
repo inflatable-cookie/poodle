@@ -212,6 +212,18 @@ function matchesScopePattern(path: string, pattern: string): boolean {
   return path === pattern;
 }
 
+function isCargoManifestOrLockPath(path: string): boolean {
+  return (
+    path === "Cargo.toml" ||
+    path === "Cargo.lock" ||
+    /^(?:packages|scripts)\/[^/]+(?:\/[^/]+)*\/Cargo\.(?:toml|lock)$/.test(path)
+  );
+}
+
+function isCargoTomlPath(path: string): boolean {
+  return isCargoManifestOrLockPath(path) && path.endsWith(".toml");
+}
+
 export function isWritableCertificationPath(
   path: string,
   mode: CertificationScopeMode = "strict",
@@ -250,14 +262,140 @@ export function forbiddenCertificationSurfaceLabels(
   ) {
     filteredLabels.push("version");
   }
-  if (
-    path === "Cargo.toml" ||
-    path === "Cargo.lock" ||
-    /^(?:packages|scripts)\/[^/]+(?:\/[^/]+)*\/Cargo\.(?:toml|lock)$/.test(path)
-  ) {
-    if (!candidateVersionPath) filteredLabels.push("version");
+  // Ordinary Cargo version/publication labels are content-derived later;
+  // path membership alone is not a package release version.
+  if (isCargoManifestOrLockPath(path) && mode !== "ordinary" && !candidateVersionPath) {
+    filteredLabels.push("version");
   }
   return [...new Set(filteredLabels)];
+}
+
+function looksLikeCargoManifest(text: string): boolean {
+  return text.split(/\r?\n/).some((line) => /^\s*\[[^\]]+\]\s*(?:#.*)?$/.test(line));
+}
+
+function cargoTableName(line: string): string | null {
+  const match = /^\s*\[([^\]]+)\]\s*(?:#.*)?$/.exec(line);
+  return match ? match[1].trim() : null;
+}
+
+function cargoBareKeyValue(line: string): { key: string; value: string } | null {
+  const match = /^\s*([A-Za-z0-9_.-]+)\s*=\s*(.*?)\s*(?:#.*)?$/.exec(line);
+  if (!match) return null;
+  return { key: match[1], value: match[2].trim() };
+}
+
+function isPackageVersionSection(section: string): boolean {
+  return section === "package" || section === "workspace.package";
+}
+
+function isPatchOrReplaceSection(section: string): boolean {
+  return (
+    section === "patch" ||
+    section === "replace" ||
+    section.startsWith("patch.") ||
+    section.startsWith("replace.")
+  );
+}
+
+function cargoSectionKey(text: string, section: string, key: string): string | undefined {
+  let current = "";
+  for (const line of text.split(/\r?\n/)) {
+    const name = cargoTableName(line);
+    if (name !== null) {
+      current = name;
+      continue;
+    }
+    if (current !== section) continue;
+    const kv = cargoBareKeyValue(line);
+    if (kv?.key === key) return kv.value;
+  }
+  return undefined;
+}
+
+function cargoPackageVersionSignal(text: string): string {
+  return JSON.stringify({
+    packageVersion:
+      cargoSectionKey(text, "package", "version") ??
+      cargoSectionKey(text, "package", "version.workspace"),
+    workspacePackageVersion:
+      cargoSectionKey(text, "workspace.package", "version") ??
+      cargoSectionKey(text, "workspace.package", "version.workspace"),
+  });
+}
+
+function unquoteTomlValue(value: string): string {
+  return value.replace(/^"(.*)"$/, "$1");
+}
+
+function hasInlineTransportKey(line: string): boolean {
+  return /(?:^|\{|,)\s*(?:source|registry)\s*=/.test(line);
+}
+
+function cargoTransportFingerprint(text: string): string {
+  const parts: string[] = [];
+  let section = "";
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const name = cargoTableName(line);
+    if (name !== null) {
+      section = name;
+      if (isPatchOrReplaceSection(section)) parts.push(`[${section}]`);
+      continue;
+    }
+    if (isPatchOrReplaceSection(section)) {
+      parts.push(`${section}|${line}`);
+      continue;
+    }
+    const kv = cargoBareKeyValue(line);
+    if (
+      isPackageVersionSection(section) &&
+      kv &&
+      (kv.key === "publish" || kv.key === "registry" || kv.key === "source")
+    ) {
+      parts.push(`${section}|${kv.key}=${kv.value}`);
+      continue;
+    }
+    if (!isPackageVersionSection(section) && hasInlineTransportKey(line)) {
+      parts.push(`${section}|${line}`);
+    }
+  }
+  return parts.sort().join("\n");
+}
+
+function isEffectivelyPublishable(text: string): boolean {
+  const publish =
+    cargoSectionKey(text, "package", "publish") ??
+    cargoSectionKey(text, "workspace.package", "publish");
+  return publish === undefined || unquoteTomlValue(publish) !== "false";
+}
+
+function newManifestHasDisallowedTransport(text: string): boolean {
+  const allowed = new Set(["package|publish=false", "workspace.package|publish=false"]);
+  const fingerprint = cargoTransportFingerprint(text);
+  if (fingerprint.length === 0) return false;
+  return fingerprint.split("\n").some((part) => !allowed.has(part));
+}
+
+function ordinaryCargoForbiddenLabels(
+  before: string | null,
+  after: string | null,
+): string[] {
+  const labels: string[] = [];
+  if (before !== null && after !== null) {
+    if (cargoPackageVersionSignal(before) !== cargoPackageVersionSignal(after)) {
+      labels.push("version");
+    }
+    if (cargoTransportFingerprint(before) !== cargoTransportFingerprint(after)) {
+      labels.push("registry");
+    }
+    return [...new Set(labels)];
+  }
+  if (after !== null && (isEffectivelyPublishable(after) || newManifestHasDisallowedTransport(after))) {
+    labels.push("registry");
+  }
+  return labels;
 }
 
 function isJsonRecord(value: unknown): value is Record<string, unknown> {
@@ -311,6 +449,43 @@ async function runResult(
   });
   const exitCode = await child.exited;
   return { exitCode };
+}
+
+async function gitShowFile(
+  checkoutRoot: string,
+  commit: string,
+  path: string,
+): Promise<string | null> {
+  const exists = await runResult(
+    ["git", "cat-file", "-e", `${commit}:${path}`],
+    checkoutRoot,
+  );
+  if (exists.exitCode !== 0) return null;
+  return runCapture(["git", "show", `${commit}:${path}`], checkoutRoot);
+}
+
+async function ordinaryCargoForbiddenSurfaces(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<{ path: string; surface: string }[]> {
+  const forbidden: { path: string; surface: string }[] = [];
+  for (const path of changedPaths) {
+    if (!isCargoTomlPath(path)) continue;
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (
+      (before !== null && !looksLikeCargoManifest(before)) ||
+      (after !== null && !looksLikeCargoManifest(after))
+    ) {
+      throw new Error(`certification scope rejected unparsable Cargo manifest: ${path}`);
+    }
+    for (const surface of ordinaryCargoForbiddenLabels(before, after)) {
+      forbidden.push({ path, surface });
+    }
+  }
+  return forbidden;
 }
 
 function sortedUnique(values: Iterable<string>): string[] {
@@ -568,6 +743,16 @@ export async function assertInstalledScope(
   const forbidden = changedPaths.flatMap((path) =>
     forbiddenCertificationSurfaceLabels(path, mode).map((surface) => ({ path, surface })),
   );
+  if (mode === "ordinary") {
+    forbidden.push(
+      ...(await ordinaryCargoForbiddenSurfaces(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      )),
+    );
+  }
   if (forbidden.length > 0) {
     throw new Error(
       `certification scope rejected forbidden ${forbidden
