@@ -30921,6 +30921,10 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
             let host = Arc::clone(&host);
             Rc::new(move || {
                 div()
+                    // Match a production application host: the modal's
+                    // absolute inset resolves against this mounted box.
+                    .relative()
+                    .size_full()
                     .flex()
                     .flex_col()
                     .gap(px(24.0))
@@ -31098,7 +31102,10 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
         assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
 
-        let outside_surface = point(px(40.0), px(40.0));
+        let outside_surface = point(
+            mount_bounds.right() - px(8.0),
+            mount_bounds.bottom() - px(8.0),
+        );
         driver.pointer_press(outside_surface);
         driver.pointer_release(outside_surface);
         assert_eq!(

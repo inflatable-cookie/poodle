@@ -9,8 +9,8 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use gpui::{
-    div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, KeyDownEvent, ParentElement,
-    Rgba, StatefulInteractiveElement, Styled, Window,
+    canvas, div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, KeyDownEvent,
+    ParentElement, Rgba, StatefulInteractiveElement, Styled, Window,
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -6898,6 +6898,17 @@ fn native_dialog_backdrop(mut node: poodle_node::Node) -> AnyElement {
         .map(poodle_gpui_node_backend::color)
         .unwrap_or_else(gpui::transparent_black);
     let dismiss = node.interaction.on_activate;
+    // This legacy native wrapper is not converted from a Node, so give its
+    // exact inset paint box to the backend's mounted-bounds registry.
+    let bounds_id = backdrop_id.clone();
+    let bounds_probe = canvas(
+        move |bounds, _window, _cx| {
+            poodle_gpui_node_backend::record_element_bounds(&bounds_id, bounds);
+        },
+        |_, _, _, _| {},
+    )
+    .absolute()
+    .inset_0();
     let mut backdrop = div()
         .id(gpui::SharedString::from(backdrop_id))
         .absolute()
@@ -6907,20 +6918,13 @@ fn native_dialog_backdrop(mut node: poodle_node::Node) -> AnyElement {
         .items_center()
         .justify_center()
         .occlude()
+        .child(bounds_probe)
         .child(poodle_gpui_node_backend::to_gpui(&panel));
     if let Some(dismiss) = dismiss {
-        let click = dismiss.clone();
-        backdrop = backdrop
-            .on_click(move |_event, _window, cx| {
-                click();
-                cx.refresh_windows();
-            })
-            .on_key_down(move |event: &KeyDownEvent, _window, cx| {
-                if event.keystroke.key == "escape" {
-                    dismiss();
-                    cx.refresh_windows();
-                }
-            });
+        backdrop = backdrop.on_click(move |_event, _window, cx| {
+            dismiss();
+            cx.refresh_windows();
+        });
     }
     backdrop.into_any_element()
 }

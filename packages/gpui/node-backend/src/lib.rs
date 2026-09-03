@@ -68,7 +68,7 @@ use interaction::apply_listeners;
 pub use layers::{
     attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, layer_for_element,
     open_layer_count, overlay_frame_begin, overlay_frame_begin_for, overlay_frame_end,
-    overlay_frame_end_for, request_focus, spared_layer_ids_at,
+    overlay_frame_end_for, record_element_bounds, request_focus, spared_layer_ids_at,
 };
 use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,
