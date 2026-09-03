@@ -19418,13 +19418,13 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
             driver.mounted_observation(),
             &[
                 "mount controlled EditableLabel sessions through node_compat::EditableLabel::from_spec(...).into_element() in HeadlessDriver",
-                "enter edit mode through pointer double activation, pointer single activation, Enter, and Space while programmatic and disabled gestures stay inert",
+                "single-click a default-mode display without entering, double-click it to enter, and enter EnterOrSpace mode separately through pointer, Enter, and Space while programmatic and disabled gestures stay inert",
                 "dispatch printable scalar input, Enter, Escape, Tab, and pointer blur through the GPUI test platform",
                 "commit every scalar in portable trim set T and preserve ZWSP through mounted input",
                 "mount equal-valued caller-id instances and remove one live editor through the production rebuild path",
             ],
             &[
-                "production adapter projects display Button and editing TextInput semantics, one visible mode, accessible-name fallback, label typography, field treatment, and text cursor",
+                "production adapter projects display Button and editing TextInput semantics, one visible mode, accessible-name fallback, label size, weight, relative line-height, explicit sans-family inheritance metadata, empty-state italics, field treatment, and text cursor",
                 "mounted bounds are positive, non-overlapping, and contained by the production mount box",
                 "live draft paint stays separate from the host-owned committed value until commit and preserves the previous committed snapshot",
                 "Enter commits and Escape cancels with display focus restoration while Tab and pointer blur commit exactly once and let focus leave",
