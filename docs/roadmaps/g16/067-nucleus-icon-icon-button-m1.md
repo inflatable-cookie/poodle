@@ -9,6 +9,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/icon.md`,
 `../../contracts/components/icon-button.md`
+Log: `../../logs/2026-09/20260903-g16-067-nucleus-icon-receipts.md`
 
 ## Goal
 

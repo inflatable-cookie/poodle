@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Button",
-  "scenario_id": "nucleus.shell.button",
+  "component": "Icon",
+  "scenario_id": "nucleus.shell.icon",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,11 +46,14 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount Button through HeadlessDriver",
-    "pointer press and release through GPUI dispatch"
+    "install icon provider and render Icon through poodle_render",
+    "pointer move dispatch through HeadlessDriver"
   ],
   "assertions": [
-    "the mounted Button listener fired exactly once"
+    "resolved icon glyph and asset reach the mounted tree",
+    "token size and text_color tint match the resolved theme values",
+    "explicit accessible label is preserved on the mounted node",
+    "mounted bounds and probe channel confirm production backend paint"
   ],
   "outcome": "passed",
   "artifact_paths": []
