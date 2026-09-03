@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "8578cc03facedc43384b76d515dee20b720a152b",
+  "source_commit": "c23f15531e387bc895ecc795785400103e5246a3",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
   "lock_resolution": [
@@ -47,13 +47,13 @@
   },
   "actions": [
     "install icon provider and render Icon through poodle_render",
-    "pointer move dispatch through HeadlessDriver"
+    "pointer hover dispatch through HeadlessDriver"
   ],
   "assertions": [
-    "resolved icon glyph and asset reach the mounted tree",
-    "token size and text_color tint match the resolved theme values",
+    "production render path emits NodeKind::Icon with named SVG path handoff and token size",
+    "text_color tint matches the resolved theme value",
     "explicit accessible label is preserved on the mounted node",
-    "mounted bounds and probe channel confirm production backend paint"
+    "mounted bounds and content.text-icon.icon probe channel confirm production backend layout"
   ],
   "outcome": "passed",
   "artifact_paths": []

@@ -22,20 +22,22 @@ from the production GPUI render, node backend, and test-platform path in
 `effigy regressions:native`. `IconProvider` remains a non-rendered setup
 prerequisite, keeping the Nucleus rendered denominator at 29. The manifest,
 existing Button receipt, new Icon and IconButton receipts, and generated
-ledger pin the exact runtime source commit `8578cc03facedc43384b76d515dee20b720a152b`.
+ledger pin the exact runtime source commit `c23f15531e387bc895ecc795785400103e5246a3`.
 
 ## What landed
 
 - Headless regressions: `packages/gpui/preview/tests/headless_regressions.rs`.
-  - Added `icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend`:
-    proves registered asset resolution, token sizing, primary tint, explicit
+  - Updated `icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend`:
+    proves named SVG path handoff, token sizing, primary tint, explicit
     accessible label, probe capture (`content.text-icon.icon`), and mounted
-    bounds under `IconProvider` wrapping.
+    layout bounds under `IconProvider` wrapping.
   - Strengthened `icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard`:
     proves hit-tested pointer and keyboard activation, controlled/seeded toggle
     rebuilds, disabled inertness, and the full 300ms tooltip lifecycle
     (hover delay, visible text, departure dismissal, fallback text, and
-    Escape dismissal).
+    Escape dismissal). Moved receipt emission to the terminal boundary after
+    all three sub-scenarios (activation/tooltip, controlled toggle, seeded toggle)
+    succeed.
   - Wired deterministic `nucleus_receipts::emit_if_configured` calls for
     `Icon` (`nucleus.shell.icon`) and `IconButton` (`nucleus.shell.icon-button`).
 - Receipts:
@@ -43,17 +45,19 @@ ledger pin the exact runtime source commit `8578cc03facedc43384b76d515dee20b720a
   - `docs/roadmaps/g16/nucleus-parity-receipts/iconbutton--nucleus-shell-icon-button.json`
   - Refreshed `docs/roadmaps/g16/nucleus-parity-receipts/button--nucleus-shell-button.json`
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated Icon `expected_test` and `source_commit`.
-  - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts --write`; reports 3 mounted rows (Button, Icon, IconButton).
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated Icon `expected_test` and `source_commit` (`c23f15531e387bc895ecc795785400103e5246a3`).
+  - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts`; reports 3 mounted rows (Button, Icon, IconButton).
 
 ## Review oracle falsification
 
 | Invariant | Smallest counterexample | Required proof / Observed failure |
 | --- | --- | --- |
 | Icon uses the production path | bypass render or skip probe channel | `assert!(probe_channels.contains(&"content.text-icon.icon"))` failed |
+| Icon claims match headless bounds | claim decoded asset paint in unit context | assertions explicitly bounded to named SVG path handoff, token metadata, and mounted layout |
 | Provider is setup only | promote IconProvider to rendered row 30 or emit receipt | `validateNucleusManifest` threw `manifest has 30 rendered rows, expected 29`; `validateNucleusReceipt` threw `receipt component is not a rendered manifest entry: IconProvider` |
-| Registry is real | omit the named icon from the installed registry (`"search_nonexistent"`) | `assert!(icon_asset_exists(icon_name))` panicked: `Icon fixture requires a real registered icon asset` |
+| Asset presence is verified | omit the named icon from disk (`"search_nonexistent"`) | `assert!(icon_asset_exists(icon_name))` panicked: `Icon fixture requires a real registered icon asset on disk` |
 | IconButton input is dispatched | call handler directly without `HeadlessDriver` input | `observation.is_valid()` panicked: `receipt requires observed mounted paint and GPUI input dispatch` |
+| IconButton receipt is terminal | fail controlled or seeded toggle sub-scenario | test panicked before terminal receipt emission; stale or missing receipt failed validation |
 | Receipt means execution | unmanifested receipt or synthetic JSON | `validateNucleusReceipt` / `loadValidatedNucleusReceipts` rejected unmanifested and unobserved receipts |
 | Evidence identity is exact | keep stale source SHA after test change | `loadValidatedNucleusReceipts` threw `receipt source commit ... no longer matches the mounted runtime source` |
 | Levels stay separate | label receipt `A1` or `V1` | `validateNucleusReceipt` threw `receipt proof level must be M1; A1 and V1 require separate evidence` |
@@ -78,8 +82,8 @@ No windowed or native-visual selectors were run.
 
 ## Limits
 
-- `M1` proves mounted production-path render, node backend, and test-platform
-  input dispatch only; it does not claim `A1` (accessibility semantics) or
-  `V1` (visual comparison).
+- `M1` proves mounted production-path render, node backend, named SVG path handoff,
+  token geometry/tint metadata, mounted layout, and test-platform input dispatch;
+  it does not claim `A1` (accessibility semantics) or `V1` (visual comparison).
 - `IconProvider` remains non-rendered fixture setup.
 - Merge remains orchestrator-owned.
