@@ -6892,12 +6892,31 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
             "the jump control leaves the mounted tree once pinned"
         );
     });
+
+    let observation = agent_transcript_dependency_observation();
+    assert!(observation.is_valid());
+    nucleus_receipts::emit_if_configured(
+        "AgentTranscript",
+        "nucleus.agent.agent-transcript",
+        observation,
+        &[
+            "mount caller-scoped AgentTranscript instances through node_compat::AgentTranscript::from_spec(...).into_element() in HeadlessDriver",
+            "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding from host-owned records",
+            "replace an empty transcript with a spinning activity through the production factory and observe the mounted dependency structures",
+        ],
+        &[
+            "production Text, Surface, EmptyState, and Spinner composition preserves the accepted contract-owned structure and token treatment",
+            "the user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
+            "authored record order, roles, statuses, transcript containment, child geometry, and caller-scoped duplicate identity remain exact",
+            "host rebuilds preserve scoped disclosure state and detached scroll position while mounted keyboard, pointer, wheel, and jump input take effect",
+            "empty and loading rebuilds mount the real contained EmptyState and Spinner plus Text structures before terminal receipt emission",
+        ],
+    );
 }
 
 /// AgentTranscript postures and the user-message shell must stay observable as
 /// their production dependencies, not as transcript-authored lookalike nodes.
-#[test]
-fn agent_transcript_dependencies_are_structural_not_metadata() {
+fn agent_transcript_dependency_observation() -> headless_driver::MountedObservation {
     use crate::node_compat::IntoCompatNode;
     use gpui::IntoElement;
     use poodle_adapter::ThemeProvider;
@@ -6915,7 +6934,7 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
         loading_label: bool,
         loading_contained: bool,
         dependency_channels: bool,
-        mounted: bool,
+        observation: Option<headless_driver::MountedObservation>,
     }
 
     let mounted = Arc::new(Mutex::new(MountedPostureFacts::default()));
@@ -6974,7 +6993,7 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
         facts.dependency_channels = channels.contains(&"surface.channels.background")
             && channels.contains(&"content.text-icon.icon")
             && channels.contains(&"content.text-icon.text");
-        facts.mounted = driver.mounted_observation().is_valid();
+        facts.observation = Some(driver.mounted_observation());
     });
 
     let theme_provider = theme();
@@ -7006,7 +7025,11 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
     {
         blockers.push("loading posture did not mount the contained production Spinner and Text");
     }
-    if !mounted.dependency_channels || !mounted.mounted {
+    if !mounted.dependency_channels
+        || !mounted
+            .observation
+            .is_some_and(headless_driver::MountedObservation::is_valid)
+    {
         blockers.push("posture dependencies did not reach the mounted GPUI backend");
     }
     if user_message.style.descriptor.background
@@ -7029,6 +7052,14 @@ fn agent_transcript_dependencies_are_structural_not_metadata() {
     }
 
     assert!(blockers.is_empty(), "{}", blockers.join("; "));
+    mounted
+        .observation
+        .expect("mounted dependency observation follows terminal assertions")
+}
+
+#[test]
+fn agent_transcript_dependencies_are_structural_not_metadata() {
+    let _ = agent_transcript_dependency_observation();
 }
 
 /// Host-owned open state and trace for one nested popover pair. The outer
