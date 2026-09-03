@@ -113,11 +113,44 @@ impl Avatar {
     }
 }
 
-pub(crate) struct StatusIndicator;
+pub(crate) struct StatusIndicator {
+    spec: StatusIndicatorSpec,
+    theme: GpuiThemeProvider,
+    instance_id: Option<String>,
+}
 
 impl StatusIndicator {
-    pub(crate) fn from_spec(spec: StatusIndicatorSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::status_indicator(&spec, &RenderContext::new(theme)))
+    pub(crate) fn from_spec(spec: StatusIndicatorSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            instance_id: None,
+        }
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let mut node = poodle_render::status_indicator(&self.spec, &RenderContext::new(&self.theme));
+        if let Some(scope) = self.instance_id {
+            let root_id = format!("status-indicator:{scope}");
+            node.id = Some(root_id.clone());
+            node.runtime_id = Some(root_id.clone());
+            if let Some(dot) = node.children.get_mut(0) {
+                let dot_id = format!("{root_id}:dot");
+                dot.id = Some(dot_id.clone());
+                dot.runtime_id = Some(dot_id);
+            }
+            if let Some(label) = node.children.get_mut(1) {
+                let label_id = format!("{root_id}:label");
+                label.id = Some(label_id.clone());
+                label.runtime_id = Some(label_id);
+            }
+        }
+        node
     }
 
     pub(crate) fn node_from_spec(
@@ -125,6 +158,14 @@ impl StatusIndicator {
         theme: &GpuiThemeProvider,
     ) -> poodle_node::Node {
         poodle_render::status_indicator(&spec, &RenderContext::new(theme))
+    }
+}
+
+impl IntoElement for StatusIndicator {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 

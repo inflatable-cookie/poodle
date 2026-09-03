@@ -96,6 +96,7 @@ pub struct PaintedNodeSnapshot {
     pub shadow_layers: Vec<ShadowLayer>,
     pub border_dashed: bool,
     pub text_wrap: bool,
+    pub text_size: Option<f32>,
     pub line_height: Option<f32>,
     pub text_weight: Option<u16>,
     pub child_layout_directions: Vec<LayoutDirection>,
@@ -112,6 +113,7 @@ impl PaintedNodeSnapshot {
             shadow_layers: node.style.shadow_layers.clone(),
             border_dashed: node.style.border_dashed,
             text_wrap: node.style.text_wrap,
+            text_size: node.style.text_size,
             line_height: node.style.line_height,
             text_weight: node.style.text_weight,
             child_layout_directions: node
