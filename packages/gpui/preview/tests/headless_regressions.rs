@@ -11283,28 +11283,383 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
 /// backend with caller-scoped identity.
 #[test]
 fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
-    use gpui::IntoElement;
-    use poodle_specs::CallOutSpec;
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{
+        CallOutSpec, CalloutAnnounceMode, ControlDensity, ControlSize, StatusTone, ToneFill,
+    };
+
+    fn spec(dismissible: bool) -> CallOutSpec {
+        CallOutSpec::new()
+            .with_tone(StatusTone::Warning)
+            .with_fill(ToneFill::Tint)
+            .with_title("Maintenance window")
+            .with_content("Save before the scheduled restart.")
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact)
+            .with_announce_mode(CalloutAnnounceMode::Polite)
+            .with_aria_label("Maintenance notice")
+            .with_dismiss_label("Dismiss maintenance notice")
+            .dismissible(dismissible)
+    }
+
+    let theme_provider = theme();
+    let proof = crate::node_compat::Callout::from_spec(spec(true), &theme_provider)
+        .with_instance_id("proof")
+        .on_dismiss(Arc::new(|| {}))
+        .into_compat_node();
+    assert_eq!(proof.runtime_id.as_deref(), Some("callout:proof"));
+    assert_eq!(proof.a11y.role, Some(NodeRole::Status));
+    assert_eq!(proof.a11y.label.as_deref(), Some("Maintenance notice"));
+    assert_eq!(proof.roles.get("tone").map(String::as_str), Some("warning"));
+    assert_eq!(proof.roles.get("fill").map(String::as_str), Some("tint"));
+    assert_eq!(proof.roles.get("size").map(String::as_str), Some("sm"));
+    assert_eq!(
+        proof.roles.get("density").map(String::as_str),
+        Some("compact")
+    );
+    assert_eq!(
+        proof.style.descriptor.background,
+        Some(poodle_render::color::mix_srgb(
+            theme_provider.resolve_color("color.status.warning"),
+            theme_provider.resolve_color("color.background.panel"),
+            0.10,
+        ))
+    );
+    assert_eq!(
+        proof.style.descriptor.border.color,
+        poodle_render::color::mix_srgb(
+            theme_provider.resolve_color("color.status.warning"),
+            theme_provider.resolve_color("color.border.default"),
+            0.34,
+        )
+    );
+    assert_eq!(
+        proof.style.descriptor.border.width,
+        theme_provider.resolve_space("border.width.default")
+    );
+    assert_eq!(
+        proof.style.descriptor.corner_radii.top_left,
+        theme_provider.resolve_radius("radius.surface")
+    );
+    assert_eq!(proof.style.descriptor.layout.spacing.padding.left, 12.0);
+    assert_eq!(proof.style.descriptor.layout.spacing.padding.top, 10.0);
+    assert_eq!(
+        proof.style.descriptor.layout.spacing.gap,
+        theme_provider.resolve_space("space.inline.md")
+    );
+
+    assert_eq!(proof.children.len(), 2, "body precedes the dismiss action");
+    let body = &proof.children[0];
+    assert_eq!(body.runtime_id.as_deref(), Some("callout:proof:body"));
+    assert_eq!(body.roles.get("part").map(String::as_str), Some("body"));
+    assert_eq!(body.children.len(), 2, "body contains icon badge then content");
+    let badge = &body.children[0];
+    assert_eq!(
+        badge.runtime_id.as_deref(),
+        Some("callout:proof:icon-badge")
+    );
+    assert_eq!(badge.style.descriptor.layout.width, LayoutSizing::Fixed(20.0));
+    assert_eq!(badge.style.descriptor.layout.height, LayoutSizing::Fixed(20.0));
+    assert_eq!(badge.style.descriptor.corner_radii.top_left, 999.0);
+    let icon = &badge.children[0];
+    assert_eq!(icon.runtime_id.as_deref(), Some("callout:proof:icon"));
+    assert!(matches!(
+        &icon.kind,
+        NodeKind::Icon { name, size } if name == "triangle-alert" && *size == 12.0
+    ));
+    assert_eq!(
+        icon.roles.get("dependency").map(String::as_str),
+        Some("icon")
+    );
+    assert_eq!(icon.style.descriptor.layout.direction, LayoutDirection::Row);
+    assert_eq!(
+        icon.style.descriptor.layout.alignment.cross,
+        poodle_node::CrossAxisAlignment::Center
+    );
+    assert_eq!(
+        icon.style.descriptor.layout.alignment.main,
+        poodle_node::MainAxisAlignment::Center
+    );
+
+    let content = &body.children[1];
+    assert_eq!(
+        content.runtime_id.as_deref(),
+        Some("callout:proof:content")
+    );
+    assert_eq!(content.children.len(), 2, "title precedes body message");
+    assert_eq!(
+        content.children[0].runtime_id.as_deref(),
+        Some("callout:proof:title")
+    );
+    assert_eq!(content.children[0].intrinsic_text(), Some("Maintenance window"));
+    assert_eq!(
+        content.children[1].runtime_id.as_deref(),
+        Some("callout:proof:message")
+    );
+    assert_eq!(
+        content.children[1].intrinsic_text(),
+        Some("Save before the scheduled restart.")
+    );
+    assert_eq!(
+        content.style.descriptor.layout.spacing.gap,
+        theme_provider.resolve_space("space.inline.sm")
+    );
+
+    let dismiss = &proof.children[1];
+    assert_eq!(
+        dismiss.runtime_id.as_deref(),
+        Some("callout:proof:poodle-callout-dismiss")
+    );
+    assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        dismiss.a11y.label.as_deref(),
+        Some("Dismiss maintenance notice")
+    );
+    assert!(dismiss.interaction.focusable);
+    assert!(dismiss.interaction.on_activate.is_some());
+    assert_eq!(
+        dismiss.children[0]
+            .roles
+            .get("dependency")
+            .map(String::as_str),
+        Some("icon")
+    );
+    assert_eq!(
+        dismiss.children[0].runtime_id.as_deref(),
+        Some("callout:proof:dismiss-icon")
+    );
+
+    let neutral = crate::node_compat::Callout::from_spec(CallOutSpec::new(), &theme_provider)
+        .with_instance_id("neutral")
+        .into_compat_node();
+    assert_eq!(neutral.a11y.role, None, "announceMode none stays non-announcing");
+    assert!(neutral
+        .find(&|node| node.a11y.role == Some(NodeRole::Button))
+        .is_none());
+    let assertive = crate::node_compat::Callout::from_spec(
+        CallOutSpec::new().with_announce_mode(CalloutAnnounceMode::Assertive),
+        &theme_provider,
+    )
+    .with_instance_id("assertive")
+    .into_compat_node();
+    assert_eq!(assertive.a11y.role, Some(NodeRole::Alert));
 
     run_headless(|cx| {
-        let theme_provider = theme();
-        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
-            crate::node_compat::Callout::from_spec(
-                CallOutSpec::new()
-                    .with_title("Dismissible callout")
-                    .with_content("This callout can be dismissed by the user.")
-                    .dismissible(true),
-                &theme_provider,
-            )
-            .with_instance_id("counterexample")
-            .into_element()
-        });
+        struct CalloutHost {
+            subject_visible: bool,
+            accept_subject_dismissal: bool,
+            events: Vec<String>,
+        }
 
-        let _driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 180.0);
+        fn element(
+            host: &Arc<Mutex<CalloutHost>>,
+            scope: &'static str,
+            dismissible: bool,
+            theme_provider: &GpuiThemeProvider,
+        ) -> AnyElement {
+            let dismiss_host = Arc::clone(host);
+            crate::node_compat::Callout::from_spec(spec(dismissible), theme_provider)
+                .with_instance_id(scope)
+                .on_dismiss(Arc::new(move || {
+                    let mut host = dismiss_host.lock().expect("callout host");
+                    host.events.push(format!("{scope}:dismiss"));
+                    if scope == "subject" && host.accept_subject_dismissal {
+                        host.subject_visible = false;
+                    }
+                }))
+                .into_element()
+        }
+
+        let host = Arc::new(Mutex::new(CalloutHost {
+            subject_visible: true,
+            accept_subject_dismissal: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme();
+            Rc::new(move || {
+                let subject_visible = host.lock().expect("callout host").subject_visible;
+                let mut children = Vec::new();
+                if subject_visible {
+                    children.push(element(&host, "subject", true, &theme_provider));
+                }
+                children.push(element(&host, "witness", true, &theme_provider));
+                children.push(element(&host, "inert", false, &theme_provider));
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(24.0))
+                    .children(children)
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 360.0);
+        let subject_root = "callout:subject";
+        let subject_body = "callout:subject:body";
+        let subject_badge = "callout:subject:icon-badge";
+        let subject_content = "callout:subject:content";
+        let subject_title = "callout:subject:title";
+        let subject_message = "callout:subject:message";
+        let subject_dismiss = "callout:subject:poodle-callout-dismiss";
+        let witness_root = "callout:witness";
+        let witness_dismiss = "callout:witness:poodle-callout-dismiss";
+        let inert_root = "callout:inert";
+        let inert_dismiss = "callout:inert:poodle-callout-dismiss";
+        for id in [
+            subject_root,
+            subject_body,
+            subject_badge,
+            subject_content,
+            subject_title,
+            subject_message,
+            subject_dismiss,
+            witness_root,
+            witness_dismiss,
+            inert_root,
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "the production Callout IntoElement path must paint {id}"
+            );
+        }
         assert!(
-            poodle_gpui_node_backend::bounds_for("callout:counterexample").is_some(),
-            "the production Callout IntoElement path must paint caller-scoped root identity"
+            poodle_gpui_node_backend::bounds_for(inert_dismiss).is_none(),
+            "dismissible=false must not mount a focusable or activatable dismiss action"
         );
+
+        let mount_bounds = driver.mount_box_bounds();
+        let subject_bounds = poodle_gpui_node_backend::bounds_for(subject_root)
+            .expect("subject Callout bounds");
+        let witness_bounds = poodle_gpui_node_backend::bounds_for(witness_root)
+            .expect("witness Callout bounds");
+        let inert_bounds = poodle_gpui_node_backend::bounds_for(inert_root)
+            .expect("inert Callout bounds");
+        let body_bounds = poodle_gpui_node_backend::bounds_for(subject_body)
+            .expect("subject body bounds");
+        let badge_bounds = poodle_gpui_node_backend::bounds_for(subject_badge)
+            .expect("subject icon badge bounds");
+        let content_bounds = poodle_gpui_node_backend::bounds_for(subject_content)
+            .expect("subject content bounds");
+        let title_bounds = poodle_gpui_node_backend::bounds_for(subject_title)
+            .expect("subject title bounds");
+        let message_bounds = poodle_gpui_node_backend::bounds_for(subject_message)
+            .expect("subject message bounds");
+        let dismiss_bounds = poodle_gpui_node_backend::bounds_for(subject_dismiss)
+            .expect("subject dismiss bounds");
+        for (name, bounds) in [
+            ("subject", subject_bounds),
+            ("witness", witness_bounds),
+            ("inert", inert_bounds),
+            ("body", body_bounds),
+            ("badge", badge_bounds),
+            ("content", content_bounds),
+            ("title", title_bounds),
+            ("message", message_bounds),
+            ("dismiss", dismiss_bounds),
+        ] {
+            assert!(
+                bounds.size.width > px(0.0) && bounds.size.height > px(0.0),
+                "{name} must paint with positive geometry"
+            );
+        }
+        assert!(bounds_contain(mount_bounds, subject_bounds));
+        assert!(bounds_contain(mount_bounds, witness_bounds));
+        assert!(bounds_contain(mount_bounds, inert_bounds));
+        assert!(bounds_contain(subject_bounds, body_bounds));
+        assert!(bounds_contain(body_bounds, badge_bounds));
+        assert!(bounds_contain(body_bounds, content_bounds));
+        assert!(bounds_contain(content_bounds, title_bounds));
+        assert!(bounds_contain(content_bounds, message_bounds));
+        assert!(bounds_contain(subject_bounds, dismiss_bounds));
+        assert!(badge_bounds.right() <= content_bounds.left());
+        assert!(title_bounds.bottom() <= message_bounds.top());
+        assert!(body_bounds.right() <= dismiss_bounds.left());
+        assert!(subject_bounds.bottom() <= witness_bounds.top());
+        assert!(witness_bounds.bottom() <= inert_bounds.top());
+
+        let subject_snapshot = poodle_gpui_node_backend::painted_node_for(subject_root)
+            .expect("subject reached production backend paint");
+        assert_eq!(
+            subject_snapshot.roles.get("tone").map(String::as_str),
+            Some("warning")
+        );
+        assert_eq!(
+            subject_snapshot.roles.get("size").map(String::as_str),
+            Some("sm")
+        );
+        assert_eq!(subject_snapshot.a11y_role, Some(NodeRole::Status));
+        assert_eq!(
+            subject_snapshot.a11y_label.as_deref(),
+            Some("Maintenance notice")
+        );
+        let icon_snapshot = poodle_gpui_node_backend::painted_node_for("callout:subject:icon")
+            .expect("production Icon dependency reached backend paint");
+        assert_eq!(
+            icon_snapshot.roles.get("dependency").map(String::as_str),
+            Some("icon")
+        );
+
+        driver.wait_for_focus_handle(subject_dismiss);
+        driver.wait_for_focus_handle(witness_dismiss);
+        driver.focus_element(subject_dismiss);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(subject_dismiss),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(witness_dismiss),
+            Some(false),
+            "duplicate content must retain caller-scoped focus identity"
+        );
+
+        driver.pointer_activate_id(subject_dismiss);
+        assert_eq!(host.lock().expect("callout host").events, ["subject:dismiss"]);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(subject_root).is_some(),
+            "a refused controlled dismissal must leave the subject mounted"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(witness_root).is_some());
+
+        host.lock()
+            .expect("callout host")
+            .accept_subject_dismissal = true;
+        driver.keyboard_activate(subject_dismiss);
+        assert_eq!(
+            host.lock().expect("callout host").events,
+            ["subject:dismiss", "subject:dismiss"]
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(subject_root).is_none(),
+            "only an accepted host rebuild removes the controlled Callout"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(witness_root).is_some());
+
+        driver.keyboard_activate(witness_dismiss);
+        assert_eq!(
+            host.lock().expect("callout host").events,
+            ["subject:dismiss", "subject:dismiss", "witness:dismiss"],
+            "mounted callbacks stay isolated after the subject is removed"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(witness_root).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(inert_root).is_some());
+        assert!(driver.mounted_observation().is_valid());
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        for channel in [
+            "semantic.token-roles.received",
+            "accessibility.projection.received",
+            "content.text-icon.icon",
+        ] {
+            assert!(
+                probe_channels.contains(&channel),
+                "production backend must observe {channel}"
+            );
+        }
     });
 }
 

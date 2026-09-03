@@ -8,14 +8,16 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole, StylePatch,
+    NodeKind, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    CallOutSpec, ControlSize, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
+    CallOutSpec, CalloutAnnounceMode, ControlSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone,
+    SpinnerVariant, StatusTone,
 };
 
 use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
 use crate::context::RenderContext;
+use crate::icon::icon;
 use crate::presentation::{
     panel_space_x_rem, rem_to_px, resolve_supporting_visual_size, size_font_rem,
 };
@@ -44,6 +46,31 @@ pub fn callout_dismiss_focus_id(instance_id: Option<&str>) -> String {
 
 fn scoped(instance_id: Option<&str>, semantic: &str) -> Option<String> {
     instance_id.map(|scope| format!("callout:{scope}:{semantic}"))
+}
+
+fn component_root_id(instance_id: Option<&str>) -> Option<String> {
+    instance_id.map(|scope| format!("callout:{scope}"))
+}
+
+fn callout_icon(
+    name: &str,
+    size: f32,
+    color: poodle_node::ColorValue,
+    ctx: &RenderContext<'_>,
+) -> Node {
+    let mut node = icon(&IconSpec::new(name), ctx);
+    let NodeKind::Icon {
+        size: rendered_size,
+        ..
+    } = &mut node.kind
+    else {
+        unreachable!("Icon renderer must return NodeKind::Icon");
+    };
+    *rendered_size = size;
+    node.style.descriptor.text_color = Some(color);
+    node.roles
+        .insert("dependency".to_owned(), "icon".to_owned());
+    node
 }
 
 /// Contract §6 icon map. Pending renders a spinner, not an icon.
@@ -110,6 +137,23 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     };
 
     let mut el = Node::container();
+    el.runtime_id = component_root_id(instance_id.as_deref());
+    el.roles.insert(
+        "tone".to_owned(),
+        format!("{:?}", spec.tone).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "fill".to_owned(),
+        format!("{:?}", spec.fill).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
     {
         let s = &mut el.style;
         s.descriptor.background = Some(fill);
@@ -136,6 +180,8 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
 
     // ── Body: icon badge + content ──
     let mut body = Node::container();
+    body.runtime_id = scoped(instance_id.as_deref(), "body");
+    body.roles.insert("part".to_owned(), "body".to_owned());
     {
         let s = &mut body.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -153,6 +199,10 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         ControlSize::Xl => 2.125,
     });
     let mut badge = Node::container();
+    badge.runtime_id = scoped(instance_id.as_deref(), "icon-badge");
+    badge
+        .roles
+        .insert("part".to_owned(), "icon-badge".to_owned());
     {
         let s = &mut badge.style;
         s.descriptor.layout.width = LayoutSizing::Fixed(badge_size);
@@ -186,20 +236,31 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         if let Some(surface) = solid_surface {
             pending_spinner.style.descriptor.text_color = Some(surface.foreground);
         }
+        pending_spinner.runtime_id = scoped(instance_id.as_deref(), "spinner");
+        pending_spinner
+            .roles
+            .insert("dependency".to_owned(), "spinner".to_owned());
         badge = badge.child(pending_spinner);
     } else {
-        let mut icon = Node::icon(tone_icon(spec.tone), icon_glyph);
-        icon.style.descriptor.text_color = Some(
+        let mut icon = callout_icon(
+            tone_icon(spec.tone),
+            icon_glyph,
             solid_surface
                 .map(|surface| surface.foreground)
                 .unwrap_or(tone_color),
+            ctx,
         );
+        icon.runtime_id = scoped(instance_id.as_deref(), "icon");
         badge = badge.child(icon);
     }
     body = body.child(badge);
 
     // Content column — title + message.
     let mut content = Node::container();
+    content.runtime_id = scoped(instance_id.as_deref(), "content");
+    content
+        .roles
+        .insert("part".to_owned(), "content".to_owned());
     {
         let s = &mut content.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -209,6 +270,8 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     }
     if let Some(ref title) = spec.title {
         let mut t = Node::text(title);
+        t.runtime_id = scoped(instance_id.as_deref(), "title");
+        t.roles.insert("part".to_owned(), "title".to_owned());
         t.style.descriptor.text_color = Some(
             solid_surface
                 .map(|surface| surface.foreground)
@@ -220,6 +283,8 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     }
     if let Some(ref message) = spec.content {
         let mut m = Node::text(message);
+        m.runtime_id = scoped(instance_id.as_deref(), "message");
+        m.roles.insert("part".to_owned(), "message".to_owned());
         m.style.descriptor.text_color = Some(
             solid_surface
                 .map(|surface| surface.foreground)
@@ -241,6 +306,9 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         dismiss.runtime_id = scoped(instance_id.as_deref(), CALLOUT_DISMISS_ID);
         dismiss.a11y.role = Some(NodeRole::Button);
         dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        dismiss
+            .roles
+            .insert("part".to_owned(), "dismiss".to_owned());
         dismiss.interaction.focusable = true;
         dismiss.style.focus = Some(StylePatch {
             background: None,
@@ -261,12 +329,15 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
             s.descriptor.cursor = CursorHint::Pointer;
         }
-        let mut x = Node::icon("x", icon_glyph);
-        x.style.descriptor.text_color = Some(
+        let mut x = callout_icon(
+            "x",
+            icon_glyph,
             solid_surface
                 .map(|surface| surface.foreground)
                 .unwrap_or(text_secondary),
+            ctx,
         );
+        x.runtime_id = scoped(instance_id.as_deref(), "dismiss-icon");
         dismiss = dismiss.child(x);
 
         if let Some(handler) = &on_dismiss {
@@ -279,7 +350,11 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
-    el.a11y.role = Some(NodeRole::Alert);
+    el.a11y.role = match spec.announce_mode {
+        CalloutAnnounceMode::None => None,
+        CalloutAnnounceMode::Polite => Some(NodeRole::Status),
+        CalloutAnnounceMode::Assertive => Some(NodeRole::Alert),
+    };
     el
 }
 
