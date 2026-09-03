@@ -385,6 +385,7 @@ pub fn toast_stack(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_node::NodeKind;
     use poodle_specs::{Toast, ToastTone};
     use std::sync::Mutex;
@@ -425,6 +426,131 @@ mod tests {
             .expect("danger toast");
         assert_eq!(success.a11y.role, Some(NodeRole::ListItem));
         assert_eq!(danger.a11y.role, Some(NodeRole::Alert));
+    }
+
+    #[test]
+    fn exact_tone_composition_focus_axes_and_spacing_match_contract() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let tones = [
+            ("info", ToastTone::Info),
+            ("success", ToastTone::Success),
+            ("warning", ToastTone::Warning),
+            ("danger", ToastTone::Danger),
+        ];
+        let spec = ToastStackSpec::new()
+            .with_toasts(
+                tones
+                    .iter()
+                    .map(|(id, tone)| {
+                        Toast::new(*id, format!("{id} title"))
+                            .with_message(format!("{id} message"))
+                            .with_tone(*tone)
+                            .with_action_label("Inspect")
+                    })
+                    .collect(),
+            )
+            .with_size(ControlSize::Lg)
+            .with_density(ControlDensity::Comfortable);
+        let node = toast_stack(
+            &spec,
+            &ctx,
+            ToastStackHandlers {
+                instance_id: Some("tokens".to_owned()),
+                ..ToastStackHandlers::default()
+            },
+        );
+
+        let elevated = theme.resolve_color(spec.fill_token());
+        let border_default = theme.resolve_color(spec.border_token());
+        let pad = theme.resolve_space(spec.padding_token()) * 1.25;
+        assert_eq!(
+            node.style.descriptor.layout.spacing.gap,
+            theme.resolve_space("space.stack.lg")
+        );
+
+        for (id, tone) in tones {
+            let row = node
+                .find(&|node| node.runtime_id.as_deref()
+                    == Some(format!("toast-host:tokens:toast:{id}").as_str()))
+                .unwrap_or_else(|| panic!("{id} row"));
+            let tone_color = theme.resolve_color(spec.tone_color(&tone));
+            let fill = mix_srgb(tone_color, elevated, 0.12);
+            assert_eq!(row.style.descriptor.background, Some(fill));
+            assert_eq!(row.style.descriptor.border.width, 1.0);
+            assert_eq!(
+                row.style.descriptor.border.color,
+                mix_srgb(tone_color, border_default, 0.34)
+            );
+            assert_eq!(
+                row.style.gradient,
+                Some((90.0, vec![(fill, 0.0), (elevated, 0.18)]))
+            );
+            assert_eq!(
+                row.style.descriptor.shadow,
+                Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+            );
+            let spacing = row.style.descriptor.layout.spacing;
+            assert_eq!(spacing.padding.left, pad);
+            assert_eq!(spacing.padding.top, pad);
+            assert_eq!(spacing.padding.bottom, pad);
+            assert_eq!(spacing.padding.right, pad + rem_to_px(1.75));
+            assert_eq!(spacing.gap, theme.resolve_space(spec.gap_token()));
+
+            let accent = row.children.first().expect("accent bar");
+            assert_eq!(
+                accent.style.descriptor.background,
+                Some(mix_srgb(tone_color, WHITE, 0.94))
+            );
+            assert_eq!(
+                accent.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(0.1875))
+            );
+            assert!(matches!(
+                accent.position,
+                NodePosition::Absolute {
+                    top: Some(0.0),
+                    bottom: Some(0.0),
+                    left: Some(0.0),
+                    right: None,
+                }
+            ));
+
+            let action = row
+                .find(&|node| node.runtime_id.as_deref()
+                    == Some(format!("toast-host:tokens:toast:{id}:action").as_str()))
+                .expect("secondary action Button");
+            assert!(matches!(action.kind, NodeKind::Button { .. }));
+            assert_eq!(action.roles.get("dependency").map(String::as_str), Some("button"));
+            assert_eq!(action.roles.get("variant").map(String::as_str), Some("secondary"));
+            assert_eq!(action.roles.get("size").map(String::as_str), Some("lg"));
+            assert_eq!(
+                action.roles.get("density").map(String::as_str),
+                Some("comfortable")
+            );
+            let actions = row
+                .find(&|node| node.runtime_id.as_deref()
+                    == Some(format!("toast-host:tokens:toast:{id}:actions").as_str()))
+                .expect("actions wrapper");
+            assert_eq!(
+                actions.style.descriptor.layout.spacing.margin.top,
+                rem_to_px(0.25)
+            );
+
+            let dismiss = row
+                .find(&|node| node.runtime_id.as_deref()
+                    == Some(format!("toast-host:tokens:toast:{id}:dismiss").as_str()))
+                .expect("dismiss control");
+            assert_eq!(
+                dismiss.style.focus_ring,
+                Some(FocusRing {
+                    color: theme.resolve_color("color.accent.focusRing"),
+                    width: theme.resolve_border_width("border.width.focus"),
+                    offset: rem_to_px(0.125),
+                })
+            );
+            assert_eq!(dismiss.style.descriptor.background, Some(TRANSPARENT));
+        }
     }
 
     #[test]
