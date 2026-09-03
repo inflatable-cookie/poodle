@@ -112,13 +112,17 @@ stay maintained; backend admission is not part of the first card.
 75. [075 — Nucleus Popover M1 receipt](075-nucleus-popover-m1.md) — complete; merged in PR #181 with the production Popover adapter, nested and sibling layer isolation, mounted dismissal/focus/geometry proofs, and one M1 receipt
 76. [076 — Nucleus Select M1 receipt](076-nucleus-select-m1.md) — complete; merged in PR #182 with production adapter execution, paired-instance isolation, mounted search/navigation/dismissal proofs, and one M1 receipt
 77. [077 — Nucleus TextInput M1 receipt](077-nucleus-text-input-m1.md) — ready; convert the retained controlled-editing fixture into one production adapter receipt and unblock three dependent Nucleus rows
+78. [078 — Nucleus RadioGroup M1 receipt](078-nucleus-radio-group-m1.md) — preparation-ready in parallel with 077; production proof may advance, but receipt finalization waits for the latest merged cohort identity
+79. [079 — Nucleus Switch M1 receipt](079-nucleus-switch-m1.md) — preparation-ready in parallel with 077; production proof may advance, but receipt finalization waits for 078's merged cohort identity
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.076` are complete. `g16.077` is the next ready small Nucleus
-receipt child; later receipt cards remain serial on its exact native source
+`g16.053`–`g16.076` are complete. `g16.077` is the active receipt finalization
+lane. `g16.078` and `g16.079` may prepare independent production proofs in
+parallel, but receipt emission, cohort refresh, review, and merge remain serial
+on the latest native source identity
 identity. Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their

@@ -41,9 +41,11 @@ Updated: 2026-09-03
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: `g16.077`, the TextInput M1 receipt child. Later
-    Nucleus receipt cards remain serial on its exact native source identity;
-    do not dispatch an NP tranche as one batch.
+  - Ready frontier: `g16.077`, the TextInput M1 receipt child. `g16.078`
+    RadioGroup and `g16.079` Switch may prepare independent production proofs
+    in parallel. Their receipt emission, cohort refresh, exact-head review, and
+    merge remain serial in that order on the latest native source identity;
+    do not emit competing receipt cohorts.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
