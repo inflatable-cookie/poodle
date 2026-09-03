@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "IconButton",
-  "scenario_id": "nucleus.shell.icon-button",
+  "component": "Text",
+  "scenario_id": "nucleus.shell.text",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,15 +46,13 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount IconButton through HeadlessDriver",
-    "pointer activate, keyboard activate, and hover dispatch through GPUI platform",
-    "controlled and seeded toggle rebuilds through dispatched keyboard input"
+    "render Text through poodle_render and compose inside Surface",
+    "pointer hover dispatch through HeadlessDriver"
   ],
   "assertions": [
-    "pointer and keyboard activation fire listeners through real hit testing and focus dispatch",
-    "controlled and seeded toggle states rebuild host tree",
-    "disabled and loading states remain inert",
-    "300ms tooltip lifecycle resolves explicit and fallback text through dispatched hover and timing"
+    "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, and clamp metadata",
+    "mounted bounds confirm text is contained within the parent Surface layout",
+    "text node remains non-focusable and outside the focus chain"
   ],
   "outcome": "passed",
   "artifact_paths": []
