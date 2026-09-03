@@ -10,7 +10,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/dialog.md`, `../../contracts/components/surface.md`,
 `../../contracts/components/button.md`
 Log: `../../logs/2026-09/20260903-g16-074-nucleus-dialog-receipt.md`
-PR: pending
+PR: `https://github.com/inflatable-cookie/poodle/pull/180`
 Handoff: `../../handoffs/20260903-074500-g16-074-nucleus-dialog-receipt.md`
 
 ## Goal

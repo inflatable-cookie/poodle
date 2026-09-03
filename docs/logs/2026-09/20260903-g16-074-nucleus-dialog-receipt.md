@@ -14,7 +14,7 @@ Governing refs: `docs/roadmaps/g16/nucleus-gpui-parity-programme.md`,
 Branch: `feature/g16-074-nucleus-dialog-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-074-nucleus-dialog-receipt`
 Planning base: `cec2670ec` (`origin/main`)
-Worker PR: pending
+Worker PR: `https://github.com/inflatable-cookie/poodle/pull/180`
 
 ## Outcome
 
