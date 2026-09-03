@@ -12,6 +12,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   read-only exploration opt into the last complete index. Hit while preparing
   g16.081.
 
+- 2026-09-03 — `effigy regressions:native <test> -- --exact` drops the
+  forwarded Cargo arguments and runs the whole `headless_regressions` target.
+  That turns a named counterexample loop into a multi-minute board. Let the
+  task accept trailing arguments or add a focused native-test selector. Hit
+  while preparing g16.082.
+
 - 2026-09-03 — RESOLVED 2026-09-03 by g16.076. Two open Selects plus a focused
   trigger used to close both layers: `on_cancel` Closed the focused instance
   and `dismiss_innermost` popped the other. Overlay members skip cancel so

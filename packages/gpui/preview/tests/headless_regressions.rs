@@ -28749,3 +28749,23 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
         );
     });
 }
+
+/// g16.082. AgentChatInput must mount its editable field through the
+/// production adapter rather than painting the supplied value as static text.
+#[test]
+fn agent_chat_input_mounted_input_and_action_follow_host_state() {
+    run_headless(|cx| {
+        use gpui::IntoElement;
+
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(|| {
+            node_compat::AgentChatInput::from_spec(
+                poodle_specs::AgentChatInputSpec::new().with_value("Inspect the failing gate"),
+                &theme(),
+            )
+            .into_element()
+        });
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 560.0, 240.0);
+
+        driver.wait_for_focus_handle("poodle-input-nucleus-agent-chat-input-subject-editor");
+    });
+}
