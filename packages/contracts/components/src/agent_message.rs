@@ -87,7 +87,7 @@ impl AgentMessageSpec {
     }
     /// A user turn sits on the surface step; an assistant turn has no chrome.
     pub fn user_surface_token(&self) -> &'static str {
-        semantic::COLOR_BACKGROUND_SURFACE
+        semantic::COLOR_BACKGROUND_ELEVATED
     }
     pub fn radius_token(&self) -> &'static str {
         semantic::RADIUS_SURFACE

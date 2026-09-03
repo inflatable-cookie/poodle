@@ -1,8 +1,9 @@
 # g16.083 — Nucleus AgentTranscript M1 Receipt
 
-Status: preparation-ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.062`, completed Text and Surface receipts; serial
 finalization follows `g16.082`
 Governing refs: `nucleus-gpui-parity-programme.md`,
@@ -12,39 +13,53 @@ Handoff: `../../handoffs/20260903-163500-g16-083-nucleus-agent-transcript-receip
 
 ## Goal
 
-Prepare the first named production-path mounted proof for Nucleus
-`AgentTranscript`. Pause before shared evidence. After the orchestrator supplies
-the latest merged cohort identity, finalize one terminal `M1` receipt.
+Produce the first named production-path mounted proof for Nucleus
+`AgentTranscript`, then emit one terminal `M1` receipt at the exact committed
+runtime source.
 
-## Preparation Boundary
+Completed at runtime source
+`08c4cb9f134bec0d2a7023ca372f29715cdfed5d`. The 20-receipt cohort shares that
+identity, and the generated ledger advances only AgentTranscript from missing
+to mounted. M1 does not infer A1 or V1.
 
-- Create one stable mounted test through
+## Fixed Boundary
+
+- The manifest names only the retained
+  `agent_transcript_records_rebuild_through_production_mounted_input` fixture
+  for this card.
+- Mount
   `node_compat::AgentTranscript::from_spec(...).into_element()` and the
   element-backed `HeadlessDriver`. Renderer-only construction is not evidence.
-- Prove production Text/Surface composition, ordered message/record structure,
-  roles/status metadata, empty/loading/error/content posture, token metadata,
-  scrolling or bounded overflow where contract-owned, mount containment, and
-  duplicate-instance identity.
-- Drive only real mounted input exposed by the contract. Host state owns records
-  and rebuilds; do not import Nucleus data, streaming orchestration, markdown
-  policy, citations, approval policy, or persistence.
-- Commit a biting counterexample before any repair. A bounded generalized native
-  repair is allowed only when the mounted production proof fails.
-- During preparation, do not edit manifest, receipts, ledger, g16 front doors,
-  or claim M1 completion. Push a draft PR and pause.
-- On resume, rebase onto the latest receipt merge, set the expected test, commit
-  runtime source, emit the cohort after the terminal assertion, update this card
-  and one log, and run full boards.
+- Prove real production Text, Surface, EmptyState, and Spinner composition;
+  ordered records and statuses; exact elevated user-message fill and radius
+  without shadow; bounded scrolling; mount containment; and caller-scoped
+  duplicate runtime, focus, callback, and bounds identity.
+- Host state owns records, disclosure, and appended content. Keyboard, pointer,
+  wheel, and jump-control input pass through the mounted GPUI test platform and
+  production rebuild factory.
+- Empty and loading structures are mounted and bounded through the production
+  path. The receipt emits only after their terminal structural assertion.
+- Paint-time backend observation proves exact mounted record roles, available
+  statuses, content, dependency structure, and Surface style. All five initial
+  blocks have positive, ordered, non-overlapping bounds inside their production
+  parent; both transcript roots stay inside the mount.
+- Preparation committed both biting counterexamples before their generalized
+  native repairs and was independently accepted at
+  `61c5cc7c909ea8cfce44c044fbb6559b303dc44a`.
+- Finalization rebased the complete preparation batch onto `dec442579`, then
+  re-emitted all 20 receipts at the committed runtime source. No Nucleus data,
+  streaming orchestration, markdown policy, citations, approval policy, or
+  persistence entered the proof.
 
 ## Review Oracle
 
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
 | Production adapter owns execution | mount renderer Node directly | adapter identity/lifecycle fails |
-| Dependencies are real | replace Text/Surface with raw nodes | exact metadata or layout fails |
+| Dependencies are real | replace Text/Surface with raw nodes | mounted paint facts or layout fails |
 | Host ownership is real | mutate records without rebuild | mounted order/content stays stale |
-| Postures differ | collapse empty/loading/error/content | exact structure/status fails |
-| Identity is caller-scoped | reuse one runtime id | focus/scroll/callback state crosses |
+| Postures differ | collapse empty/loading/content | mounted dependency or record-status proof fails |
+| Identity is caller-scoped | reuse one runtime id | focus, callback, or bounds identity crosses |
 | Geometry is exact | reorder rows, overlap, or escape mount | order/containment fails |
 | Receipt is terminal | fail final posture/isolation assertion | no receipt is emitted |
 | Evidence identity is exact | emit before predecessor merge | cohort validation fails |
@@ -60,4 +75,5 @@ visual selectors.
 
 ## Continuation
 
-Pause after preparation. Shared receipt production and merge remain serial.
+Pause for M1 re-review. Merge and g16 front-door closeout remain with the
+orchestrator; this card does not start another receipt.

@@ -758,6 +758,7 @@ pub(crate) struct AgentTranscript {
     spec: AgentTranscriptSpec,
     theme: GpuiThemeProvider,
     handlers: poodle_render::AgentTranscriptHandlers,
+    scroll_state: Option<poodle_gpui_node_backend::TrackedScrollState>,
 }
 
 pub(crate) struct MediaBrowsePanel {
@@ -1354,6 +1355,7 @@ impl AgentTranscript {
             spec,
             theme: theme.clone(),
             handlers: poodle_render::AgentTranscriptHandlers::default(),
+            scroll_state: None,
         }
     }
 
@@ -1379,17 +1381,74 @@ impl AgentTranscript {
         self.handlers.on_file_select = Some(handler);
         self
     }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    pub(crate) fn with_scroll_state(
+        mut self,
+        scroll_state: poodle_gpui_node_backend::TrackedScrollState,
+    ) -> Self {
+        self.scroll_state = Some(scroll_state);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::agent_transcript(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        )
+    }
+}
+
+impl IntoCompatNode for AgentTranscript {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
 }
 
 impl IntoElement for AgentTranscript {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_transcript(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        ))
+        let Self {
+            spec,
+            theme,
+            handlers,
+            scroll_state,
+        } = self;
+        let instance_id = handlers.instance_id.clone();
+        let ctx = RenderContext::new(&theme);
+        let content = poodle_render::agent_transcript(&spec, &ctx, handlers);
+        let Some(scroll_state) = scroll_state else {
+            return poodle_gpui_node_backend::to_gpui(&content);
+        };
+
+        let root_id =
+            poodle_render::agent_transcript::agent_transcript_root_id(instance_id.as_deref());
+        let mut jump = poodle_render::agent_transcript::agent_transcript_jump(
+            &spec,
+            &ctx,
+            Some(scroll_state.jump_handler()),
+        );
+        jump.runtime_id = Some(format!("{root_id}:jump-control"));
+        let viewport_id = format!("{root_id}:viewport");
+        let jump_id = format!("{root_id}:jump");
+        poodle_gpui_node_backend::tracked_vertical_scroll(
+            &content,
+            &jump,
+            &scroll_state,
+            poodle_gpui_node_backend::TrackedScrollOptions {
+                viewport_id: &viewport_id,
+                jump_id: &jump_id,
+                pin_threshold: spec.pin_threshold,
+                auto_follow: spec.is_auto_scroll,
+                is_empty: spec.is_empty(),
+            },
+        )
     }
 }
 

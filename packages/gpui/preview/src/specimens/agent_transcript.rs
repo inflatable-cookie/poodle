@@ -10,7 +10,6 @@ use poodle_headless::agent_transcript::{
     ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
     TranscriptMessage, TranscriptToolCall,
 };
-use poodle_render::RenderContext;
 use poodle_specs::{AgentTranscriptSpec, EyebrowSpec};
 
 fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {
@@ -170,20 +169,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     };
 
-    let detached_spec = AgentTranscriptSpec::new(long.clone());
-    let ctx = RenderContext::new(theme);
-    let detached_content = poodle_render::agent_transcript(
-        &detached_spec,
-        &ctx,
-        poodle_render::AgentTranscriptHandlers::default(),
-    );
-    let mut jump_control = poodle_render::agent_transcript::agent_transcript_jump(
-        &detached_spec,
-        &ctx,
-        Some(state.agent_transcript_scroll.jump_handler()),
-    );
-    jump_control.id = Some("agent-transcript-jump-control".to_string());
-
     let worked = AgentTranscript::from_spec(
         AgentTranscriptSpec::new(turn)
             .with_expanded_tool_runs(expanded_for("run", &["t1", "t6"]))
@@ -228,18 +213,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .into_any_element(),
                 div()
                     .h(px(256.0))
-                    .child(poodle_gpui_node_backend::tracked_vertical_scroll(
-                        &detached_content,
-                        &jump_control,
-                        &state.agent_transcript_scroll,
-                        poodle_gpui_node_backend::TrackedScrollOptions {
-                            viewport_id: "agent-transcript-detached-viewport",
-                            jump_id: "agent-transcript-jump",
-                            pin_threshold: detached_spec.pin_threshold,
-                            auto_follow: detached_spec.is_auto_scroll,
-                            is_empty: detached_spec.is_empty(),
-                        },
-                    ))
+                    .child(
+                        AgentTranscript::from_spec(AgentTranscriptSpec::new(long.clone()), theme)
+                            .with_instance_id("detached")
+                            .with_scroll_state(state.agent_transcript_scroll.clone()),
+                    )
                     .into_any_element(),
             ])
             .into_any_element(),

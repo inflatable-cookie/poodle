@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "AppHeader",
-  "scenario_id": "nucleus.shell.app-header",
+  "component": "AgentTranscript",
+  "scenario_id": "nucleus.agent.agent-transcript",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,13 +46,16 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "render AppHeader with centered custom-identity composite through poodle_render",
-    "pointer hover dispatch through HeadlessDriver"
+    "mount caller-scoped AgentTranscript instances through node_compat::AgentTranscript::from_spec(...).into_element() in HeadlessDriver",
+    "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding and appending host-owned records",
+    "replace an empty transcript with a spinning activity through the production factory and observe the mounted dependency structures"
   ],
   "assertions": [
-    "production render path resolves shell background, bottom border, size ladder min-height, typography, density padding/gaps, fill-width posture, and aria-label fallback/override",
-    "presence of center slot switches layout from flat root regions to symmetric grow trailing column",
-    "mounted bounds confirm child containment, positive dimensions, stable region ordering, and non-focusable styled-only root"
+    "paint-time node facts and positive bounds prove the real mounted Text, Surface, EmptyState, and Spinner dependency structures",
+    "the mounted user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
+    "all five mounted record blocks preserve exact roles, available statuses, content, order, non-overlap, production-parent containment, and caller-scoped identity",
+    "host rebuilds append the scoped runtime id in order and preserve disclosure state; the separately mounted scroll fixture preserves detached position while keyboard, pointer, wheel, and jump input take effect",
+    "empty and loading rebuilds mount positive contained EmptyState and Spinner plus Text child bounds before terminal receipt emission"
   ],
   "outcome": "passed",
   "artifact_paths": []
