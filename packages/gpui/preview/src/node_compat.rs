@@ -6695,8 +6695,12 @@ impl IntoElement for AlertDialog {
 pub(crate) struct ConfirmAction {
     spec: ConfirmActionSpec,
     theme: GpuiThemeProvider,
+    instance_id: Option<String>,
     trigger: Option<poodle_node::Node>,
     content: Option<poodle_node::Node>,
+    working: bool,
+    working_label: String,
+    on_trigger: Option<Arc<dyn Fn() + Send + Sync>>,
     confirm: Option<Arc<dyn Fn() + Send + Sync>>,
     cancel: Option<Arc<dyn Fn() + Send + Sync>>,
 }
@@ -6706,11 +6710,20 @@ impl ConfirmAction {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: None,
             trigger: None,
             content: None,
+            working: false,
+            working_label: poodle_render::alert_dialog::DEFAULT_WORKING_LABEL.to_string(),
+            on_trigger: None,
             confirm: None,
             cancel: None,
         }
+    }
+
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.instance_id = Some(id.into());
+        self
     }
 
     pub(crate) fn with_trigger(mut self, trigger: impl IntoCompatNode) -> Self {
@@ -6720,6 +6733,21 @@ impl ConfirmAction {
 
     pub(crate) fn with_content(mut self, content: impl IntoCompatNode) -> Self {
         self.content = Some(content.into_compat_node());
+        self
+    }
+
+    pub(crate) fn working(mut self, working: bool) -> Self {
+        self.working = working;
+        self
+    }
+
+    pub(crate) fn working_label(mut self, label: impl Into<String>) -> Self {
+        self.working_label = label.into();
+        self
+    }
+
+    pub(crate) fn on_trigger(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_trigger = Some(handler);
         self
     }
 
@@ -6738,18 +6766,25 @@ impl IntoElement for ConfirmAction {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::confirm_action_with_slots(
+        let is_open = self.spec.is_open;
+        let instance_id = self.instance_id.clone();
+        let mut node = poodle_render::confirm_action::confirm_action_with_slots_state(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.trigger,
             self.content,
+            self.working,
+            &self.working_label,
             poodle_render::ConfirmActionHandlers {
-                on_trigger: None,
+                on_trigger: self.on_trigger,
                 on_confirm: self.confirm,
                 on_cancel: self.cancel,
             },
         );
-        if self.spec.is_open {
+        if let Some(instance_id) = instance_id {
+            stamp_confirm_action_identity(&mut node, &instance_id, is_open);
+        }
+        if is_open {
             native_alert_dialog_spacing(
                 &mut node,
                 false,
@@ -6758,6 +6793,72 @@ impl IntoElement for ConfirmAction {
         }
         native_dialog_element(node)
     }
+}
+
+fn stamp_confirm_action_identity(
+    node: &mut poodle_node::Node,
+    instance_id: &str,
+    is_open: bool,
+) {
+    fn stamp(node: &mut poodle_node::Node, id: String) {
+        node.id = Some(id.clone());
+        node.runtime_id = Some(id);
+    }
+
+    fn stamp_existing_id(node: &mut poodle_node::Node, current: &str, id: String) -> bool {
+        if node.runtime_id.as_deref() == Some(current) || node.id.as_deref() == Some(current) {
+            stamp(node, id);
+            return true;
+        }
+        node.children
+            .iter_mut()
+            .any(|child| stamp_existing_id(child, current, id.clone()))
+    }
+
+    let scope = format!("confirm-action:{instance_id}");
+    if !is_open {
+        stamp(node, format!("{scope}:trigger"));
+        return;
+    }
+
+    let dialog = if matches!(node.position, poodle_node::NodePosition::Absolute { .. }) {
+        node
+    } else {
+        let trigger = node
+            .children
+            .first_mut()
+            .expect("open ConfirmAction with a custom trigger keeps it first");
+        stamp(trigger, format!("{scope}:trigger"));
+        node.children
+            .last_mut()
+            .expect("open ConfirmAction keeps its Dialog last")
+    };
+    stamp(dialog, format!("{scope}:backdrop"));
+    let surface = dialog
+        .children
+        .first_mut()
+        .expect("ConfirmAction Dialog keeps its surface first");
+    stamp(surface, format!("{scope}:surface"));
+    let _ = stamp_existing_id(
+        surface,
+        "poodle-dialog-close",
+        format!("{scope}:close"),
+    );
+    let actions = surface
+        .children
+        .last_mut()
+        .expect("ConfirmAction Dialog keeps its actions last");
+    let buttons = actions
+        .children
+        .first_mut()
+        .expect("ConfirmAction actions keep their Button group");
+    assert_eq!(
+        buttons.children.len(),
+        2,
+        "ConfirmAction keeps exactly cancel and confirm Buttons"
+    );
+    stamp(&mut buttons.children[0], format!("{scope}:cancel"));
+    stamp(&mut buttons.children[1], format!("{scope}:confirm"));
 }
 
 fn native_dialog_element(mut node: poodle_node::Node) -> AnyElement {
@@ -6782,6 +6883,11 @@ fn native_dialog_element(mut node: poodle_node::Node) -> AnyElement {
 }
 
 fn native_dialog_backdrop(mut node: poodle_node::Node) -> AnyElement {
+    let backdrop_id = node
+        .runtime_id
+        .clone()
+        .or_else(|| node.id.clone())
+        .unwrap_or_else(|| "poodle-dialog-backdrop".to_string());
     let Some(panel) = node.children.pop() else {
         return poodle_gpui_node_backend::to_gpui(&node);
     };
@@ -6793,7 +6899,7 @@ fn native_dialog_backdrop(mut node: poodle_node::Node) -> AnyElement {
         .unwrap_or_else(gpui::transparent_black);
     let dismiss = node.interaction.on_activate;
     let mut backdrop = div()
-        .id("poodle-dialog-backdrop")
+        .id(gpui::SharedString::from(backdrop_id))
         .absolute()
         .inset_0()
         .bg(fill)

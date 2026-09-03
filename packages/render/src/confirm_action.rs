@@ -71,6 +71,29 @@ pub fn confirm_action_with_slots(
     content: Option<Node>,
     handlers: ConfirmActionHandlers,
 ) -> Node {
+    confirm_action_with_slots_state(
+        spec,
+        ctx,
+        trigger,
+        content,
+        false,
+        "Working\u{2026}",
+        handlers,
+    )
+}
+
+/// Render with host-owned in-flight state. Native adapters use this seam to
+/// rebuild the synchronous node tree while asynchronous application work is
+/// pending; web runtimes keep that same state internally in AlertDialog.
+pub fn confirm_action_with_slots_state(
+    spec: &ConfirmActionSpec,
+    ctx: &RenderContext<'_>,
+    trigger: Option<Node>,
+    content: Option<Node>,
+    working: bool,
+    working_label: &str,
+    handlers: ConfirmActionHandlers,
+) -> Node {
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
     if !spec.is_open {
@@ -104,8 +127,8 @@ pub fn confirm_action_with_slots(
     let dialog = alert_dialog_with_content(
         &alert_spec,
         ctx,
-        false,
-        "Working\u{2026}",
+        working,
+        working_label,
         content.into_iter().collect(),
         AlertDialogHandlers {
             confirm: handlers.on_confirm,
