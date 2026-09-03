@@ -3894,6 +3894,39 @@ fn attach_bridge(
 }
 
 
+/// g16.091 review counterexample. A frame may retire only the focus identities
+/// owned by its own window. The background window stays live after its driver
+/// is dropped, so mounting a second window must not discard its focus handle.
+#[test]
+fn one_window_focus_sweep_cannot_drop_another_live_windows_handle() {
+    run_headless(|cx| {
+        let background_trace = Arc::new(Mutex::new(Vec::new()));
+        {
+            let node = Arc::new(Mutex::new(scoped_drag_tree("focus-bg", &background_trace)));
+            let mut background = HeadlessDriver::new(cx, node);
+            background.wait_for_focus_handle("focus-bg-source");
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for("focus-bg-source").is_some(),
+                "the background window owns a tracked focus handle before another window paints"
+            );
+        }
+
+        let foreground_trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(scoped_drag_tree("focus-fg", &foreground_trace)));
+        let mut foreground = HeadlessDriver::new(cx, node);
+        foreground.draw_frame();
+
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("focus-bg-source").is_some(),
+            "a foreground frame must not sweep a live background window's focus handle"
+        );
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("focus-fg-source").is_some(),
+            "the foreground frame still owns its own tracked focus handle"
+        );
+    });
+}
+
 /// g16.026, carried from g16.025. **Two windows, no false cancel.**
 ///
 /// This is the counterexample that sank the first attempt. That version kept a
@@ -29026,6 +29059,535 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
         assert!(
             channels.contains(&"surface.animation.approximation.opacity-stand-in"),
             "unsupported translation must stay a named approximation: {channels:?}"
+        );
+    });
+}
+
+/// g16.091. Production ToastHost placement owns the authored viewport inset;
+/// the composed stack cannot shift itself again inside that host.
+#[test]
+fn toast_host_all_placements_are_exact_ordered_and_contained_when_mounted() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_specs::{ToastHostPlacement, ToastHostSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build = Rc::new(move || {
+            let host = |scope: &'static str, placement| {
+                node_compat::ToastHost::from_spec(
+                    ToastHostSpec::new().with_placement(placement),
+                    &theme_provider,
+                )
+                .with_instance_id(scope)
+                .toasts(vec![
+                    Toast::new("first", format!("{scope} first"))
+                        .with_message("Mounted placement proof")
+                        .with_action_label("Inspect"),
+                    Toast::new("second", format!("{scope} second"))
+                        .with_tone(ToastTone::Success),
+                ])
+            };
+            div()
+                .relative()
+                .size_full()
+                .child(host("top-start", ToastHostPlacement::TopStart))
+                .child(host("top-end", ToastHostPlacement::TopEnd))
+                .child(host("bottom-start", ToastHostPlacement::BottomStart))
+                .child(host("bottom-end", ToastHostPlacement::BottomEnd))
+                .into_any_element()
+        }) as Rc<dyn Fn() -> gpui::AnyElement>;
+
+        let driver = HeadlessDriver::new_element_in_box(cx, build, 960.0, 720.0);
+        let mount = driver.mount_box_bounds();
+        let exact = |actual: Pixels, expected: Pixels, label: &str| {
+            assert!(
+                (f32::from(actual) - f32::from(expected)).abs() <= 0.5,
+                "{label}: expected {expected:?}, got {actual:?}"
+            );
+        };
+        let bounds = |id: &str| {
+            poodle_gpui_node_backend::bounds_for(id)
+                .unwrap_or_else(|| panic!("mounted bounds for {id}"))
+        };
+
+        for (scope, start, top) in [
+            ("top-start", true, true),
+            ("top-end", false, true),
+            ("bottom-start", true, false),
+            ("bottom-end", false, false),
+        ] {
+            let host = bounds(&format!("toast-host:{scope}"));
+            let stack = bounds(&format!("toast-host:{scope}:stack"));
+            exact(host.size.width, px(448.0), &format!("{scope} 28rem cap"));
+            if start {
+                exact(
+                    host.left(),
+                    mount.left() + px(16.0),
+                    &format!("{scope} authored 1rem inline edge"),
+                );
+                exact(
+                    stack.left(),
+                    host.left(),
+                    &format!("{scope} stack must not add a second inline inset"),
+                );
+            } else {
+                exact(
+                    host.right(),
+                    mount.right() - px(16.0),
+                    &format!("{scope} authored 1rem inline edge"),
+                );
+                exact(
+                    stack.right(),
+                    host.right(),
+                    &format!("{scope} stack must not add a second inline inset"),
+                );
+            }
+            if top {
+                exact(
+                    host.top(),
+                    mount.top() + px(16.0),
+                    &format!("{scope} authored 1rem block edge"),
+                );
+                exact(
+                    stack.top(),
+                    host.top(),
+                    &format!("{scope} stack must not add a second block inset"),
+                );
+            } else {
+                exact(
+                    host.bottom(),
+                    mount.bottom() - px(16.0),
+                    &format!("{scope} authored 1rem block edge"),
+                );
+                exact(
+                    stack.bottom(),
+                    host.bottom(),
+                    &format!("{scope} stack must not add a second block inset"),
+                );
+            }
+            assert!(bounds_contain(host, stack), "{scope} stack escaped host");
+
+            let first = bounds(&format!("toast-host:{scope}:toast:first"));
+            let second = bounds(&format!("toast-host:{scope}:toast:second"));
+            assert!(bounds_contain(stack, first), "{scope} first row escaped stack");
+            assert!(bounds_contain(stack, second), "{scope} second row escaped stack");
+            assert!(
+                first.bottom() <= second.top(),
+                "{scope} authored row order overlaps or reversed: {first:?}, {second:?}"
+            );
+
+            let action = bounds(&format!("toast-host:{scope}:toast:first:action"));
+            let dismiss = bounds(&format!("toast-host:{scope}:toast:first:dismiss"));
+            let icon = bounds(&format!("toast-host:{scope}:toast:first:dismiss-icon"));
+            assert!(bounds_contain(first, action), "{scope} action escaped row");
+            assert!(bounds_contain(first, dismiss), "{scope} dismiss escaped row");
+            assert!(bounds_contain(dismiss, icon), "{scope} Icon escaped dismiss");
+        }
+    });
+}
+
+/// g16.091. Resolved ToastHost presentation must survive the production
+/// adapter and real backend paint; role-only renderer metadata is insufficient.
+#[test]
+fn toast_host_exact_tones_composition_axes_and_focus_reach_mounted_paint() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::mix_srgb;
+    use poodle_specs::{SemanticControlSizeRole, ToastHostPlacement, ToastHostSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build_theme = theme_provider.clone();
+        let build = Rc::new(move || {
+            div()
+                .relative()
+                .size_full()
+                .child(
+                    node_compat::ToastHost::from_spec(
+                        ToastHostSpec::new()
+                            .with_placement(ToastHostPlacement::TopStart)
+                            .with_size_role(SemanticControlSizeRole::Prominent)
+                            .with_density(ControlDensity::Comfortable),
+                        &build_theme,
+                    )
+                    .with_instance_id("tokens")
+                    .toasts(vec![
+                        Toast::new("info", "Information")
+                            .with_tone(ToastTone::Info)
+                            .with_action_label("Inspect"),
+                        Toast::new("success", "Published")
+                            .with_tone(ToastTone::Success)
+                            .with_action_label("Inspect"),
+                        Toast::new("warning", "Rate limited")
+                            .with_tone(ToastTone::Warning)
+                            .with_action_label("Inspect"),
+                        Toast::new("danger", "Publishing failed")
+                            .with_tone(ToastTone::Danger)
+                            .with_action_label("Inspect"),
+                    ]),
+                )
+                .into_any_element()
+        }) as Rc<dyn Fn() -> gpui::AnyElement>;
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 640.0);
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let _channels = poodle_gpui_node_backend::take_probe_capture();
+
+        let stack = poodle_gpui_node_backend::painted_node_for("toast-host:tokens:stack")
+            .expect("mounted ToastStack paint");
+        assert_eq!(stack.roles.get("size").map(String::as_str), Some("lg"));
+        assert_eq!(
+            stack.roles.get("density").map(String::as_str),
+            Some("comfortable")
+        );
+        assert_eq!(
+            stack.style.layout.spacing.gap,
+            theme_provider.resolve_space("space.stack.lg")
+        );
+
+        let elevated = theme_provider.resolve_color("color.background.elevated");
+        let border_default = theme_provider.resolve_color("color.border.default");
+        let pad = theme_provider.resolve_space("space.panel.x") * 1.25;
+        for (id, tone_token) in [
+            ("info", "color.status.info"),
+            ("success", "color.status.success"),
+            ("warning", "color.status.warning"),
+            ("danger", "color.status.danger"),
+        ] {
+            let row_id = format!("toast-host:tokens:toast:{id}");
+            let row = poodle_gpui_node_backend::painted_node_for(&row_id)
+                .unwrap_or_else(|| panic!("mounted {id} row paint"));
+            let tone = theme_provider.resolve_color(tone_token);
+            let fill = mix_srgb(tone, elevated, 0.12);
+            assert_eq!(row.style.background, Some(fill));
+            assert_eq!(row.style.border.width, 1.0);
+            assert_eq!(
+                row.style.border.color,
+                mix_srgb(tone, border_default, 0.34)
+            );
+            assert_eq!(
+                row.style.shadow,
+                Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+            );
+            assert_eq!(row.style.layout.spacing.padding.left, pad);
+            assert_eq!(row.style.layout.spacing.padding.top, pad);
+            assert_eq!(row.style.layout.spacing.padding.bottom, pad);
+            assert_eq!(
+                row.style.layout.spacing.padding.right,
+                pad + poodle_render::presentation::rem_to_px(1.75)
+            );
+
+            let accent_id = format!("toast-host:tokens:toast:{id}:accent");
+            let accent = poodle_gpui_node_backend::painted_node_for(&accent_id)
+                .unwrap_or_else(|| panic!("mounted {id} accent paint"));
+            assert_eq!(
+                accent.style.background,
+                Some(mix_srgb(tone, ColorValue(1.0, 1.0, 1.0, 1.0), 0.94))
+            );
+            assert_eq!(
+                accent.style.layout.width,
+                LayoutSizing::Fixed(poodle_render::presentation::rem_to_px(0.1875))
+            );
+
+            let action_id = format!("toast-host:tokens:toast:{id}:action");
+            let action = poodle_gpui_node_backend::painted_node_for(&action_id)
+                .unwrap_or_else(|| panic!("mounted {id} secondary Button paint"));
+            assert_eq!(
+                action.roles.get("dependency").map(String::as_str),
+                Some("button")
+            );
+            assert_eq!(
+                action.roles.get("variant").map(String::as_str),
+                Some("secondary")
+            );
+            assert_eq!(action.roles.get("size").map(String::as_str), Some("lg"));
+            assert_eq!(
+                action.roles.get("density").map(String::as_str),
+                Some("comfortable")
+            );
+            assert_eq!(
+                action.style.layout.height,
+                LayoutSizing::Fixed(poodle_render::presentation::rem_to_px(2.75))
+            );
+            assert_eq!(
+                action.style.layout.spacing.padding.left,
+                theme_provider.resolve_space("space.control.x")
+                    + poodle_render::presentation::rem_to_px(0.125)
+            );
+            assert_eq!(
+                action.style.layout.spacing.padding.right,
+                theme_provider.resolve_space("space.control.x")
+                    + poodle_render::presentation::rem_to_px(0.125)
+            );
+        }
+
+        let dismiss_id = "toast-host:tokens:toast:danger:dismiss";
+        driver.wait_for_focus_handle(dismiss_id);
+        driver.focus_element(dismiss_id);
+        let painted_ring = poodle_gpui_node_backend::painted_ring_for(dismiss_id)
+            .expect("focused dismiss paints its ring");
+        assert_eq!(
+            painted_ring.ring,
+            FocusRing {
+                color: theme_provider.resolve_color("color.accent.focusRing"),
+                width: theme_provider.resolve_border_width("border.width.focus"),
+                offset: poodle_render::presentation::rem_to_px(0.125),
+            }
+        );
+    });
+}
+
+/// g16.091. Duplicate production ToastHost mounts must retain caller-scoped
+/// identity even when their controlled queues reuse the same toast id.
+#[test]
+fn toast_host_controlled_composition_actions_and_identity_through_mounted_backend() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_specs::{ToastHostPlacement, ToastHostSpec};
+
+    run_headless(|cx| {
+        let left_toasts = Arc::new(Mutex::new(vec![
+            Toast::new("job", "Publishing").with_action_label("Retry"),
+            Toast::new("saved", "Saved").with_tone(ToastTone::Success),
+        ]));
+        let right_toasts = Arc::new(Mutex::new(vec![
+            Toast::new("job", "Rate limited")
+                .with_tone(ToastTone::Warning)
+                .with_action_label("Unavailable"),
+            Toast::new("blocked", "Publishing failed").with_tone(ToastTone::Danger),
+        ]));
+        let trace = Arc::new(Mutex::new(Vec::<String>::new()));
+        let theme_provider = theme();
+        let build = {
+            let left_toasts = Arc::clone(&left_toasts);
+            let right_toasts = Arc::clone(&right_toasts);
+            let trace = Arc::clone(&trace);
+            Rc::new(move || {
+                let left_action_trace = Arc::clone(&trace);
+                let left_dismiss_trace = Arc::clone(&trace);
+                let right_dismiss_trace = Arc::clone(&trace);
+                div()
+                    .relative()
+                    .size_full()
+                    .child(
+                        node_compat::ToastHost::from_spec(
+                            ToastHostSpec::new()
+                                .with_placement(ToastHostPlacement::TopStart)
+                                .with_size(ControlSize::Xs)
+                                .with_density(ControlDensity::Compact),
+                            &theme_provider,
+                        )
+                        .with_instance_id("left")
+                        .on_action(Arc::new(move |id| {
+                            left_action_trace
+                                .lock()
+                                .expect("trace lock")
+                                .push(format!("left/action:{id}"));
+                        }))
+                        .on_dismiss(Arc::new(move |id| {
+                            left_dismiss_trace
+                                .lock()
+                                .expect("trace lock")
+                                .push(format!("left/dismiss:{id}"));
+                        }))
+                        .toasts(left_toasts.lock().expect("left queue lock").clone()),
+                    )
+                    .child(
+                        node_compat::ToastHost::from_spec(
+                            ToastHostSpec::new()
+                                .with_placement(ToastHostPlacement::BottomEnd)
+                                .with_size(ControlSize::Xl)
+                                .with_density(ControlDensity::Comfortable),
+                            &theme_provider,
+                        )
+                        .with_instance_id("right")
+                        .on_dismiss(Arc::new(move |id| {
+                            right_dismiss_trace
+                                .lock()
+                                .expect("trace lock")
+                                .push(format!("right/dismiss:{id}"));
+                        }))
+                        // Deliberately no action handler: the rendered Button
+                        // remains reachable but activation is inert.
+                        .toasts(right_toasts.lock().expect("right queue lock").clone()),
+                    )
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        let bounds = |id: &str| {
+            poodle_gpui_node_backend::bounds_for(id)
+                .unwrap_or_else(|| panic!("mounted bounds for {id}"))
+        };
+        let left_host = bounds("toast-host:left");
+        let right_host = bounds("toast-host:right");
+        assert!(
+            left_host.origin.x < right_host.origin.x && left_host.origin.y < right_host.origin.y,
+            "top-start and bottom-end hosts must occupy distinct exact quadrants"
+        );
+
+        let left_job = bounds("toast-host:left:toast:job");
+        let left_saved = bounds("toast-host:left:toast:saved");
+        assert!(
+            left_job.origin.y < left_saved.origin.y,
+            "controlled queue order must be retained in mounted geometry"
+        );
+        assert!(
+            bounds("toast-host:left:toast:job:dismiss-icon").size.width > px(0.0),
+            "the real Icon dependency must paint inside dismiss"
+        );
+        assert!(
+            bounds("toast-host:right:toast:job:action").size.height
+                > bounds("toast-host:left:toast:job:action").size.height,
+            "forwarded xl/comfortable and xs/compact axes must reach Button geometry"
+        );
+
+        driver.pointer_activate_id("toast-host:left:toast:job:action");
+        driver.wait_for_focus_handle("toast-host:left:toast:job:dismiss");
+        driver.keyboard_activate("toast-host:left:toast:job:dismiss");
+        driver.pointer_activate_id("toast-host:right:toast:job:action");
+        driver.keyboard_activate("toast-host:right:toast:job:action");
+        driver.pointer_activate_id("toast-host:right:toast:job:dismiss");
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["left/action:job", "left/dismiss:job", "right/dismiss:job"],
+            "pointer, keyboard, inert action, and duplicate-id callbacks stay exact and isolated"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:job").is_some(),
+            "callbacks request changes; they do not mutate the controlled queue"
+        );
+
+        driver.focus_element("toast-host:left:toast:job:action");
+        *left_toasts.lock().expect("left queue lock") = vec![
+            Toast::new("job", "Published")
+                .with_tone(ToastTone::Success)
+                .with_action_label("Open"),
+            Toast::new("fresh", "New version").with_tone(ToastTone::Info),
+        ];
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:left:toast:job:action"),
+            Some(true),
+            "same-id controlled field replacement retains Button runtime identity"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:saved").is_none()
+                && poodle_gpui_node_backend::bounds_for("toast-host:left:toast:fresh").is_some(),
+            "accepted host rebuild applies controlled remove and add"
+        );
+
+        let trace_before_time = trace.lock().expect("trace lock").clone();
+        driver.advance_clock(std::time::Duration::from_secs(60));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:job").is_some(),
+            "deterministic time cannot remove a controlled native row; native render owns no clock"
+        );
+        assert_eq!(
+            *trace.lock().expect("trace lock"),
+            trace_before_time,
+            "advancing the headless clock must not manufacture a dismiss callback"
+        );
+
+        left_toasts.lock().expect("left queue lock").remove(0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left:toast:job").is_none()
+                && poodle_gpui_node_backend::bounds_for("toast-host:right:toast:job").is_some(),
+            "removing the left duplicate cannot remove the right host's row"
+        );
+
+        let terminal_focus = "toast-host:right:toast:job:dismiss";
+        driver.wait_for_focus_handle(terminal_focus);
+        driver.focus_element(terminal_focus);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(terminal_focus),
+            Some(true),
+            "terminal teardown starts from a real focused duplicate-host control"
+        );
+        let trace_before_teardown = trace.lock().expect("trace lock").clone();
+        left_toasts.lock().expect("left queue lock").clear();
+        right_toasts.lock().expect("right queue lock").clear();
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let _terminal_channels = poodle_gpui_node_backend::take_probe_capture();
+
+        let vanished = [
+            "toast-host:left",
+            "toast-host:left:stack",
+            "toast-host:left:toast:job",
+            "toast-host:left:toast:job:action",
+            "toast-host:left:toast:job:dismiss",
+            "toast-host:left:toast:job:dismiss-icon",
+            "toast-host:left:toast:saved",
+            "toast-host:left:toast:saved:dismiss",
+            "toast-host:left:toast:saved:dismiss-icon",
+            "toast-host:left:toast:fresh",
+            "toast-host:left:toast:fresh:dismiss",
+            "toast-host:left:toast:fresh:dismiss-icon",
+            "toast-host:right",
+            "toast-host:right:stack",
+            "toast-host:right:toast:job",
+            "toast-host:right:toast:job:action",
+            "toast-host:right:toast:job:dismiss",
+            "toast-host:right:toast:job:dismiss-icon",
+            "toast-host:right:toast:blocked",
+            "toast-host:right:toast:blocked:dismiss",
+            "toast-host:right:toast:blocked:dismiss-icon",
+        ];
+        for id in vanished {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_none(),
+                "terminal empty queues must clear mounted bounds for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::painted_node_for(id).is_none(),
+                "terminal empty queues must clear paint identity for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+                "terminal empty queues must clear focus handle identity for {id}"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(id),
+                None,
+                "terminal empty queues must clear focus state identity for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::painted_ring_for(id).is_none(),
+                "terminal empty queues must clear focus paint for {id}"
+            );
+        }
+        driver.dispatch_key("enter");
+        assert_eq!(
+            *trace.lock().expect("trace lock"),
+            trace_before_teardown,
+            "terminal input cannot reach either removed host or cross their callbacks"
+        );
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "ToastHost",
+            "nucleus.attention.toast-host",
+            observation,
+            &[
+                "mount duplicate caller-scoped controlled ToastHost instances through node_compat::ToastHost::from_spec(...).into_element() in a 720x520 HeadlessDriver host",
+                "compose production Toast rows with real secondary Button actions, dismiss controls, and Icon glyphs through the shared renderer and GPUI adapter",
+                "dispatch mounted pointer and keyboard activation across duplicate toast ids, inert actions, dismiss controls, and controlled host rebuilds",
+                "advance deterministic headless time while the native controlled host owns no timeout clock",
+                "empty both controlled queues while a duplicate-host dismiss control owns focus, redraw, and dispatch terminal keyboard input",
+            ],
+            &[
+                "all four placements retain authored one-rem edges, a 28rem host cap, exact stack direction, ordered non-overlap, containment, and rejection of shifted or double-inset geometry",
+                "info, success, warning, and danger rows preserve exact fill, border, accent, elevation, focus, spacing, size, density, and size-role tokens through mounted production composition",
+                "secondary Button actions and dismiss Icon controls remain contained, reachable, and caller-scoped while duplicate toast ids never cross callbacks",
+                "controlled replacement retains same-id focus identity, explicit removal stays host-local, and advancing time cannot remove rows or manufacture callbacks",
+                "terminal empty queues clear both hosts and every row, action, dismiss, Icon, focus, ring, and backend identity before further input",
+            ],
         );
     });
 }

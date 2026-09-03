@@ -1,0 +1,64 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "ToastHost",
+  "scenario_id": "nucleus.attention.toast-host",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "0f04083c9dee61d01722104e7403368559f0b590",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount duplicate caller-scoped controlled ToastHost instances through node_compat::ToastHost::from_spec(...).into_element() in a 720x520 HeadlessDriver host",
+    "compose production Toast rows with real secondary Button actions, dismiss controls, and Icon glyphs through the shared renderer and GPUI adapter",
+    "dispatch mounted pointer and keyboard activation across duplicate toast ids, inert actions, dismiss controls, and controlled host rebuilds",
+    "advance deterministic headless time while the native controlled host owns no timeout clock",
+    "empty both controlled queues while a duplicate-host dismiss control owns focus, redraw, and dispatch terminal keyboard input"
+  ],
+  "assertions": [
+    "all four placements retain authored one-rem edges, a 28rem host cap, exact stack direction, ordered non-overlap, containment, and rejection of shifted or double-inset geometry",
+    "info, success, warning, and danger rows preserve exact fill, border, accent, elevation, focus, spacing, size, density, and size-role tokens through mounted production composition",
+    "secondary Button actions and dismiss Icon controls remain contained, reachable, and caller-scoped while duplicate toast ids never cross callbacks",
+    "controlled replacement retains same-id focus identity, explicit removal stays host-local, and advancing time cannot remove rows or manufacture callbacks",
+    "terminal empty queues clear both hosts and every row, action, dismiss, Icon, focus, ring, and backend identity before further input"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}

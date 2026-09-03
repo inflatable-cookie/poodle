@@ -1590,6 +1590,24 @@ impl ToastStack {
         self.spec.density = Some(density);
         self
     }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    pub(crate) fn on_dismiss(
+        mut self,
+        handler: Arc<dyn Fn(&str) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_action = Some(handler);
+        self
+    }
 }
 
 impl IntoElement for ToastStack {
@@ -1616,6 +1634,24 @@ impl ToastHost {
 
     pub(crate) fn toasts(mut self, toasts: Vec<poodle_specs::Toast>) -> Self {
         self.stack_spec.toasts = toasts;
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    pub(crate) fn on_dismiss(
+        mut self,
+        handler: Arc<dyn Fn(&str) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_action = Some(handler);
         self
     }
 }
