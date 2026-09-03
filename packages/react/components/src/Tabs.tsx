@@ -201,6 +201,7 @@ export function Tabs({
   const pendingFocusGenerationRef = useRef(0);
   const focusTransferTimerRef = useRef<number | null>(null);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipPendingValue = useRef<string | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
   const lastSyncedValue = useRef<string | null>(null);
@@ -209,7 +210,7 @@ export function Tabs({
   const [uncontrolledValue, setUncontrolledValue] = useState<string | null>(defaultValue);
   const [renderedItems, setRenderedItems] = useState<TabItem[]>(items);
   const [focusIndex, setFocusIndex] = useState(0);
-  const [tooltipIndex, setTooltipIndex] = useState<number | null>(null);
+  const [tooltipValue, setTooltipValue] = useState<string | null>(null);
   // The hovered tab is promoted to state so the portalled tooltip can be
   // positioned against it.
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
@@ -222,9 +223,8 @@ export function Tabs({
   const [indicatorSnap, setIndicatorSnap] = useState(false);
 
   useEffect(() => {
-    const value = tooltipIndex === null ? undefined : renderedItems[tooltipIndex]?.value;
-    setTooltipAnchor(value ? (tabRefs.current[value] ?? null) : null);
-  }, [tooltipIndex, renderedItems]);
+    setTooltipAnchor(tooltipValue ? (tabRefs.current[tooltipValue] ?? null) : null);
+  }, [tooltipValue, renderedItems]);
   const [collapsedByOverflow, setCollapsedByOverflow] = useState(false);
   /** How many entries of `shed` are currently given up. */
   const [shedCount, setShedCount] = useState(0);
@@ -471,7 +471,7 @@ export function Tabs({
     }, 0);
   }, [currentValue, focusOnValueChange, isControlled, renderedItems]);
 
-  // ── Tooltip (vertical icon-only mode) ──
+  // ── Tooltip (vertical implicit labels, or showTooltips) ──
 
   function clearTooltip(): void {
     if (tooltipTimer.current) {
@@ -481,16 +481,36 @@ export function Tabs({
   }
 
   function scheduleTooltip(index: number): void {
+    const item = renderedItems[index];
+    if (!hasTooltips || item?.disabled === true || item === undefined) {
+      dismissTooltip();
+      return;
+    }
     clearTooltip();
-    tooltipTimer.current = setTimeout(() => setTooltipIndex(index), 300);
+    tooltipPendingValue.current = item.value;
+    tooltipTimer.current = setTimeout(() => {
+      const pending = tooltipPendingValue.current;
+      tooltipPendingValue.current = null;
+      setTooltipValue(pending);
+    }, 300);
   }
 
   function dismissTooltip(): void {
     clearTooltip();
-    setTooltipIndex(null);
+    tooltipPendingValue.current = null;
+    setTooltipValue(null);
   }
 
   useEffect(() => clearTooltip, []);
+
+  useLayoutEffect(() => {
+    const value = tooltipValue ?? tooltipPendingValue.current;
+    if (value === null) return;
+    const live = renderedItems.find((item) => item.value === value);
+    if (live === undefined || live.disabled === true) {
+      dismissTooltip();
+    }
+  }, [renderedItems, tooltipValue]);
 
   // ── Overflow collapse ──
 
@@ -891,10 +911,10 @@ export function Tabs({
                 onClose={() => send({ type: "CLOSE", value: item.value })}
                 onFocus={() => {
                   setFocusIndex(index);
-                  if (isVertical) scheduleTooltip(index);
+                  if (hasTooltips) scheduleTooltip(index);
                 }}
                 onBlur={() => hasTooltips && dismissTooltip()}
-                onEnter={() => hasTooltips && scheduleTooltip(index)}
+                onEnter={() => scheduleTooltip(index)}
                 onLeave={() => hasTooltips && dismissTooltip()}
                 onKeyDown={(event) => {
                   if (event.key === "Escape" && hasTooltips) dismissTooltip();
@@ -902,7 +922,7 @@ export function Tabs({
                 }}
                 content={tabContent(item)}
                 tooltip={
-                  hasTooltips && tooltipIndex === index ? (
+                  hasTooltips && item.disabled !== true && tooltipValue === item.value ? (
                     <AnchoredSurface
                       tag="span"
                       anchor={tooltipAnchor}

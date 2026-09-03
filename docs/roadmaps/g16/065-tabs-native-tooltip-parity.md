@@ -1,11 +1,13 @@
 # g16.065 — Tabs Native Tooltip Parity
 
-Status: blocked — waits for `g16.066`
+Status: in review
 Type: cross-runtime semantic and mounted repair
 Opened: 2026-09-02
 Depends on: current Tabs contract, completed `g16.060`, completed `g16.066`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/tabs.md`
+Log: `../../logs/2026-09/20260902-g16-065-tabs-native-tooltip-parity.md`
+PR: #172
 
 ## Goal
 
@@ -22,9 +24,11 @@ input. Keep web drag behavior and `focusOnValueChange` unchanged.
 
 ## Acceptance
 
-- `showTooltips=false` exposes no tooltip after the full delay.
-- `showTooltips=true` exposes the selected/hovered tab label after the contract
-  delay and hides it on leave, focus departure, disabled/removal, and teardown.
+- `showTooltips=false` exposes no tooltip after the full delay, on hover or
+  keyboard focus.
+- `showTooltips=true` exposes the hovered or keyboard-focused tab label after
+  300ms and hides it on leave, blur, Escape, disabled/removal, and teardown.
+  Disabled tabs never enter pending or visible.
 - Svelte, React, Rust spec, renderer, and mounted GPUI agree on the public
   meaning; runtime mechanism may differ.
 - A Nucleus-shaped Tabs fixture is included without Nucleus data or source.
@@ -39,6 +43,10 @@ input. Keep web drag behavior and `focusOnValueChange` unchanged.
 | Delay is real | tooltip appears immediately | timer assertion fails |
 | Lifecycle is bounded | tab is removed while pending | no late tooltip/task residue |
 | False stays inert | adapter shows tooltip from label alone | negative mounted proof fails |
+| Disabled stays inert | web schedules a disabled tab | paired Svelte/React disabled proofs fail |
+| Live disablement cancels | paint-gate only while Search is pending or visible | paired rerender proofs rematerialize Search |
+| Removal follows identity | index-latched timer paints Git after Search is removed | paired rerender proofs show Git or a late tooltip |
+| Horizontal focus matches native | `onFocus` only schedules when vertical | paired 299/300ms keyboard proofs fail |
 | Web semantics survive | native fix changes web drag/focus | focused paired Tabs suites fail |
 
 ## Writable Scope
@@ -62,10 +70,16 @@ using preview-only state.
 
 ## Continuation
 
-PR #169 was closed without merge after the stop condition proved the GPUI
-0.2.2 `.tooltip()` path cannot provide the contract's 300ms delay or
-focus-departure dismissal. `g16.066` now owns the generic backend boundary.
-After that merge, resume this card from the preserved PR #169 branch, rebase,
-and complete the Tabs projection and mounted oracle. Accepted merge then
-unblocks the later Nucleus Tabs component card. It does not claim Nucleus M2,
-accessibility A2, or visual V2.
+PR #169 was closed without merge. Resume is this branch rebased onto merged
+`g16.066`. Accepted merge unblocks the later Nucleus Tabs component card. It
+does not claim Nucleus M2, accessibility A2, or visual V2.
+
+## Outcome
+
+`shows_tooltips` projects each tab's trimmed label onto `Node.tooltip` when
+the flag is true or the strip is vertical. Empty labels are omitted. Disabled
+tabs still project the label (web wrap); the shared GPUI backend keeps them
+inert. Web never schedules or paints a disabled tab. Horizontal
+`showTooltips=true` schedules on keyboard focus and paints at 300ms, matching
+`Node.tooltip`. Delay is 300ms. Leave, blur, Escape, removal, and teardown
+hide. No new Node field.

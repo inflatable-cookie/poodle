@@ -245,6 +245,7 @@ export function tabsKeydownEvent(
 }
 
 // ── Tooltip sub-machine (vertical / showTooltips mode) ──
+// Adapters must not send ENTER for a disabled item; that target stays hidden.
 
 export type TabsTooltipState =
   | { name: "hidden" }
@@ -253,6 +254,7 @@ export type TabsTooltipState =
 
 export type TabsTooltipEvent =
   | { type: "POINTER_ENTER"; index: number }
+  | { type: "FOCUS_ENTER"; index: number }
   | { type: "TIMER_FIRE" }
   | { type: "POINTER_LEAVE" };
 
@@ -264,6 +266,7 @@ export function tabsTooltipTransition(
 ): { state: TabsTooltipState; effects: TabsTooltipEffect[] } {
   switch (event.type) {
     case "POINTER_ENTER":
+    case "FOCUS_ENTER":
       return {
         state: { name: "pending", index: event.index },
         effects: [{ type: "clearTimer" }, { type: "startTimer" }],

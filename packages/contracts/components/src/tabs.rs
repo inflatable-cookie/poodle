@@ -360,6 +360,13 @@ impl TabsSpec {
         self.density = Some(density);
         self
     }
+
+    /// Project tab labels as native hover tooltips. Vertical strips also
+    /// project even when this is false, matching web `hasTooltips`.
+    pub fn with_shows_tooltips(mut self, shows_tooltips: bool) -> Self {
+        self.shows_tooltips = shows_tooltips;
+        self
+    }
 }
 
 #[cfg(test)]
@@ -418,5 +425,12 @@ mod tests {
             .with_active_fill(ActiveFill::Solid);
         assert_eq!(spec.active_edge, ActiveEdge::Outline);
         assert_eq!(spec.active_fill, ActiveFill::Solid);
+    }
+
+    #[test]
+    fn shows_tooltips_defaults_false_and_builder_sets_it() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
+        assert!(!spec.shows_tooltips);
+        assert!(spec.with_shows_tooltips(true).shows_tooltips);
     }
 }

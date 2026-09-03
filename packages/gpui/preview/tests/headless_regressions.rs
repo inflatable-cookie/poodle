@@ -4011,6 +4011,224 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
     });
 }
 
+/// g16.065. Compact chrome Tabs project `shows_tooltips` onto `Node.tooltip`.
+/// Nucleus-shaped fixture, no Nucleus source. Lifecycle is the g16.066
+/// backend: 300ms delay, leave, focus departure, Escape, disable, removal,
+/// teardown.
+#[test]
+fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip, TOOLTIP_DELAY,
+    };
+    use std::time::Duration;
+
+    const SEARCH: &str = "tabs:nav:tab:search";
+    const GIT: &str = "tabs:nav:tab:git";
+    const EXPLORER: &str = "tabs:nav:tab:explorer";
+
+    fn nav_items() -> Vec<TabDefinition> {
+        vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("search", "Search").with_icon("search"),
+            TabDefinition::new("git", "Git").with_icon("git-branch"),
+            TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+        ]
+    }
+
+    fn chrome_tabs(shows_tooltips: bool, items: Vec<TabDefinition>, value: &str) -> Node {
+        let spec = TabsSpec::new(items)
+            .with_value(value)
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact)
+            .with_shows_tooltips(shows_tooltips)
+            .with_aria_label("Activity");
+        let mut node = poodle_render::tabs_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            TabsHandlers {
+                instance_id: Some("nav".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        node
+    }
+
+    fn painted_text() -> Option<String> {
+        painted_tooltip().map(|painted| painted.text)
+    }
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(false, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        assert!(!is_tooltip_pending(SEARCH));
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            painted_text().is_none(),
+            "showTooltips=false stays inert after the contract delay"
+        );
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        assert!(
+            is_tooltip_pending(SEARCH),
+            "hover must start a pending timer"
+        );
+        assert!(painted_text().is_none(), "tooltip must not appear on hover");
+        driver.advance_clock(Duration::from_millis(299));
+        driver.draw_frame();
+        assert!(
+            is_tooltip_pending(SEARCH),
+            "tooltip must remain pending at 299ms"
+        );
+        assert!(
+            painted_text().is_none(),
+            "tooltip must stay absent at 299ms"
+        );
+        driver.advance_clock(Duration::from_millis(1));
+        driver.draw_frame();
+        assert!(is_tooltip_visible(SEARCH), "tooltip must paint at 300ms");
+        assert_eq!(painted_text().as_deref(), Some("Search"));
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert_eq!(painted_text().as_deref(), Some("Search"));
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        assert!(
+            painted_text().is_none(),
+            "leave hides in the same frame"
+        );
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.wait_for_focus_handle(SEARCH);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert_eq!(painted_text().as_deref(), Some("Search"));
+        driver.focus_element(SEARCH);
+        driver.blur_element_focus(SEARCH);
+        assert!(
+            !is_tooltip_visible(SEARCH),
+            "focus departure must hide while the pointer stays over Search"
+        );
+        assert!(painted_text().is_none());
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert_eq!(painted_text().as_deref(), Some("Search"));
+        driver.dispatch_key("escape");
+        assert!(
+            painted_text().is_none(),
+            "Escape must dismiss the visible tab tooltip"
+        );
+    });
+
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer")));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        assert!(is_tooltip_pending(SEARCH));
+        let remaining = vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("git", "Git").with_icon("git-branch"),
+            TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+        ];
+        *mounted.lock().unwrap() = chrome_tabs(true, remaining, "explorer");
+        driver.draw_frame();
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            painted_text().is_none(),
+            "removing the hovered tab cancels the pending show"
+        );
+        assert!(!is_tooltip_pending(SEARCH));
+    });
+
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer")));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(SEARCH, 0.5, 0.5));
+        *mounted.lock().unwrap() = Node::container();
+        driver.draw_frame();
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            painted_text().is_none(),
+            "teardown while pending leaves no late tooltip"
+        );
+        assert!(!is_tooltip_pending(SEARCH));
+    });
+
+    run_headless(|cx| {
+        let mut items = nav_items();
+        items[2] = TabDefinition::new("git", "Git")
+            .with_icon("git-branch")
+            .with_disabled(true);
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, items, "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.wait_for_focus_handle(EXPLORER);
+        driver.pointer_hover(payload_frac(GIT, 0.5, 0.5));
+        assert!(
+            !is_tooltip_pending(GIT),
+            "disabled tabs must not start a tooltip timer"
+        );
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            painted_text().is_none(),
+            "disabled tabs stay inert after the contract delay"
+        );
+    });
+}
+
 fn stamp_slider_id(node: &mut Node, id: &str) {
     if node.a11y.role == Some(NodeRole::Slider) {
         node.id = Some(id.to_owned());

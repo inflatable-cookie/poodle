@@ -199,8 +199,9 @@
   let renderedItems = $state<TabItem[]>([]);
   let lastItemsSignature = $state("");
   let lastSyncedValue = $state<string | null>(null);
-  let tooltipIndex = $state<number | null>(null);
+  let tooltipValue = $state<string | null>(null);
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
+  let tooltipPendingValue: string | null = null;
   let collapsedByOverflow = $state(false);
   let historyReady = $state(false);
 
@@ -395,16 +396,27 @@
     void evaluateCollapsedOverflow();
   }
 
-  // ── Tooltip (vertical icon-only mode) ──
+  // ── Tooltip (vertical implicit labels, or showTooltips) ──
 
   function scheduleTooltip(index: number): void {
+    const item = renderedItems[index];
+    if (!hasTooltips || item?.disabled === true || item === undefined) {
+      dismissTooltip();
+      return;
+    }
     clearTooltip();
-    tooltipTimer = setTimeout(() => (tooltipIndex = index), 300);
+    tooltipPendingValue = item.value;
+    tooltipTimer = setTimeout(() => {
+      const pending = tooltipPendingValue;
+      tooltipPendingValue = null;
+      tooltipValue = pending;
+    }, 300);
   }
 
   function dismissTooltip(): void {
     clearTooltip();
-    tooltipIndex = null;
+    tooltipPendingValue = null;
+    tooltipValue = null;
   }
 
   function clearTooltip(): void {
@@ -413,6 +425,15 @@
       tooltipTimer = null;
     }
   }
+
+  $effect.pre(() => {
+    const value = tooltipValue ?? tooltipPendingValue;
+    if (value === null) return;
+    const live = renderedItems.find((item) => item.value === value);
+    if (live === undefined || live.disabled === true) {
+      dismissTooltip();
+    }
+  });
 
   $effect.pre(() => {
     const nextValue = currentValue;
@@ -900,7 +921,7 @@
           targetId={targetIdOf(item.value)}
           selected={currentValue === item.value}
           focused={focusIndex === index}
-          tooltipOpen={tooltipIndex === index}
+          tooltipOpen={tooltipValue === item.value}
           iconSize={resolvedIconSize}
           anchorElement={tabElements[item.value] ?? null}
           onDrop={handleDrop}
@@ -909,10 +930,10 @@
           onClose={() => send({ type: "CLOSE", value: item.value })}
           onFocus={() => {
             focusIndex = index;
-            if (isVertical) scheduleTooltip(index);
+            if (hasTooltips) scheduleTooltip(index);
           }}
           onBlur={() => hasTooltips && dismissTooltip()}
-          onEnter={() => hasTooltips && scheduleTooltip(index)}
+          onEnter={() => scheduleTooltip(index)}
           onLeave={() => hasTooltips && dismissTooltip()}
           onKeydown={(event) => {
             if (event.key === "Escape" && hasTooltips) dismissTooltip();
