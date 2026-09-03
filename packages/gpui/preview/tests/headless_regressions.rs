@@ -18959,10 +18959,12 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
     assert!(matches!(display.kind, NodeKind::Container));
     assert_eq!(display.a11y.role, Some(NodeRole::Button));
     assert_eq!(display.a11y.label.as_deref(), Some("Kick"));
+    assert_eq!(display.a11y.tab_index, Some(0));
     assert!(display.interaction.focusable);
     assert!(display.interaction.on_double_activate.is_none());
     assert!(display.interaction.on_edit_key.is_none());
     assert_eq!(display.style.descriptor.cursor, CursorHint::Text);
+    assert!(display.style.focus_ring.is_some());
     assert_eq!(
         display.style.descriptor.border.width,
         ctx.theme().resolve_space("border.width.focus")
@@ -19018,6 +19020,18 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
         empty.children[0].style.descriptor.text_color,
         Some(ctx.theme().resolve_color("color.text.secondary"))
     );
+
+    let disabled = node_compat::EditableLabel::from_spec(
+        EditableLabelSpec::new().with_value("Locked").with_disabled(true),
+        &provider,
+    )
+    .with_id("structure-disabled")
+    .into_compat_node();
+    assert_eq!(disabled.a11y.role, Some(NodeRole::Button));
+    assert!(!disabled.interaction.focusable);
+    assert!(disabled.interaction.disabled);
+    assert!(disabled.style.focus_ring.is_none());
+    assert_eq!(disabled.style.descriptor.cursor, CursorHint::NotAllowed);
 
     // Pointer double activation, live draft paint, terminal focus restoration,
     // disabled inertia, bounds, containment, and equal-value identity.
@@ -19193,20 +19207,16 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&id), Some(true));
     });
 
-    // ZWSP is deliberately outside T, and a trimmed unchanged value still
-    // emits one commit with the original committed snapshot.
+    // ZWSP is deliberately outside T.
     run_headless(|cx| {
         let host = MountedLabelHost::new(vec![
             MountedLabelState::new("zwsp", "Kick")
                 .editing("\u{200B}Keep\u{200B}"),
-            MountedLabelState::new("unchanged", "Kick")
-                .editing(&format!("{TRIM_SET}Kick{TRIM_SET}")),
         ]);
-        let mut driver = mount_labels(cx, &host, 170.0);
+        let mut driver = mount_labels(cx, &host, 120.0);
 
         let zwsp_id = mounted_label_id("zwsp");
         driver.wait_for_focus_handle(&zwsp_id);
-        driver.focus_element(&zwsp_id);
         host.take_log();
         driver.dispatch_key_raw("enter");
         assert_eq!(host.label("zwsp").value, "\u{200B}Keep\u{200B}");
@@ -19214,9 +19224,18 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
             host.take_log(),
             vec!["zwsp/commit:\u{200B}Keep\u{200B}:Kick", "zwsp/restore"]
         );
+    });
 
+    // A trimmed unchanged value still emits one commit with the original
+    // committed snapshot.
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("unchanged", "Kick")
+                .editing(&format!("{TRIM_SET}Kick{TRIM_SET}")),
+        ]);
+        let mut driver = mount_labels(cx, &host, 120.0);
         let unchanged_id = mounted_label_id("unchanged");
-        driver.focus_element(&unchanged_id);
+        driver.wait_for_focus_handle(&unchanged_id);
         host.take_log();
         driver.dispatch_key_raw("enter");
         assert_eq!(host.label("unchanged").value, "Kick");
@@ -19293,21 +19312,26 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
     // unmounts mid-session without changing either callback stream.
     run_headless(|cx| {
         let host = MountedLabelHost::new(vec![
-            MountedLabelState::new("left", "Same").editing("Same-left"),
-            MountedLabelState::new("right", "Same").editing("Same-right"),
+            MountedLabelState::new("left", "Same").select_on_focus(false),
+            MountedLabelState::new("right", "Same"),
         ]);
         let mut driver = mount_labels(cx, &host, 170.0);
         let left_id = mounted_label_id("left");
         let right_id = mounted_label_id("right");
         driver.wait_for_focus_handle(&left_id);
         driver.wait_for_focus_handle(&right_id);
-        driver.focus_element(&left_id);
+        let left_bounds = poodle_gpui_node_backend::bounds_for(&left_id).expect("left bounds");
+        driver.pointer_press_details(left_bounds.center(), 2, Modifiers::none());
+        driver.pointer_release_details(left_bounds.center(), 2, Modifiers::none());
+        for key in ["-", "l", "e", "f", "t"] {
+            driver.dispatch_key_raw(key);
+        }
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&left_id), Some(true));
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&right_id), Some(false));
         assert_eq!(host.label("left").value, "Same");
         assert_eq!(host.label("right").value, "Same");
         assert_eq!(host.label("left").draft, "Same-left");
-        assert_eq!(host.label("right").draft, "Same-right");
+        assert_eq!(host.label("right").draft, "Same");
         host.take_log();
 
         host.set_present("left", false);
@@ -19319,7 +19343,7 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
         );
         assert_eq!(host.label("left").value, "Same");
         assert_eq!(host.label("right").value, "Same");
-        assert_eq!(host.label("right").draft, "Same-right");
+        assert_eq!(host.label("right").draft, "Same");
         assert!(poodle_gpui_node_backend::bounds_for(&left_id).is_none());
         assert!(poodle_gpui_node_backend::bounds_for(&right_id).is_some());
 

@@ -21,8 +21,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, StylePatch,
-    TextChangeHandler,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, Node, NodeRole,
+    StylePatch, TextChangeHandler,
 };
 use poodle_specs::{
     ControlDensity, ControlSize, EditableLabelActivation, EditableLabelSpec, EditableLabelVariant,
@@ -164,6 +164,7 @@ pub fn editable_label_with_handlers(
         let selection_fill = ctx.theme().resolve_color("color.accent.base");
 
         let mut input = Node::input(live.clone(), spec.placeholder.clone().unwrap_or_default());
+        input.a11y.role = Some(NodeRole::TextInput);
         input.a11y.label = Some(accessible_name.clone());
         input = input.with_caret(
             selection,
@@ -323,6 +324,7 @@ pub fn editable_label_with_handlers(
         // Text span + optional pencil icon (contract: 0.75rem icon, color
         // text-secondary, shown on hover/focus — here always present when set).
         let mut row = Node::container();
+        row.a11y.role = Some(NodeRole::Button);
         {
             let s = &mut row.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -343,7 +345,7 @@ pub fn editable_label_with_handlers(
 
         if is_flush {
             // Flush display: no padding / border / radius, transparent bg.
-            row.style.descriptor.cursor = CursorHint::Pointer;
+            row.style.descriptor.cursor = CursorHint::Text;
         } else {
             // Default display: padding + radius + transparent border, hover hint.
             // Svelte hover = color-mix(border-default 72%, transparent) border
@@ -364,7 +366,7 @@ pub fn editable_label_with_handlers(
             s.descriptor.corner_radii.bottom_left = radius;
             s.descriptor.border.width = focus_width;
             s.descriptor.border.color = ColorValue(0.0, 0.0, 0.0, 0.0);
-            s.descriptor.cursor = CursorHint::Pointer;
+            s.descriptor.cursor = CursorHint::Text;
             s.hover = Some(StylePatch {
                 background: Some(hover_bg),
                 border_color: Some(hover_border),
@@ -377,9 +379,16 @@ pub fn editable_label_with_handlers(
 
     if spec.is_disabled {
         el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.cursor = CursorHint::NotAllowed;
         el.interaction.disabled = true;
     } else if !spec.is_editing {
         el.interaction.focusable = true;
+        el.a11y.tab_index = Some(0);
+        el.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            width: focus_width,
+            offset: rem_to_px(0.0625),
+        });
         if spec.request_focus {
             el.interaction.request_focus = true;
         }
