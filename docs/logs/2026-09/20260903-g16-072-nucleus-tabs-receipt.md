@@ -23,7 +23,7 @@ verifies production structure (root tablist role, horizontal/vertical orientatio
 aria label, layout direction), individual tab roles, visible tab labels at Node
 boundary (`intrinsic_text` and text child matching), selected state, roving tab
 stops (`a11y.tab_index` 0 / -1), focus patches, controls target association,
-disabled opacity and inertness, closable tab close buttons and pointer activation,
+disabled opacity and inertness, closable tab close buttons with `x` icon and pointer activation,
 tabpanel role with `labelled_by` association and intrinsic panel text, probe channel
 capture (`structure.identity.*`, `content.typography.*`, `surface.channels.*`),
 mounted layout bounds (positive dimensions, horizontal/vertical containment,
@@ -32,14 +32,14 @@ roving keyboard navigation (ArrowLeft/Right, Home, End, disabled tab skipping,
 Up/Down axis inertness for horizontal tabs), manual activation mode (decoupled
 focus movement via arrows with explicit Enter/Space activation), vertical orientation
 mode (column layout, vertical ArrowUp/Down navigation with disabled skipping and
-horizontal key inertness), keyboard reordering (Alt+ArrowLeft/Right with focus
-retention), pointer drag-and-drop reordering lifecycle (drag threshold, dragged item
-opacity, drop target indicator shadow ring, self-drop refusal, and Escape drag
-cancellation), and two composed instances focus handle and callback isolation,
-emitting the M1 receipt at the terminal boundary. The manifest, all existing
+horizontal key inertness via controlled host rebuild), keyboard reordering (Alt+ArrowLeft/Right with focus
+retention), pointer drag-and-drop reordering lifecycle (sub-threshold movement inertness,
+drag start threshold, dragged item opacity, drop target indicator shadow ring,
+self-drop refusal, and Escape drag cancellation), and two composed instances focus handle
+and callback isolation, emitting the M1 receipt at the terminal boundary. The manifest, all existing
 receipts (AppHeader, Button, Icon, IconButton, SegmentedControl, SplitView, Surface,
 Text), and the new Tabs receipt pin the exact runtime source commit
-`13367ec967dad548ad85d7fcd86eeb54764dc0f4`. The ledger records 9 mounted Nucleus rows.
+`f33123492acfecd2ddb37cea932bc1553ee7022a`. The ledger records 9 mounted Nucleus rows.
 
 ## What landed
 
@@ -47,36 +47,36 @@ Text), and the new Tabs receipt pin the exact runtime source commit
   - `packages/contracts/components/src/tabs.rs`: added unit tests validating default spec, builder methods, orientation, activation mode, reorderable, bordered, full-width, aria-label, history key, size, size_role, density, current value resolution order (explicit > default > first enabled fallback > empty None), token helpers and visual properties, and TabDefinition builders.
 - Headless Regressions:
   - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened `tabs_drag_keyboard_and_identity_rebuild_the_host_spec` across 7 phases:
-    1. Structure, token styling, focus patches, visible labels, close buttons, tabpanel association, probe capture, and positive layout bounds / horizontal containment / panel placement.
-    2. Pointer activation on unselected enabled tabs, disabled tab inertness, close button activation, directional roving keyboard navigation (ArrowLeft/Right, Home, End, disabled skipping, vertical key inertness), and Alt+Arrow keyboard reordering with focus retention.
-    3. Manual activation mode verifying focus movement without immediate value mutation, and commit on Enter / Space.
-    4. Vertical orientation mode verifying column layout, ArrowDown skipping disabled tabs, and horizontal key inertness.
-    5. Pointer drag-and-drop reordering lifecycle verifying drag start threshold, dragged item opacity, drop target shadow ring, self-drop rejection, and reorder commit.
-    6. Pointer drag cancellation via Escape restoring state without reorder.
-    7. Two composed instances verifying caller-scoped runtime IDs, isolated focus handles, independent focus state, and separate change sinks.
-    8. Terminal M1 receipt emission.
+    1. Structure, token styling, focus patches, visible labels, close button `x` icons and pointer activation, tabpanel association, probe capture, positive layout bounds, horizontal containment, panel placement, disabled tab click inertness, roving keyboard navigation (ArrowLeft/Right, Home, End, disabled skip, vertical key inertness), and Alt+Arrow keyboard reordering with focus retention.
+    2. Manual activation mode verifying focus movement without immediate value mutation, and commit on Enter / Space.
+    3. Vertical orientation mode verifying column layout, vertical ArrowDown/Up navigation skipping disabled tabs, and horizontal key inertness via controlled host rebuild.
+    4. Pointer drag-and-drop reordering lifecycle verifying sub-threshold movement inertness (< 4px), drag start threshold, dragged item opacity, drop target shadow ring, self-drop rejection, and reorder commit.
+    5. Pointer drag cancellation via Escape restoring state without reorder.
+    6. Two composed instances verifying caller-scoped runtime IDs, isolated focus handles, independent focus state, and separate change sinks.
+    7. Terminal M1 receipt emission.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/tabs--nucleus-navigation-tabs.json`
-  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SegmentedControl`, `SplitView`, `Surface`, `Text` with source commit `13367ec967dad548ad85d7fcd86eeb54764dc0f4`.
+  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SegmentedControl`, `SplitView`, `Surface`, `Text` with source commit `f33123492acfecd2ddb37cea932bc1553ee7022a`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `13367ec967dad548ad85d7fcd86eeb54764dc0f4`.
-  - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts --write`; reports 9 mounted rows (AppHeader, Button, Icon, IconButton, SegmentedControl, SplitView, Surface, Text, Tabs).
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `f33123492acfecd2ddb37cea932bc1553ee7022a`.
+  - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts`; reports 9 mounted rows (AppHeader, Button, Icon, IconButton, SegmentedControl, SplitView, Surface, Text, Tabs).
 
 ## Review oracle falsification
 
 | Invariant | Smallest counterexample | Required proof / Observed failure |
 | --- | --- | --- |
-| Production renderer owns structure | substitute raw buttons and a text panel | exact tablist/tab/panel metadata fails |
-| Names and relationships are exact | drop a visible label, controls, or labelled-by relation | Node-boundary assertions fail before receipt |
-| Identity is caller-scoped | derive IDs from item values alone | two composed instances alias focus or input |
+| Production renderer owns structure | substitute `NodeRole::RadioGroup` for `NodeRole::TabList` | `thread 'tabs_drag_keyboard_and_identity_rebuild_the_host_spec' panicked at tests/headless_regressions.rs:4550:18: tablist` |
+| Names and relationships are exact | assert close button icon is `"close"` instead of `"x"` | `thread 'tabs_drag_keyboard_and_identity_rebuild_the_host_spec' panicked at tests/headless_regressions.rs:4613:18: close button must contain 'close' icon with size.icon.sm` |
+| Identity is caller-scoped | assert beta keyboard navigation fires alpha change handler | `thread 'tabs_drag_keyboard_and_identity_rebuild_the_host_spec' panicked at tests/headless_regressions.rs:5418:9: assertion 'left == right' failed: Keyboard navigation on beta instance must not fire alpha change handler, left: [], right: ["other"]` |
 | Input is mounted | invoke handlers directly | mounted observation or callback trace is absent |
-| Controlled rebuild is real | record a value/order without rebuilding supplied state | selected state or order remains stale |
+| Controlled rebuild is real | omit host rebuild closure in vertical mode | vertical Up arrow fails to select previous enabled tab because context retains initial value |
 | Activation modes stay distinct | automatic focus does not select or manual focus selects early | exact focus/change traces fail |
-| Axis and disabled behavior are exact | use the wrong directional key or land on disabled Skip | exact value/focus trace fails |
+| Axis and disabled behavior are exact | vertical Up arrow lands on disabled tab `skip` instead of `one` | `thread 'tabs_drag_keyboard_and_identity_rebuild_the_host_spec' panicked at tests/headless_regressions.rs:5017:9: assertion 'left == right' failed: Up arrow in vertical tabs selects previous enabled tab, left: "one", right: "skip"` |
 | Close behavior is exact | close the wrong tab or retain a removed tab | close trace and rebuilt tree fail |
-| Reorder lifecycle is exact | accept self-drop, lose focus, or omit terminal cleanup | order/start/end and live drag state fail |
+| Reorder lifecycle is exact (sub-threshold) | 1.0px pointer move arms drag start | `thread 'tabs_drag_keyboard_and_identity_rebuild_the_host_spec' panicked at tests/headless_regressions.rs:5179:9: assertion 'left == right' failed: Sub-threshold movement must not arm drag start, left: [], right: ["one"]` |
+| Reorder lifecycle is exact (self-drop) | self-drop target hovering sets drop target to `Some("one")` | `thread 'tabs_drag_keyboard_and_identity_rebuild_the_host_spec' panicked at tests/headless_regressions.rs:5205:9: assertion 'left == right' failed: Self-drop must be rejected, left: None, right: Some("one")` |
 | Receipt is terminal | fail any final mounted assertion | no Tabs receipt is emitted |
-| Evidence identity is exact | retain the g16.071 source SHA | receipt validation fails after source movement |
+| Evidence identity is exact | retain stale source commit SHA | `currentSourceMatchesReceipt` fails due to git diff against `SOURCE_PATHS` |
 | Levels stay separate | label the receipt A1 or V1 | schema validation fails |
 
 ## Validation
