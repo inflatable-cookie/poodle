@@ -12,6 +12,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/collapse-toggle.md`,
 `../../contracts/components/icon.md`
 Log: `../../logs/2026-09/20260903-g16-070-nucleus-split-view-receipt.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/176
 Handoff: `../../handoffs/20260903-041500-g16-070-nucleus-split-view-receipt.md`
 
 ## Goal

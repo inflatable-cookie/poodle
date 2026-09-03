@@ -15,6 +15,7 @@ Governing refs: `docs/roadmaps/g16/nucleus-gpui-parity-programme.md`,
 Branch: `feature/g16-070-nucleus-split-view-receipt`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-070-nucleus-split-view-receipt`
 Planning base: `3c17a7c94` (`origin/main`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/176
 
 ## Outcome
 
