@@ -22,13 +22,17 @@ use poodle_node::{
     MainAxisAlignment, Node, NodeKey, NodeRole,
 };
 use poodle_specs::{
-    CommandActionItem, CommandPaletteSpec, DialogSpec, DiscoveryState, TextInputSpec,
+    ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, CommandPaletteSpec,
+    DialogSpec, DiscoveryState, TextInputSpec,
 };
 
-use crate::color::{mix_srgb, with_alpha};
+use crate::action_discovery_panel::{
+    action_discovery_panel, ActionDiscoveryPanelHandlers,
+};
+use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::dialog::dialog;
-use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
 use crate::text_input::{text_input_with_handlers, TextInputHandlers};
 
 #[derive(Default)]
@@ -71,6 +75,34 @@ fn next_active_action(
     Some(enabled[next].id.clone())
 }
 
+fn discovery_sections(actions: &[CommandActionItem]) -> Vec<ActionDiscoverySection> {
+    let mut sections = Vec::<ActionDiscoverySection>::new();
+    for action in actions {
+        let title = action.group.as_deref().unwrap_or("Commands");
+        if let Some(section) = sections.iter_mut().find(|section| section.title == title) {
+            section.actions.push(action.clone());
+        } else {
+            sections.push(ActionDiscoverySection::new(
+                format!("command-palette-group-{}", sections.len()),
+                title,
+                vec![action.clone()],
+            ));
+        }
+    }
+    sections
+}
+
+fn stamp_action_row(node: &mut Node, action_id: &str, runtime_id: String) -> bool {
+    if node.id.as_deref() == Some(action_id) {
+        node.id = Some(runtime_id.clone());
+        node.runtime_id = Some(runtime_id);
+        return true;
+    }
+    node.children
+        .iter_mut()
+        .any(|child| stamp_action_row(child, action_id, runtime_id.clone()))
+}
+
 pub fn command_palette(
     spec: &CommandPaletteSpec,
     ctx: &RenderContext<'_>,
@@ -109,7 +141,6 @@ pub fn command_palette_with_handlers(
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
     let theme = ctx.theme();
-    let font_size = rem_to_px(size_font_rem(effective_size));
     let icon_size = theme.resolve_space("size.icon.md");
     let panel_px = rem_to_px(panel_space_x_rem(density));
     let panel_py = rem_to_px(panel_space_y_rem(density));
@@ -124,11 +155,7 @@ pub fn command_palette_with_handlers(
     let dialog_border = with_alpha(border_default, border_default.3 * 0.42);
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_muted = theme.resolve_color("color.text.muted");
-    let accent = theme.resolve_color("color.accent.base");
     let surface_subtle = theme.resolve_color("color.background.surface");
-    let danger = theme.resolve_color("color.status.danger");
-    let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
     let label_size = theme.resolve_space("typography.label.size");
     let heading_size = theme.resolve_space("typography.heading.size");
     let radius_control = theme.resolve_radius("radius.control");
@@ -137,7 +164,6 @@ pub fn command_palette_with_handlers(
     let dialog_radius = radius_surface + rem_to_px(0.125);
     let gap_sm = theme.resolve_space("space.inline.sm");
     let gap_md = theme.resolve_space("space.inline.md");
-    let gap_lg = theme.resolve_space("space.inline.lg");
     let stack_md = theme.resolve_space("space.stack.md");
 
     // Contract §9 geometry literals (rem from the contract, not magic px):
@@ -366,171 +392,50 @@ pub fn command_palette_with_handlers(
     modal = modal.child(status);
 
     // ── Results panel ─────────────────────────────────────────────────
-    // Non-ready postures render an empty-state message in place of the list;
-    // ready renders grouped rows.
-    let state_message = |text: &str, color: poodle_node::ColorValue| {
-        let mut wrap = Node::container();
-        {
-            let s = &mut wrap.style;
-            // Explicit Row (see switch.rs).
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.top = gap_lg;
-            pad.bottom = gap_lg;
-        }
-        let mut msg = Node::text(text);
-        msg.style.text_size = Some(font_size);
-        msg.style.descriptor.text_color = Some(color);
-        wrap.child(msg)
-    };
-    let results = match spec.state {
-        DiscoveryState::Loading => state_message("Searching\u{2026}", text_secondary),
-        DiscoveryState::Error => state_message("Error loading commands", danger),
-        DiscoveryState::Empty | DiscoveryState::NoResults => {
-            state_message("No matching commands", text_secondary)
-        }
-        DiscoveryState::Ready => {
-            let mut results_list = Node::container();
-            results_list.a11y.role = Some(NodeRole::ListBox);
-            results_list.a11y.label = Some("Command results".to_string());
-            {
-                let s = &mut results_list.style;
-                s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.spacing.gap = rem_to_px(0.125);
-                s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+    // ActionDiscoveryPanel owns ready/loading/empty/no-results anatomy and
+    // token treatments. CommandPalette supplies scoped identity and combines
+    // pointer selection with its controlled active-id proposal.
+    let mut discovery_spec = ActionDiscoveryPanelSpec::new(discovery_sections(&spec.actions))
+        .with_state(spec.state)
+        .with_size(effective_size)
+        .with_size_role(spec.size_role)
+        .with_density(density);
+    discovery_spec.active_id = spec.active_action_id.clone();
+    let on_select = if select.is_some() || active_change.is_some() {
+        Some(Arc::new(move |id: &str| {
+            if let Some(active_change) = &active_change {
+                active_change(Some(id));
             }
-
-            let mut current_group: Option<&str> = None;
-            for action in &spec.actions {
-                // Group header when the group changes.
-                if action.group.as_deref() != current_group {
-                    current_group = action.group.as_deref();
-                    if let Some(group_name) = current_group {
-                        let mut g = Node::text(group_name);
-                        {
-                            let s = &mut g.style;
-                            let pad = &mut s.descriptor.layout.spacing.padding;
-                            pad.left = gap_sm;
-                            pad.right = gap_sm;
-                            pad.top = rem_to_px(0.25);
-                            pad.bottom = rem_to_px(0.25);
-                            s.text_size = Some(label_size);
-                            s.text_weight = Some(600);
-                            s.descriptor.text_color = Some(text_muted);
-                        }
-                        results_list = results_list.child(g);
-                    }
-                }
-
-                let is_active = spec
-                    .active_action_id
-                    .as_deref()
-                    .is_some_and(|id| id == action.id);
-
-                let mut row = Node::container();
-                let row_id = scoped_id(instance_id, &format!("action:{}", action.id), || {
-                    format!("poodle-cmd-palette-{}", action.id)
-                });
-                row.id = Some(row_id.clone());
-                row.runtime_id = Some(row_id);
-                row.a11y.role = Some(NodeRole::ListBoxOption);
-                row.a11y.label = Some(action.title.clone());
-                row.a11y.selected = Some(is_active);
-                {
-                    let s = &mut row.style;
-                    s.descriptor.layout.direction = LayoutDirection::Row;
-                    s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                    s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-                    s.descriptor.layout.spacing.gap = gap_sm;
-                    let pad = &mut s.descriptor.layout.spacing.padding;
-                    pad.left = gap_sm;
-                    pad.right = gap_sm;
-                    pad.top = gap_sm;
-                    pad.bottom = gap_sm;
-                    s.descriptor.corner_radii.top_left = radius_control;
-                    s.descriptor.corner_radii.top_right = radius_control;
-                    s.descriptor.corner_radii.bottom_right = radius_control;
-                    s.descriptor.corner_radii.bottom_left = radius_control;
-                }
-                let row_text_color = if is_active {
-                    // Active treatment: accent tint bg + accent text.
-                    row.style.descriptor.background = Some(mix_srgb(accent, surface_bg, 0.10));
-                    accent
-                } else {
-                    text_primary
-                };
-
-                if action.is_disabled {
-                    row.style.descriptor.opacity = disabled_opacity;
-                    row.style.descriptor.cursor = CursorHint::NotAllowed;
-                    row.interaction.disabled = true;
-                    row.a11y.tab_index = Some(-1);
-                } else {
-                    row.interaction.focusable = true;
-                    row.a11y.tab_index = Some(if is_active { 0 } else { -1 });
-                    row.style.descriptor.cursor = CursorHint::Pointer;
-                    if select.is_some() || active_change.is_some() {
-                        let select = select.clone();
-                        let active_change = active_change.clone();
-                        let id = action.id.clone();
-                        row.interaction.on_activate = Some(Arc::new(move || {
-                            if let Some(active_change) = &active_change {
-                                active_change(Some(&id));
-                            }
-                            if let Some(select) = &select {
-                                select(&id);
-                            }
-                        }));
-                    }
-                }
-
-                // Left: title + optional badge.
-                let mut left = Node::container();
-                {
-                    let s = &mut left.style;
-                    s.descriptor.layout.direction = LayoutDirection::Row;
-                    s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                    s.descriptor.layout.spacing.gap = gap_sm;
-                }
-                let mut title = Node::text(&action.title);
-                title.style.text_size = Some(font_size);
-                title.style.descriptor.text_color = Some(row_text_color);
-                let mut left = left.child(title);
-                if let Some(ref badge) = action.badge {
-                    let mut b = Node::text(badge);
-                    {
-                        let s = &mut b.style;
-                        s.text_size = Some(label_size);
-                        let pad = &mut s.descriptor.layout.spacing.padding;
-                        pad.left = rem_to_px(0.25);
-                        pad.right = rem_to_px(0.25);
-                        pad.top = rem_to_px(0.0625);
-                        pad.bottom = rem_to_px(0.0625);
-                        s.descriptor.corner_radii.top_left = radius_control;
-                        s.descriptor.corner_radii.top_right = radius_control;
-                        s.descriptor.corner_radii.bottom_right = radius_control;
-                        s.descriptor.corner_radii.bottom_left = radius_control;
-                        s.descriptor.background = Some(mix_srgb(accent, surface_bg, 0.12));
-                        s.descriptor.text_color = Some(accent);
-                    }
-                    left = left.child(b);
-                }
-                let mut row = row.child(left);
-
-                // Right: optional shortcut hint.
-                if let Some(ref shortcut) = action.shortcut {
-                    let mut hint = Node::text(shortcut);
-                    hint.style.text_size = Some(label_size);
-                    hint.style.descriptor.text_color = Some(text_muted);
-                    row = row.child(hint);
-                }
-
-                results_list = results_list.child(row);
+            if let Some(select) = &select {
+                select(id);
             }
-            results_list
-        }
+        }) as Arc<dyn Fn(&str) + Send + Sync>)
+    } else {
+        None
     };
-    let mut results = results;
+    let mut results = action_discovery_panel(
+        &discovery_spec,
+        ctx,
+        ActionDiscoveryPanelHandlers {
+            on_select,
+            instance_id: instance_id.map(str::to_owned),
+        },
+    );
+    results
+        .roles
+        .insert("dependency".to_owned(), "action-discovery-panel".to_owned());
+    results.a11y.role = Some(NodeRole::ListBox);
+    results.a11y.label = Some("Command results".to_string());
+    results.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+    if spec.state == DiscoveryState::Ready {
+        for action in &spec.actions {
+            let row_id = scoped_id(instance_id, &format!("action:{}", action.id), || {
+                format!("poodle-cmd-palette-{}", action.id)
+            });
+            let stamped = stamp_action_row(&mut results, &action.id, row_id);
+            debug_assert!(stamped, "ActionDiscoveryPanel must render every ready action");
+        }
+    }
     let results_id = scoped_id(instance_id, "results", || {
         "poodle-cmd-palette-results".to_string()
     });

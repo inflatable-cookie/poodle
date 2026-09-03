@@ -32785,7 +32785,7 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         Some("eyebrow")
     );
     let file_list = &file_group.children[1];
-    assert_eq!(file_list.a11y.role, Some(NodeRole::ListBox));
+    assert_eq!(file_list.a11y.role, None, "the root owns listbox semantics");
     assert_eq!(file_list.roles.get("part").map(String::as_str), Some("list"));
     assert_eq!(file_list.children.len(), 3);
     let active = proof
@@ -33355,7 +33355,7 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
                 .expect("no-results region paint")
                 .texts
                 .iter()
-                .any(|text| text == "No matching commands")
+                .any(|text| text == "No matching actions")
         );
 
         let clear_id = "poodle-input-command-palette:subject:query-clear";
