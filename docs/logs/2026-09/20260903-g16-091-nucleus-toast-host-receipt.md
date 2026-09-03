@@ -1,6 +1,6 @@
 # g16.091 — Nucleus ToastHost M1 Receipt
 
-Status: complete with inherited native-board blocker
+Status: review — runtime repaired; upstream native-board failure recorded
 Date: 2026-09-03
 Card: `docs/roadmaps/g16/091-nucleus-toast-host-m1.md`
 Handoff: `/Users/tom/Dev/projects/poodle/docs/handoffs/20260903-221500-g16-091-nucleus-toast-host-receipt.md`
@@ -11,7 +11,7 @@ Preparation-accepted head: `5b9d9fa1f8dc5cdf9010c35a0e773986720acbb8`
 Finalization base: `420b9a7b1b6ab40f32f3936b5bbc2483a180b0ae`
 DetailItem closeout ancestor: `420b9a7b1b6ab40f32f3936b5bbc2483a180b0ae`
 Rebased preparation head: `b2ffd421d26af13f38169984040f9c25eed14917`
-Runtime source: `740f3cb16632fc34c93f8492198fd968a348964f`
+Runtime source: `0f04083c9dee61d01722104e7403368559f0b590`
 PR: `#197`
 
 ## Outcome
@@ -24,7 +24,7 @@ fixture emits only after its terminal controlled teardown, identity, focus,
 callback, and backend-state assertions.
 
 All 28 cohort receipts and the manifest pin runtime source
-`740f3cb16632fc34c93f8492198fd968a348964f`. The generated Nucleus ledger
+`0f04083c9dee61d01722104e7403368559f0b590`. The generated Nucleus ledger
 advances only ToastHost: 28/29 mounted. The full evidence ledger records 28
 mounted and 147 missing GPUI behaviour cells. M1 does not infer A1 or V1.
 
@@ -62,7 +62,10 @@ onto `420b9a7b1b6ab40f32f3936b5bbc2483a180b0ae`:
 - The bounded preparation repair `5b9d9fa1f` maps exactly to `b2ffd421d`.
 
 Runtime commit `740f3cb16` adds terminal receipt emission without changing the
-accepted proof.
+accepted proof. Test-only commit `f089919b8` adds the cross-window focus-sweep
+counterexample: before repair it did not complete and was manually stopped.
+Repair commit `0f04083c9` keys painted focus identities and their lost-host
+sweep by `AnyWindowHandle`; it is the repaired runtime source.
 
 ## Receipt identity
 
@@ -74,30 +77,34 @@ accepted proof.
 | Proof level | `M1` |
 | Runtime | `gpui-headless` |
 | Command | `effigy regressions:native` |
-| Source commit | `740f3cb16632fc34c93f8492198fd968a348964f` |
+| Source commit | `0f04083c9dee61d01722104e7403368559f0b590` |
 | Outcome | `passed` |
 
 ## Validation
 
 - Focused Toast tests passed 45/45; renderer Toast tests passed 7/7; Node
-  backend passed 51/51; GPUI adapter passed 134/134; named mounted ToastHost
-  tests passed 3/3 after the rebase. The terminal receipt test also passed
-  alone after emission was added.
+  backend passed 51/51; GPUI adapter passed 134/134; focus-filtered mounted
+  tests passed 26/26; named mounted ToastHost tests passed 3/3. The new
+  cross-window focus-sweep test and the formerly hanging g16.026 drag-isolation
+  test each passed alone in 0.00s after the repair.
 - `effigy test:nucleus-parity-receipts` — 8 passed.
 - `effigy test:parity-evidence-ledger` — 6 passed.
 - `effigy check:parity-evidence-ledger` — 176 rows validated after generation.
 - `effigy ci:rust` — clean.
 - `effigy docs:check` — clean.
 - `git diff --check` — clean.
-- `effigy regressions:native` emitted all 28 receipts from the exact runtime
-  source, then did not complete in the inherited
-  `one_window_frame_cannot_cancel_another_windows_live_drag` test. A serialized
-  rerun and an exact standalone run reproduced the same non-completion. Each
-  was manually interrupted; no timeout result is claimed.
-- `effigy ci:native` passed its preceding drift, build, adapter, and test stages,
-  then reached the same native regression and did not complete. It was manually
-  interrupted. The stuck test is unchanged from `origin/main` and outside the
-  ToastHost boundary.
+- `effigy regressions:native` completed: 202/202 passed and all 28 receipts
+  were emitted from exact runtime source
+  `0f04083c9dee61d01722104e7403368559f0b590`.
+- `effigy ci:native` is failed, not passed. It completed the drift, build,
+  render/backend/adapter, 202-test native-regression, and 9-test specimen-probe
+  stages. Its fresh downstream dual-dependency consumer then resolved
+  crates.io `tinyvec 1.13.0` and failed inside that dependency with `cannot
+  find macro vec`; the negative control consequently failed to reach its
+  intended type mismatch. Later consumer and capture stages did not run.
+- A direct consumer rerun under the repository minimum Rust 1.95.0 completed
+  with the same `tinyvec 1.13.0` compile failure; this is not an active-toolchain
+  substitution.
 
 ## Limits
 

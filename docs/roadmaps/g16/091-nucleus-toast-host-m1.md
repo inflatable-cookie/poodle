@@ -1,6 +1,6 @@
 # g16.091 — Nucleus ToastHost M1 Receipt
 
-Status: complete
+Status: review — runtime repaired; card-required native gate has an upstream dependency failure recorded below
 Type: Nucleus NP-4 mounted receipt child
 Opened: 2026-09-03
 Closed: 2026-09-03
@@ -15,7 +15,7 @@ for Nucleus `ToastHost` at a committed runtime source.
 
 ## Completed
 
-- Runtime source `740f3cb16632fc34c93f8492198fd968a348964f` emits the
+- Runtime source `0f04083c9dee61d01722104e7403368559f0b590` emits the
   terminal ToastHost receipt from the stable named mounted test.
 - All 28 cohort receipts pin that exact runtime source. The generated Nucleus
   ledger advances only ToastHost from missing to mounted: 28/29 mounted. The
@@ -41,6 +41,10 @@ for Nucleus `ToastHost` at a committed runtime source.
 - The identity counterexample remains the genuine test-only red commit. The
   placement, token, and teardown counterexamples and their bounded repairs
   remain separate accepted history.
+- Cross-window focus-sweep counterexample `f089919b8` hangs before the repair
+  and is followed by bounded repair `0f04083c9`. Focus paint ownership and
+  lost-host sweeping are keyed by `AnyWindowHandle`, so one ending frame cannot
+  discard another live window's focus handles.
 - Shared evidence contains the complete 28-receipt cohort pinned to the runtime
   source. MessageCenter remains planning-only. No g16 front-door changes belong
   to this card.
@@ -63,10 +67,16 @@ for Nucleus `ToastHost` at a committed runtime source.
 
 ## Validation
 
-Focused ToastHost contract/machine/render/backend and named mounted checks
-passed after the rebase. Final validation ran the native regressions, receipt
-and ledger tests, parity ledger check, Rust/native CI, docs check, and diff
-check. No windowed or native-visual selector ran.
+Focused ToastHost contract/machine/render/backend, focus, and named mounted
+checks passed after the repair. `effigy regressions:native` completed with
+202/202 tests and emitted all 28 receipts at the exact runtime source.
+`effigy ci:rust` passed. The card-required `effigy ci:native` completed its
+drift, build, adapter, 202-test regression, and 9-test specimen stages, then
+failed in the fresh downstream consumer because crates.io `tinyvec 1.13.0`
+does not compile its alloc-only path (`cannot find macro vec`). The failure is
+outside this card and is not reported as a pass. Receipt/ledger checks, docs
+check, and diff check are recorded in the execution log. No windowed or
+native-visual selector ran.
 
 ## Continuation
 
