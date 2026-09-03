@@ -1,0 +1,72 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Select",
+  "scenario_id": "nucleus.navigation.select",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "232ae3b73f0e068f1f59690cc8e2f942546dcec2",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount two duplicate-content Select instances through node_compat::Select::from_spec(...).into_element() into HeadlessDriver",
+    "activate the non-searchable trigger through mounted pointer input and observe the listbox, group header, and disabled option paint",
+    "activate a disabled option and observe no value change; activate an enabled option and observe a host-owned rebuild",
+    "open both instances through host-owned state and observe independent layers, listbox ids, and callback streams",
+    "keep two live layers, focus one trigger, and observe Escape close only the innermost instance with scoped restoration",
+    "dispatch an outside press and observe scoped dismissal plus matching trigger focus restoration",
+    "edit the searchable instance through the production text-input path: Home/End, Arrow navigation, query filtering, caret/selection movement, option commit, freeform Enter, and freeform blur commit",
+    "clear the non-searchable instance and observe the authored default",
+    "mount a disabled Select and observe no callback, listbox, or layer",
+    "disable the highlighted option while open and observe machine revalidation that refuses a stale commit",
+    "mount a long menu through the adapter and observe max-height capping plus wheel-scroll activation of the last row"
+  ],
+  "assertions": [
+    "the production renderer composition owns combobox/listbox relationships, group labeling, selected/highlighted/disabled option metadata, chevron and check Icon metadata, and overlay token styling",
+    "mounted listboxes record positive bounds, overlay width floors, and option containment without a pixel claim",
+    "two duplicate-content instances keep runtime ids, queries, values, focus, callbacks, and dismiss layers separate",
+    "disabled whole-control and disabled-option paths are inert; a stale highlighted option cannot commit after OptionsChanged revalidation",
+    "search editing, Arrow/Home/End navigation, caret movement, freeform Enter/blur commit, clear-to-authored-default, and ordered effect streams are host-owned rebuilds driven by mounted input",
+    "Escape dismisses only the innermost live Select layer and restores that instance trigger; opening one instance through host state does not dismiss the other",
+    "a long menu caps at size.menu.maxHeight and only activates overflow rows after mounted wheel scrolling"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}

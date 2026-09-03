@@ -631,6 +631,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
 
         let submit = node.interaction.on_submit.clone();
         let cancel = node.interaction.on_cancel.clone();
+        let overlay_owns_escape = in_dismiss_layer;
         // Clipboard is the backend's: the text comes from outside the tree, and
         // `App` reaches it directly. (IME still needs an `EntityInputHandler`,
         // which a `&Node -> AnyElement` backend has no entity to hang on.)
@@ -725,6 +726,13 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         return;
                     }
                 } else if key == "escape" {
+                    // Overlay members already register on the dismiss stack.
+                    // Invoking on_cancel here would Close the focused instance
+                    // and then let the window host dismiss_innermost — two
+                    // different layers on one keystroke.
+                    if overlay_owns_escape {
+                        return;
+                    }
                     if let Some(handler) = &cancel {
                         handler();
                         cx.refresh_windows();

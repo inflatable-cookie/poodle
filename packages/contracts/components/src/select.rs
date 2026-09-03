@@ -374,3 +374,107 @@ impl SelectSpec {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::ChoiceOption;
+
+    fn fruit() -> Vec<ChoiceOption> {
+        vec![
+            ChoiceOption::new("apple", "Apple"),
+            ChoiceOption::new("banana", "Banana"),
+            ChoiceOption::new("cherry", "Cherry"),
+        ]
+    }
+
+    #[test]
+    fn defaults_match_the_contract() {
+        let spec = SelectSpec::default();
+        assert_eq!(spec.value, None);
+        assert_eq!(spec.default_value, None);
+        assert!(!spec.is_disabled);
+        assert_eq!(spec.open, None);
+        assert!(!spec.default_open);
+        assert!(spec.dismiss_on_outside_interact);
+        assert!(!spec.searchable);
+        assert!(!spec.freeform);
+        assert!(!spec.clearable);
+        assert_eq!(spec.empty_message, "No matches");
+        assert_eq!(spec.menu_min_width, None);
+        assert_eq!(spec.mode, SelectMode::Auto);
+        assert_eq!(spec.variant, SelectVariant::Default);
+    }
+
+    #[test]
+    fn builders_cover_the_public_prop_surface() {
+        let spec = SelectSpec::new(fruit())
+            .with_placeholder("Choose")
+            .with_value("banana")
+            .with_default_value("apple")
+            .with_open(true)
+            .with_searchable(true)
+            .with_freeform(true)
+            .with_clearable(true)
+            .with_menu_min_width("12rem")
+            .with_aria_label("Fruit")
+            .with_highlighted_value("cherry");
+        assert_eq!(spec.placeholder.as_deref(), Some("Choose"));
+        assert_eq!(spec.value.as_deref(), Some("banana"));
+        assert_eq!(spec.default_value.as_deref(), Some("apple"));
+        assert_eq!(spec.open, Some(true));
+        assert!(spec.searchable);
+        assert!(spec.freeform);
+        assert!(spec.clearable);
+        assert_eq!(spec.menu_min_width.as_deref(), Some("12rem"));
+        assert_eq!(spec.aria_label.as_deref(), Some("Fruit"));
+        assert_eq!(spec.highlighted_value.as_deref(), Some("cherry"));
+    }
+
+    #[test]
+    fn current_open_and_value_prefer_controlled_fields() {
+        let uncontrolled = SelectSpec::new(fruit()).with_default_value("apple");
+        assert_eq!(uncontrolled.current_value(), Some("apple"));
+        assert!(!uncontrolled.current_open());
+        let controlled = SelectSpec::new(fruit())
+            .with_default_value("apple")
+            .with_value("banana")
+            .with_default_open(true)
+            .with_open(false);
+        assert_eq!(controlled.current_value(), Some("banana"));
+        assert!(!controlled.current_open());
+    }
+
+    #[test]
+    fn overlay_fill_token_is_elevated() {
+        assert_eq!(
+            SelectSpec::new(fruit()).overlay_fill_token(),
+            semantic::COLOR_BACKGROUND_ELEVATED
+        );
+    }
+
+    #[test]
+    fn applying_context_rebuilds_host_owned_fields() {
+        let spec = SelectSpec::new(fruit())
+            .with_value("apple")
+            .with_open(true)
+            .with_search_query("ap");
+        let mut context = spec.select_context();
+        context.value = "banana".to_owned();
+        context.open = false;
+        context.query = "Banana".to_owned();
+        context.highlighted_value = Some("banana".to_owned());
+        let next = spec.applying_context(&context);
+        assert_eq!(next.value.as_deref(), Some("banana"));
+        assert_eq!(next.open, Some(false));
+        assert_eq!(next.search_query.as_deref(), Some("Banana"));
+        assert_eq!(next.highlighted_value.as_deref(), Some("banana"));
+        assert_eq!(next.select_context().clear_value, "");
+    }
+
+    #[test]
+    fn authored_default_is_the_clear_value() {
+        let spec = SelectSpec::new(fruit()).with_default_value("apple");
+        assert_eq!(spec.select_context().clear_value, "apple");
+    }
+}

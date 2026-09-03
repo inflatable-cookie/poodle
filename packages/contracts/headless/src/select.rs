@@ -335,3 +335,175 @@ pub fn select_transition(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fruit() -> Vec<SelectOptionState> {
+        vec![
+            SelectOptionState {
+                value: "apple".into(),
+                label: "Apple".into(),
+                disabled: false,
+            },
+            SelectOptionState {
+                value: "banana".into(),
+                label: "Banana".into(),
+                disabled: false,
+            },
+            SelectOptionState {
+                value: "cherry".into(),
+                label: "Cherry".into(),
+                disabled: false,
+            },
+            SelectOptionState {
+                value: "spinach".into(),
+                label: "Spinach".into(),
+                disabled: true,
+            },
+        ]
+    }
+
+    fn context() -> SelectContext {
+        SelectContext {
+            value: String::new(),
+            open: false,
+            query: String::new(),
+            highlighted_value: None,
+            options: fruit(),
+            clear_value: "apple".into(),
+            searchable: false,
+            freeform: false,
+            disabled: false,
+        }
+    }
+
+    #[test]
+    fn disabled_context_is_inert_in_every_direction() {
+        let mut disabled = context();
+        disabled.disabled = true;
+        for event in [
+            SelectEvent::Open,
+            SelectEvent::Toggle,
+            SelectEvent::HighlightNext,
+            SelectEvent::CommitOption {
+                value: "banana".into(),
+            },
+            SelectEvent::Clear,
+        ] {
+            let (next, effects) = select_transition(disabled.clone(), event);
+            assert_eq!(next, disabled);
+            assert!(effects.is_empty());
+        }
+    }
+
+    #[test]
+    fn disabled_option_commit_is_inert() {
+        let mut open = context();
+        open.open = true;
+        let (next, effects) = select_transition(
+            open.clone(),
+            SelectEvent::CommitOption {
+                value: "spinach".into(),
+            },
+        );
+        assert_eq!(next, open);
+        assert!(effects.is_empty());
+    }
+
+    #[test]
+    fn highlight_navigation_skips_disabled_and_lands_on_enabled_bounds() {
+        let mut open = context();
+        open.open = true;
+        open.highlighted_value = Some("cherry".into());
+        let (next, effects) = select_transition(open, SelectEvent::HighlightNext);
+        assert_eq!(next.highlighted_value.as_deref(), Some("cherry"));
+        assert!(effects.is_empty());
+
+        let mut open = context();
+        open.open = true;
+        let (next, _) = select_transition(open, SelectEvent::HighlightLast);
+        assert_eq!(next.highlighted_value.as_deref(), Some("cherry"));
+    }
+
+    #[test]
+    fn options_changed_revalidates_a_stale_highlight() {
+        let mut open = context();
+        open.open = true;
+        open.highlighted_value = Some("banana".into());
+        let mut options = fruit();
+        options.retain(|option| option.value != "banana");
+        let (next, effects) = select_transition(open, SelectEvent::OptionsChanged { options });
+        assert_eq!(next.highlighted_value.as_deref(), Some("apple"));
+        assert!(effects.is_empty());
+        let (committed, commit_effects) = select_transition(next, SelectEvent::CommitHighlighted);
+        assert_eq!(committed.value, "apple");
+        assert!(commit_effects
+            .iter()
+            .any(|effect| matches!(effect, SelectEffect::ValueChanged { value } if value == "apple")));
+        assert!(commit_effects.iter().all(
+            |effect| !matches!(effect, SelectEffect::ValueChanged { value } if value == "banana")
+        ));
+    }
+
+    #[test]
+    fn clear_restores_the_authored_default() {
+        let mut selected = context();
+        selected.value = "banana".into();
+        let (next, effects) = select_transition(selected, SelectEvent::Clear);
+        assert_eq!(next.value, "apple");
+        assert_eq!(
+            effects,
+            vec![SelectEffect::ValueChanged {
+                value: "apple".into()
+            }]
+        );
+    }
+
+    #[test]
+    fn effects_are_ordered_open_then_query_then_value() {
+        let mut searchable = context();
+        searchable.searchable = true;
+        searchable.freeform = true;
+        searchable.open = true;
+        searchable.query = "mango".into();
+        searchable.highlighted_value = None;
+        let (next, effects) = select_transition(searchable, SelectEvent::CommitFreeform);
+        assert_eq!(next.value, "mango");
+        assert!(!next.open);
+        assert_eq!(
+            effects,
+            vec![
+                SelectEffect::OpenChanged { open: false },
+                SelectEffect::ValueChanged {
+                    value: "mango".into()
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn query_opens_and_highlights_the_first_enabled_match() {
+        let mut searchable = context();
+        searchable.searchable = true;
+        let (next, effects) = select_transition(
+            searchable,
+            SelectEvent::Query {
+                query: "ban".into(),
+            },
+        );
+        assert!(next.open);
+        assert_eq!(next.query, "ban");
+        assert_eq!(next.highlighted_value.as_deref(), Some("banana"));
+        assert_eq!(
+            effects,
+            vec![
+                SelectEffect::OpenChanged { open: true },
+                SelectEffect::QueryChanged {
+                    query: "ban".into()
+                },
+            ]
+        );
+    }
+}

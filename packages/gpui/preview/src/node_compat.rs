@@ -3943,6 +3943,14 @@ impl Select {
         self
     }
 
+    pub(crate) fn on_transition(
+        mut self,
+        handler: Arc<dyn Fn(poodle_render::SelectTransitionResult) + Send + Sync>,
+    ) -> Self {
+        self.on_transition = Some(handler);
+        self
+    }
+
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let mut handlers = poodle_render::SelectHandlers::new(self.instance_scope);
         if let Some(on_transition) = self.on_transition {
