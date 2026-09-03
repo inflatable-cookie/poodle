@@ -31206,6 +31206,32 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
             ],
             "duplicate instances keep callback and controlled state ownership isolated"
         );
+        drop(state);
+
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "ConfirmAction",
+            "nucleus.settings.confirm-action",
+            observation,
+            &[
+                "mount caller-scoped controlled ConfirmAction instances through node_compat::ConfirmAction::from_spec(...).into_element() in an 800x600 HeadlessDriver host",
+                "open destructive and ordinary instances with mounted pointer and keyboard activation through the GPUI test platform",
+                "drive confirm, cancel button, backdrop, and Escape as separate mounted inputs while the host refuses each close request",
+                "rebuild pending state and dispatch cancel, confirm, backdrop, and Escape input to prove every route remains inert",
+                "accept keyboard confirm and pointer cancel through host-owned rebuilds that unmount each Dialog independently",
+            ],
+            &[
+                "production ConfirmAction composes Dialog and Button nodes with exact title, description, body, action labels, alert-dialog role, variants, tone, size, and density metadata",
+                "destructive trigger and confirm actions resolve the production danger recipes while an ordinary warning request resolves default action tone",
+                "the positive 800x600 mount, backdrop, and surface bounds preserve exact mount-to-backdrop equality and mount-to-backdrop-to-surface containment",
+                "body and action bounds remain contained by the surface, ordered, and non-overlapping",
+                "confirm, cancel button, backdrop, and Escape each emit exactly one callback in mounted input order and immediate host refusal leaves the Dialog mounted",
+                "pending state disables both actions, removes the close affordance, and suppresses all pointer and Escape callbacks",
+                "accepted host rebuilds close the selected instance, restore its closed trigger path, and preserve sibling focus, callback, state, and runtime identity isolation",
+            ],
+        );
     });
 }
 
