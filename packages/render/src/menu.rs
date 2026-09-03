@@ -110,6 +110,11 @@ pub fn menu(
         s.overlay = true;
     }
 
+    let first_enabled_idx = spec
+        .items
+        .iter()
+        .position(|entry| !entry.is_disabled && entry.kind != MenuItemKind::Separator);
+
     let disabled_map: Vec<bool> = spec
         .items
         .iter()
@@ -189,7 +194,11 @@ pub fn menu(
             };
             item.interaction.disabled = false;
             item.interaction.focusable = true;
-            item.a11y.tab_index = Some(0);
+            item.a11y.tab_index = Some(if Some(idx) == first_enabled_idx {
+                0
+            } else {
+                -1
+            });
             item.style.descriptor.cursor = CursorHint::Pointer;
             item.style.hover = Some(StylePatch {
                 background: Some(hover),
@@ -406,5 +415,64 @@ mod tests {
         // Space, ArrowLeft, and other non-navigation keys are inert for roving
         assert_eq!(last_key(NodeKey::Space, NodeModifiers::default()), None);
         assert_eq!(last_key(NodeKey::ArrowLeft, NodeModifiers::default()), None);
+    }
+
+    #[test]
+    fn single_entry_tab_posture_assigns_zero_to_first_enabled_and_minus_one_to_all_others() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        // Leading disabled item and separator must not steal tab_index=0;
+        // only the first enabled item gets tab_index=0, subsequent enabled items get -1.
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("disabled_0", "Disabled First").with_disabled(true),
+            poodle_specs::MenuEntry::new("sep_1", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("enabled_2", "First Enabled"),
+            poodle_specs::MenuEntry::new("enabled_3", "Second Enabled"),
+            poodle_specs::MenuEntry::new("sep_4", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("enabled_5", "Third Enabled"),
+            poodle_specs::MenuEntry::new("disabled_6", "Disabled Last").with_disabled(true),
+        ]);
+        let node = menu(&spec, &ctx, None);
+
+        let d0 = node.find(&|n| n.id.as_deref() == Some("menu-item:disabled_0")).unwrap();
+        assert_eq!(d0.a11y.tab_index, Some(-1));
+        assert!(!d0.interaction.focusable);
+
+        let e2 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_2")).unwrap();
+        assert_eq!(e2.a11y.tab_index, Some(0), "first enabled item must be single tab entry stop");
+        assert!(e2.interaction.focusable);
+
+        let e3 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_3")).unwrap();
+        assert_eq!(e3.a11y.tab_index, Some(-1), "subsequent enabled item must be tab_index -1");
+        assert!(e3.interaction.focusable);
+
+        let e5 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_5")).unwrap();
+        assert_eq!(e5.a11y.tab_index, Some(-1), "subsequent enabled item must be tab_index -1");
+        assert!(e5.interaction.focusable);
+
+        let d6 = node.find(&|n| n.id.as_deref() == Some("menu-item:disabled_6")).unwrap();
+        assert_eq!(d6.a11y.tab_index, Some(-1));
+        assert!(!d6.interaction.focusable);
+
+        // Verify exactly one item in the entire menu has tab_index == Some(0)
+        let tab_stop_count = node
+            .children
+            .iter()
+            .filter(|child| child.a11y.tab_index == Some(0))
+            .count();
+        assert_eq!(tab_stop_count, 1);
+
+        // When all items are disabled or separators, no item has tab_index=0
+        let all_inert_spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("d1", "D1").with_disabled(true),
+            poodle_specs::MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("d2", "D2").with_disabled(true),
+        ]);
+        let inert_node = menu(&all_inert_spec, &ctx, None);
+        for child in &inert_node.children {
+            assert_eq!(child.a11y.tab_index, Some(-1));
+            assert!(!child.interaction.focusable);
+        }
     }
 }

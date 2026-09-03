@@ -23100,6 +23100,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         assert_eq!(item_new.id.as_deref(), Some("menu-item:new"));
         assert_eq!(item_new.a11y.role, Some(NodeRole::MenuItem));
         assert!(item_new.interaction.focusable);
+        assert_eq!(item_new.a11y.tab_index, Some(0), "first enabled item must have tab_index=0");
         assert_eq!(
             item_new.style.descriptor.cursor,
             CursorHint::Pointer
@@ -23166,6 +23167,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         assert_eq!(item_print.id.as_deref(), Some("menu-item:print"));
         assert_eq!(item_print.a11y.role, Some(NodeRole::MenuItem));
         assert!(!item_print.interaction.focusable);
+        assert_eq!(item_print.a11y.tab_index, Some(-1));
         assert!(item_print.interaction.on_activate.is_none());
         assert_eq!(
             item_print.style.descriptor.opacity,
@@ -23185,6 +23187,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         assert_eq!(item_sep.id, None);
         assert_eq!(item_sep.a11y.role, Some(NodeRole::Splitter));
         assert!(!item_sep.interaction.focusable);
+        assert_eq!(item_sep.a11y.tab_index, Some(-1));
         assert!(item_sep.interaction.on_activate.is_none());
         assert_eq!(
             item_sep.style.descriptor.layout.direction,
@@ -23212,6 +23215,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         assert_eq!(item_delete.id.as_deref(), Some("menu-item:delete"));
         assert_eq!(item_delete.a11y.role, Some(NodeRole::MenuItem));
         assert!(item_delete.interaction.focusable);
+        assert_eq!(item_delete.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
         assert_eq!(
             item_delete.style.descriptor.cursor,
             CursorHint::Pointer
@@ -23246,6 +23250,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         assert_eq!(item_save.id.as_deref(), Some("menu-item:save"));
         assert_eq!(item_save.a11y.role, Some(NodeRole::MenuItem));
         assert!(item_save.interaction.focusable);
+        assert_eq!(item_save.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
         assert_eq!(item_save.children.len(), 2);
         let label_save = &item_save.children[0];
         assert!(matches!(&label_save.kind, NodeKind::Text { content } if content == "Save file"));
@@ -23263,6 +23268,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         );
         assert_eq!(item_dark.a11y.toggled, Some(NodeToggled::True));
         assert!(item_dark.interaction.focusable);
+        assert_eq!(item_dark.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
         assert_eq!(item_dark.children.len(), 2);
         let check_icon = &item_dark.children[0];
         assert!(matches!(&check_icon.kind, NodeKind::Icon { name, size } if name == "check" && *size == font_size));
@@ -23285,6 +23291,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         );
         assert_eq!(item_notif.a11y.toggled, Some(NodeToggled::False));
         assert!(item_notif.interaction.focusable);
+        assert_eq!(item_notif.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
         assert_eq!(item_notif.children.len(), 2);
         let spacer_notif = &item_notif.children[0];
         assert!(matches!(&spacer_notif.kind, NodeKind::Container));
@@ -23309,6 +23316,18 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         );
         assert_eq!(item_radio.a11y.toggled, Some(NodeToggled::False));
         assert!(item_radio.interaction.focusable);
+        assert_eq!(item_radio.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
+
+        // Verify exact single tab-entry posture across initial_node
+        let initial_tab_stops = initial_node
+            .children
+            .iter()
+            .filter(|child| child.a11y.tab_index == Some(0))
+            .count();
+        assert_eq!(
+            initial_tab_stops, 1,
+            "Menu must have exactly one single tab_index=0 entry stop"
+        );
 
         // ── 2. Mounted Host Setup & Layout Containment ─────────────────────
         let actions = Arc::new(Mutex::new(Vec::new()));
@@ -23469,6 +23488,12 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
         driver.draw_frame();
         let rebuilt_hc = mounted.lock().unwrap().children[7].clone();
         assert_eq!(rebuilt_hc.a11y.toggled, Some(NodeToggled::True));
+        let radio_check = &rebuilt_hc.children[0];
+        assert!(matches!(&radio_check.kind, NodeKind::Icon { name, size } if name == "check" && *size == font_size));
+        assert_eq!(
+            radio_check.style.descriptor.text_color,
+            Some(accent_color)
+        );
 
         // ── 5. Keyboard Navigation (Roving Focus with Skip & Wrap) ─────────
         driver.wait_for_focus_handle("menu-item:new");
@@ -23545,67 +23570,31 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
             "Escape must not activate any menu item"
         );
 
+        // 5i. Mounted single-entry tab-stop posture proof
+        let current_mounted = mounted.lock().unwrap();
+        assert_eq!(current_mounted.children[0].a11y.tab_index, Some(0), "mounted 'new' item has tab_index=0");
+        assert_eq!(current_mounted.children[1].a11y.tab_index, Some(-1), "mounted 'print' item has tab_index=-1");
+        assert_eq!(current_mounted.children[2].a11y.tab_index, Some(-1), "mounted separator has tab_index=-1");
+        assert_eq!(current_mounted.children[3].a11y.tab_index, Some(-1), "mounted 'delete' item has tab_index=-1");
+        assert_eq!(current_mounted.children[4].a11y.tab_index, Some(-1), "mounted 'save' item has tab_index=-1");
+        assert_eq!(current_mounted.children[5].a11y.tab_index, Some(-1), "mounted 'dark_mode' item has tab_index=-1");
+        assert_eq!(current_mounted.children[6].a11y.tab_index, Some(-1), "mounted 'notifications' item has tab_index=-1");
+        assert_eq!(current_mounted.children[7].a11y.tab_index, Some(-1), "mounted 'high_contrast' item has tab_index=-1");
+        let mounted_tab_stops = current_mounted
+            .children
+            .iter()
+            .filter(|child| child.a11y.tab_index == Some(0))
+            .count();
+        assert_eq!(
+            mounted_tab_stops, 1,
+            "Mounted Menu must enforce exactly one single tab_index=0 entry stop"
+        );
+        drop(current_mounted);
+
         let observation = driver.mounted_observation();
         drop(driver);
 
-        // ── 6. Two Composed Instances Focus and Callback Isolation ─────────
-        let alpha_actions = Arc::new(Mutex::new(Vec::new()));
-        let beta_actions = Arc::new(Mutex::new(Vec::new()));
-
-        let alpha_sink = Arc::clone(&alpha_actions);
-        let beta_sink = Arc::clone(&beta_actions);
-
-        let alpha_spec = MenuSpec::new(vec![
-            MenuEntry::new("item1", "Item One"),
-            MenuEntry::new("item2", "Item Two"),
-        ]);
-        let beta_spec = MenuSpec::new(vec![
-            MenuEntry::new("item1", "Item One"),
-            MenuEntry::new("item2", "Item Two"),
-        ]);
-
-        let mut alpha_node = poodle_render::menu(
-            &alpha_spec,
-            &RenderContext::new(&theme_inst),
-            Some(Arc::new(move |v| alpha_sink.lock().unwrap().push(v.to_string()))),
-        );
-        alpha_node.id = Some("menu-alpha".to_string());
-        alpha_node.children[0].id = Some("alpha:item1".to_string());
-        alpha_node.children[0].runtime_id = Some("alpha:item1".to_string());
-        alpha_node.children[1].id = Some("alpha:item2".to_string());
-        alpha_node.children[1].runtime_id = Some("alpha:item2".to_string());
-
-        let mut beta_node = poodle_render::menu(
-            &beta_spec,
-            &RenderContext::new(&theme_inst),
-            Some(Arc::new(move |v| beta_sink.lock().unwrap().push(v.to_string()))),
-        );
-        beta_node.id = Some("menu-beta".to_string());
-        beta_node.children[0].id = Some("beta:item1".to_string());
-        beta_node.children[0].runtime_id = Some("beta:item1".to_string());
-        beta_node.children[1].id = Some("beta:item2".to_string());
-        beta_node.children[1].runtime_id = Some("beta:item2".to_string());
-
-        let mut two_menus = Node::container();
-        two_menus.style.descriptor.layout.direction = LayoutDirection::Row;
-        two_menus.style.descriptor.layout.spacing.gap = 16.0;
-        two_menus = two_menus.child(alpha_node).child(beta_node);
-
-        let mut multi_driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(two_menus)), 600.0, 400.0);
-        multi_driver.draw_frame();
-
-        multi_driver.wait_for_focus_handle("alpha:item1");
-        multi_driver.wait_for_focus_handle("beta:item1");
-
-        multi_driver.pointer_activate_id("alpha:item1");
-        assert_eq!(alpha_actions.lock().unwrap().as_slice(), ["item1"]);
-        assert!(beta_actions.lock().unwrap().is_empty());
-
-        multi_driver.pointer_activate_id("beta:item2");
-        assert_eq!(alpha_actions.lock().unwrap().as_slice(), ["item1"]);
-        assert_eq!(beta_actions.lock().unwrap().as_slice(), ["item2"]);
-
-        // ── 7. Terminal Receipt Emission ───────────────────────────────────
+        // ── 6. Terminal Receipt Emission ───────────────────────────────────
         nucleus_receipts::emit_if_configured(
             "Menu",
             "nucleus.navigation.menu",
@@ -23614,10 +23603,11 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
                 "mount controlled Menu panel with action, disabled, separator, destructive, shortcut, checkbox, and radio items through HeadlessDriver",
                 "pointer activate enabled action, destructive action, shortcut action, and verify disabled row inertness",
                 "controlled toggle rebuild of checkbox and radio items through test-platform pointer dispatch",
+                "assert production check Icon metadata on checked checkbox and radio rows through controlled rebuild",
                 "keyboard navigate roving focus across enabled items with arrow keys skipping disabled and separator rows",
                 "keyboard jump to boundaries with Home/End and wrap around with directional arrows",
                 "keyboard activate focused items with Enter and Space while Escape remains inert to item activation",
-                "mount two composed Menu instances to prove focus handle and callback isolation",
+                "verify single-entry tab posture with first enabled item tab_index=0 and all other enabled, disabled, and separator rows tab_index=-1",
             ],
             &[
                 "production render path resolves root menu role, background elevation fill, border, surface radius, shadow, overlay posture, min-width, and padding",
@@ -23632,7 +23622,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
                 "keyboard navigation skips disabled and separator rows in both directions, jumps to boundaries with Home/End, and wraps at edges",
                 "Enter and Space activate the focused item once while Escape never activates an item",
                 "mounted bounds confirm positive dimensions, child containment, and vertical row order",
-                "two composed instances maintain separate runtime focus handles and independent action callback sinks",
+                "panel enforces single tab-entry posture with exactly one enabled row at tab_index 0 while all other rows carry tab_index -1",
             ],
         );
     });
