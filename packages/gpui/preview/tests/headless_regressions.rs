@@ -29030,6 +29030,48 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
     });
 }
 
+/// g16.091. Duplicate production ToastHost mounts must retain caller-scoped
+/// identity even when their controlled queues reuse the same toast id.
+#[test]
+fn toast_host_controlled_composition_actions_and_identity_through_mounted_backend() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_specs::{ToastHostPlacement, ToastHostSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            div()
+                .relative()
+                .size_full()
+                .child(
+                    node_compat::ToastHost::from_spec(
+                        ToastHostSpec::new().with_placement(ToastHostPlacement::TopStart),
+                        &theme_provider,
+                    )
+                    .toasts(vec![Toast::new("job", "Publishing")]),
+                )
+                .child(
+                    node_compat::ToastHost::from_spec(
+                        ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
+                        &theme_provider,
+                    )
+                    .toasts(vec![Toast::new("job", "Publishing")]),
+                )
+                .into_any_element()
+        });
+
+        let _driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:left").is_some(),
+            "left ToastHost must paint its caller-scoped production identity"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:right").is_some(),
+            "right ToastHost must not alias the left mount"
+        );
+    });
+}
+
 /// g16.047. Native danger projects Alert; success stays ListItem. Drawing the
 /// node tree does not claim GPUI assistive-technology parity.
 #[test]
