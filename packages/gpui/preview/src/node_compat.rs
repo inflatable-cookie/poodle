@@ -858,6 +858,7 @@ pub(crate) struct ToastHost {
 pub(crate) struct MessageCenter {
     spec: MessageCenterSpec,
     theme: GpuiThemeProvider,
+    handlers: poodle_render::MessageCenterHandlers,
 }
 
 pub(crate) struct DebugDialog {
@@ -1679,7 +1680,41 @@ impl MessageCenter {
         Self {
             spec,
             theme: theme.clone(),
+            handlers: poodle_render::MessageCenterHandlers::default(),
         }
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_item_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_item_select = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_read_change(
+        mut self,
+        handler: Arc<dyn Fn(&str, bool) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_read_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_remove = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_mark_all_read(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_mark_all_read = Some(handler);
+        self
     }
 }
 
@@ -1690,7 +1725,7 @@ impl IntoElement for MessageCenter {
         poodle_gpui_node_backend::to_gpui(&poodle_render::message_center(
             &self.spec,
             &RenderContext::new(&self.theme),
-            poodle_render::MessageCenterHandlers::default(),
+            self.handlers,
         ))
     }
 }

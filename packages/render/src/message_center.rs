@@ -5,8 +5,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodePosition, NodeRole,
+    CrossAxisAlignment, CursorHint, DismissReason, FocusRing, LayoutDirection, LayoutOverflow,
+    LayoutSizing, MainAxisAlignment, Node, NodePosition, NodeRole, StylePatch,
 };
 use poodle_specs::{
     ButtonFit, ButtonSpec, ButtonTone, ButtonVariant, ControlSize, EmptyStateSize, EmptyStateSpec,
@@ -33,6 +33,24 @@ pub struct MessageCenterHandlers {
     pub on_read_change: Option<Arc<dyn Fn(&str, bool) + Send + Sync>>,
     pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_mark_all_read: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Stable native instance scope. Semantic ids stay readable; backends key
+    /// focus, bounds, and layer state on the scoped runtime ids.
+    pub instance_id: Option<String>,
+}
+
+fn scoped(instance: Option<&str>, part: &str) -> Option<String> {
+    instance.map(|scope| format!("message-center:{scope}:{part}"))
+}
+
+fn root_id(instance: Option<&str>) -> Option<String> {
+    instance.map(|scope| format!("message-center:{scope}"))
+}
+
+/// The layer the open surface registers on the backend dismiss stack.
+pub fn message_center_layer_id(instance: Option<&str>) -> String {
+    instance
+        .map(|scope| format!("message-center-layer:{scope}"))
+        .unwrap_or_else(|| "message-center-layer".to_owned())
 }
 
 pub fn message_center(
@@ -40,18 +58,21 @@ pub fn message_center(
     ctx: &RenderContext<'_>,
     handlers: MessageCenterHandlers,
 ) -> Node {
+    let instance = handlers.instance_id.as_deref();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
     let anchor_size = rem_to_px(control_height_rem(effective_size));
     let unread = spec.unread_count();
     let open = spec.current_open();
+    let layer_id = message_center_layer_id(instance);
+    let surface_id = scoped(instance, "surface").unwrap_or_else(|| "message-center:surface".into());
 
     let open_handler = handlers
         .on_open_change
         .clone()
         .map(|handler| Arc::new(move || handler(!open)) as Arc<dyn Fn() + Send + Sync>);
-    let trigger_spec = IconButtonSpec::new()
+    let mut trigger_spec = IconButtonSpec::new()
         .with_variant(ButtonVariant::Secondary)
         .with_icon(&spec.trigger_icon)
         .with_aria_label(spec.effective_trigger_label())
@@ -60,32 +81,76 @@ pub fn message_center(
         .with_size(base_size)
         .with_size_role(spec.size_role)
         .with_density(density);
-    let trigger_button = icon_button(&trigger_spec, ctx, open_handler);
-    let trigger = trigger_with_indicator(trigger_button, unread, ctx);
+    if open {
+        trigger_spec = trigger_spec.with_controls(&surface_id);
+    }
+    let mut trigger_button = icon_button(&trigger_spec, ctx, open_handler);
+    trigger_button.runtime_id = scoped(instance, "trigger");
+    trigger_button
+        .roles
+        .insert("dependency".to_owned(), "icon-button".to_owned());
+    if let Some(glyph) = trigger_button.children.get_mut(0) {
+        glyph.runtime_id = scoped(instance, "trigger-icon");
+        glyph
+            .roles
+            .insert("dependency".to_owned(), "icon".to_owned());
+    }
+    if open {
+        trigger_button.interaction.dismiss_layer = Some(layer_id.clone());
+    }
+    let trigger = trigger_with_indicator(trigger_button, unread, ctx, instance);
 
+    let dismiss = handlers.on_open_change.clone().map(|handler| {
+        Arc::new(move |_reason: DismissReason| handler(false))
+            as Arc<dyn Fn(DismissReason) + Send + Sync>
+    });
     let surface = open.then(|| {
-        let content = center_content(spec, ctx, &handlers);
+        let content = center_content(spec, ctx, &handlers, instance);
         let popover_spec = PopoverSpec::new()
             .with_open(true)
             .with_placement(spec.placement)
             .with_aria_label(spec.effective_aria_label())
             .with_surface_min_width(poodle_specs::Dimension::new("24rem"))
             .with_surface_max_width(poodle_specs::Dimension::new("30rem"));
-        popover_surface(&popover_spec, ctx, Some(content))
+        let mut node = popover_surface(&popover_spec, ctx, Some(content));
+        node.runtime_id = Some(surface_id.clone());
+        node.roles
+            .insert("dependency".to_owned(), "popover".to_owned());
+        node.interaction.focusable = true;
+        node.a11y.tab_index = Some(0);
+        node.interaction.dismiss_layer = Some(layer_id.clone());
+        node.interaction.on_dismiss = dismiss.clone();
+        node.style.focus = Some(StylePatch {
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+            ..StylePatch::default()
+        });
+        node
     });
 
-    floating_overlay(
+    let mut wrapper = floating_overlay(
         trigger,
         surface,
         spec.placement,
         anchor_size,
         anchor_size,
         crate::floating_overlay::OVERLAY_GAP_PX,
-    )
+    );
+    wrapper.runtime_id = root_id(instance);
+    if open {
+        wrapper.interaction.dismiss_layer = Some(layer_id);
+        wrapper.interaction.on_dismiss = dismiss;
+    }
+    wrapper
 }
 
-fn trigger_with_indicator(trigger: Node, unread: usize, ctx: &RenderContext<'_>) -> Node {
+fn trigger_with_indicator(
+    trigger: Node,
+    unread: usize,
+    ctx: &RenderContext<'_>,
+    instance: Option<&str>,
+) -> Node {
     let mut wrapper = Node::container();
+    wrapper.runtime_id = scoped(instance, "trigger-wrap");
     wrapper.position = NodePosition::Relative;
     wrapper.style.descriptor.layout.direction = LayoutDirection::Row;
     wrapper = wrapper.child(trigger);
@@ -100,6 +165,7 @@ fn trigger_with_indicator(trigger: Node, unread: usize, ctx: &RenderContext<'_>)
         unread.to_string()
     };
     let mut badge = Node::text(count);
+    badge.runtime_id = scoped(instance, "unread");
     badge.position = NodePosition::Absolute {
         top: Some(-rem_to_px(0.2)),
         left: None,
@@ -137,9 +203,11 @@ fn center_content(
     spec: &MessageCenterSpec,
     ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
+    instance: Option<&str>,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let mut root = Node::container();
+    root.runtime_id = scoped(instance, "panel");
     root.a11y.role = Some(NodeRole::Region);
     root.a11y.label = Some(spec.effective_aria_label().to_string());
     {
@@ -149,17 +217,23 @@ fn center_content(
         s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(28.0));
         s.fill_width = true;
     }
-    root = root.child(center_header(spec, ctx, handlers));
+    root = root.child(center_header(spec, ctx, handlers, instance));
 
     if spec.items.is_empty() {
         let empty_spec = EmptyStateSpec::new(&spec.empty_title)
             .with_message(&spec.empty_message)
             .with_size(EmptyStateSize::Compact)
             .with_density(density);
-        return root.child(empty_state(&empty_spec, ctx));
+        let mut empty = empty_state(&empty_spec, ctx);
+        empty.runtime_id = scoped(instance, "empty");
+        empty
+            .roles
+            .insert("dependency".to_owned(), "empty-state".to_owned());
+        return root.child(empty);
     }
 
     let mut list = Node::container();
+    list.runtime_id = scoped(instance, "list");
     list.a11y.role = Some(NodeRole::List);
     {
         let s = &mut list.style;
@@ -170,7 +244,7 @@ fn center_content(
         s.fill_width = true;
     }
     for item in &spec.items {
-        list = list.child(message_row(item, spec, ctx, handlers));
+        list = list.child(message_row(item, spec, ctx, handlers, instance));
     }
     root.child(list)
 }
@@ -179,10 +253,12 @@ fn center_header(
     spec: &MessageCenterSpec,
     ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
+    instance: Option<&str>,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let unread = spec.unread_count();
     let mut header = Node::container();
+    header.runtime_id = scoped(instance, "header");
     {
         let s = &mut header.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -199,13 +275,16 @@ fn center_header(
     copy.style.descriptor.layout.direction = LayoutDirection::Column;
     copy.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
     let mut title = Node::text(&spec.title);
+    title.runtime_id = scoped(instance, "title");
     title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     title.style.text_size = Some(ctx.theme().resolve_space("typography.heading.size"));
     title.style.text_weight = Some(650);
     copy = copy.child(title);
     if unread > 0 {
         let mut summary = Node::text(format!("{unread} unread"));
-        summary.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+        summary.runtime_id = scoped(instance, "unread-summary");
+        summary.style.descriptor.text_color =
+            Some(ctx.theme().resolve_color("color.text.secondary"));
         summary.style.text_size = Some(ctx.theme().resolve_space("typography.caption.size"));
         copy = copy.child(summary);
     }
@@ -219,7 +298,12 @@ fn center_header(
                 .with_fit(ButtonFit::Content)
                 .with_size(ControlSize::Xs)
                 .with_density(density);
-            header = header.child(button(&button_spec, ctx, Some(handler)));
+            let mut mark_all = button(&button_spec, ctx, Some(handler));
+            mark_all.runtime_id = scoped(instance, "mark-all-read");
+            mark_all
+                .roles
+                .insert("dependency".to_owned(), "button".to_owned());
+            header = header.child(mark_all);
         }
     }
     header
@@ -230,9 +314,11 @@ fn message_row(
     spec: &MessageCenterSpec,
     ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
+    instance: Option<&str>,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let mut row = Node::container();
+    row.runtime_id = scoped(instance, &format!("item:{}", item.id));
     row.a11y.role = Some(NodeRole::ListItem);
     {
         let s = &mut row.style;
@@ -261,10 +347,12 @@ fn message_row(
         spec,
         ctx,
         handlers.on_item_select.clone().filter(|_| item.selectable),
+        instance,
     );
     row = row.child(content);
 
     let mut actions = Node::container();
+    actions.runtime_id = scoped(instance, &format!("item:{}:actions", item.id));
     actions.style.descriptor.layout.direction = LayoutDirection::Row;
     actions.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
     actions.style.flex_shrink_zero = true;
@@ -289,11 +377,21 @@ fn message_row(
                 })
                 .with_size(ControlSize::Xs)
                 .with_density(density);
-            actions = actions.child(icon_button(
+            let mut read = icon_button(
                 &control,
                 ctx,
                 Some(Arc::new(move || handler(&id, next_read))),
-            ));
+            );
+            read.runtime_id = scoped(instance, &format!("item:{}:read", item.id));
+            read.roles
+                .insert("dependency".to_owned(), "icon-button".to_owned());
+            if let Some(glyph) = read.children.get_mut(0) {
+                glyph.runtime_id = scoped(instance, &format!("item:{}:read-icon", item.id));
+                glyph
+                    .roles
+                    .insert("dependency".to_owned(), "icon".to_owned());
+            }
+            actions = actions.child(read);
             has_actions = true;
         }
     }
@@ -308,11 +406,18 @@ fn message_row(
                 .with_tone(ButtonTone::Danger)
                 .with_size(ControlSize::Xs)
                 .with_density(density);
-            actions = actions.child(icon_button(
-                &control,
-                ctx,
-                Some(Arc::new(move || handler(&id))),
-            ));
+            let mut remove = icon_button(&control, ctx, Some(Arc::new(move || handler(&id))));
+            remove.runtime_id = scoped(instance, &format!("item:{}:remove", item.id));
+            remove
+                .roles
+                .insert("dependency".to_owned(), "icon-button".to_owned());
+            if let Some(glyph) = remove.children.get_mut(0) {
+                glyph.runtime_id = scoped(instance, &format!("item:{}:remove-icon", item.id));
+                glyph
+                    .roles
+                    .insert("dependency".to_owned(), "icon".to_owned());
+            }
+            actions = actions.child(remove);
             has_actions = true;
         }
     }
@@ -328,6 +433,7 @@ fn message_content(
     spec: &MessageCenterSpec,
     ctx: &RenderContext<'_>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    instance: Option<&str>,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let mut content = if on_select.is_some() {
@@ -335,6 +441,7 @@ fn message_content(
     } else {
         Node::container()
     };
+    content.runtime_id = scoped(instance, &format!("item:{}:content", item.id));
     {
         let s = &mut content.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -344,6 +451,11 @@ fn message_content(
         s.fill_width = true;
         s.descriptor.background = None;
         s.descriptor.border.width = 0.0;
+        let radius = ctx.theme().resolve_radius("radius.control");
+        s.descriptor.corner_radii.top_left = radius;
+        s.descriptor.corner_radii.top_right = radius;
+        s.descriptor.corner_radii.bottom_left = radius;
+        s.descriptor.corner_radii.bottom_right = radius;
     }
     if let Some(handler) = on_select {
         let id = item.id.clone();
@@ -351,10 +463,25 @@ fn message_content(
         content.interaction.on_activate = Some(Arc::new(move || handler(&id)));
         content.style.descriptor.cursor = CursorHint::Pointer;
         content.a11y.label = Some(item.title.clone());
+        let surface = ctx.theme().resolve_color("color.background.surface");
+        content.style.hover = Some(StylePatch {
+            background: Some(with_alpha(surface, surface.3 * 0.72)),
+            border_color: None,
+            text_color: None,
+            opacity: None,
+        });
+        content.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(-0.125),
+        });
     }
 
     let leading = if let Some(icon) = item.icon.as_deref() {
         let mut icon = Node::icon(icon, rem_to_px(1.0));
+        icon.runtime_id = scoped(instance, &format!("item:{}:icon", item.id));
+        icon.roles
+            .insert("dependency".to_owned(), "icon".to_owned());
         icon.style.descriptor.text_color = Some(ctx.theme().resolve_color(item.tone.color_token()));
         icon
     } else {
@@ -368,7 +495,12 @@ fn message_content(
             .with_size(ControlSize::Xs)
             .with_size_role(SemanticControlSizeRole::Control)
             .with_density(density);
-        status_indicator(&indicator, ctx)
+        let mut indicator = status_indicator(&indicator, ctx);
+        indicator.runtime_id = scoped(instance, &format!("item:{}:indicator", item.id));
+        indicator
+            .roles
+            .insert("dependency".to_owned(), "status-indicator".to_owned());
+        indicator
     };
     content = content.child(leading);
 
@@ -398,7 +530,8 @@ fn message_content(
         meta.style.descriptor.layout.spacing.gap = rem_to_px(0.25);
         if let Some(value) = item.meta.as_deref() {
             let mut label = Node::text(value);
-            label.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+            label.style.descriptor.text_color =
+                Some(ctx.theme().resolve_color("color.text.secondary"));
             label.style.text_size = Some(ctx.theme().resolve_space("typography.caption.size"));
             meta = meta.child(label);
         }
@@ -413,7 +546,11 @@ fn message_content(
                 .with_timestamp(timestamp)
                 .with_short(true)
                 .with_typography(InlineTypographyMode::Inherit);
-            meta = meta.child(time_ago(&time_spec, ctx));
+            let mut time = time_ago(&time_spec, ctx);
+            time.runtime_id = scoped(instance, &format!("item:{}:time", item.id));
+            time.roles
+                .insert("dependency".to_owned(), "time-ago".to_owned());
+            meta = meta.child(time);
         }
         copy = copy.child(meta);
     }
@@ -435,7 +572,11 @@ fn message_content(
             spec.aria_label = Some(format!("{} progress", item.title));
             spec
         };
-        copy = copy.child(progress(&progress_spec, ctx));
+        let mut bar = progress(&progress_spec, ctx);
+        bar.runtime_id = scoped(instance, &format!("item:{}:progress", item.id));
+        bar.roles
+            .insert("dependency".to_owned(), "progress".to_owned());
+        copy = copy.child(bar);
     }
     content.child(copy)
 }
@@ -446,6 +587,44 @@ mod tests {
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn caller_scoped_runtime_ids_do_not_alias() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MessageCenterSpec::new(vec![MessageCenterItem::new("job", "Mix preview")])
+            .with_open(true);
+        let left = message_center(
+            &spec,
+            &ctx,
+            MessageCenterHandlers {
+                instance_id: Some("left".into()),
+                ..Default::default()
+            },
+        );
+        let right = message_center(
+            &spec,
+            &ctx,
+            MessageCenterHandlers {
+                instance_id: Some("right".into()),
+                ..Default::default()
+            },
+        );
+        assert_eq!(left.runtime_id.as_deref(), Some("message-center:left"));
+        assert_eq!(right.runtime_id.as_deref(), Some("message-center:right"));
+        assert_eq!(
+            left.find(&|node| node.runtime_id.as_deref() == Some("message-center:left:trigger"))
+                .and_then(|node| node.roles.get("dependency"))
+                .map(String::as_str),
+            Some("icon-button")
+        );
+        assert!(right
+            .find(&|node| node.runtime_id.as_deref() == Some("message-center:right:surface"))
+            .is_some());
+        assert!(left
+            .find(&|node| node.runtime_id.as_deref() == Some("message-center:right:trigger"))
+            .is_none());
     }
 
     #[test]
@@ -492,9 +671,9 @@ mod tests {
             node.children[1].children[0].a11y.role,
             Some(NodeRole::Dialog)
         );
-            // The surface's inner padded wrapper carries the panel spacing;
-            // the message centre content sits inside it.
-            let content = &node.children[1].children[0].children[0].children[0];
+        // The surface's inner padded wrapper carries the panel spacing;
+        // the message centre content sits inside it.
+        let content = &node.children[1].children[0].children[0].children[0];
         assert_eq!(
             content.style.descriptor.layout.width,
             LayoutSizing::Fixed(rem_to_px(28.0))
@@ -529,9 +708,9 @@ mod tests {
         };
         let node = message_center(&spec, &ctx, handlers);
 
-            // The surface's inner padded wrapper carries the panel spacing;
-            // the message centre content sits inside it.
-            let content = &node.children[1].children[0].children[0].children[0];
+        // The surface's inner padded wrapper carries the panel spacing;
+        // the message centre content sits inside it.
+        let content = &node.children[1].children[0].children[0].children[0];
         let list = &content.children[1];
         assert_eq!(list.children.len(), 3);
 
@@ -596,7 +775,8 @@ mod tests {
         let late = message_center(&spec_at(80.0), &ctx, MessageCenterHandlers::default());
 
         let fraction = |node: &Node| {
-            node.children[1].children[0].children[0].children[0].children[1].children[0].children[0].children[1]
+            node.children[1].children[0].children[0].children[0].children[1].children[0].children[0]
+                .children[1]
                 .children
                 .iter()
                 .find_map(|child| match child.kind {
