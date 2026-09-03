@@ -1,11 +1,13 @@
 # g16.094 — Ordinary Cargo Scope Classification Repair
 
-Status: ready
+Status: complete — awaiting orchestrator review
 Type: installed-smoke routing repair
 Opened: 2026-09-04
 Depends on: merged `g16.061`; reproduced ordinary-mode rejection on PR #199
-Governing refs: `059-installed-web-distribution-certification.md`, `061-installed-web-ordinary-routing.md`, `092-native-consumer-tinyvec-build.md`
+Governing refs: `059-installed-web-distribution-certification.md`, `061-installed-web-smoke-certification-routing.md`, `092-native-consumer-tinyvec-build.md`
 Handoff: `../../handoffs/20260904-001500-g16-094-ordinary-cargo-scope-classification.md`
+Proof commits: `9b14cf5ed` (plants), `3f9ef94d5` (classifier)
+Execution log: `../../logs/2026-09/20260904-g16-094-ordinary-cargo-scope-classification.md`
 
 ## Goal
 
@@ -46,6 +48,16 @@ Run focused router tests and plants through the production scope function,
 `effigy test:web-pack-install`, `effigy ci:web`, `effigy docs:check`, and `git
 diff --check origin/main...HEAD`. Never run release, workflow, windowed, or
 native-visual selectors.
+
+## Validation Result
+
+- Focused plants: `effigy test:core-build` — 51 pass / 0 fail.
+- `effigy test:web-pack-install`: 11 files / 22 tests; `mode: ordinary`; no
+  receipt hash. Ordinary Cargo version/publication plants reject before
+  build/pack; dependency/feature/lock plants are in `scope.test.ts`.
+- `effigy ci:web`: pass.
+- `effigy docs:check`: pass.
+- `git diff --check origin/main...HEAD`: pass.
 
 ## Continuation
 
