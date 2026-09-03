@@ -15,9 +15,9 @@ pub enum DetailItemLayout {
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum DetailItemPresentation {
     /// Plain label-value pair with no container chrome.
-    #[default]
     Simple,
     /// Elevated card-like styling with background and padding.
+    #[default]
     Surface,
 }
 
@@ -40,7 +40,7 @@ pub struct DetailItemSpec {
     pub truncate_value: bool,
     pub aria_label: Option<String>,
     pub layout: DetailItemLayout,
-    /// Visual presentation: Simple (default) or Surface (elevated card).
+    /// Visual presentation: Surface (default) or Simple (no chrome).
     pub presentation: DetailItemPresentation,
     /// Optional column span in a parent grid.
     pub span: Option<DetailItemSpan>,
@@ -144,6 +144,12 @@ impl DetailItemSpec {
         }
     }
 
+    /// Surface+stacked gap in rem. Contract §8 fixes this composite gap at
+    /// 0.25rem independently of the root row-gap density ladder.
+    pub fn surface_stacked_gap_rem(&self) -> f32 {
+        0.25
+    }
+
     /// Surface horizontal padding in rem for the resolved density. Contract
     /// §7: compact 0.75, default `space.panel.x` (1.0), comfortable 1.0.
     pub fn surface_padding_x_rem(&self, density: ControlDensity) -> f32 {
@@ -197,6 +203,14 @@ impl DetailItemSpec {
 
     pub fn value_size_token(&self) -> &'static str {
         semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    pub fn label_line_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT
+    }
+
+    pub fn value_line_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
     }
 
     pub fn radius_token(&self) -> &'static str {

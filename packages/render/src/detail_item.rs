@@ -66,10 +66,13 @@ pub fn detail_item_with_slots(
 
     let label_font = theme.resolve_space(spec.label_size_token());
     let value_font = theme.resolve_space(spec.value_size_token());
+    let label_line_height = theme.resolve_space(spec.label_line_height_token());
+    let value_line_height = theme.resolve_space(spec.value_line_height_token());
     let desc_font = rem_to_px(0.75);
 
     let row_gap = rem_to_px(spec.row_gap_rem(density));
     let inline_gap = rem_to_px(spec.inline_gap_rem(density));
+    let surface_stacked_gap = rem_to_px(spec.surface_stacked_gap_rem());
     let pad_x = rem_to_px(spec.surface_padding_x_rem(density));
     let pad_y = rem_to_px(spec.surface_padding_y_rem(density));
 
@@ -77,10 +80,10 @@ pub fn detail_item_with_slots(
     let is_surface = spec.presentation == DetailItemPresentation::Surface;
     let is_surface_stacked = is_surface && is_stacked;
 
-    let (eff_label_color, eff_label_font) = if is_surface_stacked {
-        (tertiary_color, rem_to_px(0.75))
+    let (eff_label_color, eff_label_font, eff_label_line_height) = if is_surface_stacked {
+        (tertiary_color, rem_to_px(0.75), 1.35)
     } else {
-        (label_color, label_font)
+        (label_color, label_font, label_line_height / label_font)
     };
     let (eff_value_font, value_weight) = if is_surface_stacked {
         (rem_to_px(1.0), 600u16)
@@ -99,7 +102,7 @@ pub fn detail_item_with_slots(
         eff_label_color,
         eff_label_font,
         TextWeight::Normal,
-        rem_to_px(1.0) / eff_label_font,
+        eff_label_line_height,
         ctx,
     );
     label_block = label_block.child(l);
@@ -144,7 +147,7 @@ pub fn detail_item_with_slots(
             value_color,
             eff_value_font,
             weight,
-            rem_to_px(1.25) / eff_value_font,
+            value_line_height / eff_value_font,
             ctx,
         );
         v.roles.insert("value-kind".to_owned(), "text".to_owned());
@@ -165,10 +168,10 @@ pub fn detail_item_with_slots(
         let mut v = detail_text(
             &spec.empty_text,
             "value",
-            desc_color,
+            value_color,
             eff_value_font,
             weight,
-            rem_to_px(1.25) / eff_value_font,
+            value_line_height / eff_value_font,
             ctx,
         );
         v.roles.insert("value-kind".to_owned(), "empty".to_owned());
@@ -208,10 +211,18 @@ pub fn detail_item_with_slots(
         let s = &mut el.style;
         if is_stacked {
             s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.spacing.gap = row_gap;
+            s.descriptor.layout.spacing.gap = if is_surface_stacked {
+                surface_stacked_gap
+            } else {
+                row_gap
+            };
         } else {
             s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.cross = if is_surface {
+                CrossAxisAlignment::Center
+            } else {
+                CrossAxisAlignment::Baseline
+            };
             s.descriptor.layout.spacing.gap = inline_gap;
         }
         if is_surface_stacked {
@@ -255,7 +266,7 @@ pub fn detail_item_with_slots(
         let mut content = Node::container();
         part(&mut content, "content");
         content.style.descriptor.layout.direction = LayoutDirection::Row;
-        content.style.descriptor.layout.spacing.gap = row_gap;
+        content.style.descriptor.layout.spacing.gap = surface_stacked_gap;
         content.style.descriptor.layout.width = LayoutSizing::Grow;
         content.style.min_width = Some(0.0);
         content = content.child(value_block);

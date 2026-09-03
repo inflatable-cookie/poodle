@@ -31918,6 +31918,7 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
                 .with_description("Host supplied configuration")
                 .with_value("Configured")
                 .with_aria_label("Workspace detail witness")
+                .with_presentation(DetailItemPresentation::Simple)
                 .with_span(DetailItemSpan::Full)
                 .with_density(ControlDensity::Compact),
             _ => panic!("unknown DetailItem scope"),
@@ -32186,8 +32187,11 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
         drop(host);
         let right = poodle_gpui_node_backend::painted_node_for("detail-item:right").expect("rebuilt right DetailItem");
         assert_eq!(right.roles.get("layout").map(String::as_str), Some("inline"));
-        assert_eq!(right.roles.get("presentation").map(String::as_str), Some("surface"));
-        assert_eq!(right.style.layout.alignment.cross, poodle_node::CrossAxisAlignment::Center);
+        assert_eq!(right.roles.get("presentation").map(String::as_str), Some("simple"));
+        assert_eq!(right.style.layout.alignment.cross, poodle_node::CrossAxisAlignment::Baseline);
+        assert_eq!(right.style.background, None);
+        assert_eq!(right.style.layout.spacing.padding.left, 0.0);
+        assert_eq!(right.style.layout.spacing.padding.top, 0.0);
         assert_eq!(right.roles.get("span").map(String::as_str), Some("full"));
         text_snapshot("right", "supporting", "Host supplied configuration");
         text_snapshot("right", "value", "Configured");

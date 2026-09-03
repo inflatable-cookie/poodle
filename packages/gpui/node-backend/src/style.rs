@@ -121,6 +121,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         CrossAxisAlignment::Center => el = el.items_center(),
         CrossAxisAlignment::Start => el = el.items_start(),
         CrossAxisAlignment::End => el = el.items_end(),
+        CrossAxisAlignment::Baseline => el = el.items_baseline(),
         // Stretch is taffy's default: silence is the faithful emission.
         CrossAxisAlignment::Stretch => {}
     }
