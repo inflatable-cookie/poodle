@@ -32,13 +32,12 @@ Updated: 2026-09-02
     merged in PR #153 with a verified static-fallback benchmark verdict; `049`
     merged in PR #156; `050`, `053`–`061` are complete; independent `055`
     merged in PR #151; `062` merged in PR #170; `063` and `064` merged in PRs
-    #167 and #168; `066` merged in PR #171; `065` is ready to resume on that
-    shared backend lifecycle
+    #167 and #168; `066` merged in PR #171; `065` merged in PR #172
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: resume `g16.065` on the merged Poodle-owned GPUI Node
-    tooltip lifecycle runtime.
+  - Ready frontier: compile small Nucleus receipt cards from the validated
+    29-component cohort gaps; do not dispatch an NP tranche as one batch.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -55,7 +54,7 @@ Updated: 2026-09-02
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: complete `g16.065`, while the
+  - Next move: compile and dispatch the first small Nucleus receipt cards while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.

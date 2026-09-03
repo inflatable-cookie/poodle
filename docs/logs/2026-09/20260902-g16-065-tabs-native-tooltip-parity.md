@@ -1,6 +1,6 @@
 # g16.065 — Tabs Native Tooltip Parity
 
-Status: in review
+Status: complete — merged in PR #172 at `718d6f082`
 Date: 2026-09-03
 Card: `docs/roadmaps/g16/065-tabs-native-tooltip-parity.md`
 Handoff: `docs/handoffs/20260902-225241-g16-065-tabs-tooltips.md`

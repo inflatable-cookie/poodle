@@ -99,15 +99,16 @@ stay maintained; backend admission is not part of the first card.
 62. [062 — Nucleus parity receipt foundation](062-nucleus-parity-receipt-foundation.md) — complete; merged in PR #170 with execution-backed M1/A1/V1 receipts and the fixed 29-component cohort manifest
 63. [063 — HistoryCenter nested deletion parity](063-history-center-nested-deletion-parity.md) — complete; merged in PR #167 with paired recursive invalidation and sibling-preservation proofs
 64. [064 — Slider negative-half rounding parity](064-slider-negative-half-rounding-parity.md) — complete; merged in PR #168 with one shared low-level quantization law and paired transition vectors
-65. [065 — Tabs native tooltip parity](065-tabs-native-tooltip-parity.md) — ready to resume on the merged g16.066 backend lifecycle
+65. [065 — Tabs native tooltip parity](065-tabs-native-tooltip-parity.md) — complete; merged in PR #172 with paired-value tooltip identity and paired 300ms lifecycle parity
 66. [066 — GPUI Node tooltip lifecycle runtime](066-gpui-node-tooltip-lifecycle-runtime.md) — complete; merged in PR #171 with a window-scoped 300ms lifecycle and production teardown
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
-`g16.053`–`g16.064`, and `g16.066` are complete. `g16.065` is the ready native
-frontier. Release mutation remains separately gated.
+`g16.053`–`g16.066` are complete. The next ready work is small Nucleus receipt
+cards compiled from the validated cohort gaps. Release mutation remains
+separately gated.
 `g16.051` and `g16.052` retain their
 explicit serial or external gates. Completed `g16.054` does not inherit release
 authority from the distribution programme. Citations,
