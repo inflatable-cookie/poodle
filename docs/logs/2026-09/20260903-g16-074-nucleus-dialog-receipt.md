@@ -21,7 +21,8 @@ Worker PR: `https://github.com/inflatable-cookie/poodle/pull/180`
 `Dialog` now has a validated `M1` execution receipt emitted from the production
 GPUI render, GPUI Dialog compat adapter (`node_compat::Dialog`), node backend, and test-platform path in `effigy regressions:native`.
 The regression `dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend`
-verifies production structure (root backdrop role, overlay posture, backdrop fill, panel elevated background,
+mounts the Dialog directly via its `IntoElement` path in `HeadlessDriver::new_element_in_box`,
+verifying production structure (root backdrop role, overlay posture, backdrop fill, panel elevated background,
 border, surface radius, shadow, md width preset, max height, padding, and section spacing),
 header title and description typography, close affordance chrome dimensions and pointer cursor,
 body composed through production `Surface` with panel tone (96% alpha), subtle border (74% alpha), and Md inset padding,
@@ -36,22 +37,23 @@ unmounting backdrop, surface, and close controls), emitting the M1 receipt at th
 A dedicated test `nearest_clickable_ancestor_stops_propagation_symmetrically` proves event propagation symmetry across modified-child -> regular-parent and regular-child -> modified-parent.
 The manifest, all 10 existing receipts (`AppHeader`, `Button`, `Icon`, `IconButton`, `Menu`, `SegmentedControl`,
 `SplitView`, `Surface`, `Tabs`, `Text`), and the new Dialog receipt pin the exact runtime source commit
-`87d616b1476f233d813c11ab9920794554680560`. The ledger records 11 mounted Nucleus rows out of 29.
+`b97cec2638de4ab9268da2d3789f4f0ae4725eb4`. The ledger records 11 mounted Nucleus rows out of 29.
 
 ## What landed
 
 - Contracts:
   - `packages/contracts/components/src/dialog.rs`: added unit tests validating default spec and builder methods (`open`, `default_open`, `title`, `description`, `role`, `dismiss_on_escape`, `dismiss_on_backdrop`, `dismiss_on_outside_interact`, `aria_label`, `width`, `bare`, `show_close_button`, `close_label`, `size`, `size_role`, `density`), width preset rem dimensions, and semantic token resolvers.
+  - `docs/contracts/components/dialog.md` & `docs/parity/dialog.md`: updated GPUI notes and parity deltas to document backend-owned Escape dismissal via overlay layers while explicitly recording outside-interact, A1 (focus trapping, accessibility tree, modal background suppression, initial focus, focus restoration), and nested modal stacks as unproved.
 - Renderer:
   - `packages/render/src/dialog.rs`: assigned `poodle-dialog-surface` id to the dialog panel container, registered `poodle-dialog-layer` dismiss layer on the panel surface to define containment boundaries, wired `on_dismiss` reason handler for Escape dismissal, assigned inert `on_activate` on panel when `on_request_close` is present to consume inside clicks, and added unit tests for backdrop/surface rendering, dismissal wiring, bare mode, and width presets.
 - GPUI Compatibility Adapter:
-  - `packages/gpui/preview/src/node_compat.rs`: updated `Dialog::into_element` to route directly through `poodle_gpui_node_backend::to_gpui(&self.into_node())`, added `on_request_close` builder, and exposed `into_node`.
+  - `packages/gpui/preview/src/node_compat.rs`: updated `Dialog::into_element` to route directly through `poodle_gpui_node_backend::to_gpui(&self.into_node())`, while retaining legacy `native_dialog_element` and `native_dialog_backdrop` for `AlertDialog` and `ConfirmAction`, added `on_request_close` builder, and exposed `into_node`.
 - GPUI Node Backend:
   - `packages/gpui/node-backend/src/interaction.rs`: added `cx.stop_propagation()` in `on_activate` and `on_activate_modified` click listeners so activated child nodes consume pointer clicks and do not bubble activation events to parent overlay backdrops.
 - Headless Regressions:
   - `packages/gpui/preview/tests/headless_regressions.rs`:
     - Added `nearest_clickable_ancestor_stops_propagation_symmetrically` proving modified-child to regular-parent and regular-child to modified-parent click propagation containment.
-    - Added `dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend` across 6 phases:
+    - Added `dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend` mounted via `HeadlessDriver::new_element_in_box` across 6 phases:
       1. Production Spec & Token Structure Proof: root backdrop tokens, overlay posture, panel elevated styling, header title/description, close affordance, biting production Surface (tone, border alpha, inset padding), and biting production Buttons (semantic variant role metadata, disabled cursor/opacity/tab index, secondary elevation mix, primary fill, focus rings).
       2. Mounted Host Setup & Layout Containment: positive dimensions, panel containment within backdrop, child containment within panel, and vertical order.
       3. Pointer Activation & Inside Click Containment: inside click on body surface absorbed without triggering backdrop close, disabled action button inertness, Cancel and Confirm button dispatches.
@@ -60,9 +62,9 @@ The manifest, all 10 existing receipts (`AppHeader`, `Button`, `Icon`, `IconButt
       6. Terminal Receipt Emission.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/dialog--nucleus-navigation-dialog.json`
-  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `Menu`, `SegmentedControl`, `SplitView`, `Surface`, `Tabs`, `Text` with source commit `87d616b1476f233d813c11ab9920794554680560`.
+  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `Menu`, `SegmentedControl`, `SplitView`, `Surface`, `Tabs`, `Text` with source commit `b97cec2638de4ab9268da2d3789f4f0ae4725eb4`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated Dialog `expected_test` to `dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend` and `source_commit` to `87d616b1476f233d813c11ab9920794554680560`.
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated Dialog `expected_test` to `dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend` and `source_commit` to `b97cec2638de4ab9268da2d3789f4f0ae4725eb4`.
   - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts`; reports 11 mounted rows.
 - Card:
   - `docs/roadmaps/g16/074-nucleus-dialog-m1.md`: marked complete with link to execution log.
