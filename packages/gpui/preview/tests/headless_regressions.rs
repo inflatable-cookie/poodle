@@ -33405,7 +33405,8 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         assert_eq!(host.take_events(), ["witness/select:open"]);
         assert_eq!(host.state("witness").active.as_deref(), Some("open"));
         assert!(host.state("witness").open);
-        assert!(driver.mounted_observation().is_valid());
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
 
         let probe_channels = poodle_gpui_node_backend::take_probe_capture();
         for channel in [
@@ -33419,6 +33420,30 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
                 "production backend must observe {channel}"
             );
         }
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "CommandPalette",
+            "nucleus.attention.command-palette",
+            observation,
+            &[
+                "mount caller-scoped controlled CommandPalette instances through node_compat::CommandPalette::from_spec(...).into_element() in a 1600x640 HeadlessDriver host",
+                "compose Dialog, TextInput, and ActionDiscoveryPanel-owned ready, loading, empty, and no-results states through the production renderer and node_compat adapter",
+                "dispatch mounted keyboard navigation across enabled actions while preserving disabled skip and wrap",
+                "refuse an exact active-selection proposal through an unchanged host rebuild, then accept the later proposal and activate through mounted keyboard input",
+                "dispatch mounted query edits, disabled and enabled pointer activation, close-button dismissal, backdrop dismissal, and Escape dismissal through controlled host rebuilds",
+                "activate the duplicate witness palette after the subject unmounts",
+            ],
+            &[
+                "production CommandPalette composition preserves Dialog, TextInput, ActionDiscoveryPanel, EmptyState, Skeleton, Eyebrow, list, ListCard-equivalent row, and trailing-chip structure",
+                "loading renders five two-Skeleton rows while empty and no-results preserve distinct production EmptyState anatomy and copy",
+                "active rows resolve the exact 18% accent fill and 22% inset ring; badge chips use 16% accent fill with uppercase label treatment; shortcut chips use 76% surface fill with monospace treatment",
+                "a refused controlled active proposal keeps the old selected roving row and Enter target before an accepted proposal rebuilds to the new selection",
+                "disabled navigation and pointer activation remain inert while enabled navigation skips and wraps exactly",
+                "query, activation, close button, backdrop, and Escape remain separate controlled axes with refusal and acceptance proved through mounted input",
+                "positive mounted bounds preserve containment and ordering while caller-scoped runtime ids, focus, callbacks, controlled state, and geometry remain isolated across duplicate instances",
+            ],
+        );
     });
 }
 
