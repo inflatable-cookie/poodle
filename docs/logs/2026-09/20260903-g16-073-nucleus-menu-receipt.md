@@ -36,7 +36,7 @@ wrap-around at edges, Enter and Space activation on focused items with Escape in
 and mounted single-entry tab-stop enforcement, emitting the M1 receipt at the terminal boundary.
 The manifest, all 9 existing receipts (AppHeader, Button, Icon, IconButton, SegmentedControl,
 SplitView, Surface, Tabs, Text), and the new Menu receipt pin the exact runtime source commit
-`3f4f872af363476027e0b56aa06ccc5a0378efdb`. The ledger records 10 mounted Nucleus rows out of 29.
+`b9479dcf2c54300419c156640e023f0433f82c52`. The ledger records 10 mounted Nucleus rows out of 29.
 
 ## What landed
 
@@ -54,9 +54,9 @@ SplitView, Surface, Tabs, Text), and the new Menu receipt pin the exact runtime 
     6. Terminal Receipt Emission.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/menu--nucleus-navigation-menu.json`
-  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SegmentedControl`, `SplitView`, `Surface`, `Tabs`, `Text` with source commit `3f4f872af363476027e0b56aa06ccc5a0378efdb`.
+  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SegmentedControl`, `SplitView`, `Surface`, `Tabs`, `Text` with source commit `b9479dcf2c54300419c156640e023f0433f82c52`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated Menu `expected_test` to `menu_items_semantics_activation_and_identity_rebuild_the_host_spec` and `source_commit` to `3f4f872af363476027e0b56aa06ccc5a0378efdb`.
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated Menu `expected_test` to `menu_items_semantics_activation_and_identity_rebuild_the_host_spec` and `source_commit` to `b9479dcf2c54300419c156640e023f0433f82c52`.
   - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts`; reports 10 mounted rows.
 
 ## Review oracle falsification
