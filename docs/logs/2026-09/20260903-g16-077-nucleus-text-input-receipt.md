@@ -47,29 +47,36 @@ and host-owned rebuilds:
 The manifest, all 13 existing receipts (`AppHeader`, `Button`, `Dialog`,
 `Icon`, `IconButton`, `Menu`, `Popover`, `SegmentedControl`, `Select`,
 `SplitView`, `Surface`, `Tabs`, `Text`), and the new `TextInput` receipt pin the
-exact runtime source commit `b654b46eaedd8f41988b80719fd3c489f2c5428c`. The ledger records
+exact runtime source commit `69d3afbc0ff65878320d5a6b0f5bc33ad78786c4`. The ledger records
 14 mounted Nucleus rows out of 29.
 
 ## What landed
 
 - GPUI adapter:
   - `packages/gpui/preview/src/node_compat.rs`: added `on_submit`, `on_cancel`,
-    and `on_clear` builder handlers to `node_compat::TextInput` and forwarded them
-    into `poodle_render::TextInputHandlers`.
+    and `on_clear` builder handlers to `node_compat::TextInput`, derived `Clone`,
+    and forwarded them into `poodle_render::TextInputHandlers`.
+- Production renderer:
+  - `packages/render/src/text_input.rs`: projected `a11y.described_by` from
+    `spec.described_by()`, and `a11y.invalid` / `a11y.busy` from `spec.validation_state`.
 - Headless regressions:
   - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened
     `text_input_controlled_editing_and_identity_rebuild_the_host_spec` to mount
     via `node_compat::TextInput::from_spec(...).into_element()` through
     `HeadlessDriver::new_element_in_box` with host-owned rebuilds, covering
     unmounted composition, controlled editing, astral scalar maxLength, search
-    clear button, disabled/read-only isolation, paired field identity, and terminal
-    receipt emission via `nucleus_receipts::emit_if_configured`.
+    clear button, disabled/read-only isolation, paired field identity, biting
+    placeholder/value witnesses (`mounted_text` / `showing_placeholder` on
+    `node_compat::TextInput::into_compat_node()`), full Node boundary field
+    assertions (NodeKind::Input, text_size, line_height, text_color, described_by,
+    invalid, etc.), and terminal receipt emission via `nucleus_receipts::emit_if_configured`.
 
 ## Focused repair
 
-No renderer or GPUI backend repairs were required. The existing editing and
-rendering logic in `poodle_render` and `poodle_gpui_node_backend` already satisfied
-all contract invariants.
+- `packages/render/src/text_input.rs`: added projection of `a11y.described_by` from
+  `spec.described_by()` and `a11y.invalid` / `a11y.busy` from `spec.validation_state`.
+- `packages/gpui/preview/src/node_compat.rs`: derived `Clone` on `TextInput` to enable
+  stashing rebuilt `into_compat_node()` from the element factory feeding `into_element()`.
 
 ## Review oracle falsification
 
@@ -87,7 +94,7 @@ all contract invariants.
 | Blur/teardown are exact | double blur or emit on unmount | terminal callback trace fails |
 | Structure and tokens are exact | drop semantic projection or field metadata | Node assertion fails |
 | Receipt is terminal | fail final independent-field assertion | no TextInput receipt is emitted |
-| Evidence identity is exact | retain the g16.076 source SHA | receipts and manifest pin `b654b46ea`; `currentSourceMatchesReceipt` diffs `SOURCE_PATHS` |
+| Evidence identity is exact | retain the g16.076 source SHA | receipts and manifest pin `69d3afbc0`; `currentSourceMatchesReceipt` diffs `SOURCE_PATHS` |
 | Levels stay separate | label the receipt A1 or V1 | `scripts/nucleus-parity-receipts.test.ts` rejects `proof_level: "A1"` |
 
 ## Validation
@@ -102,7 +109,7 @@ Focused:
 - `bun scripts/parity-evidence-ledger.ts` — 176 component evidence rows validated
 
 Required boards:
-- `effigy regressions:native` — 187 passed (all 14 receipts emitted at runtime commit `b654b46ea`)
+- `effigy regressions:native` — 187 passed (all 14 receipts emitted at runtime commit `69d3afbc0`)
 - `effigy check:parity-evidence-ledger` — passed (176 component evidence rows)
 - `effigy ci:rust` — passed
 - `effigy ci:native` — passed

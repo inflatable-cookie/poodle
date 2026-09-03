@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "b654b46eaedd8f41988b80719fd3c489f2c5428c",
+  "source_commit": "69d3afbc0ff65878320d5a6b0f5bc33ad78786c4",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
   "lock_resolution": [
@@ -58,7 +58,7 @@
     "blur field and observe single focus loss callback with state preservation and silent unmount"
   ],
   "assertions": [
-    "production render path resolves TextInput role, aria labels, required, read-only, invalid state, affixes, icons, character counter, and validation indicators",
+    "production render path resolves TextInput role, aria labels, described-by, invalid state, affixes, icons, character counter, and validation indicators",
     "layout geometry resolves control height, density padding, gaps, corner radius, borders, surface colors, focus rings, and text styling",
     "mounted bounds confirm positive dimensions, cursor hints, and value node containment within field bounds",
     "two equal-valued fields maintain separate instance identities, focus handles, carets, selections, and undo histories",
