@@ -337,6 +337,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     // CSS `outline` + `outline-offset` (a negative offset insets the ring).
     if let Some(ring) = node.style.focus_ring {
         let ring_id = id.to_owned();
+        let ring_within = node.style.focus_ring_within;
         let border = &node.style.descriptor.border;
         let border_left = node.style.border_left_width.unwrap_or(border.width);
         let border_right = node.style.border_right_width.unwrap_or(border.width);
@@ -346,9 +347,14 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         el = el.child(
             gpui::canvas(
                 move |_, _, _| {},
-                move |bounds, (), window, _cx| {
-                    let focused = super::focus_handle_for(&ring_id)
-                        .is_some_and(|handle| handle.is_focused(window));
+                move |bounds, (), window, cx| {
+                    let focused = super::focus_handle_for(&ring_id).is_some_and(|handle| {
+                        if ring_within {
+                            handle.contains_focused(window, cx)
+                        } else {
+                            handle.is_focused(window)
+                        }
+                    });
                     if !focused {
                         super::clear_painted_ring(&ring_id);
                         return;

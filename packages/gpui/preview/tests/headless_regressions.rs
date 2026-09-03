@@ -29034,7 +29034,13 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             field_ring.color,
             ctx.theme().resolve_color(spec.focus_ring_color_token())
         );
+        assert_eq!(
+            field_ring.width,
+            ctx.theme()
+                .resolve_border_width(spec.focus_ring_width_token())
+        );
         assert_eq!(field_ring.offset, rem_to_px(0.0625));
+        assert!(field.style.focus_ring_within);
 
         let attachments = &field.children[0];
         assert_eq!(
@@ -29116,6 +29122,18 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         assert_eq!(
             action.style.descriptor.background,
             Some(ctx.theme().resolve_color(spec.action_fill_token()))
+        );
+        assert_eq!(
+            action
+                .style
+                .hover
+                .as_ref()
+                .and_then(|patch| patch.background),
+            Some(poodle_render::color::mix_srgb(
+                ctx.theme().resolve_color(spec.action_fill_token()),
+                poodle_render::color::WHITE,
+                0.88,
+            ))
         );
         assert_eq!(action.style.focus_ring, None, "field owns the only ring");
         assert!(action.find(&|child| {
@@ -29239,49 +29257,34 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
     }
 
     run_headless(|cx| {
-        let mut read_only = AgentChatInputState::new("read-only", "Locked");
-        read_only.read_only = true;
-        let mut disabled = AgentChatInputState::new("disabled", "Unavailable");
-        disabled.disabled = true;
-        let mut busy = AgentChatInputState::new("busy", "");
-        busy.status = AgentChatStatus::Busy;
-        let mut allowed_empty = AgentChatInputState::new("allowed-empty", "");
-        allowed_empty.allow_empty_submit = true;
         let mut subject = AgentChatInputState::new("subject", "Draft");
         subject.detailed_structure = true;
         let host = AgentChatInputHost::new(vec![
             subject,
             AgentChatInputState::new("witness", "Draft"),
-            AgentChatInputState::new("empty", ""),
-            allowed_empty,
-            read_only,
-            disabled,
-            busy,
         ]);
         let mounted_host = Arc::clone(&host);
         let build: Rc<dyn Fn() -> gpui::AnyElement> =
             Rc::new(move || agent_chat_input_container(&mounted_host));
-        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 720.0);
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 360.0);
 
-        for id in [
-            "subject",
-            "witness",
-            "empty",
-            "allowed-empty",
-            "read-only",
-            "busy",
-        ] {
+        for id in ["subject", "witness"] {
             driver.wait_for_focus_handle(&agent_chat_editor_id(id));
         }
 
         let root_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:subject")
             .expect("subject root bounds");
+        let witness_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:witness")
+            .expect("witness root bounds");
         let field_bounds = poodle_gpui_node_backend::bounds_for("agent-chat-input:subject:field")
             .expect("subject field bounds");
         let attachment_bounds = poodle_gpui_node_backend::bounds_for(
             &agent_chat_part_id("subject", "attachments"),
         )
         .expect("subject attachment bounds");
+        let attachment_item_bounds =
+            poodle_gpui_node_backend::bounds_for("agent-chat-input:subject:attachment:trace")
+                .expect("subject attachment item bounds");
         let editor_bounds = poodle_gpui_node_backend::bounds_for(&agent_chat_editor_id("subject"))
             .expect("subject editor bounds");
         let toolbar_bounds =
@@ -29307,10 +29310,16 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             assert!(child.top() >= parent.top(), "{relationship}: top escaped");
             assert!(child.bottom() <= parent.bottom(), "{relationship}: bottom escaped");
         };
-        assert_contains(mount_bounds, root_bounds, "mount contains root");
+        assert_contains(mount_bounds, root_bounds, "mount contains subject root");
+        assert_contains(mount_bounds, witness_bounds, "mount contains witness root");
         assert_contains(root_bounds, field_bounds, "root contains field");
         assert_contains(root_bounds, footer_bounds, "root contains footer");
         assert_contains(field_bounds, attachment_bounds, "field contains attachments");
+        assert_contains(
+            attachment_bounds,
+            attachment_item_bounds,
+            "attachments contain each attachment item",
+        );
         assert_contains(field_bounds, editor_bounds, "field contains editor");
         assert_contains(field_bounds, toolbar_bounds, "field contains toolbar");
         assert_contains(toolbar_bounds, leading_bounds, "toolbar contains leading");
@@ -29331,6 +29340,10 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         assert!(
             field_bounds.bottom() <= footer_bounds.top(),
             "field must end before the optional footer begins"
+        );
+        assert!(
+            root_bounds.bottom() <= witness_bounds.top(),
+            "mounted sibling inputs must not overlap"
         );
 
         driver.pointer_activate_id(&agent_chat_editor_id("subject"));
@@ -29416,6 +29429,35 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
             "equal-valued duplicate instances keep callbacks caller-scoped"
         );
 
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+    });
+
+    run_headless(|cx| {
+        let mut read_only = AgentChatInputState::new("read-only", "Locked");
+        read_only.read_only = true;
+        let mut disabled = AgentChatInputState::new("disabled", "Unavailable");
+        disabled.disabled = true;
+        let mut busy = AgentChatInputState::new("busy", "");
+        busy.status = AgentChatStatus::Busy;
+        let mut allowed_empty = AgentChatInputState::new("allowed-empty", "");
+        allowed_empty.allow_empty_submit = true;
+        let host = AgentChatInputHost::new(vec![
+            AgentChatInputState::new("empty", ""),
+            allowed_empty,
+            read_only,
+            disabled,
+            busy,
+        ]);
+        let mounted_host = Arc::clone(&host);
+        let build: Rc<dyn Fn() -> gpui::AnyElement> =
+            Rc::new(move || agent_chat_input_container(&mounted_host));
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 600.0);
+
+        for id in ["empty", "allowed-empty", "read-only", "busy"] {
+            driver.wait_for_focus_handle(&agent_chat_editor_id(id));
+        }
+
         driver.pointer_activate_id(&agent_chat_action_id("empty"));
         driver.pointer_activate_id(&agent_chat_editor_id("empty"));
         host.take_log();
@@ -29451,29 +29493,33 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
         assert_eq!(host.state("read-only").value, "Locked");
         assert!(host.take_log().is_empty(), "read-only suppresses mutation");
         driver.pointer_activate_id(&agent_chat_action_id("read-only"));
-        assert_eq!(host.take_log(), vec!["read-only/submit:Locked"]);
+        assert_eq!(
+            host.take_log(),
+            vec!["read-only/focus:false", "read-only/submit:Locked"]
+        );
 
         assert!(
             poodle_gpui_node_backend::focus_handle_for(&agent_chat_editor_id("disabled")).is_none(),
             "a disabled editor does not register a focus handle"
         );
-        driver.pointer_activate_id(&agent_chat_editor_id("subject"));
+        driver.pointer_activate_id(&agent_chat_editor_id("allowed-empty"));
         host.take_log();
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("subject")),
+            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("allowed-empty")),
             Some(true)
         );
         driver.pointer_activate_id(&agent_chat_editor_id("disabled"));
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&agent_chat_editor_id("subject")),
-            Some(true),
-            "disabled editor pointer activation cannot steal focus"
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&agent_chat_editor_id("disabled")).is_none(),
+            "disabled pointer activation cannot create a focus target"
         );
+        assert!(!host.state("disabled").focused);
+        assert_eq!(host.take_log(), vec!["allowed-empty/focus:false"]);
         driver.pointer_activate_id(&agent_chat_action_id("disabled"));
         assert_eq!(host.state("disabled").value, "Unavailable");
         assert!(
             host.take_log().is_empty(),
-            "the mounted disabled action has a live submit sink but remains inert"
+            "the mounted disabled action remains inert"
         );
 
         driver.pointer_activate_id(&agent_chat_editor_id("busy"));
@@ -29491,5 +29537,39 @@ fn agent_chat_input_mounted_input_and_action_follow_host_state() {
 
         let observation = driver.mounted_observation();
         assert!(observation.is_valid());
+    });
+}
+
+/// Backend routing oracle for disabled pointer semantics. Production
+/// components normally remove an unavailable callback before this boundary;
+/// this adversarial node keeps a live sink so an accidental backend dispatch
+/// cannot pass as proof merely because there was nothing to call.
+#[test]
+fn disabled_pointer_routing_blocks_a_live_activation_sink() {
+    run_headless(|cx| {
+        let activations = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&activations);
+        let mut node = Node::button("Disabled routing oracle");
+        node.id = Some("disabled-live-sink".to_owned());
+        node.interaction.focusable = true;
+        node.interaction.disabled = true;
+        node.interaction.on_activate = Some(Arc::new(move || {
+            *sink.lock().expect("disabled sink lock") += 1;
+        }));
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, mounted);
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for("disabled-live-sink").is_some(),
+            "the oracle must expose a real mounted pointer target"
+        );
+        driver.pointer_activate_id("disabled-live-sink");
+        assert_eq!(*activations.lock().expect("activation lock"), 0);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("disabled-live-sink").is_none(),
+            "disabled routing cannot manufacture a focus target"
+        );
+
+        assert!(driver.mounted_observation().is_valid());
     });
 }

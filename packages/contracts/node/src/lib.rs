@@ -297,6 +297,10 @@ pub struct NodeStyle {
     /// track this node's focus handle even when no `focus` patch exists; the
     /// two channels compose when both are set.
     pub focus_ring: Option<FocusRing>,
+    /// Paint [`Self::focus_ring`] while this node or a descendant holds focus.
+    /// Containers opt in when their contract owns a focus-within treatment;
+    /// ordinary controls keep the default node-local ring.
+    pub focus_ring_within: bool,
     /// Multi-layer shadow stack (inset highlights, outset drops). When
     /// non-empty it wins over `descriptor.shadow`, which stays the one-token
     /// single-shadow convenience.
@@ -417,6 +421,7 @@ impl Default for NodeStyle {
             active: None,
             focus: None,
             focus_ring: None,
+            focus_ring_within: false,
             shadow_layers: Vec::new(),
             overlay: false,
             min_width: None,
@@ -1149,7 +1154,9 @@ mod tests {
     /// every focusable node and a tracked handle on all of them.
     #[test]
     fn a_node_declares_no_focus_ring_by_default() {
-        assert_eq!(Node::container().style.focus_ring, None);
+        let node = Node::container();
+        assert_eq!(node.style.focus_ring, None);
+        assert!(!node.style.focus_ring_within);
     }
 
     #[test]

@@ -574,6 +574,10 @@ impl AgentChatInputSpec {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
 
+    pub fn focus_ring_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_FOCUS
+    }
+
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
     }
