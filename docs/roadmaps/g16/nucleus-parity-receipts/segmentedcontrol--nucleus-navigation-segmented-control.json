@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Text",
-  "scenario_id": "nucleus.shell.text",
+  "component": "SegmentedControl",
+  "scenario_id": "nucleus.navigation.segmented-control",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,13 +46,18 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "render Text through poodle_render and compose inside Surface",
-    "pointer hover dispatch through HeadlessDriver"
+    "mount controlled SegmentedControl with one disabled option through HeadlessDriver",
+    "pointer activate unselected, selected, and disabled segments through GPUI platform dispatch",
+    "keyboard navigate roving focus across enabled segments with arrow keys, Home, End, and wraparound",
+    "mount two composed SegmentedControl instances to prove focus and callback isolation"
   ],
   "assertions": [
-    "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, and clamp metadata",
-    "mounted bounds confirm text is contained within the parent Surface layout",
-    "text node remains non-focusable and outside the focus chain"
+    "production render path resolves root radiogroup role, direction, size ladder height, track styling, and density padding/gaps",
+    "each segment resolves radiobutton role, selected/toggled state, roving tab stop, typography, truncation, and focus patch",
+    "pointer and keyboard input update selected value through controlled host rebuild while disabled and same-value clicks remain inert",
+    "roving keyboard navigation skips disabled segments, wraps at boundaries, and transfers backend focus handle state",
+    "mounted bounds confirm positive dimensions, horizontal segment ordering, and track child containment",
+    "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers"
   ],
   "outcome": "passed",
   "artifact_paths": []

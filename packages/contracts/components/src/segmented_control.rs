@@ -156,3 +156,85 @@ impl SegmentedControlSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_spec_and_builder_methods() {
+        let opt1 = SegmentedControlOption::new("grid", "Grid");
+        let opt2 = SegmentedControlOption::new("list", "List");
+        let mut spec = SegmentedControlSpec::new("view-picker", vec![opt1, opt2])
+            .with_default_value("grid")
+            .with_equal_width(false)
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Chrome)
+            .with_density(ControlDensity::Compact);
+        spec.aria_label = Some("View picker".to_string());
+        spec.is_disabled = true;
+
+        assert_eq!(spec.instance_id, "view-picker");
+        assert_eq!(spec.default_value.as_deref(), Some("grid"));
+        assert_eq!(spec.current_value(), Some("grid"));
+        assert!(!spec.equal_width);
+        assert!(spec.is_disabled);
+        assert_eq!(spec.aria_label.as_deref(), Some("View picker"));
+        assert_eq!(spec.size, Some(ControlSize::Lg));
+        assert_eq!(spec.size_role, SemanticControlSizeRole::Chrome);
+        assert_eq!(spec.density, Some(ControlDensity::Compact));
+        assert_eq!(spec.selected_fill_token(), semantic::COLOR_ACCENT_BASE);
+
+        // Controlled value overrides default value
+        spec.value = Some("list".to_string());
+        assert_eq!(spec.current_value(), Some("list"));
+    }
+
+    #[test]
+    fn option_builders_icon_only_and_fallbacks() {
+        // Plain labelled option
+        let plain = SegmentedControlOption::new("grid", "Grid");
+        assert_eq!(plain.value, "grid");
+        assert_eq!(plain.label, "Grid");
+        assert_eq!(plain.icon, None);
+        assert!(!plain.icon_only);
+        assert!(!plain.is_disabled);
+        assert!(!plain.is_icon_only());
+        assert_eq!(plain.accessible_name_override(), None);
+        assert_eq!(plain.tooltip_text(), None);
+
+        // Labelled option with icon
+        let with_icon = SegmentedControlOption::new("list", "List")
+            .with_icon("view-list")
+            .with_disabled(true);
+        assert_eq!(with_icon.icon.as_deref(), Some("view-list"));
+        assert!(!with_icon.is_icon_only());
+        assert!(with_icon.is_disabled);
+        assert_eq!(with_icon.accessible_name_override(), None);
+        assert_eq!(with_icon.tooltip_text(), None);
+
+        // Icon-only option: icon_only flag + icon present -> falls back to label for accessible name and tooltip
+        let icon_only = SegmentedControlOption::new("table", "Table")
+            .with_icon("view-table")
+            .with_icon_only(true);
+        assert!(icon_only.is_icon_only());
+        assert_eq!(icon_only.accessible_name_override(), Some("Table"));
+        assert_eq!(icon_only.tooltip_text(), Some("Table"));
+
+        // Icon-only requested but no icon provided -> is_icon_only is false
+        let pseudo_icon_only = SegmentedControlOption::new("cards", "Cards")
+            .with_icon_only(true);
+        assert!(!pseudo_icon_only.is_icon_only());
+        assert_eq!(pseudo_icon_only.accessible_name_override(), None);
+        assert_eq!(pseudo_icon_only.tooltip_text(), None);
+
+        // Explicit aria_label and title overrides
+        let explicit = SegmentedControlOption::new("custom", "C")
+            .with_icon("view-custom")
+            .with_icon_only(true)
+            .with_aria_label("Custom View")
+            .with_title("Switch to custom view");
+        assert_eq!(explicit.accessible_name_override(), Some("Custom View"));
+        assert_eq!(explicit.tooltip_text(), Some("Switch to custom view"));
+    }
+}
