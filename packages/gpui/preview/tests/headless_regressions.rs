@@ -353,6 +353,341 @@ fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend()
     });
 }
 
+/// g16.068: Text and Surface mount through production poodle_render, Node,
+/// and GPUI backend paths. Text proof covers exact content, resolved tone,
+/// size, weight, line-height, compact spacing, and clamped overflow metadata.
+/// Surface proof covers panel/canvas/elevated resolution, border, radius,
+/// padding, shadow, child containment, and explicit region/group semantics.
+/// Harmless pointer input is dispatched over the tree while proving styled-only
+/// primitives remain outside the focus chain. Separate deterministic M1
+/// receipts are emitted at the terminal boundary.
+#[test]
+fn text_and_surface_resolve_typography_container_styling_and_layout_through_mounted_backend() {
+    use poodle_specs::{
+        PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone, TextLeading, TextSize,
+        TextSpacing, TextSpec, TextTone, TextWeight,
+    };
+    use poodle_tokens::semantic;
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        // ── 1. Variant & Metadata Verification for Text ────────────────────
+        for tone in [
+            TextTone::Default,
+            TextTone::Secondary,
+            TextTone::Muted,
+            TextTone::Success,
+            TextTone::Danger,
+            TextTone::Warning,
+        ] {
+            let spec = TextSpec::new("sample").with_tone(tone);
+            let expected_color = ctx.theme().resolve_color(spec.color_token());
+            let node = poodle_render::text(&spec, &ctx);
+            assert_eq!(
+                node.style.descriptor.text_color,
+                Some(expected_color),
+                "Text tone must resolve to expected color token"
+            );
+        }
+
+        let xs_node = poodle_render::text(&TextSpec::new("xs").with_size(TextSize::Xs), &ctx);
+        assert_eq!(xs_node.style.text_size, Some(12.0));
+        let sm_node = poodle_render::text(&TextSpec::new("sm").with_size(TextSize::Sm), &ctx);
+        assert_eq!(sm_node.style.text_size, Some(13.0));
+        let md_node = poodle_render::text(&TextSpec::new("md").with_size(TextSize::Md), &ctx);
+        assert_eq!(md_node.style.text_size, Some(14.0));
+
+        let normal_w =
+            poodle_render::text(&TextSpec::new("w").with_weight(TextWeight::Normal), &ctx);
+        assert_eq!(normal_w.style.text_weight, Some(400));
+        let medium_w =
+            poodle_render::text(&TextSpec::new("w").with_weight(TextWeight::Medium), &ctx);
+        assert_eq!(medium_w.style.text_weight, Some(500));
+        let semibold_w =
+            poodle_render::text(&TextSpec::new("w").with_weight(TextWeight::Semibold), &ctx);
+        assert_eq!(semibold_w.style.text_weight, Some(600));
+        let bold_w = poodle_render::text(&TextSpec::new("w").with_weight(TextWeight::Bold), &ctx);
+        assert_eq!(bold_w.style.text_weight, Some(700));
+
+        let norm_l =
+            poodle_render::text(&TextSpec::new("l").with_leading(TextLeading::Normal), &ctx);
+        assert_eq!(norm_l.style.line_height, Some(1.5));
+        let relaxed_l =
+            poodle_render::text(&TextSpec::new("l").with_leading(TextLeading::Relaxed), &ctx);
+        assert_eq!(relaxed_l.style.line_height, Some(1.6));
+
+        let clamped = poodle_render::text(&TextSpec::new("c").with_clamp(2), &ctx);
+        assert_eq!(
+            clamped.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Hidden
+        );
+        assert_eq!(
+            clamped.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Hidden
+        );
+
+        let compact = poodle_render::text(
+            &TextSpec::new("compact").with_spacing(TextSpacing::Compact),
+            &ctx,
+        );
+        assert_eq!(
+            compact.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(
+            compact.style.descriptor.layout.spacing.gap,
+            ctx.theme().resolve_space(semantic::SPACE_STACK_SM)
+        );
+
+        // ── 2. Variant & Metadata Verification for Surface ─────────────────
+        let panel_spec = SurfaceSpec::new().with_tone(SurfaceTone::Panel);
+        let panel_node = poodle_render::surface(&panel_spec, &ctx, vec![]);
+        let canvas_spec = SurfaceSpec::new().with_tone(SurfaceTone::Canvas);
+        let canvas_node = poodle_render::surface(&canvas_spec, &ctx, vec![]);
+        let elevated_spec = SurfaceSpec::new()
+            .with_tone(SurfaceTone::Elevated)
+            .with_elevation(true);
+        let elevated_node = poodle_render::surface(&elevated_spec, &ctx, vec![]);
+
+        assert_ne!(
+            panel_node.style.descriptor.background,
+            canvas_node.style.descriptor.background
+        );
+        assert_eq!(
+            elevated_node.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_SURFACE)
+        );
+
+        let subtle_border = poodle_render::surface(
+            &SurfaceSpec::new().with_border(SurfaceBorder::Subtle),
+            &ctx,
+            vec![],
+        );
+        let default_border = poodle_render::surface(
+            &SurfaceSpec::new().with_border(SurfaceBorder::Default),
+            &ctx,
+            vec![],
+        );
+        let no_border = poodle_render::surface(
+            &SurfaceSpec::new().with_border(SurfaceBorder::None),
+            &ctx,
+            vec![],
+        );
+        assert_ne!(
+            subtle_border.style.descriptor.border.color,
+            default_border.style.descriptor.border.color
+        );
+        assert_eq!(no_border.style.descriptor.border.width, 0.0);
+
+        let expected_radius = ctx.theme().resolve_radius(semantic::RADIUS_SURFACE);
+        assert_eq!(
+            panel_node.style.descriptor.corner_radii.top_left,
+            expected_radius
+        );
+
+        let pad_none = poodle_render::surface(
+            &SurfaceSpec::new().with_padding(PaddingScale::None),
+            &ctx,
+            vec![],
+        );
+        let pad_sm = poodle_render::surface(
+            &SurfaceSpec::new().with_padding(PaddingScale::Sm),
+            &ctx,
+            vec![],
+        );
+        let pad_md = poodle_render::surface(
+            &SurfaceSpec::new().with_padding(PaddingScale::Md),
+            &ctx,
+            vec![],
+        );
+        let pad_lg = poodle_render::surface(
+            &SurfaceSpec::new().with_padding(PaddingScale::Lg),
+            &ctx,
+            vec![],
+        );
+        assert_eq!(pad_none.style.descriptor.layout.spacing.padding.left, 0.0);
+        assert!(
+            pad_sm.style.descriptor.layout.spacing.padding.left
+                < pad_md.style.descriptor.layout.spacing.padding.left
+        );
+        assert!(
+            pad_md.style.descriptor.layout.spacing.padding.top
+                < pad_lg.style.descriptor.layout.spacing.padding.top
+        );
+
+        let deco = poodle_render::surface(&SurfaceSpec::new(), &ctx, vec![]);
+        assert_eq!(deco.a11y.role, None);
+        assert_eq!(deco.a11y.label, None);
+
+        let region = poodle_render::surface(
+            &SurfaceSpec::new()
+                .with_role(SurfaceRole::Region)
+                .with_label("Settings section"),
+            &ctx,
+            vec![],
+        );
+        assert_eq!(region.a11y.role, Some(poodle_node::NodeRole::Region));
+        assert_eq!(region.a11y.label.as_deref(), Some("Settings section"));
+
+        let group = poodle_render::surface(
+            &SurfaceSpec::new().with_role(SurfaceRole::Group),
+            &ctx,
+            vec![],
+        );
+        assert_eq!(group.a11y.role, Some(poodle_node::NodeRole::Group));
+
+        // ── 3. Production Mounted Composite Fixture ────────────────────────
+        let text_spec = TextSpec::new("Production body text in surface")
+            .with_tone(TextTone::Default)
+            .with_size(TextSize::Md)
+            .with_weight(TextWeight::Medium);
+
+        let mut text_node = poodle_render::text(&text_spec, &ctx);
+        text_node.id = Some("nucleus-text-fixture".to_owned());
+        match &text_node.kind {
+            NodeKind::Text { content } => {
+                assert_eq!(content, "Production body text in surface")
+            }
+            _ => panic!("poodle_render::text must emit NodeKind::Text"),
+        }
+
+        let surface_spec = SurfaceSpec::new()
+            .with_tone(SurfaceTone::Panel)
+            .with_border(SurfaceBorder::Subtle)
+            .with_padding(PaddingScale::Md)
+            .with_role(SurfaceRole::Region)
+            .with_label("Mounted surface region");
+
+        let mut surface_node = poodle_render::surface(&surface_spec, &ctx, vec![text_node]);
+        surface_node.id = Some("nucleus-surface-fixture".to_owned());
+
+        assert_eq!(surface_node.children.len(), 1);
+        assert_eq!(
+            surface_node.a11y.role,
+            Some(poodle_node::NodeRole::Region)
+        );
+        assert_eq!(
+            surface_node.a11y.label.as_deref(),
+            Some("Mounted surface region")
+        );
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(surface_node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.draw_frame();
+
+        // Harmless pointer hover dispatch across the mounted container
+        driver.pointer_hover(point(px(40.0), px(40.0)));
+        driver.draw_frame();
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            probe_channels.contains(&"structure.identity.container"),
+            "Backend must receive structure.identity.container probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.text-icon.text"),
+            "Backend must receive content.text-icon.text probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.background"),
+            "Backend must receive surface.channels.background probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.border"),
+            "Backend must receive surface.channels.border probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.size"),
+            "Backend must receive content.typography.size probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.weight"),
+            "Backend must receive content.typography.weight probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"accessibility.projection.received"),
+            "Backend must receive accessibility.projection.received probe channel"
+        );
+
+        // ── 4. Mounted Layout & Child Containment Proof ────────────────────
+        let surface_bounds =
+            poodle_gpui_node_backend::bounds_for("nucleus-surface-fixture")
+                .expect("mounted surface bounds");
+        let text_bounds = poodle_gpui_node_backend::bounds_for("nucleus-text-fixture")
+            .expect("mounted text bounds");
+
+        assert!(
+            surface_bounds.size.width > px(0.0) && surface_bounds.size.height > px(0.0),
+            "surface must have positive mounted layout dimensions"
+        );
+        assert!(
+            text_bounds.size.width > px(0.0) && text_bounds.size.height > px(0.0),
+            "text must have positive mounted layout dimensions"
+        );
+        assert!(
+            text_bounds.left() >= surface_bounds.left()
+                && text_bounds.right() <= surface_bounds.right()
+                && text_bounds.top() >= surface_bounds.top()
+                && text_bounds.bottom() <= surface_bounds.bottom(),
+            "mounted text child bounds must be contained within parent surface bounds"
+        );
+
+        // ── 5. Focus & Inertness Proof ─────────────────────────────────────
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("nucleus-surface-fixture").is_none(),
+            "styled-only surface must not create a focus handle"
+        );
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("nucleus-text-fixture").is_none(),
+            "styled-only text must not create a focus handle"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("nucleus-surface-fixture"),
+            None,
+            "surface must stay outside the focus chain"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("nucleus-text-fixture"),
+            None,
+            "text must stay outside the focus chain"
+        );
+
+        // ── 6. Terminal Receipt Emission ───────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "Text",
+            "nucleus.shell.text",
+            driver.mounted_observation(),
+            &[
+                "render Text through poodle_render and compose inside Surface",
+                "pointer hover dispatch through HeadlessDriver",
+            ],
+            &[
+                "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, and clamp metadata",
+                "mounted bounds confirm text is contained within the parent Surface layout",
+                "text node remains non-focusable and outside the focus chain",
+            ],
+        );
+
+        nucleus_receipts::emit_if_configured(
+            "Surface",
+            "nucleus.shell.surface",
+            driver.mounted_observation(),
+            &[
+                "render Surface through poodle_render with composed Text child",
+                "pointer hover dispatch through HeadlessDriver",
+            ],
+            &[
+                "production render path resolves panel, canvas, elevated, border, radius, padding, shadow, and region/group semantics",
+                "mounted bounds confirm container layout and child containment",
+                "surface container remains non-focusable and outside the focus chain",
+            ],
+        );
+    });
+}
+
 /// g15.041: Button disclosure targets (contract §3 `controls`) ride the same
 /// renderer-neutral node channel as IconButton's — a Button built with
 /// `with_controls(...)` mounts through the real backend carrying
