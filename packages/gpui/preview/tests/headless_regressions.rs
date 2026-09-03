@@ -11821,113 +11821,433 @@ fn selection_segment_options() -> Vec<poodle_specs::SegmentedControlOption> {
     ]
 }
 
-/// SegmentedControl exclusive selection, wrap, disabled skip, disabled-group
-/// inertia, and independent instance focus identity through the mounted tree.
+/// g16.071: SegmentedControl exclusive selection, wrap, disabled skip,
+/// disabled-group inertia, and independent instance focus identity through the
+/// mounted tree. Emits the terminal M1 execution receipt.
 #[test]
 fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
-    use poodle_specs::{SegmentedControlOption, SegmentedControlSpec};
+    use poodle_node::{
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+        MainAxisAlignment, NodeRole, NodeToggled, ShadowLayer, StylePatch,
+    };
+    use poodle_render::color::{mix_srgb, with_alpha, TRANSPARENT};
+    use poodle_render::presentation::{control_height_rem, control_space_x_rem, rem_to_px};
+    use poodle_specs::{
+        ControlDensity, ControlSize, SegmentedControlSpec,
+    };
+    use poodle_tokens::semantic;
 
     run_headless(|cx| {
-        fn build(
-            value: &str,
-            mounted: Arc<Mutex<Node>>,
-            payloads: Arc<Mutex<Vec<String>>>,
-        ) -> Node {
-            let mount = Arc::clone(&mounted);
-            let sink = Arc::clone(&payloads);
-            let mut spec = SegmentedControlSpec::new("view", selection_segment_options());
-            spec.value = Some(value.to_string());
-            let mut node = poodle_render::segmented_control(
-                &spec,
-                &RenderContext::new(&theme()),
-                Some(Arc::new(move |next: &str| {
-                    sink.lock().unwrap().push(next.to_string());
-                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
-                })),
-            );
-            node.id = Some(FIXTURE_ID.to_owned());
-            node
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+
+        let accent_color = ctx.theme().resolve_color(semantic::COLOR_ACCENT_BASE);
+        let surface_color = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_SURFACE);
+        let elevated_color = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_ELEVATED);
+        let text_primary = ctx.theme().resolve_color(semantic::COLOR_TEXT_PRIMARY);
+        let border_subtle = ctx.theme().resolve_color(semantic::COLOR_BORDER_SUBTLE);
+        let text_inverse = ctx.theme().resolve_color(semantic::COLOR_TEXT_INVERSE);
+        let text_secondary = ctx.theme().resolve_color(semantic::COLOR_TEXT_SECONDARY);
+        let control_radius = ctx.theme().resolve_radius(semantic::RADIUS_CONTROL);
+        let disabled_opacity = ctx.theme().resolve_opacity(semantic::STATE_OPACITY_DISABLED);
+        let focus_ring = ctx.theme().resolve_color(semantic::COLOR_ACCENT_FOCUS_RING);
+
+        let expected_root_bg = mix_srgb(surface_color, text_primary, 0.93);
+        let expected_root_border = with_alpha(border_subtle, border_subtle.3 * 0.84);
+        let expected_hover_fill = mix_srgb(surface_color, elevated_color, 0.84);
+        let expected_selected_highlight = with_alpha(text_inverse, text_inverse.3 * 0.12);
+        let inner_pad = rem_to_px(0.125);
+        let expected_inner_radius = (control_radius - inner_pad).max(0.0);
+        let expected_track_height = rem_to_px(control_height_rem(ControlSize::Md));
+        let expected_seg_height = expected_track_height - rem_to_px(0.25);
+        let expected_font_size = rem_to_px(0.75);
+        let expected_seg_px = rem_to_px(control_space_x_rem(ControlDensity::Default));
+        let expected_focus_ring_width = rem_to_px(0.125);
+
+        // ── 1. Production Spec & Token Structure Proof ─────────────────────
+        let mut subject_spec = SegmentedControlSpec::new("view", selection_segment_options());
+        subject_spec.value = Some("grid".to_string());
+        subject_spec.aria_label = Some("View mode".to_string());
+
+        let initial_node = poodle_render::segmented_control(&subject_spec, &ctx, None);
+        assert_eq!(initial_node.a11y.role, Some(NodeRole::RadioGroup));
+        assert_eq!(initial_node.a11y.label.as_deref(), Some("View mode"));
+        assert_eq!(initial_node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(initial_node.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(initial_node.style.descriptor.layout.height, LayoutSizing::Fixed(expected_track_height));
+        assert_eq!(initial_node.style.descriptor.background, Some(expected_root_bg));
+        assert_eq!(initial_node.style.descriptor.border.width, 1.0);
+        assert_eq!(initial_node.style.descriptor.border.color, expected_root_border);
+        assert_eq!(initial_node.style.descriptor.corner_radii.top_left, control_radius);
+        assert_eq!(initial_node.style.descriptor.corner_radii.top_right, control_radius);
+        assert_eq!(initial_node.style.descriptor.corner_radii.bottom_right, control_radius);
+        assert_eq!(initial_node.style.descriptor.corner_radii.bottom_left, control_radius);
+        assert_eq!(initial_node.style.descriptor.layout.spacing.padding.left, inner_pad);
+        assert_eq!(initial_node.style.descriptor.layout.spacing.padding.right, inner_pad);
+        assert_eq!(initial_node.style.descriptor.layout.spacing.padding.top, inner_pad);
+        assert_eq!(initial_node.style.descriptor.layout.spacing.padding.bottom, inner_pad);
+        assert_eq!(initial_node.style.descriptor.layout.spacing.gap, inner_pad);
+        assert_eq!(initial_node.children.len(), 3);
+
+        let seg_grid = initial_node.children.iter().find(|n| n.id.as_deref() == Some("segmented:grid")).expect("grid segment");
+        assert_eq!(seg_grid.runtime_id.as_deref(), Some("segmented:view:option:grid"));
+        assert_eq!(seg_grid.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(seg_grid.a11y.selected, Some(true));
+        assert_eq!(seg_grid.a11y.toggled, Some(NodeToggled::True));
+        assert_eq!(seg_grid.a11y.tab_index, Some(0));
+        assert_eq!(seg_grid.style.descriptor.background, Some(accent_color));
+        assert_eq!(seg_grid.style.descriptor.text_color, Some(text_inverse));
+        assert_eq!(seg_grid.style.shadow_layers, vec![ShadowLayer {
+            offset_x: 0.0,
+            offset_y: rem_to_px(0.0625),
+            blur: 0.0,
+            spread: 0.0,
+            color: expected_selected_highlight,
+            inset: false,
+        }]);
+        assert!(seg_grid.style.hover.is_none());
+        assert_eq!(seg_grid.style.descriptor.cursor, CursorHint::Pointer);
+        assert!(seg_grid.interaction.focusable);
+        assert!(seg_grid.interaction.on_activate.is_none());
+        assert_eq!(seg_grid.style.descriptor.border.width, expected_focus_ring_width);
+        assert_eq!(seg_grid.style.descriptor.border.color, TRANSPARENT);
+        assert_eq!(seg_grid.style.focus, Some(StylePatch {
+            border_color: Some(focus_ring),
+            background: None,
+            text_color: None,
+            opacity: None,
+        }));
+
+        let seg_list = initial_node.children.iter().find(|n| n.id.as_deref() == Some("segmented:list")).expect("list segment");
+        assert_eq!(seg_list.runtime_id.as_deref(), Some("segmented:view:option:list"));
+        assert_eq!(seg_list.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(seg_list.a11y.selected, Some(false));
+        assert_eq!(seg_list.a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(seg_list.a11y.tab_index, Some(-1));
+        assert!(seg_list.interaction.disabled);
+        assert!(!seg_list.interaction.focusable);
+        assert!(seg_list.interaction.on_activate.is_none());
+        assert_eq!(seg_list.style.descriptor.opacity, disabled_opacity);
+        assert_eq!(seg_list.style.descriptor.cursor, CursorHint::NotAllowed);
+        assert!(seg_list.style.hover.is_none());
+        assert!(seg_list.style.focus.is_none());
+
+        let seg_table = initial_node.children.iter().find(|n| n.id.as_deref() == Some("segmented:table")).expect("table segment");
+        assert_eq!(seg_table.runtime_id.as_deref(), Some("segmented:view:option:table"));
+        assert_eq!(seg_table.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(seg_table.a11y.selected, Some(false));
+        assert_eq!(seg_table.a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(seg_table.a11y.tab_index, Some(-1));
+        assert_eq!(seg_table.style.descriptor.background, None);
+        assert_eq!(seg_table.style.descriptor.text_color, Some(text_secondary));
+        assert!(seg_table.style.shadow_layers.is_empty());
+        assert_eq!(seg_table.style.hover, Some(StylePatch {
+            background: Some(expected_hover_fill),
+            border_color: None,
+            text_color: None,
+            opacity: None,
+        }));
+        assert_eq!(seg_table.style.descriptor.cursor, CursorHint::Pointer);
+        assert!(seg_table.interaction.focusable);
+        assert_eq!(seg_table.style.descriptor.border.width, expected_focus_ring_width);
+        assert_eq!(seg_table.style.descriptor.border.color, TRANSPARENT);
+        assert_eq!(seg_table.style.focus, Some(StylePatch {
+            border_color: Some(focus_ring),
+            background: None,
+            text_color: None,
+            opacity: None,
+        }));
+
+        for seg in [&seg_grid, &seg_list, &seg_table] {
+            assert_eq!(seg.style.descriptor.layout.direction, LayoutDirection::Row);
+            assert_eq!(seg.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+            assert_eq!(seg.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+            assert_eq!(seg.style.descriptor.layout.height, LayoutSizing::Fixed(expected_seg_height));
+            assert_eq!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
+            assert_eq!(seg.style.text_size, Some(expected_font_size));
+            assert_eq!(seg.style.text_weight, Some(600));
+            assert!(seg.style.no_wrap);
+            assert!(seg.style.text_ellipsis);
+            assert_eq!(seg.style.descriptor.layout.overflow_x, LayoutOverflow::Hidden);
+            assert_eq!(seg.style.descriptor.corner_radii.top_left, expected_inner_radius);
+            assert_eq!(seg.style.descriptor.corner_radii.top_right, expected_inner_radius);
+            assert_eq!(seg.style.descriptor.corner_radii.bottom_right, expected_inner_radius);
+            assert_eq!(seg.style.descriptor.corner_radii.bottom_left, expected_inner_radius);
+            assert_eq!(seg.style.descriptor.layout.spacing.padding.left, expected_seg_px);
+            assert_eq!(seg.style.descriptor.layout.spacing.padding.right, expected_seg_px);
         }
 
-        let payloads = Arc::new(Mutex::new(Vec::new()));
+        // ── 2. Controlled Multi-Instance Mount ─────────────────────────────
+        fn create_fixture_root(
+            subject_val: &str,
+            mounted: &Arc<Mutex<Node>>,
+            subject_sink: &Arc<Mutex<Vec<String>>>,
+            witness_sink: &Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mount_ref = Arc::clone(mounted);
+            let sub_sink = Arc::clone(subject_sink);
+            let wit_sink = Arc::clone(witness_sink);
+
+            let mut subject_spec = SegmentedControlSpec::new("view", selection_segment_options());
+            subject_spec.value = Some(subject_val.to_string());
+            subject_spec.aria_label = Some("View mode".to_string());
+            let mut subject_node = poodle_render::segmented_control(
+                &subject_spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next: &str| {
+                    sub_sink.lock().unwrap().push(next.to_string());
+                    let new_tree = create_fixture_root(next, &mount_ref, &sub_sink, &wit_sink);
+                    *mount_ref.lock().unwrap() = new_tree;
+                })),
+            );
+            subject_node.id = Some("segmented-control-subject-track".to_owned());
+
+            let wit_sink_2 = Arc::clone(witness_sink);
+            let mut witness_spec = SegmentedControlSpec::new("witness", selection_segment_options());
+            witness_spec.value = Some("grid".to_string());
+            witness_spec.aria_label = Some("Witness mode".to_string());
+            let mut witness_node = poodle_render::segmented_control(
+                &witness_spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next: &str| {
+                    wit_sink_2.lock().unwrap().push(next.to_string());
+                })),
+            );
+            witness_node.id = Some("segmented-control-witness-track".to_owned());
+
+            let mut disabled_spec = SegmentedControlSpec::new("disabled-view", selection_segment_options());
+            disabled_spec.is_disabled = true;
+            disabled_spec.value = Some("grid".to_string());
+            disabled_spec.aria_label = Some("Disabled mode".to_string());
+            let mut disabled_node = poodle_render::segmented_control(
+                &disabled_spec,
+                &RenderContext::new(&theme()),
+                None,
+            );
+            disabled_node.id = Some("segmented-control-disabled-track".to_owned());
+
+            let mut root = Node::container();
+            root.id = Some(FIXTURE_ID.to_owned());
+            root.style.descriptor.layout.direction = LayoutDirection::Column;
+            root.style.descriptor.layout.spacing.gap = 16.0;
+            root.style.fill_width = true;
+            root.style.fill_height = true;
+            root = root.child(subject_node).child(witness_node).child(disabled_node);
+            root
+        }
+
+        let subject_payloads = Arc::new(Mutex::new(Vec::new()));
+        let witness_payloads = Arc::new(Mutex::new(Vec::new()));
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build("grid", Arc::clone(&mounted), Arc::clone(&payloads));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        *mounted.lock().unwrap() = create_fixture_root(
+            "grid",
+            &mounted,
+            &subject_payloads,
+            &witness_payloads,
+        );
 
-        let grid = segment_option_id("view", "grid");
-        let list = segment_option_id("view", "list");
-        let table = segment_option_id("view", "table");
-        driver.wait_for_focus_handle(&grid);
-        driver.pointer_activate_id(&table);
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["table"]);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 320.0);
+
+        let subject_grid = segment_option_id("view", "grid");
+        let subject_list = segment_option_id("view", "list");
+        let subject_table = segment_option_id("view", "table");
+
+        // Probe channel verification
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.pointer_hover(point(px(40.0), px(40.0)));
+        driver.draw_frame();
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            probe_channels.contains(&"structure.identity.container"),
+            "Backend must receive structure.identity.container probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"structure.identity.button"),
+            "Backend must receive structure.identity.button probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.background"),
+            "Backend must receive surface.channels.background probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.border"),
+            "Backend must receive surface.channels.border probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.size"),
+            "Backend must receive content.typography.size probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.weight"),
+            "Backend must receive content.typography.weight probe channel"
+        );
+
+        // ── 3. Mounted Layout Bounds & Containment ─────────────────────────
+        let subject_track_bounds = poodle_gpui_node_backend::bounds_for("segmented-control-subject-track")
+            .expect("subject track bounds");
+        let grid_bounds = poodle_gpui_node_backend::bounds_for(&subject_grid)
+            .expect("grid bounds");
+        let list_bounds = poodle_gpui_node_backend::bounds_for(&subject_list)
+            .expect("list bounds");
+        let table_bounds = poodle_gpui_node_backend::bounds_for(&subject_table)
+            .expect("table bounds");
+
+        assert!(subject_track_bounds.size.width > px(0.0) && subject_track_bounds.size.height >= px(28.0));
+        assert!(grid_bounds.size.width > px(0.0) && grid_bounds.size.height > px(0.0));
+        assert!(list_bounds.size.width > px(0.0) && list_bounds.size.height > px(0.0));
+        assert!(table_bounds.size.width > px(0.0) && table_bounds.size.height > px(0.0));
+
+        for (name, bounds) in [
+            ("grid", grid_bounds),
+            ("list", list_bounds),
+            ("table", table_bounds),
+        ] {
+            assert!(
+                bounds.left() >= subject_track_bounds.left()
+                    && bounds.right() <= subject_track_bounds.right()
+                    && bounds.top() >= subject_track_bounds.top()
+                    && bounds.bottom() <= subject_track_bounds.bottom(),
+                "mounted {name} bounds must be contained within parent track bounds"
+            );
+        }
+
+        assert!(
+            grid_bounds.right() <= list_bounds.left(),
+            "grid segment must precede list segment horizontally"
+        );
+        assert!(
+            list_bounds.right() <= table_bounds.left(),
+            "list segment must precede table segment horizontally"
+        );
+
+        // ── 4. Pointer Selection & Controlled Rebuild ──────────────────────
+        driver.wait_for_focus_handle(&subject_grid);
+        driver.wait_for_focus_handle(&subject_table);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&subject_list).is_none(),
+            "disabled segment must not register a focus handle"
+        );
+
+        driver.pointer_activate_id(&subject_table);
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table"]);
         assert!(segment_selected(&mounted.lock().unwrap(), "view", "table"));
+        assert!(!segment_selected(&mounted.lock().unwrap(), "view", "grid"));
 
-        driver.pointer_activate_id(&table);
+        driver.pointer_activate_id(&subject_table);
         assert_eq!(
-            payloads.lock().unwrap().as_slice(),
+            subject_payloads.lock().unwrap().as_slice(),
             ["table"],
             "same-value selection is inert"
         );
-        driver.pointer_activate_id(&list);
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["table"]);
 
-        driver.wait_for_focus_handle(&table);
-        driver.focus_element(&table);
-        driver.dispatch_key_raw("right");
-        assert_eq!(payloads.lock().unwrap().as_slice(), ["table", "grid"]);
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(&grid), Some(true));
-    });
-
-    run_headless(|cx| {
-        let payloads = Arc::new(Mutex::new(Vec::new()));
-        let sink = Arc::clone(&payloads);
-        let spec = SegmentedControlSpec {
-            is_disabled: true,
-            ..SegmentedControlSpec::new("disabled-view", selection_segment_options())
-        };
-        let mut spec = spec;
-        spec.value = Some("grid".to_string());
-        let mut node = poodle_render::segmented_control(
-            &spec,
-            &RenderContext::new(&theme()),
-            Some(Arc::new(move |next: &str| {
-                sink.lock().unwrap().push(next.to_string())
-            })),
-        );
-        node.id = Some(FIXTURE_ID.to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
-        driver.draw_frame();
-        driver.pointer_activate_id(&segment_option_id("disabled-view", "table"));
-        assert!(payloads.lock().unwrap().is_empty());
-    });
-
-    run_headless(|cx| {
-        let picker = |scope: &str| {
-            let mut spec = SegmentedControlSpec::new(
-                scope,
-                vec![
-                    SegmentedControlOption::new("grid", "Grid"),
-                    SegmentedControlOption::new("list", "List"),
-                ],
-            );
-            spec.value = Some("grid".to_string());
-            poodle_render::segmented_control(&spec, &RenderContext::new(&theme()), None)
-        };
-        let mut node = Node::container()
-            .child(picker("left"))
-            .child(picker("right"));
-        node.id = Some(FIXTURE_ID.to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
-        let left = segment_option_id("left", "grid");
-        let right = segment_option_id("right", "grid");
-        driver.wait_for_focus_handle(&left);
-        driver.wait_for_focus_handle(&right);
-        driver.focus_element(&left);
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        driver.pointer_activate_id(&subject_list);
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&right),
-            Some(false),
-            "two mounted controls keep independent focus identity"
+            subject_payloads.lock().unwrap().as_slice(),
+            ["table"],
+            "disabled option click is inert"
+        );
+
+        // ── 5. Directional Keyboard Navigation (Skipping & Wrapping) ───────
+        driver.wait_for_focus_handle(&subject_table);
+        driver.focus_element(&subject_table);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
+
+        driver.dispatch_key_raw("right");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+        assert!(segment_selected(&mounted.lock().unwrap(), "view", "grid"));
+
+        driver.dispatch_key_raw("left");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
+        assert!(segment_selected(&mounted.lock().unwrap(), "view", "table"));
+
+        driver.dispatch_key_raw("down");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+
+        driver.dispatch_key_raw("up");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
+
+        driver.dispatch_key_raw("home");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+
+        driver.dispatch_key_raw("end");
+        assert_eq!(subject_payloads.lock().unwrap().as_slice(), ["table", "grid", "table", "grid", "table", "grid", "table"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_table), Some(true));
+
+        driver.dispatch_key_raw("escape");
+        assert_eq!(subject_payloads.lock().unwrap().len(), 7);
+
+        // ── 6. Disabled Group Verification ────────────────────────────────
+        let disabled_table = segment_option_id("disabled-view", "table");
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&disabled_table).is_none(),
+            "disabled group options must not register focus handles"
+        );
+        driver.pointer_activate_id(&disabled_table);
+        assert_eq!(subject_payloads.lock().unwrap().len(), 7);
+        assert!(witness_payloads.lock().unwrap().is_empty());
+
+        // ── 7. Two Composed Instances Focus & Callback Isolation ───────────
+        let witness_grid = segment_option_id("witness", "grid");
+        let witness_table = segment_option_id("witness", "table");
+        driver.wait_for_focus_handle(&witness_grid);
+        driver.wait_for_focus_handle(&witness_table);
+
+        driver.focus_element(&subject_grid);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&witness_grid), Some(false));
+
+        driver.focus_element(&witness_grid);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&witness_grid), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_grid), Some(false));
+
+        driver.dispatch_key_raw("right");
+        assert_eq!(witness_payloads.lock().unwrap().as_slice(), ["table"]);
+        assert_eq!(
+            subject_payloads.lock().unwrap().len(),
+            7,
+            "Subject handler count must not change when witness is keyboard navigated"
+        );
+
+        driver.pointer_activate_id(&witness_table);
+        assert_eq!(witness_payloads.lock().unwrap().as_slice(), ["table", "table"]);
+        assert_eq!(
+            subject_payloads.lock().unwrap().len(),
+            7,
+            "Subject handler count must not change when witness is pointer clicked"
+        );
+
+        driver.pointer_activate_id(&witness_grid);
+        assert_eq!(
+            witness_payloads.lock().unwrap().as_slice(),
+            ["table", "table"],
+            "Same-value click on witness is inert"
+        );
+
+        // ── 8. Terminal Receipt Emission ───────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "SegmentedControl",
+            "nucleus.navigation.segmented-control",
+            driver.mounted_observation(),
+            &[
+                "mount controlled SegmentedControl with one disabled option through HeadlessDriver",
+                "pointer activate unselected, selected, and disabled segments through GPUI platform dispatch",
+                "keyboard navigate roving focus across enabled segments with arrow keys, Home, End, and wraparound",
+                "mount two composed SegmentedControl instances to prove focus and callback isolation",
+            ],
+            &[
+                "production render path resolves root radiogroup role, direction, size ladder height, track styling, and density padding/gaps",
+                "each segment resolves radiobutton role, selected/toggled state, roving tab stop, typography, truncation, and focus patch",
+                "pointer and keyboard input update selected value through controlled host rebuild while disabled and same-value clicks remain inert",
+                "roving keyboard navigation skips disabled segments, wraps at boundaries, and transfers backend focus handle state",
+                "mounted bounds confirm positive dimensions, horizontal segment ordering, equal-width layout, and track child containment",
+                "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers",
+            ],
         );
     });
 }
