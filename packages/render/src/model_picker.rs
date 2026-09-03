@@ -14,15 +14,26 @@ use poodle_node::{
     NodeToggled,
 };
 use poodle_specs::{
-    ControlDensity, ControlSize, ModelAxisControlKind, ModelAxisKind, ModelAxisValue,
-    ModelPickerSpec, ModelPickerVariant, SegmentedControlOption, SegmentedControlSpec, SwitchSpec,
+    ChoiceOption, ControlDensity, ControlSize, ModelAxisControlKind, ModelAxisKind, ModelAxisValue,
+    ModelPickerSpec, ModelPickerVariant, SegmentedControlOption, SegmentedControlSpec, SelectSpec,
+    SwitchSpec,
 };
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::segmented_control::segmented_control;
+use crate::select::{select, select_option_id, SelectHandlers};
 use crate::switch::switch;
+
+fn find_runtime_id_mut<'a>(node: &'a mut Node, runtime_id: &str) -> Option<&'a mut Node> {
+    if node.runtime_id.as_deref() == Some(runtime_id) {
+        return Some(node);
+    }
+    node.children
+        .iter_mut()
+        .find_map(|child| find_runtime_id_mut(child, runtime_id))
+}
 
 pub fn model_picker(
     spec: &ModelPickerSpec,
@@ -32,6 +43,58 @@ pub fn model_picker(
 ) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
+    let is_open = spec.is_open && !spec.is_disabled;
+    let select_scope = format!("model-picker:{instance_id}");
+    let mut select_spec = SelectSpec::new(
+        spec.models
+            .iter()
+            .map(|model| {
+                let mut option = ChoiceOption::new(&model.value, &model.label)
+                    .with_disabled(model.is_disabled);
+                if spec.show_model_descriptions {
+                    if let Some(description) = &model.description {
+                        option = option.with_description(description);
+                    }
+                }
+                if let Some(group) = &model.group {
+                    option = option.with_group(group);
+                }
+                option
+            })
+            .collect(),
+    )
+    .with_value(&spec.value.model)
+    .with_placeholder(&spec.placeholder)
+    .with_aria_label(spec.trigger_aria_label())
+    .with_open(spec.is_open)
+    .with_dismiss_on_outside_interact(spec.dismiss_on_outside_interact)
+    .with_size(effective_size)
+    .with_density(density);
+    select_spec.is_disabled = spec.is_disabled;
+    let mut select_handlers = SelectHandlers::new(&select_scope);
+    if let Some(handler) = on_change.clone() {
+        let current = spec.value.model.clone();
+        select_handlers = select_handlers.on_transition(Arc::new(move |result| {
+            let next = result.context.value.as_str();
+            if !next.is_empty() && next != current {
+                handler(next);
+            }
+        }));
+    }
+    let mut select_tree = select(&select_spec, ctx, &select_handlers);
+    let (select_trigger, mut models) = if is_open {
+        let mut children = std::mem::take(&mut select_tree.children);
+        assert_eq!(
+            children.len(),
+            2,
+            "open ModelPicker Select composition requires trigger and listbox"
+        );
+        let listbox = children.pop().expect("Select listbox");
+        let trigger = children.pop().expect("Select trigger");
+        (trigger, Some(listbox))
+    } else {
+        (select_tree, None)
+    };
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
     let trigger_h = rem_to_px(match effective_size {
@@ -89,6 +152,10 @@ pub fn model_picker(
 
     // ── Trigger ───────────────────────────────────────────────────────────────
     let mut trigger = Node::container();
+    trigger.id = select_trigger.id;
+    trigger.runtime_id = select_trigger.runtime_id;
+    trigger.a11y = select_trigger.a11y;
+    trigger.interaction = select_trigger.interaction;
     {
         let s = &mut trigger.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -104,6 +171,8 @@ pub fn model_picker(
             s.descriptor.border.color = border;
             s.descriptor.background = Some(surface);
         }
+        s.focus_ring = select_trigger.style.focus_ring;
+        s.hover = select_trigger.style.hover;
     }
     all_radius(&mut trigger, radius);
     let mut trigger = trigger;
@@ -171,137 +240,87 @@ pub fn model_picker(
     trigger = trigger.child(chevron);
 
     let mut root = Node::container();
+    root.id = Some(format!("model-picker-{instance_id}"));
+    root.runtime_id = Some(select_scope.clone());
     root.style.descriptor.layout.direction = LayoutDirection::Column;
     root.style.descriptor.layout.spacing.gap = rem_to_px(0.5);
     root.style.min_width = Some(0.0);
+    root.roles
+        .insert("dependency".to_owned(), "select".to_owned());
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
+    root.roles
+        .insert("variant".to_owned(), spec.variant.as_str().to_owned());
+    root.roles
+        .insert("emphasis".to_owned(), spec.emphasis.as_str().to_owned());
+    root.roles
+        .insert("open".to_owned(), is_open.to_string());
+    root.roles
+        .insert("disabled".to_owned(), spec.is_disabled.to_string());
     let mut root = root.child(trigger);
 
     // ── Dialog surface (rendered inline when open) ────────────────────────────
-    if spec.is_open {
+    if is_open {
         // Two columns (models | axes) whenever the selected model has
         // applicable axes; a plain list otherwise (contract §7).
         let applicable = spec.applicable_axes();
         let is_split = !applicable.is_empty();
 
-        let mut models = Node::container();
-        {
-            let s = &mut models.style;
-            s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.width = LayoutSizing::Grow;
-            s.min_width = Some(0.0);
-            s.descriptor.layout.spacing.gap = rem_to_px(0.125);
-        }
-        let mut models = models;
-        for (index, model) in spec.models.iter().enumerate() {
-            if let Some(heading) = spec.group_heading_for(index) {
-                let mut h = Node::text(heading);
-                {
-                    let s = &mut h.style;
-                    s.flex_none = true;
-                    s.descriptor.text_color = Some(text_secondary);
-                    s.text_size = Some(rem_to_px(0.6875));
-                    s.text_weight = Some(500);
-                    s.letter_spacing_em = Some(0.05);
-                    let pad = &mut s.descriptor.layout.spacing.padding;
-                    pad.left = rem_to_px(0.5);
-                    // Space above every heading but the first, so group runs
-                    // read as sections.
-                    pad.top = rem_to_px(if index == 0 { 0.5 } else { 0.875 });
-                    pad.bottom = rem_to_px(0.25);
-                }
-                models = models.child(h);
-            }
-
-            let is_selected = model.value == spec.value.model;
-            // Never shrink: the list is height-capped and scrolls, so a
-            // shrinkable row would squash below its own content.
-            let mut row = Node::container();
-            {
-                let s = &mut row.style;
-                s.flex_none = true;
-                s.descriptor.layout.direction = LayoutDirection::Row;
-                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-                s.descriptor.layout.spacing.gap = rem_to_px(0.5);
-                let pad = &mut s.descriptor.layout.spacing.padding;
-                pad.left = rem_to_px(0.5);
-                pad.right = rem_to_px(0.5);
-                pad.top = rem_to_px(0.375);
-                pad.bottom = rem_to_px(0.375);
+        let mut models = models.take().expect("open ModelPicker Select listbox");
+        models.style.descriptor.layout.width = LayoutSizing::Grow;
+        models.style.min_width = Some(0.0);
+        models.style.descriptor.border.width = 0.0;
+        models.style.descriptor.background = None;
+        models.style.descriptor.shadow = None;
+        models.style.shadow_layers.clear();
+        models.style.overlay = false;
+        models.position = poodle_node::NodePosition::InFlow;
+        models.a11y.role = Some(NodeRole::RadioGroup);
+        models.a11y.label = Some("Model".to_owned());
+        models.roles.insert("dependency".to_owned(), "select".to_owned());
+        for model in &spec.models {
+            let row_id = select_option_id(&select_scope, &model.value);
+            if let Some(row) = find_runtime_id_mut(&mut models, &row_id) {
+                let is_selected = model.value == spec.value.model;
+                row.a11y.role = Some(NodeRole::RadioButton);
+                row.a11y.selected = Some(is_selected);
+                row.a11y.toggled = Some(if is_selected {
+                    NodeToggled::True
+                } else {
+                    NodeToggled::False
+                });
+                row.roles
+                    .insert("selected".to_owned(), is_selected.to_string());
+                row.roles
+                    .insert("disabled".to_owned(), model.is_disabled.to_string());
                 if is_selected {
-                    s.descriptor.background = Some(row_selected_bg);
+                    row.style.descriptor.background = Some(row_selected_bg);
+                }
+                if let Some(image) = &model.image {
+                    row.children.insert(0, image_node(&image.src, rem_to_px(1.0)));
+                } else if let Some(icon) = &model.icon {
+                    let mut glyph = Node::icon(icon, rem_to_px(0.875));
+                    glyph.style.descriptor.text_color = Some(text_secondary);
+                    row.children.insert(0, glyph);
+                }
+                if let Some(badge) = &model.badge {
+                    let mut badge_node = Node::text(badge);
+                    badge_node.style.flex_none = true;
+                    badge_node.style.descriptor.border.width = 1.0;
+                    badge_node.style.descriptor.border.color = item_border;
+                    badge_node.style.descriptor.text_color = Some(text_secondary);
+                    badge_node.style.text_size = Some(rem_to_px(0.6875));
+                    all_radius(&mut badge_node, rem_to_px(0.5));
+                    let insert_at = row.children.len().saturating_sub(usize::from(is_selected));
+                    row.children.insert(insert_at, badge_node);
                 }
             }
-            all_radius(&mut row, radius);
-            let mut row = row;
-
-            if let Some(image) = &model.image {
-                row = row.child(image_node(&image.src, rem_to_px(1.0)));
-            } else if let Some(icon) = &model.icon {
-                let mut glyph = Node::icon(icon, rem_to_px(0.875));
-                glyph.style.descriptor.text_color = Some(text_secondary);
-                row = row.child(glyph);
-            }
-
-            let mut copy = Node::container();
-            {
-                let s = &mut copy.style;
-                s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.width = LayoutSizing::Grow;
-                s.min_width = Some(0.0);
-            }
-            let mut title = Node::text(&model.label);
-            {
-                let s = &mut title.style;
-                s.descriptor.text_color = Some(text_primary);
-                s.text_size = Some(rem_to_px(0.875));
-                s.text_weight = Some(if is_selected { 600 } else { 400 });
-                s.text_ellipsis = true;
-                s.no_wrap = true;
-            }
-            let mut copy = copy.child(title);
-            if spec.show_model_descriptions {
-                if let Some(description) = &model.description {
-                    let mut d = Node::text(description);
-                    d.style.descriptor.text_color = Some(text_secondary);
-                    d.style.text_size = Some(rem_to_px(0.75));
-                    copy = copy.child(d);
-                }
-            }
-            row = row.child(copy);
-
-            if let Some(badge) = &model.badge {
-                let mut b = Node::text(badge);
-                {
-                    let s = &mut b.style;
-                    s.flex_none = true;
-                    let pad = &mut s.descriptor.layout.spacing.padding;
-                    pad.left = rem_to_px(0.375);
-                    pad.right = rem_to_px(0.375);
-                    s.descriptor.border.width = 1.0;
-                    s.descriptor.border.color = item_border;
-                    s.descriptor.text_color = Some(text_secondary);
-                    s.text_size = Some(rem_to_px(0.6875));
-                }
-                all_radius(&mut b, rem_to_px(0.5));
-                row = row.child(b);
-            }
-
-            if is_selected {
-                let mut check = Node::icon("check", rem_to_px(0.75));
-                check.style.descriptor.text_color = Some(accent);
-                row = row.child(check);
-            }
-
-            if model.is_disabled {
-                row.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
-            } else if let Some(handler) = &on_change {
-                let handler = Arc::clone(handler);
-                let id = model.value.clone();
-                row.style.descriptor.cursor = CursorHint::Pointer;
-                row.interaction.on_activate = Some(Arc::new(move || handler(&id)));
-            }
-
-            models = models.child(row);
         }
 
         // One section per applicable axis, in declaration order, stacked in
@@ -322,6 +341,18 @@ pub fn model_picker(
         for (index, axis) in applicable.iter().enumerate() {
             let current = spec.axis_value(axis);
             let mut section = Node::container();
+            section.runtime_id = Some(format!("{select_scope}:axis:{}", axis.key));
+            section
+                .roles
+                .insert("kind".to_owned(), axis.kind.as_str().to_owned());
+            section.roles.insert(
+                "control".to_owned(),
+                match axis.control_kind() {
+                    ModelAxisControlKind::Segmented => "segmented",
+                    ModelAxisControlKind::List => "list",
+                }
+                .to_owned(),
+            );
             {
                 let s = &mut section.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
@@ -357,12 +388,19 @@ pub fn model_picker(
                 ModelAxisKind::Select if axis.control_kind() == ModelAxisControlKind::List => {
                     let selected = current.as_text().unwrap_or_default().to_string();
                     let mut list = Node::container();
+                    list.runtime_id = Some(format!("{select_scope}:axis:{}:list", axis.key));
+                    list.a11y.role = Some(NodeRole::RadioGroup);
+                    list.a11y.label = Some(axis.label.clone());
                     list.style.descriptor.layout.direction = LayoutDirection::Column;
                     list.style.descriptor.layout.spacing.gap = rem_to_px(0.0625);
                     list.style.min_width = Some(0.0);
                     for option in axis.options.iter() {
                         let is_option_selected = option.value == selected;
                         let mut row = Node::container();
+                        row.runtime_id = Some(format!(
+                            "{select_scope}:axis:{}:option:{}",
+                            axis.key, option.value
+                        ));
                         // Contract: axis options are mutually exclusive, so
                         // each is a `radio` with its own checked state.
                         row.a11y.role = Some(NodeRole::RadioButton);
@@ -409,6 +447,17 @@ pub fn model_picker(
                             check.style.descriptor.text_color = Some(accent);
                             row = row.child(check);
                         }
+                        if spec.is_disabled || axis.is_disabled || option.is_disabled {
+                            row.interaction.disabled = true;
+                        } else if let Some(handler) = &on_change {
+                            let handler = Arc::clone(handler);
+                            let value = option.value.clone();
+                            row.interaction.focusable = true;
+                            row.a11y.tab_index = Some(0);
+                            row.style.descriptor.cursor = CursorHint::Pointer;
+                            row.interaction.on_activate =
+                                Some(Arc::new(move || handler(value.as_str())));
+                        }
                         list = list.child(row);
                     }
                     section.child(list)
@@ -422,14 +471,14 @@ pub fn model_picker(
                         })
                         .collect();
                     let mut control = SegmentedControlSpec::new(
-                        format!("{instance_id}:axis:{}", axis.key),
+                        format!("{select_scope}:axis:{}", axis.key),
                         options,
                     )
                     .with_size(effective_size)
                     .with_density(density);
                     control.value = current.as_text().map(|value| value.to_string());
                     control.is_disabled = spec.is_disabled || axis.is_disabled;
-                    section.child(segmented_control(&control, ctx, None))
+                    section.child(segmented_control(&control, ctx, on_change.clone()))
                 }
                 ModelAxisKind::Toggle => {
                     let mut control = SwitchSpec::new()
@@ -440,7 +489,13 @@ pub fn model_picker(
                         .with_size(effective_size)
                         .with_density(density);
                     control.is_disabled = spec.is_disabled || axis.is_disabled;
-                    section.child(switch(&control, ctx, None))
+                    let toggle_handler = on_change.clone().map(|handler| {
+                        Arc::new(move |next| handler(if next { "true" } else { "false" }))
+                            as Arc<dyn Fn(bool) + Send + Sync>
+                    });
+                    let mut toggle = switch(&control, ctx, toggle_handler);
+                    toggle.runtime_id = Some(format!("{select_scope}:axis:{}:toggle", axis.key));
+                    section.child(toggle)
                 }
             };
 
@@ -451,6 +506,7 @@ pub fn model_picker(
         // must run the panel's full height.
         // Contract: the open picker panel is a `dialog`.
         let mut panel = Node::container();
+        panel.runtime_id = Some(format!("{select_scope}:panel"));
         panel.a11y.role = Some(NodeRole::Dialog);
         panel.style.descriptor.layout.direction = LayoutDirection::Row;
         panel.style.descriptor.layout.spacing.gap = rem_to_px(0.75);
@@ -460,6 +516,10 @@ pub fn model_picker(
         }
 
         let mut dialog = Node::container();
+        dialog.id = Some(format!("model-picker-{instance_id}-dialog"));
+        dialog.runtime_id = Some(format!("{select_scope}:dialog"));
+        dialog.a11y.role = Some(NodeRole::Dialog);
+        dialog.a11y.label = Some(spec.aria_label.clone());
         {
             let s = &mut dialog.style;
             // The GPUI surface is a block wrapper around the horizontal panel.
