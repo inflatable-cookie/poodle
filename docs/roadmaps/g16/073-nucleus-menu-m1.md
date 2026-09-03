@@ -1,6 +1,6 @@
 # g16.073 — Nucleus Menu M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`, completed `g16.072`
@@ -8,8 +8,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/menu.md`, `../../contracts/components/icon.md`
-Log: pending
-PR: pending
+Log: `../../logs/2026-09/20260903-g16-073-nucleus-menu-receipt.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/179
 Handoff: `../../handoffs/20260903-064013-g16-073-nucleus-menu-receipt.md`
 
 ## Goal
@@ -18,8 +18,8 @@ Produce one validated `M1` receipt for the Nucleus `Menu` row through the
 production Rust render, Node, GPUI backend, and test-platform paths. Establish
 the manifest's first named mounted Menu fixture. Prove the flat action-menu
 shape Nucleus uses while retaining generic checked and shortcut rows needed by
-the contract. Keep trigger/open ownership and nested-pointer policy outside
-this panel-only native boundary.
+the contract. Keep trigger/open ownership, concurrent same-valued panel identity,
+and nested-pointer policy outside this panel-only native boundary.
 
 ## Fixed Boundary
 
@@ -38,7 +38,7 @@ this panel-only native boundary.
 - Mount through `HeadlessDriver`. Prove positive ordered row bounds and panel
   containment. Dispatch pointer plus Enter/Space activation through the test
   platform. Disabled and separator rows remain inert. An accepted checkbox or
-  radio action reaches one host stream and rebuilds the externally supplied
+  radio action reaches the host stream and rebuilds the externally supplied
   checked state.
 - Prove the keyboard command-list floor required by the Menu contract:
   next/previous movement with disabled/separator skip, Home/End, and
@@ -50,7 +50,9 @@ this panel-only native boundary.
 - Treat native Menu as the documented panel-only surface: it does not own a
   trigger or raise `onOpenChange`. Do not claim or implement trigger placement,
   outside dismissal, focus restoration to a consumer trigger, recursive
-  submenu behavior, or web `onSurfaceGeometryChange` in this card.
+  submenu behavior, or web `onSurfaceGeometryChange` in this card. This
+  Nucleus M1 covers one mounted panel and does not infer concurrent
+  same-valued panels.
 - Emit the Menu receipt only after every claimed assertion passes. Refresh the
   manifest resolution, every existing receipt, and generated ledger from the
   exact committed runtime source. No other row advances.
@@ -61,15 +63,15 @@ this panel-only native boundary.
   `nucleus.navigation.menu` M1 receipt.
 - Replacing the production renderer with raw rows, losing roles/toggled state,
   bypassing mounted input, accepting disabled/separator rows, dropping the
-  production check Icon, crossing host streams, or failing controlled checked
-  state rebuild fails before receipt emission.
+  production check Icon, or failing controlled checked state rebuild fails
+  before receipt emission.
 - Keyboard navigation skips inert rows in both directions, Home/End land on
   enabled boundaries, Enter/Space activate once, and Escape never activates a
   row. Host-owned dismissal is not inferred. If the panel cannot provide the
   command-list floor without API widening, return the exact gap to planning.
 - Existing nine receipts remain valid. The denominator stays 29. M1 does not
   infer A1, V1, Nucleus adoption, browser trigger/overlay behavior, recursive
-  submenus, or pixel-level parity.
+  submenus, concurrent same-valued panels, or pixel-level parity.
 
 ## Review Oracle
 
@@ -105,6 +107,16 @@ Run focused Menu spec/render/backend tests, the named mounted fixture, the real
 `effigy docs:check`, and `git diff --check origin/main...HEAD`. Do not run
 windowed or native-visual selectors.
 
+## Limits
+
+- `M1` covers one mounted panel and does not infer concurrent same-valued panels,
+  trigger ownership, outside dismissal, recursive submenus, or `A1`/`V1` claims.
+- Production instance identity: `MenuSpec` in `poodle-specs` and `poodle_render::menu`
+  currently emit static `menu-item:{value}` runtime IDs and lack an `instance_scope`
+  parameter. Multi-instance concurrent isolation across duplicate-valued menu panels
+  is an unresolved production seam; future public identity and scoping API work is
+  gated on a named composite-overlay consumer (e.g., `MenuButton`, `Popover`, or `Select`).
+
 ## Stop Conditions
 
 Stop for orchestrator review if the proof requires a public API, a second menu
@@ -116,4 +128,6 @@ the M1 receipt.
 ## Continuation
 
 After merge, compile the Dialog M1 receipt child from the refreshed receipt
-identity. Later Nucleus receipt cards remain serial.
+identity. Multi-instance panel identity scoping remains deferred until a named
+composite-overlay consumer requires concurrent same-valued menus. Later Nucleus
+receipt cards remain serial.

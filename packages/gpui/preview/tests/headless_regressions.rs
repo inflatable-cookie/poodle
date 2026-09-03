@@ -22951,3 +22951,738 @@ fn gpui_node_tooltip_probe_channels() {
         );
     });
 }
+
+// ── g16.073 Nucleus Menu mounted parity ─────────────────────────────
+
+#[test]
+fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
+    use poodle_node::{
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
+        NodeKind, NodeRole, NodeToggled, StylePatch,
+    };
+    use poodle_render::color::{mix_srgb, with_alpha};
+    use poodle_render::presentation::{control_height_rem, rem_to_px};
+    use poodle_specs::{
+        ControlSize, MenuEntry, MenuItemKind, MenuSpec,
+    };
+    use poodle_tokens::semantic;
+
+    fn generic_menu_entries(
+        dark_mode: bool,
+        notifications: bool,
+        high_contrast: bool,
+    ) -> Vec<MenuEntry> {
+        vec![
+            MenuEntry::new("new", "New file"),
+            MenuEntry::new("print", "Print\u{2026}").with_disabled(true),
+            MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
+            MenuEntry::new("delete", "Delete item").with_destructive(true),
+            MenuEntry::new("save", "Save file").with_shortcut_label("\u{2318}S"),
+            MenuEntry::new("dark_mode", "Dark mode")
+                .with_kind(MenuItemKind::Checkbox)
+                .with_checked(dark_mode),
+            MenuEntry::new("notifications", "Notifications")
+                .with_kind(MenuItemKind::Checkbox)
+                .with_checked(notifications),
+            MenuEntry::new("high_contrast", "High contrast")
+                .with_kind(MenuItemKind::Radio)
+                .with_checked(high_contrast),
+        ]
+    }
+
+    run_headless(|cx| {
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+
+        let elevated = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_ELEVATED);
+        let panel = ctx.theme().resolve_color("color.background.panel");
+        let expected_fill = mix_srgb(elevated, panel, 0.98);
+        let border_base = ctx.theme().resolve_color(semantic::COLOR_BORDER_DEFAULT);
+        let expected_border = with_alpha(border_base, border_base.3 * 0.72);
+        let radius = ctx.theme().resolve_radius(semantic::RADIUS_SURFACE);
+        let text_color = ctx.theme().resolve_color(semantic::COLOR_TEXT_PRIMARY);
+        let muted_color = ctx.theme().resolve_color("color.text.secondary");
+        let separator_base = ctx.theme().resolve_color(semantic::COLOR_BORDER_SUBTLE);
+        let separator_color = with_alpha(separator_base, separator_base.3 * 0.72);
+        let danger_color = ctx.theme().resolve_color("color.status.danger");
+        let accent_color = ctx.theme().resolve_color(semantic::COLOR_ACCENT_BASE);
+        let disabled_opacity = ctx.theme().resolve_opacity(semantic::STATE_OPACITY_DISABLED);
+
+        let hover_tint = with_alpha(accent_color, accent_color.3 * 0.16);
+        let danger_hover_tint = with_alpha(danger_color, danger_color.3 * 0.14);
+
+        let spec = MenuSpec::new(generic_menu_entries(true, false, false));
+        let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(match effective_size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.75,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 0.9375,
+            ControlSize::Xl => 1.0,
+        });
+        let item_min_height = rem_to_px(control_height_rem(effective_size));
+        let meta_font_size = ctx.theme().resolve_space("typography.caption.size");
+        let item_px = rem_to_px(0.75);
+        let item_py = ctx.theme().resolve_space("space.control.y");
+        let menu_py = rem_to_px(0.25);
+        let item_gap = ctx.theme().resolve_space("space.inline.sm");
+        let separator_my = rem_to_px(0.25);
+        let item_radius = (ctx
+            .theme()
+            .resolve_radius(semantic::RADIUS_SURFACE)
+            .min(ctx.theme().resolve_radius("radius.control"))
+            - rem_to_px(0.125))
+        .max(0.0);
+        let min_width = ctx.theme().resolve_space("size.menu.minWidth");
+        let expected_icon_size = ctx.theme().resolve_space(
+            poodle_specs::IconSpec::new("check")
+                .with_size(poodle_specs::IconSize::from(effective_size))
+                .size_token(),
+        );
+
+        // ── 1. Production Spec & Token Structure Proof ─────────────────────
+        let mut menu_spec = MenuSpec::new(generic_menu_entries(true, false, false));
+        menu_spec.aria_label = Some("Document Actions".to_string());
+
+        let initial_node = poodle_render::menu(&menu_spec, &ctx, None);
+        assert_eq!(initial_node.a11y.role, Some(NodeRole::Menu));
+        assert_eq!(
+            initial_node.a11y.label.as_deref(),
+            Some("Document Actions")
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert_eq!(
+            initial_node.style.descriptor.background,
+            Some(expected_fill)
+        );
+        assert_eq!(initial_node.style.descriptor.border.width, 1.0);
+        assert_eq!(initial_node.style.descriptor.border.color, expected_border);
+        assert_eq!(
+            initial_node.style.descriptor.corner_radii.top_left,
+            radius
+        );
+        assert_eq!(
+            initial_node.style.descriptor.corner_radii.top_right,
+            radius
+        );
+        assert_eq!(
+            initial_node.style.descriptor.corner_radii.bottom_right,
+            radius
+        );
+        assert_eq!(
+            initial_node.style.descriptor.corner_radii.bottom_left,
+            radius
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.spacing.padding.top,
+            menu_py
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.spacing.padding.bottom,
+            menu_py
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.spacing.padding.left,
+            menu_py
+        );
+        assert_eq!(
+            initial_node.style.descriptor.layout.spacing.padding.right,
+            menu_py
+        );
+        assert_eq!(initial_node.style.min_width, Some(min_width));
+        assert_eq!(
+            initial_node.style.descriptor.shadow,
+            Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
+        );
+        assert!(initial_node.style.overlay);
+        assert_eq!(initial_node.children.len(), 8);
+
+        // Row 0: Enabled Action ("new")
+        let item_new = &initial_node.children[0];
+        assert_eq!(item_new.id.as_deref(), Some("menu-item:new"));
+        assert_eq!(item_new.a11y.role, Some(NodeRole::MenuItem));
+        assert!(item_new.interaction.focusable);
+        assert_eq!(item_new.a11y.tab_index, Some(0), "first enabled item must have tab_index=0");
+        assert_eq!(
+            item_new.style.descriptor.cursor,
+            CursorHint::Pointer
+        );
+        assert_eq!(
+            item_new.style.hover,
+            Some(StylePatch {
+                background: Some(hover_tint),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            })
+        );
+        assert_eq!(
+            item_new.style.focus,
+            Some(StylePatch {
+                background: Some(hover_tint),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            })
+        );
+        assert_eq!(item_new.style.min_height, Some(item_min_height));
+        assert_eq!(
+            item_new.style.descriptor.layout.spacing.padding.left,
+            item_px
+        );
+        assert_eq!(
+            item_new.style.descriptor.layout.spacing.padding.right,
+            item_px
+        );
+        assert_eq!(
+            item_new.style.descriptor.layout.spacing.padding.top,
+            item_py
+        );
+        assert_eq!(
+            item_new.style.descriptor.layout.spacing.padding.bottom,
+            item_py
+        );
+        assert_eq!(
+            item_new.style.descriptor.layout.spacing.gap,
+            item_gap
+        );
+        assert_eq!(
+            item_new.style.descriptor.corner_radii.top_left,
+            item_radius
+        );
+        assert_eq!(item_new.children.len(), 1);
+        let label_new = &item_new.children[0];
+        assert!(matches!(&label_new.kind, NodeKind::Text { content } if content == "New file"));
+        assert_eq!(
+            label_new.style.descriptor.text_color,
+            Some(text_color)
+        );
+        assert_eq!(label_new.style.text_size, Some(font_size));
+        assert_eq!(
+            label_new.style.descriptor.layout.width,
+            LayoutSizing::Grow
+        );
+        assert_eq!(label_new.intrinsic_text(), Some("New file"));
+
+        // Row 1: Disabled Action ("print")
+        let item_print = &initial_node.children[1];
+        assert_eq!(item_print.id.as_deref(), Some("menu-item:print"));
+        assert_eq!(item_print.a11y.role, Some(NodeRole::MenuItem));
+        assert!(!item_print.interaction.focusable);
+        assert_eq!(item_print.a11y.tab_index, Some(-1));
+        assert!(item_print.interaction.on_activate.is_none());
+        assert_eq!(
+            item_print.style.descriptor.opacity,
+            disabled_opacity
+        );
+        assert!(item_print.style.hover.is_none());
+        assert!(item_print.style.focus.is_none());
+        let label_print = &item_print.children[0];
+        assert!(matches!(&label_print.kind, NodeKind::Text { content } if content == "Print\u{2026}"));
+        assert_eq!(
+            label_print.style.descriptor.text_color,
+            Some(muted_color)
+        );
+
+        // Row 2: Separator ("sep1")
+        let item_sep = &initial_node.children[2];
+        assert_eq!(item_sep.id, None);
+        assert_eq!(item_sep.a11y.role, Some(NodeRole::Splitter));
+        assert!(!item_sep.interaction.focusable);
+        assert_eq!(item_sep.a11y.tab_index, Some(-1));
+        assert!(item_sep.interaction.on_activate.is_none());
+        assert_eq!(
+            item_sep.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            item_sep.style.descriptor.layout.height,
+            LayoutSizing::Fixed(rem_to_px(0.0625))
+        );
+        assert_eq!(
+            item_sep.style.descriptor.background,
+            Some(separator_color)
+        );
+        assert_eq!(
+            item_sep.style.descriptor.layout.spacing.margin.top,
+            separator_my
+        );
+        assert_eq!(
+            item_sep.style.descriptor.layout.spacing.margin.bottom,
+            separator_my
+        );
+
+        // Row 3: Destructive Action ("delete")
+        let item_delete = &initial_node.children[3];
+        assert_eq!(item_delete.id.as_deref(), Some("menu-item:delete"));
+        assert_eq!(item_delete.a11y.role, Some(NodeRole::MenuItem));
+        assert!(item_delete.interaction.focusable);
+        assert_eq!(item_delete.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
+        assert_eq!(
+            item_delete.style.descriptor.cursor,
+            CursorHint::Pointer
+        );
+        assert_eq!(
+            item_delete.style.hover,
+            Some(StylePatch {
+                background: Some(danger_hover_tint),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            })
+        );
+        assert_eq!(
+            item_delete.style.focus,
+            Some(StylePatch {
+                background: Some(danger_hover_tint),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            })
+        );
+        let label_delete = &item_delete.children[0];
+        assert!(matches!(&label_delete.kind, NodeKind::Text { content } if content == "Delete item"));
+        assert_eq!(
+            label_delete.style.descriptor.text_color,
+            Some(danger_color)
+        );
+
+        // Row 4: Shortcut Action ("save")
+        let item_save = &initial_node.children[4];
+        assert_eq!(item_save.id.as_deref(), Some("menu-item:save"));
+        assert_eq!(item_save.a11y.role, Some(NodeRole::MenuItem));
+        assert!(item_save.interaction.focusable);
+        assert_eq!(item_save.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
+        assert_eq!(item_save.children.len(), 2);
+        let label_save = &item_save.children[0];
+        assert!(matches!(&label_save.kind, NodeKind::Text { content } if content == "Save file"));
+        let meta_save = &item_save.children[1];
+        assert!(matches!(&meta_save.kind, NodeKind::Text { content } if content == "\u{2318}S"));
+        assert_eq!(meta_save.style.descriptor.text_color, Some(muted_color));
+        assert_eq!(meta_save.style.text_size, Some(meta_font_size));
+
+        // Row 5: Checked Checkbox ("dark_mode")
+        let item_dark = &initial_node.children[5];
+        assert_eq!(item_dark.id.as_deref(), Some("menu-item:dark_mode"));
+        assert_eq!(
+            item_dark.a11y.role,
+            Some(NodeRole::MenuItemCheckBox)
+        );
+        assert_eq!(item_dark.a11y.toggled, Some(NodeToggled::True));
+        assert!(item_dark.interaction.focusable);
+        assert_eq!(item_dark.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
+        assert_eq!(item_dark.children.len(), 2);
+        let check_icon = &item_dark.children[0];
+        assert!(matches!(&check_icon.kind, NodeKind::Icon { name, size } if name == "check" && *size == expected_icon_size));
+        assert_eq!(
+            check_icon.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Icon must carry LayoutDirection::Row from production icon renderer"
+        );
+        assert_eq!(
+            check_icon.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Icon must carry CrossAxisAlignment::Center from production icon renderer"
+        );
+        assert_eq!(
+            check_icon.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Icon must carry MainAxisAlignment::Center from production icon renderer"
+        );
+        assert_eq!(
+            check_icon.style.descriptor.text_color,
+            Some(accent_color)
+        );
+        let label_dark = &item_dark.children[1];
+        assert!(matches!(&label_dark.kind, NodeKind::Text { content } if content == "Dark mode"));
+
+        // Row 6: Unchecked Checkbox ("notifications")
+        let item_notif = &initial_node.children[6];
+        assert_eq!(
+            item_notif.id.as_deref(),
+            Some("menu-item:notifications")
+        );
+        assert_eq!(
+            item_notif.a11y.role,
+            Some(NodeRole::MenuItemCheckBox)
+        );
+        assert_eq!(item_notif.a11y.toggled, Some(NodeToggled::False));
+        assert!(item_notif.interaction.focusable);
+        assert_eq!(item_notif.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
+        assert_eq!(item_notif.children.len(), 2);
+        let spacer_notif = &item_notif.children[0];
+        assert!(matches!(&spacer_notif.kind, NodeKind::Container));
+        assert_eq!(
+            spacer_notif.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            spacer_notif.style.descriptor.layout.width,
+            LayoutSizing::Fixed(expected_icon_size)
+        );
+        assert_eq!(
+            spacer_notif.style.descriptor.layout.height,
+            LayoutSizing::Fixed(expected_icon_size)
+        );
+
+        // Row 7: Radio Option ("high_contrast")
+        let item_radio = &initial_node.children[7];
+        assert_eq!(
+            item_radio.id.as_deref(),
+            Some("menu-item:high_contrast")
+        );
+        assert_eq!(
+            item_radio.a11y.role,
+            Some(NodeRole::MenuItemRadio)
+        );
+        assert_eq!(item_radio.a11y.toggled, Some(NodeToggled::False));
+        assert!(item_radio.interaction.focusable);
+        assert_eq!(item_radio.a11y.tab_index, Some(-1), "non-first enabled item must have tab_index=-1");
+
+        // Verify exact single tab-entry posture across initial_node
+        let initial_tab_stops = initial_node
+            .children
+            .iter()
+            .filter(|child| child.a11y.tab_index == Some(0))
+            .count();
+        assert_eq!(
+            initial_tab_stops, 1,
+            "Menu must have exactly one single tab_index=0 entry stop"
+        );
+
+        // ── 2. Mounted Host Setup & Layout Containment ─────────────────────
+        let actions = Arc::new(Mutex::new(Vec::new()));
+        let dark_mode_state = Arc::new(Mutex::new(true));
+        let notif_state = Arc::new(Mutex::new(false));
+        let contrast_state = Arc::new(Mutex::new(false));
+
+        let build_menu_node = |actions_sink: Arc<Mutex<Vec<String>>>,
+                               dm: Arc<Mutex<bool>>,
+                               notif: Arc<Mutex<bool>>,
+                               hc: Arc<Mutex<bool>>|
+         -> Node {
+            let spec = MenuSpec::new(generic_menu_entries(
+                *dm.lock().unwrap(),
+                *notif.lock().unwrap(),
+                *hc.lock().unwrap(),
+            ))
+            .with_aria_label("Document Actions");
+
+            let on_action = Some(Arc::new(move |val: &str| {
+                actions_sink.lock().unwrap().push(val.to_string());
+                if val == "dark_mode" {
+                    let mut flag = dm.lock().unwrap();
+                    *flag = !*flag;
+                } else if val == "notifications" {
+                    let mut flag = notif.lock().unwrap();
+                    *flag = !*flag;
+                } else if val == "high_contrast" {
+                    let mut flag = hc.lock().unwrap();
+                    *flag = !*flag;
+                }
+            }) as Arc<dyn Fn(&str) + Send + Sync>);
+
+            let mut n = poodle_render::menu(&spec, &RenderContext::new(&theme_inst), on_action);
+            n.id = Some("menu-panel".to_string());
+            n
+        };
+
+        let mounted = Arc::new(Mutex::new(build_menu_node(
+            Arc::clone(&actions),
+            Arc::clone(&dark_mode_state),
+            Arc::clone(&notif_state),
+            Arc::clone(&contrast_state),
+        )));
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 600.0);
+        driver.draw_frame();
+
+        let panel_bounds = poodle_gpui_node_backend::bounds_for("menu-panel").expect("menu-panel bounds");
+        assert!(panel_bounds.size.width >= px(min_width - 2.0), "panel width must meet size.menu.minWidth");
+        assert!(panel_bounds.size.height > px(0.0), "panel height must be positive");
+
+        let row_ids = [
+            ("new", "menu-item:new"),
+            ("print", "menu-item:print"),
+            ("delete", "menu-item:delete"),
+            ("save", "menu-item:save"),
+            ("dark_mode", "menu-item:dark_mode"),
+            ("notifications", "menu-item:notifications"),
+            ("high_contrast", "menu-item:high_contrast"),
+        ];
+
+        let mut prev_bottom: Option<Pixels> = None;
+        for (name, row_id) in &row_ids {
+            let b = poodle_gpui_node_backend::bounds_for(row_id)
+                .unwrap_or_else(|| panic!("bounds for {name} ({row_id})"));
+            assert!(b.size.width > px(0.0), "{name} width must be positive");
+            assert!(b.size.height >= px(item_min_height), "{name} height must meet item_min_height");
+            assert!(
+                b.left() >= panel_bounds.left()
+                    && b.right() <= panel_bounds.right()
+                    && b.top() >= panel_bounds.top()
+                    && b.bottom() <= panel_bounds.bottom(),
+                "{name} must be contained within menu panel bounds"
+            );
+            if let Some(prev) = prev_bottom {
+                assert!(
+                    b.top() >= prev - px(1.0),
+                    "{name} top ({:?}) must be below previous item bottom ({:?})",
+                    b.top(),
+                    prev
+                );
+            }
+            prev_bottom = Some(b.bottom());
+        }
+
+        // ── 3. Pointer Activation, Disabled & Separator Inertness ──────────
+        // 3a. Enabled action
+        driver.pointer_activate_id("menu-item:new");
+        assert_eq!(actions.lock().unwrap().as_slice(), ["new"]);
+
+        // 3b. Disabled action is inert
+        driver.pointer_activate_id("menu-item:print");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["new"],
+            "disabled action click must be inert"
+        );
+
+        // 3c. Destructive action
+        driver.pointer_activate_id("menu-item:delete");
+        assert_eq!(actions.lock().unwrap().as_slice(), ["new", "delete"]);
+
+        // 3d. Shortcut action
+        driver.pointer_activate_id("menu-item:save");
+        assert_eq!(actions.lock().unwrap().as_slice(), ["new", "delete", "save"]);
+
+        // ── 4. Controlled Checkbox & Radio State Rebuild ───────────────────
+        // 4a. Checkbox toggle true -> false
+        driver.pointer_activate_id("menu-item:dark_mode");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["new", "delete", "save", "dark_mode"]
+        );
+        assert!(!*dark_mode_state.lock().unwrap());
+        *mounted.lock().unwrap() = build_menu_node(
+            Arc::clone(&actions),
+            Arc::clone(&dark_mode_state),
+            Arc::clone(&notif_state),
+            Arc::clone(&contrast_state),
+        );
+        driver.draw_frame();
+        let rebuilt_dm = mounted.lock().unwrap().children[5].clone();
+        assert_eq!(rebuilt_dm.a11y.toggled, Some(NodeToggled::False));
+        assert!(matches!(&rebuilt_dm.children[0].kind, NodeKind::Container));
+
+        // 4b. Checkbox toggle false -> true
+        driver.pointer_activate_id("menu-item:notifications");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["new", "delete", "save", "dark_mode", "notifications"]
+        );
+        assert!(*notif_state.lock().unwrap());
+        *mounted.lock().unwrap() = build_menu_node(
+            Arc::clone(&actions),
+            Arc::clone(&dark_mode_state),
+            Arc::clone(&notif_state),
+            Arc::clone(&contrast_state),
+        );
+        driver.draw_frame();
+        let rebuilt_notif = mounted.lock().unwrap().children[6].clone();
+        assert_eq!(rebuilt_notif.a11y.toggled, Some(NodeToggled::True));
+        let notif_check = &rebuilt_notif.children[0];
+        assert!(matches!(&notif_check.kind, NodeKind::Icon { name, size } if name == "check" && *size == expected_icon_size));
+        assert_eq!(
+            notif_check.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Rebuilt checkbox Icon must carry LayoutDirection::Row"
+        );
+        assert_eq!(
+            notif_check.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Rebuilt checkbox Icon must carry CrossAxisAlignment::Center"
+        );
+        assert_eq!(
+            notif_check.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Rebuilt checkbox Icon must carry MainAxisAlignment::Center"
+        );
+        assert_eq!(
+            notif_check.style.descriptor.text_color,
+            Some(accent_color)
+        );
+
+        // 4c. Radio toggle false -> true
+        driver.pointer_activate_id("menu-item:high_contrast");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["new", "delete", "save", "dark_mode", "notifications", "high_contrast"]
+        );
+        assert!(*contrast_state.lock().unwrap());
+        *mounted.lock().unwrap() = build_menu_node(
+            Arc::clone(&actions),
+            Arc::clone(&dark_mode_state),
+            Arc::clone(&notif_state),
+            Arc::clone(&contrast_state),
+        );
+        driver.draw_frame();
+        let rebuilt_hc = mounted.lock().unwrap().children[7].clone();
+        assert_eq!(rebuilt_hc.a11y.toggled, Some(NodeToggled::True));
+        let radio_check = &rebuilt_hc.children[0];
+        assert!(matches!(&radio_check.kind, NodeKind::Icon { name, size } if name == "check" && *size == expected_icon_size));
+        assert_eq!(
+            radio_check.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Rebuilt radio Icon must carry LayoutDirection::Row"
+        );
+        assert_eq!(
+            radio_check.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Rebuilt radio Icon must carry CrossAxisAlignment::Center"
+        );
+        assert_eq!(
+            radio_check.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Rebuilt radio Icon must carry MainAxisAlignment::Center"
+        );
+        assert_eq!(
+            radio_check.style.descriptor.text_color,
+            Some(accent_color)
+        );
+
+        // ── 5. Keyboard Navigation (Roving Focus with Skip & Wrap) ─────────
+        driver.wait_for_focus_handle("menu-item:new");
+        driver.focus_element("menu-item:new");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:new"),
+            Some(true)
+        );
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("menu-item:print").is_none(),
+            "disabled menu item must not register a focus handle"
+        );
+
+        // 5a. Down arrow skips disabled "print" and separator "sep1" -> lands on "delete"
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:delete"),
+            Some(true),
+            "Down arrow must skip disabled item and separator to land on delete"
+        );
+
+        // 5b. Down arrow -> "save"
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:save"),
+            Some(true)
+        );
+
+        // 5c. End key -> lands on last enabled item ("high_contrast")
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:high_contrast"),
+            Some(true)
+        );
+
+        // 5d. Home key -> lands on first enabled item ("new")
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:new"),
+            Some(true)
+        );
+
+        // 5e. Up arrow wraps to last enabled item ("high_contrast")
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:high_contrast"),
+            Some(true)
+        );
+
+        // 5f. Space activates focused item
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["new", "delete", "save", "dark_mode", "notifications", "high_contrast", "high_contrast"]
+        );
+
+        // 5g. Focus "save" and Enter activates it
+        driver.focus_element("menu-item:save");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:save"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["new", "delete", "save", "dark_mode", "notifications", "high_contrast", "high_contrast", "save"]
+        );
+
+        // 5h. Escape is inert to item activation
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            actions.lock().unwrap().len(),
+            8,
+            "Escape must not activate any menu item"
+        );
+
+        // 5i. Mounted single-entry tab-stop posture proof
+        let current_mounted = mounted.lock().unwrap();
+        assert_eq!(current_mounted.children[0].a11y.tab_index, Some(0), "mounted 'new' item has tab_index=0");
+        assert_eq!(current_mounted.children[1].a11y.tab_index, Some(-1), "mounted 'print' item has tab_index=-1");
+        assert_eq!(current_mounted.children[2].a11y.tab_index, Some(-1), "mounted separator has tab_index=-1");
+        assert_eq!(current_mounted.children[3].a11y.tab_index, Some(-1), "mounted 'delete' item has tab_index=-1");
+        assert_eq!(current_mounted.children[4].a11y.tab_index, Some(-1), "mounted 'save' item has tab_index=-1");
+        assert_eq!(current_mounted.children[5].a11y.tab_index, Some(-1), "mounted 'dark_mode' item has tab_index=-1");
+        assert_eq!(current_mounted.children[6].a11y.tab_index, Some(-1), "mounted 'notifications' item has tab_index=-1");
+        assert_eq!(current_mounted.children[7].a11y.tab_index, Some(-1), "mounted 'high_contrast' item has tab_index=-1");
+        let mounted_tab_stops = current_mounted
+            .children
+            .iter()
+            .filter(|child| child.a11y.tab_index == Some(0))
+            .count();
+        assert_eq!(
+            mounted_tab_stops, 1,
+            "Mounted Menu must enforce exactly one single tab_index=0 entry stop"
+        );
+        drop(current_mounted);
+
+        let observation = driver.mounted_observation();
+        drop(driver);
+
+        // ── 6. Terminal Receipt Emission ───────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "Menu",
+            "nucleus.navigation.menu",
+            observation,
+            &[
+                "mount controlled Menu panel with action, disabled, separator, destructive, shortcut, checkbox, and radio items through HeadlessDriver",
+                "pointer activate enabled action, destructive action, shortcut action, and verify disabled row inertness",
+                "controlled toggle rebuild of checkbox and radio items through test-platform pointer dispatch",
+                "assert production check Icon metadata on checked checkbox and radio rows through controlled rebuild",
+                "keyboard navigate roving focus across enabled items with arrow keys skipping disabled and separator rows",
+                "keyboard jump to boundaries with Home/End and wrap around with directional arrows",
+                "keyboard activate focused items with Enter and Space while Escape remains inert to item activation",
+                "verify single-entry tab posture with first enabled item tab_index=0 and all other enabled, disabled, and separator rows tab_index=-1",
+            ],
+            &[
+                "production render path resolves root menu role, background elevation fill, border, surface radius, shadow, overlay posture, min-width, and padding",
+                "each item resolves menuitem/menuitemcheckbox/menuitemradio role, focusable state, pointer cursor, hover/focus highlight, min-height, padding, radius, and label styling",
+                "disabled item resolves menuitem role, disabled opacity, non-focusable state, and inert activation",
+                "separator resolves splitter role, fixed height, subtle border color, and non-focusable state",
+                "checked checkbox and radio items render production check Icon with accent color and toggled True state",
+                "unchecked checkbox renders container spacer with toggled False state",
+                "shortcut action renders secondary caption typography in the trailing column",
+                "destructive item renders status.danger typography and danger hover/focus highlight tint",
+                "pointer activation fires callback and rebuilds controlled checked state while disabled clicks remain inert",
+                "keyboard navigation skips disabled and separator rows in both directions, jumps to boundaries with Home/End, and wraps at edges",
+                "Enter and Space activate the focused item once while Escape never activates an item",
+                "mounted bounds confirm positive dimensions, child containment, and vertical row order",
+                "panel enforces single tab-entry posture with exactly one enabled row at tab_index 0 while all other rows carry tab_index -1",
+            ],
+        );
+    });
+}

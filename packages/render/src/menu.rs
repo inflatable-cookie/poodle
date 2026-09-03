@@ -7,15 +7,40 @@
 
 use std::sync::Arc;
 
+use poodle_headless::menu::{menu_list_navigate, MenuListMove};
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole, NodeToggled, StylePatch,
+    NodeKey, NodeModifiers, NodeRole, NodeToggled, StylePatch,
 };
-use poodle_specs::{ControlDensity, ControlSize, MenuItemKind, MenuSpec};
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, MenuItemKind, MenuSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
+use crate::icon::icon;
 use crate::presentation::{control_height_rem, rem_to_px};
+
+fn roving_key_handler(
+    disabled_map: &[bool],
+    item_ids: &[String],
+    current_idx: usize,
+) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
+    let disabled = disabled_map.to_vec();
+    let ids = item_ids.to_vec();
+    Some(Arc::new(move |key, _modifiers| {
+        let mv = match key {
+            NodeKey::ArrowDown => MenuListMove::Next,
+            NodeKey::ArrowUp => MenuListMove::Prev,
+            NodeKey::Home => MenuListMove::First,
+            NodeKey::End => MenuListMove::Last,
+            _ => return None,
+        };
+        let next_idx = menu_list_navigate(&disabled, current_idx, mv);
+        if next_idx == current_idx {
+            return None;
+        }
+        Some(ids[next_idx].clone())
+    }))
+}
 
 pub fn menu(
     spec: &MenuSpec,
@@ -33,6 +58,10 @@ pub fn menu(
     });
     let item_min_height = rem_to_px(control_height_rem(effective_size));
     let meta_font_size = ctx.theme().resolve_space("typography.caption.size");
+
+    let icon_size = IconSize::from(effective_size);
+    let check_icon_spec = IconSpec::new("check").with_size(icon_size);
+    let check_icon_size = ctx.theme().resolve_space(check_icon_spec.size_token());
 
     let item_px = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
@@ -86,8 +115,24 @@ pub fn menu(
         s.overlay = true;
     }
 
+    let first_enabled_idx = spec
+        .items
+        .iter()
+        .position(|entry| !entry.is_disabled && entry.kind != MenuItemKind::Separator);
+
+    let disabled_map: Vec<bool> = spec
+        .items
+        .iter()
+        .map(|entry| matches!(entry.kind, MenuItemKind::Separator) || entry.is_disabled)
+        .collect();
+    let item_ids: Vec<String> = spec
+        .items
+        .iter()
+        .map(|entry| format!("menu-item:{}", entry.value))
+        .collect();
+
     // One item body shared by all three interactive kinds.
-    let build_item = |entry: &poodle_specs::MenuEntry, leading: Option<Node>| -> Node {
+    let build_item = |entry: &poodle_specs::MenuEntry, leading: Option<Node>, idx: usize| -> Node {
         let label_color = if entry.is_destructive {
             danger_color
         } else {
@@ -96,6 +141,7 @@ pub fn menu(
 
         let mut item = Node::container();
         item.id = Some(format!("menu-item:{}", entry.value));
+        item.runtime_id = Some(format!("menu-item:{}", entry.value));
         {
             let s = &mut item.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -112,7 +158,6 @@ pub fn menu(
             s.descriptor.corner_radii.bottom_right = item_radius;
             s.descriptor.corner_radii.bottom_left = item_radius;
         }
-        item.interaction.focusable = true;
 
         if let Some(lead) = leading {
             item = item.child(lead);
@@ -130,7 +175,7 @@ pub fn menu(
 
         // Trailing: a check (action kind only) or the mono shortcut hint.
         if matches!(entry.kind, MenuItemKind::Action) && entry.is_checked {
-            let mut check = Node::icon("check", font_size);
+            let mut check = icon(&check_icon_spec, ctx);
             check.style.descriptor.text_color = Some(accent_color);
             item = item.child(check);
         } else if let Some(ref shortcut) = entry.shortcut_label {
@@ -142,12 +187,23 @@ pub fn menu(
 
         if entry.is_disabled {
             item.style.descriptor.opacity = disabled_opacity;
+            item.style.descriptor.cursor = CursorHint::NotAllowed;
+            item.interaction.disabled = true;
+            item.interaction.focusable = false;
+            item.a11y.tab_index = Some(-1);
         } else {
             let hover = if entry.is_destructive {
                 danger_hover_tint
             } else {
                 hover_tint
             };
+            item.interaction.disabled = false;
+            item.interaction.focusable = true;
+            item.a11y.tab_index = Some(if Some(idx) == first_enabled_idx {
+                0
+            } else {
+                -1
+            });
             item.style.descriptor.cursor = CursorHint::Pointer;
             item.style.hover = Some(StylePatch {
                 background: Some(hover),
@@ -155,6 +211,13 @@ pub fn menu(
                 text_color: None,
                 opacity: None,
             });
+            item.style.focus = Some(StylePatch {
+                background: Some(hover),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            });
+            item.interaction.on_key = roving_key_handler(&disabled_map, &item_ids, idx);
             if let Some(handler) = &on_action {
                 let handler = Arc::clone(handler);
                 let value = entry.value.clone();
@@ -164,7 +227,7 @@ pub fn menu(
         item
     };
 
-    for entry in &spec.items {
+    for (idx, entry) in spec.items.iter().enumerate() {
         match entry.kind {
             MenuItemKind::Separator => {
                 let mut sep = Node::container();
@@ -177,25 +240,27 @@ pub fn menu(
                     s.descriptor.layout.spacing.margin.top = separator_my;
                     s.descriptor.layout.spacing.margin.bottom = separator_my;
                 }
+                sep.interaction.disabled = true;
+                sep.interaction.focusable = false;
+                sep.a11y.tab_index = Some(-1);
                 sep.a11y.role = Some(NodeRole::Splitter);
                 el = el.child(sep);
             }
             MenuItemKind::Checkbox | MenuItemKind::Radio => {
                 // Leading check or a blank spacer keeping labels aligned.
-                let check_size = font_size;
                 let leading = if entry.is_checked {
-                    let mut c = Node::icon("check", check_size);
+                    let mut c = icon(&check_icon_spec, ctx);
                     c.style.descriptor.text_color = Some(accent_color);
                     c
                 } else {
                     let mut s = Node::container();
                     // Explicit Row (see switch.rs).
                     s.style.descriptor.layout.direction = LayoutDirection::Row;
-                    s.style.descriptor.layout.width = LayoutSizing::Fixed(check_size);
-                    s.style.descriptor.layout.height = LayoutSizing::Fixed(check_size);
+                    s.style.descriptor.layout.width = LayoutSizing::Fixed(check_icon_size);
+                    s.style.descriptor.layout.height = LayoutSizing::Fixed(check_icon_size);
                     s
                 };
-                let mut item = build_item(entry, Some(leading));
+                let mut item = build_item(entry, Some(leading), idx);
                 item.a11y.role = Some(match entry.kind {
                     MenuItemKind::Radio => NodeRole::MenuItemRadio,
                     _ => NodeRole::MenuItemCheckBox,
@@ -208,7 +273,7 @@ pub fn menu(
                 el = el.child(item);
             }
             MenuItemKind::Action => {
-                let mut item = build_item(entry, None);
+                let mut item = build_item(entry, None, idx);
                 item.a11y.role = Some(NodeRole::MenuItem);
                 el = el.child(item);
             }
@@ -254,5 +319,236 @@ mod tests {
         let refusing = MenuSpec::default().with_dismiss_on_outside_interact(false);
         let node = menu(&refusing, &ctx, None);
         assert!(node.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn disabled_items_are_not_focusable_and_lack_activation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("enabled", "Enabled"),
+            poodle_specs::MenuEntry::new("disabled", "Disabled").with_disabled(true),
+            poodle_specs::MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+        ]);
+        let node = menu(&spec, &ctx, Some(Arc::new(|_| {})));
+
+        let enabled_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:enabled"))
+            .expect("enabled item");
+        assert!(enabled_item.interaction.focusable);
+        assert!(!enabled_item.interaction.disabled);
+        assert_eq!(enabled_item.a11y.tab_index, Some(0));
+        assert!(enabled_item.style.hover.is_some());
+        assert!(enabled_item.style.focus.is_some());
+        assert!(enabled_item.interaction.on_activate.is_some());
+        assert!(enabled_item.interaction.on_key.is_some());
+
+        let disabled_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:disabled"))
+            .expect("disabled item");
+        assert!(!disabled_item.interaction.focusable);
+        assert!(disabled_item.interaction.disabled);
+        assert_eq!(disabled_item.a11y.tab_index, Some(-1));
+        assert!(disabled_item.style.hover.is_none());
+        assert!(disabled_item.style.focus.is_none());
+        assert!(disabled_item.interaction.on_activate.is_none());
+        assert!(disabled_item.interaction.on_key.is_none());
+
+        let sep = node
+            .find(&|n| n.a11y.role == Some(NodeRole::Splitter))
+            .expect("separator");
+        assert!(!sep.interaction.focusable);
+        assert!(sep.interaction.disabled);
+        assert_eq!(sep.a11y.tab_index, Some(-1));
+    }
+
+    #[test]
+    fn roving_key_navigation_skips_disabled_and_separators() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("first", "First"),
+            poodle_specs::MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("disabled", "Disabled").with_disabled(true),
+            poodle_specs::MenuEntry::new("last", "Last"),
+        ]);
+        let node = menu(&spec, &ctx, None);
+
+        let first = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:first"))
+            .expect("first item");
+        let first_key = first.interaction.on_key.as_ref().expect("key handler");
+
+        // ArrowDown from first skips sep and disabled, lands on last
+        assert_eq!(
+            first_key(NodeKey::ArrowDown, NodeModifiers::default()),
+            Some("menu-item:last".into())
+        );
+        // ArrowUp from first wraps to last
+        assert_eq!(
+            first_key(NodeKey::ArrowUp, NodeModifiers::default()),
+            Some("menu-item:last".into())
+        );
+        // End lands on last
+        assert_eq!(
+            first_key(NodeKey::End, NodeModifiers::default()),
+            Some("menu-item:last".into())
+        );
+
+        let last = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:last"))
+            .expect("last item");
+        let last_key = last.interaction.on_key.as_ref().expect("key handler");
+
+        // ArrowDown from last wraps to first
+        assert_eq!(
+            last_key(NodeKey::ArrowDown, NodeModifiers::default()),
+            Some("menu-item:first".into())
+        );
+        // ArrowUp from last skips disabled and sep, lands on first
+        assert_eq!(
+            last_key(NodeKey::ArrowUp, NodeModifiers::default()),
+            Some("menu-item:first".into())
+        );
+        // Home lands on first
+        assert_eq!(
+            last_key(NodeKey::Home, NodeModifiers::default()),
+            Some("menu-item:first".into())
+        );
+
+        // Space, ArrowLeft, and other non-navigation keys are inert for roving
+        assert_eq!(last_key(NodeKey::Space, NodeModifiers::default()), None);
+        assert_eq!(last_key(NodeKey::ArrowLeft, NodeModifiers::default()), None);
+    }
+
+    #[test]
+    fn single_entry_tab_posture_assigns_zero_to_first_enabled_and_minus_one_to_all_others() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        // Leading disabled item and separator must not steal tab_index=0;
+        // only the first enabled item gets tab_index=0, subsequent enabled items get -1.
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("disabled_0", "Disabled First").with_disabled(true),
+            poodle_specs::MenuEntry::new("sep_1", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("enabled_2", "First Enabled"),
+            poodle_specs::MenuEntry::new("enabled_3", "Second Enabled"),
+            poodle_specs::MenuEntry::new("sep_4", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("enabled_5", "Third Enabled"),
+            poodle_specs::MenuEntry::new("disabled_6", "Disabled Last").with_disabled(true),
+        ]);
+        let node = menu(&spec, &ctx, None);
+
+        let d0 = node.find(&|n| n.id.as_deref() == Some("menu-item:disabled_0")).unwrap();
+        assert_eq!(d0.a11y.tab_index, Some(-1));
+        assert!(!d0.interaction.focusable);
+
+        let e2 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_2")).unwrap();
+        assert_eq!(e2.a11y.tab_index, Some(0), "first enabled item must be single tab entry stop");
+        assert!(e2.interaction.focusable);
+
+        let e3 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_3")).unwrap();
+        assert_eq!(e3.a11y.tab_index, Some(-1), "subsequent enabled item must be tab_index -1");
+        assert!(e3.interaction.focusable);
+
+        let e5 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_5")).unwrap();
+        assert_eq!(e5.a11y.tab_index, Some(-1), "subsequent enabled item must be tab_index -1");
+        assert!(e5.interaction.focusable);
+
+        let d6 = node.find(&|n| n.id.as_deref() == Some("menu-item:disabled_6")).unwrap();
+        assert_eq!(d6.a11y.tab_index, Some(-1));
+        assert!(!d6.interaction.focusable);
+
+        // Verify exactly one item in the entire menu has tab_index == Some(0)
+        let tab_stop_count = node
+            .children
+            .iter()
+            .filter(|child| child.a11y.tab_index == Some(0))
+            .count();
+        assert_eq!(tab_stop_count, 1);
+
+        // When all items are disabled or separators, no item has tab_index=0
+        let all_inert_spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("d1", "D1").with_disabled(true),
+            poodle_specs::MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+            poodle_specs::MenuEntry::new("d2", "D2").with_disabled(true),
+        ]);
+        let inert_node = menu(&all_inert_spec, &ctx, None);
+        for child in &inert_node.children {
+            assert_eq!(child.a11y.tab_index, Some(-1));
+            assert!(!child.interaction.focusable);
+        }
+    }
+
+    #[test]
+    fn checked_items_render_production_icon_metadata() {
+        use poodle_node::NodeKind;
+
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let accent = ctx.theme().resolve_color("color.accent.base");
+
+        let spec = MenuSpec::new(vec![
+            poodle_specs::MenuEntry::new("action_checked", "Checked Action")
+                .with_checked(true),
+            poodle_specs::MenuEntry::new("checkbox_checked", "Checked Box")
+                .with_kind(MenuItemKind::Checkbox)
+                .with_checked(true),
+            poodle_specs::MenuEntry::new("radio_checked", "Checked Radio")
+                .with_kind(MenuItemKind::Radio)
+                .with_checked(true),
+        ]);
+        let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+        let expected_icon_size = ctx.theme().resolve_space(
+            IconSpec::new("check")
+                .with_size(IconSize::from(effective_size))
+                .size_token(),
+        );
+        let node = menu(&spec, &ctx, None);
+
+        // Action checked has trailing check icon
+        let action_item = node.find(&|n| n.id.as_deref() == Some("menu-item:action_checked")).unwrap();
+        let action_icon = action_item.children.iter().find(|c| matches!(c.kind, NodeKind::Icon { .. })).unwrap();
+        match &action_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "check");
+                assert_eq!(*size, expected_icon_size);
+            }
+            _ => panic!("expected NodeKind::Icon"),
+        }
+        assert_eq!(action_icon.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(action_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(action_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(action_icon.style.descriptor.text_color, Some(accent));
+
+        // Checkbox checked has leading check icon
+        let cb_item = node.find(&|n| n.id.as_deref() == Some("menu-item:checkbox_checked")).unwrap();
+        let cb_icon = &cb_item.children[0];
+        match &cb_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "check");
+                assert_eq!(*size, expected_icon_size);
+            }
+            _ => panic!("expected NodeKind::Icon"),
+        }
+        assert_eq!(cb_icon.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(cb_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(cb_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(cb_icon.style.descriptor.text_color, Some(accent));
+
+        // Radio checked has leading check icon
+        let radio_item = node.find(&|n| n.id.as_deref() == Some("menu-item:radio_checked")).unwrap();
+        let radio_icon = &radio_item.children[0];
+        match &radio_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "check");
+                assert_eq!(*size, expected_icon_size);
+            }
+            _ => panic!("expected NodeKind::Icon"),
+        }
+        assert_eq!(radio_icon.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(radio_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(radio_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(radio_icon.style.descriptor.text_color, Some(accent));
     }
 }
