@@ -81,6 +81,13 @@ Jetstream, workflows, versions, releases, or other component rows.
 
 ## Validation
 
+PR #186 review revision closes the activation and typography counterexamples:
+default single-click is mounted and inert before a distinct default
+double-click entry; `enterOrSpace` enters through separate mounted Enter and
+Space paths; display and input Nodes carry label size, weight, relative
+line-height, and explicit sans-family inheritance metadata; empty display text
+carries italics.
+
 Run focused EditableLabel spec/machine/render/backend tests, the named mounted
 fixture, `effigy regressions:native`, receipt and ledger tests,
 `effigy check:parity-evidence-ledger`, `effigy ci:rust`, `effigy ci:native`,

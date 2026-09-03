@@ -18,17 +18,19 @@ was strengthened rather than duplicated.
 The fixture mounts
 `node_compat::EditableLabel::from_spec(...).into_element()` through the
 element-backed `HeadlessDriver`. It proves host-owned committed state remains
-separate from the session draft; exact double-click, Enter, Space, printable,
-Escape, Tab, blur, disabled, and programmatic input boundaries; Unicode-scalar
-`maxLength`; portable trim set T including NEL and BOM while preserving ZWSP;
-unchanged trimmed commit; Enter/Escape focus restoration; Tab/blur departure;
-equal-valued caller-id isolation; silent focused teardown; display/input roles,
-accessible-name fallback, typography, field treatment, positive bounds,
-containment, and non-overlap. Receipt emission follows the terminal teardown
-assertion.
+separate from the session draft; inert default single-click and distinct
+default double-click entry; `enterOrSpace` entry through mounted pointer, Enter,
+and Space paths; printable, Escape, Tab, blur, disabled, and programmatic input
+boundaries; Unicode-scalar `maxLength`; portable trim set T including NEL and
+BOM while preserving ZWSP; unchanged trimmed commit; Enter/Escape focus
+restoration; Tab/blur departure; equal-valued caller-id isolation; silent
+focused teardown; display/input roles, accessible-name fallback, label size,
+weight, line-height, explicit sans-family inheritance metadata, empty-state
+italics, field treatment, positive bounds, containment, and non-overlap.
+Receipt emission follows the terminal teardown assertion.
 
 All 17 receipts and the manifest pin runtime source
-`313a1f56bcc1041d1aa8a939e95d5422525c9392`. The generated ledger advances only
+`ccf068f49e33b905e4ed6c1b6523c73f697655f4`. The generated ledger advances only
 EditableLabel's GPUI mounted-behaviour cell: 17 mounted, 158 missing. M1 does
 not infer A1 or V1.
 
@@ -42,13 +44,14 @@ not infer A1 or V1.
   the adapter-backed element.
 - `packages/render/src/editable_label.rs`: display `Button` and editing
   `TextInput` roles, text/not-allowed cursor projection, display tab stop, and
-  focus-ring metadata.
+  focus-ring metadata; shared label size, weight, relative line-height, and
+  sans-family metadata; empty-state italics.
 - `packages/contracts/components/src/editable_label.rs`: focused spec tests for
   defaults, draft/value separation, name fallback, Unicode-scalar selection,
   and semantic token projection.
 - Receipt cohort, manifest, generated evidence ledger, this card, and this log.
 
-## Focused repair
+## Focused repairs
 
 Committed counterexample `efe896169a142eb259e7c5361ef5f875800f09af`
 mounted the production adapter and failed before receipt emission:
@@ -65,6 +68,22 @@ API, live draft callback, host persistence, browser behavior, Nucleus data, or
 IME work changed. The Rust contract has no EditableLabel read-only input; this
 card did not invent one. Disabled and programmatic activation paths are inert.
 
+PR #186 review oracle `d8e89dcc0b39b79822571973d547da182ea64529`
+added the missing activation matrix and exact typography plants, then failed
+before receipt emission:
+
+```text
+assertion `left == right` failed
+  left: None
+ right: Some(500)
+```
+
+Repair `837785a8d8310e2fa2804000e5002658a962ef16` projects contract-owned
+weight, relative label line-height, and explicit sans-family inheritance
+metadata on display/input Nodes plus empty-state italics. The same mounted
+fixture proves default single-click stays out of editing, default double-click
+enters, and `enterOrSpace` enters independently through Enter and Space.
+
 ## Review oracle falsification
 
 | Invariant | Smallest counterexample | Observed proof |
@@ -72,7 +91,7 @@ card did not invent one. Disabled and programmatic activation paths are inert.
 | Production adapter owns execution | mount the renderer Node directly | adapter element mount, adapter-stamped ids, bounds, focus handles, and dispatch trace are required |
 | Draft and committed value stay separate | paint the committed value in edit mode | mounted input paints `Kicks` while host value remains `Kick` until Enter |
 | Input is mounted | call a transition or callback directly | GPUI test-platform dispatch and mounted observation are required for receipt emission |
-| Activation routes are exact | accept one click in double-click mode or activate programmatic | phase and callback assertions fail |
+| Activation routes are exact | accept one click in double-click mode, lose either `enterOrSpace` key, or activate programmatic | mounted phase, callback, selection, and focus assertions fail |
 | Commit and cancel differ | commit Escape or retain draft after cancel | rebuilt value, draft, previous-value, and callback trace fail |
 | Focus departure is exact | restore after Tab/blur or lose display focus after Enter/Escape | active focus-handle assertions fail |
 | Trim law is exact | use Rust `str::trim` | NEL/BOM assertion fails; ZWSP preservation catches over-trim |
@@ -81,6 +100,7 @@ card did not invent one. Disabled and programmatic activation paths are inert.
 | Identity is caller-scoped | reuse one runtime id for equal values | focus, draft, callbacks, or bounds cross instances |
 | Geometry is exact | overlap fields or escape the mount box | positive, ordering, and containment assertions fail |
 | Semantics are exact | omit display Button or editing TextInput role | committed red proof fails before receipt emission |
+| Typography is exact | omit weight, relative line-height, sans metadata, or empty italics | exact production Node assertion fails; committed review oracle observed missing weight |
 | Evidence identity is exact | retain the g16.079 SHA | receipt cohort validation rejects the source mismatch |
 | Levels stay separate | label M1 as A1 or V1 | receipt schema test rejects the proof level |
 
@@ -98,7 +118,7 @@ Focused:
 Required boards:
 
 - `effigy regressions:native` — 187 passed; all 17 receipts emitted at runtime
-  `313a1f56bcc1041d1aa8a939e95d5422525c9392`.
+  `ccf068f49e33b905e4ed6c1b6523c73f697655f4`.
 - `bun test scripts/nucleus-parity-receipts.test.ts` — 8 passed.
 - `bun test scripts/parity-evidence-ledger.test.ts` — 6 passed.
 - `effigy check:parity-evidence-ledger` — 176 rows validated.
