@@ -9,7 +9,7 @@ Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-083-nucleus-agent-transcript
 Planning base: `068bb7f3b95340954142a71b896bf70c3b8b5892`
 Preparation-accepted head: `61c5cc7c909ea8cfce44c044fbb6559b303dc44a`
 Finalization base: `dec442579f400a78d7b656f6feaa8943520b4f57`
-Runtime source: `2d14d7e6afa25976cd475afb6b60542027b47216`
+Runtime source: `08c4cb9f134bec0d2a7023ca372f29715cdfed5d`
 PR: `#190`
 
 ## Outcome
@@ -21,7 +21,7 @@ test platform. The retained
 emits only after its terminal production-dependency assertion.
 
 All 20 cohort receipts and the manifest pin runtime source
-`2d14d7e6afa25976cd475afb6b60542027b47216`. The generated ledger advances only
+`08c4cb9f134bec0d2a7023ca372f29715cdfed5d`. The generated ledger advances only
 AgentTranscript's GPUI mounted-behaviour cell: 20 mounted, 155 missing. M1 does
 not infer A1 or V1.
 
@@ -36,8 +36,9 @@ not infer A1 or V1.
   radius without either Surface elevation shadow channel. Structural assertions
   fail if a raw shell replaces the production Surface composition.
 - Host-owned disclosure and appended records rebuild the production factory.
-  Duplicate instances keep separate runtime IDs, focus, callbacks, bounds, and
-  scroll state.
+  Duplicate instances keep separate runtime IDs, focus, callbacks, and bounds.
+  The separate scroll fixture owns one real tracked scroll state and makes no
+  duplicate-scroll claim.
 - Mounted keyboard, pointer, wheel, and jump-control input proves exact callback
   order, bounded overflow, detached-reader preservation, and return to pinned
   following.
@@ -59,7 +60,12 @@ composed the exact AgentMessage Surface treatment without shadow or invented
 posture metadata.
 
 Runtime commit `2d14d7e6a` makes the stable receipt fixture execute that accepted
-dependency oracle and emits only after its terminal assertion.
+dependency oracle and emits only after its terminal assertion. Review
+counterexample `b56acd5d6` then replaced off-mount inspection with a generic
+paint-time backend observation and failed on escaped mount bounds. Runtime
+repair `08c4cb9f1` gives the two-instance fixture a containing host, asserts all
+five mounted blocks and the appended runtime ID, and makes positive
+EmptyState/Spinner/Text bounds terminal.
 
 ## Receipt identity
 
@@ -71,7 +77,7 @@ dependency oracle and emits only after its terminal assertion.
 | Proof level | `M1` |
 | Runtime | `gpui-headless` |
 | Command | `effigy regressions:native` |
-| Source commit | `2d14d7e6afa25976cd475afb6b60542027b47216` |
+| Source commit | `08c4cb9f134bec0d2a7023ca372f29715cdfed5d` |
 | Outcome | `passed` |
 
 ## Validation

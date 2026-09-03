@@ -18,7 +18,7 @@ Produce the first named production-path mounted proof for Nucleus
 runtime source.
 
 Completed at runtime source
-`2d14d7e6afa25976cd475afb6b60542027b47216`. The 20-receipt cohort shares that
+`08c4cb9f134bec0d2a7023ca372f29715cdfed5d`. The 20-receipt cohort shares that
 identity, and the generated ledger advances only AgentTranscript from missing
 to mounted. M1 does not infer A1 or V1.
 
@@ -33,12 +33,16 @@ to mounted. M1 does not infer A1 or V1.
 - Prove real production Text, Surface, EmptyState, and Spinner composition;
   ordered records and statuses; exact elevated user-message fill and radius
   without shadow; bounded scrolling; mount containment; and caller-scoped
-  duplicate identity.
+  duplicate runtime, focus, callback, and bounds identity.
 - Host state owns records, disclosure, and appended content. Keyboard, pointer,
   wheel, and jump-control input pass through the mounted GPUI test platform and
   production rebuild factory.
 - Empty and loading structures are mounted and bounded through the production
   path. The receipt emits only after their terminal structural assertion.
+- Paint-time backend observation proves exact mounted record roles, available
+  statuses, content, dependency structure, and Surface style. All five initial
+  blocks have positive, ordered, non-overlapping bounds inside their production
+  parent; both transcript roots stay inside the mount.
 - Preparation committed both biting counterexamples before their generalized
   native repairs and was independently accepted at
   `61c5cc7c909ea8cfce44c044fbb6559b303dc44a`.
@@ -52,10 +56,10 @@ to mounted. M1 does not infer A1 or V1.
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
 | Production adapter owns execution | mount renderer Node directly | adapter identity/lifecycle fails |
-| Dependencies are real | replace Text/Surface with raw nodes | exact metadata or layout fails |
+| Dependencies are real | replace Text/Surface with raw nodes | mounted paint facts or layout fails |
 | Host ownership is real | mutate records without rebuild | mounted order/content stays stale |
-| Postures differ | collapse empty/loading/error/content | exact structure/status fails |
-| Identity is caller-scoped | reuse one runtime id | focus/scroll/callback state crosses |
+| Postures differ | collapse empty/loading/content | mounted dependency or record-status proof fails |
+| Identity is caller-scoped | reuse one runtime id | focus, callback, or bounds identity crosses |
 | Geometry is exact | reorder rows, overlap, or escape mount | order/containment fails |
 | Receipt is terminal | fail final posture/isolation assertion | no receipt is emitted |
 | Evidence identity is exact | emit before predecessor merge | cohort validation fails |

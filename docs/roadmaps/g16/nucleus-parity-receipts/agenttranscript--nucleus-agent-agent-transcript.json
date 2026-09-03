@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "2d14d7e6afa25976cd475afb6b60542027b47216",
+  "source_commit": "08c4cb9f134bec0d2a7023ca372f29715cdfed5d",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
   "lock_resolution": [
@@ -47,15 +47,15 @@
   },
   "actions": [
     "mount caller-scoped AgentTranscript instances through node_compat::AgentTranscript::from_spec(...).into_element() in HeadlessDriver",
-    "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding from host-owned records",
+    "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding and appending host-owned records",
     "replace an empty transcript with a spinning activity through the production factory and observe the mounted dependency structures"
   ],
   "assertions": [
-    "production Text, Surface, EmptyState, and Spinner composition preserves the accepted contract-owned structure and token treatment",
-    "the user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
-    "authored record order, roles, statuses, transcript containment, child geometry, and caller-scoped duplicate identity remain exact",
-    "host rebuilds preserve scoped disclosure state and detached scroll position while mounted keyboard, pointer, wheel, and jump input take effect",
-    "empty and loading rebuilds mount the real contained EmptyState and Spinner plus Text structures before terminal receipt emission"
+    "paint-time node facts and positive bounds prove the real mounted Text, Surface, EmptyState, and Spinner dependency structures",
+    "the mounted user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
+    "all five mounted record blocks preserve exact roles, available statuses, content, order, non-overlap, production-parent containment, and caller-scoped identity",
+    "host rebuilds append the scoped runtime id in order and preserve disclosure state; the separately mounted scroll fixture preserves detached position while keyboard, pointer, wheel, and jump input take effect",
+    "empty and loading rebuilds mount positive contained EmptyState and Spinner plus Text child bounds before terminal receipt emission"
   ],
   "outcome": "passed",
   "artifact_paths": []
