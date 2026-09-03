@@ -31843,6 +31843,37 @@ fn detail_item_scoped_node_matches_contract_defaults_structure_and_tokens() {
     assert_eq!(default_stacked.style.descriptor.layout.spacing.gap, 4.0);
     assert_eq!(default_stacked.children[1].style.descriptor.layout.spacing.gap, 4.0);
 
+    for (density, scope, expected_gap) in [
+        (ControlDensity::Compact, "compact-gap", 2.0),
+        (ControlDensity::Default, "default-gap", 3.0),
+        (ControlDensity::Comfortable, "comfortable-gap", 4.0),
+    ] {
+        let density_node = node_compat::DetailItem::from_spec(
+            DetailItemSpec::new("Density")
+                .with_layout(DetailItemLayout::Stacked)
+                .with_density(density),
+            &theme_provider,
+        )
+        .with_instance_id(scope)
+        .into_compat_node();
+        let expected_id = format!("detail-item:{scope}");
+        let content = density_node
+            .children
+            .iter()
+            .find(|child| child.roles.get("part").map(String::as_str) == Some("content"))
+            .expect("surface-stacked DetailItem content row");
+
+        assert_eq!(density_node.id.as_deref(), Some(expected_id.as_str()));
+        assert_eq!(
+            (
+                density_node.style.descriptor.layout.spacing.gap,
+                content.style.descriptor.layout.spacing.gap,
+            ),
+            (expected_gap, expected_gap),
+            "surface-stacked root and content gaps follow the exact density ladder"
+        );
+    }
+
     let simple_inline = poodle_render::detail_item(
         &DetailItemSpec::new("Workspace")
             .with_value("Poodle")
