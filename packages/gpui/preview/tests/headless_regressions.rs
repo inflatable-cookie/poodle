@@ -32233,7 +32233,30 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
         for channel in ["structure.identity.container", "structure.identity.button", "content.text-icon.text", "semantic.token-roles.received"] {
             assert!(channels.contains(&channel), "backend receives {channel}");
         }
-        assert!(driver.mounted_observation().is_valid());
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "DetailItem",
+            "nucleus.settings.detail-item",
+            observation,
+            &[
+                "mount duplicate caller-scoped controlled DetailItem instances through node_compat::DetailItem::from_spec(...).into_element() in a 640x320 HeadlessDriver host",
+                "compose production Text label, supporting, and value nodes with a real Button action through the shared renderer and compatibility adapter",
+                "dispatch mounted pointer input to the inert value and interactive left action paths",
+                "dispatch mounted keyboard activation to the duplicate right action path",
+                "rebuild both host-owned instances across surface inline, surface stacked, and simple inline presentations",
+            ],
+            &[
+                "portable defaults, explicit presentations, layouts, spans, densities, truncation, empty values, and accessibility labels reach exact mounted metadata",
+                "production Text and Button dependencies preserve exact label, supporting, value, and action structure plus typography, color, line-height, weight, and truncation recipes",
+                "surface background, radius, padding, alignment, and stacked gaps stay exact while simple inline remains baseline with no surface chrome",
+                "both duplicate roots and their children remain contained, ordered, and non-overlapping initially and after every host rebuild",
+                "the value and root remain inert while pointer and keyboard action callbacks rebuild only their owning instance",
+                "caller-scoped runtime ids, focus, callbacks, controlled state, and geometry remain isolated across duplicate instances",
+            ],
+        );
     });
 }
 
