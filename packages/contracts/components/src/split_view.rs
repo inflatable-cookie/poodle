@@ -213,3 +213,110 @@ impl SplitViewSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_spec_and_builder_methods() {
+        let spec = SplitViewSpec::new("workspace:main", SplitOrientation::Horizontal)
+            .with_ratio(0.65)
+            .with_default_ratio(0.5)
+            .with_min_primary_size(150.0)
+            .with_min_secondary_size(200.0)
+            .with_primary_size(300.0)
+            .with_secondary_size(400.0)
+            .with_primary_collapsed(true)
+            .with_secondary_collapsed(false)
+            .with_disabled(true)
+            .with_show_collapse_primary(true)
+            .with_show_collapse_secondary(true)
+            .with_toggle_visibility(SplitToggleVisibility::Hover)
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Chrome)
+            .with_density(ControlDensity::Compact)
+            .with_aria_label("Main editor split")
+            .with_primary_collapse(100.0, 0.0)
+            .with_secondary_collapse(120.0, 48.0);
+
+        assert_eq!(spec.instance_id, "workspace:main");
+        assert_eq!(spec.orientation, SplitOrientation::Horizontal);
+        assert_eq!(spec.ratio, Some(0.65));
+        assert_eq!(spec.default_ratio, 0.5);
+        assert_eq!(spec.min_primary_size, Some(150.0));
+        assert_eq!(spec.min_secondary_size, Some(200.0));
+        assert_eq!(spec.primary_size, Some(300.0));
+        assert_eq!(spec.secondary_size, Some(400.0));
+        assert!(spec.is_primary_collapsed);
+        assert!(!spec.is_secondary_collapsed);
+        assert!(spec.is_disabled);
+        assert!(spec.show_collapse_primary);
+        assert!(spec.show_collapse_secondary);
+        assert_eq!(spec.toggle_visibility, SplitToggleVisibility::Hover);
+        assert_eq!(spec.size, Some(ControlSize::Lg));
+        assert_eq!(spec.size_role, SemanticControlSizeRole::Chrome);
+        assert_eq!(spec.density, Some(ControlDensity::Compact));
+        assert_eq!(spec.aria_label.as_deref(), Some("Main editor split"));
+        assert_eq!(spec.collapse_primary_below_size, Some(100.0));
+        assert_eq!(spec.primary_collapsed_size, Some(0.0));
+        assert_eq!(spec.collapse_secondary_below_size, Some(120.0));
+        assert_eq!(spec.secondary_collapsed_size, Some(48.0));
+    }
+
+    #[test]
+    fn divider_instance_id_derives_from_instance_scope() {
+        let spec = SplitViewSpec::new("editor:left", SplitOrientation::Horizontal);
+        assert_eq!(spec.divider_instance_id(), "editor:left:divider");
+    }
+
+    #[test]
+    fn current_ratio_resolves_and_clamps() {
+        let unconfigured = SplitViewSpec::new("split", SplitOrientation::Horizontal);
+        assert_eq!(unconfigured.current_ratio(), 0.5);
+
+        let explicit = SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(0.35);
+        assert_eq!(explicit.current_ratio(), 0.35);
+
+        let clamped_low = SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(-0.5);
+        assert_eq!(clamped_low.current_ratio(), 0.0);
+
+        let clamped_high = SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(1.5);
+        assert_eq!(clamped_high.current_ratio(), 1.0);
+    }
+
+    #[test]
+    fn keyboard_resize_supported_requires_uncollapsed_panes() {
+        let open = SplitViewSpec::new("split", SplitOrientation::Horizontal);
+        assert!(open.keyboard_resize_supported());
+
+        let primary_collapsed =
+            SplitViewSpec::new("split", SplitOrientation::Horizontal).with_primary_collapsed(true);
+        assert!(!primary_collapsed.keyboard_resize_supported());
+
+        let secondary_collapsed = SplitViewSpec::new("split", SplitOrientation::Horizontal)
+            .with_secondary_collapsed(true);
+        assert!(!secondary_collapsed.keyboard_resize_supported());
+    }
+
+    #[test]
+    fn toggles_hidden_until_hover_policy() {
+        let always = SplitViewSpec::new("split", SplitOrientation::Horizontal)
+            .with_toggle_visibility(SplitToggleVisibility::Always);
+        assert!(!always.toggles_hidden_until_hover());
+
+        let hover_open = SplitViewSpec::new("split", SplitOrientation::Horizontal)
+            .with_toggle_visibility(SplitToggleVisibility::Hover);
+        assert!(hover_open.toggles_hidden_until_hover());
+
+        let hover_primary_collapsed = SplitViewSpec::new("split", SplitOrientation::Horizontal)
+            .with_toggle_visibility(SplitToggleVisibility::Hover)
+            .with_primary_collapsed(true);
+        assert!(!hover_primary_collapsed.toggles_hidden_until_hover());
+
+        let hover_secondary_collapsed = SplitViewSpec::new("split", SplitOrientation::Horizontal)
+            .with_toggle_visibility(SplitToggleVisibility::Hover)
+            .with_secondary_collapsed(true);
+        assert!(!hover_secondary_collapsed.toggles_hidden_until_hover());
+    }
+}

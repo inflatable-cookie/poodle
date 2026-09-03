@@ -8467,43 +8467,269 @@ fn a_disabled_resize_handle_takes_no_focus_and_answers_no_key() {
     });
 }
 
-/// g15.040 review. Two ordinary `SplitView`s on one page compose two dividers.
+/// g15.040 review / g16.070: Two ordinary `SplitView`s on one page compose two dividers.
 /// While the handle keyed itself on orientation and accessible name, both
 /// derived the same key and resolved ONE backend focus handle: focusing one
 /// divider focused the other, and keys landed on whichever painted last. Each
-/// split now states its own scope and derives the divider's from it.
+/// split states its own scope and derives the divider's from it.
+///
+/// Strengthened for g16.070: verifies production SplitView structure and layout
+/// metadata (orientation, fill, min sizes, ratio flex bases, overflow clipping),
+/// caller-owned divider instance identity and focus isolation, test-platform keyboard
+/// resize dispatch (axis arrows, Home/End, cross-axis filtering), primary collapse
+/// toggle composition via production CollapseToggle and Icon renderers, mounted
+/// layout child containment and pane ordering, and emits the M1 receipt at the
+/// terminal boundary.
 #[test]
 fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
-    use poodle_specs::{ResizeHandleSpec, SplitOrientation, SplitViewSpec};
+    use poodle_node::{
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+        MainAxisAlignment, NodeKind, NodeRole,
+    };
+    use poodle_render::{
+        resize_handle_focus_id, split_view, ResizePhase, SplitViewHandlers,
+    };
+    use poodle_specs::{
+        ResizeHandleSpec, SplitOrientation, SplitViewSpec,
+    };
+    use poodle_tokens::semantic;
 
     run_headless(|cx| {
-        // Same orientation, same (absent) label, same ratio — everything a
-        // derived key could see is identical.
-        let left = SplitViewSpec::new("workspace:left", SplitOrientation::Horizontal);
-        let right = SplitViewSpec::new("workspace:right", SplitOrientation::Horizontal);
-        let divider_id = |spec: &SplitViewSpec| {
-            poodle_render::resize_handle_focus_id(&ResizeHandleSpec::new(
-                spec.divider_instance_id(),
-            ))
-        };
-        let (left_id, right_id) = (divider_id(&left), divider_id(&right));
-        assert_ne!(left_id, right_id);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
 
-        let build = |spec: &SplitViewSpec| {
-            poodle_render::split_view(
-                spec,
-                &RenderContext::new(&theme()),
-                Some(Node::text("primary")),
-                Some(Node::text("secondary")),
-                poodle_render::SplitViewHandlers {
-                    on_resize: Some(Arc::new(|_phase, _delta| {})),
-                    ..poodle_render::SplitViewHandlers::default()
-                },
-            )
-        };
-        let tree = Node::container().child(build(&left)).child(build(&right));
+        // ── 1. Variant, Token & Structural Verification for SplitView ──────
+        let vertical_spec = SplitViewSpec::new("workspace:vertical-probe", SplitOrientation::Vertical)
+            .with_ratio(0.35)
+            .with_min_primary_size(80.0)
+            .with_min_secondary_size(110.0)
+            .with_show_collapse_primary(true)
+            .with_show_collapse_secondary(true)
+            .with_aria_label("Vertical split probe");
+        let vertical_node = split_view(&vertical_spec, &ctx, None, None, SplitViewHandlers::default());
+        assert_eq!(
+            vertical_node.style.descriptor.layout.direction,
+            LayoutDirection::Column,
+            "Vertical split root must have column layout direction"
+        );
+        assert!(vertical_node.style.fill_width && vertical_node.style.fill_height);
+        assert_eq!(vertical_node.style.descriptor.layout.width, LayoutSizing::Grow);
+        assert_eq!(vertical_node.a11y.label.as_deref(), Some("Vertical split probe"));
 
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(tree)));
+        let v_primary = &vertical_node.children[0];
+        assert_eq!(v_primary.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(v_primary.style.fill_width, "Vertical split pane must fill width");
+        assert_eq!(v_primary.style.min_height, Some(80.0));
+        assert_eq!(v_primary.style.flex_grow, Some(1.0));
+        assert_eq!(v_primary.style.flex_basis_pct, Some(0.35));
+
+        let v_secondary = &vertical_node.children[2];
+        assert_eq!(v_secondary.style.min_height, Some(110.0));
+        assert_eq!(v_secondary.style.flex_grow, Some(1.0));
+        assert!((v_secondary.style.flex_basis_pct.unwrap() - 0.65).abs() < 1e-5);
+
+        let v_divider = &vertical_node.children[1];
+        let v_handle = &v_divider.children[0];
+        assert_eq!(v_handle.a11y.role, Some(NodeRole::Splitter));
+        assert_eq!(v_handle.a11y.orientation.as_deref(), Some("vertical"));
+        assert_eq!(v_handle.style.descriptor.cursor, CursorHint::RowResize);
+
+        let v_cluster = &v_divider.children[1];
+        let v_p_icon = &v_cluster.children[0].children[0];
+        let v_s_icon = &v_cluster.children[1].children[0];
+        match &v_p_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-up");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("Vertical primary collapse toggle must emit chevron-up icon"),
+        }
+        match &v_s_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-down");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("Vertical secondary collapse toggle must emit chevron-down icon"),
+        }
+
+        // ── 2. Two Composed Horizontal SplitViews Setup ────────────────────
+        let left_spec = SplitViewSpec::new("workspace:left", SplitOrientation::Horizontal)
+            .with_ratio(0.4)
+            .with_min_primary_size(100.0)
+            .with_min_secondary_size(120.0)
+            .with_show_collapse_primary(true)
+            .with_aria_label("Workspace split left");
+
+        let right_spec = SplitViewSpec::new("workspace:right", SplitOrientation::Horizontal)
+            .with_ratio(0.4)
+            .with_min_primary_size(100.0)
+            .with_min_secondary_size(120.0)
+            .with_aria_label("Workspace split right");
+
+        let left_id = resize_handle_focus_id(&ResizeHandleSpec::new(left_spec.divider_instance_id()));
+        let right_id = resize_handle_focus_id(&ResizeHandleSpec::new(right_spec.divider_instance_id()));
+        assert_ne!(left_id, right_id, "Divider runtime IDs must be distinct");
+        assert_eq!(left_id, "resize-handle:workspace:left:divider");
+        assert_eq!(right_id, "resize-handle:workspace:right:divider");
+
+        let subject_resizes = Arc::new(Mutex::new(Vec::<(ResizePhase, f32)>::new()));
+        let witness_resizes = Arc::new(Mutex::new(Vec::<(ResizePhase, f32)>::new()));
+        let subject_collapses = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let witness_collapses = Arc::new(Mutex::new(Vec::<bool>::new()));
+
+        let subject_resize_sink = Arc::clone(&subject_resizes);
+        let witness_resize_sink = Arc::clone(&witness_resizes);
+        let subject_collapse_sink = Arc::clone(&subject_collapses);
+        let witness_collapse_sink = Arc::clone(&witness_collapses);
+
+        let mut left_primary_pane = Node::container();
+        left_primary_pane.id = Some("nucleus-split-left-primary".to_string());
+        left_primary_pane = left_primary_pane.child(Node::text("Left Primary Content"));
+
+        let mut left_secondary_pane = Node::container();
+        left_secondary_pane.id = Some("nucleus-split-left-secondary".to_string());
+        left_secondary_pane = left_secondary_pane.child(Node::text("Left Secondary Content"));
+
+        let mut left_split_node = split_view(
+            &left_spec,
+            &ctx,
+            Some(left_primary_pane),
+            Some(left_secondary_pane),
+            SplitViewHandlers {
+                on_resize: Some(Arc::new(move |phase, delta| {
+                    subject_resize_sink.lock().unwrap().push((phase, delta));
+                })),
+                on_primary_collapse: Some(Arc::new(move |next| {
+                    subject_collapse_sink.lock().unwrap().push(next);
+                })),
+                ..SplitViewHandlers::default()
+            },
+        );
+        left_split_node.id = Some("nucleus-split-view-subject".to_string());
+
+        let mut right_primary_pane = Node::container();
+        right_primary_pane.id = Some("nucleus-split-right-primary".to_string());
+        right_primary_pane = right_primary_pane.child(Node::text("Right Primary Content"));
+
+        let mut right_secondary_pane = Node::container();
+        right_secondary_pane.id = Some("nucleus-split-right-secondary".to_string());
+        right_secondary_pane = right_secondary_pane.child(Node::text("Right Secondary Content"));
+
+        let mut right_split_node = split_view(
+            &right_spec,
+            &ctx,
+            Some(right_primary_pane),
+            Some(right_secondary_pane),
+            SplitViewHandlers {
+                on_resize: Some(Arc::new(move |phase, delta| {
+                    witness_resize_sink.lock().unwrap().push((phase, delta));
+                })),
+                on_primary_collapse: Some(Arc::new(move |next| {
+                    witness_collapse_sink.lock().unwrap().push(next);
+                })),
+                ..SplitViewHandlers::default()
+            },
+        );
+        right_split_node.id = Some("nucleus-split-view-witness".to_string());
+
+        // Verify subject node structure & CollapseToggle / Icon composition
+        assert_eq!(
+            left_split_node.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Horizontal split root must have row layout direction"
+        );
+        assert!(left_split_node.style.fill_width && left_split_node.style.fill_height);
+        assert_eq!(left_split_node.style.descriptor.layout.width, LayoutSizing::Grow);
+        assert_eq!(left_split_node.a11y.label.as_deref(), Some("Workspace split left"));
+
+        let primary_pane_node = &left_split_node.children[0];
+        assert_eq!(primary_pane_node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(primary_pane_node.style.fill_height);
+        assert_eq!(primary_pane_node.style.descriptor.layout.overflow_x, LayoutOverflow::Hidden);
+        assert_eq!(primary_pane_node.style.descriptor.layout.overflow_y, LayoutOverflow::Hidden);
+        assert_eq!(primary_pane_node.style.min_width, Some(100.0));
+        assert_eq!(primary_pane_node.style.flex_grow, Some(1.0));
+        assert_eq!(primary_pane_node.style.flex_basis_pct, Some(0.4));
+
+        let secondary_pane_node = &left_split_node.children[2];
+        assert_eq!(secondary_pane_node.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(secondary_pane_node.style.fill_height);
+        assert_eq!(secondary_pane_node.style.descriptor.layout.overflow_x, LayoutOverflow::Hidden);
+        assert_eq!(secondary_pane_node.style.descriptor.layout.overflow_y, LayoutOverflow::Hidden);
+        assert_eq!(secondary_pane_node.style.min_width, Some(120.0));
+        assert_eq!(secondary_pane_node.style.flex_grow, Some(1.0));
+        assert!((secondary_pane_node.style.flex_basis_pct.unwrap() - 0.6).abs() < 1e-5);
+
+        let divider_node = &left_split_node.children[1];
+        let handle_node = &divider_node.children[0];
+        assert_eq!(handle_node.runtime_id.as_deref(), Some("resize-handle:workspace:left:divider"));
+        assert_eq!(handle_node.a11y.role, Some(NodeRole::Splitter));
+        assert_eq!(handle_node.a11y.orientation.as_deref(), Some("horizontal"));
+        assert_eq!(handle_node.a11y.label.as_deref(), Some("Resize"));
+        assert!(handle_node.interaction.focusable);
+        assert_eq!(handle_node.style.descriptor.cursor, CursorHint::ColResize);
+        assert_eq!(
+            handle_node.style.descriptor.background,
+            Some(ctx.theme().resolve_color(semantic::COLOR_BORDER_SUBTLE))
+        );
+        let handle_focus_patch = handle_node.style.focus.as_ref().expect("handle focus patch");
+        assert_eq!(
+            handle_focus_patch.background,
+            Some(ctx.theme().resolve_color(semantic::COLOR_ACCENT_FOCUS_RING))
+        );
+
+        let cluster_node = &divider_node.children[1];
+        let toggle_button = &cluster_node.children[0];
+        assert_eq!(toggle_button.a11y.role, Some(NodeRole::Button));
+        assert_eq!(toggle_button.a11y.label.as_deref(), Some("Collapse"));
+        assert_eq!(toggle_button.a11y.expanded, Some(true));
+        assert_eq!(toggle_button.a11y.tab_index, Some(0));
+        assert!(toggle_button.interaction.focusable);
+        assert_eq!(toggle_button.style.descriptor.cursor, CursorHint::Pointer);
+        let toggle_ring = toggle_button.style.focus_ring.as_ref().expect("toggle focus ring");
+        assert_eq!(
+            toggle_ring.color,
+            ctx.theme().resolve_color(semantic::COLOR_ACCENT_FOCUS_RING)
+        );
+
+        let chevron_node = &toggle_button.children[0];
+        match &chevron_node.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-left");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("Primary collapse toggle must render chevron-left icon"),
+        }
+        assert_eq!(
+            chevron_node.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "Icon must carry LayoutDirection::Row from production icon renderer"
+        );
+        assert_eq!(
+            chevron_node.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center,
+            "Icon must carry CrossAxisAlignment::Center from production icon renderer"
+        );
+        assert_eq!(
+            chevron_node.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center,
+            "Icon must carry MainAxisAlignment::Center from production icon renderer"
+        );
+        assert_eq!(
+            chevron_node.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color(semantic::COLOR_TEXT_SECONDARY)),
+            "Collapse toggle chevron must carry text.secondary color"
+        );
+
+        // ── 3. Mount in Test Platform & Focus Handle Isolation ─────────────
+        let mut root_container = Node::container();
+        root_container.style.descriptor.layout.direction = LayoutDirection::Column;
+        root_container.style.descriptor.layout.spacing.gap = 16.0;
+        root_container.style.fill_width = true;
+        root_container.style.fill_height = true;
+        root_container = root_container.child(left_split_node).child(right_split_node);
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root_container)), 640.0, 320.0);
         driver.wait_for_focus_handle(&left_id);
         driver.wait_for_focus_handle(&right_id);
 
@@ -8511,21 +8737,197 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&left_id),
             Some(true),
+            "Subject divider must receive focus"
         );
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&right_id),
             Some(false),
-            "the other split's divider is a different control and stays blurred",
+            "Witness divider must remain blurred when subject is focused"
         );
 
         driver.focus_element(&right_id);
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&right_id),
             Some(true),
+            "Witness divider must receive focus"
         );
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&left_id),
             Some(false),
+            "Subject divider must blur when witness is focused"
+        );
+
+        // ── 4. Dispatched Keyboard Resize & Handler Isolation Proof ────────
+        driver.focus_element(&left_id);
+        driver.dispatch_key_raw("right");
+        driver.dispatch_key_raw("left");
+        driver.dispatch_key_raw("home");
+        driver.dispatch_key_raw("end");
+        driver.dispatch_key_raw("up");
+        driver.dispatch_key_raw("down");
+
+        assert_eq!(
+            *subject_resizes.lock().unwrap(),
+            vec![
+                (ResizePhase::Start, 0.0),
+                (ResizePhase::Move, 8.0),
+                (ResizePhase::End, 0.0),
+                (ResizePhase::Start, 0.0),
+                (ResizePhase::Move, -8.0),
+                (ResizePhase::End, 0.0),
+                (ResizePhase::Start, 0.0),
+                (ResizePhase::Move, -9999.0),
+                (ResizePhase::End, 0.0),
+                (ResizePhase::Start, 0.0),
+                (ResizePhase::Move, 9999.0),
+                (ResizePhase::End, 0.0),
+            ],
+            "Dispatched arrow keys must produce +/-8px gestures, Home/End saturating, and cross-axis keys must be ignored"
+        );
+        assert!(
+            witness_resizes.lock().unwrap().is_empty(),
+            "Witness split must not receive resize events from subject divider keyboard dispatch"
+        );
+
+        driver.focus_element(&right_id);
+        driver.dispatch_key_raw("right");
+
+        assert_eq!(
+            *witness_resizes.lock().unwrap(),
+            vec![
+                (ResizePhase::Start, 0.0),
+                (ResizePhase::Move, 8.0),
+                (ResizePhase::End, 0.0),
+            ],
+            "Witness divider must independently receive its dispatched resize event"
+        );
+        assert_eq!(
+            subject_resizes.lock().unwrap().len(),
+            12,
+            "Subject split handler count must remain unchanged when witness divider is resized"
+        );
+
+        // ── 5. Mounted CollapseToggle Keyboard Activation Proof ───────────
+        driver.focus_element(&left_id);
+        driver.focus_next_tab_stop();
+        driver.dispatch_key_raw("enter");
+
+        assert_eq!(
+            *subject_collapses.lock().unwrap(),
+            vec![true],
+            "Keyboard activation on focused collapse toggle must report next collapsed value true"
+        );
+        assert!(
+            witness_collapses.lock().unwrap().is_empty(),
+            "Witness collapse handler must remain untouched"
+        );
+
+        // ── 6. Mounted Layout, Positive Dimensions & Child Containment ─────
+        let subject_bounds = poodle_gpui_node_backend::bounds_for("nucleus-split-view-subject")
+            .expect("mounted subject split bounds");
+        let left_primary_bounds = poodle_gpui_node_backend::bounds_for("nucleus-split-left-primary")
+            .expect("mounted left primary pane bounds");
+        let left_divider_bounds = poodle_gpui_node_backend::bounds_for(&left_id)
+            .expect("mounted left divider bounds");
+        let left_secondary_bounds = poodle_gpui_node_backend::bounds_for("nucleus-split-left-secondary")
+            .expect("mounted left secondary pane bounds");
+
+        let witness_bounds = poodle_gpui_node_backend::bounds_for("nucleus-split-view-witness")
+            .expect("mounted witness split bounds");
+        let right_primary_bounds = poodle_gpui_node_backend::bounds_for("nucleus-split-right-primary")
+            .expect("mounted right primary pane bounds");
+        let right_divider_bounds = poodle_gpui_node_backend::bounds_for(&right_id)
+            .expect("mounted right divider bounds");
+        let right_secondary_bounds = poodle_gpui_node_backend::bounds_for("nucleus-split-right-secondary")
+            .expect("mounted right secondary pane bounds");
+
+        for (name, b) in [
+            ("subject", subject_bounds),
+            ("left primary", left_primary_bounds),
+            ("left divider", left_divider_bounds),
+            ("left secondary", left_secondary_bounds),
+            ("witness", witness_bounds),
+            ("right primary", right_primary_bounds),
+            ("right divider", right_divider_bounds),
+            ("right secondary", right_secondary_bounds),
+        ] {
+            assert!(
+                b.size.width > px(0.0) && b.size.height > px(0.0),
+                "{name} bounds must have positive dimensions: got {:?}",
+                b
+            );
+        }
+
+        // Subject pane containment & horizontal sequence proof (with documented inline toggle cluster)
+        for (name, b) in [
+            ("left primary pane", left_primary_bounds),
+            ("left secondary pane", left_secondary_bounds),
+        ] {
+            assert!(
+                b.left() >= subject_bounds.left()
+                    && b.right() <= subject_bounds.right()
+                    && b.top() >= subject_bounds.top()
+                    && b.bottom() <= subject_bounds.bottom(),
+                "{name} must be contained within subject split bounds"
+            );
+        }
+        assert!(
+            left_divider_bounds.left() >= subject_bounds.left()
+                && left_divider_bounds.right() <= subject_bounds.right(),
+            "Left divider must be contained horizontally within subject split bounds"
+        );
+
+        // Horizontal sequence ordering proof
+        assert!(
+            left_primary_bounds.right() <= left_divider_bounds.left(),
+            "Left primary pane must precede left divider horizontally"
+        );
+        assert!(
+            left_divider_bounds.right() <= left_secondary_bounds.left(),
+            "Left divider must precede left secondary pane horizontally"
+        );
+
+        // Witness child containment & sequence proof (pure SplitView with direct ResizeHandle divider)
+        for (name, b) in [
+            ("right primary pane", right_primary_bounds),
+            ("right divider", right_divider_bounds),
+            ("right secondary pane", right_secondary_bounds),
+        ] {
+            assert!(
+                b.left() >= witness_bounds.left()
+                    && b.right() <= witness_bounds.right()
+                    && b.top() >= witness_bounds.top()
+                    && b.bottom() <= witness_bounds.bottom(),
+                "{name} must be contained within witness split bounds"
+            );
+        }
+        assert!(
+            right_primary_bounds.right() <= right_divider_bounds.left(),
+            "Right primary pane must precede right divider horizontally"
+        );
+        assert!(
+            right_divider_bounds.right() <= right_secondary_bounds.left(),
+            "Right divider must precede right secondary pane horizontally"
+        );
+
+        // ── 7. Terminal Receipt Emission ───────────────────────────────────
+        nucleus_receipts::emit_if_configured(
+            "SplitView",
+            "nucleus.shell.split-view",
+            driver.mounted_observation(),
+            &[
+                "mount two composed SplitViews with caller-scoped divider instance IDs through HeadlessDriver",
+                "dispatch keyboard arrow and Home/End resize input through GPUI test platform",
+                "dispatch cross-axis keys to prove axis filter isolation",
+                "dispatch keyboard activation to primary collapse toggle",
+            ],
+            &[
+                "production render path resolves root orientation, ratio flex bases, min-size constraints, overflow clipping, and aria-label",
+                "caller-scoped divider instance IDs prevent focus handle aliasing across multiple mounted SplitViews",
+                "mounted keyboard input dispatches axis-constrained deltas and saturating Home/End to the focused split divider with complete handler isolation",
+                "primary collapse toggle composes production CollapseToggle and Icon renderers with accurate button role, label, expanded state, and focus ring",
+                "mounted bounds confirm positive dimensions, pane ordering, and child containment within owning SplitView layouts",
+            ],
         );
     });
 }
