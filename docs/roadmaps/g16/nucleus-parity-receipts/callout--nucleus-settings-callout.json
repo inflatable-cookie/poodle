@@ -1,0 +1,66 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Callout",
+  "scenario_id": "nucleus.settings.callout",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "2d0e963c0b082c258213749a6d8d452339c7c01b",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount caller-scoped controlled Callout instances through node_compat::Callout::from_spec(...).into_element() in a 560x360 HeadlessDriver host",
+    "compose one live Button action and one disabled Button action through the production renderer and node_compat adapter",
+    "activate the live and disabled actions through mounted pointer input",
+    "request dismissal through mounted pointer input while the host refuses the controlled rebuild, then accept through mounted keyboard input",
+    "activate the duplicate witness dismissal through mounted keyboard input after the subject unmounts"
+  ],
+  "assertions": [
+    "production Callout composition preserves exact body, actions, dismiss part order and metadata with real Icon and Button dependencies",
+    "the ControlSize::Sm ladder resolves exact 8px root gap, 9px status icon, 12px title, 11px message, and 24px dismiss geometry",
+    "warning tint, announcement role, labels, density, padding, border, radius, and color token metadata remain exact",
+    "positive mounted bounds preserve mount containment, internal containment, part ordering, and duplicate-instance separation",
+    "the live Button action emits exactly one callback while the disabled Button action remains inert",
+    "a refused controlled dismissal remains mounted and an accepted host rebuild removes only the subject Callout",
+    "caller-scoped runtime ids, focus, callbacks, controlled visibility, and geometry remain isolated across duplicate instances"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}

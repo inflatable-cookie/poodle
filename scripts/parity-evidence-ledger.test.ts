@@ -27,11 +27,13 @@ describe("g16.001 parity evidence ledger", () => {
     expect(buttonRow).not.toContain("Known Deltas` | not-applicable");
   });
 
-  it("keeps an expected mounted test missing until a receipt exists", () => {
+  it("keeps an expected mounted test distinct from receipt evidence", () => {
     const ledger = generateLedgerMarkdown(root);
     const calloutRow = ledger.split("\n").find((line) => line.startsWith("| Callout |"));
-    expect(calloutRow).toContain("expected `docs/roadmaps/g16/nucleus-parity-manifest.json#nucleus.settings.callout`");
-    expect(calloutRow).toContain("no validated M1 receipt");
+    expect(calloutRow).toContain(
+      "mounted — validated `docs/roadmaps/g16/nucleus-parity-receipts/callout--nucleus-settings-callout.json#proof_level`",
+    );
+    expect(calloutRow).not.toContain("no validated M1 receipt");
     expect(ledger).toContain(
       "| Callout | `packages/gpui/preview/tests/headless_regressions.rs#callout_dismiss_rebuilds_the_host_spec_through_mounted_input` | expected only |",
     );
