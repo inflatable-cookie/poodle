@@ -29030,6 +29030,129 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
     });
 }
 
+/// g16.091. Production ToastHost placement owns the authored viewport inset;
+/// the composed stack cannot shift itself again inside that host.
+#[test]
+fn toast_host_all_placements_are_exact_ordered_and_contained_when_mounted() {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    use poodle_specs::{ToastHostPlacement, ToastHostSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let build = Rc::new(move || {
+            let host = |scope: &'static str, placement| {
+                node_compat::ToastHost::from_spec(
+                    ToastHostSpec::new().with_placement(placement),
+                    &theme_provider,
+                )
+                .with_instance_id(scope)
+                .toasts(vec![
+                    Toast::new("first", format!("{scope} first"))
+                        .with_message("Mounted placement proof")
+                        .with_action_label("Inspect"),
+                    Toast::new("second", format!("{scope} second"))
+                        .with_tone(ToastTone::Success),
+                ])
+            };
+            div()
+                .relative()
+                .size_full()
+                .child(host("top-start", ToastHostPlacement::TopStart))
+                .child(host("top-end", ToastHostPlacement::TopEnd))
+                .child(host("bottom-start", ToastHostPlacement::BottomStart))
+                .child(host("bottom-end", ToastHostPlacement::BottomEnd))
+                .into_any_element()
+        }) as Rc<dyn Fn() -> gpui::AnyElement>;
+
+        let driver = HeadlessDriver::new_element_in_box(cx, build, 960.0, 720.0);
+        let mount = driver.mount_box_bounds();
+        let exact = |actual: Pixels, expected: Pixels, label: &str| {
+            assert!(
+                (f32::from(actual) - f32::from(expected)).abs() <= 0.5,
+                "{label}: expected {expected:?}, got {actual:?}"
+            );
+        };
+        let bounds = |id: &str| {
+            poodle_gpui_node_backend::bounds_for(id)
+                .unwrap_or_else(|| panic!("mounted bounds for {id}"))
+        };
+
+        for (scope, start, top) in [
+            ("top-start", true, true),
+            ("top-end", false, true),
+            ("bottom-start", true, false),
+            ("bottom-end", false, false),
+        ] {
+            let host = bounds(&format!("toast-host:{scope}"));
+            let stack = bounds(&format!("toast-host:{scope}:stack"));
+            exact(host.size.width, px(448.0), &format!("{scope} 28rem cap"));
+            if start {
+                exact(
+                    host.left(),
+                    mount.left() + px(16.0),
+                    &format!("{scope} authored 1rem inline edge"),
+                );
+                exact(
+                    stack.left(),
+                    host.left(),
+                    &format!("{scope} stack must not add a second inline inset"),
+                );
+            } else {
+                exact(
+                    host.right(),
+                    mount.right() - px(16.0),
+                    &format!("{scope} authored 1rem inline edge"),
+                );
+                exact(
+                    stack.right(),
+                    host.right(),
+                    &format!("{scope} stack must not add a second inline inset"),
+                );
+            }
+            if top {
+                exact(
+                    host.top(),
+                    mount.top() + px(16.0),
+                    &format!("{scope} authored 1rem block edge"),
+                );
+                exact(
+                    stack.top(),
+                    host.top(),
+                    &format!("{scope} stack must not add a second block inset"),
+                );
+            } else {
+                exact(
+                    host.bottom(),
+                    mount.bottom() - px(16.0),
+                    &format!("{scope} authored 1rem block edge"),
+                );
+                exact(
+                    stack.bottom(),
+                    host.bottom(),
+                    &format!("{scope} stack must not add a second block inset"),
+                );
+            }
+            assert!(bounds_contain(host, stack), "{scope} stack escaped host");
+
+            let first = bounds(&format!("toast-host:{scope}:toast:first"));
+            let second = bounds(&format!("toast-host:{scope}:toast:second"));
+            assert!(bounds_contain(stack, first), "{scope} first row escaped stack");
+            assert!(bounds_contain(stack, second), "{scope} second row escaped stack");
+            assert!(
+                first.bottom() <= second.top(),
+                "{scope} authored row order overlaps or reversed: {first:?}, {second:?}"
+            );
+
+            let action = bounds(&format!("toast-host:{scope}:toast:first:action"));
+            let dismiss = bounds(&format!("toast-host:{scope}:toast:first:dismiss"));
+            let icon = bounds(&format!("toast-host:{scope}:toast:first:dismiss-icon"));
+            assert!(bounds_contain(first, action), "{scope} action escaped row");
+            assert!(bounds_contain(first, dismiss), "{scope} dismiss escaped row");
+            assert!(bounds_contain(dismiss, icon), "{scope} Icon escaped dismiss");
+        }
+    });
+}
+
 /// g16.091. Duplicate production ToastHost mounts must retain caller-scoped
 /// identity even when their controlled queues reuse the same toast id.
 #[test]
