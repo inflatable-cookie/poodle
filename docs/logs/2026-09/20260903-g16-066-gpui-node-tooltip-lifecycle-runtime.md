@@ -9,6 +9,7 @@ Governing refs: `docs/contracts/components/tooltip.md`,
 Branch: `fix/g16-066-gpui-tooltip-runtime`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-066-gpui-tooltip-runtime`
 Planning base: `200c15780` (`origin/main` after g16.062 / PR #170)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/171
 
 ## Outcome
 

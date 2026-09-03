@@ -8,6 +8,7 @@ Depends on: current `Node.tooltip` contract; `g16.062` only for merge ordering
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `065-tabs-native-tooltip-parity.md`, `../../contracts/components/tooltip.md`
 Log: `../../logs/2026-09/20260903-g16-066-gpui-node-tooltip-lifecycle-runtime.md`
+PR: #171
 
 ## Goal
 
