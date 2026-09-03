@@ -1016,15 +1016,76 @@ fn app_header_resolves_structure_token_styling_and_layout_through_mounted_backen
             row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             row.style.descriptor.layout.spacing.gap = 8.0;
 
-            let icon_spec = IconSpec::new("search").with_size(IconSize::Sm);
+            let icon_spec = IconSpec::new("search")
+                .with_size(IconSize::Sm)
+                .with_aria_label("Application Search");
             let mut icon_node = poodle_render::icon(&icon_spec, scope);
             icon_node.id = Some("nucleus-app-header-identity-icon".to_owned());
+
+            let expected_icon_size =
+                scope.theme().resolve_space(poodle_tokens::semantic::SIZE_ICON_SM);
+            let expected_icon_tint = scope.theme().resolve_color("color.icon.primary");
+            assert_eq!(
+                icon_node.a11y.label.as_deref(),
+                Some("Application Search"),
+                "Identity icon must retain spec aria_label via production renderer"
+            );
+            assert_eq!(
+                icon_node.style.descriptor.text_color,
+                Some(expected_icon_tint),
+                "Identity icon must carry explicit primary tint resolved by production renderer"
+            );
+            match &icon_node.kind {
+                NodeKind::Icon { name, size } => {
+                    assert_eq!(name, "search", "Identity icon must name the glyph");
+                    assert_eq!(
+                        *size, expected_icon_size,
+                        "Identity icon must match resolved token size"
+                    );
+                }
+                _ => panic!("Identity icon must emit NodeKind::Icon from poodle_render::icon"),
+            }
 
             let text_spec = TextSpec::new("Poodle Nucleus")
                 .with_weight(TextWeight::Semibold)
                 .with_size(TextSize::Sm);
             let mut text_node = poodle_render::text(&text_spec, scope);
             text_node.id = Some("nucleus-app-header-identity-text".to_owned());
+
+            let expected_text_color = scope.theme().resolve_color(text_spec.color_token());
+            assert_eq!(
+                text_node.style.descriptor.text_color,
+                Some(expected_text_color),
+                "Identity text must carry tone color resolved by production renderer"
+            );
+            assert_eq!(
+                text_node.style.text_size,
+                Some(13.0),
+                "Identity text must carry resolved Sm font size (13px) from production renderer"
+            );
+            assert_eq!(
+                text_node.style.text_weight,
+                Some(600),
+                "Identity text must carry Semibold weight (600) from production renderer"
+            );
+            assert_eq!(
+                text_node.style.line_height,
+                Some(1.5),
+                "Identity text must carry normal line height (1.5) from production renderer"
+            );
+            assert!(
+                text_node.style.text_wrap,
+                "Identity text must carry text_wrap enabled from production renderer"
+            );
+            match &text_node.kind {
+                NodeKind::Text { content } => {
+                    assert_eq!(
+                        content, "Poodle Nucleus",
+                        "Identity text must match authored content"
+                    );
+                }
+                _ => panic!("Identity text must emit NodeKind::Text from poodle_render::text"),
+            }
 
             row.child(icon_node).child(text_node)
         });
