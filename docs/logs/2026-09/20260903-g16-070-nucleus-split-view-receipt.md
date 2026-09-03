@@ -30,23 +30,23 @@ filtering), primary collapse toggle composition via production CollapseToggle
 and Icon renderers, mounted layout child containment and pane ordering, and
 emits the M1 receipt at the terminal boundary. The manifest, existing receipts
 (AppHeader, Button, Icon, IconButton, Surface, Text), and new SplitView receipt
-pin the exact runtime source commit `aa49f9eb19d78d7240b840237bd47450e4cdd6bf`.
+pin the exact runtime source commit `a92ed7d1c0ce0af713d25dc536c14f41555dabb4`.
 The ledger records 7 mounted Nucleus rows.
 
 ## What landed
 
 - Contracts & Render:
   - `packages/contracts/components/src/split_view.rs`: added unit tests validating default spec, builder methods, `divider_instance_id` derivation, `current_ratio` resolution and clamping, `keyboard_resize_supported` logic, and `toggles_hidden_until_hover` policy.
-  - `packages/render/src/collapse_toggle.rs`: updated `collapse_toggle` to render chevron through production `crate::icon::icon` using `IconSpec`.
-  - `packages/render/src/resize_handle.rs`: added `fill_height = true` for horizontal and `fill_width = true` for vertical root handle layout.
-  - `packages/render/src/split_view.rs`: added relative positioning on divider container with absolute positioning on toggle cluster overlay; added unit tests covering horizontal/vertical root and pane layout postures, pane min sizes, fixed pane sizes and collapses, disabled split dimming, and handlers forwarding.
+  - `packages/render/src/collapse_toggle.rs`: updated `collapse_toggle` to render chevron through production `crate::icon::icon` using `IconSpec`. Pre-fix counterexample: raw `Node::icon` bypassed the production `Icon` renderer, dropping layout direction/alignment metadata (`LayoutDirection::Row`, `CrossAxisAlignment::Center`, `MainAxisAlignment::Center`) and token-resolved tinting.
+  - `packages/render/src/resize_handle.rs`: added `fill_height = true` for horizontal and `fill_width = true` for vertical root handle layout. Pre-fix counterexample: without `fill_height`/`fill_width`, `ResizeHandle`'s only child is an absolute grab overlay, causing GPUI's flex layout with `LayoutSizing::Fit` to resolve cross-axis extent to 0px (`Size { 2px × 0px }` for horizontal dividers), failing the mounted positive dimensions assertion.
+  - `packages/render/src/split_view.rs`: retained the contract-documented inline toggle cluster layout `centered(cluster_dir).child(handle).child(cluster)` per `docs/contracts/components/split-view.md` §11a Known Deltas; added unit tests covering horizontal/vertical root and pane layout postures, pane min sizes, fixed pane sizes and collapses, disabled split dimming, and handlers forwarding.
 - Headless Regressions:
-  - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened `two_composed_split_views_do_not_share_a_divider_focus_handle` with full SplitView variant/token verification, focus handle isolation across distinct instance IDs, dispatched arrow keys (+/-8px), saturating Home/End (+/-9999px), cross-axis key filtering, keyboard activation of primary CollapseToggle, mounted bounds checking for positive dimensions, child containment, horizontal pane ordering, and terminal M1 receipt emission.
+  - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened `two_composed_split_views_do_not_share_a_divider_focus_handle` with full SplitView variant/token verification, focus handle isolation across distinct instance IDs, dispatched arrow keys (+/-8px), saturating Home/End (+/-9999px), cross-axis key filtering, keyboard activation of primary CollapseToggle, mounted bounds checking for positive dimensions, subject pane containment & divider horizontal containment and ordering, witness containment, and terminal M1 receipt emission.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/splitview--nucleus-shell-split-view.json`
-  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `Surface`, `Text` with source commit `aa49f9eb19d78d7240b840237bd47450e4cdd6bf`.
+  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `Surface`, `Text` with source commit `a92ed7d1c0ce0af713d25dc536c14f41555dabb4`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `aa49f9eb19d78d7240b840237bd47450e4cdd6bf`.
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `a92ed7d1c0ce0af713d25dc536c14f41555dabb4`.
   - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts --write`; reports 7 mounted rows (AppHeader, Button, Icon, IconButton, SplitView, Surface, Text).
 
 ## Review oracle falsification
