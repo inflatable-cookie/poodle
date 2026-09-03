@@ -225,7 +225,7 @@
     </button>
   {/if}
 
-  {#if hasTooltips && tooltipOpen}
+  {#if hasTooltips && tooltipOpen && item.disabled !== true}
     <span
       use:anchored={{
         anchor: anchorElement,

@@ -24,9 +24,11 @@ input. Keep web drag behavior and `focusOnValueChange` unchanged.
 
 ## Acceptance
 
-- `showTooltips=false` exposes no tooltip after the full delay.
-- `showTooltips=true` exposes the selected/hovered tab label after the contract
-  delay and hides it on leave, focus departure, disabled/removal, and teardown.
+- `showTooltips=false` exposes no tooltip after the full delay, on hover or
+  keyboard focus.
+- `showTooltips=true` exposes the hovered or keyboard-focused tab label after
+  300ms and hides it on leave, blur, Escape, disabled/removal, and teardown.
+  Disabled tabs never enter pending or visible.
 - Svelte, React, Rust spec, renderer, and mounted GPUI agree on the public
   meaning; runtime mechanism may differ.
 - A Nucleus-shaped Tabs fixture is included without Nucleus data or source.
@@ -41,6 +43,8 @@ input. Keep web drag behavior and `focusOnValueChange` unchanged.
 | Delay is real | tooltip appears immediately | timer assertion fails |
 | Lifecycle is bounded | tab is removed while pending | no late tooltip/task residue |
 | False stays inert | adapter shows tooltip from label alone | negative mounted proof fails |
+| Disabled stays inert | web schedules a disabled tab | paired Svelte/React disabled proofs fail |
+| Horizontal focus matches native | `onFocus` only schedules when vertical | paired 299/300ms keyboard proofs fail |
 | Web semantics survive | native fix changes web drag/focus | focused paired Tabs suites fail |
 
 ## Writable Scope
@@ -73,5 +77,7 @@ does not claim Nucleus M2, accessibility A2, or visual V2.
 `shows_tooltips` projects each tab's trimmed label onto `Node.tooltip` when
 the flag is true or the strip is vertical. Empty labels are omitted. Disabled
 tabs still project the label (web wrap); the shared GPUI backend keeps them
-inert. Delay is 300ms. Leave, focus departure, Escape, removal, and teardown
+inert. Web never schedules or paints a disabled tab. Horizontal
+`showTooltips=true` schedules on keyboard focus and paints at 300ms, matching
+`Node.tooltip`. Delay is 300ms. Leave, blur, Escape, removal, and teardown
 hide. No new Node field.

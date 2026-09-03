@@ -471,7 +471,7 @@ export function Tabs({
     }, 0);
   }, [currentValue, focusOnValueChange, isControlled, renderedItems]);
 
-  // ── Tooltip (vertical icon-only mode) ──
+  // ── Tooltip (vertical implicit labels, or showTooltips) ──
 
   function clearTooltip(): void {
     if (tooltipTimer.current) {
@@ -481,6 +481,10 @@ export function Tabs({
   }
 
   function scheduleTooltip(index: number): void {
+    if (!hasTooltips || renderedItems[index]?.disabled === true) {
+      dismissTooltip();
+      return;
+    }
     clearTooltip();
     tooltipTimer.current = setTimeout(() => setTooltipIndex(index), 300);
   }
@@ -891,10 +895,10 @@ export function Tabs({
                 onClose={() => send({ type: "CLOSE", value: item.value })}
                 onFocus={() => {
                   setFocusIndex(index);
-                  if (isVertical) scheduleTooltip(index);
+                  if (hasTooltips) scheduleTooltip(index);
                 }}
                 onBlur={() => hasTooltips && dismissTooltip()}
-                onEnter={() => hasTooltips && scheduleTooltip(index)}
+                onEnter={() => scheduleTooltip(index)}
                 onLeave={() => hasTooltips && dismissTooltip()}
                 onKeyDown={(event) => {
                   if (event.key === "Escape" && hasTooltips) dismissTooltip();
@@ -902,7 +906,7 @@ export function Tabs({
                 }}
                 content={tabContent(item)}
                 tooltip={
-                  hasTooltips && tooltipIndex === index ? (
+                  hasTooltips && item.disabled !== true && tooltipIndex === index ? (
                     <AnchoredSurface
                       tag="span"
                       anchor={tooltipAnchor}

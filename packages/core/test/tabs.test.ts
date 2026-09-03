@@ -223,6 +223,16 @@ describe("tabsTooltipTransition", () => {
     expect(hidden.effects).toEqual([{ type: "clearTimer" }]);
   });
 
+  test("keyboard focus enter schedules the same pending show as pointer enter", () => {
+    const pending = tabsTooltipTransition({ name: "hidden" }, { type: "FOCUS_ENTER", index: 1 });
+    expect(pending.state).toEqual({ name: "pending", index: 1 });
+    expect(pending.effects).toEqual([{ type: "clearTimer" }, { type: "startTimer" }]);
+    expect(tabsTooltipTransition(pending.state, { type: "TIMER_FIRE" }).state).toEqual({
+      name: "visible",
+      index: 1,
+    });
+  });
+
   test("stale timer fire in hidden state is inert", () => {
     expect(tabsTooltipTransition({ name: "hidden" }, { type: "TIMER_FIRE" }).state).toEqual({
       name: "hidden",

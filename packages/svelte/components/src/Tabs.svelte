@@ -395,9 +395,13 @@
     void evaluateCollapsedOverflow();
   }
 
-  // ── Tooltip (vertical icon-only mode) ──
+  // ── Tooltip (vertical implicit labels, or showTooltips) ──
 
   function scheduleTooltip(index: number): void {
+    if (!hasTooltips || renderedItems[index]?.disabled === true) {
+      dismissTooltip();
+      return;
+    }
     clearTooltip();
     tooltipTimer = setTimeout(() => (tooltipIndex = index), 300);
   }
@@ -909,10 +913,10 @@
           onClose={() => send({ type: "CLOSE", value: item.value })}
           onFocus={() => {
             focusIndex = index;
-            if (isVertical) scheduleTooltip(index);
+            if (hasTooltips) scheduleTooltip(index);
           }}
           onBlur={() => hasTooltips && dismissTooltip()}
-          onEnter={() => hasTooltips && scheduleTooltip(index)}
+          onEnter={() => scheduleTooltip(index)}
           onLeave={() => hasTooltips && dismissTooltip()}
           onKeydown={(event) => {
             if (event.key === "Escape" && hasTooltips) dismissTooltip();

@@ -9,13 +9,23 @@ const items = [
   { value: "git", label: "Git", icon: "git-branch" },
 ];
 
+const itemsWithDisabledGit = [
+  ...items.slice(0, 2),
+  { value: "git", label: "Git", icon: "git-branch", disabled: true },
+];
+
 afterEach(() => {
   vi.useRealTimers();
 });
 
-function itemOf(container: HTMLElement, value: string): HTMLElement {
+function tabOf(container: HTMLElement, value: string): HTMLElement {
   const tab = container.querySelector<HTMLElement>(`.poodle-tabs__tab[data-value="${value}"]`);
-  const item = tab?.closest<HTMLElement>(".poodle-tabs__item");
+  if (!tab) throw new Error(`tab ${value}`);
+  return tab;
+}
+
+function itemOf(container: HTMLElement, value: string): HTMLElement {
+  const item = tabOf(container, value).closest<HTMLElement>(".poodle-tabs__item");
   if (!item) throw new Error(`item ${value}`);
   return item;
 }
@@ -31,6 +41,10 @@ describe("Tabs tooltips (svelte)", () => {
       props: { items, defaultValue: "explorer" },
     });
     await fireEvent.mouseEnter(itemOf(container, "search"));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()).toBeNull();
+
+    await fireEvent.focus(tabOf(container, "search"));
     await vi.advanceTimersByTimeAsync(300);
     expect(tooltip()).toBeNull();
   });
@@ -66,8 +80,7 @@ describe("Tabs tooltips (svelte)", () => {
     const { container } = render(Tabs, {
       props: { items, defaultValue: "explorer", showTooltips: true },
     });
-    const searchTab = container.querySelector<HTMLElement>('.poodle-tabs__tab[data-value="search"]');
-    if (!searchTab) throw new Error("search tab");
+    const searchTab = tabOf(container, "search");
     searchTab.focus();
     await fireEvent.mouseEnter(itemOf(container, "search"));
     await vi.advanceTimersByTimeAsync(300);
@@ -99,6 +112,47 @@ describe("Tabs tooltips (svelte)", () => {
       props: { items, defaultValue: "explorer", orientation: "vertical" },
     });
     await fireEvent.mouseEnter(itemOf(container, "search"));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()?.textContent?.trim()).toBe("Search");
+  });
+
+  it("never schedules or paints a tooltip for a disabled tab", async () => {
+    vi.useFakeTimers();
+    const { container } = render(Tabs, {
+      props: { items: itemsWithDisabledGit, defaultValue: "explorer", showTooltips: true },
+    });
+    await fireEvent.mouseEnter(itemOf(container, "git"));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()).toBeNull();
+
+    await fireEvent.mouseEnter(itemOf(container, "search"));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()?.textContent?.trim()).toBe("Search");
+    await fireEvent.mouseEnter(itemOf(container, "git"));
+    expect(tooltip()).toBeNull();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()).toBeNull();
+  });
+
+  it("schedules on horizontal keyboard focus and paints at 300ms", async () => {
+    vi.useFakeTimers();
+    const { container } = render(Tabs, {
+      props: { items, defaultValue: "explorer", showTooltips: true },
+    });
+    await fireEvent.focus(tabOf(container, "search"));
+    await vi.advanceTimersByTimeAsync(299);
+    expect(tooltip()).toBeNull();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(tooltip()?.getAttribute("role")).toBe("tooltip");
+    expect(tooltip()?.textContent?.trim()).toBe("Search");
+  });
+
+  it("schedules vertical keyboard focus without showTooltips", async () => {
+    vi.useFakeTimers();
+    const { container } = render(Tabs, {
+      props: { items, defaultValue: "explorer", orientation: "vertical" },
+    });
+    await fireEvent.focus(tabOf(container, "search"));
     await vi.advanceTimersByTimeAsync(300);
     expect(tooltip()?.textContent?.trim()).toBe("Search");
   });

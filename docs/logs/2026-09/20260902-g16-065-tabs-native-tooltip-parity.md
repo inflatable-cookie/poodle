@@ -14,9 +14,13 @@ PR: https://github.com/inflatable-cookie/poodle/pull/172
 ## Outcome
 
 `showTooltips` has one public meaning across Svelte, React, the Rust spec,
-the renderer, and mounted GPUI. False stays inert after 300ms. True, and
-every vertical strip, projects the trimmed tab label onto `Node.tooltip`.
-The merged g16.066 backend owns delay and dismiss. No new Node field.
+the renderer, and mounted GPUI. False stays inert after 300ms on hover and
+keyboard focus. True, and every vertical strip, projects the trimmed tab
+label onto `Node.tooltip`. Horizontal `showTooltips=true` schedules on
+keyboard focus and paints at 300ms, matching native `Node.tooltip`. Disabled
+tabs never pending/visible on web; native still projects the label and the
+g16.066 backend refuses the timer. The merged g16.066 backend owns delay and
+dismiss. No new Node field.
 
 ## What landed
 
@@ -28,7 +32,13 @@ The merged g16.066 backend owns delay and dismiss. No new Node field.
   `Terminal`), no Nucleus data. False inert at 300ms; true silent at 299ms
   then `Search` at 300ms; leave, blur-while-hovered, Escape, disabled Git,
   removal-while-pending, and teardown leave no late paint.
-- Paired Svelte/React `TabsTooltips` suites with fake timers.
+- Tooltip machine: `FOCUS_ENTER` matches `POINTER_ENTER`. Adapters must not
+  send either ENTER for a disabled item.
+- Web: `scheduleTooltip` returns after dismiss when `hasTooltips` is false or
+  the live item is disabled. `onFocus` schedules whenever `hasTooltips`, not
+  only when vertical. Paint requires the live item is not disabled.
+- Paired Svelte/React `TabsTooltips` suites with fake timers, including
+  disabled never pending/visible and horizontal 299/300ms keyboard focus.
 
 ## Falsification
 
@@ -40,24 +50,24 @@ Green proofs first. Plants restored after each row.
 | Label-only projection | ignore `shows_tooltips` / vertical | `show_tooltips_false_does_not_project_hover_text` saw a tooltip |
 | Skip delay | `advance_clock(0)` after the 299ms None row | mounted test expected visible `Search`, got none |
 | Skip hide | omit leave hover | mounted test expected none, got `Search` |
+| Disabled still paints | omit live disabled gate in `scheduleTooltip` | paired disabled proof kept Search visible after entering Git |
+| Horizontal focus silent | keep `onFocus` behind `isVertical` | paired 300ms keyboard proof expected `Search`, got none |
 
 ## Validation
 
 Focused:
 
-- `bun run --cwd packages/core test test/tabs.test.ts` — 23 pass
+- `bun run --cwd packages/core test test/tabs.test.ts` — 24 pass
 - `cargo test --manifest-path packages/contracts/components/Cargo.toml shows_tooltips` — 1 pass
 - renderer `tabs::` — 22 pass, including 5 tooltip projection tests
-- Svelte/React `TabsTooltips` plus Tabs/controlled-focus/roving/subject files — 78 pass
+- Svelte/React `TabsTooltips` plus Tabs/controlled-focus/roving/subject files — 84 pass
 - `tabs_show_tooltips_delay_and_hide_through_mounted_gpui` — pass
 
-Boards:
+Boards (this exact-head repair):
 
 - `effigy ci:rust` — pass
-- `effigy ci:native` — pass, including 181 headless regressions
-- `effigy regressions:native` re-emitted the Button receipt at `5a7a8f2a0`
-  because `packages/render` is in Nucleus SOURCE_PATHS
-- `effigy ci:web` — pass after the receipt pin
+- `effigy ci:native` — pass, including 181 headless regressions; Button receipt unchanged at `5a7a8f2a0`
+- `effigy ci:web` — pass
 - `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — pass
 
@@ -66,4 +76,6 @@ Boards:
 - No Nucleus source, windowed/native-visual run, Jetstream, workflow, or shared
   g16 front-door change.
 - Nucleus Tabs stays a later card. The Button receipt pin is the same SOURCE_PATHS
-  refresh g16.066 used; it is not a Tabs M1 receipt.
+  refresh g16.066 used; it is not a Tabs M1 receipt. This exact-head repair did
+  not retouch `packages/render` / GPUI / contracts, so the receipt stays at
+  `5a7a8f2a0`.

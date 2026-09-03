@@ -26,7 +26,7 @@ Updated: 2026-09-02
   │     │     │     ├── [Icon] (optional, Icon component using supporting semantic sizing)
   │     │     │     └── [Label .poodle-tabs__label]  <span>
   │     │     ├── [Close .poodle-tabs__close] (optional, when closable)
-  │     │     └── [Tooltip] (optional, when `showTooltips`; wraps the tab)
+  │     │     └── [Tooltip] (optional, when `showTooltips` or vertical; pointer or keyboard focus)
   │     ├── [Underline Indicator .poodle-tabs__indicator] (conditional, when activeEdge="underline")
   │     ├── [Collapsed Menu] (optional, when `collapseWhenOverflow` and the list overflows; Menu replacing the tablist)
   │     └── [Actions .poodle-tabs__actions] (optional actions snippet)
@@ -41,7 +41,7 @@ Updated: 2026-09-02
 | Tab | yes | selectable button | text, background, focus ring |
 | Label | yes | text content | whitespace, min-width |
 | Close | no | close button (when closable) | icon color, hover bg |
-| Tooltip | no | hover tooltip over a tab (when `showTooltips`) | Tooltip component tokens |
+| Tooltip | no | hover or keyboard-focus tooltip over a tab (when `showTooltips` or vertical) | Tooltip component tokens |
 | Underline Indicator | no | one paint-only measured indicator for `activeEdge="underline"` | accent fill, motion transform/size |
 | Collapsed Menu | no | overflow affordance: collapses the tablist into a `Menu` (when `collapseWhenOverflow` and the list overflows) | Menu component tokens |
 | Actions | no | trailing actions snippet | margin-left auto |
@@ -72,7 +72,7 @@ Updated: 2026-09-02
 | `fullWidth` | `boolean` | `false` | no | tabs flex to fill the row (sets `data-full-width`) |
 | `collapseLabel` | `string \| null` | `null` | no | label for the collapsed-overflow trigger; falls back to the active tab label when null |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
-| `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |
+| `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover and keyboard focus |
 | `historyKey` | `string \| null` | `null` | no | syncs the active tab to a URL query param with replaceState |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `onValueChange` | `(value: string) => void` | `undefined` | no | callback fired when the active tab changes |
@@ -266,8 +266,9 @@ Keyboard reorder (Alt+Arrow) issues a keyboard drop command against the same
 registrations, so it reaches the machine the same way.
 
 Tooltip sub-machine (active when vertical or `showTooltips`): `hidden` →
-`pending { index }` (pointer enter, 300ms timer) → `visible { index }`;
-pointer leave from any state → `hidden`, cancelling the timer.
+`pending { index }` (pointer enter or keyboard focus, 300ms timer) →
+`visible { index }`; pointer leave, blur, or Escape from any state → `hidden`,
+cancelling the timer. Disabled items never enter `pending` or `visible`.
 
 #### Events
 
@@ -301,8 +302,8 @@ own tab index.
 | `idle` | `OVERFLOW_CHANGE` | `collapseWhenOverflow`, horizontal | `idle` | set `collapsedByOverflow`; collapsed rendering delegates selection to a Menu, which re-enters via `SELECT` |
 
 Disabled items: never selectable, never focus targets (`FOCUS_MOVE` skips
-them, wrapping modulo item count), and never drag sources. A disabled tab is
-still a place to put one.
+them, wrapping modulo item count), never drag sources, and never tooltip
+targets. A disabled tab is still a place to put one.
 
 #### Effects
 
@@ -311,7 +312,7 @@ still a place to put one.
 | `focusTab` | focuses the tab element at `focusIndex` after render | none |
 | `syncHistory` | when `historyKey` set: mirror `value` into `?{historyKey}=` via `history.replaceState` (deleting the param when at the default tab); subscribe to `popstate` and emit `URL_POP` | unsubscribe `popstate` on unmount |
 | `measureOverflow` | when `collapseWhenOverflow`: compare natural list width (hidden measurement copy) against available width via ResizeObserver + window resize; emit `OVERFLOW_CHANGE` | disconnect observer, remove listener on unmount |
-| `tooltipTimer` | 300ms delay between `pending` and `visible` in the tooltip sub-machine | clear timer on leave/unmount |
+| `tooltipTimer` | 300ms delay between `pending` and `visible` in the tooltip sub-machine | clear timer on leave, blur, Escape, disablement, or unmount |
 
 #### Part Attribute Output
 
@@ -881,7 +882,10 @@ Applies when `fullWidth` is set and orientation is horizontal.
   render through the owned tab registry with live policy, value, destination,
   and teardown checks.
 - `data-full-width` — set when `fullWidth` is true; drives the full-width flex layout (non-vertical only)
-- `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
+- `showTooltips` (and every vertical strip) schedules the hidden or compact
+  label on pointer enter and keyboard focus, paints after 300ms, and dismisses
+  on leave, blur, Escape, disablement, removal, and teardown. Disabled tabs
+  never schedule or paint.
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
 - Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-edge` and `data-active-fill` carry `activeEdge` / `activeFill` on the root
 - `activeEdge="underline"` uses one measured indicator child. ResizeObserver,
