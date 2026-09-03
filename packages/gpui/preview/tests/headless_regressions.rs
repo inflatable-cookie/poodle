@@ -267,9 +267,9 @@ fn a_pointer_press_reaches_the_backend_listener_once() {
     });
 }
 
-/// g16.067: Icon mounts through the production registry/provider and render
-/// path, proving its resolved glyph asset, token size, primary tint, and
-/// explicit accessible label reach the painted backend.
+/// g16.067: Icon mounts through the production render path and backend,
+/// proving its named SVG path handoff, token size, primary tint, explicit
+/// accessible label, and mounted layout reach the backend.
 #[test]
 fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend() {
     use poodle_specs::{IconProviderSpec, IconSize, IconSpec};
@@ -288,7 +288,7 @@ fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend()
         let icon_name = "search";
         assert!(
             icon_asset_exists(icon_name),
-            "Icon fixture requires a real registered icon asset"
+            "Icon fixture requires a real registered icon asset on disk"
         );
 
         let spec = IconSpec::new(icon_name)
@@ -341,13 +341,13 @@ fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend()
             driver.mounted_observation(),
             &[
                 "install icon provider and render Icon through poodle_render",
-                "pointer move dispatch through HeadlessDriver",
+                "pointer hover dispatch through HeadlessDriver",
             ],
             &[
-                "resolved icon glyph and asset reach the mounted tree",
-                "token size and text_color tint match the resolved theme values",
+                "production render path emits NodeKind::Icon with named SVG path handoff and token size",
+                "text_color tint matches the resolved theme value",
                 "explicit accessible label is preserved on the mounted node",
-                "mounted bounds and probe channel confirm production backend paint",
+                "mounted bounds and content.text-icon.icon probe channel confirm production backend layout",
             ],
         );
     });
@@ -14232,6 +14232,8 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             .unwrap_or_else(|| panic!("{id}"))
     }
 
+    let mut observation = None;
+
     // ── Command, tooltip projection, semantics, inert skips ──────────────
     run_headless(|cx| {
         let clicks = Arc::new(Mutex::new(Vec::<String>::new()));
@@ -14466,21 +14468,7 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             "disabled and loading targets are skipped"
         );
 
-        nucleus_receipts::emit_if_configured(
-            "IconButton",
-            "nucleus.shell.icon-button",
-            driver.mounted_observation(),
-            &[
-                "mount IconButton through HeadlessDriver",
-                "pointer activate, keyboard activate, and hover dispatch through GPUI platform",
-            ],
-            &[
-                "pointer and keyboard activation fire listeners through real hit testing and focus dispatch",
-                "controlled and seeded toggle states rebuild host tree",
-                "disabled and loading states remain inert",
-                "300ms tooltip lifecycle resolves explicit and fallback text through dispatched hover and timing",
-            ],
-        );
+        observation = Some(driver.mounted_observation());
     });
 
     // ── Controlled toggle: Enter then Space rebuild the host spec ────────
@@ -14618,6 +14606,23 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
             "the host rebuilds from the reported inverse"
         );
     });
+
+    nucleus_receipts::emit_if_configured(
+        "IconButton",
+        "nucleus.shell.icon-button",
+        observation.expect("mounted observation recorded from first scenario"),
+        &[
+            "mount IconButton through HeadlessDriver",
+            "pointer activate, keyboard activate, and hover dispatch through GPUI platform",
+            "controlled and seeded toggle rebuilds through dispatched keyboard input",
+        ],
+        &[
+            "pointer and keyboard activation fire listeners through real hit testing and focus dispatch",
+            "controlled and seeded toggle states rebuild host tree",
+            "disabled and loading states remain inert",
+            "300ms tooltip lifecycle resolves explicit and fallback text through dispatched hover and timing",
+        ],
+    );
 }
 
 /// Collapsible disclosure travels through mounted pointer and keyboard input.
