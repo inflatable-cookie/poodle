@@ -134,6 +134,11 @@ pub fn action_discovery_panel(
     };
 
     let mut panel = Node::container();
+    panel.a11y.role = Some(NodeRole::ListBox);
+    panel.a11y.label = Some("Actions".to_string());
+    panel
+        .roles
+        .insert("component".to_owned(), "action-discovery-panel".to_owned());
     panel.style.descriptor.layout.direction = LayoutDirection::Column;
     panel.style.descriptor.layout.spacing.gap = gap;
     panel.style.fill_width = true;
@@ -156,14 +161,19 @@ pub fn action_discovery_panel(
             }
             let mut skeletons = skeletons;
             for _ in 0..5 {
-                let wide = skeleton(
+                let mut wide = skeleton(
                     &SkeletonSpec::new().with_width("48%").with_animated(true),
                     ctx,
                 );
-                let narrow = skeleton(
+                wide.roles
+                    .insert("dependency".to_owned(), "skeleton".to_owned());
+                let mut narrow = skeleton(
                     &SkeletonSpec::new().with_width("20%").with_animated(true),
                     ctx,
                 );
+                narrow
+                    .roles
+                    .insert("dependency".to_owned(), "skeleton".to_owned());
                 // Skeleton width strings like "48%" aren't parsed by skeleton
                 // (rem/px only); express the proportions via flex sizing.
                 let cell = |basis: f32, child: Node| -> Node {
@@ -174,6 +184,8 @@ pub fn action_discovery_panel(
                     c.child(child)
                 };
                 let mut row = Node::container();
+                row.roles
+                    .insert("part".to_owned(), "skeleton-row".to_owned());
                 {
                     let s = &mut row.style;
                     s.descriptor.layout.direction = LayoutDirection::Row;
@@ -187,6 +199,9 @@ pub fn action_discovery_panel(
             }
             // __state wrapper: min-height 10rem, centered.
             let mut state = Node::container();
+            state
+                .roles
+                .insert("part".to_owned(), "loading-state".to_owned());
             {
                 let s = &mut state.style;
                 // Explicit Row (see switch.rs).
@@ -199,33 +214,50 @@ pub fn action_discovery_panel(
             return panel.child(state.child(skeletons));
         }
         DiscoveryState::Error => {
-            return panel.child(empty_state(
+            let mut state = empty_state(
                 &EmptyStateSpec::new("Could not load actions")
                     .with_message("Actions could not be loaded. Try again.")
                     .with_size(EmptyStateSize::Compact),
                 ctx,
-            ));
+            );
+            state
+                .roles
+                .insert("dependency".to_owned(), "empty-state".to_owned());
+            state.roles.insert("state".to_owned(), "error".to_owned());
+            return panel.child(state);
         }
         DiscoveryState::Empty => {
             let title = spec
                 .empty_message
                 .as_deref()
                 .unwrap_or("No actions available");
-            return panel.child(empty_state(
+            let mut state = empty_state(
                 &EmptyStateSpec::new(title)
                     .with_message("No actions are available in this context.")
                     .with_size(EmptyStateSize::Compact),
                 ctx,
-            ));
+            );
+            state
+                .roles
+                .insert("dependency".to_owned(), "empty-state".to_owned());
+            state.roles.insert("state".to_owned(), "empty".to_owned());
+            return panel.child(state);
         }
         DiscoveryState::NoResults => {
-            return panel.child(empty_state(
+            let mut state = empty_state(
                 &EmptyStateSpec::new("No matching actions")
                     .with_message("No actions match the current search.")
                     .with_variant(EmptyStateVariant::Search)
                     .with_size(EmptyStateSize::Compact),
                 ctx,
-            ));
+            );
+            state
+                .roles
+                .insert("dependency".to_owned(), "empty-state".to_owned());
+            state
+                .roles
+                .insert("state".to_owned(), "no-results".to_owned());
+            return panel.child(state);
         }
         DiscoveryState::Ready => {}
     }
@@ -233,15 +265,22 @@ pub fn action_discovery_panel(
     // Render each section (group: Eyebrow heading + list of items).
     for section in &spec.sections {
         let mut section_el = Node::container();
+        section_el
+            .roles
+            .insert("part".to_owned(), "group".to_owned());
         section_el.style.descriptor.layout.direction = LayoutDirection::Column;
         section_el.style.descriptor.layout.spacing.gap = group_gap;
         let mut section_el = section_el;
 
         // Section heading via the Eyebrow primitive.
-        section_el = section_el.child(eyebrow(
+        let mut heading = eyebrow(
             &EyebrowSpec::new().with_content(&section.title),
             ctx,
-        ));
+        );
+        heading
+            .roles
+            .insert("dependency".to_owned(), "eyebrow".to_owned());
+        section_el = section_el.child(heading);
 
         // Optional section description.
         if let Some(ref desc) = section.description {
@@ -256,10 +295,10 @@ pub fn action_discovery_panel(
             section_el = section_el.child(d);
         }
 
-        // List of action items.
-        // Contract: the actions in a section are a `listbox` of `option`s.
+        // Structural list of action items. The panel root owns listbox
+        // semantics; each action is one option within it.
         let mut list = Node::container();
-        list.a11y.role = Some(NodeRole::ListBox);
+        list.roles.insert("part".to_owned(), "list".to_owned());
         list.style.descriptor.layout.direction = LayoutDirection::Column;
         list.style.descriptor.layout.spacing.gap = list_gap;
 
@@ -290,9 +329,12 @@ pub fn action_discovery_panel(
             }
 
             let mut row = Node::container();
-            // Each action is an `option` of the section's listbox.
+            // Each action is an option of the panel listbox.
             row.a11y.role = Some(NodeRole::ListBoxOption);
+            row.a11y.label = Some(action.title.clone());
             row.a11y.selected = Some(is_active);
+            row.roles
+                .insert("equivalent".to_owned(), "list-card".to_owned());
             row.id = Some(action.id.clone());
             row.runtime_id = scoped(handlers.instance_id.as_deref(), &action.id);
             {
@@ -328,6 +370,9 @@ pub fn action_discovery_panel(
             let has_shortcut = action.shortcut.is_some();
             if has_badge || has_shortcut {
                 let mut trailing = Node::container();
+                trailing
+                    .roles
+                    .insert("part".to_owned(), "trailing".to_owned());
                 {
                     let s = &mut trailing.style;
                     s.descriptor.layout.direction = LayoutDirection::Row;
@@ -366,8 +411,9 @@ pub fn action_discovery_panel(
                         s.text_weight = Some(600);
                         s.letter_spacing_em = Some(0.03); // contract §9 chip: 0.03em
                     }
-                    trailing = trailing
-                        .child(chip_shell(with_alpha(accent, accent.3 * 0.16)).child(label));
+                    let mut chip = chip_shell(with_alpha(accent, accent.3 * 0.16));
+                    chip.roles.insert("part".to_owned(), "badge".to_owned());
+                    trailing = trailing.child(chip.child(label));
                 }
 
                 if let Some(ref shortcut) = action.shortcut {
@@ -381,8 +427,10 @@ pub fn action_discovery_panel(
                         // Contract §9 kbd override: code-family (monospace).
                         s.font_family = Some(FontFamily::Mono);
                     }
-                    trailing = trailing
-                        .child(chip_shell(with_alpha(surface, surface.3 * 0.76)).child(label));
+                    let mut chip = chip_shell(with_alpha(surface, surface.3 * 0.76));
+                    chip.roles
+                        .insert("part".to_owned(), "shortcut".to_owned());
+                    trailing = trailing.child(chip.child(label));
                 }
 
                 row = row.child(trailing);
@@ -391,9 +439,13 @@ pub fn action_discovery_panel(
             // Disabled: reduce opacity via token, not a hardcoded value.
             if action.is_disabled {
                 row.style.descriptor.opacity = disabled_opacity;
+                row.style.descriptor.cursor = CursorHint::NotAllowed;
+                row.interaction.disabled = true;
+                row.a11y.tab_index = Some(-1);
             } else {
                 row.style.descriptor.cursor = CursorHint::Pointer;
                 row.interaction.focusable = true;
+                row.a11y.tab_index = Some(if is_active { 0 } else { -1 });
                 row.style.focus = Some(StylePatch {
                     background: None,
                     border_color: Some(accent),

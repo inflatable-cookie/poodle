@@ -9,8 +9,8 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use gpui::{
-    canvas, div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, KeyDownEvent,
-    ParentElement, Rgba, StatefulInteractiveElement, Styled, Window,
+    canvas, div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, ParentElement, Rgba,
+    StatefulInteractiveElement, Styled, Window,
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -7063,11 +7063,14 @@ impl IntoElement for Menu {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct CommandPalette {
     spec: CommandPaletteSpec,
     theme: GpuiThemeProvider,
+    instance_id: Option<String>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_query_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_active_change: Option<Arc<dyn Fn(Option<&str>) + Send + Sync>>,
     on_close: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
@@ -7076,13 +7079,16 @@ impl CommandPalette {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: None,
             on_select: None,
             on_query_change: None,
+            on_active_change: None,
             on_close: None,
         }
     }
 
-    pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.instance_id = Some(id.into());
         self
     }
 
@@ -7096,9 +7102,37 @@ impl CommandPalette {
         self
     }
 
+    pub(crate) fn on_active_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<&str>) + Send + Sync>,
+    ) -> Self {
+        self.on_active_change = Some(handler);
+        self
+    }
+
     pub(crate) fn on_close(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.on_close = Some(handler);
         self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::command_palette_with_handlers(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            poodle_render::CommandPaletteHandlers {
+                select: self.on_select,
+                query_change: self.on_query_change,
+                active_change: self.on_active_change,
+                close: self.on_close,
+                instance_id: self.instance_id,
+            },
+        )
+    }
+}
+
+impl IntoCompatNode for CommandPalette {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
     }
 }
 
@@ -7106,62 +7140,7 @@ impl IntoElement for CommandPalette {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let close = self.on_close.clone();
-        let mut node = poodle_render::command_palette_with_handlers(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            poodle_render::CommandPaletteHandlers {
-                select: self.on_select,
-                query_change: self.on_query_change,
-                close: self.on_close,
-            },
-        );
-        // The outgoing native tier rendered shortcut copy in the inherited
-        // sans family. Keep that baseline-local delta out of the shared recipe.
-        clear_mono_family(&mut node);
-        let Some(modal) = node.children.pop() else {
-            return poodle_gpui_node_backend::to_gpui(&node);
-        };
-        let scrim = node
-            .style
-            .descriptor
-            .background
-            .map(poodle_gpui_node_backend::color)
-            .unwrap_or_else(gpui::transparent_black);
-        let mut backdrop = div()
-            .id("poodle-cmd-palette-overlay")
-            .absolute()
-            .inset_0()
-            .bg(scrim)
-            .flex()
-            .items_center()
-            .justify_center()
-            .occlude()
-            .child(poodle_gpui_node_backend::to_gpui(&modal));
-        if let Some(close) = close {
-            let click = close.clone();
-            backdrop = backdrop
-                .on_click(move |_event, _window, cx| {
-                    click();
-                    cx.refresh_windows();
-                })
-                .on_key_down(move |event: &KeyDownEvent, _window, cx| {
-                    if event.keystroke.key == "escape" {
-                        close();
-                        cx.refresh_windows();
-                    }
-                });
-        }
-        backdrop.into_any_element()
-    }
-}
-
-fn clear_mono_family(node: &mut poodle_node::Node) {
-    if node.style.font_family == Some(poodle_node::FontFamily::Mono) {
-        node.style.font_family = None;
-    }
-    for child in &mut node.children {
-        clear_mono_family(child);
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
