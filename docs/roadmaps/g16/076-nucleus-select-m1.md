@@ -10,6 +10,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/select.md`, `../../contracts/components/popover.md`,
 `../../architecture/002-anchored-overlays.md`
 Log: `../../logs/2026-09/20260903-g16-076-nucleus-select-receipt.md`
+PR: `https://github.com/inflatable-cookie/poodle/pull/182`
 Handoff: `../../handoffs/20260903-091200-g16-076-nucleus-select-receipt.md`
 
 ## Goal
