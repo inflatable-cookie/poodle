@@ -16,7 +16,7 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::icon::icon;
 use crate::presentation::{
     panel_space_x_rem, rem_to_px, resolve_supporting_visual_size, size_font_rem,
@@ -31,6 +31,9 @@ pub const CALLOUT_DISMISS_ID: &str = "poodle-callout-dismiss";
 #[derive(Default)]
 pub struct CalloutHandlers {
     pub on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Contract-owned actions snippet, built through the production render
+    /// context before the renderer stamps the actions region.
+    pub actions: Option<SlotBuilder<'static>>,
     /// Stable native instance scope. Two dismissible callouts would otherwise
     /// share one backend focus handle.
     pub instance_id: Option<String>,
@@ -87,17 +90,38 @@ fn tone_icon(tone: StatusTone) -> &'static str {
 pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHandlers) -> Node {
     let theme = ctx.theme();
     let on_dismiss = handlers.on_dismiss;
+    let actions = handlers.actions;
     let instance_id = handlers.instance_id;
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+    let title_font = if effective_size == ControlSize::Sm {
+        rem_to_px(0.75)
+    } else {
+        font_size
+    };
+    let message_font = if effective_size == ControlSize::Sm {
+        rem_to_px(0.6875)
+    } else {
+        font_size
+    };
+    let default_icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));
+    let icon_glyph = if effective_size == ControlSize::Sm {
+        rem_to_px(0.5625)
+    } else {
+        default_icon_glyph
+    };
 
     let pad_x = rem_to_px(panel_space_x_rem(density));
     let pad_y = rem_to_px(0.625);
-    let gap = theme.resolve_space("space.inline.md");
+    let root_gap = if effective_size == ControlSize::Sm {
+        rem_to_px(0.5)
+    } else {
+        theme.resolve_space("space.inline.md")
+    };
+    let body_gap = theme.resolve_space("space.inline.md");
     let content_gap = theme.resolve_space("space.inline.sm");
 
     let tone_color = theme.resolve_color(spec.tone_color_token());
@@ -174,7 +198,7 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         s.descriptor.layout.spacing.padding.bottom = pad_y;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = gap;
+        s.descriptor.layout.spacing.gap = root_gap;
         s.fill_width = true;
     }
 
@@ -186,7 +210,7 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
         let s = &mut body.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        s.descriptor.layout.spacing.gap = gap;
+        s.descriptor.layout.spacing.gap = body_gap;
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
 
@@ -277,7 +301,7 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
                 .map(|surface| surface.foreground)
                 .unwrap_or(text_primary),
         );
-        t.style.text_size = Some(font_size);
+        t.style.text_size = Some(title_font);
         t.style.text_weight = Some(600);
         content = content.child(t);
     }
@@ -290,15 +314,38 @@ pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHan
                 .map(|surface| surface.foreground)
                 .unwrap_or(text_secondary),
         );
-        m.style.text_size = Some(font_size);
+        m.style.text_size = Some(message_font);
         content = content.child(m);
     }
     body = body.child(content);
     el = el.child(body);
 
+    // ── Actions region ──
+    if let Some(build_actions) = actions {
+        let mut actions = build_actions(ctx);
+        actions.runtime_id = scoped(instance_id.as_deref(), "actions");
+        actions
+            .roles
+            .insert("part".to_owned(), "actions".to_owned());
+        {
+            let s = &mut actions.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.alignment.main = MainAxisAlignment::End;
+            s.descriptor.layout.spacing.gap = content_gap;
+            s.flex_wrap = true;
+            s.flex_shrink_zero = true;
+        }
+        el = el.child(actions);
+    }
+
     // ── Dismiss control (ghost "x") ──
     if spec.dismissible {
-        let dismiss_size = rem_to_px(1.75);
+        let dismiss_size = if effective_size == ControlSize::Sm {
+            rem_to_px(1.5)
+        } else {
+            rem_to_px(1.75)
+        };
         let control_radius = theme.resolve_radius("radius.control");
         let dismiss_radius = (control_radius - border_width).max(0.0);
         let mut dismiss = Node::container();

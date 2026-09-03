@@ -11401,7 +11401,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
     assert_eq!(icon.runtime_id.as_deref(), Some("callout:proof:icon"));
     assert!(matches!(
         &icon.kind,
-        NodeKind::Icon { name, size } if name == "triangle-alert" && size == 9.0
+        NodeKind::Icon { name, size } if name == "triangle-alert" && *size == 9.0
     ));
     assert_eq!(
         icon.roles.get("dependency").map(String::as_str),

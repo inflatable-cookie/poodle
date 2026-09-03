@@ -400,6 +400,14 @@ impl Callout {
         self
     }
 
+    pub(crate) fn with_actions(
+        mut self,
+        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.handlers.actions = Some(std::boxed::Box::new(actions));
+        self
+    }
+
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
         self.spec.size = Some(size);
         self
