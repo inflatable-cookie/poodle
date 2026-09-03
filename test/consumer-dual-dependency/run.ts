@@ -116,6 +116,29 @@ try {
   );
   if (gpuiCore.length === 1) console.log(`  resolved: gpui ${gpuiCore[0][2]} from ${gpuiCore[0][3]}`);
 
+  console.log("## transitive shape — the graph must compile tinyvec with std (g16.092)");
+  // tinyvec 1.13.0 broke its alloc-only build: the new `with_initial_len` calls
+  // `vec!` where only `alloc::vec::{self, Vec}` is imported (the module, not the
+  // macro), and without the `std` feature the crate is `no_std`, so nothing puts
+  // `vec!` in scope. A fresh consumer resolution has no lockfile to fall back
+  // on, so the proof compile then dies inside the dependency and the negative
+  // control never reaches its intended type mismatch. The repaired graph shape —
+  // asserted here so it cannot silently regress — is that something below this
+  // consumer enables tinyvec's `std` feature.
+  const tinyvecShape = spawnSync(
+    "cargo",
+    ["tree", "--manifest-path", join(proof, "Cargo.toml"), "--invert", "tinyvec", "--edges", "features"],
+    { encoding: "utf8", env: { ...process.env, CARGO_TARGET_DIR: TARGET_DIR } },
+  );
+  const tinyvecTree = tinyvecShape.stdout ?? "";
+  const tinyvecVersion = tinyvecTree.match(/^tinyvec v(\S+)/m);
+  if (tinyvecVersion) console.log(`  resolved: tinyvec ${tinyvecVersion[1]} from fresh resolution`);
+  check(
+    "the consumer graph enables tinyvec's std feature (alloc-only cannot compile)",
+    tinyvecShape.status === 0 && /tinyvec feature "std"/.test(tinyvecTree),
+    tinyvecTree || tinyvecShape.stderr || "",
+  );
+
   console.log("## negative control — the proof must be able to fail");
   const negative = join(work, "negative");
   stage(negative, true);
