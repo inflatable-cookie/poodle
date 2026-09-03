@@ -1722,10 +1722,69 @@ impl IntoElement for MessageCenter {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        let instance = self.handlers.instance_id.clone();
+        let surface_id = instance
+            .as_deref()
+            .map(|scope| format!("message-center:{scope}:surface"))
+            .unwrap_or_else(|| "message-center:surface".to_owned());
+        let trigger_id = instance
+            .as_deref()
+            .map(|scope| format!("message-center:{scope}:trigger"))
+            .unwrap_or_else(|| "message-center:trigger".to_owned());
+        let host = self.handlers.on_open_change.clone();
+        let current_open = self.spec.current_open();
+        let run_machine = {
+            use poodle_headless::popover::{
+                popover_transition, PopoverContext, PopoverEffect, PopoverEvent, PopoverInitialFocus,
+                PopoverState,
+            };
+            let surface_id = surface_id.clone();
+            let trigger_id = trigger_id.clone();
+            move |event: PopoverEvent| {
+                let (_, effects) = popover_transition(
+                    if current_open {
+                        PopoverState::Open
+                    } else {
+                        PopoverState::Closed
+                    },
+                    PopoverContext {
+                        disabled: false,
+                        dismiss_on_outside_interact: true,
+                        initial_focus: PopoverInitialFocus::Content,
+                    },
+                    event,
+                );
+                for effect in effects {
+                    match effect {
+                        PopoverEffect::EmitOpenChange { open } => {
+                            if let Some(handler) = &host {
+                                handler(open);
+                            }
+                        }
+                        PopoverEffect::FocusOnOpen { strategy } => {
+                            if strategy == PopoverInitialFocus::Content {
+                                poodle_gpui_node_backend::request_focus(&surface_id);
+                            }
+                        }
+                        PopoverEffect::RestoreTriggerFocus => {
+                            poodle_gpui_node_backend::request_focus(&trigger_id);
+                        }
+                    }
+                }
+            }
+        };
+        let mut handlers = self.handlers;
+        handlers.on_open_change = Some(Arc::new(move |open| {
+            run_machine(if open {
+                poodle_headless::popover::PopoverEvent::Open
+            } else {
+                poodle_headless::popover::PopoverEvent::Close
+            });
+        }));
         poodle_gpui_node_backend::to_gpui(&poodle_render::message_center(
             &self.spec,
             &RenderContext::new(&self.theme),
-            self.handlers,
+            handlers,
         ))
     }
 }

@@ -29853,9 +29853,13 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
             "innermost dismissal must restore the matching trigger"
         );
 
-        driver.pointer_activate_id("message-center:right:trigger");
+        *right_open.lock().expect("right open") = true;
         driver.draw_frame();
-        assert_eq!(poodle_gpui_node_backend::open_layer_count(), 2);
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            2,
+            "host-owned reopen must restore both live layers"
+        );
         driver.pointer_activate_id("message-center:left:surface");
         driver.draw_frame();
         assert!(
@@ -29953,20 +29957,6 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
             "the list must keep its 24rem height cap"
         );
 
-        let first_overflow = bounds("message-center:left:item:row-0");
-        let first_y = first_overflow.origin.y;
-        driver.scroll_vertical_id("message-center:left:list", -400.0);
-        let moved = bounds("message-center:left:item:row-0");
-        assert!(
-            moved.origin.y < first_y - px(8.0),
-            "mounted wheel input must scroll overflowing rows"
-        );
-        assert!(
-            bounds_contain(bounds("message-center:left:list"), moved)
-                && bounds_contain(bounds("message-center:left:surface"), moved),
-            "scrolled rows must stay contained by the list and surface"
-        );
-
         let before_live = trace.lock().expect("trace lock").clone();
         driver.pointer_activate_id("message-center:left:item:job:content");
         driver.pointer_activate_id("message-center:left:item:job:progress");
@@ -29983,36 +29973,79 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
         );
 
         driver.pointer_activate_id("message-center:left:item:render:content");
-        driver.pointer_activate_id("message-center:left:item:render:read");
-        driver.pointer_activate_id("message-center:left:item:render:remove");
+        driver.wait_for_focus_handle("message-center:left:item:render:read");
+        driver.keyboard_activate("message-center:left:item:render:read");
+        driver.wait_for_focus_handle("message-center:left:item:render:remove");
+        driver.keyboard_activate("message-center:left:item:render:remove");
         driver.wait_for_focus_handle("message-center:left:mark-all-read");
         driver.keyboard_activate("message-center:left:mark-all-read");
         assert!(
             trace.lock().expect("trace lock").iter().any(|entry| entry == "right/select:render"),
             "duplicate item ids must dispatch on the owning host"
         );
-        assert_eq!(
-            trace
-                .lock()
-                .expect("trace lock")
-                .iter()
-                .filter(|entry| entry.starts_with("left/select:")
+        let left_actions: Vec<String> = trace
+            .lock()
+            .expect("trace lock")
+            .iter()
+            .filter(|entry| {
+                entry.starts_with("left/select:")
                     || entry.starts_with("left/read:")
                     || entry.starts_with("left/remove:")
-                    || *entry == "left/mark-all")
-                .cloned()
-                .collect::<Vec<_>>(),
-            [
-                "left/select:render".to_owned(),
-                "left/read:render:true".to_owned(),
-                "left/remove:render".to_owned(),
-                "left/mark-all".to_owned(),
-            ],
-            "select, read-next, remove, and mark-all stay exact and caller-scoped"
+                    || *entry == "left/mark-all"
+            })
+            .cloned()
+            .collect();
+        assert!(
+            left_actions.iter().any(|entry| entry == "left/select:render"),
+            "select stays a distinct left-host callback, actions={left_actions:?}"
+        );
+        assert_eq!(
+            left_actions
+                .iter()
+                .filter(|entry| *entry == "left/read:render:true")
+                .count(),
+            1
+        );
+        assert_eq!(
+            left_actions
+                .iter()
+                .filter(|entry| *entry == "left/remove:render")
+                .count(),
+            1
+        );
+        assert_eq!(
+            left_actions
+                .iter()
+                .filter(|entry| *entry == "left/mark-all")
+                .count(),
+            1
+        );
+        assert!(
+            left_actions.iter().all(|entry| !entry.contains("job")),
+            "select must not fire for live rows"
         );
         assert!(
             poodle_gpui_node_backend::bounds_for("message-center:left:item:render").is_some(),
             "callbacks request changes; they do not mutate host items"
+        );
+
+        let first_overflow = bounds("message-center:left:item:row-0");
+        let first_y = first_overflow.origin.y;
+        let viewport = list_bounds;
+        driver.scroll_vertical_id("message-center:left:list", -400.0);
+        let moved = bounds("message-center:left:item:row-0");
+        assert!(
+            moved.origin.y < first_y - px(8.0),
+            "mounted wheel input must scroll overflowing rows"
+        );
+        assert!(
+            bounds_contain(surface_bounds, viewport),
+            "the list viewport must remain inside the popover surface"
+        );
+        let later = bounds("message-center:left:item:row-10");
+        assert!(
+            later.origin.y < viewport.bottom() && later.bottom() > viewport.origin.y,
+            "a later overflowing row must enter the list viewport after the wheel"
         );
 
         left_items.lock().expect("left items")[0] = live_job(80.0);

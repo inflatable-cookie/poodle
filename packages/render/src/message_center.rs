@@ -10,8 +10,9 @@ use poodle_node::{
 };
 use poodle_specs::{
     ButtonFit, ButtonSpec, ButtonTone, ButtonVariant, ControlSize, EmptyStateSize, EmptyStateSpec,
-    IconButtonSpec, InlineTypographyMode, MessageCenterItem, MessageCenterSpec, PopoverSpec,
-    ProgressSpec, SemanticControlSizeRole, StatusIndicatorSpec, TimeAgoSpec,
+    IconButtonSpec, InlineTypographyMode, MessageCenterItem, MessageCenterSpec,
+    PopoverInitialFocus, PopoverSpec, ProgressSpec, SemanticControlSizeRole, StatusIndicatorSpec,
+    TimeAgoSpec,
 };
 
 use crate::button::button;
@@ -96,6 +97,8 @@ pub fn message_center(
             .insert("dependency".to_owned(), "icon".to_owned());
     }
     if open {
+        // The trigger is part of the same dismiss layer as the surface so a
+        // press on it is not an outside dismissal of its own overlay.
         trigger_button.interaction.dismiss_layer = Some(layer_id.clone());
     }
     let trigger = trigger_with_indicator(trigger_button, unread, ctx, instance);
@@ -109,6 +112,7 @@ pub fn message_center(
         let popover_spec = PopoverSpec::new()
             .with_open(true)
             .with_placement(spec.placement)
+            .with_initial_focus(PopoverInitialFocus::Content)
             .with_aria_label(spec.effective_aria_label())
             .with_surface_min_width(poodle_specs::Dimension::new("24rem"))
             .with_surface_max_width(poodle_specs::Dimension::new("30rem"));
@@ -116,14 +120,21 @@ pub fn message_center(
         node.runtime_id = Some(surface_id.clone());
         node.roles
             .insert("dependency".to_owned(), "popover".to_owned());
-        node.interaction.focusable = true;
-        node.a11y.tab_index = Some(0);
+        node.interaction.focusable =
+            popover_spec.initial_focus == PopoverInitialFocus::Content;
+        node.a11y.tab_index = Some(if popover_spec.initial_focus == PopoverInitialFocus::Content {
+            0
+        } else {
+            -1
+        });
+        if popover_spec.initial_focus == PopoverInitialFocus::Content {
+            node.style.focus = Some(StylePatch {
+                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+                ..StylePatch::default()
+            });
+        }
         node.interaction.dismiss_layer = Some(layer_id.clone());
         node.interaction.on_dismiss = dismiss.clone();
-        node.style.focus = Some(StylePatch {
-            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
-            ..StylePatch::default()
-        });
         node
     });
 
@@ -137,6 +148,8 @@ pub fn message_center(
     );
     wrapper.runtime_id = root_id(instance);
     if open {
+        // Wrapper + trigger share the surface layer so the IconButton is not
+        // treated as an outside press against its own archive.
         wrapper.interaction.dismiss_layer = Some(layer_id);
         wrapper.interaction.on_dismiss = dismiss;
     }
@@ -240,9 +253,7 @@ fn center_content(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = rem_to_px(0.25);
         s.max_height = Some(rem_to_px(24.0));
-        // g16.093 counterexample: the list advertises a 24rem cap but clips
-        // instead of scrolling, so mounted wheel input cannot move rows.
-        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
         s.fill_width = true;
     }
     for item in &spec.items {
@@ -332,8 +343,7 @@ fn message_row(
         pad.bottom = rem_to_px(0.625);
         pad.left = rem_to_px(0.625);
         pad.right = rem_to_px(0.5);
-        // g16.093 counterexample: row radius must be radius.control.
-        let radius = rem_to_px(0.5);
+        let radius = ctx.theme().resolve_radius("radius.control");
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_left = radius;
@@ -454,8 +464,7 @@ fn message_content(
         s.fill_width = true;
         s.descriptor.background = None;
         s.descriptor.border.width = 0.0;
-        // g16.093 counterexample: content radius must be radius.control.
-        let radius = rem_to_px(0.5);
+        let radius = ctx.theme().resolve_radius("radius.control");
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_left = radius;
@@ -468,19 +477,16 @@ fn message_content(
         content.style.descriptor.cursor = CursorHint::Pointer;
         content.a11y.label = Some(item.title.clone());
         let surface = ctx.theme().resolve_color("color.background.surface");
-        // g16.093 counterexample: hover fill must be surface at 72%.
         content.style.hover = Some(StylePatch {
-            background: Some(with_alpha(surface, 0.4)),
+            background: Some(with_alpha(surface, surface.3 * 0.72)),
             border_color: None,
             text_color: None,
             opacity: None,
         });
-        // g16.093 counterexample: ring must be accent focus, focus width,
-        // and a -0.125rem inset offset.
         content.style.focus_ring = Some(FocusRing {
-            color: ctx.theme().resolve_color("color.text.primary"),
-            width: rem_to_px(0.25),
-            offset: rem_to_px(0.25),
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(-0.125),
         });
     }
 
