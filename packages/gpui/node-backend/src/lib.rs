@@ -94,6 +94,10 @@ pub struct PaintedNodeSnapshot {
     pub a11y_label: Option<String>,
     pub style: StyleDescriptor,
     pub shadow_layers: Vec<ShadowLayer>,
+    pub border_dashed: bool,
+    pub text_wrap: bool,
+    pub line_height: Option<f32>,
+    pub text_weight: Option<u16>,
     pub child_layout_directions: Vec<LayoutDirection>,
 }
 
@@ -106,6 +110,10 @@ impl PaintedNodeSnapshot {
             a11y_label: node.a11y.label.clone(),
             style: node.style.descriptor.clone(),
             shadow_layers: node.style.shadow_layers.clone(),
+            border_dashed: node.style.border_dashed,
+            text_wrap: node.style.text_wrap,
+            line_height: node.style.line_height,
+            text_weight: node.style.text_weight,
             child_layout_directions: node
                 .children
                 .iter()

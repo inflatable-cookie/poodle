@@ -6552,13 +6552,13 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
             let items = host_guard.items.clone();
             drop(host_guard);
             let spec = AgentTranscriptSpec::new(items)
-            .with_size(ControlSize::Sm)
-            .with_density(ControlDensity::Compact)
-            .with_expanded_tool_runs(if is_expanded {
-                vec!["same-run".to_owned()]
-            } else {
-                Vec::new()
-            });
+                .with_size(ControlSize::Sm)
+                .with_density(ControlDensity::Compact)
+                .with_expanded_tool_runs(if is_expanded {
+                    vec!["same-run".to_owned()]
+                } else {
+                    Vec::new()
+                });
             let toggle_host = Arc::clone(host);
             crate::node_compat::AgentTranscript::from_spec(spec, theme_provider)
                 .with_instance_id(scope)
@@ -6590,7 +6590,7 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         };
 
         poodle_gpui_node_backend::begin_probe_capture();
-        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 620.0);
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 900.0);
         let left_root = "agent-transcript:left";
         let right_root = "agent-transcript:right";
         let left_user = "agent-transcript:left:block:message:same-message";
@@ -6608,8 +6608,14 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         let mount_bounds = driver.mount_box_bounds();
         assert!(left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0));
         assert!(right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0));
-        assert!(bounds_contain(mount_bounds, left_bounds));
-        assert!(bounds_contain(mount_bounds, right_bounds));
+        assert!(
+            bounds_contain(mount_bounds, left_bounds),
+            "mount {mount_bounds:?} contains left root {left_bounds:?}"
+        );
+        assert!(
+            bounds_contain(mount_bounds, right_bounds),
+            "mount {mount_bounds:?} contains right root {right_bounds:?}"
+        );
         assert!(
             left_bounds.bottom() <= right_bounds.top(),
             "duplicate transcripts keep authored order without overlap"
@@ -6643,8 +6649,14 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
                 .unwrap_or_else(|| panic!("{scope} transcript reached paint"));
             assert_eq!(root_snapshot.a11y_role, Some(NodeRole::Log));
             assert_eq!(root_snapshot.a11y_label.as_deref(), Some("Conversation"));
-            assert_eq!(root_snapshot.roles.get("empty").map(String::as_str), Some("false"));
-            assert_eq!(root_snapshot.roles.get("size").map(String::as_str), Some("sm"));
+            assert_eq!(
+                root_snapshot.roles.get("empty").map(String::as_str),
+                Some("false")
+            );
+            assert_eq!(
+                root_snapshot.roles.get("size").map(String::as_str),
+                Some("sm")
+            );
             assert_eq!(
                 root_snapshot.roles.get("density").map(String::as_str),
                 Some("compact")
@@ -6788,9 +6800,18 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
             );
             let snapshot = poodle_gpui_node_backend::painted_node_for(&appended_id)
                 .expect("host-appended mounted facts");
-            assert_eq!(snapshot.roles.get("kind").map(String::as_str), Some("message"));
-            assert_eq!(snapshot.roles.get("role").map(String::as_str), Some("assistant"));
-            assert_eq!(snapshot.roles.get("status").map(String::as_str), Some("complete"));
+            assert_eq!(
+                snapshot.roles.get("kind").map(String::as_str),
+                Some("message")
+            );
+            assert_eq!(
+                snapshot.roles.get("role").map(String::as_str),
+                Some("assistant")
+            );
+            assert_eq!(
+                snapshot.roles.get("status").map(String::as_str),
+                Some("complete")
+            );
             assert!(snapshot.texts.iter().any(|text| text == "Host appended record"));
         }
 
@@ -6876,15 +6897,15 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
         observation,
         &[
             "mount caller-scoped AgentTranscript instances through node_compat::AgentTranscript::from_spec(...).into_element() in HeadlessDriver",
-            "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding from host-owned records",
+            "dispatch disclosure, wheel, and jump-control input through the mounted GPUI test platform while rebuilding and appending host-owned records",
             "replace an empty transcript with a spinning activity through the production factory and observe the mounted dependency structures",
         ],
         &[
-            "production Text, Surface, EmptyState, and Spinner composition preserves the accepted contract-owned structure and token treatment",
-            "the user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
-            "authored record order, roles, statuses, transcript containment, child geometry, and caller-scoped duplicate identity remain exact",
-            "host rebuilds preserve scoped disclosure state and detached scroll position while mounted keyboard, pointer, wheel, and jump input take effect",
-            "empty and loading rebuilds mount the real contained EmptyState and Spinner plus Text structures before terminal receipt emission",
+            "paint-time node facts and positive bounds prove the real mounted Text, Surface, EmptyState, and Spinner dependency structures",
+            "the mounted user AgentMessage Surface has the exact elevated background and surface radius with no shadow or raw-shell substitution",
+            "all five mounted record blocks preserve exact roles, available statuses, content, order, non-overlap, production-parent containment, and caller-scoped identity",
+            "host rebuilds append the scoped runtime id in order and preserve disclosure state; the separately mounted scroll fixture preserves detached position while keyboard, pointer, wheel, and jump input take effect",
+            "empty and loading rebuilds mount positive contained EmptyState and Spinner plus Text child bounds before terminal receipt emission",
         ],
     );
 }
@@ -6892,22 +6913,22 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
 /// AgentTranscript postures and the user-message shell must stay observable as
 /// their production dependencies, not as transcript-authored lookalike nodes.
 fn agent_transcript_dependency_observation() -> headless_driver::MountedObservation {
-    use crate::node_compat::IntoCompatNode;
     use gpui::IntoElement;
-    use poodle_adapter::ThemeProvider;
-    use poodle_headless::agent_transcript::{
-        TranscriptActivity, TranscriptItem, TranscriptMessage, TranscriptRole,
-    };
+    use poodle_headless::agent_transcript::{TranscriptActivity, TranscriptItem};
 
     #[derive(Debug, Default)]
     struct MountedPostureFacts {
         empty_state: bool,
+        empty_positive: bool,
         empty_contained: bool,
         empty_removed: bool,
+        empty_structure: bool,
         loading_activity: bool,
         loading_spinner: bool,
         loading_label: bool,
+        loading_positive: bool,
         loading_contained: bool,
+        loading_structure: bool,
         dependency_channels: bool,
         observation: Option<headless_driver::MountedObservation>,
     }
@@ -6934,6 +6955,7 @@ fn agent_transcript_dependency_observation() -> headless_driver::MountedObservat
         let empty_id = "agent-transcript:dependencies:empty-state";
         let root_bounds = poodle_gpui_node_backend::bounds_for(root_id).expect("transcript root");
         let empty_bounds = poodle_gpui_node_backend::bounds_for(empty_id);
+        let empty_snapshot = poodle_gpui_node_backend::painted_node_for(empty_id);
 
         items.borrow_mut().push(TranscriptItem::Activity(TranscriptActivity {
             id: "working".to_owned(),
@@ -6952,11 +6974,32 @@ fn agent_transcript_dependency_observation() -> headless_driver::MountedObservat
         let channels = poodle_gpui_node_backend::take_probe_capture();
         let mut facts = mounted_result.lock().expect("mounted facts");
         facts.empty_state = empty_bounds.is_some();
+        facts.empty_positive = empty_bounds.is_some_and(|bounds| {
+            bounds.size.width > px(0.0) && bounds.size.height > px(0.0)
+        });
         facts.empty_contained = empty_bounds.is_some_and(|bounds| bounds_contain(root_bounds, bounds));
         facts.empty_removed = poodle_gpui_node_backend::bounds_for(empty_id).is_none();
+        facts.empty_structure = empty_snapshot.is_some_and(|snapshot| {
+            snapshot.a11y_label.as_deref() == Some("No mounted records")
+                && snapshot.border_dashed
+                && snapshot.child_layout_directions.len() == 2
+                && snapshot.texts.iter().any(|text| text == "inbox")
+                && snapshot
+                    .texts
+                    .iter()
+                    .any(|text| text == "No mounted records")
+        });
         facts.loading_activity = activity_bounds.is_some();
         facts.loading_spinner = spinner_bounds.is_some();
         facts.loading_label = label_bounds.is_some();
+        facts.loading_positive = activity_bounds
+            .zip(spinner_bounds)
+            .zip(label_bounds)
+            .is_some_and(|((activity, spinner), label)| {
+                [activity, spinner, label].into_iter().all(|bounds| {
+                    bounds.size.width > px(0.0) && bounds.size.height > px(0.0)
+                })
+            });
         facts.loading_contained = activity_bounds
             .zip(spinner_bounds)
             .zip(label_bounds)
@@ -6965,40 +7008,42 @@ fn agent_transcript_dependency_observation() -> headless_driver::MountedObservat
                     && bounds_contain(activity, spinner)
                     && bounds_contain(activity, label)
             });
+        facts.loading_structure = poodle_gpui_node_backend::painted_node_for(spinner_id)
+            .zip(poodle_gpui_node_backend::painted_node_for(label_id))
+            .is_some_and(|(spinner, label)| {
+                spinner.a11y_role == Some(NodeRole::Status)
+                    && spinner.child_layout_directions.len() == 3
+                    && label.texts == ["Working"]
+                    && label.text_wrap
+                    && label.line_height == Some(1.5)
+                    && label.text_weight == Some(400)
+            });
         facts.dependency_channels = channels.contains(&"surface.channels.background")
             && channels.contains(&"content.text-icon.icon")
             && channels.contains(&"content.text-icon.text");
         facts.observation = Some(driver.mounted_observation());
     });
 
-    let theme_provider = theme();
-    let user_message = crate::node_compat::AgentTranscript::from_spec(
-        AgentTranscriptSpec::new(vec![TranscriptItem::Message(TranscriptMessage {
-            id: "user".to_owned(),
-            role: Some(TranscriptRole::User),
-            markdown: "Contract surface".to_owned(),
-            ..Default::default()
-        })]),
-        &theme_provider,
-    )
-    .with_instance_id("surface")
-    .into_compat_node()
-    .children
-    .into_iter()
-    .next()
-    .expect("user message");
-
     let mounted = mounted.lock().expect("mounted facts");
     let mut blockers = Vec::new();
-    if !mounted.empty_state || !mounted.empty_contained || !mounted.empty_removed {
-        blockers.push("empty posture did not mount the contained production EmptyState");
+    if !mounted.empty_state
+        || !mounted.empty_positive
+        || !mounted.empty_contained
+        || !mounted.empty_removed
+        || !mounted.empty_structure
+    {
+        blockers.push("empty posture did not mount the positive contained production EmptyState");
     }
     if !mounted.loading_activity
         || !mounted.loading_spinner
         || !mounted.loading_label
+        || !mounted.loading_positive
         || !mounted.loading_contained
+        || !mounted.loading_structure
     {
-        blockers.push("loading posture did not mount the contained production Spinner and Text");
+        blockers.push(
+            "loading posture did not mount the positive contained production Spinner and Text",
+        );
     }
     if !mounted.dependency_channels
         || !mounted
@@ -7007,25 +7052,6 @@ fn agent_transcript_dependency_observation() -> headless_driver::MountedObservat
     {
         blockers.push("posture dependencies did not reach the mounted GPUI backend");
     }
-    if user_message.style.descriptor.background
-        != Some(theme_provider.resolve_color("color.background.elevated"))
-        || user_message.style.descriptor.corner_radii.top_left
-            != theme_provider.resolve_radius("radius.surface")
-    {
-        blockers.push("user AgentMessage lost its exact elevated fill or surface radius");
-    }
-    if user_message.style.descriptor.shadow.is_some()
-        || !user_message.style.shadow_layers.is_empty()
-    {
-        blockers.push("user AgentMessage retained Surface elevation shadow absent from its contract");
-    }
-    if user_message.style.descriptor.layout.direction != LayoutDirection::Row
-        || user_message.children.len() != 1
-        || user_message.children[0].style.descriptor.layout.direction != LayoutDirection::Column
-    {
-        blockers.push("user AgentMessage substituted a raw shell for production Surface composition");
-    }
-
     assert!(blockers.is_empty(), "{}", blockers.join("; "));
     mounted
         .observation
