@@ -1,6 +1,6 @@
 # g16.073 — Nucleus Menu M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`, completed `g16.072`
@@ -8,7 +8,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/menu.md`, `../../contracts/components/icon.md`
-Log: pending
+Log: `../../logs/2026-09/20260903-g16-073-nucleus-menu-receipt.md`
 PR: pending
 Handoff: `../../handoffs/20260903-064013-g16-073-nucleus-menu-receipt.md`
 
