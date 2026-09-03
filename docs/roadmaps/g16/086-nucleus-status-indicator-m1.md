@@ -1,8 +1,9 @@
 # g16.086 — Nucleus StatusIndicator M1 Receipt
 
-Status: preparation-ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.062`, completed Icon receipt; serial finalization
 follows the latest merged Nucleus receipt
 Governing refs: `nucleus-gpui-parity-programme.md`,
@@ -12,11 +13,18 @@ Handoff: `../../handoffs/20260903-180100-g16-086-nucleus-status-indicator-receip
 
 ## Goal
 
-Prepare the first named production-path mounted proof for Nucleus
-`StatusIndicator`. Pause before shared evidence. After the orchestrator supplies
-the latest cohort identity, finalize one terminal `M1` receipt.
+Produce the first named production-path mounted proof and one terminal `M1`
+receipt for Nucleus `StatusIndicator` at a committed runtime source.
 
-## Preparation Boundary
+## Completed
+
+- Runtime source `23b968c4ba18749dab714bc9edf3a584c5fcacb3`
+  emits the terminal StatusIndicator receipt from the stable named mounted test.
+- All 23 cohort receipts pin that exact runtime source. The generated ledger
+  advances only StatusIndicator from missing to mounted: 23 mounted, 152 missing.
+- The result is M1 only. It does not infer A1 or V1.
+
+## Fixed Boundary
 
 - Mount through the production `node_compat::StatusIndicator` `IntoElement`
   path and the element-backed `HeadlessDriver`; renderer-only construction is
@@ -28,11 +36,12 @@ the latest cohort identity, finalize one terminal `M1` receipt.
   activation seam, Nucleus state machine, polling, persistence, or public API.
 - Commit a biting counterexample before any repair. A bounded generalized
   native repair is allowed only when the mounted production proof fails.
-- During preparation, do not edit manifest, receipts, ledger, g16 front doors,
-  or claim M1 completion. Push a draft PR and pause.
-- On resume, rebase onto the latest receipt merge, set the expected test,
-  commit runtime source, emit the cohort after the terminal assertion, update
-  this card and one log, and run full boards.
+- The preparation-accepted head
+  `13f5f9e8f635131ca0798e08967d432316359bd8` was rebased in full onto
+  `509e784c7734d679ebba3c5222bf2e25c9a24ed5`, preserving rebased counterexample
+  `9043e3a78` before repair `8809011a5`.
+- Shared evidence contains the complete 23-receipt cohort pinned to the runtime
+  source. No g16 front door changes in this card.
 
 ## Review Oracle
 
@@ -51,12 +60,13 @@ the latest cohort identity, finalize one terminal `M1` receipt.
 
 ## Validation
 
-Preparation: focused StatusIndicator spec/render/backend and named mounted tests
-plus `git diff --check`. Finalization adds `effigy regressions:native`,
-receipt/ledger tests, `effigy check:parity-evidence-ledger`, `effigy ci:rust`,
-`effigy ci:native`, and `effigy docs:check`. Never run windowed or native-
-visual selectors.
+Focused StatusIndicator spec, render, mounted, and backend checks passed after
+the rebase. Final validation ran `effigy regressions:native`, receipt and ledger
+tests, `effigy check:parity-evidence-ledger`, `effigy ci:rust`,
+`effigy ci:native`, `effigy docs:check`, and `git diff --check`. No windowed or
+native-visual selector ran.
 
 ## Continuation
 
-Pause after preparation. Shared receipt production and merge remain serial.
+Pause for terminal M1 re-review. Merge and g16 front-door closeout remain with
+the orchestrator. Do not start another receipt card.
