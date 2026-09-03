@@ -73,9 +73,10 @@ Updated: 2026-09-03
   - Completed: `g16.091` ToastHost merged in PR #197 at
     `4a615e99046fa9e6dc14801ef1e6f60760336fc2`; the mounted Nucleus cohort is
     28/29.
-  - Ready frontier: repair the inherited Rust 1.95 fresh-consumer dependency
-    gate in `g16.092` while preparing final-row `g16.093` MessageCenter without
-    shared evidence. Finalization remains serial after the repair merges.
+  - Ready frontier: `g16.093` MessageCenter preparation is accepted and paused.
+    `g16.092` repairs the inherited Rust 1.95 fresh-consumer dependency gate but
+    waits for `g16.094`, a bounded ordinary installed-smoke Cargo scope repair.
+    Finalization remains serial after both repairs merge.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -92,8 +93,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: run `g16.092` and the preparation half of `g16.093` in
-    parallel, then finalize the final MessageCenter receipt serially; the
+  - Next move: merge `g16.094`, rebase and merge `g16.092`, then finalize the
+    accepted final MessageCenter receipt serially; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
