@@ -11287,7 +11287,8 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
     use node_compat::IntoCompatNode;
     use poodle_adapter::ThemeProvider;
     use poodle_specs::{
-        CallOutSpec, CalloutAnnounceMode, ControlDensity, ControlSize, StatusTone, ToneFill,
+        ButtonSpec, ButtonVariant, CallOutSpec, CalloutAnnounceMode, ControlDensity, ControlSize,
+        StatusTone, ToneFill,
     };
 
     fn spec(dismissible: bool) -> CallOutSpec {
@@ -11307,6 +11308,34 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
     let theme_provider = theme();
     let proof = crate::node_compat::Callout::from_spec(spec(true), &theme_provider)
         .with_instance_id("proof")
+        .with_actions({
+            let resolve = crate::node_compat::Button::from_spec(
+                ButtonSpec::new()
+                    .with_label("Resolve")
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(ControlSize::Sm)
+                    .with_density(ControlDensity::Compact),
+                &theme_provider,
+            )
+            .with_id("callout-proof-resolve")
+            .on_click(Arc::new(|| {}));
+            let disabled = crate::node_compat::Button::from_spec(
+                ButtonSpec::new()
+                    .with_label("Unavailable")
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_size(ControlSize::Sm)
+                    .with_density(ControlDensity::Compact)
+                    .with_disabled(true),
+                &theme_provider,
+            )
+            .with_id("callout-proof-disabled")
+            .on_click(Arc::new(|| panic!("disabled Callout action must stay inert")));
+            move |ctx| {
+                Node::container()
+                    .child(resolve.into_node_with(ctx))
+                    .child(disabled.into_node_with(ctx))
+            }
+        })
         .on_dismiss(Arc::new(|| {}))
         .into_compat_node();
     assert_eq!(proof.runtime_id.as_deref(), Some("callout:proof"));
@@ -11345,12 +11374,17 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
     );
     assert_eq!(proof.style.descriptor.layout.spacing.padding.left, 12.0);
     assert_eq!(proof.style.descriptor.layout.spacing.padding.top, 10.0);
-    assert_eq!(
-        proof.style.descriptor.layout.spacing.gap,
-        theme_provider.resolve_space("space.inline.md")
-    );
+    assert_eq!(proof.style.descriptor.layout.spacing.gap, 8.0);
 
-    assert_eq!(proof.children.len(), 2, "body precedes the dismiss action");
+    assert_eq!(
+        proof
+            .children
+            .iter()
+            .map(|child| child.roles.get("part").map(String::as_str))
+            .collect::<Vec<_>>(),
+        [Some("body"), Some("actions"), Some("dismiss")],
+        "Callout parts must keep exact contract order"
+    );
     let body = &proof.children[0];
     assert_eq!(body.runtime_id.as_deref(), Some("callout:proof:body"));
     assert_eq!(body.roles.get("part").map(String::as_str), Some("body"));
@@ -11367,7 +11401,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
     assert_eq!(icon.runtime_id.as_deref(), Some("callout:proof:icon"));
     assert!(matches!(
         &icon.kind,
-        NodeKind::Icon { name, size } if name == "triangle-alert" && *size == 12.0
+        NodeKind::Icon { name, size } if name == "triangle-alert" && size == 9.0
     ));
     assert_eq!(
         icon.roles.get("dependency").map(String::as_str),
@@ -11394,6 +11428,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         Some("callout:proof:title")
     );
     assert_eq!(content.children[0].intrinsic_text(), Some("Maintenance window"));
+    assert_eq!(content.children[0].style.text_size, Some(12.0));
     assert_eq!(
         content.children[1].runtime_id.as_deref(),
         Some("callout:proof:message")
@@ -11402,12 +11437,49 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         content.children[1].intrinsic_text(),
         Some("Save before the scheduled restart.")
     );
+    assert_eq!(content.children[1].style.text_size, Some(11.0));
     assert_eq!(
         content.style.descriptor.layout.spacing.gap,
         theme_provider.resolve_space("space.inline.sm")
     );
 
-    let dismiss = &proof.children[1];
+    let actions = &proof.children[1];
+    assert_eq!(
+        actions.runtime_id.as_deref(),
+        Some("callout:proof:actions")
+    );
+    assert_eq!(
+        actions.roles.get("part").map(String::as_str),
+        Some("actions")
+    );
+    assert_eq!(
+        actions.style.descriptor.layout.direction,
+        LayoutDirection::Row
+    );
+    assert_eq!(
+        actions.style.descriptor.layout.spacing.gap,
+        theme_provider.resolve_space("space.inline.sm")
+    );
+    assert!(actions.style.flex_wrap);
+    assert_eq!(actions.children.len(), 2);
+    let resolve = &actions.children[0];
+    let disabled = &actions.children[1];
+    assert_eq!(resolve.intrinsic_text(), Some("Resolve"));
+    assert_eq!(resolve.a11y.role, Some(NodeRole::Button));
+    assert_eq!(resolve.roles.get("variant").map(String::as_str), Some("secondary"));
+    assert_eq!(resolve.roles.get("size").map(String::as_str), Some("sm"));
+    assert_eq!(
+        resolve.roles.get("density").map(String::as_str),
+        Some("compact")
+    );
+    assert!(resolve.interaction.on_activate.is_some());
+    assert_eq!(disabled.intrinsic_text(), Some("Unavailable"));
+    assert_eq!(disabled.a11y.role, Some(NodeRole::Button));
+    assert_eq!(disabled.roles.get("variant").map(String::as_str), Some("ghost"));
+    assert!(disabled.interaction.disabled);
+    assert!(disabled.interaction.on_activate.is_none());
+
+    let dismiss = &proof.children[2];
     assert_eq!(
         dismiss.runtime_id.as_deref(),
         Some("callout:proof:poodle-callout-dismiss")
@@ -11419,6 +11491,14 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
     );
     assert!(dismiss.interaction.focusable);
     assert!(dismiss.interaction.on_activate.is_some());
+    assert_eq!(
+        dismiss.style.descriptor.layout.width,
+        LayoutSizing::Fixed(24.0)
+    );
+    assert_eq!(
+        dismiss.style.descriptor.layout.height,
+        LayoutSizing::Fixed(24.0)
+    );
     assert_eq!(
         dismiss.children[0]
             .roles
@@ -11459,9 +11539,51 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
             dismissible: bool,
             theme_provider: &GpuiThemeProvider,
         ) -> AnyElement {
+            let resolve_host = Arc::clone(host);
+            let disabled_host = Arc::clone(host);
             let dismiss_host = Arc::clone(host);
             crate::node_compat::Callout::from_spec(spec(dismissible), theme_provider)
                 .with_instance_id(scope)
+                .with_actions({
+                    let resolve = crate::node_compat::Button::from_spec(
+                        ButtonSpec::new()
+                            .with_label("Resolve")
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_size(ControlSize::Sm)
+                            .with_density(ControlDensity::Compact),
+                        theme_provider,
+                    )
+                    .with_id(format!("callout-{scope}-resolve"))
+                    .on_click(Arc::new(move || {
+                        resolve_host
+                            .lock()
+                            .expect("callout host")
+                            .events
+                            .push(format!("{scope}:resolve"));
+                    }));
+                    let disabled = crate::node_compat::Button::from_spec(
+                        ButtonSpec::new()
+                            .with_label("Unavailable")
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(ControlSize::Sm)
+                            .with_density(ControlDensity::Compact)
+                            .with_disabled(true),
+                        theme_provider,
+                    )
+                    .with_id(format!("callout-{scope}-disabled"))
+                    .on_click(Arc::new(move || {
+                        disabled_host
+                            .lock()
+                            .expect("callout host")
+                            .events
+                            .push(format!("{scope}:disabled"));
+                    }));
+                    move |ctx| {
+                        Node::container()
+                            .child(resolve.into_node_with(ctx))
+                            .child(disabled.into_node_with(ctx))
+                    }
+                })
                 .on_dismiss(Arc::new(move || {
                     let mut host = dismiss_host.lock().expect("callout host");
                     host.events.push(format!("{scope}:dismiss"));
@@ -11505,6 +11627,9 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         let subject_content = "callout:subject:content";
         let subject_title = "callout:subject:title";
         let subject_message = "callout:subject:message";
+        let subject_actions = "callout:subject:actions";
+        let subject_resolve = "poodle-btn-callout-subject-resolve";
+        let subject_disabled = "poodle-btn-callout-subject-disabled";
         let subject_dismiss = "callout:subject:poodle-callout-dismiss";
         let witness_root = "callout:witness";
         let witness_dismiss = "callout:witness:poodle-callout-dismiss";
@@ -11517,6 +11642,9 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
             subject_content,
             subject_title,
             subject_message,
+            subject_actions,
+            subject_resolve,
+            subject_disabled,
             subject_dismiss,
             witness_root,
             witness_dismiss,
@@ -11549,6 +11677,12 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
             .expect("subject title bounds");
         let message_bounds = poodle_gpui_node_backend::bounds_for(subject_message)
             .expect("subject message bounds");
+        let actions_bounds = poodle_gpui_node_backend::bounds_for(subject_actions)
+            .expect("subject actions bounds");
+        let resolve_bounds = poodle_gpui_node_backend::bounds_for(subject_resolve)
+            .expect("subject resolve action bounds");
+        let disabled_bounds = poodle_gpui_node_backend::bounds_for(subject_disabled)
+            .expect("subject disabled action bounds");
         let dismiss_bounds = poodle_gpui_node_backend::bounds_for(subject_dismiss)
             .expect("subject dismiss bounds");
         for (name, bounds) in [
@@ -11560,6 +11694,9 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
             ("content", content_bounds),
             ("title", title_bounds),
             ("message", message_bounds),
+            ("actions", actions_bounds),
+            ("resolve", resolve_bounds),
+            ("disabled", disabled_bounds),
             ("dismiss", dismiss_bounds),
         ] {
             assert!(
@@ -11575,10 +11712,15 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         assert!(bounds_contain(body_bounds, content_bounds));
         assert!(bounds_contain(content_bounds, title_bounds));
         assert!(bounds_contain(content_bounds, message_bounds));
+        assert!(bounds_contain(subject_bounds, actions_bounds));
+        assert!(bounds_contain(actions_bounds, resolve_bounds));
+        assert!(bounds_contain(actions_bounds, disabled_bounds));
         assert!(bounds_contain(subject_bounds, dismiss_bounds));
         assert!(badge_bounds.right() <= content_bounds.left());
         assert!(title_bounds.bottom() <= message_bounds.top());
-        assert!(body_bounds.right() <= dismiss_bounds.left());
+        assert!(body_bounds.right() <= actions_bounds.left());
+        assert!(actions_bounds.right() <= dismiss_bounds.left());
+        assert!(resolve_bounds.right() <= disabled_bounds.left());
         assert!(subject_bounds.bottom() <= witness_bounds.top());
         assert!(witness_bounds.bottom() <= inert_bounds.top());
 
@@ -11603,6 +11745,35 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
             icon_snapshot.roles.get("dependency").map(String::as_str),
             Some("icon")
         );
+        let actions_snapshot = poodle_gpui_node_backend::painted_node_for(subject_actions)
+            .expect("Callout actions part reached backend paint");
+        assert_eq!(
+            actions_snapshot.roles.get("part").map(String::as_str),
+            Some("actions")
+        );
+        let resolve_snapshot = poodle_gpui_node_backend::painted_node_for(subject_resolve)
+            .expect("production Button action reached backend paint");
+        assert_eq!(resolve_snapshot.a11y_role, Some(NodeRole::Button));
+        assert_eq!(
+            resolve_snapshot.roles.get("variant").map(String::as_str),
+            Some("secondary")
+        );
+        let disabled_snapshot = poodle_gpui_node_backend::painted_node_for(subject_disabled)
+            .expect("disabled production Button action reached backend paint");
+        assert_eq!(disabled_snapshot.a11y_role, Some(NodeRole::Button));
+        assert_eq!(
+            disabled_snapshot.style.cursor,
+            poodle_node::CursorHint::NotAllowed
+        );
+
+        driver.pointer_activate_id(subject_resolve);
+        assert_eq!(host.lock().expect("callout host").events, ["subject:resolve"]);
+        driver.pointer_activate_id(subject_disabled);
+        assert_eq!(
+            host.lock().expect("callout host").events,
+            ["subject:resolve"],
+            "disabled mounted Button action must stay inert"
+        );
 
         driver.wait_for_focus_handle(subject_dismiss);
         driver.wait_for_focus_handle(witness_dismiss);
@@ -11618,7 +11789,10 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         );
 
         driver.pointer_activate_id(subject_dismiss);
-        assert_eq!(host.lock().expect("callout host").events, ["subject:dismiss"]);
+        assert_eq!(
+            host.lock().expect("callout host").events,
+            ["subject:resolve", "subject:dismiss"]
+        );
         assert!(
             poodle_gpui_node_backend::bounds_for(subject_root).is_some(),
             "a refused controlled dismissal must leave the subject mounted"
@@ -11631,7 +11805,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         driver.keyboard_activate(subject_dismiss);
         assert_eq!(
             host.lock().expect("callout host").events,
-            ["subject:dismiss", "subject:dismiss"]
+            ["subject:resolve", "subject:dismiss", "subject:dismiss"]
         );
         assert!(
             poodle_gpui_node_backend::bounds_for(subject_root).is_none(),
@@ -11642,7 +11816,12 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
         driver.keyboard_activate(witness_dismiss);
         assert_eq!(
             host.lock().expect("callout host").events,
-            ["subject:dismiss", "subject:dismiss", "witness:dismiss"],
+            [
+                "subject:resolve",
+                "subject:dismiss",
+                "subject:dismiss",
+                "witness:dismiss"
+            ],
             "mounted callbacks stay isolated after the subject is removed"
         );
         assert!(poodle_gpui_node_backend::bounds_for(witness_root).is_some());
