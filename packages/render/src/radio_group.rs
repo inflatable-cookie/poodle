@@ -107,6 +107,11 @@ fn axis_step(orientation: Orientation, key: NodeKey, index: usize, last: usize) 
         | (Orientation::Horizontal, NodeKey::ArrowLeft) => {
             Some(if index == 0 { last } else { index - 1 })
         }
+        // Contract §6: Home and End jump to the first/last enabled option on
+        // either axis; extremes stay inert because the roving handler never
+        // fires a change for the current value.
+        (_, NodeKey::Home) => Some(0),
+        (_, NodeKey::End) => Some(last),
         _ => None,
     }
 }
@@ -458,6 +463,54 @@ mod tests {
         assert_eq!(seen.lock().unwrap().as_slice(), ["free"]);
         assert!(keys(NodeKey::ArrowDown, modifiers).is_none());
         assert!(keys(NodeKey::ArrowUp, modifiers).is_none());
+    }
+
+    #[test]
+    fn home_and_end_jump_across_enabled_options_and_stay_inert_at_extremes() {
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let spec = RadioGroupSpec::new(vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro").with_disabled(true),
+            ChoiceOption::new("enterprise", "Enterprise"),
+        ])
+        .with_value("free");
+        let node = render(
+            &spec,
+            RadioGroupHandlers::new("plan")
+                .on_change(Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()))),
+        );
+        let modifiers = NodeModifiers::default();
+        let free_keys = find_option(&node, "free")
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("roving handler");
+        let enterprise_keys = find_option(&node, "enterprise")
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("roving handler");
+        assert_eq!(
+            free_keys(NodeKey::End, modifiers),
+            Some(option_focus_id("plan", "enterprise")),
+            "End jumps over the disabled option to the last enabled one"
+        );
+        assert_eq!(seen.lock().unwrap().as_slice(), ["enterprise"]);
+        assert!(
+            enterprise_keys(NodeKey::End, modifiers).is_none(),
+            "End on the last enabled option is inert"
+        );
+        assert_eq!(
+            enterprise_keys(NodeKey::Home, modifiers),
+            Some(option_focus_id("plan", "free")),
+            "Home jumps to the first enabled option"
+        );
+        assert_eq!(seen.lock().unwrap().as_slice(), ["enterprise", "free"]);
+        assert!(
+            free_keys(NodeKey::Home, modifiers).is_none(),
+            "Home on the first enabled option is inert"
+        );
     }
 
     #[test]

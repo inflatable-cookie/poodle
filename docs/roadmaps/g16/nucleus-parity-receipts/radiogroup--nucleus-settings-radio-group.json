@@ -1,0 +1,67 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "RadioGroup",
+  "scenario_id": "nucleus.settings.radio-group",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "7343e25a887fba68978f9cc763fca845a54cdd7a",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount a controlled vertical RadioGroup with one disabled option through node_compat::RadioGroup::from_spec(...).into_element() into HeadlessDriver",
+    "pointer activate enabled and disabled options through GPUI platform dispatch",
+    "activate focused options with Space through keyboard dispatch and observe the controlled host rebuild",
+    "navigate roving focus with Arrow Up/Down, Home, End, and wraparound across enabled options",
+    "mount a horizontal RadioGroup and observe orientation-exact arrows with wraparound",
+    "mount a group-disabled RadioGroup and observe no focus handles or callback",
+    "mount two duplicate-content RadioGroup instances and observe independent focus and callback streams"
+  ],
+  "assertions": [
+    "the production render path resolves radiogroup role, aria label, orientation, and per-option radiobutton names, selected/toggled state, and single roving tab stop",
+    "indicator and dot production structure carries exact sizes, radii, surface fill, border widths, and selected accent or caller custom color precedence; label typography and text color resolve from tokens",
+    "mounted pointer and Space selection update the host-owned spec through rebuilds while same-value selection and disabled options remain inert",
+    "roving navigation skips disabled options, wraps at boundaries, and retains backend focus across rebuilds; Home/End jump to the first/last enabled option",
+    "mounted bounds confirm positive dimensions, vertical stacking and horizontal ordering, and containment inside each group root",
+    "two duplicate-content instances keep separate runtime IDs, focus handles, and callback streams"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
