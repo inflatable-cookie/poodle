@@ -55,9 +55,12 @@ Updated: 2026-09-03
   - Completed: `g16.085` ModelPicker merged in PR #191 at
     `7a44013c8aa3fc69fffeb7f56f5d7cbe4cf762fe`; the mounted Nucleus cohort is
     22/29.
-  - Ready frontier: prepare and review `g16.086` StatusIndicator while
-    `g16.087` Callout and `g16.088` ConfirmAction prepare without shared
-    evidence; finalize each serially against the latest merged cohort identity.
+  - Completed: `g16.086` StatusIndicator merged in PR #192 at
+    `9edb437d463fb55e9b6d953c513a78441dec4bab`; the mounted Nucleus cohort is
+    23/29.
+  - Ready frontier: review `g16.087` Callout and repair/re-review `g16.088`
+    ConfirmAction preparation, then finalize each serially against the latest
+    merged cohort identity.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -74,9 +77,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: review and finalize `g16.086`, then serially consume accepted
-    `g16.087` and `g16.088` preparations without overlapping shared receipt
-    files; the
+  - Next move: serially consume accepted `g16.087` and `g16.088` preparations
+    without overlapping shared receipt files; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
