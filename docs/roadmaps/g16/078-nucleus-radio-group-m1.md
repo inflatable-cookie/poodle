@@ -1,6 +1,6 @@
 # g16.078 — Nucleus RadioGroup M1 Receipt
 
-Status: finalization-ready; production proof prepared in draft PR #185
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.077`
@@ -8,6 +8,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`, `nucleus-parity-manifest.json`,
 `parity-evidence-ledger.md`, `../../contracts/components/radio-group.md`
 Handoff: `../../handoffs/20260903-115000-g16-078-nucleus-radio-group-receipt.md`
+Log: `../../logs/2026-09/20260903-g16-078-nucleus-radio-group-receipt.md`
 
 ## Goal
 
@@ -67,4 +68,5 @@ visual selectors.
 ## Continuation
 
 After orchestrator merge, g16.079 may rebase and finalize its prepared Switch
-proof against this exact cohort identity.
+proof against the refreshed identity `7343e25a887fba68978f9cc763fca845a54cdd7a`.
+Receipt-producing merges remain serial.
