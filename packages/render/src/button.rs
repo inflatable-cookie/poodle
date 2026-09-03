@@ -34,7 +34,8 @@ fn mix_black(c: ColorValue, ratio: f32) -> ColorValue {
 
 /// A resolved resting-and-hover recipe for composing Button semantics into a
 /// contract-owned control appearance. Internal composites use this seam so
-/// their surface recipe replaces both states atomically.
+/// their surface recipe replaces both states atomically; accessibility,
+/// focus, activation, and variant roles remain Button-owned.
 #[derive(Clone, Copy)]
 pub(crate) struct ButtonVisualRecipe {
     pub fill: ColorValue,

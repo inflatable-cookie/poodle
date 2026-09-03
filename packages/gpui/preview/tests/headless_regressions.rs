@@ -11068,6 +11068,8 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
     let control_radius = theme_provider.resolve_radius("radius.control");
     let focus_color = theme_provider.resolve_color("color.accent.focusRing");
     let focus_width = theme_provider.resolve_border_width("border.width.focus");
+    // Resolve every state against the named contract token, not a generic
+    // token-role marker or a non-empty roles map.
     for (
         name,
         label,

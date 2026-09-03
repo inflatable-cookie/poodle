@@ -103,6 +103,8 @@ pub fn agent_plan(
         actions.style.descriptor.layout.spacing.gap = action_gap;
 
         let instance = handlers.instance_id.clone();
+        // AgentPlan §10 owns these surface tokens; Button keeps semantics,
+        // activation, focus, typography, and variant roles.
         let action_recipe = |variant| {
             let (fill, border, text, hover) = match variant {
                 ButtonVariant::Primary | ButtonVariant::Danger => (
