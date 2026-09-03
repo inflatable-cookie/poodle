@@ -40,15 +40,15 @@ Updated: 2026-09-03
     `076` merged in PR #182 after one repair/re-review round; `077` merged in
     PR #184 after one repair/re-review round; `078` merged in PR #185 after
     parallel proof preparation and independent exact-head review; `079` merged
-    in PR #183 after two repair/re-review rounds
+    in PR #183 after two repair/re-review rounds; `080` merged in PR #186 after
+    one repair/re-review round
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: execute `g16.080` EditableLabel against the merged TextInput
-    and 16/29 mounted cohort identity. Prepare `g16.081` AgentPlan and `g16.082`
-    AgentChatInput production proofs in parallel, but pause both before shared
-    evidence files. Receipt emission, cohort refresh, exact-head review, and
-    merge remain serial; do not emit competing receipt cohorts.
+  - Ready frontier: prepare `g16.081` AgentPlan and `g16.082` AgentChatInput
+    production proofs in parallel. Finalize only one accepted proof at a time
+    against the merged 17/29 cohort identity. Receipt emission, cohort refresh,
+    exact-head review, and merge remain serial.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -65,7 +65,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: review and merge `g16.080`; prepare `g16.081` and `g16.082` while the
+  - Next move: review the prepared `g16.081` and `g16.082` proofs, then finalize
+    one serially while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
