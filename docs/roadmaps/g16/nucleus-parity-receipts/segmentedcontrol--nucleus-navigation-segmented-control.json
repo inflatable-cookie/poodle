@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "050515ca4775d33b314adf38395676f109aa6e7c",
+  "source_commit": "635fc7163279098163fde4a8a4d9aafd3c77eb6f",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
   "lock_resolution": [
@@ -56,7 +56,7 @@
     "each segment resolves radiobutton role, selected/toggled state, roving tab stop, typography, truncation, and focus patch",
     "pointer and keyboard input update selected value through controlled host rebuild while disabled and same-value clicks remain inert",
     "roving keyboard navigation skips disabled segments, wraps at boundaries, and transfers backend focus handle state",
-    "mounted bounds confirm positive dimensions, horizontal segment ordering, equal-width layout, and track child containment",
+    "mounted bounds confirm positive dimensions, horizontal segment ordering, and track child containment",
     "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers"
   ],
   "outcome": "passed",

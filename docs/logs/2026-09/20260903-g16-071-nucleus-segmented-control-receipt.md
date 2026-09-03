@@ -22,28 +22,30 @@ production GPUI render, node backend, and test-platform path in
 `segmented_control_exclusive_focus_identity_and_disabled_paths` verifies
 production structure (root radiogroup role, direction, size ladder height,
 track background/border/radius, padding/gap), individual segment radiobutton
-roles, selected/toggled state, roving tab stops, typography, truncation,
-disabled opacity, focus patches, pointer activation and same-value/disabled
-inertia, test-platform directional roving keyboard navigation (arrow keys,
-Home/End, disabled skipping, wraparound), mounted bounds containment and
-ordering, caller-owned option instance identity, and two-instance focus and
-callback isolation, emitting the M1 receipt at the terminal boundary. The
-manifest, existing receipts (AppHeader, Button, Icon, IconButton, SplitView,
-Surface, Text), and new SegmentedControl receipt pin the exact runtime source
-commit `050515ca4775d33b314adf38395676f109aa6e7c`. The ledger records 8
-mounted Nucleus rows.
+roles, segment button labels (`NodeKind::Button` and `intrinsic_text`),
+selected/toggled state, roving tab stops, typography, truncation, disabled
+opacity, focus patches, pointer activation and same-value/disabled inertia,
+test-platform directional roving keyboard navigation with independently
+legible forward/backward disabled skipping, forward/backward edge wraparound,
+arrow keys, Home/End, and Escape inertness, mounted bounds containment and
+horizontal ordering, caller-owned option instance identity, and two-instance
+focus and callback isolation, emitting the M1 receipt at the terminal
+boundary. The manifest, existing receipts (AppHeader, Button, Icon,
+IconButton, SplitView, Surface, Text), and new SegmentedControl receipt pin the
+exact runtime source commit `635fc7163279098163fde4a8a4d9aafd3c77eb6f`. The
+ledger records 8 mounted Nucleus rows.
 
 ## What landed
 
 - Contracts:
   - `packages/contracts/components/src/segmented_control.rs`: added unit tests validating default spec, builder methods, `is_disabled`, `aria_label`, `size_role`, `density`, `selected_fill_token`, controlled value overriding default value, and option icon-only/fallback name and tooltip derivation.
 - Headless Regressions:
-  - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened `segmented_control_exclusive_focus_identity_and_disabled_paths` with full token and style descriptor verification, disabled segment state (no focus handle, disabled opacity, not-allowed cursor), mounted bounds positive dimensions and containment, probe channel capture (`structure.identity.*`, `surface.channels.*`, `content.typography.*`), pointer selection and inert same-value/disabled clicks, roving keyboard navigation (ArrowLeft/Right/Up/Down, Home/End, Escape inertness), disabled group inertness, two composed instances focus handle and change sink isolation, and terminal M1 receipt emission.
+  - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened `segmented_control_exclusive_focus_identity_and_disabled_paths` with full token and style descriptor verification, segment button labels (`NodeKind::Button` and `intrinsic_text`), disabled segment state (no focus handle, disabled opacity, not-allowed cursor), mounted bounds positive dimensions, horizontal ordering, and track containment, probe channel capture (`structure.identity.*`, `surface.channels.*`, `content.typography.*`), pointer selection and inert same-value/disabled clicks, roving keyboard navigation with distinct forward/backward disabled skipping and edge wrapping steps (ArrowLeft/Right/Up/Down, Home/End, Escape inertness), disabled group inertness, two composed instances focus handle and change sink isolation, and terminal M1 receipt emission.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/segmentedcontrol--nucleus-navigation-segmented-control.json`
-  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SplitView`, `Surface`, `Text` with source commit `050515ca4775d33b314adf38395676f109aa6e7c`.
+  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SplitView`, `Surface`, `Text` with source commit `635fc7163279098163fde4a8a4d9aafd3c77eb6f`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `050515ca4775d33b314adf38395676f109aa6e7c`.
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `635fc7163279098163fde4a8a4d9aafd3c77eb6f`.
   - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts --write`; reports 8 mounted rows (AppHeader, Button, Icon, IconButton, SegmentedControl, SplitView, Surface, Text).
 
 ## Review oracle falsification
