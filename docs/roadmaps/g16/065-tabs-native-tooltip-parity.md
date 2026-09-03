@@ -7,6 +7,7 @@ Depends on: current Tabs contract, completed `g16.060`, completed `g16.066`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/tabs.md`
 Log: `../../logs/2026-09/20260902-g16-065-tabs-native-tooltip-parity.md`
+PR: #172
 
 ## Goal
 
