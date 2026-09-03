@@ -1,0 +1,74 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Dialog",
+  "scenario_id": "nucleus.navigation.dialog",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "8d3cc4ff85f2a534a5ea6adbb76891023d17ae7b",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount controlled Dialog modal with title, description, close affordance, body Surface, and action Buttons through HeadlessDriver",
+    "verify pointer activation inside panel does not trigger backdrop dismissal",
+    "pointer activate disabled action and verify inertness",
+    "pointer activate Cancel and Confirm action buttons and verify callback traces",
+    "pointer activate close button and verify request close emission",
+    "test backdrop click dismissal policy with false and true postures",
+    "test Escape key dismissal policy with false and true postures",
+    "verify host refusal leaves Dialog mounted without duplicate emission",
+    "verify accepted close triggers host rebuild unmounting Dialog backdrop, surface, and controls"
+  ],
+  "assertions": [
+    "production render path resolves root backdrop role, overlay posture, backdrop fill, panel elevated background, border, surface radius, shadow, md width preset, max height, padding, and section spacing",
+    "header resolves title typography with heading weight, description typography with text.secondary color, and close affordance with chrome size and pointer cursor",
+    "body composes production Surface with panel tone and subtle border",
+    "actions compose production Buttons with secondary, primary, and disabled states",
+    "mounted layout bounds confirm positive dimensions, panel containment within backdrop, and child containment within panel",
+    "inside panel clicks are absorbed and never bubble to backdrop dismissal",
+    "disabled action button remains inert to pointer activation",
+    "Cancel and Confirm action buttons dispatch callbacks through the mounted backend",
+    "dismissal axes remain independent: close button always requests close, backdrop respects dismiss_on_backdrop, and Escape respects dismiss_on_escape",
+    "host refusal preserves mounted Dialog state and subsequent interactions",
+    "accepted close rebuilds host tree without Dialog, removing backdrop, surface, and chrome from the mounted backend"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
