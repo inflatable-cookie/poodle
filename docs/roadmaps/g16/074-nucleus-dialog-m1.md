@@ -1,6 +1,6 @@
 # g16.074 — Nucleus Dialog M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.068`, completed `g16.073`
@@ -9,8 +9,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/dialog.md`, `../../contracts/components/surface.md`,
 `../../contracts/components/button.md`
-Log: pending
-PR: pending
+Log: `../../logs/2026-09/20260903-g16-074-nucleus-dialog-receipt.md`
+PR: `https://github.com/inflatable-cookie/poodle/pull/180`
 Handoff: `../../handoffs/20260903-074500-g16-074-nucleus-dialog-receipt.md`
 
 ## Goal

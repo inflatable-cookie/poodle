@@ -434,13 +434,10 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::dialog`
-- GPUI implementation must explicitly own modal stacking, focus trapping,
-  background blocking, announcement, and restoration behavior
-- Dialog and alertdialog roles must be correctly exposed
-- Background inertness must be enforced (not just visual overlay)
-- Focus trap must handle edge cases: empty surface, single focusable element
-- Body scroll lock equivalent required in GPUI context
-- Width presets must be mapped to equivalent pixel constraints
+- Escape dismissal is backend-owned via `poodle_gpui_node_backend` overlay layers and `on_dismiss` dispatching `DismissReason::Escape`.
+- Outside interaction on modal Dialogs, full A1 parity (focus trapping, accessibility tree, modal background suppression, initial focus resolution, focus restoration), and nested modal stacks remain unproved.
+- Background inertness must be enforced (not just visual overlay).
+- Width presets must be mapped to equivalent pixel constraints.
 
 ## 10a. Jetstream Notes
 
@@ -452,7 +449,7 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
   handler of its own. Without it every click *inside* the dialog would reach the
   backdrop — pressing "Save" would dismiss the dialog it was saving.
 - `dismissOnBackdrop` guards the backdrop route only; the close button always
-  dismisses. Escape is host-event-loop work, as on GPUI.
+  dismisses. Escape on Jetstream is host-event-loop work.
 
 ## 11. Parity Checklist
 
@@ -506,7 +503,7 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | The alertdialog role does not itself block backdrop dismissal | `AlertDialog.svelte` passes `dismissOnBackdrop={!working}`, so an alert dialog dismisses like any other and stops only while its confirm is in flight. The native spec briefly carved the role out, which made every native alert dialog undismissable | fixed | none |
-| Escape does not dismiss on either native | key handling is host-event-loop work, as with every native control | accepted | host wires keys |
+| Escape on Jetstream is host-event-loop work | Jetstream preview event loop handles Escape while GPUI backend owns Escape dismissal via overlay dismiss layers | accepted | align Jetstream when backend overlay layers land |
 | exact transition timing may differ slightly | runtime animation systems differ | allowed | keep modality, focus trap, and dismissal semantics strict |
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
 | backdrop as button vs div with click handler | semantic choice for click handling | allowed | backdrop dismissal behavior must match |

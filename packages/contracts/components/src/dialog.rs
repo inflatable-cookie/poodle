@@ -216,3 +216,95 @@ impl DialogSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_spec_and_builder_methods() {
+        let default_spec = DialogSpec::default();
+        assert_eq!(default_spec.open, None);
+        assert!(!default_spec.default_open);
+        assert_eq!(default_spec.title, None);
+        assert_eq!(default_spec.description, None);
+        assert_eq!(default_spec.role, DialogKind::Dialog);
+        assert!(default_spec.dismiss_on_escape);
+        assert!(default_spec.dismiss_on_backdrop);
+        assert!(!default_spec.dismiss_on_outside_interact);
+        assert_eq!(default_spec.aria_label, None);
+        assert_eq!(default_spec.width, DialogWidth::Md);
+        assert!(!default_spec.bare);
+        assert!(!default_spec.show_close_button);
+        assert_eq!(default_spec.close_label, "Close dialog");
+        assert_eq!(default_spec.size, None);
+        assert_eq!(default_spec.size_role, SemanticControlSizeRole::Control);
+        assert_eq!(default_spec.density, None);
+
+        assert_eq!(default_spec.surface_width_rem(), 34.0);
+        assert!(!default_spec.is_full_width());
+        assert!(!default_spec.current_open());
+        assert!(!default_spec.is_alert_dialog());
+        assert!(default_spec.effective_dismiss_on_backdrop());
+        assert!(default_spec.requires_accessible_name());
+
+        let built = DialogSpec::new()
+            .with_open(true)
+            .with_default_open(true)
+            .with_title("Delete repository?")
+            .with_description("This cannot be undone.")
+            .with_role(DialogKind::AlertDialog)
+            .with_dismiss_on_escape(false)
+            .with_dismiss_on_backdrop(false)
+            .with_dismiss_on_outside_interact(true)
+            .with_aria_label("Delete confirmation")
+            .with_width(DialogWidth::Lg)
+            .with_bare(true)
+            .with_show_close_button(true)
+            .with_close_label("Dismiss modal")
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Prominent)
+            .with_density(ControlDensity::Comfortable);
+
+        assert_eq!(built.open, Some(true));
+        assert!(built.default_open);
+        assert_eq!(built.title.as_deref(), Some("Delete repository?"));
+        assert_eq!(built.description.as_deref(), Some("This cannot be undone."));
+        assert_eq!(built.role, DialogKind::AlertDialog);
+        assert!(!built.dismiss_on_escape);
+        assert!(!built.dismiss_on_backdrop);
+        assert!(built.dismiss_on_outside_interact);
+        assert_eq!(built.aria_label.as_deref(), Some("Delete confirmation"));
+        assert_eq!(built.width, DialogWidth::Lg);
+        assert!(built.bare);
+        assert!(built.show_close_button);
+        assert_eq!(built.close_label, "Dismiss modal");
+        assert_eq!(built.size, Some(ControlSize::Lg));
+        assert_eq!(built.size_role, SemanticControlSizeRole::Prominent);
+        assert_eq!(built.density, Some(ControlDensity::Comfortable));
+
+        assert_eq!(built.surface_width_rem(), 48.0);
+        assert!(!built.is_full_width());
+        assert!(built.current_open());
+        assert!(built.is_alert_dialog());
+        assert!(!built.effective_dismiss_on_backdrop());
+        assert!(!built.requires_accessible_name());
+    }
+
+    #[test]
+    fn width_presets_match_contract_dimensions() {
+        assert_eq!(DialogSpec::new().with_width(DialogWidth::Sm).surface_width_rem(), 24.0);
+        assert_eq!(DialogSpec::new().with_width(DialogWidth::Md).surface_width_rem(), 34.0);
+        assert_eq!(DialogSpec::new().with_width(DialogWidth::Lg).surface_width_rem(), 48.0);
+        assert_eq!(DialogSpec::new().with_width(DialogWidth::Xl).surface_width_rem(), 64.0);
+        assert!(DialogSpec::new().with_width(DialogWidth::Full).is_full_width());
+    }
+
+    #[test]
+    fn semantic_token_resolvers_match_contract() {
+        let spec = DialogSpec::default();
+        assert_eq!(spec.surface_fill_token(), semantic::COLOR_BACKGROUND_ELEVATED);
+        assert_eq!(spec.backdrop_fill_token(), semantic::COLOR_BACKGROUND_OVERLAY);
+        assert_eq!(spec.shadow_token(), semantic::ELEVATION_DIALOG);
+    }
+}

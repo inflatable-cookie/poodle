@@ -1935,6 +1935,11 @@ impl Dialog {
         }
     }
 
+    pub(crate) fn on_request_close(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_request_close = Some(handler);
+        self
+    }
+
     pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
         self.on_request_close = Some(Arc::new(move || handler(false)));
         self
@@ -1960,7 +1965,7 @@ impl Dialog {
         self
     }
 
-    fn into_node(self) -> poodle_node::Node {
+    pub(crate) fn into_node(self) -> poodle_node::Node {
         poodle_render::dialog_with_slots(
             &self.spec,
             &RenderContext::new(&self.theme),
@@ -1983,7 +1988,7 @@ impl IntoElement for Dialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        native_dialog_element(self.into_node())
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 

@@ -72,6 +72,7 @@ pub fn dialog_with_slots(
 
     // ── Panel ──
     let mut panel = Node::container();
+    panel.id = Some("poodle-dialog-surface".to_string());
     {
         let s = &mut panel.style;
         s.descriptor.background = Some(fill);
@@ -256,10 +257,30 @@ fn backdrop(
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
     }
 
+    // Dismiss layer registration for Escape and outside dismissal stack.
+    // The panel surface is the containment boundary (contract §8 / Dialog.svelte);
+    // the full-screen backdrop is not part of the layer so outside clicks can fire.
+    let layer_id = "poodle-dialog-layer".to_string();
+    if on_request_close.is_some() {
+        panel.interaction.dismiss_layer = Some(layer_id);
+        panel.interaction.on_activate = Some(Arc::new(|| {}));
+    }
+
     if let (true, Some(handler)) = (spec.effective_dismiss_on_backdrop(), &on_request_close) {
         let handler = Arc::clone(handler);
         root.interaction.on_activate = Some(Arc::new(move || handler()));
-        panel.interaction.on_activate = Some(Arc::new(|| {}));
+    }
+
+    if let Some(handler) = on_request_close {
+        let dismiss_on_escape = spec.dismiss_on_escape;
+        if dismiss_on_escape {
+            panel.interaction.on_dismiss = Some(Arc::new(move |reason| match reason {
+                poodle_node::DismissReason::Escape if dismiss_on_escape => {
+                    handler();
+                }
+                _ => {}
+            }));
+        }
     }
 
     let mut root = root.child(panel);
@@ -268,4 +289,168 @@ fn backdrop(
     }
     root.a11y.role = Some(NodeRole::Dialog);
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::DialogWidth;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    struct TestTheme;
+    impl poodle_adapter::ThemeProvider for TestTheme {
+        fn resolve_color(&self, _: &str) -> poodle_node::ColorValue {
+            poodle_node::ColorValue(0.1, 0.2, 0.3, 1.0)
+        }
+        fn resolve_space(&self, _: &str) -> f32 {
+            8.0
+        }
+        fn resolve_border_width(&self, _: &str) -> f32 {
+            1.0
+        }
+        fn resolve_radius(&self, _: &str) -> f32 {
+            6.0
+        }
+        fn resolve_opacity(&self, _: &str) -> f32 {
+            1.0
+        }
+    }
+
+    #[test]
+    fn renders_dialog_backdrop_and_surface() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+        let spec = DialogSpec::new()
+            .with_title("Test Title")
+            .with_description("Test Description")
+            .with_show_close_button(true);
+
+        let node = dialog(&spec, &ctx, vec![Node::text("Body content")], None, None);
+
+        assert_eq!(node.id.as_deref(), Some("poodle-dialog-backdrop"));
+        assert!(node.style.overlay);
+        assert_eq!(node.a11y.role, Some(NodeRole::Dialog));
+        assert!(node.interaction.dismiss_layer.is_none());
+
+        assert_eq!(node.children.len(), 1);
+        let panel = &node.children[0];
+        assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
+        assert!(panel.interaction.dismiss_layer.is_none());
+        assert!(panel.interaction.on_activate.is_none());
+
+        let with_close = dialog(
+            &spec,
+            &ctx,
+            vec![Node::text("Body content")],
+            None,
+            Some(Arc::new(|| {})),
+        );
+        let with_close_panel = &with_close.children[0];
+        assert_eq!(
+            with_close_panel.interaction.dismiss_layer.as_deref(),
+            Some("poodle-dialog-layer")
+        );
+        assert!(with_close_panel.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn dismissal_wiring_for_backdrop_and_escape() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+
+        let call_count = Arc::new(AtomicUsize::new(0));
+        let count_clone = Arc::clone(&call_count);
+        let on_close = Arc::new(move || {
+            count_clone.fetch_add(1, Ordering::SeqCst);
+        });
+
+        let spec = DialogSpec::new()
+            .with_dismiss_on_backdrop(true)
+            .with_dismiss_on_escape(true);
+
+        let node = dialog(&spec, &ctx, vec![], None, Some(on_close));
+
+        // Backdrop activation on root
+        assert!(node.interaction.on_activate.is_some());
+        if let Some(act) = &node.interaction.on_activate {
+            act();
+            assert_eq!(call_count.load(Ordering::SeqCst), 1);
+        }
+
+        // On dismiss (Escape) on panel
+        let panel = &node.children[0];
+        assert!(panel.interaction.on_dismiss.is_some());
+        if let Some(dismiss) = &panel.interaction.on_dismiss {
+            dismiss(poodle_node::DismissReason::Escape);
+            assert_eq!(call_count.load(Ordering::SeqCst), 2);
+        }
+
+        // Escape disabled omits dismissal
+        let escape_disabled_spec = DialogSpec::new()
+            .with_dismiss_on_escape(false);
+        let escape_disabled_node = dialog(&escape_disabled_spec, &ctx, vec![], None, Some(Arc::new(|| {})));
+        let escape_disabled_panel = &escape_disabled_node.children[0];
+        assert!(escape_disabled_panel.interaction.on_dismiss.is_none());
+    }
+
+    #[test]
+    fn dismiss_on_backdrop_disabled_omits_root_activation() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+
+        let on_close = Arc::new(|| {});
+        let spec = DialogSpec::new().with_dismiss_on_backdrop(false);
+
+        let node = dialog(&spec, &ctx, vec![], None, Some(on_close));
+        assert!(node.interaction.on_activate.is_none());
+    }
+
+    #[test]
+    fn bare_dialog_mode_mounts_children_directly_into_panel() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+
+        let spec = DialogSpec::new().with_bare(true);
+        let node = dialog(
+            &spec,
+            &ctx,
+            vec![Node::text("Custom Modal View")],
+            None,
+            None,
+        );
+
+        let panel = &node.children[0];
+        assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
+        assert_eq!(panel.children.len(), 1);
+    }
+
+    #[test]
+    fn width_presets_apply_to_panel_sizing() {
+        let theme = TestTheme;
+        let ctx = RenderContext::new(&theme);
+
+        let sm_node = dialog(
+            &DialogSpec::new().with_width(DialogWidth::Sm),
+            &ctx,
+            vec![],
+            None,
+            None,
+        );
+        assert_eq!(
+            sm_node.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(24.0))
+        );
+
+        let full_node = dialog(
+            &DialogSpec::new().with_width(DialogWidth::Full),
+            &ctx,
+            vec![],
+            None,
+            None,
+        );
+        assert_eq!(
+            full_node.children[0].style.descriptor.layout.width,
+            LayoutSizing::Grow
+        );
+    }
 }
