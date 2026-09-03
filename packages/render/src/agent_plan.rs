@@ -9,11 +9,13 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, StylePatch};
 use poodle_specs::{
     AgentMessageSpec, AgentPlanSpec, ButtonSpec, ButtonVariant, TextSpec, TextTone, TextWeight,
 };
+use poodle_tokens::semantic;
 
+use crate::button::{apply_visual_recipe, ButtonVisualRecipe};
 use crate::color::TRANSPARENT;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
@@ -55,14 +57,16 @@ pub fn agent_plan(
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
     let accent = ctx.theme().resolve_color(spec.accent_token());
+    let accent_hover = ctx.theme().resolve_color(semantic::COLOR_ACCENT_HOVER);
     let border = ctx.theme().resolve_color(spec.border_token());
     let action_color = ctx.theme().resolve_color(spec.action_token());
+    let action_hover_color = ctx.theme().resolve_color(semantic::COLOR_TEXT_PRIMARY);
+    let primary_action_color = ctx.theme().resolve_color(spec.primary_action_token());
     let radius = ctx.theme().resolve_radius(spec.radius_token());
 
     let font_size = rem_to_px(spec.font_size_rem(base_size));
     let gap = rem_to_px(spec.gap_rem(density));
     let action_gap = rem_to_px(spec.action_gap_rem(density));
-    let hairline = rem_to_px(0.0625);
 
     let mut root = Node::container();
     root.runtime_id = handlers
@@ -99,6 +103,50 @@ pub fn agent_plan(
         actions.style.descriptor.layout.spacing.gap = action_gap;
 
         let instance = handlers.instance_id.clone();
+        let action_recipe = |variant| {
+            let (fill, border, text, hover) = match variant {
+                ButtonVariant::Primary | ButtonVariant::Danger => (
+                    accent,
+                    TRANSPARENT,
+                    primary_action_color,
+                    StylePatch {
+                        background: Some(accent_hover),
+                        border_color: Some(TRANSPARENT),
+                        text_color: Some(primary_action_color),
+                        opacity: None,
+                    },
+                ),
+                ButtonVariant::Secondary => (
+                    TRANSPARENT,
+                    border,
+                    action_color,
+                    StylePatch {
+                        background: Some(TRANSPARENT),
+                        border_color: Some(border),
+                        text_color: Some(action_hover_color),
+                        opacity: None,
+                    },
+                ),
+                ButtonVariant::Ghost => (
+                    TRANSPARENT,
+                    TRANSPARENT,
+                    action_color,
+                    StylePatch {
+                        background: Some(TRANSPARENT),
+                        border_color: Some(TRANSPARENT),
+                        text_color: Some(action_hover_color),
+                        opacity: None,
+                    },
+                ),
+            };
+            ButtonVisualRecipe {
+                fill,
+                border,
+                text,
+                radius,
+                hover,
+            }
+        };
         let action = |kind: &str,
                       label: String,
                       variant: ButtonVariant,
@@ -110,6 +158,7 @@ pub fn agent_plan(
                 .with_size(base_size)
                 .with_density(density);
             let mut button = crate::button::button(&button_spec, ctx, handler);
+            apply_visual_recipe(&mut button, action_recipe(variant));
             button.id = Some(format!("agent-plan-{kind}"));
             button.runtime_id = scoped(instance.as_deref(), kind);
             {
@@ -121,26 +170,7 @@ pub fn agent_plan(
                 pad.bottom = rem_to_px(0.25);
                 pad.left = rem_to_px(0.625);
                 pad.right = rem_to_px(0.625);
-                s.descriptor.border.width = hairline;
-                s.descriptor.border.color = match variant {
-                    ButtonVariant::Primary | ButtonVariant::Ghost => TRANSPARENT,
-                    _ => border,
-                };
-                s.descriptor.background = Some(if variant == ButtonVariant::Primary {
-                    accent
-                } else {
-                    TRANSPARENT
-                });
-                s.descriptor.text_color = Some(if variant == ButtonVariant::Primary {
-                    ctx.theme().resolve_color(spec.primary_action_token())
-                } else {
-                    action_color
-                });
                 s.text_size = Some(font_size);
-                s.descriptor.corner_radii.top_left = radius;
-                s.descriptor.corner_radii.top_right = radius;
-                s.descriptor.corner_radii.bottom_right = radius;
-                s.descriptor.corner_radii.bottom_left = radius;
             }
 
             button

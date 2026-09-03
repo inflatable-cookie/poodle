@@ -32,6 +32,30 @@ fn mix_black(c: ColorValue, ratio: f32) -> ColorValue {
     ColorValue(c.0 * ratio, c.1 * ratio, c.2 * ratio, c.3)
 }
 
+/// A resolved resting-and-hover recipe for composing Button semantics into a
+/// contract-owned control appearance. Internal composites use this seam so
+/// their surface recipe replaces both states atomically.
+#[derive(Clone, Copy)]
+pub(crate) struct ButtonVisualRecipe {
+    pub fill: ColorValue,
+    pub border: ColorValue,
+    pub text: ColorValue,
+    pub radius: f32,
+    pub hover: StylePatch,
+}
+
+pub(crate) fn apply_visual_recipe(button: &mut Node, recipe: ButtonVisualRecipe) {
+    let style = &mut button.style;
+    style.descriptor.background = Some(recipe.fill);
+    style.descriptor.border.color = recipe.border;
+    style.descriptor.text_color = Some(recipe.text);
+    style.descriptor.corner_radii.top_left = recipe.radius;
+    style.descriptor.corner_radii.top_right = recipe.radius;
+    style.descriptor.corner_radii.bottom_right = recipe.radius;
+    style.descriptor.corner_radii.bottom_left = recipe.radius;
+    style.hover = Some(recipe.hover);
+}
+
 /// Build a button node. `on_click` fires unless disabled or loading — the
 /// contract dims a loading button, drops the cursor and removes it from the
 /// tab order, so it must not fire either.
