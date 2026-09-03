@@ -504,10 +504,10 @@ pub fn model_picker(
 
         // Stretch (the flex default), not items_start: the rail's left rule
         // must run the panel's full height.
-        // Contract: the open picker panel is a `dialog`.
+        // The panel owns layout only; the containing surface owns dialog
+        // semantics and overlay chrome.
         let mut panel = Node::container();
         panel.runtime_id = Some(format!("{select_scope}:panel"));
-        panel.a11y.role = Some(NodeRole::Dialog);
         panel.style.descriptor.layout.direction = LayoutDirection::Row;
         panel.style.descriptor.layout.spacing.gap = rem_to_px(0.75);
         let mut panel = panel.child(models);
@@ -532,6 +532,7 @@ pub fn model_picker(
             s.descriptor.border.width = 1.0;
             s.descriptor.border.color = item_border;
             s.descriptor.background = Some(elevated);
+            s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = rem_to_px(0.5);
             pad.right = rem_to_px(0.5);
