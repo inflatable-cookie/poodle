@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "IconButton",
-  "scenario_id": "nucleus.shell.icon-button",
+  "component": "SplitView",
+  "scenario_id": "nucleus.shell.split-view",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,15 +46,17 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount IconButton through HeadlessDriver",
-    "pointer activate, keyboard activate, and hover dispatch through GPUI platform",
-    "controlled and seeded toggle rebuilds through dispatched keyboard input"
+    "mount two composed SplitViews with caller-scoped divider instance IDs through HeadlessDriver",
+    "dispatch keyboard arrow and Home/End resize input through GPUI test platform",
+    "dispatch cross-axis keys to prove axis filter isolation",
+    "dispatch keyboard activation to primary collapse toggle"
   ],
   "assertions": [
-    "pointer and keyboard activation fire listeners through real hit testing and focus dispatch",
-    "controlled and seeded toggle states rebuild host tree",
-    "disabled and loading states remain inert",
-    "300ms tooltip lifecycle resolves explicit and fallback text through dispatched hover and timing"
+    "production render path resolves root orientation, ratio flex bases, min-size constraints, overflow clipping, and aria-label",
+    "caller-scoped divider instance IDs prevent focus handle aliasing across multiple mounted SplitViews",
+    "mounted keyboard input dispatches axis-constrained deltas and saturating Home/End to the focused split divider with complete handler isolation",
+    "primary collapse toggle composes production CollapseToggle and Icon renderers with accurate button role, label, expanded state, and focus ring",
+    "mounted bounds confirm positive dimensions, pane ordering, and child containment within owning SplitView layouts"
   ],
   "outcome": "passed",
   "artifact_paths": []

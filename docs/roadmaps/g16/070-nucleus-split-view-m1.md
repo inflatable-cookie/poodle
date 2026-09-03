@@ -1,6 +1,6 @@
 # g16.070 — Nucleus SplitView M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`, completed `g16.069`
@@ -11,6 +11,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/resize-handle.md`,
 `../../contracts/components/collapse-toggle.md`,
 `../../contracts/components/icon.md`
+Log: `../../logs/2026-09/20260903-g16-070-nucleus-split-view-receipt.md`
 Handoff: `../../handoffs/20260903-041500-g16-070-nucleus-split-view-receipt.md`
 
 ## Goal
