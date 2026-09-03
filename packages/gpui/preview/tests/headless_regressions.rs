@@ -12675,9 +12675,29 @@ fn agent_question_choices_rebuild_the_host_spec_through_mounted_input() {
         assert!(channels.contains(&"content.text-icon.text"));
         assert!(channels.contains(&"semantic.token-roles.received"));
         assert!(channels.contains(&"accessibility.projection.received"));
+        let observation = driver.mounted_observation();
         assert!(
-            driver.mounted_observation().is_valid(),
+            observation.is_valid(),
             "the proof must paint and dispatch input through the mounted backend"
+        );
+
+        nucleus_receipts::emit_if_configured(
+            "AgentQuestion",
+            "nucleus.agent.agent-question",
+            observation,
+            &[
+                "mount duplicate controlled AgentQuestion instances through node_compat::AgentQuestion::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch pointer and keyboard choices plus dismissal through the mounted GPUI test platform while rebuilding from host-owned selections",
+                "dispatch mounted pointer input at a production Button option carrying a live callback and host-state sink while its disabled gate is active",
+            ],
+            &[
+                "production Text and Button composition preserves prompt, option, selection, progress, dismissal, accessibility, and exact token metadata",
+                "mounted question roots, option rows, dismissal, and disabled witness have positive full extents, authored non-overlapping order, and real mount or production-parent containment",
+                "single-select replacement, multi-select toggling, refusal, dismissal, and host-owned rebuilds preserve exact callback and state traces",
+                "duplicate caller identities keep focus, callbacks, state, and bounds isolated",
+                "the mounted disabled production Button suppresses its supplied live callback and host mutation; removing the disabled gate makes this oracle fail",
+                "backend probe channels and mounted observation confirm production render, accessibility, token, paint, and GPUI input dispatch",
+            ],
         );
     });
 }
