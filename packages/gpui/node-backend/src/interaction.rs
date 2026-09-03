@@ -514,6 +514,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 // Node handlers carry no context, so they cannot notify the
                 // entity that owns the state they mutated; a repaint is what
                 // lets the host observe the mutation on the next frame.
+                cx.stop_propagation();
                 cx.refresh_windows();
             },
         );
@@ -1065,6 +1066,7 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
         let click = handler.clone();
         el = el.on_click(move |event: &ClickEvent, _window, cx| {
             click(node_modifiers(&event.modifiers()));
+            cx.stop_propagation();
             cx.refresh_windows();
         });
     }
