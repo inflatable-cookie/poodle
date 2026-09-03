@@ -3825,6 +3825,9 @@ pub(crate) struct TextInput {
     on_change: Option<poodle_node::TextChangeHandler>,
     on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
     on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    on_submit: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl TextInput {
@@ -3836,6 +3839,9 @@ impl TextInput {
             on_change: None,
             on_selection_change: None,
             on_focus_change: None,
+            on_submit: None,
+            on_cancel: None,
+            on_clear: None,
         }
     }
 
@@ -3872,6 +3878,21 @@ impl TextInput {
         self
     }
 
+    pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_submit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_cancel = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_clear = Some(handler);
+        self
+    }
+
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let mut node = poodle_render::text_input_with_handlers(
             &self.spec,
@@ -3880,7 +3901,9 @@ impl TextInput {
                 on_change: self.on_change,
                 on_selection_change: self.on_selection_change,
                 on_focus_change: self.on_focus_change,
-                ..poodle_render::TextInputHandlers::default()
+                on_submit: self.on_submit,
+                on_cancel: self.on_cancel,
+                on_clear: self.on_clear,
             },
         );
         if let Some(id) = self.id_suffix {
