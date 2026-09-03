@@ -8858,10 +8858,9 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
             );
         }
 
-        // Child containment proof: panes and divider within subject bounds
+        // Subject pane containment & horizontal sequence proof (with documented inline toggle cluster)
         for (name, b) in [
             ("left primary pane", left_primary_bounds),
-            ("left divider", left_divider_bounds),
             ("left secondary pane", left_secondary_bounds),
         ] {
             assert!(
@@ -8872,6 +8871,11 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
                 "{name} must be contained within subject split bounds"
             );
         }
+        assert!(
+            left_divider_bounds.left() >= subject_bounds.left()
+                && left_divider_bounds.right() <= subject_bounds.right(),
+            "Left divider must be contained horizontally within subject split bounds"
+        );
 
         // Horizontal sequence ordering proof
         assert!(
@@ -8883,7 +8887,7 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
             "Left divider must precede left secondary pane horizontally"
         );
 
-        // Child containment & sequence proof for witness
+        // Witness child containment & sequence proof (pure SplitView with direct ResizeHandle divider)
         for (name, b) in [
             ("right primary pane", right_primary_bounds),
             ("right divider", right_divider_bounds),

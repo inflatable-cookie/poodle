@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    NodePosition, StylePatch,
+    StylePatch,
 };
 use poodle_specs::{
     CollapseDirection, CollapseToggleSpec, Orientation, ResizeHandleSpec, SplitOrientation,
@@ -231,24 +231,7 @@ pub fn split_view(
             });
         }
 
-        let mut d = Node::container();
-        d.position = NodePosition::Relative;
-        if is_horizontal {
-            d.style.descriptor.layout.direction = LayoutDirection::Column;
-            d.style.fill_height = true;
-            d.style.self_stretch = true;
-        } else {
-            d.style.descriptor.layout.direction = LayoutDirection::Row;
-            d.style.fill_width = true;
-            d.style.self_stretch = true;
-        }
-        cluster.position = NodePosition::Absolute {
-            top: None,
-            left: None,
-            right: None,
-            bottom: None,
-        };
-        d.child(handle).child(cluster)
+        centered(cluster_dir).child(handle).child(cluster)
     } else {
         handle
     };
