@@ -240,7 +240,9 @@ fn center_content(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = rem_to_px(0.25);
         s.max_height = Some(rem_to_px(24.0));
-        s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
+        // g16.093 counterexample: the list advertises a 24rem cap but clips
+        // instead of scrolling, so mounted wheel input cannot move rows.
+        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         s.fill_width = true;
     }
     for item in &spec.items {
@@ -330,7 +332,8 @@ fn message_row(
         pad.bottom = rem_to_px(0.625);
         pad.left = rem_to_px(0.625);
         pad.right = rem_to_px(0.5);
-        let radius = ctx.theme().resolve_radius("radius.control");
+        // g16.093 counterexample: row radius must be radius.control.
+        let radius = rem_to_px(0.5);
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_left = radius;
@@ -451,7 +454,8 @@ fn message_content(
         s.fill_width = true;
         s.descriptor.background = None;
         s.descriptor.border.width = 0.0;
-        let radius = ctx.theme().resolve_radius("radius.control");
+        // g16.093 counterexample: content radius must be radius.control.
+        let radius = rem_to_px(0.5);
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_left = radius;
@@ -464,16 +468,19 @@ fn message_content(
         content.style.descriptor.cursor = CursorHint::Pointer;
         content.a11y.label = Some(item.title.clone());
         let surface = ctx.theme().resolve_color("color.background.surface");
+        // g16.093 counterexample: hover fill must be surface at 72%.
         content.style.hover = Some(StylePatch {
-            background: Some(with_alpha(surface, surface.3 * 0.72)),
+            background: Some(with_alpha(surface, 0.4)),
             border_color: None,
             text_color: None,
             opacity: None,
         });
+        // g16.093 counterexample: ring must be accent focus, focus width,
+        // and a -0.125rem inset offset.
         content.style.focus_ring = Some(FocusRing {
-            color: ctx.theme().resolve_color("color.accent.focusRing"),
-            width: ctx.theme().resolve_border_width("border.width.focus"),
-            offset: rem_to_px(-0.125),
+            color: ctx.theme().resolve_color("color.text.primary"),
+            width: rem_to_px(0.25),
+            offset: rem_to_px(0.25),
         });
     }
 
@@ -625,6 +632,50 @@ mod tests {
         assert!(left
             .find(&|node| node.runtime_id.as_deref() == Some("message-center:right:trigger"))
             .is_none());
+    }
+
+    #[test]
+    fn selectable_row_uses_contract_hover_radius_and_inset_focus_ring() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MessageCenterSpec::new(vec![MessageCenterItem::new("one", "Build complete")])
+            .with_open(true);
+        let node = message_center(
+            &spec,
+            &ctx,
+            MessageCenterHandlers {
+                instance_id: Some("tokens".into()),
+                on_item_select: Some(Arc::new(|_| {})),
+                ..Default::default()
+            },
+        );
+        let content = node
+            .find(&|node| {
+                node.runtime_id.as_deref() == Some("message-center:tokens:item:one:content")
+            })
+            .expect("selectable content");
+        let radius = ctx.theme().resolve_radius("radius.control");
+        assert_eq!(content.style.descriptor.corner_radii.top_left, radius);
+        assert_eq!(content.style.descriptor.corner_radii.top_right, radius);
+        assert_eq!(content.style.descriptor.corner_radii.bottom_left, radius);
+        assert_eq!(content.style.descriptor.corner_radii.bottom_right, radius);
+        let surface = ctx.theme().resolve_color("color.background.surface");
+        assert_eq!(
+            content.style.hover.as_ref().and_then(|hover| hover.background),
+            Some(with_alpha(surface, surface.3 * 0.72))
+        );
+        assert_eq!(
+            content.style.focus_ring,
+            Some(FocusRing {
+                color: ctx.theme().resolve_color("color.accent.focusRing"),
+                width: ctx.theme().resolve_border_width("border.width.focus"),
+                offset: rem_to_px(-0.125),
+            })
+        );
+        let row = node
+            .find(&|node| node.runtime_id.as_deref() == Some("message-center:tokens:item:one"))
+            .expect("row");
+        assert_eq!(row.style.descriptor.corner_radii.top_left, radius);
     }
 
     #[test]
