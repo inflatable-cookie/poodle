@@ -8,6 +8,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/segmented-control.md`
+Log: `../../logs/2026-09/20260903-g16-071-nucleus-segmented-control-receipt.md`
+PR: pending
 Handoff: `../../handoffs/20260903-050013-g16-071-nucleus-segmented-control-receipt.md`
 
 ## Goal
