@@ -11826,10 +11826,10 @@ fn selection_segment_options() -> Vec<poodle_specs::SegmentedControlOption> {
 /// mounted tree. Emits the terminal M1 execution receipt.
 #[test]
 fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
-        use poodle_node::{
-            CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-            MainAxisAlignment, NodeKind, NodeRole, NodeToggled, ShadowLayer, StylePatch,
-        };
+    use poodle_node::{
+        CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+        MainAxisAlignment, NodeKind, NodeRole, NodeToggled, ShadowLayer, StylePatch,
+    };
     use poodle_render::color::{mix_srgb, with_alpha, TRANSPARENT};
     use poodle_render::presentation::{control_height_rem, control_space_x_rem, rem_to_px};
     use poodle_specs::{
