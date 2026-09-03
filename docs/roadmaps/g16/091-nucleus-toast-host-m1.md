@@ -1,6 +1,6 @@
 # g16.091 — Nucleus ToastHost M1 Receipt
 
-Status: review — runtime repaired; card-required native gate has an upstream dependency failure recorded below
+Status: complete — merged in PR #197 as `4a615e99046fa9e6dc14801ef1e6f60760336fc2`; card-required native gate has an inherited dependency failure recorded below
 Type: Nucleus NP-4 mounted receipt child
 Opened: 2026-09-03
 Closed: 2026-09-03
@@ -80,5 +80,6 @@ native-visual selector ran.
 
 ## Continuation
 
-Pause for terminal M1 re-review. Merge and g16 front-door closeout remain with
-the orchestrator. Do not start MessageCenter or another receipt card.
+Proceed with `g16.092` to repair the inherited fresh-consumer dependency gate
+and prepare `g16.093` MessageCenter in parallel. MessageCenter shared evidence
+and finalization remain serial after the dependency repair merges.

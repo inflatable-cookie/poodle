@@ -125,7 +125,9 @@ stay maintained; backend admission is not part of the first card.
 88. [088 — Nucleus ConfirmAction M1 receipt](088-nucleus-confirm-action-m1.md) — complete in PR #193 after one preparation repair/re-review round; production Dialog/Button composition, independent dismissal axes, refusal, disabled/pending posture, containment, and caller-scoped identity now carry a terminal M1 receipt
 89. [089 — Nucleus DetailItem M1 receipt](089-nucleus-detail-item-m1.md) — complete in PR #196 after two preparation repair/re-review rounds; production Text/Button composition, surface/simple layouts, exact density and typography recipes, controlled input, parentage, geometry, and caller-scoped identity now carry a terminal M1 receipt
 90. [090 — Nucleus CommandPalette M1 receipt](090-nucleus-command-palette-m1.md) — complete in PR #195 after one preparation repair/re-review round; production Dialog/TextInput and ActionDiscoveryPanel composition, exact result postures/tokens, controlled selection refusal, navigation, dismissal, geometry, and identity now carry a terminal M1 receipt
-91. [091 — Nucleus ToastHost M1 receipt](091-nucleus-toast-host-m1.md) — preparation-ready; build the production mounted toast-host proof before promoting dependent MessageCenter
+91. [091 — Nucleus ToastHost M1 receipt](091-nucleus-toast-host-m1.md) — complete in PR #197 after preparation repair and a cross-window focus-lifecycle repair; production adapter, exact placement/tokens, controlled lifecycle, duplicate teardown, and one terminal M1 receipt advance the cohort to 28/29
+92. [092 — Native consumer tinyvec build repair](092-native-consumer-tinyvec-build.md) — ready; restore the inherited Rust 1.95 fresh-consumer gate without weakening its negative controls
+93. [093 — Nucleus MessageCenter M1 receipt](093-nucleus-message-center-m1.md) — preparation-ready; build the final production mounted receipt proof in parallel with g16.092, then pause before shared evidence
 
 ## Parallel Continuation
 
@@ -133,9 +135,10 @@ The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
 `g16.053`–`g16.086` are complete. The mounted Nucleus cohort is 23/29.
 `g16.087` and `g16.088` are complete. The mounted Nucleus cohort is 25/29.
-`g16.089` and `g16.090` are complete. The mounted Nucleus cohort is 27/29.
-`g16.091` repairs the ToastHost preparation without touching shared receipt
-files. MessageCenter remains the final row and is gated on ToastHost.
+`g16.089`–`g16.091` are complete. The mounted Nucleus cohort is 28/29.
+`g16.092` repairs the inherited native fresh-consumer dependency gate while
+`g16.093` prepares MessageCenter without touching shared receipt files.
+MessageCenter finalization remains serial after that repair.
 Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
