@@ -1,6 +1,6 @@
 # g16.077 — Nucleus TextInput M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.007`, completed `g16.062`
