@@ -1,8 +1,9 @@
 # g16.081 — Nucleus AgentPlan M1 Receipt
 
-Status: preparation-ready
+Status: complete
 Type: Nucleus NP-3 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.062`, completed Button and Text receipts; serial
 finalization follows `g16.080`
 Governing refs: `nucleus-gpui-parity-programme.md`,
@@ -12,12 +13,17 @@ Handoff: `../../handoffs/20260903-133000-g16-081-nucleus-agent-plan-receipt.md`
 
 ## Goal
 
-Prepare one biting production-path mounted proof for Nucleus `AgentPlan` using
+Produce one biting production-path mounted proof for Nucleus `AgentPlan` using
 the retained `agent_plan_decisions_rebuild_the_host_spec_through_mounted_input`
-fixture. Pause before shared evidence. After the orchestrator supplies the
-latest merged cohort identity, finalize one terminal `M1` receipt.
+fixture, then emit one terminal `M1` receipt at the exact committed runtime
+source.
 
-## Preparation Boundary
+Completed at runtime source
+`9caec51bf40c9e3d21af8c92475bc069460dbc5c`. The 18-receipt cohort shares that
+identity, and the generated ledger advances only AgentPlan from missing to
+mounted. M1 does not infer A1 or V1.
+
+## Fixed Boundary
 
 - Mount `node_compat::AgentPlan::from_spec(...).into_element()` through the
   element-backed `HeadlessDriver`; renderer-only Node construction is not
@@ -32,11 +38,11 @@ latest merged cohort identity, finalize one terminal `M1` receipt.
   transcript orchestration, markdown policy, persistence, or approval APIs.
 - Commit a biting counterexample before any repair. A bounded native repair is
   allowed only when the production mounted proof fails.
-- During preparation, do not edit the Nucleus manifest, receipts, generated
-  ledger, g16 front doors, or claim M1 completion. Push a draft PR and pause.
-- On orchestrator resume, rebase onto the latest receipt merge, revalidate,
-  commit runtime source, emit the cohort, update this card and one log, then run
-  the full receipt boards. Merge remains orchestrator-owned.
+- Preparation did not edit the Nucleus manifest, receipts, generated ledger,
+  or g16 front doors and stopped at a draft PR.
+- Finalization rebases onto the latest receipt merge, revalidates, commits the
+  runtime source, emits the cohort, updates this card and one log, then runs the
+  full receipt boards. Merge remains orchestrator-owned.
 
 ## Review Oracle
 
@@ -63,5 +69,5 @@ visual selectors.
 
 ## Continuation
 
-Pause after preparation. The orchestrator selects finalization order from the
-latest merged cohort; shared receipt production remains serial.
+After review and merge, the orchestrator may authorize the next serial Nucleus
+receipt. This card does not start g16.082 finalization.

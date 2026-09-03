@@ -10961,82 +10961,496 @@ fn dock_region_hovered_tab_policy_and_static_insert_run_through_mounted_input() 
 
 // ── g15.010 Batch C regressions ───────────────────────────────────────────
 
-/// AgentPlan accept/revise/dismiss travel through mounted keyboard input.
+/// AgentPlan reaches the production compat adapter, renderer, and backend.
 #[test]
 fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
+    use crate::node_compat::IntoCompatNode;
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::agent_plan::AgentPlanStatus;
-    use poodle_specs::AgentPlanSpec;
+    use poodle_specs::{AgentPlanSpec, ControlDensity, ControlSize};
+
+    const PLAN: &str = "# Release plan\n\nKeep the adapter honest.\n\n1. Inspect the contract.\n2. Apply the change.";
+
+    fn spec(status: AgentPlanStatus) -> AgentPlanSpec {
+        AgentPlanSpec::new(PLAN)
+            .with_status(status)
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact)
+    }
+
+    fn action<'a>(plan: &'a Node, scope: &str, name: &str) -> &'a Node {
+        let id = poodle_render::agent_plan_action_focus_id(Some(scope), name);
+        plan.find(&|node| node.runtime_id.as_deref() == Some(id.as_str()))
+            .unwrap_or_else(|| panic!("missing {scope} {name} action"))
+    }
+
+    let theme_provider = theme();
+    let pending = crate::node_compat::AgentPlan::from_spec(
+        spec(AgentPlanStatus::Pending),
+        &theme_provider,
+    )
+    .with_instance_id("counterexample")
+    .into_compat_node();
+    assert_eq!(
+        pending.runtime_id.as_deref(),
+        Some("agent-plan:counterexample"),
+        "the compat facade must carry its caller-provided instance identity into the renderer"
+    );
+    assert_eq!(
+        pending.roles.get("status").map(String::as_str),
+        Some("pending")
+    );
+    assert_eq!(
+        pending.roles.get("size").map(String::as_str),
+        Some("sm")
+    );
+    assert_eq!(
+        pending.roles.get("density").map(String::as_str),
+        Some("compact")
+    );
+    assert_eq!(
+        pending.style.descriptor.layout.spacing.gap, 6.0,
+        "compact AgentPlan uses the contracted 0.375rem root gap"
+    );
+    assert_eq!(pending.children.len(), 2, "body then pending actions");
+    let rendered_plan = pending.children[0].texts();
+    for record in [
+        "Release plan",
+        "Keep the adapter honest.",
+        "Inspect the contract.",
+        "Apply the change.",
+    ] {
+        assert!(
+            rendered_plan.iter().any(|text| *text == record),
+            "production AgentMessage markdown keeps the {record:?} record"
+        );
+    }
+    let heading = pending.children[0]
+        .find(&|node| node.intrinsic_text() == Some("Release plan"))
+        .expect("rendered plan heading");
+    let description = pending.children[0]
+        .find(&|node| node.intrinsic_text() == Some("Keep the adapter honest."))
+        .expect("rendered plan description");
+    assert_eq!(heading.style.text_weight, Some(600));
+    assert!(
+        heading.style.text_size.expect("heading size")
+            > description.style.text_size.expect("description size"),
+        "markdown heading stays visually distinct from its description"
+    );
+
+    let action_row = &pending.children[1];
+    assert_eq!(action_row.children.len(), 3);
+    assert_eq!(
+        action_row.style.descriptor.layout.spacing.gap, 6.0,
+        "compact AgentPlan uses the contracted 0.375rem action gap"
+    );
+    assert_eq!(
+        action_row
+            .children
+            .iter()
+            .map(|button| button.runtime_id.as_deref())
+            .collect::<Vec<_>>(),
+        [
+            Some("agent-plan:counterexample:accept"),
+            Some("agent-plan:counterexample:revise"),
+            Some("agent-plan:counterexample:dismiss"),
+        ],
+        "decision affordances keep their authored order"
+    );
+    let transparent = ColorValue(0.0, 0.0, 0.0, 0.0);
+    let accent = theme_provider.resolve_color("color.accent.base");
+    let accent_hover = theme_provider.resolve_color("color.accent.hover");
+    let border_subtle = theme_provider.resolve_color("color.border.subtle");
+    let text_inverse = theme_provider.resolve_color("color.text.inverse");
+    let text_primary = theme_provider.resolve_color("color.text.primary");
+    let text_secondary = theme_provider.resolve_color("color.text.secondary");
+    let control_radius = theme_provider.resolve_radius("radius.control");
+    let focus_color = theme_provider.resolve_color("color.accent.focusRing");
+    let focus_width = theme_provider.resolve_border_width("border.width.focus");
+    // Resolve every state against the named contract token, not a generic
+    // token-role marker or a non-empty roles map.
+    for (
+        name,
+        label,
+        variant,
+        fill,
+        border,
+        text,
+        hover_fill,
+        hover_border,
+        hover_text,
+    ) in [
+        (
+            "accept",
+            "Accept plan",
+            "primary",
+            accent,
+            transparent,
+            text_inverse,
+            accent_hover,
+            transparent,
+            text_inverse,
+        ),
+        (
+            "revise",
+            "Revise",
+            "secondary",
+            transparent,
+            border_subtle,
+            text_secondary,
+            transparent,
+            border_subtle,
+            text_primary,
+        ),
+        (
+            "dismiss",
+            "Dismiss plan",
+            "ghost",
+            transparent,
+            transparent,
+            text_secondary,
+            transparent,
+            transparent,
+            text_primary,
+        ),
+    ] {
+        let button = action(&pending, "counterexample", name);
+        assert_eq!(button.a11y.label.as_deref(), Some(label));
+        assert_eq!(button.a11y.role, Some(NodeRole::Button));
+        assert_eq!(button.a11y.tab_index, Some(0));
+        assert!(button.interaction.focusable);
+        assert_eq!(button.style.descriptor.background, Some(fill));
+        assert_eq!(button.style.descriptor.border.width, 1.0);
+        assert_eq!(button.style.descriptor.border.color, border);
+        assert_eq!(button.style.descriptor.text_color, Some(text));
+        let radii = button.style.descriptor.corner_radii;
+        assert_eq!(
+            [
+                radii.top_left,
+                radii.top_right,
+                radii.bottom_right,
+                radii.bottom_left,
+            ],
+            [control_radius; 4]
+        );
+        let focus_ring = button.style.focus_ring.expect("production Button focus ring");
+        assert_eq!(focus_ring.color, focus_color);
+        assert_eq!(focus_ring.width, focus_width);
+        assert_eq!(focus_ring.offset, 2.0);
+        let hover = button.style.hover.expect("production Button hover recipe");
+        assert_eq!(
+            hover.background.unwrap_or(fill),
+            hover_fill,
+            "{name} hover fill must resolve from the AgentPlan contract"
+        );
+        assert_eq!(
+            hover.border_color.unwrap_or(border),
+            hover_border,
+            "{name} hover border must resolve from the AgentPlan contract"
+        );
+        assert_eq!(
+            hover.text_color.unwrap_or(text),
+            hover_text,
+            "{name} hover text must resolve from the AgentPlan contract"
+        );
+        assert_eq!(button.style.text_weight, Some(500));
+        assert_eq!(button.style.line_height, Some(1.0));
+        assert_eq!(
+            button.roles.get("variant").map(String::as_str),
+            Some(variant),
+            "AgentPlan must compose the production {variant} Button"
+        );
+        assert_eq!(button.roles.get("size").map(String::as_str), Some("sm"));
+        assert_eq!(
+            button.roles.get("density").map(String::as_str),
+            Some("compact")
+        );
+    }
+
+    let settled = crate::node_compat::AgentPlan::from_spec(
+        spec(AgentPlanStatus::Accepted),
+        &theme_provider,
+    )
+    .with_instance_id("settled")
+    .into_compat_node();
+    assert_eq!(settled.children.len(), 2, "body then settled status");
+    assert_eq!(
+        settled.roles.get("status").map(String::as_str),
+        Some("accepted")
+    );
+    assert!(
+        settled
+            .find(&|node| node.a11y.role == Some(NodeRole::Button))
+            .is_none(),
+        "settled plans remove every decision affordance"
+    );
+    let badge = settled
+        .find(&|node| node.intrinsic_text() == Some("Accepted"))
+        .expect("settled status badge");
+    assert!(badge.style.text_wrap, "status composes production Text");
+    assert_eq!(badge.style.line_height, Some(1.5));
+    assert_eq!(badge.style.text_weight, Some(500));
+    assert_eq!(
+        badge.style.descriptor.text_color,
+        Some(text_secondary),
+        "the settled badge uses the contracted secondary text token"
+    );
+    assert_eq!(
+        badge.roles.get("status").map(String::as_str),
+        Some("accepted")
+    );
 
     run_headless(|cx| {
-        fn build(status: AgentPlanStatus, mounted: Arc<Mutex<Node>>) -> Node {
-            let spec = AgentPlanSpec::new("1. Inspect the contract.\n2. Apply the change.")
-                .with_status(status);
-            let accept_mount = Arc::clone(&mounted);
-            let revise_mount = Arc::clone(&mounted);
-            let dismiss_mount = Arc::clone(&mounted);
-            let plan = poodle_render::agent_plan(
-                &spec,
-                &RenderContext::new(&theme()),
-                poodle_render::AgentPlanHandlers {
-                    on_accept: Some(Arc::new(move || {
-                        *accept_mount.lock().unwrap() =
-                            build(AgentPlanStatus::Accepted, Arc::clone(&accept_mount));
-                    })),
-                    on_revise: Some(Arc::new(move || {
-                        *revise_mount.lock().unwrap() =
-                            build(AgentPlanStatus::Revised, Arc::clone(&revise_mount));
-                    })),
-                    on_dismiss: Some(Arc::new(move || {
-                        *dismiss_mount.lock().unwrap() =
-                            build(AgentPlanStatus::Dismissed, Arc::clone(&dismiss_mount));
-                    })),
-                    ..poodle_render::AgentPlanHandlers::default()
-                },
-            );
-            Node::container()
-                .child(plan)
-                .child(Node::text(format!("Decided: {}", status.as_str())))
+        struct PlanHost {
+            left: AgentPlanStatus,
+            right: AgentPlanStatus,
+            refuse_left_accept: bool,
+            events: Vec<String>,
         }
 
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
-        driver.wait_for_focus_handle("agent-plan-accept");
-        driver.keyboard_activate("agent-plan-accept");
+        fn status(host: &PlanHost, scope: &str) -> AgentPlanStatus {
+            match scope {
+                "left" => host.left,
+                "right" => host.right,
+                other => panic!("unknown AgentPlan scope {other}"),
+            }
+        }
+
+        fn set_status(host: &mut PlanHost, scope: &str, status: AgentPlanStatus) {
+            match scope {
+                "left" => host.left = status,
+                "right" => host.right = status,
+                other => panic!("unknown AgentPlan scope {other}"),
+            }
+        }
+
+        fn element(
+            host: &Arc<Mutex<PlanHost>>,
+            scope: &'static str,
+            theme_provider: &GpuiThemeProvider,
+        ) -> AnyElement {
+            let current = status(&host.lock().expect("plan host"), scope);
+
+            let accept_host = Arc::clone(host);
+            let revise_host = Arc::clone(host);
+            let dismiss_host = Arc::clone(host);
+            crate::node_compat::AgentPlan::from_spec(spec(current), theme_provider)
+                .with_instance_id(scope)
+                .on_accept(Arc::new(move || {
+                    let mut host = accept_host.lock().expect("plan host");
+                    host.events.push(format!("{scope}:accept"));
+                    if scope != "left" || !host.refuse_left_accept {
+                        set_status(&mut host, scope, AgentPlanStatus::Accepted);
+                    }
+                }))
+                .on_revise(Arc::new(move || {
+                    let mut host = revise_host.lock().expect("plan host");
+                    host.events.push(format!("{scope}:revise"));
+                    set_status(&mut host, scope, AgentPlanStatus::Revised);
+                }))
+                .on_dismiss(Arc::new(move || {
+                    let mut host = dismiss_host.lock().expect("plan host");
+                    host.events.push(format!("{scope}:dismiss"));
+                    set_status(&mut host, scope, AgentPlanStatus::Dismissed);
+                }))
+                .into_element()
+        }
+
+        let host = Arc::new(Mutex::new(PlanHost {
+            left: AgentPlanStatus::Pending,
+            right: AgentPlanStatus::Pending,
+            refuse_left_accept: true,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme();
+            Rc::new(move || {
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(24.0))
+                    .child(element(&host, "left", &theme_provider))
+                    .child(element(&host, "right", &theme_provider))
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 720.0, 520.0);
+        let left_root = "agent-plan:left";
+        let right_root = "agent-plan:right";
+        let left_accept = poodle_render::agent_plan_action_focus_id(Some("left"), "accept");
+        let left_revise = poodle_render::agent_plan_action_focus_id(Some("left"), "revise");
+        let left_dismiss = poodle_render::agent_plan_action_focus_id(Some("left"), "dismiss");
+        let right_accept = poodle_render::agent_plan_action_focus_id(Some("right"), "accept");
+        let right_revise = poodle_render::agent_plan_action_focus_id(Some("right"), "revise");
+        let right_dismiss = poodle_render::agent_plan_action_focus_id(Some("right"), "dismiss");
+        for id in [
+            left_root,
+            right_root,
+            &left_accept,
+            &left_revise,
+            &left_dismiss,
+            &right_accept,
+            &right_revise,
+            &right_dismiss,
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "the IntoElement path must paint {id} through the GPUI backend"
+            );
+        }
+
+        let left_bounds = poodle_gpui_node_backend::bounds_for(left_root).expect("left plan bounds");
+        let right_bounds =
+            poodle_gpui_node_backend::bounds_for(right_root).expect("right plan bounds");
         assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .texts()
-                .iter()
-                .any(|t| *t == "Decided: accepted"),
-            "accept reached the host and painted the next spec"
+            left_bounds.size.width > px(0.0) && left_bounds.size.height > px(0.0)
+        );
+        assert!(
+            right_bounds.size.width > px(0.0) && right_bounds.size.height > px(0.0)
+        );
+        assert!(
+            left_bounds.origin.y + left_bounds.size.height <= right_bounds.origin.y,
+            "duplicate plans keep authored vertical order without overlap"
+        );
+        let left_accept_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_accept).expect("left accept bounds");
+        let left_revise_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_revise).expect("left revise bounds");
+        let left_dismiss_bounds =
+            poodle_gpui_node_backend::bounds_for(&left_dismiss).expect("left dismiss bounds");
+        assert!(
+            left_accept_bounds.origin.x + left_accept_bounds.size.width
+                <= left_revise_bounds.origin.x
+                && left_revise_bounds.origin.x + left_revise_bounds.size.width
+                    <= left_dismiss_bounds.origin.x,
+            "mounted decision affordances keep accept, revise, dismiss order"
+        );
+        for (name, action_id, root) in [
+            ("left accept", &left_accept, left_bounds),
+            ("left revise", &left_revise, left_bounds),
+            ("left dismiss", &left_dismiss, left_bounds),
+            ("right accept", &right_accept, right_bounds),
+            ("right revise", &right_revise, right_bounds),
+            ("right dismiss", &right_dismiss, right_bounds),
+        ] {
+            let bounds = poodle_gpui_node_backend::bounds_for(action_id).expect("action bounds");
+            assert!(
+                bounds.origin.x >= root.origin.x
+                    && bounds.origin.x + bounds.size.width <= root.origin.x + root.size.width
+                    && bounds.origin.y >= root.origin.y
+                    && bounds.origin.y + bounds.size.height <= root.origin.y + root.size.height,
+                "{name} stays contained in its own plan root"
+            );
+        }
+
+        driver.wait_for_focus_handle(&left_accept);
+        driver.wait_for_focus_handle(&right_accept);
+        driver.focus_element(&left_accept);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_accept),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_accept),
+            Some(false),
+            "duplicate labels must not alias caller-scoped focus handles"
         );
 
-        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
-        driver.wait_for_focus_handle("agent-plan-revise");
-        driver.keyboard_activate("agent-plan-revise");
+        driver.pointer_activate_id(&left_accept);
+        {
+            let host = host.lock().expect("plan host");
+            assert_eq!(host.events.as_slice(), ["left:accept"]);
+            assert_eq!(
+                host.left,
+                AgentPlanStatus::Pending,
+                "host refusal leaves the controlled plan pending"
+            );
+            assert_eq!(host.right, AgentPlanStatus::Pending);
+        }
         assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .texts()
-                .iter()
-                .any(|t| *t == "Decided: revised"),
-            "revise reached the host and painted the next spec"
+            poodle_gpui_node_backend::bounds_for(&left_accept).is_some(),
+            "refusal rebuilds the same pending affordances"
         );
 
-        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
-        driver.wait_for_focus_handle("agent-plan-dismiss");
-        driver.keyboard_activate("agent-plan-dismiss");
+        host.lock().expect("plan host").refuse_left_accept = false;
+        driver.keyboard_activate(&left_accept);
+        {
+            let host = host.lock().expect("plan host");
+            assert_eq!(host.events.as_slice(), ["left:accept", "left:accept"]);
+            assert_eq!(host.left, AgentPlanStatus::Accepted);
+            assert_eq!(host.right, AgentPlanStatus::Pending);
+        }
         assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .texts()
-                .iter()
-                .any(|t| *t == "Decided: dismissed"),
-            "dismiss reached the host and painted the next spec"
+            poodle_gpui_node_backend::bounds_for(&left_accept).is_none(),
+            "accepted host state must rebuild before the painted actions disappear"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&right_accept).is_some(),
+            "left acceptance must not rebuild the right instance as settled"
+        );
+
+        driver.pointer_activate_id(&right_dismiss);
+        {
+            let host = host.lock().expect("plan host");
+            assert_eq!(
+                host.events.as_slice(),
+                ["left:accept", "left:accept", "right:dismiss"]
+            );
+            assert_eq!(host.left, AgentPlanStatus::Accepted);
+            assert_eq!(host.right, AgentPlanStatus::Dismissed);
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(&right_accept).is_none());
+
+        host.lock().expect("plan host").right = AgentPlanStatus::Pending;
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&right_revise);
+        driver.keyboard_activate(&right_revise);
+        {
+            let host = host.lock().expect("plan host");
+            assert_eq!(
+                host.events.as_slice(),
+                [
+                    "left:accept",
+                    "left:accept",
+                    "right:dismiss",
+                    "right:revise"
+                ]
+            );
+            assert_eq!(host.left, AgentPlanStatus::Accepted);
+            assert_eq!(host.right, AgentPlanStatus::Revised);
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(&right_revise).is_none());
+
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"structure.identity.button"));
+        assert!(channels.contains(&"content.text-icon.text"));
+        assert!(channels.contains(&"semantic.token-roles.received"));
+        assert!(channels.contains(&"accessibility.projection.received"));
+        assert!(
+            driver.mounted_observation().is_valid(),
+            "the proof must paint and dispatch input through the mounted backend"
+        );
+
+        nucleus_receipts::emit_if_configured(
+            "AgentPlan",
+            "nucleus.agent.agent-plan",
+            driver.mounted_observation(),
+            &[
+                "mount duplicate controlled AgentPlan instances through node_compat::AgentPlan::from_spec(...).into_element() in HeadlessDriver",
+                "dispatch refused and accepted pointer or keyboard decisions through the GPUI test platform",
+                "rebuild host-owned pending, accepted, dismissed, and revised states through the production adapter path",
+            ],
+            &[
+                "production AgentMessage, Text, and Button composition preserves plan records, decision order, semantics, and exact contract-owned resting, hover, focus, radius, spacing, and status tokens",
+                "mounted roots and decision affordances have positive ordered bounds contained within their caller-scoped plan",
+                "refused acceptance remains pending while accepted, dismissed, and revised decisions rebuild before painted affordances disappear",
+                "duplicate caller identities keep focus, callbacks, state, and bounds isolated",
+                "backend probe channels and mounted observation confirm production render, accessibility, token, paint, and GPUI input dispatch",
+            ],
         );
     });
 }
