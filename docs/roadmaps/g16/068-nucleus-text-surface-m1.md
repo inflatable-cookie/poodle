@@ -55,14 +55,15 @@ separate from accessibility and visual acceptance.
 
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
-| Production recipes own metadata | replace Text or Surface with a raw Node | resolved token/style assertion fails |
-| Composition is real | omit the Text child from Surface | mounted containment/content assertion fails |
-| Styled-only stays inert | make either root focusable or activatable | focus-chain/interaction assertion fails |
-| Text variants remain distinct | collapse tone, size, weight, line-height, spacing, or clamp | exact metadata assertion fails |
-| Surface variants remain distinct | collapse fill, border, padding, radius, or elevation | exact metadata assertion fails |
-| Receipt is terminal | fail the final mounted assertion | neither new receipt is emitted for current source |
-| Evidence identity is exact | retain g16.067 receipt SHA | receipt validation fails after source movement |
-| Levels stay separate | label either receipt A1 or V1 | schema validation fails |
+| Production recipes own metadata | replace Text or Surface with a raw Node | resolved token/style assertions fail; missing style descriptor and probe channels |
+| Composition is real | omit the Text child from Surface | mounted containment assertion fails (`text_bounds` inside `surface_bounds`); `content.text-icon.text` probe fails |
+| Styled-only stays inert | make either root focusable or activatable | `focus_handle_for` / `focus_state_for` returns `Some(_)`, failing focus chain assertion |
+| Border width uses width resolver | query `resolve_space("border.width.default")` under `GpuiThemeProvider` | yields `0.0`, failing `assert_eq!(border.width, 1.0)` and suppressing `surface.channels.border` probe channel |
+| Exact Surface metadata | swap panel/canvas tokens, alter mix ratios (96%/98%/74%), alter insets, or omit elevation shadow | exact `assert_eq!` on style descriptor fields (`background`, `border`, `shadow`, `corner_radii`, `padding`) fails |
+| Exact Text metadata | collapse tone, size, weight, line-height, spacing, or clamp | exact metadata assertion fails |
+| Receipt is terminal | fail the final mounted assertion | test panics before terminal `nucleus_receipts::emit_if_configured`; neither receipt emitted |
+| Evidence identity is exact | retain stale receipt SHA | `validateNucleusReceipt` throws: `receipt source commit ... no longer matches the mounted runtime source` |
+| Levels stay separate | label either receipt A1 or V1 | `validateNucleusReceipt` throws: `receipt proof level must be M1; A1 and V1 require separate evidence` |
 
 ## Writable Scope
 
