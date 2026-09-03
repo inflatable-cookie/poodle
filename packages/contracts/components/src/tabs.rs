@@ -433,4 +433,120 @@ mod tests {
         assert!(!spec.shows_tooltips);
         assert!(spec.with_shows_tooltips(true).shows_tooltips);
     }
+
+    #[test]
+    fn spec_defaults_and_builder_accessors() {
+        let default_spec = TabsSpec::default();
+        assert!(default_spec.tabs.is_empty());
+        assert_eq!(default_spec.orientation, Orientation::Horizontal);
+        assert_eq!(default_spec.activation_mode, TabActivationMode::Automatic);
+        assert!(!default_spec.is_reorderable);
+        assert!(!default_spec.is_bordered);
+        assert!(!default_spec.is_full_width);
+        assert!(!default_spec.is_vertical());
+        assert!(!default_spec.uses_full_width());
+        assert!(!default_spec.uses_manual_activation());
+        assert_eq!(default_spec.size_role, SemanticControlSizeRole::Chrome);
+        assert_eq!(default_spec.overflow_strategy, TabsOverflowStrategy::Collapse);
+
+        let custom = TabsSpec::new(vec![
+            TabDefinition::new("x", "X"),
+            TabDefinition::new("y", "Y"),
+        ])
+        .with_value("x")
+        .with_default_value("y")
+        .with_orientation(Orientation::Vertical)
+        .with_activation_mode(TabActivationMode::Manual)
+        .with_variant(TabVariant::Pill)
+        .with_reorderable(true)
+        .with_bordered(true)
+        .with_full_width(true)
+        .with_aria_label("Custom Tabs")
+        .with_history_key("custom-tabs-history")
+        .with_size(ControlSize::Lg)
+        .with_size_role(SemanticControlSizeRole::Control)
+        .with_density(ControlDensity::Compact);
+
+        assert_eq!(custom.value.as_deref(), Some("x"));
+        assert_eq!(custom.default_value.as_deref(), Some("y"));
+        assert_eq!(custom.orientation, Orientation::Vertical);
+        assert!(custom.is_vertical());
+        assert!(!custom.uses_full_width(), "vertical tabs do not use full width");
+        assert!(custom.uses_manual_activation());
+        assert_eq!(custom.variant, TabVariant::Pill);
+        assert!(custom.is_reorderable);
+        assert!(custom.is_bordered);
+        assert_eq!(custom.aria_label.as_deref(), Some("Custom Tabs"));
+        assert_eq!(custom.history_key.as_deref(), Some("custom-tabs-history"));
+        assert_eq!(custom.size, Some(ControlSize::Lg));
+        assert_eq!(custom.size_role, SemanticControlSizeRole::Control);
+        assert_eq!(custom.density, Some(ControlDensity::Compact));
+    }
+
+    #[test]
+    fn current_value_resolution_order() {
+        // 1. Explicit value wins
+        let spec_val = TabsSpec::new(vec![
+            TabDefinition::new("first", "First"),
+            TabDefinition::new("second", "Second"),
+        ])
+        .with_value("second")
+        .with_default_value("first");
+        assert_eq!(spec_val.current_value(), Some("second"));
+        assert_eq!(spec_val.selected_tab().map(|t| t.label.as_str()), Some("Second"));
+
+        // 2. Default value applies when explicit value is None
+        let spec_def = TabsSpec::new(vec![
+            TabDefinition::new("first", "First"),
+            TabDefinition::new("second", "Second"),
+        ])
+        .with_default_value("second");
+        assert_eq!(spec_def.current_value(), Some("second"));
+
+        // 3. First non-disabled tab applies when value and default_value are None
+        let spec_fallback = TabsSpec::new(vec![
+            TabDefinition::new("skip", "Skip").with_disabled(true),
+            TabDefinition::new("first_enabled", "First Enabled"),
+            TabDefinition::new("third", "Third"),
+        ]);
+        assert_eq!(spec_fallback.current_value(), Some("first_enabled"));
+
+        // 4. Empty tabs returns None
+        let empty_spec = TabsSpec::new(vec![]);
+        assert_eq!(empty_spec.current_value(), None);
+        assert!(empty_spec.selected_tab().is_none());
+    }
+
+    #[test]
+    fn token_helpers_and_visual_properties() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
+        assert_eq!(spec.list_gap_token(), semantic::SPACE_INLINE_SM);
+        assert_eq!(spec.indicator_token(), semantic::COLOR_ACCENT_BASE);
+        assert_eq!(spec.list_border_token(), semantic::COLOR_BORDER_SUBTLE);
+        assert_eq!(spec.focus_ring_color_token(), semantic::COLOR_ACCENT_FOCUS_RING);
+        assert_eq!(spec.disabled_opacity_token(), semantic::STATE_OPACITY_DISABLED);
+        assert_eq!(spec.pill_border_opacity(), 0.68);
+        assert_eq!(spec.pill_active_bg_opacity(), 0.18);
+        assert_eq!(spec.block_list_bg_opacity(), 0.9);
+        assert_eq!(spec.block_selected_accent_mix(), 0.14);
+        assert_eq!(spec.block_selected_hover_accent_mix(), 0.18);
+        assert_eq!(spec.block_separator_opacity(), 0.72);
+        assert_eq!(spec.block_hover_bg_opacity(), 0.5);
+    }
+
+    #[test]
+    fn tab_definition_builders() {
+        let tab = TabDefinition::new("item", "Item")
+            .with_disabled(true)
+            .with_closable(true)
+            .with_icon("folder")
+            .with_count(42);
+
+        assert_eq!(tab.value, "item");
+        assert_eq!(tab.label, "Item");
+        assert!(tab.is_disabled);
+        assert!(tab.is_closable);
+        assert_eq!(tab.icon.as_deref(), Some("folder"));
+        assert_eq!(tab.count, Some(42));
+    }
 }
