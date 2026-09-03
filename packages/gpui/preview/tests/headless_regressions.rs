@@ -4314,10 +4314,15 @@ fn tab_at<'a>(root: &'a Node, runtime_id: &str) -> &'a Node {
         .unwrap_or_else(|| panic!("{runtime_id} exists"))
 }
 
-/// g16.006. Tabs selection, focus, close, keyboard reorder, and pointer
-/// reorder through real mounted GPUI input and controlled host rebuilds.
+/// g16.072 / g16.006. Tabs selection, focus, close, keyboard reorder, pointer
+/// reorder, axis constraints, manual/automatic activation, and multi-instance
+/// identity isolation through real mounted GPUI input and controlled host rebuilds.
 #[test]
 fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
+    use poodle_node::{CursorHint, StylePatch};
+    use poodle_tokens::semantic;
+    use crate::headless_driver::MountedObservation;
+
     #[derive(Clone)]
     struct TabsState {
         items: Vec<TabDefinition>,
@@ -4339,7 +4344,13 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         ]
     }
 
+    let mut observation: Option<MountedObservation> = None;
+
+    // ── Phase 1: Structure, Contract Tokens, Layout Bounds, Pointer & Keyboard Roving Navigation, Close & Keyboard Reorder ──
     run_headless(|cx| {
+        let theme_instance = theme();
+        let ctx = RenderContext::new(&theme_instance);
+
         fn build(
             state: &TabsState,
             mounted: &Arc<Mutex<Node>>,
@@ -4525,52 +4536,283 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
             &starts,
             &ends,
         );
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
-        driver.wait_for_focus_handle("tabs:mounted:tab:one");
 
-        let two = payload_frac("tabs:mounted:tab:two", 0.2, 0.5);
-        driver.pointer_press(two);
-        driver.pointer_release(two);
-        assert_eq!(*changes.lock().unwrap(), vec!["two".to_string()]);
-        assert_eq!(live.lock().unwrap().value, "two");
+        // ── 1. Spec, Token & Style Descriptor Verification ───────────────────
+        let expected_text_primary = ctx.theme().resolve_color("color.text.primary");
+        let expected_text_secondary = ctx.theme().resolve_color("color.text.secondary");
+        let expected_focus_ring = ctx.theme().resolve_color(semantic::COLOR_ACCENT_FOCUS_RING);
+        let expected_disabled_opacity = ctx.theme().resolve_opacity(semantic::STATE_OPACITY_DISABLED);
+
         {
             let root = mounted.lock().unwrap();
             let list = root
                 .find(&|node| node.a11y.role == Some(NodeRole::TabList))
                 .expect("tablist");
             assert_eq!(list.a11y.orientation.as_deref(), Some("horizontal"));
+            assert_eq!(list.a11y.label.as_deref(), Some("Files"));
+            assert_eq!(list.id.as_deref(), Some("tabs-list"));
+            assert_eq!(list.runtime_id.as_deref(), Some("tabs:mounted:list"));
+            assert_eq!(list.style.descriptor.layout.direction, LayoutDirection::Row);
+
+            // Tab "one" (initially selected)
+            let tab_one = tab_at(&root, "tabs:mounted:tab:one");
+            assert_eq!(tab_one.a11y.role, Some(NodeRole::Tab));
+            assert_eq!(tab_one.a11y.label.as_deref(), Some("One"));
+            assert_eq!(tab_one.a11y.selected, Some(true));
+            assert_eq!(tab_one.a11y.tab_index, Some(0));
+            assert_eq!(tab_one.a11y.controls.as_deref(), Some("tabs-panel:one"));
+            assert!(!tab_one.interaction.disabled);
+            assert!(tab_one.interaction.focusable);
+            assert_eq!(tab_one.style.descriptor.text_color, Some(expected_text_primary));
+            assert_eq!(
+                tab_one.style.focus,
+                Some(StylePatch {
+                    border_color: Some(expected_focus_ring),
+                    ..StylePatch::default()
+                })
+            );
+            assert!(
+                tab_one.find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "One")).is_some(),
+                "Tab 'one' must contain visible label text 'One' at Node boundary"
+            );
+
+            // Tab "skip" (disabled)
+            let tab_skip = tab_at(&root, "tabs:mounted:tab:skip");
+            assert_eq!(tab_skip.a11y.role, Some(NodeRole::Tab));
+            assert_eq!(tab_skip.a11y.label.as_deref(), Some("Skip"));
+            assert_eq!(tab_skip.a11y.selected, Some(false));
+            assert_eq!(tab_skip.a11y.tab_index, Some(-1));
+            assert!(tab_skip.interaction.disabled);
+            assert!(!tab_skip.interaction.focusable);
+            assert_eq!(tab_skip.style.descriptor.opacity, expected_disabled_opacity);
+            assert!(
+                tab_skip.find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "Skip")).is_some(),
+                "Tab 'skip' must contain visible label text 'Skip' at Node boundary"
+            );
+
+            // Tab "two" (unselected, closable)
+            let tab_two = tab_at(&root, "tabs:mounted:tab:two");
+            assert_eq!(tab_two.a11y.role, Some(NodeRole::Tab));
+            assert_eq!(tab_two.a11y.label.as_deref(), Some("Two"));
+            assert_eq!(tab_two.a11y.selected, Some(false));
+            assert_eq!(tab_two.a11y.tab_index, Some(-1));
+            assert_eq!(tab_two.a11y.controls.as_deref(), Some("tabs-panel:two"));
+            assert!(!tab_two.interaction.disabled);
+            assert!(tab_two.interaction.focusable);
+            assert_eq!(tab_two.style.descriptor.text_color, Some(expected_text_secondary));
+            let close_two = tab_two
+                .find(&|n| n.a11y.label.as_deref() == Some("Close Two"))
+                .expect("closable tab 'two' must render close button");
+            assert!(close_two.interaction.focusable);
+            assert_eq!(close_two.style.descriptor.cursor, CursorHint::Pointer);
+            assert_eq!(close_two.runtime_id.as_deref(), Some("tabs:mounted:close:two"));
+            let expected_icon_muted = ctx.theme().resolve_color("color.icon.muted");
+            let expected_icon_sm = ctx.theme().resolve_space("size.icon.sm");
+            let close_two_icon = close_two
+                .find(&|n| matches!(&n.kind, NodeKind::Icon { name, size } if name == "x" && *size == expected_icon_sm))
+                .expect("close button must contain 'x' icon with size.icon.sm");
+            assert_eq!(close_two_icon.style.descriptor.text_color, Some(expected_icon_muted));
+
+            // Tab "three" (unselected, closable)
+            let tab_three = tab_at(&root, "tabs:mounted:tab:three");
+            assert_eq!(tab_three.a11y.role, Some(NodeRole::Tab));
+            assert_eq!(tab_three.a11y.label.as_deref(), Some("Three"));
+            assert_eq!(tab_three.a11y.selected, Some(false));
+            assert_eq!(tab_three.a11y.tab_index, Some(-1));
+            assert_eq!(tab_three.a11y.controls.as_deref(), Some("tabs-panel:three"));
+            let close_three = tab_three
+                .find(&|n| n.a11y.label.as_deref() == Some("Close Three"))
+                .expect("closable tab 'three' must render close button");
+            assert_eq!(close_three.runtime_id.as_deref(), Some("tabs:mounted:close:three"));
+            let close_three_icon = close_three
+                .find(&|n| matches!(&n.kind, NodeKind::Icon { name, size } if name == "x" && *size == expected_icon_sm))
+                .expect("close button must contain 'x' icon with size.icon.sm");
+            assert_eq!(close_three_icon.style.descriptor.text_color, Some(expected_icon_muted));
+
+            // Panel "one"
+            let panel = root
+                .find(&|node| node.a11y.role == Some(NodeRole::TabPanel))
+                .expect("panel");
+            assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:one"));
+            assert_eq!(panel.a11y.tab_index, Some(0));
+            assert!(panel.interaction.focusable);
+            assert_eq!(panel.id.as_deref(), Some("tabs-panel:one"));
+            assert_eq!(panel.runtime_id.as_deref(), Some("tabs:mounted:panel:one"));
+            assert_eq!(panel.intrinsic_text(), Some("one panel"));
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 160.0);
+        driver.wait_for_focus_handle("tabs:mounted:tab:one");
+
+        // ── 2. Probe Capture & Mounted Layout Bounds / Ordering ─────────────
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.pointer_hover(point(px(40.0), px(20.0)));
+        driver.draw_frame();
+
+        let probe_channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            probe_channels.contains(&"structure.identity.container"),
+            "Backend must receive structure.identity.container probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.size"),
+            "Backend must receive content.typography.size probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"content.typography.weight"),
+            "Backend must receive content.typography.weight probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.text"),
+            "Backend must receive surface.channels.text probe channel"
+        );
+        assert!(
+            probe_channels.contains(&"surface.channels.opacity"),
+            "Backend must receive surface.channels.opacity probe channel"
+        );
+
+        let list_bounds = poodle_gpui_node_backend::bounds_for("tabs:mounted:list")
+            .expect("tablist bounds");
+        let one_bounds = poodle_gpui_node_backend::bounds_for("tabs:mounted:tab:one")
+            .expect("tab one bounds");
+        let skip_bounds = poodle_gpui_node_backend::bounds_for("tabs:mounted:tab:skip")
+            .expect("tab skip bounds");
+        let two_bounds = poodle_gpui_node_backend::bounds_for("tabs:mounted:tab:two")
+            .expect("tab two bounds");
+        let three_bounds = poodle_gpui_node_backend::bounds_for("tabs:mounted:tab:three")
+            .expect("tab three bounds");
+        let panel_bounds = poodle_gpui_node_backend::bounds_for("tabs:mounted:panel:one")
+            .expect("panel bounds");
+
+        assert!(list_bounds.size.width > px(0.0) && list_bounds.size.height > px(0.0));
+        assert!(one_bounds.size.width > px(0.0) && one_bounds.size.height > px(0.0));
+        assert!(skip_bounds.size.width > px(0.0) && skip_bounds.size.height > px(0.0));
+        assert!(two_bounds.size.width > px(0.0) && two_bounds.size.height > px(0.0));
+        assert!(three_bounds.size.width > px(0.0) && three_bounds.size.height > px(0.0));
+        assert!(panel_bounds.size.width > px(0.0) && panel_bounds.size.height > px(0.0));
+
+        // Horizontal ordering
+        assert!(
+            one_bounds.right() <= skip_bounds.left(),
+            "Tab 'one' must precede tab 'skip' horizontally"
+        );
+        assert!(
+            skip_bounds.right() <= two_bounds.left(),
+            "Tab 'skip' must precede tab 'two' horizontally"
+        );
+        assert!(
+            two_bounds.right() <= three_bounds.left(),
+            "Tab 'two' must precede tab 'three' horizontally"
+        );
+
+        // Child containment within tablist
+        for (name, b) in [
+            ("tab one", one_bounds),
+            ("tab skip", skip_bounds),
+            ("tab two", two_bounds),
+            ("tab three", three_bounds),
+        ] {
+            assert!(
+                b.left() >= list_bounds.left() && b.right() <= list_bounds.right(),
+                "{name} must be within tablist horizontal bounds"
+            );
+        }
+
+        // Panel placement below tablist
+        assert!(
+            panel_bounds.top() >= list_bounds.bottom(),
+            "TabPanel must be positioned below tablist"
+        );
+
+        // ── 3. Pointer Activation & Disabled Inertia ───────────────────────
+        // 3a. Disabled tab click is inert
+        driver.pointer_activate_id("tabs:mounted:tab:skip");
+        assert!(changes.lock().unwrap().is_empty(), "Clicking disabled tab 'skip' must be inert");
+        assert_eq!(live.lock().unwrap().value, "one");
+
+        // 3b. Pointer click on unselected enabled tab "two"
+        let two_pt = payload_frac("tabs:mounted:tab:two", 0.2, 0.5);
+        driver.pointer_press(two_pt);
+        driver.pointer_release(two_pt);
+        assert_eq!(*changes.lock().unwrap(), vec!["two".to_string()]);
+        assert_eq!(live.lock().unwrap().value, "two");
+        {
+            let root = mounted.lock().unwrap();
             let selected = tab_at(&root, "tabs:mounted:tab:two");
-            assert_eq!(selected.a11y.role, Some(NodeRole::Tab));
             assert_eq!(selected.a11y.selected, Some(true));
             assert_eq!(selected.a11y.tab_index, Some(0));
             assert_eq!(selected.a11y.controls.as_deref(), Some("tabs-panel:two"));
-            let skip = tab_at(&root, "tabs:mounted:tab:skip");
-            assert!(skip.interaction.disabled);
-            assert!(!skip.interaction.focusable);
+            let unselected = tab_at(&root, "tabs:mounted:tab:one");
+            assert_eq!(unselected.a11y.selected, Some(false));
+            assert_eq!(unselected.a11y.tab_index, Some(-1));
             let panel = root
                 .find(&|node| node.a11y.role == Some(NodeRole::TabPanel))
                 .expect("panel");
             assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:two"));
-            assert_eq!(panel.a11y.tab_index, Some(0));
+            assert_eq!(panel.intrinsic_text(), Some("two panel"));
         }
 
+        // ── 4. Roving Keyboard Navigation, Disabled Skipping, Home/End, Escape ──
         driver.wait_for_focus_handle("tabs:mounted:tab:two");
+
+        // 4a. Cross-axis keys (Up/Down in horizontal orientation) are inert
+        driver.keyboard_key("tabs:mounted:tab:two", "up");
+        assert_eq!(live.lock().unwrap().value, "two", "Up arrow in horizontal tabs must be inert");
+        driver.keyboard_key("tabs:mounted:tab:two", "down");
+        assert_eq!(live.lock().unwrap().value, "two", "Down arrow in horizontal tabs must be inert");
+        assert_eq!(*changes.lock().unwrap(), vec!["two".to_string()]);
+
+        // 4b. Right arrow advances to "three"
         driver.keyboard_key("tabs:mounted:tab:two", "right");
         assert_eq!(live.lock().unwrap().value, "three");
+        assert_eq!(*changes.lock().unwrap(), vec!["two".to_string(), "three".to_string()]);
         assert_eq!(
-            tab_at(&mounted.lock().unwrap(), "tabs:mounted:tab:three")
-                .a11y
-                .tab_index,
+            tab_at(&mounted.lock().unwrap(), "tabs:mounted:tab:three").a11y.tab_index,
             Some(0)
         );
 
+        // 4c. Left arrow moves back to "two"
         driver.keyboard_key("tabs:mounted:tab:three", "left");
+        assert_eq!(live.lock().unwrap().value, "two");
+
+        // 4d. Left arrow from "two" skips disabled "skip" and lands on "one"
+        driver.keyboard_key("tabs:mounted:tab:two", "left");
+        assert_eq!(
+            live.lock().unwrap().value,
+            "one",
+            "Left arrow from 'two' must skip disabled tab 'skip' and select 'one'"
+        );
+        assert_eq!(
+            tab_at(&mounted.lock().unwrap(), "tabs:mounted:tab:one").a11y.tab_index,
+            Some(0)
+        );
+
+        // 4e. Right arrow from "one" skips disabled "skip" and lands on "two"
+        driver.keyboard_key("tabs:mounted:tab:one", "right");
         assert_eq!(
             live.lock().unwrap().value,
             "two",
-            "left skips the disabled tab"
+            "Right arrow from 'one' must skip disabled tab 'skip' and select 'two'"
         );
 
+        // 4f. End key jumps to last enabled tab ("three")
+        driver.dispatch_key_raw("end");
+        assert_eq!(live.lock().unwrap().value, "three", "End key must jump to last enabled tab");
+
+        // 4g. Home key jumps to first enabled tab ("one")
+        driver.dispatch_key_raw("home");
+        assert_eq!(live.lock().unwrap().value, "one", "Home key must jump to first enabled tab");
+
+        // 4h. Escape key is inert for selection
+        driver.dispatch_key_raw("escape");
+        assert_eq!(live.lock().unwrap().value, "one", "Escape key must not change tab selection");
+
+        // ── 5. Keyboard Reorder with Focus Retention ────────────────────────
+        // Move to "two" first
+        driver.keyboard_key("tabs:mounted:tab:one", "right");
+        assert_eq!(live.lock().unwrap().value, "two");
+
+        // Alt+Right reorders "two" to the right of "three"
         driver.keyboard_key("tabs:mounted:tab:two", "alt-right");
         assert_eq!(
             orders.lock().unwrap().last().map(Vec::as_slice),
@@ -4587,23 +4829,67 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         assert_eq!(
             live.lock().unwrap().focused.as_deref(),
             Some("two"),
-            "keyboard reorder keeps focus on the moved tab"
+            "Keyboard reorder must keep focus on the moved tab"
         );
 
+        // Alt+Left reorders "two" back before "three"
+        driver.keyboard_key("tabs:mounted:tab:two", "alt-left");
+        assert_eq!(
+            orders.lock().unwrap().last().map(Vec::as_slice),
+            Some(
+                [
+                    "one".to_string(),
+                    "skip".to_string(),
+                    "two".to_string(),
+                    "three".to_string()
+                ]
+                .as_slice()
+            )
+        );
+        assert_eq!(
+            live.lock().unwrap().focused.as_deref(),
+            Some("two"),
+            "Keyboard reorder left must keep focus on the moved tab"
+        );
+
+        // ── 6. Close Behavior (Delete Key & Pointer Close Button) ───────────
+        // Delete key closes the focused closable tab "two"
         driver.keyboard_key("tabs:mounted:tab:two", "delete");
         assert_eq!(*closes.lock().unwrap(), vec!["two".to_string()]);
-        assert!(mounted
-            .lock()
-            .unwrap()
-            .find(&|node| node.runtime_id.as_deref() == Some("tabs:mounted:tab:two"))
-            .is_none());
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .find(&|node| node.runtime_id.as_deref() == Some("tabs:mounted:tab:two"))
+                .is_none(),
+            "Closed tab 'two' must be removed from the mounted tree"
+        );
+        // Active value fell back to "one"
+        assert_eq!(live.lock().unwrap().value, "one");
+        assert_eq!(
+            tab_at(&mounted.lock().unwrap(), "tabs:mounted:tab:one").a11y.selected,
+            Some(true)
+        );
+
+        // Pointer click on close button of "three"
         driver.pointer_activate_id("tabs:mounted:close:three");
         assert_eq!(
             closes.lock().unwrap().as_slice(),
             ["two".to_string(), "three".to_string()]
         );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .find(&|node| node.runtime_id.as_deref() == Some("tabs:mounted:tab:three"))
+                .is_none(),
+            "Closed tab 'three' must be removed from the mounted tree"
+        );
+
+        observation = Some(driver.mounted_observation());
     });
 
+    // ── Phase 2: Manual Activation Mode ──────────────────────────────────
     run_headless(|cx| {
         let mut spec = TabsSpec::new(definitions())
             .with_value("one")
@@ -4633,41 +4919,105 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         node.id = Some(FIXTURE_ID.to_owned());
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 420.0, 80.0);
         driver.wait_for_focus_handle("tabs:manual:tab:one");
+
+        // Right arrow moves focus without changing active selection
         driver.keyboard_key("tabs:manual:tab:one", "right");
-        assert_eq!(live.lock().unwrap().as_str(), "one");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Manual mode: focus moves without changing value");
         assert_eq!(focused.lock().unwrap().as_deref(), Some("two"));
+
+        // Enter on focused tab "two" commits selection
         driver.keyboard_key("tabs:manual:tab:two", "enter");
+        assert_eq!(live.lock().unwrap().as_str(), "two", "Manual mode: Enter commits selection");
+
+        // Left arrow skips disabled "skip" and moves focus to "one" without changing value
+        driver.keyboard_key("tabs:manual:tab:two", "left");
         assert_eq!(live.lock().unwrap().as_str(), "two");
+        assert_eq!(focused.lock().unwrap().as_deref(), Some("one"));
+
+        // Space on focused tab "one" commits selection
+        driver.keyboard_key("tabs:manual:tab:one", "space");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Manual mode: Space commits selection");
     });
 
+    // ── Phase 3: Vertical Orientation Mode ────────────────────────────────
     run_headless(|cx| {
-        let mut spec = TabsSpec::new(definitions())
-            .with_value("one")
-            .with_orientation(Orientation::Vertical);
-        spec.orientation = Orientation::Vertical;
+        fn build_vertical(
+            value: &str,
+            mounted: &Arc<Mutex<Node>>,
+            live: &Arc<Mutex<String>>,
+        ) -> Node {
+            let live_state = Arc::clone(live);
+            let mount = Arc::clone(mounted);
+            let rebuild = {
+                let live_state = Arc::clone(&live_state);
+                let mount = Arc::clone(&mount);
+                move |next: String| {
+                    *live_state.lock().expect("state lock") = next.clone();
+                    *mount.lock().expect("mount lock") = build_vertical(&next, &mount, &live_state);
+                }
+            };
+            let mut spec = TabsSpec::new(definitions())
+                .with_value(value)
+                .with_orientation(Orientation::Vertical);
+            spec.orientation = Orientation::Vertical;
+            let mut node = poodle_render::tabs_with_handlers(
+                &spec,
+                &RenderContext::new(&theme()),
+                TabsHandlers {
+                    on_change: Some({
+                        let rebuild = rebuild.clone();
+                        Arc::new(move |next_val: &str| {
+                            rebuild(next_val.to_owned());
+                        })
+                    }),
+                    instance_id: Some("vertical".into()),
+                    focused_value: Some(value.to_owned()),
+                    ..TabsHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
         let live = Arc::new(Mutex::new("one".to_string()));
-        let sink = Arc::clone(&live);
-        let mut node = poodle_render::tabs_with_handlers(
-            &spec,
-            &RenderContext::new(&theme()),
-            TabsHandlers {
-                on_change: Some(Arc::new(move |value: &str| {
-                    *sink.lock().unwrap() = value.to_owned();
-                })),
-                instance_id: Some("vertical".into()),
-                focused_value: Some("one".into()),
-                ..TabsHandlers::default()
-            },
-        );
-        node.id = Some(FIXTURE_ID.to_owned());
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 80.0, 220.0);
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build_vertical("one", &mounted, &live);
+
+        {
+            let root = mounted.lock().unwrap();
+            let list = root
+                .find(&|n| n.a11y.role == Some(NodeRole::TabList))
+                .expect("vertical tablist");
+            assert_eq!(list.a11y.orientation.as_deref(), Some("vertical"));
+            assert_eq!(list.style.descriptor.layout.direction, LayoutDirection::Column);
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 240.0);
         driver.wait_for_focus_handle("tabs:vertical:tab:one");
+        driver.wait_for_focus_handle("tabs:vertical:tab:two");
+
+        let one_b = poodle_gpui_node_backend::bounds_for("tabs:vertical:tab:one").expect("one bounds");
+        let skip_b = poodle_gpui_node_backend::bounds_for("tabs:vertical:tab:skip").expect("skip bounds");
+        let two_b = poodle_gpui_node_backend::bounds_for("tabs:vertical:tab:two").expect("two bounds");
+        assert!(one_b.bottom() <= skip_b.top(), "Vertical tabs: 'one' above 'skip'");
+        assert!(skip_b.bottom() <= two_b.top(), "Vertical tabs: 'skip' above 'two'");
+
+        // Horizontal arrows are inert in vertical tabs
         driver.keyboard_key("tabs:vertical:tab:one", "right");
-        assert_eq!(live.lock().unwrap().as_str(), "one");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Right arrow in vertical tabs must be inert");
+        driver.keyboard_key("tabs:vertical:tab:one", "left");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Left arrow in vertical tabs must be inert");
+
+        // Down arrow skips disabled "skip" and selects "two"
         driver.keyboard_key("tabs:vertical:tab:one", "down");
-        assert_eq!(live.lock().unwrap().as_str(), "two");
+        assert_eq!(live.lock().unwrap().as_str(), "two", "Down arrow in vertical tabs selects next enabled tab");
+
+        // Up arrow skips disabled "skip" and selects "one"
+        driver.keyboard_key("tabs:vertical:tab:two", "up");
+        assert_eq!(live.lock().unwrap().as_str(), "one", "Up arrow in vertical tabs selects previous enabled tab");
     });
 
+    // ── Phase 4: Pointer Drag-and-Drop Reorder Lifecycle & Self-Drop Rejection ──
     run_headless(|cx| {
         fn build(
             state: TabsState,
@@ -4823,16 +5173,37 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
 
         let source = payload_frac("tabs:drag:tab:one", 0.5, 0.5);
         driver.pointer_press(source);
+
+        // Sub-threshold movement (< 4px) does not arm drag start
+        driver.pointer_drag(point(px(f32::from(source.x) + 1.0), source.y));
+        assert!(
+            starts.lock().unwrap().is_empty(),
+            "Sub-threshold movement must not arm drag start"
+        );
+        assert!(live.lock().unwrap().drag.is_none());
+
+        // Crossing the movement threshold arms drag start
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
         assert_eq!(*starts.lock().unwrap(), vec!["one".to_string()]);
         assert_eq!(live.lock().unwrap().drag.as_deref(), Some("one"));
+        {
+            let root = mounted.lock().unwrap();
+            let dragging = tab_at(&root, "tabs:drag:tab:one");
+            assert_eq!(dragging.style.descriptor.opacity, 0.4, "Dragged tab must have opacity 0.4");
+        }
 
         driver.pointer_drag(payload_frac("tabs:drag:tab:three", 0.5, 0.5));
         assert_eq!(live.lock().unwrap().drop.as_deref(), Some("three"));
-        // Back over the dragged tab itself: a self-drop is *rejected*, so the
-        // drop-target indicator clears rather than pointing a tab at itself.
+        {
+            let root = mounted.lock().unwrap();
+            let target = tab_at(&root, "tabs:drag:tab:three");
+            assert!(!target.style.shadow_layers.is_empty(), "Drop target tab must show shadow ring");
+        }
+
+        // Back over the dragged tab itself: self-drop is rejected
         driver.pointer_drag(payload_frac("tabs:drag:tab:one", 0.5, 0.5));
-        assert_eq!(live.lock().unwrap().drop.as_deref(), None);
+        assert_eq!(live.lock().unwrap().drop.as_deref(), None, "Self-drop must be rejected");
+
         driver.pointer_drag(payload_frac("tabs:drag:tab:three", 0.5, 0.5));
         driver.pointer_release(payload_frac("tabs:drag:tab:three", 0.5, 0.5));
         assert_eq!(
@@ -4853,6 +5224,7 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         assert_eq!(live.lock().unwrap().focused.as_deref(), Some("one"));
     });
 
+    // ── Phase 5: Pointer Drag Cancellation via Escape ────────────────────
     run_headless(|cx| {
         let live = Arc::new(Mutex::new(TabsState {
             items: definitions(),
@@ -4965,22 +5337,33 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
         driver.pointer_drag(payload_frac("tabs:cancel:tab:three", 0.5, 0.5));
         driver.dispatch_key("escape");
-        assert!(orders.lock().unwrap().is_empty());
+        assert!(orders.lock().unwrap().is_empty(), "Drag cancelled via Escape must not commit reorder");
         assert_eq!(*ends.lock().unwrap(), vec!["one".to_string()]);
         assert!(live.lock().unwrap().drag.is_none());
         assert!(live.lock().unwrap().drop.is_none());
     });
 
+    // ── Phase 6: Two Composed Instances Focus & Callback Isolation ───────
     run_headless(|cx| {
         let spec = TabsSpec::new(vec![
             TabDefinition::new("shared", "Shared"),
             TabDefinition::new("other", "Other"),
         ])
         .with_value("shared");
+
+        let alpha_changes = Arc::new(Mutex::new(Vec::<String>::new()));
+        let beta_changes = Arc::new(Mutex::new(Vec::<String>::new()));
+
+        let alpha_sink = Arc::clone(&alpha_changes);
+        let beta_sink = Arc::clone(&beta_changes);
+
         let first = poodle_render::tabs_with_handlers(
             &spec,
             &RenderContext::new(&theme()),
             TabsHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    alpha_sink.lock().unwrap().push(value.to_owned());
+                })),
                 instance_id: Some("alpha".into()),
                 focused_value: Some("shared".into()),
                 ..TabsHandlers::default()
@@ -4990,6 +5373,9 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
             &spec,
             &RenderContext::new(&theme()),
             TabsHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    beta_sink.lock().unwrap().push(value.to_owned());
+                })),
                 instance_id: Some("beta".into()),
                 focused_value: Some("shared".into()),
                 ..TabsHandlers::default()
@@ -4999,20 +5385,78 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
         root.style.descriptor.layout.direction = LayoutDirection::Column;
         root = root.child(first).child(second);
         root.id = Some(FIXTURE_ID.to_owned());
+
         assert!(root
             .find(&|node| node.runtime_id.as_deref() == Some("tabs:alpha:tab:shared"))
             .is_some());
         assert!(root
             .find(&|node| node.runtime_id.as_deref() == Some("tabs:beta:tab:shared"))
             .is_some());
+
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 280.0, 120.0);
         driver.wait_for_focus_handle("tabs:alpha:tab:shared");
         driver.wait_for_focus_handle("tabs:beta:tab:shared");
+        driver.wait_for_focus_handle("tabs:alpha:tab:other");
+        driver.wait_for_focus_handle("tabs:beta:tab:other");
+
+        assert!(poodle_gpui_node_backend::focus_handle_for("tabs:alpha:tab:shared").is_some());
+        assert!(poodle_gpui_node_backend::focus_handle_for("tabs:beta:tab:shared").is_some());
+
+        // Focus alpha: alpha focus state is true, beta focus state is false
+        driver.focus_element("tabs:alpha:tab:shared");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for("tabs:alpha:tab:shared"), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for("tabs:beta:tab:shared"), Some(false));
+
+        // Focus beta: beta focus state is true, alpha focus state is false
+        driver.focus_element("tabs:beta:tab:shared");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for("tabs:beta:tab:shared"), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for("tabs:alpha:tab:shared"), Some(false));
+
+        // Keyboard arrow on beta instance only fires beta handler
+        driver.keyboard_key("tabs:beta:tab:shared", "right");
+        assert_eq!(beta_changes.lock().unwrap().as_slice(), ["other"]);
         assert!(
-            poodle_gpui_node_backend::focus_handle_for("tabs:alpha:tab:shared").is_some()
-                && poodle_gpui_node_backend::focus_handle_for("tabs:beta:tab:shared").is_some()
+            alpha_changes.lock().unwrap().is_empty(),
+            "Keyboard navigation on beta instance must not fire alpha change handler"
+        );
+
+        // Pointer activate on alpha instance only fires alpha handler
+        driver.pointer_activate_id("tabs:alpha:tab:other");
+        assert_eq!(alpha_changes.lock().unwrap().as_slice(), ["other"]);
+        assert_eq!(
+            beta_changes.lock().unwrap().as_slice(),
+            ["other"],
+            "Pointer activation on alpha instance must not fire beta change handler"
         );
     });
+
+    // ── Phase 7: Terminal M1 Receipt Emission ────────────────────────────
+    nucleus_receipts::emit_if_configured(
+        "Tabs",
+        "nucleus.navigation.tabs",
+        observation.expect("mounted observation recorded from primary driver"),
+        &[
+            "mount controlled Tabs with panel, disabled tab, closable tabs, and reorder through HeadlessDriver",
+            "pointer activate tabs, verify disabled tab inertia, and activate close button",
+            "keyboard navigate roving focus across tabs with directional arrows, disabled skip, Home, End, and axis isolation",
+            "dispatch manual activation mode where arrow keys move focus and Enter/Space commits selection",
+            "dispatch vertical orientation mode verifying vertical arrow navigation and horizontal key inertness",
+            "dispatch keyboard and pointer reorder lifecycle verifying drag threshold, drop target hover, self-drop refusal, and drag cancellation",
+            "mount two composed Tabs instances with identical item values to prove caller-scoped runtime ID, focus handle, and callback isolation",
+        ],
+        &[
+            "production render path resolves root tablist role, horizontal/vertical orientation, label, and layout direction",
+            "each tab resolves tab role, accessible name, intrinsic text, selected state, roving tab index, focus ring, controls target, and disabled opacity",
+            "tab panel resolves tabpanel role, labelled_by association, focusable tab index, and active panel text",
+            "closable tabs render accessible close buttons with icon and distinct pointer activation",
+            "pointer and keyboard navigation update selected tab and panel via controlled host rebuild while disabled tab clicks remain inert",
+            "roving focus skips disabled tabs in both directions, jumps to boundaries with Home/End, and maintains axis constraints",
+            "manual activation decouples focus movement from value changes until explicit commit",
+            "pointer drag-and-drop handles sub-threshold inertness, drag start, drop target hovering, self-drop rejection, reorder commit, and Escape cancellation",
+            "mounted bounds confirm positive dimensions, horizontal/vertical tab ordering, child containment, and panel placement",
+            "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers",
+        ],
+    );
 }
 
 /// g16.065. Compact chrome Tabs project `shows_tooltips` onto `Node.tooltip`.

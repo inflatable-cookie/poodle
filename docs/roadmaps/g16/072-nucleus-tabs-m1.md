@@ -8,8 +8,8 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/tabs.md`
-Log: pending
-PR: pending
+Log: `../../logs/2026-09/20260903-g16-072-nucleus-tabs-receipt.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/178
 Handoff: `../../handoffs/20260903-054548-g16-072-nucleus-tabs-receipt.md`
 
 ## Goal
