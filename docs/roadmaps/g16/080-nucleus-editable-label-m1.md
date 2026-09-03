@@ -1,8 +1,9 @@
 # g16.080 — Nucleus EditableLabel M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.045`, completed `g16.062`, completed `g16.077`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`,

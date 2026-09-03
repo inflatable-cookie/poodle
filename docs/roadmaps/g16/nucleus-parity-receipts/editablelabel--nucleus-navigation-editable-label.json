@@ -1,0 +1,68 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "EditableLabel",
+  "scenario_id": "nucleus.navigation.editable-label",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "313a1f56bcc1041d1aa8a939e95d5422525c9392",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount controlled EditableLabel sessions through node_compat::EditableLabel::from_spec(...).into_element() in HeadlessDriver",
+    "enter edit mode through pointer double activation, pointer single activation, Enter, and Space while programmatic and disabled gestures stay inert",
+    "dispatch printable scalar input, Enter, Escape, Tab, and pointer blur through the GPUI test platform",
+    "commit every scalar in portable trim set T and preserve ZWSP through mounted input",
+    "mount equal-valued caller-id instances and remove one live editor through the production rebuild path"
+  ],
+  "assertions": [
+    "production adapter projects display Button and editing TextInput semantics, one visible mode, accessible-name fallback, label typography, field treatment, and text cursor",
+    "mounted bounds are positive, non-overlapping, and contained by the production mount box",
+    "live draft paint stays separate from the host-owned committed value until commit and preserves the previous committed snapshot",
+    "Enter commits and Escape cancels with display focus restoration while Tab and pointer blur commit exactly once and let focus leave",
+    "portable trim removes Unicode White_Space plus BOM, preserves ZWSP, and unchanged trimmed commit still fires once",
+    "Unicode scalar maxLength accepts one astral scalar and rejects the next insertion",
+    "disabled and programmatic display controls remain inert to their forbidden gestures",
+    "equal-valued caller-id instances keep focus, draft, callback, bounds, and teardown identity separate",
+    "removing a focused live editor emits neither commit nor cancel"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
