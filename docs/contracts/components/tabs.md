@@ -268,7 +268,9 @@ registrations, so it reaches the machine the same way.
 Tooltip sub-machine (active when vertical or `showTooltips`): `hidden` →
 `pending { index }` (pointer enter or keyboard focus, 300ms timer) →
 `visible { index }`; pointer leave, blur, or Escape from any state → `hidden`,
-cancelling the timer. Disabled items never enter `pending` or `visible`.
+cancelling the timer. Disabled items never enter `pending` or `visible`. If
+the pending or visible target becomes disabled, cancel the timer and return
+to `hidden` — do not leave a pending fire or a masked visible index.
 
 #### Events
 
@@ -885,7 +887,8 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - `showTooltips` (and every vertical strip) schedules the hidden or compact
   label on pointer enter and keyboard focus, paints after 300ms, and dismisses
   on leave, blur, Escape, disablement, removal, and teardown. Disabled tabs
-  never schedule or paint.
+  never schedule or paint. Disablement of the pending or visible target
+  cancels the timer and index, not only paint.
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
 - Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-edge` and `data-active-fill` carry `activeEdge` / `activeFill` on the root
 - `activeEdge="underline"` uses one measured indicator child. ResizeObserver,

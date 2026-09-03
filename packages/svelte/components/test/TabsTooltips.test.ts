@@ -14,6 +14,10 @@ const itemsWithDisabledGit = [
   { value: "git", label: "Git", icon: "git-branch", disabled: true },
 ];
 
+function withDisabled(value: string, disabled: boolean) {
+  return items.map((item) => (item.value === value ? { ...item, disabled } : item));
+}
+
 afterEach(() => {
   vi.useRealTimers();
 });
@@ -155,5 +159,34 @@ describe("Tabs tooltips (svelte)", () => {
     await fireEvent.focus(tabOf(container, "search"));
     await vi.advanceTimersByTimeAsync(300);
     expect(tooltip()?.textContent?.trim()).toBe("Search");
+  });
+
+  it("cancels a pending tooltip when that tab becomes disabled", async () => {
+    vi.useFakeTimers();
+    const { container, rerender } = render(Tabs, {
+      props: { items, defaultValue: "explorer", showTooltips: true },
+    });
+    await fireEvent.mouseEnter(itemOf(container, "search"));
+    await vi.advanceTimersByTimeAsync(100);
+    await rerender({ items: withDisabled("search", true), defaultValue: "explorer", showTooltips: true });
+    expect(tooltip()).toBeNull();
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()).toBeNull();
+    await rerender({ items, defaultValue: "explorer", showTooltips: true });
+    expect(tooltip()).toBeNull();
+  });
+
+  it("hides a visible tooltip immediately when that tab becomes disabled", async () => {
+    vi.useFakeTimers();
+    const { container, rerender } = render(Tabs, {
+      props: { items, defaultValue: "explorer", showTooltips: true },
+    });
+    await fireEvent.mouseEnter(itemOf(container, "search"));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()?.textContent?.trim()).toBe("Search");
+    await rerender({ items: withDisabled("search", true), defaultValue: "explorer", showTooltips: true });
+    expect(tooltip()).toBeNull();
+    await rerender({ items, defaultValue: "explorer", showTooltips: true });
+    expect(tooltip()).toBeNull();
   });
 });

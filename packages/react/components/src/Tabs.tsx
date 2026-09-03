@@ -201,6 +201,7 @@ export function Tabs({
   const pendingFocusGenerationRef = useRef(0);
   const focusTransferTimerRef = useRef<number | null>(null);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipPendingIndex = useRef<number | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
   const lastSyncedValue = useRef<string | null>(null);
@@ -486,15 +487,28 @@ export function Tabs({
       return;
     }
     clearTooltip();
-    tooltipTimer.current = setTimeout(() => setTooltipIndex(index), 300);
+    tooltipPendingIndex.current = index;
+    tooltipTimer.current = setTimeout(() => {
+      tooltipPendingIndex.current = null;
+      setTooltipIndex(index);
+    }, 300);
   }
 
   function dismissTooltip(): void {
     clearTooltip();
+    tooltipPendingIndex.current = null;
     setTooltipIndex(null);
   }
 
   useEffect(() => clearTooltip, []);
+
+  useLayoutEffect(() => {
+    const target = tooltipIndex ?? tooltipPendingIndex.current;
+    if (target === null) return;
+    if (renderedItems[target]?.disabled === true) {
+      dismissTooltip();
+    }
+  }, [renderedItems, tooltipIndex]);
 
   // ── Overflow collapse ──
 

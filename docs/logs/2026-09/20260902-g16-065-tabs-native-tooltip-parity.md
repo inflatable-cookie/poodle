@@ -18,7 +18,8 @@ the renderer, and mounted GPUI. False stays inert after 300ms on hover and
 keyboard focus. True, and every vertical strip, projects the trimmed tab
 label onto `Node.tooltip`. Horizontal `showTooltips=true` schedules on
 keyboard focus and paints at 300ms, matching native `Node.tooltip`. Disabled
-tabs never pending/visible on web; native still projects the label and the
+tabs never pending/visible on web, including when the live pending or
+visible target becomes disabled; native still projects the label and the
 g16.066 backend refuses the timer. The merged g16.066 backend owns delay and
 dismiss. No new Node field.
 
@@ -36,9 +37,12 @@ dismiss. No new Node field.
   send either ENTER for a disabled item.
 - Web: `scheduleTooltip` returns after dismiss when `hasTooltips` is false or
   the live item is disabled. `onFocus` schedules whenever `hasTooltips`, not
-  only when vertical. Paint requires the live item is not disabled.
+  only when vertical. Paint requires the live item is not disabled. The
+  pending or visible target becoming disabled cancels the timer and index
+  before paint, so re-enable does not rematerialize a masked tooltip.
 - Paired Svelte/React `TabsTooltips` suites with fake timers, including
-  disabled never pending/visible and horizontal 299/300ms keyboard focus.
+  disabled never pending/visible, horizontal 299/300ms keyboard focus, and
+  rerender disablement while Search is pending or visible.
 
 ## Falsification
 
@@ -52,6 +56,8 @@ Green proofs first. Plants restored after each row.
 | Skip hide | omit leave hover | mounted test expected none, got `Search` |
 | Disabled still paints | omit live disabled gate in `scheduleTooltip` | paired disabled proof kept Search visible after entering Git |
 | Horizontal focus silent | keep `onFocus` behind `isVertical` | paired 300ms keyboard proof expected `Search`, got none |
+| Disable while pending | keep timer after Search is disabled | paired pending rerender rematerialized `Search` on re-enable |
+| Disable while visible | paint-gate only | paired visible rerender rematerialized `Search` on re-enable |
 
 ## Validation
 
@@ -60,16 +66,15 @@ Focused:
 - `bun run --cwd packages/core test test/tabs.test.ts` — 24 pass
 - `cargo test --manifest-path packages/contracts/components/Cargo.toml shows_tooltips` — 1 pass
 - renderer `tabs::` — 22 pass, including 5 tooltip projection tests
-- Svelte/React `TabsTooltips` plus Tabs/controlled-focus/roving/subject files — 84 pass
+- Svelte/React `TabsTooltips` plus Tabs/controlled-focus/roving/subject files — 88 pass
 - `tabs_show_tooltips_delay_and_hide_through_mounted_gpui` — pass
 
 Boards (this exact-head repair):
 
-- `effigy ci:rust` — pass
-- `effigy ci:native` — pass, including 181 headless regressions; Button receipt unchanged at `5a7a8f2a0`
 - `effigy ci:web` — pass
 - `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — pass
+- `effigy ci:rust` / `ci:native` — not re-run; no SOURCE_PATHS or Rust change
 
 ## Limits
 

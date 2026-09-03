@@ -201,6 +201,7 @@
   let lastSyncedValue = $state<string | null>(null);
   let tooltipIndex = $state<number | null>(null);
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
+  let tooltipPendingIndex: number | null = null;
   let collapsedByOverflow = $state(false);
   let historyReady = $state(false);
 
@@ -403,11 +404,16 @@
       return;
     }
     clearTooltip();
-    tooltipTimer = setTimeout(() => (tooltipIndex = index), 300);
+    tooltipPendingIndex = index;
+    tooltipTimer = setTimeout(() => {
+      tooltipPendingIndex = null;
+      tooltipIndex = index;
+    }, 300);
   }
 
   function dismissTooltip(): void {
     clearTooltip();
+    tooltipPendingIndex = null;
     tooltipIndex = null;
   }
 
@@ -417,6 +423,14 @@
       tooltipTimer = null;
     }
   }
+
+  $effect.pre(() => {
+    const target = tooltipIndex ?? tooltipPendingIndex;
+    if (target === null) return;
+    if (renderedItems[target]?.disabled === true) {
+      dismissTooltip();
+    }
+  });
 
   $effect.pre(() => {
     const nextValue = currentValue;
