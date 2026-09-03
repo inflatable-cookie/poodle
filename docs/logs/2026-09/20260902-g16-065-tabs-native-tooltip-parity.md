@@ -42,11 +42,26 @@ Green proofs first. Plants restored after each row.
 
 ## Validation
 
-Pending focused Tabs suites and `effigy ci:web` / `ci:rust` / `ci:native` /
-`docs:check` after the rebase onto g16.066.
+Focused:
+
+- `bun run --cwd packages/core test test/tabs.test.ts` — 23 pass
+- `cargo test --manifest-path packages/contracts/components/Cargo.toml shows_tooltips` — 1 pass
+- renderer `tabs::` — 22 pass, including 5 tooltip projection tests
+- Svelte/React `TabsTooltips` plus Tabs/controlled-focus/roving/subject files — 78 pass
+- `tabs_show_tooltips_delay_and_hide_through_mounted_gpui` — pass
+
+Boards:
+
+- `effigy ci:rust` — pass
+- `effigy ci:native` — pass, including 181 headless regressions
+- `effigy regressions:native` re-emitted the Button receipt at `5a7a8f2a0`
+  because `packages/render` is in Nucleus SOURCE_PATHS
+
+Pending after the receipt pin: `effigy ci:web`, `effigy docs:check`.
 
 ## Limits
 
-- No Nucleus edit, windowed/native-visual run, Jetstream, workflow, or shared
+- No Nucleus source, windowed/native-visual run, Jetstream, workflow, or shared
   g16 front-door change.
-- Nucleus Tabs stays a later card.
+- Nucleus Tabs stays a later card. The Button receipt pin is the same SOURCE_PATHS
+  refresh g16.066 used; it is not a Tabs M1 receipt.
