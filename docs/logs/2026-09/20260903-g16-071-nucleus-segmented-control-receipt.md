@@ -32,7 +32,7 @@ horizontal ordering, caller-owned option instance identity, and two-instance
 focus and callback isolation, emitting the M1 receipt at the terminal
 boundary. The manifest, existing receipts (AppHeader, Button, Icon,
 IconButton, SplitView, Surface, Text), and new SegmentedControl receipt pin the
-exact runtime source commit `635fc7163279098163fde4a8a4d9aafd3c77eb6f`. The
+exact runtime source commit `cf21e25f1349ed928bd1f3e21800ab0a3ecbcaa1`. The
 ledger records 8 mounted Nucleus rows.
 
 ## What landed
@@ -43,9 +43,9 @@ ledger records 8 mounted Nucleus rows.
   - `packages/gpui/preview/tests/headless_regressions.rs`: strengthened `segmented_control_exclusive_focus_identity_and_disabled_paths` with full token and style descriptor verification, segment button labels (`NodeKind::Button` and `intrinsic_text`), disabled segment state (no focus handle, disabled opacity, not-allowed cursor), mounted bounds positive dimensions, horizontal ordering, and track containment, probe channel capture (`structure.identity.*`, `surface.channels.*`, `content.typography.*`), pointer selection and inert same-value/disabled clicks, roving keyboard navigation with distinct forward/backward disabled skipping and edge wrapping steps (ArrowLeft/Right/Up/Down, Home/End, Escape inertness), disabled group inertness, two composed instances focus handle and change sink isolation, and terminal M1 receipt emission.
 - Receipts:
   - `docs/roadmaps/g16/nucleus-parity-receipts/segmentedcontrol--nucleus-navigation-segmented-control.json`
-  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SplitView`, `Surface`, `Text` with source commit `635fc7163279098163fde4a8a4d9aafd3c77eb6f`.
+  - Refreshed existing receipts for `AppHeader`, `Button`, `Icon`, `IconButton`, `SplitView`, `Surface`, `Text` with source commit `cf21e25f1349ed928bd1f3e21800ab0a3ecbcaa1`.
 - Manifest & Ledger:
-  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `635fc7163279098163fde4a8a4d9aafd3c77eb6f`.
+  - `docs/roadmaps/g16/nucleus-parity-manifest.json`: updated `source_commit` to `cf21e25f1349ed928bd1f3e21800ab0a3ecbcaa1`.
   - `docs/roadmaps/g16/parity-evidence-ledger.md`: regenerated via `bun scripts/parity-evidence-ledger.ts --write`; reports 8 mounted rows (AppHeader, Button, Icon, IconButton, SegmentedControl, SplitView, Surface, Text).
 
 ## Review oracle falsification
