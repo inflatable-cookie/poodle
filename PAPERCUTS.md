@@ -5,6 +5,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-03 — `effigy graph explore` waited its full 120-second budget on a
+  worktree-local `refresh.lock`, then failed without identifying the refresh
+  owner or offering a read-only stale-index fallback. Agent navigation stalled
+  even though the existing graph DB was present. Report lock owner/age and let
+  read-only exploration opt into the last complete index. Hit while preparing
+  g16.081.
+
 - 2026-09-03 — RESOLVED 2026-09-03 by g16.076. Two open Selects plus a focused
   trigger used to close both layers: `on_cancel` Closed the focused instance
   and `dismiss_innermost` popped the other. Overlay members skip cancel so
