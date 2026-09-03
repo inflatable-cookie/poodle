@@ -29458,6 +29458,74 @@ fn toast_host_controlled_composition_actions_and_identity_through_mounted_backen
                 && poodle_gpui_node_backend::bounds_for("toast-host:right:toast:job").is_some(),
             "removing the left duplicate cannot remove the right host's row"
         );
+
+        let terminal_focus = "toast-host:right:toast:job:dismiss";
+        driver.wait_for_focus_handle(terminal_focus);
+        driver.focus_element(terminal_focus);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(terminal_focus),
+            Some(true),
+            "terminal teardown starts from a real focused duplicate-host control"
+        );
+        let trace_before_teardown = trace.lock().expect("trace lock").clone();
+        left_toasts.lock().expect("left queue lock").clear();
+        right_toasts.lock().expect("right queue lock").clear();
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let _terminal_channels = poodle_gpui_node_backend::take_probe_capture();
+
+        let vanished = [
+            "toast-host:left",
+            "toast-host:left:stack",
+            "toast-host:left:toast:job",
+            "toast-host:left:toast:job:action",
+            "toast-host:left:toast:job:dismiss",
+            "toast-host:left:toast:job:dismiss-icon",
+            "toast-host:left:toast:saved",
+            "toast-host:left:toast:saved:dismiss",
+            "toast-host:left:toast:saved:dismiss-icon",
+            "toast-host:left:toast:fresh",
+            "toast-host:left:toast:fresh:dismiss",
+            "toast-host:left:toast:fresh:dismiss-icon",
+            "toast-host:right",
+            "toast-host:right:stack",
+            "toast-host:right:toast:job",
+            "toast-host:right:toast:job:action",
+            "toast-host:right:toast:job:dismiss",
+            "toast-host:right:toast:job:dismiss-icon",
+            "toast-host:right:toast:blocked",
+            "toast-host:right:toast:blocked:dismiss",
+            "toast-host:right:toast:blocked:dismiss-icon",
+        ];
+        for id in vanished {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_none(),
+                "terminal empty queues must clear mounted bounds for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::painted_node_for(id).is_none(),
+                "terminal empty queues must clear paint identity for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+                "terminal empty queues must clear focus handle identity for {id}"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for(id),
+                None,
+                "terminal empty queues must clear focus state identity for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::painted_ring_for(id).is_none(),
+                "terminal empty queues must clear focus paint for {id}"
+            );
+        }
+        driver.dispatch_key("enter");
+        assert_eq!(
+            *trace.lock().expect("trace lock"),
+            trace_before_teardown,
+            "terminal input cannot reach either removed host or cross their callbacks"
+        );
         assert!(driver.mounted_observation().is_valid());
     });
 }
