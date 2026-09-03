@@ -1,0 +1,71 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Tabs",
+  "scenario_id": "nucleus.navigation.tabs",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "13367ec967dad548ad85d7fcd86eeb54764dc0f4",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount controlled Tabs with panel, disabled tab, closable tabs, and reorder through HeadlessDriver",
+    "pointer activate tabs, verify same-value and disabled inertia, and activate close button",
+    "keyboard navigate roving focus across tabs with directional arrows, disabled skip, Home, End, and axis isolation",
+    "dispatch manual activation mode where arrow keys move focus and Enter/Space commits selection",
+    "dispatch vertical orientation mode verifying vertical arrow navigation and horizontal key inertness",
+    "dispatch keyboard and pointer reorder lifecycle verifying drag threshold, drop target hover, self-drop refusal, and drag cancellation",
+    "mount two composed Tabs instances with identical item values to prove caller-scoped runtime ID, focus handle, and callback isolation"
+  ],
+  "assertions": [
+    "production render path resolves root tablist role, horizontal/vertical orientation, label, and layout direction",
+    "each tab resolves tab role, accessible name, intrinsic text, selected state, roving tab index, focus ring, controls target, and disabled opacity",
+    "tab panel resolves tabpanel role, labelled_by association, focusable tab index, and active panel text",
+    "closable tabs render accessible close buttons with icon and distinct pointer activation",
+    "pointer and keyboard navigation update selected tab and panel via controlled host rebuild while disabled and same-value clicks remain inert",
+    "roving focus skips disabled tabs in both directions, jumps to boundaries with Home/End, and maintains axis constraints",
+    "manual activation decouples focus movement from value changes until explicit commit",
+    "pointer drag-and-drop handles drag start, drop target hovering, self-drop rejection, reorder commit, and Escape cancellation",
+    "mounted bounds confirm positive dimensions, horizontal/vertical tab ordering, child containment, and panel placement",
+    "two composed instances maintain separate instance runtime IDs, isolated focus handles, and independent change handlers"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
