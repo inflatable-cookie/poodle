@@ -7,7 +7,7 @@ Scope: whole `poodle/` repository.
 - Treat `docs/` as the authority for Poodle vision, architecture, roadmap, and execution status.
 - Keep Poodle focused on generalized tokens, primitives, and reusable composites; app-specific DAW widgets stay in their owning products.
 - Keep Svelte, React, shared Rust composition, and GPUI aligned to one documented contract. Parity means semantic inputs, states, behavior, and token usage first. Jetstream follows its current admission status in the working rules.
-- Keep Underlay integration behind Underlay-owned adapters and token bridges; app code should not need to know Poodle exists.
+- Underlay and its applications import Poodle's published packages directly; any translation lives in the consumer. Poodle carries no consumer-named directory or adapter (architecture 001, operator decision 2026-09-02).
 - Treat Bits Svelte as an implementation detail, not public contract authority.
 - Never run `*-windowed` conformance selectors locally without explicit operator approval; use the headless `effigy ci:conformance` path.
 - Before v1.0, do not add compatibility shims, aliases, or silent fallbacks. Stop and ask before a breaking migration.

@@ -1,7 +1,7 @@
 # Product Guardrails
 
 Status: active
-Updated: 2026-08-09
+Updated: 2026-09-04
 Owner: Poodle core
 
 - Keep Poodle focused on reusable tokens, primitives, composites, workstation
@@ -14,8 +14,9 @@ Owner: Poodle core
   renderer.
 - Put shared web behavior and styling in `poodle-core`; put shared native
   component recipes in `poodle-render`.
-- Keep Underlay-facing integration behind Underlay-owned adapters and token
-  bridges.
+- Consumers, including Underlay and its applications, import Poodle's
+  published packages directly and own any translation; Poodle carries no
+  consumer-named adapter or directory.
 - Keep Bits Svelte and runtime engines as implementation details rather than
   public Poodle contracts.
 - Freeze a bounded owner before widening a migration or parity tranche.

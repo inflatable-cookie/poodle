@@ -1,354 +1,94 @@
-# Holistic Posture Assessment — Advisory To The Orchestrator
+# Holistic Posture Assessment — Open Remainder
 
-Status: partially promoted — Nucleus parity and visual-lab routes are canonical;
-remaining advisory items retain no execution authority
-Captured: 2026-09-01
-Owner: Poodle Northstar orchestrator (promotion); authored by an independent
-Fable advisory thread at the operator's request
-Source: front doors, roadmaps, triage, papercuts, sibling consumer repos, npm,
-and five delegated read-only code audits (native pair, validation gates, web
-pair, docs/planning, packaging/consumers). Audit reports were kept outside the
-repo; every claim below was spot-verified against the tree before inclusion.
-Promotion route: see the final section
+Status: open — pruned 2026-09-04 to the items not yet promoted or rejected
+Captured: 2026-09-01; revised 2026-09-02; pruned 2026-09-04
+Owner: Chatterbox (planning)
+Provenance: the full advisory, its verified-facts table, and the operator's
+2026-09-02 decisions are in git history of this file (through `409f1ee93`) and
+in the surfaces they were promoted to. Do not reconstruct them here.
 
-## Thesis (revised 2026-09-02 after operator input)
+## Promoted (removed from this note)
 
-First draft read the split below as "value centre versus cost centre". The
-operator corrected that on 2026-09-02: *"The lack of parity is what is
-stopping commitment to GPUI in the first place. If we reach real parity I
-would switch a bunch of apps to it."* Parity is the product goal, and the
-Svelte-only consumer base is a symptom of native not being there yet, not a
-verdict on native.
+- Parity goal, Nucleus as the switch target, execution-backed ledger:
+  `../roadmaps/g16/nucleus-gpui-parity-programme.md`, `g16.062`–`g16.093`.
+- Release truth and scanner: `g16.053`, `g16.054`.
+- Compiled web distribution, `sideEffects`, `marked` as optional peer:
+  `g16.056`–`g16.061`, architecture 014.
+- Native source-of-truth repairs: `g16.063`–`g16.066`.
+- Jetstream hold: `20260902-000959-jetstream-admission-hold.md`.
+- React retain + drift gate: `g16.095` (ready).
+- Linux web + Rust PR/main board: `g16.096` (ready).
+- Underlay direct-import rule: `AGENTS.md`, product guardrails, vision §Underlay.
+- Consumer defect intake lane: `../roadmaps/README.md` rules.
 
-The facts stand; the conclusion changes:
+## Still open
 
-- **Consumers today:** `@inflatable-cookie/poodle-svelte` + `poodle-core`.
-  Nineteen app manifests across 16 sibling repos, every one pinned to npm
-  `0.2.2`, most importing 20–80 distinct components.
-- **Native today:** no shipping product depends on `poodle-render`,
-  `poodle-gpui`, or the node backend. Longhorn's `crates/longhorn-poodle`
-  pulls only `poodle-specs` by git tag for prototypes; Jetstream's
-  `jetstream-poodle` is a path-linked engine adapter; Finch's GPUI app is
-  archived; Loophole is Tauri + Svelte, "GPUI-second".
-- **Effort split since 2026-08-01 (lines changed):** gpui 213k, render 103k,
-  jetstream 100k, codegen 82k, contracts 56k versus svelte 93k, react 64k,
-  core 54k. Native ≈ 2.2× web. That is the intended investment.
-- **The gap:** GPUI mounted 56 / missing 119, GPUI accessibility manual for
-  175, GPUI visual missing for 174, at roughly one cell per card.
-- **React:** 176 shells, zero consumers, unpublished; prop drift against
-  Svelte in 32 components is not gated. Operator decision: retain + gate.
+### Validation hygiene (candidates, each assessed separately)
 
-So the question is not "how much native" but "what is *real* parity, and
-what is the shortest honest path to it". Today the ledger cannot answer the
-first half: `mounted` is a name map, accessibility is `manual`, visual is
-`missing`, the Jetstream adapter reimplements 108 components, and paired
-machines diverge in places no corpus covers. Reaching a bar nobody can
-measure is not possible; making the bar measurable is the first parity card.
+- `test:web-pack-install` leaves two tarballs in the checkout; doctor then
+  reads them as invalid UTF-8. Move pack output to a temp dir.
+- `scripts/gate-tree-guard.ts:27` keys its snapshot on one global
+  `/tmp/poodle-gate-tree-guard.json`; concurrent worktrees can consume each
+  other's state. Key by worktree.
+- Doctor scan config (`quality/effigy.scan.toml:72-87`) excludes only
+  token/icon generated roots, not the committed catalogue/specimen roots
+  `tasks/effigy.tasks.toml:14-25` calls intentional inputs; every `#[allow(`
+  scores high. A permanently red doctor is ignored.
+- `docs:machine-shape-drift` exits 1 with 20 findings and sits in no board;
+  `docs:value-domain-drift` has 20 findings but is report-only without
+  `VALUE_DOMAIN_ENFORCE=1`; `lint-docs.ts:3093` adds only contract-only prop
+  errors so Svelte-only drift is green in the composed gate.
+- `test:contracts` omits `packages/contracts/node`; no board typechecks
+  React (`g16.095` adds a prop gate, not a typecheck).
+- Two GPUI harness flake causes: `window_capture.rs:820-836` temp-dir
+  collision under parallel tests and a stderr-dropping smoke wrapper;
+  `specimen_probe.rs:295-346` asserts a 120 s wall clock while four shards
+  share one global registry lock.
+- The component denominator lives in seven places (`specimen_probe.rs:41`,
+  the census test, the ledger script, `parity.ts:754`, two JSON reports, the
+  demo audit). One `public-surface.json` manifest would derive all of them.
 
-## Verified Facts
+Next check: bundle into one "validation hygiene" card only after the operator
+confirms it is worth a lane; otherwise leave as papercut-class debt.
 
-| Fact | Evidence |
-| --- | --- |
-| npm `latest` is `0.2.2`; no `0.2.3` on npm; no `v0.2.3` git tag | `npm view` both packages; `git tag` |
-| `CHANGELOG.md` and `docs/release-notes/README.md` record `0.2.3` as released 2026-08-30; all package.json/Cargo.toml say `0.2.3` | `CHANGELOG.md:14`, `docs/release-notes/README.md:23` |
-| `effigy qa` is red on `main` | `audit:security` OpenAI regex (`scripts/audit-repository-security.ts:23`) has no left boundary; now matches 5 files (PAPERCUTS recorded 1) |
-| All five GitHub workflows are `workflow_dispatch` only; no push/PR trigger exists; `effigy qa` runs only inside a manual `release.yml` dispatch | `.github/workflows/*.yml` `on:` blocks |
-| `effigy qa` on `main`: 2:47 wall-clock, single red child `audit:security`; ledger "mounted" is a static name map (`parity-evidence-ledger.ts:72,444,512`) | validation audit run 22:29Z |
-| `effigy doctor` reports 3 error classes: 30 generated-in-src, 67 god-files (12 critical), 22 stale suppressions (19 errors) | `.effigy/reports/doctor/` |
-| Published web packages are raw source: 0 `.js`, 0 `.d.ts`; `files: ["src"]`, exports point at `src/index.ts` | `packages/svelte/components/package.json`, packed tarballs |
-| Neither web package declares `sideEffects`; 172 Svelte components import their own CSS as a side effect | grep; fresh Vite app with Button + Select builds a 684 kB CSS bundle containing list-card and tabs styles |
-| `marked` is a hard dependency of core, svelte, and react; used by 2 of 176 components | package.json files; `AgentMessage.svelte`, `MarkdownEditor.svelte` |
-| `poodle-core` root exports 751 symbols; ~45% have no consumer in either shell; test fixtures (`MODEL_*_FIXTURES`) and clip/motion internals are public | `packages/core/src/index.ts` |
-| Thin-shell claim does not hold for the large composites: DataTable 632/604 lines Svelte/React with 0 core; Button 264/185 with 0 core; Select, Tabs, Tree, MarkdownEditor duplicate loader, overflow, rename, and cursor logic per shell | line counts; paired `file:line` ranges in the web audit |
-| No drift gate compares React props to Svelte or to contracts; 32 components diverge (React-only `defaultValue`s, missing `formenctype`/`formmethod`, `ToastStack.onDismiss` arity, attribute casing) | `packages/svelte/preview/scripts/contract-prop-drift.ts` parses Svelte only |
-| `packages/core/src/file-upload.ts:102` uses `document`/`Image` outside `dom/` | architecture 006 rule |
-| Consumer-reported Poodle defects live only in consumer `PAPERCUTS.md` files; Poodle has zero GitHub issues | Figmatic: Tree treeitem has no accessible name, `Select variant="ghost"` ignored in native mode, core `licence.ts` type drift; Loophole: Keyboard vertical geometry, DockRegion `canAcceptPanel` gating |
-| AGENTS.md hard rule and product-guardrails say Underlay must wrap Poodle behind adapters; architecture 001 §Host says Underlay imports Poodle directly (settled by g12.022). Underlay templates import 64 components; its 5 apps declare Poodle directly | `AGENTS.md:10`, `docs/architecture/001-poodle-system-shape.md:206` |
-| All 17 Rust crates declare `publish = false`; GPUI guide tells consumers to use path deps | Cargo manifests; `docs/guides/gpui-developer-guide.md` |
-| Docs volume: roadmaps 446 files, logs 341, handoffs 125 (121 uncited by any canonical doc; no retention policy), parity 141 (marked historical yet 4 g16 cards instruct editing it), specs 70 (28 unreferenced; rollover purge never ran) | counts; `docs/parity/README.md` vs `docs/roadmaps/g16/010-*.md:13` |
-| `docs/roadmaps/g16/README.md` is 3,873 words of PR narrative; `docs/roadmaps/README.md` 1,685; same history repeated in logs and generation index | word counts |
-| Guides teach retired APIs: `Tabs variant="underline"` (`svelte-developer-guide.md:903,908`), `ButtonTone` with 2 of 4 members (`:1226`), pre-state Popover trigger snippet (`:820`), HistoryCenter v1 props in `component-docs.ts:5135` | grep |
-| Contract/spec drift the gates miss: `slider.rs:91` returns 0 for `max <= min` while contract and core widen to `min + 1`; `checkbox.rs:14` `description_id` vs contract `describedBy`; contracts index lists `token-input.md` twice | grep |
-| 112 remote branches, 98 already merged into main and not deleted | `git branch -r --merged` |
-| Paseo profile "Gemini Flash Worker" resolves to `cursor/grok-4.6` | `list_profiles` |
+### Repository settings (operator-owned)
 
-## Findings By Lane
+- 98 merged remote branches were never deleted; enable delete-on-merge.
 
-### A. Release truth (settled disposition; honesty repair still open)
+### Docs compaction (docs-only; suits a low-cost model)
 
-Merged PR #144 settled the version question in
-`20260901-230400-history-release-adoption-decision.md`: `0.2.3` is prepared
-but unpublished, `0.2.4` is skipped, and all post-`v0.2.2` work folds into
-`0.3.0`. This note does not reopen that. The remaining defect is that
-`CHANGELOG.md:12` and `docs/release-notes/README.md:23` still describe
-`0.2.3` as released on 2026-08-30 while npm `latest` is `0.2.2` and no
-`v0.2.3` tag exists. Candidate card `g16.054` (PR #148) owns that repair; it
-must land before the `0.3.0` candidate is cut. Longer term, bind changelog
-release headers to a publication receipt so a "released" line cannot be
-written before the registry agrees.
+- `g16/README.md` and `roadmaps/README.md` are PR narratives; reduce to
+  status tables and leave narrative to logs.
+- 121 of 125 handoffs are uncited; `docs/parity/` (141 files) is marked
+  historical yet g16 cards instruct editing it; 28 specs are unreferenced and
+  spec 001 is still `draft`; the working rules' rollover purge never ran.
+- Guides teach retired APIs: `Tabs variant="underline"`
+  (`svelte-developer-guide.md:903,908`), two-member `ButtonTone` (`:1226`),
+  pre-state Popover trigger (`:820`), HistoryCenter v1 props in
+  `component-docs.ts:5135`. Add a guide-snippet compile check.
+- `docs/contracts/components/README.md` lists `token-input.md` twice.
+- `packages/jetstream/adapter/README.md` says the adapter implements no
+  components; it implements 108. Quarantine/delete stays a gated
+  architecture decision; the README line is a plain defect.
 
-### B. Green main (blocker, cheap)
+Next check: propose one docs-compaction card to the operator once the two
+ready lanes are dispatched.
 
-`effigy qa` cannot pass on `main`. The fix is a `\b` on one regex and has been
-in PAPERCUTS since g16.028 closed; candidate `g16.053` (PR #148) is the ready
-repair. A red release board trains every worker to treat qa failure as
-noise. The operator approved a Linux-only web + Rust PR/main board on
-2026-09-02; that is a separate workflow card under `.github/workflows/`
-authority, not part of the scanner repair.
+### Web pair architecture (needs a decision before any card)
 
-### C. Consumer packaging (high, small cost, large payoff)
+- Large composites duplicate logic per shell (DataTable 632/604 lines with 0
+  in core; Button 264/185 with 0 in core; Select, Tabs, Tree, MarkdownEditor
+  duplicate loader, overflow, rename, and cursor logic). Extraction into core
+  is one card per composite, and only worth it while React is retained.
+- `packages/core/src/index.ts` exports ~751 symbols, ~45% with no shell
+  consumer, including test fixtures (`MODEL_*_FIXTURES`) and clip/motion
+  internals. `file-upload.ts:102` uses `document` outside `dom/`.
 
-Three one-batch changes improve every one of the 16 consumers:
-
-1. Add `"sideEffects": ["**/*.css"]` to core and svelte package.json so barrel
-   imports stop bundling all 172 component stylesheets.
-2. Move `marked` behind the two components that use it (peer/optional or a
-   subpath export) so a Button consumer does not ship a markdown parser.
-3. Emit `dist/` (compiled JS + declarations). Settled by the operator on
-   2026-09-02 as a mandatory prerequisite for `0.3.0`; the raw-source
-   boundary is not acceptable. The evidence packet still has to settle build
-   tool, declaration emit, export map, CSS delivery, `sideEffects`, and the
-   `marked` isolation.
-
-### D. Web pair architecture (high)
-
-The "thin shell over core" contract is true for primitives (Checkbox 47%
-shell) and false for composites (DataTable, Button, Select, Tabs, Tree,
-MarkdownEditor, HistoryCenter). Every composite fix is written twice and
-React quietly drifts because nothing gates it. Options:
-
-- Gate first: extend `contract-prop-drift.ts` to parse React `Props`
-  interfaces and fail on Svelte↔React divergence. Cheap, immediate.
-- Then extract the pure parts (CSV export, selection math, tab overflow,
-  async option loader, rename state) into core one composite per card.
-- React's posture is settled (operator, 2026-09-02): retain source-only,
-  add the Svelte↔React public-prop drift gate, and publish only after a
-  named consumer exists. Extraction of shared composite logic into core is a
-  separate, per-composite candidate.
-
-### E. Native pair (high)
-
-Targeted runs pass (headless 238, GPUI backend 49, Jetstream adapter 162)
-and the render → node → GPUI interpreter boundary is real for layout, paint,
-text, input, and lifecycle. The pair is not sound as an *admitted* pair:
-
-- **Jetstream's in-repo adapter is a second component implementation.**
-  `packages/jetstream/adapter` depends on neither `poodle-render` nor
-  `poodle-node` (0 references across its 11 source files) and directly
-  implements 108 components (`lib.rs:126-264`, pinned by a count test at
-  `:313-320`). Its README says it does not implement components. The
-  node-consuming path lives only in `packages/jetstream/preview` via the
-  sibling `jetstream-poodle` crate. Architecture 001 says "a native component
-  should not be reimplemented separately in both backends"; today it is. Merged
-  PR #147 (`20260901-230409-jetstream-readiness-review.md`, "hold") already
-  records the 60 + 48 direct implementations as a separate legacy path from
-  the Node-to-Jetstream preview route and holds admission on lost
-  interaction/accessibility/event fields. Receipt acknowledged. What remains
-  from this audit is a source-of-truth defect: the adapter README claims it
-  implements no components. Whether the legacy path is quarantined or
-  deleted stays a gated architecture decision, not a card from this note.
-- **Paired-machine divergences the corpora miss.** TypeScript HistoryCenter
-  deletion writes a nested invalidation into the root map
-  (`packages/core/src/history-center.ts:1010-1019`) while Rust replaces the
-  level in place (`history_center.rs:733-750`); no nested-delete vector
-  exists. Slider rounding differs at negative half-steps (`f64::round` vs
-  `Math.round`). Tabs `showTooltips` is contracted and implemented in core
-  (`tabs.ts:247-278`) but absent from `poodle-headless` and `render/tabs.rs`.
-  These are exactly the class the ledger's "focused"/"mounted" columns cannot
-  see.
-- **Semantic policy leaking into the GPUI backend.** `drag.rs:2617-2646`
-  and `:3498-3589` run a second refusal-selection and eligibility pass around
-  the headless kernel; the file is 4,191 lines mixing controller, input,
-  transport, file export, announcements, and tests. Continuous-value gestures
-  (Fader/Knob/XYPad) still sit in one thread-local session
-  (`interaction.rs:5-15,71-84`), the same ownership class g16.025 removed for
-  drag.
-- **Public-input panics.** `licence.rs:428-437` panics on a missing key
-  adapter although a `Reject` path exists; `audio.rs:87-114` asserts value-law
-  parameters; `render/select.rs:54-64` asserts non-empty scope; `drag.rs:437`
-  aborts on a poisoned host inbox.
-- **Structure.** The `too_many_arguments` cluster (15 sites, mostly
-  `render/history_center.rs`) marks missing argument structs, not lint noise.
-  `poodle-ir` is used only by `poodle-codegen`; it is retired-pilot schema
-  living as a contracts crate. `packages/render` is not rustfmt-clean on main
-  so no worker can verify its own formatting.
-- **Test reality.** Mounted GPUI regressions do drive production dispatch
-  through a real driver (`headless_driver.rs:67-127,252-277`); that claim
-  holds. The corpus runners are 21 loop tests over vectors whose expected
-  fields are optional on the TypeScript side (`conformance.test.ts:47-53`),
-  so a vector can pass while asserting little. Default mount geometry is a
-  fixed 160×60 box.
-
-### F. Validation gates (high)
-
-Measured on `main` at 22:29Z: `effigy qa` takes 2:47 wall-clock, 3,498 web
-tests and 167 native regressions pass, and the only red child is
-`audit:security`. The lattice is large and mostly fast; its problems are
-shape, not cost.
-
-- **No automated board exists.** Every workflow under `.github/workflows/`
-  is `workflow_dispatch` only, by a documented decision after macOS lanes
-  exhausted the Actions allowance. `effigy qa` is the release gate but runs
-  only when a human dispatches `release.yml`. At 28 merged PRs in one day,
-  "main is green" is whatever the last worker said it was. A cheap headless
-  push/PR board (ci:web + ci:rust, Linux, no macOS) restores a shared signal
-  for a few minutes of runner time per merge.
-- **"Mounted" is a name map, not execution.** `parity-evidence-ledger.ts:72`
-  is a component→test-name table; a cell is `mounted` when the map has an
-  entry and the string appears anywhere in the cited file (`:512-529`). The
-  generator never runs cargo or a browser. Fine as an expected-test manifest;
-  it should not be read as proof, and the g16 runway reads it as proof.
-- **Red or unenforced checks outside the board.** `docs:machine-shape-drift`
-  exits 1 with 20 findings and is in no board. `docs:value-domain-drift` has
-  20 findings but is report-only unless `VALUE_DOMAIN_ENFORCE=1`. `drift:roles`
-  fails because it shells into the Jetstream preview, which no longer
-  compiles. `lint-docs.ts:3093` adds only contract-only prop errors, so
-  Svelte-only drift is green in the composed docs gate while red standalone.
-- **Coverage narrower than claimed.** `test:contracts` omits
-  `packages/contracts/node`. There is no `check:react` typecheck in any board.
-  Visual capture skips nine nondeterministic components.
-- **Validation dirties the checkout.** `test:web-pack-install` leaves two
-  tarballs in the tree (found in the orchestrator's `main` checkout after the
-  audit; removed). Doctor then reads them as invalid UTF-8 and reports scan
-  errors. `gate-tree-guard.ts:27` keys its snapshot on one global
-  `/tmp/poodle-gate-tree-guard.json`, so concurrent worktrees can consume each
-  other's state.
-- **Doctor is mis-tuned.** `quality/effigy.scan.toml:72-87` scans
-  generated-in-src but excludes only token/icon roots, not the committed
-  catalogue/specimen roots that `tasks/effigy.tasks.toml:14-25` calls
-  intentional inputs. Every `#[allow(` is scored high. A permanently red
-  doctor has the same effect as a red qa: nobody reads it.
-- **Denominator in seven places.** `specimen_probe.rs:41` hard-codes 175;
-  the census test, ledger script, `parity.ts:754`, two JSON reports, and the
-  demo audit repeat it. One `public-surface.json` manifest with per-runtime
-  flags would derive all of them.
-- **Flake root causes are concrete.** `window_capture.rs:820-836` builds a
-  temp dir from pid + body length so parallel empty-manifest tests collide;
-  the smoke wrapper drops stderr. `specimen_probe.rs:295-346` asserts a
-  120 s wall clock while four shards run concurrently behind one global
-  registry lock, so any neighbouring Vitest run trips it.
-
-### G. Docs and planning posture (medium, compounding)
-
-The spine records process faithfully and serves readers poorly:
-
-- Roadmap README and generation index are PR journals. A contributor needs
-  several thousand words to learn "what is ready now". Reduce both to a status
-  table and leave narrative to logs.
-- Handoffs and parity have no retention policy; 121 handoffs and 141 parity
-  files are dead weight that agents still read and sometimes edit. Archive
-  them and add one sentence of policy to `docs/README.md`.
-- 28 specs are unreferenced; spec 001 is still `draft`. Run the rollover purge
-  the working rules already mandate.
-- Guides teach removed APIs. Add a guide-snippet compile check (extract fenced
-  Svelte blocks, `svelte-check` them against the package) so this class cannot
-  recur.
-- The Underlay hard rule in `AGENTS.md` contradicts architecture 001. Either
-  rule is defensible; the always-loaded one must match the settled one.
-
-### H. Process observations
-
-- There is no inbound defect channel. Consumers record Poodle bugs in their
-  own PAPERCUTS and they never reach this runway. A recurring "consumer
-  papercut sweep" lane (grep 16 sibling PAPERCUTS files for `poodle`) would
-  have surfaced the Figmatic Tree accessibility name defect and the Select
-  ghost-variant defect weeks ago. Both are ledger-invisible: the ledger counts
-  runtimes, not users.
-- The ledger drives card selection, and the ledger measures a runtime nobody
-  ships. Add a second selection input: consumer impact (components × consumers
-  × reported defects). Nucleus imports 29 components, Acowtancy 79; a Select
-  regression hurts 14 repos, a GPUI mounted cell hurts nobody today.
-- 98 merged branches remain on the remote. Enable delete-on-merge.
-- Doctor is red on every run, so its signal is ignored. Either tune the scan
-  config for checked-in generated catalogues or act on the god-file list;
-  a permanently red doctor is the same problem as a red qa.
-
-## Recommendations, Ranked
-
-1. **Scanner repair** — `g16.053` as compiled in PR #148. Nothing else rides
-   on it.
-2. **Release-history honesty** — `g16.054` as compiled in PR #148: changelog
-   and release-note lines for `0.2.3` say prepared-but-unpublished; `0.3.0`
-   candidate follows. Compiled `dist/` output is now an explicit operator
-   prerequisite for `0.3.0` (decision 2026-09-02) and needs its own
-   evidence/decision packet (build tool, declaration emit, export map, CSS
-   delivery, `sideEffects`, `marked` isolation) before it enters the release
-   dependency chain. It is not optional and it is not "mechanical".
-2a. **Validation hygiene candidates, each assessed separately** — pack-install
-   output to a temp dir; worktree-keyed `gate-tree-guard` state; doctor scan
-   excludes for committed generated roots. Source-level, small, no authority
-   beyond the task catalogue.
-2b. **Repository settings** — delete-on-merge for the 98 merged remote
-   branches is a GitHub setting, operator-owned, not worker work.
-2c. **Workflow automation** — Linux-only `ci:web` + `ci:rust` on PR and
-   main, approved 2026-09-02; a bounded workflow card under explicit
-   `.github/workflows/` authority.
-3. **React drift gate** — settled: React stays source-only; extend
-   `contract-prop-drift.ts` to parse React `Props` and fail on Svelte↔React
-   divergence; no publication before a named consumer.
-4. **Consumer papercut sweep lane** — approved as a recurring read-only
-   intake of sibling `PAPERCUTS.md` files for Poodle defects. Each finding
-   (for example the Figmatic Tree treeitem name, the Select ghost variant in
-   native mode, the Loophole Keyboard geometry) still enters ordinary Poodle
-   triage and promotion; the sweep promotes nothing by itself.
-5. **Docs compaction** — roadmap status tables, archive handoffs/parity, spec
-   purge, guide snippet check, Underlay rule reconciliation. Docs-only, can run
-   on a cheap model in parallel with everything else.
-6. **Ledger honesty** — rename the mounted map to an expected-test manifest
-   and have the ledger consume test execution output; admit or delete
-   `machine-shape-drift`; ratchet `value-domain-drift`; add `poodle-node` to
-   `test:contracts` and a React typecheck to `ci:web`; tune doctor excludes.
-7. **Native source-of-truth repairs** — nested history deletion, Tabs
-   tooltip machine, drag refusal policy into headless, owner-scoped
-   continuous gestures, four public-input panics. Bounded, one card each,
-   and they are real defects regardless of the pacing decision.
-8. **Define "real parity" as a switch trigger, then select cards by it** —
-   the operator will move apps once parity is real. Make that operational:
-   the operator chose **Nucleus** (29 distinct Poodle components) on
-   2026-09-02 as the first app to switch. Define parity as *Nucleus's
-   component set*
-   at mounted + accessibility + visual in GPUI, proven by execution not by
-   name map. Select ledger cells in that app's order instead of alphabetical
-   or "next bounded seam". Twenty-nine components is roughly a quarter of the
-   remaining mounted gap and yields a shippable GPUI app as the proof, which
-   is the evidence the operator says would unlock commitment. Jetstream
-   admission stays behind the adapter quarantine. Promoted on 2026-09-02 into
-   `docs/roadmaps/g16/nucleus-gpui-parity-programme.md` with the first ready
-   cards `g16.062`–`g16.065`.
-
-Items 1, 2a, 5, 6, and 7 are bounded source work that suits cheap models once
-compiled as cards. Items 2, 2c, and 8 carry release, workflow, or product
-authority. Items 3 and 4 are decided (2026-09-02) and await compilation. This
-note compiles none of them.
-
-## Questions Only The Operator Can Answer
-
-- Answered 2026-09-02: retain React source-only and add a Svelte↔React
-  prop-drift gate; publication waits for a named consumer.
-- Answered 2026-09-02: no. The operator requires a `dist/` build (compiled
-  JS + declarations) for `0.3.0`; the web packages will not ship raw source
-  again.
-- Answered 2026-09-02: parity is the goal; real parity triggers switching
-  several apps. Follow-up answered the same day: Nucleus is the first switch
-  candidate; its 29-component set defines the parity bar.
-- Answered 2026-09-02: direct import (architecture 001). Repair AGENTS.md,
-  product-guardrails, and the vision to match.
-- Answered 2026-09-02: a recurring read-only sweep of sibling consumer
-  PAPERCUTS files for Poodle defects is approved as a cheap intake lane.
+Next check: raise with the operator when React's first consumer is named, or
+when a composite is next touched for another reason.
 
 ## Promotion Route
 
-1. Orchestrator reads this note as advisory evidence. It compiles nothing.
-2. Already compiled elsewhere: `g16.053` scanner repair and `g16.054`
-   release-history honesty (PR #148); Jetstream hold (PR #147); `0.3.0`
-   disposition (PR #144). This note only cross-references them.
-3. The parity goal and Nucleus target are promoted into the canonical Nucleus
-   programme and `g16.062`–`g16.065`. Compiled distribution is complete
-   through `g16.059`. React retain + gate, Linux CI, direct Underlay imports,
-   and recurring consumer papercut intake remain pending promotion.
-4. Every other finding (packaging evidence packet, validation hygiene,
-   React drift gate, native source-of-truth repairs, ledger execution
-   backing, docs compaction, consumer sweep lane) is a separately assessed
-   candidate. None becomes a card because it appears in this list.
-5. Remove this note when each item is promoted, rejected, or superseded by a
-   canonical surface; carry any still-open item into its own note.
+Each "Still open" block becomes at most one card after operator confirmation
+in a Chatterbox conversation. Remove this note when every block is promoted or
+rejected.

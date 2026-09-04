@@ -180,6 +180,12 @@ behavior repairs without inventing another conformance authority.
 - Generation rollover is manual. Close, pause, supersede, or rehome every live
   roadmap before opening the next generation.
 - Purge stale strict-planning artifacts from `../specs/` during rollover.
+- `dispatch.md` is the canonical dispatch manifest. Chatterbox is its only
+  writer; the coordinator launches exactly the ready frontier it lists.
+- Consumer defect intake is a recurring read-only sweep of sibling consumer
+  repositories' `PAPERCUTS.md` files for Poodle-attributed friction, owned by
+  Chatterbox and run on a low-cost model. Each finding enters ordinary triage
+  and promotion; the sweep itself promotes nothing and dispatches no worker.
 
 ## Reading Roadmaps
 

@@ -1,7 +1,8 @@
 # g16 — Next Work
 
 Status: active — complete through `g16.094`; Nucleus M1 mounted cohort complete
-at 29/29, later evidence and adoption phases remain gated
+at 29/29; `g16.095` and `g16.096` are ready on the dispatch manifest; later
+evidence and adoption phases remain gated
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -129,6 +130,8 @@ stay maintained; backend admission is not part of the first card.
 92. [092 — Native consumer tinyvec build repair](092-native-consumer-tinyvec-build.md) — complete in PR #199 after ordinary routing repair g16.094; the Rust 1.95 fresh-consumer graph now unifies tinyvec `std`, preserves its negative control, and carries a freshly emitted 28-receipt identity
 93. [093 — Nucleus MessageCenter M1 receipt](093-nucleus-message-center-m1.md) — complete in PR #198; production composition, controlled archive behavior, focus/layer isolation, exact tokens, mounted scrolling/geometry, and terminal evidence complete the 29/29 cohort
 94. [094 — Ordinary Cargo scope classification repair](094-ordinary-cargo-scope-classification.md) — complete in PR #200; ordinary installed smoke now distinguishes dependency-only Cargo changes from package-version mutations without changing strict or candidate certification
+95. [095 — Svelte↔React public prop drift gate](095-react-prop-drift-gate.md) — ready; standalone `docs:react-prop-drift` selector in `docs:check`, reasoned baseline, no API change; promoted from the 2026-09-02 operator decision to retain React source-only behind a gate
+96. [096 — Linux headless PR and main board](096-linux-headless-pr-board.md) — ready; `pull_request` and `push: main` triggers on the two ubuntu-only workflows, everything else stays dispatch-only; operator approved 2026-09-02
 
 ## Parallel Continuation
 

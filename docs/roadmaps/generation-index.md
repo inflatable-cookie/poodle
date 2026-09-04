@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-03
+Updated: 2026-09-04
 
 ## Active Track
 
@@ -82,9 +82,11 @@ Updated: 2026-09-03
   - Completed: `g16.093` MessageCenter merged in PR #198 at
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
-  - Ready frontier: no additional mounted receipt child. Later Nucleus evidence
-    waits on its explicit accessibility, visual-lab, consumer, and operator
-    authority gates.
+  - Ready frontier (`../roadmaps/dispatch.md`): `g16.095` Svelte↔React prop
+    drift gate and `g16.096` Linux headless PR/main board, approved as
+    concurrent siblings. No additional mounted receipt child. Later Nucleus
+    evidence waits on its explicit accessibility, visual-lab, consumer, and
+    operator authority gates.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -101,10 +103,12 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: choose an explicitly authorized next programme boundary. The
-    dedicated visual lab still needs repository authority; GPUI accessibility,
-    Nucleus M2/V2, adoption, tag, publication, workflow, and sibling mutations
-    retain their recorded owners and gates.
+  - Next move: the coordinator dispatches the two ready lanes; Chatterbox and
+    the operator choose the next programme boundary (Nucleus M2/V2, GPUI
+    accessibility, or the visual lab, which still needs repository authority).
+    Adoption, tag, publication, and sibling mutations retain their recorded
+    owners and gates. Workflow automation for the two Linux boards is now
+    authorized through `g16.096`.
 
 ## Latest Completed Track
 

@@ -1,7 +1,7 @@
 # 001 Poodle Vision
 
 Status: active
-Updated: 2026-08-09
+Updated: 2026-09-04
 
 ## Purpose
 
@@ -44,7 +44,7 @@ before rendering mechanics.
 - product-specific workflows, routing, persistence, or service calls
 - Loophole-specific DAW surfaces such as transport, timeline, mixer,
   automation, or plugin panels
-- Underlay's application-facing APIs
+- Underlay's application-facing APIs and templates
 - Bits Svelte APIs as public Poodle contracts
 - renderer-only shortcuts that would silently change component semantics
 
@@ -55,9 +55,10 @@ moving domain vocabulary into the design system.
 
 ### Underlay
 
-Underlay consumes Poodle behind Underlay-owned adapters and token bridges.
-Underlay applications continue to import Underlay APIs and do not need to know
-which Poodle components or tokens implement them.
+Underlay and the applications built on it import Poodle's published packages
+directly. Underlay may add its own templates or bridges on top, and it owns
+them; Poodle does not carry an Underlay-facing adapter layer. Operator decision
+2026-09-02, recorded in architecture 001.
 
 ### Loophole and other products
 

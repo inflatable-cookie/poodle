@@ -16,6 +16,6 @@ Current open notes:
   prerequisite and nested-menu substrate/focus gates.
 - `20260902-000959-jetstream-admission-hold.md` — separate Poodle/Jetstream
   authority remains absent.
-- `20260901-233708-holistic-posture-assessment.md` — partially promoted;
-  remaining React drift, Linux workflow, Underlay-authority, consumer-intake,
-  validation-hygiene, and docs-compaction candidates stay open.
+- `20260901-233708-holistic-posture-assessment.md` — pruned remainder:
+  validation-hygiene, repository-settings, docs-compaction, and web-pair
+  architecture candidates; everything else is promoted.
