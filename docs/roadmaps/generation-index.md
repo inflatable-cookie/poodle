@@ -82,16 +82,22 @@ Updated: 2026-09-04
   - Completed: `g16.093` MessageCenter merged in PR #198 at
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
-  - Ready frontier (`../roadmaps/dispatch.md`): no remaining lane among the
+  - Ready frontier (`../roadmaps/dispatch.md`): `g16.103` is the urgent,
+    operator-authorized release tarball verifier repair. It aligns stale
+    `package/src/**` workflow assertions with the canonical compiled
+    `package/dist/**` boundary and is the serial predecessor of `g16.097`.
+    No remaining lane among the
     `g16.100`–`g16.102` tranche; `g16.102` Tabs fill layout is merged in PR #207
     at `a74e50955`; `g16.100` DockRegion `showTabs` portable is
     merged in PR #206 at `2db86aadd`;
     `g16.098` cold-checkout web board repair is merged in PR #203 at
     `c8636c699`, `g16.099` React prop port tranche is merged in PR #204 at
     `660b9510d`, and `g16.101` Tree accessible name is merged in PR #205 at
-    `1d8e6aeab`. `g16.096` Linux board (PR #201) and the
-    coordinator-executed `g16.097` v0.3.0 re-certification serial behind
-    `098`. The first `v0.3.0` tag is retracted; nothing was published. No additional mounted receipt child. Later Nucleus
+    `1d8e6aeab`. `g16.096` Linux board is complete in PR #201. The
+    coordinator-executed `g16.097` re-certification passed local gates at
+    `b4158a1b` but stopped before tag on the stale release verifier; it resumes
+    only from the repaired post-`103` main tip. The first `v0.3.0` tag is
+    retracted; nothing was published. No additional mounted receipt child. Later Nucleus
     evidence waits on its explicit accessibility, visual-lab, consumer, and
     operator authority gates.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
@@ -110,8 +116,9 @@ Updated: 2026-09-04
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: the coordinator advances the remaining ready lanes and performs
-    the release certification. The visual lab has repository authority
+  - Next move: the coordinator dispatches `g16.103`, merges it after exact-head
+    review and green main proof, then performs `g16.097` release certification.
+    The visual lab has repository authority
     (`inflatable-cookie/poodle-lab`, 2026-09-04); VL-1 is planned in that
     repository. Loophole adoption follows the npm proof. Nucleus A1 and M2/V2
     remain the next Poodle programme choices after the lab bootstrap.

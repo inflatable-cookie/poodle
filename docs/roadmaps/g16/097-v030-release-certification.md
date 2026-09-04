@@ -1,12 +1,11 @@
 # g16.097 — v0.3.0 Release Certification
 
-Status: ready — coordinator-executed; never dispatched to a worker. Revised
-2026-09-04 after the first dry run failed: tag `v0.3.0` at `9b451c48d` is
-retracted (operator decision 2026-09-04, "retract and re-tag after fix") and
-the lane re-certifies from `main` once `g16.098` has merged
+Status: ready — blocked serially on `g16.103`; coordinator-executed and never
+dispatched to a worker. The first tag is retracted, and the pre-tag
+re-certification at `b4158a1b` exposed the stale release tarball verifier
 Type: release mutation — explicit operator authorization recorded
 Opened: 2026-09-04
-Depends on: merged `g16.054` (PR #165, merge `9e38e7971`) and its evidence log `../../logs/2026-09/20260902-g16-054-v030-release-candidate.md`; merged `g16.098` (cold-checkout web board repair) — serial, because the certified tree must pass `effigy release gates` on a fresh runner
+Depends on: merged `g16.054` (PR #165, merge `9e38e7971`) and its evidence log `../../logs/2026-09/20260902-g16-054-v030-release-candidate.md`; merged `g16.098`; merged `g16.103` release tarball verifier repair — serial, because the tag must contain the repaired release workflow
 Governing refs: `054-historycenter-v030-release-candidate.md`, `../g15/061-v022-release-certification.md` (precedent), `../../specs/022-packaging-versioning-and-release-channel-rules.md`, `../../release-notes/0.3.0.md`, `.github/workflows/release.yml`, `../../../AGENTS.md`
 Operator decision: 2026-09-04 — "Authorize now": certify and publish the 0.3.0 candidate (tag the certified SHA, dispatch `release.yml`, prove npm `latest` is 0.3.0), then route Loophole adoption separately
 Dispatch manifest: `../dispatch.md`
@@ -33,7 +32,7 @@ distribution point.
 
 ## Candidate (re-certification)
 
-- Candidate commit: the `main` tip immediately after `g16.098` merges,
+- Candidate commit: the `main` tip immediately after `g16.103` merges,
   recorded by the coordinator in this card before any tag. Lockstep must
   still read `0.3.0` everywhere (it does on current `main`).
 - Trusted publishing is configured; the `v0.2.2` run `32756610293` published
@@ -44,8 +43,10 @@ distribution point.
 0. Retract the failed tag: `git push origin :refs/tags/v0.3.0` and
    `git tag -d v0.3.0`. Verify `git ls-remote --tags origin v0.3.0` is empty.
    Record the retracted SHA and the failed run URL in the execution log.
-1. After `g16.098` merges, record the candidate SHA (`main` tip) here.
-   From a clean detached checkout of that SHA run `effigy release gates`
+1. After `g16.103` merges, record the candidate SHA (`main` tip) here.
+   From a clean detached checkout of that SHA run
+   `bun install --frozen-lockfile`, prove `lucide-static` resolves inside that
+   checkout at `1.31.0`, then run `effigy release gates`
    (the full `qa` board) and the pack/hash steps `g16.054` used; record
    tarball names, sizes, and SHA-256. Verify lockstep `0.3.0`, tag absence
    local and remote, and npm `latest` `0.2.2`. Stop on any red gate.
@@ -87,6 +88,17 @@ distribution point.
 - [ ] Changelog, release notes, and README front doors say `0.3.0` is
       published; `0.2.3` stays described as prepared but unpublished.
 - [ ] Execution log records URLs, digests, and transcripts.
+
+## Second Attempt (2026-09-04, stopped before tag)
+
+- Candidate `b4158a1b68db9292c17be1d8c219f0fc26512a0b` passed frozen
+  bootstrap, checkout-local dependency provenance, the full headless release
+  gate, ordinary installed-package certification, and local core/Svelte/React
+  pack proof. The tree remained clean.
+- `release.yml` still required generated source members under `package/src/**`.
+  The compiled package contract intentionally publishes those artifacts under
+  `package/dist/**` and excludes source. `g16.103` owns the authorized workflow
+  repair. No tag, workflow dispatch, or publish occurred.
 
 ## Review Oracle
 

@@ -4,8 +4,9 @@ Status: active — complete through `g16.094`; Nucleus M1 mounted cohort complet
 at 29/29; `g16.098` cold-checkout board repair merged in PR #203, `g16.095`
 merged in PR #202, `g16.099` port tranche merged in PR #204, `g16.100` DockRegion
 `showTabs` merged in PR #206, `g16.101` Tree accessible name merged in PR #205,
-`g16.102` Tabs fill layout merged in PR #207, and `g16.096` / `g16.097`
-are serial behind `098`; VL-0 lab authority is
+`g16.102` Tabs fill layout merged in PR #207, and `g16.096` Linux boards merged
+in PR #201. `g16.103` is the urgent release-verifier repair; `g16.097` is
+serial behind it. VL-0 lab authority is
 closed; later evidence and adoption phases remain gated
 Posture: strict-ready
 Opened: 2026-08-25
@@ -135,13 +136,14 @@ stay maintained; backend admission is not part of the first card.
 93. [093 — Nucleus MessageCenter M1 receipt](093-nucleus-message-center-m1.md) — complete in PR #198; production composition, controlled archive behavior, focus/layer isolation, exact tokens, mounted scrolling/geometry, and terminal evidence complete the 29/29 cohort
 94. [094 — Ordinary Cargo scope classification repair](094-ordinary-cargo-scope-classification.md) — complete in PR #200; ordinary installed smoke now distinguishes dependency-only Cargo changes from package-version mutations without changing strict or candidate certification
 95. [095 — Svelte↔React public prop drift gate](095-react-prop-drift-gate.md) — complete in PR #202 at `f297774f4`; standalone `docs:react-prop-drift` selector in `docs:check`, reasoned ratcheted baseline, no API change
-96. [096 — Linux headless PR and main board](096-linux-headless-pr-board.md) — ready; `pull_request` and `push: main` triggers on the two ubuntu-only workflows, everything else stays dispatch-only; operator approved 2026-09-02
-97. [097 — v0.3.0 release certification](097-v030-release-certification.md) — ready; first attempt's tag at `9b451c48d` is retracted after dry-run `33874116177` failed on the `098` defect; re-certification from post-`098` `main`, then tag, dry-run, publish, npm proof; operator authorized 2026-09-04
+96. [096 — Linux headless PR and main board](096-linux-headless-pr-board.md) — complete in PR #201 at `372aa5253`; automatic web and Rust boards are green on `main`
+97. [097 — v0.3.0 release certification](097-v030-release-certification.md) — ready, serial behind `103`; `b4158a1b` passed local certification but exposed the stale release tarball verifier before any tag; resume from repaired `main`
 98. [098 — Cold-checkout web board repair](098-cold-checkout-web-board-repair.md) — complete in PR #203 at `c8636c699`; cold and warm `ci:web` now pass after the `react-preview` alias and package-build ordering repair
 99. [099 — React prop port tranche](099-react-prop-port-tranche.md) — complete in PR #204 at `660b9510d`; all five pending-port baseline entries are cleared
 100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — complete in PR #206; portable contract, Rust render paths, React parity, GPUI specimen, and baseline closeout
 101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — complete in PR #205; explicit `aria-label` per treeitem in both shells, including loading and rename states
 102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — complete in PR #207; `layout="fill"`, panel sizing and padding contract, native mapping, and standalone-strip ownership recipe
+103. [103 — Release tarball dist verification repair](103-release-tarball-dist-verification.md) — ready, urgent; operator-authorized workflow repair aligns release archive assertions with the compiled `dist/**` contract and blocks `097`
 
 ## Parallel Continuation
 
