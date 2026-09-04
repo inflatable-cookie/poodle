@@ -45,6 +45,7 @@ export interface DockRegionProps {
   edge?: DockEdge;
   sizing?: DockSizing;
   collapsible?: boolean;
+  showCollapseToggle?: boolean;
   collapsed?: boolean;
   collapsedPosture?: DockCollapsedPosture;
   emphasis?: DockEmphasis;
@@ -98,6 +99,7 @@ export function DockRegion({
   edge = "left",
   sizing = "flexible",
   collapsible = false,
+  showCollapseToggle = true,
   collapsed = false,
   collapsedPosture = "icon-strip",
   emphasis = "standard",
@@ -370,7 +372,7 @@ export function DockRegion({
           ))}
         </div>
       ) : showHidden ? (
-        collapsible ? (
+        collapsible && showCollapseToggle ? (
           <div className="poodle-dock-region__edge-toggle">
             <CollapseToggle
               collapsed={collapsed}
@@ -382,7 +384,7 @@ export function DockRegion({
         ) : null
       ) : showIconStrip && isVerticalEdge ? (
         <div className="poodle-dock-region__strip" data-orientation="vertical">
-          {collapsible ? (
+          {collapsible && showCollapseToggle ? (
             <CollapseToggle
               collapsed={collapsed}
               direction={collapseDirection}
@@ -401,7 +403,7 @@ export function DockRegion({
           <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
             {stripTabs("horizontal", isCompact)}
           </div>
-          {collapsible ? (
+          {collapsible && showCollapseToggle ? (
             <CollapseToggle
               collapsed={collapsed}
               direction={collapseDirection}
@@ -420,7 +422,7 @@ export function DockRegion({
             <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
               {stripTabs("horizontal", isCompact)}
             </div>
-            {collapsible ? (
+            {collapsible && showCollapseToggle ? (
               <CollapseToggle
                 collapsed={collapsed}
                 direction={collapseDirection}

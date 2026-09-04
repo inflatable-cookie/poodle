@@ -34,6 +34,7 @@ export interface CalendarProps {
   defaultValue?: string | DateRangeValue | null;
   visibleMonth?: string | null;
   weekStartsOn?: CalendarWeekStart;
+  today?: string | null;
   locale?: string;
   disabled?: boolean;
   ariaLabel?: string | null;
@@ -52,6 +53,7 @@ export function Calendar({
   defaultValue = null,
   visibleMonth,
   weekStartsOn = "monday",
+  today = null,
   locale = "en-US",
   disabled = false,
   ariaLabel = null,
@@ -114,7 +116,7 @@ export function Calendar({
         );
   const currentMonth = monthAnchorIso(hasControlledVisibleMonth ? (visibleMonth ?? uncontrolledMonth) : uncontrolledMonth);
   const currentMonthDate = parseIsoDate(currentMonth) ?? parseIsoDate(todayIsoDate())!;
-  const weeks = buildCalendarWeeks(currentMonth, weekStartsOn);
+  const weeks = buildCalendarWeeks(currentMonth, weekStartsOn, today ?? todayIsoDate());
   const weekdayLabels = getWeekdayLabels(weekStartsOn, locale);
   const monthLabel = formatMonthLabel(currentMonth, locale);
   const monthName = new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(currentMonthDate);

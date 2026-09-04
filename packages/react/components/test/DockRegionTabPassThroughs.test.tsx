@@ -140,3 +140,47 @@ describe("DockRegion tab pass-throughs (react)", () => {
     expect(tabs.querySelector(".poodle-tabs__label")?.textContent).toBe("Explorer");
   });
 });
+
+describe("DockRegion showCollapseToggle (react)", () => {
+  it("renders collapse toggle by default when collapsible is true", () => {
+    const { getByRole } = render(
+      <DockRegion items={items} value="explorer" collapsible />,
+    );
+    expect(getByRole("button", { name: "Collapse left dock" })).toBeTruthy();
+  });
+
+  it("suppresses collapse toggle when showCollapseToggle is false in expanded mode", () => {
+    const { queryByRole } = render(
+      <DockRegion items={items} value="explorer" collapsible showCollapseToggle={false} />,
+    );
+    expect(queryByRole("button", { name: "Collapse left dock" })).toBeNull();
+  });
+
+  it("suppresses collapse toggle when showCollapseToggle is false in collapsed icon-strip mode", () => {
+    const { queryByRole } = render(
+      <DockRegion
+        items={items}
+        value="explorer"
+        collapsible
+        collapsed
+        collapsedPosture="icon-strip"
+        showCollapseToggle={false}
+      />,
+    );
+    expect(queryByRole("button", { name: "Expand left dock" })).toBeNull();
+  });
+
+  it("suppresses collapse toggle when showCollapseToggle is false in collapsed hidden mode", () => {
+    const { queryByRole } = render(
+      <DockRegion
+        items={items}
+        value="explorer"
+        collapsible
+        collapsed
+        collapsedPosture="hidden"
+        showCollapseToggle={false}
+      />,
+    );
+    expect(queryByRole("button", { name: "Expand left dock" })).toBeNull();
+  });
+});

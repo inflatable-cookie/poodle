@@ -16,6 +16,20 @@ describe("AppHeader (react)", () => {
     expect(ref.current).toBe(header);
   });
 
+  it("passes rendered header element to element callback or ref object", () => {
+    let captured: HTMLElement | null = null;
+    const { container: c1 } = render(
+      <AppHeader title="Finch" element={(node) => { captured = node; }} />,
+    );
+    const header1 = c1.querySelector("header.poodle-app-header")!;
+    expect(captured).toBe(header1);
+
+    const refObj = createRef<HTMLElement>();
+    const { container: c2 } = render(<AppHeader title="Finch" element={refObj} />);
+    const header2 = c2.querySelector("header.poodle-app-header")!;
+    expect(refObj.current).toBe(header2);
+  });
+
   it("renders the header with unchanged anatomy", () => {
     const { container } = render(<AppHeader title="Finch" dragRegion />);
     const header = container.querySelector("header.poodle-app-header")!;

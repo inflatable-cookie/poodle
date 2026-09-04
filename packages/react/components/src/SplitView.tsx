@@ -42,6 +42,7 @@ export interface SplitViewProps {
    * pane's expand toggle stays visible in either mode — hiding it would leave
    * the pane unrecoverable. */
   toggleVisibility?: SplitToggleVisibility;
+  divider?: boolean;
   ariaLabel?: string | null;
   disabled?: boolean;
   size?: ControlSize | null;
@@ -77,6 +78,7 @@ export function SplitView({
   showCollapsePrimary = false,
   showCollapseSecondary = false,
   toggleVisibility = "always",
+  divider = false,
   ariaLabel = null,
   disabled = false,
   size = null,
@@ -289,6 +291,7 @@ export function SplitView({
       data-orientation={orientation}
       data-primary-collapsed={isPrimaryCollapsed || undefined}
       data-secondary-collapsed={isSecondaryCollapsed || undefined}
+      data-divider={divider ? "line" : undefined}
       data-toggle-visibility={toggleVisibility}
       data-size={resolvedSize}
       data-density={resolvedDensity}

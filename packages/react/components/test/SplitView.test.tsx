@@ -107,4 +107,10 @@ describe("SplitView toggle visibility (react)", () => {
     expect(getByRole("button", { name: "Collapse primary" })).toBeTruthy();
     expect(getByRole("button", { name: "Collapse secondary" })).toBeTruthy();
   });
+
+  it("renders data-divider='line' only when divider prop is true", () => {
+    expect(renderSplit({ divider: true }).getAttribute("data-divider")).toBe("line");
+    expect(renderSplit({ divider: false }).getAttribute("data-divider")).toBeNull();
+    expect(renderSplit({}).getAttribute("data-divider")).toBeNull();
+  });
 });

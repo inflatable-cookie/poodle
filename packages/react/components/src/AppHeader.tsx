@@ -1,6 +1,6 @@
 import "@inflatable-cookie/poodle-core/styles/app-header.css";
 
-import { forwardRef, type ReactNode } from "react";
+import { forwardRef, type ReactNode, type Ref } from "react";
 
 import { UiPresentationProvider, resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -13,6 +13,8 @@ export interface AppHeaderProps {
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
+  /** React form of Svelte's bindable `element`: ref callback or RefObject to receive the `<header>` element. */
+  element?: ((element: HTMLElement | null) => void) | Ref<HTMLElement> | null;
   identity?: ReactNode;
   /** Optional centre region (g13-b017). Its presence is the signal: it
    * switches the grid to the symmetric side-column layout and groups
@@ -33,6 +35,7 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(function AppHea
     size = null,
     sizeRole = "control",
     density = null,
+    element = null,
     identity,
     center,
     actions,
@@ -45,10 +48,23 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(function AppHea
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
 
+  function setHeaderRef(node: HTMLElement | null): void {
+    if (typeof ref === "function") {
+      ref(node);
+    } else if (ref) {
+      (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+    }
+    if (typeof element === "function") {
+      element(node);
+    } else if (element && typeof element === "object" && "current" in element) {
+      (element as React.MutableRefObject<HTMLElement | null>).current = node;
+    }
+  }
+
   return (
     <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
       <header
-        ref={ref}
+        ref={setHeaderRef}
         className="poodle-app-header"
         data-drag-region={dragRegion}
         data-center={center ? "" : undefined}
