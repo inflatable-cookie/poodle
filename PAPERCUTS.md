@@ -5,10 +5,43 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — `assertInstalledScope` in
+  `test/package-install/scope.ts` rejects any `.github/workflows/` change in
+  the scope range with generic `certification scope rejected forbidden
+  workflow surface: ...`; a workflow-changing PR (g16.096 PR #201) reads as a
+  defect, but the real case is that workflow surfaces need an approved lane.
+  Name that case plainly in the rejection, and keep the routing test in sync.
+  Hit while proving g16.096 revision runs `33882292716`/`33882930890`.
+
+- 2026-09-04 — `test/package-install/web-preview.ts` resolves its
+  certification base with `git merge-base HEAD origin/main`; on a
+  `pull_request` Actions checkout that ref does not exist, so the gate dies
+  with raw `fatal: Not a valid object name origin/main` (exit 128) at
+  `web-preview.ts:126`/`:167` instead of naming the missing base ref. Fail
+  clearly with `origin/main is not available` (and suggest fetching it) when
+  the ref is absent. Hit while proving g16.096 PR #201, run `33881115094`;
+  g16.096 works around it by fetching `main` after checkout, not by touching
+  this script.
+
 - 2026-09-04 — RESOLVED 2026-09-04 by g16.098. The 2026-09-02 `react-preview`
   workspace-alias papercut is closed: that vitest project now uses
   `workspaceAliases`, and `ci:web` builds both shell packages before
   `test:components`. A detached-worktree proof replants the missing alias.
+
+- 2026-09-04 — Second sighting of the 2026-09-02 `react-preview` dist-ordering
+  defect, now load-bearing: g16.096 made `ci-web` run automatically on every
+  PR and `main` push, and a CI tree is always cold, so `test:components`
+  runs before `react:package` and the `@inflatable-cookie/poodle-react` dist
+  import fails on every run (`Failed to resolve import
+  "@inflatable-cookie/poodle-react" from
+  packages/react/preview/src/gallery/ComponentsSection.tsx`; the three
+  react-preview suites `catalogue-nav`,
+  `g15-031-foundation-content-status`, and
+  `g15-033-composition-forms-data-media` fail at load while all 3651 tests
+  pass). The automatic web board stays red until `react:package` warms the
+  dist before `test:components`, or `react-preview` gets the same src alias
+  `react-components` already has. Hit while proving g16.096 PR #201; stopped
+  that lane per its stop condition. Resolved 2026-09-04 by g16.098 (PR #203).
 
 - 2026-09-04 — `import ts from "typescript"` under Bun with
   `@typescript/native@7.0.2` exports only `{ version, versionMajorMinor }` at

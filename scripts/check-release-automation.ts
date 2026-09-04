@@ -40,21 +40,50 @@ function requireRun(source: string, command: string, file: string): void {
   assert(runs.includes(command), `${file} must run ${command}`);
 }
 
+function triggerKeys(source: string): string[] {
+  // Event names declared directly under `on:`, in file order; [] when absent.
+  const active = withoutComments(source);
+  const on = /^on:\s*$/m.exec(active);
+  if (!on) return [];
+  const keys: string[] = [];
+  for (const line of active.slice(on.index).split("\n").slice(1)) {
+    if (/^\S/.test(line)) break;
+    const child = /^ {2}([a-z_]+):/.exec(line);
+    if (child) keys.push(child[1]);
+  }
+  return keys;
+}
+
+function eventBranchTargets(source: string, event: string): string[] {
+  // Branch names an `on:` event is restricted to; [] when unrestricted.
+  const active = withoutComments(source);
+  const on = /^on:\s*$/m.exec(active);
+  if (!on) return [];
+  const targets: string[] = [];
+  let inEvent = false;
+  for (const line of active.slice(on.index).split("\n").slice(1)) {
+    if (/^\S/.test(line)) break;
+    if (/^ {2}[a-z_]+:/.test(line)) {
+      inEvent = line.startsWith(`  ${event}:`);
+      continue;
+    }
+    if (!inEvent) continue;
+    const inline = /branches:\s*\[([^\]]*)\]/.exec(line);
+    if (inline) {
+      targets.push(...inline[1].split(",").map((branch) => branch.trim()).filter(Boolean));
+      continue;
+    }
+    const item = /^\s*-\s*(.+)$/.exec(line);
+    if (item) targets.push(item[1].trim());
+  }
+  return targets;
+}
+
 const actionRefPattern = /^\s*(?:-\s+)?uses:\s*([^\s#]+)(?:\s+#\s*(.*))?$/gm;
 
 for (const file of retainedWorkflows) {
   const relativePath = `.github/workflows/${file}`;
   const source = read(relativePath);
-  const active = withoutComments(source);
-
-  assert(
-    /^\s*workflow_dispatch:/m.test(active),
-    `${relativePath} must remain manually dispatched`,
-  );
-  assert(
-    !/^\s*(?:push|pull_request|schedule):/m.test(active),
-    `${relativePath} must not add an automatic trigger`,
-  );
 
   for (const match of source.matchAll(actionRefPattern)) {
     const reference = match[1];
@@ -85,6 +114,50 @@ const rust = read(".github/workflows/ci-rust.yml");
 const native = read(".github/workflows/ci-native.yml");
 const visual = read(".github/workflows/ci-visual.yml");
 const release = read(".github/workflows/release.yml");
+
+// Trigger shape is per workflow: the two ubuntu-only Linux boards run
+// automatically on pull requests targeting main and pushes to main; the
+// native, visual, and release lanes stay dispatch-only (operator decision
+// 2026-09-02, g16.096).
+const manualOnlyWorkflows = [
+  [native, ".github/workflows/ci-native.yml"],
+  [visual, ".github/workflows/ci-visual.yml"],
+  [release, ".github/workflows/release.yml"],
+] as const;
+
+for (const [source, relativePath] of manualOnlyWorkflows) {
+  const active = withoutComments(source);
+  assert(
+    /^\s*workflow_dispatch:/m.test(active),
+    `${relativePath} must remain manually dispatched`,
+  );
+  assert(
+    !/^\s*(?:push|pull_request|schedule):/m.test(active),
+    `${relativePath} must not add an automatic trigger`,
+  );
+}
+
+const automaticWorkflows = [
+  [web, ".github/workflows/ci-web.yml"],
+  [rust, ".github/workflows/ci-rust.yml"],
+] as const;
+
+for (const [source, relativePath] of automaticWorkflows) {
+  const active = withoutComments(source);
+  const keys = triggerKeys(active);
+  const expected = ["pull_request", "push", "workflow_dispatch"];
+  assert(
+    keys.length === expected.length && expected.every((key) => keys.includes(key)),
+    `${relativePath} must trigger on pull_request and push to main plus workflow_dispatch and nothing else`,
+  );
+  for (const event of ["push", "pull_request"]) {
+    const targets = eventBranchTargets(active, event);
+    assert(
+      targets.length === 1 && targets[0] === "main",
+      `${relativePath} ${event} trigger must target main only`,
+    );
+  }
+}
 
 requireRun(web, "effigy ci:web", ".github/workflows/ci-web.yml");
 requireRun(rust, "effigy ci:rust", ".github/workflows/ci-rust.yml");
