@@ -5,6 +5,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — `assertInstalledScope` in
+  `test/package-install/scope.ts` rejects any `.github/workflows/` change in
+  the scope range with generic `certification scope rejected forbidden
+  workflow surface: ...`; a workflow-changing PR (g16.096 PR #201) reads as a
+  defect, but the real case is that workflow surfaces need an approved lane.
+  Name that case plainly in the rejection, and keep the routing test in sync.
+  Hit while proving g16.096 revision runs `33882292716`/`33882930890`.
+
 - 2026-09-04 — `test/package-install/web-preview.ts` resolves its
   certification base with `git merge-base HEAD origin/main`; on a
   `pull_request` Actions checkout that ref does not exist, so the gate dies
