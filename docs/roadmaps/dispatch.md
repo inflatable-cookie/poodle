@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-04 (revision 5: 096 checkout-fetch revision)
+Updated: 2026-09-04 (revision 6: 100 showTabs portable, 101 Tree accessible name)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -66,8 +66,11 @@ card or triage note says.
   onto the `098` merge): add `fetch-depth: 0` or an explicit
   `origin/main` fetch to the checkout step in both workflows so
   `test:web-pack-install` can compute its base on `pull_request` runs
-  (run `33881115094` failed at `web-preview.ts:167`). Same worker, same
-  reviewer on the new exact head. Workflow-edit authority is the operator's
+  (run `33881115094` failed at `web-preview.ts:167`). Head `ae5007468`
+  carries that fix. Operator-accepted exception 2026-09-04: the PR-head
+  `ci-web` check stays red by scope-guard policy; merge on accepted review
+  plus green `ci-rust` (run `33882930950`), then record the green push-main
+  run as proof. Same reviewer on the exact head. Workflow-edit authority is the operator's
   explicit 2026-09-02 approval recorded in the card; the 2026-09-04 widening
   stays inside the two owned files
 - Prerequisites: none. Completion: PR merged after accepted exact-head review
@@ -108,6 +111,94 @@ card or triage note says.
   Review Oracle table
 - Stop conditions: per card; a red dry run or a failed-closed publish is an
   escalation capsule to Chatterbox. Escalation owner: operator, via Chatterbox
+
+### g16.100 — DockRegion `showTabs` portable spec and baseline closeout
+
+- Card: `g16/100-dock-region-show-tabs-portable.md`
+- Readiness: ready
+- Prerequisites: merged `g16.095`, `g16.099` (both satisfied). Completion:
+  PR merged after accepted exact-head review; baseline has no
+  `needs-decision` entries.
+- Owned mutable paths: per card (dock-region contract, `dock_region.rs`
+  spec and render, React `DockRegion.tsx`, GPUI specimen row, `BASELINE`
+  register, log, `PAPERCUTS.md` append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.101`, `g16.096` revision, `g16.097`.
+  Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+### g16.101 — Tree item accessible name
+
+- Card: `g16/101-tree-item-accessible-name.md`
+- Readiness: ready
+- Prerequisites: none. Completion: PR merged after accepted exact-head
+  review with name-query tests in both shells.
+- Owned mutable paths: per card (`TreeItem.svelte`, `TreeItem.tsx`,
+  placeholder rows in `Tree.svelte`/`Tree.tsx`, tests, one tree contract
+  line, log, `PAPERCUTS.md` append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.100`, `g16.096` revision, `g16.097`.
+  Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+### g16.100 — DockRegion `showTabs` portable spec and baseline closeout
+
+- Card: `g16/100-dock-region-show-tabs-portable.md`
+- Readiness: ready
+- Prerequisites: merged `g16.095`, `g16.099` (both satisfied). Completion:
+  PR merged after accepted exact-head review; baseline has no
+  `needs-decision` entries.
+- Owned mutable paths: per card (dock-region contract, `dock_region.rs`
+  spec and render, React `DockRegion.tsx`, GPUI specimen row, `BASELINE`
+  register, log, `PAPERCUTS.md` append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.101`, `g16.102`, `g16.096`, `g16.097`.
+  Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+### g16.101 — Tree item accessible name
+
+- Card: `g16/101-tree-item-accessible-name.md`
+- Readiness: ready
+- Prerequisites: none. Completion: PR merged after accepted exact-head
+  review with name-query tests in both shells.
+- Owned mutable paths: per card (`TreeItem.svelte`, `TreeItem.tsx`,
+  placeholder rows in `Tree.svelte`/`Tree.tsx`, tests, one tree contract
+  line, log, `PAPERCUTS.md` append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.100`, `g16.102`, `g16.096`, `g16.097`.
+  Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+### g16.102 — Tabs fill layout seam
+
+- Card: `g16/102-tabs-fill-layout-seam.md`
+- Readiness: ready
+- Prerequisites: none. Completion: PR merged after accepted exact-head
+  review; `layout="fill"` proven in Svelte, React, and native node
+  inventory; recipe landed.
+- Owned mutable paths: per card (tabs contract, `tabs.css`, Tabs shells and
+  tests, `tabs.rs` spec and render, one GPUI specimen row, one recipe in
+  guide 011, log, `PAPERCUTS.md` append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.100`, `g16.101`, `g16.096`, `g16.097`.
+  Serial edges: none (`g16.100` touches DockRegion, not Tabs).
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
 
 ## Held lanes (not dispatchable)
 

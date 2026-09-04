@@ -19,3 +19,5 @@ Current open notes:
 - `20260901-233708-holistic-posture-assessment.md` — pruned remainder:
   validation-hygiene, repository-settings, docs-compaction, and web-pair
   architecture candidates; everything else is promoted.
+- `20260904-151947-consumer-sweep-intake.md` — first consumer intake run;
+  Tabs styling seam is the open remainder, `0.3.0` adoption closes ten.

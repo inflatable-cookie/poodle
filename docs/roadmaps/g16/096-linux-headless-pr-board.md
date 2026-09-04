@@ -84,6 +84,18 @@ this card's execution log under `docs/logs/2026-09/`, and root `PAPERCUTS.md`
 Reserved for the coordinator at merge: `docs/roadmaps/g16/README.md`,
 `docs/roadmaps/generation-index.md`, `docs/roadmaps/dispatch.md`.
 
+## Accepted Exception (operator, 2026-09-04)
+
+PR #201's own `ci-web` run fails at `test:web-pack-install` because the
+g16.094 ordinary scope guard rejects any diff under `.github/workflows/`.
+That is the guard working as designed: workflow mutation is never an
+ordinary change and needs an operator-approved lane. The operator accepted
+the red PR-head `ci-web` check for this PR only. Merge proceeds on the
+accepted exact-head review plus the green `ci-rust` run; the first push-main
+run (no changed paths against `origin/main`) is the board's green proof and
+is recorded in the execution log. Ordinary PRs are unaffected. The guard's
+message should name this case plainly; that is a papercut, not this card.
+
 ## Stop Conditions
 
 Stop and report when: the first PR run fails for a reason unrelated to the

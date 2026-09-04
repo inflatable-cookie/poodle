@@ -1,7 +1,8 @@
 # Consumer Sweep Intake — 2026-09-04
 
-Status: open — Tree name defect promoted as `g16.101`; `showTabs` promoted
-as `g16.100`; Tabs styling discovery running; ten entries close with `0.3.0`
+Status: open — promoted: Tree name (`g16.101`), `showTabs` (`g16.100`),
+Tabs fill seam (`g16.102`); remaining: single-consumer Tabs asks, Keyboard
+geometry (held elsewhere), and the ten entries that close with `0.3.0`
 Captured: 2026-09-04
 Owner: Chatterbox (planning)
 Source: read-only sweep of 15 sibling repositories' `PAPERCUTS.md` and
@@ -40,9 +41,10 @@ argument for finishing the release before new component work.
      are never shed.
    - **Composition pattern** — standalone strip with an external panel
      (soundcheck-library): documentation, not a component change.
-   Recommendation: one small card for `layout="fill"` plus the
-   `--poodle-tabs-panel-padding` hook and the composition recipe; leave the
-   single-consumer asks in this note. Awaiting operator confirmation.
+   Promoted 2026-09-04 as `g16.102` (fill layout, panel padding hook,
+   standalone-strip recipe). Single-consumer asks (bovine label truncation,
+   nucleus responsive icon-only, loophole drop-target border) stay here
+   until a second consumer names them.
 2. **Tree treeitem accessible name and hierarchy** — figmatic
    (`PAPERCUTS.md`, 2026-08-28): Longhorn's a11y snapshot shows treeitems
    with no name and no children. Defect in Poodle Svelte `Tree`. It also
@@ -71,6 +73,8 @@ argument for finishing the release before new component work.
 
 ## Next check
 
-Operator confirmation on the Tabs fill-height card. After `0.3.0` publishes, re-run the sweep and expect the
+After `0.3.0` publishes, re-run the sweep; expect the ten "fixed on main"
+entries to close once pins move. Remove this note when the single-consumer
+Tabs asks are promoted or rejected. After `0.3.0` publishes, re-run the sweep and expect the
 ten "fixed on main" entries to close once pins move. Remove this note when
 item 1 is promoted or rejected.
