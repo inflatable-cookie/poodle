@@ -73,6 +73,9 @@ mod forbidden;
 #[path = "window_capture/fixture_capture.rs"]
 mod fixture_capture;
 
+#[path = "window_capture/icon_geometry_capture.rs"]
+mod icon_geometry_capture;
+
 // g15.052 focused-state evidence: real-focus captures of the ring channel
 // for operator review. Point-in-time evidence, never a baseline.
 #[path = "window_capture/focus_evidence.rs"]
@@ -144,6 +147,7 @@ manifest: {\"captures\":[{\"fixture\":\"<exact-name>\",\"out\":\"<png>\",\"recei
 enum CaptureMode {
     Smoke(CaptureArgs),
     Fixture(fixture_capture::FixtureArgs),
+    IconGeometry(icon_geometry_capture::IconGeometryArgs),
     InsetEvidence(inset_evidence::InsetEvidenceArgs),
     /// Many fixtures, ONE process. The whole point of this mode is that a
     /// batch is one application launch and one window at a time, not a
@@ -155,6 +159,8 @@ enum CaptureMode {
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
     if argv.iter().any(|arg| arg == "--batch") {
         parse_batch_args(argv).map(CaptureMode::Batch)
+    } else if argv.iter().any(|arg| arg == "--icon-geometry") {
+        icon_geometry_capture::parse_args(argv).map(CaptureMode::IconGeometry)
     } else if argv.iter().any(|arg| arg == "--inset-evidence") {
         inset_evidence::parse_args(argv).map(CaptureMode::InsetEvidence)
     } else if argv.iter().any(|arg| arg == "--fixture") {
@@ -594,6 +600,7 @@ fn main() -> ! {
     match mode {
         CaptureMode::Smoke(args) => run(&args),
         CaptureMode::Fixture(args) => fixture_capture::run(&args),
+        CaptureMode::IconGeometry(args) => icon_geometry_capture::run(&args),
         CaptureMode::Batch(batch) => fixture_capture::run_batch(&batch),
         CaptureMode::InsetEvidence(args) => inset_evidence::run(&args),
         CaptureMode::FocusEvidence(args) => focus_evidence::run(&args),

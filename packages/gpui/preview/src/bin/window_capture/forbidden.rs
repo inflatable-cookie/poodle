@@ -28,6 +28,10 @@ pub const CAPTURE_SOURCES: &[(&str, &str)] = &[
         include_str!("fixture_capture.rs"),
     ),
     (
+        "window_capture/icon_geometry_capture.rs",
+        include_str!("icon_geometry_capture.rs"),
+    ),
+    (
         "window_capture/focus_evidence.rs",
         include_str!("focus_evidence.rs"),
     ),
@@ -40,15 +44,30 @@ pub const CAPTURE_SOURCES: &[(&str, &str)] = &[
 
 /// Fragments that must not appear in any capture code line, with the reason.
 pub const FORBIDDEN: &[(&str, &str)] = &[
-    ("cx.activate(", "App::activate brings the application to the foreground"),
-    (".activate_window(", "Window::activate_window raises and focuses the window"),
+    (
+        "cx.activate(",
+        "App::activate brings the application to the foreground",
+    ),
+    (
+        ".activate_window(",
+        "Window::activate_window raises and focuses the window",
+    ),
     ("makeKeyAndOrderFront", "AppKit window activation"),
     ("orderFrontRegardless", "AppKit window raising"),
     ("activateIgnoringOtherApps", "AppKit application activation"),
-    ("osascript", "System Events scripting is the old focus-stealing path"),
-    ("\"-R\"", "screencapture -R captures a screen region, not one window"),
+    (
+        "osascript",
+        "System Events scripting is the old focus-stealing path",
+    ),
+    (
+        "\"-R\"",
+        "screencapture -R captures a screen region, not one window",
+    ),
     ("\"-D\"", "screencapture -D captures a whole display"),
-    ("\"-C\"", "screencapture -C captures the cursor into the frame"),
+    (
+        "\"-C\"",
+        "screencapture -C captures the cursor into the frame",
+    ),
 ];
 
 /// Words that would make a receipt field, constant, or diagnostic claim
@@ -56,9 +75,18 @@ pub const FORBIDDEN: &[(&str, &str)] = &[
 /// transport dishonestly is the exact defect g16.005 exists to correct.
 pub const FORBIDDEN_CLAIMS: &[(&str, &str)] = &[
     ("offscreen", "this transport uses a real window"),
-    ("metal-headless", "there is no headless renderer on the published crate"),
-    ("render_to_image", "window-level readback is not a published API"),
-    ("HeadlessAppContext", "the headless app context is not a published API"),
+    (
+        "metal-headless",
+        "there is no headless renderer on the published crate",
+    ),
+    (
+        "render_to_image",
+        "window-level readback is not a published API",
+    ),
+    (
+        "HeadlessAppContext",
+        "the headless app context is not a published API",
+    ),
     ("gpui_platform", "the platform crate is unpublished"),
 ];
 
@@ -117,6 +145,13 @@ mod tests {
         );
     }
 
+    #[test]
+    fn the_icon_geometry_fixture_is_covered_by_the_activation_scan() {
+        assert!(CAPTURE_SOURCES
+            .iter()
+            .any(|(path, _)| *path == "window_capture/icon_geometry_capture.rs"));
+    }
+
     /// The check must be able to fail. A list that matches nothing would pass
     /// forever and prove nothing, which is how g15.044's first verifier
     /// reported success while its claims had drifted.
@@ -144,8 +179,14 @@ mod tests {
     #[test]
     fn the_capture_command_targets_one_window_id_without_its_shadow() {
         let transport = include_str!("transport.rs");
-        assert!(transport.contains("\"-l\""), "capture must be in window mode");
-        assert!(transport.contains("\"-o\""), "the drop shadow must be excluded");
+        assert!(
+            transport.contains("\"-l\""),
+            "capture must be in window mode"
+        );
+        assert!(
+            transport.contains("\"-o\""),
+            "the drop shadow must be excluded"
+        );
         assert!(
             transport.contains("focus: false"),
             "the capture window must never be opened focused"
