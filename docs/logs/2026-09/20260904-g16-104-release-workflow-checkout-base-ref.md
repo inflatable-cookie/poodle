@@ -13,7 +13,7 @@ Base: `origin/main` at `02bb74ff2e3f0de1580e569e84ce63dd6ee38a59`
 Planning base at dispatch: `7f6fd9a1c03ed64ba99771832d28e8648fba379e` (ancestor
 of the current tip; the extra commit is `docs(g16.097): record retracted
 failed dry run`)
-Worker PR: pending
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/209
 
 ## Outcome
 
@@ -62,7 +62,7 @@ exit 128 is appended to `PAPERCUTS.md`.
   `plant publish without dry-run guard: failed as required`
   `plant publish without tag guard: failed as required`
 - `effigy docs:check`: pass.
-- `git diff --check` on the owned paths: pass.
+- `git diff --check origin/main...HEAD`: pass after commit.
 - No `release prepare/execute`, tag, publish, or workflow dispatch.
 
 PR-head `ci-web` is expected to fail only on the documented installed-package
