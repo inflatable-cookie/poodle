@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-04 (revision 4: 095 merged, 099 ready)
+Updated: 2026-09-04 (revision 5: 096 checkout-fetch revision)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -62,11 +62,14 @@ card or triage note says.
 ### g16.096 — Linux headless PR and main board
 
 - Card: `g16/096-linux-headless-pr-board.md`
-- Readiness: ready, serial behind `g16.098` — PR #201 head `428edf690`
-  stands; after `098` merges, rebase it and re-run its board. The red
-  `ci-web` run `33874196422` was the cold-checkout defect, not the workflow
-  change. Workflow-edit authority is the operator's explicit 2026-09-02
-  approval recorded in the card
+- Readiness: ready — revision on PR #201 (head `2c7cb6f2d`, already rebased
+  onto the `098` merge): add `fetch-depth: 0` or an explicit
+  `origin/main` fetch to the checkout step in both workflows so
+  `test:web-pack-install` can compute its base on `pull_request` runs
+  (run `33881115094` failed at `web-preview.ts:167`). Same worker, same
+  reviewer on the new exact head. Workflow-edit authority is the operator's
+  explicit 2026-09-02 approval recorded in the card; the 2026-09-04 widening
+  stays inside the two owned files
 - Prerequisites: none. Completion: PR merged after accepted exact-head review
   with both workflow runs green on the PR head; execution log records run URLs.
 - Owned mutable paths: `.github/workflows/ci-web.yml`,

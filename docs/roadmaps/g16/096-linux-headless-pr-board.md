@@ -1,6 +1,8 @@
 # g16.096 — Linux Headless PR And Main Board
 
-Status: ready
+Status: ready — in revision on PR #201 (head `2c7cb6f2d`, rebased onto the
+`g16.098` merge `c8636c699`). Boundary widened 2026-09-04: the checkout step
+must fetch `origin/main` so the pack-install scope classifier has its base
 Type: workflow automation — explicit operator approval recorded
 Opened: 2026-09-04
 Depends on: none; independent of every other ready lane
@@ -42,6 +44,15 @@ lanes the operator approved.
   `release.yml` keep the dispatch-only assertion. Prove both directions with
   a planted trigger on `release.yml` (must fail) and a planted `schedule` on
   `ci-web.yml` (must fail).
+- Checkout must expose `origin/main`. On a `pull_request` run,
+  `actions/checkout` fetches only the merge ref, so
+  `test/package-install/web-preview.ts:167` (`git merge-base HEAD
+  origin/main`) exits 128 and `test:web-pack-install` fails (run
+  `33881115094`). In both workflows set `fetch-depth: 0` on the checkout
+  step, or add one explicit `git fetch --no-tags origin
+  main:refs/remotes/origin/main` step immediately after checkout. Document the
+  reason in the header comment. Do not change `web-preview.ts`; a clearer
+  failure message for a missing base ref is a papercut, not this card.
 - No macOS runner, no native selector, no secret, no new job, no publish step.
 
 ## Review Oracle
@@ -53,6 +64,7 @@ lanes the operator approved.
 | Superseded heads cancel | push a second commit to the PR | the first run is cancelled by the concurrency group |
 | Only Linux | inspect both workflow files | `runs-on: ubuntu-latest` only; no `macos` string |
 | Release stays manual | inspect `release.yml`, `ci-native.yml`, `ci-visual.yml` | unchanged; `workflow_dispatch` only |
+| Base ref is present on PR runs | remove the fetch again | `test:web-pack-install` exits 128 at `web-preview.ts:167` |
 | Automation checker agrees | run `effigy check:release-automation` | pass on the new shape; planted `push` on `release.yml` and planted `schedule` on `ci-web.yml` each fail |
 
 ## Validation
