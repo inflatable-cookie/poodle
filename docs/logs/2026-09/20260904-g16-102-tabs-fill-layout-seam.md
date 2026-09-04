@@ -72,17 +72,18 @@ Plants run against this head, then reverted; every row failed as predicted.
 
 Focused (this head):
 
-- Svelte/React Tabs suites incl. the new fill files — 11 files, 106 pass
+- Svelte/React Tabs suites incl. the new fill files — 13 files, 113 pass
   (vitest `svelte-components` + `react-components`)
 - `bun test packages/core/test/tabs.test.ts` — 24 pass
 - `cargo test --manifest-path packages/contracts/components/Cargo.toml` — 330 pass
-- `cargo test` in `packages/render` (`tabs::`) — 24 pass incl. 2 fill proofs
-- `cargo check` in `packages/gpui/preview` — clean
+- `cargo test` in `packages/render` — 638 pass, incl. the two fill proofs
+- `effigy regressions:native` at `a9030c688` — 203 pass; receipt cohort repinned
 
-Boards: see the PR description; `effigy test:components`, `effigy
-docs:check`, `effigy ci:web`, `effigy test:contracts`,
-`cargo test -p poodle-render`, and `git diff --check origin/main...HEAD`
-were run before handoff.
+Boards (exit 0):
+
+- `effigy test:components`, `effigy docs:check`, `effigy ci:web`,
+  `effigy test:contracts` — pass
+- `git diff --check origin/main...HEAD` — pass
 
 ## Limits
 
