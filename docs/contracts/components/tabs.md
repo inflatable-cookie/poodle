@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-09-02
+Updated: 2026-09-04
 
 ## 1. Purpose
 
@@ -61,6 +61,7 @@ Updated: 2026-09-02
 | `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `none` draws no fill (the edge and the selected text colour carry selection alone — `block` + `activeFill="none"` + `activeEdge="underline"` is exactly the deleted `strip` variant), `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 | `bordered` | `boolean` | `false` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. `card` is a plain baseline by default — `bordered` for tabs above content, `activeEdge`/`activeFill` for selection emphasis. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
+| `layout` | `"auto" \| "fill"` | `"auto"` | no | fill-layout seam. `"fill"` makes the root take its container's block size (`height: 100%`) and the active panel scroll within it while the strip keeps its natural height; `"auto"` keeps the natural-height grid. Orientation-independent — vertical fill stretches a single row instead. `fill` requires a sized container: in a parent without a definite block size it renders the auto grid at natural height |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
@@ -408,6 +409,9 @@ the spec.
 
 - Root: `display: grid`, `gap: space-stack-md`, `min-width: 0`
 - Vertical: `grid-template-columns: auto minmax(0, 1fr)`, `align-items: start`
+- Fill (`layout="fill"`): root `height: 100%`, `grid-template-rows: auto minmax(0, 1fr)`; panel `min-height: 0`, `overflow: auto`
+- Fill vertical: root `grid-template-rows: minmax(0, 1fr)`; panel `align-self: stretch`; the strip stays at its natural height
+- `fill` requires a sized container — the root sizes to the container's block size, so an unsized parent renders the auto grid
 - List: `display: inline-flex`, `flex-wrap: wrap` (card), `flex-wrap: nowrap` (pill/block)
 - Pill/Block overflow: `overflow-x: auto; overflow-y: hidden`
 - Item: `display: inline-flex`, `align-items: center`, `min-width: 0`, `position: relative`
@@ -438,6 +442,27 @@ the spec.
 |----------|-------|
 | `grid-template-columns` | `auto minmax(0, 1fr)` |
 | `align-items` | `start` |
+
+### Root (layout="fill")
+
+| Property | Value |
+|----------|-------|
+| `height` | `100%` |
+| `grid-template-rows` | `auto minmax(0, 1fr)` |
+
+### Root (layout="fill", vertical)
+
+| Property | Value |
+|----------|-------|
+| `grid-template-rows` | `minmax(0, 1fr)` |
+
+### Panel (layout="fill")
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0` |
+| `overflow` | `auto` |
+| `align-self` | `stretch` (vertical orientation only) |
 
 ### List (all variants)
 
@@ -856,10 +881,17 @@ Applies when `fullWidth` is set and orientation is horizontal.
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` |
-| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `padding` | `var(--poodle-tabs-panel-padding)` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent)` |
+
+`--poodle-tabs-panel-padding` is the panel padding hook. Its default is
+`var(--poodle-space-panel-y) var(--poodle-space-panel-x)` — the historical
+panel padding — and consumers that need different panel padding (inspectors,
+fill surfaces) set the variable instead of overriding `.poodle-tabs__panel`
+directly. The card variant's flush borderless panel keeps `padding: 0` and
+does not read the hook.
 
 ### Drag-and-drop states
 
@@ -893,6 +925,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
   the tooltip on that tab; it does not transfer to another row.
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
 - Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-edge` and `data-active-fill` carry `activeEdge` / `activeFill` on the root
+- `data-layout` — carries the `layout` prop (`auto` or `fill`); `fill` applies the fill-layout root and panel rules (§7, §8)
 - `activeEdge="underline"` uses one measured indicator child. ResizeObserver,
   font/layout remeasurement, and policy changes clean up without leaving a
   stale clock or geometry owner.
@@ -919,6 +952,11 @@ Applies when `fullWidth` is set and orientation is horizontal.
   house field IconButton and SegmentedControl already use. No new Node field.
   Delay, leave, focus-departure, Escape, disablement, removal, and teardown
   follow the shared GPUI `Node.tooltip` lifecycle.
+- `TabsLayout` is `Auto | Fill` (default `Auto`). `Fill` maps to the
+  flex-grow / min-size vocabulary the node model already has — no new node
+  capability: the root grows in its container (`flex_grow`), the panel grows
+  with `min_height` 0 and vertical `Scroll` overflow so it fills and scrolls,
+  and the strip keeps its natural height (no grow).
 
 ## 10a. Jetstream Notes
 
@@ -952,6 +990,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - [ ] padding values match per variant
 - [ ] focus ring style matches
 - [ ] disabled opacity matches
+- [ ] fill layout fills a sized container with a scrolling panel; auto keeps the natural-height grid byte-for-byte
 - [ ] drag-and-drop visual states match
 - [ ] underline first layout and environmental remeasurement snap to the
   selected endpoint

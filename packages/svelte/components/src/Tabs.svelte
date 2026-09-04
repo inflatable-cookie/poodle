@@ -61,6 +61,13 @@
     activeFill?: "none" | "tint" | "solid";
     orientation?: Orientation;
     activationMode?: "automatic" | "manual";
+    /**
+     * Fill-layout seam. `"fill"` makes the root take its container's block
+     * size and the active panel scroll within it while the strip keeps its
+     * natural height; `"auto"` keeps the natural-height grid. Requires a
+     * sized container.
+     */
+    layout?: "auto" | "fill";
     bordered?: boolean;
     fullWidth?: boolean;
     reorderable?: boolean;
@@ -141,6 +148,7 @@
     activationMode = "automatic",
     bordered = false,
     size = null,
+    layout = "auto",
     sizeRole = "chrome",
     density = null,
     collapseWhenOverflow = false,
@@ -818,6 +826,7 @@
   data-active-edge={activeEdge}
   data-active-fill={activeFill}
   data-orientation={orientation}
+  data-layout={layout}
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-collapsed={collapsedByOverflow || undefined}

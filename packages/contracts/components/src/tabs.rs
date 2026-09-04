@@ -15,6 +15,19 @@ pub enum TabsOverflowStrategy {
     Shed,
 }
 
+/// How a `Tabs` fills its container. Matches the Svelte/React `layout` prop
+/// (`"auto" | "fill"`, default `"auto"`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TabsLayout {
+    /// Natural-height grid. The historical behaviour.
+    #[default]
+    Auto,
+    /// The root takes its container's block size and the active panel fills
+    /// and scrolls within it; the strip keeps its natural height. Requires a
+    /// sized container. Orientation-independent.
+    Fill,
+}
+
 /// Selection treatment on the active tab. Matches the Svelte/React
 /// `activeFill` prop (`"none" | "tint" | "solid"`, default `"tint"`). Shared
 /// type — see `docs/contracts/004-shared-control-types.md`.
@@ -72,6 +85,9 @@ pub struct TabsSpec {
     /// accent-filled. Matches Svelte `activeFill` (default `"tint"`).
     pub active_fill: ActiveFill,
     pub orientation: Orientation,
+    /// Fill-layout seam — see `TabsLayout`. Matches Svelte `layout`
+    /// (default `"auto"`). Contract §7.
+    pub layout: TabsLayout,
     pub activation_mode: TabActivationMode,
     pub aria_label: Option<String>,
     /// When true, tabs can be reordered via drag. Defers to the
@@ -142,6 +158,7 @@ impl Default for TabsSpec {
             active_edge: ActiveEdge::None,
             active_fill: ActiveFill::Tint,
             orientation: Orientation::Horizontal,
+            layout: TabsLayout::Auto,
             activation_mode: TabActivationMode::Automatic,
             aria_label: None,
             is_reorderable: false,
@@ -254,6 +271,13 @@ impl TabsSpec {
 
     pub fn with_orientation(mut self, orientation: Orientation) -> Self {
         self.orientation = orientation;
+        self
+    }
+
+    /// Set the fill-layout seam (natural-height grid, or root fills its
+    /// container with a scrolling panel).
+    pub fn with_layout(mut self, layout: TabsLayout) -> Self {
+        self.layout = layout;
         self
     }
 
@@ -446,6 +470,7 @@ mod tests {
         assert!(!default_spec.is_vertical());
         assert!(!default_spec.uses_full_width());
         assert!(!default_spec.uses_manual_activation());
+        assert_eq!(default_spec.layout, TabsLayout::Auto);
         assert_eq!(default_spec.size_role, SemanticControlSizeRole::Chrome);
         assert_eq!(default_spec.overflow_strategy, TabsOverflowStrategy::Collapse);
 
@@ -464,6 +489,7 @@ mod tests {
         .with_aria_label("Custom Tabs")
         .with_history_key("custom-tabs-history")
         .with_size(ControlSize::Lg)
+        .with_layout(TabsLayout::Fill)
         .with_size_role(SemanticControlSizeRole::Control)
         .with_density(ControlDensity::Compact);
 
@@ -481,6 +507,14 @@ mod tests {
         assert_eq!(custom.size, Some(ControlSize::Lg));
         assert_eq!(custom.size_role, SemanticControlSizeRole::Control);
         assert_eq!(custom.density, Some(ControlDensity::Compact));
+        assert_eq!(custom.layout, TabsLayout::Fill);
+    }
+
+    #[test]
+    fn layout_defaults_auto_and_builder_sets_fill() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
+        assert_eq!(spec.layout, TabsLayout::Auto);
+        assert_eq!(spec.with_layout(TabsLayout::Fill).layout, TabsLayout::Fill);
     }
 
     #[test]
