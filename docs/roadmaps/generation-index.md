@@ -82,9 +82,12 @@ Updated: 2026-09-04
   - Completed: `g16.093` MessageCenter merged in PR #198 at
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
-  - Ready frontier (`../roadmaps/dispatch.md`): `g16.098` cold-checkout web
-    board repair (merged in PR #203 at `c8636c699`), `g16.099` React prop port tranche, and `g16.100` DockRegion `showTabs` portable, `g16.101` Tree accessible name, `g16.102` Tabs fill layout (consumer-sweep intake, ready)
-    (merged in PR #204 at `660b9510d`), `g16.096` Linux board (PR #201) and the
+  - Ready frontier (`../roadmaps/dispatch.md`): `g16.100` DockRegion `showTabs`
+    portable and `g16.102` Tabs fill layout (consumer-sweep intake, ready);
+    `g16.098` cold-checkout web board repair is merged in PR #203 at
+    `c8636c699`, `g16.099` React prop port tranche is merged in PR #204 at
+    `660b9510d`, and `g16.101` Tree accessible name is merged in PR #205 at
+    `1d8e6aeab`. `g16.096` Linux board (PR #201) and the
     coordinator-executed `g16.097` v0.3.0 re-certification serial behind
     `098`. The first `v0.3.0` tag is retracted; nothing was published. No additional mounted receipt child. Later Nucleus
     evidence waits on its explicit accessibility, visual-lab, consumer, and
@@ -105,7 +108,7 @@ Updated: 2026-09-04
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: the coordinator dispatches the two ready lanes and performs
+  - Next move: the coordinator advances the remaining ready lanes and performs
     the release certification. The visual lab has repository authority
     (`inflatable-cookie/poodle-lab`, 2026-09-04); VL-1 is planned in that
     repository. Loophole adoption follows the npm proof. Nucleus A1 and M2/V2
