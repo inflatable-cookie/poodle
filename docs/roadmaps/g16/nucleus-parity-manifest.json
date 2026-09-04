@@ -17,7 +17,7 @@
   "resolution": {
     "package": "poodle-gpui-preview",
     "version": "0.3.0",
-    "source_commit": "ed9699dd887405cbcc1287f3ddf5abb37dc4f57b",
+    "source_commit": "f0774a7d15a195cc6b8506c5da68db99807e5376",
     "lockfile": "packages/gpui/preview/Cargo.lock",
     "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
     "distribution": "workspace",
@@ -321,7 +321,7 @@
         "toast-host"
       ],
       "expected_selector": "effigy regressions:native",
-      "expected_test": null
+      "expected_test": "message_center_composition_open_progress_and_identity_through_mounted_backend"
     },
     {
       "id": "toast-host",
