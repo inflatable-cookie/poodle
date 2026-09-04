@@ -5,6 +5,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — `import ts from "typescript"` under Bun with
+  `@typescript/native@7.0.2` exports only `{ version, versionMajorMinor }` at
+  runtime rather than the TypeScript compiler API namespace
+  (`ts.createSourceFile`, etc.). Scripts needing AST or type analysis in Bun
+  must use structural string/regex extraction or bundle compiler API. Hit
+  while authoring g16.095 `packages/svelte/preview/scripts/react-prop-drift.ts`.
+
+- 2026-09-04 — Cold worktree running `bunx vitest run --project svelte-preview`
+  fails with `Failed to resolve import "@inflatable-cookie/poodle-core"` until
+  `effigy core:build` is run once. Hit while validating g16.095 test suite.
+
 - 2026-09-04 — `FORCE_COLOR=1` (Paseo/agent default) makes packed `tsc` colorize
   HistoryEntry/Slider/Tree negative diagnostics, so
   `test/package-install/web-preview.ts` `includes(PACKED_TYPE_PROOF_DIAGNOSTIC)`
