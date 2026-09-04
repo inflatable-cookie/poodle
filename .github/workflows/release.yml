@@ -143,10 +143,10 @@ jobs:
           exit "$status"
 
       # Asserts rather than prints. A listing of the first twenty entries is
-      # alphabetical CSS and proves nothing; what matters is that the generated
-      # icon and token artifacts survived into the tarball, since they are
-      # committed source that the release gate checks but `files` could still
-      # miss.
+      # alphabetical CSS and proves nothing; what matters is that the compiled
+      # receipt, icon modules, declarations, and token stylesheets survived
+      # into the tarball. `files` could still miss them after the source-free
+      # dist boundary.
       #
       # Do not pipe `tar -tzf` into `head`: GNU tar treats the EPIPE as an error
       # and `set -o pipefail` fails the step. BSD tar does not, so it passes on
@@ -182,15 +182,15 @@ jobs:
             require "$tarball" "licence"      "^package/LICENSE$"          1
             require "$tarball" "readme"       "^package/README.md$"        1
             require "$tarball" "manifest"     "^package/package.json$"     1
+            require "$tarball" "receipt"      "^package/dist/\.poodle-build\.json$" 1
             case "$tarball" in
               *poodle-core*)
-                # Both directories are generated and committed. The counts are
-                # floors, not exact: 100 icon modules and 22 token stylesheets
-                # today, and an empty or partial generation is the thing worth
-                # catching.
-                require "$tarball" "icon modules"   "^package/src/icons/icons/.*\.ts$" 50
-                require "$tarball" "icon aliases"   "^package/src/icons/aliases\.generated\.ts$" 1
-                require "$tarball" "token css"      "^package/src/tokens/generated/css/.*\.css$" 20
+                # Floors, not exact: compiled icon JS/DTS and token CSS. An
+                # empty or partial generation is the thing worth catching.
+                require "$tarball" "icon modules"       "^package/dist/icons/icons/.*\.js$" 50
+                require "$tarball" "icon declarations"  "^package/dist/icons/icons/.*\.d\.ts$" 50
+                require "$tarball" "icon aliases"       "^package/dist/icons/aliases\.generated\.d\.ts$" 1
+                require "$tarball" "token css"          "^package/dist/tokens/generated/css/.*\.css$" 20
                 ;;
             esac
           done
