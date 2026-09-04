@@ -487,7 +487,11 @@
   { task = "drift:drag-inventory" },
   { task = "test:core" },
   { task = "test:core-build" },
+  # g16.098: detached worktree without shell dist. Bites if react-preview
+  # loses its workspace alias or ci:web tests components before package builds.
+  { run = "bun test scripts/web-distribution/cold-checkout-react-preview.test.ts" },
   { task = "test:components" },
+
   { task = "svelte:package" },
   { task = "react:package" },
   # The packaged counterpart of test:components. Cheap (~4s against ci:web's
