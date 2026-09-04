@@ -59,11 +59,31 @@ card or triage note says.
   Review Oracle table.
 - Stop conditions: per card. Escalation owner: operator, via Chatterbox.
 
+### g16.104 — Release workflow checkout base ref and pre-tag dry run
+
+- Card: `g16/104-release-workflow-checkout-base-ref.md`
+- Readiness: ready, priority — operator approved the `release.yml` edit and
+  the second `v0.3.0` retraction on 2026-09-04
+- Prerequisites: none. Completion: PR merged after accepted exact-head
+  review; `check:release-automation` green; the card's own PR shows the
+  g16.096 exception behaviour on `ci-web` (workflow diff rejected by the
+  scope guard) and green `ci-rust`, per the accepted rule
+- Owned mutable paths: `.github/workflows/release.yml`,
+  `scripts/check-release-automation.ts` (assertion extension only), log,
+  `PAPERCUTS.md` (append only)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: none needed; nothing else is ready. Serial
+  edge: `g16.097` waits for this merge.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table;
+  the branch dry run is executed by `g16.097` step 1b, not by this lane
+- Stop conditions: per card. Escalation owner: operator, via Chatterbox
+
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
 | --- | --- | --- |
-| `g16.104` release workflow checkout base ref | operator approval for a `release.yml` edit and a second `v0.3.0` retraction; blocks `g16.097` | operator, via Chatterbox |
 | Loophole adoption of `0.3.0` | proven npm `latest` `0.3.0` (`g16.097` step 5); Loophole-owned planning | Loophole planning, via Chatterbox |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
