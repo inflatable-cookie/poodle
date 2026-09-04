@@ -5,6 +5,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — `test/package-install/web-preview.ts` clones the shared Git
+  directory as a bare repository and fetches candidate SHAs by object ID. A
+  freshly merged commit reachable only through `origin/main` is not advertised
+  by the local transport, so the clean checkout fails with `unable to read tree`
+  before package-install certification. Make the harness fetch the named remote
+  ref or use a remote-aware source before resolving the candidate SHA. Hit while
+  resuming g16.097 at merged candidate `eab436eefc`.
+
 - 2026-09-04 — `assertInstalledScope` in
   `test/package-install/scope.ts` rejects any `.github/workflows/` change in
   the scope range with generic `certification scope rejected forbidden

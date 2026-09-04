@@ -39,6 +39,20 @@ distribution point.
   `g16.096` fixed for the PR board. No publish ran. `g16.104` repairs the
   workflow and adds the pre-tag branch dry run so this cannot recur.
 
+## Third Attempt (2026-09-04, retracted before publish)
+
+- The operator-authorized candidate tag `v0.3.0` was pushed at
+  `eab436eefc1a65d0e0cde518a113a51c5d4d7f4e` for dry run `33908714014`.
+  It failed in `Release gates` because the GitHub release checkout did not
+  have `origin/main`; no pack or publish step ran and npm remained at
+  `latest` `0.2.2`.
+- The tag was retracted locally and remotely on 2026-09-04 after the operator
+  confirmed the second retraction. `git tag -d v0.3.0` deleted the local tag,
+  `git push origin :refs/tags/v0.3.0` deleted the remote tag, and a follow-up
+  `git ls-remote --tags origin refs/tags/v0.3.0` was empty.
+- g16.104 is the promoted repair lane. No new tag will be created until its
+  merged workflow fix and the pre-tag branch dry run are green.
+
 ## Candidate (re-certification)
 
 - Candidate commit: the `main` tip immediately after `g16.103` merges,
