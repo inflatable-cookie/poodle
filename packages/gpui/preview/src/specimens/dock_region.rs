@@ -329,6 +329,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                     "Main content area",
                 ))
+                .child(flex_frame(
+                    160.0,
+                    theme,
+                    div().w(px(220.0)).h_full().child(
+                        DockRegion::from_spec(
+                            DockRegionSpec::new(DockEdge::Left, flex_items())
+                                .with_collapsible(true)
+                                .with_show_tabs(false)
+                                .with_value("explorer"),
+                            theme,
+                        )
+                        .with_instance_id("show-tabs-off")
+                        .with_content(panel_body(
+                            "showTabs=false: the host owns the tab strip; the region keeps its collapse toggle and body.",
+                            text_secondary,
+                        )),
+                    ),
+                    "Main content area",
+                ))
                 .child(
                     div()
                         .h(px(220.0))

@@ -614,15 +614,17 @@ pub fn dock_region(
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(true));
             }
-            for (index, item) in spec.items.iter().enumerate() {
-                strip = strip.child(build_tab(
-                    &item.value,
-                    &item.label,
-                    item.icon.as_deref(),
-                    true,
-                    true,
-                    index,
-                ));
+            if spec.show_tabs {
+                for (index, item) in spec.items.iter().enumerate() {
+                    strip = strip.child(build_tab(
+                        &item.value,
+                        &item.label,
+                        item.icon.as_deref(),
+                        true,
+                        true,
+                        index,
+                    ));
+                }
             }
             return strip;
         } else {
@@ -642,15 +644,17 @@ pub fn dock_region(
                 apply_edge_border(s);
             }
             let mut strip = strip;
-            for (index, item) in spec.items.iter().enumerate() {
-                strip = strip.child(build_tab(
-                    &item.value,
-                    &item.label,
-                    item.icon.as_deref(),
-                    true,
-                    false,
-                    index,
-                ));
+            if spec.show_tabs {
+                for (index, item) in spec.items.iter().enumerate() {
+                    strip = strip.child(build_tab(
+                        &item.value,
+                        &item.label,
+                        item.icon.as_deref(),
+                        true,
+                        false,
+                        index,
+                    ));
+                }
             }
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(false));
@@ -676,65 +680,81 @@ pub fn dock_region(
         }
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
-    el.a11y.role = Some(NodeRole::TabList);
-
-    let mut tab_bar = Node::container();
-    {
-        let s = &mut tab_bar.style;
-        s.descriptor.background = Some(fill);
-        if is_tabs_on_edge {
-            s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-            s.descriptor.layout.spacing.gap = space_y * 0.5;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.top = space_y;
-            pad.bottom = space_y;
-        } else {
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = tab_gap;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.left = space_x;
-            pad.right = space_x;
-            pad.top = space_y * 0.5;
-            pad.bottom = space_y * 0.5;
-            s.border_bottom_width = Some(border_w);
-            s.descriptor.border.color = border_subtle;
-        }
+    // A region without tabs is not a tablist.
+    if spec.show_tabs {
+        el.a11y.role = Some(NodeRole::TabList);
     }
 
-    // Tab list grows; toggle pinned at the end.
-    let mut tab_list = Node::container();
-    {
-        let s = &mut tab_list.style;
-        if is_tabs_on_edge {
-            s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-            s.descriptor.layout.spacing.gap = space_y * 0.5;
+    // The strip: tabs plus (when collapsible) the collapse toggle. With
+    // `show_tabs=false` the host owns the tab strip — the region emits no tab
+    // nodes and registers no tab interactions — and the toggle stands alone
+    // in the strip's place.
+    let strip: Option<Node> = if !spec.show_tabs {
+        if spec.is_collapsible {
+            Some(build_toggle(is_tabs_on_edge))
         } else {
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = tab_gap;
+            None
         }
-        s.flex_grow = Some(1.0);
-        s.flex_basis = Some(0.0);
-        s.min_width = Some(0.0);
-    }
-    let mut tab_list = tab_list;
-    for (index, item) in spec.items.iter().enumerate() {
-        tab_list = tab_list.child(build_tab(
-            &item.value,
-            &item.label,
-            item.icon.as_deref(),
-            false,
-            is_tabs_on_edge,
-            index,
-        ));
-    }
-    let mut tab_bar = tab_bar.child(tab_list);
-    if spec.is_collapsible {
-        tab_bar = tab_bar.child(build_toggle(is_tabs_on_edge));
-    }
+    } else {
+        let mut tab_bar = Node::container();
+        {
+            let s = &mut tab_bar.style;
+            s.descriptor.background = Some(fill);
+            if is_tabs_on_edge {
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+                s.descriptor.layout.spacing.gap = space_y * 0.5;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.top = space_y;
+                pad.bottom = space_y;
+            } else {
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.spacing.gap = tab_gap;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.left = space_x;
+                pad.right = space_x;
+                pad.top = space_y * 0.5;
+                pad.bottom = space_y * 0.5;
+                s.border_bottom_width = Some(border_w);
+                s.descriptor.border.color = border_subtle;
+            }
+        }
+
+        // Tab list grows; toggle pinned at the end.
+        let mut tab_list = Node::container();
+        {
+            let s = &mut tab_list.style;
+            if is_tabs_on_edge {
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
+                s.descriptor.layout.spacing.gap = space_y * 0.5;
+            } else {
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.spacing.gap = tab_gap;
+            }
+            s.flex_grow = Some(1.0);
+            s.flex_basis = Some(0.0);
+            s.min_width = Some(0.0);
+        }
+        let mut tab_list = tab_list;
+        for (index, item) in spec.items.iter().enumerate() {
+            tab_list = tab_list.child(build_tab(
+                &item.value,
+                &item.label,
+                item.icon.as_deref(),
+                false,
+                is_tabs_on_edge,
+                index,
+            ));
+        }
+        let mut tab_bar = tab_bar.child(tab_list);
+        if spec.is_collapsible {
+            tab_bar = tab_bar.child(build_toggle(is_tabs_on_edge));
+        }
+        Some(tab_bar)
+    };
 
     let body = content.map(|c| {
         let mut body = Node::container();
@@ -756,9 +776,15 @@ pub fn dock_region(
             Some(b) => el.child(b),
             None => el,
         };
-        el.child(tab_bar)
+        match strip {
+            Some(strip) => el.child(strip),
+            None => el,
+        }
     } else {
-        let el = el.child(tab_bar);
+        let el = match strip {
+            Some(strip) => el.child(strip),
+            None => el,
+        };
         match body {
             Some(b) => el.child(b),
             None => el,
@@ -1244,5 +1270,95 @@ mod tests {
             .find(&|n| n.runtime_id.as_deref()
                 == Some(dock_collapse_focus_id(Some("second")).as_str()))
             .is_some());
+    }
+
+    /// g16.100. `show_tabs` is a portable field: every mode that draws a
+    /// strip emits zero tab nodes and registers no tab interactions when it
+    /// is false, while the collapse toggle — and the body, when expanded —
+    /// survive.
+    #[test]
+    fn show_tabs_false_emits_no_tab_nodes_but_keeps_toggle_and_body() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        assert!(
+            DockRegionSpec::new(DockEdge::Left, vec![]).show_tabs,
+            "tabs default on"
+        );
+        let items = vec![
+            PanelTabItem::new("explorer", "Explorer"),
+            PanelTabItem::new("search", "Search"),
+        ];
+
+        let assert_tabless = |root: &Node, expect_body: bool| {
+            assert!(
+                root.find(&|n| {
+                    n.id.as_deref().map_or(false, |id| id.starts_with("dock-tab-"))
+                })
+                .is_none(),
+                "zero tab nodes"
+            );
+            assert!(
+                root.find(&|n| n.interaction.on_activate.is_some())
+                    .is_none(),
+                "no tab interaction registrations"
+            );
+            assert!(
+                root.find(&|n| n.interaction.drag_source.is_some())
+                    .is_none(),
+                "no tab drag sources"
+            );
+            assert!(
+                root.find(&|n| n.id.as_deref() == Some("dock-collapse"))
+                    .is_some(),
+                "the collapse toggle survives"
+            );
+            assert_eq!(
+                root.find(&|n| n.id.as_deref() == Some("show-tabs-body-probe"))
+                    .is_some(),
+                expect_body,
+                "body presence"
+            );
+            assert!(
+                !matches!(root.a11y.role, Some(NodeRole::TabList)),
+                "a region without tabs is not a tablist"
+            );
+        };
+
+        // Expanded: no strip at all, toggle in its place, body rendered.
+        let mut content = Node::container();
+        content.id = Some("show-tabs-body-probe".to_string());
+        let expanded = dock_region(
+            &DockRegionSpec::new(DockEdge::Left, items.clone())
+                .with_collapsible(true)
+                .with_show_tabs(false),
+            &ctx,
+            Some(content),
+            DockRegionHandlers::default(),
+        );
+        assert_tabless(&expanded, true);
+
+        // Collapsed icon-strip, side edge: bare strip with the toggle only.
+        let side = dock_region(
+            &DockRegionSpec::new(DockEdge::Left, items.clone())
+                .with_collapsed(true)
+                .with_collapsible(true)
+                .with_show_tabs(false),
+            &ctx,
+            None,
+            DockRegionHandlers::default(),
+        );
+        assert_tabless(&side, false);
+
+        // Collapsed icon-strip, top edge: same on the horizontal strip.
+        let top = dock_region(
+            &DockRegionSpec::new(DockEdge::Top, items)
+                .with_collapsed(true)
+                .with_collapsible(true)
+                .with_show_tabs(false),
+            &ctx,
+            None,
+            DockRegionHandlers::default(),
+        );
+        assert_tabless(&top, false);
     }
 }

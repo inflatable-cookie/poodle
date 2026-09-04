@@ -46,6 +46,9 @@ export interface DockRegionProps {
   sizing?: DockSizing;
   collapsible?: boolean;
   showCollapseToggle?: boolean;
+  /** When false, omit the tab strip (hosts render tabs elsewhere, e.g.
+   * titlebar). Body / stack / collapse affordances are unchanged. */
+  showTabs?: boolean;
   collapsed?: boolean;
   collapsedPosture?: DockCollapsedPosture;
   emphasis?: DockEmphasis;
@@ -100,6 +103,7 @@ export function DockRegion({
   sizing = "flexible",
   collapsible = false,
   showCollapseToggle = true,
+  showTabs = true,
   collapsed = false,
   collapsedPosture = "icon-strip",
   emphasis = "standard",
@@ -199,7 +203,7 @@ export function DockRegion({
     checkCompact();
 
     return () => resizeObserver.disconnect();
-  }, [showIconStrip, showHidden, sizing, items.length]);
+  }, [showIconStrip, showHidden, sizing, items.length, showTabs]);
 
   // Every one of these takes a strip value and hands out a panel value. The
   // encoding is substrate identity; it must never reach a consumer callback.
@@ -346,6 +350,7 @@ export function DockRegion({
       data-emphasis={emphasis}
       data-collapsed={collapsed || undefined}
       data-collapsed-posture={collapsed ? collapsedPosture : undefined}
+      data-show-tabs={showTabs ? undefined : "false"}
       aria-label={ariaLabel ?? `${edge} dock`}
       {...region.getTargetProps()}
     >
@@ -392,7 +397,7 @@ export function DockRegion({
               onToggle={handleCollapseToggle}
             />
           ) : null}
-          {stripTabs("vertical", false)}
+          {showTabs ? stripTabs("vertical", false) : null}
         </div>
       ) : showIconStrip ? (
         <div
@@ -400,9 +405,11 @@ export function DockRegion({
           data-orientation="horizontal"
           data-compact={isCompact || undefined}
         >
-          <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
-            {stripTabs("horizontal", isCompact)}
-          </div>
+          {showTabs ? (
+            <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
+              {stripTabs("horizontal", isCompact)}
+            </div>
+          ) : null}
           {collapsible && showCollapseToggle ? (
             <CollapseToggle
               collapsed={collapsed}
@@ -414,23 +421,34 @@ export function DockRegion({
         </div>
       ) : (
         <>
-          <div
-            className="poodle-dock-region__strip"
-            data-orientation="horizontal"
-            data-compact={isCompact || undefined}
-          >
-            <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
-              {stripTabs("horizontal", isCompact)}
+          {showTabs ? (
+            <div
+              className="poodle-dock-region__strip"
+              data-orientation="horizontal"
+              data-compact={isCompact || undefined}
+            >
+              <div className="poodle-dock-region__tabs" ref={stripTabsRef}>
+                {stripTabs("horizontal", isCompact)}
+              </div>
+              {collapsible && showCollapseToggle ? (
+                <CollapseToggle
+                  collapsed={collapsed}
+                  direction={collapseDirection}
+                  ariaLabel={`Collapse ${edge} dock`}
+                  onToggle={handleCollapseToggle}
+                />
+              ) : null}
             </div>
-            {collapsible && showCollapseToggle ? (
+          ) : collapsible && showCollapseToggle ? (
+            <div className="poodle-dock-region__edge-toggle">
               <CollapseToggle
                 collapsed={collapsed}
                 direction={collapseDirection}
                 ariaLabel={`Collapse ${edge} dock`}
                 onToggle={handleCollapseToggle}
               />
-            ) : null}
-          </div>
+            </div>
+          ) : null}
 
           <div className="poodle-dock-region__body">{children?.(activeItem)}</div>
         </>

@@ -70,11 +70,6 @@ const CARD_REF_REGEX = /\bg\d+(\.\d+|-[a-z0-9]+)\b/i;
 // - `needs-decision`: Divergence requiring an architectural/contract decision by Chatterbox.
 // The register is an active ratchet: it fails if an entry no longer drifts or if a pending-port omits a card.
 export const BASELINE: BaselineRegister = {
-  "dock-region": {
-    kind: "needs-decision",
-    reason: "showTabs is a spec-surface-pending tranche awaiting DockRegionSpec tab fields (g13.014)",
-    svelteOnly: ["showTabs"],
-  },
   "tri-state-switch": {
     kind: "framework-idiom",
     reason: "React uncontrolled defaultValue mirrors Svelte $bindable state initial value",
@@ -116,8 +111,8 @@ export const BASELINE: BaselineRegister = {
     reactOnly: ["defaultValue"],
   },
   tree: {
-    kind: "needs-decision",
-    reason: "Tree onEditingChange is a candidate for Svelte inclusion awaiting Chatterbox contract decision",
+    kind: "framework-idiom",
+    reason: "React change callback paired with the Svelte `$bindable` state (working rules, Runtime Parity Authority); zero consumer use 2026-09-04",
     reactOnly: ["onEditingChange"],
   },
   "filter-toolbar": {
@@ -131,8 +126,8 @@ export const BASELINE: BaselineRegister = {
     reactOnly: ["defaultFilterLevel", "defaultFilterText", "onFilterLevelChange", "onFilterTextChange"],
   },
   "order-by": {
-    kind: "needs-decision",
-    reason: "OrderBy onActiveSortChange is a candidate for Svelte inclusion awaiting Chatterbox contract decision",
+    kind: "framework-idiom",
+    reason: "React change callback paired with the Svelte `$bindable` state (working rules, Runtime Parity Authority); zero consumer use 2026-09-04",
     reactOnly: ["onActiveSortChange"],
   },
   "relation-picker": {

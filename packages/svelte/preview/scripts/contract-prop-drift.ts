@@ -36,15 +36,15 @@ const BASELINE: Record<string, { contractOnly?: string[]; svelteOnly?: string[] 
   //   excuses `overlayClassName` but not this spelling; fixing the register is
   //   out of scope here).
   dialog: { svelteOnly: ["closeButtonSize", "overlayStyle"] },
-  // dock-region `showTabs` / `tabVariant` — cross-target strip controls;
-  //   DockRegionSpec models `tabs_placement` only — spec-surface tranche.
+  // dock-region `tabVariant` — cross-target strip control; DockRegionSpec
+  //   models `tabs_placement` only — spec-surface tranche. (`showTabs` moved
+  //   into the Public Props table with `DockRegionSpec::show_tabs`, g16.100.)
   // dock-region `tabActiveEdge` / `tabActiveFill` / `tabBordered` /
   //   `tabFullWidth` / `tabReorderable` — g13-040 tab pass-throughs; the
   //   whole `tabs_placement`-adjacent surface moves into the table when
   //   g13.014 gives DockRegionSpec its tab fields — spec-surface tranche.
   "dock-region": {
     svelteOnly: [
-      "showTabs",
       "tabVariant",
       "tabActiveEdge",
       "tabActiveFill",

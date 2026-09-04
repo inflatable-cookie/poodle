@@ -1492,3 +1492,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   Firefox launch completed. The bounded workaround is one `--browser=` run per
   engine and receipt consolidation; a future runner should isolate launches or
   apply an engine-start timeout. Surface: disposable browser benchmark runner.
+
+- 2026-09-04 — Running focused React component tests from inside
+  `packages/react/components` (`bun run vitest run test/DockRegion*.test.tsx`)
+  silently matches nothing and errors: the package vitest config's `include`
+  is `test/parity/**/*.test.tsx`, so `test/*.test.tsx` files are invisible
+  from that cwd. Workers must run from the repo root
+  (`bun run vitest run packages/react/components/test/<file>`) as the g16.099
+  log models. A root vitest workspace config covering both trees, or an
+  include fix in the package config, removes the trap. Surface:
+  `packages/react/components` vitest config.

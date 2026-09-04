@@ -1,7 +1,7 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-09-01
+Updated: 2026-09-04
 
 ## 1. Purpose
 
@@ -85,6 +85,7 @@ Updated: 2026-09-01
 | `sizing` | `DockSizing` | `"flexible"` | no | `"static"` for fixed stacked panels, `"flexible"` for tabbed/collapsible |
 | `collapsible` | `boolean` | `false` | no | when true, renders the CollapseToggle in all flexible-mode postures; when false, no collapse affordance is shown |
 | `showCollapseToggle` | `boolean` | `true` | no | set false when a divider-level control (e.g. SplitView pills) already owns collapse, so the strip does not duplicate it; collapse state rendering is unaffected |
+| `showTabs` | `boolean` | `true` | no | when `false`, the strip omits panel tabs but keeps the collapse toggle when `showCollapseToggle` is true; the body still renders the active panel; keyboard tab switching is unavailable because there are no tabs |
 | `collapsed` | `boolean` | `false` | no | collapse state (flexible mode only); meaningful only when `collapsible=true` |
 | `collapsedPosture` | `DockCollapsedPosture` | `"icon-strip"` | no | `"hidden"` or `"icon-strip"` |
 | `emphasis` | `DockEmphasis` | `"standard"` | no | `"standard" \| "quiet" \| "strong"` |
@@ -134,7 +135,7 @@ oversight:
   overflow mechanisms on one strip. It reads like an omission and is not one.
 
 These props are deliberately not in the §Public Props table, matching the
-treatment of `tabVariant` and `showTabs`: they are `svelteOnly` entries in
+treatment of `tabVariant`: they are `svelteOnly` entries in
 `packages/svelte/preview/scripts/contract-prop-drift.ts`'s `BASELINE`, which
 keeps them off the table until the shared spec surface carries them. This is a
 tranche, not a permanent carve-out — when `g13.014` gives `DockRegionSpec` its
