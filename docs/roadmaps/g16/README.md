@@ -1,8 +1,8 @@
 # g16 — Next Work
 
 Status: active — complete through `g16.094`; Nucleus M1 mounted cohort complete
-at 29/29; `g16.098` cold-checkout board repair is the priority lane, `g16.095`
-merged in PR #202, `g16.099` port tranche is ready, `g16.096` and the `g16.097` re-certification
+at 29/29; `g16.098` cold-checkout board repair merged in PR #203, `g16.095`
+merged in PR #202, `g16.099` port tranche merged in PR #204, and `g16.096` / `g16.097`
 are serial behind `098`; VL-0 lab authority is
 closed; later evidence and adoption phases remain gated
 Posture: strict-ready
@@ -135,8 +135,8 @@ stay maintained; backend admission is not part of the first card.
 95. [095 — Svelte↔React public prop drift gate](095-react-prop-drift-gate.md) — complete in PR #202 at `f297774f4`; standalone `docs:react-prop-drift` selector in `docs:check`, reasoned ratcheted baseline, no API change
 96. [096 — Linux headless PR and main board](096-linux-headless-pr-board.md) — ready; `pull_request` and `push: main` triggers on the two ubuntu-only workflows, everything else stays dispatch-only; operator approved 2026-09-02
 97. [097 — v0.3.0 release certification](097-v030-release-certification.md) — ready; first attempt's tag at `9b451c48d` is retracted after dry-run `33874116177` failed on the `098` defect; re-certification from post-`098` `main`, then tag, dry-run, publish, npm proof; operator authorized 2026-09-04
-98. [098 — Cold-checkout web board repair](098-cold-checkout-web-board-repair.md) — ready, priority; the `react-preview` vitest project lacks the workspace alias and `ci:web` tests before it builds `dist/`, so fresh runners fail three suites (runs `33874196422`, `33874116177`)
-99. [099 — React prop port tranche](099-react-prop-port-tranche.md) — ready; clears the five `pending-port` baseline entries seeded by merged `095` (PR #202)
+98. [098 — Cold-checkout web board repair](098-cold-checkout-web-board-repair.md) — complete in PR #203 at `c8636c699`; cold and warm `ci:web` now pass after the `react-preview` alias and package-build ordering repair
+99. [099 — React prop port tranche](099-react-prop-port-tranche.md) — complete in PR #204 at `660b9510d`; all five pending-port baseline entries are cleared
 
 ## Parallel Continuation
 
