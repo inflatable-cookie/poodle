@@ -33,7 +33,10 @@ directory ever land in this checkout. It then asserts:
 2. the consumer compiles;
 3. the resolved lockfile contains exactly one `gpui`, and every `gpui*` crate
    comes from the registry;
-4. **negative control** — the same crate with one deliberately wrong GPUI type
+4. the resolved graph enables `tinyvec`'s `std` feature — tinyvec `1.13.0`
+   cannot compile its alloc-only path (`cannot find macro vec`), so an
+   alloc-only tinyvec in the fresh resolution is the g16.092 break;
+5. **negative control** — the same crate with one deliberately wrong GPUI type
    annotation fails to compile, with a type mismatch. A proof that cannot fail
    proves nothing.
 

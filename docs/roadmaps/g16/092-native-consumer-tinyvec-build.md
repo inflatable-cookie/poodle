@@ -1,6 +1,6 @@
 # g16.092 — Native Fresh-Consumer tinyvec Build Repair
 
-Status: ready
+Status: review — tinyvec repair in PR #199; C1 `ed9699dd8` runtime with std-unified graph, 28 fresh receipts emitted and committed
 Type: repository validation repair
 Opened: 2026-09-03
 Depends on: reproduced `effigy ci:native` failure on merged `main` `4a615e990`

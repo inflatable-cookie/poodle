@@ -33,6 +33,15 @@ poodle-headless = { version = "0.3.0", path = "../../contracts/headless" }
 # the graph as gpui's own dependency; named here to store the receiver.
 futures = "0.3"
 anyhow = "1"
+# Compile-shape guard (g16.092), not a code dependency. tinyvec reaches this
+# graph through gpui (usvg → fontdb and friends) and release 1.13.0 broke its
+# alloc-only build: `with_initial_len` calls `vec!` where only
+# `alloc::vec::{self, Vec}` is imported — the module, not the macro — and the
+# crate is `no_std` without its `std` feature. A fresh downstream consumer has
+# no lockfile to fall back on, so its resolution stopped compiling. Naming the
+# dependency here enables `std` graph-wide through feature unification while
+# the consumer gate keeps resolving current releases.
+tinyvec = { version = "1", features = ["std"] }
 
 [package.metadata.poodle]
 public-intent = true

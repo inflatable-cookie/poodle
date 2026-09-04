@@ -20,7 +20,7 @@ const COMMAND: &str = "effigy regressions:native";
 const PACKAGE: &str = "poodle-gpui-preview";
 const PACKAGE_VERSION: &str = env!("CARGO_PKG_VERSION");
 const LOCKFILE: &str = "packages/gpui/preview/Cargo.lock";
-const LOCKFILE_SHA256: &str = "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55";
+const LOCKFILE_SHA256: &str = "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c";
 const DISTRIBUTION: &str = "workspace";
 
 #[derive(Serialize)]
