@@ -79,6 +79,109 @@ function eventBranchTargets(source: string, event: string): string[] {
   return targets;
 }
 
+const PACK_STEP_NAME = "- name: Pack and verify contents";
+const PUBLISH_STEP_NAME = "- name: Publish";
+const RECEIPT_PATTERN = "^package/dist/\\.poodle-build\\.json$";
+const ICON_JS_PATTERN = "^package/dist/icons/icons/.*\\.js$";
+const ICON_DTS_PATTERN = "^package/dist/icons/icons/.*\\.d\\.ts$";
+const ICON_ALIAS_PATTERN = "^package/dist/icons/aliases\\.generated\\.d\\.ts$";
+const TOKEN_CSS_PATTERN = "^package/dist/tokens/generated/css/.*\\.css$";
+const STALE_SOURCE_PATTERN = "^package/src/icons/icons/.*\\.ts$";
+
+function packVerifyBlock(source: string): string {
+  const start = source.indexOf(PACK_STEP_NAME);
+  const publish = source.indexOf(PUBLISH_STEP_NAME);
+  if (start === -1 || publish === -1 || publish <= start) return "";
+  return source.slice(start, publish);
+}
+
+function requireLine(
+  pack: string,
+  description: string,
+  pattern: string,
+  minimum: number,
+): boolean {
+  const suffix = new RegExp(`\\s${minimum}\\s*$`);
+  return pack.split("\n").some(
+    (line) =>
+      line.includes(`require "$tarball" "${description}"`) &&
+      line.includes(pattern) &&
+      suffix.test(line),
+  );
+}
+
+function collectPackAssertionFailures(source: string): string[] {
+  const found: string[] = [];
+  const pack = packVerifyBlock(source);
+  if (!pack) {
+    found.push("release.yml must keep a Pack and verify contents block before Publish");
+    return found;
+  }
+
+  if (!pack.includes("packages/core") || !pack.includes("packages/svelte/components")) {
+    found.push("release pack verifier must still pack core and Svelte");
+  }
+  if (pack.includes("packages/react/components")) {
+    found.push("release pack verifier must not pack React");
+  }
+
+  if (!requireLine(pack, "licence", "^package/LICENSE$", 1)) {
+    found.push("release pack verifier must require package/LICENSE");
+  }
+  if (!requireLine(pack, "readme", "^package/README.md$", 1)) {
+    found.push("release pack verifier must require package/README.md");
+  }
+  if (!requireLine(pack, "manifest", "^package/package.json$", 1)) {
+    found.push("release pack verifier must require package/package.json");
+  }
+  if (!requireLine(pack, "receipt", RECEIPT_PATTERN, 1)) {
+    found.push(
+      "release pack verifier must require package/dist/.poodle-build.json for every packed package",
+    );
+  }
+
+  const receiptAt = pack.indexOf(RECEIPT_PATTERN);
+  const coreCaseAt = pack.indexOf("*poodle-core*");
+  if (receiptAt === -1 || coreCaseAt === -1 || receiptAt > coreCaseAt) {
+    found.push("release pack verifier must require the compiled receipt before the core-only case");
+  }
+
+  if (!requireLine(pack, "icon modules", ICON_JS_PATTERN, 50)) {
+    found.push("release pack verifier must require at least 50 package/dist/icons/icons/*.js modules");
+  }
+  if (!requireLine(pack, "icon declarations", ICON_DTS_PATTERN, 50)) {
+    found.push(
+      "release pack verifier must require at least 50 package/dist/icons/icons/*.d.ts declarations",
+    );
+  }
+  if (!requireLine(pack, "icon aliases", ICON_ALIAS_PATTERN, 1)) {
+    found.push("release pack verifier must require package/dist/icons/aliases.generated.d.ts");
+  }
+  if (!requireLine(pack, "token css", TOKEN_CSS_PATTERN, 20)) {
+    found.push(
+      "release pack verifier must require at least 20 package/dist/tokens/generated/css/*.css files",
+    );
+  }
+
+  for (const [pattern, label] of [
+    [ICON_JS_PATTERN, "icon modules"],
+    [ICON_DTS_PATTERN, "icon declarations"],
+    [ICON_ALIAS_PATTERN, "icon aliases"],
+    [TOKEN_CSS_PATTERN, "token css"],
+  ] as const) {
+    const at = pack.indexOf(pattern);
+    if (coreCaseAt === -1 || at === -1 || at < coreCaseAt) {
+      found.push(`release pack verifier must keep ${label} inside the core archive case`);
+    }
+  }
+
+  if (pack.includes("package/src/")) {
+    found.push("release pack verifier must not require stale package/src members");
+  }
+
+  return found;
+}
+
 const actionRefPattern = /^\s*(?:-\s+)?uses:\s*([^\s#]+)(?:\s+#\s*(.*))?$/gm;
 
 for (const file of retainedWorkflows) {
@@ -248,11 +351,52 @@ assert(publishBlock.includes("packages/core"), "release must publish core");
 assert(publishBlock.includes("packages/svelte/components"), "release must publish Svelte");
 assert(!publishBlock.includes("packages/react/components"), "release must not publish React");
 
+for (const failure of collectPackAssertionFailures(release)) failures.push(failure);
+
+const omittedReceipt = release.replaceAll(RECEIPT_PATTERN, "");
+const omittedFailures = collectPackAssertionFailures(omittedReceipt);
+const omitReceiptFailed = omittedFailures.some(
+  (failure) =>
+    failure.includes("package/dist/.poodle-build.json") || failure.includes("compiled receipt"),
+);
+assert(
+  omitReceiptFailed,
+  `omitting the compiled receipt assertion must fail the checker; got: ${
+    omittedFailures.join("; ") || "no failures"
+  }`,
+);
+
+const restoredSource = release.replace(
+  PACK_STEP_NAME,
+  `${PACK_STEP_NAME}\n          require "$tarball" "stale source" "${STALE_SOURCE_PATTERN}" 50`,
+);
+const restoredFailures = collectPackAssertionFailures(restoredSource);
+const restoreSourceFailed = restoredFailures.some((failure) => failure.includes("package/src"));
+assert(
+  restoreSourceFailed,
+  `restoring a stale package/src assertion must fail the checker; got: ${
+    restoredFailures.join("; ") || "no failures"
+  }`,
+);
+
+console.log(
+  omitReceiptFailed
+    ? "plant omit compiled receipt: failed as required"
+    : "plant omit compiled receipt: did not fail",
+);
+console.log(
+  restoreSourceFailed
+    ? "plant restore package/src: failed as required"
+    : "plant restore package/src: did not fail",
+);
+
 if (failures.length > 0) {
   console.error("release automation static check: FAIL");
   for (const failure of failures) console.error(`- ${failure}`);
   process.exitCode = 1;
 } else {
   console.log("release automation static check: pass");
-  console.log(`checked ${retainedWorkflows.length} retained workflows, Effigy gate, alias, and publish set`);
+  console.log(
+    `checked ${retainedWorkflows.length} retained workflows, Effigy gate, alias, publish set, compiled pack assertions, and planted failures`,
+  );
 }
