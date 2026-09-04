@@ -80,5 +80,6 @@ or native-visual selector ran.
 
 ## Continuation
 
-Pause for terminal M1 re-review. Merge and g16 front-door closeout remain with
-the orchestrator. Do not start another receipt card.
+Merged in PR #198 as `06de812f7037eeca204d89c72fb4c586723600eb`.
+The 29/29 mounted cohort is complete. Do not infer A1, V1, lab V2, Nucleus M2,
+or adoption; those remain separately authorized programme phases.

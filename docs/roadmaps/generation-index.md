@@ -79,8 +79,12 @@ Updated: 2026-09-03
   - Completed: `g16.092` native fresh-consumer repair merged in PR #199 at
     `17534f484665bbbdd93e2ec70bec521318201941`; stable and Rust 1.95 consumer
     graphs now pass with a freshly emitted 28-receipt identity.
-  - Ready frontier: `g16.093` MessageCenter preparation is accepted. Rebase,
-    tighten post-scroll containment, and finalize the twenty-ninth receipt.
+  - Completed: `g16.093` MessageCenter merged in PR #198 at
+    `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
+    complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
+  - Ready frontier: no additional mounted receipt child. Later Nucleus evidence
+    waits on its explicit accessibility, visual-lab, consumer, and operator
+    authority gates.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -97,11 +101,10 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: finalize and review the accepted final MessageCenter receipt,
-    then close the 29/29 mounted programme; the
-    dedicated visual lab is bootstrapped under separate repository authority;
-    retain tag, publication, workflow, and sibling-adoption authority with the
-    orchestrator.
+  - Next move: choose an explicitly authorized next programme boundary. The
+    dedicated visual lab still needs repository authority; GPUI accessibility,
+    Nucleus M2/V2, adoption, tag, publication, workflow, and sibling mutations
+    retain their recorded owners and gates.
 
 ## Latest Completed Track
 

@@ -1,6 +1,6 @@
 # Nucleus GPUI Parity Programme
 
-Status: active — first ready frontier compiled as `g16.062`–`g16.065`
+Status: active — M1 mounted cohort complete 29/29; later evidence and adoption phases remain gated
 Promoted: 2026-09-02
 Operator decision: Nucleus is the first GPUI switch target
 Source evidence: the accepted holistic posture assessment and the promoted
@@ -12,6 +12,11 @@ Make real GPUI parity measurable and ship Nucleus on GPUI. The proof target is
 the 29 Poodle components Nucleus renders, not the whole catalogue and not a
 static name map. `IconProvider` is a mandatory construction prerequisite but
 is not a rendered denominator row.
+
+The M1 mounted phase completed in `g16.093`: all 29 rendered rows have validated
+terminal GPUI-headless receipts at one exact runtime and lock identity. This is
+execution evidence only and does not promote A1, V1, lab V2, Nucleus M2, or the
+operator switch decision.
 
 The programme keeps three authorities separate:
 
@@ -147,8 +152,8 @@ Nucleus product data or claim that a Poodle fixture proves Nucleus ships.
 
 ## Continuation
 
-Dispatch `g16.062`–`g16.065` as the first safe frontier. After `g16.062`
-merges, compile the first small NP-1 child cards from validated receipt gaps.
-Bootstrap the visual lab separately through
-[`visual-lab-unblock-runway.md`](visual-lab-unblock-runway.md). Nucleus M2/V2
-and the switch decision remain consumer/operator work.
+The 29/29 M1 receipt tranche is complete. Bootstrap the visual lab separately
+through [`visual-lab-unblock-runway.md`](visual-lab-unblock-runway.md) only
+after its repository-authority gate clears. Accessibility evidence, reusable
+bundle promotion, Nucleus M2/V2, and the switch decision remain separately
+owned work; no new component receipt card is implied.
