@@ -76,9 +76,11 @@ Updated: 2026-09-03
   - Completed: `g16.094` ordinary Cargo scope classification merged in PR #200
     at `f7ae38d9f7e644de6d39de43363dd77bbf75f842`; dependency-only Cargo changes
     no longer inherit release-version treatment in ordinary installed smoke.
-  - Ready frontier: `g16.093` MessageCenter preparation is accepted and paused.
-    `g16.092` now rebases onto merged `g16.094` and must pass its full web gate.
-    Finalization remains serial after that repair merges.
+  - Completed: `g16.092` native fresh-consumer repair merged in PR #199 at
+    `17534f484665bbbdd93e2ec70bec521318201941`; stable and Rust 1.95 consumer
+    graphs now pass with a freshly emitted 28-receipt identity.
+  - Ready frontier: `g16.093` MessageCenter preparation is accepted. Rebase,
+    tighten post-scroll containment, and finalize the twenty-ninth receipt.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -95,8 +97,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: rebase and merge `g16.092`, then finalize the accepted final
-    MessageCenter receipt serially; the
+  - Next move: finalize and review the accepted final MessageCenter receipt,
+    then close the 29/29 mounted programme; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.

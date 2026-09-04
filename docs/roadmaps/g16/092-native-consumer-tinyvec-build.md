@@ -1,6 +1,6 @@
 # g16.092 — Native Fresh-Consumer tinyvec Build Repair
 
-Status: review — tinyvec repair in PR #199; C1 `ed9699dd8` runtime with std-unified graph, 28 fresh receipts emitted and committed
+Status: complete — merged in PR #199 as `17534f484665bbbdd93e2ec70bec521318201941`; C1 `ed9699dd8` runtime with std-unified graph, 28 fresh receipts emitted and committed
 Type: repository validation repair
 Opened: 2026-09-03
 Depends on: reproduced `effigy ci:native` failure on merged `main` `4a615e990`
@@ -53,5 +53,5 @@ origin/main...HEAD`. Never run windowed/native-visual or release selectors.
 
 ## Continuation
 
-Merge only after exact-head review. MessageCenter preparation may run in
-parallel, but its shared receipt finalization waits for this repair on main.
+Resume accepted `g16.093` MessageCenter preparation against this merged
+identity and finalize the twenty-ninth receipt serially.

@@ -126,8 +126,8 @@ stay maintained; backend admission is not part of the first card.
 89. [089 — Nucleus DetailItem M1 receipt](089-nucleus-detail-item-m1.md) — complete in PR #196 after two preparation repair/re-review rounds; production Text/Button composition, surface/simple layouts, exact density and typography recipes, controlled input, parentage, geometry, and caller-scoped identity now carry a terminal M1 receipt
 90. [090 — Nucleus CommandPalette M1 receipt](090-nucleus-command-palette-m1.md) — complete in PR #195 after one preparation repair/re-review round; production Dialog/TextInput and ActionDiscoveryPanel composition, exact result postures/tokens, controlled selection refusal, navigation, dismissal, geometry, and identity now carry a terminal M1 receipt
 91. [091 — Nucleus ToastHost M1 receipt](091-nucleus-toast-host-m1.md) — complete in PR #197 after preparation repair and a cross-window focus-lifecycle repair; production adapter, exact placement/tokens, controlled lifecycle, duplicate teardown, and one terminal M1 receipt advance the cohort to 28/29
-92. [092 — Native consumer tinyvec build repair](092-native-consumer-tinyvec-build.md) — ready; restore the inherited Rust 1.95 fresh-consumer gate without weakening its negative controls
-93. [093 — Nucleus MessageCenter M1 receipt](093-nucleus-message-center-m1.md) — preparation-ready; build the final production mounted receipt proof in parallel with g16.092, then pause before shared evidence
+92. [092 — Native consumer tinyvec build repair](092-native-consumer-tinyvec-build.md) — complete in PR #199 after ordinary routing repair g16.094; the Rust 1.95 fresh-consumer graph now unifies tinyvec `std`, preserves its negative control, and carries a freshly emitted 28-receipt identity
+93. [093 — Nucleus MessageCenter M1 receipt](093-nucleus-message-center-m1.md) — preparation accepted; rebase onto merged g16.092, tighten post-scroll containment, and finalize the twenty-ninth receipt
 94. [094 — Ordinary Cargo scope classification repair](094-ordinary-cargo-scope-classification.md) — complete in PR #200; ordinary installed smoke now distinguishes dependency-only Cargo changes from package-version mutations without changing strict or candidate certification
 
 ## Parallel Continuation
@@ -139,8 +139,8 @@ ready, serial, gated, and held frontier. `g16.045`–`g16.050`,
 `g16.089`–`g16.091` are complete. The mounted Nucleus cohort is 28/29.
 `g16.092` repairs the inherited native fresh-consumer dependency gate while
 `g16.093` prepares MessageCenter without touching shared receipt files.
-`g16.094` is complete. `g16.092` now rebases and proves its full web gate;
-MessageCenter finalization remains serial after `g16.092` merges.
+`g16.092` and `g16.094` are complete. `g16.093` is the sole active receipt
+lane and finalizes MessageCenter against the merged dependency identity.
 Release mutation remains
 separately gated.
 `g16.051` and `g16.052` retain their
