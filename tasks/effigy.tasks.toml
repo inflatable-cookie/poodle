@@ -373,6 +373,9 @@
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
 "docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"
+# Svelte <-> React public prop drift gate (g16.095). Standalone selector;
+# runs in docs:check.
+"docs:react-prop-drift" = "bun packages/svelte/preview/scripts/react-prop-drift.ts"
 # Contract <-> Svelte callback-surface drift: every `on*` function-typed prop a
 # component emits must be named in its contract's Callbacks/Events section.
 # contract-prop-drift deliberately skips `on*` props, so before this nothing
@@ -587,6 +590,7 @@
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
+  { task = "docs:react-prop-drift" },
   { task = "check:parity-evidence-ledger" },
   { task = "react:docs" },
   { task = "report:parity" },
