@@ -11,6 +11,7 @@ Governing refs: `docs/architecture/014-compiled-web-package-distribution.md`,
 Branch: `fix/g16-103-release-tarball-dist-verification`
 Worktree: `/Users/tom/.t3/worktrees/poodle/g16-103-release-tarball-dist-verification`
 Base: `origin/main` at `c28b2dbf650430c67d1b1aaeaa856ef223638931`
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/208
 
 ## Outcome
 
