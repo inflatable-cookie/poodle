@@ -1,8 +1,10 @@
 # Visual Lab Unblock Runway
 
-Status: external bootstrap ready for explicit repository authority
-Promoted: 2026-09-02
-Owner split: Poodle orchestrator plans/adjudicates; dedicated lab repository
+Status: VL-0 authorized 2026-09-04 — repository `inflatable-cookie/poodle-lab`
+exists; VL-1 is compiled in the lab repository's own planning surfaces
+Promoted: 2026-09-02; VL-0 closed 2026-09-04
+Owner split: Poodle Chatterbox plans and adjudicates; the Poodle coordinator
+dispatches and reviews lab workers in the lab repository; the lab repository
 implements capture; Nucleus owns consumer states
 Governing refs: `051-icon-geometry-native-visual-admission.md`,
 `nucleus-gpui-parity-programme.md`, `../g15/047-primitive-visual-comparison.md`,
@@ -17,12 +19,24 @@ generic scene system.
 
 ## Serial Route
 
-### VL-0 — repository authority
+### VL-0 — repository authority (closed 2026-09-04)
 
-Create or identify the dedicated internal `poodle-conformance-lab` repository,
-name its maintainer, and authorize its Button-only bootstrap. The repository is
-not a Poodle package and Poodle never depends on it. Until this authority is
-explicit, no lab worker is dispatched.
+The operator authorized the dedicated internal lab repository on 2026-09-04
+and named it `poodle-lab` rather than `poodle-conformance-lab`, because it is
+expected to grow past conformance capture. Facts:
+
+- GitHub: `inflatable-cookie/poodle-lab`, private; local clone
+  `/Users/tom/Dev/projects/poodle-lab` beside Poodle, Longhorn, and Nucleus.
+- Maintainer of record: Poodle planning (Chatterbox) plans lab cards in the
+  lab's own docs spine; the Poodle coordinator dispatches and reviews lab
+  workers there. Longhorn is a path dependency, not an owner.
+- Shape: baseline Northstar spine (AGENTS.md, effigy.toml, docs front doors,
+  PAPERCUTS.md) seeded before VL-1. Poodle and Longhorn are consumed as
+  sibling path dependencies, as `jetstream-poodle` consumes Poodle.
+- The repository is not a Poodle package and Poodle never depends on it.
+
+Button-only bootstrap (VL-1) is authorized as the first lab lane and is
+compiled in the lab repository, not here.
 
 ### VL-1 — Button MVP bootstrap
 
@@ -74,12 +88,14 @@ schema revision remain serial review points.
 - The lab never changes Poodle thresholds, contracts, ledger status, or known
   deltas. It returns evidence and findings.
 
-## Authority Needed Now
+## Authority Granted
 
-One operator action remains before execution: authorize creation/use of the
-dedicated `poodle-conformance-lab` repository and confirm Poodle orchestration
-owns the VL-1 bootstrap review. That authority does not authorize release,
-workflow automation, Nucleus mutation, or local Poodle windowed runs.
+Repository creation, the `poodle-lab` name, Poodle planning plus coordinator
+ownership of VL-1 review, and the baseline spine were confirmed by the operator
+on 2026-09-04. That authority does not extend to Nucleus mutation or local
+Poodle windowed runs; Poodle release and workflow automation carry their own
+recorded authority (`097-v030-release-certification.md`,
+`096-linux-headless-pr-board.md`).
 
 ## Review Oracle
 
@@ -101,6 +117,5 @@ substitute.
 
 ## Continuation
 
-Once repository authority is explicit, compile and dispatch VL-1 in the lab
-repository. Keep `g16.051` blocked until VL-2A completes. Keep Nucleus V2
+Compile and dispatch VL-1 in the lab repository once its spine is seeded. Keep `g16.051` blocked until VL-2A completes. Keep Nucleus V2
 blocked until VL-2B covers the accepted consumer tranche and exact build.

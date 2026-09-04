@@ -84,7 +84,8 @@ Updated: 2026-09-04
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
   - Ready frontier (`../roadmaps/dispatch.md`): `g16.095` Svelte↔React prop
     drift gate and `g16.096` Linux headless PR/main board, approved as
-    concurrent siblings. No additional mounted receipt child. Later Nucleus
+    concurrent siblings, plus the coordinator-executed `g16.097` v0.3.0
+    release certification (operator authorized 2026-09-04). No additional mounted receipt child. Later Nucleus
     evidence waits on its explicit accessibility, visual-lab, consumer, and
     operator authority gates.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
@@ -103,12 +104,11 @@ Updated: 2026-09-04
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: the coordinator dispatches the two ready lanes; Chatterbox and
-    the operator choose the next programme boundary (Nucleus M2/V2, GPUI
-    accessibility, or the visual lab, which still needs repository authority).
-    Adoption, tag, publication, and sibling mutations retain their recorded
-    owners and gates. Workflow automation for the two Linux boards is now
-    authorized through `g16.096`.
+  - Next move: the coordinator dispatches the two ready lanes and performs
+    the release certification. The visual lab has repository authority
+    (`inflatable-cookie/poodle-lab`, 2026-09-04); VL-1 is planned in that
+    repository. Loophole adoption follows the npm proof. Nucleus A1 and M2/V2
+    remain the next Poodle programme choices after the lab bootstrap.
 
 ## Latest Completed Track
 

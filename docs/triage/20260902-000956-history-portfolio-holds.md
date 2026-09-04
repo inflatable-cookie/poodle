@@ -1,8 +1,8 @@
 # History Portfolio Holds
 
-Status: open — three owner-specific continuations remain
+Status: open — Loophole adoption, CS20, and keyboard geometry remain; the Poodle release is promoted as `g16.097`
 Captured: 2026-09-02
-Owner: Poodle Northstar orchestrator
+Owner: Chatterbox (planning)
 Canonical Poodle cards: `../roadmaps/g16/053-repository-security-audit-boundary-repair.md`,
 `../roadmaps/g16/054-historycenter-v030-release-candidate.md`
 
@@ -11,13 +11,10 @@ work is unrelated to drag.
 
 ## Open Continuations
 
-- **Poodle release:** `g16.054` prepares and validates one immutable `0.3.0`
-  candidate only after completed `g16.053` and serial `g16.056`–`g16.059`.
-  Architecture 014 owns the compiled build, export, CSS, and dependency
-  mechanics. Tag, workflow dispatch, publication, and registry proof remain a
-  later orchestrator-owned certification step.
 - **Loophole adoption:** package pin and rejection mapping begin only after
-  npm `latest=0.3.0` is independently proved. Poodle does not write Loophole.
+  npm `latest=0.3.0` is proved by `g16.097` (operator authorized the release
+  on 2026-09-04). Poodle does not write Loophole; Chatterbox relays the proof
+  to Loophole planning.
 - **CS20 `groupId`:** Poodle and Longhorn already carry the optional field.
   Whether the one coalesced node stays label-only or receives a stable
   `HistoryGroupId` is Loophole/Pulse recording policy. No Poodle card follows.
@@ -26,7 +23,6 @@ work is unrelated to drag.
 
 ## Promotion Route
 
-Close the release/adoption rows after the separately authorized certification
-and Loophole adoption merge. Promote CS20 only in Loophole/Pulse if stable
+Close the adoption row after Loophole's pin and rejection mapping merge. Promote CS20 only in Loophole/Pulse if stable
 identity is selected. Promote keyboard geometry only after a Poodle design
 decision; do not fold it into HistoryCenter, release, or drag work.
