@@ -1,4 +1,4 @@
-import { useState, type FocusEvent, type MouseEvent, type ReactNode } from "react";
+import { useState, type CSSProperties, type FocusEvent, type MouseEvent, type ReactNode } from "react";
 
 import "@inflatable-cookie/poodle-core/styles/button.css";
 
@@ -45,11 +45,18 @@ export interface ButtonProps {
   type?: "button" | "submit" | "reset";
   form?: string | null;
   formAction?: string | null;
+  formEncType?:
+    | "application/x-www-form-urlencoded"
+    | "multipart/form-data"
+    | "text/plain"
+    | null;
+  formMethod?: "get" | "post" | "dialog" | null;
   formNoValidate?: boolean;
   formTarget?: string | null;
   leadingIcon?: IconProp | null;
   trailingIcon?: IconProp | null;
   className?: string;
+  style?: CSSProperties | null;
   onClick?: ((event: MouseEvent<HTMLButtonElement>) => void) | null;
   onFocus?: ((event: FocusEvent<HTMLButtonElement>) => void) | null;
   onBlur?: ((event: FocusEvent<HTMLButtonElement>) => void) | null;
@@ -68,6 +75,8 @@ export function Button({
   type = "button",
   form = null,
   formAction = null,
+  formEncType = null,
+  formMethod = null,
   formNoValidate = false,
   formTarget = null,
   disabled = false,
@@ -85,6 +94,7 @@ export function Button({
   controls = null,
   describedBy = null,
   className = "",
+  style = null,
   onClick = null,
   onFocus = null,
   onBlur = null,
@@ -106,6 +116,13 @@ export function Button({
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
+  const resolvedStyle: CSSProperties | undefined =
+    style || maxWidth
+      ? {
+          ...(style ?? undefined),
+          ...(maxWidth ? { maxWidth } : {}),
+        }
+      : undefined;
 
   function handleClick(event: MouseEvent<HTMLButtonElement>): void {
     if (isToggle) {
@@ -121,10 +138,12 @@ export function Button({
       type={type}
       form={form ?? undefined}
       formAction={formAction ?? undefined}
+      formEncType={formEncType ?? undefined}
+      formMethod={formMethod ?? undefined}
       formNoValidate={formNoValidate || undefined}
       formTarget={formTarget ?? undefined}
       className={`poodle-button ${className}`.trim()}
-      style={maxWidth ? { maxWidth } : undefined}
+      style={resolvedStyle}
       data-variant={variant}
       data-tone={tone !== "default" ? tone : undefined}
       data-size={resolvedSize}

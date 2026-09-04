@@ -70,38 +70,11 @@ const CARD_REF_REGEX = /\bg\d+(\.\d+|-[a-z0-9]+)\b/i;
 // - `needs-decision`: Divergence requiring an architectural/contract decision by Chatterbox.
 // The register is an active ratchet: it fails if an entry no longer drifts or if a pending-port omits a card.
 export const BASELINE: BaselineRegister = {
-  button: {
-    kind: "pending-port",
-    reason: "pending port to React in g16.099",
-    svelteOnly: ["formenctype", "formmethod", "style"],
+  "dock-region": {
+    kind: "needs-decision",
+    reason: "showTabs is a spec-surface-pending tranche awaiting DockRegionSpec tab fields (g13.014)",
+    svelteOnly: ["showTabs"],
   },
-  calendar: {
-    kind: "pending-port",
-    reason: "pending port to React in g16.099",
-    svelteOnly: ["today"],
-  },
-  "split-view": {
-    kind: "pending-port",
-    reason: "pending port to React in g16.099",
-    svelteOnly: ["divider"],
-  },
-  "app-header": {
-    kind: "pending-port",
-    reason: "pending port to React in g16.099 (forwarded ref or elementRef callback)",
-    svelteOnly: ["element"],
-  },
-  "dock-region": [
-    {
-      kind: "pending-port",
-      reason: "pending port to React in g16.099",
-      svelteOnly: ["showCollapseToggle"],
-    },
-    {
-      kind: "needs-decision",
-      reason: "showTabs is a spec-surface-pending tranche awaiting DockRegionSpec tab fields (g13.014)",
-      svelteOnly: ["showTabs"],
-    },
-  ],
   "tri-state-switch": {
     kind: "framework-idiom",
     reason: "React uncontrolled defaultValue mirrors Svelte $bindable state initial value",

@@ -58,7 +58,7 @@ third grid track.
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for header height, title text, subtitle text, and nested controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for shell spacing and nested controls |
-| `element` | `HTMLElement \| null` | `null` | no | **Svelte only.** bindable escape hatch: the rendered `<header>` DOM element, for hosts that need to attach behaviour to the root. Excluded from `AppHeaderSpec` — see Element Access below |
+| `element` | `HTMLElement \| null` | `null` | no | bindable escape hatch in Svelte (forwarded `ref` or `element` callback/ref in React): the rendered `<header>` DOM element, for hosts that need to attach behaviour to the root. Excluded from `AppHeaderSpec` — see Element Access below |
 
 ### Element Access
 
@@ -68,10 +68,9 @@ header root.
 
 - **Svelte**: `bind:element` — the `element` prop is `$bindable`, defaulting to
   `null`. Use `bind:element={myHeader}` and read it inside a `$effect`.
-- **React**: `ref` — forwarded to the `<header>` via `forwardRef`
-  (`AppHeaderProps` itself is unchanged; `ref` is React's own mechanism, not a
-  prop in the type). `useRef<HTMLElement>(null)` and pass it as `<AppHeader
-  ref={myRef} />`.
+- **React**: `ref` (forwarded via `forwardRef`) or `element` callback/ref prop —
+  forwarded to the `<header>`. Use `useRef<HTMLElement>(null)` and pass it as
+  `<AppHeader ref={myRef} />` or `<AppHeader element={myCallback} />`.
 
 Intended use: the host attaches behaviour to the element. Poodle implements no
 drag gesture and imports no `@tauri-apps/*`; `data-drag-region` keeps its

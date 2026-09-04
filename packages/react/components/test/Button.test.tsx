@@ -23,4 +23,30 @@ describe("Button (react)", () => {
     rerender(<Button>Go</Button>);
     expect(getByRole("button").getAttribute("aria-controls")).toBeNull();
   });
+
+  it("renders formEncType and formMethod attributes", () => {
+    const { getByRole } = render(
+      <Button
+        type="submit"
+        formEncType="multipart/form-data"
+        formMethod="post"
+      >
+        Submit
+      </Button>,
+    );
+    const button = getByRole("button");
+    expect(button.getAttribute("formenctype")).toBe("multipart/form-data");
+    expect(button.getAttribute("formmethod")).toBe("post");
+  });
+
+  it("renders inline style and combines with maxWidth", () => {
+    const { getByRole } = render(
+      <Button style={{ color: "red" }} maxWidth="200px">
+        Styled
+      </Button>,
+    );
+    const button = getByRole("button");
+    expect(button.style.color).toBe("red");
+    expect(button.style.maxWidth).toBe("200px");
+  });
 });

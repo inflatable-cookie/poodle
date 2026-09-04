@@ -107,4 +107,16 @@ describe("Calendar (react)", () => {
     fireEvent.click(day(container, "Mar 15, 2026"));
     expect(onValueChange).not.toHaveBeenCalled();
   });
+
+  it("pins today date deterministically via today prop", () => {
+    const { container } = render(
+      <Calendar visibleMonth="2026-03-01" today="2026-03-25" />,
+    );
+
+    const pinnedToday = day(container, "Mar 25, 2026");
+    expect(pinnedToday.getAttribute("data-today")).toBe("true");
+
+    const otherDay = day(container, "Mar 24, 2026");
+    expect(otherDay.getAttribute("data-today")).toBe("false");
+  });
 });
