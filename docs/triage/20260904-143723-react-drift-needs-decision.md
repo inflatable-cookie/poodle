@@ -24,10 +24,27 @@ Source: `packages/svelte/preview/scripts/react-prop-drift.ts` `BASELINE`
 3. **OrderBy `onActiveSortChange`** — React-only callback. Same evaluation as
    Tree; consumers to check: Soundcheck, Acowtancy admin lists.
 
+## Evidence (sweep 2026-09-04)
+
+- `Tree.onEditingChange` and `OrderBy.onActiveSortChange`: zero consumer
+  hits across 15 Svelte consumers; they exist only in the React shells and
+  specimens. Both are the change callback paired with a `$bindable` state
+  (`editing`, `activeSort`), the pattern the working rules already call
+  framework idiom.
+- `DockRegion showTabs`: used by Longhorn's `longhorn-poodle-svelte`
+  (`LayoutDockRegion.svelte:121`, `dock.test.ts:36`) and required by
+  Loophole. It is a real cross-target capability, not a web-only attribute.
+
+## Recommendation (awaiting operator confirmation)
+
+1. Re-kind `tree` and `order-by` entries to `framework-idiom` with the
+   pairing reason. No Svelte change. One-line baseline edit; fold into the
+   next React-touching card or a papercut-class worker.
+2. Promote `showTabs` to the portable spec: `DockRegionSpec` gains a
+   `show_tabs` field, `poodle-render` honours it, the contract table moves
+   the prop from web-only to portable, and the baseline entry is deleted.
+   One small card; also closes the `g13.014` spec-surface tranche note.
+
 ## Next check
 
-Fold into the first consumer papercut sweep: grep the sibling apps for
-`onEditingChange`, `onActiveSortChange`, and DockRegion tab usage before
-deciding. Decide all three in one small contract batch, then either open a
-card or re-kind the entries to `framework-idiom`. Remove this note when the
-baseline has no `needs-decision` entries.
+Remove this note when the baseline has no `needs-decision` entries.
