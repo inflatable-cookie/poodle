@@ -10,6 +10,7 @@ Branch: `feature/g16-098-cold-checkout-web-board-repair`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-098-cold-checkout-web-board-repair`
 Base: `origin/main` at `7022534e7` after rebase over merged g16.095
 Planning base at dispatch: `3dbd1cabd1ca504d9744e948a0b4079b0b865eea`
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/203
 
 ## Outcome
 
