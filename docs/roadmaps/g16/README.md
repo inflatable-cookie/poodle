@@ -2,8 +2,9 @@
 
 Status: active — complete through `g16.094`; Nucleus M1 mounted cohort complete
 at 29/29; `g16.098` cold-checkout board repair merged in PR #203, `g16.095`
-merged in PR #202, `g16.099` port tranche merged in PR #204, `g16.101` Tree
-accessible name merged in PR #205, and `g16.096` / `g16.097`
+merged in PR #202, `g16.099` port tranche merged in PR #204, `g16.100` DockRegion
+`showTabs` merged in PR #206, `g16.101` Tree accessible name merged in PR #205,
+and `g16.096` / `g16.097`
 are serial behind `098`; VL-0 lab authority is
 closed; later evidence and adoption phases remain gated
 Posture: strict-ready
@@ -138,7 +139,7 @@ stay maintained; backend admission is not part of the first card.
 97. [097 — v0.3.0 release certification](097-v030-release-certification.md) — ready; first attempt's tag at `9b451c48d` is retracted after dry-run `33874116177` failed on the `098` defect; re-certification from post-`098` `main`, then tag, dry-run, publish, npm proof; operator authorized 2026-09-04
 98. [098 — Cold-checkout web board repair](098-cold-checkout-web-board-repair.md) — complete in PR #203 at `c8636c699`; cold and warm `ci:web` now pass after the `react-preview` alias and package-build ordering repair
 99. [099 — React prop port tranche](099-react-prop-port-tranche.md) — complete in PR #204 at `660b9510d`; all five pending-port baseline entries are cleared
-100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — ready; Longhorn and Loophole need it natively; also re-kinds the two React callbacks as framework idiom
+100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — complete in PR #206; portable contract, Rust render paths, React parity, GPUI specimen, and baseline closeout
 101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — complete in PR #205; explicit `aria-label` per treeitem in both shells, including loading and rename states
 102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — ready; `layout="fill"`, a panel padding hook, and a standalone-strip recipe replace `:global` overrides in three consumers
 

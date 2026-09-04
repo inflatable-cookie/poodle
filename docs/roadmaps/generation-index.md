@@ -82,8 +82,9 @@ Updated: 2026-09-04
   - Completed: `g16.093` MessageCenter merged in PR #198 at
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
-  - Ready frontier (`../roadmaps/dispatch.md`): `g16.100` DockRegion `showTabs`
-    portable and `g16.102` Tabs fill layout (consumer-sweep intake, ready);
+  - Ready frontier (`../roadmaps/dispatch.md`): `g16.102` Tabs fill layout
+    (consumer-sweep intake, ready); `g16.100` DockRegion `showTabs` portable is
+    merged in PR #206 at `2db86aadd`;
     `g16.098` cold-checkout web board repair is merged in PR #203 at
     `c8636c699`, `g16.099` React prop port tranche is merged in PR #204 at
     `660b9510d`, and `g16.101` Tree accessible name is merged in PR #205 at
