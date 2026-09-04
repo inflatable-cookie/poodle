@@ -20,6 +20,13 @@
 //    parameter signatures and callback arities are framework-idiomatic.
 // 6. Rest props and index signatures: `...restProps` and `[key: string]` index
 //    signatures are excluded.
+//
+// Boundary note (contract-prop-drift vs react-prop-drift): contract-prop-drift.ts
+// exports `svelteProps` which deliberately drops `on*` callbacks because contract
+// callback drift is tracked separately. This script implements `parseSvelteProps`
+// to extract all public props from Svelte 5 `$props()` destructuring, including
+// `on*` callbacks, because Svelte<->React public prop parity requires comparing
+// callbacks by name (normalization rule 5).
 
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -36,37 +43,168 @@ const contractsDir = path.join(repoRoot, "docs/contracts/components");
 const svelteDir = path.join(repoRoot, "packages/svelte/components/src");
 const reactDir = path.join(repoRoot, "packages/react/components/src");
 
+export type BaselineKind = "pending-port" | "framework-idiom" | "needs-decision";
+
 export interface BaselineEntry {
+  kind: BaselineKind;
   reason: string;
   reactOnly?: string[];
   svelteOnly?: string[];
   defaultDrift?: string[];
 }
 
-// Known, accepted drift with reasoned justifications.
-// Every entry MUST carry a non-empty `reason` string explaining why the delta
-// requires a contract or API decision. Missing ports MUST NOT be baselined.
-export const BASELINE: Record<string, BaselineEntry> = {
-  // dock-region `showTabs`: Svelte carries `showTabs` as a spec-surface-pending
-  // tranche awaiting DockRegionSpec tab strip modeling in g13.014 (see
-  // contract-prop-drift.ts). React does not declare this pending port.
-  "dock-region": {
-    reason: "showTabs is a spec-surface-pending tranche awaiting DockRegionSpec tab fields (g13.014)",
-    svelteOnly: ["showTabs"],
+export type BaselineRegister = Record<string, BaselineEntry | BaselineEntry[]>;
+
+export function getBaselineEntries(register: BaselineRegister, slug: string): BaselineEntry[] {
+  const entry = register[slug];
+  if (!entry) return [];
+  return Array.isArray(entry) ? entry : [entry];
+}
+
+const VALID_BASELINE_KINDS = new Set<string>(["pending-port", "framework-idiom", "needs-decision"]);
+const CARD_REF_REGEX = /\bg\d+(\.\d+|-[a-z0-9]+)\b/i;
+
+// Ratcheted BASELINE register for accepted deltas:
+// - `pending-port`: Svelte props not yet ported to React; reason must cite the card clearing it (e.g. g16.099).
+// - `framework-idiom`: React uncontrolled default* initializers and change callbacks mirroring Svelte $bindable runes.
+// - `needs-decision`: Divergence requiring an architectural/contract decision by Chatterbox.
+// The register is an active ratchet: it fails if an entry no longer drifts or if a pending-port omits a card.
+export const BASELINE: BaselineRegister = {
+  button: {
+    kind: "pending-port",
+    reason: "pending port to React in g16.099",
+    svelteOnly: ["formenctype", "formmethod", "style"],
+  },
+  calendar: {
+    kind: "pending-port",
+    reason: "pending port to React in g16.099",
+    svelteOnly: ["today"],
+  },
+  "split-view": {
+    kind: "pending-port",
+    reason: "pending port to React in g16.099",
+    svelteOnly: ["divider"],
+  },
+  "app-header": {
+    kind: "pending-port",
+    reason: "pending port to React in g16.099 (forwarded ref or elementRef callback)",
+    svelteOnly: ["element"],
+  },
+  "dock-region": [
+    {
+      kind: "pending-port",
+      reason: "pending port to React in g16.099",
+      svelteOnly: ["showCollapseToggle"],
+    },
+    {
+      kind: "needs-decision",
+      reason: "showTabs is a spec-surface-pending tranche awaiting DockRegionSpec tab fields (g13.014)",
+      svelteOnly: ["showTabs"],
+    },
+  ],
+  "tri-state-switch": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultValue mirrors Svelte $bindable state initial value",
+    reactOnly: ["defaultValue"],
+  },
+  "embed-input": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultValue mirrors Svelte $bindable value initial value",
+    reactOnly: ["defaultValue"],
+  },
+  "file-upload": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultFiles mirrors Svelte $bindable files initial value",
+    reactOnly: ["defaultFiles"],
+  },
+  "range-slider": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultValue mirrors Svelte $bindable value initial value",
+    reactOnly: ["defaultValue"],
+  },
+  slider: {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultValue mirrors Svelte $bindable value initial value",
+    reactOnly: ["defaultValue"],
+  },
+  "token-input": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultValues mirrors Svelte $bindable values initial value",
+    reactOnly: ["defaultValues"],
+  },
+  "duration-input": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultHours/defaultMinutes/defaultSeconds mirror Svelte $bindable time values",
+    reactOnly: ["defaultHours", "defaultMinutes", "defaultSeconds"],
+  },
+  "sidebar-nav": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultValue mirrors Svelte $bindable value initial value",
+    reactOnly: ["defaultValue"],
+  },
+  tree: {
+    kind: "needs-decision",
+    reason: "Tree onEditingChange is a candidate for Svelte inclusion awaiting Chatterbox contract decision",
+    reactOnly: ["onEditingChange"],
+  },
+  "filter-toolbar": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultCollapsed and onCollapsedChange mirror Svelte $bindable collapsed initial value",
+    reactOnly: ["defaultCollapsed", "onCollapsedChange"],
+  },
+  "log-list": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultFilterLevel/defaultFilterText and onFilter*Change mirror Svelte $bindable filter initial values",
+    reactOnly: ["defaultFilterLevel", "defaultFilterText", "onFilterLevelChange", "onFilterTextChange"],
+  },
+  "order-by": {
+    kind: "needs-decision",
+    reason: "OrderBy onActiveSortChange is a candidate for Svelte inclusion awaiting Chatterbox contract decision",
+    reactOnly: ["onActiveSortChange"],
+  },
+  "relation-picker": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultQuery and defaultSelectedIds mirror Svelte $bindable selection and query initial values",
+    reactOnly: ["defaultQuery", "defaultSelectedIds"],
+  },
+  "action-discovery-panel": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultActiveId mirrors Svelte $bindable activeId initial value",
+    reactOnly: ["defaultActiveId"],
+  },
+  "settings-shell": {
+    kind: "framework-idiom",
+    reason: "React uncontrolled defaultSearchQuery mirrors Svelte $bindable searchQuery initial value",
+    reactOnly: ["defaultSearchQuery"],
   },
 };
 
-/** Validates that all entries in the baseline register carry a non-empty reason string. */
+/** Validates that all entries in the baseline register carry a valid kind and non-empty reason string. */
 export function validateBaseline(baseline: Record<string, unknown>): void {
   for (const [slug, raw] of Object.entries(baseline)) {
-    if (!raw || typeof raw !== "object") {
-      throw new Error(`Baseline entry for "${slug}" must be an object`);
-    }
-    const entry = raw as Record<string, unknown>;
-    if (typeof entry.reason !== "string" || !entry.reason.trim()) {
-      throw new Error(
-        `Baseline entry for "${slug}" must have a non-empty reason string explaining why it requires a contract or API decision`,
-      );
+    const items = Array.isArray(raw) ? raw : [raw];
+    for (const item of items) {
+      if (!item || typeof item !== "object") {
+        throw new Error(`Baseline entry for "${slug}" must be an object`);
+      }
+      const entry = item as Record<string, unknown>;
+      if (typeof entry.kind !== "string" || !VALID_BASELINE_KINDS.has(entry.kind)) {
+        throw new Error(
+          `Baseline entry for "${slug}" must have a valid kind ("pending-port" | "framework-idiom" | "needs-decision"), got: ${JSON.stringify(entry.kind)}`,
+        );
+      }
+      if (typeof entry.reason !== "string" || !entry.reason.trim()) {
+        throw new Error(
+          `Baseline entry for "${slug}" must have a non-empty reason string explaining why it requires a contract or API decision`,
+        );
+      }
+      if (entry.kind === "pending-port") {
+        if (!CARD_REF_REGEX.test(entry.reason)) {
+          throw new Error(
+            `Baseline pending-port entry for "${slug}" must name the card that will clear it (e.g. g16.099) in its reason: "${entry.reason}"`,
+          );
+        }
+      }
     }
   }
 }
@@ -165,7 +303,7 @@ function findTypeAliasEnd(src: string, startIdx: number): number {
 }
 
 /** Parses property declarations from an interface or type literal body. */
-function parsePropsFromBraceBody(body: string): Map<string, string> {
+export function parsePropsFromBraceBody(body: string): Map<string, string> {
   const props = new Map<string, string>();
   const clean = body.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   let depth = 0;
@@ -356,9 +494,21 @@ export function parseReactPropsFromSource(
     if (ifaceMatch) {
       const extendsClause = ifaceMatch[1];
       if (extendsClause.includes("AudioPresentationProps")) {
-        propsMap.set("size", "ControlSize | null");
-        propsMap.set("sizeRole", "SemanticControlSizeRole");
-        propsMap.set("density", "ControlDensity | null");
+        const audioPath = path.join(dir, "audio/useAudioPresentation.ts");
+        if (existsSync(audioPath)) {
+          const audioSrc = readFileSync(audioPath, "utf8");
+          const aMatch = audioSrc.match(/interface\s+AudioPresentationProps\b[^{]*\{/);
+          if (aMatch) {
+            const body = extractBalancedBraces(audioSrc, aMatch.index! + aMatch[0].length - 1);
+            if (body) {
+              for (const [k, v] of parsePropsFromBraceBody(body)) propsMap.set(k, v);
+            }
+          }
+        } else {
+          propsMap.set("size", "ControlSize | null");
+          propsMap.set("sizeRole", "SemanticControlSizeRole");
+          propsMap.set("density", "ControlDensity | null");
+        }
       }
       const openIndex = ifaceMatch.index! + ifaceMatch[0].length - 1;
       const body = extractBalancedBraces(src, openIndex);
@@ -446,6 +596,11 @@ export interface ReactPropDriftFinding {
   svelteOnly: string[];
   reactOnly: string[];
   defaultDrift?: { prop: string; svelteDefault: string; reactDefault: string }[];
+  staleBaseline?: {
+    svelteOnly: string[];
+    reactOnly: string[];
+    defaultDrift: string[];
+  };
 }
 
 /** Normalizes literal default value string for comparison (collapsing whitespace/quotes/trailing commas). */
@@ -470,7 +625,7 @@ export function compareComponentProps(
   allRProps: Set<string>,
   snippets: Set<string>,
   contractPropsSet: Set<string>,
-  baseline?: BaselineEntry,
+  baseline?: BaselineEntry | BaselineEntry[],
   sDefaults?: Map<string, string>,
   rDefaults?: Map<string, string>,
 ): ReactPropDriftFinding | null {
@@ -485,22 +640,35 @@ export function compareComponentProps(
   const rCanonical = new Map<string, string>();
   for (const p of rProps) rCanonical.set(canonicalizePropName(p), p);
 
-  const allowedSvelteOnly = baseline?.svelteOnly ?? [];
-  const allowedReactOnly = baseline?.reactOnly ?? [];
-  const allowedDefaultDrift = baseline?.defaultDrift ?? [];
+  const entries = baseline ? (Array.isArray(baseline) ? baseline : [baseline]) : [];
+  const allowedSvelteOnly = new Set<string>(entries.flatMap((e) => e.svelteOnly ?? []));
+  const allowedReactOnly = new Set<string>(entries.flatMap((e) => e.reactOnly ?? []));
+  const allowedDefaultDrift = new Set<string>(entries.flatMap((e) => e.defaultDrift ?? []));
+
+  const matchedSvelteOnly = new Set<string>();
+  const matchedReactOnly = new Set<string>();
+  const matchedDefaultDrift = new Set<string>();
 
   const svelteOnly: string[] = [];
   const reactOnly: string[] = [];
 
   for (const [canonical, orig] of sCanonical) {
-    if (!rCanonical.has(canonical) && !allowedSvelteOnly.includes(orig)) {
-      svelteOnly.push(orig);
+    if (!rCanonical.has(canonical)) {
+      if (allowedSvelteOnly.has(orig)) {
+        matchedSvelteOnly.add(orig);
+      } else {
+        svelteOnly.push(orig);
+      }
     }
   }
 
   for (const [canonical, orig] of rCanonical) {
-    if (!sCanonical.has(canonical) && !allowedReactOnly.includes(orig)) {
-      reactOnly.push(orig);
+    if (!sCanonical.has(canonical)) {
+      if (allowedReactOnly.has(orig)) {
+        matchedReactOnly.add(orig);
+      } else {
+        reactOnly.push(orig);
+      }
     }
   }
 
@@ -515,25 +683,44 @@ export function compareComponentProps(
           const rVal = rDefaults.get(rName)!;
           const sNorm = normalizeDefaultValue(sVal);
           const rNorm = normalizeDefaultValue(rVal);
-          if (sNorm !== rNorm && !allowedDefaultDrift.includes(sName)) {
-            defaultDrift.push({
-              prop: sName,
-              svelteDefault: sVal,
-              reactDefault: rVal,
-            });
+          if (sNorm !== rNorm) {
+            if (allowedDefaultDrift.has(sName)) {
+              matchedDefaultDrift.add(sName);
+            } else {
+              defaultDrift.push({
+                prop: sName,
+                svelteDefault: sVal,
+                reactDefault: rVal,
+              });
+            }
           }
         }
       }
     }
   }
 
-  if (svelteOnly.length > 0 || reactOnly.length > 0 || defaultDrift.length > 0) {
+  // Ratchet liveness: check for any baselined props that did NOT match an actual drift
+  const staleSvelteOnly = [...allowedSvelteOnly].filter((p) => !matchedSvelteOnly.has(p));
+  const staleReactOnly = [...allowedReactOnly].filter((p) => !matchedReactOnly.has(p));
+  const staleDefaultDrift = [...allowedDefaultDrift].filter((p) => !matchedDefaultDrift.has(p));
+  const hasStale = staleSvelteOnly.length > 0 || staleReactOnly.length > 0 || staleDefaultDrift.length > 0;
+
+  if (svelteOnly.length > 0 || reactOnly.length > 0 || defaultDrift.length > 0 || hasStale) {
     return {
       slug,
       displayName,
       svelteOnly: svelteOnly.sort(),
       reactOnly: reactOnly.sort(),
       ...(defaultDrift.length > 0 ? { defaultDrift } : {}),
+      ...(hasStale
+        ? {
+            staleBaseline: {
+              svelteOnly: staleSvelteOnly.sort(),
+              reactOnly: staleReactOnly.sort(),
+              defaultDrift: staleDefaultDrift.sort(),
+            },
+          }
+        : {}),
     };
   }
   return null;
@@ -543,12 +730,13 @@ export interface ReactPropDriftResult {
   checked: number;
   skipped: number;
   findings: ReactPropDriftFinding[];
+  ratchetErrors: string[];
 }
 
 /** Runs the public prop drift check across all catalogue components. */
 export function reactPropDrift(options?: {
   repoRoot?: string;
-  baseline?: Record<string, BaselineEntry>;
+  baseline?: BaselineRegister;
 }): ReactPropDriftResult {
   const root = options?.repoRoot ?? repoRoot;
   const activeBaseline = options?.baseline ?? BASELINE;
@@ -561,13 +749,29 @@ export function reactPropDrift(options?: {
   let checked = 0;
   let skipped = 0;
   const findings: ReactPropDriftFinding[] = [];
+  const ratchetErrors: string[] = [];
+
+  const validSlugs = new Set(allComponents.map((c) => c.slug));
+  for (const slug of Object.keys(activeBaseline)) {
+    if (!validSlugs.has(slug)) {
+      ratchetErrors.push(`react prop drift ratchet: unknown component slug in BASELINE: "${slug}"`);
+    }
+  }
 
   for (const entry of allComponents) {
     const sveltePath = path.join(curSvelteDir, `${entry.displayName}.svelte`);
     const reactPath = path.join(curReactDir, `${entry.displayName}.tsx`);
 
-    if (!existsSync(sveltePath) || !existsSync(reactPath)) {
+    if (!existsSync(sveltePath)) {
       skipped++;
+      continue;
+    }
+
+    if (!existsSync(reactPath)) {
+      skipped++;
+      ratchetErrors.push(
+        `react prop drift: missing React component shell for [${entry.displayName}] (${entry.slug})`,
+      );
       continue;
     }
 
@@ -602,16 +806,22 @@ export function reactPropDrift(options?: {
     if (finding) findings.push(finding);
   }
 
-  return { checked, skipped, findings };
+  return { checked, skipped, findings, ratchetErrors };
 }
 
 /** Formats findings as gate error strings. */
 export function reactDriftErrors(options?: {
   repoRoot?: string;
-  baseline?: Record<string, BaselineEntry>;
+  baseline?: BaselineRegister;
 }): string[] {
-  return reactPropDrift(options).findings.flatMap((f) => {
-    const errors: string[] = [];
+  const result = reactPropDrift(options);
+  const errors: string[] = [];
+
+  for (const err of result.ratchetErrors) {
+    errors.push(err);
+  }
+
+  for (const f of result.findings) {
     if (f.svelteOnly.length > 0) {
       errors.push(
         `react prop drift: [${f.displayName}] (${f.slug}) Svelte prop(s) missing from React: ${f.svelteOnly.join(", ")}`,
@@ -629,71 +839,100 @@ export function reactDriftErrors(options?: {
         );
       }
     }
-    return errors;
-  });
+    if (f.staleBaseline) {
+      if (f.staleBaseline.svelteOnly.length > 0) {
+        errors.push(
+          `react prop drift ratchet: [${f.displayName}] (${f.slug}) baselined Svelte prop(s) no longer drift (delete from BASELINE): ${f.staleBaseline.svelteOnly.join(", ")}`,
+        );
+      }
+      if (f.staleBaseline.reactOnly.length > 0) {
+        errors.push(
+          `react prop drift ratchet: [${f.displayName}] (${f.slug}) baselined React prop(s) no longer drift (delete from BASELINE): ${f.staleBaseline.reactOnly.join(", ")}`,
+        );
+      }
+      if (f.staleBaseline.defaultDrift.length > 0) {
+        errors.push(
+          `react prop drift ratchet: [${f.displayName}] (${f.slug}) baselined default drift prop(s) no longer drift (delete from BASELINE): ${f.staleBaseline.defaultDrift.join(", ")}`,
+        );
+      }
+    }
+  }
+
+  return errors;
 }
 
 // Standalone report / gate execution: `bun packages/svelte/preview/scripts/react-prop-drift.ts`
 if (import.meta.main) {
-  const { checked, skipped, findings } = reactPropDrift();
+  const { checked, skipped, findings, ratchetErrors } = reactPropDrift();
   console.log(`react-prop-drift: checked ${checked}, skipped ${skipped} (missing component file)\n`);
 
-  if (findings.length > 0) {
-    const svelteMissing = findings.reduce((acc, f) => acc + f.svelteOnly.length, 0);
-    const reactOnly = findings.reduce((acc, f) => acc + f.reactOnly.length, 0);
-    const defaults = findings.reduce((acc, f) => acc + (f.defaultDrift?.length ?? 0), 0);
+  const unbaselined = findings.filter(
+    (f) => f.svelteOnly.length > 0 || f.reactOnly.length > 0 || (f.defaultDrift?.length ?? 0) > 0,
+  );
+  const stale = findings.filter((f) => f.staleBaseline !== undefined);
+
+  if (unbaselined.length > 0 || stale.length > 0 || ratchetErrors.length > 0) {
+    const svelteMissing = unbaselined.reduce((acc, f) => acc + f.svelteOnly.length, 0);
+    const reactOnly = unbaselined.reduce((acc, f) => acc + f.reactOnly.length, 0);
+    const defaults = unbaselined.reduce((acc, f) => acc + (f.defaultDrift?.length ?? 0), 0);
     const total = svelteMissing + reactOnly + defaults;
 
-    console.log(
-      `FAIL — ${total} drift issue(s) across ${findings.length} component(s) ` +
-        `(${svelteMissing} missing in React, ${reactOnly} React-only, ${defaults} default drift):\n`,
-    );
+    if (total > 0) {
+      console.log(
+        `FAIL — ${total} un-baselined drift issue(s) across ${unbaselined.length} component(s) ` +
+          `(${svelteMissing} missing in React, ${reactOnly} React-only, ${defaults} default drift):\n`,
+      );
 
-    for (const f of findings) {
-      console.log(`  [${f.displayName}] (${f.slug}):`);
-      if (f.svelteOnly.length > 0) {
-        console.log(`    missing from React (Svelte-only): ${f.svelteOnly.join(", ")}`);
-      }
-      if (f.reactOnly.length > 0) {
-        console.log(`    React-only: ${f.reactOnly.join(", ")}`);
-      }
-      if (f.defaultDrift && f.defaultDrift.length > 0) {
-        for (const d of f.defaultDrift) {
-          console.log(`    default drift on "${d.prop}": Svelte="${d.svelteDefault}" vs React="${d.reactDefault}"`);
+      for (const f of unbaselined) {
+        console.log(`  [${f.displayName}] (${f.slug}):`);
+        if (f.svelteOnly.length > 0) {
+          console.log(`    missing from React (Svelte-only): ${f.svelteOnly.join(", ")}`);
         }
-      }
-    }
-    console.log("");
-
-    console.log("=== Grouped Findings Summary ===");
-    console.log("\n[Port to React] (Svelte props absent from React):");
-    for (const f of findings) {
-      if (f.svelteOnly.length > 0) {
-        console.log(`  - ${f.displayName} (${f.slug}): ${f.svelteOnly.join(", ")}`);
-      }
-    }
-    console.log("\n[Candidate for Svelte Inclusion / Needs Decision] (React-only props):");
-    for (const f of findings) {
-      if (f.reactOnly.length > 0) {
-        console.log(`  - ${f.displayName} (${f.slug}): ${f.reactOnly.join(", ")}`);
-      }
-    }
-    if (defaults > 0) {
-      console.log("\n[Default Drift] (Static literal default mismatch):");
-      for (const f of findings) {
+        if (f.reactOnly.length > 0) {
+          console.log(`    React-only: ${f.reactOnly.join(", ")}`);
+        }
         if (f.defaultDrift && f.defaultDrift.length > 0) {
           for (const d of f.defaultDrift) {
-            console.log(`  - ${f.displayName} (${f.slug}) "${d.prop}": Svelte="${d.svelteDefault}" vs React="${d.reactDefault}"`);
+            console.log(`    default drift on "${d.prop}": Svelte="${d.svelteDefault}" vs React="${d.reactDefault}"`);
           }
         }
       }
+      console.log("");
     }
-    console.log("");
+
+    if (stale.length > 0 || ratchetErrors.length > 0) {
+      console.log("FAIL — ratchet violation(s) in BASELINE register:\n");
+      for (const err of ratchetErrors) {
+        console.log(`  ${err}`);
+      }
+      for (const f of stale) {
+        if (f.staleBaseline?.svelteOnly.length) {
+          console.log(
+            `  [${f.displayName}] (${f.slug}) baselined Svelte prop(s) no longer drift (delete from BASELINE): ${f.staleBaseline.svelteOnly.join(", ")}`,
+          );
+        }
+        if (f.staleBaseline?.reactOnly.length) {
+          console.log(
+            `  [${f.displayName}] (${f.slug}) baselined React prop(s) no longer drift (delete from BASELINE): ${f.staleBaseline.reactOnly.join(", ")}`,
+          );
+        }
+        if (f.staleBaseline?.defaultDrift.length) {
+          console.log(
+            `  [${f.displayName}] (${f.slug}) baselined default drift no longer drifts (delete from BASELINE): ${f.staleBaseline.defaultDrift.join(", ")}`,
+          );
+        }
+      }
+      console.log("");
+    }
   } else {
-    console.log("OK — every public prop is aligned between Svelte and React.");
+    const baselineKeys = Object.keys(BASELINE);
+    console.log(
+      `OK — every public prop is aligned or accounted for in the ratcheted baseline (${checked} checked, ${baselineKeys.length} components with accepted deltas).`,
+    );
   }
 
-  if (findings.length > 0 && process.env.DRIFT_REPORT !== "1") {
+  const hasErrors = unbaselined.length > 0 || stale.length > 0 || ratchetErrors.length > 0;
+  if (hasErrors && process.env.DRIFT_REPORT !== "1") {
     process.exit(1);
   }
 }
