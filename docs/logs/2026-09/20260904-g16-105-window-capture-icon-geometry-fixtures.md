@@ -16,6 +16,13 @@ explicit samples, and paints a resolved geometry node through the ordinary
 GPUI node backend. It adds no static SVG, public Icon surface, Button change,
 runtime change, or capture-transport change.
 
+Exact-head review corrected endpoint realization: `endpoint-from` and
+`endpoint-to` now initialise the named endpoint directly, rather than issuing
+an inert reactivation after a directed clock starts. The fixture surface now
+uses the Eclipse theme's resolved `color.background.canvas` behind the fixed
+padding, and the receipt declares that scene contract. `forbidden.rs` now
+scans the icon-geometry fixture source as part of its non-activation proof.
+
 The `poodle.icon-geometry-visual-capture.v1` receipt records pair, direction,
 state, policy, sample, resolved-frame SHA-256, fixed logical viewport,
 transport, foreground evidence, and the Screen Recording requirement.
@@ -28,14 +35,22 @@ transport, foreground evidence, and the Screen Recording requirement.
 | Sample is exact | midpoint receipt state is realised with sample `0.5`. |
 | Reverse rebases | a second target issued after sample `0.5` produces a different resolved-frame hash from midpoint. |
 | Teardown is clean | teardown clears the runtime and paints the empty container scene. |
+| Endpoint target wins | both directions × both named endpoints hash-match direct endpoint realization. |
+| Capture source is complete | the forbidden activation scan includes `icon_geometry_capture.rs`. |
 | Button path untouched | existing window-capture binary tests remain green. |
 
 ## Validation
 
-- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-window-capture --features window-capture`: pass, 53 tests.
+- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-window-capture --features window-capture`: pass, 55 tests.
 - `effigy regressions:native`: pass, 203 tests.
 - `effigy check:gpui`: pass.
 - `effigy docs:check`: pass.
+- Canonical Nucleus cohort refresh: 29 M1 receipts re-emitted at
+  `a5fefa1054198c195c9414ebef612041677e29c3`; their only semantic payload
+  delta is `source_commit`, and the manifest resolution was repinned to it.
+- `effigy ci:web`: the former stale-Nucleus-pin failure is resolved; the board
+  later fails in unrelated `TabsControlledFocus.test.tsx` on
+  `separate-commit supersession retargets the latched transfer to the final tab`.
 - No `*-windowed`, native-visual, or capture selector was run.
 
 The headless test build initially could not write Clang's Metal module cache
