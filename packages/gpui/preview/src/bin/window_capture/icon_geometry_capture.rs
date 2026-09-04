@@ -11,6 +11,7 @@ use anyhow::{bail, Context as _, Result};
 use gpui::{
     div, px, App, AppContext as _, Context, IntoElement, ParentElement, Render, Styled, Window,
 };
+use poodle_adapter::ThemeProvider;
 use poodle_headless::motion_policy::MotionPolicy;
 use poodle_node::{Node, NodeKind};
 use poodle_render::icon_geometry::{
@@ -123,6 +124,7 @@ pub fn parse_args(argv: &[String]) -> Result<IconGeometryArgs> {
 
 struct Root {
     node: Node,
+    canvas: gpui::Hsla,
 }
 impl Render for Root {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
@@ -130,7 +132,7 @@ impl Render for Root {
         div()
             .size_full()
             .p(px(PADDING))
-            .bg(gpui::rgb(0xffffff))
+            .bg(self.canvas)
             .child(poodle_gpui_node_backend::to_gpui(&self.node))
     }
 }
@@ -148,7 +150,7 @@ fn opposite(direction: Direction) -> GeometryEndpoint {
     }
 }
 
-fn realise(args: &IconGeometryArgs) -> Result<(Node, Option<f32>, &'static str)> {
+fn realise(args: &IconGeometryArgs) -> Result<(Node, gpui::Hsla, Option<f32>, &'static str)> {
     let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
     let intent = |target, initial| GeometryRuntimeIntent {
         owner: OWNER.to_owned(),
@@ -156,9 +158,6 @@ fn realise(args: &IconGeometryArgs) -> Result<(Node, Option<f32>, &'static str)>
         target,
         initial,
     };
-    let initial = opposite(args.direction);
-    activate_icon_geometry(&mut runtime, intent(initial, true));
-    let first = activate_icon_geometry(&mut runtime, intent(target(args.direction), false));
     let (sample, policy) = match args.state {
         State::EndpointFrom => {
             activate_icon_geometry(&mut runtime, intent(GeometryEndpoint::From, true));
@@ -168,33 +167,44 @@ fn realise(args: &IconGeometryArgs) -> Result<(Node, Option<f32>, &'static str)>
             activate_icon_geometry(&mut runtime, intent(GeometryEndpoint::To, true));
             (Some(1.0), "full")
         }
-        State::Midpoint => {
-            sample_icon_geometry(&mut runtime, &first.key, 0.5);
-            (Some(0.5), "full")
-        }
-        State::ReverseMidpoint | State::Interruption => {
-            sample_icon_geometry(&mut runtime, &first.key, 0.5);
-            let second = activate_icon_geometry(&mut runtime, intent(initial, false));
-            sample_icon_geometry(&mut runtime, &second.key, 0.5);
-            (Some(0.5), "full")
-        }
-        State::Frozen => {
-            set_icon_geometry_policy(&mut runtime, MotionPolicy::Frozen);
-            (Some(1.0), "frozen")
-        }
-        State::Teardown => {
-            teardown_icon_geometry(&mut runtime, None);
-            (None, "full")
+        state => {
+            let initial = opposite(args.direction);
+            activate_icon_geometry(&mut runtime, intent(initial, true));
+            let first = activate_icon_geometry(&mut runtime, intent(target(args.direction), false));
+            match state {
+                State::Midpoint => {
+                    sample_icon_geometry(&mut runtime, &first.key, 0.5);
+                    (Some(0.5), "full")
+                }
+                State::ReverseMidpoint | State::Interruption => {
+                    sample_icon_geometry(&mut runtime, &first.key, 0.5);
+                    let second = activate_icon_geometry(&mut runtime, intent(initial, false));
+                    sample_icon_geometry(&mut runtime, &second.key, 0.5);
+                    (Some(0.5), "full")
+                }
+                State::Frozen => {
+                    set_icon_geometry_policy(&mut runtime, MotionPolicy::Frozen);
+                    (Some(1.0), "frozen")
+                }
+                State::Teardown => {
+                    teardown_icon_geometry(&mut runtime, None);
+                    (None, "full")
+                }
+                State::EndpointFrom | State::EndpointTo => {
+                    unreachable!("endpoint states are handled before the directed clock")
+                }
+            }
         }
     };
     let theme = poodle_gpui::GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
     let ctx = poodle_render::RenderContext::new(&theme);
+    let canvas = poodle_gpui_node_backend::color(theme.resolve_color("color.background.canvas"));
     let node = if matches!(args.state, State::Teardown) {
         Node::container()
     } else {
         poodle_render::icon_geometry::resolved_icon_geometry(&runtime, ICON_SIZE, &ctx)
     };
-    Ok((node, sample, policy))
+    Ok((node, canvas, sample, policy))
 }
 
 fn frame_sha256(node: &Node) -> String {
@@ -224,6 +234,7 @@ struct Receipt {
     transport: &'static str,
     #[serde(rename = "logicalViewport")]
     logical_viewport: Viewport,
+    scene: SceneContract,
     foreground: transport::ForegroundEvidence,
     permission: &'static str,
 }
@@ -232,9 +243,17 @@ struct Viewport {
     width: u32,
     height: u32,
 }
+#[derive(Serialize)]
+struct SceneContract {
+    surface: &'static str,
+    #[serde(rename = "paddingPx")]
+    padding_px: u32,
+    #[serde(rename = "iconSizePx")]
+    icon_size_px: u32,
+}
 
 pub fn run(args: &IconGeometryArgs) -> ! {
-    let (node, sample, policy) = match realise(args) {
+    let (node, canvas, sample, policy) = match realise(args) {
         Ok(value) => value,
         Err(error) => {
             eprintln!("poodle-window-capture: {error:#}");
@@ -256,7 +275,9 @@ pub fn run(args: &IconGeometryArgs) -> ! {
         label: "icon-geometry".to_owned(),
         logical_width: SIZE,
         logical_height: SIZE,
-        build: Box::new(move |_window: &mut Window, cx: &mut App| cx.new(|_| Root { node })),
+        build: Box::new(move |_window: &mut Window, cx: &mut App| {
+            cx.new(|_| Root { node, canvas })
+        }),
         on_frame: transport::settle_after(transport::FRAMES_BEFORE_CAPTURE),
         finish: Box::new(move |facts| {
             let (pair, direction, state, policy, sample, out_png, out_receipt, hash) = &*args;
@@ -272,6 +293,11 @@ pub fn run(args: &IconGeometryArgs) -> ! {
                 logical_viewport: Viewport {
                     width: SIZE as u32,
                     height: SIZE as u32,
+                },
+                scene: SceneContract {
+                    surface: "color.background.canvas",
+                    padding_px: PADDING as u32,
+                    icon_size_px: ICON_SIZE as u32,
                 },
                 foreground: facts.foreground.clone(),
                 permission: "screen-recording-required",
@@ -333,8 +359,8 @@ mod tests {
         let mut reverse = args(&[]);
         reverse[6] = "reverse-midpoint".to_owned();
         let reverse = parse_args(&reverse).unwrap();
-        let (mid_node, sample, _) = realise(&midpoint).unwrap();
-        let (reverse_node, reverse_sample, _) = realise(&reverse).unwrap();
+        let (mid_node, _, sample, _) = realise(&midpoint).unwrap();
+        let (reverse_node, _, reverse_sample, _) = realise(&reverse).unwrap();
         assert_eq!(sample, Some(0.5));
         assert_eq!(reverse_sample, Some(0.5));
         assert_ne!(frame_sha256(&mid_node), frame_sha256(&reverse_node));
@@ -343,8 +369,55 @@ mod tests {
     fn teardown_is_empty_scene() {
         let mut a = args(&[]);
         a[6] = "teardown".to_owned();
-        let (node, sample, _) = realise(&parse_args(&a).unwrap()).unwrap();
+        let (node, _, sample, _) = realise(&parse_args(&a).unwrap()).unwrap();
         assert_eq!(sample, None);
         assert!(matches!(node.kind, NodeKind::Container));
+    }
+
+    #[test]
+    fn endpoints_ignore_direction_and_paint_the_named_target() {
+        for (direction, state, endpoint) in [
+            ("forward", "endpoint-from", GeometryEndpoint::From),
+            ("forward", "endpoint-to", GeometryEndpoint::To),
+            ("reverse", "endpoint-from", GeometryEndpoint::From),
+            ("reverse", "endpoint-to", GeometryEndpoint::To),
+        ] {
+            let mut actual = args(&[]);
+            actual[4] = direction.to_owned();
+            actual[6] = state.to_owned();
+            let actual = parse_args(&actual).unwrap();
+            let (node, _, sample, _) = realise(&actual).unwrap();
+
+            let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
+            activate_icon_geometry(
+                &mut runtime,
+                GeometryRuntimeIntent {
+                    owner: OWNER.to_owned(),
+                    pair_id: actual.pair.clone(),
+                    target: endpoint,
+                    initial: true,
+                },
+            );
+            let theme =
+                poodle_gpui::GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+            let expected = poodle_render::icon_geometry::resolved_icon_geometry(
+                &runtime,
+                ICON_SIZE,
+                &poodle_render::RenderContext::new(&theme),
+            );
+            assert_eq!(
+                frame_sha256(&node),
+                frame_sha256(&expected),
+                "{direction}/{state}"
+            );
+            assert_eq!(
+                sample,
+                Some(if endpoint == GeometryEndpoint::From {
+                    0.0
+                } else {
+                    1.0
+                })
+            );
+        }
     }
 }
