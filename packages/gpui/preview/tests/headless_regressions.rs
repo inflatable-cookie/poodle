@@ -30031,21 +30031,35 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
 
         let first_overflow = bounds("message-center:left:item:row-0");
         let first_y = first_overflow.origin.y;
-        let viewport = list_bounds;
         driver.scroll_vertical_id("message-center:left:list", -400.0);
         let moved = bounds("message-center:left:item:row-0");
         assert!(
             moved.origin.y < first_y - px(8.0),
             "mounted wheel input must scroll overflowing rows"
         );
+        let list_after = bounds("message-center:left:list");
+        let surface_after = bounds("message-center:left:surface");
         assert!(
-            bounds_contain(surface_bounds, viewport),
-            "the list viewport must remain inside the popover surface"
+            list_after.size.height
+                <= px(poodle_render::presentation::rem_to_px(24.0) + 1.0),
+            "the current list height must keep the 24rem cap after wheel input"
+        );
+        assert!(
+            list_after.origin.x >= surface_after.origin.x - px(0.5)
+                && list_after.origin.x + list_after.size.width
+                    <= surface_after.origin.x + surface_after.size.width + px(0.5)
+                && surface_after.size.height + px(1.0) >= list_after.size.height,
+            "current post-scroll list size and horizontal placement must stay inside the current surface"
         );
         let later = bounds("message-center:left:item:row-10");
+        let panel_after = bounds("message-center:left:panel");
         assert!(
-            later.origin.y < viewport.bottom() && later.bottom() > viewport.origin.y,
-            "a later overflowing row must enter the list viewport after the wheel"
+            bounds_contain(surface_after, panel_after),
+            "the current list host must stay inside the current surface after wheel input"
+        );
+        assert!(
+            later.origin.y < panel_after.bottom() && later.bottom() > panel_after.origin.y,
+            "a later overflowing row must enter the current list host after the wheel"
         );
 
         left_items.lock().expect("left items")[0] = live_job(80.0);
@@ -30146,8 +30160,29 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
             trace_before_teardown,
             "terminal input cannot reach a removed host or cross its callbacks"
         );
-        assert!(driver.mounted_observation().is_valid());
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
         drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "MessageCenter",
+            "nucleus.attention.message-center",
+            observation,
+            &[
+                "mount duplicate caller-scoped MessageCenter instances through node_compat::MessageCenter::from_spec(...).into_element() in a 1100x720 HeadlessDriver host",
+                "compose production IconButton, Popover, Button, Icon, TimeAgo, EmptyState, Progress, and StatusIndicator through the shared renderer and GPUI adapter",
+                "dispatch mounted pointer, keyboard, Escape, outside, and wheel input across duplicate item ids, live-row inertia, and controlled host rebuilds",
+                "run the production Popover machine so open focuses the labelled dialog and dismissal restores the matching trigger",
+                "empty both hosts, redraw, and dispatch terminal keyboard input with no live surface",
+            ],
+            &[
+                "production Popover initialFocus=content focuses the labelled dialog on open and restores the exact trigger on Escape without fixture request_focus",
+                "duplicate open hosts register distinct live layers; innermost Escape and outside press dismiss only that layer; sibling callbacks and focus stay isolated",
+                "selectable rows keep radius.control, surface 72% hover fill, and the inset accent focus ring",
+                "overflowing lists scroll under mounted wheel input while current post-scroll list bounds stay inside the current surface",
+                "terminal empty hosts clear surfaces, items, paint, and focus identity before further input; MessageCenter owns no timeout clock",
+            ],
+        );
     });
 }
 
