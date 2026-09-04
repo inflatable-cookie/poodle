@@ -10,6 +10,21 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `workspaceAliases`, and `ci:web` builds both shell packages before
   `test:components`. A detached-worktree proof replants the missing alias.
 
+- 2026-09-04 — Second sighting of the 2026-09-02 `react-preview` dist-ordering
+  defect, now load-bearing: g16.096 made `ci-web` run automatically on every
+  PR and `main` push, and a CI tree is always cold, so `test:components`
+  runs before `react:package` and the `@inflatable-cookie/poodle-react` dist
+  import fails on every run (`Failed to resolve import
+  "@inflatable-cookie/poodle-react" from
+  packages/react/preview/src/gallery/ComponentsSection.tsx`; the three
+  react-preview suites `catalogue-nav`,
+  `g15-031-foundation-content-status`, and
+  `g15-033-composition-forms-data-media` fail at load while all 3651 tests
+  pass). The automatic web board stays red until `react:package` warms the
+  dist before `test:components`, or `react-preview` gets the same src alias
+  `react-components` already has. Hit while proving g16.096 PR #201; stopped
+  that lane per its stop condition. Resolved 2026-09-04 by g16.098 (PR #203).
+
 - 2026-09-04 — `import ts from "typescript"` under Bun with
   `@typescript/native@7.0.2` exports only `{ version, versionMajorMinor }` at
   runtime rather than the TypeScript compiler API namespace
