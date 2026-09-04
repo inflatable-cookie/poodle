@@ -91,6 +91,7 @@ function createColdCheckout(): string {
 
 function removeColdCheckout(root: string): void {
   run("git", ["worktree", "remove", "--force", root], repoRoot, 60_000);
+  run("git", ["worktree", "prune"], repoRoot, 30_000);
   rmSync(dirname(root), { recursive: true, force: true });
 }
 
@@ -127,7 +128,7 @@ afterAll(() => {
     removeColdCheckout(coldRoot);
     coldRoot = undefined;
   }
-});
+}, 60_000);
 
 describe("g16.098 cold-checkout react-preview", () => {
   test("ci:web builds shell packages before test:components and keeps pack-install after them", () => {
