@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-04 (revision 2: release certification lane)
+Updated: 2026-09-04 (revision 3: board repair, 095 revision, 097 re-certification)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -20,10 +20,32 @@ card or triage note says.
 
 ## Ready frontier
 
-### g16.095 — Svelte↔React public prop drift gate
+### g16.098 — Cold-checkout web board repair
+
+- Card: `g16/098-cold-checkout-web-board-repair.md`
+- Readiness: ready. Highest priority: `g16.096` and `g16.097` are serial
+  behind it.
+- Prerequisites: none. Completion: PR merged after accepted exact-head
+  review with the cold-path proof committed before the fix.
+- Owned mutable paths: `vitest.config.ts`, `tasks/effigy.tasks.toml`
+  (`ci:web` sequence only), one cold-path proof, `docs/logs/2026-09/` log,
+  root `PAPERCUTS.md` (append only)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.095` revision. Serial edges: `g16.096`
+  re-run and `g16.097` re-certification wait for this merge.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+### g16.095 — Svelte↔React public prop drift gate (revision)
 
 - Card: `g16/095-react-prop-drift-gate.md`
-- Readiness: ready
+- Readiness: ready — revision of PR #202 head `1440aeb33` in the existing
+  worker workspace: seed the 29 findings into the `kind`-tagged ratcheted
+  baseline (`pending-port` naming `g16.099`, `framework-idiom`,
+  `needs-decision`), add the ratchet test, keep the `docs:check` line.
+  Operator decision 2026-09-04. Same reviewer re-reviews the exact head.
 - Prerequisites: none. Completion: PR merged after accepted exact-head review;
   execution log written; grouped finding set recorded in the log.
 - Owned mutable paths: `packages/svelte/preview/scripts/react-prop-drift.ts`,
@@ -41,8 +63,11 @@ card or triage note says.
 ### g16.096 — Linux headless PR and main board
 
 - Card: `g16/096-linux-headless-pr-board.md`
-- Readiness: ready — workflow-edit authority is the operator's explicit
-  2026-09-02 approval recorded in the card
+- Readiness: ready, serial behind `g16.098` — PR #201 head `428edf690`
+  stands; after `098` merges, rebase it and re-run its board. The red
+  `ci-web` run `33874196422` was the cold-checkout defect, not the workflow
+  change. Workflow-edit authority is the operator's explicit 2026-09-02
+  approval recorded in the card
 - Prerequisites: none. Completion: PR merged after accepted exact-head review
   with both workflow runs green on the PR head; execution log records run URLs.
 - Owned mutable paths: `.github/workflows/ci-web.yml`,
@@ -60,19 +85,22 @@ card or triage note says.
 ### g16.097 — v0.3.0 release certification (coordinator-executed)
 
 - Card: `g16/097-v030-release-certification.md`
-- Readiness: ready — release-mutation authority is the operator's explicit
-  2026-09-04 authorization recorded in the card. Never dispatched to a
-  worker; the coordinator performs the ordered actions from a clean `main`.
-- Prerequisites: merged `g16.054` (PR #165). Completion: `v0.3.0` tag at
-  `9b451c48d`, green dry-run then publish runs, npm `latest` `0.3.0` for core
-  and Svelte, fresh-consumer install proof, closeout commit on `main`.
+- Readiness: ready for step 0 now (retract the failed `v0.3.0` tag; operator
+  decision 2026-09-04); steps 1–7 serial behind merged `g16.098`. Release
+  mutation authority is the operator's 2026-09-04 authorization recorded in
+  the card. Never dispatched to a worker.
+- Prerequisites: merged `g16.054` (PR #165) and merged `g16.098`. Completion:
+  `v0.3.0` tag at the re-certified `main` tip, green dry-run then publish
+  runs, npm `latest` `0.3.0` for core and Svelte, fresh-consumer install
+  proof, closeout commit on `main`.
 - Owned mutable paths: tag `v0.3.0`; `docs/logs/2026-09/` log; this card;
   `CHANGELOG.md` and `docs/release-notes/0.3.0.md` published headers;
   README status paragraphs naming the latest version
 - Reserved shared closeout surfaces (coordinator at closeout): `g16/README.md`,
   `generation-index.md`, this manifest
-- Approved concurrent siblings: `g16.095`, `g16.096` (they touch no release
-  surface). Serial edge: none; the tag targets a commit already on `main`.
+- Approved concurrent siblings: `g16.095` revision. Serial edges: `g16.098`
+  before step 1; `g16.096` may merge before or after, it does not touch the
+  certified tree's gates.
 - Worker capability class: none — coordinator action
 - Acceptance evidence and review oracle: the card's Acceptance checklist and
   Review Oracle table
@@ -82,6 +110,7 @@ card or triage note says.
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
+| `g16.099` React prop port tranche | merged `g16.095` with its seeded baseline | Chatterbox |
 | --- | --- | --- |
 | Loophole adoption of `0.3.0` | proven npm `latest` `0.3.0` (`g16.097` step 5); Loophole-owned planning | Loophole planning, via Chatterbox |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |

@@ -1,7 +1,7 @@
 # 001 Working Rules
 
 Status: active
-Updated: 2026-08-14
+Updated: 2026-09-04
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -86,6 +86,10 @@ workflow against the same cases.
   contract's props table is part of the port.
 - Web-native attributes (for example `autocomplete`, `spellcheck`, `autofocus`)
   belong to the web runtimes and stay excluded from the portable Rust spec.
+- React uncontrolled `default*` initializers and their change callbacks are
+  the React form of Svelte `$bindable` initial values. They are framework
+  idiom, recorded in the React drift baseline with that kind, not parity drift
+  (operator decision 2026-09-04).
   Imperative escape hatches (for example `focus()`) are documented as methods,
   not props, and are expected in both web runtimes.
 

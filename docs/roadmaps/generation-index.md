@@ -82,10 +82,11 @@ Updated: 2026-09-04
   - Completed: `g16.093` MessageCenter merged in PR #198 at
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
-  - Ready frontier (`../roadmaps/dispatch.md`): `g16.095` Svelte↔React prop
-    drift gate and `g16.096` Linux headless PR/main board, approved as
-    concurrent siblings, plus the coordinator-executed `g16.097` v0.3.0
-    release certification (operator authorized 2026-09-04). No additional mounted receipt child. Later Nucleus
+  - Ready frontier (`../roadmaps/dispatch.md`): `g16.098` cold-checkout web
+    board repair (priority), `g16.095` prop drift gate in ratcheted-baseline
+    revision (PR #202), `g16.096` Linux board (PR #201) and the
+    coordinator-executed `g16.097` v0.3.0 re-certification serial behind
+    `098`. The first `v0.3.0` tag is retracted; nothing was published. No additional mounted receipt child. Later Nucleus
     evidence waits on its explicit accessibility, visual-lab, consumer, and
     operator authority gates.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable

@@ -1,6 +1,7 @@
 # g16.095 — Svelte↔React Public Prop Drift Gate
 
-Status: ready
+Status: ready — in revision after review of PR #202 (head `1440aeb33`);
+operator decision 2026-09-04: ratcheted baseline, gate stays in `docs:check`
 Type: validation gate — no component API change
 Opened: 2026-09-04
 Depends on: none; independent of every other ready lane
@@ -36,16 +37,29 @@ Nothing compares React. The 2026-09-01 audit found 32 components whose React
 - Fail on: a React-only prop the contract does not document; a Svelte prop
   absent from React; a documented default that differs where both sides
   declare a static literal default.
-- Ship a `BASELINE` register in the script for accepted deltas, each entry
-  carrying a reason. Seed it only with deltas that need a contract or API
-  decision; do not baseline a delta that is simply a missing port. A missing
-  port is a finding the card reports, not a change the card makes.
+- Ship a `BASELINE` register in the script. Every entry carries a `kind` and
+  a reason, and the script refuses to load an entry without both. Kinds:
+  - `pending-port` — a Svelte prop not yet ported to React. The reason must
+    name the card that will clear it (`g16.099`). Adding a new `pending-port`
+    entry without a card reference fails the gate.
+  - `framework-idiom` — React uncontrolled `default*` initializers and
+    React-only change callbacks that mirror Svelte `$bindable` initial values
+    (working rules, Runtime Parity Authority). Documented, not drift.
+  - `needs-decision` — a divergence that requires a contract or API choice;
+    the reason names the open question and the owning note or card.
+  The register is a ratchet: it may only shrink except by a card-referenced
+  `pending-port` entry. Seed it with the 29 current findings so `main` stays
+  green and any new divergence fails.
 - Add selector `docs:react-prop-drift` to `tasks/effigy.tasks.toml` and
   include it in `docs:check` beside `docs:contract-drift`. Do not add it to
   `docs:lint`'s in-process aggregation; a standalone selector is enough.
 - Do not change any component API, default, or contract to make the gate pass.
   Report the finding set in the execution log grouped as: port to React,
-  candidate for Svelte inclusion, framework idiom, needs decision.
+  candidate for Svelte inclusion, framework idiom, needs decision. The
+  revision after review (`1440aeb33`) adds only the seeded register, its
+  `kind` validation and ratchet test, and the log grouping; the reviewer's
+  five non-blocking hardening notes may be taken in the same revision when
+  they do not widen scope.
 - Do not touch `.github/workflows/`, release surfaces, or React publication
   metadata.
 
@@ -57,7 +71,9 @@ Nothing compares React. The 2026-09-01 audit found 32 components whose React
 | Missing React port fails | remove one documented Svelte prop from a React shell | selector exits 1 naming component and prop |
 | Attribute casing is not drift | `autocomplete` (Svelte) vs `autoComplete` (React) | no finding |
 | Snippets and children are not drift | Svelte `children: Snippet` vs React `children: ReactNode` | no finding |
-| Baseline is reasoned | add a baseline entry without a reason string | script refuses to load the entry |
+| Baseline is reasoned | add a baseline entry without a reason string or `kind` | script refuses to load the entry |
+| Ratchet holds | add a `pending-port` entry whose reason names no card | gate exits 1 |
+| Main is green | run `effigy docs:check` on the PR head against current main | pass |
 | Board integration | run `effigy docs:check` on a planted drift | board is red at `docs:react-prop-drift` |
 
 ## Validation
@@ -89,5 +105,6 @@ register can honestly carry. Escalation owner: Chatterbox (planning).
 
 ## Continuation
 
-The grouped finding set becomes the input for a later "port to React" tranche
-and for any Svelte-inclusion candidates. Neither is authorized by this card.
+The `pending-port` entries are cleared by `g16.099`. `needs-decision` entries
+return to Chatterbox. Svelte-inclusion candidates (`Tree.onEditingChange`,
+`OrderBy.onActiveSortChange`) are recorded, not decided, here.
