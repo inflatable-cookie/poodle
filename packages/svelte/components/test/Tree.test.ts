@@ -900,6 +900,84 @@ describe("Tree row metadata", () => {
   });
 });
 
+describe("Tree accessible names", () => {
+  beforeEach(() => {
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it("names each treeitem with its node label, not its rendered contents", () => {
+    const { getByRole } = render(Tree, {
+      props: { nodes: nested, expandedValues: ["src", "lib"] },
+    });
+
+    // An expanded row contains descendant labels (a.ts, lib, c.ts); a
+    // content-derived name would concatenate them and fail this exact query.
+    const src = getByRole("treeitem", { name: "src" });
+    expect(src.getAttribute("aria-label")).toBe("src");
+    expect(getByRole("treeitem", { name: "a.ts" })).toBeTruthy();
+    expect(getByRole("treeitem", { name: "c.ts" })).toBeTruthy();
+  });
+
+  it("keeps the label as name while the row is being renamed", async () => {
+    const { getByRole, queryByRole } = render(Tree, { props: { nodes: nested } });
+
+    await fireEvent.keyDown(getByRole("treeitem", { name: "src" }), { key: "F2" });
+
+    // The visible label child is gone; the rename input is separate.
+    expect(queryByRole("textbox", { name: "Rename src" })).toBeTruthy();
+    expect(getByRole("treeitem", { name: "src" })).toBeTruthy();
+  });
+
+  it("updates the accessible name when the label is renamed", async () => {
+    const onRenameCommit = vi.fn();
+    const renamed = [
+      {
+        value: "src",
+        label: "source",
+        children: [
+          { value: "a.ts", label: "a.ts" },
+          { value: "lib", label: "lib", children: [{ value: "c.ts", label: "c.ts" }] },
+        ],
+      },
+      { value: "docs", label: "docs", isBranch: true },
+    ];
+    const { getByRole, queryByRole, rerender } = render(Tree, {
+      props: { nodes: nested, onRenameCommit },
+    });
+
+    await fireEvent.keyDown(getByRole("treeitem", { name: "src" }), { key: "F2" });
+    const input = getByRole("textbox", { name: "Rename src" }) as HTMLInputElement;
+    await fireEvent.input(input, { target: { value: "source" } });
+    await fireEvent.keyDown(input, { key: "Enter" });
+    expect(onRenameCommit).toHaveBeenCalledWith("src", "source");
+
+    await rerender({ nodes: renamed, onRenameCommit });
+    expect(getByRole("treeitem", { name: "source" })).toBeTruthy();
+    expect(queryByRole("treeitem", { name: "src" })).toBeNull();
+  });
+
+  it("names the loading placeholder with its visible text", () => {
+    const { getByRole } = render(Tree, {
+      props: {
+        nodes: [{ value: "docs", label: "docs", isBranch: true }],
+        expandedValues: ["docs"],
+        loadingValues: ["docs"],
+      },
+    });
+
+    expect(getByRole("treeitem", { name: "Loading…" })).toBeTruthy();
+  });
+});
+
 function authority(overrides: Partial<TreeReorderAuthority> = {}): TreeReorderAuthority & {
   drops: TreeReorderCandidate[];
   hovers: TreeReorderCandidate[];

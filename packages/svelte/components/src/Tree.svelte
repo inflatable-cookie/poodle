@@ -667,6 +667,7 @@
   <div
     class="poodle-tree__item"
     role="treeitem"
+    aria-label="Loading…"
     aria-level={depth + 1}
     aria-selected="false"
     aria-disabled="true"
