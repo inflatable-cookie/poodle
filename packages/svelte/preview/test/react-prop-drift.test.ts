@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   canonicalizePropName,
   compareComponentProps,
+  parsePropsFromBraceBody,
+  parseReactPropsFromSource,
+  parseSvelteProps,
   validateBaseline,
   type BaselineEntry,
 } from "../scripts/react-prop-drift.ts";
@@ -117,9 +120,9 @@ describe("react-prop-drift review oracle invariants", () => {
     expect(finding).toBeNull();
   });
 
-  it("refuses to load a baseline entry that lacks a reason string", () => {
-    // Invariant: Baseline is reasoned
-    // Counterexample: baseline entry without reason string throws
+  it("refuses to load a baseline entry that lacks a reason string or kind", () => {
+    // Invariant: Baseline is reasoned and kind-tagged
+    // Counterexample: baseline entry without reason string or invalid kind throws
     const invalidBaselines = [
       {
         "test-slug": {
@@ -128,33 +131,42 @@ describe("react-prop-drift review oracle invariants", () => {
       },
       {
         "test-slug": {
+          kind: "framework-idiom",
           reason: "",
           reactOnly: ["defaultValue"],
         },
       },
       {
         "test-slug": {
+          kind: "framework-idiom",
           reason: "   ",
           reactOnly: ["defaultValue"],
         },
       },
       {
         "test-slug": {
+          kind: "unknown-kind" as unknown as BaselineEntry["kind"],
+          reason: "some reason",
+          reactOnly: ["defaultValue"],
+        },
+      },
+      {
+        "test-slug": {
+          kind: "framework-idiom",
           reason: 123,
         } as unknown as BaselineEntry,
       },
     ];
 
     for (const invalid of invalidBaselines) {
-      expect(() => validateBaseline(invalid)).toThrow(
-        /must have a non-empty reason string/i,
-      );
+      expect(() => validateBaseline(invalid)).toThrow();
     }
   });
 
-  it("accepts a baseline entry that carries a valid reason string", () => {
+  it("accepts a baseline entry that carries a valid reason string and kind", () => {
     const validBaseline = {
       "dock-region": {
+        kind: "needs-decision" as const,
         reason:
           "showTabs is spec-surface-pending in contract-spec-drift (g13.014)",
         svelteOnly: ["showTabs"],
@@ -174,6 +186,54 @@ describe("react-prop-drift review oracle invariants", () => {
     );
 
     expect(finding).toBeNull();
+  });
+
+  it("ratchet: refuses a pending-port baseline entry whose reason names no card", () => {
+    // Invariant: Ratchet holds — pending-port must name the card clearing it
+    const entryWithoutCard = {
+      button: {
+        kind: "pending-port" as const,
+        reason: "missing port to React without card name",
+        svelteOnly: ["style"],
+      },
+    };
+
+    expect(() => validateBaseline(entryWithoutCard)).toThrow(
+      /must name the card that will clear it/i,
+    );
+  });
+
+  it("ratchet: accepts a pending-port baseline entry whose reason names a card", () => {
+    const entryWithCard = {
+      button: {
+        kind: "pending-port" as const,
+        reason: "pending port to React in g16.099",
+        svelteOnly: ["style"],
+      },
+    };
+
+    expect(() => validateBaseline(entryWithCard)).not.toThrow();
+  });
+
+  it("ratchet: detects stale baseline entries when a prop no longer drifts", () => {
+    // Invariant: Ratchet holds — baselined prop that no longer drifts is flagged as stale
+    const finding = compareComponentProps(
+      "button",
+      "Button",
+      new Set(["variant", "tone", "style"]),
+      new Set(["variant", "tone", "style"]), // style ported to React!
+      new Set(),
+      new Set(["variant", "tone", "style"]),
+      {
+        kind: "pending-port",
+        reason: "pending port to React in g16.099",
+        svelteOnly: ["style"], // stale: style is no longer Svelte-only
+      },
+    );
+
+    expect(finding).not.toBeNull();
+    expect(finding!.staleBaseline).toBeDefined();
+    expect(finding!.staleBaseline!.svelteOnly).toEqual(["style"]);
   });
 
   it("detects conflicting static literal defaults for documented props", () => {
@@ -202,5 +262,86 @@ describe("react-prop-drift review oracle invariants", () => {
     expect(finding!.defaultDrift).toEqual([
       { prop: "step", svelteDefault: "1", reactDefault: "5" },
     ]);
+  });
+
+  it("parsers: extracts props and defaults from Svelte runes source", () => {
+    const svelteFixture = `
+<script lang="ts">
+  import type { Snippet } from "svelte";
+  interface Props {
+    value?: number;
+    step?: number;
+    disabled?: boolean;
+    class?: string;
+    onValueChange?: (val: number) => void;
+    children?: Snippet;
+  }
+
+  let {
+    value = $bindable(0),
+    step = 1,
+    disabled = false,
+    class: className = "",
+    onValueChange,
+    children,
+  }: Props = $props();
+</script>
+`;
+    const { props, defaults } = parseSvelteProps(svelteFixture);
+    expect(props).toEqual(
+      new Set(["value", "step", "disabled", "class", "onValueChange", "children"]),
+    );
+    expect(defaults.get("value")).toBe("0");
+    expect(defaults.get("step")).toBe("1");
+    expect(defaults.get("disabled")).toBe("false");
+    expect(defaults.get("class")).toBe('""');
+  });
+
+  it("parsers: extracts props and defaults from React TypeScript source", () => {
+    const reactFixture = `
+import type { ReactNode } from "react";
+
+export interface TestBoxProps {
+  size?: "sm" | "md";
+  disabled?: boolean;
+  className?: string;
+  onValueChange?: (val: number) => void;
+  children?: ReactNode;
+}
+
+export function TestBox({
+  size = "md",
+  disabled = false,
+  className = "",
+  onValueChange,
+  children,
+}: TestBoxProps) {
+  return <div>{children}</div>;
+}
+`;
+    const { props, defaults } = parseReactPropsFromSource(reactFixture, "TestBox");
+    // children is slot plumbing and excluded
+    expect(props).toEqual(
+      new Set(["size", "disabled", "className", "onValueChange"]),
+    );
+    expect(defaults.get("size")).toBe('"md"');
+    expect(defaults.get("disabled")).toBe("false");
+    expect(defaults.get("className")).toBe('""');
+  });
+
+  it("parsers: parses brace body declarations correctly", () => {
+    const braceBody = `
+      name?: string;
+      age: number;
+      tags?: string[];
+      // comment line
+      /* block comment */
+      isActive?: boolean;
+    `;
+    const parsed = parsePropsFromBraceBody(braceBody);
+    expect(parsed.get("name")).toBe("string");
+    expect(parsed.get("age")).toBe("number");
+    expect(parsed.get("tags")).toBe("string[]");
+    expect(parsed.get("isActive")).toBe("boolean");
   });
 });
