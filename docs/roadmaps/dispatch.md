@@ -124,7 +124,7 @@ card or triage note says.
   register, log, `PAPERCUTS.md` append)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`, this manifest
-- Approved concurrent siblings: `g16.101`, `g16.096` revision, `g16.097`.
+- Approved concurrent siblings: `g16.101`, `g16.102`, `g16.096`, `g16.097`.
   Serial edges: none.
 - Worker capability class: capable coding model, medium reasoning
 - Acceptance evidence and review oracle: the card's Review Oracle table
@@ -141,7 +141,7 @@ card or triage note says.
   line, log, `PAPERCUTS.md` append)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`, this manifest
-- Approved concurrent siblings: `g16.100`, `g16.096` revision, `g16.097`.
+- Approved concurrent siblings: `g16.100`, `g16.102`, `g16.096`, `g16.097`.
   Serial edges: none.
 - Worker capability class: capable coding model, medium reasoning
 - Acceptance evidence and review oracle: the card's Review Oracle table
