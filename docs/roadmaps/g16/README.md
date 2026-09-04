@@ -140,8 +140,6 @@ stay maintained; backend admission is not part of the first card.
 100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — ready; Longhorn and Loophole need it natively; also re-kinds the two React callbacks as framework idiom
 101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — ready; Figmatic-reported defect, explicit `aria-label` per treeitem in both shells
 102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — ready; `layout="fill"`, a panel padding hook, and a standalone-strip recipe replace `:global` overrides in three consumers
-100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — ready; Longhorn and Loophole need it natively; also re-kinds the two React callbacks as framework idiom
-101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — ready; Figmatic-reported defect, explicit `aria-label` per treeitem in both shells
 
 ## Parallel Continuation
 

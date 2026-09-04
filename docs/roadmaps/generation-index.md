@@ -83,7 +83,7 @@ Updated: 2026-09-04
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
   - Ready frontier (`../roadmaps/dispatch.md`): `g16.098` cold-checkout web
-    board repair (merged in PR #203 at `c8636c699`), `g16.099` React prop port tranche
+    board repair (merged in PR #203 at `c8636c699`), `g16.099` React prop port tranche, and `g16.100` DockRegion `showTabs` portable, `g16.101` Tree accessible name, `g16.102` Tabs fill layout (consumer-sweep intake, ready)
     (merged in PR #204 at `660b9510d`), `g16.096` Linux board (PR #201) and the
     coordinator-executed `g16.097` v0.3.0 re-certification serial behind
     `098`. The first `v0.3.0` tag is retracted; nothing was published. No additional mounted receipt child. Later Nucleus
