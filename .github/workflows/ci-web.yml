@@ -6,6 +6,11 @@ on:
   # main. Restores a cheap default-branch validation signal after the macOS
   # lanes exhausted the org's Actions allowance. Native, visual, and release
   # lanes stay manual dispatch only. Operator approval 2026-09-02 (g16.096).
+  # The checkout step is unshallowed (fetch-depth: 0) and fetches origin/main:
+  # the pack-install scope classifier resolves its base as `git merge-base
+  # HEAD origin/main`; a default pull_request checkout is shallow and fetches
+  # only the merge ref, so HEAD has no visible ancestry and origin/main does
+  # not exist (widened 2026-09-04).
   push:
     branches: [main]
   pull_request:
@@ -25,6 +30,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: a shallow pull_request merge ref has no visible
+          # ancestry, so `git merge-base HEAD origin/main` in web-preview.ts
+          # finds no common ancestor even once main is fetched.
+          fetch-depth: 0
+
+      # Expose origin/main for the pack-install scope classifier; without it,
+      # `git merge-base HEAD origin/main` exits 128 on every PR run.
+      - run: git fetch --no-tags origin main:refs/remotes/origin/main
 
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:

@@ -5,6 +5,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — `test/package-install/web-preview.ts` resolves its
+  certification base with `git merge-base HEAD origin/main`; on a
+  `pull_request` Actions checkout that ref does not exist, so the gate dies
+  with raw `fatal: Not a valid object name origin/main` (exit 128) at
+  `web-preview.ts:126`/`:167` instead of naming the missing base ref. Fail
+  clearly with `origin/main is not available` (and suggest fetching it) when
+  the ref is absent. Hit while proving g16.096 PR #201, run `33881115094`;
+  g16.096 works around it by fetching `main` after checkout, not by touching
+  this script.
+
 - 2026-09-04 — RESOLVED 2026-09-04 by g16.098. The 2026-09-02 `react-preview`
   workspace-alias papercut is closed: that vitest project now uses
   `workspaceAliases`, and `ci:web` builds both shell packages before
