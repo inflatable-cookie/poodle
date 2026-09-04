@@ -1,9 +1,9 @@
 # g16.099 — React Prop Port Tranche
 
-Status: held — ready after `g16.095` merges with its seeded baseline
+Status: ready — `g16.095` merged in PR #202 at `f297774f4`; the seeded baseline confirms exactly five `pending-port` entries (Button ×3, Calendar `today`, SplitView `divider`, AppHeader `element`, DockRegion `showCollapseToggle`)
 Type: React parity port — no Svelte or contract change
 Opened: 2026-09-04
-Depends on: merged `g16.095`
+Depends on: merged `g16.095` (satisfied at `f297774f4`)
 Governing refs: `../../contracts/001-working-rules.md` (Svelte is the
 reference; a capability in Svelte and absent elsewhere is a gap to port),
 `095-react-prop-drift-gate.md`, the `g16.095` execution log's grouped

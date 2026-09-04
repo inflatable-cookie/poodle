@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-04 (revision 3: board repair, 095 revision, 097 re-certification)
+Updated: 2026-09-04 (revision 4: 095 merged, 099 ready)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -32,32 +32,31 @@ card or triage note says.
   root `PAPERCUTS.md` (append only)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`, this manifest
-- Approved concurrent siblings: `g16.095` revision. Serial edges: `g16.096`
+- Approved concurrent siblings: `g16.099`. Serial edges: `g16.096`
   re-run and `g16.097` re-certification wait for this merge.
 - Worker capability class: capable coding model, medium reasoning
 - Acceptance evidence and review oracle: the card's Review Oracle table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
-### g16.095 — Svelte↔React public prop drift gate (revision)
+### g16.099 — React prop port tranche
 
-- Card: `g16/095-react-prop-drift-gate.md`
-- Readiness: ready — revision of PR #202 head `1440aeb33` in the existing
-  worker workspace: seed the 29 findings into the `kind`-tagged ratcheted
-  baseline (`pending-port` naming `g16.099`, `framework-idiom`,
-  `needs-decision`), add the ratchet test, keep the `docs:check` line.
-  Operator decision 2026-09-04. Same reviewer re-reviews the exact head.
-- Prerequisites: none. Completion: PR merged after accepted exact-head review;
-  execution log written; grouped finding set recorded in the log.
-- Owned mutable paths: `packages/svelte/preview/scripts/react-prop-drift.ts`,
-  `packages/svelte/preview/test/react-prop-drift.test.ts`, `tasks/effigy.tasks.toml` (new `docs:react-prop-drift`
-  selector and the `docs:check` sequence only), `docs/logs/2026-09/` log,
-  root `PAPERCUTS.md` (append only)
+- Card: `g16/099-react-prop-port-tranche.md`
+- Readiness: ready — `g16.095` merged at `f297774f4` with five
+  `pending-port` baseline entries naming this card.
+- Prerequisites: none remaining. Completion: PR merged after accepted
+  exact-head review; every `pending-port` entry removed; gate green.
+- Owned mutable paths: `packages/react/components/src/{Button,Calendar,SplitView,AppHeader,DockRegion}.tsx`
+  and their tests; the `BASELINE` register in
+  `packages/svelte/preview/scripts/react-prop-drift.ts` (removals only); one
+  runtime-note sentence in `docs/contracts/components/app-header.md` if the
+  React `element` form needs it; `docs/logs/2026-09/` log; root
+  `PAPERCUTS.md` (append only)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`, this manifest
-- Approved concurrent siblings: `g16.096`. Serial edges: none.
+- Approved concurrent siblings: `g16.098` (no path overlap: it owns
+  `vitest.config.ts` and `tasks/effigy.tasks.toml`). Serial edges: none.
 - Worker capability class: capable coding model, medium reasoning
-- Acceptance evidence and review oracle: the card's Review Oracle table;
-  biting counterexamples committed before the script
+- Acceptance evidence and review oracle: the card's Review Oracle table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
 ### g16.096 — Linux headless PR and main board
@@ -98,7 +97,7 @@ card or triage note says.
   README status paragraphs naming the latest version
 - Reserved shared closeout surfaces (coordinator at closeout): `g16/README.md`,
   `generation-index.md`, this manifest
-- Approved concurrent siblings: `g16.095` revision. Serial edges: `g16.098`
+- Approved concurrent siblings: `g16.099`. Serial edges: `g16.098`
   before step 1; `g16.096` may merge before or after, it does not touch the
   certified tree's gates.
 - Worker capability class: none — coordinator action
@@ -110,7 +109,6 @@ card or triage note says.
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
-| `g16.099` React prop port tranche | merged `g16.095` with its seeded baseline | Chatterbox |
 | --- | --- | --- |
 | Loophole adoption of `0.3.0` | proven npm `latest` `0.3.0` (`g16.097` step 5); Loophole-owned planning | Loophole planning, via Chatterbox |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
