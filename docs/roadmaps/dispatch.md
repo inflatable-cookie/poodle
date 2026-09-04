@@ -63,6 +63,7 @@ card or triage note says.
 
 | Lane | Gate | Owner of the gate |
 | --- | --- | --- |
+| `g16.104` release workflow checkout base ref | operator approval for a `release.yml` edit and a second `v0.3.0` retraction; blocks `g16.097` | operator, via Chatterbox |
 | Loophole adoption of `0.3.0` | proven npm `latest` `0.3.0` (`g16.097` step 5); Loophole-owned planning | Loophole planning, via Chatterbox |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |

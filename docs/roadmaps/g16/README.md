@@ -144,6 +144,7 @@ stay maintained; backend admission is not part of the first card.
 101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — complete in PR #205; explicit `aria-label` per treeitem in both shells, including loading and rename states
 102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — complete in PR #207; `layout="fill"`, panel sizing and padding contract, native mapping, and standalone-strip ownership recipe
 103. [103 — Release tarball dist verification repair](103-release-tarball-dist-verification.md) — ready, urgent; operator-authorized workflow repair aligns release archive assertions with the compiled `dist/**` contract and blocks `097`
+104. [104 — Release workflow checkout base ref](104-release-workflow-checkout-base-ref.md) — held for operator approval; dry run `33908714014` failed because `release.yml` checks out only the tag ref, so the scope classifier has no `origin/main`; same fix shape as `096`
 
 ## Parallel Continuation
 

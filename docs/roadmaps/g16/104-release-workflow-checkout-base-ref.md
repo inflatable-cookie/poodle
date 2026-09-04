@@ -1,0 +1,79 @@
+# g16.104 — Release Workflow Checkout Base Ref
+
+Status: held — awaiting two operator approvals: (1) edit `release.yml`
+(workflow authority), (2) retract the `v0.3.0` tag at `eab436eef` and re-tag
+after this fix merges
+Type: workflow automation — release workflow
+Opened: 2026-09-04
+Depends on: none. Blocks: `g16.097` v0.3.0 release certification
+Governing refs: `.github/workflows/release.yml`,
+`.github/workflows/ci-web.yml:32-41` (the proven checkout shape from
+`g16.096`), `test/package-install/web-preview.ts:126,167`,
+`scripts/check-release-automation.ts`, `../../../AGENTS.md`
+Evidence: dry run `33908714014` at tag `v0.3.0` (`eab436eef`) failed in
+`Release gates` at `test:web-pack-install`: `git merge-base eab436eef
+origin/main` → `fatal: Not a valid object name origin/main`. `actions/checkout`
+at a tag ref fetches only that ref, so the ordinary scope classifier has no
+base. Locally the same gate passed because `origin/main` exists.
+Dispatch manifest: `../dispatch.md`
+
+## Goal
+
+Make `effigy release gates` pass on the release runner at a tag ref, without
+weakening the scope guard or changing what the gate checks.
+
+## Fixed Boundary
+
+- Edit `release.yml` only: on the `actions/checkout` step set
+  `fetch-depth: 0`, and add the same explicit
+  `git fetch --no-tags origin main:refs/remotes/origin/main` step that
+  `ci-web.yml` uses, with the same header comment explaining why. No other
+  change to the workflow: triggers, runner, gates, publish, and artifact
+  steps stay byte-identical.
+- Keep `scripts/check-release-automation.ts` green; if it asserts the
+  checkout shape, extend the assertion, never relax it.
+- Do not touch `web-preview.ts`. Append one PAPERCUTS entry: the classifier
+  should fail with "origin/main is not available" instead of a raw exit 128,
+  and should say which workflow to fix. (Second sighting; first was PR #201.)
+- No tag, no dispatch, no publish in this lane. `g16.097` owns those after
+  this merges.
+
+## Review Oracle
+
+| Invariant | Smallest counterexample | Required proof |
+| --- | --- | --- |
+| Base ref exists at a tag ref | dispatch `release.yml` with `dry-run=true` against the new tag | `Release gates` passes `test:web-pack-install` |
+| Nothing else moved | diff `release.yml` | only the checkout `with:` block and one fetch step |
+| Checker agrees | `effigy check:release-automation` | pass |
+| Ordinary PR board unaffected | this card's own PR | `ci-web` behaves per the g16.096 exception rules |
+
+## Validation
+
+`effigy check:release-automation`, `effigy docs:check`, `git diff --check
+origin/main...HEAD`. The dry run on the re-created tag is the executable
+proof and belongs to `g16.097` step 3.
+
+## Owned Paths
+
+`.github/workflows/release.yml`, `scripts/check-release-automation.ts` (only
+if an assertion must extend), execution log under `docs/logs/2026-09/`, root
+`PAPERCUTS.md` (append only).
+
+Reserved for the coordinator at merge: `docs/roadmaps/g16/README.md`,
+`docs/roadmaps/generation-index.md`, `docs/roadmaps/dispatch.md`.
+
+## Stop Conditions
+
+Stop if the fix needs anything beyond the checkout block and one fetch step,
+or if `check-release-automation` cannot accept the shape without relaxing a
+release assertion. Escalation owner: operator, via Chatterbox.
+
+## Continuation
+
+`g16.097` re-runs from step 0 (retract `v0.3.0` at `eab436eef`, nothing was
+published), records the post-`104` `main` tip as the candidate, runs the
+local gates, then tags and dry-runs. The card's "gates precede the tag" rule
+already covers this; the local gate could not see this defect because it
+had `origin/main`. Add to `g16.097` step 1: run the gate from a checkout
+that has only the candidate ref, or accept that the dry run is the only
+proof for checkout-shape defects.
