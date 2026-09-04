@@ -213,10 +213,10 @@ Rules for this pattern:
   consumer owns `aria-controls` on each tab and `role="tabpanel"` with
   `aria-labelledby` on the external panel. Tabs generates its internal
   tab/panel ids only for its own panels.
-- For a full-height inspector, set `layout="fill"` on a sized container: the
-  strip keeps its natural height and the panel surface scrolls under it. See
-  the Tabs contract §7 and the `--poodle-tabs-panel-padding` hook for panel
-  padding.
+- The consumer owns this layout: size the container and the panel surface in
+  host CSS. `layout="fill"` does not apply here — it sizes and scrolls only
+  the panel Tabs itself renders through its `children` snippet, and this
+  pattern renders no Tabs-owned panel.
 - Keep the panel surface itself host-owned; Tabs does not lay out content
   that is not its child.
 
