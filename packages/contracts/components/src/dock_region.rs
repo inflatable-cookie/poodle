@@ -45,6 +45,11 @@ pub struct DockRegionSpec {
     /// divider-level collapse controls set false to avoid a redundant
     /// affordance. Collapse state rendering is unaffected.
     pub show_collapse_toggle: bool,
+    /// When false the strip omits panel tabs; the collapse toggle (when
+    /// enabled) and the active-panel body are unchanged. Hosts that render
+    /// tabs elsewhere (e.g. a titlebar) set false. Keyboard tab switching is
+    /// unavailable because there are no tabs.
+    pub show_tabs: bool,
     pub collapsed_posture: DockCollapsedPosture,
     pub emphasis: DockEmphasis,
     pub tabs_placement: DockTabsPlacement,
@@ -76,6 +81,7 @@ impl DockRegionSpec {
             is_collapsed: false,
             is_collapsible: false,
             show_collapse_toggle: true,
+            show_tabs: true,
             collapsed_posture: DockCollapsedPosture::IconStrip,
             emphasis: DockEmphasis::Standard,
             tabs_placement: DockTabsPlacement::Edge,
@@ -117,6 +123,11 @@ impl DockRegionSpec {
 
     pub fn with_collapsible(mut self, is_collapsible: bool) -> Self {
         self.is_collapsible = is_collapsible;
+        self
+    }
+
+    pub fn with_show_tabs(mut self, show_tabs: bool) -> Self {
+        self.show_tabs = show_tabs;
         self
     }
 
