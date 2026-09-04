@@ -1,7 +1,7 @@
 # Consumer Sweep Intake — 2026-09-04
 
-Status: open — first run of the recurring consumer defect intake lane; four
-unresolved items await Chatterbox triage, ten are closed by `0.3.0`
+Status: open — Tree name defect promoted as `g16.101`; `showTabs` promoted
+as `g16.100`; Tabs styling discovery running; ten entries close with `0.3.0`
 Captured: 2026-09-04
 Owner: Chatterbox (planning)
 Source: read-only sweep of 15 sibling repositories' `PAPERCUTS.md` and
@@ -20,19 +20,35 @@ argument for finishing the release before new component work.
 ## Unresolved, ranked
 
 1. **Tabs styling seam** — 5 repos, 8 files write `:global(.poodle-tabs…)`
-   overrides (bovine-accelerator-desktop 3, soundcheck-library 2, figmatic,
-   loophole, nucleus 1 each), mostly sidebar-style tabs: `__tooltip`,
-   `__label`, `__tab > .poodle-icon`, `__panel`. Known: consumers want icon
-   and label treatment and panel padding control. Unknown: whether one
-   `appearance`/`density` axis or a small set of CSS custom properties covers
-   it. Route: bounded discovery (read the 8 files, list the overridden
-   properties) before any contract change. Not a card yet.
+   overrides. Discovery inventory (2026-09-04, read-only, 8 files) grouped
+   them:
+   - **Fill-height layout** — 3 consumers, 4 files (bovine-accelerator-desktop
+     ×2, soundcheck-library, figmatic): root `height: 100%;
+     grid-template-rows: auto minmax(0, 1fr)`, panel `min-height: 0;
+     overflow: auto`. The one real shared seam. Candidate: a `layout="fill"`
+     (or `fillHeight`) prop on Tabs, portable, because GPUI panels already
+     size by flex. Risk: box assumptions across renderers; needs a mounted
+     GPUI proof.
+   - **Spacing hooks** — figmatic, soundcheck-library: gap and panel padding.
+     Tabs exposes `--poodle-tabs-list-gap` / `--poodle-tabs-content-gap`
+     already (`packages/core/src/styles/tabs.css:7-13`); a
+     `--poodle-tabs-panel-padding` hook is the only missing one. Candidate:
+     one custom property, documented.
+   - **Single-consumer asks** — label truncation (bovine), responsive
+     icon-only strip (nucleus), drop-target border (loophole). Not seams yet;
+     nucleus's ask conflicts with the contract rule that horizontal labels
+     are never shed.
+   - **Composition pattern** — standalone strip with an external panel
+     (soundcheck-library): documentation, not a component change.
+   Recommendation: one small card for `layout="fill"` plus the
+   `--poodle-tabs-panel-padding` hook and the composition recipe; leave the
+   single-consumer asks in this note. Awaiting operator confirmation.
 2. **Tree treeitem accessible name and hierarchy** — figmatic
    (`PAPERCUTS.md`, 2026-08-28): Longhorn's a11y snapshot shows treeitems
    with no name and no children. Defect in Poodle Svelte `Tree`. It also
    blocks Nucleus A1 for Tree. Route: one bounded card (accessible name from
    the visible label; `aria-owns`/nesting so children are discoverable);
-   candidate for the next frontier.
+   Promoted 2026-09-04 as `g16.101`.
 3. **Keyboard vertical equal-pitch mode** — loophole. Already
    design-deferred in `20260902-000956-history-portfolio-holds.md`. No change.
 4. **Icon glyph gaps (undo/redo/pin) and static catalogue metadata** —
@@ -55,7 +71,6 @@ argument for finishing the release before new component work.
 
 ## Next check
 
-After `0.3.0` publishes: re-run the sweep, expect the ten "fixed on main"
-entries to close once pins move. Promote item 2 as a card and item 1 as a
-discovery brief when the operator confirms. Remove this note when items 1–2
-are promoted or rejected.
+Operator confirmation on the Tabs fill-height card. After `0.3.0` publishes, re-run the sweep and expect the
+ten "fixed on main" entries to close once pins move. Remove this note when
+item 1 is promoted or rejected.
