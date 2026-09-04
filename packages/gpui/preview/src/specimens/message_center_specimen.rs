@@ -6,7 +6,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{RenderContext, message_center, MessageCenterHandlers};
+use poodle_render::{message_center, MessageCenterHandlers, RenderContext};
 use poodle_specs::{
     EyebrowSpec, MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
     StatusTone,
@@ -123,6 +123,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 });
             }
         })),
+        ..Default::default()
     };
 
     let spec = MessageCenterSpec::new(items)

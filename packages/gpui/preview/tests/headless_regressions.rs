@@ -29592,6 +29592,600 @@ fn toast_host_controlled_composition_actions_and_identity_through_mounted_backen
     });
 }
 
+/// g16.093. Duplicate production MessageCenter mounts must retain caller-scoped
+/// identity even when their item ids reuse the same values.
+#[test]
+fn message_center_composition_open_progress_and_identity_through_mounted_backend() {
+    use gpui::{div, px, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{
+        MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
+        StatusTone,
+    };
+
+    fn live_job(value: f64) -> MessageCenterItem {
+        MessageCenterItem::new("job", "Mix preview")
+            .with_meta("Render queue")
+            .with_tone(StatusTone::Pending)
+            .with_progress(MessageCenterItemProgress::determinate(value))
+            .as_live_row()
+    }
+
+    fn durable_unread() -> MessageCenterItem {
+        MessageCenterItem::new("render", "Render complete")
+            .with_message("Mix preview 42 is ready for review.")
+            .with_timestamp("2020-01-01T00:00:00Z")
+            .with_tone(StatusTone::Success)
+    }
+
+    fn overflow_rows() -> Vec<MessageCenterItem> {
+        (0..16)
+            .map(|index| {
+                MessageCenterItem::new(format!("row-{index}"), format!("Archive {index}"))
+                    .with_read(true)
+            })
+            .collect()
+    }
+
+    run_headless(|cx| {
+        let mut starting_left = vec![
+            live_job(60.0),
+            MessageCenterItem::new("upload", "Uploading stems")
+                .with_progress(MessageCenterItemProgress::indeterminate())
+                .as_live_row(),
+            durable_unread(),
+        ];
+        starting_left.extend(overflow_rows());
+        let left_items = Arc::new(Mutex::new(starting_left));
+        let right_items = Arc::new(Mutex::new(vec![durable_unread().with_read(true)]));
+        let left_open = Arc::new(Mutex::new(false));
+        let right_open = Arc::new(Mutex::new(false));
+        let refuse_left_open = Arc::new(Mutex::new(false));
+        let trace = Arc::new(Mutex::new(Vec::<String>::new()));
+        let theme_provider = theme();
+        let token_theme = theme_provider.clone();
+        let build = {
+            let left_items = Arc::clone(&left_items);
+            let right_items = Arc::clone(&right_items);
+            let left_open = Arc::clone(&left_open);
+            let right_open = Arc::clone(&right_open);
+            let refuse_left_open = Arc::clone(&refuse_left_open);
+            let trace = Arc::clone(&trace);
+            Rc::new(move || {
+                let left_open_trace = Arc::clone(&trace);
+                let left_select_trace = Arc::clone(&trace);
+                let left_read_trace = Arc::clone(&trace);
+                let left_remove_trace = Arc::clone(&trace);
+                let left_mark_trace = Arc::clone(&trace);
+                let left_open_state = Arc::clone(&left_open);
+                let refuse = Arc::clone(&refuse_left_open);
+                let right_open_trace = Arc::clone(&trace);
+                let right_select_trace = Arc::clone(&trace);
+                let right_open_state = Arc::clone(&right_open);
+                div()
+                    .relative()
+                    .size_full()
+                    .child(
+                        div()
+                            .absolute()
+                            .top(px(12.0))
+                            .left(px(12.0))
+                            .child(
+                                node_compat::MessageCenter::from_spec(
+                                    MessageCenterSpec::new(
+                                        left_items.lock().expect("left items").clone(),
+                                    )
+                                    .with_open(*left_open.lock().expect("left open"))
+                                    .with_placement(OverlayPlacement::BottomStart)
+                                    .with_size(ControlSize::Sm)
+                                    .with_density(ControlDensity::Compact),
+                                    &theme_provider,
+                                )
+                                .with_instance_id("left")
+                                .on_open_change(Arc::new(move |open| {
+                                    left_open_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push(format!("left/open:{open}"));
+                                    if open && *refuse.lock().expect("refuse lock") {
+                                        return;
+                                    }
+                                    *left_open_state.lock().expect("left open") = open;
+                                }))
+                                .on_item_select(Arc::new(move |id| {
+                                    left_select_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push(format!("left/select:{id}"));
+                                }))
+                                .on_read_change(Arc::new(move |id, read| {
+                                    left_read_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push(format!("left/read:{id}:{read}"));
+                                }))
+                                .on_remove(Arc::new(move |id| {
+                                    left_remove_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push(format!("left/remove:{id}"));
+                                }))
+                                .on_mark_all_read(Arc::new(move || {
+                                    left_mark_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push("left/mark-all".into());
+                                })),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .absolute()
+                            .top(px(12.0))
+                            .right(px(12.0))
+                            .child(
+                                node_compat::MessageCenter::from_spec(
+                                    MessageCenterSpec::new(
+                                        right_items.lock().expect("right items").clone(),
+                                    )
+                                    .with_open(*right_open.lock().expect("right open"))
+                                    .with_placement(OverlayPlacement::BottomEnd)
+                                    .with_size(ControlSize::Lg)
+                                    .with_density(ControlDensity::Comfortable),
+                                    &theme_provider,
+                                )
+                                .with_instance_id("right")
+                                .on_open_change(Arc::new(move |open| {
+                                    right_open_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push(format!("right/open:{open}"));
+                                    *right_open_state.lock().expect("right open") = open;
+                                }))
+                                .on_item_select(Arc::new(move |id| {
+                                    right_select_trace
+                                        .lock()
+                                        .expect("trace lock")
+                                        .push(format!("right/select:{id}"));
+                                })),
+                            ),
+                    )
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 1100.0, 720.0);
+        let bounds = |id: &str| {
+            poodle_gpui_node_backend::bounds_for(id)
+                .unwrap_or_else(|| panic!("mounted bounds for {id}"))
+        };
+
+        let left_host = bounds("message-center:left");
+        let right_host = bounds("message-center:right");
+        assert!(
+            left_host.origin.x < right_host.origin.x,
+            "duplicate hosts must occupy distinct caller-scoped geometry"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_none()
+                && poodle_gpui_node_backend::bounds_for("message-center:right:surface").is_none(),
+            "closed hosts must not paint a dialog"
+        );
+
+        let trigger = poodle_gpui_node_backend::painted_node_for("message-center:left:trigger")
+            .expect("left trigger paints");
+        assert_eq!(
+            trigger.roles.get("dependency").map(String::as_str),
+            Some("icon-button")
+        );
+        assert_eq!(
+            trigger.a11y_label.as_deref(),
+            Some("Notifications, 1 unread")
+        );
+        assert_eq!(trigger.a11y_role, Some(NodeRole::Button));
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:trigger-icon")
+                .is_some_and(
+                    |icon| icon.roles.get("dependency").map(String::as_str) == Some("icon")
+                ),
+            "the trigger must compose a production Icon glyph"
+        );
+        let unread = poodle_gpui_node_backend::painted_node_for("message-center:left:unread")
+            .expect("unread badge");
+        assert!(unread.texts.iter().any(|text| text == "1"));
+
+        driver.pointer_activate_id("message-center:left:trigger");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_some(),
+            "accepted open must mount the production popover surface"
+        );
+        driver.wait_for_focus_handle("message-center:left:surface");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("message-center:left:surface"),
+            Some(true),
+            "opening must focus the labelled dialog through the production Popover path"
+        );
+
+        *right_open.lock().expect("right open") = true;
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            2,
+            "duplicate open hosts must register two live dismiss layers"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::layer_for_element("message-center:left:surface").as_deref(),
+            Some("message-center-layer:left")
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::layer_for_element("message-center:right:surface").as_deref(),
+            Some("message-center-layer:right")
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_some()
+                && poodle_gpui_node_backend::bounds_for("message-center:right:surface").is_some(),
+            "both caller-scoped surfaces must stay mounted together"
+        );
+
+        driver.wait_for_focus_handle("message-center:right:item:render:content");
+        driver.keyboard_activate("message-center:right:item:render:content");
+        driver.dispatch_key("escape");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:right:surface").is_none(),
+            "Escape must dismiss only the innermost live layer"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_some(),
+            "the surviving sibling surface must stay mounted"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            1,
+            "one live layer remains after innermost Escape"
+        );
+        driver.wait_for_focus_handle("message-center:right:trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("message-center:right:trigger"),
+            Some(true),
+            "innermost dismissal must restore the matching trigger"
+        );
+
+        *right_open.lock().expect("right open") = true;
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            2,
+            "host-owned reopen must restore both live layers"
+        );
+        driver.pointer_activate_id("message-center:left:surface");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:right:surface").is_none(),
+            "an outside press on the surviving sibling must close only the innermost layer"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_some(),
+            "the pressed sibling must be spared"
+        );
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let surface = poodle_gpui_node_backend::painted_node_for("message-center:left:surface")
+            .expect("left surface");
+        assert_eq!(
+            surface.roles.get("dependency").map(String::as_str),
+            Some("popover")
+        );
+        assert_eq!(surface.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y_label.as_deref(), Some("Notifications"));
+        let list = poodle_gpui_node_backend::painted_node_for("message-center:left:list")
+            .expect("item list");
+        assert_eq!(list.a11y_role, Some(NodeRole::List));
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:mark-all-read")
+                .is_some_and(|button| {
+                    button.roles.get("dependency").map(String::as_str) == Some("button")
+                }),
+            "unread hosts must compose the production Mark-all-read Button"
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:item:job:progress")
+                .is_some_and(|progress| {
+                    progress.a11y_role == Some(NodeRole::ProgressIndicator)
+                        && progress.roles.get("dependency").map(String::as_str) == Some("progress")
+                }),
+            "live determinate rows must compose production Progress"
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:item:upload:progress")
+                .is_some_and(|progress| progress.a11y_role == Some(NodeRole::ProgressIndicator)),
+            "live indeterminate rows must compose production Progress"
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:item:render:indicator")
+                .is_some_and(|indicator| {
+                    indicator.roles.get("dependency").map(String::as_str)
+                        == Some("status-indicator")
+                }),
+            "durable rows must compose production StatusIndicator"
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:item:render:time")
+                .is_some_and(|time| {
+                    time.roles.get("dependency").map(String::as_str) == Some("time-ago")
+                }),
+            "timestamped rows must compose production TimeAgo"
+        );
+
+        let radius = token_theme.resolve_radius("radius.control");
+        let content = poodle_gpui_node_backend::painted_node_for(
+            "message-center:left:item:render:content",
+        )
+        .expect("selectable content tokens");
+        assert_eq!(content.style.corner_radii.top_left, radius);
+        assert_eq!(content.style.corner_radii.top_right, radius);
+        assert_eq!(content.style.corner_radii.bottom_left, radius);
+        assert_eq!(content.style.corner_radii.bottom_right, radius);
+        let row = poodle_gpui_node_backend::painted_node_for("message-center:left:item:render")
+            .expect("row tokens");
+        assert_eq!(row.style.corner_radii.top_left, radius);
+
+        let list_bounds = bounds("message-center:left:list");
+        let surface_bounds = bounds("message-center:left:surface");
+        assert!(
+            bounds_contain(surface_bounds, list_bounds),
+            "the bounded list must stay inside the popover surface"
+        );
+        let job = bounds("message-center:left:item:job");
+        let upload = bounds("message-center:left:item:upload");
+        let render = bounds("message-center:left:item:render");
+        assert!(
+            job.origin.y < upload.origin.y && upload.origin.y < render.origin.y,
+            "rows must retain host order without overlap"
+        );
+        assert!(
+            bounds_contain(list_bounds, job)
+                && bounds_contain(list_bounds, upload)
+                && bounds_contain(list_bounds, render),
+            "rows must remain inside the scrolling list"
+        );
+        assert!(
+            list_bounds.size.height <= px(poodle_render::presentation::rem_to_px(24.0) + 1.0),
+            "the list must keep its 24rem height cap"
+        );
+
+        let before_live = trace.lock().expect("trace lock").clone();
+        driver.pointer_activate_id("message-center:left:item:job:content");
+        driver.pointer_activate_id("message-center:left:item:job:progress");
+        assert_eq!(
+            *trace.lock().expect("trace lock"),
+            before_live,
+            "live progress rows must stay inert for select, read, and remove"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:item:job:read").is_none()
+                && poodle_gpui_node_backend::bounds_for("message-center:left:item:job:remove")
+                    .is_none(),
+            "live rows must not grow read or remove controls"
+        );
+
+        driver.pointer_activate_id("message-center:left:item:render:content");
+        driver.wait_for_focus_handle("message-center:left:item:render:read");
+        driver.keyboard_activate("message-center:left:item:render:read");
+        driver.wait_for_focus_handle("message-center:left:item:render:remove");
+        driver.keyboard_activate("message-center:left:item:render:remove");
+        driver.wait_for_focus_handle("message-center:left:mark-all-read");
+        driver.keyboard_activate("message-center:left:mark-all-read");
+        assert!(
+            trace.lock().expect("trace lock").iter().any(|entry| entry == "right/select:render"),
+            "duplicate item ids must dispatch on the owning host"
+        );
+        let left_actions: Vec<String> = trace
+            .lock()
+            .expect("trace lock")
+            .iter()
+            .filter(|entry| {
+                entry.starts_with("left/select:")
+                    || entry.starts_with("left/read:")
+                    || entry.starts_with("left/remove:")
+                    || *entry == "left/mark-all"
+            })
+            .cloned()
+            .collect();
+        assert!(
+            left_actions.iter().any(|entry| entry == "left/select:render"),
+            "select stays a distinct left-host callback, actions={left_actions:?}"
+        );
+        assert_eq!(
+            left_actions
+                .iter()
+                .filter(|entry| *entry == "left/read:render:true")
+                .count(),
+            1
+        );
+        assert_eq!(
+            left_actions
+                .iter()
+                .filter(|entry| *entry == "left/remove:render")
+                .count(),
+            1
+        );
+        assert_eq!(
+            left_actions
+                .iter()
+                .filter(|entry| *entry == "left/mark-all")
+                .count(),
+            1
+        );
+        assert!(
+            left_actions.iter().all(|entry| !entry.contains("job")),
+            "select must not fire for live rows"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:item:render").is_some(),
+            "callbacks request changes; they do not mutate host items"
+        );
+
+        let first_overflow = bounds("message-center:left:item:row-0");
+        let first_y = first_overflow.origin.y;
+        driver.scroll_vertical_id("message-center:left:list", -400.0);
+        let moved = bounds("message-center:left:item:row-0");
+        assert!(
+            moved.origin.y < first_y - px(8.0),
+            "mounted wheel input must scroll overflowing rows"
+        );
+        let list_after = bounds("message-center:left:list");
+        let surface_after = bounds("message-center:left:surface");
+        assert!(
+            list_after.size.height
+                <= px(poodle_render::presentation::rem_to_px(24.0) + 1.0),
+            "the current list height must keep the 24rem cap after wheel input"
+        );
+        assert!(
+            list_after.origin.x >= surface_after.origin.x - px(0.5)
+                && list_after.origin.x + list_after.size.width
+                    <= surface_after.origin.x + surface_after.size.width + px(0.5)
+                && surface_after.size.height + px(1.0) >= list_after.size.height,
+            "current post-scroll list size and horizontal placement must stay inside the current surface"
+        );
+        let later = bounds("message-center:left:item:row-10");
+        let panel_after = bounds("message-center:left:panel");
+        assert!(
+            bounds_contain(surface_after, panel_after),
+            "the current list host must stay inside the current surface after wheel input"
+        );
+        assert!(
+            later.origin.y < panel_after.bottom() && later.bottom() > panel_after.origin.y,
+            "a later overflowing row must enter the current list host after the wheel"
+        );
+
+        left_items.lock().expect("left items")[0] = live_job(80.0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:item:job:progress").is_some(),
+            "progress is a host projection; a rebuilt value must remount in place"
+        );
+
+        driver.dispatch_key("escape");
+        driver.draw_frame();
+        assert!(
+            trace
+                .lock()
+                .expect("trace lock")
+                .iter()
+                .any(|entry| entry == "left/open:false"),
+            "Escape must request close through the production popover layer"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_none(),
+            "accepted close must unmount the left dialog"
+        );
+        driver.wait_for_focus_handle("message-center:left:trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("message-center:left:trigger"),
+            Some(true),
+            "close must restore the matching trigger"
+        );
+
+        *refuse_left_open.lock().expect("refuse lock") = true;
+        driver.pointer_activate_id("message-center:left:trigger");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("message-center:left:surface").is_none(),
+            "a refused open request must leave the dialog unmounted"
+        );
+
+        *refuse_left_open.lock().expect("refuse lock") = false;
+        *left_open.lock().expect("left open") = true;
+        left_items.lock().expect("left items").clear();
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::painted_node_for("message-center:left:empty").is_some_and(
+                |empty| {
+                    empty.roles.get("dependency").map(String::as_str) == Some("empty-state")
+                        && empty.texts.iter().any(|text| text == "No messages")
+                }
+            ),
+            "an empty host must compose production EmptyState"
+        );
+
+        let vanished = [
+            "message-center:left:item:job",
+            "message-center:left:item:job:progress",
+            "message-center:left:item:render",
+            "message-center:left:item:render:content",
+            "message-center:left:item:render:read",
+            "message-center:left:list",
+            "message-center:left:mark-all-read",
+        ];
+        for id in vanished {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_none(),
+                "clearing items must drop mounted identity for {id}"
+            );
+        }
+
+        let trace_before_teardown = trace.lock().expect("trace lock").clone();
+        *left_open.lock().expect("left open") = false;
+        *right_open.lock().expect("right open") = false;
+        right_items.lock().expect("right items").clear();
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+        for id in [
+            "message-center:left:surface",
+            "message-center:left:empty",
+            "message-center:right:surface",
+            "message-center:right:item:render",
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_none(),
+                "terminal closed hosts must clear {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::painted_node_for(id).is_none(),
+                "terminal closed hosts must clear paint identity for {id}"
+            );
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+                "terminal closed hosts must clear focus identity for {id}"
+            );
+        }
+        driver.dispatch_key("enter");
+        assert_eq!(
+            *trace.lock().expect("trace lock"),
+            trace_before_teardown,
+            "terminal input cannot reach a removed host or cross its callbacks"
+        );
+        let observation = driver.mounted_observation();
+        assert!(observation.is_valid());
+        drop(driver);
+
+        nucleus_receipts::emit_if_configured(
+            "MessageCenter",
+            "nucleus.attention.message-center",
+            observation,
+            &[
+                "mount duplicate caller-scoped MessageCenter instances through node_compat::MessageCenter::from_spec(...).into_element() in a 1100x720 HeadlessDriver host",
+                "compose production IconButton, Popover, Button, Icon, TimeAgo, EmptyState, Progress, and StatusIndicator through the shared renderer and GPUI adapter",
+                "dispatch mounted pointer, keyboard, Escape, outside, and wheel input across duplicate item ids, live-row inertia, and controlled host rebuilds",
+                "run the production Popover machine so open focuses the labelled dialog and dismissal restores the matching trigger",
+                "empty both hosts, redraw, and dispatch terminal keyboard input with no live surface",
+            ],
+            &[
+                "production Popover initialFocus=content focuses the labelled dialog on open and restores the exact trigger on Escape without fixture request_focus",
+                "duplicate open hosts register distinct live layers; innermost Escape and outside press dismiss only that layer; sibling callbacks and focus stay isolated",
+                "selectable rows keep radius.control, surface 72% hover fill, and the inset accent focus ring",
+                "overflowing lists scroll under mounted wheel input while current post-scroll list bounds stay inside the current surface",
+                "terminal empty hosts clear surfaces, items, paint, and focus identity before further input; MessageCenter owns no timeout clock",
+            ],
+        );
+    });
+}
+
 /// g16.047. Native danger projects Alert; success stays ListItem. Drawing the
 /// node tree does not claim GPUI assistive-technology parity.
 #[test]

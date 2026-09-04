@@ -1,0 +1,64 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "MessageCenter",
+  "scenario_id": "nucleus.attention.message-center",
+  "proof_level": "M1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "f0774a7d15a195cc6b8506c5da68db99807e5376",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount duplicate caller-scoped MessageCenter instances through node_compat::MessageCenter::from_spec(...).into_element() in a 1100x720 HeadlessDriver host",
+    "compose production IconButton, Popover, Button, Icon, TimeAgo, EmptyState, Progress, and StatusIndicator through the shared renderer and GPUI adapter",
+    "dispatch mounted pointer, keyboard, Escape, outside, and wheel input across duplicate item ids, live-row inertia, and controlled host rebuilds",
+    "run the production Popover machine so open focuses the labelled dialog and dismissal restores the matching trigger",
+    "empty both hosts, redraw, and dispatch terminal keyboard input with no live surface"
+  ],
+  "assertions": [
+    "production Popover initialFocus=content focuses the labelled dialog on open and restores the exact trigger on Escape without fixture request_focus",
+    "duplicate open hosts register distinct live layers; innermost Escape and outside press dismiss only that layer; sibling callbacks and focus stay isolated",
+    "selectable rows keep radius.control, surface 72% hover fill, and the inset accent focus ring",
+    "overflowing lists scroll under mounted wheel input while current post-scroll list bounds stay inside the current surface",
+    "terminal empty hosts clear surfaces, items, paint, and focus identity before further input; MessageCenter owns no timeout clock"
+  ],
+  "outcome": "passed",
+  "artifact_paths": []
+}
