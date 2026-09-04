@@ -5,6 +5,7 @@ Date: 2026-09-04
 Card: `docs/roadmaps/g16/105-window-capture-icon-geometry-fixtures.md`
 Dispatch: `docs/roadmaps/dispatch.md` revision 7
 Base: `14e2fc2b4` (`origin/main`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/210
 
 ## Outcome
 
