@@ -30,6 +30,15 @@ distribution point.
   and the tag is minutes old. Precedent: the broken `v0.2.1` tag was
   retracted after `v0.2.2` replaced it.
 
+## Second Attempt (2026-09-04, failed before publish)
+
+- After `g16.103` merged, tag `v0.3.0` was re-created at `eab436eef` and
+  dry run `33908714014` failed in `Release gates`: `git merge-base
+  eab436eef origin/main` → `fatal: Not a valid object name origin/main`.
+  The release checkout fetches only the tag ref, the same class of defect
+  `g16.096` fixed for the PR board. No publish ran. `g16.104` repairs the
+  workflow and adds the pre-tag branch dry run so this cannot recur.
+
 ## Candidate (re-certification)
 
 - Candidate commit: the `main` tip immediately after `g16.103` merges,
@@ -50,9 +59,13 @@ distribution point.
    (the full `qa` board) and the pack/hash steps `g16.054` used; record
    tarball names, sizes, and SHA-256. Verify lockstep `0.3.0`, tag absence
    local and remote, and npm `latest` `0.2.2`. Stop on any red gate.
+1b. Prove the workflow on the candidate before any tag (protocol rule
+   2026-09-04; enabled by `g16.104`): `gh workflow run release.yml --ref
+   main -f dry-run=true` with `main` at the candidate SHA. Wait for green.
+   Record the run URL. A red run here is a stop, and no tag is created.
 2. Create the lightweight tag at that exact candidate and push it:
    `git tag v0.3.0 <candidate-sha>` and `git push origin v0.3.0`. Never tag a
-   different SHA, and never tag before step 1 is green.
+   different SHA, and never tag before steps 1 and 1b are green.
 3. Dry run first: `gh workflow run release.yml --ref v0.3.0 -f dry-run=true`.
    Wait for completion. Require every step green, including release gates,
    version-tag agreement, and pack verification. Record the run URL.
@@ -106,6 +119,7 @@ distribution point.
 | --- | --- | --- |
 | Tag names the certified SHA | tag any other commit | `git rev-parse v0.3.0` equals the recorded candidate |
 | Gates precede the tag | tag before a green local `release gates` | log shows the gate transcript timestamp before the tag push |
+| Workflow precedes the tag | tag before a green branch dry run of `release.yml` on the candidate SHA | log shows the branch dry-run URL and timestamp before the tag push |
 | Dry run precedes publish | publish first | two run URLs in order, dry-run earlier |
 | Retraction is complete | old tag still on origin | `git ls-remote --tags origin v0.3.0` shows only the new SHA |
 | Registry truth | `latest` still `0.2.2` after the run | `npm view` transcript with `0.3.0` |

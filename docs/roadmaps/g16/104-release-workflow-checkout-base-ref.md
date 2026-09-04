@@ -1,4 +1,4 @@
-# g16.104 — Release Workflow Checkout Base Ref
+# g16.104 — Release Workflow Checkout Base Ref And Pre-Tag Dry Run
 
 Status: held — awaiting two operator approvals: (1) edit `release.yml`
 (workflow authority), (2) retract the `v0.3.0` tag at `eab436eef` and re-tag
@@ -19,8 +19,21 @@ Dispatch manifest: `../dispatch.md`
 
 ## Goal
 
-Make `effigy release gates` pass on the release runner at a tag ref, without
-weakening the scope guard or changing what the gate checks.
+Make `effigy release gates` pass on the release runner at a tag ref, and
+make the release workflow provable green on the exact candidate commit
+*before* any tag exists, so a failed release run is a protocol violation
+rather than a discovery.
+
+## Protocol Failure This Repairs
+
+Two `v0.3.0` dry runs (`33874116177`, `33908714014`) failed after the tag
+was pushed. Both defects lived in the tagged tree's own workflow or board
+shape, and neither could be seen by the local `effigy release gates` because
+the local checkout had `origin/main` and a built `dist/`. The operator's
+rule (2026-09-04): a release run that fails is a process failure; CI must be
+green on the candidate before the release process starts. Today the
+workflow refuses non-tag refs, so that rule cannot be followed. This card
+makes it followable.
 
 ## Fixed Boundary
 
@@ -30,8 +43,17 @@ weakening the scope guard or changing what the gate checks.
   `ci-web.yml` uses, with the same header comment explaining why. No other
   change to the workflow: triggers, runner, gates, publish, and artifact
   steps stay byte-identical.
-- Keep `scripts/check-release-automation.ts` green; if it asserts the
-  checkout shape, extend the assertion, never relax it.
+- Allow a dry run on a non-tag ref: change the "Require a versioned release
+  tag" step to fail only when `inputs.dry-run` is false, and make the
+  "Versions agree with the tag" step run only on tag refs (on a branch dry
+  run, verify instead that all manifests agree with each other). The Publish
+  step keeps its existing tag-and-not-dry-run condition, so a branch ref can
+  never publish. Header comment states the two-step protocol: prove the
+  candidate green with `gh workflow run release.yml --ref <candidate-sha
+  or main> -f dry-run=true`, then tag, then publish.
+- Keep `scripts/check-release-automation.ts` green; extend its assertions to
+  cover the new rule "publish requires a tag ref and dry-run=false"; never
+  relax the publish guard.
 - Do not touch `web-preview.ts`. Append one PAPERCUTS entry: the classifier
   should fail with "origin/main is not available" instead of a raw exit 128,
   and should say which workflow to fix. (Second sighting; first was PR #201.)
@@ -43,6 +65,8 @@ weakening the scope guard or changing what the gate checks.
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
 | Base ref exists at a tag ref | dispatch `release.yml` with `dry-run=true` against the new tag | `Release gates` passes `test:web-pack-install` |
+| Candidate is provable before tagging | dispatch `dry-run=true` against `main` at the candidate SHA | full run green with Publish skipped |
+| Branch ref can never publish | dispatch `dry-run=false` against `main` | fails at "Require a versioned release tag" |
 | Nothing else moved | diff `release.yml` | only the checkout `with:` block and one fetch step |
 | Checker agrees | `effigy check:release-automation` | pass |
 | Ordinary PR board unaffected | this card's own PR | `ci-web` behaves per the g16.096 exception rules |
@@ -71,9 +95,6 @@ release assertion. Escalation owner: operator, via Chatterbox.
 ## Continuation
 
 `g16.097` re-runs from step 0 (retract `v0.3.0` at `eab436eef`, nothing was
-published), records the post-`104` `main` tip as the candidate, runs the
-local gates, then tags and dry-runs. The card's "gates precede the tag" rule
-already covers this; the local gate could not see this defect because it
-had `origin/main`. Add to `g16.097` step 1: run the gate from a checkout
-that has only the candidate ref, or accept that the dry run is the only
-proof for checkout-shape defects.
+published), records the post-`104` `main` tip as the candidate, and follows
+the new order: green branch dry run on the candidate SHA, then tag, then
+tag dry run, then publish.

@@ -165,6 +165,16 @@ cannot.
 - An adapter may translate API shape but must not silently drop accessibility
   behavior.
 
+## Release Certification
+
+A release run that fails is a process failure, not a discovery (operator
+rule, 2026-09-04). Before any release tag exists, the exact candidate commit
+must have a green local `effigy release gates` and a green `release.yml`
+dry run dispatched against the candidate ref. Only then is the tag created,
+re-proven with a tag dry run, and published. A red run at any step stops
+the lane and returns to planning; the tag is retracted only when nothing was
+published from it.
+
 ## Validation
 
 Use Effigy as the command surface. Run the narrow checks relevant to a batch,
