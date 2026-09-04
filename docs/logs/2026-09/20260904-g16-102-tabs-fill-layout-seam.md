@@ -73,11 +73,15 @@ Plants run against this head, then reverted; every row failed as predicted.
 Focused (this head):
 
 - Svelte/React Tabs suites incl. the new fill files — 13 files, 113 pass
-  (vitest `svelte-components` + `react-components`)
+  (vitest `svelte-components` + `react-components`); re-verified 106 pass
+  across the 11 pre-existing Tabs files after the rebase onto g16.100/101
+  closeouts
 - `bun test packages/core/test/tabs.test.ts` — 24 pass
 - `cargo test --manifest-path packages/contracts/components/Cargo.toml` — 330 pass
-- `cargo test` in `packages/render` — 638 pass, incl. the two fill proofs
-- `effigy regressions:native` at `a9030c688` — 203 pass; receipt cohort repinned
+- `cargo test` in `packages/render` — 639 pass after the rebase, incl. the
+  two fill proofs
+- `effigy regressions:native` — 203 pass at both `a9030c688` and, after the
+  rebase, `72530f8dc`; the receipt cohort repinned to the rebased head
 
 Boards (exit 0):
 
