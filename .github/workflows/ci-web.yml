@@ -2,10 +2,14 @@
 name: ci-web
 
 on:
-  # Manual dispatch only. The path-filtered push and pull_request triggers ran
-  # this on nearly every commit to the default branch; combined with the
-  # macOS lanes that exhausted the org's Actions allowance and left dispatched
-  # runs queued indefinitely. Run this before a tag, and locally otherwise.
+  # Automatic ubuntu-latest gates: pull requests targeting main and pushes to
+  # main. Restores a cheap default-branch validation signal after the macOS
+  # lanes exhausted the org's Actions allowance. Native, visual, and release
+  # lanes stay manual dispatch only. Operator approval 2026-09-02 (g16.096).
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch: {}
 
 concurrency:
