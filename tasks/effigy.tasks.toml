@@ -487,9 +487,14 @@
   { task = "drift:drag-inventory" },
   { task = "test:core" },
   { task = "test:core-build" },
-  { task = "test:components" },
+  # g16.098: detached worktree without shell dist. Bites if react-preview
+  # loses its workspace alias or ci:web tests components before package builds.
+  { run = "bun test scripts/web-distribution/cold-checkout-react-preview.test.ts" },
+  # Export and docs audits inspect compiled shells. Build dist before
+  # test:components so a cold checkout cannot resolve through missing exports.
   { task = "svelte:package" },
   { task = "react:package" },
+  { task = "test:components" },
   # The packaged counterpart of test:components. Cheap (~4s against ci:web's
   # ~21s) and it catches a class nothing else here can see: g13-b041 had a
   # component import its generated artifact from the preview package, which

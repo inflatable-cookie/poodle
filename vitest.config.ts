@@ -99,6 +99,7 @@ export default defineConfig({
         },
       },
       {
+        resolve: { alias: workspaceAliases },
         test: {
           name: "react-preview",
           environment: "happy-dom",

@@ -5,6 +5,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — RESOLVED 2026-09-04 by g16.098. The 2026-09-02 `react-preview`
+  workspace-alias papercut is closed: that vitest project now uses
+  `workspaceAliases`, and `ci:web` builds both shell packages before
+  `test:components`. A detached-worktree proof replants the missing alias.
+
 - 2026-09-04 — `import ts from "typescript"` under Bun with
   `@typescript/native@7.0.2` exports only `{ version, versionMajorMinor }` at
   runtime rather than the TypeScript compiler API namespace
