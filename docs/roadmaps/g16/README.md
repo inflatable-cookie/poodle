@@ -4,7 +4,7 @@ Status: active — complete through `g16.094`; Nucleus M1 mounted cohort complet
 at 29/29; `g16.098` cold-checkout board repair merged in PR #203, `g16.095`
 merged in PR #202, `g16.099` port tranche merged in PR #204, `g16.100` DockRegion
 `showTabs` merged in PR #206, `g16.101` Tree accessible name merged in PR #205,
-and `g16.096` / `g16.097`
+`g16.102` Tabs fill layout merged in PR #207, and `g16.096` / `g16.097`
 are serial behind `098`; VL-0 lab authority is
 closed; later evidence and adoption phases remain gated
 Posture: strict-ready
@@ -141,7 +141,7 @@ stay maintained; backend admission is not part of the first card.
 99. [099 — React prop port tranche](099-react-prop-port-tranche.md) — complete in PR #204 at `660b9510d`; all five pending-port baseline entries are cleared
 100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — complete in PR #206; portable contract, Rust render paths, React parity, GPUI specimen, and baseline closeout
 101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — complete in PR #205; explicit `aria-label` per treeitem in both shells, including loading and rename states
-102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — ready; `layout="fill"`, a panel padding hook, and a standalone-strip recipe replace `:global` overrides in three consumers
+102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — complete in PR #207; `layout="fill"`, panel sizing and padding contract, native mapping, and standalone-strip ownership recipe
 
 ## Parallel Continuation
 
