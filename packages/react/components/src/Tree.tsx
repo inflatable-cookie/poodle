@@ -510,7 +510,7 @@ function TreeView({
 
   function loadingRow(depth: number) {
     return (
-      <div className="poodle-tree__item" role="treeitem" aria-level={depth + 1} aria-selected={false} aria-disabled={true}>
+      <div className="poodle-tree__item" role="treeitem" aria-label="Loading…" aria-level={depth + 1} aria-selected={false} aria-disabled={true}>
         <div className="poodle-tree__row poodle-tree__row--loading">
           {Array.from({ length: depth }, (_, i) => (
             <span key={i} className="poodle-tree__indent" aria-hidden="true" />

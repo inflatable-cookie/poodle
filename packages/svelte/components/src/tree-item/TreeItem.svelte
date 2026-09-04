@@ -146,6 +146,7 @@
   bind:this={itemEl}
   class="poodle-tree__item"
   role="treeitem"
+  aria-label={node.label}
   data-value={node.value}
   data-branch={branch ? "true" : undefined}
   data-selected={selected ? "true" : undefined}

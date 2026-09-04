@@ -288,6 +288,9 @@ Keyboard tree navigation (expand/collapse, roving). Extraction debt: tree-naviga
 - Optional attributes: `aria-label` on root when context does not already label it
 - Labeling rules: provide `ariaLabel` whenever the surrounding chrome does not
   name the tree
+- Accessible name: every `treeitem` names itself explicitly with its node
+  label (`aria-label`; loading placeholders use their visible text) — the name
+  is set, never derived from descendants
 
 ### Keyboard
 

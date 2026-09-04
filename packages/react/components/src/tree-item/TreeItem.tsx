@@ -144,6 +144,7 @@ export function TreeItem({
     <div
       {...itemProps}
       role="treeitem"
+      aria-label={node.label}
       data-value={node.value}
       data-branch={branch ? "true" : undefined}
       data-selected={selected ? "true" : undefined}
