@@ -8,7 +8,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ActiveEdge, ActiveFill, EyebrowSpec, Orientation, TabDefinition, TabVariant, TabsSpec,
+    ActiveEdge, ActiveFill, EyebrowSpec, Orientation, TabDefinition, TabVariant, TabsLayout,
+    TabsSpec,
 };
 use std::sync::Arc;
 
@@ -514,6 +515,48 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-fullwidth")
         .on_change(node_value_handler(state, "tabs-fullwidth-value"));
 
+    // 9. FILL LAYOUT — layout: Fill (g16.102). Composed through
+    // `tabs_with_panel` — the seam the strip-only wrapper path does not
+    // carry — inside a fixed-height host: the root grows to the host, the
+    // panel grows with a zero min-height and owns vertical scrolling, and
+    // the strip keeps its natural height.
+    let fill_value = state
+        .specimens
+        .text
+        .get("tabs-fill-value")
+        .map(|s| s.as_str())
+        .unwrap_or("overview")
+        .to_string();
+    let fill_spec = TabsSpec::new(vec![
+        TabDefinition::new("overview", "Overview"),
+        TabDefinition::new("activity", "Activity"),
+    ])
+    .with_variant(TabVariant::Card)
+    .with_layout(TabsLayout::Fill)
+    .with_value(&fill_value)
+    .with_aria_label("Fill layout tabs");
+    let fill_rows = (0..24).map(|row| {
+        poodle_node::Node::text(format!(
+            "Fill panel row {row:02} — the panel owns the scrolling"
+        ))
+    });
+    let mut fill_panel = poodle_node::Node::container();
+    fill_panel.style.descriptor.layout.direction = poodle_node::LayoutDirection::Column;
+    fill_panel.style.descriptor.layout.spacing.gap = 4.0;
+    for row in fill_rows {
+        fill_panel = fill_panel.child(row);
+    }
+    let fill_component = poodle_gpui_node_backend::to_gpui(&poodle_render::tabs_with_panel(
+        &fill_spec,
+        &poodle_render::RenderContext::new(theme),
+        poodle_render::TabsHandlers {
+            on_change: Some(node_value_handler(state, "tabs-fill-value")),
+            instance_id: Some("specimen-tabs-fill".to_owned()),
+            ..poodle_render::TabsHandlers::default()
+        },
+        fill_panel,
+    ));
+
     // 11. REORDER DRAG STATES (drag-source + drop-target)
     // Contract §4: drag-source = opacity 0.4; drop-target = inset accent ring
     // (GPUI fallback: 2px accent border). Host-set transient state, here pinned
@@ -785,6 +828,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(div().w_full().child(full_width_component)),
+        )
+        // 9. Fill layout — the root takes the container's block size, the
+        // panel grows and scrolls, the strip keeps its natural height.
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Fill layout — a sized container with a scrolling panel (layout: Fill)",
+                    ),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .h(px(240.0))
+                        .rounded(px(6.0))
+                        .border_1()
+                        .border_color(color_to_hsla(border))
+                        .overflow_hidden()
+                        .child(fill_component),
+                ),
         )
         // Reorder drag states (drag-source dimmed, drop-target ringed).
         // Native-specific evidence for contract §4: the transient drag visuals

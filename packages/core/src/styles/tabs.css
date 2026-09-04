@@ -11,6 +11,7 @@
     --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
     --poodle-tabs-block-close-margin-end: 0.25rem;
+    --poodle-tabs-panel-padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
@@ -115,6 +116,33 @@
   .poodle-tabs[data-orientation="vertical"] {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
+  }
+
+  /* ── Fill layout (g16.102) ──
+
+     `layout="fill"` turns Tabs into a full-height surface: the root takes its
+     container's block size, the strip keeps its natural height, and the
+     active panel scrolls within the rest. Orientation-independent — the
+     vertical orientation fills through a single stretched row instead of
+     row tracks. Requires a sized container: without a definite block size on
+     the parent, `height: 100%` computes to auto and Tabs renders the
+     ordinary natural-height grid. */
+  .poodle-tabs[data-layout="fill"] {
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .poodle-tabs[data-layout="fill"] .poodle-tabs__panel {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .poodle-tabs[data-layout="fill"][data-orientation="vertical"] {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .poodle-tabs[data-layout="fill"][data-orientation="vertical"] .poodle-tabs__panel {
+    align-self: stretch;
   }
 
   /* ── List ── */
@@ -594,7 +622,7 @@
 
   .poodle-tabs__panel {
     min-width: 0;
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: var(--poodle-tabs-panel-padding);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-recipe-tabs-panel-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));

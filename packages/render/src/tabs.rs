@@ -14,11 +14,12 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeDropCommit, NodeKey, NodeRole, ShadowLayer, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodeDropCommit, NodeKey, NodeRole, ShadowLayer, StylePatch,
 };
 use poodle_specs::{
-    ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec,
+    ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsLayout,
+    TabsSpec,
 };
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
@@ -399,6 +400,12 @@ pub fn tabs_with_handlers(
 
     let mut root = Node::container();
     root.style.descriptor.layout.direction = LayoutDirection::Column;
+    // Fill takes the container's block size: the root grows in whatever host
+    // column it is placed in (the web `height: 100%` posture). Auto keeps the
+    // natural-height root.
+    if spec.layout == TabsLayout::Fill {
+        root.style.flex_grow = Some(1.0);
+    }
     root.roles.insert(
         "variant".to_owned(),
         format!("{:?}", spec.variant).to_ascii_lowercase(),
@@ -438,6 +445,16 @@ pub fn tabs_with_panel(
     panel.a11y.labelled_by = Some(format!("tabs:{value}"));
     panel.interaction.focusable = true;
     panel.a11y.tab_index = Some(0);
+    // Fill maps to the flex-grow / min-size vocabulary the node model
+    // already has — no new node capability (contract §10): the panel grows
+    // into the space under the strip, may shrink to zero before its content
+    // (the `minmax(0, 1fr)` grid row on the web), and owns vertical
+    // scrolling. The strip above it stays at its natural height.
+    if spec.layout == TabsLayout::Fill {
+        panel.style.flex_grow = Some(1.0);
+        panel.style.min_height = Some(0.0);
+        panel.style.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
+    }
     root.children.push(panel);
     root
 }
@@ -1747,5 +1764,70 @@ mod tests {
                 "{variant:?}"
             );
         }
+    }
+
+    /// Node-inventory proof for the fill seam (contract §10): under `Fill`
+    /// the panel grows with a zero min-height and owns vertical scrolling
+    /// while the strip carries no grow; under `Auto` none of that applies.
+    #[test]
+    fn fill_layout_grows_the_panel_and_leaves_the_strip_fixed() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let tabs_def = vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ];
+
+        let fill = tabs_with_panel(
+            &TabsSpec::new(tabs_def.clone())
+                .with_layout(TabsLayout::Fill)
+                .with_value("a"),
+            &ctx,
+            TabsHandlers::default(),
+            Node::text("Panel"),
+        );
+        let panel = fill
+            .find(&|node| node.a11y.role == Some(NodeRole::TabPanel))
+            .expect("fill composes the panel");
+        assert_eq!(panel.style.flex_grow, Some(1.0), "fill panel grows");
+        assert_eq!(panel.style.min_height, Some(0.0), "fill panel may shrink");
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Scroll,
+            "fill panel owns vertical scrolling"
+        );
+        let strip = &fill.children[0];
+        assert_eq!(strip.style.flex_grow, None, "the strip keeps its natural height");
+
+        let auto = tabs_with_panel(
+            &TabsSpec::new(tabs_def).with_value("a"),
+            &ctx,
+            TabsHandlers::default(),
+            Node::text("Panel"),
+        );
+        let panel = auto
+            .find(&|node| node.a11y.role == Some(NodeRole::TabPanel))
+            .expect("auto composes the panel");
+        assert_eq!(panel.style.flex_grow, None);
+        assert_eq!(panel.style.min_height, None);
+        assert_eq!(panel.style.descriptor.layout.overflow_y, LayoutOverflow::Visible);
+    }
+
+    #[test]
+    fn fill_layout_grows_the_root_and_auto_does_not() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let tabs_def = vec![TabDefinition::new("a", "A")];
+
+        let fill = tabs(
+            &TabsSpec::new(tabs_def.clone()).with_layout(TabsLayout::Fill),
+            &ctx,
+            None,
+            None,
+        );
+        assert_eq!(fill.style.flex_grow, Some(1.0), "fill root takes the container");
+
+        let auto = tabs(&TabsSpec::new(tabs_def), &ctx, None, None);
+        assert_eq!(auto.style.flex_grow, None, "auto keeps the natural root");
     }
 }

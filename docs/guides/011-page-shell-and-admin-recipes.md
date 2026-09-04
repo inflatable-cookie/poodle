@@ -180,6 +180,46 @@ Use `Tabs` directly. Keep mount policy app-owned.
 />
 ```
 
+## Standalone Tab Strip With An External Panel
+
+Use this when the panel content lives outside the Tabs component — a
+full-height inspector where the strip is a sibling of the panel, or one strip
+driving several panels. Render Tabs without the `children` snippet and own
+the composition:
+
+```svelte
+<script lang="ts">
+  import { Tabs } from "@inflatable-cookie/poodle-svelte";
+
+  let activeTab = "layers";
+</script>
+
+<div class="inspector">
+  <Tabs
+    bind:value={activeTab}
+    items={[
+      { value: "layers", label: "Layers" },
+      { value: "history", label: "History" }
+    ]}
+    ariaLabel="Inspector sections"
+  />
+  <!-- host-owned panel surface -->
+</div>
+```
+
+Rules for this pattern:
+
+- Poodle renders no panel when the `children` snippet is absent, so the
+  consumer owns `aria-controls` on each tab and `role="tabpanel"` with
+  `aria-labelledby` on the external panel. Tabs generates its internal
+  tab/panel ids only for its own panels.
+- For a full-height inspector, set `layout="fill"` on a sized container: the
+  strip keeps its natural height and the panel surface scrolls under it. See
+  the Tabs contract §7 and the `--poodle-tabs-panel-padding` hook for panel
+  padding.
+- Keep the panel surface itself host-owned; Tabs does not lay out content
+  that is not its child.
+
 ## Modal Workflows
 
 Use `FormDialog` or `AlertDialog` directly. Do not build new generic admin
