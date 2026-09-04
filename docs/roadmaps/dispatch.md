@@ -80,6 +80,24 @@ card or triage note says.
   the branch dry run is executed by `g16.097` step 1b, not by this lane
 - Stop conditions: per card. Escalation owner: operator, via Chatterbox
 
+### g16.105 — Window-capture icon-geometry fixture kind
+
+- Card: `g16/105-window-capture-icon-geometry-fixtures.md`
+- Readiness: ready
+- Prerequisites: merged `g16.050` (satisfied). Completion: PR merged after
+  accepted exact-head review; headless tests prove the closed registry and
+  exact samples.
+- Owned mutable paths: `packages/gpui/preview/src/bin/window_capture/` and
+  its tests, log, `PAPERCUTS.md` (append only)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`, this manifest
+- Approved concurrent siblings: `g16.104`, `g16.097`. Serial edges: none in
+  Poodle; poodle-lab `g01.002`'s GPUI leg waits for this merge.
+- Worker capability class: capable coding model, medium reasoning (Rust,
+  GPUI)
+- Acceptance evidence and review oracle: the card's Review Oracle table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |

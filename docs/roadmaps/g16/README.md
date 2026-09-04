@@ -145,6 +145,7 @@ stay maintained; backend admission is not part of the first card.
 102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — complete in PR #207; `layout="fill"`, panel sizing and padding contract, native mapping, and standalone-strip ownership recipe
 103. [103 — Release tarball dist verification repair](103-release-tarball-dist-verification.md) — ready, urgent; operator-authorized workflow repair aligns release archive assertions with the compiled `dist/**` contract and blocks `097`
 104. [104 — Release workflow checkout base ref and pre-tag dry run](104-release-workflow-checkout-base-ref.md) — ready, priority; dry run `33908714014` failed because `release.yml` checks out only the tag ref; adds the checkout fix from `096` and a branch dry-run path so the candidate is proven before tagging
+105. [105 — Window-capture icon-geometry fixture kind](105-window-capture-icon-geometry-fixtures.md) — ready; lets the non-activating capture binary render the six candidate pairs per state so the lab's GPUI leg can serve `051`
 
 ## Parallel Continuation
 
