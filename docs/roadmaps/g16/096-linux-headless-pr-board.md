@@ -1,7 +1,6 @@
 # g16.096 — Linux Headless PR And Main Board
 
-Status: ready — in revision on PR #201 (head `2c7cb6f2d`, rebased onto the
-`g16.098` merge `c8636c699`). Boundary widened 2026-09-04: the checkout step
+Status: complete — merged in PR #201 at `372aa5253`. Boundary widened 2026-09-04: the checkout step
 must fetch `origin/main` so the pack-install scope classifier has its base
 Type: workflow automation — explicit operator approval recorded
 Opened: 2026-09-04
@@ -95,6 +94,14 @@ accepted exact-head review plus the green `ci-rust` run; the first push-main
 run (no changed paths against `origin/main`) is the board's green proof and
 is recorded in the execution log. Ordinary PRs are unaffected. The guard's
 message should name this case plainly; that is a papercut, not this card.
+
+## Closeout
+
+PR #201 merged after accepted exact-head review at `78e977975b` and green
+`ci-rust` run `33884905792`. The accepted red PR-head `ci-web` run was the
+documented workflow-scope exception. Post-merge push-main `ci-web` run
+`33893736159` passed in 5m45s, including `test:components` (381 files / 3681
+tests) and pack-install. This is the board's green proof.
 
 ## Stop Conditions
 

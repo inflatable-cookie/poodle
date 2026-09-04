@@ -1,7 +1,7 @@
 # g16.096 — Linux Headless PR And Main Board
 
-Status: implemented; PR #201 open — stopped at the card stop condition,
-awaiting operator decision on a pre-existing `ci-web` failure
+Status: complete; PR #201 merged — accepted workflow-scope exception followed
+by green post-merge `push: main` proof
 Date: 2026-09-04
 Card: `docs/roadmaps/g16/096-linux-headless-pr-board.md`
 Handoff: `docs/handoffs/20260904-132736-g16-096-linux-headless-pr-board.md`
@@ -89,20 +89,24 @@ widening scope.
   `*-windowed` selector was run. Local effigy was
   `v0.12.1+local.aafbd93`; CI uses `setup-effigy` 0.11.0 as pinned.
 
+## Closeout
+
+PR #201 merged at `372aa5253` after accepted exact-head review at
+`78e977975b` and green `ci-rust` run `33884905792`. The red PR-head `ci-web`
+run was the documented operator-approved workflow-scope exception. The first
+post-merge push-main `ci-web` run, `33893736159`, passed in 5m45s, including
+`test:components` (381 files / 3681 tests) and pack-install.
+
 ## Limits
 
-- This worker has not merged, rebased PR #201, or dispatched any workflow.
-- The lane stopped at the card stop condition; the automatic `ci-web` board
-  cannot go green until the pre-existing react-preview dist-ordering defect
-  is fixed (options are documented in the 2026-09-02 `PAPERCUTS.md` entry
-  and the second-sighting entry added here).
+- The PR-head red `ci-web` result is intentionally retained as the accepted
+  workflow-scope exception for PR #201 only; ordinary PRs remain subject to
+  the guard.
 - Head refresh against `main` at `c6d1a0ea` is reserved for the
   coordinator.
 
 ## Continuation
 
-Operator decision needed: repair the pre-existing `ci-web` board order (or
-alias) so the new automatic board can go green, or accept a red automatic
-web signal. The trigger and checker work in PR #201 is complete and locally
-validated; once the board defect lands, the same PR head can be re-run
-without further edits.
+The automatic Linux PR and main boards are active. The accepted exception is
+closed by the green post-merge push-main run; the guard wording papercut stays
+open for a future policy lane.
