@@ -24,16 +24,19 @@ name: Release
 # stays reserved under the claimed scope. When it does ship it ships at the
 # common version, not at 0.1.0 from a standing start.
 
-# Dispatch this workflow AGAINST THE TAG, not against main:
+# Two-step protocol: prove the candidate green before any tag exists, then
+# tag, then publish.
 #
+#     gh workflow run release.yml --ref <candidate-sha or main> -f dry-run=true
 #     git tag vX.Y.Z && git push origin vX.Y.Z
 #     gh workflow run release.yml --ref vX.Y.Z -f dry-run=false
 #
-# workflow_dispatch accepts a tag ref, so `github.ref` is `refs/tags/vX.Y.Z`
-# and the version-agrees-with-tag check below still fires. There is no
-# `push: tags` trigger: publication should be an act someone performs, not a
-# side effect of pushing a tag, and during first publication a tag push would
-# fire a run that tries to republish versions already on the registry.
+# A branch dry-run never publishes: Publish requires a versioned tag ref and
+# dry-run=false. A non-tag dispatch with dry-run=false fails at "Require a
+# versioned release tag". workflow_dispatch on a tag ref keeps `github.ref`
+# as `refs/tags/vX.Y.Z` so the version-agrees-with-tag check still fires.
+# There is no `push: tags` trigger: publication should be an act someone
+# performs, not a side effect of pushing a tag.
 on:
   workflow_dispatch:
     inputs:
@@ -63,9 +66,18 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: a shallow tag checkout has no visible
+          # ancestry, so `git merge-base HEAD origin/main` in web-preview.ts
+          # finds no common ancestor even once main is fetched.
+          fetch-depth: 0
+
+      # Expose origin/main for the pack-install scope classifier; without it,
+      # `git merge-base HEAD origin/main` exits 128 on every tag run.
+      - run: git fetch --no-tags origin main:refs/remotes/origin/main
 
       - name: Require a versioned release tag
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}
         run: |
           set -euo pipefail
           echo "Release workflow must be dispatched against refs/tags/v* (got ${GITHUB_REF})." >&2
@@ -116,6 +128,7 @@ jobs:
       # at the repository boundary -- Poodle versions independently of Longhorn,
       # which depends on it by ordinary semver range.
       - name: Versions agree with the tag
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME#v}"
@@ -138,6 +151,39 @@ jobs:
             if [ -n "$version" ] && [ "$version" != "$tag" ]; then
               echo "crate $name is $version, tag is $tag"
               status=1
+            fi
+          done < <(find packages -name Cargo.toml -not -path '*/target/*' -print0)
+          exit "$status"
+
+      # Branch dry-run has no tag to agree with. Prove lockstep against the
+      # first manifest version instead, so a pre-tag candidate still fails
+      # closed on drift without inventing a tag name from the branch ref.
+      - name: Versions agree with each other
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          set -euo pipefail
+          expected=""
+          status=0
+          record() {
+            local source="$1" version="$2"
+            if [ -z "$expected" ]; then
+              expected="$version"
+            elif [ "$version" != "$expected" ]; then
+              echo "$source is $version, expected $expected"
+              status=1
+            fi
+          }
+          for manifest in \
+            packages/core/package.json \
+            packages/svelte/components/package.json \
+            packages/react/components/package.json; do
+            record "$manifest" "$(node -p "require('./$manifest').version")"
+          done
+          while IFS= read -r -d '' manifest; do
+            name=$(grep -m1 '^name' "$manifest" | cut -d'"' -f2)
+            version=$(grep -m1 '^version' "$manifest" | cut -d'"' -f2)
+            if [ -n "$version" ]; then
+              record "crate $name" "$version"
             fi
           done < <(find packages -name Cargo.toml -not -path '*/target/*' -print0)
           exit "$status"

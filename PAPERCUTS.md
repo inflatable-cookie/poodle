@@ -5,6 +5,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-04 — Second sighting of the `web-preview.ts` origin/main classifier
+  failure, now on a tag-ref release runner. Dry run `33908714014` at tag
+  `v0.3.0` (`eab436eef`) died in `Release gates` at `test:web-pack-install`
+  with `fatal: Not a valid object name origin/main` (exit 128) because
+  `actions/checkout` at a tag fetches only that ref. Fail with
+  `origin/main is not available` and name the workflow that must fetch it
+  (`release.yml` here; `ci-web.yml` was the first sighting on PR #201).
+  g16.104 copies the ci-web checkout fetch; do not touch `web-preview.ts`
+  in this lane.
+
 - 2026-09-04 — `test/package-install/web-preview.ts` clones the shared Git
   directory as a bare repository and fetches candidate SHAs by object ID. A
   freshly merged commit reachable only through `origin/main` is not advertised
