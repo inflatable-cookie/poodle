@@ -1,12 +1,10 @@
 # g16.115 — Nucleus A1 NP-4 execution log
 
-Status: blocked at bounded divergence review
+Status: complete — ready for independent exact-head review
 Date: 2026-09-05
-Base: `origin/main` revision 18 at `7c1837f0fa2fede8fbd476b3362d88dd112290d7`
+Base: `origin/main` at `f9922fd1d558ae34f8888e524366791f79f942cb`
 Branch: `worker/g16-115-nucleus-np4`
-During execution, concurrent lane activity advanced `origin/main` to
-`f9922fd1d558ae34f8888e524366791f79f942cb`; a fresh rebase is required before
-any eventual PR.
+Runtime checkpoint: `c670294298830aa1a0ccae35810c46b66b8fb51b`
 
 ## Scope
 
@@ -31,18 +29,16 @@ created for the three divergent rows.
 
 ## Validation
 
-- `test:nucleus-a11y`: previously green for the five scenarios plus the three
-  foundation rows before native divergent rows were added.
-- Focused native TextInput and Callout probes passed before this continuation.
-- ConfirmAction and DetailItem native probes executed and published the
-  divergence snapshots/diffs above.
-- `effigy docs:check` / parity ledger remains blocked by the unrepinned dirty
-  runtime source; final revision-18 cohort repin was not performed.
+- `effigy regressions:native`: 208 passed, 8 pre-existing ignored.
+- `effigy test:nucleus-a11y`: 14 passed.
+- `effigy test:nucleus-parity-receipts`: 11 passed.
+- `effigy check:parity-evidence-ledger`: 176 component rows validated.
+- `effigy docs:check`: passed.
 - `git diff --check`: clean.
+- Full 34-receipt cohort re-emitted at `c67029429`; manifest resolution was
+  repinned to that source commit and the existing lock digest.
 
 ## Stop
 
-Chatterbox must create bounded repair decisions for the ConfirmAction and
-DetailItem projection gaps (RadioGroup is already the lane's requested repair
-card input). Do not repin the cohort or publish a PR until those decisions are
-resolved, because the exact-head receipt ledger would otherwise be red.
+The branch is ready for independent exact-head review. Do not merge this PR or
+run windowed selectors from the worker lane.
