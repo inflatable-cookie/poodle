@@ -817,13 +817,29 @@ Slide-out panel from a screen edge:
 Positioned floating content anchored to a trigger:
 
 ```svelte
-<Popover placement="bottom-start">
-  {#snippet trigger()}
-    <Button>Options</Button>
+<script lang="ts">
+  import { Popover, Button, type PopoverTriggerState } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<Popover placement="bottom-start" triggerIsInteractive>
+  {#snippet trigger(state: PopoverTriggerState)}
+    <Button
+      ariaExpanded={state.expanded}
+      controls={state.controls}
+      disabled={state.disabled}
+    >
+      Options
+    </Button>
   {/snippet}
   <div>Popover content here</div>
 </Popover>
 ```
+
+A trigger that is itself interactive (like `Button`) must use
+`triggerIsInteractive` and apply the `PopoverTriggerState` payload
+(`expanded`, `controls`, `disabled`) to the real control. Plain,
+non-interactive trigger content can use the default zero-argument trigger
+snippet without `triggerIsInteractive`.
 
 `placement`: `"top"` | `"top-start"` | `"top-end"` | `"bottom"` | `"bottom-start"` | `"bottom-end"` | `"left"` | `"right"` | etc.
 
@@ -900,12 +916,12 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 <Tabs
   items={tabs}
   value={activeTab}
-  variant="underline"
+  variant="card"
   onValueChange={(value) => activeTab = value}
 />
 ```
 
-Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
+Tab variants: `"card"` | `"pill"` | `"block"`
 
 ---
 
@@ -1223,7 +1239,7 @@ type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 type ControlDensity = "compact" | "default" | "comfortable";
 type SemanticControlSizeRole = "chrome" | "control" | "prominent";
 type ButtonVariant = "primary" | "secondary" | "ghost";
-type ButtonTone = "default" | "danger";
+type ButtonTone = "default" | "danger" | "success" | "warning";
 type ValidationState = "none" | "invalid" | "valid" | "pending";
 type StatusTone = "neutral" | "info" | "success" | "warning" | "danger" | "pending";
 type IconProp = IconNodes | string;      // direct data or string name

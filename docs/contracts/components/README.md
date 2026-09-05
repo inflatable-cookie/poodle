@@ -180,7 +180,6 @@ primitives and layout surfaces through higher-order application components.
 - `tool-call-group.md`
 - `tool-call.md`
 - `toolbar.md`
-- `token-input.md`
 - `tooltip.md`
 - `tree.md`
 - `tri-state-switch.md`
