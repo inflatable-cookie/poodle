@@ -1,6 +1,6 @@
 # Nucleus GPUI Parity Programme
 
-Status: active — M1 mounted cohort complete 29/29; later evidence and adoption phases remain gated
+Status: active — M1 complete 29/29; A1 foundation `g16.111` ready with five held tranches; A2 route decided pending `g16.110`; V1/V2/M2 and adoption remain gated
 Promoted: 2026-09-02
 Operator decision: Nucleus is the first GPUI switch target
 Source evidence: the accepted holistic posture assessment and the promoted
@@ -77,8 +77,8 @@ explicit workspace link.
 | `M1` | production GPUI path mounted and driven through real input | Poodle |
 | `M2` | actual Nucleus journey with Nucleus data and callbacks | Nucleus |
 | `A0` | current manual accessibility gap marker | discovery; never parity |
-| `A1` | executable role/name/value/state/focus semantics | Poodle |
-| `A2` | independent native accessibility validation | external authority |
+| `A1` | executable role/name/value/state/focus semantics: the mounted GPUI node-tree accessibility projection under real input equals the mounted Svelte DOM's ARIA semantics for the same scenario, per paired receipt (`g16.111`) | Poodle |
+| `A2` | independent native accessibility validation: platform accessibility tree read by an external probe. Route chosen 2026-09-05: upstream gpui AccessKit through the `gpui-unofficial` republish, pending `g16.110`; the fork-free macOS adapter is the fallback | external authority |
 | `V0` | no native comparison | gap marker |
 | `V1` | deterministic component comparison for Nucleus-used states | Poodle |
 | `V2` | actual Nucleus or Nucleus-owned harness captured in the lab | lab + Nucleus |
@@ -112,6 +112,13 @@ accepted component receipts
 NP-1 through NP-5 are programme tranches, not dispatchable mega-cards. After
 `g16.062` freezes receipt identity, the orchestrator compiles small child cards
 covering one component or one tightly coupled boundary of at most two.
+
+## A1 Tranches (2026-09-05)
+
+`g16.111` builds the paired receipt and proves Switch, Tabs, and Select.
+`g16.112`–`g16.116` cover NP-1 through NP-5 with ordinary workers after
+`111` merges. A validated A1 receipt moves the row's "GPUI accessibility"
+ledger cell from `manual` to `mounted`.
 
 ## Tranches
 

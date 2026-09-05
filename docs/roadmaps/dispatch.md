@@ -119,14 +119,35 @@ card or triage note says.
   checks the licence transcript and that the AccessKit test reads the tree
 - Stop conditions: per card. Escalation owner: Chatterbox
 
+### g16.111 — Nucleus A1 accessibility receipt foundation
+
+- Card: `g16/111-nucleus-a1-accessibility-receipt-foundation.md`
+- Readiness: ready. Operator-designated critical work: the frontier pool
+  (Claude Fable 5.1, medium thinking) is authorized for this lane.
+- Prerequisites: merged `g16.062`, M1 complete (both satisfied).
+  Completion: PR merged after accepted exact-head review with three
+  validated A1 receipts and the ledger consuming them.
+- Owned mutable paths: per card (`test/nucleus-a11y/**`, driver extractor,
+  receipt script and schema, three receipts, ledger generator A1 path, log,
+  `PAPERCUTS.md` append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`
+- Approved concurrent siblings: `g16.106`–`110`, `109` lanes. Serial edges:
+  `g16.112`–`116` wait for this merge.
+- Worker capability class: frontier coding model, medium reasoning
+  (operator-designated)
+- Acceptance evidence and review oracle: the card's table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
 | --- | --- | --- |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
+| `g16.112`–`g16.116` Nucleus A1 tranches NP-1…NP-5 | merged `g16.111`; ordinary workers, one PR each, concurrent | Chatterbox |
 | `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
-| Nucleus A1 / V1 / V2 / M2 and Nucleus adoption | next programme boundary not yet chosen | operator, via Chatterbox |
+| Nucleus V1 / V2 / M2 and Nucleus adoption | V1 after the lab Button and icon bundles; V2 after lab `g01.003` and Nucleus seeding; M2 Nucleus-owned | operator, via Chatterbox |
 | Jetstream admission | `docs/triage/20260902-000959-jetstream-admission-hold.md` | operator |
 | Citations, nested menus, CS20, keyboard geometry | `docs/triage/20260902-000956-*.md`, `20260902-000957-*.md` | Chatterbox |
 
