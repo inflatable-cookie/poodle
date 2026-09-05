@@ -12,5 +12,6 @@
   },
   "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Model: Atlas" } }],
   "declared_states": ["expanded", "checked", "disabled"],
+  "capture": { "width": 520, "height": 300 },
   "web_only_exclusions": []
 }

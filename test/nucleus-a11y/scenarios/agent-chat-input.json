@@ -11,5 +11,6 @@
   },
   "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Send" } }],
   "declared_states": ["disabled"],
+  "capture": { "width": 640, "height": 240 },
   "web_only_exclusions": []
 }

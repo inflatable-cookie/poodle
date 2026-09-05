@@ -14,5 +14,6 @@
   },
   "actions": [],
   "declared_states": ["expanded", "disabled"],
+  "capture": { "width": 360, "height": 220 },
   "web_only_exclusions": []
 }

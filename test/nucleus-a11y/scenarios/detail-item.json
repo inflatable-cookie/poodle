@@ -14,5 +14,6 @@
     { "type": "pointer_activate", "target": { "role": "button", "name": "More information" } }
   ],
   "declared_states": ["disabled"],
+  "capture": { "width": 520, "height": 160 },
   "web_only_exclusions": []
 }

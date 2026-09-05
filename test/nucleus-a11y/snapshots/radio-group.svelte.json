@@ -3,7 +3,7 @@
   "component": "RadioGroup",
   "scenario_id": "nucleus.settings.radio-group",
   "scenario_path": "test/nucleus-a11y/scenarios/radio-group.json",
-  "scenario_sha256": "55788ac7c3d79bff23212ab83d1989661b75e2d1638613eb0dd04cb1350077f6",
+  "scenario_sha256": "ac6c6ff315767621c20a38d8b2ff79ed1851d7546815944764352220a1f809ae",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

@@ -3,7 +3,7 @@
   "component": "IconButton",
   "scenario_id": "nucleus.shell.icon-button",
   "scenario_path": "test/nucleus-a11y/scenarios/icon-button.json",
-  "scenario_sha256": "92930eb5f2ad75955cfa036024e0a371ddbd5c30a7068f1f86b919d495dbc43c",
+  "scenario_sha256": "9e09c2b88a6476f1242eddc68ae5dc5423dba74c2180fd97c30253d4cf7d2476",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

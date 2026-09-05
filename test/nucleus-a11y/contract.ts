@@ -42,6 +42,7 @@ export type A1Action =
   | { type: "key"; target: A1Target; key: string };
 
 export type A1Exclusion = { attribute: string; reason: string };
+export type A1Capture = { width: number; height: number };
 
 export type A1Scenario = {
   schema: typeof A1_SCENARIO_SCHEMA;
@@ -52,6 +53,7 @@ export type A1Scenario = {
   actions: A1Action[];
   declared_states: A1StateName[];
   web_only_exclusions: A1Exclusion[];
+  capture: A1Capture;
 };
 
 export type SnapshotNode = {
@@ -100,6 +102,13 @@ export function readScenario(root: string, row: string): LoadedScenario {
   const bytes = readFileSync(path.join(root, relative));
   const scenario = JSON.parse(bytes.toString("utf8")) as A1Scenario;
   if (scenario.schema !== A1_SCENARIO_SCHEMA) throw new Error(`${relative} schema is not ${A1_SCENARIO_SCHEMA}`);
+  const capture = scenario.capture;
+  if (!capture || typeof capture !== "object") throw new Error(`${relative} capture is required`);
+  const captureKeys = Object.keys(capture).sort();
+  if (captureKeys.join(",") !== "height,width") throw new Error(`${relative} capture must contain only width and height`);
+  if (!Number.isInteger(capture.width) || capture.width <= 0 || !Number.isInteger(capture.height) || capture.height <= 0) {
+    throw new Error(`${relative} capture dimensions must be positive integers`);
+  }
   for (const state of scenario.declared_states) {
     if (!A1_STATE_NAMES.includes(state)) throw new Error(`${relative} declares an unknown state ${state}`);
   }

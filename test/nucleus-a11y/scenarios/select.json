@@ -16,5 +16,6 @@
     { "type": "pointer_activate", "target": { "name": "Fruit" } }
   ],
   "declared_states": ["expanded", "selected", "disabled"],
+  "capture": { "width": 360, "height": 280 },
   "web_only_exclusions": []
 }

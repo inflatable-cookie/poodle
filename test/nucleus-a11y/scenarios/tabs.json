@@ -22,5 +22,6 @@
     { "type": "key", "target": { "role": "tab", "name": "Two" }, "key": "right" }
   ],
   "declared_states": ["selected", "disabled"],
+  "capture": { "width": 520, "height": 160 },
   "web_only_exclusions": []
 }

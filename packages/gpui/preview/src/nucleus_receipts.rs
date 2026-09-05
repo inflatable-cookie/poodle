@@ -253,6 +253,13 @@ pub(crate) struct A1Exclusion {
     pub reason: String,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct A1Capture {
+    pub width: u32,
+    pub height: u32,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct A1Scenario {
@@ -270,6 +277,9 @@ pub(crate) struct A1Scenario {
     pub declared_states: Vec<String>,
     #[serde(default)]
     pub web_only_exclusions: Vec<A1Exclusion>,
+    /// Fixed logical capture viewport for the cohort fixture kind. The A1
+    /// extractors carry this field but do not use it for DOM layout.
+    pub capture: A1Capture,
 }
 
 pub(crate) struct LoadedA1Scenario {
@@ -294,6 +304,14 @@ pub(crate) fn load_a1_scenario(row: &'static str) -> LoadedA1Scenario {
     let scenario: A1Scenario = serde_json::from_slice(&bytes)
         .unwrap_or_else(|error| panic!("A1 scenario {relative} does not deserialise: {error}"));
     assert_eq!(scenario.schema, A1_SCENARIO_SCHEMA, "{relative} schema");
+    assert!(
+        scenario.capture.width > 0,
+        "{relative} capture width must be positive"
+    );
+    assert!(
+        scenario.capture.height > 0,
+        "{relative} capture height must be positive"
+    );
     LoadedA1Scenario {
         row,
         path: relative,

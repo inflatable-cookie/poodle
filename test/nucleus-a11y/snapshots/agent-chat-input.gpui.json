@@ -3,7 +3,7 @@
   "component": "AgentChatInput",
   "scenario_id": "nucleus.agent.agent-chat-input",
   "scenario_path": "test/nucleus-a11y/scenarios/agent-chat-input.json",
-  "scenario_sha256": "54dff4c741f2f00a2872501d9be499f261d652a458b76f64e226a5ef81ef21ad",
+  "scenario_sha256": "07ad1d66e84454c71094dcad845aaa58afcbfdcc2ef36a6ef67e9a1012f20722",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

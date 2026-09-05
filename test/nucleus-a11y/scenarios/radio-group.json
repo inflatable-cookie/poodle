@@ -16,5 +16,6 @@
     { "type": "pointer_activate", "target": { "role": "radio", "name": "Free" } }
   ],
   "declared_states": ["disabled"],
+  "capture": { "width": 360, "height": 180 },
   "web_only_exclusions": []
 }

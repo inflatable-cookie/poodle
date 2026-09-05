@@ -3,7 +3,7 @@
   "component": "StatusIndicator",
   "scenario_id": "nucleus.agent.status-indicator",
   "scenario_path": "test/nucleus-a11y/scenarios/status-indicator.json",
-  "scenario_sha256": "f06a777d792abe83b862447833507d80066bbbaa4d44a193cec947224255ce57",
+  "scenario_sha256": "1c743609347a037bee1242bd15744acccfe31cf234090acc7712d09a826b8444",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

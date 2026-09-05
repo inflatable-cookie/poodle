@@ -28,6 +28,9 @@
 //!   focused-state scene (`window_capture/focus_evidence.rs`);
 //! - `--inset-evidence <scene|all> --out-dir <dir>` renders the inset-shadow
 //!   scene set (`window_capture/inset_evidence.rs`);
+//! - `--cohort <scenario-id> --state <initial|after-actions> --out <png>
+//!   --receipt <json>` renders one of the 29 closed Nucleus cohort scenarios
+//!   (`window_capture/cohort_capture.rs`);
 //! - without either, the single-Button smoke contract below applies.
 //!
 //! One-shot contract: every invocation captures once and writes a PNG plus a
@@ -88,6 +91,9 @@ mod focus_evidence;
 #[path = "window_capture/inset_evidence.rs"]
 mod inset_evidence;
 
+#[path = "window_capture/cohort_capture.rs"]
+mod cohort_capture;
+
 use presentation_axes::{ControlSize, ThemePreset};
 
 use transport::{ACCEPTED_SCALE, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
@@ -147,6 +153,7 @@ manifest: {\"captures\":[{\"fixture\":\"<exact-name>\",\"out\":\"<png>\",\"recei
 enum CaptureMode {
     Smoke(CaptureArgs),
     Fixture(fixture_capture::FixtureArgs),
+    Cohort(cohort_capture::CohortArgs),
     IconGeometry(icon_geometry_capture::IconGeometryArgs),
     InsetEvidence(inset_evidence::InsetEvidenceArgs),
     /// Many fixtures, ONE process. The whole point of this mode is that a
@@ -157,7 +164,9 @@ enum CaptureMode {
 }
 
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
-    if argv.iter().any(|arg| arg == "--batch") {
+    if argv.iter().any(|arg| arg == "--cohort") {
+        cohort_capture::parse_args(argv).map(CaptureMode::Cohort)
+    } else if argv.iter().any(|arg| arg == "--batch") {
         parse_batch_args(argv).map(CaptureMode::Batch)
     } else if argv.iter().any(|arg| arg == "--icon-geometry") {
         icon_geometry_capture::parse_args(argv).map(CaptureMode::IconGeometry)
@@ -600,6 +609,7 @@ fn main() -> ! {
     match mode {
         CaptureMode::Smoke(args) => run(&args),
         CaptureMode::Fixture(args) => fixture_capture::run(&args),
+        CaptureMode::Cohort(args) => cohort_capture::run(&args),
         CaptureMode::IconGeometry(args) => icon_geometry_capture::run(&args),
         CaptureMode::Batch(batch) => fixture_capture::run_batch(&batch),
         CaptureMode::InsetEvidence(args) => inset_evidence::run(&args),

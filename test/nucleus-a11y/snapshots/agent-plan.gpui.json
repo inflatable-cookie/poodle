@@ -3,7 +3,7 @@
   "component": "AgentPlan",
   "scenario_id": "nucleus.agent.agent-plan",
   "scenario_path": "test/nucleus-a11y/scenarios/agent-plan.json",
-  "scenario_sha256": "4d1f37ac4aa97c5c56c605e148aca279b9c0cf42e2d04cfeab8c395896aa6425",
+  "scenario_sha256": "dcc65bee473b98a1c8ad39f1821e0da7a12f85912846840f58d8bce025bd2974",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

@@ -11,5 +11,6 @@
   },
   "actions": [{ "type": "pointer_activate", "target": { "role": "radio", "name": "Yes" } }],
   "declared_states": ["checked"],
+  "capture": { "width": 520, "height": 240 },
   "web_only_exclusions": []
 }

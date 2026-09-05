@@ -3,7 +3,7 @@
   "component": "Icon",
   "scenario_id": "nucleus.shell.icon",
   "scenario_path": "test/nucleus-a11y/scenarios/icon.json",
-  "scenario_sha256": "2170ba7bcf1a493bf4390db65741d067011e5c3ca7e333e84eaf63f2805f3592",
+  "scenario_sha256": "049f97df0f58ae093448876bcce0f88a4702bea358eb78503323f24a201968b2",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

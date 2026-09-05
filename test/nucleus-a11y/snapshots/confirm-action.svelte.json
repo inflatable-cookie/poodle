@@ -3,7 +3,7 @@
   "component": "ConfirmAction",
   "scenario_id": "nucleus.settings.confirm-action",
   "scenario_path": "test/nucleus-a11y/scenarios/confirm-action.json",
-  "scenario_sha256": "608bb02e73de546d3fcf12218d19b4fb217587a504860b82bf273a9dd3731e11",
+  "scenario_sha256": "c6031aa3364d35ef1a4d41d8ee6002f05dc2e5061e52350dce465a9ad28eca7d",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

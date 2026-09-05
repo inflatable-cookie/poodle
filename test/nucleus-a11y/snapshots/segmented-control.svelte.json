@@ -3,7 +3,7 @@
   "component": "SegmentedControl",
   "scenario_id": "nucleus.navigation.segmented-control",
   "scenario_path": "test/nucleus-a11y/scenarios/segmented-control.json",
-  "scenario_sha256": "ce382aadd2e42b116fb1632a9b117fdff22c3dbbcf933d5ed3999b41dcfb5f83",
+  "scenario_sha256": "9153cc9e1e9676cf88246bd8cbc366543bb84790277b208c039cd3a4ac1613e6",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

@@ -5,5 +5,6 @@
   "props": { "orientation": "horizontal", "defaultRatio": 0.5, "ariaLabel": "Workspace panes", "showCollapsePrimary": true, "divider": true },
   "actions": [],
   "declared_states": ["disabled", "expanded"],
+  "capture": { "width": 360, "height": 180 },
   "web_only_exclusions": []
 }

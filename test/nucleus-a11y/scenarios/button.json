@@ -6,5 +6,6 @@
   "fixtures": { "panel_text": "Apply" },
   "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Apply" } }],
   "declared_states": ["disabled"],
+  "capture": { "width": 160, "height": 60 },
   "web_only_exclusions": []
 }

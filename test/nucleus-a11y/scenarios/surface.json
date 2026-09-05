@@ -6,5 +6,6 @@
   "fixtures": { "panel_text": "Shell content" },
   "actions": [],
   "declared_states": [],
+  "capture": { "width": 220, "height": 100 },
   "web_only_exclusions": []
 }

@@ -3,7 +3,7 @@
   "component": "Popover",
   "scenario_id": "nucleus.navigation.popover",
   "scenario_path": "test/nucleus-a11y/scenarios/popover.json",
-  "scenario_sha256": "c18aadfe9fc044f1dbf7748fe5d8776243af72ad2d5548fa5add18279cc5a918",
+  "scenario_sha256": "0470349e7d0195eaa951748c254d6d2f49e6b3ca83d190e1bd8ef529b1e9393c",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

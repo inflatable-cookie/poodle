@@ -30,5 +30,6 @@
   },
   "actions": [],
   "declared_states": [],
+  "capture": { "width": 720, "height": 520 },
   "web_only_exclusions": []
 }

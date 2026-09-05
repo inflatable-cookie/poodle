@@ -3,7 +3,7 @@
   "component": "Text",
   "scenario_id": "nucleus.shell.text",
   "scenario_path": "test/nucleus-a11y/scenarios/text.json",
-  "scenario_sha256": "78e740eec7cace6f76453e26537472a6cea815587eb9cce04756d52c5cae85fc",
+  "scenario_sha256": "d67f8eb1bae0a7a6491b5a7d65efab3a7f2cc6b1ce34d51725614e7cec0f7d6e",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

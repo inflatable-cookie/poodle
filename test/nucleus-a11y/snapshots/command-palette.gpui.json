@@ -3,7 +3,7 @@
   "component": "CommandPalette",
   "scenario_id": "nucleus.attention.command-palette",
   "scenario_path": "test/nucleus-a11y/scenarios/command-palette.json",
-  "scenario_sha256": "d4e32bd0fce2d16f73771e4cf56a96a2b3ceb8fecb4f5db3adcd34721b41845d",
+  "scenario_sha256": "2f0c220a34ab12088da6072c547400e8df461aaff083e7905f6a8005e481253b",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
