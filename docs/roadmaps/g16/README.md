@@ -149,6 +149,7 @@ stay maintained; backend admission is not part of the first card.
 106. [106 — Button leading-inset edge delta diagnosis](106-button-leading-inset-edge-delta.md) — ready; the two unclassified lab findings share `poodle-render`'s leading-inset path; repair the rounding or contract `gpui-snaps-subpixel-edge`
 107. [107 — Validation hygiene bundle](107-validation-hygiene-bundle.md) — ready; clean-tree boards, per-worktree gate state, doctor tuning, wider coverage, ungated-red disposition, GPUI harness flake causes, Jetstream README truth
 108. [108 — Docs spine compaction](108-docs-spine-compaction.md) — ready; archive closed handoffs and historical parity, purge unreferenced specs, fix guide snippets, add a guide-snippet compile check
+109. [109 — v0.3.0 consumer adoption wave](109-v030-consumer-adoption-wave.md) — ready; 15 sibling lanes in two tiers move every consumer to exact `0.3.0`, absorb the three documented breaks, and close ten open consumer papercuts
 
 ## Parallel Continuation
 

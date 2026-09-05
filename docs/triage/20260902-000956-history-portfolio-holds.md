@@ -1,6 +1,6 @@
 # History Portfolio Holds
 
-Status: open — Loophole adoption, CS20, and keyboard geometry remain; the Poodle release is promoted as `g16.097`
+Status: open — CS20 and keyboard geometry remain; release and Loophole adoption are promoted (`g16.097`, `g16.109`)
 Captured: 2026-09-02
 Owner: Chatterbox (planning)
 Canonical Poodle cards: `../roadmaps/g16/053-repository-security-audit-boundary-repair.md`,
@@ -11,10 +11,9 @@ work is unrelated to drag.
 
 ## Open Continuations
 
-- **Loophole adoption:** package pin and rejection mapping begin only after
-  npm `latest=0.3.0` is proved by `g16.097` (operator authorized the release
-  on 2026-09-04). Poodle does not write Loophole; Chatterbox relays the proof
-  to Loophole planning.
+- **Loophole adoption:** promoted 2026-09-05 as the Loophole lane of
+  `g16.109` (v0.3.0 is published). Pin, HistoryCenter v3, and the five
+  rejection-code mapping are that lane's work.
 - **CS20 `groupId`:** Poodle and Longhorn already carry the optional field.
   Whether the one coalesced node stays label-only or receives a stable
   `HistoryGroupId` is Loophole/Pulse recording policy. No Poodle card follows.

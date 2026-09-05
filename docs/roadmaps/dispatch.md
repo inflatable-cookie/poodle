@@ -20,25 +20,6 @@ card or triage note says.
 
 ## Ready frontier
 
-### g16.097 — v0.3.0 release certification (coordinator-executed)
-
-- Card: `g16/097-v030-release-certification.md`
-- Readiness: ready, serially blocked on merged `g16.103` and its green
-  push-to-`main` boards. Release authority remains the operator's 2026-09-04
-  authorization. Never dispatched to a worker.
-- Prerequisites: merged `g16.054`, `g16.098`, and `g16.103`. Completion:
-  re-certify the repaired `main` tip, tag that exact SHA, run green dry-run then
-  publish, prove npm `latest` 0.3.0 for core and Svelte, and close out.
-- Owned mutable paths: tag `v0.3.0`; `docs/logs/2026-09/` log; this card;
-  `CHANGELOG.md`; `docs/release-notes/0.3.0.md`; README status paragraphs.
-- Reserved shared closeout surfaces: `g16/README.md`, `generation-index.md`,
-  and this manifest.
-- Approved concurrent siblings: none required. Serial edge: `g16.103` first.
-- Worker capability class: none — coordinator action.
-- Acceptance evidence and review oracle: the card's Acceptance checklist and
-  Review Oracle table.
-- Stop conditions: per card. Escalation owner: operator, via Chatterbox.
-
 ### g16.106 — Button leading-inset edge delta diagnosis
 
 - Card: `g16/106-button-leading-inset-edge-delta.md`
@@ -92,12 +73,37 @@ card or triage note says.
 - Acceptance evidence and review oracle: the card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
+### g16.109 — v0.3.0 consumer adoption wave (15 sibling lanes)
+
+- Card: `g16/109-v030-consumer-adoption-wave.md` (per-repository table is
+  the lane inventory; the coordinator writes one handoff per repository)
+- Readiness: ready. Tier 1 lanes launch now, concurrently: Longhorn,
+  Underlay, Soundcheck Library. Tier 2 lanes launch as each foundation
+  merges: after Underlay → Acowtancy, Compli Me, Contact Patch, Songsprout,
+  Underlay Reference; after Longhorn → Bovine Accelerator Desktop, Figmatic,
+  Finch, Jetstream, Nucleus, Loophole; after Longhorn and Soundcheck Library
+  → Soundcheck. Every lane runs in its own worktree in its own repository.
+- Prerequisites: `g16.097` complete (npm `latest` `0.3.0`, publish run
+  `33952493234`). Completion per lane: PR merged on the consumer's `main`
+  after accepted exact-head review with the board transcript.
+- Owned mutable paths: per lane, the consumer's Poodle declarations, lock,
+  and bounded compatibility fallout named in the card; the consumer's
+  `PAPERCUTS.md` entries the bump closes. Never Poodle.
+- Reserved shared closeout surfaces (coordinator, in Poodle, at wave end):
+  `g16/README.md`, `generation-index.md`, README adoption count
+- Approved concurrent siblings: all lanes within a tier; Poodle lanes
+  `g16.106`–`108` are unaffected. Serial edges: tier 2 behind its named
+  foundation.
+- Worker capability class: capable coding model, medium reasoning; Loophole
+  (HistoryCenter v3 migration) and Acowtancy (19 import rewrites) may take
+  the higher end of the ordinary pool
+- Acceptance evidence and review oracle: the card's table and lane rules
+- Stop conditions: per lane. Escalation owner: Chatterbox
+
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
 | --- | --- | --- |
-| Consumer adoption wave (16 sibling repos move pins to `0.3.0`; Loophole also maps the five HistoryCenter rejection codes) | proven npm `latest` `0.3.0` (`g16.097` step 5); then compiled as per-repo handoffs | Chatterbox compiles; coordinator dispatches into sibling repos |
-| Loophole adoption of `0.3.0` | proven npm `latest` `0.3.0` (`g16.097` step 5); Loophole-owned planning | Loophole planning, via Chatterbox |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
 | `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
@@ -107,7 +113,8 @@ card or triage note says.
 
 ## Merged since revision 6
 
-`g16.103` (PR #208), `g16.104` (PR #209), `g16.105` (PR #210). Their cards
+`g16.103` (PR #208), `g16.104` (PR #209), `g16.105` (PR #210), `g16.097`
+(v0.3.0 published from `85609d941`, closeout `1eadc581a`). Their cards
 carry the receipts; the coordinator reconciles README and index lines.
 
 ## History
