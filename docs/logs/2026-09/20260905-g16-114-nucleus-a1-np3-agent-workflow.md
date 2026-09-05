@@ -24,6 +24,12 @@ remain coordinator-owned.
 - No windowed selector was run.
 - `git diff --check` — passed.
 
+`effigy docs:check` reached the parity-evidence ledger and reported the
+coordinator-owned ledger summary/cell drift caused by the newly promoted empty
+StatusIndicator A1 receipt; receipt schema validation itself passed after the
+StatusIndicator empty-node exception was recorded. The ledger remains outside
+this worker lane.
+
 ## Notes
 
 The Svelte package required the existing `effigy core:build` bootstrap before

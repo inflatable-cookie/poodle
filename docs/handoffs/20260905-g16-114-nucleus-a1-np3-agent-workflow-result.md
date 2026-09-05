@@ -40,6 +40,8 @@ under `docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/`.
 
 `effigy core:build`, `effigy test:nucleus-a11y`, and six focused headless native
 selectors passed. `git diff --check` passed. No windowed selectors were run.
+`effigy docs:check` reached receipt validation, then stopped on coordinator-
+owned parity-ledger summary/cell drift from the new StatusIndicator receipt.
 
 ## Stop Conditions
 
