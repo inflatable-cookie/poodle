@@ -24,6 +24,27 @@ RadioGroup, Switch (receipted in `111`), TextInput, Callout, ConfirmAction, Deta
   the input for (one-line projection fix), in which case fix it and say so.
 - No contract change, no Svelte change, no backend behaviour change.
 
+## Runtime Identity (rule, 2026-09-05)
+
+The receipt checker binds every receipt to `manifest.resolution.source_commit`
+and its lock digest, and verifies the runtime source paths are unchanged since
+that commit. A lane that changes any runtime source path (this includes
+`packages/gpui/preview` A1 tests and extractor edits) therefore MUST, at its
+final exact head after rebasing onto `main`: repin `resolution.source_commit`
+and the lock digest, re-emit the entire Nucleus cohort (all M1 receipts and
+every A1 receipt already on `main`) through the real selectors, and validate
+the cohort. This is the `g16.105`/`106`/`111` practice, not a scope widening.
+Manifest edits are limited to the resolution block; the 29-row cohort and
+scenario ids never change. When several tranches are open, the coordinator
+merges them one at a time and each later head re-emits at its rebase; the
+reviewer checks the cohort validates at the exact merged head.
+
+A row whose paired snapshots diverge on real semantics is recorded (diff,
+both snapshots, exact attributes) with no receipt and no `mounted` cell,
+exactly as `g16.111` did for Select. If the cause is a missing value that
+`poodle-render` already has the input for, the one-line projection fix is in
+scope; anything else becomes a bounded repair card (`g16.117` shape).
+
 ## Review Oracle
 
 | Invariant | Smallest counterexample | Required proof |

@@ -154,7 +154,9 @@ card or triage note says.
   accepted exact-head review with a validated A1 receipt or a recorded
   divergence for every row in the card.
 - Owned mutable paths: per card (scenario files, A1 regression tests,
-  receipts for the card's rows, one-line render projection fixes only)
+  receipts for the card's rows, one-line render projection fixes only, and
+  the manifest `resolution` block plus a full cohort re-emit at the final
+  head — the runtime-identity rule in every tranche card)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
 - Approved concurrent siblings: each other, `g16.117`, `106`, `107`, `109`
