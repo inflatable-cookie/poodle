@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-08-21
+Updated: 2026-09-05
 
 ## 1. Purpose
 
@@ -515,6 +515,7 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 | Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result |
 | box-shadow omitted in GPUI | GPUI lacks CSS box-shadow support | allowed | revisit if GPUI adds shadow primitives |
 | letter-spacing omitted in GPUI | GPUI text rendering has no letter-spacing API | allowed | minor visual impact |
+| GPUI snaps the leading subpixel edge on `content-leading-icon` and `state-loading` | `poodle-render` emits the CSS inset exactly (`pad_left` 10px, inset 2px at md/default); GPUI rasterises the 0.5 logical-px edge as 1.0 | allowed | revisit if GPUI paints subpixel layout edges |
 
 ## 13. Specimen Definitions
 

@@ -30,7 +30,19 @@ import {
   compareRendererAwarePair,
   type CaptureEvidence,
 } from "./compare.ts";
-import { classifyKnownDelta } from "./policy.ts";
+import {
+  classifyKnownDelta,
+  GEOMETRY,
+  KNOWN_RENDERER_DELTAS,
+  PIXELS,
+  ROLES,
+  SUBPIXEL_EDGE_FIXTURES,
+  type Finding,
+} from "./policy.ts";
+import {
+  deriveLeadingInsetCssInventory,
+  loadCommittedLeadingInsetCssInventory,
+} from "./leading-inset-css.ts";
 import {
   MIN_FOREGROUND_SAMPLES,
   parseButtonCaptureReceipt,
@@ -548,6 +560,151 @@ describe("renderer-aware policy (svelte ↔ gpui)", () => {
         gpuiShadowLayers: 1,
       }),
     ).toBeNull();
+  });
+
+  test("g15.047 policy numbers stay the g15.047 table", () => {
+    expect(GEOMETRY).toEqual({
+      rootEdge: 0.5,
+      contentCentre: 1,
+      contentSize: 1,
+      contentExtent: 2,
+    });
+    expect(ROLES).toEqual({
+      colorChannel8Bit: 1,
+      lineWidth: 0.5,
+      shadowGeometry: 0.5,
+    });
+    expect(PIXELS).toEqual({
+      threshold: 0.1,
+      includeAA: false,
+      maxDiffRatio: 0.03,
+    });
+    expect(KNOWN_RENDERER_DELTAS.map((entry) => entry.id)).toEqual([
+      "gpui-omits-box-shadow",
+      "gpui-omits-letter-spacing",
+      "gpui-snaps-subpixel-edge",
+    ]);
+    expect([...SUBPIXEL_EDGE_FIXTURES]).toEqual([
+      "button/content-leading-icon",
+      "button/state-loading",
+    ]);
+  });
+
+  test("the CSS leading-inset artifact is derived from button.css, density tokens, and the fixtures", () => {
+    const live = deriveLeadingInsetCssInventory();
+    const committed = loadCommittedLeadingInsetCssInventory();
+    expect(live).toEqual(committed);
+    for (const row of live.fixtures) {
+      console.log(
+        `${row.fixture}: css pad_x=${row.padX} inset=${row.inset} pad_left=${row.padLeft} pad_right=${row.padRight} has_leading=${row.hasLeading}`,
+      );
+    }
+    expect(live.fixtures.map((row) => row.fixture)).toEqual([
+      "button/content-leading-icon",
+      "button/state-loading",
+      "button/rest-secondary",
+    ]);
+    expect(live.fixtures[0]?.inset).toBeGreaterThan(0);
+    expect(live.fixtures[1]?.inset).toBeGreaterThan(0);
+    expect(live.fixtures[2]?.inset).toBe(0);
+  });
+
+  test("a 1.0 logical-px root.left on the two leading-slot fixtures classifies as the snap delta", () => {
+    const png = solidPng(12, 34, 56);
+    for (const name of SUBPIXEL_EDGE_FIXTURES) {
+      const leading = fixture(name);
+      const web: CaptureEvidence = {
+        receipt: makeReceipt(leading, "svelte", (raw) => {
+          raw.pngSha256 = hashOf(png);
+        }),
+        png,
+      };
+      const gpui: CaptureEvidence = {
+        receipt: makeReceipt(leading, "gpui", (raw) => {
+          raw.pngSha256 = hashOf(png);
+          (raw.landmarks as Record<string, { x: number }>).root.x = 17;
+        }),
+        png,
+      };
+      const { verdict } = compareRendererAwarePair(leading, web, gpui);
+      expect(verdict.channels.geometry.status).toBe("fail");
+      const finding = verdict.channels.geometry.findings.find((entry) => entry.subject === "root");
+      expect(finding?.detail).toContain("root.left");
+      expect(
+        classifyKnownDelta(finding!, {
+          webShadowLayers: 0,
+          gpuiShadowLayers: 0,
+          fixture: leading.name,
+        }),
+      ).toBe("gpui-snaps-subpixel-edge");
+    }
+  });
+
+  test("the same 1.0 logical-px root.left on rest-secondary stays unclassified", () => {
+    const png = solidPng(12, 34, 56);
+    const web = evidence(target, "svelte", png, hashOf(png));
+    const { verdict } = compareRendererAwarePair(
+      target,
+      web,
+      gpuiEvidence(png, (raw) => {
+        (raw.landmarks as Record<string, { x: number }>).root.x = 17;
+      }),
+    );
+    const finding = verdict.channels.geometry.findings.find((entry) => entry.subject === "root");
+    expect(finding).toBeDefined();
+    expect(
+      classifyKnownDelta(finding!, {
+        webShadowLayers: 0,
+        gpuiShadowLayers: 0,
+        fixture: target.name,
+      }),
+    ).toBeNull();
+  });
+
+  test("a root.top delta, a missing root, and a larger root.left shift stay unclassified", () => {
+    const png = solidPng(12, 34, 56);
+    const leading = fixture("button/content-leading-icon");
+    const web: CaptureEvidence = {
+      receipt: makeReceipt(leading, "svelte", (raw) => {
+        raw.pngSha256 = hashOf(png);
+      }),
+      png,
+    };
+    const context = {
+      webShadowLayers: 0,
+      gpuiShadowLayers: 0,
+      fixture: leading.name,
+    };
+
+    const top = compareRendererAwarePair(leading, web, {
+      receipt: makeReceipt(leading, "gpui", (raw) => {
+        raw.pngSha256 = hashOf(png);
+        (raw.landmarks as Record<string, { y: number }>).root.y = 17;
+      }),
+      png,
+    });
+    const topFinding = top.verdict.channels.geometry.findings.find((entry) => entry.subject === "root");
+    expect(topFinding?.detail).toContain("root.top");
+    expect(classifyKnownDelta(topFinding!, context)).toBeNull();
+
+    const wide = compareRendererAwarePair(leading, web, {
+      receipt: makeReceipt(leading, "gpui", (raw) => {
+        raw.pngSha256 = hashOf(png);
+        (raw.landmarks as Record<string, { x: number }>).root.x = 18;
+      }),
+      png,
+    });
+    const wideFinding = wide.verdict.channels.geometry.findings.find((entry) => entry.subject === "root");
+    expect(wideFinding?.detail).toContain("root.left");
+    expect(wideFinding?.detail).toContain("delta 2");
+    expect(classifyKnownDelta(wideFinding!, context)).toBeNull();
+
+    const missingRoot: Finding = {
+      channel: "geometry",
+      subject: "root",
+      detail: "landmark present on one side only (web: true, gpui: false)",
+    };
+    expect(classifyKnownDelta(missingRoot, context)).toBeNull();
   });
 
   test("a pixel change beyond 3% fails; a smaller one passes", () => {

@@ -121,6 +121,7 @@ function annotate(verdict: PairVerdict, web: CaptureEvidence, gpui: CaptureEvide
     const context = {
       webShadowLayers: web.receipt.roles.shadow.layers.length,
       gpuiShadowLayers: gpui.receipt.roles.shadow.layers.length,
+      fixture: verdict.fixture,
     };
     for (const channelVerdict of Object.values(verdict.channels)) {
       for (const finding of channelVerdict.findings) {

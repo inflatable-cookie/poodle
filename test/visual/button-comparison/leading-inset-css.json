@@ -1,0 +1,41 @@
+{
+  "schema": "poodle.button-leading-inset-css.v1",
+  "remBasePx": 16,
+  "sources": {
+    "buttonCss": "packages/core/src/styles/button.css",
+    "densityCss": "packages/core/src/tokens/generated/css/poodle-density-*.css",
+    "inventory": "test/visual/fixtures/button-visual-inventory.json"
+  },
+  "fixtures": [
+    {
+      "fixture": "button/content-leading-icon",
+      "size": "md",
+      "density": "default",
+      "hasLeading": true,
+      "padX": 12,
+      "padLeft": 10,
+      "padRight": 12,
+      "inset": 2
+    },
+    {
+      "fixture": "button/state-loading",
+      "size": "md",
+      "density": "default",
+      "hasLeading": true,
+      "padX": 12,
+      "padLeft": 10,
+      "padRight": 12,
+      "inset": 2
+    },
+    {
+      "fixture": "button/rest-secondary",
+      "size": "md",
+      "density": "default",
+      "hasLeading": false,
+      "padX": 12,
+      "padLeft": 12,
+      "padRight": 12,
+      "inset": 0
+    }
+  ]
+}
