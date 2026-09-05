@@ -221,6 +221,7 @@ pub fn reset_element_ids() {
 pub fn reset_focus_registry() {
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().clear());
     FOCUS_STATES.with(|states| states.borrow_mut().clear());
+    INITIAL_FOCUS_REQUESTED.with(|ids| ids.borrow_mut().clear());
     PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow_mut().clear());
     FOCUS_IDENTITY_WINDOWS.with(|windows| windows.borrow_mut().clear());
     FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
@@ -759,6 +760,10 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
         RefCell::new(std::collections::HashMap::new());
+    /// Initial overlay focus is a mount request, not a standing assertion.
+    /// Once claimed, a marker does not steal focus back after a real blur.
+    static INITIAL_FOCUS_REQUESTED: RefCell<std::collections::HashSet<String>> =
+        RefCell::new(std::collections::HashSet::new());
     /// Tracked focus identities that reached paint in each window's current
     /// frame. A window may finish its frame while another live window is
     /// between build and paint, so the frame observation cannot be global.
@@ -893,6 +898,7 @@ pub(crate) fn sweep_unpainted_focus_identities() {
     });
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().retain(|id, _| painted.contains(id)));
     FOCUS_STATES.with(|states| states.borrow_mut().retain(|id, _| painted.contains(id)));
+    INITIAL_FOCUS_REQUESTED.with(|ids| ids.borrow_mut().retain(|id| painted.contains(id)));
     FOCUS_IDENTITY_WINDOWS.with(|windows| {
         windows.borrow_mut().retain(|id, _| painted.contains(id));
     });
@@ -917,6 +923,7 @@ pub(crate) fn sweep_unpainted_focus_identities_for(handle: AnyWindowHandle) {
     });
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().retain(|id, _| !stale.contains(id)));
     FOCUS_STATES.with(|states| states.borrow_mut().retain(|id, _| !stale.contains(id)));
+    INITIAL_FOCUS_REQUESTED.with(|ids| ids.borrow_mut().retain(|id| !stale.contains(id)));
     FOCUS_IDENTITY_WINDOWS.with(|windows| {
         windows.borrow_mut().retain(|id, _| !stale.contains(id));
     });
@@ -939,6 +946,13 @@ pub(crate) fn focused_handle() -> Option<gpui::FocusHandle> {
 /// focus API, observed both ways.
 pub fn focus_handle_for(id: &str) -> Option<gpui::FocusHandle> {
     FOCUS_HANDLES.with(|h| h.borrow().get(id).cloned())
+}
+
+/// Claim an accessibility-record initial-focus marker once for its mount.
+/// The marker remains on the rebuilt node tree, but the focus request must not
+/// re-fire after the user tabs or blurs away from the overlay.
+pub(crate) fn claim_initial_focus(id: &str) -> bool {
+    INITIAL_FOCUS_REQUESTED.with(|ids| ids.borrow_mut().insert(id.to_owned()))
 }
 
 /// Whether the node with this element id held focus as of the last frame.
@@ -972,6 +986,12 @@ fn tracks_focus(node: &Node) -> bool {
     node.interaction.on_focus_change.is_some()
         || node.style.focus_ring.is_some()
         || (node.interaction.focusable && node.style.focus.is_some())
+        // An accessibility-record initial-focus marker is itself a request
+        // for a backend-owned mount target. It must mint a tracked handle
+        // even when the renderer has no separate focus-ring style.
+        || (node.a11y.initial_focus
+            && node.interaction.focusable
+            && !node.interaction.disabled)
         || (node.interaction.focusable
             && node.tooltip.as_deref().is_some_and(|text| !text.is_empty()))
         // A source that opted into keyboard pickup must be observably focused,

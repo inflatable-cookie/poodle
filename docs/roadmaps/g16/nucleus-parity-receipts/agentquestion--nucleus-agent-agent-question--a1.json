@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "IconButton",
-  "scenario_id": "nucleus.shell.icon-button",
+  "component": "AgentQuestion",
+  "scenario_id": "nucleus.agent.agent-question",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,30 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production IconButton and replay the shared pointer action"
+    "mount AgentQuestion through the production renderer",
+    "replay the shared option action through GPUI dispatch and rebuild the host"
   ],
   "assertions": [
-    "button role, name, disabled state, and focus match the Svelte projection"
+    "the checked radio projection matches Svelte after the action"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/icon-button.gpui.json",
-      "sha256": "47fd41a68acd461fd086223025a53c285c03019d1e1608c1e0de26a6e2b6272b"
+      "path": "test/nucleus-a11y/snapshots/agent-question.gpui.json",
+      "sha256": "f28e4d3e758e277c736801c9b4d1cc7347221f1af3712020e1c56fac75d59bd3"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/icon-button.svelte.json",
-      "sha256": "8651958d90c2959e54e93eee3e4871f62b6d15f95066584cb4bd3387adea58fe"
+      "path": "test/nucleus-a11y/snapshots/agent-question.svelte.json",
+      "sha256": "21e1f70eecac3a06fe260048a2f8e09ef7d55ce63f4d5761dfdea879af88271f"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/icon-button.json",
-    "scenario_sha256": "92930eb5f2ad75955cfa036024e0a371ddbd5c30a7068f1f86b919d495dbc43c",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/icon-button.gpui.json",
-    "gpui_snapshot_sha256": "47fd41a68acd461fd086223025a53c285c03019d1e1608c1e0de26a6e2b6272b",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/icon-button.svelte.json",
-    "svelte_snapshot_sha256": "8651958d90c2959e54e93eee3e4871f62b6d15f95066584cb4bd3387adea58fe",
+    "scenario_path": "test/nucleus-a11y/scenarios/agent-question.json",
+    "scenario_sha256": "5f419c616c98e6d4901951529d1c1187bb0e6e31609175a9c08e05db0b1002a0",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/agent-question.gpui.json",
+    "gpui_snapshot_sha256": "f28e4d3e758e277c736801c9b4d1cc7347221f1af3712020e1c56fac75d59bd3",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/agent-question.svelte.json",
+    "svelte_snapshot_sha256": "21e1f70eecac3a06fe260048a2f8e09ef7d55ce63f4d5761dfdea879af88271f",
     "web_only_exclusions": [],
     "diff": []
   }

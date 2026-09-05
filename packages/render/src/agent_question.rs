@@ -39,6 +39,14 @@ pub fn agent_question_option_focus_id(instance_id: Option<&str>, value: &str) ->
     }
 }
 
+/// The semantic id of the prompt text that labels the option group.
+pub fn agent_question_prompt_id(instance_id: Option<&str>, question_id: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-question:{scope}:prompt:{question_id}"),
+        None => format!("agent-question-prompt-{question_id}"),
+    }
+}
+
 /// The backend-state id of the optional dismiss control.
 pub fn agent_question_dismiss_focus_id(instance_id: Option<&str>) -> String {
     match instance_id {
@@ -190,7 +198,7 @@ pub fn agent_question(
         root = root.child(h);
     }
 
-    let prompt = text(
+    let mut prompt = text(
         &question.prompt,
         TextTone::Default,
         TextSize::Md,
@@ -198,6 +206,10 @@ pub fn agent_question(
         prompt_size,
         prompt_color,
     );
+    prompt.id = Some(agent_question_prompt_id(
+        handlers.instance_id.as_deref(),
+        &question.id,
+    ));
     let mut root = root.child(prompt);
 
     // The question and its answers are separate units, so the step between them
@@ -214,6 +226,10 @@ pub fn agent_question(
         NodeRole::RadioGroup
     });
     options.a11y.label = Some(question.prompt.clone());
+    options.a11y.labelled_by = Some(agent_question_prompt_id(
+        handlers.instance_id.as_deref(),
+        &question.id,
+    ));
 
     for (index, option) in question.options.iter().enumerate() {
         let selected = spec.is_selected(&option.value);
@@ -354,4 +370,46 @@ pub fn agent_question(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn option_group_is_labelled_by_the_prompt_node() {
+        let spec = AgentQuestionSpec::new(vec![AgentQuestionItem {
+            id: "ship".into(),
+            header: None,
+            prompt: "Ship this preparation?".into(),
+            options: vec![AgentQuestionOption {
+                value: "yes".into(),
+                label: "Yes".into(),
+                description: None,
+            }],
+            allow_multiple: false,
+        }]);
+        let node = agent_question(
+            &spec,
+            &RenderContext::new(&theme()),
+            AgentQuestionHandlers {
+                instance_id: Some("a1".into()),
+                ..Default::default()
+            },
+        );
+        let prompt_id = agent_question_prompt_id(Some("a1"), "ship");
+        let prompt = node
+            .find(&|candidate| candidate.id.as_deref() == Some(prompt_id.as_str()))
+            .expect("prompt node");
+        assert!(prompt.a11y.role.is_none(), "prompt stays a name source, not a snapshot role");
+        let group = node
+            .find(&|candidate| candidate.a11y.role == Some(NodeRole::RadioGroup))
+            .expect("option group");
+        assert_eq!(group.a11y.labelled_by.as_deref(), Some(prompt_id.as_str()));
+    }
 }

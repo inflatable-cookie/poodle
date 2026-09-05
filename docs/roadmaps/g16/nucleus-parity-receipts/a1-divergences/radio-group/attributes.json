@@ -4,7 +4,17 @@
   "scenario_path": "test/nucleus-a11y/scenarios/radio-group.json",
   "scenario_sha256": "55788ac7c3d79bff23212ab83d1989661b75e2d1638613eb0dd04cb1350077f6",
   "attributes": [
-    {"index": 0, "field": "orientation", "gpui": "vertical", "svelte": null},
-    {"index": 2, "field": "focus_order", "gpui": null, "svelte": 1}
+    {
+      "index": 1,
+      "field": "focus_order",
+      "gpui": null,
+      "svelte": 0
+    },
+    {
+      "index": 2,
+      "field": "focus_order",
+      "gpui": 0,
+      "svelte": 1
+    }
   ]
 }

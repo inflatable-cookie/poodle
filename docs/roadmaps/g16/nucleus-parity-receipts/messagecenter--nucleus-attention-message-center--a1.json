@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "IconButton",
-  "scenario_id": "nucleus.shell.icon-button",
+  "component": "MessageCenter",
+  "scenario_id": "nucleus.attention.message-center",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production IconButton and replay the shared pointer action"
+    "mount the production MessageCenter node tree through HeadlessDriver with the shared scenario props"
   ],
   "assertions": [
-    "button role, name, disabled state, and focus match the Svelte projection"
+    "trigger, dialog, banner, heading, list, and item buttons match the Svelte ARIA projection"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/icon-button.gpui.json",
-      "sha256": "47fd41a68acd461fd086223025a53c285c03019d1e1608c1e0de26a6e2b6272b"
+      "path": "test/nucleus-a11y/snapshots/message-center.gpui.json",
+      "sha256": "c128532f63656dc72859546a200e76975b522cee27716817642aa2bb8d4dc668"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/icon-button.svelte.json",
-      "sha256": "8651958d90c2959e54e93eee3e4871f62b6d15f95066584cb4bd3387adea58fe"
+      "path": "test/nucleus-a11y/snapshots/message-center.svelte.json",
+      "sha256": "1819b190337b87af08d6dbb7b229911d21dfda288b822685259d994d26b7948f"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/icon-button.json",
-    "scenario_sha256": "92930eb5f2ad75955cfa036024e0a371ddbd5c30a7068f1f86b919d495dbc43c",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/icon-button.gpui.json",
-    "gpui_snapshot_sha256": "47fd41a68acd461fd086223025a53c285c03019d1e1608c1e0de26a6e2b6272b",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/icon-button.svelte.json",
-    "svelte_snapshot_sha256": "8651958d90c2959e54e93eee3e4871f62b6d15f95066584cb4bd3387adea58fe",
+    "scenario_path": "test/nucleus-a11y/scenarios/message-center.json",
+    "scenario_sha256": "a60a4f94ac882000e34326f64fd66a5668e8cea20fcfd19f0d98ef609e8f1180",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/message-center.gpui.json",
+    "gpui_snapshot_sha256": "c128532f63656dc72859546a200e76975b522cee27716817642aa2bb8d4dc668",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/message-center.svelte.json",
+    "svelte_snapshot_sha256": "1819b190337b87af08d6dbb7b229911d21dfda288b822685259d994d26b7948f",
     "web_only_exclusions": [],
     "diff": []
   }

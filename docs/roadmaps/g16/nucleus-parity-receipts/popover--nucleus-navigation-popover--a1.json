@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "IconButton",
-  "scenario_id": "nucleus.shell.icon-button",
+  "component": "Popover",
+  "scenario_id": "nucleus.navigation.popover",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production IconButton and replay the shared pointer action"
+    "mount the production Popover trigger and open surface through HeadlessDriver"
   ],
   "assertions": [
-    "button role, name, disabled state, and focus match the Svelte projection"
+    "trigger disclosure, dialog surface name, and controls relationship match the Svelte projection"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/icon-button.gpui.json",
-      "sha256": "47fd41a68acd461fd086223025a53c285c03019d1e1608c1e0de26a6e2b6272b"
+      "path": "test/nucleus-a11y/snapshots/popover.gpui.json",
+      "sha256": "da4b599920e85c05effa8b039e9b17303ddf3ea644acc7b544083ecaa7506587"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/icon-button.svelte.json",
-      "sha256": "8651958d90c2959e54e93eee3e4871f62b6d15f95066584cb4bd3387adea58fe"
+      "path": "test/nucleus-a11y/snapshots/popover.svelte.json",
+      "sha256": "fd0c0df20e3a8f2209d89686deca1d90dd27148ebf06f43dc06b1a99a0b6212b"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/icon-button.json",
-    "scenario_sha256": "92930eb5f2ad75955cfa036024e0a371ddbd5c30a7068f1f86b919d495dbc43c",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/icon-button.gpui.json",
-    "gpui_snapshot_sha256": "47fd41a68acd461fd086223025a53c285c03019d1e1608c1e0de26a6e2b6272b",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/icon-button.svelte.json",
-    "svelte_snapshot_sha256": "8651958d90c2959e54e93eee3e4871f62b6d15f95066584cb4bd3387adea58fe",
+    "scenario_path": "test/nucleus-a11y/scenarios/popover.json",
+    "scenario_sha256": "c18aadfe9fc044f1dbf7748fe5d8776243af72ad2d5548fa5add18279cc5a918",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/popover.gpui.json",
+    "gpui_snapshot_sha256": "da4b599920e85c05effa8b039e9b17303ddf3ea644acc7b544083ecaa7506587",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/popover.svelte.json",
+    "svelte_snapshot_sha256": "fd0c0df20e3a8f2209d89686deca1d90dd27148ebf06f43dc06b1a99a0b6212b",
     "web_only_exclusions": [],
     "diff": []
   }

@@ -286,6 +286,12 @@ pub fn model_picker(
         models.a11y.role = Some(NodeRole::RadioGroup);
         models.a11y.label = Some("Model".to_owned());
         models.roles.insert("dependency".to_owned(), "select".to_owned());
+        let initial_focus_value = spec
+            .models
+            .iter()
+            .find(|model| model.value == spec.value.model && !model.is_disabled)
+            .or_else(|| spec.models.iter().find(|model| !model.is_disabled))
+            .map(|model| model.value.as_str());
         for model in &spec.models {
             let row_id = select_option_id(&select_scope, &model.value);
             if let Some(row) = find_runtime_id_mut(&mut models, &row_id) {
@@ -307,6 +313,8 @@ pub fn model_picker(
                 } else {
                     NodeToggled::False
                 });
+                row.a11y.initial_focus =
+                    Some(model.value.as_str()) == initial_focus_value;
                 row.roles
                     .insert("selected".to_owned(), is_selected.to_string());
                 row.roles

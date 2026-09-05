@@ -16228,7 +16228,8 @@ fn segment_option_id(scope: &str, value: &str) -> String {
 fn segment_selected(node: &Node, scope: &str, value: &str) -> bool {
     let id = segment_option_id(scope, value);
     node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
-        .and_then(|n| n.a11y.selected)
+        .and_then(|n| n.a11y.toggled)
+        .map(|toggled| toggled == poodle_node::NodeToggled::True)
         .unwrap_or(false)
 }
 
@@ -16316,7 +16317,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert_eq!(seg_grid.intrinsic_text(), Some("Grid"));
         assert_eq!(seg_grid.runtime_id.as_deref(), Some("segmented:view:option:grid"));
         assert_eq!(seg_grid.a11y.role, Some(NodeRole::RadioButton));
-        assert_eq!(seg_grid.a11y.selected, Some(true));
+        assert_eq!(seg_grid.a11y.selected, None);
         assert_eq!(seg_grid.a11y.toggled, Some(NodeToggled::True));
         assert_eq!(seg_grid.a11y.tab_index, Some(0));
         assert_eq!(seg_grid.style.descriptor.background, Some(accent_color));
@@ -16350,7 +16351,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert_eq!(seg_list.intrinsic_text(), Some("List"));
         assert_eq!(seg_list.runtime_id.as_deref(), Some("segmented:view:option:list"));
         assert_eq!(seg_list.a11y.role, Some(NodeRole::RadioButton));
-        assert_eq!(seg_list.a11y.selected, Some(false));
+        assert_eq!(seg_list.a11y.selected, None);
         assert_eq!(seg_list.a11y.toggled, Some(NodeToggled::False));
         assert_eq!(seg_list.a11y.tab_index, Some(-1));
         assert!(seg_list.interaction.disabled);
@@ -16369,7 +16370,7 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
         assert_eq!(seg_table.intrinsic_text(), Some("Table"));
         assert_eq!(seg_table.runtime_id.as_deref(), Some("segmented:view:option:table"));
         assert_eq!(seg_table.a11y.role, Some(NodeRole::RadioButton));
-        assert_eq!(seg_table.a11y.selected, Some(false));
+        assert_eq!(seg_table.a11y.selected, None);
         assert_eq!(seg_table.a11y.toggled, Some(NodeToggled::False));
         assert_eq!(seg_table.a11y.tab_index, Some(-1));
         assert_eq!(seg_table.style.descriptor.background, None);
@@ -16847,7 +16848,7 @@ fn radio_group_exclusive_focus_identity_and_disabled_paths() {
 
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         assert_eq!(node.a11y.label.as_deref(), Some("Plan"));
-        assert_eq!(node.a11y.orientation.as_deref(), Some("vertical"));
+        assert_eq!(node.a11y.orientation, None);
         assert_eq!(
             node.style.descriptor.layout.direction,
             LayoutDirection::Column
@@ -17087,7 +17088,9 @@ fn radio_group_exclusive_focus_identity_and_disabled_paths() {
             );
         }
 
-        // Orientation flips layout direction, gap, and the a11y orientation.
+        // Orientation flips layout direction and gap. Accessibility
+        // orientation stays unset: the contract conveys axis via layout, not
+        // aria-orientation.
         let mut horizontal = RadioGroupSpec::new(radio_plan_options())
             .with_value("pro")
             .with_orientation(Orientation::Horizontal);
@@ -17106,10 +17109,7 @@ fn radio_group_exclusive_focus_identity_and_disabled_paths() {
             inline_md,
             "horizontal gap is space.inline.md"
         );
-        assert_eq!(
-            horizontal_node.a11y.orientation.as_deref(),
-            Some("horizontal")
-        );
+        assert_eq!(horizontal_node.a11y.orientation, None);
         assert_eq!(
             horizontal_node.a11y.label.as_deref(),
             Some("Plan size")
