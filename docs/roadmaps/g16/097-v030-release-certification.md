@@ -1,8 +1,8 @@
 # g16.097 — v0.3.0 Release Certification
 
-Status: ready — blocked serially on `g16.103`; coordinator-executed and never
-dispatched to a worker. The first tag is retracted, and the pre-tag
-re-certification at `b4158a1b` exposed the stale release tarball verifier
+Status: complete — published 2026-09-05 from certified `v0.3.0`; coordinator-
+executed and never dispatched to a worker. The first tag was retracted, and
+the pre-tag re-certification at `b4158a1b` exposed the stale release tarball verifier
 Type: release mutation — explicit operator authorization recorded
 Opened: 2026-09-04
 Depends on: merged `g16.054` (PR #165, merge `9e38e7971`) and its evidence log `../../logs/2026-09/20260902-g16-054-v030-release-candidate.md`; merged `g16.098`; merged `g16.103` release tarball verifier repair — serial, because the tag must contain the repaired release workflow
@@ -158,3 +158,19 @@ Loophole adoption (pin `apps/desktop` to exact `0.3.0`, map deletion
 failures onto the five HistoryCenter rejection codes) is Loophole-owned
 planning and starts only after step 5 is proven. It is recorded in
 `../../triage/20260902-000956-history-portfolio-holds.md`.
+
+## Final Certification — 2026-09-05
+
+- Candidate: `85609d941a208ff2f854e9f7c0e457089cc77d0e`.
+- Local `effigy release gates` passed from a clean detached checkout after a
+  temporary local reachability branch was created and removed.
+- Branch dry run passed: https://github.com/inflatable-cookie/poodle/actions/runs/33930305831
+- Tag dry run passed: https://github.com/inflatable-cookie/poodle/actions/runs/33934223827
+- Publish passed: https://github.com/inflatable-cookie/poodle/actions/runs/33952493234
+- `v0.3.0` resolves remotely to the candidate SHA.
+- Registry proof: core and Svelte both report `latest: 0.3.0`.
+- Fresh npm consumer installed exact core/Svelte `0.3.0` with Svelte `5.56.8`;
+  compiled subpaths `@inflatable-cookie/poodle-core/icons` and
+  `@inflatable-cookie/poodle-svelte/types` resolved successfully.
+- `packed-tarballs` artifact: 930019 bytes; downloaded archive SHA-256
+  `dc04659cd7a716f58a6a59f448c97ec5959855828d35de89e0e33acd0c4fea49`.

@@ -9,11 +9,9 @@ so minor releases may contain documented breaking changes.
 
 Nothing yet.
 
-## [0.3.0] - 2026-09-02 (candidate — not published)
+## [0.3.0] - 2026-09-05
 
-This is an immutable release candidate, not a release. No `v0.3.0` tag or
-registry publication exists; certification, tagging, and publication remain
-separate operator gates.
+Published from the certified `v0.3.0` tag on 2026-09-05.
 
 ### Breaking
 
