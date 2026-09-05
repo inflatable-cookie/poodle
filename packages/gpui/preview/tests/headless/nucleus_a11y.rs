@@ -776,11 +776,45 @@ fn agent_question_a1_accessibility_projection_matches_svelte() {
     });
 }
 
+fn build_model_picker_a1(
+    spec: &ModelPickerSpec,
+    host: &Arc<Mutex<ModelPickerSpec>>,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let mut node = poodle_render::model_picker(
+        spec,
+        &RenderContext::new(&theme()),
+        "a1",
+        None,
+    );
+    let trigger_id = poodle_render::select_trigger_focus_id("model-picker:a1");
+    if !spec.is_disabled {
+        let is_open = spec.is_open;
+        let host = Arc::clone(host);
+        let mounted = Arc::clone(mounted);
+        let trigger = node
+            .children
+            .first_mut()
+            .filter(|trigger| trigger.runtime_id.as_deref() == Some(trigger_id.as_str()))
+            .expect("ModelPicker renderer keeps the composed Select trigger first");
+        trigger.interaction.on_activate = Some(Arc::new(move || {
+            let next = {
+                let mut current = host.lock().expect("ModelPicker host lock");
+                let next = current.clone().with_open(!is_open);
+                *current = next.clone();
+                next
+            };
+            *mounted.lock().expect("ModelPicker mount lock") =
+                build_model_picker_a1(&next, &host, &mounted);
+        }));
+    }
+    node
+}
+
 #[test]
 fn model_picker_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("model-picker");
     let scenario_props = loaded.scenario.props.clone();
-    let provider = theme();
     let models = scenario_props["models"]
         .as_array()
         .expect("models")
@@ -807,9 +841,23 @@ fn model_picker_a1_accessibility_projection_matches_svelte() {
         .with_variant(ModelPickerVariant::Outlined)
         .with_size(prop_size(&scenario_props))
         .with_density(prop_density(&scenario_props));
-    let spec = spec.with_open(true);
-    let node = poodle_render::model_picker(&spec, &RenderContext::new(&provider), "a1", None);
-    prove_static_row("model-picker", node, 520.0, 300.0);
+    let host = Arc::new(Mutex::new(spec.clone()));
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("ModelPicker mount lock") =
+            build_model_picker_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 300.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production ModelPicker with host-owned closed state",
+                "replay the shared trigger action through GPUI dispatch and rebuild the open picker",
+            ],
+            &["the selected model radio receives initial focus when the picker opens"],
+        );
+    });
 }
 
 #[test]
