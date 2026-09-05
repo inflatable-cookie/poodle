@@ -1,6 +1,6 @@
 # Nucleus GPUI Parity Programme
 
-Status: active — M1 complete 29/29; A1 foundation `g16.111` ready with five held tranches; A2 route decided pending `g16.110`; V1/V2/M2 and adoption remain gated
+Status: active — M1 complete 29/29; A1 complete 29/29 (`g16.111`–`121`); V1 capture path `g16.122` merged, receipts held as `g17.001`; A2 route decided (`g16.110`), held on the gpui-apple build; V2/M2 and adoption remain gated. Continues under `../g17/README.md`
 Promoted: 2026-09-02
 Operator decision: Nucleus is the first GPUI switch target
 Source evidence: the accepted holistic posture assessment and the promoted

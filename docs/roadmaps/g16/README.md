@@ -1,15 +1,12 @@
 # g16 — Next Work
 
-Status: active — complete through `g16.094`; Nucleus M1 mounted cohort complete
-at 29/29; `g16.098` cold-checkout board repair merged in PR #203, `g16.095`
-merged in PR #202, `g16.099` port tranche merged in PR #204, `g16.100` DockRegion
-`showTabs` merged in PR #206, `g16.101` Tree accessible name merged in PR #205,
-`g16.102` Tabs fill layout merged in PR #207, and `g16.096` Linux boards merged
-in PR #201. `g16.103` is the urgent release-verifier repair; `g16.097` is
-serial behind it. VL-0 lab authority is
-closed; later evidence and adoption phases remain gated
-Posture: strict-ready
+Status: complete — closed 2026-09-06 at the g17 rollover; every card is
+complete, closed, research-complete, or explicitly gated (`052`); `123`
+rehomed as `g17.001`
+Posture: closed
 Opened: 2026-08-25
+Closed: 2026-09-06
+Rollover log: `../../logs/2026-09/20260906-g16-g17-generation-rollover.md`
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
 `../generation-index.md`
@@ -23,11 +20,13 @@ third cross-runtime authority to produce the inventory.
 
 ## Current State
 
-g16 is the evidence-recovery generation. `g15` closed the v0.2.x release and
-consumer adoption; g16 measures active-cohort parity from executed evidence and
-closes bounded gaps without inventing a new conformance authority. The live
-frontier is `../dispatch.md`; card status lines and execution logs own lane
-truth; this page is the index. Narrative history of the generation is in
+g16 was the evidence-recovery generation. `g15` closed the v0.2.x release and
+consumer adoption; g16 measured active-cohort parity from executed evidence,
+closed bounded gaps without inventing a new conformance authority, published
+v0.3.0, adopted it in all 15 consumers, and took Nucleus to M1 29/29 and A1
+29/29. The generation is closed; `../g17/README.md` carries the Nucleus switch
+path. Card status lines and execution logs own lane truth; this page is the
+index. Narrative history of the generation is in
 `../../logs/2026-09/20260905-front-door-compaction.md` and the per-lane logs.
 
 ## Generation Runway
@@ -88,7 +87,7 @@ truth; this page is the index. Narrative history of the generation is in
 51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — ready 2026-09-05 on the lab's 84-fixture closed batch (156/168 channels, 18 findings in two classes to adjudicate) — blocked on completed `g16.050`, the operational Button lab, and a separately completed icon adapter/manifest extension
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
-54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — complete; candidate merged in PR #165 as `9e38e7971`; no release mutation authorized
+54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — complete; candidate merged in PR #165 as `9e38e7971`; published as `v0.3.0` by `097`
 55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
 56. [056 — Web distribution contract](056-web-distribution-contract.md) — complete; merged in PR #159 after one exact-head repair round with frozen 176/167/108 inventories and byte-exact receipts
 57. [057 — Core build substrate](057-core-build-substrate.md) — complete; merged in PR #161 with deterministic source-free core output and receipt-backed audits
@@ -131,52 +130,51 @@ truth; this page is the index. Narrative history of the generation is in
 94. [094 — Ordinary Cargo scope classification repair](094-ordinary-cargo-scope-classification.md) — complete in PR #200; ordinary installed smoke now distinguishes dependency-only Cargo changes from package-version mutations without changing strict or candidate certification
 95. [095 — Svelte↔React public prop drift gate](095-react-prop-drift-gate.md) — complete in PR #202 at `f297774f4`; standalone `docs:react-prop-drift` selector in `docs:check`, reasoned ratcheted baseline, no API change
 96. [096 — Linux headless PR and main board](096-linux-headless-pr-board.md) — complete in PR #201 at `372aa5253`; automatic web and Rust boards are green on `main`
-97. [097 — v0.3.0 release certification](097-v030-release-certification.md) — ready, serial behind `103`; `b4158a1b` passed local certification but exposed the stale release tarball verifier before any tag; resume from repaired `main`
+97. [097 — v0.3.0 release certification](097-v030-release-certification.md) — complete; `v0.3.0` published 2026-09-05 from certified `85609d941` after two retracted tags (run `33952493234`)
 98. [098 — Cold-checkout web board repair](098-cold-checkout-web-board-repair.md) — complete in PR #203 at `c8636c699`; cold and warm `ci:web` now pass after the `react-preview` alias and package-build ordering repair
 99. [099 — React prop port tranche](099-react-prop-port-tranche.md) — complete in PR #204 at `660b9510d`; all five pending-port baseline entries are cleared
 100. [100 — DockRegion showTabs portable spec and baseline closeout](100-dock-region-show-tabs-portable.md) — complete in PR #206; portable contract, Rust render paths, React parity, GPUI specimen, and baseline closeout
 101. [101 — Tree item accessible name](101-tree-item-accessible-name.md) — complete in PR #205; explicit `aria-label` per treeitem in both shells, including loading and rename states
 102. [102 — Tabs fill layout seam](102-tabs-fill-layout-seam.md) — complete in PR #207; `layout="fill"`, panel sizing and padding contract, native mapping, and standalone-strip ownership recipe
-103. [103 — Release tarball dist verification repair](103-release-tarball-dist-verification.md) — ready, urgent; operator-authorized workflow repair aligns release archive assertions with the compiled `dist/**` contract and blocks `097`
-104. [104 — Release workflow checkout base ref and pre-tag dry run](104-release-workflow-checkout-base-ref.md) — ready, priority; dry run `33908714014` failed because `release.yml` checks out only the tag ref; adds the checkout fix from `096` and a branch dry-run path so the candidate is proven before tagging
-105. [105 — Window-capture icon-geometry fixture kind](105-window-capture-icon-geometry-fixtures.md) — ready; lets the non-activating capture binary render the six candidate pairs per state so the lab's GPUI leg can serve `051`
+103. [103 — Release tarball dist verification repair](103-release-tarball-dist-verification.md) — complete in PR #208 at `eab436eef`; release archive assertions aligned with the compiled `dist/**` contract
+104. [104 — Release workflow checkout base ref and pre-tag dry run](104-release-workflow-checkout-base-ref.md) — complete in PR #209 at `46129f83b`; release checkout exposes `origin/main` and a branch dry-run path proves the candidate before tagging
+105. [105 — Window-capture icon-geometry fixture kind](105-window-capture-icon-geometry-fixtures.md) — complete in PR #210 at `85609d941`; the non-activating capture binary renders the six icon-geometry pairs per state
 106. [106 — Button leading-inset edge delta diagnosis](106-button-leading-inset-edge-delta.md) — complete in PR #211 at `94febafad`; the two unclassified lab findings were resolved at the documented `poodle-render` leading-inset path
 107. [107 — Validation hygiene bundle](107-validation-hygiene-bundle.md) — complete in PR #213 at `6b05db508`; clean-tree boards, per-worktree gate state, doctor tuning, wider coverage, ungated-red disposition, GPUI harness flake causes, and Jetstream README truth are recorded
-108. [108 — Docs spine compaction](108-docs-spine-compaction.md) — ready; archive closed handoffs and historical parity, purge unreferenced specs, fix guide snippets, add a guide-snippet compile check
-109. [109 — v0.3.0 consumer adoption wave](109-v030-consumer-adoption-wave.md) — ready; 15 sibling lanes in two tiers move every consumer to exact `0.3.0`, absorb the three documented breaks, and close ten open consumer papercuts
+108. [108 — Docs spine compaction](108-docs-spine-compaction.md) — complete in PR #212 at `7f77aaf27`; handoffs and historical parity archived, unreferenced specs purged, guide snippets checked
+109. [109 — v0.3.0 consumer adoption wave](109-v030-consumer-adoption-wave.md) — complete; all 15 consumers on exact `0.3.0` (Underlay `v0.9.8` cut for the tier-2 apps; Acowtancy #155 and Bovine #94 closed the wave on 2026-09-05)
 110. [110 — gpui-unofficial feasibility spike](110-gpui-unofficial-feasibility-spike.md) — complete in PR #214 at `073faf61b`; report recommends adopting later, with production pinning deferred until the recorded GPUI packaging/accessibility gates clear
 111. [111 — Nucleus A1 accessibility receipt foundation](111-nucleus-a1-accessibility-receipt-foundation.md) — complete; merged in PR #215 with paired GPUI node-tree and Svelte DOM accessibility snapshots, two validated A1 receipts (Switch, Tabs), and an honestly recorded Select divergence
-112. [112 — Nucleus A1 tranche NP-1 shell](112-nucleus-a1-np1-shell.md) — ready (foundation merged in PR #215)
-113. [113 — Nucleus A1 tranche NP-2 navigation and overlays](113-nucleus-a1-np2-navigation-overlays.md) — ready (foundation merged in PR #215)
-114. [114 — Nucleus A1 tranche NP-3 agent workflow](114-nucleus-a1-np3-agent-workflow.md) — ready (foundation merged in PR #215)
-115. [115 — Nucleus A1 tranche NP-4 settings and remediation](115-nucleus-a1-np4-settings-remediation.md) — ready (foundation merged in PR #215)
-116. [116 — Nucleus A1 tranche NP-5 command and attention](116-nucleus-a1-np5-command-attention.md) — ready (foundation merged in PR #215)
-117. [117 — Select A1 alignment](117-select-a1-alignment.md) — ready; five real Select divergences from the `111` receipt, decided by the contract; one chevron decision pending
+112. [112 — Nucleus A1 tranche NP-1 shell](112-nucleus-a1-np1-shell.md) — complete in PR #219 at `eaa2e7ba2`
+113. [113 — Nucleus A1 tranche NP-2 navigation and overlays](113-nucleus-a1-np2-navigation-overlays.md) — complete in PR #221 at `f9922fd1d`
+114. [114 — Nucleus A1 tranche NP-3 agent workflow](114-nucleus-a1-np3-agent-workflow.md) — complete in PR #216 at `a3c2b1b62`
+115. [115 — Nucleus A1 tranche NP-4 settings and remediation](115-nucleus-a1-np4-settings-remediation.md) — complete in PR #222 at `51b820a5d`
+116. [116 — Nucleus A1 tranche NP-5 command and attention](116-nucleus-a1-np5-command-attention.md) — complete in PR #220 at `469898d68`
+117. [117 — Select A1 alignment](117-select-a1-alignment.md) — complete in PR #218 at `ef9049f15`; five Select divergences decided by the contract, chevron toggle per card default
 118. [118 — A1 overlay structure projection](118-a1-overlay-structure-projection.md) — complete; merged in PR #224 with `Heading`/`Banner`/`SearchBox` roles and eight overlay structures
 119. [119 — A1 focus and state semantics](119-a1-focus-and-state-semantics.md) — complete; merged in PR #223 with overlay initial-focus routing and five-row focus/state semantics
 120. [120 — A1 landmarks and content roles](120-a1-landmarks-and-content-roles.md) — complete; merged in PR #225 for AppHeader, SplitView, AgentChatInput, and AgentPlan
-121. [121 — A1 focus-model alignment](121-a1-focus-model-alignment.md) — ready; the last four rows are extractor-law, scenario, and Menu roving-focus questions, not GPUI defects; target 29/29
-122. [122 — Window-capture cohort fixture kind](122-window-capture-cohort-fixtures.md) — ready; renders any cohort row from its scenario file in the non-activating capture window, for the lab's V1 adapter
-123. [123 — Nucleus V1 visual receipts](123-nucleus-v1-visual-receipts.md) — held behind `122` and the lab's first cohort bundle
+121. [121 — A1 focus-model alignment](121-a1-focus-model-alignment.md) — complete in PR #226 at `f494ce81e`; extractor law, transcript scenario, Menu roving focus; ledger GPUI accessibility 29/29 `mounted`
+122. [122 — Window-capture cohort fixture kind](122-window-capture-cohort-fixtures.md) — complete in PR #227 at `cab7faf10`; any cohort row renders from its scenario file in the non-activating capture window
+123. [123 — Nucleus V1 visual receipts](../g17/001-nucleus-v1-visual-receipts.md) — rehomed as [`g17.001`](../g17/001-nucleus-v1-visual-receipts.md) at the rollover; held on the lab's first validated cohort bundle
 
 ## Programmes
 
-| Programme | State (2026-09-05) | Authority |
+| Programme | State at close (2026-09-06) | Authority |
 | --- | --- | --- |
 | Dependable drag-and-drop | complete, `021`–`028` | architecture 011, spec 069 |
 | Shared motion policy | complete, `034` | architecture 012 |
 | HistoryCenter rejection surface and v0.3.0 release | complete; `0.3.0` published from `85609d941` (`097`), `0.2.3` never published | release notes 0.3.0, working rules "Release Certification" |
 | Compiled web distribution | complete, `056`–`061` | architecture 014 |
-| Consumer adoption of 0.3.0 | tier 1 done (Underlay `v0.9.8`, Longhorn, Soundcheck Library); tier 2 running, `109` | `109` card |
-| Nucleus GPUI parity | M1 29/29; A1 25/29 receipted (`111`–`120`), last four in `121`; V1 capture path `122`, receipts `123`, lab adapter `g01.006`; V2 lab side landed, Nucleus seeding pending; M2 and adoption held | `nucleus-gpui-parity-programme.md` |
-| Visual lab | `poodle-lab` repository; Button and icon-geometry batches captured; `051` admitted all six icon pairs | `visual-lab-unblock-runway.md`, lab repo |
+| Consumer adoption of 0.3.0 | complete, all 15 consumers, `109` | `109` card |
+| Nucleus GPUI parity | M1 29/29; A1 29/29 (`111`–`121`); V1 capture path `122` merged, receipts rehomed as `g17.001`; V2 lab side landed, Nucleus seeding pending; M2 and adoption held — continues in `../g17/README.md` | `nucleus-gpui-parity-programme.md` |
+| Visual lab | `poodle-lab` repository; Button and icon-geometry batches captured; `051` admitted all six icon pairs; cohort adapter web legs landed (lab `g01.006`), GPUI leg pending | `visual-lab-unblock-runway.md`, lab repo |
 | Validation and docs hygiene | complete, `095`–`108` | working rules, cards |
-| GPUI accessibility route | upstream republish evaluated (`110`); adoption held on a crates.io build defect | contract 003, triage `20260905-111233-*` |
+| GPUI accessibility route | upstream republish evaluated (`110`); adoption held on the gpui-apple crates.io build defect — continues in g17 | contract 003, triage `20260905-111233-*` |
 | Jetstream admission | hold | triage `20260902-000959-*` |
 | Component continuation register | historical audit input, `020` | `component-continuation-runway.md` |
 
 ## Next Task
 
-Dispatch from `../dispatch.md` only. Open programme choices (Nucleus V1,
-generation rollover to g17) are Chatterbox planning items and are not cards
-until promoted.
+None. The generation is closed. Dispatch from `../dispatch.md`; open planning
+lives in `../g17/README.md`.

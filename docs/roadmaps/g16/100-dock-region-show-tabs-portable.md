@@ -1,6 +1,6 @@
 # g16.100 — DockRegion `showTabs` Portable Spec And Baseline Closeout
 
-Status: ready
+Status: complete — merged in PR #206 at `2db86aadd`
 Type: portable capability port — contract, Rust spec, render, React shell,
 drift baseline
 Opened: 2026-09-04

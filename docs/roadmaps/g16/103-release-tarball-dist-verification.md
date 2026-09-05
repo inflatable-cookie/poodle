@@ -1,6 +1,6 @@
 # g16.103 — Release Tarball Dist Verification Repair
 
-Status: ready — urgent serial predecessor of `g16.097`
+Status: complete — merged in PR #208 at `eab436eef`; unblocked `g16.097`
 Type: workflow automation — explicit operator approval recorded
 Opened: 2026-09-04
 Depends on: none

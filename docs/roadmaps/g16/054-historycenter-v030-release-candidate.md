@@ -1,7 +1,6 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: candidate certified — awaiting orchestrator review; later release
-certification and Loophole adoption remain separate authority gates
+Status: complete — candidate merged in PR #165 as `9e38e7971`; published as `v0.3.0` from `85609d941` by `g16.097` on 2026-09-05
 Type: release candidate — no release mutation
 Opened: 2026-09-01
 Candidate base: `0a4a329733dfb63bd5e70977d54581e4fef000c8`

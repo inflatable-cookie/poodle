@@ -1,6 +1,6 @@
 # g16.098 — Cold-Checkout Web Board Repair
 
-Status: ready
+Status: complete — merged in PR #203 at `c8636c699`
 Type: validation board repair — no component or contract change
 Opened: 2026-09-04
 Depends on: none. Blocks: `g16.096` (PR #201 re-run) and `g16.097` (release

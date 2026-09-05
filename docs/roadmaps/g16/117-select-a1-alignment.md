@@ -1,6 +1,6 @@
 # g16.117 — Select A1 Alignment
 
-Status: ready — one contract decision pending (chevron toggle), see below
+Status: complete — merged in PR #218 at `ef9049f15`; the chevron toggle followed the card default (contract decides, no consumer override)
 Type: bounded parity repair — contract, Svelte, shared Rust render; A1 receipt
 Opened: 2026-09-05
 Depends on: merged `g16.111` (`3dea40372`)

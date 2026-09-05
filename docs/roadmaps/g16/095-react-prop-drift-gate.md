@@ -1,7 +1,6 @@
 # g16.095 — Svelte↔React Public Prop Drift Gate
 
-Status: ready — in revision after review of PR #202 (head `1440aeb33`);
-operator decision 2026-09-04: ratcheted baseline, gate stays in `docs:check`
+Status: complete — merged in PR #202 at `f297774f4`; standalone `docs:react-prop-drift` selector in `docs:check`, reasoned ratcheted baseline, no API change
 Type: validation gate — no component API change
 Opened: 2026-09-04
 Depends on: none; independent of every other ready lane

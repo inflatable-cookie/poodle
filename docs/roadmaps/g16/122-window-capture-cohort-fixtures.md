@@ -1,13 +1,13 @@
 # g16.122 — Window-Capture Cohort Fixture Kind
 
-Status: ready
+Status: complete — merged in PR #227 at `cab7faf10`; the lab `g01.006` GPUI leg consumes this kind
 Type: capture-binary extension — renders any Nucleus cohort row from its
 shared scenario file in a live non-activating window; no public API
 Opened: 2026-09-05
 Depends on: merged `g16.105` (icon-geometry fixture kind precedent), merged
 `g16.111` (shared scenario files)
 Blocks: the lab's cohort fixture adapter (poodle-lab `g01.006`) GPUI leg and
-Poodle `g16.123`
+Poodle `g17.001` (formerly `g16.123`)
 Governing refs: `packages/gpui/preview/src/bin/window_capture/` (`fixture_capture.rs`,
 the `icon-geometry` kind), `test/nucleus-a11y/scenarios/*.json` (29 files,
 `poodle.g16-nucleus-a11y-scenario.v1`), `packages/gpui/preview/src/headless_driver.rs`

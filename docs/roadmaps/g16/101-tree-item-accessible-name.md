@@ -1,6 +1,6 @@
 # g16.101 — Tree Item Accessible Name
 
-Status: ready
+Status: complete — merged in PR #205 at `1d8e6aeab`
 Type: accessibility defect repair — Svelte and React, contract note
 Opened: 2026-09-04
 Depends on: none

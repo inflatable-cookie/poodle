@@ -1,6 +1,6 @@
 # g16.102 — Tabs Fill Layout Seam
 
-Status: ready
+Status: complete — merged in PR #207 at `a74e50955`
 Type: additive capability — contract, core CSS, Svelte, React, Rust spec and
 render, one recipe
 Opened: 2026-09-04

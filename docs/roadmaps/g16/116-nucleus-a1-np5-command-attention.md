@@ -1,6 +1,6 @@
 # g16.116 — Nucleus A1 Tranche NP-5 Command And Attention
 
-Status: ready — foundation `g16.111` merged in PR #215 at `3dea40372`
+Status: complete — merged in PR #220 at `469898d68`
 Type: A1 evidence tranche — paired accessibility receipts for the rows below
 Opened: 2026-09-05
 Depends on: merged `g16.111`

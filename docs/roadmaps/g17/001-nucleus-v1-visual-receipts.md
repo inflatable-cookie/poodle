@@ -1,11 +1,12 @@
-# g16.123 — Nucleus V1 Visual Receipts
+# g17.001 — Nucleus V1 Visual Receipts
 
 Status: held — ready when poodle-lab `g01.006` has produced its first
-validated cohort bundle
+validated cohort bundle (GPUI leg pending an unlocked display); rehomed from
+`g16.123` at the 2026-09-06 rollover
 Type: evidence consumption — V1 receipts and ledger column
 Opened: 2026-09-05
 Depends on: merged `g16.122`; poodle-lab `g01.006` bundle
-Governing refs: `nucleus-gpui-parity-programme.md` (V1: deterministic
+Governing refs: `../g16/nucleus-gpui-parity-programme.md` (V1: deterministic
 component comparison for Nucleus-used states, Poodle-owned),
 `docs/logs/2026-09/…-g16-051-…` (how an imported lab bundle is cited),
 poodle-lab `docs/contracts/004-receipt-import.md`, `scripts/nucleus-parity-receipts.ts`

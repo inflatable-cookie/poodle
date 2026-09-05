@@ -1,6 +1,6 @@
 # g16.099 — React Prop Port Tranche
 
-Status: ready — `g16.095` merged in PR #202 at `f297774f4`; the seeded baseline confirms exactly five `pending-port` entries (Button ×3, Calendar `today`, SplitView `divider`, AppHeader `element`, DockRegion `showCollapseToggle`)
+Status: complete — merged in PR #204 at `660b9510d`; all five pending-port baseline entries cleared
 Type: React parity port — no Svelte or contract change
 Opened: 2026-09-04
 Depends on: merged `g16.095` (satisfied at `f297774f4`)

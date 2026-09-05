@@ -1,6 +1,6 @@
 # g16.105 — Window-Capture Icon-Geometry Fixture Kind
 
-Status: ready
+Status: complete — merged in PR #210 at `85609d941`; the lab icon-geometry GPUI leg ran on it (`g16.051` admission)
 Type: capture-binary extension — no public API, no contract change
 Opened: 2026-09-04
 Depends on: merged `g16.050`

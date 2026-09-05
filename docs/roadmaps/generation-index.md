@@ -1,27 +1,40 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-05
+Updated: 2026-09-06
 
 ## Active Track
 
-- `g16`
-  - Status: active; strict-ready
-  - Range: `001`–`120` compiled; `001`–`120` merged or closed except the held
-    `052` design-guidance pilot. Per-card truth
-    is the card's status line and execution log.
-  - Aim: use one current active-cohort evidence ledger to select and close
-    bounded semantic and mounted-behaviour gaps without inventing another
-    conformance authority.
-  - Milestones: v0.3.0 published 2026-09-05 from `85609d941`; Nucleus M1
-    29/29; A1 foundation merged (`111`); icon geometry admitted (`051`);
-    docs spine compacted (`108`).
+- `g17`
+  - Status: active; operator-led planning slate opened 2026-09-06
+  - Range: `001` held (Nucleus V1 visual receipts, rehomed from `g16.123`);
+    no ready card
+  - Aim: finish the Nucleus switch evidence (V1, V2, M2, later A2) and put
+    the switch decision in front of the operator on receipts.
   - Ready frontier: `dispatch.md`.
-  - Next move: compile the next promoted frontier after the completed A1 repairs
-    and consumer adoption wave; then Nucleus V1 (lab adapter
-    for the cohort's Poodle fixtures) and the g17 rollover boundary, both
-    Chatterbox planning items.
+  - Next move: lab `g01.006` GPUI cohort batch → validated bundle → `001`
+    ready.
 
 ## Latest Completed Track
+
+- `g16`
+  - Status: complete (2026-09-06)
+  - Range: `001`–`123`; `002` closed partial, `037`–`044` research-complete,
+    `052` gated and carried, `123` rehomed as `g17.001`, every other lane
+    complete
+  - Verdict: active-cohort parity became measurable from executed evidence
+    without a third conformance authority. Dependable drag-and-drop, shared
+    motion policy, compiled web distribution, HistoryCenter rejection
+    surface, Linux PR/main boards, validation and docs hygiene, and the
+    Svelte↔React drift gate closed. Nucleus reached M1 29/29 and A1 29/29
+    with a window-capture path for V1. The visual lab exists and admitted
+    icon geometry.
+  - Release: `v0.3.0` published 2026-09-05 from `85609d941` after two
+    retracted tags; the "Release Certification" rule (green gates and a
+    green branch dry run before any tag) came out of that. All 15 consumers
+    adopted `0.3.0`; `0.2.3` was never published.
+  - Evidence:
+    `docs/logs/2026-09/20260906-g16-g17-generation-rollover.md`,
+    `docs/logs/2026-09/20260905-front-door-compaction.md`
 
 - `g15`
   - Status: complete (2026-08-25)

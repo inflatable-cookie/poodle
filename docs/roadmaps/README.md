@@ -1,24 +1,26 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-09-02
+Updated: 2026-09-06
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
 publication, v0.2.1 recovery, crates.io-GPUI correction, v0.2.2 publication,
-and adoption by all 16 authoritative consumers. `g16` uses a current
-active-cohort parity evidence ledger to select bounded semantic and mounted
-behavior repairs without inventing another conformance authority.
+and adoption by all 16 authoritative consumers. `g16` used a current
+active-cohort parity evidence ledger to close bounded semantic and mounted
+behavior gaps, published v0.3.0, and took Nucleus to M1/A1 29/29. `g17`
+finishes the Nucleus switch evidence.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary;
-  `dispatch.md` is the live frontier; `g16/README.md` indexes the cards and
-  programmes.
-- `g16` is active: v0.3.0 is published, its consumer adoption wave runs in
-  the sibling repositories, and the Nucleus A1 accessibility tranches are in
-  flight. `g15` (release and adoption programme) and `g14` (rejected
-  conformance pilot) are complete; earlier generations are historical.
+  `dispatch.md` is the live frontier; `g17/README.md` indexes the active
+  cards and programmes.
+- `g17` is active (opened 2026-09-06): Nucleus V1 visual receipts are held
+  on the lab's first cohort bundle; V2, M2, A2, and the switch decision are
+  planned. `g16` (evidence recovery, v0.3.0, Nucleus M1/A1), `g15` (release
+  and adoption programme) and `g14` (rejected conformance pilot) are
+  complete; earlier generations are historical.
 - Narrative history moved to
   `../logs/2026-09/20260905-front-door-compaction.md` on 2026-09-05.
 
@@ -41,15 +43,16 @@ behavior repairs without inventing another conformance authority.
 - `g15` — completed v0.2.x release and adoption programme; corrected v0.2.2
   published from candidate `d5607def`, with all 16 authoritative consumers
   adopted and React retained as source-only
-- `g16` — active evidence-led continuation generation. `001`–`044` are closed
-  or research-complete, including Tree authority in PR #127. The canonical
-  post-triage runway is compiled as `045`–`054`; six cards are ready and four
-  preserve serial, ownership, or external gates. Dependable drag-and-drop remains a
-  closed programme governed by architecture 011/spec 069.
+- `g16` — completed evidence-led continuation generation (2026-08-25 to
+  2026-09-06): drag-and-drop, motion policy, compiled web distribution,
+  v0.3.0 published and adopted by all 15 consumers, Linux PR/main boards,
+  Nucleus M1 and A1 29/29, visual lab opened
+- `g17` — active Nucleus switch path: V1/V2/M2 receipts, A2 via the
+  upstream AccessKit route, switch decision on receipts
 
 ## Rules
 
-- Active milestone files live in generation folders such as `g16/`.
+- Active milestone files live in generation folders such as `g17/`.
 - File names use `NNN-slug.md`; roadmap IDs use forms such as `g16.001`.
 - A roadmap file is a complete worker handoff. Do not add a batch-card
   layer.

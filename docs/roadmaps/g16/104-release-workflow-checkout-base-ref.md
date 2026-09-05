@@ -1,8 +1,6 @@
 # g16.104 — Release Workflow Checkout Base Ref And Pre-Tag Dry Run
 
-Status: ready — operator approved 2026-09-04: (1) edit `release.yml`
-(workflow authority), (2) retract the `v0.3.0` tag at `eab436eef` and re-tag
-after this fix merges. Urgent serial predecessor of `g16.097`
+Status: complete — merged in PR #209 at `46129f83b`; branch dry-run path used for the v0.3.0 pre-tag proof (run `33930305831`)
 Type: workflow automation — release workflow
 Opened: 2026-09-04
 Depends on: none. Blocks: `g16.097` v0.3.0 release certification

@@ -1,6 +1,6 @@
 # g16.121 — A1 Focus-Model Alignment (last four rows)
 
-Status: implementation complete — pending independent exact-head review
+Status: complete — merged in PR #226 at `f494ce81e`; ledger GPUI accessibility 29/29 `mounted`
 Type: A1 evidence repair — Svelte extractor law, one scenario, one Svelte
 roving-focus fix; four receipts to reach 29/29
 Opened: 2026-09-05
