@@ -14,6 +14,7 @@ import { render } from "@testing-library/svelte";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createRawSnippet } from "svelte";
+import { writable } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
 import * as components from "@inflatable-cookie/poodle-svelte";
@@ -38,6 +39,10 @@ const write = process.env.POODLE_NUCLEUS_A11Y_WRITE === "1";
 /// Slot content the scenario fixes as text. Shared with the Rust proof,
 /// which renders the same text as a node.
 function fixtureProps(scenario: A1Scenario): Record<string, unknown> {
+  if (scenario.component === "ToastHost") {
+    const toasts = writable((scenario.props.toasts ?? []) as never[]);
+    return { ...scenario.props, store: { toasts, dismiss: () => {} } };
+  }
   const panelText = scenario.fixtures?.panel_text;
   const triggerText = scenario.fixtures?.trigger_text;
   const props: Record<string, unknown> = {};
@@ -53,14 +58,17 @@ function fixtureProps(scenario: A1Scenario): Record<string, unknown> {
       render: () => `<button type="button">${triggerText}</button>`,
     }));
   }
+  if (scenario.component === "MessageCenter") {
+    props.onItemSelect = () => {};
+  }
   return props;
 }
 
 describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
   const rows = listScenarioRows(root);
 
-  it("has the foundation and NP-2 scenarios", () => {
-    expect(rows).toEqual(["dialog", "editable-label", "menu", "popover", "segmented-control", "select", "switch", "tabs"]);
+  it("has the foundation, NP-2, and NP-5 scenarios", () => {
+    expect(rows).toEqual(["command-palette", "dialog", "editable-label", "menu", "message-center", "popover", "segmented-control", "select", "switch", "tabs", "toast-host"]);
   });
 
   for (const row of rows) {
@@ -69,7 +77,10 @@ describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
       const Component = (components as Record<string, unknown>)[loaded.scenario.component];
       expect(Component, `${loaded.scenario.component} is a public Svelte export`).toBeDefined();
 
-      render(Component as never, { props: { ...loaded.scenario.props, ...fixtureProps(loaded.scenario) } });
+      const props = loaded.scenario.component === "ToastHost"
+        ? fixtureProps(loaded.scenario)
+        : { ...loaded.scenario.props, ...fixtureProps(loaded.scenario) };
+      render(Component as never, { props });
       await settle();
       await replayActions(loaded.scenario.actions);
 

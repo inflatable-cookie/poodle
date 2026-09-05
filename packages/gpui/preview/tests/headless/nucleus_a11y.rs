@@ -9,11 +9,13 @@
 use std::sync::{Arc, Mutex};
 
 use poodle_node::Node;
-use poodle_render::{EditableLabelHandlers, PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers};
+use poodle_render::{CommandPaletteHandlers, EditableLabelHandlers, MessageCenterHandlers, PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers};
 use poodle_specs::{
-    ChoiceOption, DialogSpec, EditableLabelActivation, EditableLabelSpec, MenuEntry, MenuSpec,
-    Orientation, PopoverInitialFocus, PopoverSpec, SegmentedControlOption, SegmentedControlSpec,
-    SelectMode, SelectSpec, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec,
+    ChoiceOption, CommandActionItem, CommandPaletteSpec, DialogSpec, EditableLabelActivation,
+    EditableLabelSpec, MenuEntry, MenuSpec, MessageCenterItem, MessageCenterSpec, Orientation,
+    PopoverInitialFocus, PopoverSpec, SegmentedControlOption, SegmentedControlSpec, SelectMode,
+    SelectSpec, StatusTone, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, Toast,
+    ToastHostPlacement, ToastHostSpec, ToastStackSpec,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -138,6 +140,97 @@ fn prove(
 fn props<T: for<'de> Deserialize<'de>>(loaded: &LoadedA1Scenario) -> T {
     serde_json::from_value(loaded.scenario.props.clone())
         .unwrap_or_else(|error| panic!("{} props do not map to the Rust spec: {error}", loaded.path))
+}
+
+// ── NP-5 command and attention rows ───────────────────────────────────────
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CommandPaletteProps { open: bool, title: Option<String>, description: Option<String>, invocation_hint: Option<String>, items: Vec<CommandActionProps> }
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CommandActionProps { id: String, title: String, group: Option<String>, shortcut: Option<String> }
+
+#[test]
+#[ignore = "g16.116: CommandPalette GPUI projection diverges from the Svelte reference; see the A1 divergence store"]
+fn command_palette_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("command-palette");
+    let input: CommandPaletteProps = props(&loaded);
+    let actions = input.items.into_iter().map(|item| {
+        let mut action = CommandActionItem::new(item.id, item.title);
+        if let Some(group) = item.group { action = action.with_group(group); }
+        if let Some(shortcut) = item.shortcut { action = action.with_shortcut(shortcut); }
+        action
+    }).collect();
+    let mut spec = CommandPaletteSpec::new(actions).with_open(input.open);
+    if let Some(title) = input.title { spec = spec.with_title(title); }
+    if let Some(description) = input.description { spec = spec.with_description(description); }
+    if let Some(hint) = input.invocation_hint { spec = spec.with_invocation_hint(hint); }
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(poodle_render::command_palette_with_handlers(&spec, &RenderContext::new(&theme()), CommandPaletteHandlers { instance_id: Some("a1".into()), ..Default::default() })));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
+        driver.draw_frame(); driver.draw_frame(); driver.dispatch_probe_key("escape");
+        prove(&mut driver, &loaded, &["mount the production CommandPalette node tree through HeadlessDriver with the shared scenario props", "read the mounted accessibility projection and backend focus registry", "execute gpui sequential focus traversal and attribute every stop to a tracked node"], &["the normalised GPUI snapshot equals the committed Svelte DOM snapshot for the same scenario hash", "dialog, search, status, results, action roles, names, relationships, and focus order match the Svelte ARIA projection", "gpui tab traversal visits the tracked focusable nodes in the declared order"]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MessageCenterProps { default_open: bool, title: String, items: Vec<MessageItemProps> }
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MessageItemProps { id: String, title: String, message: Option<String>, read: bool, tone: Option<String>, meta: Option<String> }
+
+#[test]
+#[ignore = "g16.116: MessageCenter GPUI projection diverges from the Svelte reference; see the A1 divergence store"]
+fn message_center_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("message-center");
+    let input: MessageCenterProps = props(&loaded);
+    let items = input.items.into_iter().map(|item| {
+        let mut out = MessageCenterItem::new(item.id, item.title).with_read(item.read);
+        if let Some(message) = item.message { out = out.with_message(message); }
+        if let Some(meta) = item.meta { out = out.with_meta(meta); }
+        if matches!(item.tone.as_deref(), Some("success")) { out = out.with_tone(StatusTone::Success); }
+        out
+    }).collect();
+    let spec = MessageCenterSpec::new(items).with_default_open(input.default_open).with_open(input.default_open).with_title(input.title);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(poodle_render::message_center(&spec, &RenderContext::new(&theme()), MessageCenterHandlers { on_item_select: Some(Arc::new(|_| {})), instance_id: Some("a1".into()), ..Default::default() })));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
+        driver.draw_frame(); driver.draw_frame(); driver.dispatch_probe_key("escape");
+        prove(&mut driver, &loaded, &["mount the production MessageCenter node tree through HeadlessDriver with the shared scenario props", "read the mounted accessibility projection and backend focus registry", "execute gpui sequential focus traversal and attribute every stop to a tracked node"], &["trigger, dialog, message rows, controls, names, expanded state, relationships, and focus order match the Svelte ARIA projection", "gpui tab traversal visits the tracked focusable nodes in the declared order"]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct ToastHostProps { placement: String, aria_label: String, auto_dismiss_ms: u32, toasts: Vec<ToastProps> }
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct ToastProps { id: String, title: String, message: Option<String>, tone: Option<String>, action_label: Option<String> }
+
+#[test]
+#[ignore = "g16.116: ToastHost GPUI projection diverges from the Svelte reference; see the A1 divergence store"]
+fn toast_host_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("toast-host");
+    let input: ToastHostProps = props(&loaded);
+    let toasts = input.toasts.into_iter().map(|item| {
+        let mut out = Toast::new(item.id, item.title);
+        if let Some(message) = item.message { out = out.with_message(message); }
+        if matches!(item.tone.as_deref(), Some("success")) { out = out.with_tone(poodle_specs::ToastTone::Success); }
+        if matches!(item.tone.as_deref(), Some("danger")) { out = out.with_tone(poodle_specs::ToastTone::Danger); }
+        if let Some(action) = item.action_label { out = out.with_action_label(action); }
+        out
+    }).collect();
+    let placement = match input.placement.as_str() { "top-start" => ToastHostPlacement::TopStart, "top-end" => ToastHostPlacement::TopEnd, "bottom-start" => ToastHostPlacement::BottomStart, _ => ToastHostPlacement::BottomEnd };
+    let host = ToastHostSpec::new().with_auto_dismiss_ms(input.auto_dismiss_ms).with_placement(placement).with_aria_label(input.aria_label);
+    let stack = ToastStackSpec::new().with_toasts(toasts);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(poodle_render::toast_host(&host, &RenderContext::new(&theme()), &stack, ToastStackHandlers { instance_id: Some("a1".into()), ..Default::default() })));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
+        driver.draw_frame(); driver.draw_frame(); driver.dispatch_probe_key("escape");
+        prove(&mut driver, &loaded, &["mount the production ToastHost node tree through HeadlessDriver with the shared scenario props", "read the mounted accessibility projection and backend focus registry", "execute gpui sequential focus traversal and attribute every stop to a tracked node"], &["host placement, stack label, toast and action roles, names, and focus order match the Svelte ARIA projection", "gpui tab traversal visits the tracked focusable nodes in the declared order"]);
+    });
 }
 
 // ── Switch ─────────────────────────────────────────────────────────────────
