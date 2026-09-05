@@ -1,0 +1,9 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "AppHeader",
+  "scenario_id": "nucleus.shell.app-header",
+  "props": { "title": "Poodle Shell", "subtitle": "Workspace", "ariaLabel": "Poodle Shell" },
+  "actions": [],
+  "declared_states": [],
+  "web_only_exclusions": []
+}

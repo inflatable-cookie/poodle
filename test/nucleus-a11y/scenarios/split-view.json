@@ -1,0 +1,9 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "SplitView",
+  "scenario_id": "nucleus.shell.split-view",
+  "props": { "orientation": "horizontal", "defaultRatio": 0.5, "ariaLabel": "Workspace panes", "showCollapsePrimary": true, "divider": true },
+  "actions": [],
+  "declared_states": ["disabled", "expanded"],
+  "web_only_exclusions": []
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Text",
+  "scenario_id": "nucleus.shell.text",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "e5cdb3f67e38417fe468a61af14c19c5d50ab07a",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount production Text and dispatch a harmless key"
+  ],
+  "assertions": [
+    "styled Text remains outside the accessibility projection on both runtimes"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/text.gpui.json",
+      "sha256": "b7b488fca1b3a5eb56944316da06740000ca684d85a01be773821fc2ebe011d0"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/text.svelte.json",
+      "sha256": "bf21d1468e81a0887b3d4632f803bee37ad9c2b3c6542ea9502288f011deb37d"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/text.json",
+    "scenario_sha256": "78e740eec7cace6f76453e26537472a6cea815587eb9cce04756d52c5cae85fc",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/text.gpui.json",
+    "gpui_snapshot_sha256": "b7b488fca1b3a5eb56944316da06740000ca684d85a01be773821fc2ebe011d0",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/text.svelte.json",
+    "svelte_snapshot_sha256": "bf21d1468e81a0887b3d4632f803bee37ad9c2b3c6542ea9502288f011deb37d",
+    "web_only_exclusions": [],
+    "diff": []
+  }
+}

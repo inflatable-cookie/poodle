@@ -1,0 +1,75 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Button",
+  "scenario_id": "nucleus.shell.button",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "e5cdb3f67e38417fe468a61af14c19c5d50ab07a",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount production Button and replay the shared pointer action"
+  ],
+  "assertions": [
+    "button role, name, disabled state, and focus match the Svelte projection"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/button.gpui.json",
+      "sha256": "372e49f215391228d8f02c9038d954ad4d7311fe0dd207d6036bbad4a8b9e7e0"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/button.svelte.json",
+      "sha256": "830330b6140e7ba413c5564cd8eba70e5da2930b4849b9cf7562d4af7c1466ea"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/button.json",
+    "scenario_sha256": "23525a617c62b3a22ec5137e915b9606043fbb31bd20fedd2482694edebd3f7a",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/button.gpui.json",
+    "gpui_snapshot_sha256": "372e49f215391228d8f02c9038d954ad4d7311fe0dd207d6036bbad4a8b9e7e0",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/button.svelte.json",
+    "svelte_snapshot_sha256": "830330b6140e7ba413c5564cd8eba70e5da2930b4849b9cf7562d4af7c1466ea",
+    "web_only_exclusions": [],
+    "diff": []
+  }
+}

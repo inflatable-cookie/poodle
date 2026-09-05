@@ -1,0 +1,10 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Button",
+  "scenario_id": "nucleus.shell.button",
+  "props": { "ariaLabel": "Apply", "variant": "primary" },
+  "fixtures": { "panel_text": "Apply" },
+  "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Apply" } }],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}

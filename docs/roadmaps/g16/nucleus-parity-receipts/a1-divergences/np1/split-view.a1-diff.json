@@ -1,0 +1,14 @@
+[
+  {
+    "index": 0,
+    "field": "value",
+    "gpui": null,
+    "svelte": 0
+  },
+  {
+    "index": 1,
+    "field": "name",
+    "gpui": "Collapse",
+    "svelte": "Collapse primary"
+  }
+]

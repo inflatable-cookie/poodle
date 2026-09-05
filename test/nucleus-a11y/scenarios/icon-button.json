@@ -1,0 +1,9 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "IconButton",
+  "scenario_id": "nucleus.shell.icon-button",
+  "props": { "icon": "search", "ariaLabel": "Search" },
+  "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Search" } }],
+  "declared_states": ["checked", "disabled"],
+  "web_only_exclusions": []
+}
