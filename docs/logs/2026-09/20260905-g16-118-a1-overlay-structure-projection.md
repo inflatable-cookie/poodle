@@ -1,11 +1,12 @@
 # g16.118 — A1 overlay structure projection
 
-Status: implementation complete — pending independent exact-head review
+Status: rebased implementation complete — pending fresh independent exact-head review
 Date: 2026-09-05
 Card: `docs/roadmaps/g16/118-a1-overlay-structure-projection.md`
-Base: `origin/main` at `ef483d029` (dispatch manifest revision 7)
+Base: `origin/main` at `a6f67f8d1` (SearchBox/focus ruling base)
 Branch: `worker/g16-118-a1-overlay-structure-projection`
 Recovery input: exact PR #224 head `d286cdd81e37db1b2f41a4c02069c4236c4cfcb6`
+Rebase recovery: rebased onto `origin/main` at `a6f67f8d14d7e55df86340335dea629a747e7ab3`; one expected card overlap resolved, no old review worktree used.
 
 Operator ruling: revision 20 adds `NodeRole::SearchBox` beside `Heading` and
 `Banner`, finishes the CommandPalette structure, assigns the five remaining
@@ -98,8 +99,8 @@ Five rows keep a refreshed focus-only store under
 - `effigy ci:web` — 3740 passed, 386 files
 - `git diff --check` — clean before final commit
 
-The cohort was repinned to implementation head
-`7ad28f7b9716f22f9a28cc29b6a81b97d4d2e59b` with the existing lock digest
+The cohort was repinned to rebased implementation head
+`3e6fce5596782995330e22b4cedbe463b7cd16aa` with the existing lock digest
 `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c` and
 re-emitted through `effigy regressions:native`; the ledger was regenerated and
 validated. The initial parallel ledger run timed out once under concurrent docs
