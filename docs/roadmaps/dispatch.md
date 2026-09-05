@@ -163,11 +163,32 @@ card or triage note says.
 - Acceptance evidence and review oracle: each card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
+### g16.051 — Icon geometry native visual admission
+
+- Card: `g16/051-icon-geometry-native-visual-admission.md`
+- Readiness: ready — the lab's complete closed batch is merged
+  (poodle-lab `e4cdcad`); the card's Evidence Bundle section names it.
+- Prerequisites: satisfied. Completion: PR merged after accepted exact-head
+  review with a per-pair, per-direction admit/revise/reject verdict, the two
+  finding classes adjudicated with evidence, and retained digests recorded;
+  no public IconMorph surface.
+- Owned mutable paths: per card (Poodle-side admission records under the
+  execution log, this card, `PAPERCUTS.md` append). Lab files are read
+  only; an oracle correction is a request file for the lab, not a Poodle
+  edit.
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`
+- Approved concurrent siblings: `g16.112`–`117`, `109` lanes. Serial
+  edges: none.
+- Worker capability class: capable coding model, high reasoning (reads
+  Rust paint path and motion policy; human-reviewable verdict)
+- Acceptance evidence and review oracle: the card's table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
 | --- | --- | --- |
-| `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
 | `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
 | Nucleus V1 / V2 / M2 and Nucleus adoption | V1 after the lab Button and icon bundles; V2 after lab `g01.003` and Nucleus seeding; M2 Nucleus-owned | operator, via Chatterbox |

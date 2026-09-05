@@ -1,7 +1,9 @@
 # g16.051 — Icon Geometry Native Visual Admission
 
-Status: blocked — requires completed `g16.050`, an operational Button-only
-lab, and a completed icon-geometry lab adapter/manifest extension
+Status: ready — every gate is satisfied as of 2026-09-05: `g16.050` complete,
+Button lab operational (poodle-lab PR #1), icon-geometry adapter and
+manifest landed with a complete closed batch (poodle-lab PR #4, merge
+`e4cdcad`)
 Type: external evidence / admission
 Opened: 2026-09-01
 Depends on: completed `g16.050` and every serial gate in
@@ -37,6 +39,32 @@ or add public IconMorph in this card.
   missing provenance, disagreeing repeats, or unavailable lab stops the card.
 - Failure leaves the internal capability unadmitted. It does not authorize a
   web-only public surface or a silent static-equivalence claim.
+
+## Evidence Bundle (poodle-lab, 2026-09-05)
+
+`poodle-lab/docs/logs/2026-09/05-111446-g01-002-icon-geometry-batch-bundle/`
+(schema `poodle-lab.icon-geometry-run.v1`, `closedBatch: true`,
+`admission: none`). Poodle source `85609d941`; 6 candidate pairs × 2
+directions × 7 states = 84 fixtures × 3 runtimes × 2 repeats = 252
+admitted captures; 128×128 logical at 2×, frozen motion, no crop, no frame
+picking, no averaging; Paseo stayed frontmost throughout.
+
+- Svelte↔React: exact on every fixture.
+- Svelte↔GPUI: 156/168 pair channels passed; 18 findings in two classes:
+  1. **teardown stroke width** — 12 findings: the GPUI teardown frame draws
+     the stroke 2 logical px wider than the web frame (limit 0.5). Adjudicate
+     whether this is a GPUI paint defect at teardown, a capture-timing
+     artefact (frame after removal vs during), or a contracted delta.
+  2. **reverse/frozen** — 6 findings: after a reversal, the frozen capture
+     snapped to `endpoint-from` (the reverse target) where the lab oracle
+     expected `endpoint-to`. Adjudicate against architecture 012 and
+     g16.050's law "reduced/frozen snap to the current target": if the law
+     says the reverse target, the finding is an oracle expectation error and
+     the lab manifest's expectation is corrected; if not, it is a runtime
+     defect.
+
+Both classes are findings, not failures; the bundle admits nothing. This
+card decides.
 
 ## Ordered Work
 
