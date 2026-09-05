@@ -5,7 +5,7 @@
 - Card: `docs/roadmaps/g16/112-nucleus-a1-np1-shell.md`
 - Dispatch: `docs/roadmaps/dispatch.md`, revision 17
 - Base verified: `3dbabac3990fb5f3856305b7c8f971039b0a81be`; rebased onto current
-  `origin/main` `469898d6838bdc56a266822606b8afc52ee8481b` after PR #219 became
+  `origin/main` `a3c2b1b62a013bd539806d7734de89ef46ef8cd8` after PR #219 became
   conflicting.
 - Worker handoff: `docs/handoffs/20260905-g16-112-nucleus-a1-np1-shell.md`
 
@@ -38,9 +38,9 @@ SplitView. No component, contract, Svelte, or backend behaviour changes.
   evidence ledger; validation passed with 176 component rows.
 - `effigy docs:check`: documentation lint/audits and ledger validation passed.
 - `effigy check:parity-evidence-ledger`: passed after regenerating the ledger;
-- NP-1 now records five mounted rows and GPUI accessibility is `9 mounted /
-  166 manual` at the rebased head. The manifest and all receipts are repinned
-  to source commit `f1442a39dfea1ff69a2bbe0650a60334b77d0f64`; the lock digest
+- NP-1 now records five mounted rows and GPUI accessibility is `10 mounted /
+  165 manual` at the rebased head. The manifest and all receipts are repinned
+  to source commit `e5cdb3f67e38417fe468a61af14c19c5d50ab07a`; the lock digest
   remains `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
 - `effigy test:nucleus-a11y`: passed, 16 tests.
 - Focused native NP-1 proof selector: passed, 7 tests.

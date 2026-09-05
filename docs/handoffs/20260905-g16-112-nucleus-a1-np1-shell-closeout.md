@@ -27,7 +27,7 @@ executed accessibility projection contract established by g16.111.
 
 - Dedicated worker branch: `worker/g16-112-nucleus-np1`.
 - Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be`, rebased onto current
-  `origin/main` `469898d6838bdc56a266822606b8afc52ee8481b`.
+  `origin/main` `a3c2b1b62a013bd539806d7734de89ef46ef8cd8`.
 - Added scenarios and Svelte snapshots for Icon, Text, Surface, Button,
   IconButton, AppHeader, and SplitView.
 - Added native A1 proof entry points in
@@ -39,7 +39,7 @@ executed accessibility projection contract established by g16.111.
   shared scenario props and fixtures.
 - Receipt contract, documentation audits, and the web/package/component board
   passed after regenerating the lane-owned evidence ledger. The source commit
-  is repinned to `f1442a39dfea1ff69a2bbe0650a60334b77d0f64`; the lock digest is
+  is repinned to `e5cdb3f67e38417fe468a61af14c19c5d50ab07a`; the lock digest is
   unchanged. Exact-head hosted runs are required after this push.
 - No sibling worktree dependencies.
 
