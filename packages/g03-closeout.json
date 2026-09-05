@@ -44,7 +44,7 @@
         "packages/svelte/preview/artifacts/parity-report.json",
         "packages/svelte/preview/artifacts/accessibility-report.json",
         "docs/specs/025-parity-automation-and-harness-boundary.md",
-        "docs/specs/027-docs-completeness-contract-linting-and-publish-pipeline.md"
+        "docs/specs/archive/027-docs-completeness-contract-linting-and-publish-pipeline.md"
       ]
     },
     {
@@ -52,9 +52,9 @@
       "label": "Underlay, Loophole, and extension-boundary proofs",
       "evidencePaths": [
         "packages/svelte/components/README.md",
-        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
-        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md",
-        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+        "docs/specs/archive/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
+        "docs/specs/archive/040-underlay-bridge-zero-leak-adoption-proof-baseline.md",
+        "docs/specs/archive/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ]
     },
     {
@@ -66,8 +66,8 @@
         "packages/ecosystem-acceptance.json",
         "packages/reference-apps.json",
         "docs/specs/044-deprecation-change-control-and-release-channel-operations.md",
-        "docs/specs/045-ecosystem-acceptance-and-long-tail-regression-baseline.md",
-        "docs/specs/046-reference-apps-onboarding-and-public-example-baseline.md"
+        "docs/specs/archive/045-ecosystem-acceptance-and-long-tail-regression-baseline.md",
+        "docs/specs/archive/046-reference-apps-onboarding-and-public-example-baseline.md"
       ]
     }
   ],

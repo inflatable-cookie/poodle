@@ -48,7 +48,7 @@
       ],
       "evidenceArtifacts": [
         "packages/svelte/components/README.md",
-        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+        "docs/specs/archive/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "regressionClasses": [
         "downstream-boundaries-and-ownership",
@@ -84,7 +84,7 @@
         "packages/gpui/native-accessibility-proof.json",
         "packages/gpui/preview-app-baseline.json",
         "packages/gpui/preview/Cargo.toml",
-        "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
+        "docs/specs/archive/042-gpui-multi-app-validation-target-matrix.md"
       ],
       "regressionClasses": [
         "runtime-specific-gpui-assumptions",
@@ -144,8 +144,8 @@
       "label": "Accessibility and keyboard posture",
       "scope": "focus, keyboard, announcement, and cross-runtime accessibility deltas",
       "primaryEvidence": [
-        "docs/specs/003-accessibility-and-assistive-technology-baseline.md",
-        "docs/specs/043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md",
+        "docs/specs/archive/003-accessibility-and-assistive-technology-baseline.md",
+        "docs/specs/archive/043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md",
         "packages/svelte/preview/artifacts/accessibility-report.json"
       ]
     },
@@ -154,8 +154,8 @@
       "label": "Downstream boundaries and ownership",
       "scope": "extension ownership and app-specific surface isolation",
       "primaryEvidence": [
-        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
-        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+        "docs/specs/archive/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
+        "docs/specs/archive/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ]
     },
     {
@@ -176,7 +176,7 @@
         "packages/gpui/cross-runtime-parity-report.json",
         "packages/gpui/native-accessibility-proof.json",
         "packages/gpui/preview-app-baseline.json",
-        "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
+        "docs/specs/archive/042-gpui-multi-app-validation-target-matrix.md"
       ]
     }
   ],
