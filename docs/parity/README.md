@@ -1,14 +1,14 @@
-# Historical Parity Audits
+# Historical Parity Audits — Archived
 
-This directory preserves the manual component audit completed before the
-g12.019 native-renderer consolidation. It is project history, not a current
-implementation register.
+The manual component audits that lived in this directory were archived
+2026-09-05 (g16.108 docs spine compaction): they now sit under
+[`docs/archive/parity/`](../archive/parity/README.md), where the full
+historical explainer and the per-component files remain.
 
-The child files refer to native package tiers that no longer exist, including
-`packages/gpui/components` and `packages/jetstream/components`. Their status
-comments, todo counts, implementation paths, and runtime limitations describe
-that earlier architecture. Do not use them to decide whether a current
-component exists or is release-ready.
+This pointer exists so historical references and bookmarks keep resolving.
+The audits are project history, not a current implementation register, and
+they were never an edit target after the g12.019 native-renderer
+consolidation. Do not add new component files here.
 
 ## Current Authority
 
@@ -30,13 +30,3 @@ Use these sources instead:
    parity report from repository evidence.
 6. `effigy check:parity-evidence-ledger`, `effigy parity:check`,
    `effigy test:components`, and `effigy docs:check` enforce the release gates.
-
-## Why These Files Remain
-
-The audits contain useful point-in-time reasoning and explain why later
-contracts and renderer work exist. Keeping them here preserves provenance
-without pretending a manually maintained matrix can stay authoritative after
-the implementation architecture changes.
-
-New parity findings belong in contracts, generated reports, tests, or an active
-roadmap. Do not add new component files to this directory.

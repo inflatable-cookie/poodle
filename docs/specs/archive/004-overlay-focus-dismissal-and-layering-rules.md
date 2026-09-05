@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `001-token-source-and-artifact-contract.md`, `002-component-contract-template-and-parity-rules.md`, `003-accessibility-and-assistive-technology-baseline.md`
+Depends on: `../001-token-source-and-artifact-contract.md`, `002-component-contract-template-and-parity-rules.md`, `003-accessibility-and-assistive-technology-baseline.md`
 
 ## Purpose
 

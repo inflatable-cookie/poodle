@@ -58,6 +58,7 @@ pagination placement. Render the actual list or grid as default children.
         <IconButton
           icon="refresh-cw"
           variant="ghost"
+          ariaLabel="Refresh"
           tooltip="Refresh"
         />
       {/snippet}

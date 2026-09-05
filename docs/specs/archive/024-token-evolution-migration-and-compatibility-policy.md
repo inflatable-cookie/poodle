@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `001-token-source-and-artifact-contract.md`, `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `021-public-package-api-stability-and-parity-debt-baseline.md`
+Depends on: `../001-token-source-and-artifact-contract.md`, `../008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
 

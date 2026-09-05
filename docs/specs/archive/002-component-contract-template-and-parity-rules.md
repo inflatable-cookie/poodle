@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `001-token-source-and-artifact-contract.md`
+Depends on: `../001-token-source-and-artifact-contract.md`
 
 ## Purpose
 

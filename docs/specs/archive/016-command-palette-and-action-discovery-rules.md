@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `006-workstation-shell-and-panel-system-rules.md`, `015-loading-empty-error-notification-and-remediation-rules.md`
+Depends on: `006-workstation-shell-and-panel-system-rules.md`, `../015-loading-empty-error-notification-and-remediation-rules.md`
 
 ## Purpose
 

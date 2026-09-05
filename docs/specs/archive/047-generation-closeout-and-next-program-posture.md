@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`, `040-underlay-bridge-zero-leak-adoption-proof-baseline.md`, `041-loophole-foundation-adoption-and-daw-extension-boundary.md`, `042-gpui-multi-app-validation-target-matrix.md`, `043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md`, `044-deprecation-change-control-and-release-channel-operations.md`, `045-ecosystem-acceptance-and-long-tail-regression-baseline.md`, `046-reference-apps-onboarding-and-public-example-baseline.md`
+Depends on: `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`, `040-underlay-bridge-zero-leak-adoption-proof-baseline.md`, `041-loophole-foundation-adoption-and-daw-extension-boundary.md`, `042-gpui-multi-app-validation-target-matrix.md`, `043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md`, `../044-deprecation-change-control-and-release-channel-operations.md`, `045-ecosystem-acceptance-and-long-tail-regression-baseline.md`, `046-reference-apps-onboarding-and-public-example-baseline.md`
 
 ## Purpose
 

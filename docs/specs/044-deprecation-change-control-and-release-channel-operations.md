@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `022-packaging-versioning-and-release-channel-rules.md`, `024-token-evolution-migration-and-compatibility-policy.md`, `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`, `043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md`
+Depends on: `archive/021-public-package-api-stability-and-parity-debt-baseline.md`, `022-packaging-versioning-and-release-channel-rules.md`, `archive/024-token-evolution-migration-and-compatibility-policy.md`, `archive/039-extension-sdk-composition-guidance-and-starter-package-baseline.md`, `archive/043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md`
 
 ## Purpose
 

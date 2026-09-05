@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `021-public-package-api-stability-and-parity-debt-baseline.md`, `026-appearance-recipes-and-downstream-override-strategy.md`, `038-performance-render-cost-and-memory-hardening-baseline.md`
+Depends on: `../008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `021-public-package-api-stability-and-parity-debt-baseline.md`, `../026-appearance-recipes-and-downstream-override-strategy.md`, `038-performance-render-cost-and-memory-hardening-baseline.md`
 
 ## Purpose
 

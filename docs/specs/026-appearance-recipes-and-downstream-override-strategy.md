@@ -2,7 +2,7 @@
 
 Status: promoted — productized as `docs/architecture/007-appearance-recipe-contract.md` (g11.005); this spec remains the strategy rationale
 Updated: 2026-07-10
-Depends on: `023-svelte-visual-hierarchy-and-contrast-baseline.md`, `024-token-evolution-migration-and-compatibility-policy.md`, `025-parity-automation-and-harness-boundary.md`
+Depends on: `archive/023-svelte-visual-hierarchy-and-contrast-baseline.md`, `archive/024-token-evolution-migration-and-compatibility-policy.md`, `025-parity-automation-and-harness-boundary.md`
 
 ## Purpose
 

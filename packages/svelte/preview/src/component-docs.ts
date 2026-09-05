@@ -5130,18 +5130,15 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "history-center": {
     props: [
-      { name: "entries", type: "HistoryEntry[]", default: "[]", description: "Caller-owned page of history entries." },
-      { name: "totalEntries", type: "number", default: "0", description: "Total entry count shown in the header." },
-      { name: "hasMoreEntries", type: "boolean", default: "false", description: "Shows the entries load-more action." },
-      { name: "branches", type: "HistoryBranch[] | null", default: "null", description: "Fork branch rows; null hides all branch and checkpoint UI." },
-      { name: "totalBranches", type: "number", default: "0", description: "Total branch count shown in the header when branches are supplied." },
-      { name: "hasMoreBranches", type: "boolean", default: "false", description: "Shows the branches load-more action." },
+      { name: "pages", type: "HistoryPathPage[] | null", default: "null", description: "Root path pages in fetch order (newest page first). null disables the list: no rows render and every row event is inert." },
       { name: "canUndo", type: "boolean", default: "false", description: "Enables the undo trigger." },
       { name: "canRedo", type: "boolean", default: "false", description: "Enables the redo trigger." },
       { name: "busy", type: "boolean", default: "false", description: "Disables undo and redo while an authority operation runs." },
-      { name: "status", type: '"idle" | "loading" | "failed"', default: '"idle"', description: "Source status; loading shows a spinner row, failed shows statusMessage." },
+      { name: "status", type: "HistoryStatus", default: '"idle"', description: "Source status; loading shows a spinner row, failed shows statusMessage." },
       { name: "statusMessage", type: "string | null", default: "null", description: "Copy for the failed status row." },
-      { name: "rejection", type: "string | null", default: "null", description: "Transient inline notice; never silent, never sticky." },
+      { name: "rejection", type: "HistoryCenterRejectionCode | null", default: "null", description: "A rejection code the host's bridge mapped from the protocol; the component owns the display copy. null clears the notice." },
+      { name: "continuationsResult", type: "{ entryId: string; continuations: HistoryContinuation[] } | null", default: "null", description: "Host op 1 result: the continuations at an anchor, fed back after onLoadContinuations." },
+      { name: "runResult", type: "{ fromEntryId: string; pages: HistoryPathPage[] } | null", default: "null", description: "Host op 2 result: a continuation run's pages, fed back after onLoadContinuationRun." },
       { name: "maxBranchNameBytes", type: "number", default: "256", description: "Client-side affordance only; caps inline rename input length." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state; bindable." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial uncontrolled open state." },
@@ -5158,36 +5155,39 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onUndo", type: "(() => void) | null", default: "null", description: "Undo command; the host owns what undo does." },
       { name: "onRedo", type: "(() => void) | null", default: "null", description: "Redo command; the host owns what redo does." },
       { name: "onOpenChange", type: "((open: boolean) => void) | null", default: "null", description: "Open-state request callback." },
-      { name: "onSelectEntry", type: "((id: string) => void) | null", default: "null", description: "Entry row activation." },
-      { name: "onCheckout", type: "((branchId: string, entryId: string) => void) | null", default: "null", description: "Branch row activation; carries the fork context." },
+      { name: "onNavigateEntry", type: "((branchId: string | null, entryId: string) => void) | null", default: "null", description: "Entry activation; always the entry actually clicked, on the branch that owns its run (null on the spine — the host's own branch)." },
       { name: "onRenameBranch", type: "((branchId: string, name: string) => void) | null", default: "null", description: "Committed inline branch rename." },
-      { name: "onLoadMoreEntries", type: "((offset: number) => void) | null", default: "null", description: "Requests the next entries page; offset is the supplied count." },
-      { name: "onLoadMoreBranches", type: "((offset: number) => void) | null", default: "null", description: "Requests the next branches page; offset is the supplied count." },
+      { name: "onLoadContinuations", type: "((entryId: string) => void) | null", default: "null", description: "Host op 1: load the continuations at the anchor entry." },
+      { name: "onLoadContinuationRun", type: "((fromEntryId: string) => void) | null", default: "null", description: "Host op 2: load the run starting at the fork's first entry." },
+      { name: "onCheckoutContinuation", type: "((entryId: string) => void) | null", default: "null", description: "Host op 3: checkout the picked continuation — the selected fork becomes the primary history." },
+      { name: "onDeleteContinuation", type: "((entryId: string) => void) | null", default: "null", description: "Host op 4 (opt-in): delete the selected fork. The delete IconButton renders only when this callback is supplied." },
     ],
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { HistoryCenter, type HistoryBranch, type HistoryEntry } from "@inflatable-cookie/poodle-svelte";
+  import { HistoryCenter } from "@inflatable-cookie/poodle-svelte";
+  import type { HistoryPathPage } from "@inflatable-cookie/poodle-core";
 
-  let entries: HistoryEntry[] = [
-    { id: "mix-1", label: "Committed mix 1", position: "past" },
-    { id: "fork", label: "Fork point", position: "past", branchCount: 2 },
-    { id: "draft", label: "Current draft", position: "current" },
-  ];
-
-  let branches: HistoryBranch[] = [
-    { id: "b-lead", name: "feature/lead", entryCount: 3, current: true },
+  let pages: HistoryPathPage[] = [
+    {
+      entries: [
+        { id: "mix-1", label: "Committed mix 1", position: "past", continuationCount: 0 },
+        { id: "fork", label: "Fork point", position: "past", continuationCount: 1 },
+        { id: "draft", label: "Current draft", position: "current", continuationCount: 0 },
+      ],
+      offset: 0,
+      precedingContinuationCount: 1,
+      truncatedBefore: false,
+      truncatedAfter: false,
+    },
   ];
 </script>
 
 <HistoryCenter
-  {entries}
-  {branches}
+  {pages}
   canUndo
-  onSelectEntry={(id) => console.log("select", id)}
-  onCheckout={(branchId, entryId) => console.log("checkout", branchId, entryId)}
-  onRenameBranch={(branchId, name) => branches = branches.map((branch) => branch.id === branchId ? { ...branch, name } : branch)}
-  onLoadMoreEntries={(offset) => console.log("load more", offset)}
+  canRedo
+  onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
 />`,
   },
 

@@ -7,7 +7,7 @@ Depends on: current MarkdownEditor contract and active-cohort implementations;
 independent of `g16.034`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/markdown-editor.md`,
-`../../parity/markdown-editor.md`
+`../../archive/parity/markdown-editor.md` (historical audit)
 Reported failure: a long rendered preview contributes its full intrinsic height,
 so the MarkdownEditor expands its surrounding editor layout instead of keeping
 the preview inside a scroll viewport
@@ -126,9 +126,10 @@ before wheel/hit-test. Restored and reran the mounted regression green.
   `packages/render/src/markdown_editor.rs`, and a focused headless GPUI
   regression only if the existing node layout vocabulary can express the same
   bounded scroll ownership;
-- `docs/contracts/components/markdown-editor.md`,
-  `docs/parity/markdown-editor.md`, this card, one September execution log, and
-  `PAPERCUTS.md` only for new execution friction.
+- `docs/contracts/components/markdown-editor.md`, this card, one September
+  execution log, and `PAPERCUTS.md` only for new execution friction. The
+  historical parity audit (`docs/archive/parity/markdown-editor.md`) is
+  archived evidence, not an edit target.
 
 The orchestrator owns `docs/roadmaps/g16/README.md` and
 `docs/roadmaps/generation-index.md` integration after merge. Do not edit motion

@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `002-component-contract-template-and-parity-rules.md`, `003-accessibility-and-assistive-technology-baseline.md`, `004-overlay-focus-dismissal-and-layering-rules.md`, `005-product-composite-composition-and-information-architecture-rules.md`, `006-workstation-shell-and-panel-system-rules.md`, `007-underlay-bridge-and-wrapper-preservation-rules.md`
+Depends on: `archive/002-component-contract-template-and-parity-rules.md`, `archive/003-accessibility-and-assistive-technology-baseline.md`, `archive/004-overlay-focus-dismissal-and-layering-rules.md`, `archive/005-product-composite-composition-and-information-architecture-rules.md`, `archive/006-workstation-shell-and-panel-system-rules.md`, `archive/007-underlay-bridge-and-wrapper-preservation-rules.md`
 
 ## Purpose
 
@@ -199,8 +199,8 @@ Before a component claims parity maturity, confirm:
 
 The first surfaces proving this rule set are:
 
-- `docs/specs/002-component-contract-template-and-parity-rules.md`
-- `docs/specs/007-underlay-bridge-and-wrapper-preservation-rules.md`
+- `docs/specs/archive/002-component-contract-template-and-parity-rules.md`
+- `docs/specs/archive/007-underlay-bridge-and-wrapper-preservation-rules.md`
 - `docs/contracts/components/README.md`
 - `docs/contracts/components/README.md`
 - `docs/contracts/workstation/README.md`

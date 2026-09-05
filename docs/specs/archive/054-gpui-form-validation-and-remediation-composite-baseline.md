@@ -33,7 +33,7 @@ The crate must stay aligned to the existing shared contracts and rules for:
 - `callout`
 - `banner`
 - `009-form-shell-validation-and-action-row-rules.md`
-- `015-loading-empty-error-notification-and-remediation-rules.md`
+- `../015-loading-empty-error-notification-and-remediation-rules.md`
 
 ## Form Shell Rule
 

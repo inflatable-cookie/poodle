@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-09-02
-Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`
+Depends on: `archive/021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
 

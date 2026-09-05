@@ -74,10 +74,15 @@ The remaining sections preserve decision and delivery context:
 - `roadmaps/` — milestone sequencing and active work
 - `logs/` — completed work and validation evidence
 - `research/` — external comparisons and early investigation
-- `handoffs/` — point-in-time continuation briefs
+- `handoffs/` — point-in-time continuation briefs. Retention rule: a handoff
+  is archived when its lane closes. Closed-lane briefs move to
+  `handoffs/archive/YYYY-MM/` (by the month in the filename) and stay there;
+  briefs of open lanes remain at the top level until their lane closes.
 - `triage/` — open observations and operator decisions awaiting promotion;
   promoted, superseded, or executed notes are removed
-- `parity/` — historical pre-consolidation parity audits; current parity is
+- `parity/` — pointer to the historical pre-consolidation parity audits;
+  the audits themselves live under `archive/parity/`
+- `archive/` — retired directories kept for provenance; current parity is
   generated from contracts, runtime reports, tests, and previews
 
 These records are useful to contributors, but they are not part of the operator

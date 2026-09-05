@@ -446,7 +446,10 @@
 # The family-level Treatment layer is retired. Historical records and the
 # architecture tombstone are preserved; active code, contracts, guides,
 # previews, and current evidence must use component Recipes directly.
-"drift:recipes" = "bun scripts/check-recipe-only-surface.ts"
+"drift:recipes" = [
+  { run = "bun scripts/check-recipe-only-surface.ts" },
+  { run = "bun test scripts/check-recipe-only-surface.test.ts" },
+]
 # g16.028 drag-and-drop closeout. The programme's certification claim is a
 # negative one — no programme component owns an HTML drag lifecycle or a local
 # drag index any more — so it needs an executable proof. Planting one
@@ -598,6 +601,10 @@
 "docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
 "docs:dev" = [{ task = "svelte:run" }]
 "docs:build" = [{ task = "svelte:build" }]
+# Guide snippets must compile against the live poodle-svelte surface
+# (g16.108): every fenced ```svelte block in docs/guides/*.md is checked in
+# a throwaway project. Needs network/cache for its first bun install.
+"docs:snippet-check" = "bun packages/svelte/preview/scripts/docs-snippet-check.ts"
 "docs:check" = [
   { task = "gate:snapshot" },
   { task = "core:build" },
@@ -608,6 +615,7 @@
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
+  { task = "docs:snippet-check" },
   { task = "docs:react-prop-drift" },
   { task = "docs:value-domain-drift" },
   { task = "check:parity-evidence-ledger" },

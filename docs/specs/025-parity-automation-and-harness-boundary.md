@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `002-component-contract-template-and-parity-rules.md`, `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `024-token-evolution-migration-and-compatibility-policy.md`
+Depends on: `archive/002-component-contract-template-and-parity-rules.md`, `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `archive/024-token-evolution-migration-and-compatibility-policy.md`
 
 ## Purpose
 

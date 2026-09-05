@@ -342,10 +342,10 @@ The pattern works identically across all value-bearing components:
 **Presentation props:**
 ```svelte
 <Button variant="primary" />     <!-- "primary" | "secondary" | "ghost" -->
-<Button tone="danger" />         <!-- "default" | "danger" -->
+<Button tone="danger" />         <!-- "default" | "danger" | "success" | "warning" -->
 <Button size="sm" />             <!-- "xs" | "sm" | "md" | "lg" | "xl" -->
 <Button sizeRole="prominent" />  <!-- semantic size offset -->
-<Stack direction="horizontal" /> <!-- layout orientation -->
+<Stack direction="row" />        <!-- "row" | "column" -->
 ```
 
 **Accessibility props:**
@@ -726,13 +726,13 @@ Flex container with direction and gap control:
   import { Stack, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
-<Stack direction="vertical" gap="md">
+<Stack direction="column" gap="md">
   <Button>First</Button>
   <Button>Second</Button>
   <Button>Third</Button>
 </Stack>
 
-<Stack direction="horizontal" gap="sm" align="center">
+<Stack direction="row" gap="sm" align="center">
   <Icon icon={info} />
   <span>Aligned content</span>
 </Stack>
@@ -817,13 +817,29 @@ Slide-out panel from a screen edge:
 Positioned floating content anchored to a trigger:
 
 ```svelte
-<Popover placement="bottom-start">
-  {#snippet trigger()}
-    <Button>Options</Button>
+<script lang="ts">
+  import { Popover, Button, type PopoverTriggerState } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<Popover placement="bottom-start" triggerIsInteractive>
+  {#snippet trigger(state: PopoverTriggerState)}
+    <Button
+      ariaExpanded={state.expanded}
+      controls={state.controls}
+      disabled={state.disabled}
+    >
+      Options
+    </Button>
   {/snippet}
   <div>Popover content here</div>
 </Popover>
 ```
+
+A trigger that is itself interactive (like `Button`) must use
+`triggerIsInteractive` and apply the `PopoverTriggerState` payload
+(`expanded`, `controls`, `disabled`) to the real control. Plain,
+non-interactive trigger content can use the default zero-argument trigger
+snippet without `triggerIsInteractive`.
 
 `placement`: `"top"` | `"top-start"` | `"top-end"` | `"bottom"` | `"bottom-start"` | `"bottom-end"` | `"left"` | `"right"` | etc.
 
@@ -842,7 +858,7 @@ Positioned floating content anchored to a trigger:
 ### Table
 
 ```svelte
-<script>
+<script lang="ts">
   import { Table } from "@inflatable-cookie/poodle-svelte";
   import type { TableColumn, TableRow } from "@inflatable-cookie/poodle-svelte";
 
@@ -866,7 +882,7 @@ Positioned floating content anchored to a trigger:
 Full-featured data table with sorting, column visibility, bulk actions, and export:
 
 ```svelte
-<script>
+<script lang="ts">
   import { DataTable } from "@inflatable-cookie/poodle-svelte";
   import type { TableColumn, TableRow } from "@inflatable-cookie/poodle-svelte";
 </script>
@@ -884,7 +900,7 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 ### Tabs
 
 ```svelte
-<script>
+<script lang="ts">
   import { Tabs } from "@inflatable-cookie/poodle-svelte";
   import type { TabItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -900,12 +916,12 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 <Tabs
   items={tabs}
   value={activeTab}
-  variant="underline"
+  variant="card"
   onValueChange={(value) => activeTab = value}
 />
 ```
 
-Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
+Tab variants: `"card"` | `"pill"` | `"block"`
 
 ---
 
@@ -914,7 +930,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 ### Breadcrumbs
 
 ```svelte
-<script>
+<script lang="ts">
   import { Breadcrumbs } from "@inflatable-cookie/poodle-svelte";
   import type { BreadcrumbItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -946,7 +962,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 ### Menu
 
 ```svelte
-<script>
+<script lang="ts">
   import { Menu, Button } from "@inflatable-cookie/poodle-svelte";
   import type { MenuItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -985,9 +1001,9 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 ### StatusIndicator
 
 ```svelte
-<StatusIndicator tone="success" label="Online" />
-<StatusIndicator tone="danger" label="Offline" />
-<StatusIndicator tone="pending" label="Syncing" />
+<StatusIndicator status="success" label="Online" />
+<StatusIndicator status="danger" label="Offline" />
+<StatusIndicator status="pending" label="Syncing" />
 ```
 
 ### Progress
@@ -999,7 +1015,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 ### ToastStack (composite)
 
 ```svelte
-<script>
+<script lang="ts">
   import { ToastStack } from "@inflatable-cookie/poodle-svelte";
   import type { ToastItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -1048,11 +1064,12 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <RadioGroup
-  id="plan"
+  name="plan"
+  ariaLabel="Plan"
   options={[
     { value: "free", label: "Free" },
     { value: "pro", label: "Pro" },
-    { value: "enterprise", label: "Enterprise", isDisabled: true },
+    { value: "enterprise", label: "Enterprise", disabled: true },
   ]}
   value={plan}
   onValueChange={(value) => plan = value}
@@ -1063,7 +1080,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <SegmentedControl
-  id="view"
+  ariaLabel="View"
   options={[
     { value: "grid", label: "Grid" },
     { value: "list", label: "List" },
@@ -1158,7 +1175,7 @@ Grouped options:
 ### CommandPalette
 
 ```svelte
-<script>
+<script lang="ts">
   import { CommandPalette } from "@inflatable-cookie/poodle-svelte";
   import type { CommandActionItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -1223,7 +1240,7 @@ type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 type ControlDensity = "compact" | "default" | "comfortable";
 type SemanticControlSizeRole = "chrome" | "control" | "prominent";
 type ButtonVariant = "primary" | "secondary" | "ghost";
-type ButtonTone = "default" | "danger";
+type ButtonTone = "default" | "danger" | "success" | "warning";
 type ValidationState = "none" | "invalid" | "valid" | "pending";
 type StatusTone = "neutral" | "info" | "success" | "warning" | "danger" | "pending";
 type IconProp = IconNodes | string;      // direct data or string name

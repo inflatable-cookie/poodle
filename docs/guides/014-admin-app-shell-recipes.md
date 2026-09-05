@@ -29,11 +29,22 @@ account layout, and public project-detail layout.
 
 ```svelte
 <script lang="ts">
-  import { ToastHost } from "@inflatable-cookie/poodle-svelte";
-  import { Button, Card, Drawer, ScrollShell, Separator } from "@inflatable-cookie/poodle-svelte";
+  import { writable } from "svelte/store";
+  import {
+    Button, Card, Drawer, ScrollShell, Separator, ToastHost,
+  } from "@inflatable-cookie/poodle-svelte";
+  import type { ToastHostStore, ToastHostStoreItem } from "@inflatable-cookie/poodle-svelte";
 
   let mobileNavOpen = false;
   let contextPanelOpen = false;
+
+  // ToastHost needs the host-owned store; the authority lives in host code.
+  const toastItems = writable<ToastHostStoreItem[]>([]);
+  const toastStore = {
+    toasts: toastItems,
+    dismiss: (id: string) =>
+      toastItems.update((items) => items.filter((item) => item.id !== id)),
+  } satisfies ToastHostStore;
 </script>
 
 <div class="admin-shell">
@@ -63,7 +74,7 @@ account layout, and public project-detail layout.
 
   <aside class="admin-shell__sidebar">
     <ScrollShell>
-      <Card padding="sm">
+      <Card density="compact">
         <!-- host-owned brand -->
       </Card>
 
@@ -82,7 +93,7 @@ account layout, and public project-detail layout.
 
   {#if contextPanelOpen}
     <aside class="admin-shell__context-panel">
-      <Card padding="md">
+      <Card density="compact">
         <!-- host-owned context tools -->
       </Card>
     </aside>
@@ -92,7 +103,7 @@ account layout, and public project-detail layout.
     <!-- host-owned mobile nav tree -->
   </Drawer>
 
-  <ToastHost />
+  <ToastHost store={toastStore} />
 </div>
 ```
 

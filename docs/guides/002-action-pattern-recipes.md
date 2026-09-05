@@ -67,8 +67,9 @@ Those wrappers mostly encode app vocabulary, not reusable UI semantics.
 ```svelte
 <script lang="ts">
   import { Menu, Button } from "@inflatable-cookie/poodle-svelte";
+  import type { MenuItem } from "@inflatable-cookie/poodle-svelte";
 
-  const items = [
+  const items: MenuItem[] = [
     { value: "duplicate", label: "Duplicate" },
     { value: "archive", label: "Archive" },
     { value: "delete", label: "Delete", tone: "danger" }

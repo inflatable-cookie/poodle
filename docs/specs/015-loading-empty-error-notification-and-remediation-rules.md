@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `003-accessibility-and-assistive-technology-baseline.md`, `011-browse-shell-filter-search-and-loading-rules.md`, `014-media-preview-embed-and-asset-surface-rules.md`
+Depends on: `archive/003-accessibility-and-assistive-technology-baseline.md`, `archive/011-browse-shell-filter-search-and-loading-rules.md`, `archive/014-media-preview-embed-and-asset-surface-rules.md`
 
 ## Purpose
 

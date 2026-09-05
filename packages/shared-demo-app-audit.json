@@ -85,7 +85,7 @@
       "summary": "The current review surface is organized as section demos rather than a coherent app with screens, flows, and stable region ownership.",
       "evidence": [
         "packages/svelte/preview/src/App.svelte",
-        "docs/specs/049-gpui-theme-runtime-and-native-preview-app-baseline.md"
+        "docs/specs/archive/049-gpui-theme-runtime-and-native-preview-app-baseline.md"
       ],
       "impact": "The current surface demonstrates parts, but not one believable app that both Svelte and GPUI can implement as the same UI."
     },

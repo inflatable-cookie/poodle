@@ -12774,40 +12774,10 @@
   "history-center": {
     "props": [
       {
-        "name": "entries",
-        "type": "HistoryEntry[]",
-        "default": "[]",
-        "description": "Caller-owned page of history entries."
-      },
-      {
-        "name": "totalEntries",
-        "type": "number",
-        "default": "0",
-        "description": "Total entry count shown in the header."
-      },
-      {
-        "name": "hasMoreEntries",
-        "type": "boolean",
-        "default": "false",
-        "description": "Shows the entries load-more action."
-      },
-      {
-        "name": "branches",
-        "type": "HistoryBranch[] | null",
+        "name": "pages",
+        "type": "HistoryPathPage[] | null",
         "default": "null",
-        "description": "Fork branch rows; null hides all branch and checkpoint UI."
-      },
-      {
-        "name": "totalBranches",
-        "type": "number",
-        "default": "0",
-        "description": "Total branch count shown in the header when branches are supplied."
-      },
-      {
-        "name": "hasMoreBranches",
-        "type": "boolean",
-        "default": "false",
-        "description": "Shows the branches load-more action."
+        "description": "Root path pages in fetch order (newest page first). null disables the list: no rows render and every row event is inert."
       },
       {
         "name": "canUndo",
@@ -12829,7 +12799,7 @@
       },
       {
         "name": "status",
-        "type": "\"idle\" | \"loading\" | \"failed\"",
+        "type": "HistoryStatus",
         "default": "\"idle\"",
         "description": "Source status; loading shows a spinner row, failed shows statusMessage."
       },
@@ -12841,9 +12811,21 @@
       },
       {
         "name": "rejection",
-        "type": "string | null",
+        "type": "HistoryCenterRejectionCode | null",
         "default": "null",
-        "description": "Transient inline notice; never silent, never sticky."
+        "description": "A rejection code the host's bridge mapped from the protocol; the component owns the display copy. null clears the notice."
+      },
+      {
+        "name": "continuationsResult",
+        "type": "{ entryId: string; continuations: HistoryContinuation[] } | null",
+        "default": "null",
+        "description": "Host op 1 result: the continuations at an anchor, fed back after onLoadContinuations."
+      },
+      {
+        "name": "runResult",
+        "type": "{ fromEntryId: string; pages: HistoryPathPage[] } | null",
+        "default": "null",
+        "description": "Host op 2 result: a continuation run's pages, fed back after onLoadContinuationRun."
       },
       {
         "name": "maxBranchNameBytes",
@@ -12942,16 +12924,10 @@
         "description": "Open-state request callback."
       },
       {
-        "name": "onSelectEntry",
-        "type": "((id: string) => void) | null",
+        "name": "onNavigateEntry",
+        "type": "((branchId: string | null, entryId: string) => void) | null",
         "default": "null",
-        "description": "Entry row activation."
-      },
-      {
-        "name": "onCheckout",
-        "type": "((branchId: string, entryId: string) => void) | null",
-        "default": "null",
-        "description": "Branch row activation; carries the fork context."
+        "description": "Entry activation; always the entry actually clicked, on the branch that owns its run (null on the spine — the host's own branch)."
       },
       {
         "name": "onRenameBranch",
@@ -12960,21 +12936,33 @@
         "description": "Committed inline branch rename."
       },
       {
-        "name": "onLoadMoreEntries",
-        "type": "((offset: number) => void) | null",
+        "name": "onLoadContinuations",
+        "type": "((entryId: string) => void) | null",
         "default": "null",
-        "description": "Requests the next entries page; offset is the supplied count."
+        "description": "Host op 1: load the continuations at the anchor entry."
       },
       {
-        "name": "onLoadMoreBranches",
-        "type": "((offset: number) => void) | null",
+        "name": "onLoadContinuationRun",
+        "type": "((fromEntryId: string) => void) | null",
         "default": "null",
-        "description": "Requests the next branches page; offset is the supplied count."
+        "description": "Host op 2: load the run starting at the fork's first entry."
+      },
+      {
+        "name": "onCheckoutContinuation",
+        "type": "((entryId: string) => void) | null",
+        "default": "null",
+        "description": "Host op 3: checkout the picked continuation — the selected fork becomes the primary history."
+      },
+      {
+        "name": "onDeleteContinuation",
+        "type": "((entryId: string) => void) | null",
+        "default": "null",
+        "description": "Host op 4 (opt-in): delete the selected fork. The delete IconButton renders only when this callback is supplied."
       }
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { HistoryCenter, type HistoryBranch, type HistoryEntry } from \"@inflatable-cookie/poodle-svelte\";\n\n  let entries: HistoryEntry[] = [\n    { id: \"mix-1\", label: \"Committed mix 1\", position: \"past\" },\n    { id: \"fork\", label: \"Fork point\", position: \"past\", branchCount: 2 },\n    { id: \"draft\", label: \"Current draft\", position: \"current\" },\n  ];\n\n  let branches: HistoryBranch[] = [\n    { id: \"b-lead\", name: \"feature/lead\", entryCount: 3, current: true },\n  ];\n</script>\n\n<HistoryCenter\n  {entries}\n  {branches}\n  canUndo\n  onSelectEntry={(id) => console.log(\"select\", id)}\n  onCheckout={(branchId, entryId) => console.log(\"checkout\", branchId, entryId)}\n  onRenameBranch={(branchId, name) => branches = branches.map((branch) => branch.id === branchId ? { ...branch, name } : branch)}\n  onLoadMoreEntries={(offset) => console.log(\"load more\", offset)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { HistoryCenter } from \"@inflatable-cookie/poodle-svelte\";\n  import type { HistoryPathPage } from \"@inflatable-cookie/poodle-core\";\n\n  let pages: HistoryPathPage[] = [\n    {\n      entries: [\n        { id: \"mix-1\", label: \"Committed mix 1\", position: \"past\", continuationCount: 0 },\n        { id: \"fork\", label: \"Fork point\", position: \"past\", continuationCount: 1 },\n        { id: \"draft\", label: \"Current draft\", position: \"current\", continuationCount: 0 },\n      ],\n      offset: 0,\n      precedingContinuationCount: 1,\n      truncatedBefore: false,\n      truncatedAfter: false,\n    },\n  ];\n</script>\n\n<HistoryCenter\n  {pages}\n  canUndo\n  canRedo\n  onNavigateEntry={(branchId, entryId) => console.log(\"navigate\", branchId, entryId)}\n/>"
   },
   "update-status": {
     "props": [

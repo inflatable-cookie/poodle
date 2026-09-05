@@ -1,7 +1,7 @@
 # 001 Token Source And Artifact Contract
 
-Status: draft
-Updated: 2026-03-11
+Status: active
+Updated: 2026-09-05
 Depends on: `../architecture/002-token-system-and-package-layout.md`
 
 ## Purpose
