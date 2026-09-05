@@ -1,0 +1,20 @@
+[
+  {
+    "index": 3,
+    "field": "role",
+    "gpui": "alert",
+    "svelte": "listitem"
+  },
+  {
+    "index": 4,
+    "field": "name",
+    "gpui": null,
+    "svelte": "Dismiss Publishing failed"
+  },
+  {
+    "index": 5,
+    "field": "name",
+    "gpui": "Dismiss Publishing failed",
+    "svelte": "Retry"
+  }
+]

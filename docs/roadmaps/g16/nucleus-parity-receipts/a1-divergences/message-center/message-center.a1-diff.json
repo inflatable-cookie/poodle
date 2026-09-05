@@ -1,0 +1,74 @@
+[
+  {
+    "index": 0,
+    "field": "relationships",
+    "gpui": {
+      "controls": [
+        -1
+      ],
+      "labelled_by": [],
+      "described_by": []
+    },
+    "svelte": {
+      "controls": [
+        1
+      ],
+      "labelled_by": [],
+      "described_by": []
+    }
+  },
+  {
+    "index": 1,
+    "field": "focused",
+    "gpui": false,
+    "svelte": true
+  },
+  {
+    "index": 3,
+    "field": "role",
+    "gpui": "list",
+    "svelte": "banner"
+  },
+  {
+    "index": 4,
+    "field": "name",
+    "gpui": null,
+    "svelte": "Notifications"
+  },
+  {
+    "index": 4,
+    "field": "role",
+    "gpui": "listitem",
+    "svelte": "heading"
+  },
+  {
+    "index": 5,
+    "field": "role",
+    "gpui": "listitem",
+    "svelte": "list"
+  },
+  {
+    "index": 6,
+    "field": "role",
+    "gpui": null,
+    "svelte": "listitem"
+  },
+  {
+    "index": 7,
+    "field": "role",
+    "gpui": null,
+    "svelte": "button"
+  },
+  {
+    "index": 8,
+    "field": "role",
+    "gpui": null,
+    "svelte": "listitem"
+  },
+  {
+    "index": 9,
+    "field": "role",
+    "gpui": null,
+    "svelte": "button"
+  }
+]
