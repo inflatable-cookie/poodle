@@ -1,0 +1,18 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Popover",
+  "scenario_id": "nucleus.navigation.popover",
+  "props": {
+    "defaultOpen": true,
+    "ariaLabel": "Quick settings",
+    "initialFocus": "content",
+    "surfaceWidth": "content"
+  },
+  "fixtures": {
+    "trigger_text": "Settings",
+    "panel_text": "Quick settings panel"
+  },
+  "actions": [],
+  "declared_states": ["expanded", "disabled"],
+  "web_only_exclusions": []
+}

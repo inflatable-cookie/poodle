@@ -1,0 +1,14 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "EditableLabel",
+  "scenario_id": "nucleus.navigation.editable-label",
+  "props": {
+    "value": "Project title",
+    "ariaLabel": "Project title",
+    "activationMode": "enterOrSpace",
+    "showEditIcon": true
+  },
+  "actions": [],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}

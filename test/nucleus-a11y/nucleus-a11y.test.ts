@@ -39,19 +39,28 @@ const write = process.env.POODLE_NUCLEUS_A11Y_WRITE === "1";
 /// which renders the same text as a node.
 function fixtureProps(scenario: A1Scenario): Record<string, unknown> {
   const panelText = scenario.fixtures?.panel_text;
-  if (typeof panelText !== "string") return {};
-  return {
-    children: createRawSnippet((value: () => string) => ({
-      render: () => `<p>${panelText.replace("{value}", value())}</p>`,
-    })),
-  };
+  const triggerText = scenario.fixtures?.trigger_text;
+  const props: Record<string, unknown> = {};
+  if (typeof panelText === "string") {
+    props.children = panelText.includes("{value}")
+      ? createRawSnippet((value: () => string) => ({
+          render: () => `<p>${panelText.replace("{value}", value())}</p>`,
+        }))
+      : createRawSnippet(() => ({ render: () => `<p>${panelText}</p>` }));
+  }
+  if (typeof triggerText === "string") {
+    props.trigger = createRawSnippet(() => ({
+      render: () => `<button type="button">${triggerText}</button>`,
+    }));
+  }
+  return props;
 }
 
 describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
   const rows = listScenarioRows(root);
 
-  it("has the three foundation scenarios", () => {
-    expect(rows).toEqual(["select", "switch", "tabs"]);
+  it("has the foundation and NP-2 scenarios", () => {
+    expect(rows).toEqual(["dialog", "editable-label", "menu", "popover", "segmented-control", "select", "switch", "tabs"]);
   });
 
   for (const row of rows) {
