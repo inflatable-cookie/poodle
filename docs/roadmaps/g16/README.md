@@ -151,7 +151,7 @@ stay maintained; backend admission is not part of the first card.
 108. [108 — Docs spine compaction](108-docs-spine-compaction.md) — ready; archive closed handoffs and historical parity, purge unreferenced specs, fix guide snippets, add a guide-snippet compile check
 109. [109 — v0.3.0 consumer adoption wave](109-v030-consumer-adoption-wave.md) — ready; 15 sibling lanes in two tiers move every consumer to exact `0.3.0`, absorb the three documented breaks, and close ten open consumer papercuts
 110. [110 — gpui-unofficial feasibility spike](110-gpui-unofficial-feasibility-spike.md) — ready; throwaway-branch port of the native pair to the upstream republish at its first Apache-clean version, with an AccessKit reachability proof; report decides the migration
-111. [111 — Nucleus A1 accessibility receipt foundation](111-nucleus-a1-accessibility-receipt-foundation.md) — ready; paired GPUI node-tree and Svelte DOM accessibility snapshots under one shared scenario, proven on Switch, Tabs, Select
+111. [111 — Nucleus A1 accessibility receipt foundation](111-nucleus-a1-accessibility-receipt-foundation.md) — complete; merged in PR #215 with paired GPUI node-tree and Svelte DOM accessibility snapshots, two validated A1 receipts (Switch, Tabs), and an honestly recorded Select divergence
 112. [112 — Nucleus A1 tranche NP-1 shell](112-nucleus-a1-np1-shell.md) — held behind `111`
 113. [113 — Nucleus A1 tranche NP-2 navigation and overlays](113-nucleus-a1-np2-navigation-overlays.md) — held behind `111`
 114. [114 — Nucleus A1 tranche NP-3 agent workflow](114-nucleus-a1-np3-agent-workflow.md) — held behind `111`

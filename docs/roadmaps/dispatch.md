@@ -131,11 +131,12 @@ card or triage note says.
 - Readiness: ready. Operator-designated critical work: the frontier pool
   (Claude Fable 5.1, medium thinking) is authorized for this lane.
 - Prerequisites: merged `g16.062`, M1 complete (both satisfied).
-  Completion: PR merged after accepted exact-head review with three
-  validated A1 receipts and the ledger consuming them.
+  Completion: PR merged after accepted exact-head review with two validated
+  A1 receipts (Switch, Tabs), one recorded Select divergence, and the ledger
+  consuming them.
 - Owned mutable paths: per card (`test/nucleus-a11y/**`, driver extractor,
-  receipt script and schema, three receipts, ledger generator A1 path, log,
-  `PAPERCUTS.md` append)
+  receipt script and schema, two A1 receipts plus divergence artifacts, ledger
+  generator A1 path, log, `PAPERCUTS.md` append)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
 - Approved concurrent siblings: `g16.106`–`110`, `109` lanes. Serial edges:

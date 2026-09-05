@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-04
+Updated: 2026-09-05
 
 ## Active Track
 
@@ -82,6 +82,10 @@ Updated: 2026-09-04
   - Completed: `g16.093` MessageCenter merged in PR #198 at
     `06de812f7037eeca204d89c72fb4c586723600eb`; the Nucleus mounted cohort is
     complete at 29/29. This closes M1 only, not A1/V1/V2/M2 or adoption.
+  - Completed: `g16.111` Nucleus A1 accessibility receipt foundation merged in
+    PR #215 at `3dea40372063a05b46a550f8f69648564506a949`; Switch and Tabs
+    provide validated mounted A1 receipts, while Select's five-attribute
+    divergence is recorded for NP-2 rather than repaired in this lane.
   - Ready frontier (`../roadmaps/dispatch.md`): `g16.103` is the urgent,
     operator-authorized release tarball verifier repair. It aligns stale
     `package/src/**` workflow assertions with the canonical compiled
