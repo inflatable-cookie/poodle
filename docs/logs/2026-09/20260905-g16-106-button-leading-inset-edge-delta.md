@@ -63,7 +63,7 @@ vocabulary does not drop the fraction because there is no fraction to drop.
 
 - `cargo test -p poodle-render --manifest-path packages/render/Cargo.toml leading_inset_fixtures_emit_the_css_padding -- --nocapture` — pass; printed inventory above
 - `cargo test -p poodle-render --manifest-path packages/render/Cargo.toml` — 641 passed
-- `effigy test:visual-comparator` / `bun test test/visual/button-comparison/compare.test.ts` — 38 pass
+- `effigy test:visual-comparator` / `bun test test/visual/button-comparison/compare.test.ts` — 40 pass
 - `effigy regressions:native` — 203 passed
 - Nucleus cohort mechanical repin at `93c4ef19175e5d03cf840a1ef0542e9b93e81fa5`
   after the review-fix commit (prior pin was `8623e926d`): 29 receipts and
