@@ -1,8 +1,8 @@
 # g16.114 — Nucleus A1 NP-3 Agent Workflow
 
 Status: revision 18 disposition recorded; awaiting fresh exact-head review
-Base: `ef9049f15` (`origin/main`, manifest revision 17; rebased for the current merge gate)
-Rebased manifest source commit: `71b25b96272b3b2cc3e986c06fe840103e258e99`; lock digest unchanged at `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
+Base: `469898d6838bdc56a266822606b8afc52ee8481b` (`origin/main`, manifest revision 17; rebased for the current merge gate)
+Rebased manifest source commit: `d4e86802b83261d871ca9f78ff743c526141eb31`; lock digest unchanged at `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
 
 ## Scope
 
