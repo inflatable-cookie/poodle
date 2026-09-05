@@ -2,7 +2,7 @@
 
 Status: revision 18 disposition recorded; awaiting fresh exact-head review
 Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be` (`origin/main`, manifest revision 17)
-Rebased manifest source commit: `56f9bc75d6d2686943a93ff916a9016546c1f2df`; lock digest unchanged at `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
+Rebased manifest source commit: `56f9bc75d7fe9de29ab139376c4a73c0cecd22ab`; lock digest unchanged at `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
 
 ## Scope
 
