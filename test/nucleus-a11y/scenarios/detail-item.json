@@ -1,0 +1,18 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "DetailItem",
+  "scenario_id": "nucleus.settings.detail-item",
+  "props": {
+    "label": "Workspace",
+    "value": "Poodle",
+    "description": "Current workspace identity"
+  },
+  "fixtures": {
+    "detail_action_label": "Refresh"
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "button", "name": "More information" } }
+  ],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}

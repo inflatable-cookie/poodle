@@ -1,0 +1,52 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "Callout",
+  "scenario_id": "nucleus.settings.callout",
+  "scenario_path": "test/nucleus-a11y/scenarios/callout.json",
+  "scenario_sha256": "240be260092141ad7dbaff39f8b90a3d3b05c0e8ec6bc4ebef4284e03c0eb6ed",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "status",
+      "name": null,
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Dismiss notice",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    }
+  ]
+}

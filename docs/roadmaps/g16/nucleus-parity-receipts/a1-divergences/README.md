@@ -33,8 +33,9 @@ Reproduce: `POODLE_NUCLEUS_RECEIPT_DIR=$PWD/target/nucleus-receipts cargo test -
 
 ## g16.114 NP-3 rows
 
-Each row directory contains `diff.json`, both runtime snapshots (`gpui.json`
-and `svelte.json`), and `attributes.json` with the exact changed attributes.
+Each row directory contains a diff, both runtime snapshots, and exact changed
+attributes. NP-4 settings rows use the same evidence contract with named
+`<row>.a1-diff.json`, `<row>.gpui.json`, `svelte.json`, and `attributes.json`.
 
 - `agent-chat-input/` — the rendered action has no backend identity, so the
   scenario action cannot be resolved. No renderer projection fix was applied.

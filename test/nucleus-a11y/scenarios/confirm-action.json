@@ -1,0 +1,18 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "ConfirmAction",
+  "scenario_id": "nucleus.settings.confirm-action",
+  "props": {
+    "title": "Delete workspace?",
+    "description": "This action cannot be undone.",
+    "triggerLabel": "Delete",
+    "confirmLabel": "Delete workspace",
+    "cancelLabel": "Keep workspace",
+    "tone": "danger"
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "button", "name": "Delete" } }
+  ],
+  "declared_states": ["disabled", "busy"],
+  "web_only_exclusions": []
+}

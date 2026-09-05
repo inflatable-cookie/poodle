@@ -1,0 +1,36 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "TextInput",
+  "scenario_id": "nucleus.settings.text-input",
+  "scenario_path": "test/nucleus-a11y/scenarios/text-input.json",
+  "scenario_sha256": "b7444c0157b9d4483e4aa2aff3f834067bdbf21d8e419049cea23af67662c202",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "textbox",
+      "name": "Workspace",
+      "value": null,
+      "value_text": "alpha",
+      "states": {
+        "disabled": false,
+        "invalid": null,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Callout",
+  "scenario_id": "nucleus.settings.callout",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "ecfdc3a662c3e937782c07f35b042e7c3bb0e294",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount the production Callout through HeadlessDriver",
+    "replay shared actions through GPUI dispatch",
+    "read accessibility and focus after dispatch"
+  ],
+  "assertions": [
+    "Callout projection equals the Svelte snapshot",
+    "focus traversal matches the declared order"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/callout.gpui.json",
+      "sha256": "bfb67040c6da1e87cf7658a498919cf08febf69f06673ecd9207ca9ab854eec6"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/callout.svelte.json",
+      "sha256": "3203ab837ea3ad48c4750b1a7ef1277241b387d07a942ce3f224d302436195ea"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/callout.json",
+    "scenario_sha256": "240be260092141ad7dbaff39f8b90a3d3b05c0e8ec6bc4ebef4284e03c0eb6ed",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/callout.gpui.json",
+    "gpui_snapshot_sha256": "bfb67040c6da1e87cf7658a498919cf08febf69f06673ecd9207ca9ab854eec6",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/callout.svelte.json",
+    "svelte_snapshot_sha256": "3203ab837ea3ad48c4750b1a7ef1277241b387d07a942ce3f224d302436195ea",
+    "web_only_exclusions": [],
+    "diff": []
+  }
+}

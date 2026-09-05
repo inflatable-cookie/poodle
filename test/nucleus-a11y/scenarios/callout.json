@@ -1,0 +1,18 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Callout",
+  "scenario_id": "nucleus.settings.callout",
+  "props": {
+    "tone": "warning",
+    "title": "Review settings",
+    "message": "Your workspace needs attention.",
+    "announceMode": "polite",
+    "dismissible": true,
+    "dismissLabel": "Dismiss notice"
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "button", "name": "Dismiss notice" } }
+  ],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}
