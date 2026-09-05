@@ -8,8 +8,8 @@ Governing refs: `tasks/effigy.tasks.toml`, `quality/effigy.scan.toml`,
 `scripts/gate-tree-guard.ts`, `test/package-install/web-preview.ts`
 Branch: `worker/g16.107-validation-hygiene-bundle`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-107-validation-hygiene-bundle`
-Base: `origin/main` at `9481cc95dbd65c1dff8c73a6b74b9504cf19b077`
-Worker PR: pending
+Base: `origin/main` at `e3c63e910256f7bf982b46ddbb7f240e51517c89` (rebased; planning base was `9481cc95dbd65c1dff8c73a6b74b9504cf19b077`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/213
 
 ## Outcome
 

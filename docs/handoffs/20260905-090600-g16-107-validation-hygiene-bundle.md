@@ -37,7 +37,7 @@ Here is the state after the worker run:
 - **Repository:** `inflatable-cookie/poodle`
 - **Planning branch:** `main`
 - **Planning base commit:** `9481cc95dbd65c1dff8c73a6b74b9504cf19b077`
-- **Pushed main verification:** `HEAD == origin/main` at that SHA before mutation
+- **Pushed main verification:** rebased onto `origin/main` `e3c63e910256f7bf982b46ddbb7f240e51517c89` before push (g16.109 planning; g16.108 still open)
 - **Planning checkout:** not used; worker stayed in the dedicated Paseo worktree
 - **Worker mode:** implementation worker dispatched by the orchestrator; this
   handoff activates the worker-only worktree preflight.
@@ -78,7 +78,7 @@ Here is the state after the worker run:
 - **Required validation:** `effigy qa`, `effigy doctor`, `effigy docs:check`,
   `git diff --check origin/main...HEAD`
 - **PR base/head:** `main` / `worker/g16.107-validation-hygiene-bundle`
-- **PR URL:** pending
+- **PR URL:** https://github.com/inflatable-cookie/poodle/pull/213
 - **Review state:** awaiting orchestrator review of the pushed head
 - **Merge path:** orchestrator after accepted review of the current head and
   passing required checks
