@@ -396,6 +396,7 @@ export function Select({
         key={option.value}
         type="button"
         className="poodle-select__option"
+        tabIndex={-1}
         id={`${listboxId}-option-${flatIdx}`}
         data-value={option.value}
         role="option"
@@ -571,6 +572,8 @@ export function Select({
           <button
             type="button"
             className="poodle-select__indicator-button"
+            tabIndex={-1}
+            aria-hidden="true"
             aria-label={open ? "Close options" : "Open options"}
             onClick={(event) => {
               event.stopPropagation();
@@ -616,6 +619,8 @@ export function Select({
           <button
             type="button"
             className="poodle-select__indicator-button"
+            tabIndex={-1}
+            aria-hidden="true"
             aria-label={open ? "Close options" : "Open options"}
             onClick={() => {
               dispatch({ type: "TOGGLE" });
