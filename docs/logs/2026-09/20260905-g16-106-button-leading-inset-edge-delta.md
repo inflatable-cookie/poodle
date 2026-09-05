@@ -65,10 +65,9 @@ vocabulary does not drop the fraction because there is no fraction to drop.
 - `cargo test -p poodle-render --manifest-path packages/render/Cargo.toml` — 641 passed
 - `effigy test:visual-comparator` / `bun test test/visual/button-comparison/compare.test.ts` — 38 pass
 - `effigy regressions:native` — 203 passed
-- Nucleus cohort mechanical repin at `8623e926dbf32dc73c3a59fba494c3f7b55d7434`
-  (g16.100/g16.105 precedent): 29 receipts and the manifest
-  `source_commit` advanced; payloads differ only in that SHA. The generated
-  ledger text was unchanged (Button known-delta cell already `present`).
+- Nucleus cohort mechanical repin at `93c4ef19175e5d03cf840a1ef0542e9b93e81fa5`
+  after the review-fix commit (prior pin was `8623e926d`): 29 receipts and
+  the manifest `source_commit` advanced; payloads differ only in that SHA.
 - `effigy docs:check` — after the receipt commit
 - `git diff --check origin/main...HEAD`
 
