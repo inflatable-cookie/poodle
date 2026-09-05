@@ -28,7 +28,7 @@ repairs, and `docs:snippet-check` in `docs:check`.
 
 ## Why It Matters
 
-Closed lanes left 175 finished worker briefs and a 140-file historical parity
+Closed lanes left 176 finished worker briefs (including g16.106's, added by its merge) and a 140-file historical parity
 corpus in the live docs paths agents walk first, g16 cards still instructed
 workers to edit the now-archived audits, 56 specs no current surface cites
 still sat in the normative set, and guides taught removed APIs (Tabs
@@ -49,11 +49,14 @@ coordinator's counter, not the dispatch.md text revision. Lane status in this
 brief follows merge evidence, not the unreconciled dispatch list. Execution
 log: `docs/logs/2026-09/20260905-g16-108-docs-spine-compaction.md`.
 
-- **Handoffs**: 175 closed-lane files archived to
-  `docs/handoffs/archive/2026-{08,09}/` by filename month; retention rule
-  added to `docs/README.md`; 9 briefs kept in place (listed in the log) —
-  orchestrator thread briefs, g16.052 planning feeds, held VL-1/visual/
-  Jetstream-adjacent files, and one indeterminate papercuts file.
+- **Handoffs**: 176 closed-lane files archived to
+  `docs/handoffs/archive/2026-{08,09}/` by filename month (175 at the
+  original dispatch base `9481cc95`, plus g16.106's brief after the rebase
+  onto `954a0252` — its lane closed at `94febafad`, PR #211); retention
+  rule added to `docs/README.md`; 9 briefs kept in place (listed in the
+  log) — orchestrator thread briefs, g16.052 planning feeds, held
+  VL-1/visual/Jetstream-adjacent files, and one indeterminate papercuts
+  file.
 - **Parity**: 140 files renamed at 100% into `docs/archive/parity/` (139
   component audits plus `TEMPLATE.md`); `docs/parity/README.md` was rewritten
   as the pointer and the archive README records the move. Parity-edit

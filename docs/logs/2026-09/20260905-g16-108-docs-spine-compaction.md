@@ -16,8 +16,9 @@ Handoff: `docs/handoffs/20260905-...-g16-108-docs-spine-compaction.md`
 
 ## Outcome
 
-All five fixed boundaries landed in one PR. 175 closed-lane handoffs are
-archived by filename month; the 140-file parity audit corpus moved to
+All five fixed boundaries landed in one PR. 176 closed-lane handoffs are
+archived by filename month (175 at the original dispatch base `9481cc95`,
+plus g16.106's brief after the rebase onto `954a0252`); the 140-file parity audit corpus moved to
 `docs/archive/parity/` behind a pointer README; 56 specs that no current
 surface references moved to `docs/specs/archive/` with one-line index
 entries; the consumer guides no longer teach removed APIs (Tabs, ButtonTone,
@@ -30,15 +31,21 @@ archived; the front doors (`roadmaps/README.md`, `generation-index.md`,
 
 ## Boundary 1 — Handoffs
 
-184 files under `docs/handoffs/` at the base snapshot. Lane state per the
-generation records: g15.001–079 complete (056 superseded, 078 cancelled) and
-g16.001–105 merged except the open frontier. 175 closed-lane handoffs moved
-with `git mv` (this head then adds the g16.108 handoff itself: 10 top-level
-files — 9 retained briefs plus this lane's brief — and 185 total):
+At the original dispatch base `9481cc95` there were 184 files under
+`docs/handoffs/`. Lane state per the generation records: g15.001–079
+complete (056 superseded, 078 cancelled) and g16.001–105 merged except the
+open frontier. 175 closed-lane handoffs moved with `git mv` (by filename
+month). After the rebase onto `954a0252`, g16.106's brief — added by its
+merge (PR #211, `94febafad`, an ancestor of the base) — was archived under
+the retention rule, so this head holds 176 archived files:
 
 - `docs/handoffs/archive/2026-08/` — 96 files (g15 programme and the
-  canonical g16.001–027 era, by filename month)
-- `docs/handoffs/archive/2026-09/` — 79 files (g16.028–105 era)
+  canonical g16.001–027 era)
+- `docs/handoffs/archive/2026-09/` — 80 files (g16.028–105 era plus
+  g16.106's brief)
+
+Nine briefs remain in place (below), and this head adds the g16.108 handoff
+itself: 10 top-level files, 186 total.
 
 **Kept in place (9)** — lane state open, held, or indeterminate; listed so
 the reviewer can confirm nothing open was archived:
@@ -55,9 +62,14 @@ the reviewer can confirm nothing open was archived:
 | `20260901-230409-jetstream-readiness-review.md` | Jetstream admission held |
 | `20260904-083000-fresh-poodle-orchestrator-continuation.md` | current orchestrator continuation brief |
 
-No handoff exists for open lanes g16.051/052/097/106/107 (none were ever
-created), so there was nothing open-lane-owned to preserve beyond the nine
-above.
+Handoff-file existence by lane, as of this head: at the original dispatch
+base (`9481cc95`) no briefs existed for g16.051, g16.052, g16.097, g16.106,
+or g16.107. g16.106's brief arrived with its merge (`94febafad`, an
+ancestor of the rebased base) and is archived here under the retention rule;
+g16.097 (coordinator-executed) and g16.107 have no handoff files; lanes
+promoted beyond the base (g16.109/110/111–116) are outside this PR's tree.
+Nothing open-lane-owned was archived beyond the nine retained briefs
+listed above.
 
 `docs/README.md` gains the retention rule: a handoff is archived when its
 lane closes, into `handoffs/archive/YYYY-MM/` by the month in the filename.
@@ -188,7 +200,8 @@ against the shipped surface.
 4. **Coordination records refreshed**: base identified as the stale
    dispatch snapshot; open cards per `origin/main` `da8c9c37` (g16.097
    closed; g16.109/110 ready; held 051/052); handoff counts clarified
-   (184 base → 175 archived + 9 retained + 1 new = 185).
+   (original base 184 files; at that snapshot 175 archived + 9 retained
+   + 1 new = 185 — superseded by the rebase counts in Boundary 1).
 5. **Parity wording** corrected (see Boundary 2).
 
 Same-class stale `docs/specs/…` mentions remain in `docs/research/`
@@ -271,7 +284,8 @@ PR #211; g16.107 was open at the base and merged later at `6b05db50`
 
 ## Files Changed
 
-Directories moved: `docs/handoffs/archive/{2026-08,2026-09}` (175 files),
+Directories moved: `docs/handoffs/archive/{2026-08,2026-09}` (176 files
+  total: 96 + 80),
 `docs/archive/parity/` (141 files), `docs/specs/archive/` (56 files +
 `index.md`). Edited: `docs/README.md`, `docs/parity/README.md`,
 `docs/archive/parity/README.md`, `docs/specs/README.md`,
