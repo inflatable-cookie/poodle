@@ -63,8 +63,9 @@ function declaredState(element: HTMLElement, state: string): boolean | "mixed" |
     case "checked": {
       const aria = element.getAttribute("aria-checked");
       if (aria !== null) return tristate(aria);
-      if (element instanceof HTMLInputElement && (element.type === "checkbox" || element.type === "radio")) {
-        return element.indeterminate ? "mixed" : element.checked;
+      if (element.tagName === "INPUT" && ((element as HTMLInputElement).type === "checkbox" || (element as HTMLInputElement).type === "radio")) {
+        const input = element as HTMLInputElement;
+        return input.indeterminate ? "mixed" : input.checked;
       }
       return null;
     }
@@ -73,6 +74,8 @@ function declaredState(element: HTMLElement, state: string): boolean | "mixed" |
     case "selected": {
       const aria = element.getAttribute("aria-selected");
       if (aria !== null) return tristate(aria);
+      const checked = element.getAttribute("aria-checked");
+      if (checked !== null) return tristate(checked);
       if (element instanceof HTMLOptionElement) return element.selected;
       return null;
     }

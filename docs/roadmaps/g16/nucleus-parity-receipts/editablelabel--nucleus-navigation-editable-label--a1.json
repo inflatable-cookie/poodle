@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Surface",
-  "scenario_id": "nucleus.shell.surface",
-  "proof_level": "M1",
+  "component": "EditableLabel",
+  "scenario_id": "nucleus.navigation.editable-label",
+  "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
@@ -46,14 +46,30 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "render Surface through poodle_render with composed Text child",
-    "pointer hover dispatch through HeadlessDriver"
+    "mount the production EditableLabel display through HeadlessDriver"
   ],
   "assertions": [
-    "production render path resolves panel, canvas, elevated, border, radius, padding, shadow, and region/group semantics",
-    "mounted bounds confirm container layout and child containment",
-    "surface container remains non-focusable and outside the focus chain"
+    "display button role, accessible name, disabled state, and focus match the Svelte projection"
   ],
   "outcome": "passed",
-  "artifact_paths": []
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/editable-label.gpui.json",
+      "sha256": "9bc5f57fb322b87691ea59270f4f60835d9a9de8842ff23dae15531f57cc23cc"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/editable-label.svelte.json",
+      "sha256": "014a87761f2517f900578011d2d0f25bd651b144cb17097b6275830083053d01"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/editable-label.json",
+    "scenario_sha256": "16c2eb0684b3126edf123158f32262e6dabacc73afe2c0e16326d79e035502e6",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/editable-label.gpui.json",
+    "gpui_snapshot_sha256": "9bc5f57fb322b87691ea59270f4f60835d9a9de8842ff23dae15531f57cc23cc",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/editable-label.svelte.json",
+    "svelte_snapshot_sha256": "014a87761f2517f900578011d2d0f25bd651b144cb17097b6275830083053d01",
+    "web_only_exclusions": [],
+    "diff": []
+  }
 }

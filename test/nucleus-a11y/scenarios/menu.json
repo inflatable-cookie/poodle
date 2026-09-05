@@ -1,0 +1,19 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Menu",
+  "scenario_id": "nucleus.navigation.menu",
+  "props": {
+    "items": [
+      { "value": "new", "label": "New" },
+      { "value": "print", "label": "Print", "disabled": true },
+      { "value": "delete", "label": "Delete", "tone": "danger" }
+    ],
+    "defaultOpen": true,
+    "ariaLabel": "File actions",
+    "triggerAriaLabel": "Open file actions"
+  },
+  "fixtures": { "trigger_text": "Actions" },
+  "actions": [],
+  "declared_states": ["selected", "disabled"],
+  "web_only_exclusions": []
+}

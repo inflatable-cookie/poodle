@@ -9,10 +9,11 @@
 use std::sync::{Arc, Mutex};
 
 use poodle_node::Node;
-use poodle_render::{RenderContext, SelectHandlers, TabsHandlers};
+use poodle_render::{EditableLabelHandlers, PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers};
 use poodle_specs::{
-    ChoiceOption, Orientation, SelectMode, SelectSpec, SwitchSpec, TabActivationMode,
-    TabDefinition, TabsSpec,
+    ChoiceOption, DialogSpec, EditableLabelActivation, EditableLabelSpec, MenuEntry, MenuSpec,
+    Orientation, PopoverInitialFocus, PopoverSpec, SegmentedControlOption, SegmentedControlSpec,
+    SelectMode, SelectSpec, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -444,5 +445,219 @@ fn select_a1_accessibility_projection_matches_svelte() {
                 "gpui tab traversal visits the tracked focusable nodes in the declared order",
             ],
         );
+    });
+}
+
+// ── NP-2 navigation and overlays ──────────────────────────────────────────
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SegmentedControlProps {
+    options: Vec<SegmentedControlOptionProps>,
+    default_value: Option<String>,
+    value: Option<String>,
+    aria_label: Option<String>,
+    equal_width: Option<bool>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SegmentedControlOptionProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+}
+
+fn build_segmented_control(
+    spec: &SegmentedControlSpec,
+    props: &SegmentedControlProps,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let host = spec.clone();
+    let props = props.clone();
+    let mounted = Arc::clone(mounted);
+    let on_change = Arc::new(move |value: &str| {
+        let mut next = host.clone();
+        next.value = Some(value.to_owned());
+        *mounted.lock().expect("mount lock") = build_segmented_control(&next, &props, &mounted);
+    });
+    let theme_provider = theme();
+    poodle_render::segmented_control(spec, &RenderContext::new(&theme_provider), Some(on_change))
+}
+
+#[test]
+#[ignore = "g16.113: SegmentedControl native radio projection is recorded as a divergence pending contract/backend attribution"]
+fn segmented_control_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("segmented-control");
+    let props: SegmentedControlProps = props(&loaded);
+    let options = props
+        .options
+        .iter()
+        .map(|item| SegmentedControlOption::new(item.value.clone(), item.label.clone()).with_disabled(item.disabled.unwrap_or(false)))
+        .collect();
+    let mut spec = SegmentedControlSpec::new("a1", options);
+    spec.default_value = props.default_value.clone();
+    spec.value = props.value.clone();
+    spec.aria_label = props.aria_label.clone();
+    spec.equal_width = props.equal_width.unwrap_or(true);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build_segmented_control(&spec, &props, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
+        driver.dispatch_probe_key("f13");
+        driver.wait_for_focus_handle("segmented:a1:option:grid");
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(&mut driver, &loaded,
+            &["mount the production SegmentedControl node tree with shared options and selected value", "replay the shared pointer activation through GPUI dispatch", "read the mounted accessibility projection and execute focus traversal"],
+            &["radiogroup and radio roles, names, selected and disabled states, and roving focus match the Svelte projection", "the selected value is updated through the controlled host rebuild"]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MenuProps {
+    items: Vec<MenuItemProps>,
+    default_open: Option<bool>,
+    aria_label: Option<String>,
+    trigger_aria_label: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MenuItemProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+    tone: Option<String>,
+}
+
+fn menu_trigger(label: &str, inner: &str) -> Node {
+    let mut child = Node::container();
+    child.a11y.role = Some(poodle_node::NodeRole::Button);
+    child.a11y.label = Some(inner.to_owned());
+    child.interaction.focusable = true;
+    child.a11y.tab_index = Some(0);
+    let mut trigger = Node::container().child(child);
+    trigger.a11y.role = Some(poodle_node::NodeRole::Button);
+    trigger.a11y.label = Some(label.to_owned());
+    trigger.interaction.focusable = true;
+    trigger.a11y.tab_index = Some(0);
+    trigger
+}
+
+#[test]
+#[ignore = "g16.113: Menu native projection records item roles without the Svelte default-open focus effect"]
+fn menu_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("menu");
+    let props: MenuProps = props(&loaded);
+    let items = props.items.iter().map(|item| {
+        MenuEntry::new(item.value.clone(), item.label.clone())
+            .with_disabled(item.disabled.unwrap_or(false))
+            .with_destructive(item.tone.as_deref() == Some("danger"))
+    }).collect();
+    let mut spec = MenuSpec::new(items).with_default_open(props.default_open.unwrap_or(false));
+    if let Some(label) = &props.aria_label { spec = spec.with_aria_label(label); }
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let theme_provider = theme();
+        let menu = poodle_render::menu(&spec, &RenderContext::new(&theme_provider), None);
+        let root = Node::container().child(menu_trigger(props.trigger_aria_label.as_deref().unwrap_or("Open"), "Actions")).child(menu);
+        *mounted.lock().expect("mount lock") = root;
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
+        driver.dispatch_probe_key("f13");
+        prove(&mut driver, &loaded, &["mount the production Menu panel and trigger through HeadlessDriver"], &["menu and menuitem roles, names, disabled states, and single-entry focus order match the Svelte projection"]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct DialogProps {
+    default_open: Option<bool>,
+    title: Option<String>,
+    description: Option<String>,
+    show_close_button: Option<bool>,
+    close_label: Option<String>,
+    aria_label: Option<String>,
+    dismiss_on_escape: Option<bool>,
+    dismiss_on_backdrop: Option<bool>,
+}
+
+#[test]
+#[ignore = "g16.113: Dialog native projection records only the surface; backdrop and close-button semantics diverge from Svelte"]
+fn dialog_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("dialog");
+    let props: DialogProps = props(&loaded);
+    let mut spec = DialogSpec::new().with_default_open(props.default_open.unwrap_or(false));
+    if let Some(title) = &props.title { spec = spec.with_title(title); }
+    if let Some(description) = &props.description { spec = spec.with_description(description); }
+    if let Some(label) = &props.aria_label { spec = spec.with_aria_label(label); }
+    if let Some(label) = &props.close_label { spec = spec.with_close_label(label); }
+    spec = spec.with_show_close_button(props.show_close_button.unwrap_or(false));
+    spec = spec.with_dismiss_on_escape(props.dismiss_on_escape.unwrap_or(true)).with_dismiss_on_backdrop(props.dismiss_on_backdrop.unwrap_or(true));
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let theme_provider = theme();
+        let body = Node::text("Confirm deletion");
+        *mounted.lock().expect("mount lock") = poodle_render::dialog(&spec, &RenderContext::new(&theme_provider), vec![body], None, None);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        driver.dispatch_probe_key("f13");
+        prove(&mut driver, &loaded, &["mount the production Dialog modal with title, description, close affordance, and body"], &["backdrop, dialog, and close-button semantics and focus match the Svelte projection"]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct PopoverProps {
+    default_open: Option<bool>,
+    aria_label: Option<String>,
+    initial_focus: Option<String>,
+    surface_width: Option<String>,
+}
+
+#[test]
+#[ignore = "g16.113: Popover native controls relationship and trigger/surface node shape diverge from Svelte"]
+fn popover_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("popover");
+    let props: PopoverProps = props(&loaded);
+    let mut spec = PopoverSpec::new().with_default_open(props.default_open.unwrap_or(false));
+    if let Some(label) = &props.aria_label { spec = spec.with_aria_label(label); }
+    if props.initial_focus.as_deref() == Some("content") { spec = spec.with_initial_focus(PopoverInitialFocus::Content); }
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let theme_provider = theme();
+        let handlers = PopoverHandlers { instance_id: Some("a1".to_owned()), ..PopoverHandlers::default() };
+        let trigger = Node::text("Settings");
+        let content = Node::text("Quick settings panel");
+        *mounted.lock().expect("mount lock") = poodle_render::popover(&spec, &RenderContext::new(&theme_provider), &handlers, Some(trigger), Some(content));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
+        driver.dispatch_probe_key("f13");
+        prove(&mut driver, &loaded, &["mount the production Popover trigger and open surface through HeadlessDriver"], &["trigger disclosure, dialog surface name, controls relationship, and content focus match the Svelte projection"]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EditableLabelProps {
+    value: Option<String>,
+    aria_label: Option<String>,
+    activation_mode: Option<String>,
+    show_edit_icon: Option<bool>,
+}
+
+#[test]
+fn editable_label_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("editable-label");
+    let props: EditableLabelProps = props(&loaded);
+    let mut spec = EditableLabelSpec::new().with_value(props.value.unwrap_or_default());
+    if let Some(label) = &props.aria_label { spec = spec.with_aria_label(label); }
+    spec.show_edit_icon = props.show_edit_icon.unwrap_or(false);
+    spec.activation_mode = match props.activation_mode.as_deref() { Some("enterOrSpace") => EditableLabelActivation::EnterOrSpace, Some("programmatic") => EditableLabelActivation::Programmatic, _ => EditableLabelActivation::DoubleClick };
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let theme_provider = theme();
+        *mounted.lock().expect("mount lock") = poodle_render::editable_label_with_handlers(&spec, &RenderContext::new(&theme_provider), EditableLabelHandlers::default());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 300.0, 80.0);
+        driver.dispatch_probe_key("f13");
+        prove(&mut driver, &loaded, &["mount the production EditableLabel display through HeadlessDriver"], &["display button role, accessible name, disabled state, and focus match the Svelte projection"]);
     });
 }

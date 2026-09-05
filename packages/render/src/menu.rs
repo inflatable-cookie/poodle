@@ -142,6 +142,7 @@ pub fn menu(
         let mut item = Node::container();
         item.id = Some(format!("menu-item:{}", entry.value));
         item.runtime_id = Some(format!("menu-item:{}", entry.value));
+        item.a11y.label = Some(entry.label.clone());
         {
             let s = &mut item.style;
             s.descriptor.layout.direction = LayoutDirection::Row;

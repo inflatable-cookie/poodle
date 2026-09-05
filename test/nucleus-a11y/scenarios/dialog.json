@@ -1,0 +1,19 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Dialog",
+  "scenario_id": "nucleus.navigation.dialog",
+  "props": {
+    "defaultOpen": true,
+    "title": "Delete file",
+    "description": "This action cannot be undone.",
+    "showCloseButton": true,
+    "closeLabel": "Close dialog",
+    "ariaLabel": "Delete file dialog",
+    "dismissOnEscape": true,
+    "dismissOnBackdrop": true
+  },
+  "fixtures": { "panel_text": "Confirm deletion" },
+  "actions": [],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}

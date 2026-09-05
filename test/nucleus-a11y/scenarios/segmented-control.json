@@ -1,0 +1,18 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "SegmentedControl",
+  "scenario_id": "nucleus.navigation.segmented-control",
+  "props": {
+    "options": [
+      { "value": "grid", "label": "Grid" },
+      { "value": "list", "label": "List" },
+      { "value": "board", "label": "Board", "disabled": true }
+    ],
+    "defaultValue": "list",
+    "ariaLabel": "View",
+    "equalWidth": true
+  },
+  "actions": [],
+  "declared_states": ["selected", "disabled"],
+  "web_only_exclusions": []
+}

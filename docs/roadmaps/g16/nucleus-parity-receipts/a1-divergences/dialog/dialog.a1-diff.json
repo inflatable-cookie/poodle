@@ -1,0 +1,32 @@
+[
+  {
+    "index": 0,
+    "field": "focus_order",
+    "gpui": null,
+    "svelte": 0
+  },
+  {
+    "index": 0,
+    "field": "name",
+    "gpui": "Delete file dialog",
+    "svelte": "Dismiss dialog backdrop"
+  },
+  {
+    "index": 0,
+    "field": "role",
+    "gpui": "dialog",
+    "svelte": "button"
+  },
+  {
+    "index": 1,
+    "field": "role",
+    "gpui": null,
+    "svelte": "dialog"
+  },
+  {
+    "index": 2,
+    "field": "role",
+    "gpui": null,
+    "svelte": "button"
+  }
+]

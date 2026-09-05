@@ -221,6 +221,7 @@ pub fn segmented_control(
         seg.id = Some(segment_id(&option.value));
         seg.runtime_id = Some(segment_focus_id(instance_scope, &option.value));
         seg.a11y.role = Some(NodeRole::RadioButton);
+        seg.a11y.label = Some(option.aria_label.clone().unwrap_or_else(|| option.label.clone()));
         seg.a11y.selected = Some(is_selected);
         seg.a11y.toggled = Some(if is_selected {
             NodeToggled::True
