@@ -1,0 +1,88 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "AgentPlan",
+  "scenario_id": "nucleus.agent.agent-plan",
+  "scenario_path": "test/nucleus-a11y/scenarios/agent-plan.json",
+  "scenario_sha256": "4d1f37ac4aa97c5c56c605e148aca279b9c0cf42e2d04cfeab8c395896aa6425",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "heading",
+      "name": "Release plan",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Accept plan",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    },
+    {
+      "role": "button",
+      "name": "Revise",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Dismiss plan",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 2,
+      "focused": false
+    }
+  ]
+}

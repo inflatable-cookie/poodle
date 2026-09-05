@@ -4,12 +4,12 @@
   "scenario_id": "nucleus.agent.agent-transcript",
   "scenario_path": "test/nucleus-a11y/scenarios/agent-transcript.json",
   "scenario_sha256": "6ae44bd8dd69449b989e9f297f5696fbb66a6902399f979a581235f91d68e63a",
-  "runtime": "svelte-happy-dom",
+  "runtime": "gpui-headless",
   "run": {
-    "command": "effigy test:nucleus-a11y",
-    "mount": "@testing-library/svelte render",
-    "render_path": "svelte mount -> happy-dom document",
-    "input_dispatch": "dom-events"
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
   },
   "nodes": [
     {
@@ -26,7 +26,7 @@
       "level": null,
       "orientation": null,
       "focus_order": null,
-      "focused": true
+      "focused": null
     }
   ]
 }

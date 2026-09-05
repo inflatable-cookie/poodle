@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: pr-open-awaiting-review
+status: revision-18-pushed-awaiting-fresh-exact-head-review
 owner: Poodle Northstar orchestrator
 created: 2026-09-05
 updated: 2026-09-05
@@ -30,14 +30,14 @@ revision 17. Scope is the six NP-3 A1 rows only.
 ## Scope Delivered
 
 Shared scenarios and Svelte snapshots cover AgentTranscript, AgentChatInput,
-AgentPlan, AgentQuestion, ModelPicker, and StatusIndicator. Native mounted proof
-entrypoints use the existing A1 extractor, scenario hash, and receipt path.
+AgentPlan, AgentQuestion, ModelPicker, and StatusIndicator. StatusIndicator has
+the sole NP-3 A1 receipt. The other five rows have complete divergence records
+under `docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/`.
 
 ## Checks Run
 
-`effigy core:build` and `effigy test:nucleus-a11y` passed. `git diff --check`
-passed. Native focused validation was blocked by concurrent Cargo builds and is
-left for the coordinator/reviewer to rerun. No windowed selectors were run.
+`effigy core:build`, `effigy test:nucleus-a11y`, and six focused headless native
+selectors passed. `git diff --check` passed. No windowed selectors were run.
 
 ## Stop Conditions
 

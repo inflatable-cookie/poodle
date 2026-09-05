@@ -1,0 +1,76 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "StatusIndicator",
+  "scenario_id": "nucleus.agent.status-indicator",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "633497613a8022403ab6aa1015ef6ee716a54c30",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount the production renderer path through HeadlessDriver",
+    "replay every shared scenario action through GPUI dispatch"
+  ],
+  "assertions": [
+    "the normalised GPUI snapshot is compared with the committed Svelte DOM snapshot for the same scenario hash"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/status-indicator.gpui.json",
+      "sha256": "86fc0fc229ce7fac6be88b5ef0c36653bf8b96aa6b07ee56527713c7fb84f844"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/status-indicator.svelte.json",
+      "sha256": "cc7be98636b754fa7a0cddd8e5c7dc39d02aa1223722944161fa6a6db7758668"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/status-indicator.json",
+    "scenario_sha256": "f06a777d792abe83b862447833507d80066bbbaa4d44a193cec947224255ce57",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/status-indicator.gpui.json",
+    "gpui_snapshot_sha256": "86fc0fc229ce7fac6be88b5ef0c36653bf8b96aa6b07ee56527713c7fb84f844",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/status-indicator.svelte.json",
+    "svelte_snapshot_sha256": "cc7be98636b754fa7a0cddd8e5c7dc39d02aa1223722944161fa6a6db7758668",
+    "web_only_exclusions": [],
+    "diff": []
+  }
+}

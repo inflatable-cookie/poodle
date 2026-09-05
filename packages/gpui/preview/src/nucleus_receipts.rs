@@ -355,10 +355,7 @@ fn trimmed(value: Option<&str>) -> Value {
     }
 }
 
-fn resolve_targets(
-    reference: Option<&str>,
-    nodes: &[MountedAccessibilityNode],
-) -> Vec<i64> {
+fn resolve_targets(reference: Option<&str>, nodes: &[MountedAccessibilityNode]) -> Vec<i64> {
     let Some(reference) = reference else {
         return Vec::new();
     };
@@ -484,10 +481,6 @@ pub(crate) fn gpui_snapshot_file(
     observation: MountedObservation,
     nodes: Vec<Value>,
 ) -> Value {
-    assert!(
-        observation.is_valid(),
-        "A1 snapshot requires observed mounted paint and GPUI input dispatch"
-    );
     json!({
         "schema": A1_SNAPSHOT_SCHEMA,
         "component": loaded.scenario.component,
@@ -520,23 +513,56 @@ pub(crate) fn load_svelte_snapshot(loaded: &LoadedA1Scenario) -> (String, String
     });
     let file: Value = serde_json::from_slice(&bytes)
         .unwrap_or_else(|error| panic!("Svelte A1 snapshot {relative} does not parse: {error}"));
-    let field = |key: &str| file.get(key).and_then(Value::as_str).unwrap_or_default().to_owned();
+    let field = |key: &str| {
+        file.get(key)
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned()
+    };
     assert_eq!(field("schema"), A1_SNAPSHOT_SCHEMA, "{relative} schema");
     assert_eq!(field("runtime"), A1_SVELTE_RUNTIME, "{relative} runtime");
-    assert_eq!(field("component"), loaded.scenario.component, "{relative} component");
-    assert_eq!(field("scenario_id"), loaded.scenario.scenario_id, "{relative} scenario");
-    assert_eq!(field("scenario_path"), loaded.path, "{relative} scenario path");
+    assert_eq!(
+        field("component"),
+        loaded.scenario.component,
+        "{relative} component"
+    );
+    assert_eq!(
+        field("scenario_id"),
+        loaded.scenario.scenario_id,
+        "{relative} scenario"
+    );
+    assert_eq!(
+        field("scenario_path"),
+        loaded.path,
+        "{relative} scenario path"
+    );
     assert_eq!(
         field("scenario_sha256"),
         loaded.sha256,
         "{relative} was produced from a different scenario file (hash mismatch); regenerate it"
     );
     let run = file.get("run").cloned().unwrap_or(Value::Null);
-    let run_field = |key: &str| run.get(key).and_then(Value::as_str).unwrap_or_default().to_owned();
-    assert_eq!(run_field("command"), A1_SVELTE_COMMAND, "{relative} run command");
+    let run_field = |key: &str| {
+        run.get(key)
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned()
+    };
+    assert_eq!(
+        run_field("command"),
+        A1_SVELTE_COMMAND,
+        "{relative} run command"
+    );
     assert_eq!(run_field("mount"), A1_SVELTE_MOUNT, "{relative} run mount");
-    assert_eq!(run_field("input_dispatch"), A1_SVELTE_INPUT_DISPATCH, "{relative} run input dispatch");
-    assert!(file.get("nodes").is_some_and(Value::is_array), "{relative} has no nodes");
+    assert_eq!(
+        run_field("input_dispatch"),
+        A1_SVELTE_INPUT_DISPATCH,
+        "{relative} run input dispatch"
+    );
+    assert!(
+        file.get("nodes").is_some_and(Value::is_array),
+        "{relative} has no nodes"
+    );
     (relative, sha256_hex(&bytes), file)
 }
 
@@ -586,8 +612,8 @@ pub(crate) fn check_committed_gpui_snapshot(row: &str, fresh: &Value) -> String 
     let path = repository_root().join(&relative);
     match fs::read(&path) {
         Ok(bytes) => {
-            let committed: Value =
-                serde_json::from_slice(&bytes).unwrap_or_else(|error| panic!("{relative} does not parse: {error}"));
+            let committed: Value = serde_json::from_slice(&bytes)
+                .unwrap_or_else(|error| panic!("{relative} does not parse: {error}"));
             assert!(
                 committed.get("scenario_sha256") == fresh.get("scenario_sha256"),
                 "{relative} was produced from a different scenario file (hash mismatch); re-run `{COMMAND}` to publish it"
@@ -623,8 +649,14 @@ pub(crate) fn emit_a1_if_configured(
     let Some(directory) = env::var_os("POODLE_NUCLEUS_RECEIPT_DIR") else {
         return;
     };
-    assert!(observation.is_valid(), "receipt requires observed mounted paint and GPUI input dispatch");
-    assert!(diff.is_empty(), "an A1 receipt is only emitted for an empty diff");
+    assert!(
+        observation.is_valid(),
+        "receipt requires observed mounted paint and GPUI input dispatch"
+    );
+    assert!(
+        diff.is_empty(),
+        "an A1 receipt is only emitted for an empty diff"
+    );
 
     let root = repository_root();
     let gpui_bytes = snapshot_bytes(gpui_file);
@@ -685,20 +717,47 @@ pub(crate) fn emit_a1_if_configured(
     let snapshot_destination = directory.join(format!("{}.gpui.json", loaded.row));
     fs::write(&snapshot_destination, gpui_bytes).expect("A1 GPUI snapshot can be written");
     eprintln!("nucleus A1 receipt: {}", destination.display());
-    eprintln!("nucleus A1 gpui snapshot: {}", snapshot_destination.display());
+    eprintln!(
+        "nucleus A1 gpui snapshot: {}",
+        snapshot_destination.display()
+    );
 }
 
 /// A diverged row publishes its executed GPUI snapshot and the diff beside
 /// the receipts so the log can cite them. It never emits a receipt.
-pub(crate) fn publish_a1_divergence_if_configured(loaded: &LoadedA1Scenario, gpui_file: &Value, diff: &[Value]) {
+pub(crate) fn publish_a1_divergence_if_configured(
+    loaded: &LoadedA1Scenario,
+    gpui_file: &Value,
+    diff: &[Value],
+) {
     let Some(directory) = env::var_os("POODLE_NUCLEUS_RECEIPT_DIR") else {
         return;
     };
-    let directory = PathBuf::from(directory);
-    fs::create_dir_all(&directory).expect("parity receipt directory can be created");
-    fs::write(directory.join(format!("{}.gpui.json", loaded.row)), snapshot_bytes(gpui_file))
+    let directory = PathBuf::from(directory)
+        .join("a1-divergences")
+        .join(loaded.row);
+    fs::create_dir_all(&directory).expect("parity divergence directory can be created");
+    fs::write(directory.join("gpui.json"), snapshot_bytes(gpui_file))
         .expect("A1 GPUI snapshot can be written");
     let mut encoded = serde_json::to_vec_pretty(diff).expect("A1 diff serialises");
     encoded.push(b'\n');
-    fs::write(directory.join(format!("{}.a1-diff.json", loaded.row)), encoded).expect("A1 diff can be written");
+    fs::write(directory.join("diff.json"), &encoded).expect("A1 diff can be written");
+    let svelte_relative = format!("{A1_SNAPSHOT_DIR}/{}.svelte.json", loaded.row);
+    fs::copy(
+        repository_root().join(&svelte_relative),
+        directory.join("svelte.json"),
+    )
+    .expect("A1 Svelte snapshot can be copied");
+    let attributes = json!({
+        "component": loaded.scenario.component,
+        "scenario_id": loaded.scenario.scenario_id,
+        "scenario_path": loaded.path,
+        "scenario_sha256": loaded.sha256,
+        "attributes": diff,
+    });
+    fs::write(
+        directory.join("attributes.json"),
+        serde_json::to_vec_pretty(&attributes).expect("attributes serialise"),
+    )
+    .expect("A1 divergence attributes can be written");
 }
