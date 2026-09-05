@@ -1,0 +1,80 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Tabs",
+  "scenario_id": "nucleus.navigation.tabs",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "ca7b76c4049eaa25cf0fb98e2287acb7a4a27c66",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount the production Tabs node tree with a panel through HeadlessDriver with the shared scenario props",
+    "replay the shared scenario actions through GPUI test-platform dispatch (pointer activate a tab, then ArrowRight on it)",
+    "read the mounted accessibility projection and the backend focus registry after the host rebuilds",
+    "execute gpui sequential focus traversal and attribute every stop to a tracked node"
+  ],
+  "assertions": [
+    "the normalised GPUI snapshot equals the committed Svelte DOM snapshot for the same scenario hash",
+    "tablist, tab, and tabpanel roles, names, selected state, controls and labelled-by indices, orientation, and roving focus order match the Svelte ARIA projection",
+    "gpui tab traversal visits the tracked focusable nodes in the declared order"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/tabs.gpui.json",
+      "sha256": "e56ef8fe6c6aa2eca319a1172426fb0a155ad2d6bbff098a944723a19ef8b723"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/tabs.svelte.json",
+      "sha256": "9130a734f994579a79b9806bd40ee250fdf0146f3c6742bb070a3a8c0c587ad6"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/tabs.json",
+    "scenario_sha256": "8815066ec2c6b88a3f25a107d469d51be4b061873a5f302f1d6622be447bfb3f",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/tabs.gpui.json",
+    "gpui_snapshot_sha256": "e56ef8fe6c6aa2eca319a1172426fb0a155ad2d6bbff098a944723a19ef8b723",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/tabs.svelte.json",
+    "svelte_snapshot_sha256": "9130a734f994579a79b9806bd40ee250fdf0146f3c6742bb070a3a8c0c587ad6",
+    "web_only_exclusions": [],
+    "diff": []
+  }
+}
