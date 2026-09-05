@@ -2,9 +2,10 @@
  * g16.005 — downstream dual-dependency proof.
  *
  * Builds `consumer/`, a crate written the way an ordinary crates.io user
- * would write it: it declares `gpui = "0.2.2"` for itself AND depends on
- * `poodle-gpui-node-backend`, then passes GPUI values across the boundary in
- * both directions. If Poodle resolves `gpui` from anywhere but crates.io,
+ * would write it: it declares `gpui-unofficial = "1.19.0-pre"` for itself AND
+ * depends on `poodle-gpui-node-backend`, then passes GPUI values across the
+ * boundary in both directions. If Poodle resolves GPUI from anywhere but
+ * crates.io `gpui-unofficial`,
  * Cargo gives the two crates different identities and this stops compiling.
  * That is the v0.2.1 defect, reproduced as a gate.
  *
@@ -72,7 +73,7 @@ function compile(dir: string): { status: number | null; stderr: string } {
   return { status: result.status, stderr: result.stderr ?? "" };
 }
 
-console.log("## downstream consumer: crates.io gpui 0.2.2 + poodle-gpui-node-backend");
+console.log("## downstream consumer: crates.io gpui-unofficial 1.19.0-pre + poodle-gpui-node-backend");
 const work = mkdtempSync(join(tmpdir(), "poodle-dual-dependency-"));
 try {
   const proof = join(work, "proof");
@@ -85,7 +86,10 @@ try {
     .split("\n")
     .filter((line) => !line.trimStart().startsWith("#"))
     .join("\n");
-  check('the consumer declares gpui = "0.2.2" itself', active.includes('gpui = "0.2.2"'));
+  check(
+    'the consumer declares gpui-unofficial = "1.19.0-pre" itself',
+    active.includes('gpui-unofficial = "1.19.0-pre"'),
+  );
   check(
     "the consumer uses no patch, replace, or override section",
     !/\[patch|\[replace|\bpaths\s*=/.test(active),
@@ -94,7 +98,7 @@ try {
 
   const built = compile(proof);
   check(
-    "the consumer compiles against Poodle and its own crates.io gpui",
+    "the consumer compiles against Poodle and its own crates.io gpui-unofficial",
     built.status === 0,
     built.stderr.trim(),
   );
@@ -103,18 +107,23 @@ try {
   // gpui, from the registry.
   const lock = readFileSync(join(proof, "Cargo.lock"), "utf8");
   const gpuiEntries = [...lock.matchAll(/\[\[package\]\]\nname = "(gpui[^"]*)"\nversion = "([^"]+)"\nsource = "([^"]+)"/g)];
-  const gpuiCore = gpuiEntries.filter(([, name]) => name === "gpui");
+  const gpuiCore = gpuiEntries.filter(([, name]) => name === "gpui-unofficial");
   check(
-    "the resolved graph contains exactly one gpui",
+    "the resolved graph contains exactly one gpui-unofficial",
     gpuiCore.length === 1,
     gpuiCore.map(([, , version, source]) => `${version} ${source}`).join(", "),
+  );
+  check(
+    "the graph does not also resolve crates.io gpui 0.2.x",
+    !gpuiEntries.some(([, name]) => name === "gpui"),
+    gpuiEntries.map(([, name, version]) => `${name} ${version}`).join(", "),
   );
   check(
     "every gpui* crate resolves from the crates.io registry",
     gpuiEntries.length > 0 && gpuiEntries.every(([, , , source]) => source.startsWith("registry+")),
     gpuiEntries.map(([, name, , source]) => `${name}: ${source}`).join("\n"),
   );
-  if (gpuiCore.length === 1) console.log(`  resolved: gpui ${gpuiCore[0][2]} from ${gpuiCore[0][3]}`);
+  if (gpuiCore.length === 1) console.log(`  resolved: gpui-unofficial ${gpuiCore[0][2]} from ${gpuiCore[0][3]}`);
 
   console.log("## transitive shape — the graph must compile tinyvec with std (g16.092)");
   // tinyvec 1.13.0 broke its alloc-only build: the new `with_initial_len` calls

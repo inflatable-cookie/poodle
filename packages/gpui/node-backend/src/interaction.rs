@@ -259,7 +259,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     // the target element exists and has a handle.
                     if super::layers::take_focus_request(&id) {
                         if !handle.is_focused(window) {
-                            handle.focus(window);
+                            handle.focus(window, cx);
                             cx.refresh_windows();
                         }
                     }
@@ -1124,7 +1124,7 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
             if let Some(key) = node_key(event.keystroke.key.as_str()) {
                 if let Some(target) = keys(key, node_modifiers(&event.keystroke.modifiers)) {
                     if let Some(handle) = focus_handle_for(&target) {
-                        handle.focus(window);
+                        handle.focus(window, cx);
                     }
                 }
                 cx.refresh_windows();

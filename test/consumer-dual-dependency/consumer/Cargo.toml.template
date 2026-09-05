@@ -1,10 +1,10 @@
 # The downstream consumer, as an ORDINARY crates.io user would write it.
 #
-# `gpui` is declared here independently of Poodle. If Poodle resolves `gpui`
-# from anywhere other than crates.io, Cargo treats the two as different crate
-# identities and `src/main.rs` stops compiling — which is exactly the v0.2.1
-# defect Longhorn hit. There is no `[patch]`, no `[replace]`, and no override
-# section in this file on purpose: the proof is that none is needed.
+# `gpui-unofficial` is declared here independently of Poodle. If Poodle
+# resolves GPUI from anywhere other than this crates.io package, Cargo treats
+# the two as different crate identities and `src/main.rs` stops compiling.
+# There is no `[patch]`, no `[replace]`, and no override section in this file
+# on purpose: the proof is that none is needed. Lib name stays `gpui`.
 [package]
 name = "poodle-dual-dependency-consumer"
 version = "0.0.0"
@@ -16,6 +16,6 @@ name = "consumer"
 path = "src/main.rs"
 
 [dependencies]
-gpui = "0.2.2"
+gpui-unofficial = "1.19.0-pre"
 poodle-gpui-node-backend = { path = "__POODLE_ROOT__/packages/gpui/node-backend" }
 poodle-node = { path = "__POODLE_ROOT__/packages/contracts/node" }

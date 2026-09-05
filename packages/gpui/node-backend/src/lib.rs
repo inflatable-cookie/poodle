@@ -42,6 +42,7 @@ use poodle_node::{
     StyleDescriptor, StylePatch, TextAlign,
 };
 
+mod a11y;
 mod drag;
 mod inset_shadow;
 mod interaction;
@@ -653,6 +654,7 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         let el = base.id(id);
         let el = apply_shared(el, node, &id_string);
         let el = apply_listeners(el, node, &id_string);
+        let el = a11y::apply(el, node);
         // Deferred overlays paint later; without occlude, pointer events fall
         // through to in-flow widgets that share the same window point.
         let el = if node.style.overlay { el.occlude() } else { el };
@@ -707,6 +709,7 @@ fn needs_state(node: &Node) -> bool {
         // even when `Node.id` is unset.
         || node.style.overlay
         || node.runtime_id.is_some()
+        || a11y::requires_state(node)
 }
 
 pub(crate) fn current_dismiss_layer() -> Option<String> {
@@ -1140,12 +1143,8 @@ where
 
 // ── Accessibility ───────────────────────────────────────────────────
 //
-// NodeA11y (role, label, expanded, selected, toggled, level) is intentionally
-// NOT mapped: gpui 0.2.2's fluent element API exposes no accessibility
-// attributes. `docs/contracts/003-native-accessibility.md` records the same
-// accepted runtime gap, and g12.015 holds GPUI accessibility upstream work
-// deliberately. The channels are walked (read)
-// here so the omission is a decision, not a drift.
+// NodeA11y is projected onto GPUI 1.19 AccessKit attributes in `a11y.rs`.
+// Relationship fields and `invalid`/`busy` have no fluent counterpart.
 
 mod ime;
 mod input_text;

@@ -273,14 +273,14 @@ fn prepare(args: &FocusEvidenceArgs) -> Result<transport::Shot<EvidenceRoot>> {
                 canvas: poodle_gpui_node_backend::color(canvas),
             })
         }),
-        on_frame: Box::new(move |window, _cx, _frame| {
+        on_frame: Box::new(move |window, cx, _frame| {
             let Some(handle) = poodle_gpui_node_backend::focus_handle_for(focus_id) else {
                 return Ok(transport::Settled::Wait);
             };
             if !focused {
                 // Real focus through the backend registry — no pointer, and
                 // no window or application activation anywhere.
-                handle.focus(window);
+                handle.focus(window, cx);
                 focused = true;
                 return Ok(transport::Settled::Wait);
             }

@@ -1,11 +1,9 @@
 //! The consumer-compatibility proof for g16.005.
 //!
 //! Every line below fails to compile if `poodle-gpui-node-backend` exposes a
-//! GPUI crate identity other than the crates.io `gpui` this crate declares
-//! for itself. That is the whole point: published v0.2.1 resolved `gpui` from
-//! the `inflatable-cookie/zed` fork, so a consumer that also depended on
-//! crates.io `gpui = "0.2.2"` received two incompatible sets of GPUI types
-//! and could not pass a single value across the boundary.
+//! GPUI crate identity other than the crates.io `gpui-unofficial` this crate
+//! declares for itself. The rustc lib name is still `gpui`; the package
+//! identity Longhorn and Nucleus must declare is `gpui-unofficial`.
 //!
 //! This is a type-identity proof, not a rendering test. It opens no window,
 //! captures nothing, and needs no window server.
@@ -61,5 +59,5 @@ fn main() {
     };
     let _ = poodle_focus("consumer:probe");
     let _ = poodle_bounds("consumer:probe");
-    println!("crates.io gpui and poodle-gpui-node-backend share one crate identity");
+    println!("crates.io gpui-unofficial and poodle-gpui-node-backend share one crate identity");
 }

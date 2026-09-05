@@ -20,7 +20,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     match d.layout.width {
         // `.flex_grow()` is a flex property, not a width — matching the
         // Jetstream `el.grow()` mapping, which is also a flex property.
-        LayoutSizing::Grow => el = el.flex_grow(),
+        LayoutSizing::Grow => el = el.flex_grow(1.0),
         LayoutSizing::Fixed(w) => el = el.w(px(w)),
         LayoutSizing::Fit => {}
         LayoutSizing::Constrained { min, max } => {
@@ -68,7 +68,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         // Jetstream maps flex_fill to its grow() — grow + shrink, no stretch.
         // gpui's `.flex_grow()` leaves shrink at its 1.0 default and does not
         // touch align-self, which is exactly that.
-        el = el.flex_grow();
+        el = el.flex_grow(1.0);
     }
     if style.flex_shrink_zero {
         el = el.flex_shrink_0();
@@ -314,6 +314,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
                 offset: point(px(l.offset_x), px(l.offset_y)),
                 blur_radius: px(l.blur),
                 spread_radius: px(l.spread),
+                inset: false,
             })
             .collect::<Vec<_>>();
         if !shadows.is_empty() {
@@ -325,6 +326,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
             offset: point(px(shadow.offset_x), px(shadow.offset_y)),
             blur_radius: px(shadow.blur),
             spread_radius: px(0.0),
+            inset: false,
         }]);
         record_probe_channel("surface.extended.shadow");
     }

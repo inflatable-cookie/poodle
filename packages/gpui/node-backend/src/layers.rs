@@ -355,9 +355,9 @@ where
                 }
                 "tab" => {
                     if event.keystroke.modifiers.shift {
-                        window.focus_prev();
+                        window.focus_prev(cx);
                     } else {
-                        window.focus_next();
+                        window.focus_next(cx);
                     }
                     cx.refresh_windows();
                 }

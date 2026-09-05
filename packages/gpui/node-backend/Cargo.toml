@@ -15,11 +15,11 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-# GPUI framework — the published crates.io release. This is a public-intent
-# package: a consumer that also depends on crates.io `gpui` must receive the
-# SAME crate identity, so this source is never a Git fork, patch, or override
-# (g16.005). Optional visual tooling does not get to choose it.
-gpui = "0.2.2"
+# GPUI framework — crates.io `gpui-unofficial` 1.19.0-pre (g16.110 spike).
+# Lib name stays `gpui`, so `use gpui::*` is unchanged. The package identity
+# a consumer must declare is `gpui-unofficial`, never crates.io `gpui` 0.2.2.
+# Still never a Git fork, patch, or override.
+gpui-unofficial = "1.19.0-pre"
 poodle-node = { version = "0.3.0", path = "../../contracts/node" }
 # Undo coalescing only. The backend owns the history *storage* because history
 # is ephemeral per-field UI state and only the backend persists anything across

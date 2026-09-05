@@ -371,9 +371,9 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Focus the element through the real backend focus registry.
     pub fn focus_element(&mut self, element_id: &str) {
-        self.cx.update(|window, _cx| {
+        self.cx.update(|window, cx| {
             if let Some(handle) = poodle_gpui_node_backend::focus_handle_for(element_id) {
-                handle.focus(window);
+                handle.focus(window, cx);
             }
         });
         self.draw_frame();
@@ -382,8 +382,8 @@ impl<'a> HeadlessDriver<'a> {
     /// Move focus to the next tab stop through the window's real traversal —
     /// the native counterpart of pressing Tab, with no pointer involved.
     pub fn focus_next_tab_stop(&mut self) {
-        self.cx.update(|window, _cx| {
-            window.focus_next();
+        self.cx.update(|window, cx| {
+            window.focus_next(cx);
         });
         self.draw_frame();
     }
@@ -392,8 +392,8 @@ impl<'a> HeadlessDriver<'a> {
     /// reports the element as blurred.
     pub fn blur_element_focus(&mut self, element_id: &str) {
         for _ in 0..16 {
-            self.cx.update(|window, _cx| {
-                window.blur();
+            self.cx.update(|window, cx| {
+                window.blur(cx);
             });
             self.draw_frame();
             if poodle_gpui_node_backend::focus_state_for(element_id) == Some(false) {
@@ -581,9 +581,9 @@ impl<'a> HeadlessDriver<'a> {
     /// overlay dismissal) would never fire. The mount host is focused first;
     /// the same guarantee a document-level key listener has on the web.
     pub fn dispatch_key(&mut self, key: &str) {
-        self.cx.update(|window, _cx| {
+        self.cx.update(|window, cx| {
             let handle = self.root_focus.clone();
-            handle.focus(window);
+            handle.focus(window, cx);
         });
         self.dispatch_key_raw(key);
     }
@@ -600,6 +600,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke,
             is_held: false,
+            prefer_character_input: false,
         });
         self.cx.run_until_parked();
         self.draw_frame();
@@ -623,6 +624,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
+            prefer_character_input: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();
@@ -638,6 +640,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
+            prefer_character_input: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();

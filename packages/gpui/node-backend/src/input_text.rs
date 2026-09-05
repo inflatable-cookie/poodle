@@ -430,10 +430,9 @@ impl Element for InputText {
             underline: None,
             strikethrough: None,
         };
-        let line =
-            window
-                .text_system()
-                .shape_line(display.clone().into(), font_size, &[run], None);
+        let line = window
+            .text_system()
+            .shape_line(display.clone().into(), font_size, &[run], None);
 
         // The caret is the height of the text, not the field — a field-height
         // caret in a padded input looks like a divider.
@@ -549,7 +548,14 @@ impl Element for InputText {
         let line = prepaint.line.take().expect("prepaint shapes the line");
         let text_top = bounds.top() + (bounds.size.height - window.line_height()) / 2.0;
         let origin_x = prepaint.origin_x;
-        let _ = line.paint(point(origin_x, text_top), window.line_height(), window, cx);
+        let _ = line.paint(
+            point(origin_x, text_top),
+            window.line_height(),
+            gpui::TextAlign::Left,
+            None,
+            window,
+            cx,
+        );
         if let Some(caret) = prepaint.caret.take() {
             window.paint_quad(caret);
         }

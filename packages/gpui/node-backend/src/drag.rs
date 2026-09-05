@@ -841,13 +841,10 @@ impl DragDropController {
                     return;
                 };
                 let controller = DragDropController { state };
-                let applied = cx.update(|cx| {
+                cx.update(|cx| {
                     controller.drain_host_answers(cx);
                     cx.refresh_windows();
                 });
-                if applied.is_err() {
-                    return;
-                }
             }
         })
         .detach();

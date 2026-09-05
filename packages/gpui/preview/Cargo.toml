@@ -35,10 +35,14 @@ window-capture = [
 ]
 
 [dependencies]
-# GPUI framework — the published crates.io release, matching the node
-# backend's public source. `Application::new()` is the framework's own
-# constructor here; there is no separate platform crate to depend on.
-gpui = "0.2.2"
+# GPUI framework — crates.io `gpui-unofficial` 1.19.0-pre, matching the
+# node backend's public source (g16.110 spike). Lib name stays `gpui`.
+# `Application::new()` is gone. The live preview needs
+# `gpui-platform-gpui-unofficial`, but that crate's macOS backend
+# (`gpui-apple`) cannot build from crates.io: its build.rs looks for a
+# sibling `../gpui-unofficial` that cargo's registry layout does not
+# provide. Headless tests use `TestAppContext` and do not need it.
+gpui-unofficial = "1.19.0-pre"
 
 # Poodle adapter + contracts + real components
 poodle-gpui = { path = "../adapter" }
@@ -115,4 +119,4 @@ path = "tests/visual_fixture_inventory.rs"
 # (TestAppContext / VisualTestContext / TestWindow). test-support is a
 # dev-dependency so ordinary builds and the preview bin never pull it in.
 [dev-dependencies]
-gpui = { version = "0.2.2", features = ["test-support"] }
+gpui-unofficial = { version = "1.19.0-pre", features = ["test-support"] }

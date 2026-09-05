@@ -5,6 +5,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-05 — `gpui-apple-gpui-unofficial` 1.19.0-pre `build.rs` looks for a
+  sibling `../gpui-unofficial` (the unofficial transform rewrote `../gpui`).
+  Cargo extracts `gpui-unofficial-1.19.0-pre`, so the published macOS backend
+  cannot build from crates.io. Live `Application` construction is blocked.
+  Hit while executing g16.110.
+
 - 2026-09-05 — g16.105 worker ran with the coordinator checkout as cwd and left
   byte-identical merged PR #210 files (`window_capture.rs` modified and
   `icon_geometry_capture.rs` untracked). Cleaned only after comparing those

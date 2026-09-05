@@ -245,12 +245,14 @@ pub fn specimen_card(title: &str, theme: &GpuiThemeProvider, content: impl IntoE
                 offset: point(px(0.0), px(2.0)),
                 blur_radius: px(8.0),
                 spread_radius: px(0.0),
+                inset: false,
             },
             gpui::BoxShadow {
                 color: hsla(0.0, 0.0, 0.0, 0.04),
                 offset: point(px(0.0), px(1.0)),
                 blur_radius: px(2.0),
                 spread_radius: px(0.0),
+                inset: false,
             },
         ])
         .child(

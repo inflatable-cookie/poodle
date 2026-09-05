@@ -35,8 +35,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, AppContext as _, Application, AssetSource, AsyncApp, Bounds, Entity, Point,
-    Render, VisualContext as _, Window, WindowBounds, WindowOptions,
+    px, size, App, AppContext as _, AssetSource, AsyncApp, Bounds, Entity, Point, Render,
+    VisualContext as _, Window, WindowBounds, WindowOptions,
 };
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
@@ -306,7 +306,13 @@ pub fn capture_batch<V: Render, A: AssetSource>(
     // Baseline BEFORE the application exists, let alone a window.
     let monitor = Arc::new(ForegroundMonitor::start());
 
-    Application::new().with_assets(assets).run(move |cx: &mut App| {
+    fail(anyhow::anyhow!(
+        "g16.110: live Application requires gpui-platform-gpui-unofficial; \
+         gpui-apple 1.19.0-pre cannot build from crates.io \
+         (build.rs looks for ../gpui-unofficial)"
+    ));
+    #[allow(unreachable_code, unused_variables, unused_mut)]
+    let _blocked = move |cx: &mut App| {
         if !fonts.is_empty() {
             if let Err(error) = cx
                 .text_system()
@@ -330,7 +336,7 @@ pub fn capture_batch<V: Render, A: AssetSource>(
             std::process::exit(0);
         })
         .detach();
-    });
+    };
 
     // `Application::run` does not return on macOS; if it ever does, the run
     // produced no capture, which is a failure rather than a silent success.

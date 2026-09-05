@@ -33,7 +33,7 @@ use poodle_node::{
     DragSession, DragSessionPhase, DragSubject, DragTerminalOutcome, DropEligibility, FocusRing,
     LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeAnimation, NodeContinuousValueEvent,
     NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent, NodeDropIntentEvent,
-    NodeDropTarget, NodeKind, NodePosition, NodeRole, NodeWheelEvent,
+    NodeDropTarget, NodeKind, NodePosition, NodeRole, NodeToggled, NodeWheelEvent,
 };
 use poodle_render::{
     audio_entry_id, fader_spec_from_context, fader_with_handlers, history_center,
@@ -35122,5 +35122,70 @@ fn disabled_pointer_routing_blocks_a_live_activation_sink() {
         );
 
         assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// g16.110 — AccessKit projection for Checkbox, Slider, and Tabs.
+///
+/// Projection is applied at conversion (`accessibility.projection.applied`).
+/// The in-memory test platform never activates AccessKit
+/// (`TestWindow::a11y_init` is the trait default no-op), so
+/// `debug_a11y_tree_json` is None. That is the executed tree-read result,
+/// not a skip. Pointer activation still proves the Click handler is wired.
+#[test]
+fn accesskit_projects_checkbox_slider_and_tabs_and_test_platform_builds_no_tree() {
+    run_headless(|cx| {
+        let mut checkbox = Node::button("");
+        checkbox.id = Some("a11y-checkbox".into());
+        checkbox.a11y.role = Some(NodeRole::CheckBox);
+        checkbox.a11y.label = Some("Accept terms".into());
+        checkbox.a11y.toggled = Some(NodeToggled::True);
+
+        let mut slider = Node::container();
+        slider.id = Some("a11y-slider".into());
+        slider.a11y.role = Some(NodeRole::Slider);
+        slider.a11y.label = Some("Volume".into());
+        slider.a11y.value = Some(40.0);
+        slider.a11y.value_min = Some(0.0);
+        slider.a11y.value_max = Some(100.0);
+
+        let mut tab = Node::button("Overview");
+        tab.id = Some("a11y-tab".into());
+        tab.a11y.role = Some(NodeRole::Tab);
+        tab.a11y.label = Some("Overview".into());
+        tab.a11y.selected = Some(true);
+
+        let mut root = Node::container();
+        root.children = vec![checkbox, slider, tab];
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 400.0, 180.0);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            channels.iter().any(|c| *c == "accessibility.projection.applied"),
+            "conversion must apply AccessKit attributes, got {channels:?}"
+        );
+
+        let checkbox_snap = poodle_gpui_node_backend::painted_node_for("a11y-checkbox")
+            .expect("checkbox painted");
+        assert_eq!(checkbox_snap.a11y_role, Some(NodeRole::CheckBox));
+        assert_eq!(checkbox_snap.a11y_label.as_deref(), Some("Accept terms"));
+        let slider_snap =
+            poodle_gpui_node_backend::painted_node_for("a11y-slider").expect("slider painted");
+        assert_eq!(slider_snap.a11y_role, Some(NodeRole::Slider));
+        assert_eq!(slider_snap.a11y_label.as_deref(), Some("Volume"));
+        let tab_snap = poodle_gpui_node_backend::painted_node_for("a11y-tab").expect("tab painted");
+        assert_eq!(tab_snap.a11y_role, Some(NodeRole::Tab));
+        assert_eq!(tab_snap.a11y_label.as_deref(), Some("Overview"));
+
+        let (active, json) = driver.with_window(|window, _cx| {
+            (window.is_a11y_active(), window.debug_a11y_tree_json())
+        });
+        assert!(
+            !active && json.is_none(),
+            "expected the 1.19.0-pre test platform to leave AccessKit inactive \
+             (is_a11y_active={active}, json={json:?})"
+        );
     });
 }
