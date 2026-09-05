@@ -15,6 +15,9 @@ allow = [
   "0BSD",
   "Apache-2.0",
   "Apache-2.0 WITH LLVM-exception",
+  # Permissive bzip2 licence (libbz2-rs-sys via the gpui-unofficial http
+  # client). Operator-approved 2026-09-05 for the g16.110 route.
+  "bzip2-1.0.6",
   "BSD-2-Clause",
   "BSD-3-Clause",
   "BSL-1.0",
