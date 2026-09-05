@@ -36,7 +36,7 @@ accessibility 29/29 across 176 component evidence rows.
 - `effigy test:nucleus-parity-receipts` — 11 passed
 - `effigy check:parity-evidence-ledger` — 176 rows validated
 - `effigy ci:web` — passed
-- `effigy ci:rust` — passed previously at the same code source pin
+- `effigy ci:rust` — passed at the revised implementation source pin
 - `git diff --check` — clean
 
 The prior `effigy ci:web` run at `da369c40f` passed the full board before
