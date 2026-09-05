@@ -79,7 +79,7 @@ describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
   const rows = listScenarioRows(root);
 
   it("has the foundation, NP-1, NP-2, NP-3, and NP-5 scenarios", () => {
-    expect(rows).toEqual(["agent-chat-input", "agent-plan", "agent-question", "agent-transcript", "app-header", "button", "command-palette", "dialog", "editable-label", "icon", "icon-button", "menu", "message-center", "model-picker", "popover", "segmented-control", "select", "split-view", "status-indicator", "surface", "switch", "tabs", "text", "toast-host"]);
+    expect(rows).toEqual(["agent-chat-input", "agent-plan", "agent-question", "agent-transcript", "app-header", "button", "callout", "command-palette", "confirm-action", "detail-item", "dialog", "editable-label", "icon", "icon-button", "menu", "message-center", "model-picker", "popover", "radio-group", "segmented-control", "select", "split-view", "status-indicator", "surface", "switch", "tabs", "text", "text-input", "toast-host"]);
   });
 
   for (const row of rows) {

@@ -2,9 +2,9 @@
 
 Status: complete — ready for independent exact-head review
 Date: 2026-09-05
-Base: `origin/main` at `a3c2b1b62a013bd539806d7734de89ef46ef8cd8`
+Base: `origin/main` at `eaa2e7ba20d6de585ab19f13bcb385cd1ef9b9bc`
 Branch: `worker/g16-115-nucleus-np4`
-Runtime checkpoint: `20c5e5bee75d294fcc7173e70359930e7cc68aff`
+Runtime checkpoint: `ecfdc3a662c3e937782c07f35b042e7c3bb0e294`
 
 ## Scope
 
@@ -33,15 +33,15 @@ created for the three divergent rows.
 
 ## Validation
 
-- `effigy regressions:native`: 213 passed, 0 failed, 4 ignored. Ignore
-  accounting is 1 inherited from `origin/main` plus 3 NP-4 divergence probes
-  (RadioGroup, ConfirmAction, and DetailItem).
-- `effigy test:nucleus-a11y`: 23 passed.
+- `effigy regressions:native`: 218 passed, 0 failed, 1 ignored. The one
+  ignored test is inherited from `origin/main`; the NP-4 divergence probes
+  (RadioGroup, ConfirmAction, and DetailItem) ran in the native board.
+- `effigy test:nucleus-a11y`: 30 passed.
 - `effigy test:nucleus-parity-receipts`: 11 passed.
 - `effigy check:parity-evidence-ledger`: 176 component rows validated.
 - `effigy docs:check`: passed.
 - `git diff --check`: clean.
-- Full current Nucleus receipt cohort re-emitted at `20c5e5be`; manifest resolution was
+- Full current Nucleus receipt cohort re-emitted at `ecfdc3a6`; manifest resolution was
   repinned to that source commit and the existing lock digest.
 
 ## Stop
