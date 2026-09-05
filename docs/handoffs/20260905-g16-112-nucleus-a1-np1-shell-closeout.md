@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: pr-open-awaiting-review
+status: pr-open-awaiting-review-revision
 owner: Poodle Northstar orchestrator
 created: 2026-09-05
 updated: 2026-09-05
@@ -26,7 +26,8 @@ executed accessibility projection contract established by g16.111.
 ## Current State
 
 - Dedicated worker branch: `worker/g16-112-nucleus-np1`.
-- Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be`.
+- Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be`, rebased onto current
+  `origin/main` `7c1837f0fa2fede8fbd476b3362d88dd112290d7`.
 - Added scenarios and Svelte snapshots for Icon, Text, Surface, Button,
   IconButton, AppHeader, and SplitView.
 - Added native A1 proof entry points in
@@ -34,9 +35,12 @@ executed accessibility projection contract established by g16.111.
 - Execution log: `docs/logs/2026-09/20260905-g16-112-nucleus-a1-np1-shell.md`.
 - Svelte A1 check passed. Native headless check passed with 212 tests, five
   validated A1 receipts, and two recorded divergences under the NP-1 store.
-- Receipt contract and docs checks passed. The ledger checker is intentionally
-  left for the coordinator because its generated markdown is a reserved
-  shared closeout surface.
+- Text now has a declared status probe fixture, and native proofs deserialize
+  shared scenario props and fixtures.
+- Receipt contract, docs, and the web/package/component board passed until the
+  reserved ledger step. Hosted web run `33965002026` failed at that same step;
+  the coordinator-owned markdown needs the four mounted cells and summary
+  update. No reserved closeout surface was edited here.
 - No sibling worktree dependencies.
 
 ## Boundaries
@@ -55,10 +59,9 @@ only supplies row scenarios and proofs.
 
 ## Suggested Next Move
 
-Finish the managed `effigy regressions:native` run, record its exact result,
-then run the receipt and ledger checks with the generated artifacts. Resolve
-only concrete row-local mismatches; record any contract/backend divergence and
-stop for Chatterbox if a repair is required.
+Regenerate the reserved ledger at the pushed exact head, then dispatch fresh
+independent exact-head review. The row-local Text and native-prop findings are
+resolved; AppHeader and SplitView remain recorded contract/backend deltas.
 
 ## Completion Protocol
 
