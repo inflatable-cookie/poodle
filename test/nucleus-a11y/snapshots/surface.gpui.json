@@ -1,0 +1,32 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "Surface",
+  "scenario_id": "nucleus.shell.surface",
+  "scenario_path": "test/nucleus-a11y/scenarios/surface.json",
+  "scenario_sha256": "e84b6cf6d9bee423c6051b57dead8999a423895b632aebc0647a634274e2c18d",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "region",
+      "name": "Workspace",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    }
+  ]
+}
