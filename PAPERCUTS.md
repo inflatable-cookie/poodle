@@ -11,6 +11,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-05 — later A1 tranche merges dropped already-landed `nucleus_a11y.rs`
+  probes (NP-2 menu/segmented, NP-4 radio-group). Impact: those rows had
+  snapshots in the divergence store but no live test on `main`. Restore tests
+  with the owning repair card rather than re-recording silently. Surface:
+  `packages/gpui/preview/tests/headless/nucleus_a11y.rs`.
+
 - 2026-09-05 — `effigy doctor --verbose` hit a stale same-worktree
   `task:health` lock held by PID 55014 and exited before health validation.
   Clear/retry task locks or make health lock ownership recoverable. Surface:

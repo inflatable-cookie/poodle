@@ -73,6 +73,9 @@ pub fn dialog_with_slots(
     // ── Panel ──
     let mut panel = Node::container();
     panel.id = Some("poodle-dialog-surface".to_string());
+    panel.a11y.initial_focus = true;
+    panel.interaction.focusable = true;
+    panel.a11y.tab_index = Some(-1);
     {
         let s = &mut panel.style;
         s.descriptor.background = Some(fill);

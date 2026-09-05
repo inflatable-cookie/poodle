@@ -88,3 +88,64 @@ inside each option. The mounted paired snapshots agree with an empty diff, so
 CommandPalette emits an A1 receipt.
 
 Receipt: `commandpalette--nucleus-attention-command-palette--a1.json`.
+
+## g16.119 focus and state semantics (recorded 2026-09-05)
+
+Every store below carries `diff.json`, `gpui.json`, `svelte.json`, and
+`attributes.json` for the same scenario file, emitted by the mounted GPUI
+run. Each row was repaired as far as the contract allows; what remains is
+recorded, not silently accepted.
+
+Repaired (no store left):
+
+- `agent-question/` — the option group is now `labelled_by` the prompt node
+  (`agent_question_prompt_id`), and the scenario replay keeps one stable
+  instance scope so post-action focus lands on the answered radio. Empty
+  diff; receipt `agentquestion--nucleus-agent-agent-question--a1.json`.
+
+Recorded, cause A — happy-dom counts every enabled native radio as a
+sequential tab stop. Real browsers give a native radio group one roving tab
+stop, which is what GPUI projects, so this is a limitation of the Svelte
+extractor rather than a component divergence. Repairing it means teaching
+`test/nucleus-a11y/extract.ts` native radio-group semantics, which is outside
+this card.
+
+| Store | Remaining attributes | GPUI | Svelte |
+| --- | --- | --- | --- |
+| `radio-group/` | node 1 `focus_order`, node 2 `focus_order` | Pro `null`, Free `0` (roving stop follows the selection) | Pro `0`, Free `1` |
+| `segmented-control/` | node 1 `focus_order`, node 2 `focus_order` | Grid `null`, List `0` | Grid `0`, List `1` |
+
+Both rows' state projection is repaired: `radio-group` no longer projects
+`orientation` (contract `radio-group.md` §6 — `aria-orientation` is not set;
+axis rides `data-orientation`), and `segmented-control` no longer projects
+`selected` (contract `segmented-control.md` — segments are native radios and
+carry checked semantics, not `aria-selected`).
+
+Recorded, cause B — Svelte `MenuSurface` renders each item as a plain
+`<button>` with no `tabindex`, so every enabled item is a sequential tab stop.
+GPUI keeps one roving stop on the first enabled item. `menu.md` §6 names
+focus entry and highlighted-item movement but states no tab-stop rule, so the
+contract does not decide this. Question returned to Chatterbox rather than
+repaired.
+
+| Store | Remaining attributes | GPUI | Svelte |
+| --- | --- | --- | --- |
+| `menu/` | node 5 `focus_order` | Delete `null` | Delete `3` |
+
+Menu focus entry itself is repaired: opening now moves focus to the first
+enabled item through production dispatch, so node 3 `focused` agrees.
+
+Recorded, cause C — happy-dom focuses a clicked non-focusable element.
+
+| Store | Remaining attributes | GPUI | Svelte |
+| --- | --- | --- | --- |
+| `agent-transcript/` | node 0 `focused` | `null` | `true` |
+
+`agent-transcript.md` §"Focus And Announcement" states the transcript never
+takes focus on append and output must not move focus. GPUI is correct; the
+Svelte value is the extractor focusing a clicked `role="log"` container.
+Making the log a tab stop to match would contradict the contract.
+
+Reproduce all four: `POODLE_NUCLEUS_RECEIPT_DIR=$PWD/target/nucleus-receipts
+cargo test --manifest-path packages/gpui/preview/Cargo.toml --test
+headless_regressions a1_accessibility`.

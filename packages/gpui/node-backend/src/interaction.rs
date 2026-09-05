@@ -161,8 +161,38 @@ fn release_continuous(
     }
 }
 
+fn should_focus_opening_menu_item(node: &Node) -> bool {
+    matches!(
+        node.a11y.role,
+        Some(NodeRole::MenuItem | NodeRole::MenuItemCheckBox | NodeRole::MenuItemRadio)
+    ) && node.a11y.tab_index == Some(0)
+        && node.interaction.focusable
+        && !node.interaction.disabled
+        && super::FOCUSED_FIELD.with(|focused| focused.borrow().is_none())
+}
+
+fn should_focus_initial_overlay_node(node: &Node) -> bool {
+    node.a11y.initial_focus
+        && node.interaction.focusable
+        && !node.interaction.disabled
+        && super::FOCUSED_FIELD.with(|focused| focused.borrow().is_none())
+}
+
 pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
     if node.interaction.request_focus {
+        super::layers::request_focus(id);
+    } else if should_focus_initial_overlay_node(node) {
+        // Overlay renderers mark their single initial target in the
+        // accessibility record. Queue through the same paint-time request
+        // path as machine effects so a target that is mounted this frame is
+        // focused only after its owned handle exists.
+        super::layers::request_focus(id);
+    } else if should_focus_opening_menu_item(node) {
+        // Menu's machine emits FocusFirstItem on open. The panel renderer is
+        // stateless, so the backend applies that effect once: the first
+        // sequential tab-stop item is focused while the window still has no
+        // attributed focus. Re-queuing after another item is focused would
+        // steal arrow-key movement back to the first row every frame.
         super::layers::request_focus(id);
     }
     // A pointer press that lands inside a dismissable layer must still run

@@ -42,6 +42,13 @@ pub fn popover_layer_id(instance_id: Option<&str>) -> String {
         .unwrap_or_else(|| "popover-layer".to_owned())
 }
 
+fn first_focusable_mut(node: &mut Node) -> Option<&mut Node> {
+    if node.interaction.focusable && !node.interaction.disabled {
+        return Some(node);
+    }
+    node.children.iter_mut().find_map(first_focusable_mut)
+}
+
 /// Host-owned interaction intent. The backend turns these into real listeners.
 #[derive(Clone, Default)]
 pub struct PopoverHandlers {
@@ -195,15 +202,28 @@ pub fn popover(
         let mut node = popover_surface(spec, ctx, content);
         node.id = Some(surface_id.clone());
         node.runtime_id = Some(surface_id.clone());
-        node.interaction.focusable = spec.initial_focus == poodle_specs::PopoverInitialFocus::Content;
-        node.a11y.tab_index = Some(if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content { 0 } else { -1 });
+        node.interaction.focusable = matches!(
+            spec.initial_focus,
+            poodle_specs::PopoverInitialFocus::Content
+        );
+        node.a11y.tab_index = Some(if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content {
+            0
+        } else {
+            -1
+        });
         if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content {
+            node.a11y.initial_focus = true;
             // The surface itself is the focus target in content mode; the
             // focus patch also makes the focused state backend-observable.
             node.style.focus = Some(poodle_node::StylePatch {
                 border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 ..poodle_node::StylePatch::default()
             });
+        }
+        if spec.initial_focus == poodle_specs::PopoverInitialFocus::FirstFocusable {
+            if let Some(target) = first_focusable_mut(&mut node) {
+                target.a11y.initial_focus = true;
+            }
         }
         node.interaction.dismiss_layer = Some(layer_id.clone());
         if spec.surface_width.is_trigger() {

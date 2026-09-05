@@ -15,15 +15,16 @@ use poodle_node::Node;
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
     CommandPaletteHandlers, ConfirmActionHandlers, EditableLabelHandlers, MessageCenterHandlers,
-    PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers,
+    PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers, TabsHandlers,
+    ToastStackHandlers,
 };
 use poodle_specs::{
     AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, AppHeaderSpec,
     ButtonSpec, ButtonVariant, ChoiceOption, CommandActionItem, CommandPaletteSpec, ControlDensity,
     ControlSize, DialogSpec, EditableLabelActivation, EditableLabelSpec, IconButtonSpec,
     IconProviderSpec, IconSize, IconSpec, MenuEntry, MenuSpec, MessageCenterItem,
-    MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection,
-    Orientation, PaddingScale, PopoverInitialFocus, PopoverSpec, SegmentedControlOption,
+    MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection, Orientation,
+    PaddingScale, PopoverInitialFocus, PopoverSpec, RadioGroupSpec, SegmentedControlOption,
     SegmentedControlSpec, SelectMode, SelectSpec, SplitOrientation, SplitViewSpec,
     StatusIndicatorSpec, StatusTone, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone,
     SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, TextElement, TextSize, TextSpec,
@@ -1598,6 +1599,227 @@ fn toast_host_a1_accessibility_projection_matches_svelte() {
             &loaded,
             &["mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"],
             &["stack label, listitem toasts, dismiss and retry names match the Svelte ARIA projection"],
+        );
+    });
+}
+
+// ── g16.119 focus and state semantics ─────────────────────────────────────
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SegmentedControlA1Props {
+    options: Vec<SegmentedControlA1OptionProps>,
+    default_value: Option<String>,
+    value: Option<String>,
+    aria_label: Option<String>,
+    equal_width: Option<bool>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SegmentedControlA1OptionProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+}
+
+fn build_segmented_control_a1(
+    spec: &SegmentedControlSpec,
+    host: &Arc<Mutex<SegmentedControlSpec>>,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let host = Arc::clone(host);
+    let mounted = Arc::clone(mounted);
+    let theme_provider = theme();
+    poodle_render::segmented_control(
+        spec,
+        &RenderContext::new(&theme_provider),
+        Some(Arc::new(move |value: &str| {
+            let mut next = host.lock().expect("segmented host").clone();
+            next.value = Some(value.to_owned());
+            *host.lock().expect("segmented host") = next.clone();
+            *mounted.lock().expect("segmented mount") =
+                build_segmented_control_a1(&next, &host, &mounted);
+        })),
+    )
+}
+
+#[test]
+fn segmented_control_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("segmented-control");
+    let props: SegmentedControlA1Props = props(&loaded);
+    let options = props
+        .options
+        .iter()
+        .map(|item| {
+            SegmentedControlOption::new(item.value.clone(), item.label.clone())
+                .with_disabled(item.disabled.unwrap_or(false))
+        })
+        .collect();
+    let mut spec = SegmentedControlSpec::new("a1", options);
+    spec.default_value = props.default_value.clone();
+    spec.value = props.value.clone();
+    spec.aria_label = props.aria_label.clone();
+    spec.equal_width = props.equal_width.unwrap_or(true);
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(spec.clone()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("segmented mount") =
+            build_segmented_control_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
+        driver.wait_for_focus_handle("segmented:a1:option:list");
+        replay(&mut driver, &loaded.scenario.actions);
+        // Contract/GPUI: one roving tab stop on the selected segment. The
+        // Svelte extractor counts every enabled native radio as a sequential
+        // stop, so Grid and List still differ on focus_order.
+        record_shell_divergence(
+            &mut driver,
+            &loaded,
+            &[("1", "focus_order"), ("2", "focus_order")],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MenuA1Props {
+    items: Vec<MenuA1ItemProps>,
+    default_open: Option<bool>,
+    aria_label: Option<String>,
+    trigger_aria_label: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MenuA1ItemProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+    tone: Option<String>,
+}
+
+fn menu_a1_trigger(label: &str, inner: &str) -> Node {
+    let mut child = Node::container();
+    child.a11y.role = Some(poodle_node::NodeRole::Button);
+    child.a11y.label = Some(inner.to_owned());
+    child.interaction.focusable = true;
+    child.a11y.tab_index = Some(0);
+    let mut trigger = Node::container().child(child);
+    trigger.a11y.role = Some(poodle_node::NodeRole::Button);
+    trigger.a11y.label = Some(label.to_owned());
+    trigger.interaction.focusable = true;
+    trigger.a11y.tab_index = Some(0);
+    trigger
+}
+
+#[test]
+fn menu_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("menu");
+    let props: MenuA1Props = props(&loaded);
+    let items = props
+        .items
+        .iter()
+        .map(|item| {
+            MenuEntry::new(item.value.clone(), item.label.clone())
+                .with_disabled(item.disabled.unwrap_or(false))
+                .with_destructive(item.tone.as_deref() == Some("danger"))
+        })
+        .collect();
+    let mut spec = MenuSpec::new(items).with_default_open(props.default_open.unwrap_or(false));
+    if let Some(label) = &props.aria_label {
+        spec = spec.with_aria_label(label.clone());
+    }
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let menu = poodle_render::menu(&spec, &RenderContext::new(&theme_provider), None);
+        let root = Node::container()
+            .child(menu_a1_trigger(
+                props.trigger_aria_label.as_deref().unwrap_or("Open"),
+                loaded.scenario.fixtures["trigger_text"]
+                    .as_str()
+                    .expect("trigger_text fixture"),
+            ))
+            .child(menu);
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
+        driver.wait_for_focus_handle("menu-item:new");
+        // Opening focuses the first enabled item. Remaining: Svelte lists
+        // every enabled menuitem as a sequential tab stop; GPUI keeps one
+        // roving stop, so Delete is not in focus_order.
+        record_shell_divergence(&mut driver, &loaded, &[("5", "focus_order")]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RadioGroupA1Props {
+    options: Vec<RadioGroupA1OptionProps>,
+    default_value: Option<String>,
+    aria_label: Option<String>,
+    orientation: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RadioGroupA1OptionProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+}
+
+fn build_radio_group_a1(
+    spec: &RadioGroupSpec,
+    host: &Arc<Mutex<RadioGroupSpec>>,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let host = Arc::clone(host);
+    let mounted = Arc::clone(mounted);
+    poodle_render::radio_group(
+        spec,
+        &RenderContext::new(&theme()),
+        RadioGroupHandlers::new("a1").on_change(Arc::new(move |value: &str| {
+            let mut next = host.lock().expect("radio host").clone();
+            next.value = Some(value.to_owned());
+            *host.lock().expect("radio host") = next.clone();
+            *mounted.lock().expect("radio mount") = build_radio_group_a1(&next, &host, &mounted);
+        })),
+    )
+}
+
+#[test]
+fn radio_group_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("radio-group");
+    let input: RadioGroupA1Props = props(&loaded);
+    let options = input
+        .options
+        .iter()
+        .map(|option| {
+            let mut choice = ChoiceOption::new(&option.value, &option.label);
+            choice.is_disabled = option.disabled.unwrap_or(false);
+            choice
+        })
+        .collect();
+    let mut spec = RadioGroupSpec::new(options).with_value(input.default_value.unwrap_or_default());
+    if let Some(label) = input.aria_label {
+        spec.aria_label = Some(label);
+    }
+    spec.orientation = match input.orientation.as_deref() {
+        Some("horizontal") => Orientation::Horizontal,
+        _ => Orientation::Vertical,
+    };
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(spec.clone()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("radio mount") = build_radio_group_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 180.0);
+        driver.wait_for_focus_handle("radio:a1:option:pro");
+        replay(&mut driver, &loaded.scenario.actions);
+        // After selecting Free the single GPUI tab stop follows the selection.
+        // Svelte's extractor still lists both enabled native radios as stops.
+        record_shell_divergence(
+            &mut driver,
+            &loaded,
+            &[("1", "focus_order"), ("2", "focus_order")],
         );
     });
 }

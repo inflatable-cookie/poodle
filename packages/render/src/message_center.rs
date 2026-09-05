@@ -129,6 +129,7 @@ pub fn message_center(
             -1
         });
         if popover_spec.initial_focus == PopoverInitialFocus::Content {
+            node.a11y.initial_focus = true;
             node.style.focus = Some(StylePatch {
                 border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 ..StylePatch::default()

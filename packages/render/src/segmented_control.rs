@@ -222,7 +222,10 @@ pub fn segmented_control(
         seg.runtime_id = Some(segment_focus_id(instance_scope, &option.value));
         seg.a11y.role = Some(NodeRole::RadioButton);
         seg.a11y.label = Some(option.aria_label.clone().unwrap_or_else(|| option.label.clone()));
-        seg.a11y.selected = Some(is_selected);
+        // Contract/Svelte use native radio `checked` (`toggled` here), not
+        // `aria-selected`. Projecting `selected` made the A1 snapshot diverge
+        // on a state the web radiogroup never sets.
+        seg.a11y.selected = None;
         seg.a11y.toggled = Some(if is_selected {
             NodeToggled::True
         } else {
@@ -636,7 +639,7 @@ mod tests {
         assert_eq!(node.a11y.label.as_deref(), Some("View mode"));
         let grid = find_segment(&node, "Grid");
         assert_eq!(grid.a11y.role, Some(NodeRole::RadioButton));
-        assert_eq!(grid.a11y.selected, Some(false));
+        assert_eq!(grid.a11y.selected, None);
         assert_eq!(grid.a11y.toggled, Some(NodeToggled::False));
         assert_eq!(grid.a11y.tab_index, Some(0));
         let list = find_segment(&node, "List");
@@ -653,7 +656,7 @@ mod tests {
         assert_eq!(find_segment(&node, "Grid").a11y.tab_index, Some(-1));
         let list = find_segment(&node, "List");
         assert_eq!(list.a11y.tab_index, Some(0));
-        assert_eq!(list.a11y.selected, Some(true));
+        assert_eq!(list.a11y.selected, None);
         assert_eq!(list.a11y.toggled, Some(NodeToggled::True));
         assert_eq!(find_segment(&node, "Table").a11y.tab_index, Some(-1));
     }
