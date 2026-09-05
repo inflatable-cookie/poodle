@@ -38,17 +38,20 @@ executed accessibility projection contract established by g16.111.
 - Text now has a declared status probe fixture, and native proofs deserialize
   shared scenario props and fixtures.
 - Receipt contract, documentation audits, and the web/package/component board
-  passed until the reserved ledger step. Hosted web run `33965002026` failed at that same step;
-  the coordinator-owned markdown needs the five mounted cells and summary
-  update. No reserved closeout surface was edited here.
+  passed after regenerating the lane-owned evidence ledger. Hosted web run
+  `33965002026` was the pre-clarification failure at the stale ledger step;
+  exact-head hosted runs are required after this push.
 - No sibling worktree dependencies.
 
 ## Boundaries
 
 Keep the PR to NP-1 owned scenarios, snapshots, native A1 tests, execution log,
-handoff, and append-only papercut evidence. Do not change component contracts,
-Svelte components, backend behaviour, shared closeout surfaces, or windowed
-selectors. Do not merge.
+handoff, the generated parity evidence ledger, and append-only papercut
+evidence. `docs/roadmaps/g16/parity-evidence-ledger.md` is lane-owned generated
+evidence. Only `docs/roadmaps/g16/README.md` and
+`docs/roadmaps/generation-index.md` remain reserved. Do not change component
+contracts, Svelte components, backend behaviour, or windowed selectors. Do not
+merge.
 
 ## Important Context
 
@@ -59,9 +62,10 @@ only supplies row scenarios and proofs.
 
 ## Suggested Next Move
 
-Regenerate the reserved ledger at the pushed exact head, then dispatch fresh
-independent exact-head review. The row-local Text and native-prop findings are
-resolved; AppHeader and SplitView remain recorded contract/backend deltas.
+Regenerate the lane-owned ledger at the pushed exact head, verify both hosted
+workflow runs for that exact branch head, then dispatch fresh independent
+exact-head review. The row-local Text and native-prop findings are resolved;
+AppHeader and SplitView remain recorded contract/backend deltas.
 
 ## Completion Protocol
 

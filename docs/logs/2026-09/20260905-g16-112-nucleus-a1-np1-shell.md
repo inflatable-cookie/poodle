@@ -33,14 +33,12 @@ SplitView. No component, contract, Svelte, or backend behaviour changes.
   are stored under `nucleus-parity-receipts/a1-divergences/np1/`.
 - `git diff --check`: passed.
 - `effigy test:nucleus-parity-receipts`: passed, 11 tests.
-- `effigy docs:check`: documentation lint/audits passed, then the selector
-  reached the same coordinator-owned ledger boundary and failed there.
-- `effigy ci:web`: web/package/component checks passed; it stops at the
-  coordinator-owned ledger boundary because the reserved markdown lacks the
-  five new mounted cells and summary update.
-- `effigy check:parity-evidence-ledger`: same reserved boundary (five NP-1
-  rows, four component accessibility cells, and GPUI `7 mounted / 168 manual`
-  summary drift); no reserved closeout surface changed.
-- Hosted `web` run `33965002026` failed at that same ledger step; Svelte checks
-  passed. Coordinator must regenerate the reserved ledger at this exact head.
+- `bun scripts/parity-evidence-ledger.ts --write`: regenerated the lane-owned
+  evidence ledger; validation passed with 176 component rows.
+- `effigy docs:check`: documentation lint/audits and ledger validation passed.
+- `effigy check:parity-evidence-ledger`: passed after regenerating the ledger;
+  NP-1 now records five mounted rows and GPUI accessibility is `7 mounted /
+  168 manual`.
+- Hosted `web` run `33965002026` was the pre-clarification failure at the stale
+  ledger step; a new exact-head hosted run is required after push.
 - Windowed selectors: not run.
