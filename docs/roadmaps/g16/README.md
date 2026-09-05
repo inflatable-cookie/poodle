@@ -146,6 +146,9 @@ stay maintained; backend admission is not part of the first card.
 103. [103 — Release tarball dist verification repair](103-release-tarball-dist-verification.md) — ready, urgent; operator-authorized workflow repair aligns release archive assertions with the compiled `dist/**` contract and blocks `097`
 104. [104 — Release workflow checkout base ref and pre-tag dry run](104-release-workflow-checkout-base-ref.md) — ready, priority; dry run `33908714014` failed because `release.yml` checks out only the tag ref; adds the checkout fix from `096` and a branch dry-run path so the candidate is proven before tagging
 105. [105 — Window-capture icon-geometry fixture kind](105-window-capture-icon-geometry-fixtures.md) — ready; lets the non-activating capture binary render the six candidate pairs per state so the lab's GPUI leg can serve `051`
+106. [106 — Button leading-inset edge delta diagnosis](106-button-leading-inset-edge-delta.md) — ready; the two unclassified lab findings share `poodle-render`'s leading-inset path; repair the rounding or contract `gpui-snaps-subpixel-edge`
+107. [107 — Validation hygiene bundle](107-validation-hygiene-bundle.md) — ready; clean-tree boards, per-worktree gate state, doctor tuning, wider coverage, ungated-red disposition, GPUI harness flake causes, Jetstream README truth
+108. [108 — Docs spine compaction](108-docs-spine-compaction.md) — ready; archive closed handoffs and historical parity, purge unreferenced specs, fix guide snippets, add a guide-snippet compile check
 
 ## Parallel Continuation
 

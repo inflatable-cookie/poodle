@@ -17,7 +17,9 @@ Current open notes:
 - `20260902-000959-jetstream-admission-hold.md` — separate Poodle/Jetstream
   authority remains absent.
 - `20260901-233708-holistic-posture-assessment.md` — pruned remainder:
-  validation-hygiene, repository-settings, docs-compaction, and web-pair
-  architecture candidates; everything else is promoted.
+  repository-settings and web-pair architecture candidates; everything
+  else is promoted.
 - `20260904-151947-consumer-sweep-intake.md` — first consumer intake run;
   Tabs styling seam is the open remainder, `0.3.0` adoption closes ten.
+- `20260904-155753-lab-button-run-findings.md` — Finding 1 promoted as
+  `g16.106`; closes on its merge.

@@ -1,7 +1,7 @@
 # Lab Button Run — Unclassified Findings And Density Observability
 
-Status: open — two unclassified findings await a bounded Poodle diagnosis;
-one evidence-integrity observation awaits a lab fixture check
+Status: open — Finding 1 promoted as `g16.106`; Finding 2 answered by the
+lab in PR #2 (see its log); this note closes when `106` merges
 Captured: 2026-09-04
 Owner: Chatterbox (planning)
 Source: poodle-lab `g01.001` closed Button batch at exact head `fb839407b`
