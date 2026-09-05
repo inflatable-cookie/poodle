@@ -40,7 +40,9 @@ import {
 } from "./scope";
 
 const repoRoot = resolve(import.meta.dir, "../..");
-const artifactRoot = mkdtempSync(join(tmpdir(), "poodle-web-pack-install-"));
+// macOS tmpdir is `/var/folders/...` → `/private/var/folders/...`. tsc
+// `--traceResolution` prints the realpath, so the temp root must match.
+const artifactRoot = realpathSync(mkdtempSync(join(tmpdir(), "poodle-web-pack-install-")));
 const innerRun = globalThis.process.env.POODLE_WEB_PACK_INSTALL_INNER === "1";
 
 type PackageManifest = {
@@ -810,10 +812,8 @@ async function proveInstalledReactPublicRoot(
     process.exited,
   ]);
   const trace = `${stdout}\n${stderr}`;
-  const fromProbe = `Resolving module '${REACT_PUBLIC_SPECIFIER}' from '${join(
-    consumerRoot,
-    PACKED_TYPE_PROOF_DIR,
-    REACT_ROOT_RESOLVE_FILE,
+  const fromProbe = `Resolving module '${REACT_PUBLIC_SPECIFIER}' from '${realpathSync(
+    join(consumerRoot, PACKED_TYPE_PROOF_DIR, REACT_ROOT_RESOLVE_FILE),
   )}'`;
   if (!trace.includes(fromProbe)) {
     throw new Error(

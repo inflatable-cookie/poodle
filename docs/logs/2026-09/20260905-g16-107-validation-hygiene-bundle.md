@@ -28,8 +28,10 @@ No workflow, component, or contract edits. No windowed selectors.
 ## Item results
 
 1. **Pack tarballs leave the checkout.** `test:web-pack-install` writes
-   under `os.tmpdir()`. Archive paths resolve against the pack destination
-   and reject a checkout path. Proof: `pack-archives.test.ts` 3/3.
+   under `os.tmpdir()` (realpathed so macOS `/var` matches tsc
+   `/private/var`). Archive paths resolve against the pack destination
+   and reject a checkout path. Proof: `pack-archives.test.ts` 3/3; inner
+   pack-install pass; failed qa run left porcelain empty.
 2. **Gate snapshots are per worktree.** Snapshot file is
    `poodle-gate-tree-guard-<sha256(git rev-parse --show-toplevel)[:16]>.json`
    in the OS temp dir. Proof: unit tests 3/3; live `--snapshot` / `--compare`
@@ -86,7 +88,11 @@ No workflow, component, or contract edits. No windowed selectors.
 - `bun run vitest run --project svelte-preview packages/svelte/preview/test/value-domain-drift.test.ts`: 4 pass
 - `cargo test --manifest-path packages/contracts/node/Cargo.toml`: 12 pass
 - `git diff --check origin/main...HEAD`: pass (pre-commit)
-- `effigy docs:check` on HEAD with item 7: failed at `check:parity-evidence-ledger`. Item 7 reverted.
-- `effigy docs:check` / `effigy qa`: after the revert commit
+- `effigy doctor --verbose` after revert: exit 0 (ok 18, warn 3, err 0)
+- `git diff --check origin/main...HEAD`: pass
+- `effigy docs:check` after item 7 revert: pass (value-domain ratchet 30 keys; ledger 176 rows; tree clean)
+- `effigy qa` on revert HEAD: failed `test:web-pack-install` — tsc `--traceResolution` prints `/private/var/...` while `os.tmpdir()` is `/var/...`. Realpath the temp root and the React probe path.
+- inner `POODLE_WEB_PACK_INSTALL_INNER=1` after that fix: pass
+- `effigy qa` after the pack-install commit: pending
 
 No `release prepare/execute/simulate`, tag, publish, workflow, or windowed selector.
