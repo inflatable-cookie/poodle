@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Switch",
-  "scenario_id": "nucleus.settings.switch",
+  "component": "Select",
+  "scenario_id": "nucleus.navigation.select",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,34 +46,34 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount the production Switch node tree through HeadlessDriver with the shared scenario props",
-    "replay the shared scenario actions through GPUI test-platform dispatch (pointer activate resolved by role and name)",
-    "read the mounted accessibility projection and the backend focus registry after dispatch",
+    "mount the production Select node tree through HeadlessDriver with the shared scenario props",
+    "replay the shared scenario actions through GPUI test-platform dispatch (pointer activate the trigger to open the listbox)",
+    "read the mounted accessibility projection and the backend focus registry after the host rebuild",
     "execute gpui sequential focus traversal and attribute every stop to a tracked node"
   ],
   "assertions": [
     "the normalised GPUI snapshot equals the committed Svelte DOM snapshot for the same scenario hash",
-    "gpui tab traversal visits the tracked focusable nodes in the declared order",
-    "switch role, accessible name, checked state, and focus match the Svelte ARIA projection"
+    "trigger, listbox, and option roles, names, expanded and selected states, controls indices, and value text match the Svelte ARIA projection",
+    "gpui tab traversal visits the tracked focusable nodes in the declared order"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/switch.gpui.json",
-      "sha256": "7fc3c8a0c43770807f6bcf1c23cc7d70df0ebf4795c270b72f3c55e3558e0fbe"
+      "path": "test/nucleus-a11y/snapshots/select.gpui.json",
+      "sha256": "8fa13b3d8ddd899a499b6312e8e2cae7c7b83572e6fed1043eb1874f7c75e79c"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/switch.svelte.json",
-      "sha256": "a0bf47622ef50c83193f61f07c0e93a1c8b13252fceb7540f48eb99fdcb3b914"
+      "path": "test/nucleus-a11y/snapshots/select.svelte.json",
+      "sha256": "d3d02ed35cbe23a771c1bc89dbfe8347cee8386a18e52b7af31d5d8baaa29808"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/switch.json",
-    "scenario_sha256": "70d10dd0379ca3e9d0177e647f9a2c276bd5d8a51a84c6d7a3a2f9d5e37a1b9c",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/switch.gpui.json",
-    "gpui_snapshot_sha256": "7fc3c8a0c43770807f6bcf1c23cc7d70df0ebf4795c270b72f3c55e3558e0fbe",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/switch.svelte.json",
-    "svelte_snapshot_sha256": "a0bf47622ef50c83193f61f07c0e93a1c8b13252fceb7540f48eb99fdcb3b914",
+    "scenario_path": "test/nucleus-a11y/scenarios/select.json",
+    "scenario_sha256": "a04fe29171e9e3630fb103742ad6eb0354060394c80f96519c47170f36bb31a8",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/select.gpui.json",
+    "gpui_snapshot_sha256": "8fa13b3d8ddd899a499b6312e8e2cae7c7b83572e6fed1043eb1874f7c75e79c",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/select.svelte.json",
+    "svelte_snapshot_sha256": "d3d02ed35cbe23a771c1bc89dbfe8347cee8386a18e52b7af31d5d8baaa29808",
     "web_only_exclusions": [],
     "diff": []
   }
