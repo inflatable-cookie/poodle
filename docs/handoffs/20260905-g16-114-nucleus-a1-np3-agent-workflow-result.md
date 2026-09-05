@@ -42,6 +42,8 @@ under `docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/`.
 selectors passed. `git diff --check` passed. No windowed selectors were run.
 `effigy docs:check` reached receipt validation, then stopped on coordinator-
 owned parity-ledger summary/cell drift from the new StatusIndicator receipt.
+The revision-required generated output was removed; final `git status --short`
+is clean and no source changes were hidden.
 
 ## Stop Conditions
 

@@ -30,6 +30,9 @@ StatusIndicator A1 receipt; receipt schema validation itself passed after the
 StatusIndicator empty-node exception was recorded. The ledger remains outside
 this worker lane.
 
+Revision cleanup: removed all untracked generated files under
+`packages/gpui/preview/docs/`; final `git status --short` is clean.
+
 ## Notes
 
 The Svelte package required the existing `effigy core:build` bootstrap before
