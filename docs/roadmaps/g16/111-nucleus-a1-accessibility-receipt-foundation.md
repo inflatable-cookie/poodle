@@ -70,8 +70,13 @@ distinct semantics, and leave five tranche cards ready to cover the other
   does for M1. Nothing else moves.
 - **Proof rows in this card:** Switch (toggle state, name), Tabs (roles
   tablist/tab/tabpanel, selected, controls, focus order across tabs), Select
-  (combobox/listbox, expanded, value text, active option). Their receipts
-  land here; the remaining 26 rows belong to the tranches.
+  (combobox/listbox, expanded, value text, active option). A row whose
+  snapshots match yields a validated receipt here. A row whose snapshots
+  diverge on real semantics yields a recorded divergence (the diff, both
+  snapshots, the exact attributes) in the log and the receipt store, and no
+  `mounted` cell; the repair is a separate card. Two receipts plus one
+  honest divergence satisfy this card (decision 2026-09-05: Select
+  diverged; not pulled forward). The remaining 26 rows belong to the tranches.
 - No component, contract, or backend behaviour change. Divergences found on
   the three rows are reported in the log and, if real, become bounded repair
   candidates; this card does not fix them.
