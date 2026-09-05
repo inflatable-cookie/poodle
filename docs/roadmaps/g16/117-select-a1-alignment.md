@@ -65,7 +65,10 @@ the cohort. This is the `g16.105`/`106`/`111` practice, not a scope widening.
 Manifest edits are limited to the resolution block; the 29-row cohort and
 scenario ids never change. When several tranches are open, the coordinator
 merges them one at a time and each later head re-emits at its rebase; the
-reviewer checks the cohort validates at the exact merged head.
+reviewer checks the cohort validates at the exact merged head. The lane's
+PR also commits the regenerated parity ledger
+(`docs/roadmaps/g16/parity-evidence-ledger.md`) at that head; the ledger is
+generated evidence, not a coordinator-reserved closeout surface.
 
 A row whose paired snapshots diverge on real semantics is recorded (diff,
 both snapshots, exact attributes) with no receipt and no `mounted` cell,
