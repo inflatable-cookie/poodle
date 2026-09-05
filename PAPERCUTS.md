@@ -26,6 +26,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   that stays high unless the previous line is a comment would match the
   intended rule. Surface: `effigy scan stale-suppressions`.
 
+- 2026-09-05 — Nucleus receipt identity pins the whole of
+  `packages/gpui/preview` (plus adapter, render, contracts) in
+  `scripts/nucleus-parity-receipts.ts` `SOURCE_PATHS`. A harness-only edit
+  to `window_capture.rs`, `window-capture-smoke.ts`, or `specimen_probe.rs`
+  fails `check:parity-evidence-ledger` until every receipt `source_commit`
+  is refreshed. g16.107 stopped item 7 rather than rewrite receipts (not
+  owned; hidden dependency). Narrow SOURCE_PATHS to rendered runtime, or
+  document a headless identity bump for harness-only diffs. Surface:
+  `scripts/nucleus-parity-receipts.ts` and
+  `docs/roadmaps/g16/nucleus-parity-receipts/`.
+
 - 2026-09-04 — Second sighting of the `web-preview.ts` origin/main classifier
   failure, now on a tag-ref release runner. Dry run `33908714014` at tag
   `v0.3.0` (`eab436eef`) died in `Release gates` at `test:web-pack-install`
@@ -277,7 +288,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `task-backed-...` do not. Denominator stays `git ls-files` with no path
   exclusion. Found while closing g16.028.
 
-- 2026-09-01 — RESOLVED 2026-09-05 by g16.107. `probe:gpui-specimens` fails on a wall-clock budget
+- 2026-09-01 — `probe:gpui-specimens` fails on a wall-clock budget
   (`probe shard N exceeded the two-minute test-body budget`) rather than on
   anything it constructed. All four shards reported `42/42 routes constructed`
   and still failed at 162s because a `bunx vitest run` happened to be running
@@ -307,14 +318,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   header line rather than on evidence. Derive it from the newest evidence, or
   exclude the header from the comparison. Hit while closing g16.025.
 
-- 2026-09-01 — RESOLVED 2026-09-05 by g16.107. Second sighting of the `smoke:gpui-window-capture` qa flake
+- 2026-09-01 — Second sighting of the `smoke:gpui-window-capture` qa flake
   below, this time on `tests::batch_mode_accepts_no_other_flag`. `ci:native`
   had just run the same selector green, the branch touches nothing under
   `bin/window_capture`, and the selector passed in isolation and on the next qa
   run. Two different assertions now, which points at the harness rather than
   either test. Hit while closing g16.028.
 
-- 2026-08-30 — RESOLVED 2026-09-05 by g16.107. `smoke:gpui-window-capture` failed once in `effigy qa` on
+- 2026-08-30 — `smoke:gpui-window-capture` failed once in `effigy qa` on
   `an_empty_or_malformed_batch_manifest_is_rejected`, then passed in isolation
   and on the next qa run. The smoke script only prints the last three cargo
   lines, so the real assertion is lost. Keep the full cargo stderr on failure.

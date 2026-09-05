@@ -60,15 +60,7 @@ const unit = spawnSync(
   ["test", "--quiet", "--manifest-path", MANIFEST, "--bin", "poodle-window-capture", "--features", FEATURE],
   { encoding: "utf8" },
 );
-if (unit.status !== 0) {
-  if (unit.stderr.trim()) console.error(unit.stderr);
-  if (unit.stdout.trim()) console.error(unit.stdout);
-}
-check(
-  "capture target unit tests pass",
-  unit.status === 0,
-  unit.stderr.trim() || unit.stdout.trim(),
-);
+check("capture target unit tests pass", unit.status === 0, unit.stdout.trim().split("\n").slice(-3).join(" | "));
 
 const work = mkdtempSync(join(tmpdir(), "poodle-window-capture-smoke-"));
 try {

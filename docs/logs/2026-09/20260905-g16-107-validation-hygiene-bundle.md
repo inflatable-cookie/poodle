@@ -13,8 +13,11 @@ Worker PR: pending
 
 ## Outcome
 
-Seven of eight items landed. Item 5 stopped: `check:react` exists and is red
-on current sources, so it stays off `ci:web`.
+Six of eight items landed. Item 5 stopped: `check:react` exists and is red
+on current sources, so it stays off `ci:web`. Item 7 stopped: nucleus receipt
+identity pins all of `packages/gpui/preview`; harness-only edits fail
+`check:parity-evidence-ledger`. Receipts are not owned; Chatterbox owns the
+follow-up (narrow `SOURCE_PATHS` or authorize a receipt identity bump).
 
 g16.108 also owns a line in `tasks/effigy.tasks.toml` (`docs:check` +
 `docs:snippet-check`). This lane's task edits stay on hygiene selectors;
@@ -53,11 +56,13 @@ No workflow, component, or contract edits. No windowed selectors.
    findings + 10 unresolved-type keys frozen; new or stale keys fail.
    Why: value-domain can join a board without contract edits; machine-shape
    cannot. Vitest ratchet 4/4. Script exit 0 on current inventory.
-7. **GPUI harness flakes.** `staged_path` and test temp dirs take a
-   per-call unique suffix (`pid` + atomic seq). Smoke prints full cargo
-   stderr/stdout on unit-test failure. Specimen probe keeps wall-clock as
-   telemetry and names contention; construction remains the pass/fail.
-   Proof: uniqueness test 1/1; `smoke:gpui-window-capture` all checks pass.
+7. **Stopped — GPUI harness flakes.** Implemented unique staged paths, full
+   smoke stderr, and contention-named probe telemetry, then reverted.
+   `git diff a5fefa105 HEAD -- packages/gpui/preview` is non-empty with those
+   files, so `check:parity-evidence-ledger` fails (`receipt source commit …
+   no longer matches the mounted runtime source`). Receipts and
+   `SOURCE_PATHS` are not owned. Papercut recorded 2026-09-05. The 2026-09-01
+   / 2026-08-30 harness papercuts stay open.
 8. **Jetstream adapter README.** Replaced "does not implement components"
    with the legacy 108-component implementation that is not the poodle-node
    route and is not admitted.
@@ -66,12 +71,12 @@ No workflow, component, or contract edits. No windowed selectors.
 
 | Invariant | Proof |
 | --- | --- |
-| Boards leave the tree clean | `docs:check` dirty-tree run left porcelain unchanged except this lane's files; re-run on committed HEAD |
+| Boards leave the tree clean | `docs:check` / `ci:web` on committed HEAD; porcelain empty afterwards |
 | Gate state is per worktree | distinct hashed snapshot files for two roots; live snapshot at this worktree hash |
 | Doctor is green and honest | exit 0; god-file and stale-suppression warnings still listed |
 | Coverage widened | node crate in `test:contracts`; `check:react` exists but is not on `ci:web` (item 5 stop) |
 | No ungated red `docs:*-drift` | `docs:machine-shape-drift` renamed to `advisory:machine-shape-drift`; `docs:value-domain-drift` is on `docs:check` |
-| Flake causes gone | unique staged paths; smoke stderr; work-based probe budget |
+| Flake causes gone | item 7 stopped; uniqueness / stderr / contention naming not on this head |
 
 ## Validation
 
@@ -80,10 +85,8 @@ No workflow, component, or contract edits. No windowed selectors.
 - `bun packages/svelte/preview/scripts/contract-value-domain-drift.ts`: exit 0
 - `bun run vitest run --project svelte-preview packages/svelte/preview/test/value-domain-drift.test.ts`: 4 pass
 - `cargo test --manifest-path packages/contracts/node/Cargo.toml`: 12 pass
-- `cargo test --bin poodle-window-capture staged_paths_are_unique_within_a_process`: 1 pass
-- `effigy smoke:gpui-window-capture`: pass
 - `git diff --check origin/main...HEAD`: pass (pre-commit)
-- `effigy docs:check` on dirty tree: failed at `check:parity-evidence-ledger` (`receipt source commit … no longer matches the mounted runtime source`). Value-domain ratchet had already passed. Re-run after commit.
-- `effigy qa`: after commit
+- `effigy docs:check` on HEAD with item 7: failed at `check:parity-evidence-ledger`. Item 7 reverted.
+- `effigy docs:check` / `effigy qa`: after the revert commit
 
 No `release prepare/execute/simulate`, tag, publish, workflow, or windowed selector.

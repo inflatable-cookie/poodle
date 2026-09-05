@@ -18,7 +18,7 @@ tags: [coordination, handoff, worker, pr, g16, g16.107]
 
 Worker loop for g16.107: close the 2026-09-01 validation-hygiene remainder so
 boards stop dirtying checkouts, doctor stops failing on accepted source shape,
-and red-but-ungated checks join a board or leave. Eight independent items; one
+and red-but-ungated checks join a board or leave. Eight independent items; two
 stopped.
 
 This dispatches one bounded implementation lane. No transcript or second prompt
@@ -52,7 +52,7 @@ Here is the state after the worker run:
 - **Roadmap milestone:** g16
 - **Ready cards, in order:** `docs/roadmaps/g16/107-validation-hygiene-bundle.md`
 - **Allowed runway:** g16.107 only
-- **Remaining card budget:** this card; item 5 follow-up is Chatterbox
+- **Remaining card budget:** this card; item 5 and item 7 follow-ups are Chatterbox
 - **Coordinator agent ID:** chat-dispatched worker; report through this PR
 - **Delivery route:** coordinator-attached child with `notifyOnFinish: true`;
   the coordinator records scoped creation and returned child/workspace identity.
@@ -69,7 +69,7 @@ Here is the state after the worker run:
   refreshes this head against current `main` and re-reviews it if a sibling lane
   merges first
 - **Canonical refs:** `docs/architecture/001-poodle-system-shape.md`; `docs/contracts/001-working-rules.md`
-- **Review oracle:** all rows in the g16.107 card; item 5 is the documented stop
+- **Review oracle:** all rows in the g16.107 card; items 5 and 7 are documented stops
 - **Model capability profile:** capable coding model, high reasoning
 - **Worker provider/model identity:** Cursor Grok 4.6
 - **Frontier-worker justification:** none
@@ -94,6 +94,8 @@ Please keep this run inside the named runway:
 - **Out of scope:** workflows, components, contracts, windowed selectors, merge
 - **Outcome shape:** issue-fix. Item 5 is diagnostics-plus-selector: the
   typecheck exists; putting it on `ci:web` needs the React type backlog cleared.
+  Item 7 is a hidden-dependency stop: nucleus `SOURCE_PATHS` pins
+  `packages/gpui/preview`; receipts are not owned.
 - Do not invent architecture, change contracts, widen the roadmap, or choose an
   unresolved product/API/persistence/security decision.
 - This handoff represents one worker lane, and sibling lanes may be running
@@ -119,6 +121,8 @@ Please keep this run inside the named runway:
   scorer. God-files fail only above 3200 code lines.
 - **Open tensions:** item 5 — `check:react` is red (12 component errors + preview
   specimen `string`/`ControlSize` backlog). Including it would red `ci:web`.
+  Item 7 — harness flake fixes implemented then reverted because they break
+  nucleus receipt identity. Narrow `SOURCE_PATHS` or authorize a receipt bump.
 - **Report after:** the eight-item batch
 - **Report to:** the owning coordinator through the linked child result. Do
   not require operator relay or message Chatterbox during automatic dispatch;
@@ -126,10 +130,11 @@ Please keep this run inside the named runway:
 
 ## Suggested Next Move
 
-Review the PR against the card oracle. Item 5 is the only stop: keep
-`check:react` off `ci:web` until a React type-backlog card clears it, or
-accept that call. If g16.108 merged first, rebase this head and re-run
-`docs:check` / `qa`.
+Review the PR against the card oracle. Two stops: keep `check:react` off
+`ci:web` until a React type-backlog card clears it; keep GPUI harness edits
+off this head until Chatterbox narrows nucleus `SOURCE_PATHS` or authorizes
+a receipt identity bump. If g16.108 merged first, rebase this head and
+re-run `docs:check` / `qa`.
 
 Take a moment to read the named canonical files before changing anything. If
 one of the open questions changes the shape of the work, pause and bring that
@@ -149,13 +154,14 @@ pre-committed handoff blob).
 ### While you work
 
 Eight items executed independently. Item 5 stopped on the type backlog.
+Item 7 stopped on the nucleus `SOURCE_PATHS` pin (hidden dependency).
 
 ### When the assigned runway is complete
 
 1. Run the required final validation: `effigy qa`, `effigy doctor`,
    `effigy docs:check`, `git diff --check origin/main...HEAD`.
-2. Dirty-tree `docs:check` failed at the parity ledger because the source
-   commit no longer matched; re-run on the committed head.
+2. Item 7 reds `check:parity-evidence-ledger` against receipt commit
+   `a5fefa1054198c195c9414ebef612041677e29c3`. Reverted those three files.
 3. Log: `docs/logs/2026-09/20260905-g16-107-validation-hygiene-bundle.md`
 4. Push this worker branch. If a sibling lane merged first, rebase onto
    current `main`.
@@ -172,4 +178,4 @@ Requested changes are: none yet.
 
 ### Handoff closeout
 
-Item 5 is the honest stop. Everything else in the card landed.
+Items 5 and 7 are the honest stops. The other six items landed.
