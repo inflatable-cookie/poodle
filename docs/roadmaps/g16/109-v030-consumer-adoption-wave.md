@@ -91,6 +91,17 @@ commit; Soundcheck → both.
   coordinator reviews and merges, as in the `v0.2.2` wave.
 - Close the consumer's own `PAPERCUTS.md` entries the bump resolves, citing
   the Poodle release note line.
+- **Pre-existing red boards (amended 2026-09-05).** The wave moves pins; it
+  does not repair consumer debt. If a consumer's board is red at the base
+  commit before the bump, the lane is complete when the failure set after
+  the bump is provably identical to the failure set at the base (same
+  selectors, same counts, same named failures, recorded side by side in the
+  PR and the handoff), and the pre-existing failures are filed in that
+  consumer's `PAPERCUTS.md` with the base commit named. A new failure, a
+  changed count, or a failure in a Poodle-touching path is a stop. First
+  case: Soundcheck Library PR #10 (`qa:rust:fmt`, `qa:frontend:check` 19
+  errors, `qa:frontend:test` 3 failures, all byte-identical at base
+  `bd25c6f`).
 
 ## Review Oracle
 
@@ -100,7 +111,7 @@ commit; Soundcheck → both.
 | Breaks absorbed, not shimmed | a re-export of a removed root name | reviewer rejects |
 | Foundations first | an app lane merged before its foundation is consumable | coordinator gate: Underlay apps wait on tag `v0.9.8`; Longhorn apps on the merged pin and sibling checkout |
 | No duplicate Poodle through Underlay | an app on Underlay `#v0.9.7` with Poodle `0.3.0` | lock shows two Poodle versions; lane red |
-| Board green | the repository's board red | PR carries the board transcript |
+| Board green or provably unchanged | the repository's board red | PR carries the board transcript; if red at base, the base and head failure sets side by side, identical, plus the consumer papercut entry |
 | Papercuts closed honestly | an entry closed without the fix being in 0.3.0 | reviewer checks against the release note |
 
 ## Stop Conditions
