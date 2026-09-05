@@ -6,7 +6,6 @@
 //! committed Svelte DOM snapshot produced from the same scenario file. The
 //! A1 receipt is emitted only after the diff is empty.
 
-use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use poodle_headless::agent_plan::AgentPlanStatus;
@@ -14,7 +13,7 @@ use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, TranscriptRole};
 use poodle_node::Node;
 use poodle_render::{
-    AgentPlanHandlers, AgentQuestionHandlers,
+    AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
     CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers,
     MessageCenterHandlers, PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers,
     TabsHandlers, ToastStackHandlers,
@@ -38,10 +37,7 @@ use serde_json::Value;
 use super::headless_driver::HeadlessDriver;
 use super::nucleus_receipts::{self, A1Action, A1Target, LoadedA1Scenario};
 use super::{run_headless, theme};
-use crate::node_compat::{
-    AgentChatInput as CompatAgentChatInput, AgentTranscript as CompatAgentTranscript,
-    IntoCompatNode,
-};
+use crate::node_compat::{AgentChatInput as CompatAgentChatInput, IntoCompatNode};
 
 fn gpui_key(key: &str) -> &str {
     match key {
@@ -638,8 +634,6 @@ fn status_indicator_a1_accessibility_projection_matches_svelte() {
 
 #[test]
 fn agent_transcript_a1_accessibility_projection_matches_svelte() {
-    use gpui::IntoElement;
-
     let loaded = nucleus_receipts::load_a1_scenario("agent-transcript");
     let scenario_props = loaded.scenario.props.clone();
     let provider = theme();
@@ -677,26 +671,26 @@ fn agent_transcript_a1_accessibility_projection_matches_svelte() {
     }
 
     let items = Arc::new(Mutex::new(transcript_items(&scenario_props["items"])));
-    let build: Rc<dyn Fn() -> gpui::AnyElement> = {
-        let items = Arc::clone(&items);
-        let aria_label = prop_string(&scenario_props, "ariaLabel");
-        let size = prop_size(&scenario_props);
-        let density = prop_density(&scenario_props);
-        let virtualized = scenario_props["virtualized"].as_bool().unwrap_or(false);
-        Rc::new(move || {
-            let spec = AgentTranscriptSpec::new(items.lock().expect("transcript items").clone())
-                .with_virtualized(virtualized)
-                .with_aria_label(aria_label.clone())
-                .with_size(size)
-                .with_density(density);
-            CompatAgentTranscript::from_spec(spec, &provider)
-                .with_instance_id("a1")
-                .into_element()
-        })
+    let aria_label = prop_string(&scenario_props, "ariaLabel");
+    let size = prop_size(&scenario_props);
+    let density = prop_density(&scenario_props);
+    let virtualized = scenario_props["virtualized"].as_bool().unwrap_or(false);
+    let build_node = || {
+        let spec = AgentTranscriptSpec::new(items.lock().expect("transcript items").clone())
+            .with_virtualized(virtualized)
+            .with_aria_label(aria_label.clone())
+            .with_size(size)
+            .with_density(density);
+        poodle_render::agent_transcript(
+            &spec,
+            &RenderContext::new(&provider),
+            AgentTranscriptHandlers::default(),
+        )
     };
+    let mounted = Arc::new(Mutex::new(build_node()));
 
     run_headless(|cx| {
-        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 240.0);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 240.0);
         for action in &loaded.scenario.actions {
             match action {
                 nucleus_receipts::A1Action::ProgrammaticAppend { item } => {
@@ -704,7 +698,8 @@ fn agent_transcript_a1_accessibility_projection_matches_svelte() {
                         .lock()
                         .expect("transcript items")
                         .push(transcript_item(item));
-                    driver.draw_frame();
+                    *mounted.lock().expect("transcript mount") = build_node();
+                    driver.mount_node(Arc::clone(&mounted));
                     // A host update is not input. Keep the receipt's mounted
                     // observation honest with a harmless real key dispatch;
                     // the transcript has no focusable node to steal focus.
@@ -1806,6 +1801,7 @@ fn segmented_control_a1_accessibility_projection_matches_svelte() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
         driver.wait_for_focus_handle("segmented:a1:option:list");
         replay(&mut driver, &loaded.scenario.actions);
+        driver.dispatch_probe_key("escape");
         prove(
             &mut driver,
             &loaded,
@@ -1880,6 +1876,7 @@ fn menu_a1_accessibility_projection_matches_svelte() {
         let mounted = Arc::new(Mutex::new(root));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
         driver.wait_for_focus_handle("menu-item:new");
+        driver.dispatch_probe_key("escape");
         // Opening focuses the first enabled item. Both renderers keep that
         // item as the single sequential stop while roving remains in the
         // mounted menu list.
