@@ -10,9 +10,11 @@ import {
   rmSync,
   statSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 import { packedMemberMissing } from "./archive-membership";
+import { resolvePackArchivePath } from "./pack-archives";
 import { buildCore } from "../../scripts/web-distribution/core-build";
 import { buildReact } from "../../scripts/web-distribution/react-build";
 import { buildSvelte } from "../../scripts/web-distribution/svelte-build";
@@ -38,8 +40,7 @@ import {
 } from "./scope";
 
 const repoRoot = resolve(import.meta.dir, "../..");
-const artifactRoot = join(repoRoot, ".artifacts");
-mkdirSync(artifactRoot, { recursive: true });
+const artifactRoot = mkdtempSync(join(tmpdir(), "poodle-web-pack-install-"));
 const innerRun = globalThis.process.env.POODLE_WEB_PACK_INSTALL_INNER === "1";
 
 type PackageManifest = {
@@ -223,22 +224,21 @@ mkdirSync(consumerRoot);
 function archivePathFromPackOutput(
   packageEntry: PackageEntry,
   output: string,
+  destination: string,
 ): string {
-  const archivePath = output
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.endsWith(".tgz"))
-    .at(-1);
-  if (!archivePath) {
-    throw new Error(
-      `${packageEntry.name} pack did not report a .tgz archive path:\n${output.trim()}`,
-    );
+  return resolvePackArchivePath(packageEntry.name, output, destination);
+}
+
+function assertNoCheckoutTarballs(): void {
+  for (const packageEntry of packages) {
+    const directory = join(repoRoot, packageEntry.directory);
+    const tarballs = readdirSync(directory).filter((name) => name.endsWith(".tgz"));
+    if (tarballs.length > 0) {
+      throw new Error(
+        `${packageEntry.directory} contains pack tarballs in the checkout: ${tarballs.join(", ")}`,
+      );
+    }
   }
-  return resolve(
-    archivePath.startsWith("/")
-      ? archivePath
-      : join(repoRoot, packageEntry.directory, archivePath),
-  );
 }
 
 function normalizeArchiveEntry(entry: string): string {
@@ -1064,9 +1064,10 @@ async function packPackages(destination: string): Promise<PackedPackage[]> {
     packed.push({
       ...packageEntry,
       manifest,
-      archivePath: archivePathFromPackOutput(packageEntry, packOutput),
+      archivePath: archivePathFromPackOutput(packageEntry, packOutput, destination),
     });
   }
+  assertNoCheckoutTarballs();
   return packed;
 }
 

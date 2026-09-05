@@ -11,6 +11,21 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   paths to merge `85609d941`; route all future workers through dedicated
   Paseo-managed worktree workspaces.
 
+- 2026-09-05 — `check:react` exists (g16.107) but is red on current sources:
+  12 strict errors in `packages/react/components/src` (EditableList data
+  attrs, TextInput/ModelConnection refs, BlockEditorBlock `ref` on `{}`)
+  plus a large React preview specimen backlog (`string` assigned to
+  `ControlSize`/`ControlDensity`). Including it in `ci:web` would red the
+  board. Clear those type errors on a component/preview card, then put
+  `check:react` on `ci:web`. Surface: `packages/react/{components,preview}`
+  tsconfig and `tasks/effigy.tasks.toml`.
+
+- 2026-09-05 — Effigy 0.12 stale-suppression scan has no "adjacent rationale
+  comment" scorer, so g16.107 had to demote every `#[allow(` from high to
+  warning. Unannotated allows are no longer doctor-errors either. A marker
+  that stays high unless the previous line is a comment would match the
+  intended rule. Surface: `effigy scan stale-suppressions`.
+
 - 2026-09-04 — Second sighting of the `web-preview.ts` origin/main classifier
   failure, now on a tag-ref release runner. Dry run `33908714014` at tag
   `v0.3.0` (`eab436eef`) died in `Release gates` at `test:web-pack-install`
@@ -177,7 +192,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   receipt/consumer/two-pack work stays out of this harness. Hit while
   closing g16.057.
 
-- 2026-09-02 — `scripts/gate-tree-guard.ts` writes `poodle-gate-tree-guard.json`
+- 2026-09-02 — RESOLVED 2026-09-05 by g16.107. `scripts/gate-tree-guard.ts` writes `poodle-gate-tree-guard.json`
   into the shared OS temp dir. Parallel worktrees (`docs:check` / `ci:web`)
   clobber each other's snapshot; `--compare` then fails with "no snapshot found".
   Hit while closing g16.050 next to a sibling lane.
@@ -262,7 +277,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `task-backed-...` do not. Denominator stays `git ls-files` with no path
   exclusion. Found while closing g16.028.
 
-- 2026-09-01 — `probe:gpui-specimens` fails on a wall-clock budget
+- 2026-09-01 — RESOLVED 2026-09-05 by g16.107. `probe:gpui-specimens` fails on a wall-clock budget
   (`probe shard N exceeded the two-minute test-body budget`) rather than on
   anything it constructed. All four shards reported `42/42 routes constructed`
   and still failed at 162s because a `bunx vitest run` happened to be running
@@ -292,14 +307,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   header line rather than on evidence. Derive it from the newest evidence, or
   exclude the header from the comparison. Hit while closing g16.025.
 
-- 2026-09-01 — second sighting of the `smoke:gpui-window-capture` qa flake
+- 2026-09-01 — RESOLVED 2026-09-05 by g16.107. Second sighting of the `smoke:gpui-window-capture` qa flake
   below, this time on `tests::batch_mode_accepts_no_other_flag`. `ci:native`
   had just run the same selector green, the branch touches nothing under
   `bin/window_capture`, and the selector passed in isolation and on the next qa
   run. Two different assertions now, which points at the harness rather than
   either test. Hit while closing g16.028.
 
-- 2026-08-30 — `smoke:gpui-window-capture` failed once in `effigy qa` on
+- 2026-08-30 — RESOLVED 2026-09-05 by g16.107. `smoke:gpui-window-capture` failed once in `effigy qa` on
   `an_empty_or_malformed_batch_manifest_is_rejected`, then passed in isolation
   and on the next qa run. The smoke script only prints the last three cargo
   lines, so the real assertion is lost. Keep the full cargo stderr on failure.
@@ -332,7 +347,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 - 2026-08-29 — `rustfmt` on a touched `packages/gpui/preview/tests/headless_regressions.rs` or specimen file rewrites the whole multi-thousand-line file. Format only the new function, or skip rustfmt on those paths. Hit while landing g16.032 Batch 1; recovered by restoring and re-applying the surgical edit.
 
-- 2026-08-29 — `scripts/gate-tree-guard.ts` keeps its snapshot at a fixed
+- 2026-08-29 — RESOLVED 2026-09-05 by g16.107. `scripts/gate-tree-guard.ts` keeps its snapshot at a fixed
   `os.tmpdir()` path shared by every worktree, and `--compare` deletes it. Two
   concurrent `effigy ci:web`/`qa` runs in different worktrees therefore fail
   each other with "no snapshot found". Key the snapshot by repository root or
@@ -464,7 +479,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   the JS package version before the next Underlay tag. Found while widening
   Poodle `g15.068`–`072` and `079`.
 
-- 2026-08-24 — Required Northstar orientation through `effigy doctor` now
+- 2026-08-24 — RESOLVED 2026-09-05 by g16.107. Required Northstar orientation through `effigy doctor` now
   fails on three broad repository scans (`generated-in-src`, `god-files`, and
   `stale-suppressions`: 41 error findings total) even though none is connected
   to the active consumer-adoption lane. Baseline or intentionally configure
@@ -550,7 +565,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   A build script or an in-crate generated module would remove it. Found on
   g15.044 while vendoring the Rust graph into a throwaway proof workspace.
 
-- 2026-08-21 — `effigy qa` reproducibly reaches `gate-tree-guard --compare`
+- 2026-08-21 — RESOLVED 2026-09-05 by g16.107. `effigy qa` reproducibly reaches `gate-tree-guard --compare`
   with no snapshot even when run alone from a clean committed worktree; every
   preceding component, package, type, and docs step passes. The earlier entry
   treated this as a parallel-worktree race, but it also affects a single broad
@@ -573,7 +588,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   the `svelte-components-ssr` project (server-render evidence for
   `defaultOpen`/SSR-dependent components now has a home).
 
-- 2026-08-20 — `effigy ci:rust` runs `test:contracts`, which lists seven
+- 2026-08-20 — RESOLVED 2026-09-05 by g16.107. `effigy ci:rust` runs `test:contracts`, which lists seven
   contract crates but not `packages/contracts/node`. `poodle-node` is the
   vocabulary every component depends on, and its own unit tests run under no
   selector — only `cargo test --manifest-path packages/contracts/node/...`
@@ -716,7 +731,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   both-collapsed recoverability and `primaryHidden`/`secondaryHidden` deltas
   were fixed there; these remain).
 
-- 2026-08-16 — two `effigy docs:check` runs in separate worktrees can race on
+- 2026-08-16 — RESOLVED 2026-09-05 by g16.107. two `effigy docs:check` runs in separate worktrees can race on
   `gate-tree-guard` state: one run reached `--compare` after the shared snapshot
   had disappeared and failed with "no snapshot found", while the other passed.
   Namespace guard snapshots by worktree and process, or make snapshot/compare
@@ -1340,8 +1355,8 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 - 2026-08-10 — `effigy react:build` runs Vite transpilation without a TypeScript
   check; direct `tsc` finds pre-existing `AgentChatStatus` errors the build
-  reports as green. Add a React consumer type-check selector and CI lane.
-  Affects React parity work.
+  reports as green. g16.107 added `check:react` but could not put it on
+  `ci:web` (see 2026-09-05 entry). Affects React parity work.
 
 - 2026-08-10 — A combined `git log -G` secret-pattern history scan ran for
   more than 90 seconds without progress or a result. Add a bounded, cached
@@ -1468,7 +1483,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   which is what keeps the cross-runtime comparison green.
 
 - 2026-08-17 — g15.005 (workstation & agent evidence) found that **no repo
-  selector typechecks React test files.** `effigy react:build` builds
+  selector typechecks React test files.** g16.107 added `check:react` over
+  component and preview `src` (not test files) and left it off `ci:web`
+  because current sources are red; see the 2026-09-05 papercut. Original
+  report: `effigy react:build` builds
   `packages/react/preview` only, and there is no `check:react` counterpart to
   `check:svelte`; `packages/react/components` has no `tsconfig.json`. The
   ToolCallGroup fixtures in this card were missing the required

@@ -14,7 +14,8 @@ The crate is a pre-1.0 source preview and is not published to crates.io.
 - `map_style()` for Jetstream-compatible resolved styles
 - adapter metadata and target types
 
-It does not implement components or own the engine widget tree.
+It carries a legacy direct implementation of 108 components. That path is
+not the poodle-node route and is not admitted.
 `poodle-render` produces `poodle-node` trees. The `jetstream-poodle` crate in
 the Jetstream repository converts those trees to `JsEl`.
 

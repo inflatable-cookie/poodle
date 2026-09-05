@@ -47,6 +47,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ButtonSpec, ButtonVariant};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 #[path = "../presentation_axes.rs"]
 mod presentation_axes;
@@ -436,13 +437,31 @@ struct DeviceDimensions {
     height: u32,
 }
 
+static UNIQUE_SEQ: AtomicU64 = AtomicU64::new(0);
+
+fn next_unique_suffix() -> u64 {
+    UNIQUE_SEQ.fetch_add(1, Ordering::Relaxed)
+}
+
 fn staged_path(path: &Path, kind: &str) -> Result<PathBuf> {
     let file_name = path
         .file_name()
         .with_context(|| format!("output path must name a file: {}", path.display()))?;
     let mut staged_name = file_name.to_os_string();
-    staged_name.push(format!(".tmp-{}-{kind}", std::process::id()));
+    staged_name.push(format!(
+        ".tmp-{}-{}-{kind}",
+        std::process::id(),
+        next_unique_suffix()
+    ));
     Ok(path.with_file_name(staged_name))
+}
+
+fn unique_temp_root(label: &str) -> PathBuf {
+    std::env::temp_dir().join(format!(
+        "poodle-window-capture-{label}-{}-{}",
+        std::process::id(),
+        next_unique_suffix()
+    ))
 }
 
 fn remove_if_present(path: &Path) -> Result<()> {
@@ -694,11 +713,18 @@ mod tests {
     }
 
     #[test]
+    fn staged_paths_are_unique_within_a_process() {
+        let first = staged_path(Path::new("out.png"), "png").expect("first staged path");
+        let second = staged_path(Path::new("out.png"), "png").expect("second staged path");
+        assert_ne!(
+            first, second,
+            "parallel tests in one process must not share a staged name"
+        );
+    }
+
+    #[test]
     fn publish_failure_invalidates_a_prior_receipt() {
-        let root = std::env::temp_dir().join(format!(
-            "poodle-window-capture-publish-test-{}",
-            std::process::id()
-        ));
+        let root = unique_temp_root("publish-test");
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir(&root).expect("create test root");
 
@@ -825,11 +851,7 @@ mod tests {
     // ── g16.005 batch mode ──────────────────────────────────────────────
 
     fn write_manifest(body: &str) -> (std::path::PathBuf, std::path::PathBuf) {
-        let dir = std::env::temp_dir().join(format!(
-            "poodle-window-capture-batch-test-{}-{}",
-            std::process::id(),
-            body.len()
-        ));
+        let dir = unique_temp_root("batch-test");
         let _ = std::fs::create_dir_all(&dir);
         let path = dir.join("batch.json");
         std::fs::write(&path, body).expect("write manifest");

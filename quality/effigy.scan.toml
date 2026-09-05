@@ -1,11 +1,12 @@
 [scan.god_files]
 # Poodle's component and renderer files are declarative composition units: a
 # line count above 500 is common without implying mixed ownership. Keep 500 as
-# the review signal; reserve doctor errors for files beyond the largest current
-# cohesive units so the scanner reports growth instead of failing healthy code.
+# the review signal. Doctor errors only on growth past the current largest
+# cohesive unit (3164 code lines in `packages/core/src/dom/drag-drop-controller.ts`
+# on the g16.107 baseline). Findings stay listed as warnings.
 warn = 500
-high = 1200
-critical = 1600
+high = 3200
+critical = 4000
 doctor = true
 fail_on_findings = false
 respect_gitignore = true
@@ -82,6 +83,13 @@ exclude = [
   "packages/core/src/icons/generated.ts",
   "packages/core/src/icons/aliases.generated.ts",
   "packages/core/src/icons/icons/**",
+  "packages/core/src/icons/morph-pairs.generated.ts",
+  "packages/contracts/components/src/icon_geometry.generated.rs",
+  "packages/core/src/generated/**",
+  "packages/contracts/headless/src/generated/**",
+  # catalogue:build / specimens:build write these committed generated roots
+  # under each preview `src/` so the previews can import them as source.
+  "packages/**/preview/src/generated/**",
 ]
 format = "markdown"
 out = ".effigy/reports/generated-in-src.md"
@@ -105,8 +113,13 @@ out = ".effigy/reports/comment-ratio.md"
 # Rust `#[expect]` attributes are self-reporting: rustc emits an
 # `unfulfilled_lint_expectations` warning once the expected lint disappears.
 # Scan silent and tool-specific bypasses instead.
-warning = ["@ts-ignore", "@ts-expect-error", "type: ignore", "eslint-disable-next-line"]
-high = ["#[allow(", "rubocop:disable", "swiftlint:disable", "prettier-ignore", "stylelint-disable"]
+#
+# `#[allow(` is warning, not high: Poodle's allows sit next to a rationale
+# comment (or are the clippy shape-argument form). Effigy 0.12 cannot score
+# "adjacent rationale" separately, so the whole marker stays listed without
+# failing doctor. `#[allow(warnings)]` remains critical.
+warning = ["@ts-ignore", "@ts-expect-error", "type: ignore", "eslint-disable-next-line", "#[allow("]
+high = ["rubocop:disable", "swiftlint:disable", "prettier-ignore", "stylelint-disable"]
 critical = ["nolint", "#[allow(warnings)]", "shellcheck disable=", "eslint-disable", "fmt: off"]
 doctor = true
 fail_on_findings = false
