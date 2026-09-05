@@ -33,7 +33,8 @@ card and remains with g16.117.
 ## Validation
 
 `effigy test:nucleus-a11y` passed. The headless native board passed with 206
-tests, 5 ignored, and 0 failures. Windowed selectors were not run.
+tests, 5 ignored, and 0 failures. The parity evidence ledger and docs checks
+passed, as did `git diff --check`. Windowed selectors were not run.
 
 ## Review Boundary
 

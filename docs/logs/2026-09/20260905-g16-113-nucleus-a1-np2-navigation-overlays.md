@@ -39,8 +39,8 @@ No contract, Svelte, or backend behaviour change was made.
 - `effigy test:nucleus-a11y`: pass, 9 tests.
 - Headless native regression board: pass, 206 passed, 5 ignored, 0 failed.
 - No windowed, native-visual, or capture selector was run.
-- Final checks still required after the closeout evidence commit: receipt
-  ledger, docs, diff check, and the focused A1 Svelte/native selectors.
+- Final checks passed after the closeout evidence commit: receipt ledger,
+  docs check, diff check, and the focused A1 Svelte/native selectors.
 
 ## Closeout
 
