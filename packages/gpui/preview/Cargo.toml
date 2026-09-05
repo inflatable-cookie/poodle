@@ -116,3 +116,7 @@ path = "tests/visual_fixture_inventory.rs"
 # dev-dependency so ordinary builds and the preview bin never pull it in.
 [dev-dependencies]
 gpui = { version = "0.2.2", features = ["test-support"] }
+# g16.111 A1 receipts hash the shared accessibility scenario file so the GPUI
+# and Svelte extractors cannot drift apart. Already in the graph (optional
+# window-capture dependency above); test-only here.
+sha2 = "0.10"

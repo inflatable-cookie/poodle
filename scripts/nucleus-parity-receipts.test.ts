@@ -5,6 +5,7 @@ import { describe, expect, it } from "bun:test";
 import {
   loadNucleusManifest,
   NUCLEUS_SCHEMA_PATH,
+  receiptFileStem,
   validateNucleusManifest,
   validateNucleusReceipt,
   type NucleusManifest,
@@ -83,7 +84,7 @@ describe("g16.062 Nucleus parity receipt contract", () => {
 
   it("keeps the checked-in schema and manifest valid", () => {
     const manifest = loadNucleusManifest(root);
-    expect(JSON.parse(readFileSync(path.join(root, NUCLEUS_SCHEMA_PATH), "utf8")).properties.proof_level.const).toBe("M1");
+    expect(JSON.parse(readFileSync(path.join(root, NUCLEUS_SCHEMA_PATH), "utf8")).properties.proof_level.enum).toEqual(["M1", "A1"]);
     expect(() => validateNucleusManifest(manifest, root)).not.toThrow();
   });
 
@@ -146,7 +147,8 @@ describe("g16.062 Nucleus parity receipt contract", () => {
       ...base,
       production_path_observation: { ...base.production_path_observation, observed: false, mount: "direct-handler" },
     } as NucleusReceipt, manifest, root)).toThrow(/observed mounted|HeadlessDriver|production path/);
-    expect(() => validateNucleusReceipt({ ...base, proof_level: "A1" } as NucleusReceipt, manifest, root)).toThrow(/proof level/);
+    expect(() => validateNucleusReceipt({ ...base, proof_level: "V1" } as never, manifest, root)).toThrow(/proof level/);
+    expect(() => validateNucleusReceipt({ ...base, proof_level: "A1" } as NucleusReceipt, manifest, root)).toThrow(/accessibility block/);
   });
 
   it("rejects a cohort with IconProvider promoted to row 30", () => {
@@ -164,5 +166,44 @@ describe("g16.062 Nucleus parity receipt contract", () => {
     expect(() => validateNucleusReceipt({ ...validButtonReceipt(manifest), component: "NotNucleus" }, manifest, root)).toThrow(
       /not a rendered manifest entry/,
     );
+  });
+});
+
+describe("g16.111 Nucleus A1 paired accessibility receipts", () => {
+  const a1Path = "docs/roadmaps/g16/nucleus-parity-receipts/switch--nucleus-settings-switch--a1.json";
+  const committedA1 = (): NucleusReceipt => JSON.parse(readFileSync(path.join(root, a1Path), "utf8")) as NucleusReceipt;
+
+  it("accepts the committed Switch A1 receipt with its paired snapshots", () => {
+    const manifest = loadNucleusManifest(root);
+    const receipt = committedA1();
+    expect(receipt.proof_level).toBe("A1");
+    expect(receipt.accessibility?.diff).toEqual([]);
+    expect(() => validateNucleusReceipt(receipt, manifest, root)).not.toThrow();
+  });
+
+  it("rejects an A1 receipt whose snapshots, scenario, or diff were substituted", () => {
+    const manifest = loadNucleusManifest(root);
+    const base = committedA1();
+    const withBlock = (patch: Partial<NonNullable<NucleusReceipt["accessibility"]>>): NucleusReceipt => ({
+      ...base,
+      accessibility: { ...(base.accessibility as NonNullable<NucleusReceipt["accessibility"]>), ...patch },
+    });
+    expect(() => validateNucleusReceipt(withBlock({ scenario_sha256: "0".repeat(64) }), manifest, root)).toThrow(/scenario SHA-256/);
+    expect(() => validateNucleusReceipt(withBlock({ svelte_snapshot_sha256: "0".repeat(64) }), manifest, root)).toThrow(/svelte snapshot SHA-256/);
+    expect(() => validateNucleusReceipt(withBlock({ gpui_snapshot_sha256: "0".repeat(64) }), manifest, root)).toThrow(/gpui snapshot SHA-256/);
+    expect(() => validateNucleusReceipt(withBlock({ diff: [{ index: 0, field: "role" }] }), manifest, root)).toThrow(/diff is not empty/);
+    expect(() => validateNucleusReceipt(withBlock({ svelte_snapshot_path: "test/nucleus-a11y/snapshots/tabs.svelte.json" }), manifest, root)).toThrow(/does not belong to the scenario row/);
+    expect(() => validateNucleusReceipt(withBlock({ web_only_exclusions: [{ attribute: "aria-readonly", reason: "invented" }] }), manifest, root)).toThrow(/web_only_exclusions/);
+    expect(() => validateNucleusReceipt({ ...base, accessibility: { ...base.accessibility, invented: true } } as never, manifest, root)).toThrow(/receipt accessibility has unexpected property invented/);
+  });
+
+  it("keeps A1 evidence separate from M1 and rejects an unmanifested A1 receipt", () => {
+    const manifest = loadNucleusManifest(root);
+    const base = committedA1();
+    const m1 = validButtonReceipt(manifest);
+    expect(() => validateNucleusReceipt({ ...m1, accessibility: base.accessibility }, manifest, root)).toThrow(/M1 receipt carries no accessibility block/);
+    expect(() => validateNucleusReceipt({ ...base, component: "Tree", scenario_id: "nucleus.settings.tree" }, manifest, root)).toThrow(/not a rendered manifest entry/);
+    expect(receiptFileStem(base)).toBe("switch--nucleus-settings-switch--a1");
+    expect(receiptFileStem(m1)).toBe("button--nucleus-shell-button");
   });
 });

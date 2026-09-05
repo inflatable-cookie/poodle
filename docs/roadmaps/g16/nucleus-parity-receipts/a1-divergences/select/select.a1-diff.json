@@ -1,0 +1,134 @@
+[
+  {
+    "index": 0,
+    "field": "relationships",
+    "gpui": {
+      "controls": [
+        1
+      ],
+      "labelled_by": [],
+      "described_by": []
+    },
+    "svelte": {
+      "controls": [
+        2
+      ],
+      "labelled_by": [],
+      "described_by": []
+    }
+  },
+  {
+    "index": 0,
+    "field": "role",
+    "gpui": "combobox",
+    "svelte": "button"
+  },
+  {
+    "index": 0,
+    "field": "value_text",
+    "gpui": "Banana",
+    "svelte": null
+  },
+  {
+    "index": 1,
+    "field": "focus_order",
+    "gpui": null,
+    "svelte": 1
+  },
+  {
+    "index": 1,
+    "field": "name",
+    "gpui": null,
+    "svelte": "Close options"
+  },
+  {
+    "index": 1,
+    "field": "role",
+    "gpui": "listbox",
+    "svelte": "button"
+  },
+  {
+    "index": 2,
+    "field": "name",
+    "gpui": "Apple",
+    "svelte": "Fruit"
+  },
+  {
+    "index": 2,
+    "field": "role",
+    "gpui": "option",
+    "svelte": "listbox"
+  },
+  {
+    "index": 2,
+    "field": "states",
+    "gpui": {
+      "expanded": null,
+      "selected": false,
+      "disabled": false
+    },
+    "svelte": {
+      "expanded": null,
+      "selected": null,
+      "disabled": false
+    }
+  },
+  {
+    "index": 3,
+    "field": "focus_order",
+    "gpui": null,
+    "svelte": 2
+  },
+  {
+    "index": 3,
+    "field": "name",
+    "gpui": "Banana",
+    "svelte": "Apple"
+  },
+  {
+    "index": 3,
+    "field": "states",
+    "gpui": {
+      "expanded": null,
+      "selected": true,
+      "disabled": false
+    },
+    "svelte": {
+      "expanded": null,
+      "selected": false,
+      "disabled": false
+    }
+  },
+  {
+    "index": 4,
+    "field": "focus_order",
+    "gpui": null,
+    "svelte": 3
+  },
+  {
+    "index": 4,
+    "field": "name",
+    "gpui": "Cherry",
+    "svelte": "Banana"
+  },
+  {
+    "index": 4,
+    "field": "states",
+    "gpui": {
+      "expanded": null,
+      "selected": false,
+      "disabled": true
+    },
+    "svelte": {
+      "expanded": null,
+      "selected": true,
+      "disabled": false
+    }
+  },
+  {
+    "index": 5,
+    "field": "role",
+    "gpui": null,
+    "svelte": "option"
+  }
+]

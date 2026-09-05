@@ -1,0 +1,80 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "Switch",
+  "scenario_id": "nucleus.settings.switch",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "7c2ab2030835fbd268bee04c9d44fbf449ffe404",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.3.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.3.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount the production Switch node tree through HeadlessDriver with the shared scenario props",
+    "replay the shared scenario actions through GPUI test-platform dispatch (pointer activate resolved by role and name)",
+    "read the mounted accessibility projection and the backend focus registry after dispatch",
+    "execute gpui sequential focus traversal and attribute every stop to a tracked node"
+  ],
+  "assertions": [
+    "the normalised GPUI snapshot equals the committed Svelte DOM snapshot for the same scenario hash",
+    "gpui tab traversal visits the tracked focusable nodes in the declared order",
+    "switch role, accessible name, checked state, and focus match the Svelte ARIA projection"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/switch.gpui.json",
+      "sha256": "7fc3c8a0c43770807f6bcf1c23cc7d70df0ebf4795c270b72f3c55e3558e0fbe"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/switch.svelte.json",
+      "sha256": "a0bf47622ef50c83193f61f07c0e93a1c8b13252fceb7540f48eb99fdcb3b914"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/switch.json",
+    "scenario_sha256": "70d10dd0379ca3e9d0177e647f9a2c276bd5d8a51a84c6d7a3a2f9d5e37a1b9c",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/switch.gpui.json",
+    "gpui_snapshot_sha256": "7fc3c8a0c43770807f6bcf1c23cc7d70df0ebf4795c270b72f3c55e3558e0fbe",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/switch.svelte.json",
+    "svelte_snapshot_sha256": "a0bf47622ef50c83193f61f07c0e93a1c8b13252fceb7540f48eb99fdcb3b914",
+    "web_only_exclusions": [],
+    "diff": []
+  }
+}

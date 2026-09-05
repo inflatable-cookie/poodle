@@ -2,6 +2,18 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import {
+  A1_GPUI_RUNTIME,
+  A1_SNAPSHOT_SCHEMA,
+  A1_SVELTE_RUNTIME,
+  diffSnapshotNodes,
+  GPUI_RUN_RECORD,
+  readScenario,
+  sha256Hex,
+  SVELTE_RUN_RECORD,
+  type A1Exclusion,
+  type SnapshotFile,
+} from "../test/nucleus-a11y/contract";
 
 export const NUCLEUS_MANIFEST_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.json";
 export const NUCLEUS_MANIFEST_SCHEMA_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.schema.json";
@@ -54,11 +66,26 @@ export type NucleusManifest = {
   components: NucleusEntry[];
 };
 
+export type NucleusProofLevel = "M1" | "A1";
+
+/// g16.111 A1: the paired accessibility record. Both snapshots are committed
+/// artifacts; the diff is empty for a pass.
+export type NucleusAccessibilityBlock = {
+  scenario_path: string;
+  scenario_sha256: string;
+  gpui_snapshot_path: string;
+  gpui_snapshot_sha256: string;
+  svelte_snapshot_path: string;
+  svelte_snapshot_sha256: string;
+  web_only_exclusions: A1Exclusion[];
+  diff: unknown[];
+};
+
 export type NucleusReceipt = {
   schema: typeof NUCLEUS_RECEIPT_SCHEMA;
   component: string;
   scenario_id: string;
-  proof_level: "M1";
+  proof_level: NucleusProofLevel;
   runtime: typeof NUCLEUS_RUNTIME;
   command: typeof NUCLEUS_COMMAND;
   package: string;
@@ -78,12 +105,17 @@ export type NucleusReceipt = {
   assertions: string[];
   outcome: "passed";
   artifact_paths: NucleusArtifact[];
+  accessibility?: NucleusAccessibilityBlock;
 };
 
 export type NucleusReceiptRow = {
   entry: NucleusEntry;
+  /// The validated M1 receipt, when one exists.
   receiptPath?: string;
   receipt?: NucleusReceipt;
+  /// The validated A1 receipt, when one exists (g16.111).
+  a1ReceiptPath?: string;
+  a1Receipt?: NucleusReceipt;
 };
 
 function rootPath(root: string, relativePath: string): string {
@@ -158,8 +190,20 @@ const RECEIPT_REQUIRED_KEYS = [
   "outcome",
   "artifact_paths",
 ];
+const RECEIPT_OPTIONAL_KEYS = ["accessibility"];
 const OBSERVATION_REQUIRED_KEYS = ["observed", "mount", "render_path", "input_dispatch"];
 const ARTIFACT_REQUIRED_KEYS = ["path", "sha256"];
+const ACCESSIBILITY_REQUIRED_KEYS = [
+  "scenario_path",
+  "scenario_sha256",
+  "gpui_snapshot_path",
+  "gpui_snapshot_sha256",
+  "svelte_snapshot_path",
+  "svelte_snapshot_sha256",
+  "web_only_exclusions",
+  "diff",
+];
+const EXCLUSION_REQUIRED_KEYS = ["attribute", "reason"];
 
 function manifestShapeErrors(manifest: unknown): string[] {
   const errors: string[] = [];
@@ -183,7 +227,7 @@ function manifestShapeErrors(manifest: unknown): string[] {
 
 function receiptShapeErrors(receipt: unknown): string[] {
   const errors: string[] = [];
-  if (!assertExactObject(receipt, "receipt", RECEIPT_REQUIRED_KEYS, [], errors)) return errors;
+  if (!assertExactObject(receipt, "receipt", RECEIPT_REQUIRED_KEYS, RECEIPT_OPTIONAL_KEYS, errors)) return errors;
   if (assertArray(receipt.lock_resolution, "receipt lock_resolution", errors)) {
     receipt.lock_resolution.forEach((packageEntry, index) =>
       assertExactObject(packageEntry, `receipt lock_resolution[${index}]`, LOCKED_PACKAGE_REQUIRED_KEYS, LOCKED_PACKAGE_OPTIONAL_KEYS, errors),
@@ -196,6 +240,16 @@ function receiptShapeErrors(receipt: unknown): string[] {
     receipt.artifact_paths.forEach((artifact, index) =>
       assertExactObject(artifact, `receipt artifact_paths[${index}]`, ARTIFACT_REQUIRED_KEYS, [], errors),
     );
+  }
+  if (Object.hasOwn(receipt, "accessibility")) {
+    if (assertExactObject(receipt.accessibility, "receipt accessibility", ACCESSIBILITY_REQUIRED_KEYS, [], errors)) {
+      if (assertArray(receipt.accessibility.web_only_exclusions, "receipt accessibility web_only_exclusions", errors)) {
+        receipt.accessibility.web_only_exclusions.forEach((exclusion, index) =>
+          assertExactObject(exclusion, `receipt accessibility web_only_exclusions[${index}]`, EXCLUSION_REQUIRED_KEYS, [], errors),
+        );
+      }
+      assertArray(receipt.accessibility.diff, "receipt accessibility diff", errors);
+    }
   }
   return errors;
 }
@@ -349,7 +403,13 @@ export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadN
   assert(receipt.schema === NUCLEUS_RECEIPT_SCHEMA, "receipt schema is not current", errors);
   assert(entry !== undefined && entry.rendered !== false, `receipt component is not a rendered manifest entry: ${receipt.component}`, errors);
   if (entry !== undefined) assert(receipt.scenario_id === entry.scenario_id, `${receipt.component} receipt scenario does not match the manifest`, errors);
-  assert(receipt.proof_level === "M1", "receipt proof level must be M1; A1 and V1 require separate evidence", errors);
+  assert(receipt.proof_level === "M1" || receipt.proof_level === "A1", "receipt proof level must be M1 or A1; V1 requires separate evidence", errors);
+  if (receipt.proof_level === "M1") {
+    assert(receipt.accessibility === undefined, "an M1 receipt carries no accessibility block", errors);
+  } else if (receipt.proof_level === "A1") {
+    assert(receipt.accessibility !== undefined, "an A1 receipt requires an accessibility block", errors);
+    if (receipt.accessibility !== undefined) validateAccessibilityBlock(receipt, root, errors);
+  }
   assert(receipt.runtime === NUCLEUS_RUNTIME, `receipt runtime must be ${NUCLEUS_RUNTIME}`, errors);
   assert(receipt.command === NUCLEUS_COMMAND, `receipt command must be ${NUCLEUS_COMMAND}`, errors);
   assert(receipt.package === manifest.resolution.package, "receipt package does not match manifest resolution", errors);
@@ -372,6 +432,91 @@ export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadN
   const encoded = JSON.stringify(receipt);
   assert(!encoded.includes("/Users/") && !encoded.includes("/private/") && !encoded.includes("timestamp"), "receipt contains a machine path or timestamp", errors);
   if (errors.length > 0) throw new Error(errors.join("\n"));
+}
+
+function readSnapshot(root: string, relativePath: string, label: string, errors: string[]): SnapshotFile | undefined {
+  const filePath = repositoryRelativeArtifactPath(root, relativePath);
+  if (filePath === undefined || !existsSync(filePath)) {
+    errors.push(`${label} does not exist: ${relativePath}`);
+    return undefined;
+  }
+  try {
+    return JSON.parse(readFileSync(filePath, "utf8")) as SnapshotFile;
+  } catch {
+    errors.push(`${label} does not parse: ${relativePath}`);
+    return undefined;
+  }
+}
+
+/// g16.111: an A1 receipt is evidence only when the scenario it names is the
+/// committed one (hash), both snapshots are the committed artifacts (hash),
+/// both carry a real run record for their runtime, both ran against that
+/// scenario hash, and the recomputed diff is empty.
+function validateAccessibilityBlock(receipt: NucleusReceipt, root: string, errors: string[]): void {
+  const block = receipt.accessibility;
+  if (block === undefined) return;
+  const row = block.scenario_path.match(/^test\/nucleus-a11y\/scenarios\/([a-z0-9-]+)\.json$/)?.[1];
+  assert(row !== undefined, `receipt accessibility scenario_path is not a shared scenario file: ${block.scenario_path}`, errors);
+  if (row === undefined) return;
+  assert(block.gpui_snapshot_path === `test/nucleus-a11y/snapshots/${row}.gpui.json`, "receipt accessibility gpui_snapshot_path does not belong to the scenario row", errors);
+  assert(block.svelte_snapshot_path === `test/nucleus-a11y/snapshots/${row}.svelte.json`, "receipt accessibility svelte_snapshot_path does not belong to the scenario row", errors);
+
+  let loaded: ReturnType<typeof readScenario> | undefined;
+  try {
+    loaded = readScenario(root, row);
+  } catch (error) {
+    errors.push(`receipt accessibility scenario cannot be read: ${error instanceof Error ? error.message : String(error)}`);
+    return;
+  }
+  assert(loaded.sha256 === block.scenario_sha256, "receipt accessibility scenario SHA-256 does not match the committed scenario file", errors);
+  assert(loaded.scenario.component === receipt.component, "receipt accessibility scenario component does not match the receipt", errors);
+  assert(loaded.scenario.scenario_id === receipt.scenario_id, "receipt accessibility scenario id does not match the receipt", errors);
+  assert(
+    JSON.stringify(loaded.scenario.web_only_exclusions) === JSON.stringify(block.web_only_exclusions),
+    "receipt accessibility web_only_exclusions do not match the scenario file",
+    errors,
+  );
+
+  for (const [label, relativePath, expectedHash] of [
+    ["receipt accessibility gpui snapshot", block.gpui_snapshot_path, block.gpui_snapshot_sha256],
+    ["receipt accessibility svelte snapshot", block.svelte_snapshot_path, block.svelte_snapshot_sha256],
+  ] as const) {
+    const filePath = repositoryRelativeArtifactPath(root, relativePath);
+    if (filePath !== undefined && existsSync(filePath)) {
+      assert(sha256File(filePath) === expectedHash, `${label} SHA-256 does not match: ${relativePath}`, errors);
+    }
+    assert(
+      receipt.artifact_paths.some((artifact) => artifact.path === relativePath && artifact.sha256 === expectedHash),
+      `${label} is not listed in artifact_paths with the same SHA-256`,
+      errors,
+    );
+  }
+
+  const gpui = readSnapshot(root, block.gpui_snapshot_path, "receipt accessibility gpui snapshot", errors);
+  const svelte = readSnapshot(root, block.svelte_snapshot_path, "receipt accessibility svelte snapshot", errors);
+  if (gpui === undefined || svelte === undefined) return;
+  for (const [label, snapshot, runtime, run] of [
+    ["gpui snapshot", gpui, A1_GPUI_RUNTIME, GPUI_RUN_RECORD],
+    ["svelte snapshot", svelte, A1_SVELTE_RUNTIME, SVELTE_RUN_RECORD],
+  ] as const) {
+    assert(snapshot.schema === A1_SNAPSHOT_SCHEMA, `receipt accessibility ${label} schema is not ${A1_SNAPSHOT_SCHEMA}`, errors);
+    assert(snapshot.component === receipt.component, `receipt accessibility ${label} component does not match the receipt`, errors);
+    assert(snapshot.scenario_id === receipt.scenario_id, `receipt accessibility ${label} scenario id does not match the receipt`, errors);
+    assert(snapshot.scenario_path === block.scenario_path, `receipt accessibility ${label} scenario path does not match the receipt`, errors);
+    assert(snapshot.scenario_sha256 === block.scenario_sha256, `receipt accessibility ${label} ran against a different scenario hash`, errors);
+    assert(snapshot.runtime === runtime, `receipt accessibility ${label} runtime is not ${runtime}`, errors);
+    assert(JSON.stringify(snapshot.run) === JSON.stringify(run), `receipt accessibility ${label} lacks the executed run record`, errors);
+    assert(Array.isArray(snapshot.nodes) && snapshot.nodes.length > 0, `receipt accessibility ${label} has no nodes`, errors);
+  }
+  if (!Array.isArray(gpui.nodes) || !Array.isArray(svelte.nodes)) return;
+  const diff = diffSnapshotNodes(gpui.nodes, svelte.nodes);
+  assert(diff.length === 0, `receipt accessibility snapshots diverge: ${JSON.stringify(diff)}`, errors);
+  assert(block.diff.length === 0, "receipt accessibility diff is not empty", errors);
+}
+
+export function receiptFileStem(receipt: Pick<NucleusReceipt, "component" | "scenario_id" | "proof_level">): string {
+  const stem = `${receipt.component.toLowerCase().replaceAll(" ", "-")}--${receipt.scenario_id.replaceAll(".", "-")}`;
+  return receipt.proof_level === "A1" ? `${stem}--a1` : stem;
 }
 
 function currentSourceMatchesReceipt(manifest: NucleusManifest, root: string): boolean {
@@ -400,8 +545,10 @@ export function loadValidatedNucleusReceipts(root = ROOT): Array<{ path: string;
     try {
       const receipt = readJson<NucleusReceipt>(root, relativePath);
       validateNucleusReceipt(receipt, manifest, root);
-      if (seenComponents.has(receipt.component)) throw new Error(`duplicate receipt component ${receipt.component}`);
-      seenComponents.add(receipt.component);
+      const key = `${receipt.component}/${receipt.proof_level}`;
+      if (seenComponents.has(key)) throw new Error(`duplicate ${receipt.proof_level} receipt component ${receipt.component}`);
+      seenComponents.add(key);
+      if (file !== `${receiptFileStem(receipt)}.json`) throw new Error(`receipt file name must be ${receiptFileStem(receipt)}.json`);
       receipts.push({ path: relativePath, receipt });
     } catch (error) {
       errors.push(`${relativePath}: ${error instanceof Error ? error.message : String(error)}`);
@@ -416,9 +563,21 @@ export function loadValidatedNucleusReceipts(root = ROOT): Array<{ path: string;
 
 export function deriveNucleusReceiptRows(root = ROOT): NucleusReceiptRow[] {
   const manifest = loadNucleusManifest(root);
-  const receipts = new Map(loadValidatedNucleusReceipts(root).map((item) => [item.receipt.component, item]));
+  const validated = loadValidatedNucleusReceipts(root);
+  const m1 = new Map(validated.filter((item) => item.receipt.proof_level === "M1").map((item) => [item.receipt.component, item]));
+  const a1 = new Map(validated.filter((item) => item.receipt.proof_level === "A1").map((item) => [item.receipt.component, item]));
   return manifest.components.map((entry) => {
-    const match = receipts.get(entry.name);
-    return match === undefined ? { entry } : { entry, receiptPath: match.path, receipt: match.receipt };
+    const row: NucleusReceiptRow = { entry };
+    const mounted = m1.get(entry.name);
+    if (mounted !== undefined) {
+      row.receiptPath = mounted.path;
+      row.receipt = mounted.receipt;
+    }
+    const accessible = a1.get(entry.name);
+    if (accessible !== undefined) {
+      row.a1ReceiptPath = accessible.path;
+      row.a1Receipt = accessible.receipt;
+    }
+    return row;
   });
 }

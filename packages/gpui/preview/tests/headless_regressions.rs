@@ -59,6 +59,11 @@ mod headless_driver;
 #[path = "../src/nucleus_receipts.rs"]
 mod nucleus_receipts;
 
+// g16.111 A1 paired accessibility proofs. Same selector, same receipt
+// directory, same M1 rule: evidence only from an executed mounted run.
+#[path = "headless/nucleus_a11y.rs"]
+mod nucleus_a11y;
+
 #[path = "../src/block_slider_host.rs"]
 mod block_slider_host;
 
