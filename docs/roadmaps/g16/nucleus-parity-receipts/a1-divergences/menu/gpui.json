@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "RadioGroup",
-  "scenario_id": "nucleus.settings.radio-group",
-  "scenario_path": "test/nucleus-a11y/scenarios/radio-group.json",
-  "scenario_sha256": "55788ac7c3d79bff23212ab83d1989661b75e2d1638613eb0dd04cb1350077f6",
+  "component": "Menu",
+  "scenario_id": "nucleus.navigation.menu",
+  "scenario_path": "test/nucleus-a11y/scenarios/menu.json",
+  "scenario_sha256": "136cbe82cc0c8ba5a524380f284622c79bac4012eb39f12ef1f8f8d2d4391ff3",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -13,29 +13,12 @@
   },
   "nodes": [
     {
-      "role": "radiogroup",
-      "name": "Plan",
+      "role": "button",
+      "name": "Open file actions",
       "value": null,
       "value_text": null,
       "states": {
-        "disabled": false
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": "vertical",
-      "focus_order": null,
-      "focused": false
-    },
-    {
-      "role": "radio",
-      "name": "Pro",
-      "value": null,
-      "value_text": null,
-      "states": {
+        "selected": null,
         "disabled": false
       },
       "relationships": {
@@ -49,11 +32,31 @@
       "focused": false
     },
     {
-      "role": "radio",
-      "name": "Free",
+      "role": "button",
+      "name": "Actions",
       "value": null,
       "value_text": null,
       "states": {
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": false
+    },
+    {
+      "role": "menu",
+      "name": "File actions",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": null,
         "disabled": false
       },
       "relationships": {
@@ -64,15 +67,54 @@
       "level": null,
       "orientation": null,
       "focus_order": null,
-      "focused": true
+      "focused": false
     },
     {
-      "role": "radio",
-      "name": "Legacy",
+      "role": "menuitem",
+      "name": "New",
       "value": null,
       "value_text": null,
       "states": {
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 2,
+      "focused": true
+    },
+    {
+      "role": "menuitem",
+      "name": "Print",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": null,
         "disabled": true
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "menuitem",
+      "name": "Delete",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": null,
+        "disabled": false
       },
       "relationships": {
         "controls": [],

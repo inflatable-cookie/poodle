@@ -4,12 +4,12 @@
   "scenario_id": "nucleus.navigation.menu",
   "scenario_path": "test/nucleus-a11y/scenarios/menu.json",
   "scenario_sha256": "136cbe82cc0c8ba5a524380f284622c79bac4012eb39f12ef1f8f8d2d4391ff3",
-  "runtime": "gpui-headless",
+  "runtime": "svelte-happy-dom",
   "run": {
-    "command": "effigy regressions:native",
-    "mount": "HeadlessDriver",
-    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "input_dispatch": "gpui-test-platform-dispatch"
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
   },
   "nodes": [
     {
@@ -86,7 +86,7 @@
       "level": null,
       "orientation": null,
       "focus_order": 2,
-      "focused": false
+      "focused": true
     },
     {
       "role": "menuitem",
@@ -123,7 +123,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": null,
+      "focus_order": 3,
       "focused": false
     }
   ]

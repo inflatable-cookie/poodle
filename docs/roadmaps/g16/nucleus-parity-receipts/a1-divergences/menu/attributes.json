@@ -1,0 +1,14 @@
+{
+  "component": "Menu",
+  "scenario_id": "nucleus.navigation.menu",
+  "scenario_path": "test/nucleus-a11y/scenarios/menu.json",
+  "scenario_sha256": "136cbe82cc0c8ba5a524380f284622c79bac4012eb39f12ef1f8f8d2d4391ff3",
+  "attributes": [
+    {
+      "index": 5,
+      "field": "focus_order",
+      "gpui": null,
+      "svelte": 3
+    }
+  ]
+}

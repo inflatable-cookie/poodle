@@ -4,12 +4,12 @@
   "scenario_id": "nucleus.navigation.segmented-control",
   "scenario_path": "test/nucleus-a11y/scenarios/segmented-control.json",
   "scenario_sha256": "ce382aadd2e42b116fb1632a9b117fdff22c3dbbcf933d5ed3999b41dcfb5f83",
-  "runtime": "gpui-headless",
+  "runtime": "svelte-happy-dom",
   "run": {
-    "command": "effigy regressions:native",
-    "mount": "HeadlessDriver",
-    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "input_dispatch": "gpui-test-platform-dispatch"
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
   },
   "nodes": [
     {
@@ -37,26 +37,7 @@
       "value": null,
       "value_text": null,
       "states": {
-        "selected": false,
-        "disabled": false
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": null,
-      "focused": false
-    },
-    {
-      "role": "radio",
-      "name": "List",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "selected": true,
+        "selected": null,
         "disabled": false
       },
       "relationships": {
@@ -71,11 +52,30 @@
     },
     {
       "role": "radio",
+      "name": "List",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": false
+    },
+    {
+      "role": "radio",
       "name": "Board",
       "value": null,
       "value_text": null,
       "states": {
-        "selected": false,
+        "selected": null,
         "disabled": true
       },
       "relationships": {
