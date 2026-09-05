@@ -509,79 +509,98 @@ mod tests {
         }
     }
 
-    /// g16.106 node inventory: the two lab fixtures that paint a 1.0 vs 0.5
-    /// logical-px leading edge. Print poodle-render's emitted padding beside
-    /// the CSS `calc(--poodle-space-control-x - 0.125rem)` the Svelte fixture
-    /// computes at md/default, 16px rem base.
+    /// g16.106 node inventory: compare poodle-render's emitted padding with
+    /// the CSS-side artifact derived from `button.css`, the density custom
+    /// properties, and the frozen visual-fixture rows (not restated rem
+    /// literals). The TypeScript sibling regenerates and checks that JSON.
     #[test]
     fn leading_inset_fixtures_emit_the_css_padding() {
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct CssInventory {
+            fixtures: Vec<CssRow>,
+        }
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct CssRow {
+            fixture: String,
+            has_leading: bool,
+            pad_x: f32,
+            pad_left: f32,
+            pad_right: f32,
+            inset: f32,
+        }
+
+        let css: CssInventory = serde_json::from_str(include_str!(
+            "../../../test/visual/button-comparison/leading-inset-css.json"
+        ))
+        .expect("leading-inset CSS inventory is JSON");
+        assert_eq!(
+            css.fixtures.len(),
+            3,
+            "CSS inventory must cover the two lab fixtures plus rest-secondary"
+        );
+
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        // button.css default density: `--poodle-space-control-x: 0.75rem`.
-        // `[data-has-leading]` (md, no size override): minus `0.125rem`.
-        let css_pad_x = rem_to_px(0.75);
-        let css_inset = rem_to_px(0.125);
-        let css_pad_left = css_pad_x - css_inset;
-        let native_inset = rem_to_px(size_icon_inset_rem(ControlSize::Md));
-        let native_pad_x = theme.resolve_space("space.control.x");
 
-        let cases = [
-            (
-                "button/content-leading-icon",
-                ButtonSpec::new()
+        for row in &css.fixtures {
+            let spec = match row.fixture.as_str() {
+                "button/content-leading-icon" => ButtonSpec::new()
                     .with_label("Run")
                     .with_size(ControlSize::Md)
                     .with_density(ControlDensity::Default)
                     .with_leading_icon("play"),
-            ),
-            (
-                "button/state-loading",
-                ButtonSpec::new()
+                "button/state-loading" => ButtonSpec::new()
                     .with_label("Run")
                     .with_size(ControlSize::Md)
                     .with_density(ControlDensity::Default)
                     .with_loading(true),
-            ),
-        ];
-        for (id, spec) in cases {
+                "button/rest-secondary" => ButtonSpec::new()
+                    .with_label("Run")
+                    .with_size(ControlSize::Md)
+                    .with_density(ControlDensity::Default),
+                other => panic!("unexpected CSS inventory fixture {other}"),
+            };
             let node = button(&spec, &ctx, None);
             let padding = node.style.descriptor.layout.spacing.padding;
+            let native_pad_x = theme.resolve_space("space.control.x");
+            let native_inset = if row.has_leading {
+                rem_to_px(size_icon_inset_rem(ControlSize::Md))
+            } else {
+                0.0
+            };
             eprintln!(
-                "{id}: css pad_x={css_pad_x} inset={css_inset} pad_left={css_pad_left} pad_right={css_pad_x} | native token_pad_x={native_pad_x} inset={native_inset} emitted pad_left={} pad_right={}",
-                padding.left, padding.right
+                "{}: css pad_x={} inset={} pad_left={} pad_right={} | native token_pad_x={native_pad_x} inset={native_inset} emitted pad_left={} pad_right={}",
+                row.fixture,
+                row.pad_x,
+                row.inset,
+                row.pad_left,
+                row.pad_right,
+                padding.left,
+                padding.right
             );
             assert_eq!(
-                native_pad_x, css_pad_x,
-                "{id}: space.control.x vs CSS 0.75rem"
+                native_pad_x, row.pad_x,
+                "{}: space.control.x vs CSS pad_x",
+                row.fixture
             );
             assert_eq!(
-                native_inset, css_inset,
-                "{id}: size_icon_inset_rem(md) vs CSS 0.125rem"
+                native_inset, row.inset,
+                "{}: icon inset vs CSS inset",
+                row.fixture
             );
-            assert_eq!(padding.left, css_pad_left, "{id}: emitted pad_left");
             assert_eq!(
-                padding.right, css_pad_x,
-                "{id}: emitted pad_right (no trailing)"
+                padding.left, row.pad_left,
+                "{}: emitted pad_left",
+                row.fixture
+            );
+            assert_eq!(
+                padding.right, row.pad_right,
+                "{}: emitted pad_right",
+                row.fixture
             );
         }
-
-        // Negative: a no-leading fixture must keep symmetric pad_x. A leading
-        // inset repair that leaked here would fail this row.
-        let rest = button(
-            &ButtonSpec::new()
-                .with_label("Run")
-                .with_size(ControlSize::Md)
-                .with_density(ControlDensity::Default),
-            &ctx,
-            None,
-        );
-        let rest_pad = rest.style.descriptor.layout.spacing.padding;
-        eprintln!(
-            "button/rest-secondary: css pad_left={css_pad_x} pad_right={css_pad_x} | native emitted pad_left={} pad_right={}",
-            rest_pad.left, rest_pad.right
-        );
-        assert_eq!(rest_pad.left, css_pad_x, "rest-secondary pad_left");
-        assert_eq!(rest_pad.right, css_pad_x, "rest-secondary pad_right");
     }
 
     #[test]

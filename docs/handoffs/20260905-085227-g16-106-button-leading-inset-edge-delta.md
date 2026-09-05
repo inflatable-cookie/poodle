@@ -80,7 +80,8 @@ Here is the state the worker is inheriting:
   `git diff --check origin/main...HEAD`
 - **PR base/head:** `main` ← `worker/g16.106-button-leading-inset-edge-delta`
 - **PR URL:** https://github.com/inflatable-cookie/poodle/pull/211
-- **Review state:** awaiting independent exact-head review
+- **Review state:** awaiting re-review of the revised head after the two
+  blockers on `043fcec6f`
 - **Merge path:** orchestrator after accepted review of the current head and
   passing required checks
 

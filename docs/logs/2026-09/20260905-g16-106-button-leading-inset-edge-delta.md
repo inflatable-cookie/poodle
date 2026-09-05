@@ -1,6 +1,6 @@
 # g16.106 — Button Leading-Inset Edge Delta Diagnosis
 
-Status: complete — awaiting orchestrator review
+Status: complete — awaiting re-review of the revised head
 Date: 2026-09-05
 Card: `docs/roadmaps/g16/106-button-leading-inset-edge-delta.md`
 Handoff: `docs/handoffs/20260905-085227-g16-106-button-leading-inset-edge-delta.md`
@@ -44,8 +44,11 @@ vocabulary does not drop the fraction because there is no fraction to drop.
   is annotation-only; the geometry channel still fails at `rootEdge: 0.5`.
 - Contract §12 row (ledger known-delta generator input). The generated
   Button known-delta cell stays `present`.
-- `compare.test.ts` pins the g15.047 geometry/roles/pixels numbers and
-  proves classification on the two fixtures only.
+- `compare.test.ts` pins the g15.047 geometry/roles/pixels numbers,
+  proves the CSS artifact matches live `button.css` + density files +
+  fixtures, classifies only `root.left` delta `1` on the two fixtures,
+  and rejects `root.top`, a missing root, a 2px `root.left`, and the
+  same 1px shift on `rest-secondary`.
 
 ## Falsification
 
@@ -70,6 +73,25 @@ vocabulary does not drop the fraction because there is no fraction to drop.
 - `git diff --check origin/main...HEAD`
 
 No `*-windowed` selector was run.
+
+## Review remediation (exact head `043fcec6f`)
+
+Independent review
+https://github.com/inflatable-cookie/poodle/pull/211#issuecomment-5550554355
+asked for two changes. Both landed on this branch.
+
+1. The Rust inventory no longer restates `0.75rem` / `0.125rem`. A CSS-side
+   artifact (`test/visual/button-comparison/leading-inset-css.ts` + `.json`)
+   derives pad_x / inset / pad_left / pad_right from shipped `button.css`,
+   the density custom-property files, and the frozen fixture rows. The bun
+   test fails if that JSON drifts from the live sources. The Rust test
+   consumes the JSON and prints CSS vs native side by side. happy-dom
+   cannot cascade stylesheets at computed-value time, so this is the
+   headless stand-in the review allowed.
+2. `gpui-snaps-subpixel-edge` now matches only `root.left` with delta `1`
+   on the two named fixtures. `root.top`, a missing root landmark, a
+   2px `root.left` shift, and the same 1px shift on `rest-secondary`
+   stay unclassified.
 
 ## Closeout
 

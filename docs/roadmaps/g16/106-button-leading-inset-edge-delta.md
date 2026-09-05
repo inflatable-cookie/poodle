@@ -79,3 +79,9 @@ button/rest-secondary: css pad_left=12 pad_right=12 | native emitted pad_left=12
 `rem_to_px` does not round; `LayoutEdges` carries the f32 values. Outcome:
 contracted `gpui-snaps-subpixel-edge`. Render padding unchanged. GPUI paint
 path not modified.
+
+Review of `043fcec6f` required the CSS side to come from shipped
+`button.css` / density custom properties / the fixture inventory, not
+restated rem literals, and required the snap classifier to match only
+`root.left` delta `1`. Both are now in the inventory artifact and
+`classifyKnownDelta`.

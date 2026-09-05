@@ -117,9 +117,9 @@ export type KnownDeltaId = (typeof KNOWN_RENDERER_DELTAS)[number]["id"];
  * "GPUI paints no shadow". Numeric shadow-geometry differences between two
  * non-empty layer sets are NOT covered and stay failures.
  *
- * The subpixel-edge snap is recognized by fixture id plus a root geometry
- * finding: only `content-leading-icon` and `state-loading`. The same 1.0
- * logical-px root delta on any other fixture stays unclassified.
+ * The subpixel-edge snap is the observed `root.left` 1.0-vs-0.5 logical-px
+ * delta on `content-leading-icon` and `state-loading` only. A missing root,
+ * a different root edge, or any other delta stays unclassified.
  */
 export function classifyKnownDelta(
   finding: Finding,
@@ -138,13 +138,23 @@ export function classifyKnownDelta(
   ) {
     return "gpui-omits-box-shadow";
   }
-  if (
-    finding.channel === "geometry" &&
-    finding.subject === "root" &&
-    context?.fixture !== undefined &&
-    (SUBPIXEL_EDGE_FIXTURES as readonly string[]).includes(context.fixture)
-  ) {
+  if (isLeadingSubpixelEdgeSnap(finding, context?.fixture)) {
     return "gpui-snaps-subpixel-edge";
   }
   return null;
+}
+
+/** The lab-measured leading-edge snap: GPUI 1.0 logical px vs web 0.5. */
+const SUBPIXEL_EDGE_DELTA = 1;
+
+function isLeadingSubpixelEdgeSnap(finding: Finding, fixture: string | undefined): boolean {
+  if (finding.channel !== "geometry" || finding.subject !== "root") return false;
+  if (fixture === undefined || !(SUBPIXEL_EDGE_FIXTURES as readonly string[]).includes(fixture)) {
+    return false;
+  }
+  const match = finding.detail.match(
+    /^root\.left: web \S+ vs gpui \S+ \(delta (\S+) > (\S+) logical px\)$/,
+  );
+  if (!match) return false;
+  return Number(match[1]) === SUBPIXEL_EDGE_DELTA && Number(match[2]) === GEOMETRY.rootEdge;
 }
