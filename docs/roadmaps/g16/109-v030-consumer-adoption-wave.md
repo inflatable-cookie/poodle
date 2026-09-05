@@ -1,7 +1,7 @@
 # g16.109 — v0.3.0 Consumer Adoption Wave
 
-Status: ready — 15 sibling-repository lanes in two tiers; amended
-2026-09-05 after the operator caught a sequencing defect: Underlay apps
+Status: complete — Acowtancy PR #155 and Bovine Accelerator Desktop PR #94 merged on 2026-09-05; remaining consumer lanes were previously closed
+The card was amended 2026-09-05 after the operator caught a sequencing defect: Underlay apps
 consume Underlay by git tag, so tier 2 waits for an Underlay release, not
 for a merged pin
 Type: consumer adoption — sibling repositories; Poodle unchanged

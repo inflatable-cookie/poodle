@@ -152,9 +152,9 @@ truth; this page is the index. Narrative history of the generation is in
 115. [115 — Nucleus A1 tranche NP-4 settings and remediation](115-nucleus-a1-np4-settings-remediation.md) — ready (foundation merged in PR #215)
 116. [116 — Nucleus A1 tranche NP-5 command and attention](116-nucleus-a1-np5-command-attention.md) — ready (foundation merged in PR #215)
 117. [117 — Select A1 alignment](117-select-a1-alignment.md) — ready; five real Select divergences from the `111` receipt, decided by the contract; one chevron decision pending
-118. [118 — A1 overlay structure projection](118-a1-overlay-structure-projection.md) — ready; `Heading`/`Banner` roles plus eight overlay rows from the divergence store
-119. [119 — A1 focus and state semantics](119-a1-focus-and-state-semantics.md) — ready; post-action focus, roving stops, and state projection for five rows
-120. [120 — A1 landmarks and content roles](120-a1-landmarks-and-content-roles.md) — held behind `118`; AppHeader, SplitView, AgentChatInput, AgentPlan
+118. [118 — A1 overlay structure projection](118-a1-overlay-structure-projection.md) — complete; merged in PR #224 with `Heading`/`Banner`/`SearchBox` roles and eight overlay structures
+119. [119 — A1 focus and state semantics](119-a1-focus-and-state-semantics.md) — complete; merged in PR #223 with overlay initial-focus routing and five-row focus/state semantics
+120. [120 — A1 landmarks and content roles](120-a1-landmarks-and-content-roles.md) — complete; merged in PR #225 for AppHeader, SplitView, AgentChatInput, and AgentPlan
 
 ## Programmes
 

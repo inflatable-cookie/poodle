@@ -1,6 +1,6 @@
 # g16.118 — A1 Overlay Structure Projection
 
-Status: implementation complete — pending independent exact-head review
+Status: complete — merged in PR #224 at `e4407101e5836843e124c75b4884c118f74bb1e3` on 2026-09-05
 Type: native accessibility repair — `poodle-node` vocabulary, `poodle-render`
 composition, backend/Jetstream role mapping; A1 receipts for eight rows
 Opened: 2026-09-05

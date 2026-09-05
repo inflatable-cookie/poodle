@@ -1,6 +1,6 @@
 # g16.120 — A1 Landmarks And Content Roles
 
-Status: implementation complete — pending fresh exact-head review
+Status: complete — merged in PR #225 at `273a6fd02fdcddc19b327aaa0fc919c5af047f4c` on 2026-09-05
 Type: native projection repair — `poodle-render`; A1 receipts for four rows
 Opened: 2026-09-05
 Depends on: merged `g16.118`

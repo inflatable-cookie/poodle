@@ -1,6 +1,6 @@
 # g16.119 — A1 Focus And State Semantics
 
-Status: ready — concurrent with `g16.118`; overlay initial-focus rows join after `118` merges (serial for those five rows only)
+Status: complete — merged in PR #223 at `cceb6646a2bf7776b670fb63f586bce037d0ee6e` on 2026-09-05
 Type: native behaviour repair — GPUI backend focus routing and `poodle-render`
 state projection; A1 receipts for five rows
 Opened: 2026-09-05
