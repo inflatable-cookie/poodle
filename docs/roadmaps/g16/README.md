@@ -152,11 +152,12 @@ stay maintained; backend admission is not part of the first card.
 109. [109 — v0.3.0 consumer adoption wave](109-v030-consumer-adoption-wave.md) — ready; 15 sibling lanes in two tiers move every consumer to exact `0.3.0`, absorb the three documented breaks, and close ten open consumer papercuts
 110. [110 — gpui-unofficial feasibility spike](110-gpui-unofficial-feasibility-spike.md) — ready; throwaway-branch port of the native pair to the upstream republish at its first Apache-clean version, with an AccessKit reachability proof; report decides the migration
 111. [111 — Nucleus A1 accessibility receipt foundation](111-nucleus-a1-accessibility-receipt-foundation.md) — complete; merged in PR #215 with paired GPUI node-tree and Svelte DOM accessibility snapshots, two validated A1 receipts (Switch, Tabs), and an honestly recorded Select divergence
-112. [112 — Nucleus A1 tranche NP-1 shell](112-nucleus-a1-np1-shell.md) — held behind `111`
-113. [113 — Nucleus A1 tranche NP-2 navigation and overlays](113-nucleus-a1-np2-navigation-overlays.md) — held behind `111`
-114. [114 — Nucleus A1 tranche NP-3 agent workflow](114-nucleus-a1-np3-agent-workflow.md) — held behind `111`
-115. [115 — Nucleus A1 tranche NP-4 settings and remediation](115-nucleus-a1-np4-settings-remediation.md) — held behind `111`
-116. [116 — Nucleus A1 tranche NP-5 command and attention](116-nucleus-a1-np5-command-attention.md) — held behind `111`
+112. [112 — Nucleus A1 tranche NP-1 shell](112-nucleus-a1-np1-shell.md) — ready (foundation merged in PR #215)
+113. [113 — Nucleus A1 tranche NP-2 navigation and overlays](113-nucleus-a1-np2-navigation-overlays.md) — ready (foundation merged in PR #215)
+114. [114 — Nucleus A1 tranche NP-3 agent workflow](114-nucleus-a1-np3-agent-workflow.md) — ready (foundation merged in PR #215)
+115. [115 — Nucleus A1 tranche NP-4 settings and remediation](115-nucleus-a1-np4-settings-remediation.md) — ready (foundation merged in PR #215)
+116. [116 — Nucleus A1 tranche NP-5 command and attention](116-nucleus-a1-np5-command-attention.md) — ready (foundation merged in PR #215)
+117. [117 — Select A1 alignment](117-select-a1-alignment.md) — ready; five real Select divergences from the `111` receipt, decided by the contract; one chevron decision pending
 
 ## Parallel Continuation
 

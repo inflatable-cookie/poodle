@@ -125,25 +125,42 @@ card or triage note says.
   checks the licence transcript and that the AccessKit test reads the tree
 - Stop conditions: per card. Escalation owner: Chatterbox
 
-### g16.111 — Nucleus A1 accessibility receipt foundation
+### g16.117 — Select A1 alignment
 
-- Card: `g16/111-nucleus-a1-accessibility-receipt-foundation.md`
-- Readiness: ready. Operator-designated critical work: the frontier pool
-  (Claude Fable 5.1, medium thinking) is authorized for this lane.
-- Prerequisites: merged `g16.062`, M1 complete (both satisfied).
-  Completion: PR merged after accepted exact-head review with two validated
-  A1 receipts (Switch, Tabs), one recorded Select divergence, and the ledger
-  consuming them.
-- Owned mutable paths: per card (`test/nucleus-a11y/**`, driver extractor,
-  receipt script and schema, two A1 receipts plus divergence artifacts, ledger
-  generator A1 path, log, `PAPERCUTS.md` append)
+- Card: `g16/117-select-a1-alignment.md`
+- Readiness: ready. One contract decision (chevron focusability) is
+  pending with the operator; the card names the default if unanswered.
+- Prerequisites: merged `g16.111`. Completion: PR merged after accepted
+  exact-head review with an empty-diff Select A1 receipt.
+- Owned mutable paths: per card (select contract, Svelte/React/render
+  Select, scenario file, receipt and divergence store, log, `PAPERCUTS.md`)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
-- Approved concurrent siblings: `g16.106`–`110`, `109` lanes. Serial edges:
-  `g16.112`–`116` wait for this merge.
-- Worker capability class: frontier coding model, medium reasoning
-  (operator-designated)
+- Approved concurrent siblings: `g16.112`–`116` (113 skips the Select row),
+  `106`, `107`, `109` lanes. Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning (Svelte,
+  React, Rust render)
 - Acceptance evidence and review oracle: the card's table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+### g16.112–g16.116 — Nucleus A1 tranches NP-1…NP-5
+
+- Cards: `g16/112-nucleus-a1-np1-shell.md`, `113-…np2-navigation-overlays.md`,
+  `114-…np3-agent-workflow.md`, `115-…np4-settings-remediation.md`,
+  `116-…np5-command-attention.md`
+- Readiness: ready (foundation `g16.111` merged at `3dea40372`). Five
+  concurrent lanes, one PR each; owned paths are disjoint by row.
+- Prerequisites: none remaining. Completion per lane: PR merged after
+  accepted exact-head review with a validated A1 receipt or a recorded
+  divergence for every row in the card.
+- Owned mutable paths: per card (scenario files, A1 regression tests,
+  receipts for the card's rows, one-line render projection fixes only)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`
+- Approved concurrent siblings: each other, `g16.117`, `106`, `107`, `109`
+  lanes. Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning
+- Acceptance evidence and review oracle: each card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
 ## Held lanes (not dispatchable)
@@ -152,7 +169,6 @@ card or triage note says.
 | --- | --- | --- |
 | `g16.051` icon geometry native visual admission | accepted VL-1 Button bootstrap and VL-2A icon adapter in `poodle-lab` | Poodle Chatterbox (lab planning) |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
-| `g16.112`–`g16.116` Nucleus A1 tranches NP-1…NP-5 | merged `g16.111`; ordinary workers, one PR each, concurrent | Chatterbox |
 | `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
 | Nucleus V1 / V2 / M2 and Nucleus adoption | V1 after the lab Button and icon bundles; V2 after lab `g01.003` and Nucleus seeding; M2 Nucleus-owned | operator, via Chatterbox |
 | Jetstream admission | `docs/triage/20260902-000959-jetstream-admission-hold.md` | operator |

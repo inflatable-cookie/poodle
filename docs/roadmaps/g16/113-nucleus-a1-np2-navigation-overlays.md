@@ -1,6 +1,6 @@
 # g16.113 — Nucleus A1 Tranche NP-2 Navigation And Overlays
 
-Status: held — ready when `g16.111` merges
+Status: ready — foundation `g16.111` merged in PR #215 at `3dea40372`
 Type: A1 evidence tranche — paired accessibility receipts for the rows below
 Opened: 2026-09-05
 Depends on: merged `g16.111`
@@ -11,7 +11,7 @@ Dispatch manifest: `../dispatch.md`
 
 ## Rows
 
-SegmentedControl, Tabs (receipted in `111`), Menu, Dialog, Popover, Select (receipted in `111`), EditableLabel (7 rows, 5 new)
+SegmentedControl, Tabs (receipted in `111`), Menu, Dialog, Popover, Select (receipted by `g16.117`, the bounded repair; skip here), EditableLabel (7 rows, 5 in this card)
 
 ## Fixed Boundary
 
