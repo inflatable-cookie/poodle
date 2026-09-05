@@ -1696,3 +1696,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   reviewers must never rebase or edit another lane's worktree; the coordinator
   should enforce a clean exact-head lease per lane. Surface: Paseo worktree
   ownership and independent PR review.
+
+- 2026-09-05 — `regressions:native` owns the receipt output directory in its
+  task environment, while direct Cargo integration tests run with the package
+  directory as their process cwd. Relative `POODLE_NUCLEUS_RECEIPT_DIR` values
+  can therefore split one run across root and package `target/` trees. Use an
+  absolute output path for direct re-emission, or let the task honor an
+  explicit caller override. Surface: Effigy task env and A1 receipt runner.

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "AgentQuestion",
-  "scenario_id": "nucleus.agent.agent-question",
+  "component": "MessageCenter",
+  "scenario_id": "nucleus.attention.message-center",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,30 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount AgentQuestion through the production renderer",
-    "replay the shared option action through GPUI dispatch and rebuild the host"
+    "mount the production MessageCenter node tree through HeadlessDriver with the shared scenario props"
   ],
   "assertions": [
-    "the checked radio projection matches Svelte after the action"
+    "trigger, dialog, banner, heading, list, and item buttons match the Svelte ARIA projection"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/agent-question.gpui.json",
-      "sha256": "f28e4d3e758e277c736801c9b4d1cc7347221f1af3712020e1c56fac75d59bd3"
+      "path": "test/nucleus-a11y/snapshots/message-center.gpui.json",
+      "sha256": "c128532f63656dc72859546a200e76975b522cee27716817642aa2bb8d4dc668"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/agent-question.svelte.json",
-      "sha256": "21e1f70eecac3a06fe260048a2f8e09ef7d55ce63f4d5761dfdea879af88271f"
+      "path": "test/nucleus-a11y/snapshots/message-center.svelte.json",
+      "sha256": "1819b190337b87af08d6dbb7b229911d21dfda288b822685259d994d26b7948f"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/agent-question.json",
-    "scenario_sha256": "5f419c616c98e6d4901951529d1c1187bb0e6e31609175a9c08e05db0b1002a0",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/agent-question.gpui.json",
-    "gpui_snapshot_sha256": "f28e4d3e758e277c736801c9b4d1cc7347221f1af3712020e1c56fac75d59bd3",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/agent-question.svelte.json",
-    "svelte_snapshot_sha256": "21e1f70eecac3a06fe260048a2f8e09ef7d55ce63f4d5761dfdea879af88271f",
+    "scenario_path": "test/nucleus-a11y/scenarios/message-center.json",
+    "scenario_sha256": "a60a4f94ac882000e34326f64fd66a5668e8cea20fcfd19f0d98ef609e8f1180",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/message-center.gpui.json",
+    "gpui_snapshot_sha256": "c128532f63656dc72859546a200e76975b522cee27716817642aa2bb8d4dc668",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/message-center.svelte.json",
+    "svelte_snapshot_sha256": "1819b190337b87af08d6dbb7b229911d21dfda288b822685259d994d26b7948f",
     "web_only_exclusions": [],
     "diff": []
   }

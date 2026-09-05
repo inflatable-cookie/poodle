@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "AgentQuestion",
-  "scenario_id": "nucleus.agent.agent-question",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,30 +46,30 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount AgentQuestion through the production renderer",
-    "replay the shared option action through GPUI dispatch and rebuild the host"
+    "mount the production ModelPicker with host-owned closed state",
+    "replay the shared trigger action through GPUI dispatch and rebuild the open picker"
   ],
   "assertions": [
-    "the checked radio projection matches Svelte after the action"
+    "the selected model radio receives initial focus when the picker opens"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/agent-question.gpui.json",
-      "sha256": "f28e4d3e758e277c736801c9b4d1cc7347221f1af3712020e1c56fac75d59bd3"
+      "path": "test/nucleus-a11y/snapshots/model-picker.gpui.json",
+      "sha256": "eb6d24dea1ca9a21496f5973179cfe75bb019d65c6203e8605a26a75d7d92a9e"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/agent-question.svelte.json",
-      "sha256": "21e1f70eecac3a06fe260048a2f8e09ef7d55ce63f4d5761dfdea879af88271f"
+      "path": "test/nucleus-a11y/snapshots/model-picker.svelte.json",
+      "sha256": "ed40cf9bcba81ea664966e64391b5428312b7a2dbffcf91f7d33c66df8111180"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/agent-question.json",
-    "scenario_sha256": "5f419c616c98e6d4901951529d1c1187bb0e6e31609175a9c08e05db0b1002a0",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/agent-question.gpui.json",
-    "gpui_snapshot_sha256": "f28e4d3e758e277c736801c9b4d1cc7347221f1af3712020e1c56fac75d59bd3",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/agent-question.svelte.json",
-    "svelte_snapshot_sha256": "21e1f70eecac3a06fe260048a2f8e09ef7d55ce63f4d5761dfdea879af88271f",
+    "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+    "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/model-picker.gpui.json",
+    "gpui_snapshot_sha256": "eb6d24dea1ca9a21496f5973179cfe75bb019d65c6203e8605a26a75d7d92a9e",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/model-picker.svelte.json",
+    "svelte_snapshot_sha256": "ed40cf9bcba81ea664966e64391b5428312b7a2dbffcf91f7d33c66df8111180",
     "web_only_exclusions": [],
     "diff": []
   }

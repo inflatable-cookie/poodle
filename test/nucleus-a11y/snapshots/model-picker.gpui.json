@@ -32,7 +32,7 @@
       "level": null,
       "orientation": null,
       "focus_order": 0,
-      "focused": true
+      "focused": false
     },
     {
       "role": "dialog",
@@ -92,7 +92,7 @@
       "level": null,
       "orientation": null,
       "focus_order": 1,
-      "focused": false
+      "focused": true
     },
     {
       "role": "radio",
