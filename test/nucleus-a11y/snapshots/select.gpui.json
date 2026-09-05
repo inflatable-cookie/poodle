@@ -13,10 +13,10 @@
   },
   "nodes": [
     {
-      "role": "combobox",
+      "role": "button",
       "name": "Fruit",
       "value": null,
-      "value_text": "Banana",
+      "value_text": null,
       "states": {
         "expanded": true,
         "selected": null,
@@ -36,7 +36,7 @@
     },
     {
       "role": "listbox",
-      "name": null,
+      "name": "Fruit",
       "value": null,
       "value_text": null,
       "states": {

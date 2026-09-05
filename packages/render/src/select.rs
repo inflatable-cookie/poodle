@@ -464,7 +464,11 @@ fn build_trigger(
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
-    el.a11y.role = Some(NodeRole::ComboBox);
+    el.a11y.role = Some(if spec.searchable {
+        NodeRole::ComboBox
+    } else {
+        NodeRole::Button
+    });
     el.a11y.expanded = Some(open);
     el.a11y.controls = Some(select_part_id(&handlers.instance_scope, "listbox"));
     el.interaction.focusable = !is_disabled && !searchable_editor;
@@ -631,6 +635,9 @@ fn build_panel(
         bottom: None,
     };
     panel.a11y.role = Some(NodeRole::ListBox);
+    if let Some(label) = spec.aria_label.as_deref() {
+        panel.a11y.label = Some(label.to_string());
+    }
     stamp_identity(
         &mut panel,
         select_part_id(&handlers.instance_scope, "listbox"),
@@ -1271,12 +1278,13 @@ mod tests {
         .with_open(true)
         .with_value("banana")
         .with_highlighted_value("apple")
+        .with_aria_label("Fruit")
         .with_menu_min_width("12rem");
         let node = select(&spec, &ctx, &SelectHandlers::new("proof"));
         let trigger = node
             .find(&|n| n.runtime_id.as_deref() == Some("select:proof:trigger"))
             .expect("trigger");
-        assert_eq!(trigger.a11y.role, Some(NodeRole::ComboBox));
+        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
         assert_eq!(trigger.a11y.expanded, Some(true));
         assert_eq!(
             trigger.a11y.controls.as_deref(),
@@ -1296,6 +1304,7 @@ mod tests {
             .find(&|n| n.runtime_id.as_deref() == Some("select:proof:listbox"))
             .expect("listbox");
         assert_eq!(listbox.a11y.role, Some(NodeRole::ListBox));
+        assert_eq!(listbox.a11y.label.as_deref(), Some("Fruit"));
         assert_eq!(listbox.style.descriptor.background, Some(fill));
         assert_eq!(
             listbox.style.descriptor.shadow,

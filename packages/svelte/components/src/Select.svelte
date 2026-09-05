@@ -476,6 +476,8 @@
         <button
           type="button"
           class="poodle-select__indicator-button"
+          tabindex="-1"
+          aria-hidden="true"
           aria-label={open ? "Close options" : "Open options"}
           onclick={handleSearchableIndicatorClick}
         >
@@ -521,6 +523,8 @@
         <button
           type="button"
           class="poodle-select__indicator-button"
+          tabindex="-1"
+          aria-hidden="true"
           aria-label={open ? "Close options" : "Open options"}
           onclick={handleTriggerClick}
         >
@@ -572,6 +576,7 @@
                   <button
                     type="button"
                   class="poodle-select__option"
+                  tabindex="-1"
                   id={`${listboxId}-option-${flatIdx}`}
                   data-value={option.value}
                   role="option"
@@ -621,6 +626,7 @@
                   <button
                     type="button"
                   class="poodle-select__option"
+                  tabindex="-1"
                   id={`${listboxId}-option-${flatIdx}`}
                   data-value={option.value}
                   role="option"
@@ -663,6 +669,7 @@
             <button
               type="button"
               class="poodle-select__option"
+              tabindex="-1"
               id={`${listboxId}-option-${index}`}
               data-value={option.value}
               role="option"
@@ -769,4 +776,3 @@
     <span class="poodle-select__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
   </div>
 {/if}
-

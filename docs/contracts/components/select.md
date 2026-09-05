@@ -266,7 +266,8 @@ uses the dismissable-layer stack (innermost-first), guarded by
 - Searchable: trigger area has `role="combobox"`, `aria-expanded`, `aria-haspopup="listbox"`, `aria-controls` pointing to listbox id
 - Searchable input: `aria-autocomplete="list"`, `aria-activedescendant` pointing to highlighted option id
 - Non-searchable: trigger button has `aria-expanded`, `aria-haspopup="listbox"`, `aria-controls`
-- Listbox: `role="listbox"`, unique id referenced by `aria-controls`
+- Listbox: `role="listbox"`, unique id referenced by `aria-controls`, and the
+  Select label projected as its accessible name
 - Option: `role="option"`, `aria-selected` on the currently selected option
 - Group: `role="group"` with `aria-label` from group label
 - Disabled options: native `disabled` attribute on button
@@ -508,6 +509,8 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - Recipe fallback chains use the component override when set and otherwise use
   the semantic-token default.
 - The indicator chevron is decorative and does not need separate accessibility exposure
+- The custom chevron is a pointer-only decorative affordance (`tabindex="-1"`,
+  `aria-hidden="true"`); it does not create a second tab stop
 
 ## 10a. Jetstream Notes
 
