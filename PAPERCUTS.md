@@ -1553,3 +1553,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   log models. A root vitest workspace config covering both trees, or an
   include fix in the package config, removes the trap. Surface:
   `packages/react/components` vitest config.
+
+- 2026-09-05 — `cargo test -p poodle-render` at the repository root fails
+  with `could not find Cargo.toml`: Poodle has no root workspace manifest.
+  The g16.106 card writes that form; the working command is
+  `cargo test -p poodle-render --manifest-path packages/render/Cargo.toml`
+  (already used by `check:gpui`). Surface: g16.106 card validation.
+
+- 2026-09-05 — A unit-test-only edit under `packages/render` fails
+  `docs:check` because `scripts/nucleus-parity-receipts.ts` treats the whole
+  crate as Nucleus source. The mechanical escape is the g16.100/g16.105
+  cohort repin (29 receipts + manifest `source_commit` + ledger rewrite).
+  A test-only exemption, or pinning to the files a receipt actually
+  observes, would stop this. Surface: `SOURCE_PATHS` in
+  `scripts/nucleus-parity-receipts.ts`.

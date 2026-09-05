@@ -64,3 +64,18 @@ generator inputs, execution log, `PAPERCUTS.md` (append only).
 
 Stop if the cause is in the node vocabulary and needs a new capability, or
 if GPUI's paint path needs a change. Escalation owner: Chatterbox.
+
+## Evidence
+
+Diagnosis 2026-09-05: both fixtures emit the CSS inset exactly. Printed
+node inventory (`leading_inset_fixtures_emit_the_css_padding`):
+
+```
+button/content-leading-icon: css pad_x=12 inset=2 pad_left=10 pad_right=12 | native token_pad_x=12 inset=2 emitted pad_left=10 pad_right=12
+button/state-loading: css pad_x=12 inset=2 pad_left=10 pad_right=12 | native token_pad_x=12 inset=2 emitted pad_left=10 pad_right=12
+button/rest-secondary: css pad_left=12 pad_right=12 | native emitted pad_left=12 pad_right=12
+```
+
+`rem_to_px` does not round; `LayoutEdges` carries the f32 values. Outcome:
+contracted `gpui-snaps-subpixel-edge`. Render padding unchanged. GPUI paint
+path not modified.

@@ -509,6 +509,81 @@ mod tests {
         }
     }
 
+    /// g16.106 node inventory: the two lab fixtures that paint a 1.0 vs 0.5
+    /// logical-px leading edge. Print poodle-render's emitted padding beside
+    /// the CSS `calc(--poodle-space-control-x - 0.125rem)` the Svelte fixture
+    /// computes at md/default, 16px rem base.
+    #[test]
+    fn leading_inset_fixtures_emit_the_css_padding() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        // button.css default density: `--poodle-space-control-x: 0.75rem`.
+        // `[data-has-leading]` (md, no size override): minus `0.125rem`.
+        let css_pad_x = rem_to_px(0.75);
+        let css_inset = rem_to_px(0.125);
+        let css_pad_left = css_pad_x - css_inset;
+        let native_inset = rem_to_px(size_icon_inset_rem(ControlSize::Md));
+        let native_pad_x = theme.resolve_space("space.control.x");
+
+        let cases = [
+            (
+                "button/content-leading-icon",
+                ButtonSpec::new()
+                    .with_label("Run")
+                    .with_size(ControlSize::Md)
+                    .with_density(ControlDensity::Default)
+                    .with_leading_icon("play"),
+            ),
+            (
+                "button/state-loading",
+                ButtonSpec::new()
+                    .with_label("Run")
+                    .with_size(ControlSize::Md)
+                    .with_density(ControlDensity::Default)
+                    .with_loading(true),
+            ),
+        ];
+        for (id, spec) in cases {
+            let node = button(&spec, &ctx, None);
+            let padding = node.style.descriptor.layout.spacing.padding;
+            eprintln!(
+                "{id}: css pad_x={css_pad_x} inset={css_inset} pad_left={css_pad_left} pad_right={css_pad_x} | native token_pad_x={native_pad_x} inset={native_inset} emitted pad_left={} pad_right={}",
+                padding.left, padding.right
+            );
+            assert_eq!(
+                native_pad_x, css_pad_x,
+                "{id}: space.control.x vs CSS 0.75rem"
+            );
+            assert_eq!(
+                native_inset, css_inset,
+                "{id}: size_icon_inset_rem(md) vs CSS 0.125rem"
+            );
+            assert_eq!(padding.left, css_pad_left, "{id}: emitted pad_left");
+            assert_eq!(
+                padding.right, css_pad_x,
+                "{id}: emitted pad_right (no trailing)"
+            );
+        }
+
+        // Negative: a no-leading fixture must keep symmetric pad_x. A leading
+        // inset repair that leaked here would fail this row.
+        let rest = button(
+            &ButtonSpec::new()
+                .with_label("Run")
+                .with_size(ControlSize::Md)
+                .with_density(ControlDensity::Default),
+            &ctx,
+            None,
+        );
+        let rest_pad = rest.style.descriptor.layout.spacing.padding;
+        eprintln!(
+            "button/rest-secondary: css pad_left={css_pad_x} pad_right={css_pad_x} | native emitted pad_left={} pad_right={}",
+            rest_pad.left, rest_pad.right
+        );
+        assert_eq!(rest_pad.left, css_pad_x, "rest-secondary pad_left");
+        assert_eq!(rest_pad.right, css_pad_x, "rest-secondary pad_right");
+    }
+
     #[test]
     fn gap_ladders_on_density() {
         let theme = theme();

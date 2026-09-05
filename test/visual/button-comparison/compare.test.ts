@@ -30,7 +30,14 @@ import {
   compareRendererAwarePair,
   type CaptureEvidence,
 } from "./compare.ts";
-import { classifyKnownDelta } from "./policy.ts";
+import {
+  classifyKnownDelta,
+  GEOMETRY,
+  KNOWN_RENDERER_DELTAS,
+  PIXELS,
+  ROLES,
+  SUBPIXEL_EDGE_FIXTURES,
+} from "./policy.ts";
 import {
   MIN_FOREGROUND_SAMPLES,
   parseButtonCaptureReceipt,
@@ -546,6 +553,86 @@ describe("renderer-aware policy (svelte ↔ gpui)", () => {
       classifyKnownDelta(finding!, {
         webShadowLayers: 1,
         gpuiShadowLayers: 1,
+      }),
+    ).toBeNull();
+  });
+
+  test("g15.047 policy numbers stay the g15.047 table", () => {
+    expect(GEOMETRY).toEqual({
+      rootEdge: 0.5,
+      contentCentre: 1,
+      contentSize: 1,
+      contentExtent: 2,
+    });
+    expect(ROLES).toEqual({
+      colorChannel8Bit: 1,
+      lineWidth: 0.5,
+      shadowGeometry: 0.5,
+    });
+    expect(PIXELS).toEqual({
+      threshold: 0.1,
+      includeAA: false,
+      maxDiffRatio: 0.03,
+    });
+    expect(KNOWN_RENDERER_DELTAS.map((entry) => entry.id)).toEqual([
+      "gpui-omits-box-shadow",
+      "gpui-omits-letter-spacing",
+      "gpui-snaps-subpixel-edge",
+    ]);
+    expect([...SUBPIXEL_EDGE_FIXTURES]).toEqual([
+      "button/content-leading-icon",
+      "button/state-loading",
+    ]);
+  });
+
+  test("a 1.0 logical-px root edge on the two leading-slot fixtures classifies as the snap delta", () => {
+    const png = solidPng(12, 34, 56);
+    for (const name of SUBPIXEL_EDGE_FIXTURES) {
+      const leading = fixture(name);
+      const web: CaptureEvidence = {
+        receipt: makeReceipt(leading, "svelte", (raw) => {
+          raw.pngSha256 = hashOf(png);
+        }),
+        png,
+      };
+      const gpui: CaptureEvidence = {
+        receipt: makeReceipt(leading, "gpui", (raw) => {
+          raw.pngSha256 = hashOf(png);
+          (raw.landmarks as Record<string, { x: number }>).root.x = 17;
+        }),
+        png,
+      };
+      const { verdict } = compareRendererAwarePair(leading, web, gpui);
+      expect(verdict.channels.geometry.status).toBe("fail");
+      const finding = verdict.channels.geometry.findings.find((entry) => entry.subject === "root");
+      expect(finding?.detail).toContain("root.left");
+      expect(
+        classifyKnownDelta(finding!, {
+          webShadowLayers: 0,
+          gpuiShadowLayers: 0,
+          fixture: leading.name,
+        }),
+      ).toBe("gpui-snaps-subpixel-edge");
+    }
+  });
+
+  test("the same 1.0 logical-px root edge on rest-secondary stays unclassified", () => {
+    const png = solidPng(12, 34, 56);
+    const web = evidence(target, "svelte", png, hashOf(png));
+    const { verdict } = compareRendererAwarePair(
+      target,
+      web,
+      gpuiEvidence(png, (raw) => {
+        (raw.landmarks as Record<string, { x: number }>).root.x = 17;
+      }),
+    );
+    const finding = verdict.channels.geometry.findings.find((entry) => entry.subject === "root");
+    expect(finding).toBeDefined();
+    expect(
+      classifyKnownDelta(finding!, {
+        webShadowLayers: 0,
+        gpuiShadowLayers: 0,
+        fixture: target.name,
       }),
     ).toBeNull();
   });

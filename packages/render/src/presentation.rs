@@ -782,5 +782,21 @@ mod tests {
         assert_eq!(rem_to_px(1.0), 16.0);
         assert_eq!(rem_to_px(0.5), 8.0);
         assert_eq!(rem_to_px(2.25), 36.0);
+        // Button icon-inset rem stops (button.css [data-has-leading] ladder).
+        // These must stay exact; a round-to-whole-px conversion is the g16.106
+        // defect the node inventory is allowed to repair.
+        assert_eq!(rem_to_px(0.1875), 3.0);
+        assert_eq!(rem_to_px(0.125), 2.0);
+        assert_eq!(rem_to_px(0.0625), 1.0);
+        assert_eq!(rem_to_px(-0.0625), -1.0);
+    }
+
+    #[test]
+    fn button_icon_inset_ladder_matches_css() {
+        assert_eq!(size_icon_inset_rem(ControlSize::Xs), 0.1875);
+        assert_eq!(size_icon_inset_rem(ControlSize::Sm), 0.25);
+        assert_eq!(size_icon_inset_rem(ControlSize::Md), 0.125);
+        assert_eq!(size_icon_inset_rem(ControlSize::Lg), 0.0);
+        assert_eq!(size_icon_inset_rem(ControlSize::Xl), -0.0625);
     }
 }
