@@ -1,11 +1,5 @@
 [
   {
-    "index": 3,
-    "field": "focused",
-    "gpui": false,
-    "svelte": true
-  },
-  {
     "index": 5,
     "field": "focus_order",
     "gpui": null,

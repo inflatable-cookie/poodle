@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "SegmentedControl",
-  "scenario_id": "nucleus.navigation.segmented-control",
-  "scenario_path": "test/nucleus-a11y/scenarios/segmented-control.json",
-  "scenario_sha256": "ce382aadd2e42b116fb1632a9b117fdff22c3dbbcf933d5ed3999b41dcfb5f83",
+  "component": "Dialog",
+  "scenario_id": "nucleus.navigation.dialog",
+  "scenario_path": "test/nucleus-a11y/scenarios/dialog.json",
+  "scenario_sha256": "86acd39ec2a88c7cf2c45e5162459bf5cb1013934a4a89b9eed5978d89c9858b",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -13,50 +13,11 @@
   },
   "nodes": [
     {
-      "role": "radiogroup",
-      "name": "View",
+      "role": "button",
+      "name": "Dismiss dialog backdrop",
       "value": null,
       "value_text": null,
       "states": {
-        "selected": null,
-        "disabled": false
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": null,
-      "focused": false
-    },
-    {
-      "role": "radio",
-      "name": "Grid",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "selected": false,
-        "disabled": false
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": null,
-      "focused": false
-    },
-    {
-      "role": "radio",
-      "name": "List",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "selected": true,
         "disabled": false
       },
       "relationships": {
@@ -70,13 +31,32 @@
       "focused": false
     },
     {
-      "role": "radio",
-      "name": "Board",
+      "role": "dialog",
+      "name": "Delete file",
       "value": null,
       "value_text": null,
       "states": {
-        "selected": false,
-        "disabled": true
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [
+          -1
+        ],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": true
+    },
+    {
+      "role": "button",
+      "name": "Close dialog",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
       },
       "relationships": {
         "controls": [],
@@ -85,7 +65,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": null,
+      "focus_order": 1,
       "focused": false
     }
   ]

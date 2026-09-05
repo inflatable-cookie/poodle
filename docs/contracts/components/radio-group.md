@@ -306,8 +306,9 @@ Behavior classification: machine-backed (shared `singleSelectTransition` in
   unique and stable for the mounted control's lifetime; option runtime ids are
   derived from it. `on_change` remains optional on the handler bundle.
 - each option must expose its selected state and accessible name individually
-- orientation must be reflected in both keyboard navigation axis and the
-  accessibility tree via `aria-orientation`
+- orientation drives the keyboard navigation axis and the layout axis only;
+  the accessibility record carries no orientation, matching §6 (`aria-orientation`
+  is not set; the axis rides `data-orientation` on the web)
 - disabled options must be skipped during keyboard navigation
 
 ## 10a. Jetstream Notes

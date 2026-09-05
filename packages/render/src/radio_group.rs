@@ -303,7 +303,9 @@ pub fn radio_group(
         el.a11y.label = Some(label.to_string());
     }
     el.a11y.role = Some(NodeRole::RadioGroup);
-    el.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
+    // Contract §6: orientation is a layout/navigation axis (`data-orientation`
+    // on web). `aria-orientation` is not set, so the accessibility record
+    // stays silent even when the spec names an axis.
     el
 }
 
@@ -575,14 +577,14 @@ mod tests {
     }
 
     #[test]
-    fn radiogroup_role_and_orientation_ride_the_root() {
+    fn radiogroup_role_rides_the_root_without_aria_orientation() {
         let mut spec =
             RadioGroupSpec::new(plan_options()).with_orientation(Orientation::Horizontal);
         spec.aria_label = Some("Plan".to_string());
         let node = render(&spec, RadioGroupHandlers::new("plan"));
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         assert_eq!(node.a11y.label.as_deref(), Some("Plan"));
-        assert_eq!(node.a11y.orientation.as_deref(), Some("horizontal"));
+        assert_eq!(node.a11y.orientation, None);
         let free = find_option(&node, "free");
         assert_eq!(free.a11y.role, Some(NodeRole::RadioButton));
         assert_eq!(free.a11y.selected, Some(false));

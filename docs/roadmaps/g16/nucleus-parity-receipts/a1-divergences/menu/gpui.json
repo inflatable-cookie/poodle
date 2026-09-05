@@ -86,7 +86,7 @@
       "level": null,
       "orientation": null,
       "focus_order": 2,
-      "focused": false
+      "focused": true
     },
     {
       "role": "menuitem",

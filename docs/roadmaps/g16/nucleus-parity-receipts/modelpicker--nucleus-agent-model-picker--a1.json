@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Icon",
-  "scenario_id": "nucleus.shell.icon",
-  "proof_level": "M1",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
@@ -46,15 +46,31 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "install icon provider and render Icon through poodle_render",
-    "pointer hover dispatch through HeadlessDriver"
+    "mount the production ModelPicker with host-owned closed state",
+    "replay the shared trigger action through GPUI dispatch and rebuild the open picker"
   ],
   "assertions": [
-    "production render path emits NodeKind::Icon with named SVG path handoff and token size",
-    "text_color tint matches the resolved theme value",
-    "explicit accessible label is preserved on the mounted node",
-    "mounted bounds and content.text-icon.icon probe channel confirm production backend layout"
+    "the selected model radio receives initial focus when the picker opens"
   ],
   "outcome": "passed",
-  "artifact_paths": []
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/model-picker.gpui.json",
+      "sha256": "eb6d24dea1ca9a21496f5973179cfe75bb019d65c6203e8605a26a75d7d92a9e"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/model-picker.svelte.json",
+      "sha256": "ed40cf9bcba81ea664966e64391b5428312b7a2dbffcf91f7d33c66df8111180"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+    "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/model-picker.gpui.json",
+    "gpui_snapshot_sha256": "eb6d24dea1ca9a21496f5973179cfe75bb019d65c6203e8605a26a75d7d92a9e",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/model-picker.svelte.json",
+    "svelte_snapshot_sha256": "ed40cf9bcba81ea664966e64391b5428312b7a2dbffcf91f7d33c66df8111180",
+    "web_only_exclusions": [],
+    "diff": []
+  }
 }

@@ -4,12 +4,12 @@
   "scenario_id": "nucleus.agent.agent-question",
   "scenario_path": "test/nucleus-a11y/scenarios/agent-question.json",
   "scenario_sha256": "5f419c616c98e6d4901951529d1c1187bb0e6e31609175a9c08e05db0b1002a0",
-  "runtime": "svelte-happy-dom",
+  "runtime": "gpui-headless",
   "run": {
-    "command": "effigy test:nucleus-a11y",
-    "mount": "@testing-library/svelte render",
-    "render_path": "svelte mount -> happy-dom document",
-    "input_dispatch": "dom-events"
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
   },
   "nodes": [
     {

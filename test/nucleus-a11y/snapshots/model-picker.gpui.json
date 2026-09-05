@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "ConfirmAction",
-  "scenario_id": "nucleus.settings.confirm-action",
-  "scenario_path": "test/nucleus-a11y/scenarios/confirm-action.json",
-  "scenario_sha256": "608bb02e73de546d3fcf12218d19b4fb217587a504860b82bf273a9dd3731e11",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -14,15 +14,18 @@
   "nodes": [
     {
       "role": "button",
-      "name": "Delete",
+      "name": "Model: Atlas",
       "value": null,
       "value_text": null,
       "states": {
-        "disabled": false,
-        "busy": null
+        "expanded": true,
+        "checked": null,
+        "disabled": false
       },
       "relationships": {
-        "controls": [],
+        "controls": [
+          1
+        ],
         "labelled_by": [],
         "described_by": []
       },
@@ -32,13 +35,54 @@
       "focused": false
     },
     {
-      "role": "button",
-      "name": "Dismiss dialog backdrop",
+      "role": "dialog",
+      "name": "Model",
       "value": null,
       "value_text": null,
       "states": {
-        "disabled": false,
-        "busy": null
+        "expanded": null,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radiogroup",
+      "name": "Model",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radio",
+      "name": "Atlas Balanced model",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": true,
+        "disabled": false
       },
       "relationships": {
         "controls": [],
@@ -48,84 +92,26 @@
       "level": null,
       "orientation": null,
       "focus_order": 1,
-      "focused": false
+      "focused": true
     },
     {
-      "role": "alertdialog",
-      "name": "Delete workspace?",
+      "role": "radio",
+      "name": "Mini",
       "value": null,
       "value_text": null,
       "states": {
-        "disabled": false,
-        "busy": null
+        "expanded": null,
+        "checked": false,
+        "disabled": true
       },
       "relationships": {
         "controls": [],
-        "labelled_by": [
-          -1
-        ],
+        "labelled_by": [],
         "described_by": []
       },
       "level": null,
       "orientation": null,
       "focus_order": null,
-      "focused": false
-    },
-    {
-      "role": "button",
-      "name": "Close dialog",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "disabled": false,
-        "busy": null
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": 2,
-      "focused": false
-    },
-    {
-      "role": "button",
-      "name": "Keep workspace",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "disabled": false,
-        "busy": null
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": 3,
-      "focused": false
-    },
-    {
-      "role": "button",
-      "name": "Delete workspace",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "disabled": false,
-        "busy": null
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": 4,
       "focused": false
     }
   ]

@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "AgentQuestion",
-  "scenario_id": "nucleus.agent.agent-question",
-  "scenario_path": "test/nucleus-a11y/scenarios/agent-question.json",
-  "scenario_sha256": "5f419c616c98e6d4901951529d1c1187bb0e6e31609175a9c08e05db0b1002a0",
+  "component": "SegmentedControl",
+  "scenario_id": "nucleus.navigation.segmented-control",
+  "scenario_path": "test/nucleus-a11y/scenarios/segmented-control.json",
+  "scenario_sha256": "ce382aadd2e42b116fb1632a9b117fdff22c3dbbcf933d5ed3999b41dcfb5f83",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -14,11 +14,12 @@
   "nodes": [
     {
       "role": "radiogroup",
-      "name": "Ship this preparation?",
+      "name": "View",
       "value": null,
       "value_text": null,
       "states": {
-        "checked": null
+        "selected": null,
+        "disabled": false
       },
       "relationships": {
         "controls": [],
@@ -32,11 +33,31 @@
     },
     {
       "role": "radio",
-      "name": "Yes",
+      "name": "Grid",
       "value": null,
       "value_text": null,
       "states": {
-        "checked": true
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radio",
+      "name": "List",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": null,
+        "disabled": false
       },
       "relationships": {
         "controls": [],
@@ -50,11 +71,12 @@
     },
     {
       "role": "radio",
-      "name": "No",
+      "name": "Board",
       "value": null,
       "value_text": null,
       "states": {
-        "checked": false
+        "selected": null,
+        "disabled": true
       },
       "relationships": {
         "controls": [],
@@ -63,7 +85,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": 1,
+      "focus_order": null,
       "focused": false
     }
   ]

@@ -87,6 +87,10 @@ pub fn message_center(
     }
     let mut trigger_button = icon_button(&trigger_spec, ctx, open_handler);
     trigger_button.runtime_id = scoped(instance, "trigger");
+    // The deferred overlay subtree is painted after the trigger. Explicit
+    // indices keep native sequential traversal in the same order as the DOM
+    // projection: trigger, surface, then message actions.
+    trigger_button.a11y.tab_index = Some(0);
     trigger_button
         .roles
         .insert("dependency".to_owned(), "icon-button".to_owned());
@@ -124,11 +128,12 @@ pub fn message_center(
         node.interaction.focusable =
             popover_spec.initial_focus == PopoverInitialFocus::Content;
         node.a11y.tab_index = Some(if popover_spec.initial_focus == PopoverInitialFocus::Content {
-            0
+            1
         } else {
             -1
         });
         if popover_spec.initial_focus == PopoverInitialFocus::Content {
+            node.a11y.initial_focus = true;
             node.style.focus = Some(StylePatch {
                 border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 ..StylePatch::default()
@@ -257,8 +262,15 @@ fn center_content(
         s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
         s.fill_width = true;
     }
-    for item in &spec.items {
-        list = list.child(message_row(item, spec, ctx, handlers, instance));
+    for (index, item) in spec.items.iter().enumerate() {
+        list = list.child(message_row(
+            item,
+            spec,
+            ctx,
+            handlers,
+            instance,
+            (index as i32) + 2,
+        ));
     }
     root.child(list)
 }
@@ -332,6 +344,7 @@ fn message_row(
     ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
     instance: Option<&str>,
+    tab_index: i32,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let mut row = Node::container();
@@ -365,6 +378,7 @@ fn message_row(
         ctx,
         handlers.on_item_select.clone().filter(|_| item.selectable),
         instance,
+        tab_index,
     );
     row = row.child(content);
 
@@ -451,6 +465,7 @@ fn message_content(
     ctx: &RenderContext<'_>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     instance: Option<&str>,
+    tab_index: i32,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let mut content = if on_select.is_some() {
@@ -481,6 +496,7 @@ fn message_content(
         content.style.descriptor.cursor = CursorHint::Pointer;
         content.a11y.role = Some(NodeRole::Button);
         content.a11y.label = Some(item.title.clone());
+        content.a11y.tab_index = Some(tab_index);
         let surface = ctx.theme().resolve_color("color.background.surface");
         content.style.hover = Some(StylePatch {
             background: Some(with_alpha(surface, surface.3 * 0.72)),

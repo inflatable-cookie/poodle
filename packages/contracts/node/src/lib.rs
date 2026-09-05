@@ -926,6 +926,10 @@ pub struct NodeA11y {
     pub label: Option<String>,
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
+    /// Requests focus when this node is first mounted as an overlay's initial
+    /// focus target. Exactly one node in an open overlay may set this marker;
+    /// the backend consumes it through the normal mount-time focus queue.
+    pub initial_focus: bool,
     /// Roving traversal marker. `0` is the current traversal stop; `-1`
     /// remains programmatically focusable but is skipped by sequential focus.
     pub tab_index: Option<i32>,

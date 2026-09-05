@@ -14,20 +14,22 @@ use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, Trans
 use poodle_node::Node;
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
-    CommandPaletteHandlers, ConfirmActionHandlers, EditableLabelHandlers, MessageCenterHandlers,
-    PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers,
+    CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers,
+    MessageCenterHandlers, PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers,
+    TabsHandlers, ToastStackHandlers,
 };
 use poodle_specs::{
     AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, AppHeaderSpec,
-    ButtonSpec, ButtonVariant, ChoiceOption, CommandActionItem, CommandPaletteSpec, ControlDensity,
-    ControlSize, DialogSpec, EditableLabelActivation, EditableLabelSpec, IconButtonSpec,
-    IconProviderSpec, IconSize, IconSpec, MenuEntry, MenuSpec, MessageCenterItem,
-    MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection,
-    Orientation, PaddingScale, PopoverInitialFocus, PopoverSpec, SegmentedControlOption,
-    SegmentedControlSpec, SelectMode, SelectSpec, SplitOrientation, SplitViewSpec,
-    StatusIndicatorSpec, StatusTone, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone,
-    SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, TextElement, TextSize, TextSpec,
-    TextTone, TextWeight, Toast, ToastHostPlacement, ToastHostSpec, ToastStackSpec,
+    ButtonSpec, ButtonVariant, CallOutSpec, CalloutAnnounceMode, ChoiceOption, CommandActionItem,
+    CommandPaletteSpec, ControlDensity, ControlSize, DialogSpec, EditableLabelActivation,
+    EditableLabelSpec, IconButtonSpec, IconProviderSpec, IconSize, IconSpec, MenuEntry, MenuSpec,
+    MessageCenterItem, MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant,
+    ModelSelection, Orientation, PaddingScale, PopoverInitialFocus, PopoverSpec, RadioGroupSpec,
+    SegmentedControlOption, SegmentedControlSpec, SelectMode, SelectSpec, SplitOrientation,
+    SplitViewSpec, StatusIndicatorSpec, StatusTone, SurfaceBorder, SurfaceRole, SurfaceSpec,
+    SurfaceTone, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, TextElement,
+    TextInputSpec, TextSize, TextSpec, TextTone, TextWeight, Toast, ToastHostPlacement,
+    ToastHostSpec, ToastStackSpec,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -745,7 +747,10 @@ fn agent_question_a1_accessibility_projection_matches_svelte() {
                             poodle_render::agent_question(
                                 &next,
                                 &RenderContext::new(&callback_provider),
-                                AgentQuestionHandlers::default(),
+                                AgentQuestionHandlers {
+                                    instance_id: Some("a1".into()),
+                                    ..Default::default()
+                                },
                             );
                     }
                 })),
@@ -771,11 +776,45 @@ fn agent_question_a1_accessibility_projection_matches_svelte() {
     });
 }
 
+fn build_model_picker_a1(
+    spec: &ModelPickerSpec,
+    host: &Arc<Mutex<ModelPickerSpec>>,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let mut node = poodle_render::model_picker(
+        spec,
+        &RenderContext::new(&theme()),
+        "a1",
+        None,
+    );
+    let trigger_id = poodle_render::select_trigger_focus_id("model-picker:a1");
+    if !spec.is_disabled {
+        let is_open = spec.is_open;
+        let host = Arc::clone(host);
+        let mounted = Arc::clone(mounted);
+        let trigger = node
+            .children
+            .first_mut()
+            .filter(|trigger| trigger.runtime_id.as_deref() == Some(trigger_id.as_str()))
+            .expect("ModelPicker renderer keeps the composed Select trigger first");
+        trigger.interaction.on_activate = Some(Arc::new(move || {
+            let next = {
+                let mut current = host.lock().expect("ModelPicker host lock");
+                let next = current.clone().with_open(!is_open);
+                *current = next.clone();
+                next
+            };
+            *mounted.lock().expect("ModelPicker mount lock") =
+                build_model_picker_a1(&next, &host, &mounted);
+        }));
+    }
+    node
+}
+
 #[test]
 fn model_picker_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("model-picker");
     let scenario_props = loaded.scenario.props.clone();
-    let provider = theme();
     let models = scenario_props["models"]
         .as_array()
         .expect("models")
@@ -802,9 +841,72 @@ fn model_picker_a1_accessibility_projection_matches_svelte() {
         .with_variant(ModelPickerVariant::Outlined)
         .with_size(prop_size(&scenario_props))
         .with_density(prop_density(&scenario_props));
-    let spec = spec.with_open(true);
-    let node = poodle_render::model_picker(&spec, &RenderContext::new(&provider), "a1", None);
-    prove_static_row("model-picker", node, 520.0, 300.0);
+    let host = Arc::new(Mutex::new(spec.clone()));
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("ModelPicker mount lock") =
+            build_model_picker_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 300.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production ModelPicker with host-owned closed state",
+                "replay the shared trigger action through GPUI dispatch and rebuild the open picker",
+            ],
+            &["the selected model radio receives initial focus when the picker opens"],
+        );
+    });
+}
+
+#[test]
+fn model_picker_initial_focus_falls_back_to_first_enabled_controlled_selection() {
+    let spec = ModelPickerSpec::new()
+        .with_models(vec![
+            ModelOption::new("disabled", "Disabled").with_disabled(true),
+            ModelOption::new("fallback", "Fallback"),
+        ])
+        .with_value(ModelSelection {
+            model: "disabled".to_owned(),
+            axes: Vec::new(),
+        });
+    let host = Arc::new(Mutex::new(spec.clone()));
+
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("ModelPicker mount lock") =
+            build_model_picker_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 300.0);
+        let trigger_id = poodle_render::select_trigger_focus_id("model-picker:a1");
+        let fallback_id = poodle_render::select_option_id("model-picker:a1", "fallback");
+
+        driver.wait_for_focus_handle(&trigger_id);
+        driver.pointer_activate_id(&trigger_id);
+        driver.draw_frame();
+        driver.draw_frame();
+
+        let nodes = driver.accessibility_nodes();
+        let fallback = nodes
+            .iter()
+            .find(|node| node.element_id == fallback_id)
+            .expect("first enabled fallback radio is mounted");
+        assert!(fallback.focusable);
+        assert_eq!(fallback.tab_index, Some(0));
+        assert_eq!(fallback.focused, Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&fallback_id),
+            Some(true)
+        );
+
+        let disabled = nodes
+            .iter()
+            .find(|node| {
+                node.element_id == poodle_render::select_option_id("model-picker:a1", "disabled")
+            })
+            .expect("controlled disabled selection is mounted");
+        assert!(!disabled.focusable);
+    });
 }
 
 #[test]
@@ -1598,6 +1700,385 @@ fn toast_host_a1_accessibility_projection_matches_svelte() {
             &loaded,
             &["mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"],
             &["stack label, listitem toasts, dismiss and retry names match the Svelte ARIA projection"],
+        );
+    });
+}
+
+// ── g16.119 focus and state semantics ─────────────────────────────────────
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SegmentedControlA1Props {
+    options: Vec<SegmentedControlA1OptionProps>,
+    default_value: Option<String>,
+    value: Option<String>,
+    aria_label: Option<String>,
+    equal_width: Option<bool>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SegmentedControlA1OptionProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+}
+
+fn build_segmented_control_a1(
+    spec: &SegmentedControlSpec,
+    host: &Arc<Mutex<SegmentedControlSpec>>,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let host = Arc::clone(host);
+    let mounted = Arc::clone(mounted);
+    let theme_provider = theme();
+    poodle_render::segmented_control(
+        spec,
+        &RenderContext::new(&theme_provider),
+        Some(Arc::new(move |value: &str| {
+            let mut next = host.lock().expect("segmented host").clone();
+            next.value = Some(value.to_owned());
+            *host.lock().expect("segmented host") = next.clone();
+            *mounted.lock().expect("segmented mount") =
+                build_segmented_control_a1(&next, &host, &mounted);
+        })),
+    )
+}
+
+#[test]
+fn segmented_control_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("segmented-control");
+    let props: SegmentedControlA1Props = props(&loaded);
+    let options = props
+        .options
+        .iter()
+        .map(|item| {
+            SegmentedControlOption::new(item.value.clone(), item.label.clone())
+                .with_disabled(item.disabled.unwrap_or(false))
+        })
+        .collect();
+    let mut spec = SegmentedControlSpec::new("a1", options);
+    spec.default_value = props.default_value.clone();
+    spec.value = props.value.clone();
+    spec.aria_label = props.aria_label.clone();
+    spec.equal_width = props.equal_width.unwrap_or(true);
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(spec.clone()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("segmented mount") =
+            build_segmented_control_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
+        driver.wait_for_focus_handle("segmented:a1:option:list");
+        replay(&mut driver, &loaded.scenario.actions);
+        // Contract/GPUI: one roving tab stop on the selected segment. The
+        // Svelte extractor counts every enabled native radio as a sequential
+        // stop, so Grid and List still differ on focus_order.
+        record_shell_divergence(
+            &mut driver,
+            &loaded,
+            &[("1", "focus_order"), ("2", "focus_order")],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MenuA1Props {
+    items: Vec<MenuA1ItemProps>,
+    default_open: Option<bool>,
+    aria_label: Option<String>,
+    trigger_aria_label: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MenuA1ItemProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+    tone: Option<String>,
+}
+
+fn menu_a1_trigger(label: &str, inner: &str) -> Node {
+    let mut child = Node::container();
+    child.a11y.role = Some(poodle_node::NodeRole::Button);
+    child.a11y.label = Some(inner.to_owned());
+    child.interaction.focusable = true;
+    child.a11y.tab_index = Some(0);
+    let mut trigger = Node::container().child(child);
+    trigger.a11y.role = Some(poodle_node::NodeRole::Button);
+    trigger.a11y.label = Some(label.to_owned());
+    trigger.interaction.focusable = true;
+    trigger.a11y.tab_index = Some(0);
+    trigger
+}
+
+#[test]
+fn menu_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("menu");
+    let props: MenuA1Props = props(&loaded);
+    let items = props
+        .items
+        .iter()
+        .map(|item| {
+            MenuEntry::new(item.value.clone(), item.label.clone())
+                .with_disabled(item.disabled.unwrap_or(false))
+                .with_destructive(item.tone.as_deref() == Some("danger"))
+        })
+        .collect();
+    let mut spec = MenuSpec::new(items).with_default_open(props.default_open.unwrap_or(false));
+    if let Some(label) = &props.aria_label {
+        spec = spec.with_aria_label(label.clone());
+    }
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let menu = poodle_render::menu(&spec, &RenderContext::new(&theme_provider), None);
+        let root = Node::container()
+            .child(menu_a1_trigger(
+                props.trigger_aria_label.as_deref().unwrap_or("Open"),
+                loaded.scenario.fixtures["trigger_text"]
+                    .as_str()
+                    .expect("trigger_text fixture"),
+            ))
+            .child(menu);
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
+        driver.wait_for_focus_handle("menu-item:new");
+        // Opening focuses the first enabled item. Remaining: Svelte lists
+        // every enabled menuitem as a sequential tab stop; GPUI keeps one
+        // roving stop, so Delete is not in focus_order.
+        record_shell_divergence(&mut driver, &loaded, &[("5", "focus_order")]);
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RadioGroupA1Props {
+    options: Vec<RadioGroupA1OptionProps>,
+    default_value: Option<String>,
+    aria_label: Option<String>,
+    orientation: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct RadioGroupA1OptionProps {
+    value: String,
+    label: String,
+    disabled: Option<bool>,
+}
+
+fn build_radio_group_a1(
+    spec: &RadioGroupSpec,
+    host: &Arc<Mutex<RadioGroupSpec>>,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let host = Arc::clone(host);
+    let mounted = Arc::clone(mounted);
+    poodle_render::radio_group(
+        spec,
+        &RenderContext::new(&theme()),
+        RadioGroupHandlers::new("a1").on_change(Arc::new(move |value: &str| {
+            let mut next = host.lock().expect("radio host").clone();
+            next.value = Some(value.to_owned());
+            *host.lock().expect("radio host") = next.clone();
+            *mounted.lock().expect("radio mount") = build_radio_group_a1(&next, &host, &mounted);
+        })),
+    )
+}
+
+#[test]
+fn radio_group_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("radio-group");
+    let input: RadioGroupA1Props = props(&loaded);
+    let options = input
+        .options
+        .iter()
+        .map(|option| {
+            let mut choice = ChoiceOption::new(&option.value, &option.label);
+            choice.is_disabled = option.disabled.unwrap_or(false);
+            choice
+        })
+        .collect();
+    let mut spec = RadioGroupSpec::new(options).with_value(input.default_value.unwrap_or_default());
+    if let Some(label) = input.aria_label {
+        spec.aria_label = Some(label);
+    }
+    spec.orientation = match input.orientation.as_deref() {
+        Some("horizontal") => Orientation::Horizontal,
+        _ => Orientation::Vertical,
+    };
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(spec.clone()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("radio mount") = build_radio_group_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 180.0);
+        driver.wait_for_focus_handle("radio:a1:option:pro");
+        replay(&mut driver, &loaded.scenario.actions);
+        // After selecting Free the single GPUI tab stop follows the selection.
+        // Svelte's extractor still lists both enabled native radios as stops.
+        record_shell_divergence(
+            &mut driver,
+            &loaded,
+            &[("1", "focus_order"), ("2", "focus_order")],
+        );
+    });
+}
+
+// ── g16.119 restored A1 probes ────────────────────────────────────────────
+//
+// `callout`, `editable-label`, and `text-input` carry committed A1 receipts
+// and committed GPUI snapshots, but no probe survived the tranche merges
+// (`PAPERCUTS.md`, 2026-09-05). Without a probe the cohort cannot be
+// re-emitted at a new head, so the rows are restored here. Each one is
+// checked against its committed `<row>.gpui.json`, so a reconstruction that
+// does not reproduce the recorded projection fails rather than republishes.
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CalloutA1Props {
+    tone: String,
+    title: Option<String>,
+    message: Option<String>,
+    announce_mode: Option<String>,
+    dismissible: Option<bool>,
+    dismiss_label: Option<String>,
+}
+
+#[test]
+fn callout_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("callout");
+    let input: CalloutA1Props = props(&loaded);
+    let mut spec = CallOutSpec::new()
+        .with_tone(match input.tone.as_str() {
+            "neutral" => StatusTone::Neutral,
+            "info" => StatusTone::Info,
+            "success" => StatusTone::Success,
+            "warning" => StatusTone::Warning,
+            "danger" => StatusTone::Danger,
+            other => panic!("unmapped callout tone `{other}`"),
+        })
+        .dismissible(input.dismissible.unwrap_or(false));
+    spec.title = input.title.clone();
+    spec.content = input.message.clone();
+    spec.announce_mode = match input.announce_mode.as_deref() {
+        None | Some("none") => CalloutAnnounceMode::None,
+        Some("polite") => CalloutAnnounceMode::Polite,
+        Some("assertive") => CalloutAnnounceMode::Assertive,
+        Some(other) => panic!("unmapped callout announce mode `{other}`"),
+    };
+    if let Some(label) = &input.dismiss_label {
+        spec.dismiss_label = label.clone();
+    }
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let node = poodle_render::callout(
+            &spec,
+            &RenderContext::new(&theme_provider),
+            CalloutHandlers {
+                instance_id: Some("a1".into()),
+                ..Default::default()
+            },
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 140.0);
+        driver.wait_for_focus_handle(&poodle_render::callout_dismiss_focus_id(Some("a1")));
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production Callout through HeadlessDriver with the shared scenario props",
+                "replay the shared dismiss activation through GPUI test-platform dispatch",
+            ],
+            &["the live-region role, dismiss button name, and post-activation focus match the Svelte projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EditableLabelA1Props {
+    value: String,
+    aria_label: Option<String>,
+    activation_mode: Option<String>,
+    show_edit_icon: Option<bool>,
+}
+
+#[test]
+fn editable_label_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("editable-label");
+    let input: EditableLabelA1Props = props(&loaded);
+    assert_eq!(
+        input.aria_label.as_deref(),
+        Some(input.value.as_str()),
+        "EditableLabel names its display control from the value; the scenario must agree"
+    );
+    let mut spec = EditableLabelSpec::new();
+    spec.value = input.value.clone();
+    spec.activation_mode = match input.activation_mode.as_deref() {
+        None | Some("enterOrSpace") => EditableLabelActivation::EnterOrSpace,
+        Some("doubleClick") => EditableLabelActivation::DoubleClick,
+        Some(other) => panic!("unmapped editable label activation `{other}`"),
+    };
+    spec.show_edit_icon = input.show_edit_icon.unwrap_or(false);
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let node = poodle_render::editable_label(&spec, &RenderContext::new(&theme_provider), None);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        // The scenario declares no action, but a receipt only counts when the
+        // mounted tree took real input. Hover is the one dispatch that does
+        // not move focus, which the committed projection records as unfocused.
+        driver.pointer_hover(gpui::Point::new(
+            gpui::Pixels::from(20.0),
+            gpui::Pixels::from(20.0),
+        ));
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production EditableLabel display control through HeadlessDriver",
+                "dispatch a pointer hover over the mounted control through the GPUI test platform",
+            ],
+            &["the display control projects a button role named from the value and is the single tab stop, matching Svelte"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct TextInputA1Props {
+    id: Option<String>,
+    default_value: Option<String>,
+    aria_label: Option<String>,
+    placeholder: Option<String>,
+}
+
+#[test]
+fn text_input_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("text-input");
+    let input: TextInputA1Props = props(&loaded);
+    let mut spec = TextInputSpec::default();
+    spec.id = input.id.clone();
+    spec.default_value = input.default_value.clone().unwrap_or_default();
+    spec.aria_label = input.aria_label.clone();
+    spec.placeholder = input.placeholder.clone();
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let node = poodle_render::text_input(&spec, &RenderContext::new(&theme_provider), None);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production TextInput through HeadlessDriver with the shared scenario props",
+                "replay the shared pointer activation of the field through GPUI test-platform dispatch",
+            ],
+            &["textbox role, accessible name, value text, and post-activation focus match the Svelte projection"],
         );
     });
 }
