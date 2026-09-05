@@ -5,6 +5,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-05 — g16.105 worker ran with the coordinator checkout as cwd and left
+  byte-identical merged PR #210 files (`window_capture.rs` modified and
+  `icon_geometry_capture.rs` untracked). Cleaned only after comparing those
+  paths to merge `85609d941`; route all future workers through dedicated
+  Paseo-managed worktree workspaces.
+
 - 2026-09-04 — Second sighting of the `web-preview.ts` origin/main classifier
   failure, now on a tag-ref release runner. Dry run `33908714014` at tag
   `v0.3.0` (`eab436eef`) died in `Release gates` at `test:web-pack-install`
