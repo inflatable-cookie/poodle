@@ -24029,7 +24029,7 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
         let trigger = node
             .find(&|n| n.runtime_id.as_deref() == Some("select:proof:trigger"))
             .expect("trigger");
-        assert_eq!(trigger.a11y.role, Some(NodeRole::ComboBox));
+        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
         assert_eq!(trigger.a11y.expanded, Some(true));
         assert_eq!(
             trigger.a11y.controls.as_deref(),
@@ -24827,7 +24827,7 @@ fn model_picker_selection_and_identity_rebuild_through_mounted_input() {
     let proof_trigger = proof
         .find(&|node| node.runtime_id.as_deref() == Some(proof_trigger_id.as_str()))
         .expect("production Select trigger");
-    assert_eq!(proof_trigger.a11y.role, Some(NodeRole::ComboBox));
+    assert_eq!(proof_trigger.a11y.role, Some(NodeRole::Button));
     assert_eq!(
         proof_trigger.a11y.label.as_deref(),
         Some("Model: Atlas 3, High · Fast")
