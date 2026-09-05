@@ -27,7 +27,7 @@ executed accessibility projection contract established by g16.111.
 
 - Dedicated worker branch: `worker/g16-112-nucleus-np1`.
 - Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be`, rebased onto current
-  `origin/main` `7c1837f0fa2fede8fbd476b3362d88dd112290d7`.
+  `origin/main` `469898d6838bdc56a266822606b8afc52ee8481b`.
 - Added scenarios and Svelte snapshots for Icon, Text, Surface, Button,
   IconButton, AppHeader, and SplitView.
 - Added native A1 proof entry points in
@@ -38,9 +38,9 @@ executed accessibility projection contract established by g16.111.
 - Text now has a declared status probe fixture, and native proofs deserialize
   shared scenario props and fixtures.
 - Receipt contract, documentation audits, and the web/package/component board
-  passed after regenerating the lane-owned evidence ledger. Hosted web run
-  `33965002026` was the pre-clarification failure at the stale ledger step;
-  exact-head hosted runs are required after this push.
+  passed after regenerating the lane-owned evidence ledger. The source commit
+  is repinned to `f1442a39dfea1ff69a2bbe0650a60334b77d0f64`; the lock digest is
+  unchanged. Exact-head hosted runs are required after this push.
 - No sibling worktree dependencies.
 
 ## Boundaries
