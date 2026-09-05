@@ -1,6 +1,8 @@
 # g16.051 — Icon Geometry Native Visual Admission
 
-Status: ready — every gate is satisfied as of 2026-09-05: `g16.050` complete,
+Status: complete — IG-06 admitted all six candidate pairs in both directions;
+fresh independent exact-head review pending. Every gate was satisfied as of 2026-09-05:
+`g16.050` complete,
 Button lab operational (poodle-lab PR #1), icon-geometry adapter and
 manifest landed with a complete closed batch (poodle-lab PR #4, merge
 `e4cdcad`)
@@ -130,3 +132,16 @@ public/web-only surface from partial evidence.
 Only an accepted admission verdict permits a later IG-07 planning batch for a
 separate public IconMorph contract and curated active-cohort implementation.
 That batch has no card number yet.
+
+## Execution Record
+
+The closed lab batch admitted all six candidate pairs for IG-06. See
+`docs/logs/2026-09/20260905-g16-051-icon-geometry-native-visual-admission.md`
+for the per-pair/per-direction review, the 12 teardown stroke-width finding
+adjudication, the six reverse/frozen oracle corrections, retained digests, and
+validation. After BLOCK review, the log records the actual policy provenance:
+`policy.ts` changed at `94febafad` between the lab pin and Poodle base, while
+the icon comparator's numeric geometry/role/pixel limits were unchanged and
+its Button-only known-delta classifier is not used. The registry entries remain
+`candidate` and runtime input remains fixture-only; this card does not admit a
+public `IconMorph` surface.
