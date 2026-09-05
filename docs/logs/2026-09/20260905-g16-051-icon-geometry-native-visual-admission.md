@@ -1,7 +1,7 @@
 # g16.051 — Icon Geometry Native Visual Admission
 
 Status: complete — IG-06 admitted all six candidate pairs in both directions;
-awaiting independent exact-head review
+awaiting fresh independent exact-head review
 Date: 2026-09-05
 Card: `docs/roadmaps/g16/051-icon-geometry-native-visual-admission.md`
 Launch handoff: `docs/handoffs/20260905-g16-051-icon-geometry-native-visual-admission.md`
@@ -11,6 +11,7 @@ Planning base: `3dbabac3990fb5f3856305b7c8f971039b0a81be` (`origin/main`)
 Lab bundle: `poodle-lab/docs/logs/2026-09/05-111446-g01-002-icon-geometry-batch-bundle`
 Lab run: `2026-09-05T11-14-46` (`g01.002`)
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/217
+Revision review: BLOCK comment https://github.com/inflatable-cookie/poodle/pull/217#issuecomment-5551704145
 
 ## Outcome
 
@@ -30,8 +31,21 @@ blocks this internal admission.
 
 - Poodle capture source: `85609d941a208ff2f854e9f7c0e457089cc77d0e`
   (`g16.105`, PR #210). That commit is an ancestor of the worker base, and
-  the relevant morph-pair, private shell, render, GPUI capture, policy, and
-  font paths are unchanged at `3dbabac39`.
+  the relevant morph-pair, private shell, render, GPUI capture, and font paths
+  are unchanged at `3dbabac39`.
+- The whole comparison-policy module is not unchanged: `test/visual/button-comparison/policy.ts`
+  changed at `94febafad53aa4e3feff5a28c82fcf20ccc0b6da` (`g16.106`) between
+  the lab pin and the Poodle base. That change adds the Button-only
+  `gpui-snaps-subpixel-edge` known-delta entry, its two-fixture registry, and
+  classifier context. The icon comparator does not invoke that Button
+  known-delta/classifier path.
+- The icon comparison basis remains the unchanged numeric table consumed by
+  the lab's icon comparator: Svelte↔React is exact; Svelte↔GPUI geometry uses
+  `rootEdge: 0.5`, `contentCentre: 1`, and `contentSize: 1` logical px;
+  roles use `colorChannel8Bit: 1` and `lineWidth: 0.5`; pixels use
+  `threshold: 0.1`, `includeAA: false`, and `maxDiffRatio: 0.03`. The
+  `g16.106` module change does not alter those values. This record claims
+  numeric-policy continuity for the icon run, not whole-file policy identity.
 - Lab bundle directory digest: `f3404acd3fd6fd69208e36371f01c8afe5e7cf8c746b456be43c3d266bfa1ed6`.
 - Longhorn: `168ecc72be5d8643afe6e1246f080cc1c07701ab`.
 - Bundle schema: `poodle-lab.icon-geometry-run.v1`; `closedBatch: true`;

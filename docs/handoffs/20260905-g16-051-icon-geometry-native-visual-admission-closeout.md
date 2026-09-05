@@ -1,7 +1,7 @@
 ---
 title: g16.051 icon geometry native visual admission closeout
 kind: northstar-handoff
-status: awaiting-independent-exact-head-review
+status: awaiting-fresh-independent-exact-head-review
 owner: Poodle g16.051 implementation worker
 created: 2026-09-05
 updated: 2026-09-05
@@ -31,8 +31,13 @@ eligibility, and public Icon APIs remain unchanged.
   metadata after empty-scene teardown, not a paint or contracted delta. Six
   reverse/frozen findings are direction-blind oracle expectations; the correct
   target is reverse `endpoint-from` under architecture 012.
-- **Still open:** independent exact-head review and orchestrator merge decision;
-  worker PR is [#217](https://github.com/inflatable-cookie/poodle/pull/217).
+- **Still open:** fresh independent exact-head review and orchestrator merge
+  decision; worker PR is [#217](https://github.com/inflatable-cookie/poodle/pull/217).
+- **Revision:** the BLOCK review identified an inaccurate whole-file policy
+  continuity claim. The record now states that `policy.ts` changed at
+  `94febafad` between the lab pin and base, while the icon comparator's
+  consumed numeric limits stayed unchanged and its Button-only classifier is
+  not used.
 - **Active spec lane:** `docs/architecture/012-semantic-motion-policy.md` and
   `docs/architecture/013-icon-geometry-substrate.md`.
 - **Current batch card:** `docs/roadmaps/g16/051-icon-geometry-native-visual-admission.md`.
@@ -62,12 +67,22 @@ eligibility, and public Icon APIs remain unchanged.
 
 - **Planning lineage:** the worker started from `3dbabac39`, with the canonical
   handoff from that exact `origin/main`; lab captures are pinned to Poodle
-  source `85609d941` and the relevant source paths are unchanged at the worker
-  base.
+  source `85609d941`. The relevant morph-pair, private shell, render, GPUI
+  capture, and font paths are unchanged at the worker base. The whole
+  `test/visual/button-comparison/policy.ts` module is not unchanged: it changed
+  at `94febafad` (`g16.106`) by adding a Button-only known delta and classifier
+  context.
 - **Evidence:** bundle digest
   `f3404acd3fd6fd69208e36371f01c8afe5e7cf8c746b456be43c3d266bfa1ed6`;
   156/168 mechanical channels passed before the two findings classes were
   adjudicated; Svelte↔React was exact and all pixel channels passed policy.
+- **Comparison-policy basis:** the icon comparator does not invoke the
+  Button-only known-delta/classifier path added in `94febafad`. Its consumed
+  numeric limits remain continuous from the lab pin to the base: GPUI geometry
+  `0.5/1/1` logical-px limits, role colour `1` 8-bit and stroke width `0.5`,
+  and pixels `0.1` threshold, antialias exclusion, and `3%` maximum ratio.
+  The admission therefore relies on numeric-policy continuity, not an
+  inaccurate whole-file policy identity claim.
 - **Decision:** admit the internal IG-06 cohort. Keep registry entries as
   `candidate`; no public or runtime contract follows from this record.
 - **Open tension:** the lab should correct its reverse/frozen oracle and avoid
