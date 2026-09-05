@@ -14,7 +14,7 @@ use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, Trans
 use poodle_node::Node;
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
-    CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers, EditableLabelHandlers,
+    CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers,
     MessageCenterHandlers, PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers,
     TabsHandlers, ToastStackHandlers,
 };
@@ -747,7 +747,10 @@ fn agent_question_a1_accessibility_projection_matches_svelte() {
                             poodle_render::agent_question(
                                 &next,
                                 &RenderContext::new(&callback_provider),
-                                AgentQuestionHandlers::default(),
+                                AgentQuestionHandlers {
+                                    instance_id: Some("a1".into()),
+                                    ..Default::default()
+                                },
                             );
                     }
                 })),

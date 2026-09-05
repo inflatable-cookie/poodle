@@ -171,17 +171,17 @@ fn should_focus_opening_menu_item(node: &Node) -> bool {
         && super::FOCUSED_FIELD.with(|focused| focused.borrow().is_none())
 }
 
-fn should_focus_initial_overlay_node(node: &Node) -> bool {
+fn should_focus_initial_overlay_node(node: &Node, id: &str) -> bool {
     node.a11y.initial_focus
         && node.interaction.focusable
         && !node.interaction.disabled
-        && super::FOCUSED_FIELD.with(|focused| focused.borrow().is_none())
+        && super::claim_initial_focus(id)
 }
 
 pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
     if node.interaction.request_focus {
         super::layers::request_focus(id);
-    } else if should_focus_initial_overlay_node(node) {
+    } else if should_focus_initial_overlay_node(node, id) {
         // Overlay renderers mark their single initial target in the
         // accessibility record. Queue through the same paint-time request
         // path as machine effects so a target that is mounted this frame is
@@ -241,12 +241,19 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     // is what a latched-on-click flag could never do.
     if tracks_focus(node) {
         let id = id.to_owned();
+        let tab_index = node.a11y.tab_index;
+        let node_focusable = node.interaction.focusable;
         if let Some(handle) = focus_handle_for(&id) {
+            // `track_focus` stores the handle's copied tab fields on the
+            // element. Keep that copy in step with the shared registry before
+            // attaching it; otherwise a roving/native overlay index changes
+            // only the registry and GPUI continues traversing the old order.
+            let handle = handle
+                .tab_index(tab_index.unwrap_or(0).max(0) as isize)
+                .tab_stop(tab_index.map_or(node_focusable, |index| index >= 0));
             el = el.track_focus(&handle);
         }
         let on_focus_change = node.interaction.on_focus_change.clone();
-        let tab_index = node.a11y.tab_index;
-        let node_focusable = node.interaction.focusable;
         let painted_id = input_text::painted_key(node, &id);
         let focus_tooltip = node.tooltip.clone();
         let focus_disabled = node.interaction.disabled;
