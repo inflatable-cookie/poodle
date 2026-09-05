@@ -16,11 +16,9 @@
 //     (types.rs or the component's spec module), reached through the matching
 //     `<Name>Spec` struct field.
 //
-// Report-only by default: the script exits 0 regardless of findings. Set
-// `VALUE_DOMAIN_ENFORCE=1` to exit 1 on any finding — the inverse of the
-// `DRIFT_REPORT=1` escape the sibling drift scripts use. This is deliberately
-// NOT wired into `docs:check`: the backlog is unknown until this inventory
-// exists, and a gate that fails the build on day one blocks everyone.
+// Report-only inventory until g16.107: the script now ratchets the known
+// backlog and fails on new or stale keys. Set `VALUE_DOMAIN_ENFORCE=1` to
+// also fail on every remaining inventory finding.
 //
 // Normalisation:
 //   - `null` / `undefined` union members are absence markers, not domain values;
@@ -47,11 +45,12 @@
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { allComponents } from "../src/component-registry.ts";
 import { unionPropsBody } from "./contract-prop-drift.ts";
 
-const repoRoot = path.resolve(import.meta.dir, "../../../..");
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const contractsDir = path.join(repoRoot, "docs/contracts/components");
 const svelteDir = path.join(repoRoot, "packages/svelte/components/src");
 const rustDir = path.join(repoRoot, "packages/contracts/components/src");
@@ -621,6 +620,62 @@ export type UnresolvedTypeFinding = {
   cell: string;
 };
 
+export function valueDomainFindingKey(finding: ValueDomainFinding): string {
+  return `${finding.slug}|${finding.prop}|${finding.side}|${finding.classification}`;
+}
+
+export function unresolvedTypeKey(finding: UnresolvedTypeFinding): string {
+  return `unresolved|${finding.slug}|${finding.prop}|${finding.typeName}`;
+}
+
+/** Known inventory at g16.107. New keys fail; stale keys must be deleted. */
+export const VALUE_DOMAIN_BASELINE = new Set<string>([
+  "box|overflow|rust|impl-wider",
+  "box|overflow|ts|contract-wider",
+  "button|fit|rust|contract-wider",
+  "confirm-action|tone|rust|impl-wider",
+  "dialog|role|rust|contract-wider",
+  "editable-label|activationMode|rust|contract-wider",
+  "empty-state|variant|rust|contract-wider",
+  "history-center|status|rust|contract-wider",
+  "icon-button|tooltipPlacement|rust|impl-wider",
+  "icon-button|tooltipPlacement|ts|impl-wider",
+  "list-container|emptyVariant|rust|contract-wider",
+  "menu|placement|rust|impl-wider",
+  "menu|placement|ts|impl-wider",
+  "page-header|bannerTone|rust|impl-wider",
+  "pill|typography|rust|contract-wider",
+  "scroll-shell|padding|rust|impl-wider",
+  "stack|justify|rust|contract-wider",
+  "stack|overflow|rust|impl-wider",
+  "status-indicator|typography|rust|contract-wider",
+  "time-ago|typography|rust|contract-wider",
+  "unresolved|app-header|element|HTMLElement",
+  "unresolved|color-picker|defaultMode|ColorInputMode",
+  "unresolved|dock-region|collapsedPosture|DockCollapsedPosture",
+  "unresolved|dock-region|edge|DockEdge",
+  "unresolved|dock-region|emphasis|DockEmphasis",
+  "unresolved|dock-region|sizing|DockSizing",
+  "unresolved|fader|automation|AudioAutomationState",
+  "unresolved|history-center|rejection|HistoryCenterRejectionCode",
+  "unresolved|knob|automation|AudioAutomationState",
+  "unresolved|xy-pad|automation|AudioAutomationState",
+]);
+
+export function valueDomainRatchet(result: {
+  findings: ValueDomainFinding[];
+  unresolved: UnresolvedTypeFinding[];
+}): { live: string[]; fresh: string[]; stale: string[] } {
+  const live = [
+    ...result.findings.map(valueDomainFindingKey),
+    ...result.unresolved.map(unresolvedTypeKey),
+  ].sort();
+  const liveSet = new Set(live);
+  const fresh = live.filter((key) => !VALUE_DOMAIN_BASELINE.has(key));
+  const stale = [...VALUE_DOMAIN_BASELINE].filter((key) => !liveSet.has(key)).sort();
+  return { live, fresh, stale };
+}
+
 export function contractValueDomainDrift(): {
   checkedComponents: number;
   checkedProps: number;
@@ -812,7 +867,23 @@ if (import.meta.main) {
     `summary: ${r.findings.length} findings (${[...byClass.entries()].map(([c, n]) => `${c}: ${n}`).join(", ")}), ` +
       `${r.unresolved.length} unresolved-type`,
   );
-  // Report-only by default. VALUE_DOMAIN_ENFORCE=1 mirrors the DRIFT_REPORT
-  // escape inverted: the gate fails only when explicitly asked to enforce.
+
+  const ratchet = valueDomainRatchet(r);
+  if (ratchet.fresh.length > 0 || ratchet.stale.length > 0) {
+    if (ratchet.fresh.length > 0) {
+      console.log(`FAIL — ${ratchet.fresh.length} new value-domain finding(s):`);
+      for (const key of ratchet.fresh) console.log(`  ${key}`);
+    }
+    if (ratchet.stale.length > 0) {
+      console.log(`FAIL — ${ratchet.stale.length} stale baseline key(s); delete from VALUE_DOMAIN_BASELINE:`);
+      for (const key of ratchet.stale) console.log(`  ${key}`);
+    }
+    process.exit(1);
+  }
+
+  console.log(
+    `OK — value-domain inventory matches the g16.107 ratchet (${VALUE_DOMAIN_BASELINE.size} keys).`,
+  );
+
   if (r.findings.length > 0 && process.env.VALUE_DOMAIN_ENFORCE === "1") process.exit(1);
 }

@@ -179,7 +179,7 @@
 "core:build" = "bun scripts/web-distribution/core-build.ts"
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
-"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/scope.test.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/scope.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts"
 # Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
 # its parallel test-file workers; the helper still validates the exact nested
 # realpath on every build.
@@ -370,6 +370,17 @@
 # consumer's own type-check found a Poodle error before Poodle did.
 "check:svelte-components" = "bunx svelte-check --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
 
+# React type gate (g16.107). Counterpart to `check:svelte`. Not on `ci:web`:
+# current sources have a 12-error component backlog plus a large preview
+# specimen `string`/`ControlSize` mismatch. Clearing those is component work,
+# outside this hygiene lane. Selector exists so the backlog is runnable.
+"check:react" = [
+  { task = "check:react-components" },
+  { task = "check:react-preview" },
+]
+"check:react-components" = "bunx tsc -p packages/react/components/tsconfig.json --noEmit"
+"check:react-preview" = "bunx tsc -p packages/react/preview/tsconfig.json --noEmit"
+
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
 "docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"
@@ -409,16 +420,17 @@
 "docs:focus-ring-drift" = "bun packages/svelte/preview/scripts/focus-ring-drift.ts"
 # Contract <-> implementation value-domain drift: compares the permitted value
 # set of each enumerated prop (contract union vs Svelte types.ts vs the
-# poodle-specs enum). Report-only — exits 0 unless VALUE_DOMAIN_ENFORCE=1 is
-# set (the inverse of DRIFT_REPORT). Deliberately not in docs:check until the
-# inventory backlog is triaged; see docs/roadmaps/g13/batch-cards/007-value-domain-drift-inventory.md.
+# poodle-specs enum). Ratcheted inventory (g16.107): known findings stay
+# listed; new or stale keys fail. Clearing the backlog is contract work, not
+# this hygiene lane. Lives on `docs:check`.
 "docs:value-domain-drift" = "bun packages/svelte/preview/scripts/contract-value-domain-drift.ts"
 # Machine-shape drift (g13.047 R5): every machine present in both runtimes must
 # be pinned by a shared vector both harnesses run, and every transition must
-# follow the documented shape (g11.002). Baselined: correctly-different modules
-# with reasons. Standalone; the conformance vectors themselves run in test:core
-# and test:contracts.
-"docs:machine-shape-drift" = "bun packages/svelte/preview/scripts/machine-shape-drift.ts"
+# follow the documented shape (g11.002). Twenty live findings need machine or
+# vector work to clear, which is out of g16.107's validation-hygiene boundary.
+# Advisory: not a board gate. The conformance vectors themselves run in
+# test:core and test:contracts.
+"advisory:machine-shape-drift" = "bun packages/svelte/preview/scripts/machine-shape-drift.ts"
 # A GPUI component that accepts a handler must use it. `Stepper` stored two and
 # attached neither — the builders type-checked and nothing happened when you
 # clicked. Runs in ci:native.
@@ -464,6 +476,7 @@
   { run = "cargo test --manifest-path packages/contracts/events/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/adapter/Cargo.toml" },
   { run = "cargo test --manifest-path packages/contracts/tokens/Cargo.toml" },
+  { run = "cargo test --manifest-path packages/contracts/node/Cargo.toml" },
 ]
 # Fails if the working tree is dirty. Belongs at the END of any gate that
 # runs a write-mode generator.
@@ -596,6 +609,7 @@
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
   { task = "docs:react-prop-drift" },
+  { task = "docs:value-domain-drift" },
   { task = "check:parity-evidence-ledger" },
   { task = "react:docs" },
   { task = "report:parity" },
