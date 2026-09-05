@@ -1,6 +1,6 @@
 # g16.108 — Docs Spine Compaction
 
-Status: ready
+Status: complete — merged in PR #212 at `7f77aaf27`
 Type: documentation hygiene — docs only, no active roadmap surface
 Opened: 2026-09-05
 Depends on: none

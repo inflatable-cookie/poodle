@@ -1,6 +1,6 @@
 # g16.111 — Nucleus A1 Accessibility Receipt Foundation
 
-Status: ready — foundation of the A1 tranche (`g16.112`–`g16.116`)
+Status: complete — merged in PR #215 at `3dea40372`; two validated A1 receipts (Switch, Tabs) plus the recorded Select divergence, repaired in `g16.117`
 Type: evidence infrastructure — paired accessibility receipts; no component
 behaviour change
 Opened: 2026-09-05

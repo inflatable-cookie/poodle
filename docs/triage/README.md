@@ -21,5 +21,3 @@ Current open notes:
   else is promoted.
 - `20260904-151947-consumer-sweep-intake.md` — first consumer intake run;
   Tabs styling seam is the open remainder, `0.3.0` adoption closes ten.
-- `20260904-155753-lab-button-run-findings.md` — Finding 1 promoted as
-  `g16.106`; closes on its merge.
