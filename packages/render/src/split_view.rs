@@ -150,6 +150,9 @@ pub fn split_view(
     // hand the backend one focus handle for two dividers.
     let handle_spec = ResizeHandleSpec::new(spec.divider_instance_id())
         .with_orientation(handle_orientation)
+        // SplitView's Svelte counterpart leaves the handle uncontrolled, so
+        // ResizeHandle exposes its minimum as the current value (zero).
+        .with_aria_value_now(0.0)
         .with_disabled(spec.is_disabled);
     let handle = resize_handle(
         &handle_spec,
@@ -199,6 +202,11 @@ pub fn split_view(
                 &CollapseToggleSpec::new()
                     .with_direction(primary_dir)
                     .with_collapsed(spec.is_primary_collapsed)
+                    .with_aria_label(if spec.is_primary_collapsed {
+                        "Expand primary"
+                    } else {
+                        "Collapse primary"
+                    })
                     .with_disabled(spec.is_disabled),
                 ctx,
                 handlers.on_primary_collapse.as_ref().map(Arc::clone),
@@ -209,6 +217,11 @@ pub fn split_view(
                 &CollapseToggleSpec::new()
                     .with_direction(secondary_dir)
                     .with_collapsed(spec.is_secondary_collapsed)
+                    .with_aria_label(if spec.is_secondary_collapsed {
+                        "Expand secondary"
+                    } else {
+                        "Collapse secondary"
+                    })
                     .with_disabled(spec.is_disabled),
                 ctx,
                 handlers.on_secondary_collapse.as_ref().map(Arc::clone),
@@ -302,6 +315,18 @@ mod tests {
         let cluster = cluster(&node);
         assert_eq!(cluster.style.descriptor.opacity, 1.0);
         assert!(cluster.style.hover.is_none());
+    }
+
+    #[test]
+    fn divider_and_toggle_expose_the_split_accessibility_contract() {
+        let node = render(&toggling_spec());
+        let divider = &node.children[1];
+        let handle = &divider.children[0];
+        assert_eq!(handle.a11y.value, Some(0.0));
+        assert_eq!(handle.a11y.orientation.as_deref(), Some("horizontal"));
+
+        let primary_toggle = &cluster(&node).children[0];
+        assert_eq!(primary_toggle.a11y.label.as_deref(), Some("Collapse primary"));
     }
 
     #[test]

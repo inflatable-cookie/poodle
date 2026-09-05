@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "ConfirmAction",
-  "scenario_id": "nucleus.settings.confirm-action",
+  "component": "AppHeader",
+  "scenario_id": "nucleus.shell.app-header",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,30 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount the production ConfirmAction node tree through HeadlessDriver with the shared scenario props",
-    "replay the shared scenario actions through GPUI test-platform dispatch"
+    "mount the production AppHeader and dispatch the shared probe key"
   ],
   "assertions": [
-    "trigger, backdrop, alert-dialog, close, cancel, and confirm semantics match the Svelte projection"
+    "banner role and accessible name match the Svelte projection"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/confirm-action.gpui.json",
-      "sha256": "aa08070cdf9e989c120a9bd0dde50284b832c8fa414d024978d54920788c7f29"
+      "path": "test/nucleus-a11y/snapshots/app-header.gpui.json",
+      "sha256": "ae4764b69c0461872b5b4f20973bb1881e1889c80a059b0be57bd74d3f92dd5f"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/confirm-action.svelte.json",
-      "sha256": "16f0823b22e7b84d0a266da03183f956c10697a734449a4a57a0b9c968129b89"
+      "path": "test/nucleus-a11y/snapshots/app-header.svelte.json",
+      "sha256": "d8e067e163978cff87c76cfaaf49cf3d57333313e145ca12148c3e64f4223eed"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/confirm-action.json",
-    "scenario_sha256": "608bb02e73de546d3fcf12218d19b4fb217587a504860b82bf273a9dd3731e11",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/confirm-action.gpui.json",
-    "gpui_snapshot_sha256": "aa08070cdf9e989c120a9bd0dde50284b832c8fa414d024978d54920788c7f29",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/confirm-action.svelte.json",
-    "svelte_snapshot_sha256": "16f0823b22e7b84d0a266da03183f956c10697a734449a4a57a0b9c968129b89",
+    "scenario_path": "test/nucleus-a11y/scenarios/app-header.json",
+    "scenario_sha256": "c85689d489b968bb4f7935b46d4fc7ade8624a5cf4bb68d884a30a30f1d2f8eb",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/app-header.gpui.json",
+    "gpui_snapshot_sha256": "ae4764b69c0461872b5b4f20973bb1881e1889c80a059b0be57bd74d3f92dd5f",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/app-header.svelte.json",
+    "svelte_snapshot_sha256": "d8e067e163978cff87c76cfaaf49cf3d57333313e145ca12148c3e64f4223eed",
     "web_only_exclusions": [],
     "diff": []
   }

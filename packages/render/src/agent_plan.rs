@@ -9,7 +9,8 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, StylePatch};
+use poodle_markdown::{parse_markdown, MdBlock};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch};
 use poodle_specs::{
     AgentMessageSpec, AgentPlanSpec, ButtonSpec, ButtonVariant, TextSpec, TextTone, TextWeight,
 };
@@ -88,12 +89,33 @@ pub fn agent_plan(
     );
 
     // The plan is markdown, rendered by the same path as the turn's prose.
-    let body = crate::agent_message::agent_message(
+    let mut body = crate::agent_message::agent_message(
         &AgentMessageSpec::new(spec.plan.clone())
             .with_size(base_size)
             .with_density(density),
         ctx,
     );
+    // AgentMessage renders the block shape, while AgentPlan owns the title's
+    // landmark because it is the plan's content heading. Keep the markdown
+    // level in the shared accessibility record; the A1 Svelte snapshot reads
+    // the same `data-level` emitted by AgentMessage.
+    let blocks = parse_markdown(&spec.plan);
+    if let Some((title_index, level)) = blocks.iter().enumerate().find_map(|(index, block)| {
+        if let MdBlock::Heading { level, .. } = block {
+            Some((index, *level))
+        } else {
+            None
+        }
+    }) {
+        if let Some(title) = body.children.get_mut(title_index) {
+            title.a11y.role = Some(NodeRole::Heading);
+            title.a11y.label = title.texts().first().map(|text| (*text).to_owned());
+            title.a11y.level = Some(level as usize);
+            let title_id = "agent-plan-title".to_owned();
+            title.id = Some(title_id.clone());
+            title.runtime_id = scoped(handlers.instance_id.as_deref(), "title").or(Some(title_id));
+        }
+    }
     let mut root = root.child(body);
 
     if spec.can_decide() {
@@ -255,5 +277,20 @@ mod tests {
             .find(&|n| n.runtime_id.as_deref()
                 == Some(agent_plan_action_focus_id(Some("second"), "revise").as_str()))
             .is_some());
+    }
+
+    #[test]
+    fn plan_title_is_a_levelled_heading() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = AgentPlanSpec::new("# Release plan\n\n1. Inspect.")
+            .with_status(AgentPlanStatus::Pending);
+        let node = agent_plan(&spec, &ctx, AgentPlanHandlers::default());
+
+        let title = node
+            .find(&|child| child.a11y.role == Some(NodeRole::Heading))
+            .expect("plan title heading");
+        assert_eq!(title.a11y.label.as_deref(), Some("Release plan"));
+        assert_eq!(title.a11y.level, Some(1));
     }
 }

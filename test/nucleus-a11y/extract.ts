@@ -109,7 +109,9 @@ function valueText(element: HTMLElement, role: string): string | null {
   if (declared !== null) return collapsedText(declared);
   if (role === "combobox" || role === "textbox") {
     if (element instanceof HTMLSelectElement) return collapsedText(element.selectedOptions[0]?.label ?? "");
-    if (element instanceof HTMLInputElement) return collapsedText(element.value);
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+      return collapsedText(element.value);
+    }
     return collapsedText(element.textContent ?? "");
   }
   return null;
@@ -153,7 +155,7 @@ export function extractSnapshotNodes(scenario: A1Scenario): SnapshotNode[] {
         labelled_by: resolveTargets(element, "aria-labelledby", elements),
         described_by: resolveTargets(element, "aria-describedby", elements),
       },
-      level: numberOrNull(element.getAttribute("aria-level")),
+      level: numberOrNull(element.getAttribute("aria-level") ?? element.getAttribute("data-level")),
       orientation: element.getAttribute("aria-orientation"),
       focus_order: order,
       focused: document.activeElement === element,

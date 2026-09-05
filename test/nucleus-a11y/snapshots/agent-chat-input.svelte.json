@@ -16,7 +16,7 @@
       "role": "textbox",
       "name": "Message",
       "value": null,
-      "value_text": null,
+      "value_text": "Inspect the failing gate",
       "states": {
         "disabled": false
       },

@@ -11,5 +11,22 @@
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
-  "nodes": []
+  "nodes": [
+    {
+      "role": "banner",
+      "name": "Poodle Shell",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    }
+  ]
 }

@@ -2191,7 +2191,11 @@ impl AgentChatInput {
             text_color: None,
             opacity: None,
         });
+        // The field owns the visible focus ring, but the action still needs a
+        // backend focus handle so the accessibility projection can attribute
+        // focus after real input dispatch.
         action.style.focus_ring = None;
+        action.style.focus = Some(poodle_node::StylePatch::default());
         action
             .roles
             .insert("state".to_owned(), spec.action_state().to_owned());

@@ -1,11 +1,14 @@
 # g16.120 — A1 Landmarks And Content Roles
 
-Status: held — ready when `g16.118` merges (needs `Heading` and `Banner`)
+Status: implementation complete — pending fresh exact-head review
 Type: native projection repair — `poodle-render`; A1 receipts for four rows
 Opened: 2026-09-05
 Depends on: merged `g16.118`
+Base: `origin/main` at `cceb6646a2bf7776b670fb63f586bce037d0ee6e`
+Runtime/evidence source pin: `54646ba2369959150a1b4953e06de5871b3ffe8f`
+Lock digest: `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`
 Governing refs: `../../contracts/components/{app-header,split-view,agent-chat-input,agent-plan}.md`,
-`nucleus-parity-receipts/a1-divergences/{np1,agent-chat-input,agent-plan}/`
+`nucleus-parity-receipts/a1-divergences/README.md`
 Dispatch manifest: `../dispatch.md`
 
 ## Rows and recorded causes
@@ -19,13 +22,24 @@ Dispatch manifest: `../dispatch.md`
 
 ## Fixed Boundary
 
-- Project `Banner` on AppHeader's root and `Heading` with `level` on
-  AgentPlan's title (roles land in `g16.118`); give AgentChatInput's editor
+- Use the `g16.118` vocabulary to project `Banner` on AppHeader's root and
+  `Heading` with `level` on AgentPlan's title; give AgentChatInput's editor
   and action their `TextInput`/`Button` roles and backend identity; give
   SplitView's separator its current value and the toggle its full name.
 - Svelte unchanged unless the contract contradicts it.
 - Proof: empty-diff A1 receipts for the four rows; divergence stores deleted;
   cohort repin and re-emit; ledger regenerated.
+
+## Outcome
+
+All four rows now match their paired Svelte accessibility snapshots at the
+implementation source pin above. AppHeader projects `Banner`; SplitView
+projects the separator's current value and full collapse-toggle name;
+AgentChatInput projects `TextInput` and `Button` roles with stable action
+identity; AgentPlan projects its first markdown heading as a levelled `Heading`.
+The complete cohort was re-emitted at the same exact head. The four target A1
+receipts are empty-diff receipts, and their superseded divergence stores were
+deleted. The older active divergence stores remain unchanged.
 
 ## Review Oracle
 
@@ -36,9 +50,15 @@ Dispatch manifest: `../dispatch.md`
 
 ## Validation
 
-`effigy regressions:native`, `cargo test -p poodle-render`,
-`effigy check:parity-evidence-ledger`, `effigy docs:check`, `git diff --check
-origin/main...HEAD`.
+`effigy regressions:native`, `effigy test:nucleus-a11y`,
+`effigy test:nucleus-parity-receipts`, `effigy test:parity-evidence-ledger`,
+`effigy check:parity-evidence-ledger`, `effigy docs:check`, `effigy ci:web`,
+`effigy ci:rust`, and `git diff --check origin/main...HEAD`.
+
+Full `poodle-render` tests were run through
+`cargo test --manifest-path packages/render/Cargo.toml`: 642 passed and the
+two known origin-main failures recorded in `PAPERCUTS.md` remain outside this
+card's ownership.
 
 ## Owned Paths
 

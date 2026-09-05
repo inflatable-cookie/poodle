@@ -2,7 +2,7 @@
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
   "component": "AgentChatInput",
   "scenario_id": "nucleus.agent.agent-chat-input",
-  "proof_level": "M1",
+  "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
@@ -46,17 +46,31 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount caller-scoped controlled AgentChatInput instances through node_compat::AgentChatInput::from_spec(...).into_element() in HeadlessDriver",
-    "dispatch pointer and keyboard edits, focus changes, submits, stops, and disabled activations through the GPUI test platform",
-    "submit refused and accepted controlled edit proposals, rebuilding the production factory from unchanged or updated host-owned value and selection"
+    "mount the production renderer path through HeadlessDriver",
+    "replay every shared scenario action through GPUI dispatch"
   ],
   "assertions": [
-    "production TextInput and Button composition preserves exact AgentChatInput-owned token, data, placeholder, status, and disabled metadata",
-    "host refusal rebuilds the mounted production path from unchanged controlled value and selection, while acceptance rebuilds it from updated host-owned state",
-    "submit eligibility and exact callback payload order cover empty, allow-empty, read-only, disabled, idle, and busy states",
-    "the real mount box and parent bounds contain ordered non-overlapping fields, attachments, editors, toolbars, actions, footers, and sibling instances",
-    "caller-scoped instances isolate focus, draft, callbacks, runtime identity, and bounds while disabled pointer input cannot focus or activate the production control"
+    "the normalised GPUI snapshot is compared with the committed Svelte DOM snapshot for the same scenario hash"
   ],
   "outcome": "passed",
-  "artifact_paths": []
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/agent-chat-input.gpui.json",
+      "sha256": "72fff8d32da57e7c68770da782007ae5689a9f34ee1aff8d4917d6ac62f7a930"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/agent-chat-input.svelte.json",
+      "sha256": "324950e9962aad866b4329a48df55b8749e75a0a3bd4573fa7451bde79906173"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/agent-chat-input.json",
+    "scenario_sha256": "54dff4c741f2f00a2872501d9be499f261d652a458b76f64e226a5ef81ef21ad",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/agent-chat-input.gpui.json",
+    "gpui_snapshot_sha256": "72fff8d32da57e7c68770da782007ae5689a9f34ee1aff8d4917d6ac62f7a930",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/agent-chat-input.svelte.json",
+    "svelte_snapshot_sha256": "324950e9962aad866b4329a48df55b8749e75a0a3bd4573fa7451bde79906173",
+    "web_only_exclusions": [],
+    "diff": []
+  }
 }

@@ -11,13 +11,6 @@ Each active row directory contains `diff.json`, `gpui.json`, `svelte.json`, and
 `attributes.json` from the same executed run. The records preserve the
 remaining differences rather than silently accepting them.
 
-### g16.114 NP-3 rows
-
-- `agent-chat-input/` — the rendered action has no backend identity, so the
-  scenario action cannot be resolved. No renderer projection fix was applied.
-- `agent-plan/` — the title text is available, but the native node has no
-  contract heading role/level. No projection fix was applied.
-
 ### g16.119 focus and state semantics
 
 `AgentQuestion` is repaired: the option group is labelled by the prompt node,
@@ -51,15 +44,20 @@ AgentTranscript remains unfocused because
 focus on append. The Svelte value is happy-dom focusing a clicked `role="log"`
 container; making the log a tab stop would contradict the contract.
 
-## NP-1 records
+### Consumed g16.120 landmark rows
 
-These older records remain outside g16.119's boundary:
+The four landmark/content-role rows are repaired and now emit empty-diff A1
+receipts at the final implementation head:
 
-- `np1/app-header.*` — Svelte has an implicit `banner` role; `poodle-node` has
-  no Banner role.
-- `np1/split-view.*` — the native separator has no host-owned current value,
-  and its collapse toggle is named `Collapse` rather than Svelte's
-  `Collapse primary`.
+| Row | Receipt |
+| --- | --- |
+| AppHeader | `appheader--nucleus-shell-app-header--a1.json` |
+| SplitView | `splitview--nucleus-shell-split-view--a1.json` |
+| AgentChatInput | `agentchatinput--nucleus-agent-agent-chat-input--a1.json` |
+| AgentPlan | `agentplan--nucleus-agent-agent-plan--a1.json` |
+
+The superseded AgentChatInput, AgentPlan, and NP-1 AppHeader/SplitView
+divergence stores were deleted after the paired snapshots agreed.
 
 ## Consumed g16.118 overlay stores
 
@@ -85,6 +83,5 @@ Reproduce the owned cohort with:
 
 ```sh
 POODLE_NUCLEUS_RECEIPT_DIR=$PWD/target/nucleus-receipts \
-  cargo test --manifest-path packages/gpui/preview/Cargo.toml \
-  --test headless_regressions nucleus_a11y
+  effigy regressions:native
 ```
