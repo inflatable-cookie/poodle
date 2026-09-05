@@ -5,7 +5,8 @@
 - Card: `docs/roadmaps/g16/112-nucleus-a1-np1-shell.md`
 - Dispatch: `docs/roadmaps/dispatch.md`, revision 17
 - Base verified: `3dbabac3990fb5f3856305b7c8f971039b0a81be`; rebased onto current
-  `origin/main` `7c1837f0fa2fede8fbd476b3362d88dd112290d7`.
+  `origin/main` `ef9049f158863ec181dee46123a8e59c0c957091` after PR #219 became
+  conflicting.
 - Worker handoff: `docs/handoffs/20260905-g16-112-nucleus-a1-np1-shell.md`
 
 ## Scope
@@ -37,8 +38,22 @@ SplitView. No component, contract, Svelte, or backend behaviour changes.
   evidence ledger; validation passed with 176 component rows.
 - `effigy docs:check`: documentation lint/audits and ledger validation passed.
 - `effigy check:parity-evidence-ledger`: passed after regenerating the ledger;
-  NP-1 now records five mounted rows and GPUI accessibility is `7 mounted /
-  168 manual`.
+- NP-1 now records five mounted rows and GPUI accessibility is `9 mounted /
+  166 manual` at the rebased head. The manifest and all receipts are repinned
+  to source commit `7d88454df565030360ef868528b50c50b63b0eba`; the lock digest
+  remains `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
+- `effigy test:nucleus-a11y`: passed, 16 tests.
+- Focused native NP-1 proof selector: passed, 7 tests.
+- Full `effigy regressions:native` remains blocked by two unrelated current-main
+  failures (`model_picker_selection_and_identity_rebuild_through_mounted_input`
+  and `select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds`);
+  the run reached 211 passed, 2 failed, 5 ignored.
+- Ledger, receipt contract, Svelte, native NP-1, docs, and diff checks are
+  rerun after the rebase; hosted `ci-web` and `ci-rust` must pass on the pushed
+  exact head below.
 - Hosted `web` run `33965002026` was the pre-clarification failure at the stale
   ledger step; a new exact-head hosted run is required after push.
+- Ledger ownership clarification: `docs/roadmaps/g16/parity-evidence-ledger.md`
+  is lane-owned generated evidence. Only `docs/roadmaps/g16/README.md` and
+  `docs/roadmaps/generation-index.md` remain coordinator-reserved.
 - Windowed selectors: not run.

@@ -14,3 +14,9 @@ tags: [coordination, handoff, worker, g16, g16.112]
 ---
 
 Execute `docs/roadmaps/g16/112-nucleus-a1-np1-shell.md` from current `origin/main` (dispatch manifest revision 17). Scope is g16.112 only. Produce one PR, record the execution log and closeout handoff, run relevant headless checks, push, and stop for independent exact-head review. Do not merge or run windowed selectors.
+
+This closeout is for the rebased PR #219 lane. The generated
+`docs/roadmaps/g16/parity-evidence-ledger.md` is lane-owned evidence and is
+committed with the PR. Only `docs/roadmaps/g16/README.md` and
+`docs/roadmaps/generation-index.md` remain coordinator-reserved; no ledger/docs
+check boundary is being bypassed.
