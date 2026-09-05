@@ -1,6 +1,6 @@
 # g16.107 — Validation Hygiene Bundle
 
-Status: ready
+Status: complete — merged in PR #213 at `6b05db508e0b344885a96f83255d8e2f63098b8b` on 2026-09-05
 Type: validation and tooling repair — no component, contract, or workflow change
 Opened: 2026-09-05
 Depends on: none

@@ -1,6 +1,6 @@
 # g16.110 — `gpui-unofficial` Feasibility Spike
 
-Status: ready
+Status: complete — report merged in PR #214 at `073faf61b364e93ea56d1ce55dc9b87504d4764b` on 2026-09-05; production adoption remains deferred
 Type: disposable feasibility spike — throwaway branch, report only, no merge
 of production changes
 Opened: 2026-09-05

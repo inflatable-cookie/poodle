@@ -1,6 +1,6 @@
 # g16.106 — Button Leading-Inset Edge Delta Diagnosis
 
-Status: ready
+Status: complete — merged in PR #211 at `94febafad53aa4e3feff5a28c82fcf20ccc0b6da` on 2026-09-05
 Type: bounded diagnosis and repair-or-contract — native render path
 Opened: 2026-09-05
 Depends on: none
