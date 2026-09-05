@@ -163,8 +163,8 @@ Item 7 stopped on the nucleus `SOURCE_PATHS` pin (hidden dependency).
 2. Item 7 reds `check:parity-evidence-ledger` against receipt commit
    `a5fefa1054198c195c9414ebef612041677e29c3`. Reverted those three files.
 3. Log: `docs/logs/2026-09/20260905-g16-107-validation-hygiene-bundle.md`
-4. Push this worker branch. If a sibling lane merged first, rebase onto
-   current `main`.
+4. Push this worker branch. `origin/main` moved to `e3c63e910` (g16.109
+   planning + g16.097 closeout, not 108). Rebase before push.
 5. Open a reviewable PR against current pushed `main`.
 6. Do not merge.
 

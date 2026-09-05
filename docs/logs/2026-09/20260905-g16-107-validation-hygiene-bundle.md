@@ -73,7 +73,7 @@ No workflow, component, or contract edits. No windowed selectors.
 
 | Invariant | Proof |
 | --- | --- |
-| Boards leave the tree clean | `docs:check` / `ci:web` on committed HEAD; porcelain empty afterwards |
+| Boards leave the tree clean | `docs:check` and `qa` on `d2f0157d08`; porcelain empty afterwards |
 | Gate state is per worktree | distinct hashed snapshot files for two roots; live snapshot at this worktree hash |
 | Doctor is green and honest | exit 0; god-file and stale-suppression warnings still listed |
 | Coverage widened | node crate in `test:contracts`; `check:react` exists but is not on `ci:web` (item 5 stop) |
@@ -90,9 +90,10 @@ No workflow, component, or contract edits. No windowed selectors.
 - `git diff --check origin/main...HEAD`: pass (pre-commit)
 - `effigy doctor --verbose` after revert: exit 0 (ok 18, warn 3, err 0)
 - `git diff --check origin/main...HEAD`: pass
-- `effigy docs:check` after item 7 revert: pass (value-domain ratchet 30 keys; ledger 176 rows; tree clean)
+- `effigy docs:check` after item 7 revert: pass (value-domain ratchet 30 keys; ledger 176 rows; tree clean afterwards)
 - `effigy qa` on revert HEAD: failed `test:web-pack-install` — tsc `--traceResolution` prints `/private/var/...` while `os.tmpdir()` is `/var/...`. Realpath the temp root and the React probe path.
 - inner `POODLE_WEB_PACK_INSTALL_INNER=1` after that fix: pass
-- `effigy qa` after the pack-install commit: pending
+- `effigy test:web-pack-install` on `d2f0157d08a8a5112d7d64cb58aad0bcee1cae88`: pass; tree clean
+- `effigy qa` on that SHA: pass (exit 0, ~11 min); tree clean afterwards
 
 No `release prepare/execute/simulate`, tag, publish, workflow, or windowed selector.
