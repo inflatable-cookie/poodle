@@ -1,5 +1,9 @@
 # Longhorn history-tree requests — Poodle-side record
 
+Relocated 2026-09-05 from `docs/requests/` (a non-Northstar folder) into the
+logs as a dated decision record. HistoryCenter v3 and Longhorn's wire work have
+since shipped; this stays as provenance only.
+
 Status: filed upstream 2026-08-11
 Raised by: Poodle core (HistoryCenter v2, batch cards `023` / `024`)
 Blocking: no — Poodle ships a client-side stitcher meanwhile

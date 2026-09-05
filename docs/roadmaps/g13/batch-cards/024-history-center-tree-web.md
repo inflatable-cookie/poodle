@@ -8,7 +8,7 @@ Depends on: `g13-b023` — **branch from
 `thread/g13-023-history-center-tree-core`, not from `main`.**
 Governing refs: `docs/contracts/components/history-center.md`,
 `docs/architecture/006-headless-core-and-machine-model.md`,
-`docs/requests/longhorn-fork-tree-page.md`
+`docs/logs/2026-08/11-longhorn-fork-tree-requests.md` (moved from `docs/requests/` on 2026-09-05)
 
 ## Goal
 
