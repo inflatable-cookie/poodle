@@ -3,10 +3,13 @@
 Status: complete — awaiting re-review after operator decision execution (rev 3)
 Date: 2026-09-05
 Card: `docs/roadmaps/g16/108-docs-spine-compaction.md` (amended on main at
-`954a0252`, item 6 "Historical-prefix gates", manifest revision 14)
-Dispatch: `docs/roadmaps/dispatch.md` revision 7 text; coordinator manifest
-revision 14 per operator
-Base: `954a025222aeb2d7f126ed7f620c2948de58efb9` (`origin/main`, promoted —
+`954a0252`, item 6 "Historical-prefix gates"; coordinator manifest counter
+revision 14 — dispatch.md text revision 7, see the dispatch line below)
+Dispatch: `docs/roadmaps/dispatch.md` **text revision 7** at this base —
+snapshot stale for lane status (its ready frontier still lists g16.106,
+whose merge predates the text); coordinator manifest counter revision 14 per
+the operator decision and the amendment commit `954a0252`.
+Base: `954a025222aeb2d7f126ed7f620c2948de58efb9` (`origin/main` at rebase —
 the commit that last touched `dispatch.md`; branch rebased onto it)
 Worker PR: open from this branch (see closeout)
 Handoff: `docs/handoffs/20260905-...-g16-108-docs-spine-compaction.md`
@@ -227,14 +230,29 @@ replayed cleanly):
   path-independent over tracked files (identical content pre/post move);
   `parity-evidence-ledger.ts`/`nucleus-parity-receipts.ts` read fixed paths.
   No other gate required an analogous update.
-- **Rebase fallout** — `g16.106` merged on main (PR #211) with a top-level
-  handoff; its lane is now closed, so that brief was archived to
-  `docs/handoffs/archive/2026-09/` under the retention rule. Counts:
+- **Rebase fallout** — `g16.106` merged on main (PR #211, `94febafad`, an
+  ancestor of the base) with a top-level handoff; its lane is closed by that
+  merge evidence, so the brief was archived to
+  `docs/handoffs/archive/2026-09/` under the retention rule (the base's
+  dispatch.md text still lists 106 ready — the manifest is reconciled later
+  by the coordinator; see the dispatch note above). Counts:
   185 pre-existing files (184 at the original base plus g16.106's brief),
   176 archived, 9 retained top-level briefs, plus this lane's handoff = 10
   top-level, 186 total.
 - **Authorization recorded** in the card (item 6) and this log; archived
   parity content untouched; relocation stands.
+
+Dispatch state is reported against the PR base snapshot `954a0252`. That
+snapshot's `docs/roadmaps/dispatch.md` text still reads **revision 7** and
+still lists g16.106 (and g16.107) in the ready frontier: the manifest text
+is not reconciled for g16.106's merge (PR #211, `94febafad`, an ancestor of
+the base) or for later promotions — **treat the base dispatch list as stale
+for lane status**. The "manifest revision 14" cited in the operator
+decision and the amendment commit `954a0252` is the coordinator's counter,
+not the dispatch.md text revision. Lane status here follows merge evidence
+(cards/PRs/logs), not the unreconciled dispatch list: g16.106 is closed by
+PR #211; g16.107 was open at the base and merged later at `6b05db50`
+(PR #213), which is beyond this review base.
 
 ## Validation
 

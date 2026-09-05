@@ -37,11 +37,17 @@ v1) with nothing to stop regressions.
 
 ## Current State
 
-PR open from this branch, rebased onto promoted main `954a025222aeb2d7f126ed7f620c2948de58efb9`
-(manifest revision 14; the commit that last touched `docs/roadmaps/dispatch.md`,
-which amended this card with item 6 "Historical-prefix gates" authorizing the
-drift-gate prefix update and planted test). Execution log:
-`docs/logs/2026-09/20260905-g16-108-docs-spine-compaction.md`.
+PR open from this branch, rebased onto promoted main
+`954a025222aeb2d7f126ed7f620c2948de58efb9` (the commit that last touched
+`docs/roadmaps/dispatch.md` and amended this card with item 6
+"Historical-prefix gates"). Dispatch/revision note: that snapshot's
+dispatch.md text still reads revision 7 and still lists g16.106 in the ready
+frontier — the manifest text is not reconciled for g16.106's merge (PR #211,
+`94febafad`, an ancestor of the base) or later promotions; the "manifest
+revision 14" of the operator decision and amendment commit is the
+coordinator's counter, not the dispatch.md text revision. Lane status in this
+brief follows merge evidence, not the unreconciled dispatch list. Execution
+log: `docs/logs/2026-09/20260905-g16-108-docs-spine-compaction.md`.
 
 - **Handoffs**: 175 closed-lane files archived to
   `docs/handoffs/archive/2026-{08,09}/` by filename month; retention rule
@@ -75,18 +81,21 @@ drift-gate prefix update and planted test). Execution log:
   gains `docs/archive/` so the retired-Treatment drift gate follows the
   archived corpus (required for `docs:check` green).
 
-**Open cards per `origin/main` `954a0252` (manifest revision 14):** g16.051
-(held), g16.052 (held), g16.107 (concurrent worker), g16.108 (this lane),
-g16.109 (consumer adoption wave), g16.110 (feasibility spike), g16.111–116
-(Nucleus A1 accessibility programme). g16.097 and g16.106 are **closed**
-(097: v0.3.0 published at `1eadc581a`; 106: merged in PR #211 at
-`94febafad`). Held non-card directions (Jetstream admission, VL-1 lab,
-visual tranche, citations/nested menus) likewise untouched. No open-lane
-brief was moved. Count check: 185 pre-existing handoff files (184 at the
-original base plus g16.106's brief added at its merge); this head archives
-176 of them (g16.106's closed-lane brief included, per the retention rule),
-keeps 9 top-level briefs, and adds this g16.108 handoff — 10 top-level
-files, 186 total.
+**Lane status at the PR base snapshot `954a0252`** (dispatch.md text
+revision 7 is stale for lane status — see the dispatch note above; status
+follows merge evidence): open — g16.051 (held), g16.052 (held), g16.107
+(concurrent worker; merged after this base at `6b05db50`, PR #213), g16.108
+(this lane), g16.109 (consumer adoption wave), g16.110 (feasibility spike),
+g16.111–116 (Nucleus A1 accessibility programme). Closed — g16.097 (v0.3.0
+published at `1eadc581a`) and g16.106 (merged in PR #211 at `94febafad`).
+Held non-card directions (Jetstream admission, VL-1 lab, visual tranche,
+citations/nested menus) likewise untouched. No open-lane brief was moved.
+Count check: 185 pre-existing handoff files (184 at the original base plus
+g16.106's brief added at its merge); this head archives 176 of them
+(g16.106's closed-lane brief included, per the retention rule), keeps 9
+top-level briefs, and adds this g16.108 handoff — 10 top-level files, 186
+total. `origin/main` has since advanced to `6b05db50` (g16.107, PR #213),
+beyond this review base.
 
 ## Stop Conditions
 
@@ -98,8 +107,9 @@ files, 186 total.
 
 ## Revision 3 — Operator Decision Execution (2026-09-05)
 
-Card amendment `954a0252` (item 6, manifest revision 14) authorizes the
-historical-prefix gate work in this lane. Executed: `docs/archive/` added to
+Card amendment `954a0252` (item 6; coordinator manifest revision 14 —
+dispatch.md text at the same commit still reads revision 7, unreconciled)
+authorizes the historical-prefix gate work in this lane. Executed: `docs/archive/` added to
 `HISTORICAL_PREFIXES` in `scripts/check-recipe-only-surface.ts`;
 `drift:recipes` now composes the gate scan with planted tests
 (`scripts/check-recipe-only-surface.test.ts`) proving an active-path
@@ -136,7 +146,9 @@ Archived parity content was never edited for a gate; the relocation stands.
 
 ## Next Move
 
-Reviewer verifies against dispatch manifest revision 7 and the open-card list:
+Reviewer verifies against the open-card list recorded in this brief and the
+execution log (the base's dispatch.md text revision 7 is stale for lane
+status; lane status follows merge evidence — see the dispatch note above):
 nothing open archived; `effigy docs:check` and `effigy docs:snippet-check`
 green; parity grep clean outside card 108's own text; specs README diff lists
 no archived spec as active. Merge; coordinator closes out front-door lines at
