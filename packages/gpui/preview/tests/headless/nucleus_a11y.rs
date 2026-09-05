@@ -84,6 +84,9 @@ fn replay(driver: &mut HeadlessDriver, actions: &[A1Action]) {
                 driver.wait_for_focus_handle(&id);
                 driver.keyboard_key(&id, gpui_key(key));
             }
+            A1Action::ProgrammaticAppend { .. } => {
+                panic!("programmatic_append requires the AgentTranscript host proof");
+            }
         }
         // Host rebuilds land in the callback; two frames let the backend
         // mint and attach any focus handle the rebuilt tree introduced.
@@ -333,38 +336,6 @@ fn prove_shell_row(
     assertions: &[&'static str],
 ) {
     prove(driver, loaded, actions, assertions);
-}
-
-fn record_shell_divergence(
-    driver: &mut HeadlessDriver,
-    loaded: &LoadedA1Scenario,
-    expected: &[(&str, &str)],
-) {
-    let nodes =
-        nucleus_receipts::normalise_a1_nodes(&driver.accessibility_nodes(), &loaded.scenario);
-    let (_, _, svelte) = nucleus_receipts::load_svelte_snapshot(loaded);
-    let diff = nucleus_receipts::diff_a1_nodes(
-        &nodes,
-        svelte["nodes"].as_array().expect("snapshot nodes"),
-    );
-    let fields: Vec<(String, String)> = diff
-        .iter()
-        .map(|entry| {
-            (
-                entry["index"].as_i64().unwrap().to_string(),
-                entry["field"].as_str().unwrap().to_owned(),
-            )
-        })
-        .collect();
-    assert_eq!(
-        fields,
-        expected
-            .iter()
-            .map(|(index, field)| ((*index).to_owned(), (*field).to_owned()))
-            .collect::<Vec<_>>()
-    );
-    let gpui = nucleus_receipts::gpui_snapshot_file(loaded, driver.mounted_observation(), nodes);
-    nucleus_receipts::publish_a1_divergence_if_configured(loaded, &gpui, &diff);
 }
 
 #[test]
@@ -666,11 +637,9 @@ fn agent_transcript_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("agent-transcript");
     let scenario_props = loaded.scenario.props.clone();
     let provider = theme();
-    let items = scenario_props["items"]
-        .as_array()
-        .expect("transcript items")
-        .iter()
-        .map(|item| match item["kind"].as_str() {
+
+    fn transcript_item(item: &Value) -> TranscriptItem {
+        match item["kind"].as_str() {
             Some("message") => TranscriptItem::Message(TranscriptMessage {
                 id: prop_string(item, "id"),
                 role: Some(match prop_string(item, "role").as_str() {
@@ -689,19 +658,73 @@ fn agent_transcript_a1_accessibility_projection_matches_svelte() {
                 })
             }
             other => panic!("unmapped transcript item kind {other:?}"),
-        })
-        .collect();
-    let spec = AgentTranscriptSpec::new(items)
-        .with_virtualized(scenario_props["virtualized"].as_bool().unwrap_or(false))
-        .with_aria_label(prop_string(&scenario_props, "ariaLabel"))
-        .with_size(prop_size(&scenario_props))
-        .with_density(prop_density(&scenario_props));
-    let node = poodle_render::agent_transcript(
-        &spec,
-        &RenderContext::new(&provider),
-        AgentTranscriptHandlers::default(),
-    );
-    prove_static_row("agent-transcript", node, 520.0, 240.0);
+        }
+    }
+
+    fn transcript_items(items: &Value) -> Vec<TranscriptItem> {
+        items
+            .as_array()
+            .expect("transcript items")
+            .iter()
+            .map(transcript_item)
+            .collect()
+    }
+
+    let items = Arc::new(Mutex::new(transcript_items(&scenario_props["items"])));
+    let aria_label = prop_string(&scenario_props, "ariaLabel");
+    let size = prop_size(&scenario_props);
+    let density = prop_density(&scenario_props);
+    let virtualized = scenario_props["virtualized"].as_bool().unwrap_or(false);
+    let build_node = || {
+        let spec = AgentTranscriptSpec::new(items.lock().expect("transcript items").clone())
+            .with_virtualized(virtualized)
+            .with_aria_label(aria_label.clone())
+            .with_size(size)
+            .with_density(density);
+        poodle_render::agent_transcript(
+            &spec,
+            &RenderContext::new(&provider),
+            AgentTranscriptHandlers::default(),
+        )
+    };
+    let mounted = Arc::new(Mutex::new(build_node()));
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 240.0);
+        for action in &loaded.scenario.actions {
+            match action {
+                nucleus_receipts::A1Action::ProgrammaticAppend { item } => {
+                    items
+                        .lock()
+                        .expect("transcript items")
+                        .push(transcript_item(item));
+                    *mounted.lock().expect("transcript mount") = build_node();
+                    driver.mount_node(Arc::clone(&mounted));
+                    // A host update is not input. Keep the receipt's mounted
+                    // observation honest with a harmless real key dispatch;
+                    // the transcript has no focusable node to steal focus.
+                    driver.dispatch_probe_key("escape");
+                }
+                other => {
+                    let action = (*other).clone();
+                    replay(&mut driver, std::slice::from_ref(&action));
+                }
+            }
+        }
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount AgentTranscript through the production compat adapter and HeadlessDriver",
+                "apply the shared programmatic append to host-owned items without a pointer action",
+                "dispatch a harmless real key after the host update to validate the mounted input path",
+            ],
+            &[
+                "appending transcript output does not move focus out of the reader or composer",
+                "the normalised GPUI snapshot matches the Svelte DOM snapshot after the same append",
+            ],
+        );
+    });
 }
 
 #[test]
@@ -1754,7 +1777,7 @@ fn build_segmented_control_a1(
 }
 
 #[test]
-fn segmented_control_a1_accessibility_divergence_is_recorded() {
+fn segmented_control_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("segmented-control");
     let props: SegmentedControlA1Props = props(&loaded);
     let options = props
@@ -1778,13 +1801,14 @@ fn segmented_control_a1_accessibility_divergence_is_recorded() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
         driver.wait_for_focus_handle("segmented:a1:option:list");
         replay(&mut driver, &loaded.scenario.actions);
-        // Contract/GPUI: one roving tab stop on the selected segment. The
-        // Svelte extractor counts every enabled native radio as a sequential
-        // stop, so Grid and List still differ on focus_order.
-        record_shell_divergence(
+        driver.dispatch_probe_key("escape");
+        prove(
             &mut driver,
             &loaded,
-            &[("1", "focus_order"), ("2", "focus_order")],
+            &[
+                "mount production SegmentedControl and replay the shared selection action",
+            ],
+            &["one native-radio group entry stop matches the roving GPUI segment"],
         );
     });
 }
@@ -1822,7 +1846,7 @@ fn menu_a1_trigger(label: &str, inner: &str) -> Node {
 }
 
 #[test]
-fn menu_a1_accessibility_divergence_is_recorded() {
+fn menu_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("menu");
     let props: MenuA1Props = props(&loaded);
     let items = props
@@ -1852,10 +1876,16 @@ fn menu_a1_accessibility_divergence_is_recorded() {
         let mounted = Arc::new(Mutex::new(root));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
         driver.wait_for_focus_handle("menu-item:new");
-        // Opening focuses the first enabled item. Remaining: Svelte lists
-        // every enabled menuitem as a sequential tab stop; GPUI keeps one
-        // roving stop, so Delete is not in focus_order.
-        record_shell_divergence(&mut driver, &loaded, &[("5", "focus_order")]);
+        driver.dispatch_probe_key("escape");
+        // Opening focuses the first enabled item. Both renderers keep that
+        // item as the single sequential stop while roving remains in the
+        // mounted menu list.
+        prove(
+            &mut driver,
+            &loaded,
+            &["mount production Menu and open it through the trigger path"],
+            &["Tab enters the first enabled menu item and later items stay roving-only"],
+        );
     });
 }
 
@@ -1896,7 +1926,7 @@ fn build_radio_group_a1(
 }
 
 #[test]
-fn radio_group_a1_accessibility_divergence_is_recorded() {
+fn radio_group_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("radio-group");
     let input: RadioGroupA1Props = props(&loaded);
     let options = input
@@ -1923,12 +1953,13 @@ fn radio_group_a1_accessibility_divergence_is_recorded() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 180.0);
         driver.wait_for_focus_handle("radio:a1:option:pro");
         replay(&mut driver, &loaded.scenario.actions);
-        // After selecting Free the single GPUI tab stop follows the selection.
-        // Svelte's extractor still lists both enabled native radios as stops.
-        record_shell_divergence(
+        // After selecting Free the single native-radio group entry stop
+        // follows the selection in both projections.
+        prove(
             &mut driver,
             &loaded,
-            &[("1", "focus_order"), ("2", "focus_order")],
+            &["mount production RadioGroup and replay the shared selection action"],
+            &["the named native radio group has one sequential entry stop"],
         );
     });
 }

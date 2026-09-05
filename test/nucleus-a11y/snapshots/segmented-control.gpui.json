@@ -3,13 +3,13 @@
   "component": "SegmentedControl",
   "scenario_id": "nucleus.navigation.segmented-control",
   "scenario_path": "test/nucleus-a11y/scenarios/segmented-control.json",
-  "scenario_sha256": "ce382aadd2e42b116fb1632a9b117fdff22c3dbbcf933d5ed3999b41dcfb5f83",
-  "runtime": "svelte-happy-dom",
+  "scenario_sha256": "9153cc9e1e9676cf88246bd8cbc366543bb84790277b208c039cd3a4ac1613e6",
+  "runtime": "gpui-headless",
   "run": {
-    "command": "effigy test:nucleus-a11y",
-    "mount": "@testing-library/svelte render",
-    "render_path": "svelte mount -> happy-dom document",
-    "input_dispatch": "dom-events"
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
   },
   "nodes": [
     {
@@ -47,7 +47,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": 0,
+      "focus_order": null,
       "focused": false
     },
     {
@@ -66,7 +66,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": 1,
+      "focus_order": 0,
       "focused": false
     },
     {

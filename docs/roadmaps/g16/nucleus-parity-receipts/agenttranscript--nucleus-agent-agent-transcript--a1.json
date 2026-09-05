@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Surface",
-  "scenario_id": "nucleus.shell.surface",
+  "component": "AgentTranscript",
+  "scenario_id": "nucleus.agent.agent-transcript",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,32 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production Surface and dispatch a harmless key"
+    "mount AgentTranscript through the production compat adapter and HeadlessDriver",
+    "apply the shared programmatic append to host-owned items without a pointer action",
+    "dispatch a harmless real key after the host update to validate the mounted input path"
   ],
   "assertions": [
-    "region role and accessible name match the Svelte projection"
+    "appending transcript output does not move focus out of the reader or composer",
+    "the normalised GPUI snapshot matches the Svelte DOM snapshot after the same append"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-      "sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35"
+      "path": "test/nucleus-a11y/snapshots/agent-transcript.gpui.json",
+      "sha256": "27327fad382a44f466d011f3b316cf306d78091c653f26f36734f0622f36dd5f"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-      "sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8"
+      "path": "test/nucleus-a11y/snapshots/agent-transcript.svelte.json",
+      "sha256": "d798eded057bd1302a660f613e69914a65f8d94320801b7918c46fb96c507199"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/surface.json",
-    "scenario_sha256": "f5c9583f55022d5e1dd477ff0cb27ee78cd995b24dd97ca0ac74dad38a5eac90",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-    "gpui_snapshot_sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-    "svelte_snapshot_sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8",
+    "scenario_path": "test/nucleus-a11y/scenarios/agent-transcript.json",
+    "scenario_sha256": "791c2f012c7122bfa5f3ea2d2ef4bed44812c5dca7454a0fd70342c0bf1feb2c",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/agent-transcript.gpui.json",
+    "gpui_snapshot_sha256": "27327fad382a44f466d011f3b316cf306d78091c653f26f36734f0622f36dd5f",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/agent-transcript.svelte.json",
+    "svelte_snapshot_sha256": "d798eded057bd1302a660f613e69914a65f8d94320801b7918c46fb96c507199",
     "web_only_exclusions": [],
     "diff": []
   }

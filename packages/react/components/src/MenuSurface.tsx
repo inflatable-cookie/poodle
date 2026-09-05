@@ -56,6 +56,8 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
   const [highlightIndex, setHighlightIndex] = useState(0);
 
   const actionableItems = menuNavigableItems(items);
+  const firstTabStopIndex =
+    actionableItems.length === 0 ? -1 : menuListNavigate(actionableItems, 0, "first");
   const effectiveHighlight =
     actionableItems.length === 0
       ? 0
@@ -114,6 +116,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
             data-kind={item.kind ?? "action"}
             data-tone={item.tone ?? "default"}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
+            tabIndex={actionableItems.findIndex((candidate) => candidate.value === item.value) === firstTabStopIndex ? 0 : -1}
             aria-checked={item.kind === "checkbox" || item.kind === "radio" ? item.checked === true : undefined}
             onClick={() => activateItem(item)}
             onKeyDown={(event) => {

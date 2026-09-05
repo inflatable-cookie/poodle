@@ -45,7 +45,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": 0,
+      "focus_order": null,
       "focused": false
     },
     {
@@ -63,7 +63,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": 1,
+      "focus_order": 0,
       "focused": true
     },
     {

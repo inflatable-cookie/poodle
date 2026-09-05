@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Surface",
-  "scenario_id": "nucleus.shell.surface",
+  "component": "RadioGroup",
+  "scenario_id": "nucleus.settings.radio-group",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production Surface and dispatch a harmless key"
+    "mount production RadioGroup and replay the shared selection action"
   ],
   "assertions": [
-    "region role and accessible name match the Svelte projection"
+    "the named native radio group has one sequential entry stop"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-      "sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35"
+      "path": "test/nucleus-a11y/snapshots/radio-group.gpui.json",
+      "sha256": "8a6286a8e47b11088e725f4ca7f2b66c17cf7a2fac37fa194e6df0b5a3618dba"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-      "sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8"
+      "path": "test/nucleus-a11y/snapshots/radio-group.svelte.json",
+      "sha256": "9f3ed9d4c535d1e5c9267217fc086cf0ed821dca8e3e9dbe2bb2b2fcd36fa909"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/surface.json",
-    "scenario_sha256": "f5c9583f55022d5e1dd477ff0cb27ee78cd995b24dd97ca0ac74dad38a5eac90",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-    "gpui_snapshot_sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-    "svelte_snapshot_sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8",
+    "scenario_path": "test/nucleus-a11y/scenarios/radio-group.json",
+    "scenario_sha256": "ac6c6ff315767621c20a38d8b2ff79ed1851d7546815944764352220a1f809ae",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/radio-group.gpui.json",
+    "gpui_snapshot_sha256": "8a6286a8e47b11088e725f4ca7f2b66c17cf7a2fac37fa194e6df0b5a3618dba",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/radio-group.svelte.json",
+    "svelte_snapshot_sha256": "9f3ed9d4c535d1e5c9267217fc086cf0ed821dca8e3e9dbe2bb2b2fcd36fa909",
     "web_only_exclusions": [],
     "diff": []
   }

@@ -91,9 +91,16 @@ describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
       const props = loaded.scenario.component === "ToastHost"
         ? fixtureProps(loaded.scenario)
         : { ...loaded.scenario.props, ...fixtureProps(loaded.scenario) };
-      render(Component as never, { props });
+      const view = render(Component as never, { props });
       await settle();
-      await replayActions(loaded.scenario.actions);
+      let currentProps = props;
+      await replayActions(loaded.scenario.actions, async ({ item }) => {
+        if (loaded.scenario.component !== "AgentTranscript" || !Array.isArray(currentProps.items)) {
+          throw new Error("programmatic_append is only supported by the AgentTranscript host fixture");
+        }
+        currentProps = { ...currentProps, items: [...currentProps.items, item] };
+        await view.rerender(currentProps);
+      });
 
       const file: SnapshotFile = {
         schema: A1_SNAPSHOT_SCHEMA,

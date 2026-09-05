@@ -12,7 +12,17 @@
     "size": "sm",
     "density": "compact"
   },
-  "actions": [{ "type": "pointer_activate", "target": { "role": "log", "name": "Conversation" } }],
+  "actions": [
+    {
+      "type": "programmatic_append",
+      "item": {
+        "kind": "message",
+        "id": "appended",
+        "role": "assistant",
+        "markdown": "Appended without moving focus"
+      }
+    }
+  ],
   "declared_states": [],
   "capture": { "width": 520, "height": 240 },
   "web_only_exclusions": []
