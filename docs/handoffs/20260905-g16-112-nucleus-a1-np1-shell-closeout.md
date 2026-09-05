@@ -37,9 +37,9 @@ executed accessibility projection contract established by g16.111.
   validated A1 receipts, and two recorded divergences under the NP-1 store.
 - Text now has a declared status probe fixture, and native proofs deserialize
   shared scenario props and fixtures.
-- Receipt contract, docs, and the web/package/component board passed until the
-  reserved ledger step. Hosted web run `33965002026` failed at that same step;
-  the coordinator-owned markdown needs the four mounted cells and summary
+- Receipt contract, documentation audits, and the web/package/component board
+  passed until the reserved ledger step. Hosted web run `33965002026` failed at that same step;
+  the coordinator-owned markdown needs the five mounted cells and summary
   update. No reserved closeout surface was edited here.
 - No sibling worktree dependencies.
 
