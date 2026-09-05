@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "AgentPlan",
+  "scenario_id": "nucleus.agent.agent-plan",
+  "props": {
+    "plan": "# Release plan\n\nKeep the adapter honest.",
+    "status": "pending",
+    "dismissible": true,
+    "size": "sm",
+    "density": "compact"
+  },
+  "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Accept plan" } }],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}

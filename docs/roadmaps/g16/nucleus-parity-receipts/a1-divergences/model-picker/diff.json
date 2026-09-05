@@ -1,0 +1,64 @@
+[
+  {
+    "index": 0,
+    "field": "focused",
+    "gpui": true,
+    "svelte": false
+  },
+  {
+    "index": 0,
+    "field": "relationships",
+    "gpui": {
+      "controls": [
+        -1
+      ],
+      "labelled_by": [],
+      "described_by": []
+    },
+    "svelte": {
+      "controls": [
+        1
+      ],
+      "labelled_by": [],
+      "described_by": []
+    }
+  },
+  {
+    "index": 0,
+    "field": "states",
+    "gpui": {
+      "expanded": false,
+      "checked": null,
+      "disabled": false
+    },
+    "svelte": {
+      "expanded": true,
+      "checked": null,
+      "disabled": false
+    }
+  },
+  {
+    "index": 1,
+    "field": "role",
+    "gpui": null,
+    "svelte": "dialog"
+  },
+  {
+    "index": 2,
+    "field": "role",
+    "gpui": null,
+    "svelte": "radiogroup"
+  },
+  {
+    "index": 3,
+    "field": "role",
+    "gpui": null,
+    "svelte": "radio"
+  },
+  {
+    "index": 4,
+    "field": "role",
+    "gpui": null,
+    "svelte": "radio"
+  }
+]

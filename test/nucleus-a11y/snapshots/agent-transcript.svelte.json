@@ -1,0 +1,32 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "AgentTranscript",
+  "scenario_id": "nucleus.agent.agent-transcript",
+  "scenario_path": "test/nucleus-a11y/scenarios/agent-transcript.json",
+  "scenario_sha256": "6ae44bd8dd69449b989e9f297f5696fbb66a6902399f979a581235f91d68e63a",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "log",
+      "name": "Conversation",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": true
+    }
+  ]
+}

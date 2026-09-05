@@ -1,0 +1,118 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "button",
+      "name": "Model: Atlas",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": true,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [
+          1
+        ],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": false
+    },
+    {
+      "role": "dialog",
+      "name": "Model",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radiogroup",
+      "name": "Model",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radio",
+      "name": "Atlas Balanced model",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": true,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": true
+    },
+    {
+      "role": "radio",
+      "name": "Mini",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": false,
+        "disabled": true
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    }
+  ]
+}

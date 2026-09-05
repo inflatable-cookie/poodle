@@ -30,3 +30,20 @@ Semantic causes, Svelte as reference (repair owner: `g16.113`, NP-2):
 | 5 | option `focus_order` | `null` (option rows are pointer targets, `focusable` false) | sequential stops (`<button role="option">`) |
 
 Reproduce: `POODLE_NUCLEUS_RECEIPT_DIR=$PWD/target/nucleus-receipts cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions select_a1 -- --ignored`.
+
+## g16.114 NP-3 rows
+
+Each row directory contains `diff.json`, both runtime snapshots (`gpui.json`
+and `svelte.json`), and `attributes.json` with the exact changed attributes.
+
+- `agent-chat-input/` — the rendered action has no backend identity, so the
+  scenario action cannot be resolved. No renderer projection fix was applied.
+- `agent-plan/` — title text is available, but the native node has no contract
+  heading role/level. No projection fix was applied.
+- `agent-question/` — the label exists but its labelled-by relation is not
+  linked; post-action focus is behavior divergence. No behavior repair was
+  applied.
+- `agent-transcript/` — post-action focus diverges. No behavior repair was
+  applied.
+- `model-picker/` — combobox semantics and focus order diverge. Select-class
+  repair is deferred to `g16.117`; no behavior repair was applied.

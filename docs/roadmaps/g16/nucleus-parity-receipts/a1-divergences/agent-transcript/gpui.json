@@ -1,0 +1,32 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "AgentTranscript",
+  "scenario_id": "nucleus.agent.agent-transcript",
+  "scenario_path": "test/nucleus-a11y/scenarios/agent-transcript.json",
+  "scenario_sha256": "6ae44bd8dd69449b989e9f297f5696fbb66a6902399f979a581235f91d68e63a",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "log",
+      "name": "Conversation",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": null
+    }
+  ]
+}

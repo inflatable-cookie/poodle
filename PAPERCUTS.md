@@ -1,5 +1,11 @@
 # Papercuts
 
+- 2026-09-05 — `effigy test:nucleus-a11y` cannot resolve generated
+  `@inflatable-cookie/poodle-core/styles/accordion.css` in a fresh worker
+  checkout; impact: A1 Svelte evidence cannot start; plausible fix: make the
+  package build/link bootstrap produce style exports before Vitest; affected
+  surface: `test/nucleus-a11y` Vite resolution.
+
 Small, actionable friction found during agent work. Agents append entries when
 they hit a solvable hurdle; they do not stop the current task to fix one.
 

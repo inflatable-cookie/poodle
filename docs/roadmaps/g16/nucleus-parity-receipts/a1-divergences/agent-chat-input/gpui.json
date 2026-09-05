@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "AgentChatInput",
+  "scenario_id": "nucleus.agent.agent-chat-input",
+  "scenario_path": "test/nucleus-a11y/scenarios/agent-chat-input.json",
+  "scenario_sha256": "54dff4c741f2f00a2872501d9be499f261d652a458b76f64e226a5ef81ef21ad",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": []
+}

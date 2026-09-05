@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "AgentQuestion",
+  "scenario_id": "nucleus.agent.agent-question",
+  "props": {
+    "questions": [{ "id": "ship", "header": "Review", "prompt": "Ship this preparation?", "options": [{ "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" }], "allowMultiple": false }],
+    "activeIndex": 0,
+    "selections": [],
+    "size": "sm",
+    "density": "compact"
+  },
+  "actions": [{ "type": "pointer_activate", "target": { "role": "radio", "name": "Yes" } }],
+  "declared_states": ["checked"],
+  "web_only_exclusions": []
+}

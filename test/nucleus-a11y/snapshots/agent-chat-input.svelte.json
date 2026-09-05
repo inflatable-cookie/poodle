@@ -1,0 +1,52 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "AgentChatInput",
+  "scenario_id": "nucleus.agent.agent-chat-input",
+  "scenario_path": "test/nucleus-a11y/scenarios/agent-chat-input.json",
+  "scenario_sha256": "54dff4c741f2f00a2872501d9be499f261d652a458b76f64e226a5ef81ef21ad",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "textbox",
+      "name": "Message",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Send",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": true
+    }
+  ]
+}

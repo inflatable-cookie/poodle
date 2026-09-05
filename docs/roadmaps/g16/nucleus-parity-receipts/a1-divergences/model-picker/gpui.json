@@ -1,0 +1,38 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "button",
+      "name": "Model: Atlas",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": false,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [
+          -1
+        ],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    }
+  ]
+}

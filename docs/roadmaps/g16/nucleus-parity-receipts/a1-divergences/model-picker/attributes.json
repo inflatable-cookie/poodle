@@ -1,0 +1,70 @@
+{
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+  "attributes": [
+    {
+      "index": 0,
+      "field": "focused",
+      "gpui": true,
+      "svelte": false
+    },
+    {
+      "index": 0,
+      "field": "relationships",
+      "gpui": {
+        "controls": [
+          -1
+        ],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "svelte": {
+        "controls": [
+          1
+        ],
+        "labelled_by": [],
+        "described_by": []
+      }
+    },
+    {
+      "index": 0,
+      "field": "states",
+      "gpui": {
+        "expanded": false,
+        "checked": null,
+        "disabled": false
+      },
+      "svelte": {
+        "expanded": true,
+        "checked": null,
+        "disabled": false
+      }
+    },
+    {
+      "index": 1,
+      "field": "role",
+      "gpui": null,
+      "svelte": "dialog"
+    },
+    {
+      "index": 2,
+      "field": "role",
+      "gpui": null,
+      "svelte": "radiogroup"
+    },
+    {
+      "index": 3,
+      "field": "role",
+      "gpui": null,
+      "svelte": "radio"
+    },
+    {
+      "index": 4,
+      "field": "role",
+      "gpui": null,
+      "svelte": "radio"
+    }
+  ]
+}

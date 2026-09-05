@@ -1,0 +1,41 @@
+# g16.114 — Nucleus A1 NP-3 Agent Workflow
+
+Status: revision 18 disposition recorded; awaiting fresh exact-head review
+Base: `469898d6838bdc56a266822606b8afc52ee8481b` (`origin/main`, manifest revision 17; rebased for the current merge gate)
+Rebased manifest source commit: `d4e86802b83261d871ca9f78ff743c526141eb31`; lock digest unchanged at `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`.
+
+## Scope
+
+Added shared A1 scenarios and Svelte snapshots for AgentTranscript,
+AgentChatInput, AgentPlan, AgentQuestion, ModelPicker, and StatusIndicator.
+Added mounted GPUI proof entrypoints for the six rows, reusing the foundation
+snapshot/comparison/emission path. StatusIndicator is the only promoted NP-3
+receipt. ChatInput, AgentPlan, AgentQuestion, AgentTranscript, and ModelPicker
+are recorded under `docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/`
+with both snapshots, diffs, and exact changed attributes. Switch/Tabs receipts
+remain coordinator-owned.
+
+## Validation
+
+- `effigy core:build` — passed.
+- `effigy test:nucleus-a11y` with snapshot writing — passed, 10 tests.
+- `effigy regressions:native` equivalent focused headless native checks — six
+  NP-3 selectors passed; five recorded divergence rows emitted no receipts.
+- No windowed selector was run.
+- `git diff --check` — passed.
+
+`effigy docs:check` reached the parity-evidence ledger and reported the
+coordinator-owned ledger summary/cell drift caused by the newly promoted empty
+StatusIndicator A1 receipt; receipt schema validation itself passed after the
+StatusIndicator empty-node exception was recorded. The ledger remains outside
+this worker lane.
+
+Revision cleanup: removed all untracked generated files under
+`packages/gpui/preview/docs/`; final `git status --short` is clean.
+
+## Notes
+
+The Svelte package required the existing `effigy core:build` bootstrap before
+Vitest could resolve generated style exports. The friction is recorded in the
+root `PAPERCUTS.md`. The native proof remains subject to exact-head review and
+must not be merged from this worker.

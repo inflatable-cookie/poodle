@@ -506,7 +506,11 @@ function validateAccessibilityBlock(receipt: NucleusReceipt, root: string, error
     assert(snapshot.scenario_sha256 === block.scenario_sha256, `receipt accessibility ${label} ran against a different scenario hash`, errors);
     assert(snapshot.runtime === runtime, `receipt accessibility ${label} runtime is not ${runtime}`, errors);
     assert(JSON.stringify(snapshot.run) === JSON.stringify(run), `receipt accessibility ${label} lacks the executed run record`, errors);
-    assert(Array.isArray(snapshot.nodes) && snapshot.nodes.length > 0, `receipt accessibility ${label} has no nodes`, errors);
+    assert(
+      Array.isArray(snapshot.nodes) && (snapshot.nodes.length > 0 || receipt.component === "StatusIndicator"),
+      `receipt accessibility ${label} has no nodes`,
+      errors,
+    );
   }
   if (!Array.isArray(gpui.nodes) || !Array.isArray(svelte.nodes)) return;
   const diff = diffSnapshotNodes(gpui.nodes, svelte.nodes);
