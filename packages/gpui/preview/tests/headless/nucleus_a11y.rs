@@ -14,21 +14,22 @@ use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, Trans
 use poodle_node::Node;
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
-    CommandPaletteHandlers, ConfirmActionHandlers, EditableLabelHandlers, MessageCenterHandlers,
-    PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers, TabsHandlers,
-    ToastStackHandlers,
+    CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers, EditableLabelHandlers,
+    MessageCenterHandlers, PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers,
+    TabsHandlers, ToastStackHandlers,
 };
 use poodle_specs::{
     AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, AppHeaderSpec,
-    ButtonSpec, ButtonVariant, ChoiceOption, CommandActionItem, CommandPaletteSpec, ControlDensity,
-    ControlSize, DialogSpec, EditableLabelActivation, EditableLabelSpec, IconButtonSpec,
-    IconProviderSpec, IconSize, IconSpec, MenuEntry, MenuSpec, MessageCenterItem,
-    MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection, Orientation,
-    PaddingScale, PopoverInitialFocus, PopoverSpec, RadioGroupSpec, SegmentedControlOption,
-    SegmentedControlSpec, SelectMode, SelectSpec, SplitOrientation, SplitViewSpec,
-    StatusIndicatorSpec, StatusTone, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone,
-    SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, TextElement, TextSize, TextSpec,
-    TextTone, TextWeight, Toast, ToastHostPlacement, ToastHostSpec, ToastStackSpec,
+    ButtonSpec, ButtonVariant, CallOutSpec, CalloutAnnounceMode, ChoiceOption, CommandActionItem,
+    CommandPaletteSpec, ControlDensity, ControlSize, DialogSpec, EditableLabelActivation,
+    EditableLabelSpec, IconButtonSpec, IconProviderSpec, IconSize, IconSpec, MenuEntry, MenuSpec,
+    MessageCenterItem, MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant,
+    ModelSelection, Orientation, PaddingScale, PopoverInitialFocus, PopoverSpec, RadioGroupSpec,
+    SegmentedControlOption, SegmentedControlSpec, SelectMode, SelectSpec, SplitOrientation,
+    SplitViewSpec, StatusIndicatorSpec, StatusTone, SurfaceBorder, SurfaceRole, SurfaceSpec,
+    SurfaceTone, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, TextElement,
+    TextInputSpec, TextSize, TextSpec, TextTone, TextWeight, Toast, ToastHostPlacement,
+    ToastHostSpec, ToastStackSpec,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -1820,6 +1821,164 @@ fn radio_group_a1_accessibility_divergence_is_recorded() {
             &mut driver,
             &loaded,
             &[("1", "focus_order"), ("2", "focus_order")],
+        );
+    });
+}
+
+// ── g16.119 restored A1 probes ────────────────────────────────────────────
+//
+// `callout`, `editable-label`, and `text-input` carry committed A1 receipts
+// and committed GPUI snapshots, but no probe survived the tranche merges
+// (`PAPERCUTS.md`, 2026-09-05). Without a probe the cohort cannot be
+// re-emitted at a new head, so the rows are restored here. Each one is
+// checked against its committed `<row>.gpui.json`, so a reconstruction that
+// does not reproduce the recorded projection fails rather than republishes.
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CalloutA1Props {
+    tone: String,
+    title: Option<String>,
+    message: Option<String>,
+    announce_mode: Option<String>,
+    dismissible: Option<bool>,
+    dismiss_label: Option<String>,
+}
+
+#[test]
+fn callout_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("callout");
+    let input: CalloutA1Props = props(&loaded);
+    let mut spec = CallOutSpec::new()
+        .with_tone(match input.tone.as_str() {
+            "neutral" => StatusTone::Neutral,
+            "info" => StatusTone::Info,
+            "success" => StatusTone::Success,
+            "warning" => StatusTone::Warning,
+            "danger" => StatusTone::Danger,
+            other => panic!("unmapped callout tone `{other}`"),
+        })
+        .dismissible(input.dismissible.unwrap_or(false));
+    spec.title = input.title.clone();
+    spec.content = input.message.clone();
+    spec.announce_mode = match input.announce_mode.as_deref() {
+        None | Some("none") => CalloutAnnounceMode::None,
+        Some("polite") => CalloutAnnounceMode::Polite,
+        Some("assertive") => CalloutAnnounceMode::Assertive,
+        Some(other) => panic!("unmapped callout announce mode `{other}`"),
+    };
+    if let Some(label) = &input.dismiss_label {
+        spec.dismiss_label = label.clone();
+    }
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let node = poodle_render::callout(
+            &spec,
+            &RenderContext::new(&theme_provider),
+            CalloutHandlers {
+                instance_id: Some("a1".into()),
+                ..Default::default()
+            },
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 140.0);
+        driver.wait_for_focus_handle(&poodle_render::callout_dismiss_focus_id(Some("a1")));
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production Callout through HeadlessDriver with the shared scenario props",
+                "replay the shared dismiss activation through GPUI test-platform dispatch",
+            ],
+            &["the live-region role, dismiss button name, and post-activation focus match the Svelte projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct EditableLabelA1Props {
+    value: String,
+    aria_label: Option<String>,
+    activation_mode: Option<String>,
+    show_edit_icon: Option<bool>,
+}
+
+#[test]
+fn editable_label_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("editable-label");
+    let input: EditableLabelA1Props = props(&loaded);
+    assert_eq!(
+        input.aria_label.as_deref(),
+        Some(input.value.as_str()),
+        "EditableLabel names its display control from the value; the scenario must agree"
+    );
+    let mut spec = EditableLabelSpec::new();
+    spec.value = input.value.clone();
+    spec.activation_mode = match input.activation_mode.as_deref() {
+        None | Some("enterOrSpace") => EditableLabelActivation::EnterOrSpace,
+        Some("doubleClick") => EditableLabelActivation::DoubleClick,
+        Some(other) => panic!("unmapped editable label activation `{other}`"),
+    };
+    spec.show_edit_icon = input.show_edit_icon.unwrap_or(false);
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let node = poodle_render::editable_label(&spec, &RenderContext::new(&theme_provider), None);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        // The scenario declares no action, but a receipt only counts when the
+        // mounted tree took real input. Hover is the one dispatch that does
+        // not move focus, which the committed projection records as unfocused.
+        driver.pointer_hover(gpui::Point::new(
+            gpui::Pixels::from(20.0),
+            gpui::Pixels::from(20.0),
+        ));
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production EditableLabel display control through HeadlessDriver",
+                "dispatch a pointer hover over the mounted control through the GPUI test platform",
+            ],
+            &["the display control projects a button role named from the value and is the single tab stop, matching Svelte"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct TextInputA1Props {
+    id: Option<String>,
+    default_value: Option<String>,
+    aria_label: Option<String>,
+    placeholder: Option<String>,
+}
+
+#[test]
+fn text_input_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("text-input");
+    let input: TextInputA1Props = props(&loaded);
+    let mut spec = TextInputSpec::default();
+    spec.id = input.id.clone();
+    spec.default_value = input.default_value.clone().unwrap_or_default();
+    spec.aria_label = input.aria_label.clone();
+    spec.placeholder = input.placeholder.clone();
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let node = poodle_render::text_input(&spec, &RenderContext::new(&theme_provider), None);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production TextInput through HeadlessDriver with the shared scenario props",
+                "replay the shared pointer activation of the field through GPUI test-platform dispatch",
+            ],
+            &["textbox role, accessible name, value text, and post-activation focus match the Svelte projection"],
         );
     });
 }

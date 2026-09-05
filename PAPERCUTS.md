@@ -12,10 +12,28 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 ## Open
 
 - 2026-09-05 — later A1 tranche merges dropped already-landed `nucleus_a11y.rs`
-  probes (NP-2 menu/segmented, NP-4 radio-group). Impact: those rows had
-  snapshots in the divergence store but no live test on `main`. Restore tests
-  with the owning repair card rather than re-recording silently. Surface:
+  probes. Confirmed lost: NP-2 menu/segmented, NP-4 radio-group (divergence
+  stores but no live test), and NP-4 callout/editable-label/text-input (a
+  committed A1 receipt and committed GPUI snapshot but no probe in any commit,
+  so the cohort could not be re-emitted at a new head). `g16.119` restored all
+  six. Impact: any lane that repins `resolution.source_commit` is blocked, or
+  is pushed toward hand-editing receipts it cannot re-run. Make the receipt
+  validator require a live probe for every committed A1 receipt. Surfaces:
+  `packages/gpui/preview/tests/headless/nucleus_a11y.rs`,
+  `scripts/nucleus-parity-receipts.ts`.
+
+- 2026-09-05 — `select_a1_accessibility_projection_matches_svelte` is still
+  `#[ignore]`d with a `g16.111` divergence reason, but `g16.117` repaired the
+  row and its A1 receipt is committed. Every cohort re-emit therefore needs a
+  second `-- --ignored` run or the Select receipt silently keeps the old pin.
+  Drop the attribute. Surface:
   `packages/gpui/preview/tests/headless/nucleus_a11y.rs`.
+
+- 2026-09-05 — `cargo test --manifest-path packages/render/Cargo.toml` is red
+  on `main` at `ef483d029`: `context::tests::the_provider_adds_no_wrapper_node_layout_or_accessibility_entry`
+  and `segmented_control::tests::icon_only_without_an_icon_keeps_the_visible_label`.
+  Neither touches `g16.119`'s changed lines. Surfaces:
+  `packages/render/src/context.rs`, `packages/render/src/segmented_control.rs`.
 
 - 2026-09-05 — `effigy doctor --verbose` hit a stale same-worktree
   `task:health` lock held by PID 55014 and exited before health validation.
