@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: awaiting-review
 owner: Poodle Northstar orchestrator
 created: 2026-09-05
 updated: 2026-09-05
@@ -79,8 +79,8 @@ Here is the state the worker is inheriting:
   `effigy regressions:native`, `effigy docs:check`,
   `git diff --check origin/main...HEAD`
 - **PR base/head:** `main` ← `worker/g16.106-button-leading-inset-edge-delta`
-- **PR URL:** pending
-- **Review state:** awaiting review after PR open
+- **PR URL:** https://github.com/inflatable-cookie/poodle/pull/211
+- **Review state:** awaiting independent exact-head review
 - **Merge path:** orchestrator after accepted review of the current head and
   passing required checks
 

@@ -11,6 +11,7 @@ Governing refs: `packages/render/src/button.rs`,
 Branch: `worker/g16.106-button-leading-inset-edge-delta`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-106-button-leading-inset-edge-delta`
 Planning base: `9481cc95dbd65c1dff8c73a6b74b9504cf19b077` (`origin/main`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/211
 
 ## Outcome
 
