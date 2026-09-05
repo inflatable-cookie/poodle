@@ -587,7 +587,7 @@ pub(crate) fn diff_a1_nodes(gpui: &[Value], svelte: &[Value]) -> Vec<Value> {
                 for key in keys {
                     let left_value = left.get(key).cloned().unwrap_or(Value::Null);
                     let right_value = right.get(key).cloned().unwrap_or(Value::Null);
-                    if left_value != right_value {
+                    if !a1_values_equal(&left_value, &right_value) {
                         diff.push(json!({
                             "index": index,
                             "field": key,
@@ -606,6 +606,16 @@ pub(crate) fn diff_a1_nodes(gpui: &[Value], svelte: &[Value]) -> Vec<Value> {
         }
     }
     diff
+}
+
+/// JSON has one numeric value space for the A1 contract. Keep Rust's typed
+/// integer/float representation from reporting a semantic mismatch such as
+/// `0` versus `0.0`.
+fn a1_values_equal(left: &Value, right: &Value) -> bool {
+    match (left.as_f64(), right.as_f64()) {
+        (Some(left), Some(right)) => left == right,
+        _ => left == right,
+    }
 }
 
 /// Compare the fresh GPUI snapshot with the committed one. A missing

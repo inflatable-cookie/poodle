@@ -19,7 +19,9 @@
 //! min-width 0 for truncation), actions/utility hold intrinsic width
 //! (shrink 0), utility justifies to the end.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
+use poodle_node::{
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+};
 use poodle_specs::AppHeaderSpec;
 
 use crate::color::with_alpha;
@@ -206,7 +208,9 @@ pub fn app_header(
         }
     }
 
-    // Contract: `aria-label` falls back to `title`.
+    // Contract: the root is the shell's banner landmark and its
+    // `aria-label` falls back to `title`.
+    header.a11y.role = Some(NodeRole::Banner);
     if let Some(label) = spec.aria_label.as_deref().or(spec.title.as_deref()) {
         if !label.is_empty() {
             header.a11y.label = Some(label.to_string());
@@ -485,6 +489,7 @@ mod tests {
             None,
             None,
         );
+        assert_eq!(title_only.a11y.role, Some(NodeRole::Banner));
         assert_eq!(title_only.a11y.label.as_deref(), Some("My DAW"));
 
         // Explicit aria-label overrides title

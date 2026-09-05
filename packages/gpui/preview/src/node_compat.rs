@@ -2191,7 +2191,6 @@ impl AgentChatInput {
             text_color: None,
             opacity: None,
         });
-        action.style.focus_ring = None;
         action
             .roles
             .insert("state".to_owned(), spec.action_state().to_owned());

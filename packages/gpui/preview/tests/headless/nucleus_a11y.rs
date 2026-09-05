@@ -13,7 +13,7 @@ use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, TranscriptRole};
 use poodle_node::Node;
 use poodle_render::{
-    AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
+    AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
     CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers,
     MessageCenterHandlers, PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers,
     TabsHandlers, ToastStackHandlers,
@@ -37,6 +37,7 @@ use serde_json::Value;
 use super::headless_driver::HeadlessDriver;
 use super::nucleus_receipts::{self, A1Action, A1Target, LoadedA1Scenario};
 use super::{run_headless, theme};
+use crate::node_compat::{AgentChatInput as CompatAgentChatInput, IntoCompatNode};
 
 fn gpui_key(key: &str) -> &str {
     match key {
@@ -559,12 +560,20 @@ fn np1_split_view_a1_accessibility_projection_matches_svelte() {
         let mounted = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 180.0);
         driver.dispatch_probe_key("tab");
-        record_shell_divergence(&mut driver, &loaded, &[("0", "value"), ("1", "name")]);
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production SplitView with its ResizeHandle and collapse toggle",
+                "dispatch the shared probe key through GPUI's real input path",
+            ],
+            &["separator value, orientation, toggle name, and focus order match Svelte"],
+        );
     });
 }
 
 #[test]
-fn np1_app_header_a1_accessibility_divergence_is_recorded() {
+fn np1_app_header_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("app-header");
     let input: AppHeaderProps = props(&loaded);
     run_headless(|cx| {
@@ -584,7 +593,12 @@ fn np1_app_header_a1_accessibility_divergence_is_recorded() {
         let mounted = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
         driver.dispatch_probe_key("tab");
-        record_shell_divergence(&mut driver, &loaded, &[("0", "role")]);
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &["mount the production AppHeader and dispatch the shared probe key"],
+            &["banner role and accessible name match the Svelte projection"],
+        );
     });
 }
 
@@ -920,15 +934,9 @@ fn agent_chat_input_a1_accessibility_projection_matches_svelte() {
         .with_aria_label(prop_string(&scenario_props, "ariaLabel"))
         .with_size(prop_size(&scenario_props))
         .with_density(prop_density(&scenario_props));
-    let node = poodle_render::agent_chat_input(
-        &spec,
-        &RenderContext::new(&provider),
-        Vec::new(),
-        Vec::new(),
-        Vec::new(),
-        Vec::new(),
-        AgentChatInputHandlers::default(),
-    );
+    let node = CompatAgentChatInput::from_spec(spec, &provider)
+        .with_id("a1")
+        .into_compat_node();
     prove_static_row("agent-chat-input", node, 640.0, 240.0);
 }
 

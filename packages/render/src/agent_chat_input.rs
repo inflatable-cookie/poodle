@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutSizing,
-    MainAxisAlignment, Node, NodeKind, StylePatch,
+    MainAxisAlignment, Node, NodeKind, NodeRole, StylePatch,
 };
 use poodle_specs::{AgentChatInputSpec, AgentChatStatus, MeterShape, MeterSpec};
 
@@ -248,6 +248,11 @@ pub fn agent_chat_input(
         s.text_size = Some(editor_font);
         s.font_family = Some(FontFamily::Sans);
     }
+    editor.a11y.role = Some(NodeRole::TextInput);
+    editor.a11y.label = Some(spec.aria_label.clone());
+    if !is_empty {
+        editor.a11y.value_text = Some(spec.value.clone());
+    }
     field = field.child(editor);
 
     // ── Toolbar ───────────────────────────────────────────────────────────────
@@ -323,6 +328,8 @@ pub fn agent_chat_input(
     action
         .roles
         .insert("state".to_owned(), spec.action_state().to_owned());
+    action.a11y.role = Some(NodeRole::Button);
+    action.a11y.label = Some(spec.action_aria_label().to_owned());
     action.style.hover = Some(StylePatch {
         background: Some(mix_srgb(action_fill, WHITE, 0.88)),
         border_color: None,
@@ -416,7 +423,7 @@ pub fn agent_chat_input(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_node::NodeKind;
+    use poodle_node::{NodeKind, NodeRole};
     use poodle_specs::{AgentChatAttachment, ControlDensity, ControlSize};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
@@ -569,6 +576,9 @@ mod tests {
             &editor.kind,
             NodeKind::Text { content } if content == "Draft"
         ));
+        assert_eq!(editor.a11y.role, Some(NodeRole::TextInput));
+        assert_eq!(editor.a11y.label.as_deref(), Some("Message"));
+        assert_eq!(editor.a11y.value_text.as_deref(), Some("Draft"));
         assert_eq!(editor.style.font_family, Some(FontFamily::Sans));
         assert_eq!(
             editor.style.text_size,
@@ -591,6 +601,8 @@ mod tests {
             Some(ctx.theme().resolve_color(spec.divider_token()))
         );
         let action = toolbar.children[1].children.last().expect("action");
+        assert_eq!(action.a11y.role, Some(NodeRole::Button));
+        assert_eq!(action.a11y.label.as_deref(), Some("Send"));
         assert_eq!(action.roles.get("state").map(String::as_str), Some("submit"));
         assert_eq!(
             action.style.descriptor.background,
