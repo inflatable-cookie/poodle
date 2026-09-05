@@ -28,7 +28,7 @@ authoritative.
 - **Base:** `d8aea4aea639642f834c95261e63250b27f4dd60` (promoted, `origin/main`)
 - **Worker branch:** `worker/g16.111-nucleus-a1-accessibility-receipt-foundation`
 - **Head:** the pushed tip of the worker branch at PR open; the receipt
-  source pin is `ca7b76c4049eaa25cf0fb98e2287acb7a4a27c66` (manifest
+  source pin is `7c2ab2030835fbd268bee04c9d44fbf449ffe404` (manifest
   `resolution.source_commit`), and every later commit on the branch touches
   docs and evidence only
 - **Allowed runway:** g16.111 only; g16.112–116 stay held

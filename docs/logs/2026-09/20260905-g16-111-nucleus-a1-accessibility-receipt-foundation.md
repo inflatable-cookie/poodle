@@ -5,7 +5,7 @@ Date: 2026-09-05
 Card: `docs/roadmaps/g16/111-nucleus-a1-accessibility-receipt-foundation.md`
 Dispatch: `docs/roadmaps/dispatch.md` revision 7
 Base: `d8aea4aea639642f834c95261e63250b27f4dd60` (`origin/main`)
-Receipt source pin: `ca7b76c4049eaa25cf0fb98e2287acb7a4a27c66`
+Receipt source pin: `7c2ab2030835fbd268bee04c9d44fbf449ffe404`
 Worker branch: `worker/g16.111-nucleus-a1-accessibility-receipt-foundation`
 
 ## Outcome
@@ -113,7 +113,7 @@ is committed because the pair does not agree.
 ## Validation
 
 - `effigy regressions:native`: pass, 205 passed, 1 ignored (Select A1);
-  emitted 29 M1 + 2 A1 receipts at `ca7b76c4…`.
+  emitted 29 M1 + 2 A1 receipts at `7c2ab203…`.
 - `effigy test:nucleus-a11y`: pass, 4 tests (three rows plus the roster).
 - `bun test scripts/nucleus-parity-receipts.test.ts scripts/parity-evidence-ledger.test.ts`: pass, 17 tests.
 - `effigy check:parity-evidence-ledger`: pass, 176 rows.
@@ -137,7 +137,9 @@ is committed because the pair does not agree.
   list and are the minimum wiring for the new project.
 - The manifest `resolution.source_commit` was repinned and all 29 M1 receipts
   re-emitted because the validator's source-match covers the whole preview
-  crate (recorded in `PAPERCUTS.md`).
+  crate (already recorded in `PAPERCUTS.md` by g16.107). After rebasing onto
+  `origin/main` (g16.106 had repinned to `93c4ef19…`) the whole cohort was
+  re-emitted once more at the rebased head.
 
 ## Closeout
 
