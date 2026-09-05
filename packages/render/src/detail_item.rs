@@ -3,15 +3,32 @@
 //! Contract: `docs/contracts/components/detail-item.md`
 //! Ported from: `packages/jetstream/components/src/detail_item.rs`.
 
+use std::sync::Arc;
+
 use poodle_node::{CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{
-    DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec, TextSpec, TextWeight,
+    DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec, IconSpec, PopoverSpec,
+    TextSpec, TextWeight,
 };
 
 use crate::color::mix_srgb;
 use crate::context::RenderContext;
+use crate::icon::icon;
+use crate::popover::{popover, PopoverHandlers, POPOVER_TRIGGER_ID};
 use crate::presentation::rem_to_px;
 use crate::text;
+
+/// Accessible name Svelte gives the description trigger and its surface.
+const INFO_LABEL: &str = "More information";
+
+fn find_id_mut<'a>(node: &'a mut Node, id: &str) -> Option<&'a mut Node> {
+    if node.id.as_deref() == Some(id) {
+        return Some(node);
+    }
+    node.children
+        .iter_mut()
+        .find_map(|child| find_id_mut(child, id))
+}
 
 fn part(node: &mut Node, name: &str) {
     node.roles.insert("part".to_owned(), name.to_owned());
@@ -54,6 +71,19 @@ pub fn detail_item_with_slots(
     ctx: &RenderContext<'_>,
     value_content: Option<Node>,
     action: Option<Node>,
+) -> Node {
+    detail_item_with_slots_state(spec, ctx, value_content, action, false, None)
+}
+
+/// Host-owned description popover open state. Svelte keeps that overlay
+/// inside DetailItem; the native composition matches it.
+pub fn detail_item_with_slots_state(
+    spec: &DetailItemSpec,
+    ctx: &RenderContext<'_>,
+    value_content: Option<Node>,
+    action: Option<Node>,
+    description_open: bool,
+    on_description_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     let density = ctx.resolve_density(spec.density);
     let theme = ctx.theme();
@@ -107,16 +137,44 @@ pub fn detail_item_with_slots(
     );
     label_block = label_block.child(l);
     if let Some(ref desc) = spec.description {
-        let d = detail_text(
-            desc,
-            "supporting",
-            desc_color,
-            desc_font,
-            TextWeight::Normal,
-            1.5,
+        // Svelte wraps a role-less icon span in the Popover trigger, so the
+        // composition projects exactly one button. The trigger name comes from
+        // the icon's own label, which the native trigger cannot read as
+        // visible text, so it is set on the wrapper here.
+        let mut glyph = icon(&IconSpec::new("info"), ctx);
+        glyph.a11y.role = None;
+        glyph.a11y.label = None;
+        let mut trigger = Node::container();
+        part(&mut trigger, "info-trigger");
+        trigger = trigger.child(glyph);
+        let popover_spec = PopoverSpec::new()
+            .with_open(description_open)
+            .with_aria_label(INFO_LABEL);
+        let handlers = PopoverHandlers {
+            instance_id: Some("detail-item-info".to_owned()),
+            on_activate: on_description_toggle,
+            ..PopoverHandlers::default()
+        };
+        let mut info = popover(
+            &popover_spec,
             ctx,
+            &handlers,
+            Some(trigger),
+            Some(detail_text(
+                desc,
+                "supporting",
+                desc_color,
+                desc_font,
+                TextWeight::Normal,
+                1.5,
+                ctx,
+            )),
         );
-        label_block = label_block.child(d);
+        part(&mut info, "info");
+        if let Some(node) = find_id_mut(&mut info, POPOVER_TRIGGER_ID) {
+            node.a11y.label = Some(INFO_LABEL.to_string());
+        }
+        label_block = label_block.child(info);
     }
     if !is_stacked {
         label_block.style.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(11.25));

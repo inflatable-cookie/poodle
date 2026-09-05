@@ -298,6 +298,7 @@ pub fn action_discovery_panel(
         // Structural list of action items. The panel root owns listbox
         // semantics; each action is one option within it.
         let mut list = Node::container();
+        list.a11y.role = Some(NodeRole::List);
         list.roles.insert("part".to_owned(), "list".to_owned());
         list.style.descriptor.layout.direction = LayoutDirection::Column;
         list.style.descriptor.layout.spacing.gap = list_gap;
@@ -331,7 +332,12 @@ pub fn action_discovery_panel(
             let mut row = Node::container();
             // Each action is an option of the panel listbox.
             row.a11y.role = Some(NodeRole::ListBoxOption);
-            row.a11y.label = Some(action.title.clone());
+            row.a11y.label = Some(match action.shortcut.as_deref() {
+                Some(shortcut) if !shortcut.is_empty() => {
+                    format!("{} {}", action.title, shortcut)
+                }
+                _ => action.title.clone(),
+            });
             row.a11y.selected = Some(is_active);
             row.roles
                 .insert("equivalent".to_owned(), "list-card".to_owned());

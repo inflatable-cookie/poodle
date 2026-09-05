@@ -4,18 +4,11 @@
   "scenario_path": "test/nucleus-a11y/scenarios/confirm-action.json",
   "scenario_sha256": "608bb02e73de546d3fcf12218d19b4fb217587a504860b82bf273a9dd3731e11",
   "attributes": [
-    {"index": 0, "field": "role", "gpui": "alertdialog", "svelte": "button"},
-    {"index": 0, "field": "name", "gpui": null, "svelte": "Delete"},
-    {"index": 0, "field": "focus_order", "gpui": null, "svelte": 0},
-    {"index": 1, "field": "name", "gpui": "Keep workspace", "svelte": "Dismiss dialog backdrop"},
-    {"index": 1, "field": "focus_order", "gpui": 0, "svelte": 1},
-    {"index": 2, "field": "role", "gpui": "button", "svelte": "alertdialog"},
-    {"index": 2, "field": "name", "gpui": "Delete workspace", "svelte": "Delete workspace?"},
-    {"index": 2, "field": "focus_order", "gpui": 1, "svelte": null},
-    {"index": 2, "field": "focused", "gpui": false, "svelte": true},
-    {"index": 2, "field": "relationships", "gpui": {"controls": [], "labelled_by": [], "described_by": []}, "svelte": {"controls": [], "labelled_by": [-1], "described_by": []}},
-    {"index": 3, "field": "role", "gpui": null, "svelte": "button"},
-    {"index": 4, "field": "role", "gpui": null, "svelte": "button"},
-    {"index": 5, "field": "role", "gpui": null, "svelte": "button"}
+    {
+      "index": 2,
+      "field": "focused",
+      "gpui": false,
+      "svelte": true
+    }
   ]
 }

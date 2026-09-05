@@ -1,6 +1,6 @@
 # g16.118 — A1 Overlay Structure Projection
 
-Status: ready
+Status: implementation complete — pending independent exact-head review
 Type: native accessibility repair — `poodle-node` vocabulary, `poodle-render`
 composition, backend/Jetstream role mapping; A1 receipts for eight rows
 Opened: 2026-09-05
@@ -86,3 +86,65 @@ stores, manifest `resolution`, ledger, execution log, `PAPERCUTS.md` (append).
 Stop when a row needs a behaviour change (focus, dismissal) rather than
 structure — that belongs to `g16.119` — or when the contract and Svelte
 disagree and the ruling is not obvious. Escalation owner: Chatterbox.
+
+## Rulings And Outcome (2026-09-05)
+
+Both new roles landed: `NodeRole::Heading` and `NodeRole::Banner`, mapped in
+the GPUI backend record path (`packages/gpui/node-backend/src/a11y.rs`, total
+match, paint is a no-op) and in the Jetstream AccessKit projection.
+
+Rulings taken against the executed snapshots, which outrank the card's prose
+table where they disagree:
+
+- **Dialog gets no heading node.** `dialog.svelte.json` projects backdrop
+  button, `dialog`, close button — the `.dialog__title` element carries no
+  role, and the surface's `aria-labelledby` resolves to `-1` there too. The
+  native surface now matches exactly: the title keeps its id, the surface
+  carries both `labelled_by` and the computed name. ConfirmAction inherits the
+  same shape, and its Svelte snapshot has no heading either.
+- **Heading is used where Svelte projects one**: the CommandPalette `<h3>` and
+  the MessageCenter header `<h2>`. `Banner` is used for the MessageCenter
+  header landmark.
+- **A `-1` relationship target is a defect only when Svelte resolves it.**
+  Where the reference itself projects `-1` (Dialog and ConfirmAction
+  `labelled_by`, CommandPalette `described_by`), matching it is the parity
+  result.
+- **DetailItem's description moves inside its info Popover**, as
+  `DetailItem.svelte` has it. The description text no longer paints inline;
+  the trigger does. Mounted geometry assertions were moved to the new
+  `info` / `info-trigger` parts.
+- **CommandPalette does not compose Dialog on the web.** Its overlay is an
+  `aria-hidden` div, so the shared native backdrop's dismiss node is demoted
+  in `command_palette.rs` rather than projected.
+- **ConfirmAction keeps no synthesised default trigger while open.** Svelte
+  renders one, but the native backdrop is absolute inside its wrapper rather
+  than the window, so adding a sibling trigger shrinks the overlay to the
+  trigger row (`confirm_action_composition_…` proves it). Recorded as an
+  out-of-scope divergence; a caller-supplied trigger is still preserved.
+
+Receipts: **DetailItem** and **ToastHost** are empty-diff and hold A1
+receipts; their divergence stores are deleted. Six rows keep a refreshed
+store — Dialog, Popover, ConfirmAction, MessageCenter and ModelPicker are
+structurally aligned and diverge only on initial overlay focus, which the card
+routes to `g16.119`; CommandPalette is blocked on a third role
+(`searchbox`), which the card's fixed boundary forbids. Details and exact
+attributes: `nucleus-parity-receipts/a1-divergences/README.md`.
+
+Two `poodle-render` unit tests fail identically on `origin/main`
+(`context::tests::the_provider_adds_no_wrapper_node_layout_or_accessibility_entry`,
+`segmented_control::tests::icon_only_without_an_icon_keeps_the_visible_label`);
+both assert a button's `a11y.label` is `None`. Recorded in `PAPERCUTS.md`, not
+repaired here.
+
+## Escalations For Chatterbox
+
+1. `g16.119` owns focus for Menu, AgentQuestion, AgentTranscript, RadioGroup
+   and SegmentedControl. Initial overlay focus for Dialog, Popover,
+   ConfirmAction, MessageCenter and ModelPicker has no lane. Five rows cannot
+   reach an empty diff until one exists.
+2. CommandPalette needs `NodeRole::SearchBox`. The contract already names
+   `TextInput type="search"`; the role is the only missing piece, plus the
+   TextInput placeholder-as-`value_text` projection and the
+   `ActionDiscoveryPanel` inner card button, both outside this card's owned
+   paths.
+

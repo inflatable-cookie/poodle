@@ -1,69 +1,5 @@
 [
   {
-    "index": 1,
-    "field": "focus_order",
-    "gpui": 0,
-    "svelte": null
-  },
-  {
-    "index": 1,
-    "field": "name",
-    "gpui": "Close command palette",
-    "svelte": "Workspace commands"
-  },
-  {
-    "index": 1,
-    "field": "role",
-    "gpui": "button",
-    "svelte": "heading"
-  },
-  {
-    "index": 2,
-    "field": "focus_order",
-    "gpui": 1,
-    "svelte": 0
-  },
-  {
-    "index": 2,
-    "field": "name",
-    "gpui": "Search commands",
-    "svelte": "Close command palette"
-  },
-  {
-    "index": 2,
-    "field": "relationships",
-    "gpui": {
-      "controls": [],
-      "labelled_by": [],
-      "described_by": [
-        3
-      ]
-    },
-    "svelte": {
-      "controls": [],
-      "labelled_by": [],
-      "described_by": []
-    }
-  },
-  {
-    "index": 2,
-    "field": "role",
-    "gpui": "textbox",
-    "svelte": "button"
-  },
-  {
-    "index": 2,
-    "field": "value_text",
-    "gpui": "Search commands, panels, and actions",
-    "svelte": null
-  },
-  {
-    "index": 3,
-    "field": "focus_order",
-    "gpui": null,
-    "svelte": 1
-  },
-  {
     "index": 3,
     "field": "focused",
     "gpui": false,
@@ -71,90 +7,62 @@
   },
   {
     "index": 3,
-    "field": "name",
-    "gpui": null,
-    "svelte": "Search commands"
-  },
-  {
-    "index": 3,
-    "field": "relationships",
-    "gpui": {
-      "controls": [],
-      "labelled_by": [],
-      "described_by": []
-    },
-    "svelte": {
-      "controls": [],
-      "labelled_by": [],
-      "described_by": [
-        4
-      ]
-    }
-  },
-  {
-    "index": 3,
     "field": "role",
-    "gpui": "status",
+    "gpui": "textbox",
     "svelte": "searchbox"
   },
   {
-    "index": 4,
-    "field": "name",
-    "gpui": "Command results",
+    "index": 3,
+    "field": "value_text",
+    "gpui": "Search commands, panels, and actions",
     "svelte": null
   },
   {
-    "index": 4,
-    "field": "role",
-    "gpui": "listbox",
-    "svelte": "status"
+    "index": 8,
+    "field": "focus_order",
+    "gpui": null,
+    "svelte": 2
   },
   {
-    "index": 5,
+    "index": 8,
     "field": "name",
-    "gpui": "Open File",
-    "svelte": "Command results"
-  },
-  {
-    "index": 5,
-    "field": "role",
-    "gpui": "option",
-    "svelte": "listbox"
-  },
-  {
-    "index": 6,
-    "field": "name",
-    "gpui": "Save",
-    "svelte": null
-  },
-  {
-    "index": 6,
-    "field": "role",
-    "gpui": "option",
-    "svelte": "list"
-  },
-  {
-    "index": 7,
-    "field": "name",
-    "gpui": "Toggle terminal",
-    "svelte": "Open File Cmd+O"
+    "gpui": "Save Cmd+S",
+    "svelte": "Open File"
   },
   {
     "index": 8,
     "field": "role",
-    "gpui": null,
+    "gpui": "option",
     "svelte": "button"
   },
   {
     "index": 9,
-    "field": "role",
+    "field": "name",
     "gpui": null,
+    "svelte": "Save Cmd+S"
+  },
+  {
+    "index": 9,
+    "field": "role",
+    "gpui": "list",
     "svelte": "option"
   },
   {
     "index": 10,
-    "field": "role",
+    "field": "focus_order",
     "gpui": null,
+    "svelte": 3
+  },
+  {
+    "index": 10,
+    "field": "name",
+    "gpui": "Toggle terminal Cmd+`",
+    "svelte": "Save"
+  },
+  {
+    "index": 10,
+    "field": "role",
+    "gpui": "option",
     "svelte": "button"
   },
   {

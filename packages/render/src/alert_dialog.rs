@@ -8,7 +8,7 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, DialogKind,
     DialogSpec, DialogWidth,
@@ -150,16 +150,11 @@ pub fn alert_dialog_with_content(
         dialog_spec = dialog_spec.with_aria_label(aria.clone());
     }
 
-    let mut root = dialog(
+    dialog(
         &dialog_spec,
         ctx,
         children,
         Some(actions),
         handlers.cancel,
-    );
-    // An alert dialog interrupts; assistive technology must know the
-    // difference from a plain dialog. Overridden on the way out, as the
-    // shared surface cannot know which it is building.
-    root.a11y.role = Some(NodeRole::AlertDialog);
-    root
+    )
 }

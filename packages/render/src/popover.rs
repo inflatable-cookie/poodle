@@ -81,6 +81,7 @@ pub fn popover_surface(spec: &PopoverSpec, ctx: &RenderContext<'_>, content: Opt
 
     let mut el = Node::container();
     el.id = Some(POPOVER_SURFACE_ID.to_owned());
+    el.runtime_id = Some(POPOVER_SURFACE_ID.to_owned());
     // Contract: the popover surface is a `dialog`.
     el.a11y.role = Some(NodeRole::Dialog);
     {
@@ -192,7 +193,8 @@ pub fn popover(
     // ── Surface (conditional) ──────────────────────────────────────────────
     let surface = open.then(|| {
         let mut node = popover_surface(spec, ctx, content);
-        node.runtime_id = instance.as_ref().map(|scope| format!("{scope}:{POPOVER_SURFACE_ID}"));
+        node.id = Some(surface_id.clone());
+        node.runtime_id = Some(surface_id.clone());
         node.interaction.focusable = spec.initial_focus == poodle_specs::PopoverInitialFocus::Content;
         node.a11y.tab_index = Some(if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content { 0 } else { -1 });
         if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content {
@@ -435,7 +437,7 @@ mod tests {
         );
         assert_eq!(positioned.children.len(), 1);
         let surface = &positioned.children[0];
-        assert_eq!(surface.id.as_deref(), Some(POPOVER_SURFACE_ID));
+        assert_eq!(surface.id.as_deref(), Some("alpha:popover-surface"));
         assert_eq!(surface.runtime_id.as_deref(), Some("alpha:popover-surface"));
         assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
         assert_eq!(surface.a11y.label.as_deref(), Some("Outer settings"));

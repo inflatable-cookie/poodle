@@ -215,10 +215,14 @@ pub fn command_palette_with_handlers(
         s.min_width = Some(0.0);
     }
     if let Some(ref title) = spec.title {
-        let mut t = Node::text(title);
-        t.runtime_id = Some(scoped_id(instance_id, "title", || {
+        let title_id = scoped_id(instance_id, "title", || {
             "poodle-cmd-palette-title".to_string()
-        }));
+        });
+        let mut t = Node::text(title);
+        t.id = Some(title_id.clone());
+        t.runtime_id = Some(title_id);
+        t.a11y.role = Some(NodeRole::Heading);
+        t.a11y.label = Some(title.clone());
         t.style.text_size = Some(heading_size);
         t.style.text_weight = Some(600);
         t.style.descriptor.text_color = Some(text_primary);
@@ -468,14 +472,22 @@ pub fn command_palette_with_handlers(
         .insert("dependency".to_owned(), "dialog".to_owned());
     root.roles
         .insert("component".to_owned(), "command-palette".to_owned());
-    if spec.description.is_some() {
-        root.a11y.described_by = Some(scoped_id(instance_id, "description", || {
-            "poodle-cmd-palette-description".to_string()
-        }));
+    // CommandPalette does not compose Dialog on the web: its overlay is an
+    // `aria-hidden` div, not the Dialog backdrop button. The shared native
+    // surface still builds one, so it is demoted here rather than projected.
+    if let Some(backdrop) = root
+        .children
+        .iter_mut()
+        .find(|child| child.id.as_deref() == Some("poodle-dialog-backdrop-dismiss"))
+    {
+        backdrop.a11y.role = None;
+        backdrop.a11y.label = None;
+        backdrop.interaction.focusable = false;
     }
     let panel = root
         .children
-        .first_mut()
+        .iter_mut()
+        .find(|child| child.id.as_deref() == Some("poodle-dialog-surface"))
         .expect("Dialog renderer always provides a surface panel");
     let dialog_id = scoped_id(instance_id, "dialog", || {
         "poodle-cmd-palette-dialog".to_string()
@@ -491,6 +503,11 @@ pub fn command_palette_with_handlers(
     panel.interaction.dismiss_layer = Some(scoped_id(instance_id, "layer", || {
         "poodle-cmd-palette-layer".to_string()
     }));
+    if spec.description.is_some() {
+        panel.a11y.described_by = Some(scoped_id(instance_id, "description", || {
+            "poodle-cmd-palette-description".to_string()
+        }));
+    }
     root
 }
 

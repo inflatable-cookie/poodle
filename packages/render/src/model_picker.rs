@@ -155,6 +155,8 @@ pub fn model_picker(
     trigger.id = select_trigger.id;
     trigger.runtime_id = select_trigger.runtime_id;
     trigger.a11y = select_trigger.a11y;
+    trigger.a11y.expanded = Some(is_open);
+    trigger.a11y.controls = is_open.then(|| format!("model-picker-{instance_id}-dialog"));
     trigger.interaction = select_trigger.interaction;
     {
         let s = &mut trigger.style;
@@ -289,6 +291,16 @@ pub fn model_picker(
             if let Some(row) = find_runtime_id_mut(&mut models, &row_id) {
                 let is_selected = model.value == spec.value.model;
                 row.a11y.role = Some(NodeRole::RadioButton);
+                row.a11y.label = Some(if spec.show_model_descriptions {
+                    match model.description.as_deref() {
+                        Some(description) if !description.is_empty() => {
+                            format!("{} {}", model.label, description)
+                        }
+                        _ => model.label.clone(),
+                    }
+                } else {
+                    model.label.clone()
+                });
                 row.a11y.selected = Some(is_selected);
                 row.a11y.toggled = Some(if is_selected {
                     NodeToggled::True

@@ -1,0 +1,14 @@
+{
+  "component": "Popover",
+  "scenario_id": "nucleus.navigation.popover",
+  "scenario_path": "test/nucleus-a11y/scenarios/popover.json",
+  "scenario_sha256": "c18aadfe9fc044f1dbf7748fe5d8776243af72ad2d5548fa5add18279cc5a918",
+  "attributes": [
+    {
+      "index": 2,
+      "field": "focused",
+      "gpui": false,
+      "svelte": true
+    }
+  ]
+}

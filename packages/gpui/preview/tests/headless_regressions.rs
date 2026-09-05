@@ -7607,7 +7607,7 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
             }
         );
         let surface = &positioned.children[0];
-        assert_eq!(surface.id.as_deref(), Some("popover-surface"));
+        assert_eq!(surface.id.as_deref(), Some("proof:popover-surface"));
         assert_eq!(surface.runtime_id.as_deref(), Some("proof:popover-surface"));
         assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
         assert_eq!(surface.a11y.label.as_deref(), Some("Proof settings"));
@@ -30191,10 +30191,10 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
     });
 }
 
-/// g16.047. Native danger projects Alert; success stays ListItem. Drawing the
-/// node tree does not claim GPUI assistive-technology parity.
+/// g16.118. Every toast row is a ListItem, matching the Svelte `<li>` per
+/// toast. Drawing the node tree does not claim GPUI assistive-technology parity.
 #[test]
-fn mounted_toast_danger_uses_alert_role() {
+fn mounted_toast_rows_are_list_items_for_every_tone() {
     run_headless(|cx| {
         let node = toast_stack(
             &ToastStackSpec::new().with_toasts(vec![
@@ -30216,7 +30216,7 @@ fn mounted_toast_danger_uses_alert_role() {
                 .expect("danger toast")
                 .a11y
                 .role,
-            Some(NodeRole::Alert)
+            Some(NodeRole::ListItem)
         );
 
         let tree = Arc::new(Mutex::new(node));
@@ -30240,7 +30240,7 @@ fn mounted_toast_danger_uses_alert_role() {
                 .expect("mounted danger")
                 .a11y
                 .role,
-            Some(NodeRole::Alert)
+            Some(NodeRole::ListItem)
         );
     });
 }
@@ -31879,7 +31879,11 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
 
         // 1d. Root Backdrop
         assert_eq!(initial_node.id.as_deref(), Some("poodle-dialog-backdrop"));
-        assert_eq!(initial_node.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(initial_node.a11y.role, None);
+        let surface = initial_node
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
         assert!(initial_node.style.overlay);
         assert_eq!(
             initial_node.position,
@@ -31906,18 +31910,20 @@ fn dialog_dismissal_axes_and_controlled_rebuild_reach_the_mounted_backend() {
             initial_node.style.descriptor.layout.alignment.main,
             MainAxisAlignment::Center
         );
-        assert_eq!(initial_node.children.len(), 1);
+        assert_eq!(initial_node.children.len(), 2);
         assert!(
             initial_node.interaction.dismiss_layer.is_none(),
             "Backdrop must NOT register dismiss layer; panel surface is the containment boundary"
         );
+        let backdrop = &initial_node.children[0];
+        assert_eq!(backdrop.a11y.role, Some(NodeRole::Button));
         assert!(
-            initial_node.interaction.on_activate.is_some(),
+            backdrop.interaction.on_activate.is_some(),
             "Backdrop must carry on_activate when dismiss_on_backdrop is true"
         );
 
         // 1e. Surface Panel
-        let panel = &initial_node.children[0];
+        let panel = &initial_node.children[1];
         assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
         assert_eq!(
             panel.interaction.dismiss_layer.as_deref(),
@@ -32489,7 +32495,11 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         "Deleting\u{2026}",
         poodle_render::ConfirmActionHandlers::default(),
     );
-    assert_eq!(open.a11y.role, Some(NodeRole::AlertDialog));
+    assert_eq!(
+        open.find(&|node| node.a11y.role == Some(NodeRole::AlertDialog))
+            .map(|node| node.a11y.role),
+        Some(Some(NodeRole::AlertDialog))
+    );
     assert!(open.has_text("Delete workspace?"));
     assert!(open.has_text("This action cannot be undone."));
     assert!(open.has_text("Workspace: alpha"));
@@ -32989,9 +32999,9 @@ fn detail_item_scoped_node_matches_contract_defaults_structure_and_tokens() {
         child_ids(&default_stacked.children[0]),
         [
             "detail-item:counterexample:label",
-            "detail-item:counterexample:supporting",
+            "detail-item:counterexample:info",
         ],
-        "label block owns label then supporting text"
+        "label block owns label then the description info Popover"
     );
     assert_eq!(
         child_ids(&default_stacked.children[1]),
@@ -33168,13 +33178,17 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
         assert!(bounds_contain(mount, root), "{scope} root escapes mount");
         assert!(bounds_contain(root, label_block), "{scope} label block escapes root");
         assert!(bounds_contain(label_block, label), "{scope} label escapes label block");
+        // The description sits inside the closed info Popover, as it does on
+        // the web, so only the trigger paints; the text has no bounds.
+        assert!(poodle_gpui_node_backend::bounds_for(&part_id(scope, "supporting")).is_none());
         if supporting_present {
-            let supporting = poodle_gpui_node_backend::bounds_for(&part_id(scope, "supporting"))
-                .unwrap_or_else(|| panic!("mounted DetailItem {scope} supporting"));
-            assert!(bounds_contain(label_block, supporting), "{scope} supporting text escapes label block");
-            assert!(label.bottom() <= supporting.top(), "{scope} label must precede supporting text");
+            let info = poodle_gpui_node_backend::bounds_for(&part_id(scope, "info"))
+                .unwrap_or_else(|| panic!("mounted DetailItem {scope} info popover"));
+            assert!(bounds_contain(label_block, info), "{scope} info popover escapes label block");
+            assert!(label.bottom() <= info.top(), "{scope} label must precede the info popover");
+            assert!(poodle_gpui_node_backend::bounds_for(&part_id(scope, "info-trigger")).is_some());
         } else {
-            assert!(poodle_gpui_node_backend::bounds_for(&part_id(scope, "supporting")).is_none());
+            assert!(poodle_gpui_node_backend::bounds_for(&part_id(scope, "info")).is_none());
         }
 
         if surface_stacked {
@@ -33234,7 +33248,8 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
             "detail-item:left".to_owned(),
             part_id("left", "label-block"),
             part_id("left", "label"),
-            part_id("left", "supporting"),
+            part_id("left", "info"),
+            part_id("left", "info-trigger"),
             part_id("left", "value"),
             part_id("left", "action"),
             action_id("left"),
@@ -33248,6 +33263,10 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
             assert!(poodle_gpui_node_backend::bounds_for(&mounted_id).is_some(), "production DetailItem IntoElement must paint {mounted_id}");
         }
         assert!(poodle_gpui_node_backend::bounds_for(&part_id("right", "supporting")).is_none());
+        // The description lives inside the closed info Popover, as it does on
+        // the web; only its trigger paints until the surface opens.
+        assert!(poodle_gpui_node_backend::bounds_for(&part_id("left", "supporting")).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(&part_id("right", "info")).is_none());
 
         let left = poodle_gpui_node_backend::painted_node_for("detail-item:left").expect("left DetailItem");
         assert_eq!(left.roles.get("component").map(String::as_str), Some("detail-item"));
@@ -33276,10 +33295,13 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
             theme_provider.resolve_space("typography.label.lineHeight")
                 / theme_provider.resolve_space("typography.label.size")
         ));
-        let supporting = text_snapshot("left", "supporting", "Current workspace identity");
-        assert_eq!(supporting.style.text_color, Some(theme_provider.resolve_color("color.text.secondary")));
-        assert_eq!(supporting.text_size, Some(12.0));
-        assert_eq!(supporting.line_height, Some(1.5));
+        // Description typography is asserted at the render tier; while the
+        // info Popover is closed the text is not painted.
+        assert_eq!(
+            snapshot("left", "info-trigger").a11y_role,
+            None,
+            "the Popover wrapper owns the trigger button role"
+        );
         let value = text_snapshot("left", "value", "Poodle design system with a deliberately long mounted value");
         assert_eq!(value.roles.get("value-kind").map(String::as_str), Some("text"));
         assert_eq!(value.style.text_color, Some(theme_provider.resolve_color("color.text.primary")));
@@ -33385,7 +33407,6 @@ fn detail_item_structure_states_actions_and_identity_rebuild_through_mounted_bac
         assert_eq!(right.style.layout.spacing.padding.left, 0.0);
         assert_eq!(right.style.layout.spacing.padding.top, 0.0);
         assert_eq!(right.roles.get("span").map(String::as_str), Some("full"));
-        text_snapshot("right", "supporting", "Host supplied configuration");
         text_snapshot("right", "value", "Configured");
         text_snapshot("left", "value", "Poodle design system");
         assert_mounted_pair_geometry(driver.mount_box_bounds(), true, false, true);
@@ -34283,10 +34304,13 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         proof.runtime_id.as_deref(),
         Some("command-palette:proof:overlay")
     );
-    assert_eq!(proof.a11y.role, Some(NodeRole::Dialog));
-    assert_eq!(proof.a11y.label.as_deref(), Some("Workspace commands"));
+    assert_eq!(proof.a11y.role, None);
+    let proof_dialog = proof
+        .find(&|node| node.a11y.role == Some(NodeRole::Dialog))
+        .expect("command palette dialog surface");
+    assert_eq!(proof_dialog.a11y.label.as_deref(), Some("Workspace commands"));
     assert_eq!(
-        proof.a11y.described_by.as_deref(),
+        proof_dialog.a11y.described_by.as_deref(),
         Some("command-palette:proof:description")
     );
     assert_eq!(
@@ -34299,9 +34323,9 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         proof.style.descriptor.background,
         Some(theme_provider.resolve_color("color.background.overlay"))
     );
-    assert_eq!(proof.children.len(), 1);
+    assert_eq!(proof.children.len(), 2);
 
-    let dialog = &proof.children[0];
+    let dialog = &proof.children[1];
     assert_eq!(
         dialog.runtime_id.as_deref(),
         Some("command-palette:proof:dialog")
@@ -34434,7 +34458,8 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         Some("eyebrow")
     );
     let file_list = &file_group.children[1];
-    assert_eq!(file_list.a11y.role, None, "the root owns listbox semantics");
+    // Svelte projects the group `<ul>` as a list inside the panel listbox.
+    assert_eq!(file_list.a11y.role, Some(NodeRole::List));
     assert_eq!(file_list.roles.get("part").map(String::as_str), Some("list"));
     assert_eq!(file_list.children.len(), 3);
     let active = proof

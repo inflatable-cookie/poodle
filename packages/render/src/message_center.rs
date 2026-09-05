@@ -117,6 +117,7 @@ pub fn message_center(
             .with_surface_min_width(poodle_specs::Dimension::new("24rem"))
             .with_surface_max_width(poodle_specs::Dimension::new("30rem"));
         let mut node = popover_surface(&popover_spec, ctx, Some(content));
+        node.id = Some(surface_id.clone());
         node.runtime_id = Some(surface_id.clone());
         node.roles
             .insert("dependency".to_owned(), "popover".to_owned());
@@ -272,6 +273,7 @@ fn center_header(
     let unread = spec.unread_count();
     let mut header = Node::container();
     header.runtime_id = scoped(instance, "header");
+    header.a11y.role = Some(NodeRole::Banner);
     {
         let s = &mut header.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -289,6 +291,8 @@ fn center_header(
     copy.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
     let mut title = Node::text(&spec.title);
     title.runtime_id = scoped(instance, "title");
+    title.a11y.role = Some(NodeRole::Heading);
+    title.a11y.label = Some(spec.title.clone());
     title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     title.style.text_size = Some(ctx.theme().resolve_space("typography.heading.size"));
     title.style.text_weight = Some(650);
@@ -475,6 +479,7 @@ fn message_content(
         content.interaction.focusable = true;
         content.interaction.on_activate = Some(Arc::new(move || handler(&id)));
         content.style.descriptor.cursor = CursorHint::Pointer;
+        content.a11y.role = Some(NodeRole::Button);
         content.a11y.label = Some(item.title.clone());
         let surface = ctx.theme().resolve_color("color.background.surface");
         content.style.hover = Some(StylePatch {

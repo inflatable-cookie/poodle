@@ -48,3 +48,54 @@ attributes. NP-4 settings rows use the same evidence contract with named
   applied.
 - `model-picker/` — combobox semantics and focus order diverge. Select-class
   repair is deferred to `g16.117`; no behavior repair was applied.
+
+## g16.118 rows (recorded 2026-09-05)
+
+The eight overlay rows were repaired for structure. DetailItem and ToastHost
+reach an empty diff and hold receipts; their stores are deleted. Six rows keep
+a store because their residual cause is outside this card's fixed boundary.
+Each directory holds `<row>.a1-diff.json`, `<row>.gpui.json`, `svelte.json`,
+and `attributes.json` from the same executed run.
+
+Reproduce any row with
+`POODLE_NUCLEUS_RECEIPT_DIR=$PWD/target/nucleus-receipts cargo test
+--manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions
+<row>_a1`.
+
+### Initial overlay focus (`g16.119` class, not owned by `g16.118`)
+
+The overlay structure now matches; what remains is where focus lands when the
+overlay opens. `poodle-node` has no autofocus channel and GPUI focus routing
+is `g16.119`'s owned path, so no repair was applied here. `g16.119` as written
+owns five other rows, so these four need a lane decision.
+
+| Row | Node | Attribute | GPUI | Svelte |
+| --- | --- | --- | --- | --- |
+| Dialog | 1, `dialog` "Delete file" | `focused` | `false` | `true` |
+| Popover | 2, `dialog` "Quick settings" | `focused` | `false` | `true` |
+| ConfirmAction | 2, `alertdialog` "Delete workspace?" | `focused` | `false` | `true` |
+| MessageCenter | 1, `dialog` "Notifications" | `focused` | `false` | `true` |
+
+### ModelPicker
+
+Structure matches (dialog, radiogroup, radios, `expanded` true). The residual
+is focus only, same class as above.
+
+| Node | Attribute | GPUI | Svelte |
+| --- | --- | --- | --- |
+| 0, `button` "Model: Atlas" | `focused` | `true` | `false` |
+| 3, `radio` "Atlas Balanced model" | `focus_order` | `null` | `1` |
+| 3, `radio` "Atlas Balanced model" | `focused` | `false` | `true` |
+
+### CommandPalette — blocked on vocabulary
+
+The dialog, heading, close button, status, listbox and group lists now agree.
+Fourteen entries remain from three causes; the first is a card stop condition
+(`g16.118` owns exactly two new roles, `Heading` and `Banner`).
+
+| Cause | Attribute | GPUI | Svelte | Owner |
+| --- | --- | --- | --- | --- |
+| The contract's `TextInput type="search"` has no `poodle-node` role | node 3 `role` | `textbox` | `searchbox` | needs a third role; escalated |
+| TextInput projects its placeholder as the value | node 3 `value_text` | `"Search commands, panels, and actions"` | `null` | TextInput, out of this card's owned paths |
+| `ActionDiscoveryPanel` rows have no inner interactive card node; Svelte nests a `button` named by the item title inside each `option` | nodes 8–13 `role`, `name`, `focus_order` | option/list only | option then button, each button a tab stop | `ActionDiscoveryPanel`, out of this card's owned paths |
+| Initial focus | node 3 `focused` | `false` | `true` | same class as above |

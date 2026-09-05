@@ -308,6 +308,7 @@ pub(crate) fn aria_role(role: NodeRole) -> &'static str {
     match role {
         NodeRole::Alert => "alert",
         NodeRole::AlertDialog => "alertdialog",
+        NodeRole::Banner => "banner",
         NodeRole::Button => "button",
         NodeRole::Cell => "cell",
         NodeRole::CheckBox => "checkbox",
@@ -315,6 +316,7 @@ pub(crate) fn aria_role(role: NodeRole) -> &'static str {
         NodeRole::Dialog => "dialog",
         NodeRole::Grid => "grid",
         NodeRole::Group => "group",
+        NodeRole::Heading => "heading",
         NodeRole::Label => "label",
         NodeRole::List => "list",
         NodeRole::ListItem => "listitem",

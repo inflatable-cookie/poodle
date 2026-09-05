@@ -4,12 +4,12 @@
   "scenario_id": "nucleus.attention.toast-host",
   "scenario_path": "test/nucleus-a11y/scenarios/toast-host.json",
   "scenario_sha256": "fe6095a95ca638900ac38998713420d87ae8a0519f389a182151ed0903899a34",
-  "runtime": "svelte-happy-dom",
+  "runtime": "gpui-headless",
   "run": {
-    "command": "effigy test:nucleus-a11y",
-    "mount": "@testing-library/svelte render",
-    "render_path": "svelte mount -> happy-dom document",
-    "input_dispatch": "dom-events"
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
   },
   "nodes": [
     {

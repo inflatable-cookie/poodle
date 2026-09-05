@@ -1,30 +1,27 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "Popover",
-  "scenario_id": "nucleus.navigation.popover",
-  "scenario_path": "test/nucleus-a11y/scenarios/popover.json",
-  "scenario_sha256": "c18aadfe9fc044f1dbf7748fe5d8776243af72ad2d5548fa5add18279cc5a918",
-  "runtime": "gpui-headless",
+  "component": "Dialog",
+  "scenario_id": "nucleus.navigation.dialog",
+  "scenario_path": "test/nucleus-a11y/scenarios/dialog.json",
+  "scenario_sha256": "86acd39ec2a88c7cf2c45e5162459bf5cb1013934a4a89b9eed5978d89c9858b",
+  "runtime": "svelte-happy-dom",
   "run": {
-    "command": "effigy regressions:native",
-    "mount": "HeadlessDriver",
-    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "input_dispatch": "gpui-test-platform-dispatch"
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
   },
   "nodes": [
     {
       "role": "button",
-      "name": "Settings",
+      "name": "Dismiss dialog backdrop",
       "value": null,
       "value_text": null,
       "states": {
-        "expanded": true,
         "disabled": false
       },
       "relationships": {
-        "controls": [
-          2
-        ],
+        "controls": [],
         "labelled_by": [],
         "described_by": []
       },
@@ -34,12 +31,31 @@
       "focused": false
     },
     {
-      "role": "button",
-      "name": "Settings",
+      "role": "dialog",
+      "name": "Delete file",
       "value": null,
       "value_text": null,
       "states": {
-        "expanded": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [
+          -1
+        ],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": true
+    },
+    {
+      "role": "button",
+      "name": "Close dialog",
+      "value": null,
+      "value_text": null,
+      "states": {
         "disabled": false
       },
       "relationships": {
@@ -50,25 +66,6 @@
       "level": null,
       "orientation": null,
       "focus_order": 1,
-      "focused": false
-    },
-    {
-      "role": "dialog",
-      "name": "Quick settings",
-      "value": null,
-      "value_text": null,
-      "states": {
-        "expanded": null,
-        "disabled": false
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": 2,
       "focused": false
     }
   ]

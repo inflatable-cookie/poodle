@@ -13,27 +13,8 @@
   },
   "nodes": [
     {
-      "role": "alertdialog",
-      "name": null,
-      "value": null,
-      "value_text": null,
-      "states": {
-        "disabled": false,
-        "busy": null
-      },
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": null,
-      "focused": false
-    },
-    {
       "role": "button",
-      "name": "Keep workspace",
+      "name": "Delete",
       "value": null,
       "value_text": null,
       "states": {
@@ -52,7 +33,7 @@
     },
     {
       "role": "button",
-      "name": "Delete workspace",
+      "name": "Dismiss dialog backdrop",
       "value": null,
       "value_text": null,
       "states": {
@@ -67,6 +48,84 @@
       "level": null,
       "orientation": null,
       "focus_order": 1,
+      "focused": false
+    },
+    {
+      "role": "alertdialog",
+      "name": "Delete workspace?",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [
+          -1
+        ],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Close dialog",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 2,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Keep workspace",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 3,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Delete workspace",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 4,
       "focused": false
     }
   ]

@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "DetailItem",
-  "scenario_id": "nucleus.settings.detail-item",
-  "scenario_path": "test/nucleus-a11y/scenarios/detail-item.json",
-  "scenario_sha256": "d5a16050c935f927f974323c90b43fc43d8141abb279ba30e7577b7b82fde019",
+  "component": "Popover",
+  "scenario_id": "nucleus.navigation.popover",
+  "scenario_path": "test/nucleus-a11y/scenarios/popover.json",
+  "scenario_sha256": "c18aadfe9fc044f1dbf7748fe5d8776243af72ad2d5548fa5add18279cc5a918",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",
@@ -14,15 +14,16 @@
   "nodes": [
     {
       "role": "button",
-      "name": "More information",
+      "name": "Settings",
       "value": null,
       "value_text": null,
       "states": {
+        "expanded": true,
         "disabled": false
       },
       "relationships": {
         "controls": [
-          1
+          2
         ],
         "labelled_by": [],
         "described_by": []
@@ -30,14 +31,15 @@
       "level": null,
       "orientation": null,
       "focus_order": 0,
-      "focused": true
+      "focused": false
     },
     {
-      "role": "dialog",
-      "name": "More information",
+      "role": "button",
+      "name": "Settings",
       "value": null,
       "value_text": null,
       "states": {
+        "expanded": null,
         "disabled": false
       },
       "relationships": {
@@ -47,8 +49,27 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": null,
+      "focus_order": 1,
       "focused": false
+    },
+    {
+      "role": "dialog",
+      "name": "Quick settings",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 2,
+      "focused": true
     }
   ]
 }

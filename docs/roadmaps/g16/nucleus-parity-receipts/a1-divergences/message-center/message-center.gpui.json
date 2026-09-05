@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
   "component": "MessageCenter",
-  "scenario_id": "nucleus-message-center",
+  "scenario_id": "nucleus.attention.message-center",
   "scenario_path": "test/nucleus-a11y/scenarios/message-center.json",
-  "scenario_sha256": "b7c686fbb78c3cf042e34b2854141847de1d00b7abaf90ba315814c8f280ba9c",
+  "scenario_sha256": "a60a4f94ac882000e34326f64fd66a5668e8cea20fcfd19f0d98ef609e8f1180",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -23,7 +23,7 @@
       },
       "relationships": {
         "controls": [
-          -1
+          1
         ],
         "labelled_by": [],
         "described_by": []
@@ -54,6 +54,44 @@
     },
     {
       "role": "region",
+      "name": "Notifications",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "banner",
+      "name": null,
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "heading",
       "name": "Notifications",
       "value": null,
       "value_text": null,
@@ -110,6 +148,25 @@
       "focused": false
     },
     {
+      "role": "button",
+      "name": "Build complete",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 2,
+      "focused": false
+    },
+    {
       "role": "listitem",
       "name": null,
       "value": null,
@@ -126,6 +183,25 @@
       "level": null,
       "orientation": null,
       "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "New mention",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 3,
       "focused": false
     }
   ]

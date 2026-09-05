@@ -1628,3 +1628,26 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   resolve alias through an existing dependency (what g16.111 did) or a
   separate operator-approved manifest lane. The gate's error names the file
   but not the rule. Surface: package-install certification scope.
+
+- 2026-09-05 — Two `poodle-render` unit tests are red on `origin/main`
+  (`ef483d029`): `context::tests::the_provider_adds_no_wrapper_node_layout_or_accessibility_entry`
+  and `segmented_control::tests::icon_only_without_an_icon_keeps_the_visible_label`.
+  Both assert a button's `a11y.label` is `None`; something now names buttons
+  from their visible label. `effigy check:gpui` therefore cannot be green on
+  any branch. Surface: `packages/render` unit tests. Found by g16.118, which
+  did not repair them.
+
+- 2026-09-05 — Three A1 scenarios shipped with scenario ids that no manifest
+  row carries (`nucleus-toast-host`, `nucleus-command-palette`,
+  `nucleus-message-center` against `nucleus.attention.*`). Nothing caught it
+  because a diverged row emits no receipt, so the id was never resolved
+  against the manifest. A scenario-id-to-manifest check in
+  `effigy test:nucleus-a11y` would fail it the day the scenario lands.
+  Surface: `test/nucleus-a11y/scenarios/`. Fixed by g16.118.
+
+- 2026-09-05 — The native Dialog backdrop is absolutely positioned inside its
+  own composition wrapper, not the window, so any sibling beside the open
+  overlay (ConfirmAction's default trigger, which Svelte keeps mounted)
+  collapses the backdrop to the sibling's row instead of the mount box.
+  `style.overlay` defers the paint but not the layout containing block.
+  Surface: `packages/gpui/node-backend` overlay layout.
