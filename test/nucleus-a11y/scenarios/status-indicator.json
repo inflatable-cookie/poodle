@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "StatusIndicator",
+  "scenario_id": "nucleus.agent.status-indicator",
+  "props": {
+    "status": "success",
+    "label": "Ready",
+    "ariaLabel": "Ready",
+    "size": "sm",
+    "density": "compact"
+  },
+  "actions": [],
+  "declared_states": [],
+  "web_only_exclusions": []
+}

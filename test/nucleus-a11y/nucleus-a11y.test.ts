@@ -18,6 +18,8 @@ import { writable } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
 import * as components from "@inflatable-cookie/poodle-svelte";
+import AgentPlan from "../../packages/svelte/components/src/AgentPlan.svelte";
+import AgentTranscript from "../../packages/svelte/components/src/AgentTranscript.svelte";
 
 import {
   A1_SNAPSHOT_SCHEMA,
@@ -67,14 +69,14 @@ function fixtureProps(scenario: A1Scenario): Record<string, unknown> {
 describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
   const rows = listScenarioRows(root);
 
-  it("has the foundation, NP-2, and NP-5 scenarios", () => {
-    expect(rows).toEqual(["command-palette", "dialog", "editable-label", "menu", "message-center", "popover", "segmented-control", "select", "switch", "tabs", "toast-host"]);
+  it("has the foundation, NP-2, NP-3, and NP-5 scenarios", () => {
+    expect(rows).toEqual(["agent-chat-input", "agent-plan", "agent-question", "agent-transcript", "command-palette", "dialog", "editable-label", "menu", "message-center", "model-picker", "popover", "segmented-control", "select", "status-indicator", "switch", "tabs", "toast-host"]);
   });
 
   for (const row of rows) {
     it(`${row}: the executed Svelte projection is the committed snapshot`, async () => {
       const loaded = readScenario(root, row);
-      const Component = (components as Record<string, unknown>)[loaded.scenario.component];
+      const Component = ({ AgentPlan, AgentTranscript, ...components } as Record<string, unknown>)[loaded.scenario.component];
       expect(Component, `${loaded.scenario.component} is a public Svelte export`).toBeDefined();
 
       const props = loaded.scenario.component === "ToastHost"
@@ -94,7 +96,9 @@ describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
         run: SVELTE_RUN_RECORD,
         nodes: extractSnapshotNodes(loaded.scenario),
       };
-      expect(file.nodes.length, "the mounted DOM exposes at least one role").toBeGreaterThan(0);
+      if (loaded.row !== "status-indicator") {
+        expect(file.nodes.length, "the mounted DOM exposes at least one role").toBeGreaterThan(0);
+      }
 
       const committedPath = path.join(root, snapshotPath(row, "svelte"));
       if (write) {

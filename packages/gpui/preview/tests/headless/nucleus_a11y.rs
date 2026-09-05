@@ -8,13 +8,18 @@
 
 use std::sync::{Arc, Mutex};
 
+use poodle_headless::agent_plan::AgentPlanStatus;
+use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
+use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, TranscriptRole};
 use poodle_node::Node;
-use poodle_render::{CommandPaletteHandlers, EditableLabelHandlers, MessageCenterHandlers, PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers};
+use poodle_render::{AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers, CommandPaletteHandlers, EditableLabelHandlers, MessageCenterHandlers, PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers};
 use poodle_specs::{
+    AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec,
     ChoiceOption, CommandActionItem, CommandPaletteSpec, DialogSpec, EditableLabelActivation,
-    EditableLabelSpec, MenuEntry, MenuSpec, MessageCenterItem, MessageCenterSpec, Orientation,
+    ControlDensity, ControlSize, EditableLabelSpec, MenuEntry, MenuSpec, MessageCenterItem,
+    MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection, Orientation,
     PopoverInitialFocus, PopoverSpec, SegmentedControlOption, SegmentedControlSpec, SelectMode,
-    SelectSpec, StatusTone, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, Toast,
+    SelectSpec, StatusIndicatorSpec, StatusTone, SwitchSpec, TabActivationMode, TabDefinition, TabsSpec, Toast,
     ToastHostPlacement, ToastHostSpec, ToastStackSpec,
 };
 use serde::Deserialize;
@@ -140,6 +145,76 @@ fn prove(
 fn props<T: for<'de> Deserialize<'de>>(loaded: &LoadedA1Scenario) -> T {
     serde_json::from_value(loaded.scenario.props.clone())
         .unwrap_or_else(|error| panic!("{} props do not map to the Rust spec: {error}", loaded.path))
+}
+
+fn prop_string(props: &Value, key: &str) -> String {
+    props[key].as_str().unwrap_or_else(|| panic!("missing string prop `{key}`")).to_owned()
+}
+fn prop_size(props: &Value) -> ControlSize {
+    match prop_string(props, "size").as_str() { "xs" => ControlSize::Xs, "sm" => ControlSize::Sm, "md" => ControlSize::Md, "lg" => ControlSize::Lg, "xl" => ControlSize::Xl, other => panic!("unmapped size `{other}`") }
+}
+fn prop_density(props: &Value) -> ControlDensity {
+    match prop_string(props, "density").as_str() { "compact" => ControlDensity::Compact, "default" => ControlDensity::Default, "comfortable" => ControlDensity::Comfortable, other => panic!("unmapped density `{other}`") }
+}
+fn prove_static_row(row: &'static str, node: Node, width: f32, height: f32) {
+    let loaded = nucleus_receipts::load_a1_scenario(row);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), width, height);
+        replay(&mut driver, &loaded.scenario.actions);
+        if loaded.scenario.actions.is_empty() && row == "status-indicator" { driver.pointer_activate_id("status-indicator:a1"); driver.draw_frame(); }
+        prove(&mut driver, &loaded, &["mount the production renderer path through HeadlessDriver", "replay every shared scenario action through GPUI dispatch"], &["the normalised GPUI snapshot is compared with the committed Svelte DOM snapshot for the same scenario hash"]);
+    });
+}
+
+#[test]
+fn agent_plan_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("agent-plan"); let p = loaded.scenario.props.clone();
+    let status = match prop_string(&p, "status").as_str() { "pending" => AgentPlanStatus::Pending, "accepted" => AgentPlanStatus::Accepted, "dismissed" => AgentPlanStatus::Dismissed, "revised" => AgentPlanStatus::Revised, other => panic!("unmapped plan status `{other}`") };
+    let provider = theme(); let spec = AgentPlanSpec::new(prop_string(&p, "plan")).with_status(status).with_dismissible(p["dismissible"].as_bool().unwrap_or(true)).with_size(prop_size(&p)).with_density(prop_density(&p));
+    let node = poodle_render::agent_plan(&spec, &RenderContext::new(&provider), AgentPlanHandlers { instance_id: Some("a1".to_owned()), ..Default::default() }); prove_static_row("agent-plan", node, 520.0, 180.0);
+}
+
+#[test]
+fn status_indicator_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("status-indicator"); let p = loaded.scenario.props; let provider = theme();
+    let mut node = poodle_render::status_indicator(&StatusIndicatorSpec::new().with_status(StatusTone::Success).with_label(prop_string(&p, "label")).with_aria_label(prop_string(&p, "ariaLabel")).with_size(prop_size(&p)).with_density(prop_density(&p)), &RenderContext::new(&provider));
+    node.id = Some("status-indicator:a1".into()); node.runtime_id = Some("status-indicator:a1".into()); prove_static_row("status-indicator", node, 240.0, 60.0);
+}
+
+#[test]
+fn agent_transcript_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("agent-transcript"); let p = loaded.scenario.props.clone();
+    let items = p["items"].as_array().expect("transcript items").iter().map(|item| match item["kind"].as_str() {
+        Some("message") => TranscriptItem::Message(TranscriptMessage { id: prop_string(item, "id"), role: Some(match prop_string(item, "role").as_str() { "user" => TranscriptRole::User, "assistant" => TranscriptRole::Assistant, other => panic!("unmapped transcript role `{other}`") }), markdown: prop_string(item, "markdown"), ..Default::default() }),
+        Some("activity") => TranscriptItem::Activity(poodle_headless::agent_transcript::TranscriptActivity { id: prop_string(item, "id"), label: prop_string(item, "label"), spinning: item["spinning"].as_bool() }),
+        other => panic!("unmapped transcript item kind {other:?}"),
+    }).collect();
+    let provider = theme(); let spec = AgentTranscriptSpec::new(items).with_virtualized(p["virtualized"].as_bool().unwrap_or(false)).with_aria_label(prop_string(&p, "ariaLabel")).with_size(prop_size(&p)).with_density(prop_density(&p));
+    prove_static_row("agent-transcript", poodle_render::agent_transcript(&spec, &RenderContext::new(&provider), AgentTranscriptHandlers::default()), 520.0, 240.0);
+}
+
+#[test]
+fn agent_question_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("agent-question"); let p = loaded.scenario.props.clone(); let q = &p["questions"][0];
+    let question = AgentQuestionItem { id: prop_string(q, "id"), header: q["header"].as_str().map(str::to_owned), prompt: prop_string(q, "prompt"), options: q["options"].as_array().expect("question options").iter().map(|o| AgentQuestionOption { value: prop_string(o, "value"), label: prop_string(o, "label"), description: o["description"].as_str().map(str::to_owned) }).collect(), allow_multiple: q["allowMultiple"].as_bool().unwrap_or(false) };
+    let spec = AgentQuestionSpec::new(vec![question]).with_active_index(p["activeIndex"].as_u64().unwrap_or(0) as usize).with_selections(p["selections"].as_array().expect("selections").iter().map(|v| v.as_str().expect("selection string").to_owned()).collect()).with_size(prop_size(&p)).with_density(prop_density(&p));
+    let provider = theme(); prove_static_row("agent-question", poodle_render::agent_question(&spec, &RenderContext::new(&provider), AgentQuestionHandlers { instance_id: Some("a1".into()), ..Default::default() }), 520.0, 240.0);
+}
+
+#[test]
+fn model_picker_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("model-picker"); let p = loaded.scenario.props.clone();
+    let models = p["models"].as_array().expect("models").iter().map(|m| { let mut option = ModelOption::new(prop_string(m, "value"), prop_string(m, "label")); if let Some(description) = m["description"].as_str() { option = option.with_description(description); } if m["disabled"].as_bool().unwrap_or(false) { option = option.with_disabled(true); } option }).collect();
+    let spec = ModelPickerSpec::new().with_models(models).with_value(ModelSelection { model: prop_string(&p["value"], "model"), axes: Vec::new() }).with_aria_label(prop_string(&p, "ariaLabel")).with_variant(ModelPickerVariant::Outlined).with_size(prop_size(&p)).with_density(prop_density(&p)).with_open(p["open"].as_bool().unwrap_or(false));
+    let provider = theme(); prove_static_row("model-picker", poodle_render::model_picker(&spec, &RenderContext::new(&provider), "a1", None), 520.0, 300.0);
+}
+
+#[test]
+fn agent_chat_input_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("agent-chat-input"); let p = loaded.scenario.props.clone();
+    let spec = AgentChatInputSpec::new().with_value(prop_string(&p, "value")).with_placeholder(prop_string(&p, "placeholder")).with_aria_label(prop_string(&p, "ariaLabel")).with_size(prop_size(&p)).with_density(prop_density(&p));
+    let provider = theme(); let node = poodle_render::agent_chat_input(&spec, &RenderContext::new(&provider), Vec::new(), Vec::new(), Vec::new(), Vec::new(), AgentChatInputHandlers::default()); prove_static_row("agent-chat-input", node, 640.0, 240.0);
 }
 
 // ── NP-5 command and attention rows ───────────────────────────────────────

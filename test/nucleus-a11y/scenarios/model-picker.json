@@ -1,0 +1,16 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "props": {
+    "models": [{ "value": "atlas", "label": "Atlas", "description": "Balanced model" }, { "value": "mini", "label": "Mini", "disabled": true }],
+    "value": { "model": "atlas", "axes": {} },
+    "ariaLabel": "Model",
+    "variant": "outlined",
+    "size": "sm",
+    "density": "compact"
+  },
+  "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Model: Atlas" } }],
+  "declared_states": ["expanded", "checked", "disabled"],
+  "web_only_exclusions": []
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "AgentTranscript",
+  "scenario_id": "nucleus.agent.agent-transcript",
+  "props": {
+    "items": [
+      { "kind": "message", "id": "hello", "role": "user", "markdown": "Hello Poodle" },
+      { "kind": "activity", "id": "done", "label": "Turn complete", "spinning": false }
+    ],
+    "virtualized": false,
+    "ariaLabel": "Conversation",
+    "size": "sm",
+    "density": "compact"
+  },
+  "actions": [],
+  "declared_states": [],
+  "web_only_exclusions": []
+}

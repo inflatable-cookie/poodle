@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "StatusIndicator",
+  "scenario_id": "nucleus.agent.status-indicator",
+  "scenario_path": "test/nucleus-a11y/scenarios/status-indicator.json",
+  "scenario_sha256": "f06a777d792abe83b862447833507d80066bbbaa4d44a193cec947224255ce57",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": []
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "AgentChatInput",
+  "scenario_id": "nucleus.agent.agent-chat-input",
+  "props": {
+    "value": "Inspect the failing gate",
+    "placeholder": "Describe the change",
+    "ariaLabel": "Message",
+    "size": "md",
+    "density": "comfortable"
+  },
+  "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Send" } }],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}
