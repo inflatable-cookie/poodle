@@ -47,4 +47,15 @@ describe("Menu (react) item identity", () => {
     );
     expect(values).toEqual(["rename", "delete"]);
   });
+
+  it("keeps one enabled menu item in the sequential tab order", async () => {
+    const { container } = render(<Menu items={items} />);
+    await fireEvent.click(container.querySelector(".poodle-menu__trigger") as HTMLElement);
+
+    const menuItems = [...document.querySelectorAll('[role="menuitem"]')] as HTMLButtonElement[];
+    expect(menuItems.map((item) => item.tabIndex)).toEqual([0, -1]);
+
+    await fireEvent.keyDown(menuItems[0], { key: "ArrowDown" });
+    expect(document.activeElement).toBe(menuItems[1]);
+  });
 });

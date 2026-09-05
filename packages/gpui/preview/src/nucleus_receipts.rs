@@ -244,6 +244,9 @@ pub(crate) enum A1Action {
     PointerActivate { target: A1Target },
     /// Focus the target, then one named key press and release.
     Key { target: A1Target, key: String },
+    /// Host-owned append that must not move focus. The row's proof maps the
+    /// item into the production transcript host before the final snapshot.
+    ProgrammaticAppend { item: Value },
 }
 
 #[derive(Clone, Debug, Deserialize)]

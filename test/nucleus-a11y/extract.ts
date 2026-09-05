@@ -92,6 +92,30 @@ function declaredState(element: HTMLElement, state: string): boolean | "mixed" |
 
 function isSequentialTabStop(element: HTMLElement): boolean {
   if (isDisabled(element)) return false;
+
+  // Browsers expose a named native radio group as one sequential stop: Tab
+  // enters on the checked radio, or the first enabled radio when none is
+  // checked. happy-dom reports each radio's native focusability instead, so
+  // the extractor must apply the browser's group law rather than over-count
+  // the implementation detail.
+  if (element instanceof HTMLInputElement && element.type === "radio") {
+    const name = element.getAttribute("name");
+    if (name !== null) {
+      const radios = Array.from(
+        document.querySelectorAll<HTMLInputElement>('input[type="radio"][name]'),
+      ).filter(
+        (candidate) =>
+          candidate.getAttribute("name") === name &&
+          candidate.form === element.form &&
+          !isInaccessible(candidate),
+      );
+      const entry =
+        radios.find((candidate) => !isDisabled(candidate) && candidate.checked) ??
+        radios.find((candidate) => !isDisabled(candidate));
+      return entry === element;
+    }
+  }
+
   const tabindex = element.getAttribute("tabindex");
   if (tabindex !== null) return Number(tabindex) >= 0;
   if (element instanceof HTMLInputElement && element.type === "hidden") return false;
@@ -182,22 +206,32 @@ export async function settle(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-export async function replayActions(actions: A1Action[]): Promise<void> {
+export async function replayActions(
+  actions: A1Action[],
+  onProgrammaticAppend?: (action: Extract<A1Action, { type: "programmatic_append" }>) => void | Promise<void>,
+): Promise<void> {
   for (const action of actions) {
-    const element = resolveTarget(action.target);
-    if (action.type === "pointer_activate") {
-      await fireEvent.pointerDown(element, { button: 0, pointerId: 1 });
-      await fireEvent.mouseDown(element, { button: 0 });
-      if (!isDisabled(element)) element.focus();
-      await fireEvent.pointerUp(element, { button: 0, pointerId: 1 });
-      await fireEvent.mouseUp(element, { button: 0 });
-      element.click();
+    if (action.type === "programmatic_append") {
+      if (onProgrammaticAppend === undefined) {
+        throw new Error("A1 scenario uses programmatic_append without a host update handler");
+      }
+      await onProgrammaticAppend(action);
     } else {
-      const key = DOM_KEYS[action.key];
-      if (key === undefined) throw new Error(`A1 scenario uses an unmapped key ${action.key}`);
-      element.focus();
-      await fireEvent.keyDown(element, { key });
-      await fireEvent.keyUp(element, { key });
+      const element = resolveTarget(action.target);
+      if (action.type === "pointer_activate") {
+        await fireEvent.pointerDown(element, { button: 0, pointerId: 1 });
+        await fireEvent.mouseDown(element, { button: 0 });
+        if (!isDisabled(element)) element.focus();
+        await fireEvent.pointerUp(element, { button: 0, pointerId: 1 });
+        await fireEvent.mouseUp(element, { button: 0 });
+        element.click();
+      } else {
+        const key = DOM_KEYS[action.key];
+        if (key === undefined) throw new Error(`A1 scenario uses an unmapped key ${action.key}`);
+        element.focus();
+        await fireEvent.keyDown(element, { key });
+        await fireEvent.keyUp(element, { key });
+      }
     }
     await settle();
   }

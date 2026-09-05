@@ -65,6 +65,9 @@
   let submenuFlippedValue = $state<string | null>(null);
 
   const actionableItems = $derived(menuNavigableItems(items));
+  const firstTabStopIndex = $derived(
+    actionableItems.length === 0 ? -1 : menuListNavigate(actionableItems, 0, "first"),
+  );
 
   $effect(() => {
     const count = actionableItems.length;
@@ -217,6 +220,7 @@
           data-kind={hasSubmenu ? "submenu" : (item.kind ?? "action")}
           data-tone={item.tone ?? "default"}
           role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
+          tabindex={actionableItems.findIndex((candidate) => candidate.value === item.value) === firstTabStopIndex ? "0" : "-1"}
           aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
           aria-haspopup={hasSubmenu ? "menu" : undefined}
           aria-expanded={hasSubmenu ? (openSubmenuValue === item.value ? "true" : "false") : undefined}

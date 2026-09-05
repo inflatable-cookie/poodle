@@ -3,7 +3,7 @@
   "component": "AgentTranscript",
   "scenario_id": "nucleus.agent.agent-transcript",
   "scenario_path": "test/nucleus-a11y/scenarios/agent-transcript.json",
-  "scenario_sha256": "b305b396b7a59381e9e36afa871d73ece7a03cd387bacc365f3398bb6a0d8571",
+  "scenario_sha256": "820ea1fc3107b73dae6253da66a0e4ba3323916933a6cc4f58ad5b4ae840c1e8",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",
@@ -26,7 +26,7 @@
       "level": null,
       "orientation": null,
       "focus_order": null,
-      "focused": true
+      "focused": false
     }
   ]
 }

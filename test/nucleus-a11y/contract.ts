@@ -37,9 +37,14 @@ export const A1_STATE_NAMES = ["checked", "expanded", "selected", "disabled", "i
 export type A1StateName = (typeof A1_STATE_NAMES)[number];
 
 export type A1Target = { role?: string; name?: string };
+export type A1ProgrammaticAppendAction = {
+  type: "programmatic_append";
+  item: Record<string, unknown>;
+};
 export type A1Action =
   | { type: "pointer_activate"; target: A1Target }
-  | { type: "key"; target: A1Target; key: string };
+  | { type: "key"; target: A1Target; key: string }
+  | A1ProgrammaticAppendAction;
 
 export type A1Exclusion = { attribute: string; reason: string };
 export type A1Capture = { width: number; height: number };
