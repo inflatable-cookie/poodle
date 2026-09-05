@@ -1,7 +1,7 @@
 # `gpui-unofficial` Adoption Gates
 
-Status: open — spike `g16.110` reports "adopt later"; three gates named,
-two need an operator decision or an upstream fix
+Status: open — spike `g16.110` merged (report PR #214 at `073faf61b`, spike
+branch `f5ad4491e` unmerged); gate 2 resolved 2026-09-05; gates 1 and 3 remain
 Captured: 2026-09-05
 Owner: Chatterbox (planning)
 Source: `../logs/2026-09/20260905-g16-110-gpui-unofficial-spike.md` (PR
@@ -34,9 +34,8 @@ Source: `../logs/2026-09/20260905-g16-110-gpui-unofficial-spike.md` (PR
    (outward action, operator to authorise; draft below).
 2. **`bzip2-1.0.6` licence.** `libbz2-rs-sys` (via `http-client-gpui-unofficial`,
    a required dependency) carries the permissive bzip2 licence, which is not
-   on `deny.toml`'s explicit allow list. Not GPL. Decision: add
-   `bzip2-1.0.6` to the allow list after review (operator), or reject the
-   route. No exception was added by the spike.
+   on `deny.toml`'s explicit allow list. Not GPL. **Resolved:** the operator
+   approved it and `bzip2-1.0.6` is on the allow list (`80a13f226`).
 3. **Headless AccessKit tree read is a no-op.** `TestWindow::a11y_init` is
    the trait no-op and `debug_a11y_tree_json()` returns `None` in the
    in-memory test platform, so the A2 platform-tree proof cannot execute
