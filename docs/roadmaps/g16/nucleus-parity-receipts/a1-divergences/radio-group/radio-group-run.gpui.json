@@ -1,0 +1,92 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "RadioGroup",
+  "scenario_id": "nucleus.settings.radio-group",
+  "scenario_path": "test/nucleus-a11y/scenarios/radio-group.json",
+  "scenario_sha256": "5eef76f52f8f15e32a173e2b9277f0be0c7ffd716092712ad665a4680b9392a8",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "radiogroup",
+      "name": "Plan",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": "vertical",
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radio",
+      "name": "Pro",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": true,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": false
+    },
+    {
+      "role": "radio",
+      "name": "Free",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": false,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": true
+    },
+    {
+      "role": "radio",
+      "name": "Legacy",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "selected": false,
+        "disabled": true
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    }
+  ]
+}

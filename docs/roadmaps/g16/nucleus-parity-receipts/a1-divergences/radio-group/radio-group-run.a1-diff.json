@@ -1,0 +1,50 @@
+[
+  {
+    "index": 0,
+    "field": "orientation",
+    "gpui": "vertical",
+    "svelte": null
+  },
+  {
+    "index": 1,
+    "field": "states",
+    "gpui": {
+      "selected": true,
+      "disabled": false
+    },
+    "svelte": {
+      "selected": null,
+      "disabled": false
+    }
+  },
+  {
+    "index": 2,
+    "field": "focus_order",
+    "gpui": null,
+    "svelte": 1
+  },
+  {
+    "index": 2,
+    "field": "states",
+    "gpui": {
+      "selected": false,
+      "disabled": false
+    },
+    "svelte": {
+      "selected": null,
+      "disabled": false
+    }
+  },
+  {
+    "index": 3,
+    "field": "states",
+    "gpui": {
+      "selected": false,
+      "disabled": true
+    },
+    "svelte": {
+      "selected": null,
+      "disabled": true
+    }
+  }
+]

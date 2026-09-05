@@ -1,0 +1,20 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "RadioGroup",
+  "scenario_id": "nucleus.settings.radio-group",
+  "props": {
+    "options": [
+      { "value": "pro", "label": "Pro" },
+      { "value": "free", "label": "Free" },
+      { "value": "legacy", "label": "Legacy", "disabled": true }
+    ],
+    "defaultValue": "pro",
+    "ariaLabel": "Plan",
+    "orientation": "vertical"
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "radio", "name": "Free" } }
+  ],
+  "declared_states": ["disabled"],
+  "web_only_exclusions": []
+}

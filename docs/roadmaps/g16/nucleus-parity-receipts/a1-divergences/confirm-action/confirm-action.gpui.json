@@ -1,0 +1,73 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "ConfirmAction",
+  "scenario_id": "nucleus.settings.confirm-action",
+  "scenario_path": "test/nucleus-a11y/scenarios/confirm-action.json",
+  "scenario_sha256": "608bb02e73de546d3fcf12218d19b4fb217587a504860b82bf273a9dd3731e11",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "alertdialog",
+      "name": null,
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Keep workspace",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Delete workspace",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "busy": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": false
+    }
+  ]
+}

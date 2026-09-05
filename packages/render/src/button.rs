@@ -250,6 +250,9 @@ pub fn button(
     };
 
     let mut el = Node::button(button_label);
+    if !label_text.is_empty() {
+        el.a11y.label = Some(label_text.clone());
+    }
     {
         let s = &mut el.style;
         s.descriptor.layout.height = LayoutSizing::Fixed(height);

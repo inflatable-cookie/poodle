@@ -1,0 +1,16 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "TextInput",
+  "scenario_id": "nucleus.settings.text-input",
+  "props": {
+    "id": "workspace",
+    "defaultValue": "alpha",
+    "ariaLabel": "Workspace",
+    "placeholder": "Workspace name"
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "textbox", "name": "Workspace" } }
+  ],
+  "declared_states": ["disabled", "invalid", "busy"],
+  "web_only_exclusions": []
+}
