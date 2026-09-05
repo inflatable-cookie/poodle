@@ -317,6 +317,7 @@ pub(crate) fn aria_role(role: NodeRole) -> &'static str {
         NodeRole::Grid => "grid",
         NodeRole::Group => "group",
         NodeRole::Heading => "heading",
+        NodeRole::SearchBox => "searchbox",
         NodeRole::Label => "label",
         NodeRole::List => "list",
         NodeRole::ListItem => "listitem",
@@ -399,9 +400,10 @@ fn value_text(node: &MountedAccessibilityNode) -> Value {
     if node.value_text.is_some() {
         return trimmed(node.value_text.as_deref());
     }
-    // A combobox or text box with no declared value text exposes its visible
-    // value: the text content of the node, whitespace-normalised.
-    if matches!(node.role, NodeRole::ComboBox | NodeRole::TextInput) {
+    // A combobox with no declared value text exposes its visible value: the
+    // text content of the node, whitespace-normalised. Text inputs declare
+    // their actual value explicitly so placeholder text is never a value.
+    if matches!(node.role, NodeRole::ComboBox) {
         let joined = node
             .text_content
             .iter()

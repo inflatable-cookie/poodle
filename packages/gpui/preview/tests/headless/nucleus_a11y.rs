@@ -1448,6 +1448,8 @@ fn command_palette_a1_accessibility_projection_matches_svelte() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
         driver.draw_frame();
         driver.draw_frame();
+        driver.focus_element("poodle-input-command-palette:a1:query");
+        driver.draw_frame();
         driver.dispatch_probe_key("escape");
         prove(
             &mut driver,

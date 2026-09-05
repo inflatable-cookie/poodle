@@ -34406,7 +34406,7 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         NodeKind::Input { value, placeholder }
             if value.is_empty() && placeholder == "Search commands, panels, and actions"
     ));
-    assert_eq!(query.a11y.role, Some(NodeRole::TextInput));
+    assert_eq!(query.a11y.role, Some(NodeRole::SearchBox));
     assert_eq!(query.a11y.label.as_deref(), Some("Search commands"));
     assert_eq!(
         query.a11y.described_by.as_deref(),
@@ -34467,11 +34467,15 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
             node.runtime_id.as_deref() == Some("command-palette:proof:action:open")
         })
         .expect("active action");
-    assert_eq!(active.a11y.role, Some(NodeRole::ListBoxOption));
-    assert_eq!(active.a11y.selected, Some(true));
+    assert_eq!(file_list.children[0].a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(file_list.children[0].a11y.selected, Some(true));
+    assert_eq!(active.a11y.role, Some(NodeRole::Button));
     assert_eq!(active.a11y.tab_index, Some(0));
     assert_eq!(
-        active.roles.get("equivalent").map(String::as_str),
+        file_list.children[0]
+            .roles
+            .get("equivalent")
+            .map(String::as_str),
         Some("list-card")
     );
     let accent = theme_provider.resolve_color("color.accent.base");
@@ -34917,14 +34921,14 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         );
         let query_snapshot = poodle_gpui_node_backend::painted_node_for(subject_query)
             .expect("TextInput dependency reached backend paint");
-        assert_eq!(query_snapshot.a11y_role, Some(NodeRole::TextInput));
+        assert_eq!(query_snapshot.a11y_role, Some(NodeRole::SearchBox));
         assert_eq!(
             query_snapshot.roles.get("dependency").map(String::as_str),
             Some("text-input")
         );
         let locked_snapshot = poodle_gpui_node_backend::painted_node_for(subject_locked)
             .expect("disabled result reached backend paint");
-        assert_eq!(locked_snapshot.a11y_role, Some(NodeRole::ListBoxOption));
+        assert_eq!(locked_snapshot.a11y_role, Some(NodeRole::Button));
         assert_eq!(locked_snapshot.style.cursor, CursorHint::NotAllowed);
         assert!(poodle_gpui_node_backend::focus_handle_for(subject_locked).is_none());
 
@@ -34971,8 +34975,8 @@ fn command_palette_composition_navigation_dismissal_and_identity_rebuild_the_hos
         assert!(accepted_open.shadow_layers.is_empty());
         driver.focus_element(subject_query);
         driver.focus_next_tab_stop();
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_open), Some(false));
-        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_save), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_open), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(subject_save), Some(false));
         driver.focus_element(subject_query);
         driver.dispatch_key_raw("end");
         assert_eq!(host.state("subject").active.as_deref(), Some("toggle"));

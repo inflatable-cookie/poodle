@@ -311,6 +311,14 @@ pub fn model_picker(
                     .insert("selected".to_owned(), is_selected.to_string());
                 row.roles
                     .insert("disabled".to_owned(), model.is_disabled.to_string());
+                if is_selected && !spec.is_disabled && !model.is_disabled {
+                    // The selected radio is the single sequential stop in
+                    // the open picker. Select's ordinary listbox options are
+                    // pointer targets, but the Svelte ModelPicker exposes
+                    // this radio in the tab order.
+                    row.interaction.focusable = true;
+                    row.a11y.tab_index = Some(0);
+                }
                 if is_selected {
                     row.style.descriptor.background = Some(row_selected_bg);
                 }

@@ -1666,3 +1666,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   times instead of 1, on a `packages/react` tree byte-identical to
   `origin/main`. It fails `effigy ci:web` on unrelated branches. Surface:
   React Tabs controlled-focus test timing.
+
+- 2026-09-05 — A review worktree was externally rebased onto a sibling lane and
+  left dirty, so its local results could not prove the PR head. Workers and
+  reviewers must never rebase or edit another lane's worktree; the coordinator
+  should enforce a clean exact-head lease per lane. Surface: Paseo worktree
+  ownership and independent PR review.

@@ -802,6 +802,8 @@ pub enum NodeRole {
     Group,
     /// Section title. Uses [`NodeA11y::level`] when the heading level is known.
     Heading,
+    /// Search field (`searchbox` / `type="search"`).
+    SearchBox,
     Label,
     List,
     ListItem,

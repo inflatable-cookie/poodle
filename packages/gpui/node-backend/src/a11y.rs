@@ -22,6 +22,7 @@ pub fn record_role(role: NodeRole) -> &'static str {
         NodeRole::Grid => "grid",
         NodeRole::Group => "group",
         NodeRole::Heading => "heading",
+        NodeRole::SearchBox => "searchbox",
         NodeRole::Label => "label",
         NodeRole::List => "list",
         NodeRole::ListItem => "listitem",
@@ -65,5 +66,6 @@ mod tests {
     fn heading_and_banner_map() {
         assert_eq!(record_role(NodeRole::Heading), "heading");
         assert_eq!(record_role(NodeRole::Banner), "banner");
+        assert_eq!(record_role(NodeRole::SearchBox), "searchbox");
     }
 }
