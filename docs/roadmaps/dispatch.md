@@ -77,12 +77,16 @@ card or triage note says.
 
 - Card: `g16/109-v030-consumer-adoption-wave.md` (per-repository table is
   the lane inventory; the coordinator writes one handoff per repository)
-- Readiness: ready. Tier 1 lanes launch now, concurrently: Longhorn,
-  Underlay, Soundcheck Library. Tier 2 lanes launch as each foundation
-  merges: after Underlay → Acowtancy, Compli Me, Contact Patch, Songsprout,
-  Underlay Reference; after Longhorn → Bovine Accelerator Desktop, Figmatic,
-  Finch, Jetstream, Nucleus, Loophole; after Longhorn and Soundcheck Library
-  → Soundcheck. Every lane runs in its own worktree in its own repository.
+- Readiness: ready; amended 2026-09-05. Tier 1 lanes run concurrently:
+  Longhorn, Underlay, Soundcheck Library. The Underlay lane completes only
+  when the coordinator has cut and pushed Underlay `v0.9.8` (operator
+  authorized) after the pin PR merges. Tier 2 gates: after tag `v0.9.8`
+  exists on Underlay origin → Acowtancy, Compli Me, Contact Patch,
+  Songsprout, Underlay Reference (each also moves its Underlay git ref to
+  `#v0.9.8`); after the Longhorn pin merges and the sibling checkout is at
+  that commit → Bovine Accelerator Desktop, Figmatic, Finch, Jetstream,
+  Nucleus, Loophole; after both Longhorn and Soundcheck Library → Soundcheck.
+  Every lane runs in its own worktree in its own repository.
 - Prerequisites: `g16.097` complete (npm `latest` `0.3.0`, publish run
   `33952493234`). Completion per lane: PR merged on the consumer's `main`
   after accepted exact-head review with the board transcript.
