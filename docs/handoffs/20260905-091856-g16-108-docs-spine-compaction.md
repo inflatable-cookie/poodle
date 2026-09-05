@@ -111,7 +111,7 @@ total.
 3. `scripts/check-recipe-only-surface.ts` reverted to `origin/main` —
    removing the unauthorized historical-prefix edit. Consequence: `effigy
    docs:check` now fails at `drift:recipes` exactly on the 13 archived
-   parity lines that mention `--poodle-treatment-*`; the 4-line
+   parity lines that mention the retired treatment CSS-variable pattern; the 4-line
    `docs/archive/` exemption extension is **requested for explicit
    planning/manifest authorization** (the card's own oracle requires
    `docs:check` green after the sanctioned parity relocation, which is
