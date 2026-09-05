@@ -51,50 +51,51 @@ card or triage note says.
 - Acceptance evidence and review oracle: the card's table and lane rules
 - Stop conditions: per lane. Escalation owner: Chatterbox
 
-### g16.118 — A1 overlay structure projection
+### g16.121 — A1 focus-model alignment (last four rows)
 
-- Card: `g16/118-a1-overlay-structure-projection.md`
-- Readiness: ready. Owns the two-role vocabulary addition (`Heading`,
-  `Banner`) and the eight overlay rows.
-- Prerequisites: A1 tranches merged (satisfied). Completion: PR merged after
-  accepted exact-head review; eight empty-diff A1 receipts; cohort re-emitted.
-- Owned mutable paths: per card
+- Card: `g16/121-a1-focus-model-alignment.md`
+- Readiness: ready
+- Prerequisites: merged `g16.119`. Completion: PR merged after accepted
+  exact-head review; ledger GPUI accessibility 29/29 `mounted`.
+- Owned mutable paths: per card (extractor law and test, transcript
+  scenario, Svelte/React Menu roving focus, four receipts, manifest
+  `resolution`, ledger, log)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
-- Approved concurrent siblings: `g16.119` (disjoint rows; both repin at their
-  rebase, merge one at a time), `109` lanes. Serial edges: `g16.120` waits
-  for this merge.
-- Worker capability class: capable coding model, high reasoning (Rust
-  composition across eight components)
+- Approved concurrent siblings: `g16.122`, `109` lanes. Serial edges: none
+  (122 touches the capture binary and scenario `capture` blocks; 121 touches
+  the extractor and one scenario's actions — coordinator rebases the later
+  merge and both re-emit at their heads).
+- Worker capability class: capable coding model, medium reasoning
 - Acceptance evidence and review oracle: the card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
-### g16.119 — A1 focus and state semantics
+### g16.122 — Window-capture cohort fixture kind
 
-- Card: `g16/119-a1-focus-and-state-semantics.md`
+- Card: `g16/122-window-capture-cohort-fixtures.md`
 - Readiness: ready
-- Prerequisites: A1 tranches merged (satisfied). Completion: PR merged after
-  accepted exact-head review; five empty-diff A1 receipts; cohort re-emitted.
-- Owned mutable paths: per card
+- Prerequisites: merged `g16.105`, `g16.111` (satisfied). Completion: PR
+  merged after accepted exact-head review; headless tests prove the closed
+  registry and that `after-actions` equals the A1 end state.
+- Owned mutable paths: per card (capture binary kind and tests, scenario
+  `capture` blocks and schema, log)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
-- Approved concurrent siblings: `g16.118`, `109` lanes. Serial edges: the
-  five overlay initial-focus rows (Dialog, Popover, ConfirmAction,
-  MessageCenter, ModelPicker) are handled after `118` merges; the card may
-  add one `initial_focus` field to the node accessibility record.
-- Worker capability class: capable coding model, high reasoning (GPUI
-  backend focus routing)
+- Approved concurrent siblings: `g16.121`, `109` lanes. Serial edges:
+  poodle-lab `g01.006`'s GPUI leg waits for this merge.
+- Worker capability class: capable coding model, medium reasoning (Rust,
+  GPUI)
 - Acceptance evidence and review oracle: the card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
-| `g16.120` A1 landmarks and content roles | merged `g16.118` (`Heading`, `Banner` roles) | Chatterbox |
+| `g16.123` Nucleus V1 visual receipts | merged `g16.122` and the first validated poodle-lab `g01.006` cohort bundle | Chatterbox |
 | --- | --- | --- |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
 | `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
-| Nucleus V1 / V2 / M2 and Nucleus adoption | V1 after the lab Button and icon bundles; V2 after lab `g01.003` and Nucleus seeding; M2 Nucleus-owned | operator, via Chatterbox |
+| Nucleus V2 / M2 and Nucleus adoption | V2 after Nucleus seeding (lab `g01.003` landed the lab side); M2 Nucleus-owned; switch decision after V1/V2 | operator, via Chatterbox |
 | Jetstream admission | `docs/triage/20260902-000959-jetstream-admission-hold.md` | operator |
 | Citations, nested menus, CS20, keyboard geometry | `docs/triage/20260902-000956-*.md`, `20260902-000957-*.md` | Chatterbox |
 
@@ -103,7 +104,7 @@ card or triage note says.
 `g16.103` (#208), `104` (#209), `105` (#210), `097` (v0.3.0 published from
 `85609d941`), `106` (#211), `108` (#212), `107` (#213), `110` (#214), `111`
 (#215), `114` (#216), `051` (#217), `117` (#218), `112` (#219), `116` (#220),
-`113` (#221), `115` (#222). Their cards
+`113` (#221), `115` (#222), `118` (#224), `119` (#223), `120` (#225). Their cards
 carry the receipts; the coordinator reconciles README and index lines.
 
 ## History

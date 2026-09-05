@@ -155,6 +155,9 @@ truth; this page is the index. Narrative history of the generation is in
 118. [118 — A1 overlay structure projection](118-a1-overlay-structure-projection.md) — complete; merged in PR #224 with `Heading`/`Banner`/`SearchBox` roles and eight overlay structures
 119. [119 — A1 focus and state semantics](119-a1-focus-and-state-semantics.md) — complete; merged in PR #223 with overlay initial-focus routing and five-row focus/state semantics
 120. [120 — A1 landmarks and content roles](120-a1-landmarks-and-content-roles.md) — complete; merged in PR #225 for AppHeader, SplitView, AgentChatInput, and AgentPlan
+121. [121 — A1 focus-model alignment](121-a1-focus-model-alignment.md) — ready; the last four rows are extractor-law, scenario, and Menu roving-focus questions, not GPUI defects; target 29/29
+122. [122 — Window-capture cohort fixture kind](122-window-capture-cohort-fixtures.md) — ready; renders any cohort row from its scenario file in the non-activating capture window, for the lab's V1 adapter
+123. [123 — Nucleus V1 visual receipts](123-nucleus-v1-visual-receipts.md) — held behind `122` and the lab's first cohort bundle
 
 ## Programmes
 
@@ -165,7 +168,7 @@ truth; this page is the index. Narrative history of the generation is in
 | HistoryCenter rejection surface and v0.3.0 release | complete; `0.3.0` published from `85609d941` (`097`), `0.2.3` never published | release notes 0.3.0, working rules "Release Certification" |
 | Compiled web distribution | complete, `056`–`061` | architecture 014 |
 | Consumer adoption of 0.3.0 | tier 1 done (Underlay `v0.9.8`, Longhorn, Soundcheck Library); tier 2 running, `109` | `109` card |
-| Nucleus GPUI parity | M1 29/29 complete (`062`–`093`); A1 12/29 receipted (`111`–`117` merged), 17 divergences under repair in `118`–`120`; V1, V2, M2, adoption held | `nucleus-gpui-parity-programme.md` |
+| Nucleus GPUI parity | M1 29/29; A1 25/29 receipted (`111`–`120`), last four in `121`; V1 capture path `122`, receipts `123`, lab adapter `g01.006`; V2 lab side landed, Nucleus seeding pending; M2 and adoption held | `nucleus-gpui-parity-programme.md` |
 | Visual lab | `poodle-lab` repository; Button and icon-geometry batches captured; `051` admitted all six icon pairs | `visual-lab-unblock-runway.md`, lab repo |
 | Validation and docs hygiene | complete, `095`–`108` | working rules, cards |
 | GPUI accessibility route | upstream republish evaluated (`110`); adoption held on a crates.io build defect | contract 003, triage `20260905-111233-*` |
