@@ -20,61 +20,6 @@ card or triage note says.
 
 ## Ready frontier
 
-### g16.106 — Button leading-inset edge delta diagnosis
-
-- Card: `g16/106-button-leading-inset-edge-delta.md`
-- Readiness: ready
-- Prerequisites: none. Completion: PR merged after accepted exact-head
-  review; outcome is either an exact-inset repair with a headless test or a
-  contracted `gpui-snaps-subpixel-edge` role finding.
-- Owned mutable paths: per card (render button/presentation, policy role
-  finding, ledger known-delta inputs, log, `PAPERCUTS.md` append)
-- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
-  `generation-index.md`
-- Approved concurrent siblings: `g16.107`, `g16.108`, `g16.097`. Serial
-  edges: none.
-- Worker capability class: capable coding model, medium reasoning (Rust)
-- Acceptance evidence and review oracle: the card's table
-- Stop conditions: per card. Escalation owner: Chatterbox
-
-### g16.107 — Validation hygiene bundle
-
-- Card: `g16/107-validation-hygiene-bundle.md`
-- Readiness: ready
-- Prerequisites: none. Completion: PR merged after accepted exact-head
-  review; `effigy doctor` exits 0 on `main`; boards leave the tree clean.
-- Owned mutable paths: per card (task catalogue, scan config, gate guard,
-  pack-install script, two drift scripts, GPUI harness files, Jetstream
-  adapter README, tests, log, `PAPERCUTS.md`)
-- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
-  `generation-index.md`
-- Approved concurrent siblings: `g16.106`, `g16.108`, `g16.097`. Serial
-  edges: none (`108` adds one selector line to `docs:check`; `107` edits
-  other task entries — coordinator rebases the later merge).
-- Worker capability class: capable coding model, medium reasoning
-- Acceptance evidence and review oracle: the card's table
-- Stop conditions: per card, per item. Escalation owner: Chatterbox
-
-### g16.108 — Docs spine compaction
-
-- Card: `g16/108-docs-spine-compaction.md`
-- Readiness: ready
-- Prerequisites: none. Completion: PR merged after accepted exact-head
-  review; `docs:check` and the new `docs:snippet-check` green.
-- Owned mutable paths: per card (handoffs, parity → archive, specs, guides,
-  contracts index, docs README retention rule, parity edit lines in g16
-  cards, HistoryCenter docs snippet, one script, one task line, the
-  historical-prefix lists of gates that object to the move — item 6, amended
-  2026-09-05 — log)
-- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
-  `generation-index.md`
-- Approved concurrent siblings: `g16.106`, `g16.107`, `g16.097`. Serial
-  edges: none.
-- Worker capability class: low-cost documentation model is adequate; medium
-  reasoning
-- Acceptance evidence and review oracle: the card's table
-- Stop conditions: per card. Escalation owner: Chatterbox
-
 ### g16.109 — v0.3.0 consumer adoption wave (15 sibling lanes)
 
 - Card: `g16/109-v030-consumer-adoption-wave.md` (per-repository table is
@@ -106,90 +51,43 @@ card or triage note says.
 - Acceptance evidence and review oracle: the card's table and lane rules
 - Stop conditions: per lane. Escalation owner: Chatterbox
 
-### g16.110 — `gpui-unofficial` feasibility spike
+### g16.118 — A1 overlay structure projection
 
-- Card: `g16/110-gpui-unofficial-feasibility-spike.md`
-- Readiness: ready; time-boxed to two worker days
-- Prerequisites: none. Completion: report PR merged on `main`; spike branch
-  pushed and left unmerged as evidence.
-- Owned mutable paths: the `spike/gpui-unofficial` branch; on `main` only
-  the report under `docs/logs/2026-09/` and `PAPERCUTS.md` (append)
+- Card: `g16/118-a1-overlay-structure-projection.md`
+- Readiness: ready. Owns the two-role vocabulary addition (`Heading`,
+  `Banner`) and the eight overlay rows.
+- Prerequisites: A1 tranches merged (satisfied). Completion: PR merged after
+  accepted exact-head review; eight empty-diff A1 receipts; cohort re-emitted.
+- Owned mutable paths: per card
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
-- Approved concurrent siblings: `g16.106`–`108`, `g16.109` lanes. Serial
-  edges: `g16.106` touches `packages/render/src/button.rs` on `main`; the
-  spike branch may diverge from it, which is acceptable for a spike.
-- Worker capability class: capable coding model, high reasoning (Rust,
-  gpui API migration); not frontier unless the worker escalates a blocker
-- Acceptance evidence and review oracle: the card's table; the reviewer
-  checks the licence transcript and that the AccessKit test reads the tree
-- Stop conditions: per card. Escalation owner: Chatterbox
-
-### g16.117 — Select A1 alignment
-
-- Card: `g16/117-select-a1-alignment.md`
-- Readiness: ready. One contract decision (chevron focusability) is
-  pending with the operator; the card names the default if unanswered.
-- Prerequisites: merged `g16.111`. Completion: PR merged after accepted
-  exact-head review with an empty-diff Select A1 receipt.
-- Owned mutable paths: per card (select contract, Svelte/React/render
-  Select, scenario file, receipt and divergence store, log, `PAPERCUTS.md`)
-- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
-  `generation-index.md`
-- Approved concurrent siblings: `g16.112`–`116` (113 skips the Select row),
-  `106`, `107`, `109` lanes. Serial edges: none.
-- Worker capability class: capable coding model, medium reasoning (Svelte,
-  React, Rust render)
+- Approved concurrent siblings: `g16.119` (disjoint rows; both repin at their
+  rebase, merge one at a time), `109` lanes. Serial edges: `g16.120` waits
+  for this merge.
+- Worker capability class: capable coding model, high reasoning (Rust
+  composition across eight components)
 - Acceptance evidence and review oracle: the card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
-### g16.112–g16.116 — Nucleus A1 tranches NP-1…NP-5
+### g16.119 — A1 focus and state semantics
 
-- Cards: `g16/112-nucleus-a1-np1-shell.md`, `113-…np2-navigation-overlays.md`,
-  `114-…np3-agent-workflow.md`, `115-…np4-settings-remediation.md`,
-  `116-…np5-command-attention.md`
-- Readiness: ready (foundation `g16.111` merged at `3dea40372`). Five
-  concurrent lanes, one PR each; owned paths are disjoint by row.
-- Prerequisites: none remaining. Completion per lane: PR merged after
-  accepted exact-head review with a validated A1 receipt or a recorded
-  divergence for every row in the card.
-- Owned mutable paths: per card (scenario files, A1 regression tests,
-  receipts for the card's rows, one-line render projection fixes only, and
-  the manifest `resolution` block plus a full cohort re-emit at the final
-  head — the runtime-identity rule in every tranche card)
+- Card: `g16/119-a1-focus-and-state-semantics.md`
+- Readiness: ready
+- Prerequisites: A1 tranches merged (satisfied). Completion: PR merged after
+  accepted exact-head review; five empty-diff A1 receipts; cohort re-emitted.
+- Owned mutable paths: per card
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
-- Approved concurrent siblings: each other, `g16.117`, `106`, `107`, `109`
-  lanes. Serial edges: none.
-- Worker capability class: capable coding model, medium reasoning
-- Acceptance evidence and review oracle: each card's table
-- Stop conditions: per card. Escalation owner: Chatterbox
-
-### g16.051 — Icon geometry native visual admission
-
-- Card: `g16/051-icon-geometry-native-visual-admission.md`
-- Readiness: ready — the lab's complete closed batch is merged
-  (poodle-lab `e4cdcad`); the card's Evidence Bundle section names it.
-- Prerequisites: satisfied. Completion: PR merged after accepted exact-head
-  review with a per-pair, per-direction admit/revise/reject verdict, the two
-  finding classes adjudicated with evidence, and retained digests recorded;
-  no public IconMorph surface.
-- Owned mutable paths: per card (Poodle-side admission records under the
-  execution log, this card, `PAPERCUTS.md` append). Lab files are read
-  only; an oracle correction is a request file for the lab, not a Poodle
-  edit.
-- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
-  `generation-index.md`
-- Approved concurrent siblings: `g16.112`–`117`, `109` lanes. Serial
-  edges: none.
-- Worker capability class: capable coding model, high reasoning (reads
-  Rust paint path and motion policy; human-reviewable verdict)
+- Approved concurrent siblings: `g16.118`, `109` lanes. Serial edges: none.
+- Worker capability class: capable coding model, high reasoning (GPUI
+  backend focus routing)
 - Acceptance evidence and review oracle: the card's table
 - Stop conditions: per card. Escalation owner: Chatterbox
 
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |
+| `g16.120` A1 landmarks and content roles | merged `g16.118` (`Heading`, `Banner` roles) | Chatterbox |
 | --- | --- | --- |
 | VL-1 Button MVP bootstrap | compiled in the `poodle-lab` repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
 | `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
@@ -199,8 +97,10 @@ card or triage note says.
 
 ## Merged since revision 6
 
-`g16.103` (PR #208), `g16.104` (PR #209), `g16.105` (PR #210), `g16.097`
-(v0.3.0 published from `85609d941`, closeout `1eadc581a`). Their cards
+`g16.103` (#208), `104` (#209), `105` (#210), `097` (v0.3.0 published from
+`85609d941`), `106` (#211), `108` (#212), `107` (#213), `110` (#214), `111`
+(#215), `114` (#216), `051` (#217), `117` (#218), `112` (#219), `116` (#220),
+`113` (#221), `115` (#222). Their cards
 carry the receipts; the coordinator reconciles README and index lines.
 
 ## History

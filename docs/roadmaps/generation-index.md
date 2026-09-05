@@ -6,9 +6,9 @@ Updated: 2026-09-05
 
 - `g16`
   - Status: active; strict-ready
-  - Range: `001`–`117` compiled; `001`–`111` merged or closed except the held
-    `052` design-guidance pilot; `112`–`117` (Nucleus A1 tranches, Select
-    alignment) and `109` (consumer adoption tier 2) in flight. Per-card truth
+  - Range: `001`–`120` compiled; `001`–`117` merged or closed except the held
+    `052` design-guidance pilot; `118`–`119` (A1 divergence repairs) and
+    `109` (consumer adoption tier 2) in flight; `120` held behind `118`. Per-card truth
     is the card's status line and execution log.
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behaviour gaps without inventing another
@@ -17,8 +17,10 @@ Updated: 2026-09-05
     29/29; A1 foundation merged (`111`); icon geometry admitted (`051`);
     docs spine compacted (`108`).
   - Ready frontier: `dispatch.md`.
-  - Next move: finish the A1 tranches and tier-2 adoption; then Nucleus V1
-    and the g17 rollover boundary, both Chatterbox planning items.
+  - Next move: land the A1 repairs (`118`–`120`) to bring GPUI accessibility
+    to 29/29 receipts; close tier-2 adoption; then Nucleus V1 (lab adapter
+    for the cohort's Poodle fixtures) and the g17 rollover boundary, both
+    Chatterbox planning items.
 
 ## Latest Completed Track
 

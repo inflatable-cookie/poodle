@@ -152,6 +152,9 @@ truth; this page is the index. Narrative history of the generation is in
 115. [115 — Nucleus A1 tranche NP-4 settings and remediation](115-nucleus-a1-np4-settings-remediation.md) — ready (foundation merged in PR #215)
 116. [116 — Nucleus A1 tranche NP-5 command and attention](116-nucleus-a1-np5-command-attention.md) — ready (foundation merged in PR #215)
 117. [117 — Select A1 alignment](117-select-a1-alignment.md) — ready; five real Select divergences from the `111` receipt, decided by the contract; one chevron decision pending
+118. [118 — A1 overlay structure projection](118-a1-overlay-structure-projection.md) — ready; `Heading`/`Banner` roles plus eight overlay rows from the divergence store
+119. [119 — A1 focus and state semantics](119-a1-focus-and-state-semantics.md) — ready; post-action focus, roving stops, and state projection for five rows
+120. [120 — A1 landmarks and content roles](120-a1-landmarks-and-content-roles.md) — held behind `118`; AppHeader, SplitView, AgentChatInput, AgentPlan
 
 ## Programmes
 
@@ -162,7 +165,7 @@ truth; this page is the index. Narrative history of the generation is in
 | HistoryCenter rejection surface and v0.3.0 release | complete; `0.3.0` published from `85609d941` (`097`), `0.2.3` never published | release notes 0.3.0, working rules "Release Certification" |
 | Compiled web distribution | complete, `056`–`061` | architecture 014 |
 | Consumer adoption of 0.3.0 | tier 1 done (Underlay `v0.9.8`, Longhorn, Soundcheck Library); tier 2 running, `109` | `109` card |
-| Nucleus GPUI parity | M1 29/29 complete (`062`–`093`); A1 foundation `111` merged, tranches `112`–`117` active; V1, V2, M2, adoption held | `nucleus-gpui-parity-programme.md` |
+| Nucleus GPUI parity | M1 29/29 complete (`062`–`093`); A1 12/29 receipted (`111`–`117` merged), 17 divergences under repair in `118`–`120`; V1, V2, M2, adoption held | `nucleus-gpui-parity-programme.md` |
 | Visual lab | `poodle-lab` repository; Button and icon-geometry batches captured; `051` admitted all six icon pairs | `visual-lab-unblock-runway.md`, lab repo |
 | Validation and docs hygiene | complete, `095`–`108` | working rules, cards |
 | GPUI accessibility route | upstream republish evaluated (`110`); adoption held on a crates.io build defect | contract 003, triage `20260905-111233-*` |
