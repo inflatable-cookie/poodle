@@ -15,7 +15,7 @@
     {
       "role": "separator",
       "name": "Resize",
-      "value": null,
+      "value": 0.0,
       "value_text": null,
       "states": {
         "disabled": false,
@@ -33,7 +33,7 @@
     },
     {
       "role": "button",
-      "name": "Collapse",
+      "name": "Collapse primary",
       "value": null,
       "value_text": null,
       "states": {

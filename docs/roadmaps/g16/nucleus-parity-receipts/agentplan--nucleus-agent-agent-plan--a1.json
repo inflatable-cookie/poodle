@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "ConfirmAction",
-  "scenario_id": "nucleus.settings.confirm-action",
+  "component": "AgentPlan",
+  "scenario_id": "nucleus.agent.agent-plan",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,30 +46,30 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount the production ConfirmAction node tree through HeadlessDriver with the shared scenario props",
-    "replay the shared scenario actions through GPUI test-platform dispatch"
+    "mount AgentPlan through the production renderer and HeadlessDriver",
+    "replay the shared Accept action through GPUI dispatch"
   ],
   "assertions": [
-    "trigger, backdrop, alert-dialog, close, cancel, and confirm semantics match the Svelte projection"
+    "plan heading and decision controls match the Svelte accessibility projection"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/confirm-action.gpui.json",
-      "sha256": "aa08070cdf9e989c120a9bd0dde50284b832c8fa414d024978d54920788c7f29"
+      "path": "test/nucleus-a11y/snapshots/agent-plan.gpui.json",
+      "sha256": "911c4cd67a8880c873d9096d49da3cae5565bd22d8a1016eaa27c97e0258dd27"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/confirm-action.svelte.json",
-      "sha256": "16f0823b22e7b84d0a266da03183f956c10697a734449a4a57a0b9c968129b89"
+      "path": "test/nucleus-a11y/snapshots/agent-plan.svelte.json",
+      "sha256": "efba7afe2337f64165129e9b1e3dfa8df8eb762542c425a142d49eac91de74f4"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/confirm-action.json",
-    "scenario_sha256": "608bb02e73de546d3fcf12218d19b4fb217587a504860b82bf273a9dd3731e11",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/confirm-action.gpui.json",
-    "gpui_snapshot_sha256": "aa08070cdf9e989c120a9bd0dde50284b832c8fa414d024978d54920788c7f29",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/confirm-action.svelte.json",
-    "svelte_snapshot_sha256": "16f0823b22e7b84d0a266da03183f956c10697a734449a4a57a0b9c968129b89",
+    "scenario_path": "test/nucleus-a11y/scenarios/agent-plan.json",
+    "scenario_sha256": "4d1f37ac4aa97c5c56c605e148aca279b9c0cf42e2d04cfeab8c395896aa6425",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/agent-plan.gpui.json",
+    "gpui_snapshot_sha256": "911c4cd67a8880c873d9096d49da3cae5565bd22d8a1016eaa27c97e0258dd27",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/agent-plan.svelte.json",
+    "svelte_snapshot_sha256": "efba7afe2337f64165129e9b1e3dfa8df8eb762542c425a142d49eac91de74f4",
     "web_only_exclusions": [],
     "diff": []
   }
