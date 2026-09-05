@@ -342,10 +342,10 @@ The pattern works identically across all value-bearing components:
 **Presentation props:**
 ```svelte
 <Button variant="primary" />     <!-- "primary" | "secondary" | "ghost" -->
-<Button tone="danger" />         <!-- "default" | "danger" -->
+<Button tone="danger" />         <!-- "default" | "danger" | "success" | "warning" -->
 <Button size="sm" />             <!-- "xs" | "sm" | "md" | "lg" | "xl" -->
 <Button sizeRole="prominent" />  <!-- semantic size offset -->
-<Stack direction="horizontal" /> <!-- layout orientation -->
+<Stack direction="row" />        <!-- "row" | "column" -->
 ```
 
 **Accessibility props:**
@@ -858,7 +858,7 @@ snippet without `triggerIsInteractive`.
 ### Table
 
 ```svelte
-<script>
+<script lang="ts">
   import { Table } from "@inflatable-cookie/poodle-svelte";
   import type { TableColumn, TableRow } from "@inflatable-cookie/poodle-svelte";
 
@@ -882,7 +882,7 @@ snippet without `triggerIsInteractive`.
 Full-featured data table with sorting, column visibility, bulk actions, and export:
 
 ```svelte
-<script>
+<script lang="ts">
   import { DataTable } from "@inflatable-cookie/poodle-svelte";
   import type { TableColumn, TableRow } from "@inflatable-cookie/poodle-svelte";
 </script>
@@ -900,7 +900,7 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 ### Tabs
 
 ```svelte
-<script>
+<script lang="ts">
   import { Tabs } from "@inflatable-cookie/poodle-svelte";
   import type { TabItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -930,7 +930,7 @@ Tab variants: `"card"` | `"pill"` | `"block"`
 ### Breadcrumbs
 
 ```svelte
-<script>
+<script lang="ts">
   import { Breadcrumbs } from "@inflatable-cookie/poodle-svelte";
   import type { BreadcrumbItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -962,7 +962,7 @@ Tab variants: `"card"` | `"pill"` | `"block"`
 ### Menu
 
 ```svelte
-<script>
+<script lang="ts">
   import { Menu, Button } from "@inflatable-cookie/poodle-svelte";
   import type { MenuItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -1001,9 +1001,9 @@ Tab variants: `"card"` | `"pill"` | `"block"`
 ### StatusIndicator
 
 ```svelte
-<StatusIndicator tone="success" label="Online" />
-<StatusIndicator tone="danger" label="Offline" />
-<StatusIndicator tone="pending" label="Syncing" />
+<StatusIndicator status="success" label="Online" />
+<StatusIndicator status="danger" label="Offline" />
+<StatusIndicator status="pending" label="Syncing" />
 ```
 
 ### Progress
@@ -1015,7 +1015,7 @@ Tab variants: `"card"` | `"pill"` | `"block"`
 ### ToastStack (composite)
 
 ```svelte
-<script>
+<script lang="ts">
   import { ToastStack } from "@inflatable-cookie/poodle-svelte";
   import type { ToastItem } from "@inflatable-cookie/poodle-svelte";
 
@@ -1064,11 +1064,12 @@ Tab variants: `"card"` | `"pill"` | `"block"`
 
 ```svelte
 <RadioGroup
-  id="plan"
+  name="plan"
+  ariaLabel="Plan"
   options={[
     { value: "free", label: "Free" },
     { value: "pro", label: "Pro" },
-    { value: "enterprise", label: "Enterprise", isDisabled: true },
+    { value: "enterprise", label: "Enterprise", disabled: true },
   ]}
   value={plan}
   onValueChange={(value) => plan = value}
@@ -1079,7 +1080,7 @@ Tab variants: `"card"` | `"pill"` | `"block"`
 
 ```svelte
 <SegmentedControl
-  id="view"
+  ariaLabel="View"
   options={[
     { value: "grid", label: "Grid" },
     { value: "list", label: "List" },
@@ -1174,7 +1175,7 @@ Grouped options:
 ### CommandPalette
 
 ```svelte
-<script>
+<script lang="ts">
   import { CommandPalette } from "@inflatable-cookie/poodle-svelte";
   import type { CommandActionItem } from "@inflatable-cookie/poodle-svelte";
 

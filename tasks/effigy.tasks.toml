@@ -585,6 +585,10 @@
 "docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
 "docs:dev" = [{ task = "svelte:run" }]
 "docs:build" = [{ task = "svelte:build" }]
+# Guide snippets must compile against the live poodle-svelte surface
+# (g16.108): every fenced ```svelte block in docs/guides/*.md is checked in
+# a throwaway project. Needs network/cache for its first bun install.
+"docs:snippet-check" = "bun packages/svelte/preview/scripts/docs-snippet-check.ts"
 "docs:check" = [
   { task = "gate:snapshot" },
   { task = "core:build" },
@@ -595,6 +599,7 @@
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
+  { task = "docs:snippet-check" },
   { task = "docs:react-prop-drift" },
   { task = "check:parity-evidence-ledger" },
   { task = "react:docs" },
