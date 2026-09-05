@@ -100,6 +100,25 @@ card or triage note says.
 - Acceptance evidence and review oracle: the card's table and lane rules
 - Stop conditions: per lane. Escalation owner: Chatterbox
 
+### g16.110 — `gpui-unofficial` feasibility spike
+
+- Card: `g16/110-gpui-unofficial-feasibility-spike.md`
+- Readiness: ready; time-boxed to two worker days
+- Prerequisites: none. Completion: report PR merged on `main`; spike branch
+  pushed and left unmerged as evidence.
+- Owned mutable paths: the `spike/gpui-unofficial` branch; on `main` only
+  the report under `docs/logs/2026-09/` and `PAPERCUTS.md` (append)
+- Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
+  `generation-index.md`
+- Approved concurrent siblings: `g16.106`–`108`, `g16.109` lanes. Serial
+  edges: `g16.106` touches `packages/render/src/button.rs` on `main`; the
+  spike branch may diverge from it, which is acceptable for a spike.
+- Worker capability class: capable coding model, high reasoning (Rust,
+  gpui API migration); not frontier unless the worker escalates a blocker
+- Acceptance evidence and review oracle: the card's table; the reviewer
+  checks the licence transcript and that the AccessKit test reads the tree
+- Stop conditions: per card. Escalation owner: Chatterbox
+
 ## Held lanes (not dispatchable)
 
 | Lane | Gate | Owner of the gate |

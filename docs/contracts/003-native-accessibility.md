@@ -1,7 +1,7 @@
 # 003 - Native Accessibility
 
 Status: active
-Updated: 2026-08-10
+Updated: 2026-09-05
 Owner: Poodle core
 Applies to: every contract with ARIA requirements, on the GPUI and Jetstream targets
 
@@ -55,6 +55,18 @@ Roles and bounds are derived — `Widget` gives the role, layout gives the
 `computed_rect` — so a component only states what cannot be inferred. A `Label`
 and a text `Button` are announced from their own text without any explicit
 labelling; an icon-only control is the case that needs it.
+
+## Update 2026-09-05
+
+Upstream gpui merged AccessKit on 2026-05-27 (zed-industries/zed#56065).
+crates.io `gpui` is still 0.2.2, but `gpui-unofficial` republishes upstream
+unmodified at every Zed release tag (Apache-2.0; the previously GPL
+`ztracing`/`zlog` crates were relicensed Apache upstream on 2026-09-01 and are
+clean from republish 1.19.0-pre). The operator chose to evaluate that route
+(`../roadmaps/g16/110-gpui-unofficial-feasibility-spike.md`) instead of
+building a fork-free adapter. The advice below stays in force until the spike
+reports; "no API to build against" is no longer true of upstream, only of the
+crates.io 0.2.2 pin.
 
 ## Consequences For Planning
 
