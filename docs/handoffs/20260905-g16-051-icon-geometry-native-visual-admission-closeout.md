@@ -31,7 +31,8 @@ eligibility, and public Icon APIs remain unchanged.
   metadata after empty-scene teardown, not a paint or contracted delta. Six
   reverse/frozen findings are direction-blind oracle expectations; the correct
   target is reverse `endpoint-from` under architecture 012.
-- **Still open:** independent exact-head review and orchestrator merge decision.
+- **Still open:** independent exact-head review and orchestrator merge decision;
+  worker PR is [#217](https://github.com/inflatable-cookie/poodle/pull/217).
 - **Active spec lane:** `docs/architecture/012-semantic-motion-policy.md` and
   `docs/architecture/013-icon-geometry-substrate.md`.
 - **Current batch card:** `docs/roadmaps/g16/051-icon-geometry-native-visual-admission.md`.

@@ -10,7 +10,7 @@ Branch: `worker/g16-051-icon-geometry-native-visual-admission`
 Planning base: `3dbabac3990fb5f3856305b7c8f971039b0a81be` (`origin/main`)
 Lab bundle: `poodle-lab/docs/logs/2026-09/05-111446-g01-002-icon-geometry-batch-bundle`
 Lab run: `2026-09-05T11-14-46` (`g01.002`)
-Worker PR: pending
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/217
 
 ## Outcome
 
