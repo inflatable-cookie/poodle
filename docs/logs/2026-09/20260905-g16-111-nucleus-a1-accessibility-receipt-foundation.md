@@ -117,8 +117,8 @@ is committed because the pair does not agree.
 - `effigy test:nucleus-a11y`: pass, 4 tests (three rows plus the roster).
 - `bun test scripts/nucleus-parity-receipts.test.ts scripts/parity-evidence-ledger.test.ts`: pass, 17 tests.
 - `effigy check:parity-evidence-ledger`: pass, 176 rows.
-- `effigy docs:check`: VALIDATION_DOCS_CHECK
-- `effigy ci:web`: VALIDATION_CI_WEB
+- `effigy docs:check`: pass.
+- `effigy ci:web`: pass on the final head (385 vitest files, 3710 tests; pack-install 22 tests). A first run failed only on the package-install certification scope for the root manifest edit described below; the edit was reverted.
 - `git diff --check origin/main...HEAD`: clean.
 - Cargo.lock unchanged by the `sha2` dev-dependency (already in the graph).
 - No `*-windowed`, native-visual, or capture selector was run.
