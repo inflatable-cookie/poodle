@@ -51,9 +51,10 @@ attributes. NP-4 settings rows use the same evidence contract with named
 
 ## g16.118 rows (recorded 2026-09-05)
 
-The eight overlay rows were repaired for structure. DetailItem and ToastHost
-reach an empty diff and hold receipts; their stores are deleted. Six rows keep
-a store because their residual cause is outside this card's fixed boundary.
+The eight overlay rows were repaired for structure. DetailItem, CommandPalette
+and ToastHost reach an empty diff and hold receipts; their stores are deleted.
+Five rows keep a store because their residual cause is focus ownership assigned
+to `g16.119`.
 Each directory holds `<row>.a1-diff.json`, `<row>.gpui.json`, `svelte.json`,
 and `attributes.json` from the same executed run.
 
@@ -62,40 +63,28 @@ Reproduce any row with
 --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions
 <row>_a1`.
 
-### Initial overlay focus (`g16.119` class, not owned by `g16.118`)
+### Initial overlay focus (`g16.119` owner)
 
 The overlay structure now matches; what remains is where focus lands when the
 overlay opens. `poodle-node` has no autofocus channel and GPUI focus routing
-is `g16.119`'s owned path, so no repair was applied here. `g16.119` as written
-owns five other rows, so these four need a lane decision.
+is `g16.119`'s owned path, so no repair was applied here. The operator ruling
+assigns all five rows below to `g16.119`.
 
-| Row | Node | Attribute | GPUI | Svelte |
-| --- | --- | --- | --- | --- |
-| Dialog | 1, `dialog` "Delete file" | `focused` | `false` | `true` |
-| Popover | 2, `dialog` "Quick settings" | `focused` | `false` | `true` |
-| ConfirmAction | 2, `alertdialog` "Delete workspace?" | `focused` | `false` | `true` |
-| MessageCenter | 1, `dialog` "Notifications" | `focused` | `false` | `true` |
+| Row | Node | Attribute | GPUI | Svelte | Owner |
+| --- | --- | --- | --- | --- | --- |
+| Dialog | 1, `dialog` "Delete file" | `focused` | `false` | `true` | `g16.119` |
+| Popover | 2, `dialog` "Quick settings" | `focused` | `false` | `true` | `g16.119` |
+| ConfirmAction | 2, `alertdialog` "Delete workspace?" | `focused` | `false` | `true` | `g16.119` |
+| MessageCenter | 1, `dialog` "Notifications" | `focused` | `false` | `true` | `g16.119` |
+| ModelPicker | 0, `button` "Model: Atlas" | `focused` | `true` | `false` | `g16.119` |
+| ModelPicker | 3, `radio` "Atlas Balanced model" | `focused` | `false` | `true` | `g16.119` |
 
-### ModelPicker
+### CommandPalette — empty-diff receipt
 
-Structure matches (dialog, radiogroup, radios, `expanded` true). The residual
-is focus only, same class as above.
+The operator ruling added `NodeRole::SearchBox` beside `Heading` and `Banner`.
+The production TextInput now reports SearchBox and only a non-empty actual
+value as `value_text`; ActionDiscoveryPanel now nests its interactive button
+inside each option. The mounted paired snapshots agree with an empty diff, so
+CommandPalette emits an A1 receipt.
 
-| Node | Attribute | GPUI | Svelte |
-| --- | --- | --- | --- |
-| 0, `button` "Model: Atlas" | `focused` | `true` | `false` |
-| 3, `radio` "Atlas Balanced model" | `focus_order` | `null` | `1` |
-| 3, `radio` "Atlas Balanced model" | `focused` | `false` | `true` |
-
-### CommandPalette — blocked on vocabulary
-
-The dialog, heading, close button, status, listbox and group lists now agree.
-Fourteen entries remain from three causes; the first is a card stop condition
-(`g16.118` owns exactly two new roles, `Heading` and `Banner`).
-
-| Cause | Attribute | GPUI | Svelte | Owner |
-| --- | --- | --- | --- | --- |
-| The contract's `TextInput type="search"` has no `poodle-node` role | node 3 `role` | `textbox` | `searchbox` | needs a third role; escalated |
-| TextInput projects its placeholder as the value | node 3 `value_text` | `"Search commands, panels, and actions"` | `null` | TextInput, out of this card's owned paths |
-| `ActionDiscoveryPanel` rows have no inner interactive card node; Svelte nests a `button` named by the item title inside each `option` | nodes 8–13 `role`, `name`, `focus_order` | option/list only | option then button, each button a tab stop | `ActionDiscoveryPanel`, out of this card's owned paths |
-| Initial focus | node 3 `focused` | `false` | `true` | same class as above |
+Receipt: `commandpalette--nucleus-attention-command-palette--a1.json`.

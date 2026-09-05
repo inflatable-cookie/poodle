@@ -5,14 +5,19 @@ Date: 2026-09-05
 Card: `docs/roadmaps/g16/118-a1-overlay-structure-projection.md`
 Base: `origin/main` at `ef483d029` (dispatch manifest revision 7)
 Branch: `worker/g16-118-a1-overlay-structure-projection`
+Recovery input: exact PR #224 head `d286cdd81e37db1b2f41a4c02069c4236c4cfcb6`
+
+Operator ruling: revision 20 adds `NodeRole::SearchBox` beside `Heading` and
+`Banner`, finishes the CommandPalette structure, assigns the five remaining
+focus-only stores to `g16.119`, and emits no receipts for those stores.
 
 ## Outcome
 
-The bounded vocabulary addition landed: `NodeRole::Heading` and
-`NodeRole::Banner`, mapped exhaustively in the GPUI backend record path
-(new `packages/gpui/node-backend/src/a11y.rs`; paint stays a no-op on
-crates.io GPUI) and in the Jetstream AccessKit projection. No third role was
-added.
+The operator ruling landed: `NodeRole::SearchBox` was added beside
+`NodeRole::Heading` and `NodeRole::Banner`, mapped exhaustively in the GPUI
+backend record path (new `packages/gpui/node-backend/src/a11y.rs`; paint stays
+a no-op on crates.io GPUI), the Jetstream AccessKit projection, and the
+mounted A1 projection.
 
 Eight overlay rows were repaired against their executed Svelte snapshots:
 
@@ -27,10 +32,11 @@ Eight overlay rows were repaired against their executed Svelte snapshots:
   `controls` resolves to a real index. DetailItem's description moves inside
   its info Popover, as `DetailItem.svelte` has it, and the composition now
   projects exactly one trigger button.
-- **CommandPalette** — heading role on the title, `described_by` on the
-  surface rather than the overlay root, group `<ul>`s projected as lists, and
-  the shared Dialog backdrop node demoted because the web palette's overlay is
-  an `aria-hidden` div.
+- **CommandPalette** — heading role on the title, SearchBox role and explicit
+  actual-value projection on the query, `described_by` on the surface rather
+  than the overlay root, group `<ul>`s projected as lists, nested action
+  buttons inside options, and the shared Dialog backdrop node demoted because
+  the web palette's overlay is an `aria-hidden` div.
 - **ModelPicker** — trigger `expanded` and `controls` follow open state;
   radios carry their Svelte accessible name.
 - **MessageCenter** — `Banner` landmark on the header, `Heading` on the
@@ -50,9 +56,10 @@ emits with the rest of the cohort.
 Empty-diff A1 receipts, divergence stores deleted:
 
 - `detailitem--nucleus-settings-detail-item--a1.json`
+- `commandpalette--nucleus-attention-command-palette--a1.json`
 - `toasthost--nucleus-attention-toast-host--a1.json`
 
-Six rows keep a refreshed store under
+Five rows keep a refreshed focus-only store under
 `docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/`, each with
 `<row>.a1-diff.json`, `<row>.gpui.json`, `svelte.json` and
 `attributes.json` from one executed run:
@@ -63,28 +70,18 @@ Six rows keep a refreshed store under
 | Popover | 1 | overlay surface not focused on open |
 | ConfirmAction | 1 | overlay surface not focused on open |
 | MessageCenter | 1 | overlay surface not focused on open |
-| ModelPicker | 3 | trigger keeps focus; first radio is not a tab stop |
-| CommandPalette | 14 | `searchbox` role, TextInput placeholder as `value_text`, missing ActionDiscoveryPanel card button, initial focus |
-
-CommandPalette fell to 34 → 14 entries. Its remaining causes are all outside
-the card's fixed boundary; the exact attributes are in the divergence README.
+| ModelPicker | 2 | trigger and selected-radio initial focus |
 
 ## Escalations
 
-1. **Initial overlay focus has no lane.** `g16.119` owns focus for Menu,
-   AgentQuestion, AgentTranscript, RadioGroup and SegmentedControl. Dialog,
-   Popover, ConfirmAction, MessageCenter and ModelPicker are structurally
-   aligned and cannot reach an empty diff until a lane owns overlay autofocus.
-   `poodle-node` has no autofocus channel; GPUI focus routing is
-   `g16.119`'s owned path, so nothing was changed here.
-2. **CommandPalette needs `NodeRole::SearchBox`.** The contract already
-   specifies `TextInput type="search"`. The card forbids a third role, so the
-   row was left short by design.
-3. **Three A1 receipts have no live selector.** `callout`,
+1. **`g16.119` owns the remaining focus-only stores.** Dialog, Popover,
+   ConfirmAction, MessageCenter and ModelPicker are structurally aligned; the
+   native lane does not own overlay autofocus.
+2. **Three A1 receipts have no live selector.** `callout`,
    `editable-label` and `text-input` A1 receipts are committed but no GPUI
    test emits them; only their `source_commit` could be moved in this repin.
    Their emitting tests need restoring before the next cohort re-emit.
-4. **Two `poodle-render` unit tests are red on `origin/main`** (see
+3. **Two `poodle-render` unit tests are red on `origin/main`** (see
    `PAPERCUTS.md`); not repaired here.
 
 ## Validation
@@ -94,18 +91,21 @@ the card's fixed boundary; the exact attributes are in the divergence README.
   two failures that are already red on `origin/main`
 - `effigy test:jetstream-adapter` — 163 passed
 - `effigy test:nucleus-a11y` — 30 passed
-- `effigy check:parity-evidence-ledger` — 176 rows validated
+- `effigy test:parity-evidence-ledger` — 6 passed, 0 failed; 176 rows validated
 - `effigy test:nucleus-parity-receipts` — 11 pass
 - `effigy test:a11y` — 179 passed
 - `effigy docs:check` — passed
-- `git diff --check` — clean
-- `effigy ci:web` — 3740 passed, 386 files. A first run failed only on the
-  known flaky React Tabs controlled-focus case, on a `packages/react` tree
-  byte-identical to `origin/main`; recorded in `PAPERCUTS.md`.
+- `effigy ci:web` — 3740 passed, 386 files
+- `git diff --check` — clean before final commit
 
-The cohort was repinned to `71f9175d99bfbfcaf26446e536db0c191bb79eb8` with lock digest
+The cohort was repinned to implementation head
+`7ad28f7b9716f22f9a28cc29b6a81b97d4d2e59b` with the existing lock digest
 `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c` and
-re-emitted through `effigy regressions:native`; the ledger was regenerated.
+re-emitted through `effigy regressions:native`; the ledger was regenerated and
+validated. The initial parallel ledger run timed out once under concurrent docs
+build load; the isolated rerun passed. `cargo test --manifest-path
+packages/render/Cargo.toml` still has the two pre-existing unrelated failures
+listed in `PAPERCUTS.md`.
 No windowed selector was run.
 
 ## Review state

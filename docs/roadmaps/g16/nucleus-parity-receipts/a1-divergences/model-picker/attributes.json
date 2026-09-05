@@ -12,12 +12,6 @@
     },
     {
       "index": 3,
-      "field": "focus_order",
-      "gpui": null,
-      "svelte": 1
-    },
-    {
-      "index": 3,
       "field": "focused",
       "gpui": false,
       "svelte": true
