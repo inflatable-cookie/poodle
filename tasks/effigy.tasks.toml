@@ -434,7 +434,10 @@
 # The family-level Treatment layer is retired. Historical records and the
 # architecture tombstone are preserved; active code, contracts, guides,
 # previews, and current evidence must use component Recipes directly.
-"drift:recipes" = "bun scripts/check-recipe-only-surface.ts"
+"drift:recipes" = [
+  { run = "bun scripts/check-recipe-only-surface.ts" },
+  { run = "bun test scripts/check-recipe-only-surface.test.ts" },
+]
 # g16.028 drag-and-drop closeout. The programme's certification claim is a
 # negative one — no programme component owns an HTML drag lifecycle or a local
 # drag index any more — so it needs an executable proof. Planting one

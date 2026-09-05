@@ -1,13 +1,13 @@
 # g16.108 — Docs Spine Compaction
 
-Status: complete — awaiting re-review after exact-head blockers (rev 2)
+Status: complete — awaiting re-review after operator decision execution (rev 3)
 Date: 2026-09-05
-Card: `docs/roadmaps/g16/108-docs-spine-compaction.md`
-Dispatch: `docs/roadmaps/dispatch.md` revision 7 (2026-09-04)
-Base: `9481cc95dbd65c1dff8c73a6b74b9504cf19b077` — the promoted dispatch
-snapshot; stale since review. `origin/main` is now `da8c9c37a` (g16.097
-merged at `1eadc581a`, v0.3.0 published; g16.109 and g16.110 promoted
-ready). This branch is not rebased; the later merge rebases.
+Card: `docs/roadmaps/g16/108-docs-spine-compaction.md` (amended on main at
+`954a0252`, item 6 "Historical-prefix gates", manifest revision 14)
+Dispatch: `docs/roadmaps/dispatch.md` revision 7 text; coordinator manifest
+revision 14 per operator
+Base: `954a025222aeb2d7f126ed7f620c2948de58efb9` (`origin/main`, promoted —
+the commit that last touched `dispatch.md`; branch rebased onto it)
 Worker PR: open from this branch (see closeout)
 Handoff: `docs/handoffs/20260905-...-g16-108-docs-spine-compaction.md`
 
@@ -191,6 +191,50 @@ against the shipped surface.
 Same-class stale `docs/specs/…` mentions remain in `docs/research/`
 value-track records (019, 038) and historical logs; both are out of owned
 scope and not link-checked — left as point-in-time records.
+
+## Revision 3 — Operator decision execution (2026-09-05, manifest revision 14)
+
+Operator decision (card amendment `954a0252`, item 6): the drift gate's
+hardcoded historical prefixes are in scope for this lane; add
+`docs/archive/` beside `docs/logs`, `docs/parity`, `docs/roadmaps`; plant a
+test proving an active-path reference under `docs/guides/` still fails; audit
+any other gate whose only objection is a hardcoded prefix; never edit
+archived content to satisfy a gate; do not hold the relocation.
+
+Executed on top of a rebase onto promoted main `954a0252` (11 commits
+replayed cleanly):
+
+- **Gate change** — `scripts/check-recipe-only-surface.ts` gains
+  `docs/archive/` in `HISTORICAL_PREFIXES` (the only code change; 6 lines).
+  `drift:recipes` in `tasks/effigy.tasks.toml` is now a composition that runs
+  the gate scan and its planted tests, so the proof rides `docs:check` and
+  `ci-web`.
+- **Planted test** — `scripts/check-recipe-only-surface.test.ts` (new): runs
+  the gate hermeticly in a throwaway mini-repo. Test 1 plants a
+  retired-token line under `docs/guides/` plus the identical wording under
+  `docs/archive/parity/` — the gate fails listing only the guides file
+  (active paths still bite; archived content is never edited for a gate).
+  Test 2 proves archive-only content is green. Forbidden literals are
+  assembled at runtime so the gate never trips on its own test source.
+- **Other-gate audit** — gates with hardcoded doc-prefix exclusions were
+  enumerated by grepping every `.ts`/`.rs`/`.toml`/`.json` under
+  `scripts/`, `packages/`, `test/`, `tasks/` for `docs/logs`, `docs/parity`,
+  `docs/roadmaps`. Only `drift:recipes`
+  (`scripts/check-recipe-only-surface.ts`) is a repo-wide content scanner
+  whose historical list needed the follow. Inspected and clean:
+  `lint-docs.ts` validators scan contracts/guides/catalog surfaces and JSON
+  manifests, not `docs/archive/`; `audit-repository-security.ts` is
+  path-independent over tracked files (identical content pre/post move);
+  `parity-evidence-ledger.ts`/`nucleus-parity-receipts.ts` read fixed paths.
+  No other gate required an analogous update.
+- **Rebase fallout** — `g16.106` merged on main (PR #211) with a top-level
+  handoff; its lane is now closed, so that brief was archived to
+  `docs/handoffs/archive/2026-09/` under the retention rule. Counts:
+  185 pre-existing files (184 at the original base plus g16.106's brief),
+  176 archived, 9 retained top-level briefs, plus this lane's handoff = 10
+  top-level, 186 total.
+- **Authorization recorded** in the card (item 6) and this log; archived
+  parity content untouched; relocation stands.
 
 ## Validation
 

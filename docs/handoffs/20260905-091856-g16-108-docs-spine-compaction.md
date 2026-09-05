@@ -37,11 +37,10 @@ v1) with nothing to stop regressions.
 
 ## Current State
 
-PR open from this branch at base `9481cc95dbd65c1dff8c73a6b74b9504cf19b077` —
-the promoted dispatch snapshot, now **stale**: `origin/main` has advanced to
-`da8c9c37a2a5fd43d7767434fccc5dfceceb81e6` (g16.097 merged at `1eadc581a`
-with v0.3.0 published; g16.109 and g16.110 promoted ready). This branch is
-not rebased; the later merge will rebase per the coordinator. Execution log:
+PR open from this branch, rebased onto promoted main `954a025222aeb2d7f126ed7f620c2948de58efb9`
+(manifest revision 14; the commit that last touched `docs/roadmaps/dispatch.md`,
+which amended this card with item 6 "Historical-prefix gates" authorizing the
+drift-gate prefix update and planted test). Execution log:
 `docs/logs/2026-09/20260905-g16-108-docs-spine-compaction.md`.
 
 - **Handoffs**: 175 closed-lane files archived to
@@ -76,17 +75,18 @@ not rebased; the later merge will rebase per the coordinator. Execution log:
   gains `docs/archive/` so the retired-Treatment drift gate follows the
   archived corpus (required for `docs:check` green).
 
-**Open cards per `origin/main` `da8c9c37` (dispatch revision 7):** g16.051
-(held), g16.052 (held), g16.106 and g16.107 (concurrent workers), g16.108
-(this lane), g16.109 (consumer adoption wave), g16.110 (feasibility spike).
-g16.097 is **closed**: merged with v0.3.0 published (`1eadc581a`). Held
-non-card directions (Jetstream admission, VL-1 lab, visual tranche,
-citations/nested menus) likewise untouched. No handoff files exist for
-051/052/097/106/107/109/110, so no open-lane brief was moved; the 9 kept
-files above are the full indeterminate-or-open remainder. Count check: the
-base snapshot held 184 handoff files; this head archives 175 of them, keeps
-9 top-level briefs, and adds this g16.108 handoff — 10 top-level files, 185
-total.
+**Open cards per `origin/main` `954a0252` (manifest revision 14):** g16.051
+(held), g16.052 (held), g16.107 (concurrent worker), g16.108 (this lane),
+g16.109 (consumer adoption wave), g16.110 (feasibility spike), g16.111–116
+(Nucleus A1 accessibility programme). g16.097 and g16.106 are **closed**
+(097: v0.3.0 published at `1eadc581a`; 106: merged in PR #211 at
+`94febafad`). Held non-card directions (Jetstream admission, VL-1 lab,
+visual tranche, citations/nested menus) likewise untouched. No open-lane
+brief was moved. Count check: 185 pre-existing handoff files (184 at the
+original base plus g16.106's brief added at its merge); this head archives
+176 of them (g16.106's closed-lane brief included, per the retention rule),
+keeps 9 top-level briefs, and adds this g16.108 handoff — 10 top-level
+files, 186 total.
 
 ## Stop Conditions
 
@@ -95,6 +95,19 @@ total.
 - Spec move breaking a link needing a content decision → none: no
   link-checked file referenced any moved spec; kept-spec `Depends on:` headers
   were repointed without content changes.
+
+## Revision 3 — Operator Decision Execution (2026-09-05)
+
+Card amendment `954a0252` (item 6, manifest revision 14) authorizes the
+historical-prefix gate work in this lane. Executed: `docs/archive/` added to
+`HISTORICAL_PREFIXES` in `scripts/check-recipe-only-surface.ts`;
+`drift:recipes` now composes the gate scan with planted tests
+(`scripts/check-recipe-only-surface.test.ts`) proving an active-path
+reference under `docs/guides/` still fails while `docs/archive/parity/`
+stays exempt; other prefix-hardcoded gates audited (none required the
+analogous change — each named in the execution log). Branch rebased onto
+`954a0252`; g16.106's closed-lane handoff archived under the retention rule.
+Archived parity content was never edited for a gate; the relocation stands.
 
 ## Revision 2 — Review Response (blockers from exact-head review of `eeb8fa2f`)
 
