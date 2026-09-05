@@ -10,3 +10,9 @@ and Cargo.lock resolution used by the mounted run; changing the runtime source
 requires a new run and a new receipt. M1 receipts may keep `artifact_paths`
 empty; every nonempty entry has the exact repository-relative `path` and its
 lowercase SHA-256 `sha256`, and the validator checks the file and digest.
+
+A1 receipts (g16.111) are named `<component>--<scenario>--a1.json` and pair
+the mounted GPUI node-tree projection with the mounted Svelte DOM for one
+shared scenario. An executed A1 run whose snapshots disagree emits no receipt;
+its snapshots and diff are recorded under `a1-divergences/` (ignored by the
+validator) until the owning tranche repairs the component.

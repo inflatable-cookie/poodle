@@ -1,0 +1,118 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "Select",
+  "scenario_id": "nucleus.navigation.select",
+  "scenario_path": "test/nucleus-a11y/scenarios/select.json",
+  "scenario_sha256": "a04fe29171e9e3630fb103742ad6eb0354060394c80f96519c47170f36bb31a8",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "combobox",
+      "name": "Fruit",
+      "value": null,
+      "value_text": "Banana",
+      "states": {
+        "expanded": true,
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [
+          1
+        ],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    },
+    {
+      "role": "listbox",
+      "name": null,
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "selected": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "option",
+      "name": "Apple",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "selected": false,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "option",
+      "name": "Banana",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "selected": true,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "option",
+      "name": "Cherry",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "selected": false,
+        "disabled": true
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # g16.111 — Nucleus A1 Accessibility Receipt Foundation
 
-Status: complete with one reported divergence — awaiting orchestrator review
+Status: complete — two validated A1 receipts plus one operator-accepted recorded divergence; awaiting orchestrator review
 Date: 2026-09-05
 Card: `docs/roadmaps/g16/111-nucleus-a1-accessibility-receipt-foundation.md`
 Dispatch: `docs/roadmaps/dispatch.md` revision 7
@@ -93,8 +93,13 @@ reference. The positional diff has 16 entries; the semantic causes are:
 Reproduce: `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions select_a1 -- --ignored`;
 with `POODLE_NUCLEUS_RECEIPT_DIR` set the run writes `select.gpui.json` and
 `select.a1-diff.json` beside the receipts. The Svelte snapshot is committed
-at `test/nucleus-a11y/snapshots/select.svelte.json`; no GPUI Select snapshot
-is committed because the pair does not agree.
+at `test/nucleus-a11y/snapshots/select.svelte.json`. The executed GPUI
+snapshot and the diff are stored in the receipt store under
+`docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/select/` (not a
+receipt; the validator ignores the subdirectory), so no `test/nucleus-a11y`
+GPUI snapshot exists for Select and no ledger cell moves. Operator decision
+2026-09-05: the Select repair is not pulled forward; the amended card accepts
+two validated A1 receipts plus this recorded divergence.
 
 ## Stop conditions met
 

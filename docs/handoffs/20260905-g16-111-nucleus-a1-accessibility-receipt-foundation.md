@@ -50,8 +50,17 @@ authoritative.
   dependency.
 - Receipt schema `proof_level: "A1"` with an `accessibility` block; validator
   and ledger consume validated A1 receipts (Switch, Tabs now `mounted`).
-- Select diverges from the Svelte reference; its proof is `#[ignore]` with the
-  diff recorded in the log as the NP-2 (`g16.113`) repair candidate.
+- Select diverges from the Svelte reference (operator-accepted 2026-09-05:
+  two validated receipts plus one honestly recorded divergence, no mounted
+  cell for Select). Its proof is `#[ignore]`; both snapshots and the 16-entry
+  diff are stored under
+  `docs/roadmaps/g16/nucleus-parity-receipts/a1-divergences/` with the exact
+  attributes: trigger role `combobox` (GPUI) vs `button` (Svelte) and the
+  resulting `value_text` "Banana" vs null; GPUI's role-less chevron icon vs
+  Svelte's focusable "Close options" indicator button; listbox name null
+  (GPUI) vs "Fruit" (Svelte `aria-label`); option rows not focusable (GPUI)
+  vs sequential focus stops (Svelte `<button role="option">`). Repair owner:
+  NP-2 (`g16.113`).
 
 ## Checks Run
 
