@@ -10,7 +10,7 @@ owner: Poodle Northstar orchestrator
 created: 2026-09-05
 updated: 2026-09-05
 base: ef9049f158863ec181dee46123a8e59c0c957091
-runtime_checkpoint: b033a1565f129b776a4d6e3cf8ec9ae7aa53afcf
+runtime_checkpoint: 47f1caff0b9d749b0026c3bb2b8ada53aa76a06b
 tags: [coordination, handoff, worker, g16, g16.115]
 ---
 
@@ -37,7 +37,7 @@ Chatterbox.
 ## Cohort identity
 
 The complete 34-file Nucleus receipt cohort was re-emitted through
-`effigy regressions:native` at runtime checkpoint `b033a1565`. The manifest
+`effigy regressions:native` at runtime checkpoint `47f1caff`. The manifest
 resolution block is repinned to that source commit; the lock digest remains
 `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`. The
 29-row manifest roster and scenario IDs are unchanged.
