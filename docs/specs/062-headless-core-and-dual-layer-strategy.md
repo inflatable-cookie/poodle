@@ -2,7 +2,7 @@
 
 Status: promoted — program complete (g11.002–007); durable outcomes live in architecture 006/007 and the component contracts. Retained as decision history.
 Updated: 2026-07-10
-Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `026-appearance-recipes-and-downstream-override-strategy.md`, `028-primitive-baseline-and-bits-aligned-surface.md`
+Depends on: `archive/021-public-package-api-stability-and-parity-debt-baseline.md`, `026-appearance-recipes-and-downstream-override-strategy.md`, `archive/028-primitive-baseline-and-bits-aligned-surface.md`
 
 ## Purpose
 
