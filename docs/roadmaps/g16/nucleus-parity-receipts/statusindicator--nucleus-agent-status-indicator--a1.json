@@ -7,7 +7,7 @@
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
   "package_version": "0.3.0",
-  "source_commit": "54646ba2369959150a1b4953e06de5871b3ffe8f",
+  "source_commit": "3c0a4273ba92d7eb70657d1c4ae48a01047a9ec5",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
   "lock_resolution": [
@@ -56,20 +56,20 @@
   "artifact_paths": [
     {
       "path": "test/nucleus-a11y/snapshots/status-indicator.gpui.json",
-      "sha256": "86fc0fc229ce7fac6be88b5ef0c36653bf8b96aa6b07ee56527713c7fb84f844"
+      "sha256": "e8c429e744ac8b04ab2d7ca1cb37fb316f8bbdbf2c785afd49f3c2aa303df7f6"
     },
     {
       "path": "test/nucleus-a11y/snapshots/status-indicator.svelte.json",
-      "sha256": "cc7be98636b754fa7a0cddd8e5c7dc39d02aa1223722944161fa6a6db7758668"
+      "sha256": "44531f728122f55205fd28a9cc8a7807495cfcea806feae95051769b130c6aa6"
     }
   ],
   "accessibility": {
     "scenario_path": "test/nucleus-a11y/scenarios/status-indicator.json",
-    "scenario_sha256": "f06a777d792abe83b862447833507d80066bbbaa4d44a193cec947224255ce57",
+    "scenario_sha256": "1c743609347a037bee1242bd15744acccfe31cf234090acc7712d09a826b8444",
     "gpui_snapshot_path": "test/nucleus-a11y/snapshots/status-indicator.gpui.json",
-    "gpui_snapshot_sha256": "86fc0fc229ce7fac6be88b5ef0c36653bf8b96aa6b07ee56527713c7fb84f844",
+    "gpui_snapshot_sha256": "e8c429e744ac8b04ab2d7ca1cb37fb316f8bbdbf2c785afd49f3c2aa303df7f6",
     "svelte_snapshot_path": "test/nucleus-a11y/snapshots/status-indicator.svelte.json",
-    "svelte_snapshot_sha256": "cc7be98636b754fa7a0cddd8e5c7dc39d02aa1223722944161fa6a6db7758668",
+    "svelte_snapshot_sha256": "44531f728122f55205fd28a9cc8a7807495cfcea806feae95051769b130c6aa6",
     "web_only_exclusions": [],
     "diff": []
   }
