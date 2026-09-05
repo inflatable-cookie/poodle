@@ -15,6 +15,7 @@
     {"index": 2, "field": "focused", "gpui": false, "svelte": true},
     {"index": 2, "field": "relationships", "gpui": {"controls": [], "labelled_by": [], "described_by": []}, "svelte": {"controls": [], "labelled_by": [-1], "described_by": []}},
     {"index": 3, "field": "role", "gpui": null, "svelte": "button"},
-    {"index": 4, "field": "role", "gpui": null, "svelte": "button"}
+    {"index": 4, "field": "role", "gpui": null, "svelte": "button"},
+    {"index": 5, "field": "role", "gpui": null, "svelte": "button"}
   ]
 }
