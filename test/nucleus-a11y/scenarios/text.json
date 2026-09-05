@@ -3,7 +3,10 @@
   "component": "Text",
   "scenario_id": "nucleus.shell.text",
   "props": { "as": "div", "tone": "secondary", "size": "sm", "weight": "medium" },
-  "fixtures": { "panel_text": "Shell status" },
+  "fixtures": {
+    "panel_text": "Shell status",
+    "a11y_probe": { "role": "status", "label": "Shell status" }
+  },
   "actions": [],
   "declared_states": [],
   "web_only_exclusions": []
