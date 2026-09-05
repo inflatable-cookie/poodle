@@ -11,5 +11,6 @@
   },
   "actions": [{ "type": "pointer_activate", "target": { "role": "button", "name": "Accept plan" } }],
   "declared_states": ["disabled"],
+  "capture": { "width": 520, "height": 180 },
   "web_only_exclusions": []
 }

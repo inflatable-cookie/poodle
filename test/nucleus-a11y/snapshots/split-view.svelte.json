@@ -3,7 +3,7 @@
   "component": "SplitView",
   "scenario_id": "nucleus.shell.split-view",
   "scenario_path": "test/nucleus-a11y/scenarios/split-view.json",
-  "scenario_sha256": "93e27139d1637db633c686ae7cbedd9d0119a96a5b20e29acbc5c20eaca224ba",
+  "scenario_sha256": "be2a123784ee362d1d963e1ce2293eae9ad86826b516b6f295a53882723b11b8",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

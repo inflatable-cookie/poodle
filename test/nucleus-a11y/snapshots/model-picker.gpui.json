@@ -3,7 +3,7 @@
   "component": "ModelPicker",
   "scenario_id": "nucleus.agent.model-picker",
   "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
-  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+  "scenario_sha256": "73bcfa65a6994fe41fc40d88dd8e3451ccc084fb06ff56a79e943e78bb175d09",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

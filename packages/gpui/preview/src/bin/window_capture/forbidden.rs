@@ -39,6 +39,10 @@ pub const CAPTURE_SOURCES: &[(&str, &str)] = &[
         "window_capture/inset_evidence.rs",
         include_str!("inset_evidence.rs"),
     ),
+    (
+        "window_capture/cohort_capture.rs",
+        include_str!("cohort_capture.rs"),
+    ),
     ("window_capture/inventory.rs", include_str!("inventory.rs")),
 ];
 

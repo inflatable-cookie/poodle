@@ -3,7 +3,7 @@
   "component": "EditableLabel",
   "scenario_id": "nucleus.navigation.editable-label",
   "scenario_path": "test/nucleus-a11y/scenarios/editable-label.json",
-  "scenario_sha256": "16c2eb0684b3126edf123158f32262e6dabacc73afe2c0e16326d79e035502e6",
+  "scenario_sha256": "7fc6c5bdd75185592de8bf0afdc7af607d29dfdcb1039e0e3d0adc3d71c196e9",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

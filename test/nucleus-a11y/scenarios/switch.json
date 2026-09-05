@@ -10,5 +10,6 @@
     { "type": "pointer_activate", "target": { "role": "switch", "name": "Enabled" } }
   ],
   "declared_states": ["checked", "disabled"],
+  "capture": { "width": 200, "height": 60 },
   "web_only_exclusions": []
 }

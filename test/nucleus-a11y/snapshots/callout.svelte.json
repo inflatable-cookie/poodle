@@ -3,7 +3,7 @@
   "component": "Callout",
   "scenario_id": "nucleus.settings.callout",
   "scenario_path": "test/nucleus-a11y/scenarios/callout.json",
-  "scenario_sha256": "240be260092141ad7dbaff39f8b90a3d3b05c0e8ec6bc4ebef4284e03c0eb6ed",
+  "scenario_sha256": "2134597db3542715f0d69e458657f2d8cc7c52f5eeeb58ef76757e8372a03beb",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

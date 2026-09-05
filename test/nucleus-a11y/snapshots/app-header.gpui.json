@@ -3,7 +3,7 @@
   "component": "AppHeader",
   "scenario_id": "nucleus.shell.app-header",
   "scenario_path": "test/nucleus-a11y/scenarios/app-header.json",
-  "scenario_sha256": "c85689d489b968bb4f7935b46d4fc7ade8624a5cf4bb68d884a30a30f1d2f8eb",
+  "scenario_sha256": "07b2b34f76fa3529cd390b2b118e1ccc78eb3584308dc7716647cb6978ce4033",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

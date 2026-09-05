@@ -3,7 +3,7 @@
   "component": "Button",
   "scenario_id": "nucleus.shell.button",
   "scenario_path": "test/nucleus-a11y/scenarios/button.json",
-  "scenario_sha256": "23525a617c62b3a22ec5137e915b9606043fbb31bd20fedd2482694edebd3f7a",
+  "scenario_sha256": "523c564e452f77f3cf32e0d5367a3f6545db4a479f18cdbc544a7c53d81742ea",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

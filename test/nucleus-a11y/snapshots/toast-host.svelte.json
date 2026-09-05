@@ -3,7 +3,7 @@
   "component": "ToastHost",
   "scenario_id": "nucleus.attention.toast-host",
   "scenario_path": "test/nucleus-a11y/scenarios/toast-host.json",
-  "scenario_sha256": "fe6095a95ca638900ac38998713420d87ae8a0519f389a182151ed0903899a34",
+  "scenario_sha256": "b570ac96011a2c5cf3b89d65295f91503357f3037498345b7da46fff17857364",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

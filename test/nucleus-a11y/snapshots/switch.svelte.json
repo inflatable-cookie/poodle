@@ -3,7 +3,7 @@
   "component": "Switch",
   "scenario_id": "nucleus.settings.switch",
   "scenario_path": "test/nucleus-a11y/scenarios/switch.json",
-  "scenario_sha256": "70d10dd0379ca3e9d0177e647f9a2c276bd5d8a51a84c6d7a3a2f9d5e37a1b9c",
+  "scenario_sha256": "6c0eb29a5651ab2c76e1a38bc4d32fa2312aa6307effb22c1e42800cb6658201",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

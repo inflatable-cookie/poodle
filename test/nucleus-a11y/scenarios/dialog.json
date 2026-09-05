@@ -15,5 +15,6 @@
   "fixtures": { "panel_text": "Confirm deletion" },
   "actions": [],
   "declared_states": ["disabled"],
+  "capture": { "width": 520, "height": 360 },
   "web_only_exclusions": []
 }

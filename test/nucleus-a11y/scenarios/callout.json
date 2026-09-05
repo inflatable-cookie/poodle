@@ -14,5 +14,6 @@
     { "type": "pointer_activate", "target": { "role": "button", "name": "Dismiss notice" } }
   ],
   "declared_states": ["disabled"],
+  "capture": { "width": 420, "height": 140 },
   "web_only_exclusions": []
 }

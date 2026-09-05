@@ -3,7 +3,7 @@
   "component": "Dialog",
   "scenario_id": "nucleus.navigation.dialog",
   "scenario_path": "test/nucleus-a11y/scenarios/dialog.json",
-  "scenario_sha256": "86acd39ec2a88c7cf2c45e5162459bf5cb1013934a4a89b9eed5978d89c9858b",
+  "scenario_sha256": "c7fb20a3b98ecd60274d1147a15d1e2f9cd239caf410e597fb882f365de74992",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

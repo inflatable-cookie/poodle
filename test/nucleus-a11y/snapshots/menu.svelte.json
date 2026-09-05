@@ -3,7 +3,7 @@
   "component": "Menu",
   "scenario_id": "nucleus.navigation.menu",
   "scenario_path": "test/nucleus-a11y/scenarios/menu.json",
-  "scenario_sha256": "136cbe82cc0c8ba5a524380f284622c79bac4012eb39f12ef1f8f8d2d4391ff3",
+  "scenario_sha256": "619f15afd304f9b068ba25f0f40d4c20983366171aa78c8f026f0e3b406a2bd3",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

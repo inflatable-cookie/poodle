@@ -3,7 +3,7 @@
   "component": "Select",
   "scenario_id": "nucleus.navigation.select",
   "scenario_path": "test/nucleus-a11y/scenarios/select.json",
-  "scenario_sha256": "a04fe29171e9e3630fb103742ad6eb0354060394c80f96519c47170f36bb31a8",
+  "scenario_sha256": "c5e2d4c5e18432defaa634acaed598fa87c2d71defc57ffebc566f9b84c58238",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

@@ -12,5 +12,6 @@
     { "type": "pointer_activate", "target": { "role": "textbox", "name": "Workspace" } }
   ],
   "declared_states": ["disabled", "invalid", "busy"],
+  "capture": { "width": 360, "height": 80 },
   "web_only_exclusions": []
 }

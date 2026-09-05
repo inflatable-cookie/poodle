@@ -14,5 +14,6 @@
     { "type": "pointer_activate", "target": { "role": "button", "name": "Delete" } }
   ],
   "declared_states": ["disabled", "busy"],
+  "capture": { "width": 520, "height": 260 },
   "web_only_exclusions": []
 }

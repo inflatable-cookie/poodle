@@ -15,5 +15,6 @@
   "fixtures": { "trigger_text": "Actions" },
   "actions": [],
   "declared_states": ["selected", "disabled"],
+  "capture": { "width": 360, "height": 220 },
   "web_only_exclusions": []
 }

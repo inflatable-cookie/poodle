@@ -3,7 +3,7 @@
   "component": "AgentQuestion",
   "scenario_id": "nucleus.agent.agent-question",
   "scenario_path": "test/nucleus-a11y/scenarios/agent-question.json",
-  "scenario_sha256": "5f419c616c98e6d4901951529d1c1187bb0e6e31609175a9c08e05db0b1002a0",
+  "scenario_sha256": "e463f283adfee24801664e09b50cfc9daeac86ba29a18c524297fe9c1902efe5",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",

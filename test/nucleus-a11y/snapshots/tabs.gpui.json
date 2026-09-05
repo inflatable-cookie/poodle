@@ -3,7 +3,7 @@
   "component": "Tabs",
   "scenario_id": "nucleus.navigation.tabs",
   "scenario_path": "test/nucleus-a11y/scenarios/tabs.json",
-  "scenario_sha256": "8815066ec2c6b88a3f25a107d469d51be4b061873a5f302f1d6622be447bfb3f",
+  "scenario_sha256": "432f60edc0f4237f349f8eaa2c5216d63f4325e83dff3782412063e27142ba7d",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
