@@ -47,7 +47,7 @@ runtime.
 | GPUI construction | 0 | 175 | 0 | 0 | 0 | 0 | 1 | 0 |
 | GPUI mounted behaviour | 0 | 0 | 29 | 0 | 0 | 146 | 1 | 0 |
 | Web accessibility | 0 | 176 | 0 | 0 | 0 | 0 | 0 | 0 |
-| GPUI accessibility | 0 | 0 | 4 | 0 | 171 | 0 | 1 | 0 |
+| GPUI accessibility | 0 | 0 | 5 | 0 | 170 | 0 | 1 | 0 |
 | Web visual | 0 | 170 | 0 | 1 | 5 | 0 | 0 | 0 |
 | GPUI visual | 0 | 0 | 0 | 1 | 0 | 174 | 1 | 0 |
 | Known deltas | 116 | 0 | 0 | 0 | 0 | 0 | 60 | 0 |

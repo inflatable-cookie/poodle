@@ -13,10 +13,10 @@
   },
   "nodes": [
     {
-      "role": "combobox",
+      "role": "button",
       "name": "Model: Atlas",
       "value": null,
-      "value_text": "Atlas",
+      "value_text": null,
       "states": {
         "expanded": false,
         "checked": null,
@@ -32,7 +32,7 @@
       "level": null,
       "orientation": null,
       "focus_order": 0,
-      "focused": false
+      "focused": true
     }
   ]
 }

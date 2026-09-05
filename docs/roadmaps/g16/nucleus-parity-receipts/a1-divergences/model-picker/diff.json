@@ -1,6 +1,12 @@
 [
   {
     "index": 0,
+    "field": "focused",
+    "gpui": true,
+    "svelte": false
+  },
+  {
+    "index": 0,
     "field": "relationships",
     "gpui": {
       "controls": [
@@ -19,12 +25,6 @@
   },
   {
     "index": 0,
-    "field": "role",
-    "gpui": "combobox",
-    "svelte": "button"
-  },
-  {
-    "index": 0,
     "field": "states",
     "gpui": {
       "expanded": false,
@@ -36,12 +36,6 @@
       "checked": null,
       "disabled": false
     }
-  },
-  {
-    "index": 0,
-    "field": "value_text",
-    "gpui": "Atlas",
-    "svelte": null
   },
   {
     "index": 1,

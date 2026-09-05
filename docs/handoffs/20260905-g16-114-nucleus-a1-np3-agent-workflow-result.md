@@ -23,8 +23,8 @@ revision 18. Scope is the six NP-3 A1 rows only.
 - Repository: `inflatable-cookie/poodle`
 - Workspace: `/Users/tom/.paseo/worktrees/1ugbsx1t/worker-g16-114-nucleus-np3`
 - Branch: `worker/g16-114-nucleus-np3`
-- Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be`
-- Rebased manifest source commit: `56f9bc75d7fe9de29ab139376c4a73c0cecd22ab`
+- Base: `ef9049f15` (`origin/main`, manifest revision 17; rebased for the current merge gate)
+- Rebased manifest source commit: `71b25b96272b3b2cc3e986c06fe840103e258e99`
 - Manifest lock digest: `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`
 - Owned paths: NP-3 scenario/snapshot/proof files, execution log, and append-only `PAPERCUTS.md`.
 - Reserved coordinator paths were not edited.
