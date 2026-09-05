@@ -1,0 +1,14 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Switch",
+  "scenario_id": "nucleus.settings.switch",
+  "props": {
+    "label": "Enabled",
+    "defaultChecked": false
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "switch", "name": "Enabled" } }
+  ],
+  "declared_states": ["checked", "disabled"],
+  "web_only_exclusions": []
+}

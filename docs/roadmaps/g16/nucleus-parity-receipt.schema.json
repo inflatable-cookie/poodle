@@ -28,7 +28,7 @@
     "schema": { "const": "poodle.g16-nucleus-parity-receipt.v1" },
     "component": { "type": "string", "minLength": 1 },
     "scenario_id": { "type": "string", "minLength": 1 },
-    "proof_level": { "const": "M1" },
+    "proof_level": { "enum": ["M1", "A1"] },
     "runtime": { "const": "gpui-headless" },
     "command": { "const": "effigy regressions:native" },
     "package": { "const": "poodle-gpui-preview" },
@@ -52,9 +52,49 @@
     "actions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
     "assertions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
     "outcome": { "const": "passed" },
-    "artifact_paths": { "type": "array", "items": { "$ref": "#/$defs/artifact" } }
+    "artifact_paths": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "accessibility": { "$ref": "#/$defs/accessibility" }
   },
+  "if": { "properties": { "proof_level": { "const": "A1" } } },
+  "then": { "required": ["accessibility"] },
+  "else": { "not": { "required": ["accessibility"] } },
   "$defs": {
+    "accessibility": {
+      "description": "g16.111 A1: the paired GPUI node-tree / Svelte DOM accessibility snapshot record. Both snapshots are committed artifacts (also listed in artifact_paths); the diff is empty for a pass; every web-only exclusion is named with its reason.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_path",
+        "scenario_sha256",
+        "gpui_snapshot_path",
+        "gpui_snapshot_sha256",
+        "svelte_snapshot_path",
+        "svelte_snapshot_sha256",
+        "web_only_exclusions",
+        "diff"
+      ],
+      "properties": {
+        "scenario_path": { "type": "string", "pattern": "^test/nucleus-a11y/scenarios/[a-z0-9-]+\\.json$" },
+        "scenario_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "gpui_snapshot_path": { "type": "string", "pattern": "^test/nucleus-a11y/snapshots/[a-z0-9-]+\\.gpui\\.json$" },
+        "gpui_snapshot_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "svelte_snapshot_path": { "type": "string", "pattern": "^test/nucleus-a11y/snapshots/[a-z0-9-]+\\.svelte\\.json$" },
+        "svelte_snapshot_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "web_only_exclusions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attribute", "reason"],
+            "properties": {
+              "attribute": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "diff": { "type": "array", "maxItems": 0 }
+      }
+    },
     "locked_package": {
       "type": "object",
       "additionalProperties": false,

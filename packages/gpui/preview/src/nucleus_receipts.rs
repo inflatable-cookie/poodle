@@ -198,3 +198,507 @@ pub(crate) fn emit_if_configured(
     fs::rename(&temporary, &destination).expect("parity receipt can be published");
     eprintln!("nucleus receipt: {}", destination.display());
 }
+
+// ── A1 paired accessibility receipts (g16.111) ────────────────────────────
+//
+// An A1 receipt pairs the mounted GPUI node-tree accessibility projection
+// with the mounted Svelte DOM's ARIA semantics for the same shared scenario.
+// The scenario file is deserialised here and hashed; the Svelte snapshot
+// carries the hash it ran against, and a mismatch is rejected before any
+// comparison. Both snapshots are committed artifacts whose SHA-256 the
+// receipt records. The receipt is emitted only after the diff is empty.
+
+use crate::headless_driver::MountedAccessibilityNode;
+use poodle_node::{NodeRole, NodeToggled};
+use serde::Deserialize;
+use serde_json::{json, Map, Value};
+use sha2::{Digest, Sha256};
+
+pub(crate) const A1_SCENARIO_SCHEMA: &str = "poodle.g16-nucleus-a11y-scenario.v1";
+pub(crate) const A1_SNAPSHOT_SCHEMA: &str = "poodle.g16-nucleus-a11y-snapshot.v1";
+pub(crate) const A1_SCENARIO_DIR: &str = "test/nucleus-a11y/scenarios";
+pub(crate) const A1_SNAPSHOT_DIR: &str = "test/nucleus-a11y/snapshots";
+const A1_GPUI_RUNTIME: &str = "gpui-headless";
+const A1_SVELTE_RUNTIME: &str = "svelte-happy-dom";
+const A1_SVELTE_COMMAND: &str = "effigy test:nucleus-a11y";
+const A1_SVELTE_MOUNT: &str = "@testing-library/svelte render";
+const A1_SVELTE_INPUT_DISPATCH: &str = "dom-events";
+
+/// A node reference shared by both extractors: the first node in document
+/// order whose role and accessible name match. No runtime id ever appears
+/// in a scenario, so the same file drives the DOM and the node tree.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct A1Target {
+    #[serde(default)]
+    pub role: Option<String>,
+    #[serde(default)]
+    pub name: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
+pub(crate) enum A1Action {
+    /// Pointer press and release on the target (mouse down focuses a
+    /// focusable control on both runtimes, then the click activates it).
+    PointerActivate { target: A1Target },
+    /// Focus the target, then one named key press and release.
+    Key { target: A1Target, key: String },
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct A1Exclusion {
+    pub attribute: String,
+    pub reason: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct A1Scenario {
+    pub schema: String,
+    pub component: String,
+    pub scenario_id: String,
+    /// Web-named props, applied verbatim by the Svelte extractor and mapped
+    /// field-for-field by the row's Rust proof (unknown keys are rejected).
+    pub props: Value,
+    /// Fixture text that is not a public prop on either runtime (slot content).
+    #[serde(default)]
+    pub fixtures: Map<String, Value>,
+    pub actions: Vec<A1Action>,
+    /// States compared for this component, exactly as its contract declares.
+    pub declared_states: Vec<String>,
+    #[serde(default)]
+    pub web_only_exclusions: Vec<A1Exclusion>,
+}
+
+pub(crate) struct LoadedA1Scenario {
+    pub row: &'static str,
+    pub path: String,
+    pub sha256: String,
+    pub scenario: A1Scenario,
+}
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    let digest = Sha256::digest(bytes);
+    digest.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+/// Deserialise the shared scenario file for one cohort row and hash its
+/// exact bytes. A shape the Rust side does not understand is an error, not
+/// a silently ignored key.
+pub(crate) fn load_a1_scenario(row: &'static str) -> LoadedA1Scenario {
+    let relative = format!("{A1_SCENARIO_DIR}/{row}.json");
+    let bytes = fs::read(repository_root().join(&relative))
+        .unwrap_or_else(|error| panic!("A1 scenario {relative} is unreadable: {error}"));
+    let scenario: A1Scenario = serde_json::from_slice(&bytes)
+        .unwrap_or_else(|error| panic!("A1 scenario {relative} does not deserialise: {error}"));
+    assert_eq!(scenario.schema, A1_SCENARIO_SCHEMA, "{relative} schema");
+    LoadedA1Scenario {
+        row,
+        path: relative,
+        sha256: sha256_hex(&bytes),
+        scenario,
+    }
+}
+
+/// The ARIA role string a `poodle-node` role projects as. One mapping,
+/// total over the enum, so a new role cannot silently compare as `null`.
+pub(crate) fn aria_role(role: NodeRole) -> &'static str {
+    match role {
+        NodeRole::Alert => "alert",
+        NodeRole::AlertDialog => "alertdialog",
+        NodeRole::Button => "button",
+        NodeRole::Cell => "cell",
+        NodeRole::CheckBox => "checkbox",
+        NodeRole::ComboBox => "combobox",
+        NodeRole::Dialog => "dialog",
+        NodeRole::Grid => "grid",
+        NodeRole::Group => "group",
+        NodeRole::Label => "label",
+        NodeRole::List => "list",
+        NodeRole::ListItem => "listitem",
+        NodeRole::ListBox => "listbox",
+        NodeRole::ListBoxOption => "option",
+        NodeRole::Log => "log",
+        NodeRole::Image => "img",
+        NodeRole::Menu => "menu",
+        NodeRole::MenuBar => "menubar",
+        NodeRole::MenuItem => "menuitem",
+        NodeRole::MenuItemCheckBox => "menuitemcheckbox",
+        NodeRole::MenuItemRadio => "menuitemradio",
+        NodeRole::Splitter => "separator",
+        NodeRole::Slider => "slider",
+        NodeRole::ProgressIndicator => "progressbar",
+        NodeRole::RadioGroup => "radiogroup",
+        NodeRole::RadioButton => "radio",
+        NodeRole::Region => "region",
+        NodeRole::Row => "row",
+        NodeRole::SpinButton => "spinbutton",
+        NodeRole::Status => "status",
+        NodeRole::Switch => "switch",
+        NodeRole::Tab => "tab",
+        NodeRole::TabList => "tablist",
+        NodeRole::TabPanel => "tabpanel",
+        NodeRole::TextInput => "textbox",
+        NodeRole::Toolbar => "toolbar",
+        NodeRole::Tooltip => "tooltip",
+        NodeRole::Tree => "tree",
+        NodeRole::TreeItem => "treeitem",
+    }
+}
+
+fn trimmed(value: Option<&str>) -> Value {
+    match value.map(str::trim) {
+        Some(text) if !text.is_empty() => Value::String(text.to_owned()),
+        _ => Value::Null,
+    }
+}
+
+fn resolve_targets(
+    reference: Option<&str>,
+    nodes: &[MountedAccessibilityNode],
+) -> Vec<i64> {
+    let Some(reference) = reference else {
+        return Vec::new();
+    };
+    reference
+        .split_whitespace()
+        .map(|target| {
+            nodes
+                .iter()
+                .position(|node| node.semantic_id.as_deref() == Some(target))
+                .map_or(-1, |index| index as i64)
+        })
+        .collect()
+}
+
+/// The accessible name the node record yields: `labelled_by` resolves to the
+/// referenced node's own label (the record-level half of the accessible-name
+/// algorithm), else the record's label. There is no name-from-content
+/// fallback on this side: a name the record lacks is reported as `null`.
+fn record_name(node: &MountedAccessibilityNode, nodes: &[MountedAccessibilityNode]) -> Value {
+    if let Some(reference) = node.labelled_by.as_deref() {
+        let joined = reference
+            .split_whitespace()
+            .filter_map(|target| {
+                nodes
+                    .iter()
+                    .find(|candidate| candidate.semantic_id.as_deref() == Some(target))
+                    .and_then(|candidate| candidate.label.clone())
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
+        if !joined.trim().is_empty() {
+            return Value::String(joined.trim().to_owned());
+        }
+    }
+    trimmed(node.label.as_deref())
+}
+
+fn value_text(node: &MountedAccessibilityNode) -> Value {
+    if node.value_text.is_some() {
+        return trimmed(node.value_text.as_deref());
+    }
+    // A combobox or text box with no declared value text exposes its visible
+    // value: the text content of the node, whitespace-normalised.
+    if matches!(node.role, NodeRole::ComboBox | NodeRole::TextInput) {
+        let joined = node
+            .text_content
+            .iter()
+            .flat_map(|text| text.split_whitespace())
+            .collect::<Vec<_>>()
+            .join(" ");
+        return trimmed(Some(&joined));
+    }
+    Value::Null
+}
+
+fn declared_state(node: &MountedAccessibilityNode, state: &str) -> Value {
+    match state {
+        "checked" => match node.toggled {
+            Some(NodeToggled::True) => json!(true),
+            Some(NodeToggled::False) => json!(false),
+            Some(NodeToggled::Mixed) => json!("mixed"),
+            None => Value::Null,
+        },
+        "expanded" => json!(node.expanded),
+        "selected" => json!(node.selected),
+        "disabled" => json!(node.disabled),
+        "invalid" => json!(node.invalid),
+        "busy" => json!(node.busy),
+        other => panic!("A1 scenario declares an unknown state `{other}`"),
+    }
+}
+
+pub(crate) fn is_sequential_tab_stop(node: &MountedAccessibilityNode) -> bool {
+    node.focusable && !node.disabled && node.tab_index.map_or(true, |index| index >= 0)
+}
+
+/// Normalise the mounted projection into the shared snapshot shape:
+/// relationships by index, names trimmed, value text as strings, and only
+/// the states the scenario declares for this component.
+pub(crate) fn normalise_a1_nodes(
+    nodes: &[MountedAccessibilityNode],
+    scenario: &A1Scenario,
+) -> Vec<Value> {
+    let mut focus_order = 0i64;
+    nodes
+        .iter()
+        .map(|node| {
+            let mut states = Map::new();
+            for state in &scenario.declared_states {
+                states.insert(state.clone(), declared_state(node, state));
+            }
+            let order = if is_sequential_tab_stop(node) {
+                let index = focus_order;
+                focus_order += 1;
+                json!(index)
+            } else {
+                Value::Null
+            };
+            json!({
+                "role": aria_role(node.role),
+                "name": record_name(node, nodes),
+                "value": node.value,
+                "value_text": value_text(node),
+                "states": states,
+                "relationships": {
+                    "controls": resolve_targets(node.controls.as_deref(), nodes),
+                    "labelled_by": resolve_targets(node.labelled_by.as_deref(), nodes),
+                    "described_by": resolve_targets(node.described_by.as_deref(), nodes),
+                },
+                "level": node.level,
+                "orientation": trimmed(node.orientation.as_deref()),
+                "focus_order": order,
+                "focused": node.focused,
+            })
+        })
+        .collect()
+}
+
+/// The GPUI snapshot file: the normalised nodes plus the run record that
+/// proves they came from a mounted, input-driven frame.
+pub(crate) fn gpui_snapshot_file(
+    loaded: &LoadedA1Scenario,
+    observation: MountedObservation,
+    nodes: Vec<Value>,
+) -> Value {
+    assert!(
+        observation.is_valid(),
+        "A1 snapshot requires observed mounted paint and GPUI input dispatch"
+    );
+    json!({
+        "schema": A1_SNAPSHOT_SCHEMA,
+        "component": loaded.scenario.component,
+        "scenario_id": loaded.scenario.scenario_id,
+        "scenario_path": loaded.path,
+        "scenario_sha256": loaded.sha256,
+        "runtime": A1_GPUI_RUNTIME,
+        "run": {
+            "command": COMMAND,
+            "mount": "HeadlessDriver",
+            "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+            "input_dispatch": "gpui-test-platform-dispatch",
+        },
+        "nodes": nodes,
+    })
+}
+
+fn snapshot_bytes(file: &Value) -> Vec<u8> {
+    let mut encoded = serde_json::to_vec_pretty(file).expect("A1 snapshot serialises");
+    encoded.push(b'\n');
+    encoded
+}
+
+/// Read the committed Svelte snapshot for the row and reject it unless it
+/// ran against exactly this scenario file and carries a real run record.
+pub(crate) fn load_svelte_snapshot(loaded: &LoadedA1Scenario) -> (String, String, Value) {
+    let relative = format!("{}/{}.svelte.json", A1_SNAPSHOT_DIR, loaded.row);
+    let bytes = fs::read(repository_root().join(&relative)).unwrap_or_else(|error| {
+        panic!("Svelte A1 snapshot {relative} is missing; run `{A1_SVELTE_COMMAND}` with POODLE_NUCLEUS_A11Y_WRITE=1 ({error})")
+    });
+    let file: Value = serde_json::from_slice(&bytes)
+        .unwrap_or_else(|error| panic!("Svelte A1 snapshot {relative} does not parse: {error}"));
+    let field = |key: &str| file.get(key).and_then(Value::as_str).unwrap_or_default().to_owned();
+    assert_eq!(field("schema"), A1_SNAPSHOT_SCHEMA, "{relative} schema");
+    assert_eq!(field("runtime"), A1_SVELTE_RUNTIME, "{relative} runtime");
+    assert_eq!(field("component"), loaded.scenario.component, "{relative} component");
+    assert_eq!(field("scenario_id"), loaded.scenario.scenario_id, "{relative} scenario");
+    assert_eq!(field("scenario_path"), loaded.path, "{relative} scenario path");
+    assert_eq!(
+        field("scenario_sha256"),
+        loaded.sha256,
+        "{relative} was produced from a different scenario file (hash mismatch); regenerate it"
+    );
+    let run = file.get("run").cloned().unwrap_or(Value::Null);
+    let run_field = |key: &str| run.get(key).and_then(Value::as_str).unwrap_or_default().to_owned();
+    assert_eq!(run_field("command"), A1_SVELTE_COMMAND, "{relative} run command");
+    assert_eq!(run_field("mount"), A1_SVELTE_MOUNT, "{relative} run mount");
+    assert_eq!(run_field("input_dispatch"), A1_SVELTE_INPUT_DISPATCH, "{relative} run input dispatch");
+    assert!(file.get("nodes").is_some_and(Value::is_array), "{relative} has no nodes");
+    (relative, sha256_hex(&bytes), file)
+}
+
+/// Positional, field-by-field comparison of two normalised node lists. An
+/// extra node on either side is reported against `role` with `null` on the
+/// side that lacks it.
+pub(crate) fn diff_a1_nodes(gpui: &[Value], svelte: &[Value]) -> Vec<Value> {
+    let mut diff = Vec::new();
+    let length = gpui.len().max(svelte.len());
+    for index in 0..length {
+        match (gpui.get(index), svelte.get(index)) {
+            (Some(left), Some(right)) => {
+                let left = left.as_object().expect("gpui node object");
+                let right = right.as_object().expect("svelte node object");
+                let mut keys: Vec<&String> = left.keys().chain(right.keys()).collect();
+                keys.sort();
+                keys.dedup();
+                for key in keys {
+                    let left_value = left.get(key).cloned().unwrap_or(Value::Null);
+                    let right_value = right.get(key).cloned().unwrap_or(Value::Null);
+                    if left_value != right_value {
+                        diff.push(json!({
+                            "index": index,
+                            "field": key,
+                            "gpui": left_value,
+                            "svelte": right_value,
+                        }));
+                    }
+                }
+            }
+            (left, right) => diff.push(json!({
+                "index": index,
+                "field": "role",
+                "gpui": left.and_then(|node| node.get("role").cloned()).unwrap_or(Value::Null),
+                "svelte": right.and_then(|node| node.get("role").cloned()).unwrap_or(Value::Null),
+            })),
+        }
+    }
+    diff
+}
+
+/// Compare the fresh GPUI snapshot with the committed one. A missing
+/// committed file is tolerated only while a receipt directory is configured,
+/// which is the run that publishes it.
+pub(crate) fn check_committed_gpui_snapshot(row: &str, fresh: &Value) -> String {
+    let relative = format!("{A1_SNAPSHOT_DIR}/{row}.gpui.json");
+    let path = repository_root().join(&relative);
+    match fs::read(&path) {
+        Ok(bytes) => {
+            let committed: Value =
+                serde_json::from_slice(&bytes).unwrap_or_else(|error| panic!("{relative} does not parse: {error}"));
+            assert!(
+                committed.get("scenario_sha256") == fresh.get("scenario_sha256"),
+                "{relative} was produced from a different scenario file (hash mismatch); re-run `{COMMAND}` to publish it"
+            );
+            assert!(
+                committed == *fresh,
+                "{relative} is stale: the mounted GPUI projection changed; re-run `{COMMAND}` and publish the new snapshot"
+            );
+        }
+        Err(_) => assert!(
+            env::var_os("POODLE_NUCLEUS_RECEIPT_DIR").is_some(),
+            "{relative} is missing; run `{COMMAND}` to publish it"
+        ),
+    }
+    relative
+}
+
+/// Emit one A1 receipt and the GPUI snapshot it hashes when the mounted
+/// selector has been asked to collect execution evidence. The receipt
+/// carries both snapshot hashes, the scenario hash, the exclusions, and the
+/// (empty) diff; the caller has already asserted the diff is empty.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn emit_a1_if_configured(
+    loaded: &LoadedA1Scenario,
+    observation: MountedObservation,
+    gpui_file: &Value,
+    svelte_path: &str,
+    svelte_sha256: &str,
+    diff: &[Value],
+    actions: &[&'static str],
+    assertions: &[&'static str],
+) {
+    let Some(directory) = env::var_os("POODLE_NUCLEUS_RECEIPT_DIR") else {
+        return;
+    };
+    assert!(observation.is_valid(), "receipt requires observed mounted paint and GPUI input dispatch");
+    assert!(diff.is_empty(), "an A1 receipt is only emitted for an empty diff");
+
+    let root = repository_root();
+    let gpui_bytes = snapshot_bytes(gpui_file);
+    let gpui_sha256 = sha256_hex(&gpui_bytes);
+    let gpui_path = format!("{}/{}.gpui.json", A1_SNAPSHOT_DIR, loaded.row);
+    let component: &str = &loaded.scenario.component;
+    let scenario_id: &str = &loaded.scenario.scenario_id;
+    let receipt = json!({
+        "schema": RECEIPT_SCHEMA,
+        "component": component,
+        "scenario_id": scenario_id,
+        "proof_level": "A1",
+        "runtime": RUNTIME,
+        "command": COMMAND,
+        "package": PACKAGE,
+        "package_version": PACKAGE_VERSION,
+        "source_commit": source_commit(&root),
+        "lockfile": LOCKFILE,
+        "lockfile_sha256": lockfile_sha256(&root),
+        "lock_resolution": lock_resolution(),
+        "distribution": DISTRIBUTION,
+        "production_path_observation": {
+            "observed": true,
+            "mount": "HeadlessDriver",
+            "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+            "input_dispatch": "gpui-test-platform-dispatch",
+        },
+        "actions": actions,
+        "assertions": assertions,
+        "outcome": "passed",
+        "artifact_paths": [
+            { "path": gpui_path, "sha256": gpui_sha256 },
+            { "path": svelte_path, "sha256": svelte_sha256 },
+        ],
+        "accessibility": {
+            "scenario_path": loaded.path,
+            "scenario_sha256": loaded.sha256,
+            "gpui_snapshot_path": gpui_path,
+            "gpui_snapshot_sha256": gpui_sha256,
+            "svelte_snapshot_path": svelte_path,
+            "svelte_snapshot_sha256": svelte_sha256,
+            "web_only_exclusions": loaded.scenario.web_only_exclusions.iter().map(|exclusion| json!({
+                "attribute": exclusion.attribute,
+                "reason": exclusion.reason,
+            })).collect::<Vec<_>>(),
+            "diff": diff,
+        },
+    });
+
+    let directory = PathBuf::from(directory);
+    fs::create_dir_all(&directory).expect("parity receipt directory can be created");
+    let stem = format!("{}--a1", safe_file_stem(component, scenario_id));
+    let destination = directory.join(format!("{stem}.json"));
+    let temporary = destination.with_extension("json.tmp");
+    let encoded = serde_json::to_vec_pretty(&receipt).expect("A1 receipt serialises");
+    fs::write(&temporary, encoded).expect("A1 receipt can be written");
+    fs::rename(&temporary, &destination).expect("A1 receipt can be published");
+    let snapshot_destination = directory.join(format!("{}.gpui.json", loaded.row));
+    fs::write(&snapshot_destination, gpui_bytes).expect("A1 GPUI snapshot can be written");
+    eprintln!("nucleus A1 receipt: {}", destination.display());
+    eprintln!("nucleus A1 gpui snapshot: {}", snapshot_destination.display());
+}
+
+/// A diverged row publishes its executed GPUI snapshot and the diff beside
+/// the receipts so the log can cite them. It never emits a receipt.
+pub(crate) fn publish_a1_divergence_if_configured(loaded: &LoadedA1Scenario, gpui_file: &Value, diff: &[Value]) {
+    let Some(directory) = env::var_os("POODLE_NUCLEUS_RECEIPT_DIR") else {
+        return;
+    };
+    let directory = PathBuf::from(directory);
+    fs::create_dir_all(&directory).expect("parity receipt directory can be created");
+    fs::write(directory.join(format!("{}.gpui.json", loaded.row)), snapshot_bytes(gpui_file))
+        .expect("A1 GPUI snapshot can be written");
+    let mut encoded = serde_json::to_vec_pretty(diff).expect("A1 diff serialises");
+    encoded.push(b'\n');
+    fs::write(directory.join(format!("{}.a1-diff.json", loaded.row)), encoded).expect("A1 diff can be written");
+}

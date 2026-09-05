@@ -1,0 +1,26 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Tabs",
+  "scenario_id": "nucleus.navigation.tabs",
+  "props": {
+    "items": [
+      { "value": "one", "label": "One" },
+      { "value": "skip", "label": "Skip", "disabled": true },
+      { "value": "two", "label": "Two" },
+      { "value": "three", "label": "Three" }
+    ],
+    "defaultValue": "one",
+    "ariaLabel": "Files",
+    "orientation": "horizontal",
+    "activationMode": "automatic"
+  },
+  "fixtures": {
+    "panel_text": "{value} panel"
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "role": "tab", "name": "Two" } },
+    { "type": "key", "target": { "role": "tab", "name": "Two" }, "key": "right" }
+  ],
+  "declared_states": ["selected", "disabled"],
+  "web_only_exclusions": []
+}

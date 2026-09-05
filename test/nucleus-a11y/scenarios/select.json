@@ -1,0 +1,20 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "Select",
+  "scenario_id": "nucleus.navigation.select",
+  "props": {
+    "options": [
+      { "value": "apple", "label": "Apple" },
+      { "value": "banana", "label": "Banana" },
+      { "value": "cherry", "label": "Cherry", "disabled": true }
+    ],
+    "defaultValue": "banana",
+    "ariaLabel": "Fruit",
+    "native": false
+  },
+  "actions": [
+    { "type": "pointer_activate", "target": { "name": "Fruit" } }
+  ],
+  "declared_states": ["expanded", "selected", "disabled"],
+  "web_only_exclusions": []
+}

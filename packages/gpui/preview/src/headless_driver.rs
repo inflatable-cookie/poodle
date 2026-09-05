@@ -653,3 +653,193 @@ impl<'a> HeadlessDriver<'a> {
         }
     }
 }
+
+// ── A1 accessibility extractor (g16.111) ──────────────────────────────────
+
+/// One node of the mounted accessibility projection, exactly as the
+/// `poodle-node` record and the backend focus registry report it after the
+/// scenario's input has run through production dispatch. Nothing here is
+/// filled in from source: a missing role or label stays `None`.
+#[derive(Clone, Debug)]
+pub struct MountedAccessibilityNode {
+    /// The backend element identity (`runtime_id`, else `id`) used for input
+    /// and focus-registry lookups. Empty when the node declares neither.
+    pub element_id: String,
+    /// The semantic identity (`id`) that accessibility relationships target.
+    pub semantic_id: Option<String>,
+    pub role: poodle_node::NodeRole,
+    pub label: Option<String>,
+    pub value: Option<f64>,
+    pub value_text: Option<String>,
+    /// Text-kind content of the subtree, in tree order. Icon names are not
+    /// text and are excluded.
+    pub text_content: Vec<String>,
+    pub toggled: Option<poodle_node::NodeToggled>,
+    pub expanded: Option<bool>,
+    pub selected: Option<bool>,
+    pub disabled: bool,
+    pub invalid: Option<bool>,
+    pub busy: Option<bool>,
+    pub controls: Option<String>,
+    pub labelled_by: Option<String>,
+    pub described_by: Option<String>,
+    pub level: Option<usize>,
+    pub orientation: Option<String>,
+    pub focusable: bool,
+    pub tab_index: Option<i32>,
+    /// Whether the backend owns a focus handle for this node (the node
+    /// tracks focus). Untracked focusable nodes use gpui's private handle.
+    pub focus_tracked: bool,
+    /// Real window focus as of the last frame: `Some(true)` when this node's
+    /// tracked handle is focused, `Some(false)` when focus is provably
+    /// elsewhere (another tracked node, or nothing), `None` when the focused
+    /// handle belongs to an untracked node and cannot be attributed.
+    pub focused: Option<bool>,
+}
+
+fn backend_element_id(node: &Node) -> String {
+    match node.runtime_id.as_ref().or(node.id.as_ref()) {
+        Some(id) => id.clone(),
+        None => node
+            .style
+            .animation
+            .as_ref()
+            .map(|animation| animation.key.clone())
+            .unwrap_or_default(),
+    }
+}
+
+fn collect_text_content(node: &Node, out: &mut Vec<String>) {
+    if let poodle_node::NodeKind::Text { content } = &node.kind {
+        out.push(content.clone());
+    }
+    for child in &node.children {
+        collect_text_content(child, out);
+    }
+}
+
+fn collect_accessibility_nodes(node: &Node, out: &mut Vec<MountedAccessibilityNode>) {
+    if let Some(role) = node.a11y.role {
+        let mut text_content = Vec::new();
+        collect_text_content(node, &mut text_content);
+        let element_id = backend_element_id(node);
+        out.push(MountedAccessibilityNode {
+            focus_tracked: !element_id.is_empty()
+                && poodle_gpui_node_backend::focus_handle_for(&element_id).is_some(),
+            element_id,
+            semantic_id: node.id.clone(),
+            role,
+            label: node.a11y.label.clone(),
+            value: node.a11y.value,
+            value_text: node.a11y.value_text.clone(),
+            text_content,
+            toggled: node.a11y.toggled,
+            expanded: node.a11y.expanded,
+            selected: node.a11y.selected,
+            disabled: node.interaction.disabled,
+            invalid: node.a11y.invalid,
+            busy: node.a11y.busy,
+            controls: node.a11y.controls.clone(),
+            labelled_by: node.a11y.labelled_by.clone(),
+            described_by: node.a11y.described_by.clone(),
+            level: node.a11y.level,
+            orientation: node.a11y.orientation.clone(),
+            focusable: node.interaction.focusable,
+            tab_index: node.a11y.tab_index,
+            focused: None,
+        });
+    }
+    for child in &node.children {
+        collect_accessibility_nodes(child, out);
+    }
+}
+
+impl HeadlessDriver<'_> {
+    /// The mounted node tree, cloned under its lock. Only the node-mounted
+    /// driver can answer: an element-factory mount owns no renderer-neutral
+    /// tree to project.
+    fn mounted_node(&mut self) -> Node {
+        let content = self.root.update(self.cx, |root, _cx| match &root.content {
+            HeadlessContent::Node(node) => Some(Arc::clone(node)),
+            HeadlessContent::Element(_) => None,
+        });
+        let node = content.expect("accessibility snapshot requires a node-mounted HeadlessDriver");
+        let node = node.lock().expect("node lock").clone();
+        node
+    }
+
+    /// The backend identity of the mounted node currently holding real
+    /// window focus, if the focused handle belongs to a tracked node.
+    /// Returns `(has_focus, attributed_id)`.
+    fn attributed_focus(&mut self, candidate_ids: &[String]) -> (bool, Option<String>) {
+        self.cx.update(|window, cx| {
+            let Some(focused) = window.focused(cx) else {
+                return (false, None);
+            };
+            let attributed = candidate_ids.iter().find(|id| {
+                poodle_gpui_node_backend::focus_handle_for(id)
+                    .is_some_and(|handle| handle == focused)
+            });
+            (true, attributed.cloned())
+        })
+    }
+
+    /// Walk the mounted node tree in document order and report every node
+    /// that declares a role, with the backend's real focus state. Read after
+    /// the scenario's actions have run through production dispatch; nothing
+    /// is inferred from component source.
+    pub fn accessibility_nodes(&mut self) -> Vec<MountedAccessibilityNode> {
+        self.draw_frame();
+        let tree = self.mounted_node();
+        let mut nodes = Vec::new();
+        collect_accessibility_nodes(&tree, &mut nodes);
+        let candidate_ids: Vec<String> = nodes
+            .iter()
+            .filter(|node| node.focus_tracked)
+            .map(|node| node.element_id.clone())
+            .collect();
+        let (has_focus, attributed) = self.attributed_focus(&candidate_ids);
+        for node in &mut nodes {
+            node.focused = if node.focus_tracked {
+                Some(attributed.as_deref() == Some(node.element_id.as_str()))
+            } else if !has_focus || attributed.is_some() {
+                Some(false)
+            } else {
+                None
+            };
+        }
+        nodes
+    }
+
+    /// Execute sequential focus traversal through gpui's real tab-stop
+    /// order: blur the window, then press the native equivalent of Tab until
+    /// the first stop repeats or `limit` is reached. Each stop is attributed
+    /// to a tracked node id, or `None` when the focused handle is a node the
+    /// backend does not track. Moves real focus; read the snapshot first.
+    pub fn focus_traversal(&mut self, candidate_ids: &[String], limit: usize) -> Vec<Option<String>> {
+        self.cx.update(|window, _cx| window.blur());
+        self.draw_frame();
+        let mut first: Option<FocusHandle> = None;
+        let mut stops = Vec::new();
+        for _ in 0..limit {
+            self.focus_next_tab_stop();
+            let focused = self.cx.update(|window, cx| window.focused(cx));
+            let Some(focused) = focused else { break };
+            if first.as_ref() == Some(&focused) {
+                break;
+            }
+            if first.is_none() {
+                first = Some(focused.clone());
+            }
+            let attributed = candidate_ids
+                .iter()
+                .find(|id| {
+                    poodle_gpui_node_backend::focus_handle_for(id)
+                        .is_some_and(|handle| handle == focused)
+                })
+                .cloned();
+            stops.push(attributed);
+        }
+        stops
+    }
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "Switch",
+  "scenario_id": "nucleus.settings.switch",
+  "scenario_path": "test/nucleus-a11y/scenarios/switch.json",
+  "scenario_sha256": "70d10dd0379ca3e9d0177e647f9a2c276bd5d8a51a84c6d7a3a2f9d5e37a1b9c",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "switch",
+      "name": "Enabled",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "checked": true,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    }
+  ]
+}

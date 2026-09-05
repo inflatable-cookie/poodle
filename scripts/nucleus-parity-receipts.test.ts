@@ -83,7 +83,7 @@ describe("g16.062 Nucleus parity receipt contract", () => {
 
   it("keeps the checked-in schema and manifest valid", () => {
     const manifest = loadNucleusManifest(root);
-    expect(JSON.parse(readFileSync(path.join(root, NUCLEUS_SCHEMA_PATH), "utf8")).properties.proof_level.const).toBe("M1");
+    expect(JSON.parse(readFileSync(path.join(root, NUCLEUS_SCHEMA_PATH), "utf8")).properties.proof_level.enum).toEqual(["M1", "A1"]);
     expect(() => validateNucleusManifest(manifest, root)).not.toThrow();
   });
 
@@ -146,7 +146,8 @@ describe("g16.062 Nucleus parity receipt contract", () => {
       ...base,
       production_path_observation: { ...base.production_path_observation, observed: false, mount: "direct-handler" },
     } as NucleusReceipt, manifest, root)).toThrow(/observed mounted|HeadlessDriver|production path/);
-    expect(() => validateNucleusReceipt({ ...base, proof_level: "A1" } as NucleusReceipt, manifest, root)).toThrow(/proof level/);
+    expect(() => validateNucleusReceipt({ ...base, proof_level: "V1" } as never, manifest, root)).toThrow(/proof level/);
+    expect(() => validateNucleusReceipt({ ...base, proof_level: "A1" } as NucleusReceipt, manifest, root)).toThrow(/accessibility block/);
   });
 
   it("rejects a cohort with IconProvider promoted to row 30", () => {

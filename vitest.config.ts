@@ -121,6 +121,21 @@ export default defineConfig({
         },
       },
       {
+        // g16.111 Nucleus A1: the Svelte half of the paired accessibility
+        // receipt. Mounts each shared scenario, replays its actions through
+        // DOM events, and emits the accessibility snapshot the GPUI headless
+        // run is compared against.
+        plugins: [svelte()],
+        resolve: { alias: workspaceAliases, conditions: ["browser"] },
+        test: {
+          name: "nucleus-a11y",
+          environment: "happy-dom",
+          globals: true,
+          include: ["test/nucleus-a11y/**/*.test.ts"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
         // Svelte <-> React parity: renders both implementations of a component in
         // one happy-dom process and diffs their emitted poodle-* anatomy classes.
         // Needs the Svelte plugin and Vitest's JSX transform in the same project.

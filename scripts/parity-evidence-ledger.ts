@@ -489,10 +489,16 @@ function expectedComponentRow(
               }; no validated execution receipt`,
             );
     }
-    base["GPUI accessibility"] = cell(
-      "manual",
-      `${pathRef(nativeProofPath, "currentPosture")}; spec and bounded mounted evidence are not broad native assistive-technology proof`,
-    );
+    base["GPUI accessibility"] =
+      nucleus?.a1Receipt !== undefined && nucleus.a1ReceiptPath !== undefined
+        ? cell(
+            "mounted",
+            `validated ${pathRef(nucleus.a1ReceiptPath, "proof_level")}; ${pathRef(nucleus.a1ReceiptPath, "accessibility")}; paired GPUI node-tree and Svelte DOM snapshots ${pathRef(nucleus.a1Receipt.accessibility?.gpui_snapshot_path ?? "", "nodes")} and ${pathRef(nucleus.a1Receipt.accessibility?.svelte_snapshot_path ?? "", "nodes")} for ${pathRef(nucleus.a1Receipt.accessibility?.scenario_path ?? "", "actions")}; not broad native assistive-technology proof (A2)`,
+          )
+        : cell(
+            "manual",
+            `${pathRef(nativeProofPath, "currentPosture")}; spec and bounded mounted evidence are not broad native assistive-technology proof`,
+          );
     base["GPUI visual"] =
       name === "Button"
         ? cell(
@@ -654,7 +660,7 @@ function rowMarkdown(row: ComponentRow): string {
 }
 
 function nucleusRow(nucleus: NucleusReceiptRow): string[] {
-  const { entry, receipt, receiptPath } = nucleus;
+  const { entry, receipt, receiptPath, a1Receipt, a1ReceiptPath } = nucleus;
   return [
     entry.name,
     pathRef(NUCLEUS_MANIFEST_PATH, entry.scenario_id),
@@ -665,7 +671,9 @@ function nucleusRow(nucleus: NucleusReceiptRow): string[] {
     receipt === undefined || receiptPath === undefined
       ? cell("missing", "no validated execution receipt")
       : cell("mounted", `validated ${pathRef(receiptPath, "proof_level")}; ${pathRef(receiptPath, "outcome")}`),
-    cell("missing", "M1 does not infer executable accessibility semantics"),
+    a1Receipt === undefined || a1ReceiptPath === undefined
+      ? cell("missing", "M1 does not infer executable accessibility semantics; no validated A1 receipt")
+      : cell("mounted", `validated ${pathRef(a1ReceiptPath, "proof_level")}; ${pathRef(a1ReceiptPath, "accessibility")}`),
     cell("missing", "M1 does not infer visual comparison"),
   ];
 }
@@ -759,7 +767,9 @@ The Nucleus denominator is **29 rendered components**. \`IconProvider\` is one
 separate construction prerequisite and is not row 30. A row is \`mounted\` only
 when its validated receipt was emitted after the real GPUI render, node backend,
 and test-platform input path completed successfully. \`M1\` does not imply \`A1\`
-or \`V1\`.
+or \`V1\`. An \`A1\` row is \`mounted\` only when its validated paired receipt
+(g16.111) records an empty diff between the mounted GPUI node-tree projection
+and the mounted Svelte DOM for the same shared scenario file.
 
 Manifest: ${pathRef(NUCLEUS_MANIFEST_PATH)}; receipt schema: \`${NUCLEUS_RECEIPT_SCHEMA}\`.
 Poodle resolution: \`${nucleusRows[0]?.receipt?.package ?? "poodle-gpui-preview"}@${nucleusRows[0]?.receipt?.package_version ?? "0.3.0"}\`;
@@ -784,9 +794,10 @@ ${expectedMapTable()}
 - GPUI mounted behaviour is the named regression set, not a ${portableCount}-component
   behaviour pass. Expected test names are not execution evidence; the fixed
   Nucleus cohort advances only from validated receipts.
-- GPUI accessibility remains manual: shared specs and bounded mounted tests do
-  not prove broad native semantics, focus, keyboard, announcement, or
-  assistive-technology parity.
+- GPUI accessibility remains manual except where a validated \`A1\` receipt
+  pairs the mounted node-tree projection with the Svelte DOM for one scenario;
+  shared specs, bounded mounted tests, and \`A1\` do not prove broad native
+  semantics, announcement, or assistive-technology parity (\`A2\`).
 - Web accessibility is asymmetric: the Svelte axe sweep covers the live Svelte
   surface; no React axe sweep currently exists.
 - The accepted three-runtime visual comparison is Button-only: 18 named
