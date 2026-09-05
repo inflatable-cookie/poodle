@@ -78,7 +78,10 @@ card or triage note says.
 - Owned mutable paths: per card
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
-- Approved concurrent siblings: `g16.118`, `109` lanes. Serial edges: none.
+- Approved concurrent siblings: `g16.118`, `109` lanes. Serial edges: the
+  five overlay initial-focus rows (Dialog, Popover, ConfirmAction,
+  MessageCenter, ModelPicker) are handled after `118` merges; the card may
+  add one `initial_focus` field to the node accessibility record.
 - Worker capability class: capable coding model, high reasoning (GPUI
   backend focus routing)
 - Acceptance evidence and review oracle: the card's table

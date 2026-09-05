@@ -1,6 +1,6 @@
 # g16.119 — A1 Focus And State Semantics
 
-Status: ready — concurrent with `g16.118`
+Status: ready — concurrent with `g16.118`; overlay initial-focus rows join after `118` merges (serial for those five rows only)
 Type: native behaviour repair — GPUI backend focus routing and `poodle-render`
 state projection; A1 receipts for five rows
 Opened: 2026-09-05
@@ -20,6 +20,17 @@ Dispatch manifest: `../dispatch.md`
 | AgentTranscript | post-action focus `null` | focus lands on the new entry |
 | RadioGroup | `orientation` "vertical" projected where Svelte omits; second radio not in focus order | roving focus: one stop, `orientation` only when set |
 | SegmentedControl | `selected` projected on segments; segments all in focus order | Svelte uses `aria-pressed`/checked semantics (`selected` null) and one roving stop |
+
+## Added Scope (2026-09-05, from `g16.118`'s capsule)
+
+Initial overlay focus for Dialog, Popover, ConfirmAction, MessageCenter, and
+ModelPicker: when the overlay opens, focus must land where the contract says
+(first focusable, the dialog itself, or the search editor) and the snapshot
+must show it. `poodle-node` has no channel for it today; this card may add
+one accessibility-record field, `initial_focus: bool`, set by
+`poodle-render` on exactly one node per overlay, which the backend honours
+through its existing focus request on mount. Those five rows' receipts are
+emitted here, after `118`'s structure has merged.
 
 ## Fixed Boundary
 

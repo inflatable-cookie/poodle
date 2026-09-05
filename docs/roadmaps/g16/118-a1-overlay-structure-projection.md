@@ -27,12 +27,20 @@ Dispatch manifest: `../dispatch.md`
 
 ## Fixed Boundary
 
-- **Vocabulary (one bounded addition, this card owns it):** add
-  `NodeRole::Heading` (uses the existing `level` field) and
-  `NodeRole::Banner` to `poodle-node`; map both in the GPUI backend (no-op
-  paint, record only) and in the Jetstream AccessKit projection so the
-  quarantined adapter still compiles. No other vocabulary change; if a row
-  needs more, stop and report.
+- **Vocabulary (this card owns it):** add `NodeRole::Heading` (uses the
+  existing `level` field), `NodeRole::Banner`, and `NodeRole::SearchBox`
+  (the Select/CommandPalette search editor; the TextInput contract's
+  `type="search"` maps to it) to `poodle-node`; map all three in the GPUI
+  backend (record only) and in the Jetstream AccessKit projection so the
+  quarantined adapter still compiles. Decision 2026-09-05: a role the
+  contract names is never a scope violation; anything beyond these three,
+  stop and report.
+- **Initial overlay focus is not this card.** Dialog, Popover,
+  ConfirmAction, MessageCenter, and ModelPicker also diverge on where focus
+  lands when the overlay opens. That is focus routing and belongs to
+  `g16.119`. This card lands the structure; for those rows the divergence
+  store is reduced to the focus-only remainder and no receipt is emitted;
+  `g16.119` emits them.
 - **Composition:** in `poodle-render`, give every overlay the structure the
   contract and Svelte agree on: a container node with the `dialog` or
   `alertdialog` role named from its title, a heading node for the title, a
@@ -44,8 +52,10 @@ Dispatch manifest: `../dispatch.md`
 - **Svelte:** unchanged unless the contract contradicts it; then the
   contract decides and the card records the ruling before repairing.
 - **Proof:** re-run the A1 receipt for each of the eight rows through the
-  paired runner; each diff must be empty; delete the row's divergence store;
-  repin and re-emit the cohort at the final head; regenerate the ledger.
+  paired runner. A row with an empty diff gets its receipt and its store
+  deleted. A row whose only remaining diff entries are `focused`/`focus_order`
+  on overlay open keeps a reduced store naming `g16.119`. Repin and re-emit
+  the cohort at the final head; regenerate the ledger.
 
 ## Review Oracle
 
