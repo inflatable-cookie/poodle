@@ -11064,7 +11064,10 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
         let cluster_node = &divider_node.children[1];
         let toggle_button = &cluster_node.children[0];
         assert_eq!(toggle_button.a11y.role, Some(NodeRole::Button));
-        assert_eq!(toggle_button.a11y.label.as_deref(), Some("Collapse"));
+        assert_eq!(
+            toggle_button.a11y.label.as_deref(),
+            Some("Collapse primary")
+        );
         assert_eq!(toggle_button.a11y.expanded, Some(true));
         assert_eq!(toggle_button.a11y.tab_index, Some(0));
         assert!(toggle_button.interaction.focusable);
