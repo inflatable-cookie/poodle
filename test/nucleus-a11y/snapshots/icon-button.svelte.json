@@ -1,0 +1,35 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "IconButton",
+  "scenario_id": "nucleus.shell.icon-button",
+  "scenario_path": "test/nucleus-a11y/scenarios/icon-button.json",
+  "scenario_sha256": "92930eb5f2ad75955cfa036024e0a371ddbd5c30a7068f1f86b919d495dbc43c",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "button",
+      "name": "Search",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    }
+  ]
+}

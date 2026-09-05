@@ -49,11 +49,20 @@ function fixtureProps(scenario: A1Scenario): Record<string, unknown> {
   const triggerText = scenario.fixtures?.trigger_text;
   const props: Record<string, unknown> = {};
   if (typeof panelText === "string") {
+    const probe = scenario.fixtures?.a11y_probe as { role?: unknown; label?: unknown } | undefined;
+    const probeRole = typeof probe?.role === "string" ? probe.role : undefined;
+    const probeLabel = typeof probe?.label === "string" ? probe.label : undefined;
     props.children = panelText.includes("{value}")
-      ? createRawSnippet((value: () => string) => ({
-          render: () => `<p>${panelText.replace("{value}", value())}</p>`,
+      ? createRawSnippet((value?: () => string) => ({
+          render: () => probeRole
+            ? `<span role="${probeRole}" aria-label="${probeLabel ?? ""}">${panelText.replace("{value}", value?.() ?? "")}</span>`
+            : `<p>${panelText.replace("{value}", value?.() ?? "")}</p>`,
         }))
-      : createRawSnippet(() => ({ render: () => `<p>${panelText}</p>` }));
+      : createRawSnippet(() => ({
+          render: () => probeRole
+            ? `<span role="${probeRole}" aria-label="${probeLabel ?? ""}">${panelText}</span>`
+            : `<p>${panelText}</p>`,
+        }));
   }
   if (typeof triggerText === "string") {
     props.trigger = createRawSnippet(() => ({
@@ -69,8 +78,8 @@ function fixtureProps(scenario: A1Scenario): Record<string, unknown> {
 describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
   const rows = listScenarioRows(root);
 
-  it("has the foundation, NP-2, NP-3, and NP-5 scenarios", () => {
-    expect(rows).toEqual(["agent-chat-input", "agent-plan", "agent-question", "agent-transcript", "command-palette", "dialog", "editable-label", "menu", "message-center", "model-picker", "popover", "segmented-control", "select", "status-indicator", "switch", "tabs", "toast-host"]);
+  it("has the foundation, NP-1, NP-2, NP-3, and NP-5 scenarios", () => {
+    expect(rows).toEqual(["agent-chat-input", "agent-plan", "agent-question", "agent-transcript", "app-header", "button", "command-palette", "dialog", "editable-label", "icon", "icon-button", "menu", "message-center", "model-picker", "popover", "segmented-control", "select", "split-view", "status-indicator", "surface", "switch", "tabs", "text", "toast-host"]);
   });
 
   for (const row of rows) {

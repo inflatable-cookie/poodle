@@ -1,0 +1,32 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "Icon",
+  "scenario_id": "nucleus.shell.icon",
+  "scenario_path": "test/nucleus-a11y/scenarios/icon.json",
+  "scenario_sha256": "2170ba7bcf1a493bf4390db65741d067011e5c3ca7e333e84eaf63f2805f3592",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "img",
+      "name": "Search documents",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    }
+  ]
+}

@@ -14,13 +14,20 @@ use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, Trans
 use poodle_node::Node;
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
-    RenderContext, SelectHandlers, TabsHandlers,
+    CommandPaletteHandlers, EditableLabelHandlers, MessageCenterHandlers, PopoverHandlers,
+    RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers,
 };
 use poodle_specs::{
-    AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, ChoiceOption,
-    ControlDensity, ControlSize, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection,
-    Orientation, SelectMode, SelectSpec, StatusIndicatorSpec, SwitchSpec, TabActivationMode,
-    TabDefinition, TabsSpec,
+    AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, AppHeaderSpec,
+    ButtonSpec, ButtonVariant, ChoiceOption, CommandActionItem, CommandPaletteSpec,
+    ControlDensity, ControlSize, DialogSpec, EditableLabelActivation, EditableLabelSpec,
+    IconButtonSpec, IconProviderSpec, IconSize, IconSpec, MenuEntry, MenuSpec, MessageCenterItem,
+    MessageCenterSpec, ModelOption, ModelPickerSpec, ModelPickerVariant, ModelSelection, Orientation,
+    PaddingScale, PopoverInitialFocus, PopoverSpec, SegmentedControlOption, SegmentedControlSpec,
+    SelectMode, SelectSpec, SplitOrientation, SplitViewSpec, StatusTone, SurfaceBorder, SurfaceRole,
+    SurfaceSpec, SurfaceTone, StatusIndicatorSpec, SwitchSpec, TabActivationMode, TabDefinition,
+    TabsSpec, TextElement, TextSize, TextSpec, TextTone, TextWeight, Toast, ToastHostPlacement,
+    ToastHostSpec, ToastStackSpec,
 };
 use serde::Deserialize;
 use serde_json::Value;
@@ -186,6 +193,396 @@ fn prove_static_row(row: &'static str, node: Node, width: f32, height: f32) {
             &["mount the production renderer path through HeadlessDriver", "replay every shared scenario action through GPUI dispatch"],
             &["the normalised GPUI snapshot is compared with the committed Svelte DOM snapshot for the same scenario hash"],
         );
+    });
+}
+// ── NP-1 shell ───────────────────────────────────────────────────────────
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct IconProps {
+    name: String,
+    aria_label: Option<String>,
+    size: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct TextProps {
+    #[serde(rename = "as")]
+    as_: Option<String>,
+    tone: Option<String>,
+    size: Option<String>,
+    weight: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SurfaceProps {
+    tone: Option<String>,
+    border: Option<String>,
+    padding: Option<String>,
+    as_role: Option<String>,
+    label: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct ButtonProps {
+    aria_label: Option<String>,
+    variant: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct IconButtonProps {
+    icon: Option<String>,
+    aria_label: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct AppHeaderProps {
+    title: Option<String>,
+    subtitle: Option<String>,
+    aria_label: Option<String>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct SplitViewProps {
+    orientation: String,
+    default_ratio: f32,
+    aria_label: Option<String>,
+    show_collapse_primary: bool,
+    divider: bool,
+}
+
+fn fixture_text(loaded: &LoadedA1Scenario) -> String {
+    loaded.scenario.fixtures["panel_text"]
+        .as_str()
+        .expect("panel_text fixture")
+        .to_owned()
+}
+
+fn named<T>(value: Option<T>, name: &str) -> T {
+    value.unwrap_or_else(|| panic!("missing {name}"))
+}
+
+fn text_size(value: Option<&str>) -> TextSize {
+    match value.unwrap_or("md") {
+        "xs" => TextSize::Xs,
+        "sm" => TextSize::Sm,
+        "md" => TextSize::Md,
+        other => panic!("unknown text size {other}"),
+    }
+}
+fn text_tone(value: Option<&str>) -> TextTone {
+    match value.unwrap_or("default") {
+        "default" => TextTone::Default,
+        "secondary" => TextTone::Secondary,
+        "muted" => TextTone::Muted,
+        "success" => TextTone::Success,
+        "danger" => TextTone::Danger,
+        "warning" => TextTone::Warning,
+        other => panic!("unknown text tone {other}"),
+    }
+}
+fn text_weight(value: Option<&str>) -> TextWeight {
+    match value.unwrap_or("normal") {
+        "normal" => TextWeight::Normal,
+        "medium" => TextWeight::Medium,
+        "semibold" => TextWeight::Semibold,
+        "bold" => TextWeight::Bold,
+        other => panic!("unknown text weight {other}"),
+    }
+}
+fn icon_size(value: Option<&str>) -> IconSize {
+    match value.unwrap_or("md") {
+        "xs" => IconSize::Xs,
+        "sm" => IconSize::Sm,
+        "md" => IconSize::Md,
+        "lg" => IconSize::Lg,
+        "xl" => IconSize::Xl,
+        other => panic!("unknown icon size {other}"),
+    }
+}
+fn button_variant(value: Option<&str>) -> ButtonVariant {
+    match value.unwrap_or("secondary") {
+        "primary" => ButtonVariant::Primary,
+        "secondary" => ButtonVariant::Secondary,
+        "ghost" => ButtonVariant::Ghost,
+        "danger" => ButtonVariant::Danger,
+        other => panic!("unknown button variant {other}"),
+    }
+}
+fn split_orientation(value: &str) -> SplitOrientation {
+    match value {
+        "horizontal" => SplitOrientation::Horizontal,
+        "vertical" => SplitOrientation::Vertical,
+        other => panic!("unknown split orientation {other}"),
+    }
+}
+
+fn prove_shell_row(
+    driver: &mut HeadlessDriver,
+    loaded: &LoadedA1Scenario,
+    actions: &[&'static str],
+    assertions: &[&'static str],
+) {
+    prove(driver, loaded, actions, assertions);
+}
+
+fn record_shell_divergence(
+    driver: &mut HeadlessDriver,
+    loaded: &LoadedA1Scenario,
+    expected: &[(&str, &str)],
+) {
+    let nodes =
+        nucleus_receipts::normalise_a1_nodes(&driver.accessibility_nodes(), &loaded.scenario);
+    let (_, _, svelte) = nucleus_receipts::load_svelte_snapshot(loaded);
+    let diff = nucleus_receipts::diff_a1_nodes(
+        &nodes,
+        svelte["nodes"].as_array().expect("snapshot nodes"),
+    );
+    let fields: Vec<(String, String)> = diff
+        .iter()
+        .map(|entry| {
+            (
+                entry["index"].as_i64().unwrap().to_string(),
+                entry["field"].as_str().unwrap().to_owned(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        fields,
+        expected
+            .iter()
+            .map(|(index, field)| ((*index).to_owned(), (*field).to_owned()))
+            .collect::<Vec<_>>()
+    );
+    let gpui = nucleus_receipts::gpui_snapshot_file(loaded, driver.mounted_observation(), nodes);
+    nucleus_receipts::publish_a1_divergence_if_configured(loaded, &gpui, &diff);
+}
+
+#[test]
+fn np1_icon_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("icon");
+    let input: IconProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut icon = poodle_render::icon(
+            &IconSpec::new(input.name.clone())
+                .with_size(icon_size(input.size.as_deref()))
+                .with_aria_label(named(input.aria_label.clone(), "ariaLabel")),
+            &ctx,
+        );
+        icon.id = Some("np1-icon".to_owned());
+        let root = poodle_render::icon_provider(&IconProviderSpec::new(), &ctx, Some(icon));
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 80.0);
+        driver.pointer_hover(gpui::Point::new(
+            gpui::Pixels::from(20.0),
+            gpui::Pixels::from(20.0),
+        ));
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &["mount production Icon through IconProvider and dispatch pointer hover"],
+            &["mounted Icon accessibility projection matches Svelte"],
+        );
+    });
+}
+
+#[test]
+fn np1_text_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("text");
+    let input: TextProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let text = TextSpec::new(fixture_text(&loaded))
+            .with_element(match input.as_.as_deref().unwrap_or("p") {
+                "p" => TextElement::P,
+                "span" => TextElement::Span,
+                "div" => TextElement::Div,
+                other => panic!("unknown text element {other}"),
+            })
+            .with_size(text_size(input.size.as_deref()))
+            .with_tone(text_tone(input.tone.as_deref()))
+            .with_weight(text_weight(input.weight.as_deref()));
+        let mut probe = Node::container();
+        probe.a11y.role = Some(poodle_node::NodeRole::Status);
+        probe.a11y.label = Some(
+            loaded.scenario.fixtures["a11y_probe"]["label"]
+                .as_str()
+                .expect("probe label")
+                .to_owned(),
+        );
+        let node = probe.child(poodle_render::text(&text, &ctx));
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 60.0);
+        driver.dispatch_probe_key("tab");
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &["mount production Text and dispatch a harmless key"],
+            &["styled Text remains outside the accessibility projection on both runtimes"],
+        );
+    });
+}
+
+#[test]
+fn np1_surface_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("surface");
+    let input: SurfaceProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = poodle_render::surface(
+            &SurfaceSpec::new()
+                .with_tone(match input.tone.as_deref().unwrap_or("panel") {
+                    "panel" => SurfaceTone::Panel,
+                    "canvas" => SurfaceTone::Canvas,
+                    "elevated" => SurfaceTone::Elevated,
+                    other => panic!("unknown surface tone {other}"),
+                })
+                .with_border(match input.border.as_deref().unwrap_or("subtle") {
+                    "none" => SurfaceBorder::None,
+                    "subtle" => SurfaceBorder::Subtle,
+                    "default" => SurfaceBorder::Default,
+                    other => panic!("unknown surface border {other}"),
+                })
+                .with_padding(match input.padding.as_deref().unwrap_or("md") {
+                    "sm" => PaddingScale::Sm,
+                    "md" => PaddingScale::Md,
+                    "lg" => PaddingScale::Lg,
+                    other => panic!("unknown surface padding {other}"),
+                })
+                .with_role(match input.as_role.as_deref().expect("asRole") {
+                    "group" => SurfaceRole::Group,
+                    "region" => SurfaceRole::Region,
+                    other => panic!("unknown surface role {other}"),
+                })
+                .with_label(named(input.label.clone(), "label")),
+            &ctx,
+            vec![],
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 220.0, 100.0);
+        driver.dispatch_probe_key("tab");
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &["mount production Surface and dispatch a harmless key"],
+            &["region role and accessible name match the Svelte projection"],
+        );
+    });
+}
+
+#[test]
+fn np1_button_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("button");
+    let input: ButtonProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut node = poodle_render::button(
+            &ButtonSpec::new()
+                .with_label(fixture_text(&loaded))
+                .with_aria_label(named(input.aria_label.clone(), "ariaLabel"))
+                .with_variant(button_variant(input.variant.as_deref())),
+            &ctx,
+            None,
+        );
+        node.id = Some("np1-button".to_owned());
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 60.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &["mount production Button and replay the shared pointer action"],
+            &["button role, name, disabled state, and focus match the Svelte projection"],
+        );
+    });
+}
+
+#[test]
+fn np1_icon_button_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("icon-button");
+    let input: IconButtonProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut node = poodle_render::icon_button(
+            &IconButtonSpec::new()
+                .with_icon(named(input.icon.clone(), "icon"))
+                .with_aria_label(named(input.aria_label.clone(), "ariaLabel")),
+            &ctx,
+            None,
+        );
+        node.id = Some("np1-icon-button".to_owned());
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 100.0, 100.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove_shell_row(
+            &mut driver,
+            &loaded,
+            &["mount production IconButton and replay the shared pointer action"],
+            &["button role, name, disabled state, and focus match the Svelte projection"],
+        );
+    });
+}
+
+#[test]
+fn np1_split_view_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("split-view");
+    let input: SplitViewProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut spec = SplitViewSpec::new("np1", split_orientation(&input.orientation))
+            .with_default_ratio(input.default_ratio)
+            .with_aria_label(named(input.aria_label.clone(), "ariaLabel"))
+            .with_show_collapse_primary(input.show_collapse_primary);
+        spec.divider = input.divider;
+        let node = poodle_render::split_view(
+            &spec,
+            &ctx,
+            None,
+            None,
+            poodle_render::SplitViewHandlers::default(),
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 180.0);
+        driver.dispatch_probe_key("tab");
+        record_shell_divergence(&mut driver, &loaded, &[("0", "value"), ("1", "name")]);
+    });
+}
+
+#[test]
+fn np1_app_header_a1_accessibility_divergence_is_recorded() {
+    let loaded = nucleus_receipts::load_a1_scenario("app-header");
+    let input: AppHeaderProps = props(&loaded);
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = poodle_render::app_header(
+            &AppHeaderSpec::new()
+                .with_title(named(input.title.clone(), "title"))
+                .with_subtitle(named(input.subtitle.clone(), "subtitle"))
+                .with_aria_label(named(input.aria_label.clone(), "ariaLabel")),
+            &ctx,
+            None,
+            None,
+            None,
+            None,
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 80.0);
+        driver.dispatch_probe_key("tab");
+        record_shell_divergence(&mut driver, &loaded, &[("0", "role")]);
     });
 }
 

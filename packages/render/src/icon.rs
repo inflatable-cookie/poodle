@@ -4,7 +4,7 @@
 //! Ported from: `packages/jetstream/components/src/icon.rs`. Rasterisation and
 //! tinting are backend concerns; the node names the glyph and its box.
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::IconSpec;
 
 use crate::context::RenderContext;
@@ -25,6 +25,7 @@ pub fn icon(spec: &IconSpec, ctx: &RenderContext<'_>) -> Node {
     }
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
+        el.a11y.role = Some(NodeRole::Image);
     }
     el
 }

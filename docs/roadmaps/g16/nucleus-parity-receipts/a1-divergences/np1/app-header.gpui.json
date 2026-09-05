@@ -1,0 +1,15 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "AppHeader",
+  "scenario_id": "nucleus.shell.app-header",
+  "scenario_path": "test/nucleus-a11y/scenarios/app-header.json",
+  "scenario_sha256": "c85689d489b968bb4f7935b46d4fc7ade8624a5cf4bb68d884a30a30f1d2f8eb",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": []
+}

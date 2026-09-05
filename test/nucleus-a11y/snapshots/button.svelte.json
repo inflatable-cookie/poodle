@@ -1,0 +1,34 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "Button",
+  "scenario_id": "nucleus.shell.button",
+  "scenario_path": "test/nucleus-a11y/scenarios/button.json",
+  "scenario_sha256": "23525a617c62b3a22ec5137e915b9606043fbb31bd20fedd2482694edebd3f7a",
+  "runtime": "svelte-happy-dom",
+  "run": {
+    "command": "effigy test:nucleus-a11y",
+    "mount": "@testing-library/svelte render",
+    "render_path": "svelte mount -> happy-dom document",
+    "input_dispatch": "dom-events"
+  },
+  "nodes": [
+    {
+      "role": "button",
+      "name": "Apply",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 0,
+      "focused": true
+    }
+  ]
+}

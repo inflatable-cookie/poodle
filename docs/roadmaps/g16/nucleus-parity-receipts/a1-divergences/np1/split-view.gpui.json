@@ -1,0 +1,54 @@
+{
+  "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
+  "component": "SplitView",
+  "scenario_id": "nucleus.shell.split-view",
+  "scenario_path": "test/nucleus-a11y/scenarios/split-view.json",
+  "scenario_sha256": "93e27139d1637db633c686ae7cbedd9d0119a96a5b20e29acbc5c20eaca224ba",
+  "runtime": "gpui-headless",
+  "run": {
+    "command": "effigy regressions:native",
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "nodes": [
+    {
+      "role": "separator",
+      "name": "Resize",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "expanded": null
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": "horizontal",
+      "focus_order": 0,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Collapse",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false,
+        "expanded": true
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 1,
+      "focused": false
+    }
+  ]
+}

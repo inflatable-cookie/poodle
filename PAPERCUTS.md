@@ -11,6 +11,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-05 — A cold g16.112 worktree cannot start `effigy test:nucleus-a11y`
+  until `effigy core:build` materializes the shared core CSS dist; Vite reports
+  the first missing component stylesheet (`accordion.css`) during package
+  barrel resolution. Surface: `packages/core/dist`, Svelte A1 test bootstrap.
+
 - 2026-09-05 — `gpui-apple-gpui-unofficial` 1.19.0-pre `build.rs` looks for a
   sibling `../gpui-unofficial` (the unofficial transform rewrote `../gpui`).
   Cargo extracts `gpui-unofficial-1.19.0-pre`, so the published macOS backend
