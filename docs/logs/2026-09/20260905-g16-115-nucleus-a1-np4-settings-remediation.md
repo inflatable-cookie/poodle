@@ -2,9 +2,9 @@
 
 Status: complete — ready for independent exact-head review
 Date: 2026-09-05
-Base: `origin/main` at `ef9049f158863ec181dee46123a8e59c0c957091`
+Base: `origin/main` at `a3c2b1b62a013bd539806d7734de89ef46ef8cd8`
 Branch: `worker/g16-115-nucleus-np4`
-Runtime checkpoint: `47f1caff0b9d749b0026c3bb2b8ada53aa76a06b`
+Runtime checkpoint: `20c5e5bee75d294fcc7173e70359930e7cc68aff`
 
 ## Scope
 
@@ -33,18 +33,15 @@ created for the three divergent rows.
 
 ## Validation
 
-- First rebased `effigy regressions:native`: 206 passed, 2 failed, 8 ignored;
-  the two failures were stale current-main Select migration expectations.
-  The two assertions were updated to the merged `Button` role as legitimate
-  rebase conflict repair. Final native run: 208 passed, 0 failed, 8 ignored.
-  Ignore accounting is 5 inherited from `origin/main` plus 3 NP-4 divergence
-  probes (RadioGroup, ConfirmAction, and DetailItem).
-- `effigy test:nucleus-a11y`: 14 passed.
+- `effigy regressions:native`: 213 passed, 0 failed, 4 ignored. Ignore
+  accounting is 1 inherited from `origin/main` plus 3 NP-4 divergence probes
+  (RadioGroup, ConfirmAction, and DetailItem).
+- `effigy test:nucleus-a11y`: 23 passed.
 - `effigy test:nucleus-parity-receipts`: 11 passed.
 - `effigy check:parity-evidence-ledger`: 176 component rows validated.
 - `effigy docs:check`: passed.
 - `git diff --check`: clean.
-- Full 34-receipt cohort re-emitted at `47f1caff`; manifest resolution was
+- Full current Nucleus receipt cohort re-emitted at `20c5e5be`; manifest resolution was
   repinned to that source commit and the existing lock digest.
 
 ## Stop

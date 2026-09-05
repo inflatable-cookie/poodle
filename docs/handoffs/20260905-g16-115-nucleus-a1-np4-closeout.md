@@ -9,8 +9,8 @@ status: ready-for-independent-review
 owner: Poodle Northstar orchestrator
 created: 2026-09-05
 updated: 2026-09-05
-base: ef9049f158863ec181dee46123a8e59c0c957091
-runtime_checkpoint: 47f1caff0b9d749b0026c3bb2b8ada53aa76a06b
+base: a3c2b1b62a013bd539806d7734de89ef46ef8cd8
+runtime_checkpoint: 20c5e5bee75d294fcc7173e70359930e7cc68aff
 tags: [coordination, handoff, worker, g16, g16.115]
 ---
 
@@ -36,21 +36,19 @@ Chatterbox.
 
 ## Cohort identity
 
-The complete 34-file Nucleus receipt cohort was re-emitted through
-`effigy regressions:native` at runtime checkpoint `47f1caff`. The manifest
+The complete 36-file Nucleus receipt cohort (29 M1 rows plus the current A1
+receipts) was re-emitted through
+`effigy regressions:native` at runtime checkpoint `20c5e5be`. The manifest
 resolution block is repinned to that source commit; the lock digest remains
 `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`. The
 29-row manifest roster and scenario IDs are unchanged.
 
 ## Validation
 
-The first rebased native run recorded 206 passed, 2 failed, and 8 ignored;
-the two failures were stale current-main Select migration expectations. The
-two assertions were updated to the merged `Button` role as legitimate rebase
-conflict repair. The final native run recorded 208 passed, 0 failed, and 8
-ignored: 5 inherited from origin/main plus 3 NP-4 divergence probes for
-RadioGroup, ConfirmAction, and DetailItem.
-`effigy test:nucleus-a11y` passed (14), receipt contract tests passed (11),
+The final rebased native run recorded 213 passed, 0 failed, and 4 ignored:
+1 inherited from origin/main plus 3 NP-4 divergence probes for RadioGroup,
+ConfirmAction, and DetailItem. `effigy test:nucleus-a11y` passed (23), receipt
+contract tests passed (11),
 the evidence ledger validated all 176 rows, `effigy docs:check` passed, and
 `git diff --check` passed. No windowed selectors ran.
 
