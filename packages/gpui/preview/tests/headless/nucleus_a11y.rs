@@ -861,6 +861,55 @@ fn model_picker_a1_accessibility_projection_matches_svelte() {
 }
 
 #[test]
+fn model_picker_initial_focus_falls_back_to_first_enabled_controlled_selection() {
+    let spec = ModelPickerSpec::new()
+        .with_models(vec![
+            ModelOption::new("disabled", "Disabled").with_disabled(true),
+            ModelOption::new("fallback", "Fallback"),
+        ])
+        .with_value(ModelSelection {
+            model: "disabled".to_owned(),
+            axes: Vec::new(),
+        });
+    let host = Arc::new(Mutex::new(spec.clone()));
+
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("ModelPicker mount lock") =
+            build_model_picker_a1(&spec, &host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 300.0);
+        let trigger_id = poodle_render::select_trigger_focus_id("model-picker:a1");
+        let fallback_id = poodle_render::select_option_id("model-picker:a1", "fallback");
+
+        driver.wait_for_focus_handle(&trigger_id);
+        driver.pointer_activate_id(&trigger_id);
+        driver.draw_frame();
+        driver.draw_frame();
+
+        let nodes = driver.accessibility_nodes();
+        let fallback = nodes
+            .iter()
+            .find(|node| node.element_id == fallback_id)
+            .expect("first enabled fallback radio is mounted");
+        assert!(fallback.focusable);
+        assert_eq!(fallback.tab_index, Some(0));
+        assert_eq!(fallback.focused, Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&fallback_id),
+            Some(true)
+        );
+
+        let disabled = nodes
+            .iter()
+            .find(|node| {
+                node.element_id == poodle_render::select_option_id("model-picker:a1", "disabled")
+            })
+            .expect("controlled disabled selection is mounted");
+        assert!(!disabled.focusable);
+    });
+}
+
+#[test]
 fn agent_chat_input_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("agent-chat-input");
     let scenario_props = loaded.scenario.props.clone();
