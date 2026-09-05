@@ -125,12 +125,16 @@ is committed because the pair does not agree.
 
 ## Scope notes
 
-- `package.json`/`bun.lock` gained `dom-accessibility-api@0.5.16` as a dev
-  dependency (previously only transitive and not hoisted). `vitest.config.ts`
-  and `tasks/effigy.tasks.toml` gained the `nucleus-a11y` project and
-  `test:nucleus-a11y` selector; `test:components` (in `ci:web`) already runs
-  every vitest project. These are outside the card's owned-path list and are
-  the minimum wiring for the new project.
+- `dom-accessibility-api@0.5.16` is consumed through its declared place in
+  the graph (a dependency of `@testing-library/dom`) via a resolve alias in
+  the `nucleus-a11y` vitest project. A first attempt added it to the root
+  `package.json`; `effigy ci:web` rejected that through the package-install
+  certification scope (`test/package-install/scope.ts` forbids any manifest
+  change on a worker branch), so the manifest and lockfile are unchanged.
+  `vitest.config.ts` and `tasks/effigy.tasks.toml` gained the `nucleus-a11y`
+  project and `test:nucleus-a11y` selector; `test:components` (in `ci:web`)
+  already runs every vitest project. These are outside the card's owned-path
+  list and are the minimum wiring for the new project.
 - The manifest `resolution.source_commit` was repinned and all 29 M1 receipts
   re-emitted because the validator's source-match covers the whole preview
   crate (recorded in `PAPERCUTS.md`).

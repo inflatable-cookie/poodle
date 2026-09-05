@@ -1602,3 +1602,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   A test-only exemption, or pinning to the files a receipt actually
   observes, would stop this. Surface: `SOURCE_PATHS` in
   `scripts/nucleus-parity-receipts.ts`.
+
+- 2026-09-05 — `effigy ci:web` fails on any worker branch that edits the root
+  `package.json`: `test:web-pack-install` runs the package-install
+  certification scope, which treats every package manifest as a forbidden
+  surface outside a release candidate. Adding a dev dependency for a test
+  project (g16.111, `dom-accessibility-api`) therefore needs either a
+  resolve alias through an existing dependency (what g16.111 did) or a
+  separate operator-approved manifest lane. The gate's error names the file
+  but not the rule. Surface: package-install certification scope.

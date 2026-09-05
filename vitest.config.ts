@@ -1,9 +1,18 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { configDefaults, defineConfig } from "vitest/config";
 
 const repoRoot = dirname(fileURLToPath(import.meta.url));
+// g16.111: the Svelte accessibility extractor reads names and roles through
+// dom-accessibility-api, which this repository already carries as a declared
+// dependency of @testing-library/dom. Resolve it through that graph rather
+// than adding a root manifest entry, which the package-install certification
+// gate forbids on a worker branch.
+const domAccessibilityApi = createRequire(
+  createRequire(import.meta.url).resolve("@testing-library/dom/package.json"),
+).resolve("dom-accessibility-api");
 const workspaceAliases = {
   "@inflatable-cookie/poodle-svelte/markdown": join(
     repoRoot,
@@ -126,7 +135,10 @@ export default defineConfig({
         // DOM events, and emits the accessibility snapshot the GPUI headless
         // run is compared against.
         plugins: [svelte()],
-        resolve: { alias: workspaceAliases, conditions: ["browser"] },
+        resolve: {
+          alias: { ...workspaceAliases, "dom-accessibility-api": domAccessibilityApi },
+          conditions: ["browser"],
+        },
         test: {
           name: "nucleus-a11y",
           environment: "happy-dom",
