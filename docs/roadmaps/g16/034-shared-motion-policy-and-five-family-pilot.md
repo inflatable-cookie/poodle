@@ -155,8 +155,8 @@ Production repair evidence:
 - GPUI backend/probes only for accepted channels, cleanup, and named
   approximations;
 - bounded browser probe fixtures and exact pilot specimens;
-- `docs/parity/skeleton.md` for the promoted shimmer-to-pulse delta and its
-  implementation closeout;
+- the archived skeleton parity audit (`docs/archive/parity/skeleton.md`) as
+  the historical shimmer-to-pulse delta record;
 - architecture 012, MotionPolicyProvider and the eight named component
   contracts, this card, one execution log, front-door currentness, and
   `PAPERCUTS.md` for new execution friction.

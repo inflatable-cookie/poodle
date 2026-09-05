@@ -110,9 +110,9 @@ not-applicable). No other component's row changes.
 - Replace focused renderer tests that bless URL-driven callbacks with tests for
   linkless-value activation, current/ellipsis/`href` inertia, text/icon target
   unity, button semantics, focusability, label, and focus ring.
-- Update `docs/parity/breadcrumbs.md` only where its old callback and runtime
-  notes contradict the corrected source. Do not revive Jetstream as an active
-  target.
+- The corrected callback and runtime semantics supersede the historical
+  parity audit (`docs/archive/parity/breadcrumbs.md`); that audit stays
+  untouched as evidence. Do not revive Jetstream as an active target.
 
 ### 2. Repair the shared renderer
 
@@ -171,7 +171,6 @@ Complete. The full record is
 ## Writable Scope
 
 - `docs/contracts/components/breadcrumbs.md`
-- `docs/parity/breadcrumbs.md`
 - `packages/render/src/breadcrumbs.rs`
 - Breadcrumbs-only compatibility/specimen state under `packages/gpui/preview/`
 - the smallest Breadcrumbs mounted regression changes in

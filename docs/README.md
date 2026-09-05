@@ -80,7 +80,10 @@ The remaining sections preserve decision and delivery context:
   briefs of open lanes remain at the top level until their lane closes.
 - `triage/` — open observations and operator decisions awaiting promotion;
   promoted, superseded, or executed notes are removed
-- `parity/` — pointer to the archived parity audits (see below)
+- `parity/` — pointer to the historical pre-consolidation parity audits;
+  the audits themselves live under `archive/parity/`
+- `archive/` — retired directories kept for provenance; current parity is
+  generated from contracts, runtime reports, tests, and previews
 
 These records are useful to contributors, but they are not part of the operator
 learning path and may describe superseded implementation states.

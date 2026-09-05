@@ -61,8 +61,8 @@ runtimes?
   never borrows another runtime's result.
 - Jetstream is one program-level `deferred` target. Shared specs, render nodes,
   or adapter compilation do not make its backend pass.
-- Historical `docs/parity/` audits and rejected g13/g14 evidence remain
-  historical. Do not rewrite them as current results.
+- Historical `docs/archive/parity/` audits and rejected g13/g14 evidence
+  remain historical. Do not rewrite them as current results.
 
 If the measured roster differs, stop before changing the denominator. Report
 the source change and required planning decision.
