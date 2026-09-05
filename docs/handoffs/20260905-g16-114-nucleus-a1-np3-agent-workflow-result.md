@@ -24,7 +24,7 @@ revision 18. Scope is the six NP-3 A1 rows only.
 - Workspace: `/Users/tom/.paseo/worktrees/1ugbsx1t/worker-g16-114-nucleus-np3`
 - Branch: `worker/g16-114-nucleus-np3`
 - Base: `3dbabac3990fb5f3856305b7c8f971039b0a81be`
-- Manifest source commit: `c0659590b8e8abfa8bda0f97037ad4b1c5ecf78e`
+- Manifest source commit: `c0659590b00367e03d2d755c6437a2e9dc470543`
 - Manifest lock digest: `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`
 - Owned paths: NP-3 scenario/snapshot/proof files, execution log, and append-only `PAPERCUTS.md`.
 - Reserved coordinator paths were not edited.
