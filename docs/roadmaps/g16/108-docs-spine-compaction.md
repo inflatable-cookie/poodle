@@ -45,10 +45,20 @@ class of defect impossible to reintroduce.
    the workspace packages and run `svelte-check`; include it in
    `docs:check`. Plant one stale prop to prove it bites.
 
+6. **Historical-prefix gates.** `scripts/check-recipe-only-surface.ts`
+   (`drift:recipes`) hardcodes `docs/logs`, `docs/parity`, and
+   `docs/roadmaps` as historical prefixes, so the relocated parity corpus
+   turns 13 archived Treatment-token lines red. Add `docs/archive/` to that
+   list (it is historical by definition), with a planted test proving an
+   active-path Treatment reference still fails. Do the same for any other
+   gate whose only objection to the move is a hardcoded prefix; name each
+   in the log. Never edit archived content to satisfy a gate. (Scope
+   amended 2026-09-05 after PR #212's review.)
+
 Out of scope: the active roadmap front doors (`docs/roadmaps/README.md`,
 `generation-index.md`, `g16/README.md`) and `dispatch.md`; they compact at
-generation rollover. Do not touch code outside the one guide-snippet check
-script and its task entry.
+generation rollover. Do not touch code outside the guide-snippet check
+script, its task entry, and the historical-prefix lists in item 6.
 
 ## Review Oracle
 
@@ -59,6 +69,7 @@ script and its task entry.
 | Parity is not an edit target | grep `docs/parity/` in g16 cards and log templates | zero instructions remain |
 | Guides compile | `docs:snippet-check` | green; planted stale prop fails |
 | Specs index is honest | a moved spec still listed as active | `specs/README.md` diff |
+| Archive is historical to gates | a Treatment reference in `docs/archive/parity/` | `drift:recipes` green; a planted reference under `docs/guides/` still fails |
 
 ## Validation
 
@@ -73,7 +84,9 @@ origin/main...HEAD`.
 instructions only), `packages/svelte/preview/src/component-docs.ts`
 (HistoryCenter snippet), one new script under
 `packages/svelte/preview/scripts/`, `tasks/effigy.tasks.toml` (one selector
-and the `docs:check` line), execution log, `PAPERCUTS.md` (append only).
+and the `docs:check` line), `scripts/check-recipe-only-surface.ts` and any
+other gate's historical-prefix list (item 6) with their tests, execution
+log, `PAPERCUTS.md` (append only).
 
 ## Stop Conditions
 

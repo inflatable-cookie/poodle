@@ -63,7 +63,9 @@ card or triage note says.
   review; `docs:check` and the new `docs:snippet-check` green.
 - Owned mutable paths: per card (handoffs, parity → archive, specs, guides,
   contracts index, docs README retention rule, parity edit lines in g16
-  cards, HistoryCenter docs snippet, one script, one task line, log)
+  cards, HistoryCenter docs snippet, one script, one task line, the
+  historical-prefix lists of gates that object to the move — item 6, amended
+  2026-09-05 — log)
 - Reserved shared closeout surfaces (coordinator at merge): `g16/README.md`,
   `generation-index.md`
 - Approved concurrent siblings: `g16.106`, `g16.107`, `g16.097`. Serial
