@@ -103,6 +103,13 @@ request from the log author). 14 specs stay: 001, 008, 015, 022, 025, 026,
   lists exactly the 14 kept specs with one-line descriptors, and the README
   points at the archive index. Oracle 5 holds: no moved spec is listed as
   active anywhere in the README diff.
+- docs:check follow-ups: the retired-Treatment drift gate
+  (`scripts/check-recipe-only-surface.ts`) exempts `docs/archive/` now that
+  the parity corpus lives there, and the historical manifests
+  (`packages/{ecosystem-acceptance,reference-apps,g03-closeout,
+  shared-demo-app-audit}.json`) repoint their `docs/specs/NNN-*` evidence
+  citations at the archive. The regenerated react `component-docs.json`
+  artifact was committed with the HistoryCenter v3 docs rewrite.
 
 ## Boundary 4 — Guides
 
