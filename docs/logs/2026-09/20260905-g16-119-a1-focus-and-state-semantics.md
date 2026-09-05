@@ -6,7 +6,7 @@ Card: `docs/roadmaps/g16/119-a1-focus-and-state-semantics.md`
 Base: `origin/main` at `e4407101e5836843e124c75b4884c118f74bb1e3`
 Branch: `worker/g16-119-a1-focus-state-semantics`
 Runtime/evidence repin:
-`1636f70bd373323128e3bf4dd5e923fed0066e45`
+`ecc88ff5a37fb13fabe721ba1595fd3ad166b2f1`
 Lock digest:
 `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`
 
@@ -32,7 +32,10 @@ panel marker; ModelPicker marks the selected enabled model row, falling back to
 the first enabled row.
 
 All five overlay A1 diffs are empty and their g16.118 focus-only stores were
-consumed. The five receipts are:
+consumed. ModelPicker also has a focused native regression for a controlled
+disabled selection with no change handler: the first enabled fallback is
+focusable, tab-index zero, and receives the backend mount focus request. The
+five receipts are:
 
 - `dialog--nucleus-navigation-dialog--a1.json`
 - `popover--nucleus-navigation-popover--a1.json`
@@ -48,7 +51,7 @@ contains overlay focus stores.
 
 ## Validation
 
-- `effigy regressions:native` — 232 passed, 0 failed, 0 ignored; receipts
+- `effigy regressions:native` — 233 passed, 0 failed, 0 ignored; receipts
   emitted from the clean final target
 - `effigy test:nucleus-a11y` — 30 passed
 - `effigy test:nucleus-parity-receipts` — 11 passed
