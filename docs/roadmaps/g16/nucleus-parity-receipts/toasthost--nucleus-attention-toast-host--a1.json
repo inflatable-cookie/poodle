@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Text",
-  "scenario_id": "nucleus.shell.text",
+  "component": "ToastHost",
+  "scenario_id": "nucleus.attention.toast-host",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production Text and dispatch a harmless key"
+    "mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"
   ],
   "assertions": [
-    "styled Text remains outside the accessibility projection on both runtimes"
+    "stack label, listitem toasts, dismiss and retry names match the Svelte ARIA projection"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/text.gpui.json",
-      "sha256": "b7b488fca1b3a5eb56944316da06740000ca684d85a01be773821fc2ebe011d0"
+      "path": "test/nucleus-a11y/snapshots/toast-host.gpui.json",
+      "sha256": "2b9307ddb29f69671b3a93208da9b7bf8c13259bd51ab3280ff2dd1a9e6915ca"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/text.svelte.json",
-      "sha256": "bf21d1468e81a0887b3d4632f803bee37ad9c2b3c6542ea9502288f011deb37d"
+      "path": "test/nucleus-a11y/snapshots/toast-host.svelte.json",
+      "sha256": "5fb97289d22295e163eb247a2acb1fede3bca58e6caf841704eec657c858bb80"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/text.json",
-    "scenario_sha256": "78e740eec7cace6f76453e26537472a6cea815587eb9cce04756d52c5cae85fc",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/text.gpui.json",
-    "gpui_snapshot_sha256": "b7b488fca1b3a5eb56944316da06740000ca684d85a01be773821fc2ebe011d0",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/text.svelte.json",
-    "svelte_snapshot_sha256": "bf21d1468e81a0887b3d4632f803bee37ad9c2b3c6542ea9502288f011deb37d",
+    "scenario_path": "test/nucleus-a11y/scenarios/toast-host.json",
+    "scenario_sha256": "fe6095a95ca638900ac38998713420d87ae8a0519f389a182151ed0903899a34",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/toast-host.gpui.json",
+    "gpui_snapshot_sha256": "2b9307ddb29f69671b3a93208da9b7bf8c13259bd51ab3280ff2dd1a9e6915ca",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/toast-host.svelte.json",
+    "svelte_snapshot_sha256": "5fb97289d22295e163eb247a2acb1fede3bca58e6caf841704eec657c858bb80",
     "web_only_exclusions": [],
     "diff": []
   }

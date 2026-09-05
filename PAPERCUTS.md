@@ -1651,3 +1651,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   collapses the backdrop to the sibling's row instead of the mount box.
   `style.overlay` defers the paint but not the layout containing block.
   Surface: `packages/gpui/node-backend` overlay layout.
+
+- 2026-09-05 — Three A1 receipts are committed with no selector that emits
+  them (`callout`, `editable-label`, `text-input`): no GPUI A1 test loads
+  those scenarios, so a cohort repin can only rewrite their `source_commit`
+  in place. The `select` A1 test also stayed `#[ignore]`d after g16.117
+  aligned the row, so it silently left the cohort. A check that every
+  committed `--a1` receipt has a live test would catch both. Surface:
+  `packages/gpui/preview/tests/headless/nucleus_a11y.rs`.
+
+- 2026-09-05 — `packages/react/components/test/TabsControlledFocus.test.tsx`
+  > "separate-commit supersession retargets the latched transfer to the final
+  tab" is flaky: it fails roughly one run in two with `treeFocus` called 0
+  times instead of 1, on a `packages/react` tree byte-identical to
+  `origin/main`. It fails `effigy ci:web` on unrelated branches. Surface:
+  React Tabs controlled-focus test timing.
