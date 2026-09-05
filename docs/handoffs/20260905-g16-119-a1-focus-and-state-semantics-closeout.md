@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: implementation-complete-awaiting-review
+status: pushed-awaiting-review
 owner: Poodle Northstar orchestrator
 created: 2026-09-05
 updated: 2026-09-05

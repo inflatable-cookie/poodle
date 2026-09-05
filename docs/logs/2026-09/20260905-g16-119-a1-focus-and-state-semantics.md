@@ -58,6 +58,9 @@ contains overlay focus stores.
 - `effigy docs:check` — passed; existing Svelte diagnostics and ratcheted
   value-domain findings remain informational
 - `effigy docs:react-prop-drift` — 176 checked, 0 skipped, passed
+- exact-head no-emission replay of the five overlay A1 probes — 5 passed;
+  the full no-emission cohort is not a valid mode for intentionally divergent
+  rows, whose GPUI snapshots remain in their divergence stores
 - `git diff --check` — clean
 
 `effigy qa` reached the broad repository board but stopped at the two known
