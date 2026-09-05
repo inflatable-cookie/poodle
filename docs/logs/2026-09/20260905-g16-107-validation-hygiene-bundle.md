@@ -60,11 +60,14 @@ No workflow, component, or contract edits. No windowed selectors.
    cannot. Vitest ratchet 4/4. Script exit 0 on current inventory.
 7. **Stopped — GPUI harness flakes.** Implemented unique staged paths, full
    smoke stderr, and contention-named probe telemetry, then reverted.
-   `git diff a5fefa105 HEAD -- packages/gpui/preview` is non-empty with those
-   files, so `check:parity-evidence-ledger` fails (`receipt source commit …
-   no longer matches the mounted runtime source`). Receipts and
-   `SOURCE_PATHS` are not owned. Papercut recorded 2026-09-05. The 2026-09-01
-   / 2026-08-30 harness papercuts stay open.
+   Historical: pre-revert `0a9026511` had a non-empty
+   `git diff a5fefa105 -- packages/gpui/preview`, so
+   `check:parity-evidence-ledger` failed (`receipt source commit … no longer
+   matches the mounted runtime source`). Receipts and `SOURCE_PATHS` are not
+   owned, which is why that telemetry stayed reverted. Final head:
+   `packages/gpui/preview` vs `origin/main` is empty;
+   `check:parity-evidence-ledger` passes. Papercut recorded 2026-09-05.
+   The 2026-09-01 / 2026-08-30 harness papercuts stay open.
 8. **Jetstream adapter README.** Replaced "does not implement components"
    with the legacy 108-component implementation that is not the poodle-node
    route and is not admitted.
@@ -90,7 +93,9 @@ No workflow, component, or contract edits. No windowed selectors.
 - `git diff --check origin/main...HEAD`: pass (pre-commit)
 - `effigy doctor --verbose` after revert: exit 0 (ok 18, warn 3, err 0)
 - `git diff --check origin/main...HEAD`: pass
+- pre-revert `0a9026511`: `check:parity-evidence-ledger` failed (non-empty `packages/gpui/preview` vs receipt source `a5fefa105`)
 - `effigy docs:check` after item 7 revert: pass (value-domain ratchet 30 keys; ledger 176 rows; tree clean afterwards)
+- final head after revert: `git diff origin/main -- packages/gpui/preview` empty; `check:parity-evidence-ledger` passes
 - `effigy qa` on revert HEAD: failed `test:web-pack-install` — tsc `--traceResolution` prints `/private/var/...` while `os.tmpdir()` is `/var/...`. Realpath the temp root and the React probe path.
 - inner `POODLE_WEB_PACK_INSTALL_INNER=1` after that fix: pass
 - `effigy test:web-pack-install` on `d2f0157d08a8a5112d7d64cb58aad0bcee1cae88`: pass; tree clean
