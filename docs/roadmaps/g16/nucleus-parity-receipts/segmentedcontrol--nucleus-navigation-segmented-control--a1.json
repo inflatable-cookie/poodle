@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Surface",
-  "scenario_id": "nucleus.shell.surface",
+  "component": "SegmentedControl",
+  "scenario_id": "nucleus.navigation.segmented-control",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production Surface and dispatch a harmless key"
+    "mount production SegmentedControl and replay the shared selection action"
   ],
   "assertions": [
-    "region role and accessible name match the Svelte projection"
+    "one native-radio group entry stop matches the roving GPUI segment"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-      "sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35"
+      "path": "test/nucleus-a11y/snapshots/segmented-control.gpui.json",
+      "sha256": "8c095fb20be187a5f9a7b50e94a167a12b4515625d400fc8085ac4ff96692c04"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-      "sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8"
+      "path": "test/nucleus-a11y/snapshots/segmented-control.svelte.json",
+      "sha256": "a3a38c7f6b61f34478e07a0ea4d618e5e7a2ab181c2ecdd481536aef5bf6f94a"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/surface.json",
-    "scenario_sha256": "f5c9583f55022d5e1dd477ff0cb27ee78cd995b24dd97ca0ac74dad38a5eac90",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-    "gpui_snapshot_sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-    "svelte_snapshot_sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8",
+    "scenario_path": "test/nucleus-a11y/scenarios/segmented-control.json",
+    "scenario_sha256": "9153cc9e1e9676cf88246bd8cbc366543bb84790277b208c039cd3a4ac1613e6",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/segmented-control.gpui.json",
+    "gpui_snapshot_sha256": "8c095fb20be187a5f9a7b50e94a167a12b4515625d400fc8085ac4ff96692c04",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/segmented-control.svelte.json",
+    "svelte_snapshot_sha256": "a3a38c7f6b61f34478e07a0ea4d618e5e7a2ab181c2ecdd481536aef5bf6f94a",
     "web_only_exclusions": [],
     "diff": []
   }

@@ -1,10 +1,13 @@
 # g16.121 — A1 Focus-Model Alignment (last four rows)
 
-Status: ready
+Status: implementation complete — pending independent exact-head review
 Type: A1 evidence repair — Svelte extractor law, one scenario, one Svelte
 roving-focus fix; four receipts to reach 29/29
 Opened: 2026-09-05
 Depends on: merged `g16.119` (`cceb6646a`)
+Base: `origin/main` at `cab7faf1054d61bc3251d53ddcd5cbf224992c61`
+Runtime/evidence source pin: `06316f34fffe607a78405cbd2bef0d518fe32080`
+Lock digest: `c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c`
 Governing refs: `../../contracts/components/{radio-group,segmented-control,menu,agent-transcript}.md`,
 `test/nucleus-a11y/` (Svelte extractor and scenarios), `111` snapshot law,
 `nucleus-parity-receipts/a1-divergences/{radio-group,segmented-control,menu,agent-transcript}/`,
@@ -63,3 +66,11 @@ ledger, execution log, `PAPERCUTS.md` (append).
 Stop if the extractor law would change any already-receipted row's snapshot
 (re-run the cohort and report), or if the Menu change alters keyboard
 behaviour the contract names. Escalation owner: Chatterbox.
+
+## Outcome
+
+The four remaining focus-model differences were contract/scenario or extractor
+issues, not GPUI defects. The named-radio group law, programmatic transcript
+append scenario, and first-enabled Menu roving stop now produce empty-diff A1
+receipts. The complete cohort is 29 M1 + 29 A1 receipts; the GPUI accessibility
+ledger is 29/29. Superseded divergence stores were deleted.

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Surface",
-  "scenario_id": "nucleus.shell.surface",
+  "component": "Menu",
+  "scenario_id": "nucleus.navigation.menu",
   "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,29 +46,29 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount production Surface and dispatch a harmless key"
+    "mount production Menu and open it through the trigger path"
   ],
   "assertions": [
-    "region role and accessible name match the Svelte projection"
+    "Tab enters the first enabled menu item and later items stay roving-only"
   ],
   "outcome": "passed",
   "artifact_paths": [
     {
-      "path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-      "sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35"
+      "path": "test/nucleus-a11y/snapshots/menu.gpui.json",
+      "sha256": "c5c5475a398f71d7c035c2570f746100cc3d39d9a8cb15a80cb3822aff0d2db9"
     },
     {
-      "path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-      "sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8"
+      "path": "test/nucleus-a11y/snapshots/menu.svelte.json",
+      "sha256": "5994589455d85f6ea69dd16f0af4954344e86d254b8ad7ad84f8afc6d8433823"
     }
   ],
   "accessibility": {
-    "scenario_path": "test/nucleus-a11y/scenarios/surface.json",
-    "scenario_sha256": "f5c9583f55022d5e1dd477ff0cb27ee78cd995b24dd97ca0ac74dad38a5eac90",
-    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/surface.gpui.json",
-    "gpui_snapshot_sha256": "89ec49bf05ab88b0de40d17eb11d72a08451600f6a0c953eb616f386fa600f35",
-    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/surface.svelte.json",
-    "svelte_snapshot_sha256": "ed52c2a6fa51ec169c219abee4b7cfb82aa1cd00246e752cd7d8254f6633a1e8",
+    "scenario_path": "test/nucleus-a11y/scenarios/menu.json",
+    "scenario_sha256": "619f15afd304f9b068ba25f0f40d4c20983366171aa78c8f026f0e3b406a2bd3",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/menu.gpui.json",
+    "gpui_snapshot_sha256": "c5c5475a398f71d7c035c2570f746100cc3d39d9a8cb15a80cb3822aff0d2db9",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/menu.svelte.json",
+    "svelte_snapshot_sha256": "5994589455d85f6ea69dd16f0af4954344e86d254b8ad7ad84f8afc6d8433823",
     "web_only_exclusions": [],
     "diff": []
   }
