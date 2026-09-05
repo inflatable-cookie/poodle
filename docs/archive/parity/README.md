@@ -4,7 +4,7 @@ This directory preserves the manual component audit completed before the
 g12.019 native-renderer consolidation. It is project history, not a current
 implementation register. It moved here from `docs/parity/` on 2026-09-05
 (g16.108 docs spine compaction); the old path keeps a
-[pointer](../parity/README.md). Archived lanes never become edit targets
+[pointer](../../parity/README.md). Archived lanes never become edit targets
 again: they are evidence, not authority.
 
 The child files refer to native package tiers that no longer exist, including

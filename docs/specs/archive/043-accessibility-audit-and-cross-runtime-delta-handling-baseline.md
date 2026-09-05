@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `003-accessibility-and-assistive-technology-baseline.md`, `019-advanced-catalog-accessibility-focus-keyboard-and-state-rules.md`, `025-parity-automation-and-harness-boundary.md`, `042-gpui-multi-app-validation-target-matrix.md`
+Depends on: `003-accessibility-and-assistive-technology-baseline.md`, `019-advanced-catalog-accessibility-focus-keyboard-and-state-rules.md`, `../025-parity-automation-and-harness-boundary.md`, `042-gpui-multi-app-validation-target-matrix.md`
 
 ## Purpose
 

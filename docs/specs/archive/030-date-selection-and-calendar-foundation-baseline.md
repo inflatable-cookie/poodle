@@ -80,7 +80,7 @@ need deliberate follow-up rather than incidental growth.
 
 ## Evidence
 
-- `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
+- `docs/specs/archive/029-advanced-primitive-promotion-and-substrate-mapping.md`
 - `docs/contracts/components/calendar.md`
 - `docs/contracts/components/range-calendar.md`
 - `docs/contracts/components/date-picker.md`

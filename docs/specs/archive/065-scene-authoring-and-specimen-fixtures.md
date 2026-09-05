@@ -16,7 +16,7 @@ cases. Its cost report excluded schema, generator, generated output,
 interpreters, tests, and wiring.
 
 The attempted follow-up moved fixture data into
-[066 Executable Component Conformance](066-executable-component-conformance.md),
+[066 Executable Component Conformance](../066-executable-component-conformance.md),
 which `g14.008` also rejected. The durable requirement is narrower: curated
 specimen pages should teach the same component across runtimes without a
 universal scene or exhaustive case projection. `g14.026` owns that later

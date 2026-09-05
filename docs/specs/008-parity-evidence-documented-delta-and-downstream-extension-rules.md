@@ -199,8 +199,8 @@ Before a component claims parity maturity, confirm:
 
 The first surfaces proving this rule set are:
 
-- `docs/specs/002-component-contract-template-and-parity-rules.md`
-- `docs/specs/007-underlay-bridge-and-wrapper-preservation-rules.md`
+- `docs/specs/archive/002-component-contract-template-and-parity-rules.md`
+- `docs/specs/archive/007-underlay-bridge-and-wrapper-preservation-rules.md`
 - `docs/contracts/components/README.md`
 - `docs/contracts/components/README.md`
 - `docs/contracts/workstation/README.md`

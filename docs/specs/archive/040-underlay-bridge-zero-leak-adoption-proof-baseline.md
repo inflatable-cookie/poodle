@@ -2,7 +2,7 @@
 
 Status: superseded
 Updated: 2026-08-21
-Superseded by: `../architecture/001-poodle-system-shape.md#application-boundary`
+Superseded by: `../../architecture/001-poodle-system-shape.md#application-boundary`
 
 > **Superseded.** `packages/bridges/underlay` has been removed from Poodle. A
 > design system must not carry a package named after one of its consumers, and
@@ -10,7 +10,7 @@ Superseded by: `../architecture/001-poodle-system-shape.md#application-boundary`
 > Underlay now consumes Poodle's published packages directly and owns any
 > translation in its own source. Retained for the reasoning; not current
 > guidance.
-Depends on: `004-underlay-bridge-and-adapter-ownership.md`, `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`
+Depends on: `004-underlay-bridge-and-adapter-ownership.md`, `../008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`
 
 ## Purpose
 

@@ -1,17 +1,20 @@
 # g16.108 — Docs Spine Compaction
 
-Status: complete — awaiting orchestrator review
+Status: complete — awaiting re-review after exact-head blockers (rev 2)
 Date: 2026-09-05
 Card: `docs/roadmaps/g16/108-docs-spine-compaction.md`
 Dispatch: `docs/roadmaps/dispatch.md` revision 7 (2026-09-04)
-Base: `9481cc95dbd65c1dff8c73a6b74b9504cf19b077` (`origin/main`, promoted)
-Worker PR: opened from this branch (see closeout)
+Base: `9481cc95dbd65c1dff8c73a6b74b9504cf19b077` — the promoted dispatch
+snapshot; stale since review. `origin/main` is now `da8c9c37a` (g16.097
+merged at `1eadc581a`, v0.3.0 published; g16.109 and g16.110 promoted
+ready). This branch is not rebased; the later merge rebases.
+Worker PR: open from this branch (see closeout)
 Handoff: `docs/handoffs/20260905-...-g16-108-docs-spine-compaction.md`
 
 ## Outcome
 
 All five fixed boundaries landed in one PR. 175 closed-lane handoffs are
-archived by filename month; the 141-file historical parity corpus moved to
+archived by filename month; the 140-file parity audit corpus moved to
 `docs/archive/parity/` behind a pointer README; 56 specs that no current
 surface references moved to `docs/specs/archive/` with one-line index
 entries; the consumer guides no longer teach removed APIs (Tabs, ButtonTone,
@@ -24,9 +27,11 @@ archived; the front doors (`roadmaps/README.md`, `generation-index.md`,
 
 ## Boundary 1 — Handoffs
 
-184 files under `docs/handoffs/`. Lane state per the generation records:
-g15.001–079 complete (056 superseded, 078 cancelled) and g16.001–105 merged
-except the open frontier. 175 closed-lane handoffs moved with `git mv`:
+184 files under `docs/handoffs/` at the base snapshot. Lane state per the
+generation records: g15.001–079 complete (056 superseded, 078 cancelled) and
+g16.001–105 merged except the open frontier. 175 closed-lane handoffs moved
+with `git mv` (this head then adds the g16.108 handoff itself: 10 top-level
+files — 9 retained briefs plus this lane's brief — and 185 total):
 
 - `docs/handoffs/archive/2026-08/` — 96 files (g15 programme and the
   canonical g16.001–027 era, by filename month)
@@ -58,11 +63,12 @@ READMEs) links into `docs/handoffs/`, so the move broke nothing.
 
 ## Boundary 2 — Parity
 
-All 141 files moved from `docs/parity/` to `docs/archive/parity/` (the
-component audits, `TEMPLATE.md`, and the full historical README). The old
-path now keeps `docs/parity/README.md` as a short pointer naming the archive
-and the current authority sources. The archived README records the move and
-re-anchors its two relative links one level deeper.
+140 files renamed at 100% from `docs/parity/` to `docs/archive/parity/`
+(139 component audits plus `TEMPLATE.md`). `docs/parity/README.md` was
+replaced by a short pointer naming the archive and the current authority
+sources, and the archive README records the move and re-anchors its links one
+level deeper (review-corrected: the diff is 140 R100 renames plus the README
+pointer rewrite and the archive README, not 141 renames).
 
 Parity-edit instructions are gone from the g16 cards that carried them:
 
@@ -157,6 +163,34 @@ against the shipped surface.
   fails with `Type '"underline"' is not assignable to type '"card" |
   "pill" | "block"'` (snippet `svelte-developer-guide-29.svelte`); reverted,
   the check is green.
+
+## Revision 2 — Reviewer blockers (exact-head `eeb8fa2f`) and responses
+
+1. **Stack API**: guide still taught `direction="vertical|horizontal"` at
+   :729/:735 → now `"column"`/`"row"`.
+2. **Stale/broken archive and spec links** (three groups + same-class):
+   `docs/archive/parity/README.md` pointer depth fixed (`../../parity/…`);
+   archived specs 064/065 links to kept 066 → `../066-…`; kept spec 008 body
+   cites of archived 002/007 → `docs/specs/archive/…`; plus archived specs'
+   `../architecture`/`../roadmaps` depth, bare mentions of kept specs
+   (`../` prefix), and archive-internal root-relative cites of archived
+   specs. Re-audit: 0 missing link targets inside `docs/specs/**`.
+3. **`scripts/check-recipe-only-surface.ts` reverted** to `origin/main`
+   (unauthorized scope expansion removed). Consequence, verified:
+   `drift:recipes` now fails `docs:check` on exactly the 13 archived parity
+   lines citing `--poodle-treatment-*`. The 4-line `docs/archive/`
+   historical-prefix extension is semantically required for the card's
+   `docs:check`-green oracle after the sanctioned relocation; it is
+   **pending explicit planning/manifest authorization** and is not applied.
+4. **Coordination records refreshed**: base identified as the stale
+   dispatch snapshot; open cards per `origin/main` `da8c9c37` (g16.097
+   closed; g16.109/110 ready; held 051/052); handoff counts clarified
+   (184 base → 175 archived + 9 retained + 1 new = 185).
+5. **Parity wording** corrected (see Boundary 2).
+
+Same-class stale `docs/specs/…` mentions remain in `docs/research/`
+value-track records (019, 038) and historical logs; both are out of owned
+scope and not link-checked — left as point-in-time records.
 
 ## Validation
 

@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `020-docs-site-example-and-component-discoverability-rules.md`, `024-token-evolution-migration-and-compatibility-policy.md`, `025-parity-automation-and-harness-boundary.md`, `026-appearance-recipes-and-downstream-override-strategy.md`
+Depends on: `020-docs-site-example-and-component-discoverability-rules.md`, `024-token-evolution-migration-and-compatibility-policy.md`, `../025-parity-automation-and-harness-boundary.md`, `../026-appearance-recipes-and-downstream-override-strategy.md`
 
 ## Purpose
 

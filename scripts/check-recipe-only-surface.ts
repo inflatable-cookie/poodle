@@ -5,12 +5,7 @@ const SELF = "scripts/check-recipe-only-surface.ts";
 const RETIRED_ARCHITECTURE =
   "docs/architecture/005-treatment-system-and-recipe-variables.md";
 const RETIRED_ARCHITECTURE_LINK = "005-treatment-system-and-recipe-variables.md";
-const HISTORICAL_PREFIXES = [
-  "docs/archive/",
-  "docs/logs/",
-  "docs/parity/",
-  "docs/roadmaps/",
-];
+const HISTORICAL_PREFIXES = ["docs/logs/", "docs/parity/", "docs/roadmaps/"];
 const SCANNED_EXTENSIONS = new Set([
   ".css",
   ".json",

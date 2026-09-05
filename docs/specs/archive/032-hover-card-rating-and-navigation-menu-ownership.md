@@ -70,4 +70,4 @@ outside this utility tranche.
 - `docs/contracts/components/hover-card.md`
 - `docs/contracts/components/rating.md`
 - `packages/svelte/components/README.md`
-- `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
+- `docs/specs/archive/029-advanced-primitive-promotion-and-substrate-mapping.md`

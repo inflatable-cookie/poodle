@@ -726,13 +726,13 @@ Flex container with direction and gap control:
   import { Stack, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
-<Stack direction="vertical" gap="md">
+<Stack direction="column" gap="md">
   <Button>First</Button>
   <Button>Second</Button>
   <Button>Third</Button>
 </Stack>
 
-<Stack direction="horizontal" gap="sm" align="center">
+<Stack direction="row" gap="sm" align="center">
   <Icon icon={info} />
   <span>Aligned content</span>
 </Stack>

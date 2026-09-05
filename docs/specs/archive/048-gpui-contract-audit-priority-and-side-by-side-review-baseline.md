@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-13
-Depends on: `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `042-gpui-multi-app-validation-target-matrix.md`, `047-generation-closeout-and-next-program-posture.md`
+Depends on: `../008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `042-gpui-multi-app-validation-target-matrix.md`, `047-generation-closeout-and-next-program-posture.md`
 
 ## Purpose
 

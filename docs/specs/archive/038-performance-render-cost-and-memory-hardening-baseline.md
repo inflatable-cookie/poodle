@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `025-parity-automation-and-harness-boundary.md`, `027-docs-completeness-contract-linting-and-publish-pipeline.md`
+Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `../025-parity-automation-and-harness-boundary.md`, `027-docs-completeness-contract-linting-and-publish-pipeline.md`
 
 ## Purpose
 

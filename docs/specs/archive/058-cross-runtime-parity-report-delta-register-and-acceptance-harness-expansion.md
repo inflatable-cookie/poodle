@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `025-parity-automation-and-harness-boundary.md`, `045-ecosystem-acceptance-and-long-tail-regression-baseline.md`, `048-gpui-contract-audit-priority-and-side-by-side-review-baseline.md`, `057-gpui-native-accessibility-focus-keyboard-and-assistive-technology-proof-baseline.md`
+Depends on: `../025-parity-automation-and-harness-boundary.md`, `045-ecosystem-acceptance-and-long-tail-regression-baseline.md`, `048-gpui-contract-audit-priority-and-side-by-side-review-baseline.md`, `057-gpui-native-accessibility-focus-keyboard-and-assistive-technology-proof-baseline.md`
 
 ## Purpose
 

@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-12
-Depends on: `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `017-app-shell-and-workspace-shell-depth-rules.md`, `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`, `040-underlay-bridge-zero-leak-adoption-proof-baseline.md`
+Depends on: `../008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `017-app-shell-and-workspace-shell-depth-rules.md`, `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`, `040-underlay-bridge-zero-leak-adoption-proof-baseline.md`
 
 ## Purpose
 

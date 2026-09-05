@@ -28,7 +28,7 @@ repairs, and `docs:snippet-check` in `docs:check`.
 
 ## Why It Matters
 
-Closed lanes left 175 finished worker briefs and a 141-file historical parity
+Closed lanes left 175 finished worker briefs and a 140-file historical parity
 corpus in the live docs paths agents walk first, g16 cards still instructed
 workers to edit the now-archived audits, 56 specs no current surface cites
 still sat in the normative set, and guides taught removed APIs (Tabs
@@ -37,8 +37,11 @@ v1) with nothing to stop regressions.
 
 ## Current State
 
-PR open from this branch at base `9481cc95dbd65c1dff8c73a6b74b9504cf19b077`
-(origin/main, promoted). Execution log:
+PR open from this branch at base `9481cc95dbd65c1dff8c73a6b74b9504cf19b077` —
+the promoted dispatch snapshot, now **stale**: `origin/main` has advanced to
+`da8c9c37a2a5fd43d7767434fccc5dfceceb81e6` (g16.097 merged at `1eadc581a`
+with v0.3.0 published; g16.109 and g16.110 promoted ready). This branch is
+not rebased; the later merge will rebase per the coordinator. Execution log:
 `docs/logs/2026-09/20260905-g16-108-docs-spine-compaction.md`.
 
 - **Handoffs**: 175 closed-lane files archived to
@@ -46,9 +49,10 @@ PR open from this branch at base `9481cc95dbd65c1dff8c73a6b74b9504cf19b077`
   added to `docs/README.md`; 9 briefs kept in place (listed in the log) —
   orchestrator thread briefs, g16.052 planning feeds, held VL-1/visual/
   Jetstream-adjacent files, and one indeterminate papercuts file.
-- **Parity**: 141 files moved to `docs/archive/parity/`; `docs/parity/`
-  keeps a pointer README; archived README records the move and re-anchors
-  links. Parity-edit instructions removed from g16 cards 001, 010, 034, 035.
+- **Parity**: 140 files renamed at 100% into `docs/archive/parity/` (139
+  component audits plus `TEMPLATE.md`); `docs/parity/README.md` was rewritten
+  as the pointer and the archive README records the move. Parity-edit
+  instructions removed from g16 cards 001, 010, 034, 035.
 - **Specs**: 56 unreferenced specs moved to `docs/specs/archive/` with
   one-line `index.md` entries; 14 kept; kept-spec dependency headers repointed
   at the archive; spec 001 marked `active`; `specs/README.md` rewritten to the
@@ -72,13 +76,17 @@ PR open from this branch at base `9481cc95dbd65c1dff8c73a6b74b9504cf19b077`
   gains `docs/archive/` so the retired-Treatment drift gate follows the
   archived corpus (required for `docs:check` green).
 
-**Open cards (unchanged, nothing archived against them):** g16.051 (held),
-g16.052 (held), g16.097 (coordinator-executed release certification), g16.106,
-g16.107 (concurrent workers), g16.108 (this lane). Held non-card directions
-(Jetstream admission, VL-1 lab, visual tranche, citations/nested menus)
-likewise untouched. No handoff files exist for 051/052/097/106/107, so no
-open-lane brief was moved; the 9 kept files above are the full
-indeterminate-or-open remainder.
+**Open cards per `origin/main` `da8c9c37` (dispatch revision 7):** g16.051
+(held), g16.052 (held), g16.106 and g16.107 (concurrent workers), g16.108
+(this lane), g16.109 (consumer adoption wave), g16.110 (feasibility spike).
+g16.097 is **closed**: merged with v0.3.0 published (`1eadc581a`). Held
+non-card directions (Jetstream admission, VL-1 lab, visual tranche,
+citations/nested menus) likewise untouched. No handoff files exist for
+051/052/097/106/107/109/110, so no open-lane brief was moved; the 9 kept
+files above are the full indeterminate-or-open remainder. Count check: the
+base snapshot held 184 handoff files; this head archives 175 of them, keeps
+9 top-level briefs, and adds this g16.108 handoff — 10 top-level files, 185
+total.
 
 ## Stop Conditions
 
@@ -87,6 +95,31 @@ indeterminate-or-open remainder.
 - Spec move breaking a link needing a content decision → none: no
   link-checked file referenced any moved spec; kept-spec `Depends on:` headers
   were repointed without content changes.
+
+## Revision 2 — Review Response (blockers from exact-head review of `eeb8fa2f`)
+
+1. Stack directions in `svelte-developer-guide.md` fixed to `"column"` /
+   `"row"` (the fence remains context-skipped by the snippet checker because
+   it references earlier Icon state; the invalid values are gone).
+2. Stale/broken archive and spec links repaired: `docs/archive/parity/
+   README.md` pointer link depth; archive specs 064/065 links to kept spec
+   066 (`../066-…`); archive `../architecture`/`../roadmaps` depth; archive
+   specs' bare mentions of kept specs (`../` prefix); kept spec 008 body
+   cites of archived 002/007; archive-internal root-relative `docs/specs/`
+   cites of archived specs. Same-class mentions in `docs/research/` were
+   left untouched (out of owned scope, not link-checked).
+3. `scripts/check-recipe-only-surface.ts` reverted to `origin/main` —
+   removing the unauthorized historical-prefix edit. Consequence: `effigy
+   docs:check` now fails at `drift:recipes` exactly on the 13 archived
+   parity lines that mention `--poodle-treatment-*`; the 4-line
+   `docs/archive/` exemption extension is **requested for explicit
+   planning/manifest authorization** (the card's own oracle requires
+   `docs:check` green after the sanctioned parity relocation, which is
+   unsatisfiable without the gate following the corpus).
+4. Coordination records refreshed to `origin/main` `da8c9c37` (see headers
+   above): g16.097 closed, g16.109/110 open, counts clarified.
+5. Parity wording corrected to the diff's real shape: 140 pure renames, a
+   rewritten README pointer, and the archive README — not "141 files moved".
 
 ## Next Move
 
