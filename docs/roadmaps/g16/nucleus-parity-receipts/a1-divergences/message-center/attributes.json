@@ -1,0 +1,14 @@
+{
+  "component": "MessageCenter",
+  "scenario_id": "nucleus.attention.message-center",
+  "scenario_path": "test/nucleus-a11y/scenarios/message-center.json",
+  "scenario_sha256": "a60a4f94ac882000e34326f64fd66a5668e8cea20fcfd19f0d98ef609e8f1180",
+  "attributes": [
+    {
+      "index": 1,
+      "field": "focused",
+      "gpui": false,
+      "svelte": true
+    }
+  ]
+}

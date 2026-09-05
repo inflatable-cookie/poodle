@@ -298,6 +298,7 @@ pub fn action_discovery_panel(
         // Structural list of action items. The panel root owns listbox
         // semantics; each action is one option within it.
         let mut list = Node::container();
+        list.a11y.role = Some(NodeRole::List);
         list.roles.insert("part".to_owned(), "list".to_owned());
         list.style.descriptor.layout.direction = LayoutDirection::Column;
         list.style.descriptor.layout.spacing.gap = list_gap;
@@ -331,18 +332,32 @@ pub fn action_discovery_panel(
             let mut row = Node::container();
             // Each action is an option of the panel listbox.
             row.a11y.role = Some(NodeRole::ListBoxOption);
-            row.a11y.label = Some(action.title.clone());
+            row.a11y.label = Some(match action.shortcut.as_deref() {
+                Some(shortcut) if !shortcut.is_empty() => {
+                    format!("{} {}", action.title, shortcut)
+                }
+                _ => action.title.clone(),
+            });
             row.a11y.selected = Some(is_active);
             row.roles
                 .insert("equivalent".to_owned(), "list-card".to_owned());
-            row.id = Some(action.id.clone());
-            row.runtime_id = scoped(handlers.instance_id.as_deref(), &action.id);
+            row.style.fill_width = true;
+
+            // Svelte's option contains an interactive ListCard button. Keep
+            // the option as the structural wrapper and put identity,
+            // focusability, styling, and activation on the nested button.
+            let mut action_button = Node::button(&action.title);
+            action_button.a11y.role = Some(NodeRole::Button);
+            action_button.a11y.label = Some(action.title.clone());
+            action_button.id = Some(action.id.clone());
+            action_button.runtime_id = scoped(handlers.instance_id.as_deref(), &action.id);
             {
-                let s = &mut row.style;
+                let s = &mut action_button.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                 s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
                 s.descriptor.layout.spacing.gap = item_gap;
+                s.fill_width = true;
                 let pad = &mut s.descriptor.layout.spacing.padding;
                 pad.left = row_x;
                 pad.right = row_x;
@@ -362,8 +377,8 @@ pub fn action_discovery_panel(
                     }];
                 }
             }
-            all_radius(&mut row, radius_control);
-            let mut row = row.child(text_block);
+            all_radius(&mut action_button, radius_control);
+            let mut action_button = action_button.child(text_block);
 
             // Trailing snippet — badge chip + kbd chip.
             let has_badge = action.badge.is_some();
@@ -433,20 +448,20 @@ pub fn action_discovery_panel(
                     trailing = trailing.child(chip.child(label));
                 }
 
-                row = row.child(trailing);
+                action_button = action_button.child(trailing);
             }
 
             // Disabled: reduce opacity via token, not a hardcoded value.
             if action.is_disabled {
-                row.style.descriptor.opacity = disabled_opacity;
-                row.style.descriptor.cursor = CursorHint::NotAllowed;
-                row.interaction.disabled = true;
-                row.a11y.tab_index = Some(-1);
+                action_button.style.descriptor.opacity = disabled_opacity;
+                action_button.style.descriptor.cursor = CursorHint::NotAllowed;
+                action_button.interaction.disabled = true;
+                action_button.a11y.tab_index = Some(-1);
             } else {
-                row.style.descriptor.cursor = CursorHint::Pointer;
-                row.interaction.focusable = true;
-                row.a11y.tab_index = Some(if is_active { 0 } else { -1 });
-                row.style.focus = Some(StylePatch {
+                action_button.style.descriptor.cursor = CursorHint::Pointer;
+                action_button.interaction.focusable = true;
+                action_button.a11y.tab_index = Some(0);
+                action_button.style.focus = Some(StylePatch {
                     background: None,
                     border_color: Some(accent),
                     text_color: None,
@@ -455,11 +470,11 @@ pub fn action_discovery_panel(
                 if let Some(handler) = &handlers.on_select {
                     let handler = Arc::clone(handler);
                     let id = action.id.clone();
-                    row.interaction.on_activate = Some(Arc::new(move || handler(&id)));
+                    action_button.interaction.on_activate = Some(Arc::new(move || handler(&id)));
                 }
             }
 
-            list = list.child(row);
+            list = list.child(row.child(action_button));
         }
 
         section_el = section_el.child(list);

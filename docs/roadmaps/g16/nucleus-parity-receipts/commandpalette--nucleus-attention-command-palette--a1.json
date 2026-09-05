@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "SplitView",
-  "scenario_id": "nucleus.shell.split-view",
-  "proof_level": "M1",
+  "component": "CommandPalette",
+  "scenario_id": "nucleus.attention.command-palette",
+  "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
@@ -46,18 +46,30 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount two composed SplitViews with caller-scoped divider instance IDs through HeadlessDriver",
-    "dispatch keyboard arrow and Home/End resize input through GPUI test platform",
-    "dispatch cross-axis keys to prove axis filter isolation",
-    "dispatch keyboard activation to primary collapse toggle"
+    "mount the production CommandPalette node tree through HeadlessDriver with the shared scenario props"
   ],
   "assertions": [
-    "production render path resolves root orientation, ratio flex bases, min-size constraints, overflow clipping, and aria-label",
-    "caller-scoped divider instance IDs prevent focus handle aliasing across multiple mounted SplitViews",
-    "mounted keyboard input dispatches axis-constrained deltas and saturating Home/End to the focused split divider with complete handler isolation",
-    "primary collapse toggle composes production CollapseToggle and Icon renderers with accurate button role, label, expanded state, and focus ring",
-    "mounted bounds confirm positive dimensions, pane ordering, and child containment within owning SplitView layouts"
+    "dialog, heading, search, status, results, and action roles match the Svelte ARIA projection"
   ],
   "outcome": "passed",
-  "artifact_paths": []
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/command-palette.gpui.json",
+      "sha256": "48e0fb2772fab93bbe1d10bf4c51db689847aec83226c590c4ce723adc6f376c"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/command-palette.svelte.json",
+      "sha256": "90bd539eadb361e45ed391307090660b66972d27ffa92a1e7a4d9ef4f3591fd1"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/command-palette.json",
+    "scenario_sha256": "d4e32bd0fce2d16f73771e4cf56a96a2b3ceb8fecb4f5db3adcd34721b41845d",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/command-palette.gpui.json",
+    "gpui_snapshot_sha256": "48e0fb2772fab93bbe1d10bf4c51db689847aec83226c590c4ce723adc6f376c",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/command-palette.svelte.json",
+    "svelte_snapshot_sha256": "90bd539eadb361e45ed391307090660b66972d27ffa92a1e7a4d9ef4f3591fd1",
+    "web_only_exclusions": [],
+    "diff": []
+  }
 }

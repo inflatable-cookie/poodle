@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "SplitView",
-  "scenario_id": "nucleus.shell.split-view",
-  "proof_level": "M1",
+  "component": "ToastHost",
+  "scenario_id": "nucleus.attention.toast-host",
+  "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
@@ -46,18 +46,30 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount two composed SplitViews with caller-scoped divider instance IDs through HeadlessDriver",
-    "dispatch keyboard arrow and Home/End resize input through GPUI test platform",
-    "dispatch cross-axis keys to prove axis filter isolation",
-    "dispatch keyboard activation to primary collapse toggle"
+    "mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"
   ],
   "assertions": [
-    "production render path resolves root orientation, ratio flex bases, min-size constraints, overflow clipping, and aria-label",
-    "caller-scoped divider instance IDs prevent focus handle aliasing across multiple mounted SplitViews",
-    "mounted keyboard input dispatches axis-constrained deltas and saturating Home/End to the focused split divider with complete handler isolation",
-    "primary collapse toggle composes production CollapseToggle and Icon renderers with accurate button role, label, expanded state, and focus ring",
-    "mounted bounds confirm positive dimensions, pane ordering, and child containment within owning SplitView layouts"
+    "stack label, listitem toasts, dismiss and retry names match the Svelte ARIA projection"
   ],
   "outcome": "passed",
-  "artifact_paths": []
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/toast-host.gpui.json",
+      "sha256": "2b9307ddb29f69671b3a93208da9b7bf8c13259bd51ab3280ff2dd1a9e6915ca"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/toast-host.svelte.json",
+      "sha256": "5fb97289d22295e163eb247a2acb1fede3bca58e6caf841704eec657c858bb80"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/toast-host.json",
+    "scenario_sha256": "fe6095a95ca638900ac38998713420d87ae8a0519f389a182151ed0903899a34",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/toast-host.gpui.json",
+    "gpui_snapshot_sha256": "2b9307ddb29f69671b3a93208da9b7bf8c13259bd51ab3280ff2dd1a9e6915ca",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/toast-host.svelte.json",
+    "svelte_snapshot_sha256": "5fb97289d22295e163eb247a2acb1fede3bca58e6caf841704eec657c858bb80",
+    "web_only_exclusions": [],
+    "diff": []
+  }
 }

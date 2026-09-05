@@ -791,6 +791,8 @@ pub struct Interaction {
 pub enum NodeRole {
     Alert,
     AlertDialog,
+    /// Landmark for a page or overlay header (`banner` / `role="banner"`).
+    Banner,
     Button,
     Cell,
     CheckBox,
@@ -798,6 +800,10 @@ pub enum NodeRole {
     Dialog,
     Grid,
     Group,
+    /// Section title. Uses [`NodeA11y::level`] when the heading level is known.
+    Heading,
+    /// Search field (`searchbox` / `type="search"`).
+    SearchBox,
     Label,
     List,
     ListItem,

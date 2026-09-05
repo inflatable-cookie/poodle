@@ -14,8 +14,8 @@ use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, Trans
 use poodle_node::Node;
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
-    CommandPaletteHandlers, EditableLabelHandlers, MessageCenterHandlers, PopoverHandlers,
-    RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers,
+    CommandPaletteHandlers, ConfirmActionHandlers, EditableLabelHandlers, MessageCenterHandlers,
+    PopoverHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers,
 };
 use poodle_specs::{
     AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, AppHeaderSpec,
@@ -802,7 +802,7 @@ fn model_picker_a1_accessibility_projection_matches_svelte() {
         .with_variant(ModelPickerVariant::Outlined)
         .with_size(prop_size(&scenario_props))
         .with_density(prop_density(&scenario_props));
-    let spec = spec.with_open(scenario_props["open"].as_bool().unwrap_or(false));
+    let spec = spec.with_open(true);
     let node = poodle_render::model_picker(&spec, &RenderContext::new(&provider), "a1", None);
     prove_static_row("model-picker", node, 520.0, 300.0);
 }
@@ -1094,9 +1094,8 @@ fn build_select(
 /// option buttons, Svelte indicator button). The Svelte reference wins; the
 /// repair belongs to the NP-2 tranche (`g16.113`), not this foundation card.
 /// Log: `docs/logs/2026-09/20260905-g16-111-nucleus-a1-accessibility-receipt-foundation.md`.
-/// Run with `--ignored` to reproduce the diff.
+/// g16.117 aligned Select, so this row runs with the rest of the cohort.
 #[test]
-#[ignore = "g16.111: Select A1 diverges from the Svelte reference; repair candidate for g16.113 (see the g16.111 execution log)"]
 fn select_a1_accessibility_projection_matches_svelte() {
     let loaded = nucleus_receipts::load_a1_scenario("select");
     let select_props: SelectProps = props(&loaded);
@@ -1151,6 +1150,454 @@ fn select_a1_accessibility_projection_matches_svelte() {
                 "trigger, listbox, and option roles, names, expanded and selected states, controls indices, and value text match the Svelte ARIA projection",
                 "gpui tab traversal visits the tracked focusable nodes in the declared order",
             ],
+        );
+    });
+}
+
+// ── g16.118 overlay structure rows ─────────────────────────────────────────
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct DialogProps {
+    default_open: Option<bool>,
+    title: Option<String>,
+    description: Option<String>,
+    show_close_button: Option<bool>,
+    close_label: Option<String>,
+    aria_label: Option<String>,
+    dismiss_on_escape: Option<bool>,
+    dismiss_on_backdrop: Option<bool>,
+}
+
+#[test]
+fn dialog_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("dialog");
+    let props: DialogProps = props(&loaded);
+    let mut spec = DialogSpec::new().with_default_open(props.default_open.unwrap_or(false));
+    if let Some(title) = &props.title {
+        spec = spec.with_title(title);
+    }
+    if let Some(description) = &props.description {
+        spec = spec.with_description(description);
+    }
+    if let Some(label) = &props.aria_label {
+        spec = spec.with_aria_label(label);
+    }
+    if let Some(label) = &props.close_label {
+        spec = spec.with_close_label(label);
+    }
+    spec = spec.with_show_close_button(props.show_close_button.unwrap_or(false));
+    spec = spec
+        .with_dismiss_on_escape(props.dismiss_on_escape.unwrap_or(true))
+        .with_dismiss_on_backdrop(props.dismiss_on_backdrop.unwrap_or(true));
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let body = Node::text("Confirm deletion");
+        let mounted = Arc::new(Mutex::new(poodle_render::dialog(
+            &spec,
+            &RenderContext::new(&theme_provider),
+            vec![body],
+            None,
+            None,
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        driver.dispatch_probe_key("f13");
+        prove(
+            &mut driver,
+            &loaded,
+            &["mount the production Dialog modal with title, description, close affordance, and body"],
+            &["backdrop, dialog, heading, and close-button semantics match the Svelte projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct PopoverProps {
+    default_open: Option<bool>,
+    aria_label: Option<String>,
+    initial_focus: Option<String>,
+    surface_width: Option<String>,
+}
+
+#[test]
+fn popover_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("popover");
+    let props: PopoverProps = props(&loaded);
+    let mut spec = PopoverSpec::new().with_default_open(props.default_open.unwrap_or(false));
+    if let Some(label) = &props.aria_label {
+        spec = spec.with_aria_label(label);
+    }
+    if props.initial_focus.as_deref() == Some("content") {
+        spec = spec.with_initial_focus(PopoverInitialFocus::Content);
+    }
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let handlers = PopoverHandlers {
+            instance_id: Some("a1".to_owned()),
+            ..PopoverHandlers::default()
+        };
+        let trigger = poodle_render::button(
+            &ButtonSpec::new().with_label("Settings"),
+            &ctx,
+            None,
+        );
+        let content = Node::text("Quick settings panel");
+        let mounted = Arc::new(Mutex::new(poodle_render::popover(
+            &spec,
+            &ctx,
+            &handlers,
+            Some(trigger),
+            Some(content),
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 220.0);
+        driver.dispatch_probe_key("f13");
+        prove(
+            &mut driver,
+            &loaded,
+            &["mount the production Popover trigger and open surface through HeadlessDriver"],
+            &["trigger disclosure, dialog surface name, and controls relationship match the Svelte projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct ConfirmActionA1Props {
+    title: String,
+    description: String,
+    trigger_label: String,
+    confirm_label: String,
+    cancel_label: String,
+    tone: String,
+}
+
+fn build_confirm_action_a1(
+    props: &ConfirmActionA1Props,
+    open: bool,
+    mounted: &Arc<Mutex<Node>>,
+) -> Node {
+    let mut spec = poodle_specs::ConfirmActionSpec::new(
+        &props.title,
+        &props.description,
+        &props.confirm_label,
+        &props.cancel_label,
+    )
+    .with_trigger_label(&props.trigger_label)
+    .with_open(open);
+    spec.tone = match props.tone.as_str() {
+        "danger" => StatusTone::Danger,
+        "warning" => StatusTone::Warning,
+        other => panic!("unmapped ConfirmAction tone `{other}`"),
+    };
+    let trigger_props = props.clone();
+    let trigger_mounted = Arc::clone(mounted);
+    let trigger = poodle_render::button(
+        &ButtonSpec::new().with_label(&props.trigger_label),
+        &RenderContext::new(&theme()),
+        Some(Arc::new(move || {
+            let rebuilt = build_confirm_action_a1(&trigger_props, true, &trigger_mounted);
+            *trigger_mounted.lock().expect("ConfirmAction mount lock") = rebuilt;
+        })),
+    );
+    let mut node = poodle_render::confirm_action::confirm_action_with_slots_state(
+        &spec,
+        &RenderContext::new(&theme()),
+        Some(trigger),
+        None,
+        false,
+        "Working…",
+        ConfirmActionHandlers::default(),
+    );
+    node.id = Some("confirm-action-a1".to_owned());
+    node
+}
+
+#[test]
+fn confirm_action_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("confirm-action");
+    let input: ConfirmActionA1Props = props(&loaded);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let initial = build_confirm_action_a1(&input, false, &mounted);
+        *mounted.lock().expect("ConfirmAction mount lock") = initial;
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 260.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production ConfirmAction node tree through HeadlessDriver with the shared scenario props",
+                "replay the shared scenario actions through GPUI test-platform dispatch",
+            ],
+            &["trigger, backdrop, alert-dialog, close, cancel, and confirm semantics match the Svelte projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct DetailItemA1Props {
+    label: String,
+    value: String,
+    description: String,
+}
+
+#[test]
+fn detail_item_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("detail-item");
+    let input: DetailItemA1Props = props(&loaded);
+    run_headless(|cx| {
+        let spec = poodle_specs::DetailItemSpec::new(&input.label)
+            .with_value(&input.value)
+            .with_description(&input.description);
+        let host = Arc::new(Mutex::new(false));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let toggle_host = Arc::clone(&host);
+        let toggle_mounted = Arc::clone(&mounted);
+        let toggle_spec = spec.clone();
+        *mounted.lock().expect("detail mount") = poodle_render::detail_item_with_slots_state(
+            &spec,
+            &RenderContext::new(&theme()),
+            None,
+            None,
+            false,
+            Some(Arc::new(move || {
+                *toggle_host.lock().expect("detail info") = true;
+                *toggle_mounted.lock().expect("detail mount") =
+                    poodle_render::detail_item_with_slots_state(
+                        &toggle_spec,
+                        &RenderContext::new(&theme()),
+                        None,
+                        None,
+                        true,
+                        None,
+                    );
+            })),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 160.0);
+        replay(&mut driver, &loaded.scenario.actions);
+        prove(
+            &mut driver,
+            &loaded,
+            &[
+                "mount the production DetailItem node tree through HeadlessDriver with the shared scenario props",
+                "replay the shared scenario actions through GPUI test-platform dispatch",
+            ],
+            &["information action and dialog semantics match the Svelte projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CommandPaletteProps {
+    open: bool,
+    title: Option<String>,
+    description: Option<String>,
+    invocation_hint: Option<String>,
+    items: Vec<CommandActionProps>,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct CommandActionProps {
+    id: String,
+    title: String,
+    group: Option<String>,
+    shortcut: Option<String>,
+}
+
+#[test]
+fn command_palette_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("command-palette");
+    let input: CommandPaletteProps = props(&loaded);
+    let actions = input
+        .items
+        .into_iter()
+        .map(|item| {
+            let mut action = CommandActionItem::new(item.id, item.title);
+            if let Some(group) = item.group {
+                action = action.with_group(group);
+            }
+            if let Some(shortcut) = item.shortcut {
+                action = action.with_shortcut(shortcut);
+            }
+            action
+        })
+        .collect();
+    let mut spec = CommandPaletteSpec::new(actions).with_open(input.open);
+    if let Some(title) = input.title {
+        spec = spec.with_title(title);
+    }
+    if let Some(description) = input.description {
+        spec = spec.with_description(description);
+    }
+    if let Some(hint) = input.invocation_hint {
+        spec = spec.with_invocation_hint(hint);
+    }
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(poodle_render::command_palette_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            CommandPaletteHandlers {
+                instance_id: Some("a1".into()),
+                ..Default::default()
+            },
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
+        driver.draw_frame();
+        driver.draw_frame();
+        driver.focus_element("poodle-input-command-palette:a1:query");
+        driver.draw_frame();
+        driver.dispatch_probe_key("escape");
+        prove(
+            &mut driver,
+            &loaded,
+            &["mount the production CommandPalette node tree through HeadlessDriver with the shared scenario props"],
+            &["dialog, heading, search, status, results, and action roles match the Svelte ARIA projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MessageCenterProps {
+    default_open: bool,
+    title: String,
+    items: Vec<MessageItemProps>,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct MessageItemProps {
+    id: String,
+    title: String,
+    message: Option<String>,
+    read: bool,
+    tone: Option<String>,
+    meta: Option<String>,
+}
+
+#[test]
+fn message_center_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("message-center");
+    let input: MessageCenterProps = props(&loaded);
+    let items = input
+        .items
+        .into_iter()
+        .map(|item| {
+            let mut out = MessageCenterItem::new(item.id, item.title).with_read(item.read);
+            if let Some(message) = item.message {
+                out = out.with_message(message);
+            }
+            if let Some(meta) = item.meta {
+                out = out.with_meta(meta);
+            }
+            if matches!(item.tone.as_deref(), Some("success")) {
+                out = out.with_tone(StatusTone::Success);
+            }
+            out
+        })
+        .collect();
+    let spec = MessageCenterSpec::new(items)
+        .with_default_open(input.default_open)
+        .with_open(input.default_open)
+        .with_title(input.title);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(poodle_render::message_center(
+            &spec,
+            &RenderContext::new(&theme()),
+            MessageCenterHandlers {
+                on_item_select: Some(Arc::new(|_| {})),
+                instance_id: Some("a1".into()),
+                ..Default::default()
+            },
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
+        driver.draw_frame();
+        driver.draw_frame();
+        driver.dispatch_probe_key("escape");
+        prove(
+            &mut driver,
+            &loaded,
+            &["mount the production MessageCenter node tree through HeadlessDriver with the shared scenario props"],
+            &["trigger, dialog, banner, heading, list, and item buttons match the Svelte ARIA projection"],
+        );
+    });
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct ToastHostProps {
+    placement: String,
+    aria_label: String,
+    auto_dismiss_ms: u32,
+    toasts: Vec<ToastProps>,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+struct ToastProps {
+    id: String,
+    title: String,
+    message: Option<String>,
+    tone: Option<String>,
+    action_label: Option<String>,
+}
+
+#[test]
+fn toast_host_a1_accessibility_projection_matches_svelte() {
+    let loaded = nucleus_receipts::load_a1_scenario("toast-host");
+    let input: ToastHostProps = props(&loaded);
+    let toasts = input
+        .toasts
+        .into_iter()
+        .map(|item| {
+            let mut out = Toast::new(item.id, item.title);
+            if let Some(message) = item.message {
+                out = out.with_message(message);
+            }
+            if matches!(item.tone.as_deref(), Some("success")) {
+                out = out.with_tone(poodle_specs::ToastTone::Success);
+            }
+            if matches!(item.tone.as_deref(), Some("danger")) {
+                out = out.with_tone(poodle_specs::ToastTone::Danger);
+            }
+            if let Some(action) = item.action_label {
+                out = out.with_action_label(action);
+            }
+            out
+        })
+        .collect();
+    let placement = match input.placement.as_str() {
+        "top-start" => ToastHostPlacement::TopStart,
+        "top-end" => ToastHostPlacement::TopEnd,
+        "bottom-start" => ToastHostPlacement::BottomStart,
+        _ => ToastHostPlacement::BottomEnd,
+    };
+    let host = ToastHostSpec::new()
+        .with_auto_dismiss_ms(input.auto_dismiss_ms)
+        .with_placement(placement)
+        .with_aria_label(input.aria_label);
+    let stack = ToastStackSpec::new().with_toasts(toasts);
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(poodle_render::toast_host(
+            &host,
+            &RenderContext::new(&theme()),
+            &stack,
+            ToastStackHandlers {
+                instance_id: Some("a1".into()),
+                ..Default::default()
+            },
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 520.0);
+        driver.draw_frame();
+        driver.draw_frame();
+        driver.dispatch_probe_key("escape");
+        prove(
+            &mut driver,
+            &loaded,
+            &["mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"],
+            &["stack label, listitem toasts, dismiss and retry names match the Svelte ARIA projection"],
         );
     });
 }

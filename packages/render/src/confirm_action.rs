@@ -136,6 +136,11 @@ pub fn confirm_action_with_slots_state(
         },
     );
 
+    // Svelte keeps the default trigger mounted beside the open AlertDialog.
+    // Native cannot yet: the backdrop is absolute inside its wrapper, not the
+    // window, so synthesising a trigger here shrinks the overlay to the
+    // trigger row. Recorded as an out-of-scope divergence (g16.118); a custom
+    // trigger is still preserved because the caller owns that geometry.
     if let Some(trigger) = trigger {
         Node::container().child(trigger).child(dialog)
     } else {

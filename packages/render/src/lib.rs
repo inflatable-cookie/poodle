@@ -266,7 +266,7 @@ pub use date_time_picker::date_time_picker;
 pub use date_time_range_picker::date_time_range_picker;
 pub use date_time_zone_picker::{date_time_zone_picker, DateTimeZonePickerHandlers};
 pub use debug_dialog::debug_dialog;
-pub use detail_item::{detail_item, detail_item_with_slots};
+pub use detail_item::{detail_item, detail_item_with_slots, detail_item_with_slots_state};
 pub use detail_section::detail_section;
 pub use detail_section_group::detail_section_group;
 pub use detail_shell::detail_shell;

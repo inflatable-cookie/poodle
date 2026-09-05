@@ -48,3 +48,43 @@ attributes. NP-4 settings rows use the same evidence contract with named
   applied.
 - `model-picker/` — combobox semantics and focus order diverge. Select-class
   repair is deferred to `g16.117`; no behavior repair was applied.
+
+## g16.118 rows (recorded 2026-09-05)
+
+The eight overlay rows were repaired for structure. DetailItem, CommandPalette
+and ToastHost reach an empty diff and hold receipts; their stores are deleted.
+Five rows keep a store because their residual cause is focus ownership assigned
+to `g16.119`.
+Each directory holds `<row>.a1-diff.json`, `<row>.gpui.json`, `svelte.json`,
+and `attributes.json` from the same executed run.
+
+Reproduce any row with
+`POODLE_NUCLEUS_RECEIPT_DIR=$PWD/target/nucleus-receipts cargo test
+--manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions
+<row>_a1`.
+
+### Initial overlay focus (`g16.119` owner)
+
+The overlay structure now matches; what remains is where focus lands when the
+overlay opens. `poodle-node` has no autofocus channel and GPUI focus routing
+is `g16.119`'s owned path, so no repair was applied here. The operator ruling
+assigns all five rows below to `g16.119`.
+
+| Row | Node | Attribute | GPUI | Svelte | Owner |
+| --- | --- | --- | --- | --- | --- |
+| Dialog | 1, `dialog` "Delete file" | `focused` | `false` | `true` | `g16.119` |
+| Popover | 2, `dialog` "Quick settings" | `focused` | `false` | `true` | `g16.119` |
+| ConfirmAction | 2, `alertdialog` "Delete workspace?" | `focused` | `false` | `true` | `g16.119` |
+| MessageCenter | 1, `dialog` "Notifications" | `focused` | `false` | `true` | `g16.119` |
+| ModelPicker | 0, `button` "Model: Atlas" | `focused` | `true` | `false` | `g16.119` |
+| ModelPicker | 3, `radio` "Atlas Balanced model" | `focused` | `false` | `true` | `g16.119` |
+
+### CommandPalette — empty-diff receipt
+
+The operator ruling added `NodeRole::SearchBox` beside `Heading` and `Banner`.
+The production TextInput now reports SearchBox and only a non-empty actual
+value as `value_text`; ActionDiscoveryPanel now nests its interactive button
+inside each option. The mounted paired snapshots agree with an empty diff, so
+CommandPalette emits an A1 receipt.
+
+Receipt: `commandpalette--nucleus-attention-command-palette--a1.json`.

@@ -542,7 +542,14 @@ pub fn text_input_with_handlers(
     } else if spec.validation_state == ValidationState::Pending {
         root.a11y.busy = Some(true);
     }
-    root.a11y.role = Some(NodeRole::TextInput);
+    root.a11y.role = Some(if spec.input_type == "search" {
+        NodeRole::SearchBox
+    } else {
+        NodeRole::TextInput
+    });
+    if !current_value.is_empty() {
+        root.a11y.value_text = Some(current_value.to_owned());
+    }
     root.roles.insert(
         "size".to_owned(),
         format!("{effective_size:?}").to_ascii_lowercase(),

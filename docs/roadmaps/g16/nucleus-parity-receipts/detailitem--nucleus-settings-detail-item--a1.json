@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "SplitView",
-  "scenario_id": "nucleus.shell.split-view",
-  "proof_level": "M1",
+  "component": "DetailItem",
+  "scenario_id": "nucleus.settings.detail-item",
+  "proof_level": "A1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
   "package": "poodle-gpui-preview",
@@ -46,18 +46,31 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount two composed SplitViews with caller-scoped divider instance IDs through HeadlessDriver",
-    "dispatch keyboard arrow and Home/End resize input through GPUI test platform",
-    "dispatch cross-axis keys to prove axis filter isolation",
-    "dispatch keyboard activation to primary collapse toggle"
+    "mount the production DetailItem node tree through HeadlessDriver with the shared scenario props",
+    "replay the shared scenario actions through GPUI test-platform dispatch"
   ],
   "assertions": [
-    "production render path resolves root orientation, ratio flex bases, min-size constraints, overflow clipping, and aria-label",
-    "caller-scoped divider instance IDs prevent focus handle aliasing across multiple mounted SplitViews",
-    "mounted keyboard input dispatches axis-constrained deltas and saturating Home/End to the focused split divider with complete handler isolation",
-    "primary collapse toggle composes production CollapseToggle and Icon renderers with accurate button role, label, expanded state, and focus ring",
-    "mounted bounds confirm positive dimensions, pane ordering, and child containment within owning SplitView layouts"
+    "information action and dialog semantics match the Svelte projection"
   ],
   "outcome": "passed",
-  "artifact_paths": []
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/detail-item.gpui.json",
+      "sha256": "8a314b5c71e5fb5e9a0afd3dbbc61852d334aa2877f57621a30ec168716f4d1d"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/detail-item.svelte.json",
+      "sha256": "ab44b7ca9f435992fcf78f867a6d222d87df0f1963de35d18ed1e40a4207ca4e"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/detail-item.json",
+    "scenario_sha256": "d5a16050c935f927f974323c90b43fc43d8141abb279ba30e7577b7b82fde019",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/detail-item.gpui.json",
+    "gpui_snapshot_sha256": "8a314b5c71e5fb5e9a0afd3dbbc61852d334aa2877f57621a30ec168716f4d1d",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/detail-item.svelte.json",
+    "svelte_snapshot_sha256": "ab44b7ca9f435992fcf78f867a6d222d87df0f1963de35d18ed1e40a4207ca4e",
+    "web_only_exclusions": [],
+    "diff": []
+  }
 }

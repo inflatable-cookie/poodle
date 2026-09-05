@@ -155,6 +155,8 @@ pub fn model_picker(
     trigger.id = select_trigger.id;
     trigger.runtime_id = select_trigger.runtime_id;
     trigger.a11y = select_trigger.a11y;
+    trigger.a11y.expanded = Some(is_open);
+    trigger.a11y.controls = is_open.then(|| format!("model-picker-{instance_id}-dialog"));
     trigger.interaction = select_trigger.interaction;
     {
         let s = &mut trigger.style;
@@ -289,6 +291,16 @@ pub fn model_picker(
             if let Some(row) = find_runtime_id_mut(&mut models, &row_id) {
                 let is_selected = model.value == spec.value.model;
                 row.a11y.role = Some(NodeRole::RadioButton);
+                row.a11y.label = Some(if spec.show_model_descriptions {
+                    match model.description.as_deref() {
+                        Some(description) if !description.is_empty() => {
+                            format!("{} {}", model.label, description)
+                        }
+                        _ => model.label.clone(),
+                    }
+                } else {
+                    model.label.clone()
+                });
                 row.a11y.selected = Some(is_selected);
                 row.a11y.toggled = Some(if is_selected {
                     NodeToggled::True
@@ -299,6 +311,14 @@ pub fn model_picker(
                     .insert("selected".to_owned(), is_selected.to_string());
                 row.roles
                     .insert("disabled".to_owned(), model.is_disabled.to_string());
+                if is_selected && !spec.is_disabled && !model.is_disabled {
+                    // The selected radio is the single sequential stop in
+                    // the open picker. Select's ordinary listbox options are
+                    // pointer targets, but the Svelte ModelPicker exposes
+                    // this radio in the tab order.
+                    row.interaction.focusable = true;
+                    row.a11y.tab_index = Some(0);
+                }
                 if is_selected {
                     row.style.descriptor.background = Some(row_selected_bg);
                 }

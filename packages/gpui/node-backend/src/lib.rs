@@ -42,6 +42,7 @@ use poodle_node::{
     StyleDescriptor, StylePatch, TextAlign,
 };
 
+mod a11y;
 mod drag;
 mod inset_shadow;
 mod interaction;
@@ -288,8 +289,8 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
     if !node.roles.is_empty() {
         record_probe_channel("semantic.token-roles.received");
     }
-    if node.a11y.role.is_some() && node.a11y.label.is_some() {
-        record_probe_channel("accessibility.projection.received");
+    if let Some(role) = node.a11y.role {
+        let _ = a11y::record_role(role);
     }
     if node.a11y.toggled.is_some() {
         record_probe_channel("toggle.received");

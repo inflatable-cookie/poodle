@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
   "component": "CommandPalette",
-  "scenario_id": "nucleus-command-palette",
+  "scenario_id": "nucleus.attention.command-palette",
   "scenario_path": "test/nucleus-a11y/scenarios/command-palette.json",
-  "scenario_sha256": "6f2d6a5777a91aa50ab8113b351b261d2c2bf420684e285472d4dc98f0b5110b",
+  "scenario_sha256": "d4e32bd0fce2d16f73771e4cf56a96a2b3ceb8fecb4f5db3adcd34721b41845d",
   "runtime": "svelte-happy-dom",
   "run": {
     "command": "effigy test:nucleus-a11y",

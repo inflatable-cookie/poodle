@@ -1,1 +1,31 @@
-{"schema":"poodle.g16-nucleus-a11y-scenario.v1","component":"MessageCenter","scenario_id":"nucleus-message-center","props":{"defaultOpen":true,"title":"Notifications","items":[{"id":"build","title":"Build complete","message":"Release candidate is ready.","read":false,"tone":"success"},{"id":"mention","title":"New mention","message":"Ada mentioned you in Studio.","read":true,"meta":"Studio"}]},"actions":[],"declared_states":["expanded","disabled"],"web_only_exclusions":[]}
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "MessageCenter",
+  "scenario_id": "nucleus.attention.message-center",
+  "props": {
+    "defaultOpen": true,
+    "title": "Notifications",
+    "items": [
+      {
+        "id": "build",
+        "title": "Build complete",
+        "message": "Release candidate is ready.",
+        "read": false,
+        "tone": "success"
+      },
+      {
+        "id": "mention",
+        "title": "New mention",
+        "message": "Ada mentioned you in Studio.",
+        "read": true,
+        "meta": "Studio"
+      }
+    ]
+  },
+  "actions": [],
+  "declared_states": [
+    "expanded",
+    "disabled"
+  ],
+  "web_only_exclusions": []
+}

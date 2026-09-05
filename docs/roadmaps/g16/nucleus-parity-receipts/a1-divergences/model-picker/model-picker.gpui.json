@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "ToastHost",
-  "scenario_id": "nucleus-toast-host",
-  "scenario_path": "test/nucleus-a11y/scenarios/toast-host.json",
-  "scenario_sha256": "973b8a505770493fe3514c123f2eb6bb541002f0f70c502deb80019fb7741f22",
+  "component": "ModelPicker",
+  "scenario_id": "nucleus.agent.model-picker",
+  "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
+  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -13,59 +13,37 @@
   },
   "nodes": [
     {
-      "role": "list",
-      "name": "Job notices",
-      "value": null,
-      "value_text": null,
-      "states": {},
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": null,
-      "focused": false
-    },
-    {
-      "role": "listitem",
-      "name": null,
-      "value": null,
-      "value_text": null,
-      "states": {},
-      "relationships": {
-        "controls": [],
-        "labelled_by": [],
-        "described_by": []
-      },
-      "level": null,
-      "orientation": null,
-      "focus_order": null,
-      "focused": false
-    },
-    {
       "role": "button",
-      "name": "Dismiss Saved",
+      "name": "Model: Atlas",
       "value": null,
       "value_text": null,
-      "states": {},
+      "states": {
+        "expanded": true,
+        "checked": null,
+        "disabled": false
+      },
       "relationships": {
-        "controls": [],
+        "controls": [
+          1
+        ],
         "labelled_by": [],
         "described_by": []
       },
       "level": null,
       "orientation": null,
       "focus_order": 0,
-      "focused": false
+      "focused": true
     },
     {
-      "role": "alert",
-      "name": null,
+      "role": "dialog",
+      "name": "Model",
       "value": null,
       "value_text": null,
-      "states": {},
+      "states": {
+        "expanded": null,
+        "checked": null,
+        "disabled": false
+      },
       "relationships": {
         "controls": [],
         "labelled_by": [],
@@ -77,11 +55,35 @@
       "focused": false
     },
     {
-      "role": "button",
-      "name": null,
+      "role": "radiogroup",
+      "name": "Model",
       "value": null,
       "value_text": null,
-      "states": {},
+      "states": {
+        "expanded": null,
+        "checked": null,
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "radio",
+      "name": "Atlas Balanced model",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "expanded": null,
+        "checked": true,
+        "disabled": false
+      },
       "relationships": {
         "controls": [],
         "labelled_by": [],
@@ -93,11 +95,15 @@
       "focused": false
     },
     {
-      "role": "button",
-      "name": "Dismiss Publishing failed",
+      "role": "radio",
+      "name": "Mini",
       "value": null,
       "value_text": null,
-      "states": {},
+      "states": {
+        "expanded": null,
+        "checked": false,
+        "disabled": true
+      },
       "relationships": {
         "controls": [],
         "labelled_by": [],
@@ -105,7 +111,7 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": 2,
+      "focus_order": null,
       "focused": false
     }
   ]

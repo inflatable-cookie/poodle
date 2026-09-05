@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
-  "component": "ModelPicker",
-  "scenario_id": "nucleus.agent.model-picker",
-  "scenario_path": "test/nucleus-a11y/scenarios/model-picker.json",
-  "scenario_sha256": "acb317e33a8cdcf9325824298b9a244910da439df6ae7e24819d82564813b25f",
+  "component": "DetailItem",
+  "scenario_id": "nucleus.settings.detail-item",
+  "scenario_path": "test/nucleus-a11y/scenarios/detail-item.json",
+  "scenario_sha256": "d5a16050c935f927f974323c90b43fc43d8141abb279ba30e7577b7b82fde019",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -14,17 +14,15 @@
   "nodes": [
     {
       "role": "button",
-      "name": "Model: Atlas",
+      "name": "More information",
       "value": null,
       "value_text": null,
       "states": {
-        "expanded": false,
-        "checked": null,
         "disabled": false
       },
       "relationships": {
         "controls": [
-          -1
+          1
         ],
         "labelled_by": [],
         "described_by": []
@@ -33,6 +31,24 @@
       "orientation": null,
       "focus_order": 0,
       "focused": true
+    },
+    {
+      "role": "dialog",
+      "name": "More information",
+      "value": null,
+      "value_text": null,
+      "states": {
+        "disabled": false
+      },
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
     }
   ]
 }

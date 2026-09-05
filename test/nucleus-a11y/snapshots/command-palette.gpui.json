@@ -1,9 +1,9 @@
 {
   "schema": "poodle.g16-nucleus-a11y-snapshot.v1",
   "component": "CommandPalette",
-  "scenario_id": "nucleus-command-palette",
+  "scenario_id": "nucleus.attention.command-palette",
   "scenario_path": "test/nucleus-a11y/scenarios/command-palette.json",
-  "scenario_sha256": "6f2d6a5777a91aa50ab8113b351b261d2c2bf420684e285472d4dc98f0b5110b",
+  "scenario_sha256": "d4e32bd0fce2d16f73771e4cf56a96a2b3ceb8fecb4f5db3adcd34721b41845d",
   "runtime": "gpui-headless",
   "run": {
     "command": "effigy regressions:native",
@@ -31,6 +31,22 @@
       "focused": false
     },
     {
+      "role": "heading",
+      "name": "Workspace commands",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
       "role": "button",
       "name": "Close command palette",
       "value": null,
@@ -47,22 +63,22 @@
       "focused": false
     },
     {
-      "role": "textbox",
+      "role": "searchbox",
       "name": "Search commands",
       "value": null,
-      "value_text": "Search commands, panels, and actions",
+      "value_text": null,
       "states": {},
       "relationships": {
         "controls": [],
         "labelled_by": [],
         "described_by": [
-          3
+          4
         ]
       },
       "level": null,
       "orientation": null,
       "focus_order": 1,
-      "focused": false
+      "focused": true
     },
     {
       "role": "status",
@@ -97,7 +113,39 @@
       "focused": false
     },
     {
+      "role": "list",
+      "name": null,
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
       "role": "option",
+      "name": "Open File Cmd+O",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
       "name": "Open File",
       "value": null,
       "value_text": null,
@@ -109,11 +157,27 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": null,
+      "focus_order": 2,
       "focused": false
     },
     {
       "role": "option",
+      "name": "Save Cmd+S",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
       "name": "Save",
       "value": null,
       "value_text": null,
@@ -125,12 +189,12 @@
       },
       "level": null,
       "orientation": null,
-      "focus_order": null,
+      "focus_order": 3,
       "focused": false
     },
     {
-      "role": "option",
-      "name": "Toggle terminal",
+      "role": "list",
+      "name": null,
       "value": null,
       "value_text": null,
       "states": {},
@@ -142,6 +206,38 @@
       "level": null,
       "orientation": null,
       "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "option",
+      "name": "Toggle terminal Cmd+`",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": null,
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Toggle terminal",
+      "value": null,
+      "value_text": null,
+      "states": {},
+      "relationships": {
+        "controls": [],
+        "labelled_by": [],
+        "described_by": []
+      },
+      "level": null,
+      "orientation": null,
+      "focus_order": 4,
       "focused": false
     }
   ]

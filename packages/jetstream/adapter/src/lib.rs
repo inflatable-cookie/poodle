@@ -58,6 +58,56 @@ pub use theme::JetstreamThemeProvider;
 use std::sync::LazyLock;
 
 use poodle_adapter::{AdapterManifest, RenderTarget};
+use poodle_node::NodeRole;
+
+/// AccessKit / ARIA role the quarantined adapter projects for a node role.
+/// Exhaustive so a new `NodeRole` cannot ship unmapped.
+pub fn accesskit_role(role: NodeRole) -> &'static str {
+    match role {
+        NodeRole::Alert => "alert",
+        NodeRole::AlertDialog => "alertdialog",
+        NodeRole::Banner => "banner",
+        NodeRole::Button => "button",
+        NodeRole::Cell => "cell",
+        NodeRole::CheckBox => "checkbox",
+        NodeRole::ComboBox => "combobox",
+        NodeRole::Dialog => "dialog",
+        NodeRole::Grid => "grid",
+        NodeRole::Group => "group",
+        NodeRole::Heading => "heading",
+        NodeRole::SearchBox => "searchbox",
+        NodeRole::Label => "label",
+        NodeRole::List => "list",
+        NodeRole::ListItem => "listitem",
+        NodeRole::ListBox => "listbox",
+        NodeRole::ListBoxOption => "option",
+        NodeRole::Log => "log",
+        NodeRole::Image => "img",
+        NodeRole::Menu => "menu",
+        NodeRole::MenuBar => "menubar",
+        NodeRole::MenuItem => "menuitem",
+        NodeRole::MenuItemCheckBox => "menuitemcheckbox",
+        NodeRole::MenuItemRadio => "menuitemradio",
+        NodeRole::Splitter => "separator",
+        NodeRole::Slider => "slider",
+        NodeRole::ProgressIndicator => "progressbar",
+        NodeRole::RadioGroup => "radiogroup",
+        NodeRole::RadioButton => "radio",
+        NodeRole::Region => "region",
+        NodeRole::Row => "row",
+        NodeRole::SpinButton => "spinbutton",
+        NodeRole::Status => "status",
+        NodeRole::Switch => "switch",
+        NodeRole::Tab => "tab",
+        NodeRole::TabList => "tablist",
+        NodeRole::TabPanel => "tabpanel",
+        NodeRole::TextInput => "textbox",
+        NodeRole::Toolbar => "toolbar",
+        NodeRole::Tooltip => "tooltip",
+        NodeRole::Tree => "tree",
+        NodeRole::TreeItem => "treeitem",
+    }
+}
 
 /// Represents a Jetstream UI widget type that a spec maps to.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -317,5 +367,11 @@ mod tests {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 60);
         assert_eq!(SUPPORTED_COMPOSITES.len(), 48);
         assert_eq!(supported_components().len(), 108);
+    }
+
+    #[test]
+    fn heading_and_banner_roles_map() {
+        assert_eq!(accesskit_role(NodeRole::Heading), "heading");
+        assert_eq!(accesskit_role(NodeRole::Banner), "banner");
     }
 }

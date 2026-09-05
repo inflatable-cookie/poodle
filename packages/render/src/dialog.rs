@@ -11,7 +11,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole,
 };
-use poodle_specs::{DialogSpec, SemanticControlSizeRole};
+use poodle_specs::{DialogKind, DialogSpec, SemanticControlSizeRole};
 
 use crate::context::RenderContext;
 use crate::presentation::{
@@ -129,6 +129,7 @@ pub fn dialog_with_slots(
             }
             if let Some(ref title) = spec.title {
                 let mut t = Node::text(title);
+                t.id = Some("poodle-dialog-title".to_string());
                 t.style.descriptor.text_color = Some(title_color);
                 t.style.text_size = Some(title_font);
                 t.style.text_weight = Some(600);
@@ -158,6 +159,7 @@ pub fn dialog_with_slots(
         if spec.show_close_button {
             let icon_size = rem_to_px(size_font_rem(chrome_size));
             let mut close = Node::button("");
+            close.a11y.role = Some(NodeRole::Button);
             close.a11y.label = Some(spec.close_label.clone());
             close.id = Some("poodle-dialog-close".to_string());
             {
@@ -266,14 +268,10 @@ fn backdrop(
         panel.interaction.on_activate = Some(Arc::new(|| {}));
     }
 
-    if let (true, Some(handler)) = (spec.effective_dismiss_on_backdrop(), &on_request_close) {
-        let handler = Arc::clone(handler);
-        root.interaction.on_activate = Some(Arc::new(move || handler()));
-    }
-
-    if let Some(handler) = on_request_close {
+    if let Some(ref handler) = on_request_close {
         let dismiss_on_escape = spec.dismiss_on_escape;
         if dismiss_on_escape {
+            let handler = Arc::clone(handler);
             panel.interaction.on_dismiss = Some(Arc::new(move |reason| match reason {
                 poodle_node::DismissReason::Escape if dismiss_on_escape => {
                     handler();
@@ -283,12 +281,39 @@ fn backdrop(
         }
     }
 
-    let mut root = root.child(panel);
-    if let Some(label) = spec.aria_label.as_deref() {
-        root.a11y.label = Some(label.to_string());
+    panel.a11y.role = Some(match spec.role {
+        DialogKind::AlertDialog => NodeRole::AlertDialog,
+        DialogKind::Dialog => NodeRole::Dialog,
+    });
+    if let Some(title) = spec.title.as_deref() {
+        // Svelte points `aria-labelledby` at the title element, which carries
+        // no role of its own; the name is computed from it all the same.
+        panel.a11y.labelled_by = Some("poodle-dialog-title".to_string());
+        panel.a11y.label = Some(title.to_string());
+    } else if let Some(label) = spec.aria_label.as_deref() {
+        panel.a11y.label = Some(label.to_string());
     }
-    root.a11y.role = Some(NodeRole::Dialog);
-    root
+
+    // A container, not a Button node: the backdrop is a full-bleed absolute
+    // hit target and the Button primitive sizes itself to its content.
+    let mut backdrop_button = Node::container();
+    backdrop_button.id = Some("poodle-dialog-backdrop-dismiss".to_string());
+    backdrop_button.a11y.role = Some(NodeRole::Button);
+    backdrop_button.a11y.label = Some("Dismiss dialog backdrop".to_string());
+    backdrop_button.interaction.focusable = true;
+    backdrop_button.position = NodePosition::Absolute {
+        top: Some(0.0),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: Some(0.0),
+    };
+    backdrop_button.style.descriptor.layout.direction = LayoutDirection::Row;
+    if let (true, Some(handler)) = (spec.effective_dismiss_on_backdrop(), &on_request_close) {
+        let handler = Arc::clone(handler);
+        backdrop_button.interaction.on_activate = Some(Arc::new(move || handler()));
+    }
+
+    root.child(backdrop_button).child(panel)
 }
 
 #[cfg(test)]
@@ -329,14 +354,31 @@ mod tests {
 
         assert_eq!(node.id.as_deref(), Some("poodle-dialog-backdrop"));
         assert!(node.style.overlay);
-        assert_eq!(node.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(node.a11y.role, None);
         assert!(node.interaction.dismiss_layer.is_none());
 
-        assert_eq!(node.children.len(), 1);
-        let panel = &node.children[0];
+        assert_eq!(node.children.len(), 2);
+        let backdrop = &node.children[0];
+        assert_eq!(backdrop.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            backdrop.a11y.label.as_deref(),
+            Some("Dismiss dialog backdrop")
+        );
+        let panel = &node.children[1];
         assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
+        assert_eq!(panel.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(panel.a11y.labelled_by.as_deref(), Some("poodle-dialog-title"));
         assert!(panel.interaction.dismiss_layer.is_none());
         assert!(panel.interaction.on_activate.is_none());
+        let title = panel
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-title"))
+            .expect("title element");
+        assert_eq!(title.a11y.role, None);
+        assert_eq!(panel.a11y.label.as_deref(), Some("Test Title"));
+        let close = panel
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-close"))
+            .expect("close button");
+        assert_eq!(close.a11y.role, Some(NodeRole::Button));
 
         let with_close = dialog(
             &spec,
@@ -345,7 +387,7 @@ mod tests {
             None,
             Some(Arc::new(|| {})),
         );
-        let with_close_panel = &with_close.children[0];
+        let with_close_panel = &with_close.children[1];
         assert_eq!(
             with_close_panel.interaction.dismiss_layer.as_deref(),
             Some("poodle-dialog-layer")
@@ -370,15 +412,14 @@ mod tests {
 
         let node = dialog(&spec, &ctx, vec![], None, Some(on_close));
 
-        // Backdrop activation on root
-        assert!(node.interaction.on_activate.is_some());
-        if let Some(act) = &node.interaction.on_activate {
+        let backdrop = &node.children[0];
+        assert!(backdrop.interaction.on_activate.is_some());
+        if let Some(act) = &backdrop.interaction.on_activate {
             act();
             assert_eq!(call_count.load(Ordering::SeqCst), 1);
         }
 
-        // On dismiss (Escape) on panel
-        let panel = &node.children[0];
+        let panel = &node.children[1];
         assert!(panel.interaction.on_dismiss.is_some());
         if let Some(dismiss) = &panel.interaction.on_dismiss {
             dismiss(poodle_node::DismissReason::Escape);
@@ -389,7 +430,7 @@ mod tests {
         let escape_disabled_spec = DialogSpec::new()
             .with_dismiss_on_escape(false);
         let escape_disabled_node = dialog(&escape_disabled_spec, &ctx, vec![], None, Some(Arc::new(|| {})));
-        let escape_disabled_panel = &escape_disabled_node.children[0];
+        let escape_disabled_panel = &escape_disabled_node.children[1];
         assert!(escape_disabled_panel.interaction.on_dismiss.is_none());
     }
 
@@ -402,7 +443,7 @@ mod tests {
         let spec = DialogSpec::new().with_dismiss_on_backdrop(false);
 
         let node = dialog(&spec, &ctx, vec![], None, Some(on_close));
-        assert!(node.interaction.on_activate.is_none());
+        assert!(node.children[0].interaction.on_activate.is_none());
     }
 
     #[test]
@@ -419,7 +460,7 @@ mod tests {
             None,
         );
 
-        let panel = &node.children[0];
+        let panel = &node.children[1];
         assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
         assert_eq!(panel.children.len(), 1);
     }
@@ -437,7 +478,7 @@ mod tests {
             None,
         );
         assert_eq!(
-            sm_node.children[0].style.descriptor.layout.width,
+            sm_node.children[1].style.descriptor.layout.width,
             LayoutSizing::Fixed(rem_to_px(24.0))
         );
 
@@ -449,7 +490,7 @@ mod tests {
             None,
         );
         assert_eq!(
-            full_node.children[0].style.descriptor.layout.width,
+            full_node.children[1].style.descriptor.layout.width,
             LayoutSizing::Grow
         );
     }

@@ -1,1 +1,34 @@
-{"schema":"poodle.g16-nucleus-a11y-scenario.v1","component":"CommandPalette","scenario_id":"nucleus-command-palette","props":{"open":true,"title":"Workspace commands","description":"Search every available action.","invocationHint":"Cmd+K","items":[{"id":"open","title":"Open File","group":"File","shortcut":"Cmd+O"},{"id":"save","title":"Save","group":"File","shortcut":"Cmd+S"},{"id":"toggle","title":"Toggle terminal","group":"View","shortcut":"Cmd+`"}]},"actions":[],"declared_states":[],"web_only_exclusions":[]}
+{
+  "schema": "poodle.g16-nucleus-a11y-scenario.v1",
+  "component": "CommandPalette",
+  "scenario_id": "nucleus.attention.command-palette",
+  "props": {
+    "open": true,
+    "title": "Workspace commands",
+    "description": "Search every available action.",
+    "invocationHint": "Cmd+K",
+    "items": [
+      {
+        "id": "open",
+        "title": "Open File",
+        "group": "File",
+        "shortcut": "Cmd+O"
+      },
+      {
+        "id": "save",
+        "title": "Save",
+        "group": "File",
+        "shortcut": "Cmd+S"
+      },
+      {
+        "id": "toggle",
+        "title": "Toggle terminal",
+        "group": "View",
+        "shortcut": "Cmd+`"
+      }
+    ]
+  },
+  "actions": [],
+  "declared_states": [],
+  "web_only_exclusions": []
+}

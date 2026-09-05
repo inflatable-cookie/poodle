@@ -1628,3 +1628,47 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   resolve alias through an existing dependency (what g16.111 did) or a
   separate operator-approved manifest lane. The gate's error names the file
   but not the rule. Surface: package-install certification scope.
+
+- 2026-09-05 — Two `poodle-render` unit tests are red on `origin/main`
+  (`ef483d029`): `context::tests::the_provider_adds_no_wrapper_node_layout_or_accessibility_entry`
+  and `segmented_control::tests::icon_only_without_an_icon_keeps_the_visible_label`.
+  Both assert a button's `a11y.label` is `None`; something now names buttons
+  from their visible label. `effigy check:gpui` therefore cannot be green on
+  any branch. Surface: `packages/render` unit tests. Found by g16.118, which
+  did not repair them.
+
+- 2026-09-05 — Three A1 scenarios shipped with scenario ids that no manifest
+  row carries (`nucleus-toast-host`, `nucleus-command-palette`,
+  `nucleus-message-center` against `nucleus.attention.*`). Nothing caught it
+  because a diverged row emits no receipt, so the id was never resolved
+  against the manifest. A scenario-id-to-manifest check in
+  `effigy test:nucleus-a11y` would fail it the day the scenario lands.
+  Surface: `test/nucleus-a11y/scenarios/`. Fixed by g16.118.
+
+- 2026-09-05 — The native Dialog backdrop is absolutely positioned inside its
+  own composition wrapper, not the window, so any sibling beside the open
+  overlay (ConfirmAction's default trigger, which Svelte keeps mounted)
+  collapses the backdrop to the sibling's row instead of the mount box.
+  `style.overlay` defers the paint but not the layout containing block.
+  Surface: `packages/gpui/node-backend` overlay layout.
+
+- 2026-09-05 — Three A1 receipts are committed with no selector that emits
+  them (`callout`, `editable-label`, `text-input`): no GPUI A1 test loads
+  those scenarios, so a cohort repin can only rewrite their `source_commit`
+  in place. The `select` A1 test also stayed `#[ignore]`d after g16.117
+  aligned the row, so it silently left the cohort. A check that every
+  committed `--a1` receipt has a live test would catch both. Surface:
+  `packages/gpui/preview/tests/headless/nucleus_a11y.rs`.
+
+- 2026-09-05 — `packages/react/components/test/TabsControlledFocus.test.tsx`
+  > "separate-commit supersession retargets the latched transfer to the final
+  tab" is flaky: it fails roughly one run in two with `treeFocus` called 0
+  times instead of 1, on a `packages/react` tree byte-identical to
+  `origin/main`. It fails `effigy ci:web` on unrelated branches. Surface:
+  React Tabs controlled-focus test timing.
+
+- 2026-09-05 — A review worktree was externally rebased onto a sibling lane and
+  left dirty, so its local results could not prove the PR head. Workers and
+  reviewers must never rebase or edit another lane's worktree; the coordinator
+  should enforce a clean exact-head lease per lane. Surface: Paseo worktree
+  ownership and independent PR review.

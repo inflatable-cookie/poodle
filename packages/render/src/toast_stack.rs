@@ -331,14 +331,9 @@ pub fn toast_stack(
         let dismiss = dismiss.child(dismiss_icon);
 
         // Toast box: tinted fill + fade gradient, tone border,
-        // elevation-overlay shadow, clipped. Danger projects Alert; other
-        // rows stay list items. That metadata is not a GPUI AT-parity claim.
+        // elevation-overlay shadow, clipped. Each toast is a list item.
         let mut toast_el = Node::container();
-        toast_el.a11y.role = Some(if toast.tone == poodle_specs::ToastTone::Danger {
-            NodeRole::Alert
-        } else {
-            NodeRole::ListItem
-        });
+        toast_el.a11y.role = Some(NodeRole::ListItem);
         toast_el.position = NodePosition::Relative;
         toast_el.id = Some(format!("poodle-toast-{}", toast.id));
         toast_el.runtime_id = scoped(instance_id, &format!("toast:{}", toast.id));
@@ -375,7 +370,7 @@ pub fn toast_stack(
         }
         all_corners(&mut toast_el, radius);
 
-        el = el.child(toast_el.child(accent_bar).child(content).child(dismiss));
+        el = el.child(toast_el.child(dismiss).child(accent_bar).child(content));
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
@@ -416,7 +411,7 @@ mod tests {
     }
 
     #[test]
-    fn danger_uses_alert_and_other_tones_stay_list_items() {
+    fn every_tone_projects_as_a_list_item() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = ToastStackSpec::new().with_toasts(vec![
@@ -431,7 +426,7 @@ mod tests {
             .find(&|n| n.id.as_deref() == Some("poodle-toast-fail"))
             .expect("danger toast");
         assert_eq!(success.a11y.role, Some(NodeRole::ListItem));
-        assert_eq!(danger.a11y.role, Some(NodeRole::Alert));
+        assert_eq!(danger.a11y.role, Some(NodeRole::ListItem));
     }
 
     #[test]
@@ -505,7 +500,9 @@ mod tests {
             assert_eq!(spacing.padding.right, pad + rem_to_px(1.75));
             assert_eq!(spacing.gap, theme.resolve_space(spec.gap_token()));
 
-            let accent = row.children.first().expect("accent bar");
+            // Svelte puts the dismiss button first in the DOM; both it and
+            // the accent bar are absolutely positioned, so order is semantic only.
+            let accent = row.children.get(1).expect("accent bar");
             assert_eq!(
                 accent.style.descriptor.background,
                 Some(mix_srgb(tone_color, WHITE, 0.94))
