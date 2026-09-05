@@ -34,6 +34,9 @@ executed accessibility projection contract established by g16.111.
 - Execution log: `docs/logs/2026-09/20260905-g16-112-nucleus-a1-np1-shell.md`.
 - Svelte A1 check passed. Native headless check passed with 212 tests, five
   validated A1 receipts, and two recorded divergences under the NP-1 store.
+- Receipt contract and docs checks passed. The ledger checker is intentionally
+  left for the coordinator because its generated markdown is a reserved
+  shared closeout surface.
 - No sibling worktree dependencies.
 
 ## Boundaries

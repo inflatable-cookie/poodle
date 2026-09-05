@@ -28,4 +28,9 @@ SplitView. No component, contract, Svelte, or backend behaviour changes.
   SplitView diverged on separator value and collapse-toggle name. Both diffs
   are stored under `nucleus-parity-receipts/a1-divergences/np1/`.
 - `git diff --check`: passed.
+- `effigy test:nucleus-parity-receipts`: passed, 11 tests.
+- `effigy docs:check`: passed.
+- `effigy check:parity-evidence-ledger`: blocked on the reserved coordinator
+  ledger markdown closeout and the expected summary update for these new
+  mounted rows; no reserved closeout surface was edited in this worker PR.
 - Windowed selectors: not run.
