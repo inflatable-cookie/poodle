@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-06 (revision 22: g16 closed, g17 opened; frontier empty)
+Updated: 2026-09-07 (revision 23: g17.002 web focus visibility ready)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -20,10 +20,27 @@ card or triage note says.
 
 ## Ready frontier
 
-Empty. `g16` closed on 2026-09-06 and `g17` opened with one held card. The
-only live execution is in the lab repository: poodle-lab `g01.006` GPUI
-cohort batch (lab manifest, foreground law, needs an unlocked display). Its
-validated bundle is the gate for the first g17 promotion.
+### g17.002 — Web focus rings follow input modality
+
+- Card: `g17/002-web-focus-ring-input-modality.md`
+- Readiness: ready (operator decision 2026-09-07)
+- Prerequisites: none. Completion: PR merged after accepted exact-head
+  review with the Chromium and WebKit probe transcripts in the log.
+- Owned mutable paths: per card (core `dom/input-modality.ts` and index
+  exports, nine core CSS files, seven Svelte and seven React component
+  mount calls, seven component contracts, tests, log)
+- Reserved shared closeout surfaces (coordinator at merge): `g17/README.md`,
+  `generation-index.md`
+- Approved concurrent siblings: none in Poodle (frontier is otherwise
+  empty); lab `g01.006` is unaffected. Serial edges: none.
+- Worker capability class: capable coding model, medium reasoning; the
+  browser probe runs foreground, one engine per run
+- Acceptance evidence and review oracle: the card's table
+- Stop conditions: per card. Escalation owner: Chatterbox
+
+The only other live execution is the lab repository's `g01.006` GPUI cohort
+batch (lab manifest, foreground law). Its validated bundle is the gate for
+`g17.001`.
 
 ## Held lanes (not dispatchable)
 

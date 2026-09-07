@@ -165,6 +165,16 @@ cannot.
 - An adapter may translate API shape but must not silently drop accessibility
   behavior.
 
+## Focus Visibility
+
+- A focus ring, and any composite "focus treatment" (border, fill, shadow),
+  is for keyboard interaction. Pointer-driven focus paints none of it. Simple
+  controls rely on `:focus-visible`; composite containers gate on the
+  document input-modality attribute
+  (`data-poodle-input-modality`, installed by the components that need it).
+  Native backends must apply the same rule from a keyboard-origin signal
+  (operator decision 2026-09-07; `g17.002` for web).
+
 ## Release Certification
 
 A release run that fails is a process failure, not a discovery (operator

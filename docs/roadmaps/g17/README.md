@@ -1,7 +1,7 @@
 # g17 — Nucleus Switch Path
 
-Status: active — opened 2026-09-06 at the g16 rollover; one held card
-(`001`), no ready card; the frontier is `../dispatch.md`
+Status: active — opened 2026-09-06 at the g16 rollover; `001` held, `002`
+ready; the frontier is `../dispatch.md`
 Posture: operator-led planning slate with a fixed programme goal
 Opened: 2026-09-06
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -34,6 +34,8 @@ to GPUI; real parity switches a bunch of apps, Nucleus first.
 
 1. [001 — Nucleus V1 visual receipts](001-nucleus-v1-visual-receipts.md) —
    held; ready when the lab's first validated cohort bundle exists
+2. [002 — Web focus rings follow input modality](002-web-focus-ring-input-modality.md)
+   — ready; operator-reported TokenInput composer ring on mouse focus
 
 Planned, not yet compiled (each becomes a card only after Chatterbox
 promotion; order is the intended sequence):
@@ -49,6 +51,9 @@ promotion; order is the intended sequence):
 - **A2 platform accessibility.** When gpui-apple builds from crates.io:
   migrate the GPUI backend to the `gpui-unofficial` republish (no vendoring,
   operator rule), then emit platform-tree A2 receipts for the cohort.
+- **GPUI focus-ring keyboard origin.** The node backend paints the ring on
+  any focus; add a keyboard-origin signal and gate the ring on it, matching
+  the "Focus Visibility" rule. Follows `002`.
 - **Web pair composites.** Decide whether to extract duplicated
   Svelte/React composite logic into core while React is retained
   (`../../triage/20260901-233708-holistic-posture-assessment.md`). Operator
