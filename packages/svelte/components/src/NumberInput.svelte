@@ -12,10 +12,12 @@
     stepNumberValue,
     validationStatusToState,
     type NumberInputEffect,
+    installInputModality,
   } from "@inflatable-cookie/poodle-core";
 
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { onMount } from "svelte";
 
   import type {
     ControlDensity,
@@ -66,6 +68,10 @@
   }
 
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
 
   let {
     id = "",

@@ -56,7 +56,7 @@
     border-color: var(--poodle-recipe-select-pending-border, var(--poodle-color-accent-base));
   }
 
-  .poodle-select:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-select:focus-within {
     border-color: var(--poodle-recipe-select-focus-border, var(--poodle-color-accent-focusRing));
     background: var(--poodle-recipe-select-focus-fill, var(--poodle-color-background-surface));
     box-shadow: var(--poodle-recipe-select-focus-shadow, 0 0 0 var(--poodle-border-width-focus)
@@ -364,7 +364,7 @@
     box-shadow: var(--poodle-recipe-select-ghost-shadow, none);
   }
 
-  .poodle-select[data-variant="ghost"]:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-select[data-variant="ghost"]:focus-within {
     border-color: var(--poodle-recipe-select-ghost-focus-border, transparent);
     background: var(--poodle-recipe-select-ghost-focus-fill, transparent);
     box-shadow: var(--poodle-recipe-select-ghost-focus-shadow, none);

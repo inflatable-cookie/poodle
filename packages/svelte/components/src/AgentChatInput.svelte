@@ -1,6 +1,8 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/agent-chat-input.css";
+  import { installInputModality } from "@inflatable-cookie/poodle-core";
   import type { Snippet } from "svelte";
+  import { onMount } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
@@ -99,6 +101,10 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
 
   let editorElement = $state<HTMLTextAreaElement | null>(null);
   let isComposing = $state(false);

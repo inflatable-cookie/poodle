@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -8,6 +9,7 @@ import {
 } from "react";
 
 import "@inflatable-cookie/poodle-core/styles/agent-chat-input.css";
+import { installInputModality } from "@inflatable-cookie/poodle-core";
 
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
@@ -105,6 +107,10 @@ export function AgentChatInput({
   footer,
 }: AgentChatInputProps) {
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const composingRef = useRef(false);
   const [uncontrolledValue, setUncontrolledValue] = useState("");

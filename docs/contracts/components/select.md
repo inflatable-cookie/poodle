@@ -1,7 +1,7 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-08-28
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -160,14 +160,14 @@ The component automatically determines whether to render a native `<select>` or 
 | placeholder | no value selected, placeholder prop set | placeholder text in secondary color, `data-placeholder="true"` |
 | clearable reset | `clearable=true` | placeholder option remains selectable and maps to `defaultValue` |
 | selected | value matches an option | option label displayed in primary color |
-| focus | select receives focus | focus ring via border-color change, background shift, box-shadow |
+| focus | keyboard focus within (`:root[data-poodle-input-modality="keyboard"]`) | focus ring via border-color change, background shift, box-shadow |
 | disabled | `disabled=true` | reduced opacity on root, non-interactive |
 | loading | lazy loader pending | native fallback option shows `Loading...` |
 | load error | lazy loader fails | native fallback option shows the error message |
 | open (custom) | dropdown is visible | `data-open="true"` on root, listbox rendered |
 | highlighted (custom) | keyboard nav or hover over option | `data-highlighted="true"` on option, accent background mix |
 | empty results (custom) | searchable query matches no options | empty message or empty snippet rendered in listbox |
-| ghost variant | `variant="ghost"` | no border, background, box-shadow, padding, or min-height on root; the chevron indicator stays on the non-searchable trigger (the control still signals it opens a list); focus-within treatment fully transparent |
+| ghost variant | `variant="ghost"` | no border, background, box-shadow, padding, or min-height on root; the chevron indicator stays on the non-searchable trigger (the control still signals it opens a list); keyboard focus-within treatment fully transparent |
 
 ### Component States
 
@@ -336,10 +336,11 @@ uses the dismissable-layer stack (innermost-first), guarded by
 | `box-shadow` | `var(--poodle-recipe-select-shadow, none)` |
 | `transition` | `border-color, box-shadow, background` |
 
-### Root — focus-within
+### Root — keyboard focus within
 
 | Property | Value |
 |----------|-------|
+| selector | `:root[data-poodle-input-modality="keyboard"] .poodle-select:focus-within` |
 | `border-color` | `var(--poodle-recipe-select-focus-border, var(--poodle-color-accent-focusRing))` |
 | `background` | `var(--poodle-recipe-select-focus-fill, var(--poodle-color-background-surface))` |
 | `box-shadow` | `var(--poodle-recipe-select-focus-shadow, 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent))` |
@@ -405,10 +406,11 @@ uses the dismissable-layer stack (innermost-first), guarded by
 | `background` | `transparent` |
 | `box-shadow` | `none` |
 
-### Ghost variant -- focus-within
+### Ghost variant -- keyboard focus within
 
 | Property | Value |
 |----------|-------|
+| selector | `:root[data-poodle-input-modality="keyboard"] .poodle-select[data-variant="ghost"]:focus-within` |
 | `border-color` | `transparent` |
 | `background` | `transparent` |
 | `box-shadow` | `none` |
@@ -535,7 +537,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 
 - [ ] control height uses control-height token
 - [ ] Recipe hooks and semantic-token fallbacks match for fill, border, and shadow
-- [ ] focus-within treatment matches (border-color, background, box-shadow)
+- [ ] keyboard focus-within treatment matches (border-color, background, box-shadow)
 - [ ] placeholder color (text-secondary) matches
 - [ ] indicator color (icon-muted) matches
 - [ ] disabled opacity matches

@@ -1,7 +1,7 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-07-19
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -232,7 +232,9 @@ moves it one position later.
 
 ### Focus
 
-- Summary trigger button receives the trigger-wrap focus ring; the icon trigger uses the IconButton focus ring
+- Summary trigger button receives the trigger-wrap keyboard focus ring
+  (`:root[data-poodle-input-modality="keyboard"]`); the icon trigger uses the
+  IconButton focus ring. Pointer focus paints none of the wrap treatment.
 - Reset IconButton manages its own focus ring
 - Panel controls (drag-handle button, IconButton, Select) each manage their own
   focus rings
@@ -320,10 +322,11 @@ treatment to the shared secondary `IconButton` contract.
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))` |
 
-### Trigger Wrap focus (.order-by__trigger-wrap:focus-within)
+### Trigger Wrap keyboard focus within (.order-by__trigger-wrap:focus-within)
 
 | Property | Value |
 |----------|-------|
+| selector | `:root[data-poodle-input-modality="keyboard"] .poodle-order-by__trigger-wrap:focus-within` |
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.0625rem` |
 

@@ -28,7 +28,7 @@
       box-shadow 120ms ease;
   }
 
-  .poodle-token-input:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-token-input:focus-within {
     border-color: var(--poodle-token-input-border-focus);
     background: var(--poodle-token-input-fill-focus);
     box-shadow: var(--poodle-token-input-shadow-focus);

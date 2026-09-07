@@ -11,6 +11,7 @@ import {
   stepNumberValue,
   validationStatusToState,
   type NumberInputEffect,
+  installInputModality,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/number-input.css";
@@ -123,6 +124,10 @@ export function NumberInput({
   onBlur,
 }: NumberInputProps) {
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
 
   const [internalValidationStatus, setInternalValidationStatus] = useState<InputValidationStatus>("idle");
   const [uncontrolledValue, setUncontrolledValue] = useState<number | null>(defaultValue);

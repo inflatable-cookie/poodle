@@ -67,7 +67,7 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .poodle-color-picker__input:focus {
+  .poodle-color-picker__input:focus-visible {
     border-color: var(--poodle-recipe-color-picker-focus-input-border, var(--poodle-color-accent-focusRing));
     box-shadow: var(--poodle-recipe-color-picker-focus-input-shadow, 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
@@ -262,7 +262,7 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .poodle-color-picker__text-input:focus {
+  .poodle-color-picker__text-input:focus-visible {
     border-color: var(--poodle-recipe-color-picker-focus-text-input-border, var(--poodle-color-accent-focusRing));
     box-shadow: var(--poodle-recipe-color-picker-focus-text-input-shadow, 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));

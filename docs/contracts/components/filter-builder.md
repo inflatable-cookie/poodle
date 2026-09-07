@@ -1,7 +1,7 @@
 # FilterBuilder
 
 Status: detailed contract
-Updated: 2026-07-15
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -277,6 +277,8 @@ roving tabindex.
 
 - focus entry: on open, focus moves to the first focusable control in the surface
   (the combinator when shown, else the field/operator select)
+- keyboard focus within the field block draws the ring when
+  `:root[data-poodle-input-modality="keyboard"]`; pointer focus paints none of it
 - focus exit: Escape and outside-dismiss return focus to the trigger (or the pill
   that opened an edit)
 - no nested interactive elements — pills use separate activation and remove
@@ -321,7 +323,7 @@ References semantic roles; reuses `OrderBy` trigger/surface treatment and
 | Trigger | `--poodle-color-background-surface` | fill |
 | Trigger | `--poodle-color-border-default` | border |
 | Trigger hover | `color-mix(surface 84%, elevated)` | hover fill |
-| Trigger focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus` | focus ring |
+| Trigger keyboard focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus`, `:root[data-poodle-input-modality="keyboard"]` | focus ring |
 | Label | `--poodle-color-text-secondary` | uppercase label |
 | Summary placeholder | `--poodle-color-text-muted` | empty state |
 | Pill | (SelectionSummary chip classes) | inline clause chip treatment |

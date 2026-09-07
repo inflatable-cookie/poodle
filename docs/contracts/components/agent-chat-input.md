@@ -1,7 +1,7 @@
 # AgentChatInput
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -50,7 +50,7 @@ region takes any Poodle control.
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | layout wrapper stacking the field over the footer; carries `data-size`, `data-density`, `data-status`, `data-disabled` | — |
-| Field | yes | the composer block: rounded, bordered panel holding attachments, editor and toolbar, sitting two steps up the background ladder so it reads as a distinct block against the page; shows the focus ring when focus is inside | `--poodle-radius-surface`, `--poodle-color-background-panel`, `--poodle-color-border-default`, `--poodle-color-accent-focusRing` |
+| Field | yes | the composer block: rounded, bordered panel holding attachments, editor and toolbar, sitting two steps up the background ladder so it reads as a distinct block against the page; shows the focus ring on keyboard focus within | `--poodle-radius-surface`, `--poodle-color-background-panel`, `--poodle-color-border-default`, `--poodle-color-accent-focusRing` |
 | Question | no | host-composed `AgentQuestion`, rendered first in the field while `status="questioning"` | inherited component tokens |
 | Plan | no | host-composed `AgentPlan`, rendered first in the field while `status="reviewing-plan"` | inherited component tokens |
 | Attachments | no | horizontal wrapping chip list of pending attachments | `--poodle-space-inline-sm` |
@@ -171,7 +171,7 @@ type AgentChatAttachment = {
 | idle empty | `status="idle"`, no text | placeholder shown; action button in submit state, disabled (unless `allowEmptySubmit`) |
 | idle composing | text present | action button enabled, accent-filled |
 | busy | `status="busy"` | action button shows the stop glyph and stays enabled; `data-status="busy"` on the root |
-| focused | focus inside the field | field draws the focus ring |
+| focused | keyboard focus inside the field (`:root[data-poodle-input-modality="keyboard"]`) | field draws the focus ring |
 | disabled | `disabled=true` | field at disabled opacity; editor, action button and chip removal all disabled |
 | read-only | `readOnly=true` | editor not editable; action button unaffected |
 | grown | text exceeds `minRows` | editor height grows to fit, up to `maxRows`, then scrolls |
@@ -264,9 +264,10 @@ while busy is also dropped (stop is deliberate, not accidental).
 
 - focus entry: the editor is the natural first stop; the component never steals
   focus on mount
-- focus treatment: the field draws the ring when focus is inside (editor,
-  toolbar, action); the action button's UA outline is suppressed so exactly one
-  ring shows
+- focus treatment: the field draws the ring on keyboard focus within (editor,
+  toolbar, action), gated by `:root[data-poodle-input-modality="keyboard"]`;
+  the action button's UA outline is suppressed so exactly one ring shows;
+  pointer focus paints none of the composite treatment
 - the action button keeps its accessible name in sync with `status`, so a screen
   reader announces "Stop" the moment streaming begins
 - the context ring carries its percentage in the accessible name; the ring
@@ -382,7 +383,7 @@ what was decided without keeping a second decision surface on screen.
 | Field | `--poodle-color-background-panel` | composer fill — two steps up the ladder (`canvas` → `surface` → `panel`); one step is too close to the page to read as a distinct block |
 | Field | `--poodle-color-border-default` | composer border |
 | Field | `--poodle-space-panel-x`, `--poodle-space-panel-y` | composer padding |
-| Field focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus` | focus ring |
+| Field keyboard focus | `--poodle-color-accent-focusRing`, `--poodle-border-width-focus`, `:root[data-poodle-input-modality="keyboard"]` | focus ring |
 | Editor | `--poodle-typography-body-family`, `--poodle-typography-body-size` | editor typography |
 | Editor | `--poodle-color-text-primary` | text colour |
 | Editor placeholder | `--poodle-color-text-secondary` at `calc(--poodle-state-opacity-muted * 0.62)` | placeholder colour — dimmer than the shared input convention, since the composer's placeholder is a standing hint rather than a value |

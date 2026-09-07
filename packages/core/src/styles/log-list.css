@@ -86,7 +86,7 @@
     outline: none;
   }
 
-  .poodle-log-list__search:focus {
+  .poodle-log-list__search:focus-visible {
     border-color: var(--poodle-recipe-log-list-focus-search-border, var(--poodle-color-accent-focusRing));
   }
 

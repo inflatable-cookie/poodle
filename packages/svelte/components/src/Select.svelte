@@ -7,12 +7,14 @@
     layerContains,
     registerDismissLayer,
     selectTransition,
+    installInputModality,
     type SelectContext,
     type SelectEvent,
     type SelectOptionState,
     type SelectResult,
   } from "@inflatable-cookie/poodle-core";
   import type { Snippet } from "svelte";
+  import { onMount } from "svelte";
 
   import { anchored } from "./anchored";
   import { default as Icon } from "./Icon.svelte";
@@ -102,6 +104,10 @@
 
   const generatedSelectId = `poodle-select-${crypto.randomUUID()}`;
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
   let rootElement: HTMLDivElement | null = $state(null);
   let listboxElement: HTMLDivElement | null = $state(null);
   let inputElement: HTMLInputElement | null = $state(null);

@@ -41,7 +41,7 @@
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary));
   }
 
-  .poodle-filter-builder:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-filter-builder:focus-within {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }

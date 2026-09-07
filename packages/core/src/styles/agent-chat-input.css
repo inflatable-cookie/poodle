@@ -44,7 +44,7 @@
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 78%, var(--poodle-color-text-primary));
   }
 
-  .poodle-agent-chat-input__field:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-agent-chat-input__field:focus-within {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
@@ -138,7 +138,7 @@
     overflow-y: auto;
   }
 
-  .poodle-agent-chat-input__editor:focus {
+  .poodle-agent-chat-input__editor:focus-visible {
     outline: none;
   }
 
