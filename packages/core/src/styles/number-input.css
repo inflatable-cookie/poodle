@@ -44,7 +44,7 @@
     border-color: var(--poodle-recipe-number-input-pending-field-border, var(--poodle-color-accent-base));
   }
 
-  .poodle-number-input__field:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-number-input__field:focus-within {
     box-shadow: var(--poodle-recipe-number-input-focus-field-shadow, 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }

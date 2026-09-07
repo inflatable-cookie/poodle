@@ -13,8 +13,9 @@
     type DropIntent,
     type DropPosition,
     type DropTargetRegistration,
+    installInputModality,
   } from "@inflatable-cookie/poodle-core";
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
 
   import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
@@ -75,6 +76,11 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
+
   const panelId = `poodle-order-by-${++nextOrderById}`;
   let open = $state(false);
   let addFieldValue = $state("");

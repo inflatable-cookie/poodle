@@ -6,7 +6,9 @@
     padDurationSegment,
     setDurationSegment,
     type DurationSegment,
+    installInputModality,
   } from "@inflatable-cookie/poodle-core";
+  import { onMount } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -36,6 +38,10 @@
   }
 
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
 
   let {
     size = null,

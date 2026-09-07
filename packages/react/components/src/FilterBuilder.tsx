@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
-import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
+import { installInputModality, layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/filter-builder.css";
 // Reuse SelectionSummary's chip treatment (split-chip classes) for the inline
@@ -76,6 +76,10 @@ export function FilterBuilder({
   onChange = null,
 }: FilterBuilderProps) {
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
   const panelId = useId();
 
   const [open, setOpen] = useState(false);

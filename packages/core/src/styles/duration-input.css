@@ -31,7 +31,7 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .poodle-duration-input:focus-within {
+  :root[data-poodle-input-modality="keyboard"] .poodle-duration-input:focus-within {
     border-color: var(--poodle-recipe-duration-input-focus-border, var(--poodle-color-accent-focusRing));
     box-shadow: var(--poodle-recipe-duration-input-focus-shadow, 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
@@ -53,7 +53,7 @@
     border-radius: 0.1875rem;
   }
 
-  .poodle-duration-input__segment:has(.poodle-duration-input__field:focus) {
+  .poodle-duration-input__segment:has(.poodle-duration-input__field:focus-visible) {
     background: var(--poodle-recipe-duration-input-focus-field-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }
 

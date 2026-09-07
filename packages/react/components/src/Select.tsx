@@ -16,6 +16,7 @@ import {
   layerContains,
   registerDismissLayer,
   selectTransition,
+  installInputModality,
   type SelectContext,
   type SelectEvent,
   type SelectOptionState,
@@ -111,6 +112,10 @@ export function Select({
 }: SelectProps) {
   const generatedSelectId = useId();
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
 
   // The root is state, not a ref: the portalled listbox has to re-render once
   // it exists so it can be positioned against it.

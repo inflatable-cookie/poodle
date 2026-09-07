@@ -1,7 +1,7 @@
 # DurationInput
 
 Status: detailed contract
-Updated: 2026-08-27
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -35,7 +35,7 @@ Updated: 2026-08-27
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | grouped container with focus-within styling | border, radius, background, height, padding |
+| Root | yes | grouped container with keyboard focus-within styling | border, radius, background, height, padding |
 | Segment | yes | column container for label + field | flex layout, gap |
 | Label | yes | unit indicator above field | font-size, color, letter-spacing |
 | Field | yes | numeric text input | width, font, color, text-align |
@@ -73,8 +73,8 @@ Updated: 2026-08-27
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | resting | bordered container with segmented fields |
-| focus-within | any field focused | accent border and focus shadow |
-| segment-focus | individual field focused | segment background highlight (covers label + field) |
+| keyboard focus within | any field keyboard-focused (`:root[data-poodle-input-modality="keyboard"]`) | accent border and focus shadow |
+| segment-focus | individual field keyboard-focused (`:focus-visible`) | segment background highlight (covers label + field) |
 | disabled | `disabled=true` | reduced opacity, fields not editable |
 | invalid | total out of min/max bounds | danger border color |
 
@@ -117,8 +117,9 @@ validation display and focus behavior stay adapter-side.
 ### Focus And Announcement
 
 - focus entry: first field (hours) receives focus
-- focus-within: root shows accent border and shadow
-- individual field focus: entire segment (label + field) highlights
+- keyboard focus within: root shows accent border and shadow when
+  `:root[data-poodle-input-modality="keyboard"]`
+- individual field keyboard focus: entire segment (label + field) highlights
 
 ## 7. Layout
 
@@ -152,10 +153,11 @@ validation display and focus behavior stay adapter-side.
 | `font-family` | `var(--poodle-typography-code-family)` |
 | `transition` | `border-color, box-shadow` at `motion-duration-interaction motion-easing-standard` |
 
-### Root focus-within
+### Root — keyboard focus within
 
 | Property | Value |
 |----------|-------|
+| selector | `:root[data-poodle-input-modality="keyboard"] .poodle-duration-input:focus-within` |
 | `border-color` | `var(--poodle-color-accent-focusRing)` |
 | `box-shadow` | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
@@ -210,10 +212,11 @@ validation display and focus behavior stay adapter-side.
 | `line-height` | `1` |
 | `outline` | `none` |
 
-### Segment (when child field focused)
+### Segment (when child field keyboard-focused)
 
 | Property | Value |
 |----------|-------|
+| selector | `.poodle-duration-input__segment:has(.poodle-duration-input__field:focus-visible)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 
 ### Separator `.duration-input__separator`
@@ -300,7 +303,7 @@ Horizontal padding combines a size adjust (per table) with a density adjust (`co
 
 - [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] root border, radius, background match
-- [ ] focus-within accent border and shadow match
+- [ ] keyboard focus-within accent border and shadow match
 - [ ] field focus background highlight matches
 - [ ] label typography matches (0.5625rem, uppercase, 0.05em spacing)
 - [ ] separator styling matches

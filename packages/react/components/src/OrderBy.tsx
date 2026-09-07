@@ -5,6 +5,7 @@ import {
   registerDismissLayer,
   type DragDropCommitResult,
   type DropIntent,
+  installInputModality,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/order-by.css";
@@ -63,6 +64,10 @@ export function OrderBy({
   onActiveSortChange = null,
 }: OrderByProps) {
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
   const panelId = useId();
 
   const [open, setOpen] = useState(false);

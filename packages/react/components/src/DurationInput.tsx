@@ -1,10 +1,11 @@
-import { useId, useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from "react";
+import { useEffect, useId, useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from "react";
 import {
   adjustDurationSegment,
   durationTotalSeconds,
   padDurationSegment,
   setDurationSegment,
   type DurationSegment,
+  installInputModality,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/duration-input.css";
@@ -57,6 +58,10 @@ export function DurationInput({
   onChange,
 }: DurationInputProps) {
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
   const idBase = useId();
 
   const [uncontrolled, setUncontrolled] = useState({

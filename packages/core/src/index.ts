@@ -151,6 +151,12 @@ export {
 } from "./model-connection";
 
 export { getFocusableElements, trapFocusKeydown } from "./dom/focus";
+export {
+  getInputModality,
+  installInputModality,
+  INPUT_MODALITY_ATTR,
+  type InputModality,
+} from "./dom/input-modality";
 
 export {
   disclosureTransition,

@@ -1,7 +1,8 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/token-input.css";
-  import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-core";
+  import { installInputModality, mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-core";
   import type { HTMLInputAttributes } from "svelte/elements";
+  import { onMount } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
   import { default as Pill } from "./Pill.svelte";
@@ -59,6 +60,10 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
 
   let inputValue = $state("");
   let inputElement = $state<HTMLInputElement | null>(null);

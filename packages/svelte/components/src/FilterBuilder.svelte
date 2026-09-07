@@ -9,8 +9,8 @@
   // clause pills — single CSS source, no visual fork. The pills render inline in
   // the trigger block rather than via the SelectionSummary section component.
   import "@inflatable-cookie/poodle-core/styles/selection-summary.css";
-  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
-  import { tick } from "svelte";
+  import { installInputModality, layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
+  import { onMount, tick } from "svelte";
 
   import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
@@ -81,6 +81,10 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+
+  onMount(() => {
+    installInputModality();
+  });
   const panelId = `poodle-filter-builder-${++nextFilterBuilderId}`;
 
   let open = $state(false);

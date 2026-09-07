@@ -1,7 +1,7 @@
 # NumberInput
 
 Status: active — g16.030 value/draft/mounted parity on worker PR; awaiting review/merge
-Updated: 2026-08-29
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -214,8 +214,10 @@ not turn the committed value back into a string union.
 - `describedBy` maps to `aria-describedby`.
 - Stepper buttons are labelled Increment and Decrement and are disabled at
   bounds, while read-only, or while the whole component is disabled.
-- The field owns one focus ring. Stepper focus must not draw a second competing
-  control ring.
+- The field owns one keyboard-gated focus ring
+  (`:root[data-poodle-input-modality="keyboard"] .poodle-number-input__field:focus-within`).
+  Pointer focus paints none of that treatment. Stepper focus must not draw a
+  second competing control ring.
 - GPUI exposes the editable node as `SpinButton`, projects current value and
   finite bounds, and routes real text/key/focus dispatch through the node
   backend.

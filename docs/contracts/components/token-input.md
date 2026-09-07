@@ -1,7 +1,7 @@
 # Token Input
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-07
 
 ## 1. Purpose
 
@@ -118,7 +118,7 @@ listener is local focus routing.
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | resting | neutral field chrome with wrapped tokens and draft input |
-| focus | focus within live input | border, fill, and shadow switch to focus treatment |
+| focus | keyboard focus within the live input (`:root[data-poodle-input-modality="keyboard"]`) | border, fill, and shadow switch to the focus treatment together |
 | disabled | `disabled=true` | opacity reduced, input disabled, remove buttons hidden |
 | read-only | `readOnly=true` | input remains non-editable, remove buttons hidden |
 | empty | `values=[]` and empty draft | only placeholder input is visible |
@@ -172,6 +172,18 @@ listener is local focus routing.
 - root fills available width by default and shell clicks focus the draft input
   when editable
 - token text must wrap safely inside narrow widths without forcing layout overflow
+- keyboard focus within the composer gates the whole focus treatment (border,
+  fill, shadow) on `:root[data-poodle-input-modality="keyboard"]`; pointer
+  focus keeps the resting chrome
+
+### Root — keyboard focus within
+
+| Property | Value |
+|----------|-------|
+| selector | `:root[data-poodle-input-modality="keyboard"] .poodle-token-input:focus-within` |
+| `border-color` | `var(--poodle-token-input-border-focus)` |
+| `background` | `var(--poodle-token-input-fill-focus)` |
+| `box-shadow` | `var(--poodle-token-input-shadow-focus)` |
 
 ## 8a. Jetstream Notes
 

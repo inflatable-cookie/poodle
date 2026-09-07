@@ -1,5 +1,5 @@
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
-import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-core";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { installInputModality, mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/token-input.css";
 
@@ -64,6 +64,10 @@ export function TokenInput({
   onTokenReject,
 }: TokenInputProps) {
   const uiPresentation = useUiPresentation();
+
+  useEffect(() => {
+    installInputModality();
+  }, []);
 
   const [inputValue, setInputValue] = useState("");
   const [uncontrolledValues, setUncontrolledValues] = useState<string[]>(defaultValues);
