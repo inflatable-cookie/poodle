@@ -1,6 +1,6 @@
 # g17.002 — Web Focus Rings Follow Input Modality
 
-Status: ready
+Status: complete — merged in PR #228 at `365feb7dcebcc2e2db33e97d0bb6b3581231fab7` on 2026-09-07
 Type: presentation rule + shared web helper — no component API change
 Opened: 2026-09-07
 Depends on: none

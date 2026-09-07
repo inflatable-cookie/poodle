@@ -35,7 +35,7 @@ to GPUI; real parity switches a bunch of apps, Nucleus first.
 1. [001 — Nucleus V1 visual receipts](001-nucleus-v1-visual-receipts.md) —
    held; ready when the lab's first validated cohort bundle exists
 2. [002 — Web focus rings follow input modality](002-web-focus-ring-input-modality.md)
-   — ready; operator-reported TokenInput composer ring on mouse focus
+   — complete; merged in PR #228, removing pointer-painted composite focus treatments while preserving keyboard focus recipes
 
 Planned, not yet compiled (each becomes a card only after Chatterbox
 promotion; order is the intended sequence):

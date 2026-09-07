@@ -7,7 +7,7 @@ Updated: 2026-09-06
 - `g17`
   - Status: active; operator-led planning slate opened 2026-09-06
   - Range: `001` held (Nucleus V1 visual receipts, rehomed from `g16.123`);
-    no ready card
+    `002` complete in PR #228; no ready card
   - Aim: finish the Nucleus switch evidence (V1, V2, M2, later A2) and put
     the switch decision in front of the operator on receipts.
   - Ready frontier: `dispatch.md`.
