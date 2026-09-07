@@ -1703,3 +1703,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   can therefore split one run across root and package `target/` trees. Use an
   absolute output path for direct re-emission, or let the task honor an
   explicit caller override. Surface: Effigy task env and A1 receipt runner.
+- 2026-09-07 — `file:`-linked consumers serve `packages/core/dist` and
+  `packages/svelte/components/dist`, so a Poodle pull that adds an export
+  (g17.002 `installInputModality`) throws "doesn't provide an export named"
+  in the app until `effigy core:build` and `effigy svelte:package` rerun.
+  Nothing in the pull path rebuilds. Candidate: one `web:dist` selector plus
+  a README line for linked consumers; not a card.
