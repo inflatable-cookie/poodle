@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-08 (revision 26: g17.003 merged; frontier empty)
+Updated: 2026-09-08 (revision 27: g17.004 promoted)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -20,13 +20,23 @@ card or triage note says.
 
 ## Ready frontier
 
-Empty. `g17.003` merged in PR #230 at
-`583aa173935dd66ea0d8bd17196115f5b211a01b` and is closed out in the integration
-checkout.
+### `g17.004` — GPUI cohort programmatic append replay
 
-The lab repository's queue-managed `g01.006` thread remains blocked after zero
-records were admitted. Its Lab matcher repair can finish independently; its
-next foreground capture waits for adoption of the merged `g17.003` proof.
+- Card: `g17/004-gpui-cohort-programmatic-append.md`
+- Handoff: `../handoffs/20260908-g17-004-gpui-cohort-programmatic-append.md`
+- Readiness: ready; operator approved full completion on 2026-09-08
+- Prerequisite: `g17.003` complete at `583aa173935dd66ea0d8bd17196115f5b211a01b`
+- Completion: parser/replay regression, headless checks, windowless build,
+  execution log, Lab adoption request, one PR, independent review, merge,
+  closeout
+- Owned paths: card-defined cohort capture implementation, focused tests, log,
+  and Lab adoption request; shared roadmap surfaces reserved for closeout
+- Concurrent siblings: none
+- Serial edge: merge → resume existing Lab `g01.006`; never replace that task
+- Capability: general
+- Acceptance: card review oracle plus exact-head independent PR review
+- Stop: public API change, weakened capture gate, or windowed execution
+- Escalation: Chatterbox
 
 ## Held lanes (not dispatchable)
 

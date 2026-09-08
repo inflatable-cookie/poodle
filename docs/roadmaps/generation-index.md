@@ -8,12 +8,12 @@ Updated: 2026-09-08
   - Status: active; operator-led planning slate opened 2026-09-06
   - Range: `001` held (Nucleus V1 visual receipts, rehomed from `g16.123`);
     `002` complete in PR #228; `003` complete in PR #230 at
-    `583aa173935dd66ea0d8bd17196115f5b211a01b`
+    `583aa173935dd66ea0d8bd17196115f5b211a01b`; `004` ready
   - Aim: finish the Nucleus switch evidence (V1, V2, M2, later A2) and put
     the switch decision in front of the operator on receipts.
   - Ready frontier: `dispatch.md`.
-  - Next move: Lab adoption of the merged `003` proof and `g01.006` cohort
-    batch → validated bundle → `001` ready.
+  - Next move: `004` GPUI replay repair → existing Lab `g01.006` cohort batch
+    → validated bundle → `001` ready.
 
 ## Latest Completed Track
 

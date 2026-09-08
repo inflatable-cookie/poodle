@@ -1,7 +1,7 @@
 # g17 — Nucleus Switch Path
 
 Status: active — opened 2026-09-06 at the g16 rollover; `001` held, `002`
-complete, `003` complete; the frontier is `../dispatch.md`
+complete, `003` complete, `004` ready; the frontier is `../dispatch.md`
 Posture: operator-led planning slate with a fixed programme goal
 Opened: 2026-09-06
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -38,6 +38,8 @@ to GPUI; real parity switches a bunch of apps, Nucleus first.
    — complete; merged in PR #228, removing pointer-painted composite focus treatments while preserving keyboard focus recipes
 3. [003 — Background-safe non-activation proof](003-background-safe-nonactivation-proof.md)
    — complete; merged in PR #230 at `583aa173935dd66ea0d8bd17196115f5b211a01b`; unrelated operator foreground transitions are admissible while native self-activation still fails closed
+4. [004 — GPUI cohort programmatic append replay](004-gpui-cohort-programmatic-append.md)
+   — ready; closes the stale Rust window-capture action parser exposed by the Lab run after 96/174 captures
 
 Planned, not yet compiled (each becomes a card only after Chatterbox
 promotion; order is the intended sequence):
@@ -85,7 +87,6 @@ promotion; order is the intended sequence):
 
 ## Next Task
 
-Resume the existing queue-managed Lab `g01.006` thread. Adopt Poodle merge
-commit `583aa173935dd66ea0d8bd17196115f5b211a01b`, correct Lab's external
-`ForegroundWatch`, then pause for one separately authorized cohort capture.
-Resume `001` readiness once that cohort bundle validates.
+Dispatch `004`. After merge, repin and resume the existing queue-managed Lab
+`g01.006` thread for its full cohort capture. Resume `001` readiness once that
+bundle validates.
