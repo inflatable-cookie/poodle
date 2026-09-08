@@ -3,9 +3,11 @@
 //! A cohort scene is built from the same shared scenario file used by the A1
 //! GPUI proof. The node is rendered through `poodle_render` and the GPUI node
 //! backend, then the scenario's pointer/key actions are posted through the
-//! real window event queue before the non-activating transport captures it.
+//! real window event queue and its closed programmatic appends are applied to
+//! the cohort host before the non-activating transport captures it.
 //! This module owns no Nucleus data: the scenario props are the complete
-//! Poodle fixture input.
+//! Poodle fixture input, and host state only replays what the declared
+//! actions change.
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -18,7 +20,9 @@ use gpui::{
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_plan::AgentPlanStatus;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
-use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, TranscriptRole};
+use poodle_headless::agent_transcript::{
+    TranscriptActivity, TranscriptItem, TranscriptMessage, TranscriptRole,
+};
 use poodle_node::{Node, NodeRole};
 use poodle_render::{
     AgentChatInputHandlers, AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
@@ -222,6 +226,10 @@ struct Exclusion {
 enum Action {
     PointerActivate { target: Target },
     Key { target: Target, key: String },
+    /// Declared after-actions append for the AgentTranscript host. The item
+    /// stays a raw scenario value until replay validates it through the
+    /// renderer's closed transcript mapping.
+    ProgrammaticAppend { item: Value },
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -493,6 +501,16 @@ fn initial_state(scenario: &Scenario) -> HostState {
             .or_else(|| scenario.props["defaultValue"].as_str())
             .unwrap_or("")
             .to_owned(),
+        transcript_items: scenario.props["items"].as_array().map_or_else(
+            || {
+                assert!(
+                    scenario.component != "AgentTranscript",
+                    "AgentTranscript declares no transcript items in its props"
+                );
+                Vec::new()
+            },
+            |items| items.iter().cloned().collect(),
+        ),
     }
 }
 
@@ -510,6 +528,10 @@ struct HostState {
     detail_open: bool,
     callout_dismissed: bool,
     radio_value: String,
+    /// The AgentTranscript items projected from the scenario props. A closed
+    /// `programmatic_append` replay pushes the declared item onto this list;
+    /// every other capture state reads these items unchanged.
+    transcript_items: Vec<Value>,
 }
 
 struct CohortHost {
@@ -662,7 +684,7 @@ fn build_node(host: &Arc<CohortHost>) -> Node {
             node.runtime_id = Some("cohort-status-indicator".into());
             node
         }
-        "AgentTranscript" => build_agent_transcript(scenario, &ctx),
+        "AgentTranscript" => build_agent_transcript(host, &state, &ctx),
         "AgentQuestion" => build_agent_question(host, &ctx, &state),
         "ModelPicker" => build_model_picker(host, &ctx, &state),
         "AgentChatInput" => poodle_render::agent_chat_input(
@@ -749,30 +771,59 @@ fn build_agent_plan(host: &Arc<CohortHost>, ctx: &RenderContext<'_>, state: &Hos
     )
 }
 
-fn build_agent_transcript(scenario: &Scenario, ctx: &RenderContext<'_>) -> Node {
-    let items = scenario.props["items"]
-        .as_array()
-        .expect("transcript items")
-        .iter()
-        .map(|item| match item["kind"].as_str() {
-            Some("message") => TranscriptItem::Message(TranscriptMessage {
-                id: string(item, "id"),
-                role: Some(match string(item, "role").as_str() {
-                    "user" => TranscriptRole::User,
-                    "assistant" => TranscriptRole::Assistant,
-                    other => panic!("unknown transcript role `{other}`"),
-                }),
-                markdown: string(item, "markdown"),
+/// The closed scenario-value to transcript-item mapping shared by the
+/// AgentTranscript renderer and the `programmatic_append` replay. A message
+/// must carry an id, a known role, and markdown; an activity must carry an
+/// id and a label. Unknown item kinds and unknown roles are errors, never
+/// silently skipped items.
+fn transcript_item(item: &Value) -> Result<TranscriptItem> {
+    let Some(id) = item["id"].as_str() else {
+        bail!("transcript item is missing its id");
+    };
+    match item["kind"].as_str() {
+        Some("message") => {
+            let role = match item["role"].as_str() {
+                Some("user") => TranscriptRole::User,
+                Some("assistant") => TranscriptRole::Assistant,
+                Some(other) => bail!("unknown transcript message role `{other}`"),
+                None => bail!("transcript message item is missing its role"),
+            };
+            let Some(markdown) = item["markdown"].as_str() else {
+                bail!("transcript message item is missing its markdown");
+            };
+            Ok(TranscriptItem::Message(TranscriptMessage {
+                id: id.to_owned(),
+                role: Some(role),
+                markdown: markdown.to_owned(),
                 ..Default::default()
-            }),
-            Some("activity") => {
-                TranscriptItem::Activity(poodle_headless::agent_transcript::TranscriptActivity {
-                    id: string(item, "id"),
-                    label: string(item, "label"),
-                    spinning: item["spinning"].as_bool(),
-                })
-            }
-            other => panic!("unknown transcript item kind {other:?}"),
+            }))
+        }
+        Some("activity") => {
+            let Some(label) = item["label"].as_str() else {
+                bail!("transcript activity item is missing its label");
+            };
+            Ok(TranscriptItem::Activity(TranscriptActivity {
+                id: id.to_owned(),
+                label: label.to_owned(),
+                spinning: item["spinning"].as_bool(),
+            }))
+        }
+        other => bail!("unknown transcript item kind {other:?}"),
+    }
+}
+
+fn build_agent_transcript(
+    host: &Arc<CohortHost>,
+    state: &HostState,
+    ctx: &RenderContext<'_>,
+) -> Node {
+    let scenario = &host.scenario;
+    let items = state
+        .transcript_items
+        .iter()
+        .map(|item| {
+            transcript_item(item)
+                .unwrap_or_else(|error| panic!("transcript item is malformed: {error:#}"))
         })
         .collect();
     let spec = AgentTranscriptSpec::new(items)
@@ -1396,6 +1447,29 @@ fn find_target(node: &Node, target: &Target) -> Option<(String, gpui::Bounds<gpu
         .find_map(|child| find_target(child, target))
 }
 
+/// Apply the closed `programmatic_append` after-action to the cohort host
+/// exactly once. Fails closed when the action is attached to any component
+/// other than AgentTranscript, or when the declared item cannot be mapped
+/// through the same closed transcript mapping the renderer uses. Nothing is
+/// mutated until the item has been validated, and the caller remounts after
+/// a successful append so the next painted frames show the declared item.
+fn apply_programmatic_append(host: &Arc<CohortHost>, item: &Value) -> Result<()> {
+    if host.scenario.component != "AgentTranscript" {
+        bail!(
+            "programmatic_append is only supported by the AgentTranscript cohort host, not the {} host",
+            host.scenario.component
+        );
+    }
+    transcript_item(item)
+        .with_context(|| "programmatic_append declared an item the renderer cannot map")?;
+    host.state
+        .lock()
+        .expect("cohort transcript state")
+        .transcript_items
+        .push(item.clone());
+    Ok(())
+}
+
 #[derive(Clone)]
 enum ReplayPhase {
     Idle,
@@ -1433,24 +1507,31 @@ impl ReplayController {
                 let Some(action) = self.actions.get(self.next) else {
                     return Ok(transport::Settled::Ready);
                 };
-                let target = match action {
-                    Action::PointerActivate { target } | Action::Key { target, .. } => target,
-                };
-                let (id, bounds) =
-                    find_target(&host.mounted.lock().expect("cohort mount lock"), target)
-                        .with_context(|| {
-                            format!("resolve cohort action target {:?}", target.name)
-                        })?;
-                let position = bounds.center();
                 match action {
-                    Action::PointerActivate { .. } => {
-                        post_mouse_event(window, MouseEvent::Moved, position);
-                        post_mouse_event(window, MouseEvent::Down, position);
-                        self.phase = ReplayPhase::PointerRelease { position };
+                    Action::ProgrammaticAppend { item } => {
+                        apply_programmatic_append(host, item)?;
+                        remount(host);
+                        self.phase = ReplayPhase::Wait { frames: 2 };
                     }
-                    Action::Key { key, .. } => {
-                        poodle_gpui_node_backend::request_focus(&id);
-                        self.phase = ReplayPhase::KeySend { key: key.clone() };
+                    Action::PointerActivate { target } | Action::Key { target, .. } => {
+                        let (id, bounds) =
+                            find_target(&host.mounted.lock().expect("cohort mount lock"), target)
+                                .with_context(|| {
+                                    format!("resolve cohort action target {:?}", target.name)
+                                })?;
+                        let position = bounds.center();
+                        match action {
+                            Action::PointerActivate { .. } => {
+                                post_mouse_event(window, MouseEvent::Moved, position);
+                                post_mouse_event(window, MouseEvent::Down, position);
+                                self.phase = ReplayPhase::PointerRelease { position };
+                            }
+                            Action::Key { key, .. } => {
+                                poodle_gpui_node_backend::request_focus(&id);
+                                self.phase = ReplayPhase::KeySend { key: key.clone() };
+                            }
+                            Action::ProgrammaticAppend { .. } => unreachable!(),
+                        }
                     }
                 }
                 Ok(transport::Settled::Wait)
@@ -1840,5 +1921,170 @@ mod tests {
                 entry.scenario_id
             );
         }
+    }
+
+    fn transcript_host(scenario_id: &str) -> Arc<CohortHost> {
+        let entry = registry_entry(scenario_id).expect("registered cohort scenario");
+        let (scenario, _) = load_scenario(entry).expect("registered scenario loads");
+        Arc::new(CohortHost {
+            state: Mutex::new(initial_state(&scenario)),
+            scenario,
+            theme: ThemePreset::Eclipse.build_theme(),
+            mounted: Mutex::new(Node::container()),
+        })
+    }
+
+    fn transcript_item_ids(host: &Arc<CohortHost>) -> Vec<String> {
+        host.state
+            .lock()
+            .expect("cohort state lock")
+            .transcript_items
+            .iter()
+            .filter_map(|item| item["id"].as_str().map(str::to_owned))
+            .collect()
+    }
+
+    #[test]
+    fn agent_transcript_scenario_parses_with_the_declared_programmatic_append() {
+        let host = transcript_host("nucleus.agent.agent-transcript");
+        assert_eq!(host.scenario.component, "AgentTranscript");
+        let actions = &host.scenario.actions;
+        assert_eq!(actions.len(), 1);
+        let item = match &actions[0] {
+            Action::ProgrammaticAppend { item } => item,
+            other => panic!("expected the declared append action, parsed {other:?}"),
+        };
+        assert_eq!(item["kind"], "message");
+        assert_eq!(item["id"], "appended");
+        assert_eq!(item["role"], "assistant");
+        assert_eq!(item["markdown"], "Appended without moving focus");
+    }
+
+    #[test]
+    fn initial_transcript_projection_is_scenario_props_only() {
+        let host = transcript_host("nucleus.agent.agent-transcript");
+        let props_items = host.scenario.props["items"]
+            .as_array()
+            .expect("declared transcript items");
+        assert_eq!(
+            host.state
+                .lock()
+                .expect("cohort state lock")
+                .transcript_items
+                .iter()
+                .collect::<Vec<_>>(),
+            props_items.iter().collect::<Vec<_>>()
+        );
+        assert_eq!(transcript_item_ids(&host), vec!["hello", "done"]);
+        remount(&host);
+        let texts = host
+            .mounted
+            .lock()
+            .expect("cohort mount lock")
+            .texts()
+            .iter()
+            .map(|text| (*text).to_owned())
+            .collect::<Vec<_>>();
+        assert!(
+            !texts.iter().any(|text| text.contains("Appended")),
+            "the declared append leaked into the initial projection: {texts:?}"
+        );
+    }
+
+    #[test]
+    fn one_programmatic_append_appends_the_declared_item_exactly_once() {
+        let host = transcript_host("nucleus.agent.agent-transcript");
+        let item = match &host.scenario.actions[0] {
+            Action::ProgrammaticAppend { item } => item.clone(),
+            other => panic!("expected the declared append action, parsed {other:?}"),
+        };
+        apply_programmatic_append(&host, &item).expect("declared append applies");
+        assert_eq!(
+            transcript_item_ids(&host),
+            vec!["hello", "done", "appended"]
+        );
+        let mapped = transcript_item(&item).expect("declared item maps through the renderer");
+        assert!(matches!(
+            mapped,
+            TranscriptItem::Message(TranscriptMessage { role: Some(TranscriptRole::Assistant), .. })
+        ));
+        remount(&host);
+        let texts = host
+            .mounted
+            .lock()
+            .expect("cohort mount lock")
+            .texts()
+            .iter()
+            .map(|text| (*text).to_owned())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            texts
+                .iter()
+                .filter(|text| text.contains("Appended without moving focus"))
+                .count(),
+            1,
+            "the appended message must render exactly once after remount: {texts:?}"
+        );
+    }
+
+    #[test]
+    fn programmatic_append_on_another_component_fails_closed() {
+        let host = transcript_host("nucleus.shell.button");
+        assert_ne!(host.scenario.component, "AgentTranscript");
+        let item = serde_json::json!({
+            "kind": "message",
+            "id": "appended",
+            "role": "assistant",
+            "markdown": "must not appear"
+        });
+        let error = apply_programmatic_append(&host, &item)
+            .expect_err("append on a non-transcript host must be refused");
+        assert!(
+            error.to_string().contains("AgentTranscript"),
+            "refusal must name the only supported host: {error:#}"
+        );
+        assert!(
+            host.state
+                .lock()
+                .expect("cohort state lock")
+                .transcript_items
+                .is_empty(),
+            "a refused append must not touch host state"
+        );
+    }
+
+    #[test]
+    fn malformed_declared_items_are_refused_before_append() {
+        let host = transcript_host("nucleus.agent.agent-transcript");
+        let malformed = [
+            serde_json::json!({ "kind": "widget", "id": "x" }),
+            serde_json::json!({ "kind": "message", "id": "x" }),
+            serde_json::json!({ "kind": "message", "id": "x", "role": "system", "markdown": "y" }),
+            serde_json::json!({ "kind": "message", "id": "x", "role": "assistant" }),
+            serde_json::json!({ "kind": "activity", "id": "x" }),
+        ];
+        for item in malformed {
+            apply_programmatic_append(&host, &item)
+                .expect_err("malformed declared items must be refused");
+            assert_eq!(
+                transcript_item_ids(&host),
+                vec!["hello", "done"],
+                "a refused item must not be appended: {item}"
+            );
+        }
+    }
+
+    #[test]
+    fn unknown_action_types_and_extra_fields_stay_rejected() {
+        let unknown_type = serde_json::from_str::<Action>(
+            r#"{"type":"launch_missiles","target":{"role":"button"}}"#,
+        );
+        assert!(unknown_type.is_err(), "unknown action types stay closed");
+        let extra_field = serde_json::from_str::<Action>(
+            r#"{"type":"programmatic_append","item":{"kind":"message"},"extra":1}"#,
+        );
+        assert!(extra_field.is_err(), "extra action fields stay closed");
+        let no_item = serde_json::from_str::<Action>(r#"{"type":"programmatic_append"}"#);
+        assert!(no_item.is_err(), "the append variant requires its item");
     }
 }
