@@ -1,11 +1,11 @@
 //! The activation boundary, pinned as a source check.
 //!
-//! The capture contract's central claim — "opening the capture window does not
-//! change the frontmost application or key window" — cannot be proved by
-//! running this binary in a worker, because running it needs a window server
-//! and Screen Recording permission. It CAN be proved structurally: if no
-//! focus-taking API appears anywhere in the capture target's code, no code
-//! path can take focus.
+//! The capture contract's central claim — "opening the capture window never
+//! makes the capture process the frontmost application or its window key" —
+//! cannot be proved by running this binary in a worker, because running it
+//! needs a window server and Screen Recording permission. It CAN be proved
+//! structurally: if no focus-taking API appears anywhere in the capture
+//! target's code, no code path can take focus.
 //!
 //! So this module reads its sibling sources back and fails if any code line
 //! names an activation, window-raising, desktop-capture, region-capture, or
@@ -15,9 +15,10 @@
 //! they refuse to do.
 //!
 //! Runtime evidence still exists and is stronger where it applies: every
-//! receipt carries the run's own frontmost-application samples, and a run that
-//! observed a change publishes nothing. This check covers the paths a single
-//! run would not exercise.
+//! receipt carries the run's own frontmost-process samples, and a run in
+//! which the capture process's own pid was frontmost publishes nothing.
+//! Unrelated operator foreground transitions are admissible. This check
+//! covers the paths a single run would not exercise.
 
 /// Every source file that makes up the capture target.
 pub const CAPTURE_SOURCES: &[(&str, &str)] = &[

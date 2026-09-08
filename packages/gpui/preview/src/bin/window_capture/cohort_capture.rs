@@ -48,7 +48,11 @@ use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 use crate::{normalize_output_path, publish_pair};
 
 const SCENARIO_SCHEMA: &str = "poodle.g16-nucleus-a11y-scenario.v1";
-const RECEIPT_SCHEMA: &str = "poodle.cohort-visual-capture.v1";
+/// Versioned receipt schema identity. `v2` (g17.003) proves the capture
+/// process never became frontmost: the foreground evidence names the
+/// capturer pid and carries pid-bearing samples, and unrelated operator
+/// transitions are admissible.
+const RECEIPT_SCHEMA: &str = "poodle.cohort-visual-capture.v2";
 const SCENE_PADDING: f32 = 16.0;
 const INSTANCE: &str = "cohort";
 const POODLE_SOURCE_ID: &str = concat!("poodle-gpui-preview@", env!("CARGO_PKG_VERSION"));
@@ -1615,6 +1619,7 @@ struct CohortReceipt {
     gpui_version: &'static str,
     transport: &'static str,
     focus: bool,
+    /// The run's own proof that the capture process never became frontmost.
     foreground: transport::ForegroundEvidence,
     permission: &'static str,
     logical_viewport: [u32; 2],

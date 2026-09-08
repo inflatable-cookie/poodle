@@ -12,8 +12,11 @@
 //! - the window is found by this process's own pid and captured with
 //!   `screencapture -x -o -l <window-id>` — one window id, never the desktop,
 //!   never a region;
-//! - the frontmost application is sampled for the whole run, and a run during
-//!   which it changed fails rather than publishing evidence.
+//! - the frontmost process is sampled for the whole run, and a run during
+//!   which THIS process ever became frontmost fails rather than publishing
+//!   evidence. Unrelated foreground transitions — the operator switching
+//!   applications while the batch runs — are admissible, stay recorded, and
+//!   never fail the run.
 //!
 //! It is windowed, not offscreen and not headless. It needs a macOS window
 //! server and Screen Recording permission, so it is an explicit operator
@@ -74,18 +77,18 @@ const MIN_SETTLE: Duration = Duration::from_millis(900);
 /// Hard ceiling on waiting for a settled frame.
 const SETTLE_DEADLINE: Duration = Duration::from_secs(20);
 
-/// How often the frontmost application is sampled.
+/// How often the frontmost process is sampled.
 const FOREGROUND_SAMPLE_INTERVAL: Duration = Duration::from_millis(50);
 
 /// How often the settle chain is polled while the run loop paints.
 const SETTLE_POLL: Duration = Duration::from_millis(10);
 
-/// Fewest successful frontmost-application readings a run must have before
-/// its evidence supports the claim. The monitor samples every
-/// `FOREGROUND_SAMPLE_INTERVAL`, and every capture waits at least
-/// `MIN_SETTLE`, so a healthy run records several times this many. A run that
-/// somehow recorded fewer has not watched the foreground long enough to say
-/// anything about it.
+/// Fewest successful frontmost-process readings a run must have before its
+/// evidence supports the claim that the capture process never became
+/// frontmost. The monitor samples every `FOREGROUND_SAMPLE_INTERVAL`, and
+/// every capture waits at least `MIN_SETTLE`, so a healthy run records
+/// several times this many. A run that somehow recorded fewer has not
+/// watched the foreground long enough to say anything about it.
 pub const MIN_FOREGROUND_SAMPLES: u64 = 8;
 
 /// What a scene's frame hook reports about its own readiness.
@@ -114,63 +117,120 @@ pub fn settle_after(frames: u32) -> FrameHook {
     })
 }
 
-/// Whether a run's frontmost-application evidence supports the capture
-/// contract's claim.
+/// One successful reading of the frontmost process.
 ///
-/// Three states, not a boolean, because "did not change" and "could not tell"
-/// are different answers and only one of them is proof.
+/// Both halves ride on the receipt: the identity is the auditable "which
+/// application", and the pid is what the self test compares. The capture
+/// process's own pid rides as `ForegroundEvidence::capturer_pid`, so a
+/// reader can tell exactly which process the proof is about and re-derive
+/// the verdict from these fields instead of taking the writer's word.
+#[derive(Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub struct ForegroundSample {
+    /// The bundle identifier when the frontmost process has one, else its
+    /// localized name — whatever AppKit itself reports, never a guessed
+    /// bundle for a bare process.
+    pub identity: String,
+    /// The frontmost process id. Equality against the capture process's own
+    /// pid is the self test; no bundle naming can hide a self-activation.
+    pub pid: u32,
+}
+
+/// Whether a run's frontmost-application evidence supports the capture
+/// contract's claim: that this capture process never activated itself.
+///
+/// Three states, not a boolean, because "never frontmost" and "could not
+/// tell" are different answers and only one of them is proof. Unrelated
+/// foreground transitions — the operator switching applications while the
+/// batch runs — are admissible evidence and never fail the run.
 #[derive(Serialize, Clone, Copy, PartialEq, Eq, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum ForegroundVerdict {
-    /// A baseline was read, enough samples were taken, and every one of them
-    /// was the baseline. This is the only publishable verdict.
+    /// A baseline was read, no required read failed, enough samples were
+    /// taken, and the capture process was never frontmost — neither as the
+    /// baseline nor in any later sample. This is the only publishable
+    /// verdict.
     Proved,
-    /// Some other application was frontmost at least once.
-    Changed,
-    /// No baseline, no samples, or too few of them. No evidence is not the
-    /// same as evidence of no change.
+    /// The capture process itself was frontmost at least once — as the
+    /// baseline or in a later sample.
+    SelfFrontmost,
+    /// No baseline, a failed required read, or too few successful samples.
+    /// No evidence is not the same as evidence of no activation.
     Unprovable,
 }
 
-/// What the run observed about the frontmost application, recorded on every
+/// What the run observed about the frontmost process, recorded on every
 /// receipt.
+///
+/// `capturer_pid` names the process under test, and `baseline`/`observed`
+/// carry identity AND pid per reading, so the verdict is re-derivable from
+/// the receipt rather than trusted on the writer's say-so.
 #[derive(Serialize, Clone)]
 pub struct ForegroundEvidence {
-    pub baseline: Option<String>,
-    pub observed: Vec<String>,
+    /// The pid of the capture process itself — the process this proof is
+    /// about. Only this pid can fail the run; every other foreground process
+    /// is the operator's own business.
+    pub capturer_pid: u32,
+    /// The frontmost process BEFORE any window existed. `None` means that
+    /// reading failed (a locked screen or a login window), which is not
+    /// proof of anything.
+    pub baseline: Option<ForegroundSample>,
+    /// Every distinct (identity, pid) frontmost reading of the whole run,
+    /// the baseline included. Unrelated operator transitions legitimately
+    /// appear here and are retained as evidence.
+    pub observed: Vec<ForegroundSample>,
+    /// Successful readings. The baseline counts when it was readable; a tick
+    /// that could not be read never increments this.
     pub samples: u64,
+    /// Ticks on which the frontmost process could not be read at all. Any
+    /// such failure makes the run unprovable — a silent skip would let a run
+    /// claim more watching than it did.
+    pub failed_reads: u64,
     pub verdict: ForegroundVerdict,
 }
 
 #[derive(Default)]
 struct ForegroundState {
-    baseline: Option<String>,
-    observed: BTreeSet<String>,
+    baseline: Option<ForegroundSample>,
+    observed: BTreeSet<ForegroundSample>,
     samples: u64,
+    failed_reads: u64,
 }
 
-/// Samples the frontmost macOS application for the life of the run.
+/// Samples the frontmost macOS process for the life of the run.
 ///
 /// This is the capture contract's own evidence: opening the window must not
-/// change the frontmost application, and a run that cannot prove that must
-/// not publish a PNG.
+/// make THE CAPTURE PROCESS frontmost, and a run that cannot prove that must
+/// not publish a PNG. Unrelated operator transitions do not fail the run;
+/// they are recorded and stay on the receipt.
 pub struct ForegroundMonitor {
     state: Arc<Mutex<ForegroundState>>,
     stop: Arc<AtomicBool>,
+    capturer_pid: u32,
 }
 
 #[cfg(target_os = "macos")]
-fn frontmost_application() -> Option<String> {
+fn frontmost_application() -> Option<ForegroundSample> {
     use objc2_app_kit::NSWorkspace;
     let workspace = NSWorkspace::sharedWorkspace();
     let app = workspace.frontmostApplication()?;
-    app.bundleIdentifier()
+    let identity = app
+        .bundleIdentifier()
         .map(|id| id.to_string())
-        .or_else(|| app.localizedName().map(|name| name.to_string()))
+        .or_else(|| app.localizedName().map(|name| name.to_string()))?;
+    let pid = app.processIdentifier();
+    if pid <= 0 {
+        // AppKit returned no usable pid; a reading without one cannot be
+        // compared against the capture process, so it fails closed.
+        return None;
+    }
+    Some(ForegroundSample {
+        identity,
+        pid: pid as u32,
+    })
 }
 
 #[cfg(not(target_os = "macos"))]
-fn frontmost_application() -> Option<String> {
+fn frontmost_application() -> Option<ForegroundSample> {
     None
 }
 
@@ -178,13 +238,16 @@ impl ForegroundMonitor {
     /// Take the baseline BEFORE any window exists, then sample in the
     /// background for the rest of the run.
     pub fn start() -> Self {
+        let capturer_pid = std::process::id();
         let baseline = frontmost_application();
         let state = Arc::new(Mutex::new(ForegroundState {
             observed: baseline.iter().cloned().collect(),
             // Only a successful reading counts. An unreadable baseline leaves
-            // this at zero, which keeps the verdict `Unprovable` rather than
-            // letting an empty run look like a watched one.
+            // samples at zero and records the failed read, which keeps the
+            // verdict `Unprovable` rather than letting an empty run look like
+            // a watched one.
             samples: u64::from(baseline.is_some()),
+            failed_reads: u64::from(baseline.is_none()),
             baseline,
         }));
         let stop = Arc::new(AtomicBool::new(false));
@@ -192,27 +255,47 @@ impl ForegroundMonitor {
         let thread_stop = Arc::clone(&stop);
         std::thread::spawn(move || {
             while !thread_stop.load(Ordering::Acquire) {
-                if let Some(app) = frontmost_application() {
-                    let mut state = thread_state.lock().expect("foreground state");
-                    state.observed.insert(app);
-                    state.samples += 1;
+                match frontmost_application() {
+                    Some(sample) => {
+                        let mut state = thread_state.lock().expect("foreground state");
+                        state.observed.insert(sample);
+                        state.samples += 1;
+                    }
+                    None => {
+                        // A tick that could not be read is a required reading
+                        // that failed. The run fails closed on it rather than
+                        // quietly watching less than it claims.
+                        thread_state.lock().expect("foreground state").failed_reads += 1;
+                    }
                 }
                 std::thread::sleep(FOREGROUND_SAMPLE_INTERVAL);
             }
         });
-        Self { state, stop }
+        Self {
+            state,
+            stop,
+            capturer_pid,
+        }
     }
 
     /// Snapshot what has been seen so far, without stopping. A batch calls
     /// this once per capture; the samples accumulate across the whole run.
     pub fn evidence(&self) -> ForegroundEvidence {
         let state = self.state.lock().expect("foreground state");
-        let observed: Vec<String> = state.observed.iter().cloned().collect();
+        let observed: Vec<ForegroundSample> = state.observed.iter().cloned().collect();
         ForegroundEvidence {
-            verdict: evaluate_foreground(state.baseline.as_deref(), &observed, state.samples),
+            capturer_pid: self.capturer_pid,
+            verdict: evaluate_foreground(
+                self.capturer_pid,
+                state.baseline.as_ref(),
+                &observed,
+                state.samples,
+                state.failed_reads,
+            ),
             baseline: state.baseline.clone(),
             observed,
             samples: state.samples,
+            failed_reads: state.failed_reads,
         }
     }
 
@@ -225,21 +308,37 @@ impl ForegroundMonitor {
 /// Grade a run's foreground evidence.
 ///
 /// A pure function, so the claim every receipt makes is testable without a
-/// window server. It fails closed in both directions that matter: an
-/// unreadable baseline and a too-short watch are `Unprovable`, never
-/// `Proved`.
+/// window server. The verdict is about the capture process only: every
+/// observed pid is compared against `capturer_pid`, and any other process
+/// coming and going is the operator's own business, retained in `observed`
+/// as evidence. It fails closed in every direction that matters: an
+/// unreadable baseline, a failed required read, and a too-short watch are
+/// `Unprovable`, never `Proved`, while a self-frontmost reading — baseline
+/// or later — is the typed failure `SelfFrontmost` no matter how short the
+/// watch was.
 pub fn evaluate_foreground(
-    baseline: Option<&str>,
-    observed: &[String],
+    capturer_pid: u32,
+    baseline: Option<&ForegroundSample>,
+    observed: &[ForegroundSample],
     samples: u64,
+    failed_reads: u64,
 ) -> ForegroundVerdict {
-    let Some(baseline) = baseline else {
-        // No frontmost application could be read at all — a locked screen or
-        // a login window. The run cannot say what it did or did not disturb.
+    // Self-activation outranks every other finding: if the capture process
+    // WAS frontmost — as the baseline or in any later sample — that is the
+    // answer, even when some other reading failed or the watch was short.
+    if observed.iter().any(|sample| sample.pid == capturer_pid) {
+        return ForegroundVerdict::SelfFrontmost;
+    }
+    if baseline.is_none() {
+        // No frontmost process could be read at all — a locked screen or a
+        // login window. The run cannot say what it did or did not disturb.
         return ForegroundVerdict::Unprovable;
-    };
-    if observed.iter().any(|app| app != baseline) {
-        return ForegroundVerdict::Changed;
+    }
+    if failed_reads > 0 {
+        // A required reading failed somewhere in the run. Failing closed is
+        // the only honest answer: the monitor cannot claim to have watched
+        // every moment it says it watched.
+        return ForegroundVerdict::Unprovable;
     }
     if observed.is_empty() || samples < MIN_FOREGROUND_SAMPLES {
         return ForegroundVerdict::Unprovable;
@@ -447,25 +546,29 @@ async fn capture_one<V: Render>(
     verify_device_size(logical_width, logical_height, device_width, device_height)
         .with_context(|| format!("capture {label}"))?;
 
-    // The focus claim is checked before anything is published: a run that
-    // changed the frontmost application, or that cannot show it did not, is
-    // not evidence.
+    // The non-activation claim is checked before anything is published: a
+    // run in which the capture process itself became frontmost, or that
+    // cannot show it did not, is not evidence. Unrelated operator
+    // transitions are admissible and never fail the run — they are recorded
+    // on the receipt as the run's own evidence.
     let foreground = monitor.evidence();
     match foreground.verdict {
         ForegroundVerdict::Proved => {}
-        ForegroundVerdict::Changed => bail!(
-            "{label}: the capture changed the frontmost application (baseline {:?}, observed \
-             {:?}) — the non-activating contract was violated and nothing was published",
-            foreground.baseline,
-            foreground.observed
+        ForegroundVerdict::SelfFrontmost => bail!(
+            "{label}: the capture process (pid {}) became the frontmost application (baseline \
+             {:?}, observed {:?}) — the non-activating contract was violated and nothing was \
+             published",
+            foreground.capturer_pid, foreground.baseline, foreground.observed
         ),
         ForegroundVerdict::Unprovable => bail!(
-            "{label}: the run cannot prove it left the foreground alone (baseline {:?}, observed \
-             {:?}, {} samples, {MIN_FOREGROUND_SAMPLES} required). No evidence is not the same \
-             as evidence of no change, so nothing was published.",
+            "{label}: the run cannot prove the capture process never became frontmost (baseline \
+             {:?}, observed {:?}, {} successful samples, {MIN_FOREGROUND_SAMPLES} required, {} \
+             failed readings). No evidence is not the same as evidence of no activation, so \
+             nothing was published.",
             foreground.baseline,
             foreground.observed,
-            foreground.samples
+            foreground.samples,
+            foreground.failed_reads
         ),
     }
 
@@ -680,54 +783,120 @@ mod tests {
         assert_eq!(ACCEPTED_SCALE, 2.0);
     }
 
-    fn apps(names: &[&str]) -> Vec<String> {
-        names.iter().map(|n| n.to_string()).collect()
+    fn samples(pairs: &[(&str, u32)]) -> Vec<ForegroundSample> {
+        pairs
+            .iter()
+            .map(|(identity, pid)| ForegroundSample {
+                identity: (*identity).to_string(),
+                pid: *pid,
+            })
+            .collect()
     }
 
+    /// A pid that is never the capture process's own in these tests.
+    const CAPTURER_PID: u32 = 4242;
+    /// Pids for the operator's own applications. None may equal
+    /// `CAPTURER_PID`.
+    const EDITOR_PID: u32 = 100;
+    const BROWSER_PID: u32 = 200;
     const ENOUGH: u64 = MIN_FOREGROUND_SAMPLES;
+
+    fn editor() -> Vec<ForegroundSample> {
+        samples(&[("com.example.editor", EDITOR_PID)])
+    }
 
     #[test]
     fn a_run_that_only_ever_saw_the_baseline_is_proof() {
+        let editor = editor();
         assert_eq!(
             evaluate_foreground(
-                Some("com.example.editor"),
-                &apps(&["com.example.editor"]),
-                ENOUGH
+                CAPTURER_PID,
+                editor.first(),
+                &editor,
+                ENOUGH,
+                0
             ),
             ForegroundVerdict::Proved
         );
     }
 
+    /// g17.003 — the operator stays free. Editor → browser → editor is
+    /// ordinary work, never an activation by the capture process: the run is
+    /// publishable and every transition stays recorded in `observed`.
     #[test]
-    fn any_other_frontmost_application_is_a_change() {
+    fn unrelated_frontmost_transitions_are_admissible_and_retained() {
+        let observed = samples(&[
+            ("com.example.editor", EDITOR_PID),
+            ("com.example.browser", BROWSER_PID),
+            ("com.example.editor", EDITOR_PID),
+        ]);
         assert_eq!(
             evaluate_foreground(
-                Some("com.example.editor"),
-                &apps(&[
-                    "com.example.editor",
-                    "com.inflatablecookie.poodle-window-capture"
-                ]),
-                ENOUGH
+                CAPTURER_PID,
+                observed.first(),
+                &observed,
+                ENOUGH,
+                0
             ),
-            ForegroundVerdict::Changed
+            ForegroundVerdict::Proved
+        );
+        assert_eq!(observed.len(), 3);
+        assert!(
+            observed.iter().all(|sample| sample.pid != CAPTURER_PID),
+            "no observed sample may be the capture process itself"
         );
     }
 
-    /// The blocker this closes: without a baseline the run watched nothing,
-    /// and "nothing observed" must not read as "nothing happened". Both the
-    /// empty and the non-empty case are unprovable, and NEITHER is `Proved`.
+    /// The one transition that is never the operator's: the capture
+    /// process's own pid appearing frontmost. One such sample is a typed
+    /// failure no matter how clean the rest of the run was.
+    #[test]
+    fn a_later_self_frontmost_sample_is_a_typed_failure() {
+        let mut observed = editor();
+        observed.push(ForegroundSample {
+            identity: "poodle-window-capture".to_string(),
+            pid: CAPTURER_PID,
+        });
+        assert_eq!(
+            evaluate_foreground(CAPTURER_PID, editor().first(), &observed, ENOUGH, 0),
+            ForegroundVerdict::SelfFrontmost
+        );
+    }
+
+    /// A capture-process baseline — the capture pid frontmost BEFORE its
+    /// first window — is a typed failure, never proof.
+    #[test]
+    fn a_capture_process_baseline_is_a_typed_failure() {
+        let self_baseline = samples(&[("poodle-window-capture", CAPTURER_PID)]);
+        assert_eq!(
+            evaluate_foreground(
+                CAPTURER_PID,
+                self_baseline.first(),
+                &self_baseline,
+                ENOUGH,
+                0
+            ),
+            ForegroundVerdict::SelfFrontmost
+        );
+    }
+
+    /// The blocker g16.005 closed, unchanged: without a baseline the run
+    /// watched nothing, and "nothing observed" must not read as "nothing
+    /// happened". Both the empty and the non-empty case are unprovable, and
+    /// NEITHER is `Proved`.
     #[test]
     fn an_absent_baseline_is_never_proof() {
         assert_eq!(
-            evaluate_foreground(None, &[], ENOUGH),
+            evaluate_foreground(CAPTURER_PID, None, &[], ENOUGH, 0),
+            ForegroundVerdict::Unprovable
+        );
+        let editor = editor();
+        assert_eq!(
+            evaluate_foreground(CAPTURER_PID, None, &editor, ENOUGH, 0),
             ForegroundVerdict::Unprovable
         );
         assert_eq!(
-            evaluate_foreground(None, &apps(&["com.example.editor"]), ENOUGH),
-            ForegroundVerdict::Unprovable
-        );
-        assert_eq!(
-            evaluate_foreground(None, &[], 0),
+            evaluate_foreground(CAPTURER_PID, None, &[], 0, 0),
             ForegroundVerdict::Unprovable
         );
     }
@@ -737,21 +906,21 @@ mod tests {
     #[test]
     fn too_few_samples_is_never_proof() {
         for samples in 0..MIN_FOREGROUND_SAMPLES {
+            let editor = editor();
             assert_eq!(
-                evaluate_foreground(
-                    Some("com.example.editor"),
-                    &apps(&["com.example.editor"]),
-                    samples
-                ),
+                evaluate_foreground(CAPTURER_PID, editor.first(), &editor, samples, 0),
                 ForegroundVerdict::Unprovable,
                 "{samples} samples must not prove anything"
             );
         }
+        let editor = editor();
         assert_eq!(
             evaluate_foreground(
-                Some("com.example.editor"),
-                &apps(&["com.example.editor"]),
-                MIN_FOREGROUND_SAMPLES
+                CAPTURER_PID,
+                editor.first(),
+                &editor,
+                MIN_FOREGROUND_SAMPLES,
+                0
             ),
             ForegroundVerdict::Proved
         );
@@ -762,18 +931,47 @@ mod tests {
     #[test]
     fn a_baseline_with_no_observations_is_not_proof() {
         assert_eq!(
-            evaluate_foreground(Some("com.example.editor"), &[], ENOUGH),
+            evaluate_foreground(CAPTURER_PID, editor().first(), &[], ENOUGH, 0),
             ForegroundVerdict::Unprovable
         );
     }
 
-    /// A change outranks a short watch: if some other application WAS
-    /// frontmost, that is the finding, not "we could not tell".
+    /// g17.003 fail-closed rule: a tick the monitor could not read is a
+    /// required reading that failed. Even with a clean baseline, plenty of
+    /// samples, and no self-activation, one failed read makes the run
+    /// unprovable — the monitor cannot claim to have watched every moment.
     #[test]
-    fn a_change_is_reported_even_when_the_watch_was_short() {
+    fn a_failed_required_read_is_never_proof() {
+        let editor = editor();
         assert_eq!(
-            evaluate_foreground(Some("a"), &apps(&["a", "b"]), 1),
-            ForegroundVerdict::Changed
+            evaluate_foreground(CAPTURER_PID, editor.first(), &editor, ENOUGH, 1),
+            ForegroundVerdict::Unprovable
+        );
+    }
+
+    /// A self-frontmost reading outranks a short watch: if the capture
+    /// process WAS frontmost, that is the finding, not "we could not tell".
+    /// The same precedence holds against a failed read and an absent
+    /// baseline: self-activation is the answer even when the rest of the
+    /// evidence is damaged.
+    #[test]
+    fn a_self_frontmost_sample_outranks_other_unprovable_causes() {
+        let mut observed = editor();
+        observed.push(ForegroundSample {
+            identity: "poodle-window-capture".to_string(),
+            pid: CAPTURER_PID,
+        });
+        assert_eq!(
+            evaluate_foreground(CAPTURER_PID, editor().first(), &observed, 1, 0),
+            ForegroundVerdict::SelfFrontmost
+        );
+        assert_eq!(
+            evaluate_foreground(CAPTURER_PID, editor().first(), &observed, ENOUGH, 2),
+            ForegroundVerdict::SelfFrontmost
+        );
+        assert_eq!(
+            evaluate_foreground(CAPTURER_PID, None, &observed, ENOUGH, 1),
+            ForegroundVerdict::SelfFrontmost
         );
     }
 
@@ -783,8 +981,47 @@ mod tests {
     fn the_verdict_serialises_as_a_closed_lowercase_string() {
         let json = |v: ForegroundVerdict| serde_json::to_string(&v).expect("verdict serialises");
         assert_eq!(json(ForegroundVerdict::Proved), "\"proved\"");
-        assert_eq!(json(ForegroundVerdict::Changed), "\"changed\"");
+        assert_eq!(json(ForegroundVerdict::SelfFrontmost), "\"selffrontmost\"");
         assert_eq!(json(ForegroundVerdict::Unprovable), "\"unprovable\"");
+    }
+
+    /// The receipt evidence is a closed shape: capturer pid, samples with
+    /// identity AND pid, a failed-read count, and the verdict. Every field
+    /// that makes the non-activation claim re-derivable must serialize under
+    /// its contracted name.
+    #[test]
+    fn the_evidence_serialises_under_the_contracted_names() {
+        let editor = editor();
+        let evidence = ForegroundEvidence {
+            capturer_pid: CAPTURER_PID,
+            baseline: editor.first().cloned(),
+            observed: editor,
+            samples: ENOUGH,
+            failed_reads: 0,
+            verdict: ForegroundVerdict::Proved,
+        };
+        let json = serde_json::to_value(&evidence).expect("evidence serialises");
+        let object = json.as_object().expect("evidence serialises as an object");
+        for key in [
+            "capturer_pid",
+            "baseline",
+            "observed",
+            "samples",
+            "failed_reads",
+            "verdict",
+        ] {
+            assert!(object.contains_key(key), "missing receipt field '{key}'");
+        }
+        let baseline = object["baseline"].as_object().expect("baseline is an object");
+        for key in ["identity", "pid"] {
+            assert!(
+                baseline.contains_key(key),
+                "missing baseline field '{key}'"
+            );
+        }
+        assert_eq!(object["capturer_pid"], CAPTURER_PID);
+        assert_eq!(object["failed_reads"], 0);
+        assert_eq!(object["verdict"], "proved");
     }
 
     /// A 1× display, or a window frame bigger than its content, must fail

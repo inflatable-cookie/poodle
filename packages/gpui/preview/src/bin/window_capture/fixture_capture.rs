@@ -5,7 +5,7 @@
 //! the production path — `ButtonSpec` → `poodle_render::button` →
 //! `poodle_gpui_node_backend::to_gpui` — into one real GPUI window opened
 //! with `focus: false`, and writes the captured PNG plus a typed
-//! `poodle.button-visual-capture.v2` receipt. The receipt carries the declared
+//! `poodle.button-visual-capture.v3` receipt. The receipt carries the declared
 //! landmark bounds (read back from the real paint pass, never recomputed from
 //! spec data) and the five visual roles as resolved on the node tree.
 //!
@@ -44,9 +44,13 @@ use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 use crate::publish_pair;
 
 /// Versioned fixture receipt schema identity, shared with the TypeScript
-/// verifier (`test/visual/button-comparison/receipt.ts`). `v2` is the
-/// windowed, non-activating transport; `v1` was the fork-only readback.
-const FIXTURE_RECEIPT_SCHEMA: &str = "poodle.button-visual-capture.v2";
+/// verifier (`test/visual/button-comparison/receipt.ts`). `v3` (g17.003)
+/// proves the capture process never became frontmost: the foreground
+/// evidence names the capturer pid and carries pid-bearing samples, and
+/// unrelated operator transitions are admissible. `v2` was the windowed,
+/// non-activating transport under the whole-foreground-unchanged proof;
+/// `v1` was the fork-only readback.
+const FIXTURE_RECEIPT_SCHEMA: &str = "poodle.button-visual-capture.v3";
 
 /// The scene's uniform padding: the Button's border-box origin lands at
 /// logical (16, 16), the same placement the web fixture hosts use.
@@ -484,7 +488,9 @@ struct CaptureEnvironment {
     gpui_source: &'static str,
     #[serde(rename = "gpuiVersion")]
     gpui_version: &'static str,
-    /// The run's own proof that capturing this fixture did not take focus.
+    /// The run's own proof that the capture process never became frontmost
+    /// while capturing this fixture, with every observed frontmost process
+    /// retained as evidence.
     foreground: transport::ForegroundEvidence,
 }
 
