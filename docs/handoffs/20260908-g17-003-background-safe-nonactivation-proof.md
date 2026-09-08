@@ -10,6 +10,8 @@ owner: Poodle Northstar orchestrator
 created: 2026-09-08
 updated: 2026-09-08
 base_required: pushed-main
+queue_dispatch: northstar-queue
+queue_approval: "Operator approved the durable background-safe capture correction on 2026-09-08 after confirming Poodle Lab must permit normal foreground app use during background runs."
 tags: [coordination, handoff, worker, g17, g17.003, capture, foreground]
 ---
 
