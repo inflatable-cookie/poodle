@@ -1,7 +1,7 @@
 # g17 — Nucleus Switch Path
 
 Status: active — opened 2026-09-06 at the g16 rollover; `001` held, `002`
-ready; the frontier is `../dispatch.md`
+complete, `003` ready; the frontier is `../dispatch.md`
 Posture: operator-led planning slate with a fixed programme goal
 Opened: 2026-09-06
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -36,6 +36,8 @@ to GPUI; real parity switches a bunch of apps, Nucleus first.
    held; ready when the lab's first validated cohort bundle exists
 2. [002 — Web focus rings follow input modality](002-web-focus-ring-input-modality.md)
    — complete; merged in PR #228, removing pointer-painted composite focus treatments while preserving keyboard focus recipes
+3. [003 — Background-safe non-activation proof](003-background-safe-nonactivation-proof.md)
+   — ready; allow unrelated operator foreground transitions while still failing closed if the native capture process activates
 
 Planned, not yet compiled (each becomes a card only after Chatterbox
 promotion; order is the intended sequence):
@@ -83,5 +85,5 @@ promotion; order is the intended sequence):
 
 ## Next Task
 
-Dispatch from `../dispatch.md` only. The next Chatterbox promotion is `001`
-readiness once the lab bundle validates.
+Dispatch `003` from `../dispatch.md`. After Poodle merges and the Lab adopts
+the proof correction, resume `001` readiness once the cohort bundle validates.

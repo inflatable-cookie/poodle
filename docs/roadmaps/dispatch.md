@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-08 (revision 24: g17.002 merged; frontier empty)
+Updated: 2026-09-08 (revision 25: g17.003 background-safe non-activation proof ready)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -20,12 +20,13 @@ card or triage note says.
 
 ## Ready frontier
 
-Empty. `g17.002` merged in PR #228 and closed out at `69aad646d`.
+| Lane | Card | Depends on | Concurrency | Capability | Completion |
+| --- | --- | --- | --- | --- | --- |
+| `g17.003` | [`g17/003-background-safe-nonactivation-proof.md`](g17/003-background-safe-nonactivation-proof.md) | none | no Poodle sibling | general | one reviewed PR with native self-activation evidence, windowless validation, and an exact Lab adoption request |
 
-The only other live execution is the lab repository's `g01.006` GPUI cohort
-batch, currently blocked after zero records were admitted. Its validated
-bundle is the gate for `g17.001`; dispatch belongs to the lab repository after
-its card and manifest are republished for the fresh-worker retry.
+The lab repository's queue-managed `g01.006` thread remains blocked after zero
+records were admitted. Its Lab matcher repair can finish independently; its
+next foreground capture waits for `g17.003` merge and Lab adoption.
 
 ## Held lanes (not dispatchable)
 
