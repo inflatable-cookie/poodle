@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: complete-merged
 owner: Poodle Northstar orchestrator
 created: 2026-09-08
 updated: 2026-09-08
@@ -14,6 +14,12 @@ queue_dispatch: northstar-queue
 queue_approval: "Operator approved the durable background-safe capture correction on 2026-09-08 after confirming Poodle Lab must permit normal foreground app use during background runs."
 tags: [coordination, handoff, worker, g17, g17.003, capture, foreground]
 ---
+
+PR #230 was independently reviewed at exact head
+`62be0575a51919697f78dbeaf9789339d83ae2f6` and merged into `main` as
+`583aa173935dd66ea0d8bd17196115f5b211a01b`. The integration checkout is
+synchronized with `origin/main`; the approved continuation is the existing
+queue-managed Lab `g01.006` adoption and separately authorized cohort capture.
 
 ## What This Thread Was Doing
 

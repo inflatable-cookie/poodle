@@ -1,6 +1,6 @@
 # g17.003 — Background-safe non-activation proof
 
-Status: implementation complete — pending independent exact-head review
+Status: complete — merged in PR #230 at `583aa173935dd66ea0d8bd17196115f5b211a01b` on 2026-09-08
 Date: 2026-09-08
 Card: `docs/roadmaps/g17/003-background-safe-nonactivation-proof.md`
 Base: `origin/main` at `47d42ba0e43943ba78d0e909973f060e7c29bc15`
@@ -8,6 +8,10 @@ Implementation commit: `93266dad973ca6fea2d2e4045bbbf0e21bdf3c0e`
 Branch: `ns-006ef628-17ed-4e0a-8a57-5d081ff1af6a` (queue-owned; the earlier
 `worker/g17-003-background-safe-nonactivation-proof` ref carried the same
 commits and was folded into it during queue identity repair)
+Review: accepted independent exact-head `ready_to_merge` verdict in [review
+comment #5584289808](https://github.com/inflatable-cookie/poodle/pull/230#issuecomment-5584289808)
+at head `62be0575a51919697f78dbeaf9789339d83ae2f6`; merge commit:
+`583aa173935dd66ea0d8bd17196115f5b211a01b`
 
 ## Outcome
 
@@ -97,8 +101,14 @@ other than `proved` are rejected by the verifier
   window-capture`) — passed. The pre-existing unused-import warning in
   `transport.rs` is present at the base commit too and was left alone.
 
-No `*-windowed` selector was run. No merge was performed. The worker stops
-after one pushed PR for independent exact-head review.
+No `*-windowed` selector was run. The worker stopped after one pushed PR for
+independent exact-head review. The reviewer found no blocking findings; the
+three non-blocking observations are deferred to Lab acceptance or future
+planning: a transient `failed_reads` can make a batch unprovable, stale
+sibling g16 wording remains outside this card's owned paths, and the
+contracted wire spelling `selffrontmost` should remain unchanged. The
+coordinator merged PR #230, and the integration checkout is synchronized with
+`origin/main` at `583aa173935dd66ea0d8bd17196115f5b211a01b`.
 
 ## Pre-existing reds (not introduced here)
 

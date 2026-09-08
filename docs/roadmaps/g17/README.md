@@ -1,7 +1,7 @@
 # g17 — Nucleus Switch Path
 
 Status: active — opened 2026-09-06 at the g16 rollover; `001` held, `002`
-complete, `003` ready; the frontier is `../dispatch.md`
+complete, `003` complete; the frontier is `../dispatch.md`
 Posture: operator-led planning slate with a fixed programme goal
 Opened: 2026-09-06
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -37,7 +37,7 @@ to GPUI; real parity switches a bunch of apps, Nucleus first.
 2. [002 — Web focus rings follow input modality](002-web-focus-ring-input-modality.md)
    — complete; merged in PR #228, removing pointer-painted composite focus treatments while preserving keyboard focus recipes
 3. [003 — Background-safe non-activation proof](003-background-safe-nonactivation-proof.md)
-   — ready; allow unrelated operator foreground transitions while still failing closed if the native capture process activates
+   — complete; merged in PR #230 at `583aa173935dd66ea0d8bd17196115f5b211a01b`; unrelated operator foreground transitions are admissible while native self-activation still fails closed
 
 Planned, not yet compiled (each becomes a card only after Chatterbox
 promotion; order is the intended sequence):
@@ -85,5 +85,7 @@ promotion; order is the intended sequence):
 
 ## Next Task
 
-Dispatch `003` from `../dispatch.md`. After Poodle merges and the Lab adopts
-the proof correction, resume `001` readiness once the cohort bundle validates.
+Resume the existing queue-managed Lab `g01.006` thread. Adopt Poodle merge
+commit `583aa173935dd66ea0d8bd17196115f5b211a01b`, correct Lab's external
+`ForegroundWatch`, then pause for one separately authorized cohort capture.
+Resume `001` readiness once that cohort bundle validates.

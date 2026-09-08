@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-08 (revision 25: g17.003 background-safe non-activation proof ready)
+Updated: 2026-09-08 (revision 26: g17.003 merged; frontier empty)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -20,13 +20,13 @@ card or triage note says.
 
 ## Ready frontier
 
-| Lane | Card | Depends on | Concurrency | Capability | Completion |
-| --- | --- | --- | --- | --- | --- |
-| `g17.003` | [`g17/003-background-safe-nonactivation-proof.md`](g17/003-background-safe-nonactivation-proof.md) | none | no Poodle sibling | general | one reviewed PR with native self-activation evidence, windowless validation, and an exact Lab adoption request |
+Empty. `g17.003` merged in PR #230 at
+`583aa173935dd66ea0d8bd17196115f5b211a01b` and is closed out in the integration
+checkout.
 
 The lab repository's queue-managed `g01.006` thread remains blocked after zero
 records were admitted. Its Lab matcher repair can finish independently; its
-next foreground capture waits for `g17.003` merge and Lab adoption.
+next foreground capture waits for adoption of the merged `g17.003` proof.
 
 ## Held lanes (not dispatchable)
 
@@ -46,7 +46,7 @@ next foreground capture waits for `g17.003` merge and Lab adoption.
 `85609d941`), `106` (#211), `108` (#212), `107` (#213), `110` (#214), `111`
 (#215), `114` (#216), `051` (#217), `117` (#218), `112` (#219), `116` (#220),
 `113` (#221), `115` (#222), `118` (#224), `119` (#223), `120` (#225), `121`
-(#226), `122` (#227), `109` (15 consumer PRs). Card status lines were
+(#226), `122` (#227), `109` (15 consumer PRs), `g17.003` (#230). Card status lines were
 reconciled to merge truth at the rollover; no README or index line is
 outstanding.
 

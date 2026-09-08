@@ -1,15 +1,17 @@
 # g17.003 — Lab adoption request: background-safe non-activation proof
 
-Status: request — adopt after `g17.003` merges; resolves the poodle-lab
-`g01.006` GPUI-leg foreground blocker
+Status: request — adopt the merged `g17.003` proof in PR #230 at
+`583aa173935dd66ea0d8bd17196115f5b211a01b`; resolves the poodle-lab `g01.006`
+GPUI-leg foreground blocker
 Date: 2026-09-08
 Poodle card: `docs/roadmaps/g17/003-background-safe-nonactivation-proof.md`
 Poodle implementation commit: `93266dad973ca6fea2d2e4045bbbf0e21bdf3c0e`
 (request written before the PR opened; the PR head adds documentation only
 and has the same runtime tree over the capture surface)
-Poodle base for Lab pin: the merge commit that carries
-`93266dad9` — Lab repins to that exact commit before its next cohort
-capture, per the existing pin rule.
+Poodle base for Lab pin: merge commit
+`583aa173935dd66ea0d8bd17196115f5b211a01b`, which carries `93266dad9` — Lab
+repins to that exact commit before its next cohort capture, per the existing
+pin rule.
 
 ## Why Lab must adopt
 

@@ -1,6 +1,6 @@
 # g17.003 — Background-safe non-activation proof
 
-Status: ready
+Status: complete — merged in PR #230 at merge commit `583aa173935dd66ea0d8bd17196115f5b211a01b` on 2026-09-08; independently reviewed at head `62be0575a51919697f78dbeaf9789339d83ae2f6`
 Type: native capture evidence correction — no component or pixel change
 Opened: 2026-09-08
 Depends on: none
