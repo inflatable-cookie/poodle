@@ -5,7 +5,9 @@ Date: 2026-09-08
 Card: `docs/roadmaps/g17/003-background-safe-nonactivation-proof.md`
 Base: `origin/main` at `47d42ba0e43943ba78d0e909973f060e7c29bc15`
 Implementation commit: `93266dad973ca6fea2d2e4045bbbf0e21bdf3c0e`
-Branch: `worker/g17-003-background-safe-nonactivation-proof`
+Branch: `ns-006ef628-17ed-4e0a-8a57-5d081ff1af6a` (queue-owned; the earlier
+`worker/g17-003-background-safe-nonactivation-proof` ref carried the same
+commits and was folded into it during queue identity repair)
 
 ## Outcome
 
