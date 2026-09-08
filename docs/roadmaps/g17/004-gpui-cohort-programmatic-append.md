@@ -1,6 +1,6 @@
 # g17.004 — GPUI cohort programmatic append replay
 
-Status: ready
+Status: complete — merged in PR #231 at merge commit `8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983` on 2026-09-08; independently reviewed at head `acfb0bdef1e17c5a21cd4fdc705c6f123ec8b955`
 Type: cross-language scenario-contract repair — no component API change
 Opened: 2026-09-08
 Depends on: `g17.003` complete

@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: complete-merged
 owner: Poodle Northstar orchestrator
 created: 2026-09-08
 updated: 2026-09-08
@@ -14,6 +14,14 @@ queue_dispatch: northstar-queue
 queue_approval: "Operator approved on 2026-09-08: do whatever is required to finish the blocked Lab cohort lane."
 tags: [coordination, handoff, worker, g17, g17.004, gpui, cohort]
 ---
+
+PR #231 was independently reviewed at exact head
+`acfb0bdef1e17c5a21cd4fdc705c6f123ec8b955` in review comment
+[#5585250834](https://github.com/inflatable-cookie/poodle/pull/231#issuecomment-5585250834)
+and merged into `main` as
+`8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983`. The integration checkout is
+synchronized with `origin/main`; the approved continuation is the existing
+queue-managed Lab `g01.006` adoption and separately authorized cohort capture.
 
 ## What This Thread Was Doing
 

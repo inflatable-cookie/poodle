@@ -1,6 +1,7 @@
 # g17.004 — Lab adoption request: GPUI cohort programmatic append replay
 
-Status: request — adopt the merged `g17.004` repair so the pinned Nucleus
+Status: request — adopt the merged `g17.004` repair in PR #231 at merge commit
+`8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983` so the pinned Nucleus
 cohort parser accepts the complete A1 action vocabulary; unblocks the
 poodle-lab `g01.006` GPUI-leg cohort lane
 Date: 2026-09-08
@@ -9,9 +10,11 @@ Poodle implementation commit: `2cf135d1820068f331b5ec908013dc7ba2ad0f61`
 Poodle implementation branch: `ns-32f0bd22-428b-4fdf-93a6-cf257d0768df`
 (request written before the PR opened; the PR head adds documentation only
 and has the same runtime tree over the capture surface)
-Poodle base for Lab pin: the merge commit of the g17.004 PR into `main` —
-Lab repins to that exact commit before its next cohort capture, per the
-existing pin rule. No Lab-side code or semantic change is required.
+Poodle base for Lab pin: merge commit
+`8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983`, which carries the g17.004
+runtime repair — Lab repins to that exact commit before its next cohort
+capture, per the existing pin rule. No Lab-side code or semantic change is
+required.
 
 ## Why Lab must adopt
 
@@ -26,8 +29,8 @@ the closed variant to the capture binary's own vocabulary.
 
 ## What Lab must change before the next full cohort capture
 
-1. Repin Poodle to the g17.004 merge commit on `main` (the PR head is the
-   queue-owned branch `ns-32f0bd22-428b-4fdf-93a6-cf257d0768df`).
+1. Repin Poodle to g17.004 merge commit
+   `8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983` on `main`.
 2. Re-run Lab's cohort capture from the preserved `g01.006` queue task —
    do not create a replacement task or discard the run's failure history.
 

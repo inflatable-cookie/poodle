@@ -4,7 +4,7 @@ Status: active
 Owner: Chatterbox (planning authority) — the only writer
 Consumer: the coordinator, which launches every ready lane listed here and
 designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-08 (revision 27: g17.004 promoted)
+Updated: 2026-09-08 (revision 28: g17.004 merged; frontier empty)
 Promoted commit: the commit that last touched this file
 (`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
 verifies it is an ancestor of current `origin/main` before dispatch
@@ -20,23 +20,13 @@ card or triage note says.
 
 ## Ready frontier
 
-### `g17.004` — GPUI cohort programmatic append replay
+Empty. `g17.004` merged in PR #231 at
+`8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983` and is closed out in the
+integration checkout.
 
-- Card: `g17/004-gpui-cohort-programmatic-append.md`
-- Handoff: `../handoffs/20260908-g17-004-gpui-cohort-programmatic-append.md`
-- Readiness: ready; operator approved full completion on 2026-09-08
-- Prerequisite: `g17.003` complete at `583aa173935dd66ea0d8bd17196115f5b211a01b`
-- Completion: parser/replay regression, headless checks, windowless build,
-  execution log, Lab adoption request, one PR, independent review, merge,
-  closeout
-- Owned paths: card-defined cohort capture implementation, focused tests, log,
-  and Lab adoption request; shared roadmap surfaces reserved for closeout
-- Concurrent siblings: none
-- Serial edge: merge → resume existing Lab `g01.006`; never replace that task
-- Capability: general
-- Acceptance: card review oracle plus exact-head independent PR review
-- Stop: public API change, weakened capture gate, or windowed execution
-- Escalation: Chatterbox
+The lab repository's queue-managed `g01.006` thread remains the approved next
+step. It must adopt the merged `g17.004` repair and complete its separately
+authorized cohort capture; no replacement task is created here.
 
 ## Held lanes (not dispatchable)
 
@@ -56,7 +46,7 @@ card or triage note says.
 `85609d941`), `106` (#211), `108` (#212), `107` (#213), `110` (#214), `111`
 (#215), `114` (#216), `051` (#217), `117` (#218), `112` (#219), `116` (#220),
 `113` (#221), `115` (#222), `118` (#224), `119` (#223), `120` (#225), `121`
-(#226), `122` (#227), `109` (15 consumer PRs), `g17.003` (#230). Card status lines were
+(#226), `122` (#227), `109` (15 consumer PRs), `g17.003` (#230), `g17.004` (#231). Card status lines were
 reconciled to merge truth at the rollover; no README or index line is
 outstanding.
 

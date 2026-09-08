@@ -1,6 +1,6 @@
 # g17.004 — GPUI cohort programmatic append replay
 
-Status: implementation complete — pending independent exact-head review
+Status: complete — merged in PR #231 at `8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983` on 2026-09-08
 Date: 2026-09-08
 Card: `docs/roadmaps/g17/004-gpui-cohort-programmatic-append.md`
 Base: `origin/main` at `fdb9cd5acaba299a22bf0f819da872b99e5676be`
@@ -8,6 +8,10 @@ Implementation commit: `2cf135d1820068f331b5ec908013dc7ba2ad0f61`
 Repin commit: `585ee5cfa0dd56f71c2be6b862fbff982cb54648` (docs-only;
 Nucleus cohort evidence payloads differ only in `source_commit`)
 Branch: `ns-32f0bd22-428b-4fdf-93a6-cf257d0768df` (queue-owned)
+Review: accepted independent exact-head `ready_to_merge` verdict in [review
+comment #5585250834](https://github.com/inflatable-cookie/poodle/pull/231#issuecomment-5585250834)
+at head `acfb0bdef1e17c5a21cd4fdc705c6f123ec8b955`; merge commit:
+`8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983`
 
 ## Outcome
 
@@ -71,6 +75,14 @@ log and the Lab adoption request.
   base commit too and was left alone.
 
 No `*-windowed` selector was run.
+
+The separately authorized Lab acceptance is deferred: this Poodle closeout
+does not claim a fresh full `g01.006` cohort capture. The existing Lab task
+must repin to the merge commit, publish all 174 rows, and verify the
+AgentTranscript after-actions item exactly once. The reviewer also noted only
+non-blocking follow-up: the inner replay `unreachable!()` is intentionally
+exhaustiveness-only, and the windowless build retained the pre-existing unused
+`transport.rs` import warning. Neither changes the merged acceptance.
 
 ## Pre-existing reds (now repaired)
 
