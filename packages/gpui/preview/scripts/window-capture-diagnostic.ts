@@ -12,8 +12,10 @@
  *    size the receipt claims;
  *  - identical input captured repeatedly is byte-identical;
  *  - every receipt verifies against its PNG;
- *  - the frontmost application did not change during any capture, sampled by
- *    the capture process itself for the whole of its own run.
+ *  - the capture process never became the frontmost application during any
+ *    capture, sampled by the capture process itself for the whole of its own
+ *    run. Unrelated operator foreground transitions are admissible and stay
+ *    recorded on the receipts.
  *
  * Everything lands in a temporary directory that is deleted on exit. No
  * baseline is written, nothing enters the repository, and no comparison is
@@ -29,7 +31,7 @@ const PREVIEW = new URL("..", import.meta.url).pathname;
 const MANIFEST = join(PREVIEW, "Cargo.toml");
 const BIN = join(PREVIEW, "target", "debug", "poodle-window-capture");
 const FEATURE = "window-capture";
-const RECEIPT_SCHEMA = "poodle.gpui-window-capture.v1";
+const RECEIPT_SCHEMA = "poodle.gpui-window-capture.v2";
 const TRANSPORT = "macos-window-server-nonactivating";
 const GPUI_SOURCE = "crates.io";
 const GPUI_VERSION = "0.2.2";
@@ -60,6 +62,11 @@ function pngSize(path: string): { width: number; height: number } {
   return { width: header.readUInt32BE(16), height: header.readUInt32BE(20) };
 }
 
+interface ForegroundSample {
+  identity: string;
+  pid: number;
+}
+
 interface Receipt {
   schema: string;
   component: { name: string; variant: string; label: string };
@@ -73,7 +80,14 @@ interface Receipt {
   scale: number;
   device_dimensions: { width: number; height: number };
   png_sha256: string;
-  foreground: { baseline: string; observed: string[]; samples: number; verdict: string };
+  foreground: {
+    capturer_pid: number;
+    baseline: ForegroundSample | null;
+    observed: ForegroundSample[];
+    samples: number;
+    failed_reads: number;
+    verdict: string;
+  };
 }
 
 /** Every claim a receipt makes, verified against the files it describes. */
@@ -104,19 +118,42 @@ function verifyPair(pngPath: string, receiptPath: string): string | null {
   if (receipt.scale !== 2) return "receipt scale is not 2.0";
   if (size.width !== WIDTH * 2) return `device width ${size.width} != logical x 2`;
   if (size.height !== HEIGHT * 2) return `device height ${size.height} != logical x 2`;
-  // Three-valued on purpose: "did not change" and "could not tell" are
-  // different answers and only one is proof.
+  // Three-valued on purpose: "the capture process was never frontmost" and
+  // "could not tell" are different answers and only one is proof.
   if (receipt.foreground.verdict !== "proved") {
     return `foreground verdict is '${receipt.foreground.verdict}', not 'proved'`;
   }
-  if (typeof receipt.foreground.baseline !== "string" || receipt.foreground.baseline.length === 0) {
-    return "the run read no baseline frontmost application";
+  if (!Number.isInteger(receipt.foreground.capturer_pid) || receipt.foreground.capturer_pid <= 0) {
+    return "the receipt names no positive capturer pid";
   }
-  if (receipt.foreground.observed.some((app) => app !== receipt.foreground.baseline)) {
-    return "another application was frontmost during the run";
+  const baseline = receipt.foreground.baseline;
+  if (baseline === null || typeof baseline.identity !== "string" || baseline.identity.length === 0) {
+    return "the run read no baseline frontmost process";
+  }
+  if (typeof baseline.pid !== "number" || !Number.isInteger(baseline.pid) || baseline.pid <= 0) {
+    return "the baseline carries no positive pid";
+  }
+  if (
+    receipt.foreground.observed.some(
+      (sample) =>
+        typeof sample.identity !== "string" ||
+        sample.identity.length === 0 ||
+        !Number.isInteger(sample.pid) ||
+        sample.pid <= 0,
+    )
+  ) {
+    return "an observed sample is missing its identity or pid";
+  }
+  if (
+    receipt.foreground.observed.some((sample) => sample.pid === receipt.foreground.capturer_pid)
+  ) {
+    return "the capture process itself was observed frontmost";
+  }
+  if (receipt.foreground.failed_reads !== 0) {
+    return `the run recorded ${receipt.foreground.failed_reads} failed readings`;
   }
   if (receipt.foreground.samples < MIN_FOREGROUND_SAMPLES) {
-    return `only ${receipt.foreground.samples} frontmost-application samples, ${MIN_FOREGROUND_SAMPLES} required`;
+    return `only ${receipt.foreground.samples} frontmost-process samples, ${MIN_FOREGROUND_SAMPLES} required`;
   }
   return null;
 }
@@ -169,11 +206,12 @@ try {
     console.log(`  transport: ${receipt.transport}`);
     console.log(`  device:    ${receipt.device_dimensions.width}x${receipt.device_dimensions.height}`);
     console.log(
-      `  foreground: baseline=${receipt.foreground.baseline} observed=${JSON.stringify(receipt.foreground.observed)} ` +
-        `samples=${receipt.foreground.samples} verdict=${receipt.foreground.verdict}`,
+      `  foreground: capturer_pid=${receipt.foreground.capturer_pid} baseline=${JSON.stringify(receipt.foreground.baseline)} ` +
+        `observed=${JSON.stringify(receipt.foreground.observed)} samples=${receipt.foreground.samples} ` +
+        `failed_reads=${receipt.foreground.failed_reads} verdict=${receipt.foreground.verdict}`,
     );
     check(
-      "every capture proved it left the frontmost application alone",
+      "every capture proved the capture process never became frontmost",
       runs.every((run) =>
         existsSync(run.receipt) &&
         (JSON.parse(readFileSync(run.receipt, "utf8")) as Receipt).foreground.verdict === "proved"

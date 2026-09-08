@@ -16,7 +16,8 @@
 //! operator's work, capture the desktop or a screen region, or fall back
 //! silently when the window server is unavailable. `forbidden.rs` pins those
 //! as a test over these sources, and every receipt carries the run's own
-//! frontmost-application evidence.
+//! frontmost-process evidence — that the capture process never became
+//! frontmost, not that no other application ever did.
 //!
 //! Modes:
 //!
@@ -36,8 +37,11 @@
 //! One-shot contract: every invocation captures once and writes a PNG plus a
 //! typed JSON receipt. All inputs are validated before any window is opened;
 //! unsupported scale, unknown theme or control size, an unsupported OS, a
-//! missing window server, and a run that changed the frontmost application
-//! are hard failures, never green skips.
+//! missing window server, and a run in which the capture process itself
+//! became the frontmost application are hard failures, never green skips.
+//! Unrelated operator foreground transitions do not fail a run: they are
+//! recorded on the receipt, and the claim each receipt makes is that this
+//! capture process never activated itself.
 
 use std::path::{Path, PathBuf};
 
@@ -98,10 +102,13 @@ use presentation_axes::{ControlSize, ThemePreset};
 
 use transport::{ACCEPTED_SCALE, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 
-/// Versioned receipt schema identity. `v1` claimed offscreen Metal readback
-/// through a fork-only API; the transport is now a real non-activating
-/// window, so this is a new schema rather than the old name over new facts.
-const RECEIPT_SCHEMA: &str = "poodle.gpui-window-capture.v1";
+/// Versioned receipt schema identity. `v2` (g17.003) proves the capture
+/// process never became frontmost — unrelated operator foreground
+/// transitions are admissible — so the foreground evidence now names the
+/// capturer pid and carries pid-bearing samples. `v1` claimed the whole
+/// desktop foreground stayed unchanged; before that it claimed offscreen
+/// Metal readback through a fork-only API.
+const RECEIPT_SCHEMA: &str = "poodle.gpui-window-capture.v2";
 
 /// The smoke scene: one real primary Button on a white canvas.
 struct CaptureRoot {
@@ -422,7 +429,8 @@ struct CaptureReceipt {
     scale: f32,
     device_dimensions: DeviceDimensions,
     png_sha256: String,
-    /// The run's own proof that it did not take focus.
+    /// The run's own proof that the capture process never became frontmost,
+    /// with every observed frontmost process retained as evidence.
     foreground: transport::ForegroundEvidence,
 }
 

@@ -101,9 +101,16 @@ function environmentFor(runtime: RuntimeName): ButtonCaptureReceipt["environment
         gpuiSource: "crates.io",
         gpuiVersion: "0.2.2",
         foreground: {
-          baseline: "com.example.editor",
-          observed: ["com.example.editor"],
+          capturer_pid: 4242,
+          baseline: { identity: "com.example.editor", pid: 400 },
+          // g17.003: an unrelated operator transition (editor → browser)
+          // stays recorded and never fails a proved run.
+          observed: [
+            { identity: "com.example.editor", pid: 400 },
+            { identity: "com.example.browser", pid: 500 },
+          ],
           samples: 24,
+          failed_reads: 0,
           verdict: "proved",
         },
       }
@@ -127,7 +134,7 @@ function makeReceipt(
     landmarks.spinner = { x: 28, y: 28, width: 12, height: 12 };
   }
   const raw: Record<string, unknown> = {
-    schema: "poodle.button-visual-capture.v2",
+    schema: "poodle.button-visual-capture.v3",
     fixture: target.name,
     runtime,
     logicalViewport: { width: 240, height: 80 },
@@ -224,12 +231,14 @@ describe("receipt verification", () => {
   });
 });
 
-// ── g16.005: foreground evidence is read, not trusted ────────────────
+// ── g17.003: foreground evidence is read, not trusted ────────────────
 //
 // The GPUI capture is windowed, so every receipt carries the run's own proof
-// that it left the foreground alone. A receipt is read on machines and at
-// times far removed from the run that wrote it, so the verifier applies the
-// same fail-closed rule the producer does rather than taking its word.
+// that the capture process (named by `capturer_pid`) never became the
+// frontmost application. Unrelated operator transitions are admissible and
+// stay recorded. A receipt is read on machines and at times far removed from
+// the run that wrote it, so the verifier applies the same fail-closed rule
+// the producer does rather than taking its word.
 
 describe("foreground evidence (gpui)", () => {
   const mutateForeground = (
@@ -241,28 +250,67 @@ describe("foreground evidence (gpui)", () => {
       });
   };
 
-  test("a proved receipt round-trips", () => {
+  test("a proved receipt round-trips with unrelated transitions recorded", () => {
     const receipt = makeReceipt(fixture("button/rest-secondary"), "gpui");
-    const foreground = (receipt.environment as { foreground: { verdict: string } }).foreground;
-    expect(foreground.verdict).toBe("proved");
+    const environment = receipt.environment;
+    if (environment.kind !== "macos-window-server-nonactivating") {
+      throw new Error("test setup: expected the gpui environment");
+    }
+    expect(environment.foreground.verdict).toBe("proved");
+    // The operator switching to the browser is admissible, not a failure.
+    expect(
+      environment.foreground.observed.some(
+        (sample) => sample.identity === "com.example.browser",
+      ),
+    ).toBe(true);
   });
 
   test("a null baseline is rejected — watching nothing is not proof", () => {
     expect(mutateForeground((f) => { f.baseline = null; })).toThrow(/baseline must name/);
   });
 
-  test("an empty baseline is rejected", () => {
-    expect(mutateForeground((f) => { f.baseline = ""; })).toThrow(/baseline must name/);
+  test("an empty baseline identity is rejected", () => {
+    expect(
+      mutateForeground((f) => { (f.baseline as Record<string, unknown>).identity = ""; }),
+    ).toThrow(/identity must name/);
+  });
+
+  test("a baseline without a pid is rejected", () => {
+    expect(
+      mutateForeground((f) => { delete (f.baseline as Record<string, unknown>).pid; }),
+    ).toThrow(/missing 'pid'/);
   });
 
   test("no observations is rejected", () => {
     expect(mutateForeground((f) => { f.observed = []; })).toThrow(/non-empty array/);
   });
 
-  test("an observation other than the baseline is rejected", () => {
+  test("a self-frontmost observation is rejected — the capture pid never appears", () => {
     expect(
-      mutateForeground((f) => { f.observed = ["com.example.editor", "com.example.other"]; }),
-    ).toThrow(/only the baseline/);
+      mutateForeground((f) => {
+        (f.observed as Record<string, unknown>[]).push({
+          identity: "poodle-window-capture",
+          pid: 4242,
+        });
+      }),
+    ).toThrow(/capture process's own pid/);
+  });
+
+  test("the pre-v3 string-only observed shape no longer validates", () => {
+    expect(
+      mutateForeground((f) => { f.observed = ["com.example.editor"]; }),
+    ).toThrow(/identity and pid/);
+  });
+
+  test("a non-positive sample pid is rejected", () => {
+    expect(
+      mutateForeground((f) => {
+        (f.observed as Record<string, unknown>[])[0] = {
+          identity: "com.example.editor",
+          pid: -1,
+        };
+      }),
+    ).toThrow(/positive integer/);
   });
 
   test("too few samples is rejected", () => {
@@ -272,19 +320,20 @@ describe("foreground evidence (gpui)", () => {
     expect(mutateForeground((f) => { f.samples = MIN_FOREGROUND_SAMPLES; })).not.toThrow();
   });
 
-  test("any verdict but 'proved' is rejected", () => {
-    for (const verdict of ["changed", "unprovable", "ok", true, null, undefined]) {
-      expect(mutateForeground((f) => { f.verdict = verdict; })).toThrow(/verdict must be 'proved'/);
-    }
+  test("a failed required read is rejected", () => {
+    expect(mutateForeground((f) => { f.failed_reads = 1; })).toThrow(/failed_reads must be 0/);
   });
 
-  test("the old boolean 'changed' shape no longer validates", () => {
-    expect(
-      mutateForeground((f) => {
-        delete f.verdict;
-        f.changed = false;
-      }),
-    ).toThrow();
+  test("a missing capturer pid is rejected — the proof must name its process", () => {
+    expect(mutateForeground((f) => { delete f.capturer_pid; })).toThrow(
+      /capturer_pid must be a positive integer/,
+    );
+  });
+
+  test("any verdict but 'proved' is rejected", () => {
+    for (const verdict of ["changed", "selffrontmost", "unprovable", "ok", true, null, undefined]) {
+      expect(mutateForeground((f) => { f.verdict = verdict; })).toThrow(/verdict must be 'proved'/);
+    }
   });
 
   test("a receipt with no foreground evidence at all is rejected", () => {

@@ -49,8 +49,11 @@ use crate::presentation_axes::ThemePreset;
 use crate::publish_pair;
 use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 
-/// Versioned evidence receipt schema identity.
-const RECEIPT_SCHEMA: &str = "poodle.gpui-inset-shadow-evidence.v1";
+/// Versioned evidence receipt schema identity. `v2` (g17.003) proves the
+/// capture process never became frontmost: the foreground evidence names the
+/// capturer pid and carries pid-bearing samples, and unrelated operator
+/// transitions are admissible.
+const RECEIPT_SCHEMA: &str = "poodle.gpui-inset-shadow-evidence.v2";
 
 /// The closed scene set. Closed because the output file names are derived
 /// from it: `--out-dir` is a directory, not a free-form path pair.
@@ -273,6 +276,7 @@ struct InsetEvidenceReceipt {
     scale: f32,
     device_dimensions: [u32; 2],
     png_sha256: String,
+    /// The run's own proof that the capture process never became frontmost.
     foreground: transport::ForegroundEvidence,
 }
 

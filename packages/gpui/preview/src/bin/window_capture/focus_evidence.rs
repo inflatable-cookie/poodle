@@ -11,8 +11,8 @@
 //! skip.
 //!
 //! Element focus inside the capture window is not application focus: the
-//! window is never made key by this process, and the run's own
-//! frontmost-application samples ride on the receipt.
+//! window is never made key by this process, and the receipt carries the
+//! run's own evidence that the capture process never became frontmost.
 //!
 //! This is point-in-time operator review evidence for the native focus-ring
 //! channel, not a baseline: nothing reads these files back, and no fixture
@@ -44,9 +44,13 @@ use crate::presentation_axes::ThemePreset;
 use crate::publish_pair;
 use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 
-/// Versioned evidence receipt schema identity. `v2` is the windowed,
-/// non-activating transport; `v1` claimed a fork-only offscreen readback.
-const EVIDENCE_RECEIPT_SCHEMA: &str = "poodle.gpui-focus-evidence.v2";
+/// Versioned evidence receipt schema identity. `v3` (g17.003) proves the
+/// capture process never became frontmost: the foreground evidence names the
+/// capturer pid and carries pid-bearing samples, and unrelated operator
+/// transitions are admissible. `v2` was the windowed, non-activating
+/// transport under the whole-foreground-unchanged proof; `v1` claimed a
+/// fork-only offscreen readback.
+const EVIDENCE_RECEIPT_SCHEMA: &str = "poodle.gpui-focus-evidence.v3";
 
 /// The closed scene set.
 const SCENES: &[&str] = &["button", "stepper-trigger", "stepper-summary"];
@@ -209,6 +213,7 @@ struct FocusEvidenceReceipt {
     logical_viewport: [f32; 2],
     scale: f32,
     png_sha256: String,
+    /// The run's own proof that the capture process never became frontmost.
     foreground: transport::ForegroundEvidence,
 }
 

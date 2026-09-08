@@ -26,7 +26,11 @@ use crate::fixture_capture::{inter_fonts, FixtureAssets};
 use crate::publish_pair;
 use crate::transport::{self, TRANSPORT};
 
-const SCHEMA: &str = "poodle.icon-geometry-visual-capture.v1";
+/// Versioned receipt schema identity. `v2` (g17.003) proves the capture
+/// process never became frontmost: the foreground evidence names the
+/// capturer pid and carries pid-bearing samples, and unrelated operator
+/// transitions are admissible.
+const SCHEMA: &str = "poodle.icon-geometry-visual-capture.v2";
 const SIZE: f32 = 128.0;
 const PADDING: f32 = 32.0;
 const ICON_SIZE: f32 = 64.0;
@@ -235,6 +239,7 @@ struct Receipt {
     #[serde(rename = "logicalViewport")]
     logical_viewport: Viewport,
     scene: SceneContract,
+    /// The run's own proof that the capture process never became frontmost.
     foreground: transport::ForegroundEvidence,
     permission: &'static str,
 }

@@ -28,7 +28,7 @@ const MANIFEST = join(PREVIEW, "Cargo.toml");
 const BIN = join(PREVIEW, "target", "debug", "poodle-window-capture");
 const FEATURE = "window-capture";
 const OUT = join(REPO, "test/visual/inset-shadow-evidence/out");
-const RECEIPT_SCHEMA = "poodle.gpui-inset-shadow-evidence.v1";
+const RECEIPT_SCHEMA = "poodle.gpui-inset-shadow-evidence.v2";
 const TRANSPORT = "macos-window-server-nonactivating";
 const MIN_FOREGROUND_SAMPLES = 8;
 
@@ -45,6 +45,11 @@ type Band = {
   bounds: [number, number, number, number];
 };
 
+type ForegroundSample = {
+  identity: string;
+  pid: number;
+};
+
 type Receipt = {
   schema: string;
   scene: string;
@@ -58,7 +63,14 @@ type Receipt = {
   scale: number;
   device_dimensions: [number, number];
   png_sha256: string;
-  foreground: { baseline: string; observed: string[]; samples: number; verdict: string };
+  foreground: {
+    capturer_pid: number;
+    baseline: ForegroundSample | null;
+    observed: ForegroundSample[];
+    samples: number;
+    failed_reads: number;
+    verdict: string;
+  };
 };
 
 let failures = 0;
@@ -129,11 +141,18 @@ for (const scene of SCENES) {
       band.bounds[2] > 0 && band.bounds[3] > 0),
     JSON.stringify(receipt.bands));
 
-  check(`${scene}: the capture proved it left the foreground alone`,
+  check(`${scene}: the capture process never became frontmost`,
     receipt.foreground.verdict === "proved" &&
       receipt.foreground.samples >= MIN_FOREGROUND_SAMPLES &&
-      receipt.foreground.observed.every((app) => app === receipt.foreground.baseline),
-    `verdict=${receipt.foreground.verdict} samples=${receipt.foreground.samples}`);
+      receipt.foreground.failed_reads === 0 &&
+      receipt.foreground.observed.every(
+        (sample) =>
+          sample.identity.length > 0 &&
+          Number.isInteger(sample.pid) &&
+          sample.pid !== receipt.foreground.capturer_pid,
+      ),
+    `verdict=${receipt.foreground.verdict} samples=${receipt.foreground.samples} ` +
+      `failed_reads=${receipt.foreground.failed_reads}`);
 
   for (const band of receipt.bands) {
     console.log(

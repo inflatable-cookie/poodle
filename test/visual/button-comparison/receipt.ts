@@ -29,7 +29,10 @@ import {
 // offscreen readback was replaced by a real non-activating window. It now
 // names a published crate rather than a Git revision, says what the transport
 // actually is, and carries the run's own frontmost-application evidence.
-export const RECEIPT_SCHEMA = "poodle.button-visual-capture.v2";
+// v3 (g17.003): the foreground evidence proves the capture process never
+// became frontmost — unrelated operator foreground transitions are
+// admissible — so it names the capturer pid and carries pid-bearing samples.
+export const RECEIPT_SCHEMA = "poodle.button-visual-capture.v3";
 
 export const RUNTIMES = ["svelte", "react", "gpui"] as const;
 export type RuntimeName = (typeof RUNTIMES)[number];
@@ -64,23 +67,37 @@ export type RoleEvidence = {
 };
 
 export type WebEnvironment = { kind: "chromium"; version: string };
+
+/** One reading of the frontmost process: the auditable application identity
+ * and the pid the self test compares. */
+export type ForegroundSample = {
+  identity: string;
+  pid: number;
+};
+
 /**
- * What the capture process observed about the frontmost application for the
+ * What the capture process observed about the frontmost process for the
  * whole of its own run.
  *
- * `verdict` is three-valued on purpose: "did not change" and "could not tell"
- * are different answers, and only `proved` supports the capture contract's
- * claim. The capture binary refuses to publish anything else, and this
- * verifier refuses to accept anything else — a receipt is read on machines
- * and at times far removed from the run that wrote it, so the reader does not
- * take the writer's word for it.
+ * The claim is non-activation: the capture process (named by `capturer_pid`)
+ * never became frontmost, as the baseline or in any later sample. Unrelated
+ * operator foreground transitions are admissible and stay recorded in
+ * `observed`. `verdict` is three-valued on purpose: "never frontmost" and
+ * "could not tell" are different answers, and only `proved` supports the
+ * capture contract's claim. The capture binary refuses to publish anything
+ * else, and this verifier refuses to accept anything else — a receipt is read
+ * on machines and at times far removed from the run that wrote it, so the
+ * reader does not take the writer's word for it and re-derives the verdict
+ * from these fields.
  */
-export type ForegroundVerdict = "proved" | "changed" | "unprovable";
+export type ForegroundVerdict = "proved" | "selffrontmost" | "unprovable";
 
 export type ForegroundEvidence = {
-  baseline: string;
-  observed: string[];
+  capturer_pid: number;
+  baseline: ForegroundSample;
+  observed: ForegroundSample[];
   samples: number;
+  failed_reads: number;
   verdict: "proved";
 };
 
@@ -142,7 +159,15 @@ const ROLE_KEYS = ["fill", "border", "text", "shadow", "focus-ring"] as const;
 const SHADOW_LAYER_KEYS = ["inset", "offsetX", "offsetY", "blur", "spread", "color"] as const;
 const WEB_ENV_KEYS = ["kind", "version"] as const;
 const GPUI_ENV_KEYS = ["kind", "os", "arch", "gpuiSource", "gpuiVersion", "foreground"] as const;
-const FOREGROUND_KEYS = ["baseline", "observed", "samples", "verdict"] as const;
+const FOREGROUND_KEYS = [
+  "capturer_pid",
+  "baseline",
+  "observed",
+  "samples",
+  "failed_reads",
+  "verdict",
+] as const;
+const FOREGROUND_SAMPLE_KEYS = ["identity", "pid"] as const;
 export const GPUI_TRANSPORT = "macos-window-server-nonactivating";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -283,6 +308,22 @@ function checkRoles(problems: string[], value: unknown): void {
   }
 }
 
+function checkForegroundSample(problems: string[], where: string, value: unknown): void {
+  if (!isPlainObject(value)) {
+    problems.push(
+      `${where} must be an object with identity and pid, got ${JSON.stringify(value)}`,
+    );
+    return;
+  }
+  keyProblems(problems, where, value, FOREGROUND_SAMPLE_KEYS);
+  if (typeof value.identity !== "string" || value.identity.length === 0) {
+    problems.push(`${where}.identity must name the frontmost application`);
+  }
+  if (!isFiniteNumber(value.pid) || !Number.isInteger(value.pid) || value.pid <= 0) {
+    problems.push(`${where}.pid must be a positive integer, got ${JSON.stringify(value.pid)}`);
+  }
+}
+
 function checkForeground(problems: string[], where: string, value: unknown): void {
   if (!isPlainObject(value)) {
     problems.push(`${where} must be an object, got ${JSON.stringify(value)}`);
@@ -290,27 +331,65 @@ function checkForeground(problems: string[], where: string, value: unknown): voi
   }
   keyProblems(problems, where, value, FOREGROUND_KEYS);
 
-  // A null baseline means the run never read a frontmost application, so it
-  // watched nothing. That is not a weaker proof, it is no proof.
-  if (typeof value.baseline !== "string" || value.baseline.length === 0) {
+  // `capturer_pid` names the process under test: the receipt has to say which
+  // process the proof is about, or no claim about non-activation is auditable.
+  if (
+    !isFiniteNumber(value.capturer_pid) ||
+    !Number.isInteger(value.capturer_pid) ||
+    value.capturer_pid <= 0
+  ) {
     problems.push(
-      `${where}.baseline must name the application that was frontmost before the capture window existed`,
+      `${where}.capturer_pid must be a positive integer naming the capture process, got ${JSON.stringify(value.capturer_pid)}`,
     );
   }
-  if (
-    !Array.isArray(value.observed) ||
-    value.observed.length === 0 ||
-    value.observed.some((app) => typeof app !== "string")
-  ) {
-    problems.push(`${where}.observed must be a non-empty array of strings`);
-  } else if (typeof value.baseline === "string") {
-    const strayed = value.observed.filter((app) => app !== value.baseline);
-    if (strayed.length > 0) {
-      problems.push(
-        `${where}.observed must contain only the baseline, got ${JSON.stringify(strayed)}`,
+
+  // A null baseline means the run never read a frontmost process, so it
+  // watched nothing. That is not a weaker proof, it is no proof.
+  if (value.baseline !== null) {
+    checkForegroundSample(problems, `${where}.baseline`, value.baseline);
+  } else {
+    problems.push(
+      `${where}.baseline must name the process that was frontmost before the capture window existed — a null baseline is no proof`,
+    );
+  }
+
+  const observed = value.observed;
+  if (!Array.isArray(observed) || observed.length === 0) {
+    problems.push(`${where}.observed must be a non-empty array of samples`);
+  } else {
+    for (const [index, sample] of observed.entries()) {
+      checkForegroundSample(problems, `${where}.observed[${index}]`, sample);
+    }
+
+    // Unrelated transitions (the operator switching applications) are
+    // admissible and remain recorded; the one sample that is never admissible
+    // is the capture process itself. A self-frontmost reading is a typed
+    // failure the producer never publishes.
+    if (isFiniteNumber(value.capturer_pid)) {
+      const selfSamples = observed.filter(
+        (sample) =>
+          isPlainObject(sample) &&
+          isFiniteNumber(sample.pid) &&
+          sample.pid === value.capturer_pid,
       );
+      if (selfSamples.length > 0) {
+        problems.push(
+          `${where}.observed must never contain the capture process's own pid (${value.capturer_pid}), got ${JSON.stringify(selfSamples)} — a self-frontmost sample is a typed failure, not evidence`,
+        );
+      }
     }
   }
+
+  if (
+    !isFiniteNumber(value.failed_reads) ||
+    !Number.isInteger(value.failed_reads) ||
+    value.failed_reads !== 0
+  ) {
+    problems.push(
+      `${where}.failed_reads must be 0 — any failed required reading makes the run unprovable`,
+    );
+  }
+
   if (
     typeof value.samples !== "number" ||
     !Number.isInteger(value.samples) ||
@@ -322,7 +401,7 @@ function checkForeground(problems: string[], where: string, value: unknown): voi
   }
   if (value.verdict !== "proved") {
     problems.push(
-      `${where}.verdict must be 'proved', got ${JSON.stringify(value.verdict)} — only a run that read a baseline, watched long enough, and never saw another application is evidence`,
+      `${where}.verdict must be 'proved', got ${JSON.stringify(value.verdict)} — only a run that read a baseline, watched long enough, never failed a required read, and never saw the capture process frontmost is evidence`,
     );
   }
 }
