@@ -15,11 +15,17 @@ queue_approval: "Operator approved on 2026-09-08: do whatever is required to fin
 tags: [coordination, handoff, worker, g17, g17.004, gpui, cohort]
 ---
 
-## What This Thread Is Doing
+## What This Thread Was Doing
 
 Execute `docs/roadmaps/g17/004-gpui-cohort-programmatic-append.md` from the
 exact pushed planning commit. Repair the stale GPUI window-capture action parser
 and replay path exposed by the retained Lab `g01.006` run.
+
+## Why It Matters
+
+The first validated Nucleus cohort bundle gates `g17.001`. The Lab now reaches
+AgentTranscript, but GPUI rejects an action already owned by Poodle's canonical
+A1 contract. Deleting that action would hide the state instead of comparing it.
 
 ## Current State
 
@@ -40,6 +46,19 @@ other capture and component contracts.
 
 Do not invoke any windowed selector, change scenarios, alter receipts, edit
 workflows, publish a release, touch the Lab repository, or merge a PR.
+
+## Important Context
+
+Read the card, `test/nucleus-a11y/contract.ts`, the AgentTranscript scenario,
+`packages/gpui/preview/src/nucleus_receipts.rs`, and the complete cohort capture
+module. The headless A1 model already deserializes `ProgrammaticAppend`; the
+duplicate capture enum and replay controller do not. Reuse the production
+transcript item mapping instead of adding a parallel permissive shape.
+
+## Suggested Next Move
+
+Plant the canonical scenario loader regression first, then give `HostState`
+transcript items and add one closed replay branch that appends and remounts.
 
 ## Completion Protocol
 
