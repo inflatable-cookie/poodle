@@ -2,6 +2,7 @@
 
 Task `g18.001`, planning `d8e174fb40b2634b7d00018c721816ffc037d712`.
 Worker branch `ns-d5d083f8-3bec-438f-8c5c-efeffd13b91c`. Nucleus receipts untouched.
+Merged in PR #235 as `8185a9758f146e901499a8a8704a41202f99ca9e` on 2026-09-09 after independent exact-head `ready_to_merge` review ([comment #5605510026](https://github.com/inflatable-cookie/poodle/pull/235#issuecomment-5605510026)) at head `e88cd75c9e2b68fd47e597180d20c6736a80bc31`.
 
 ## Execution identity
 
@@ -93,3 +94,9 @@ projection stays a narrow hold on all 175 portable rows.
 - Substrate groups are contract-purpose keyword buckets for compilation, not a
   repair plan.
 - No windowed selector was run. No Jetstream claim is admitted.
+
+## Closeout
+
+- Merge performed by the plugin as `8185a9758f146e901499a8a8704a41202f99ca9e` on 2026-09-09 (PR #235).
+- Closeout re-verification on merged main `8185a9758f146e901499a8a8704a41202f99ca9e`: census `--check` match; census tests 17 pass / 0 fail; ledger tests 9 pass / 0 fail; nucleus-parity-receipts tests 17 pass / 0 fail; `effigy docs:lint` pass; `git diff --check` clean.
+- Non-blocking reviewer notes (deferred, no acceptance impact): `validatePinAncestry` requires non-shallow history; the four-refusal-class taxonomy fires two shapes in this census (122 unproved-axis + 102 no-evidence).

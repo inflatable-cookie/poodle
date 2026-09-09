@@ -35,6 +35,7 @@ capabilities it actually drives.
   or retained expected-test entry.
 - GPUI visual evidence covers the 29-row Nucleus cohort; 146 rows remain
   missing. Broad platform accessibility proof remains held separately.
+- g18.001 census (PR #235): 73/175 portable rows carry at least one admitted mounted capability, 24/175 fully admitted; 224 refusals and 11 substrate groups await tranche compilation.
 
 Construction is not functional completion. A bounded regression is not whole-
 contract proof. The first task establishes the capability-level denominator
@@ -44,7 +45,7 @@ needed to compile honest repair tranches.
 
 | Task or planning horizon | State | Dependency or checkpoint |
 | --- | --- | --- |
-| [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | ready | current 176-row ledger and mounted test suite |
+| [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -54,9 +55,9 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-`g18.001` is approved for one serial queue lane. No successor auto-starts.
-Chatterbox recompiles the first repair tranche from its accepted census rather
-than guessing component scope in advance.
+No approved frontier. `g18.001` merged in PR #235 and is closed out in the
+integration checkout. Chatterbox compiles the first repair tranche from the
+accepted census; no successor auto-starts.
 
 ## Held and recurring work
 

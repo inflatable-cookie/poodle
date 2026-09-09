@@ -1,6 +1,6 @@
 # 001 — Contract-bound GPUI functionality census
 
-Status: ready
+Status: complete
 Owner: Poodle core
 Created: 2026-09-09
 Depends on: none
@@ -126,6 +126,12 @@ Starting posture: 175/175 construction; 29/175 receipt-backed mounted rows;
 entries and 102 do not. Final evidence must record the reviewed exact head, PR,
 merge, admitted receipt count, remaining capability counts, refusals, and the
 validation actually run.
+
+## Shipped result (merged)
+
+PR #235 merged as `8185a9758f146e901499a8a8704a41202f99ca9e` on 2026-09-09 after independent exact-head review of `e88cd75c9e2b68fd47e597180d20c6736a80bc31` ([review comment #5605510026](https://github.com/inflatable-cookie/poodle/pull/235#issuecomment-5605510026)).
+Census: 176 public / 175 portable rows; 73/175 rows with at least one admitted capability, 24/175 fully admitted; 65 new mounted receipts (`poodle.g18-gpui-mounted-receipt.v1`); 224 in-census refusals; 11 missing-capability substrate groups for tranche compilation. Nucleus M1/A1/V1 receipts unchanged and byte-identical.
+Validation on merged main `8185a9758f146e901499a8a8704a41202f99ca9e`: `bun scripts/gpui-functionality-census.ts --check` match, census tests 17 pass / 0 fail, ledger tests 9 pass / 0 fail, nucleus-parity-receipts tests 17 pass / 0 fail, `effigy docs:lint` pass, `git diff --check` clean. No windowed selector was run. No Jetstream claim admitted.
 
 ## Next task
 

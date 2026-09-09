@@ -6,10 +6,10 @@ Updated: 2026-09-09
 
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
-  - Ready task: `g18.001` contract-bound GPUI functionality census
-  - Approved frontier: `g18.001`; one serial queue lane; no successor auto-starts
+  - Completed tasks: `g18.001` contract-bound GPUI functionality census
+  - Approved frontier: none; `g18.001` merged in PR #235 at `8185a9758f146e901499a8a8704a41202f99ca9e`
   - Next checkpoint: Chatterbox compiles the first functional repair tranche
-    from the accepted census.
+    from the accepted census; no successor auto-starts.
 
 ## Compacted generations
 
