@@ -17,19 +17,23 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            changes.lock().unwrap().as_slice(),\n            [\"read\"],\n            \"an enabled trigger emit",
+      "assert_eq!(\n            reruns.lock().unwrap().as_slice(),\n            [\"read\"],\n            \"the rerun control emit",
+      "assert_eq!(\n            change"
     ],
     "pointer": [
-      "/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\\.click\\(/i"
+      "pointer_activate"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "dispatch_key"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::stepper",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

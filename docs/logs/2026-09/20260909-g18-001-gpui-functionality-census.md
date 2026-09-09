@@ -60,9 +60,13 @@ projection stays a narrow hold on all 175 portable rows.
 
 ## Validation run
 
-- `bun test scripts/gpui-functionality-census.test.ts`: 14 pass.
-- `bun scripts/gpui-functionality-census.ts` (generate) then `--check`: match,
-  all oracles hold.
+  - `bun test scripts/gpui-functionality-census.test.ts`: 17 pass (denominator,
+    stale/ignored-test, claim-overreach, backend-bypass, widened-A2, overclaim,
+    record-state pin, evidence-text, and announce-hardening oracles).
+  - `bun scripts/gpui-functionality-census.ts` (generate) then `--check`:
+    byte-identical match, all oracles hold — at the planning commit and again
+    at every later commit, because evidence identity is record state (the
+    execution record pin), never the live checkout hash.
 - `effigy check:gpui-census`, `effigy test:gpui-census`: pass.
 - `effigy check:parity-evidence-ledger`, `effigy test:parity-evidence-ledger`,
   `effigy test:nucleus-parity-receipts`: pass (Nucleus rows byte-identical).
@@ -71,13 +75,21 @@ projection stays a narrow hold on all 175 portable rows.
 
 ## Limitations
 
-- Receipts are point-in-time execution evidence pinned to the recorded commit
-  and test-body hashes; editing a test or the GPUI lockfile fails the check
-  until the tests are re-run and the census regenerated.
-- Axis signals are keyword-shaped over test bodies and receipt prose. They are
-  deliberately conservative (visual admits almost nothing outside V1), but a
-  future test could in principle show a signal without proving the claim; the
-  per-test signal lists are stored in each receipt for review.
+  - Receipts are point-in-time execution evidence pinned to the execution
+    record commit and per-test body hashes. Editing a test or the GPUI lockfile
+    fails the check until the tests are re-run and both record and census are
+    regenerated; the checker additionally refuses a tree that does not descend
+    from the pinned commit.
+  - Refusals fall into four recorded classes: no-evidence rows (no receipt and
+    no retained test), stale or bypassing tests (absent body, ignored, or no
+    mounted-backend production path), unproved axes (a mounted test whose body
+    shows no signal for a required axis), and nucleus gaps (manifest rows with
+    no validated M1 receipt). Each refusal names its row, test, and cause.
+  - Axis signals are keyword-shaped over test bodies and receipt prose. They are
+    deliberately conservative (visual admits almost nothing outside V1;
+    announcement evidence requires the read/handler idiom, not the bare word);
+    receipts store the matched body fragments plus the exact driver and
+    renderer references observed, so review reads evidence instead of patterns.
 - Substrate groups are contract-purpose keyword buckets for compilation, not a
   repair plan.
 - No windowed selector was run. No Jetstream claim is admitted.

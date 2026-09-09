@@ -18,22 +18,28 @@
       "production-mount"
     ],
     "pointer": [
-      "/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\\.click\\(/i"
+      "pointer_activate"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "focus_state_for",
+      "focus_element",
+      "keyboard_"
     ],
     "accessibility": [
-      "/a11y\\.|NodeToggled|NodeRole|\\baria\\b|accessible|announce/i"
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
-      "/rem_to_px|resolve_color|resolve_space|resolve_opacity|resolve_radius|_geometry|Geometry|computed_rect|dimensions/i"
+      "resolve_radius",
+      "resolve_color"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "node_compat::IntoCompatNode",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

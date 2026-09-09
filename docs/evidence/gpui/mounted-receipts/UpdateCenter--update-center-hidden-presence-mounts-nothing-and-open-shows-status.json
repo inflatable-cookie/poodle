@@ -16,16 +16,18 @@
       "production-mount"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "keyboard_"
     ],
     "accessibility": [
-      "/a11y\\.|NodeToggled|NodeRole|\\baria\\b|accessible|announce/i"
+      "a11y."
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::update_center",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

@@ -15,13 +15,15 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            trace.lock().expect(\"trace lock\").as_slice(),\n            [\"valueChange\", \"valueChange\", \"valueCommit"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::range_slider",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

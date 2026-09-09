@@ -17,19 +17,22 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            orders.lock().unwrap().last().expect(\"an order\").as_slice(),\n            [\n                \"model-alpha\".to_string(),\n                \"model-gamma\".to_string(),\n                \"model-beta\".to_string(),\n                \"model-dup-a\".to_string(),\n            ],\n            \"the move emit"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "keyboard_"
     ],
     "accessibility": [
-      "/a11y\\.|NodeToggled|NodeRole|\\baria\\b|accessible|announce/i"
+      "assert!(announce",
+      "on_announce"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::model_catalogue_editor",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

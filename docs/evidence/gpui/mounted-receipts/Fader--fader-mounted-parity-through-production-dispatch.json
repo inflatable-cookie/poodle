@@ -18,22 +18,29 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert!(\n            !live.lock().expect(\"fader machine\").machine.base.entry_open,\n            \"Tab blur must commit",
+      "assert_eq!(\n            *commits.lock().expect(\"commit\"),\n            after,\n            \"Tab blur must not commit",
+      "assert!(log.contains(&\"valueChange"
     ],
     "pointer": [
-      "/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\\.click\\(/i"
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
-      "/a11y\\.|NodeToggled|NodeRole|\\baria\\b|accessible|announce/i"
+      "NodeRole",
+      "a11y."
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render-import:audio_entry_id",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

@@ -18,22 +18,29 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            &keys[keys.len() - 6..],\n            [\n                \"valueChange\",\n                \"valueCommit\",\n                \"valueChange\",\n                \"valueCommit\",\n                \"valueChange\",\n                \"valueCommit",
+      "assert_eq!(\n            slider_control(&mounted.lock().unwrap()).a11y.value,\n            Some(100.0),\n            \"the rebuilt node carries the commit",
+      "assert_eq!(\n            trace.lock().expect(\"trace lock\").as_slice(),\n            [\"valueChange\", \"valueChange\", \"valueCommit"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "focus_state_for",
+      "dispatch_key",
+      "keyboard_"
     ],
     "accessibility": [
-      "/a11y\\.|NodeToggled|NodeRole|\\baria\\b|accessible|announce/i"
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
-      "/rem_to_px|resolve_color|resolve_space|resolve_opacity|resolve_radius|_geometry|Geometry|computed_rect|dimensions/i"
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::slider",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

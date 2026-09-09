@@ -58,7 +58,7 @@ export const AXIS_TEST_SIGNALS: Record<CensusAxis, RegExp[]> = {
   events: [/counting_handler/i, /payloads?\.\s*lock/i, /assert[^;]*(emit|payload|change|commit|callback)/i],
   pointer: [/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\.click\(/i],
   keyboard_focus: [/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i],
-  accessibility: [/a11y\.|NodeToggled|NodeRole|\baria\b|accessible|announce/i],
+  accessibility: [/a11y\.|NodeToggled|NodeRole|\baria\b|accessible/i, /assert[^;]*announce|announcements\(\)|on_announce/i],
   visual: [/rem_to_px|resolve_color|resolve_space|resolve_opacity|resolve_radius|_geometry|Geometry|computed_rect|dimensions/i],
 };
 
@@ -139,8 +139,29 @@ function read(root: string, relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
 }
 
-function headCommit(root: string): string {
-  return execSync("git rev-parse HEAD", { cwd: root, encoding: "utf8" }).trim();
+/** The pinned execution commit must exist locally and the working tree must
+ * descend from it. Evidence is point-in-time: anything else means history was
+ * rewritten or the record belongs to another line, and the census refuses to
+ * describe the current tree until the tests are re-run. */
+function validatePinAncestry(sourceCommit: string, root: string): void {
+  let known = false;
+  try {
+    execSync(`git cat-file -e ${sourceCommit}^{commit}`, { cwd: root, stdio: "ignore" });
+    known = true;
+  } catch {
+    known = false;
+  }
+  if (!known) throw new Error(`Execution record pins unknown commit ${sourceCommit}; re-run the expected tests.`);
+  let descendant = false;
+  try {
+    execSync(`git merge-base --is-ancestor ${sourceCommit} HEAD`, { cwd: root, stdio: "ignore" });
+    descendant = true;
+  } catch {
+    descendant = false;
+  }
+  if (!descendant) {
+    throw new Error(`Current HEAD does not descend from the recorded execution commit ${sourceCommit}; re-run the expected tests and regenerate the census.`);
+  }
 }
 
 /** Extract the top-level test function body, or undefined when the test is absent (renamed/stale). */
@@ -261,7 +282,33 @@ export function productionMount(body: string, source = "", selfName = ""): boole
   const mount = driverDirect || mountHelpers.some((name) => calls(name));
   return renderer && mount;
 }
+/** Distinct matched fragments for one signal, longest first, capped for review. */
+export function matchedText(body: string, signal: RegExp): string[] {
+  const flags = signal.flags.includes("g") ? signal.flags : `${signal.flags}g`;
+  const hits = body.match(new RegExp(signal.source, flags)) ?? [];
+  return [...new Set(hits)].sort((a, b) => b.length - a.length).slice(0, 3);
+}
 
+/** The exact driver construction the body shows: a HeadlessDriver constructor,
+ * or the mount helper it goes through. Stored per receipt so the production
+ * observation names evidence instead of repeating a canned block. */
+export function observedDriver(body: string, source: string, selfName: string): string {
+  const direct = body.match(/HeadlessDriver::\w+/);
+  if (direct !== null) return direct[0];
+  const helper = mountHelperNames(source).filter((name) => name !== selfName).find((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
+  return helper === undefined ? "unknown" : `mount-helper:${helper}`;
+}
+
+/** The exact renderer reference the body shows: a qualified production path,
+ * an imported poodle_render name, or the fixture helper it goes through. */
+export function observedRenderer(body: string, source: string, selfName: string): string {
+  const direct = body.match(/poodle_render::(?!color::)\w+|node_compat::\w+/);
+  if (direct !== null) return direct[0];
+  const imported = rendererImportNames(source).find((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
+  if (imported !== undefined) return `poodle_render-import:${imported}`;
+  const helper = rendererHelperNames(source).filter((name) => name !== selfName).find((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
+  return helper === undefined ? "unknown" : `fixture-helper:${helper}`;
+}
 /** Claim-bound axis admission for one expected-test body. Signals without the
  * production mount admit nothing: renderer unit tests and direct handler calls
  * fail closed here. Pass the file source so fixture-helper indirection
@@ -288,11 +335,12 @@ export function admitTestAxes(
   const observed = ASSERT_RE.test(body);
   for (const axis of CENSUS_AXES) {
     if (axis === "semantic") continue;
-    const matched = observed
-      ? AXIS_TEST_SIGNALS[axis].filter((signal) => signal.test(body)).map((signal) => String(signal))
-      : [];
-    signals[axis] = matched;
-    if (matched.length >= 1) axes.push(axis);
+    // Receipts store what the body actually said, not the pattern that
+    // matched: at most three distinct matched fragments per axis, so review
+    // reads evidence instead of regex source.
+    const matched = observed ? AXIS_TEST_SIGNALS[axis].flatMap((signal) => matchedText(body, signal)) : [];
+    signals[axis] = [...new Set(matched)].slice(0, 3);
+    if (signals[axis].length >= 1) axes.push(axis);
   }
   return { production, axes, signals };
 }
@@ -458,6 +506,7 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
   if (record.schema !== EXECUTION_SCHEMA) throw new Error(`Execution record schema is ${record.schema}.`);
   if (!/^[0-9a-f]{40}$/.test(record.source_commit)) throw new Error("Execution record needs a 40-hex source commit.");
   if (record.command !== NATIVE_SELECTOR) throw new Error(`Execution record must cite ${NATIVE_SELECTOR}.`);
+  validatePinAncestry(record.source_commit, root);
   const lockfile = read(root, record.lockfile);
   if (sha256Hex(lockfile) !== record.lockfile_sha256) {
     throw new Error("GPUI lockfile changed since the recorded execution; re-run the expected tests and regenerate the census.");
@@ -502,8 +551,10 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
   const nucleusByName = new Map(nucleusRows.map((row) => [row.entry.name, row]));
   const record = loadExecutionRecord(root);
   validateExecutionRecord(record, root);
-  const commit = headCommit(root);
-  const lockText = read(root, GPUI_LOCKFILE);
+  // Evidence identity is record state, never live HEAD: a commit cannot
+  // contain its own hash, so embedding the current checkout would make every
+  // checked-in artifact disagree with the generator on every later commit.
+  const commit = record.source_commit;
   const receipts: Array<{ file: string; content: string }> = [];
 
   const rows: CensusRow[] = roster.map((component) => {
@@ -600,7 +651,9 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
             production_path_observation: {
               observed: true,
               mount: "HeadlessDriver",
+              driver: observedDriver(body, headlessSource, test),
               render_path: "poodle_render -> poodle_gpui_node_backend::to_gpui",
+              renderer: observedRenderer(body, headlessSource, test),
               input_dispatch: "gpui-test-platform-dispatch",
             },
             package: "poodle-gpui-preview",
@@ -707,7 +760,6 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
       note: "Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.",
     },
   };
-  void lockText;
   return { doc, receipts };
 }
 
@@ -768,7 +820,7 @@ export function censusMarkdown(doc: CensusDoc): string {
   const lines: string[] = [];
   lines.push("# g18.001 — Contract-bound GPUI functionality census");
   lines.push("");
-  lines.push(`Source commit: \`${doc.source_commit}\``);
+  lines.push(`Evidence commit (execution identity from the execution record, not the checkout): \`${doc.source_commit}\``);
   lines.push(`Denominator: **${doc.denominator.public}** public / **${doc.denominator.portable}** portable; \`${doc.denominator.notApplicable[0]}\` is the single contract-approved non-portable row.`);
   lines.push("");
   lines.push("<!-- g18-census-method -->");
@@ -865,6 +917,7 @@ function validateReceiptFile(content: string, root: string): void {
     source_commit?: string;
     lockfile_sha256?: string;
     execution?: { outcome?: string; body_sha256?: string };
+    production_path_observation?: { driver?: unknown; renderer?: unknown };
   };
   if (receipt.schema !== RECEIPT_SCHEMA) throw new Error(`Mounted receipt schema is ${receipt.schema}.`);
   if (receipt.selector !== NATIVE_SELECTOR) throw new Error(`Mounted receipt selector must be ${NATIVE_SELECTOR}.`);
@@ -888,6 +941,10 @@ function validateReceiptFile(content: string, root: string): void {
   if (testIsIgnored(root, receipt.test)) throw new Error(`Mounted receipt test ${receipt.test} is ignored.`);
   const admission = admitTestAxes(body, read(root, HEADLESS_TEST_FILE), receipt.test);
   if (!admission.production) throw new Error(`Mounted receipt test ${receipt.test} bypasses the mounted backend.`);
+  const observation = receipt.production_path_observation;
+  if (typeof observation?.driver !== "string" || observation.driver === "unknown" || typeof observation?.renderer !== "string" || observation.renderer === "unknown") {
+    throw new Error(`Mounted receipt for ${receipt.component} has no resolved production observation.`);
+  }
   for (const axis of receipt.contract_claims) {
     if (!admission.axes.includes(axis as CensusAxis)) {
       throw new Error(`Mounted receipt for ${receipt.component} claims ${axis} its test body does not show.`);

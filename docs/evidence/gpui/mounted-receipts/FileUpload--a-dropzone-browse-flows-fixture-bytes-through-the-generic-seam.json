@@ -16,16 +16,18 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            selected.1,\n            poodle_headless::file_upload::base64_encode(b\"fixture payload\"),\n            \"the same bare-base64 payload"
     ],
     "pointer": [
-      "/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\\.click\\(/i"
+      "pointer_activate"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::file_upload_with_handlers",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

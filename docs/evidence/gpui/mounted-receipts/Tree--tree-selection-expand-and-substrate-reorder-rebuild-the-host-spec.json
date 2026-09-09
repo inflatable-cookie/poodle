@@ -17,19 +17,23 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert!(\n            host.drag.is_none() && host.drop_target.is_none(),\n            \"a commit",
+      "assert!(host.reorders.is_empty(), \"Escape commit"
     ],
     "pointer": [
-      "/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\\.click\\(/i"
+      "pointer_activate",
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "dispatch_key"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::TreeHandlers",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

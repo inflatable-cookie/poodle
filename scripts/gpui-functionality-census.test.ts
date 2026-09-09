@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import path from "node:path";
 import {
   ADMITTED_VIA,
   AXIS_TEST_SIGNALS,
@@ -8,8 +9,12 @@ import {
   admitReceiptTextAxes,
   admitTestAxes,
   extractTestBody,
+  loadExecutionRecord,
+  observedDriver,
+  observedRenderer,
   validateCapabilityManifest,
   validateCensusDoc,
+  validateExecutionRecord,
   type CensusAxis,
   type CensusDoc,
   type ManifestEntry,
@@ -231,5 +236,45 @@ describe("g18.001 census oracles", () => {
     for (const axis of axes) {
       expect(AXIS_TEST_SIGNALS[axis].length).toBeGreaterThan(0);
     }
+  });
+
+  it("record-state oracle: evidence identity is pinned, current tree descends from it", () => {
+    const root = path.resolve(import.meta.dir, "..");
+    const record = loadExecutionRecord(root);
+    expect(record.source_commit).toBe("d8e174fb40b2634b7d00018c721816ffc037d712");
+    validateExecutionRecord(record, root);
+  });
+
+  it("evidence-text oracle: receipts store matched body text, not patterns", () => {
+    const body = [
+      "run_headless(|cx| {",
+      "  let node = poodle_render::button(&spec, &ctx, handler);",
+      "  let mut driver = HeadlessDriver::new(cx, node);",
+      "  driver.pointer_activate();",
+      "  assert_eq!(count.lock().unwrap().as_slice(), [1]);",
+      "});",
+    ].join("\n");
+    const admission = admitTestAxes(body);
+    for (const fragment of admission.signals.pointer) {
+      expect(fragment).not.toContain("/");
+      expect(body).toContain(fragment);
+    }
+    expect(observedDriver(body, "", "")).toBe("HeadlessDriver::new");
+    expect(observedRenderer(body, "", "")).toBe("poodle_render::button");
+  });
+
+  it("announce-hardening oracle: prose alone without the read idiom admits no accessibility", () => {
+    const body = [
+      "run_headless(|cx| {",
+      "  let node = poodle_render::button(&spec, &ctx, handler);",
+      "  let mut driver = HeadlessDriver::new(cx, node);",
+      "  driver.pointer_activate();",
+      "  // announcement role is carried by the host, asserted elsewhere",
+      "  assert_eq!(count.lock().unwrap().as_slice(), [1]);",
+      "});",
+    ].join("\n");
+    const admission = admitTestAxes(body);
+    expect(admission.production).toBe(true);
+    expect(admission.axes).not.toContain("accessibility");
   });
 });

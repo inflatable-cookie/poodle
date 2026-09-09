@@ -16,16 +16,20 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            take_events(&host.log),\n            vec![\n                \"duration-before/focus:false\",\n                \"duration/change:1:59:59:7199\",\n                \"duration/change:2:0:59:7259\",\n                \"duration/change"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "fixture-helper:duration_routing_tree",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",

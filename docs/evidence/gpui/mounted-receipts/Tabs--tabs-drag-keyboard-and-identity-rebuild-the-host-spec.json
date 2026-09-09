@@ -19,25 +19,36 @@
       "production-mount"
     ],
     "events": [
-      "/assert[^;]*(emit|payload|change|commit|callback)/i"
+      "assert_eq!(\n            beta_changes.lock().unwrap().as_slice(),\n            [\"other\"],\n            \"Pointer activation on alpha instance must not fire beta change",
+      "assert!(\n            alpha_changes.lock().unwrap().is_empty(),\n            \"Keyboard navigation on beta instance must not fire alpha change",
+      "assert!(orders.lock().unwrap().is_empty(), \"Drag cancelled via Escape must not commit"
     ],
     "pointer": [
-      "/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\\.click\\(/i"
+      "pointer_activate",
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i"
+      "focus_handle_for",
+      "focus_state_for",
+      "focus_element"
     ],
     "accessibility": [
-      "/a11y\\.|NodeToggled|NodeRole|\\baria\\b|accessible|announce/i"
+      "accessible",
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
-      "/rem_to_px|resolve_color|resolve_space|resolve_opacity|resolve_radius|_geometry|Geometry|computed_rect|dimensions/i"
+      "resolve_opacity",
+      "resolve_color",
+      "resolve_space"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::tabs_with_panel",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
