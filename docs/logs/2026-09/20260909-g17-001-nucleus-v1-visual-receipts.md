@@ -1,10 +1,11 @@
 # g17.001 — Nucleus V1 visual receipts
 
-Status: ready for review
+Status: complete — merged in PR #232 at `34104e792d8f4a8c522e92b2d1c4794b01671292` on 2026-09-09
 Date: 2026-09-09
 Card: `docs/roadmaps/g17/001-nucleus-v1-visual-receipts.md`
 Base: `origin/main` at `f622e2a8d2929f3cee13e5226cac9af485b1ae43`
 Branch: `ns-e6426f01-9e5a-43dd-9c35-9437d3021919` (queue-owned)
+Review: accepted independent exact-head `ready_to_merge` verdict in [review comment #5603548461](https://github.com/inflatable-cookie/poodle/pull/232#issuecomment-5603548461) at head `10c4f2cca01302a8c12cc753f9956a2bf67e9ca9`; merge commit: `34104e792d8f4a8c522e92b2d1c4794b01671292`
 
 ## Outcome
 
@@ -78,4 +79,6 @@ and states findings are open evidence; no cell carries acceptance language.
 - `effigy docs:lint`, `docs:snippet-check`, `report:parity`,
   `report:accessibility` — green (after the documented
   `core:build`/`svelte:package`/`react:package` prerequisites)
-- `git diff --check` — clean. No windowed selector was run. No merge performed.
+- `git diff --check` — clean. No windowed selector was run. Merge performed by the plugin as `34104e792d8f4a8c522e92b2d1c4794b01671292` on 2026-09-09.
+- Closeout re-verification on merged main `34104e792d8f4a8c522e92b2d1c4794b01671292`: `effigy test:nucleus-parity-receipts` 17 pass / 0 fail, `bun test scripts/parity-evidence-ledger.test.ts` 9 pass / 0 fail, `effigy check:parity-evidence-ledger` 176 rows validated, `git diff --check` clean.
+- Non-blocking reviewer notes (deferred, no acceptance impact): `validateV1Receipt` revalidates the whole bundle once per receipt (O(29 × bundle); suite well under a second); the `mounted.receipt.proof_level !== "V1"` guards in `deriveNucleusReceiptRows` are redundant but harmless.

@@ -1,6 +1,6 @@
 # 001 — Nucleus V1 visual receipts
 
-Status: ready
+Status: complete
 Owner: Poodle core
 Created: 2026-09-05
 Updated: 2026-09-09
@@ -92,6 +92,12 @@ Prerequisite evidence: Lab run `2026-09-08T14-06-48`; 174 captures covering
 reported findings; every foreground proof valid. Final evidence must add the PR,
 reviewed exact head, merge commit, imported bundle hash, emitted receipt count,
 ledger result, and validation actually run.
+
+## Shipped result (merged)
+
+PR #232 merged as `34104e792d8f4a8c522e92b2d1c4794b01671292` on 2026-09-09 after independent exact-head review of `10c4f2cca01302a8c12cc753f9956a2bf67e9ca9` ([review comment #5603548461](https://github.com/inflatable-cookie/poodle/pull/232#issuecomment-5603548461)).
+Imported bundle `0512b830e94bc30a7f1d2c623c6e081c85d4aa0086a60f9adfd905badc612a99` (validator 1.0.0, run `2026-09-08T14-06-48`); 29 V1 receipts cover every Nucleus row with all 160 findings retained as open evidence; the generated ledger moved only receipt-backed GPUI visual cells to `compared` (29/29). M1/A1 receipts validate untouched (87/87).
+Validation on merged main: `effigy test:nucleus-parity-receipts` 17 pass / 0 fail, ledger unit tests 9 pass / 0 fail, `effigy check:parity-evidence-ledger` 176 rows validated, `git diff --check` clean. No windowed selector was run.
 
 ## Next task
 

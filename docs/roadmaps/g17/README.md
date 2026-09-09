@@ -16,7 +16,7 @@ lab and external accessibility authority own V2 and A2.
 
 ## Current state
 
-- Fixed cohort: 29 rendered components; M1 29/29; A1 29/29.
+- Fixed cohort: 29 rendered components; M1 29/29; A1 29/29; V1 29/29 (PR #232).
 - Poodle Lab run `2026-09-08T14-06-48`: 174 captures, 116 comparisons, two
   agreeing repeats, proved foreground evidence, 160 reported findings.
 - `g17.002`–`g17.004` are complete. Their web modality, native non-activation,
@@ -27,7 +27,7 @@ lab and external accessibility authority own V2 and A2.
 
 | Task or planning horizon | State | Dependency or checkpoint |
 | --- | --- | --- |
-| [`g17.001`](001-nucleus-v1-visual-receipts.md) — import Lab bundle and emit V1 receipts | **ready; approved frontier** | Lab `g01.006` complete |
+| [`g17.001`](001-nucleus-v1-visual-receipts.md) — import Lab bundle and emit V1 receipts | complete | PR #232 (merge `34104e792d8f4a8c522e92b2d1c4794b01671292`) |
 | [`g17.002`](002-web-focus-ring-input-modality.md) — web modality focus | complete | PR #228 |
 | [`g17.003`](003-background-safe-nonactivation-proof.md) — native non-activation proof | complete | PR #230 |
 | [`g17.004`](004-gpui-cohort-programmatic-append.md) — closed append replay | complete | PR #231 |
@@ -38,7 +38,7 @@ lab and external accessibility authority own V2 and A2.
 | GPUI keyboard-origin focus | planning horizon | separate task compilation after V1 checkpoint |
 | Web-pair composite extraction | operator checkpoint | first React consumer or affected composite touched |
 
-Only the bold row is approved for queue dispatch. Planned horizons are not
+No row is approved for queue dispatch. Planned horizons are not
 tasks and carry no execution authority.
 
 ## Held and recurring work
@@ -53,7 +53,6 @@ tasks and carry no execution authority.
 
 ## Approved frontier
 
-Dispatch `g17.001` only. It is a serial evidence-import task; no concurrent
-sibling or automatic successor is approved. The queue transport projection is
-[`dispatch.md`](../dispatch.md). After closeout, return to Chatterbox for the
-next planning checkpoint.
+No approved frontier. `g17.001` merged in PR #232 and is closed out in the
+integration checkout. After closeout, return to Chatterbox for the
+next planning checkpoint; no successor auto-starts.

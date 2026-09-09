@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Chatterbox
-Updated: 2026-09-09 (flattened-task switchover)
+Updated: 2026-09-09 (g17.001 merged; frontier empty)
 Planning authority: [`g17/README.md`](g17/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -13,17 +13,10 @@ commit.
 
 ## Ready queue task
 
-- **Northstar task:** [`g17.001`](g17/001-nucleus-v1-visual-receipts.md)
-- **State:** ready; serial; no concurrent sibling; no automatic successor.
-- **Prerequisite:** poodle-lab `g01.006` complete; Lab PR #8 merged at
-  `f99465f048d7c5c58603b99ae51f3209e581848e`; validated run
-  `2026-09-08T14-06-48` available.
-- **Completion:** immutable validated import, V1 receipts for every covered row,
-  receipt-backed ledger advancement, all findings retained without adjudication.
-- **Owned and reserved paths:** the task's inline dispatch manifest is exact.
-- **Worker:** general implementation.
-- **Review:** independent exact-head PR review required.
-- **Escalation:** Chatterbox for evidence mapping/policy; operator for expansion.
+Empty. `g17.001` merged in PR #232 at
+`34104e792d8f4a8c522e92b2d1c4794b01671292` and is closed out in the
+integration checkout. No task is approved for queue dispatch; return to
+Chatterbox for the next planning checkpoint. No successor auto-starts.
 
 ## Held planning horizons
 

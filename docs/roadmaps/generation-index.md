@@ -6,10 +6,10 @@ Updated: 2026-09-09
 
 - [`g17`](g17/README.md) — Nucleus switch evidence
   - Status: active
-  - Completed tasks: `g17.002`, `g17.003`, `g17.004`
-  - Approved frontier: [`g17.001`](g17/001-nucleus-v1-visual-receipts.md)
-  - Next checkpoint: choose which V2, M2, A2, focus, or switch-packet task to
-    compile after V1 closeout; no successor auto-starts.
+  - Completed tasks: `g17.001`, `g17.002`, `g17.003`, `g17.004`
+  - Approved frontier: none; `g17.001` merged in PR #232 at `34104e792d8f4a8c522e92b2d1c4794b01671292`
+  - Next checkpoint: Chatterbox chooses which V2, M2, A2, focus, or switch-packet task to
+    compile; no successor auto-starts.
 
 ## Compacted generations
 
