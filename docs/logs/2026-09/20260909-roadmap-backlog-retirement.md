@@ -66,3 +66,12 @@ and the frontier is unchanged and empty.
 - `git diff --check` passes.
 - Closeout re-verification on merged main `ec20df2b935f6a06aff59e53918bc0906ceec048`: `find docs -type d -name backlog -print` returns nothing; `roadmaps/backlog` references remain only in this log and the archived queue handoff; `bun packages/svelte/preview/scripts/lint-docs.ts` exits 0; `git diff --check` clean. Frontier unchanged and empty; no triage note, task, generation, or product-code change.
 - Non-blocking reviewer note (deferred, no acceptance impact): extra blank line after `validateRoadmapBacklogRetired` in `lint-docs.ts`; cosmetic only.
+
+## Frontier closeout correction (2026-09-09)
+
+Post-closeout verification found `docs/roadmaps/README.md` still said
+`g17.001` is ready after PR #232 had merged and closed it out. The
+front-door paragraph now states `g17.001` is complete and the approved
+frontier is empty pending a Chatterbox planning checkpoint, agreeing with
+`g17/README.md`, `generation-index.md`, and `dispatch.md`. No task,
+generation, triage, or product-code change; history above unchanged.

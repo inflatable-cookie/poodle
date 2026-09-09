@@ -19,8 +19,8 @@ Northstar roadmaps use one generation-plus-task model:
 - [`../evidence/nucleus/`](../evidence/nucleus/) holds the current Nucleus
   cohort, M1/A1 receipts, schemas, and generated ledger.
 
-`g17.001` is ready: import the completed Poodle Lab cohort bundle and emit V1
-receipts. No later horizon is dispatchable yet.
+`g17.001` is complete (merged in PR #232); the approved frontier is empty
+pending a Chatterbox planning checkpoint. No task is dispatchable yet.
 
 ## Rules
 
