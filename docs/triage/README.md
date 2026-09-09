@@ -20,4 +20,6 @@ Current open notes:
   repository-settings and web-pair architecture candidates; everything
   else is promoted.
 - `20260904-151947-consumer-sweep-intake.md` — first consumer intake run;
-  Tabs styling seam is the open remainder, `0.3.0` adoption closes ten.
+  only single-consumer Tabs asks remain after `0.3.0` adoption.
+- `20260905-111233-gpui-unofficial-adoption-gates.md` — published
+  `gpui-apple` build failure and live AccessKit-tree proof still block A2.

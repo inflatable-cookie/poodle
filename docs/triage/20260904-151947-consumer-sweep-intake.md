@@ -1,22 +1,18 @@
 # Consumer Sweep Intake — 2026-09-04
 
 Status: open — promoted: Tree name (`g16.101`), `showTabs` (`g16.100`),
-Tabs fill seam (`g16.102`); remaining: single-consumer Tabs asks, Keyboard
-geometry (held elsewhere), and the ten entries that close with `0.3.0`
+Tabs fill seam (`g16.102`); `0.3.0` adoption is complete; remaining here:
+single-consumer Tabs asks only. Keyboard geometry is held elsewhere.
 Captured: 2026-09-04
 Owner: Chatterbox (planning)
 Source: read-only sweep of 15 sibling repositories' `PAPERCUTS.md` and
 triage files (report kept outside the repo); claims below were spot-checked
 against consumer sources
 
-## Headline
+## Closed by adoption
 
-Ten of sixteen Poodle-attributed consumer entries are already fixed on
-`main` but still open in the consumer because every consumer pins `0.2.2`
-(HistoryCenter v3 and rejection codes ×5, Select ghost variant, Popover
-trigger, licence types, ContextMenu trigger). Publishing `0.3.0` (`g16.097`)
-and moving pins closes them; no Poodle card is needed. That is the strongest
-argument for finishing the release before new component work.
+The ten entries formerly waiting on `0.3.0` closed when the release published
+and all fifteen consumers adopted it. They need no Poodle task.
 
 ## Unresolved, ranked
 
@@ -73,8 +69,6 @@ argument for finishing the release before new component work.
 
 ## Next check
 
-After `0.3.0` publishes, re-run the sweep; expect the ten "fixed on main"
-entries to close once pins move. Remove this note when the single-consumer
-Tabs asks are promoted or rejected. After `0.3.0` publishes, re-run the sweep and expect the
-ten "fixed on main" entries to close once pins move. Remove this note when
-item 1 is promoted or rejected.
+Recheck the three single-consumer Tabs asks when another consumer names the
+same need or Tabs is next changed. Remove this note when each ask is promoted
+or rejected.

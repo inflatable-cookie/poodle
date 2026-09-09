@@ -64,22 +64,27 @@ crates.io `gpui` is still 0.2.2, but `gpui-unofficial` republishes upstream
 unmodified at every Zed release tag (Apache-2.0; the previously GPL
 `ztracing`/`zlog` crates were relicensed Apache upstream on 2026-09-01 and are
 clean from republish 1.19.0-pre). The operator chose to evaluate that route
-(the [`g16` roll-up](../roadmaps/archive/g16.md) preserves the feasibility
-spike) instead of
-building a fork-free adapter. The advice below stays in force until the spike
-reports; "no API to build against" is no longer true of upstream, only of the
-crates.io 0.2.2 pin.
+instead of building a fork-free adapter. The feasibility spike succeeded at
+the API boundary; the [`g16` roll-up](../roadmaps/archive/g16.md) and current
+[`gpui-unofficial` gates](../triage/20260905-111233-gpui-unofficial-adoption-gates.md)
+preserve the result. "No API to build against" is no longer true of upstream,
+only of the crates.io 0.2.2 pin. Adoption still waits on a buildable published
+`gpui-apple` crate and live platform-tree proof.
 
 ## Consequences For Planning
 
-- **Do not schedule GPUI accessibility work.** There is no API to build
-  against, and gpui 0.2.2 is the latest published version. Attaching an adapter
-  was never the blocker: gpui implements `HasWindowHandle`, so `accesskit_macos`
-  could bind its `NSView` without a fork. The blocker is that gpui is
-  immediate-mode and exposes no retained tree, no roles and no laid-out bounds,
-  so Poodle would build and maintain a **parallel accessibility tree across 140
-  `impl IntoElement` components**, macOS-only, to be obsoleted wholesale the day
-  upstream ships. Waiting costs nothing and loses nothing.
+- **Do not schedule A2 against the crates.io 0.2.2 pin.** Upstream GPUI now has
+  AccessKit and the `gpui-unofficial` spike proved that Poodle's existing node
+  accessibility record maps without a vocabulary change. Adoption remains
+  blocked because the published `gpui-apple` crate cannot build from crates.io,
+  and the in-memory test platform exposes no live accessibility tree. Track
+  those exact gates in
+  `../triage/20260905-111233-gpui-unofficial-adoption-gates.md`; do not build a
+  parallel macOS-only tree against 0.2.2.
+- **Continue component-level accessibility work below A2.** Poodle can still
+  prove roles, labels, state, value, keyboard operation, and focus in its
+  mounted node/backend path. The upstream publication hold cannot make those
+  contract claims not-applicable or complete.
 - **Do not read the GPUI accessibility artifacts as runtime proof.**
   `packages/gpui/native-accessibility-proof.json` is explicit about this in its
   own non-goals — it forbids claiming "mounted assistive-technology proof for
@@ -103,12 +108,15 @@ crates.io 0.2.2 pin.
 
 ## What Would Change The GPUI Half
 
-gpui shipping accesskit support is the single upstream event that unblocks it —
-Zed has the same need, so it is plausible rather than theoretical. Re-check on
-every gpui release.
+The source API exists upstream. The remaining adoption gate is a published
+crate set that builds outside the publisher's sibling layout, followed by a
+non-activating live-window proof that reads Poodle content from the platform
+accessibility tree. Re-check each `gpui-unofficial` release; do not infer A2
+from headless node snapshots.
 
-Until then the GPUI half is a **forced acceptance**, in the sense the Tree
-contract already uses: not a debt anyone can pay down.
+Until those gates clear, A2 is a **forced acceptance**, in the sense the Tree
+contract already uses. Component-level node semantics, keyboard, and focus are
+still payable work and remain governed by the active GPUI runway.
 
 ## The 48 Contracts This Governs
 

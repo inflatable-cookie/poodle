@@ -13,14 +13,14 @@ Northstar roadmaps use one generation-plus-task model:
 ## Current state
 
 - [`generation-index.md`](generation-index.md) names the active generation.
-- [`g17/README.md`](g17/README.md) is the current roadmap and approved frontier.
+- [`g18/README.md`](g18/README.md) is the current roadmap and approved frontier.
 - [`dispatch.md`](dispatch.md) is only the queue transport projection.
-- [`archive/`](archive/) contains compact non-procedural roll-ups for g01–g16.
+- [`archive/`](archive/) contains compact non-procedural roll-ups for g01–g17.
 - [`../evidence/nucleus/`](../evidence/nucleus/) holds the current Nucleus
   cohort, M1/A1 receipts, schemas, and generated ledger.
 
-`g17.001` is complete (merged in PR #232); the approved frontier is empty
-pending a Chatterbox planning checkpoint. No task is dispatchable yet.
+`g18.001` is the approved ready task. It establishes a contract-bound GPUI
+functionality census before component repair tranches are compiled.
 
 ## Rules
 

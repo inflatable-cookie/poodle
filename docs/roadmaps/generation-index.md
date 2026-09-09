@@ -4,12 +4,12 @@ Updated: 2026-09-09
 
 ## Active generation
 
-- [`g17`](g17/README.md) — Nucleus switch evidence
+- [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
-  - Completed tasks: `g17.001`, `g17.002`, `g17.003`, `g17.004`
-  - Approved frontier: none; `g17.001` merged in PR #232 at `34104e792d8f4a8c522e92b2d1c4794b01671292`
-  - Next checkpoint: Chatterbox chooses which V2, M2, A2, focus, or switch-packet task to
-    compile; no successor auto-starts.
+  - Ready task: `g18.001` contract-bound GPUI functionality census
+  - Approved frontier: `g18.001`; one serial queue lane; no successor auto-starts
+  - Next checkpoint: Chatterbox compiles the first functional repair tranche
+    from the accepted census.
 
 ## Compacted generations
 
@@ -31,6 +31,7 @@ Updated: 2026-09-09
 | g14 | rejected executable-conformance pilot | [`g14`](archive/g14.md) |
 | g15 | v0.2.x release and adoption programme | [`g15`](archive/g15.md) |
 | g16 | v0.3.0, consumer adoption, Nucleus M1/A1 | [`g16`](archive/g16.md) |
+| g17 | Nucleus M1/A1/V1 switch evidence and background-safe capture | [`g17`](archive/g17.md) |
 
-Only g17 remains expanded. Roll-ups are historical summaries, never executable
+Only g18 remains expanded. Roll-ups are historical summaries, never executable
 task surfaces.

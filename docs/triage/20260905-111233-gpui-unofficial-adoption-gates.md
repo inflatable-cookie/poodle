@@ -63,9 +63,10 @@ depending on `gpui-platform-gpui-unofficial = "1.19.0-pre"` on macOS.
 
 ## Next check
 
-When gate 1 has a published fix and the operator has decided gate 2,
-compile the migration card (estimate from the spike: one substantial native
+When gate 1 has a published fix, compile the migration task (estimate from the
+spike: one substantial native
 lane; 1–2 days mechanical port plus overlay/focus behaviour and the live
 `Application` restore). Until then, A2 stays "route chosen, blocked
-upstream"; A1 proceeds. Remove this note when the migration card is
+upstream"; A1 proceeds and g18 may close GPUI behaviour below the platform
+tree. Remove this note when the migration task is
 compiled or the route is rejected.
