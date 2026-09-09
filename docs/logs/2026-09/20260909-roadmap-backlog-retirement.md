@@ -1,13 +1,11 @@
 # Roadmap Backlog Retirement
 
+Status: complete-merged — PR #233 at `745f09bcdc62d92a319e781e0fe1276ecb6dda10` merged as `ec20df2b935f6a06aff59e53918bc0906ceec048` on 2026-09-09
 Date: 2026-09-09
 Repository: `inflatable-cookie/poodle`
 Integration branch: `main`
 Retirement base: `b8b672cdbbd0c8e6d7f7dbfd2d7a8ad27f18e703`
-Status: complete
-Authority: operator-prompted one-time Northstar roadmap-backlog retirement
-(`retire-roadmap-backlog-prompt.md`), queued as
-`docs/handoffs/20260909-160254-roadmap-backlog-retirement.md`
+Review: accepted independent exact-head `ready_to_merge` verdict in [review comment #5604152213](https://github.com/inflatable-cookie/poodle/pull/233#issuecomment-5604152213) at head `745f09bcdc62d92a319e781e0fe1276ecb6dda10` (reviewer `opencode-go/glm-5.3-flash`, independent of worker `meta/muse-spark-1.3-contributor`); merge commit: `ec20df2b935f6a06aff59e53918bc0906ceec048`
 
 ## Preflight
 
@@ -62,7 +60,9 @@ and the frontier is unchanged and empty.
 
 - `find docs -type d -name backlog -print` returns nothing.
 - Inbound-link search finds no live backlog-doctrine link; only this log,
-  the queue handoff (closed separately by the plugin), and historical
-  evidence name the former path as provenance.
+  the archived queue handoff, and historical evidence name the former path
+  as provenance.
 - `docs:lint` (`bun packages/svelte/preview/scripts/lint-docs.ts`) passes.
 - `git diff --check` passes.
+- Closeout re-verification on merged main `ec20df2b935f6a06aff59e53918bc0906ceec048`: `find docs -type d -name backlog -print` returns nothing; `roadmaps/backlog` references remain only in this log and the archived queue handoff; `bun packages/svelte/preview/scripts/lint-docs.ts` exits 0; `git diff --check` clean. Frontier unchanged and empty; no triage note, task, generation, or product-code change.
+- Non-blocking reviewer note (deferred, no acceptance impact): extra blank line after `validateRoadmapBacklogRetired` in `lint-docs.ts`; cosmetic only.
