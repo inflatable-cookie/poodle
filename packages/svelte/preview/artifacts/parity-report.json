@@ -54,7 +54,7 @@
     },
     "mountedBehaviour": {
       "status": "mounted",
-      "scope": "bounded named regression set, not a 175-component behaviour pass",
+      "scope": "bounded named regression set, not a 175-component behaviour pass; the g18.001 capability census (docs/evidence/gpui/gpui-functionality-census.md) is the compilation input for repair tranches",
       "testFile": "packages/gpui/preview/tests/headless_regressions.rs",
       "namedTests": [
         "a_mounted_button_carries_its_controls_target",
@@ -89,16 +89,50 @@
         "stepper_selection_and_rerun_reach_separate_mounted_controls",
         "stepper_collapse_stays_independent_in_a_mounted_window",
         "stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press",
-        "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring"
+        "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring",
+        "accordion_result_disclosure_focus_identity_and_disabled_paths",
+        "block_editor_grip_drag_and_move_controls_rebuild_the_host_spec",
+        "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
+        "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec",
+        "collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard",
+        "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",
+        "duration_input_segments_edit_and_rebuild_the_host_spec",
+        "editable_label_commits_on_enter_and_once_through_the_blur_tab_causes",
+        "editable_label_live_draft_stays_off_the_committed_value",
+        "editable_list_substrate_reorder_rebuilds_the_host_spec",
+        "fader_mounted_parity_through_production_dispatch",
+        "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
+        "knob_mounted_parity_through_production_dispatch",
+        "licence_activation_machine_name_enter_and_escape_restore_display_focus",
+        "licence_seats_seat_row_enter_and_escape_restore_display_focus",
+        "number_input_mounted_accessibility_projects_spin_button_surface",
+        "number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value",
+        "order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec",
+        "pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard",
+        "radio_group_exclusive_focus_identity_and_disabled_paths",
+        "rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard",
+        "segmented_control_exclusive_focus_identity_and_disabled_paths",
+        "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds",
+        "slider_axis_keyboard_and_disabled_rebuild_the_host_spec",
+        "switch_toggle_readonly_and_disabled_rebuild_the_host_spec",
+        "tabs_drag_keyboard_and_identity_rebuild_the_host_spec",
+        "text_input_controlled_editing_and_identity_rebuild_the_host_spec",
+        "time_input_segmented_editor_commits_drafts_and_bounds",
+        "toggle_group_result_focus_identity_and_disabled_paths",
+        "tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec",
+        "tri_state_switch_value_focus_identity_and_disabled_paths",
+        "xy_pad_mounted_parity_through_production_dispatch"
       ]
     },
+    "census": "docs/evidence/gpui/gpui-functionality-census.md",
     "accessibility": {
       "status": "manual",
-      "scope": "shared specs and bounded mounted evidence only; broad native semantics, focus, keyboard, announcement, and assistive-technology parity are not proved",
+      "scope": "shared specs and bounded mounted evidence only; broad native semantics, focus, keyboard, announcement, and assistive-technology parity are not proved; the g18.001 capability census records per-component node-level admission separately from the A2 platform hold",
       "evidence": [
         "packages/gpui/native-accessibility-proof.json#currentPosture",
         "packages/gpui/preview/tests/headless_regressions.rs",
-        "docs/contracts/003-native-accessibility.md"
+        "docs/contracts/003-native-accessibility.md",
+        "docs/evidence/gpui/gpui-functionality-census.md#g18-census-summary"
       ]
     },
     "visual": {
@@ -116,7 +150,8 @@
       "MeterSurface remains web-only and is not a native route.",
       "GPUI mounted evidence is bounded to the named regression set; it is not a 174-component behaviour pass.",
       "GPUI accessibility remains manual because no broad native assistive-technology evidence is recorded.",
-      "The retained three-runtime visual comparison is Button-only; other GPUI visual cells are missing."
+      "The retained three-runtime visual comparison is Button-only; other GPUI visual cells are missing.",
+      "g18.001 census: 175 constructing routes are not functional completion; per-component capability admission lives in docs/evidence/gpui/gpui-functionality-census.md."
     ]
   },
   "packageSurfaceCoverage": {

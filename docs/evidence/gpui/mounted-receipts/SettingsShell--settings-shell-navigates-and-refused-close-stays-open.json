@@ -1,0 +1,52 @@
+{
+  "schema": "poodle.g18-gpui-mounted-receipt.v1",
+  "component": "SettingsShell",
+  "test": "settings_shell_navigates_and_refused_close_stays_open",
+  "selector": "effigy regressions:native",
+  "scenario_id": null,
+  "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+  "contract_claims": [
+    "semantic",
+    "events",
+    "keyboard_focus"
+  ],
+  "signals": {
+    "semantic": [
+      "assert",
+      "production-mount"
+    ],
+    "events": [
+      "assert!(\n            node.lock()\n                .unwrap()\n                .texts()\n                .iter()\n                .any(|t| *t == \"Unsaved change",
+      "assert!(\n            opens.lock().unwrap().is_empty(),\n            \"refused close does not emit on_open_change"
+    ],
+    "keyboard_focus": [
+      "keyboard_"
+    ]
+  },
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::settings_shell",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "d8e174fb40b2634b7d00018c721816ffc037d712",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "distribution": "workspace",
+  "execution": {
+    "command": "effigy regressions:native",
+    "run_id": "2026-09-09-g18-001-expected",
+    "outcome": "passed",
+    "body_sha256": "229ca2d1fda2d94e77b0e81cf71b7f990198c4e6beb1e9651cd725ed897e9394"
+  },
+  "observed": [
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real keyboard input or backend focus through the mounted tree"
+  ],
+  "outcome": "passed"
+}

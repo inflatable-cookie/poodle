@@ -1,0 +1,58 @@
+{
+  "schema": "poodle.g18-gpui-mounted-receipt.v1",
+  "component": "Stepper",
+  "test": "stepper_selection_and_rerun_reach_separate_mounted_controls",
+  "selector": "effigy regressions:native",
+  "scenario_id": null,
+  "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+  "contract_claims": [
+    "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus"
+  ],
+  "signals": {
+    "semantic": [
+      "assert",
+      "production-mount"
+    ],
+    "events": [
+      "assert_eq!(\n            changes.lock().unwrap().as_slice(),\n            [\"read\"],\n            \"an enabled trigger emit",
+      "assert_eq!(\n            reruns.lock().unwrap().as_slice(),\n            [\"read\"],\n            \"the rerun control emit",
+      "assert_eq!(\n            change"
+    ],
+    "pointer": [
+      "pointer_activate"
+    ],
+    "keyboard_focus": [
+      "dispatch_key"
+    ]
+  },
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::stepper",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "d8e174fb40b2634b7d00018c721816ffc037d712",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "distribution": "workspace",
+  "execution": {
+    "command": "effigy regressions:native",
+    "run_id": "2026-09-09-g18-001-expected",
+    "outcome": "passed",
+    "body_sha256": "4c8e185d33cbe70e3a2b73ce4aa1f63e436b9830292c4345a6b6b6015451bae0"
+  },
+  "observed": [
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree"
+  ],
+  "outcome": "passed"
+}

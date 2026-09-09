@@ -1,0 +1,74 @@
+{
+  "schema": "poodle.g18-gpui-mounted-receipt.v1",
+  "component": "Select",
+  "test": "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds",
+  "selector": "effigy regressions:native",
+  "scenario_id": null,
+  "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+  "contract_claims": [
+    "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
+  ],
+  "signals": {
+    "semantic": [
+      "assert",
+      "production-mount"
+    ],
+    "events": [
+      "assert!(\n            values\n                .lock()\n                .expect(\"values\")\n                .iter()\n                .all(|value| value != \"cherry\"),\n            \"a stale highlighted value must not commit",
+      "assert_eq!(\n                host.left.spec.highlighted_value.as_deref(),\n                Some(\"banana\"),\n                \"reopening highlights the commit",
+      "assert!(\n                host.right.spec.highlighted_value.is_none(),\n                \"zz matches no option, so Enter can commit"
+    ],
+    "pointer": [
+      "pointer_activate",
+      "pointer_press"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
+    ],
+    "accessibility": [
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "resolve_radius",
+      "resolve_color",
+      "resolve_space"
+    ]
+  },
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_element_in_box",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::presentation",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "d8e174fb40b2634b7d00018c721816ffc037d712",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "distribution": "workspace",
+  "execution": {
+    "command": "effigy regressions:native",
+    "run_id": "2026-09-09-g18-001-expected",
+    "outcome": "passed",
+    "body_sha256": "7e3f1c4b9ae7a39a3b5363d448db488c62718f18a28e502abc4435ab6f0418ae"
+  },
+  "observed": [
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
+  ],
+  "outcome": "passed"
+}

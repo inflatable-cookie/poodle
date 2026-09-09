@@ -1,0 +1,473 @@
+{
+  "schema": "poodle.g18-missing-capability-groups.v1",
+  "task": "g18.001",
+  "groups": [
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "AgentPlanRecord",
+        "AlertDialog",
+        "Breadcrumbs",
+        "ColorPicker",
+        "ContextMenu",
+        "DataTable",
+        "DatePicker",
+        "DateRangePicker",
+        "DateTimePicker",
+        "DateTimeRangePicker",
+        "DateTimeZonePicker",
+        "DebugDialog",
+        "Drawer",
+        "Field",
+        "FilterBuilder",
+        "FilterToolbar",
+        "FormDialog",
+        "HistoryCenter",
+        "HoverCard",
+        "ListCardCounter",
+        "MediaBrowsePanel",
+        "MediaPicker",
+        "MediaThumbnail",
+        "Menubar",
+        "ModelConnectionSetup",
+        "NavigationMenu",
+        "OrderBy",
+        "PageLoading",
+        "PickerShell",
+        "RangeSlider",
+        "RefSelect",
+        "RelationPicker",
+        "RemediationBanner",
+        "ResizeHandle",
+        "SettingsShell",
+        "Slider",
+        "SplitButton",
+        "ThemeSelect",
+        "ToastStack",
+        "Toolbar",
+        "Tree",
+        "UpdateCenter",
+        "UpdateStatus",
+        "VideoPlayer"
+      ],
+      "missingTally": {
+        "semantic": 32,
+        "events": 36,
+        "pointer": 40,
+        "keyboard_focus": 34,
+        "accessibility": 39,
+        "visual": 42
+      },
+      "contracts": [
+        "docs/contracts/components/agent-plan-record.md",
+        "docs/contracts/components/alert-dialog.md",
+        "docs/contracts/components/breadcrumbs.md",
+        "docs/contracts/components/color-picker.md",
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/data-table.md",
+        "docs/contracts/components/date-picker.md",
+        "docs/contracts/components/date-range-picker.md",
+        "docs/contracts/components/date-time-picker.md",
+        "docs/contracts/components/date-time-range-picker.md",
+        "docs/contracts/components/date-time-zone-picker.md",
+        "docs/contracts/components/debug-dialog.md",
+        "docs/contracts/components/drawer.md",
+        "docs/contracts/components/field.md",
+        "docs/contracts/components/filter-builder.md",
+        "docs/contracts/components/filter-toolbar.md",
+        "docs/contracts/components/form-dialog.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/hover-card.md",
+        "docs/contracts/components/list-card-counter.md",
+        "docs/contracts/components/media-browse-panel.md",
+        "docs/contracts/components/media-picker.md",
+        "docs/contracts/components/media-thumbnail.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/model-connection-setup.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/order-by.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/picker-shell.md",
+        "docs/contracts/components/range-slider.md",
+        "docs/contracts/components/ref-select.md",
+        "docs/contracts/components/relation-picker.md",
+        "docs/contracts/components/remediation-banner.md",
+        "docs/contracts/components/resize-handle.md",
+        "docs/contracts/components/settings-shell.md",
+        "docs/contracts/components/slider.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/theme-select.md",
+        "docs/contracts/components/toast-stack.md",
+        "docs/contracts/components/toolbar.md",
+        "docs/contracts/components/tree.md",
+        "docs/contracts/components/update-center.md",
+        "docs/contracts/components/update-status.md",
+        "docs/contracts/components/video-player.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "Accordion",
+        "AudioPlayer",
+        "BulkActionBar",
+        "Button",
+        "ChangedFiles",
+        "Checkbox",
+        "CodeInput",
+        "CollapseToggle",
+        "DurationInput",
+        "ListContainer",
+        "LogList",
+        "ModelConnectionPicker",
+        "NavCard",
+        "Pagination",
+        "PaginationSummary",
+        "Pill",
+        "Radio",
+        "SelectionSummary",
+        "Table",
+        "TimeInput",
+        "TimeZoneSelect",
+        "ToggleGroup",
+        "ToolCallGroup",
+        "TriStateSwitch"
+      ],
+      "missingTally": {
+        "semantic": 10,
+        "events": 14,
+        "pointer": 15,
+        "keyboard_focus": 10,
+        "accessibility": 18,
+        "visual": 23
+      },
+      "contracts": [
+        "docs/contracts/components/accordion.md",
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/button.md",
+        "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/checkbox.md",
+        "docs/contracts/components/code-input.md",
+        "docs/contracts/components/collapse-toggle.md",
+        "docs/contracts/components/duration-input.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/model-connection-picker.md",
+        "docs/contracts/components/nav-card.md",
+        "docs/contracts/components/pagination-summary.md",
+        "docs/contracts/components/pagination.md",
+        "docs/contracts/components/pill.md",
+        "docs/contracts/components/radio.md",
+        "docs/contracts/components/selection-summary.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-input.md",
+        "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/toggle-group.md",
+        "docs/contracts/components/tool-call-group.md",
+        "docs/contracts/components/tri-state-switch.md"
+      ]
+    },
+    {
+      "substrate": "feedback-status",
+      "components": [
+        "ActionDiscoveryPanel",
+        "AgentSubagent",
+        "AgentTranscript",
+        "Avatar",
+        "DetailSectionGroup",
+        "DetailShell",
+        "EmbedPreview",
+        "EmptyState",
+        "ErrorBoundary",
+        "InlineListSection",
+        "LicenceSeats",
+        "MetaBar",
+        "MetaItem",
+        "Meter",
+        "PageHeader",
+        "PasswordRequirements",
+        "Progress",
+        "Region",
+        "Spinner",
+        "StatusBar",
+        "ToolCall"
+      ],
+      "missingTally": {
+        "semantic": 16,
+        "events": 16,
+        "pointer": 16,
+        "keyboard_focus": 12,
+        "accessibility": 19,
+        "visual": 20
+      },
+      "contracts": [
+        "docs/contracts/components/action-discovery-panel.md",
+        "docs/contracts/components/agent-subagent.md",
+        "docs/contracts/components/agent-transcript.md",
+        "docs/contracts/components/avatar.md",
+        "docs/contracts/components/detail-section-group.md",
+        "docs/contracts/components/detail-shell.md",
+        "docs/contracts/components/embed-preview.md",
+        "docs/contracts/components/empty-state.md",
+        "docs/contracts/components/error-boundary.md",
+        "docs/contracts/components/inline-list-section.md",
+        "docs/contracts/components/licence-seats.md",
+        "docs/contracts/components/meta-bar.md",
+        "docs/contracts/components/meta-item.md",
+        "docs/contracts/components/meter.md",
+        "docs/contracts/components/page-header.md",
+        "docs/contracts/components/password-requirements.md",
+        "docs/contracts/components/progress.md",
+        "docs/contracts/components/region.md",
+        "docs/contracts/components/spinner.md",
+        "docs/contracts/components/status-bar.md",
+        "docs/contracts/components/tool-call.md"
+      ]
+    },
+    {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "AppHeader",
+        "BlockEditor",
+        "Card",
+        "CardRadioGroup",
+        "CardToggleGroup",
+        "DockRegion",
+        "DragNumberField",
+        "EditableList",
+        "FileUpload",
+        "ListCard",
+        "MarkdownEditor",
+        "ModelCatalogueEditor",
+        "Separator",
+        "SidebarNav",
+        "SplitView",
+        "TokenInput"
+      ],
+      "missingTally": {
+        "semantic": 9,
+        "events": 8,
+        "pointer": 11,
+        "keyboard_focus": 10,
+        "accessibility": 11,
+        "visual": 14
+      },
+      "contracts": [
+        "docs/contracts/components/app-header.md",
+        "docs/contracts/components/block-editor.md",
+        "docs/contracts/components/card-radio-group.md",
+        "docs/contracts/components/card-toggle-group.md",
+        "docs/contracts/components/card.md",
+        "docs/contracts/components/dock-region.md",
+        "docs/contracts/components/drag-number-field.md",
+        "docs/contracts/components/editable-list.md",
+        "docs/contracts/components/file-upload.md",
+        "docs/contracts/components/list-card.md",
+        "docs/contracts/components/markdown-editor.md",
+        "docs/contracts/components/model-catalogue-editor.md",
+        "docs/contracts/components/separator.md",
+        "docs/contracts/components/sidebar-nav.md",
+        "docs/contracts/components/split-view.md",
+        "docs/contracts/components/token-input.md"
+      ]
+    },
+    {
+      "substrate": "form-editing",
+      "components": [
+        "AgentQuestionRecord",
+        "Calendar",
+        "EmbedInput",
+        "Fader",
+        "FormActions",
+        "FormLayout",
+        "Keyboard",
+        "Knob",
+        "LicenceActivation",
+        "NumberInput",
+        "Rating",
+        "Stepper",
+        "ValidationSummary"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 6,
+        "pointer": 8,
+        "keyboard_focus": 7,
+        "accessibility": 8,
+        "visual": 13
+      },
+      "contracts": [
+        "docs/contracts/components/agent-question-record.md",
+        "docs/contracts/components/calendar.md",
+        "docs/contracts/components/embed-input.md",
+        "docs/contracts/components/fader.md",
+        "docs/contracts/components/form-actions.md",
+        "docs/contracts/components/form-layout.md",
+        "docs/contracts/components/keyboard.md",
+        "docs/contracts/components/knob.md",
+        "docs/contracts/components/licence-activation.md",
+        "docs/contracts/components/number-input.md",
+        "docs/contracts/components/rating.md",
+        "docs/contracts/components/stepper.md",
+        "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "general-composite",
+      "components": [
+        "Collapsible",
+        "EnvelopeEditor",
+        "FieldSet",
+        "LicenceStatus",
+        "ModMatrixGrid",
+        "ModelConnectionCard",
+        "Spacer",
+        "Stack",
+        "WaveformDisplay"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 7,
+        "pointer": 5,
+        "keyboard_focus": 6,
+        "accessibility": 6,
+        "visual": 9
+      },
+      "contracts": [
+        "docs/contracts/components/collapsible.md",
+        "docs/contracts/components/envelope-editor.md",
+        "docs/contracts/components/field-set.md",
+        "docs/contracts/components/licence-status.md",
+        "docs/contracts/components/mod-matrix-grid.md",
+        "docs/contracts/components/model-connection-card.md",
+        "docs/contracts/components/spacer.md",
+        "docs/contracts/components/stack.md",
+        "docs/contracts/components/waveform-display.md"
+      ]
+    },
+    {
+      "substrate": "text-display",
+      "components": [
+        "Code",
+        "Eyebrow",
+        "Icon",
+        "IconProvider",
+        "MediaPreview",
+        "MetricTile",
+        "StateTile",
+        "TextLink"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 4,
+        "pointer": 6,
+        "keyboard_focus": 6,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/code.md",
+        "docs/contracts/components/eyebrow.md",
+        "docs/contracts/components/icon-provider.md",
+        "docs/contracts/components/icon.md",
+        "docs/contracts/components/media-preview.md",
+        "docs/contracts/components/metric-tile.md",
+        "docs/contracts/components/state-tile.md",
+        "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "layout-primitive",
+      "components": [
+        "Box",
+        "Grid",
+        "ListGrid",
+        "Skeleton",
+        "TimeAgo",
+        "Tooltip"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 2,
+        "pointer": 2,
+        "keyboard_focus": 3,
+        "accessibility": 6,
+        "visual": 6
+      },
+      "contracts": [
+        "docs/contracts/components/box.md",
+        "docs/contracts/components/grid.md",
+        "docs/contracts/components/list-grid.md",
+        "docs/contracts/components/skeleton.md",
+        "docs/contracts/components/time-ago.md",
+        "docs/contracts/components/tooltip.md"
+      ]
+    },
+    {
+      "substrate": "media-data",
+      "components": [
+        "AudioMeter",
+        "AudioSwitch",
+        "GainReductionMeter",
+        "ValueReadout",
+        "XYPad"
+      ],
+      "missingTally": {
+        "semantic": 4,
+        "events": 4,
+        "pointer": 4,
+        "keyboard_focus": 4,
+        "accessibility": 4,
+        "visual": 5
+      },
+      "contracts": [
+        "docs/contracts/components/audio-meter.md",
+        "docs/contracts/components/audio-switch.md",
+        "docs/contracts/components/gain-reduction-meter.md",
+        "docs/contracts/components/value-readout.md",
+        "docs/contracts/components/xy-pad.md"
+      ]
+    },
+    {
+      "substrate": "workstation-shell",
+      "components": [
+        "DetailSection",
+        "ScrollShell",
+        "UiPresentationProvider"
+      ],
+      "missingTally": {
+        "semantic": 3,
+        "events": 2,
+        "pointer": 3,
+        "keyboard_focus": 3,
+        "accessibility": 3,
+        "visual": 3
+      },
+      "contracts": [
+        "docs/contracts/components/detail-section.md",
+        "docs/contracts/components/scroll-shell.md",
+        "docs/contracts/components/ui-presentation-provider.md"
+      ]
+    },
+    {
+      "substrate": "agent-composites",
+      "components": [
+        "AgentMessage",
+        "MotionPolicyProvider"
+      ],
+      "missingTally": {
+        "semantic": 2,
+        "events": 2,
+        "pointer": 2,
+        "keyboard_focus": 2,
+        "accessibility": 2,
+        "visual": 2
+      },
+      "contracts": [
+        "docs/contracts/components/agent-message.md",
+        "docs/contracts/components/motion-policy-provider.md"
+      ]
+    }
+  ]
+}

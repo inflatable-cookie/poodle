@@ -1,0 +1,64 @@
+{
+  "schema": "poodle.g18-gpui-mounted-receipt.v1",
+  "component": "BlockEditor",
+  "test": "block_editor_grip_drag_and_move_controls_rebuild_the_host_spec",
+  "selector": "effigy regressions:native",
+  "scenario_id": null,
+  "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+  "contract_claims": [
+    "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus",
+    "accessibility"
+  ],
+  "signals": {
+    "semantic": [
+      "assert",
+      "production-mount"
+    ],
+    "events": [
+      "assert_eq!(host.orders.len(), 2, \"one activation, one commit"
+    ],
+    "pointer": [
+      "pointer_press"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "keyboard_"
+    ],
+    "accessibility": [
+      "assert_eq!(\n            controller.announcements().len(),\n            spoken.len(),\n            \"a move control is not a substrate session, so it adds no announcement: {:?}\",\n            controller.announce",
+      "assert_eq!(drops.len(), 1, \"one drop, one terminal announce",
+      "announcements()"
+    ]
+  },
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_in_box",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render-import:block_editor",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "package": "poodle-gpui-preview",
+  "package_version": "0.3.0",
+  "source_commit": "d8e174fb40b2634b7d00018c721816ffc037d712",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "distribution": "workspace",
+  "execution": {
+    "command": "effigy regressions:native",
+    "run_id": "2026-09-09-g18-001-expected",
+    "outcome": "passed",
+    "body_sha256": "3c8eb4f0820325144ed3965d50f1b0f2107327443bf911cf5d3c0ec6d08d18bb"
+  },
+  "observed": [
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree"
+  ],
+  "outcome": "passed"
+}
