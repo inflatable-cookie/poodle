@@ -3,7 +3,7 @@
 Status: complete (evidence documented; recommendation requires operator decisions)
 Created: 2026-09-01
 Updated: 2026-09-01
-Origin: ready card `docs/roadmaps/g16/042-semantic-interaction-cues-research.md`
+Origin: ready card `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/042-semantic-interaction-cues-research.md`
 Scope: optional semantic interaction cue roles across web and native hosts;
 Jetstream remains deferred
 
@@ -251,7 +251,7 @@ handle — `packages/react/components/src/AudioPlayer.tsx:35`,
 **[LF]** The "continuous audio machine" (`g16.031`/`g16.032`) is a
 continuous-gesture/value model for DAW controls — explicitly not payload
 drag-and-drop, and with no `AudioContext`, unlock, or synthesis anywhere
-(`docs/roadmaps/g16/031-continuous-audio-machine-and-web-lifecycle.md:15-21`,
+(`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/031-continuous-audio-machine-and-web-lifecycle.md:15-21`,
 `packages/core/src/audio/`). Its "web lifecycle" is pointer/entry lifecycle,
 not audio lifecycle.
 
@@ -512,7 +512,7 @@ cohort.
 
 ## Related
 
-- Ready card: `../../roadmaps/g16/042-semantic-interaction-cues-research.md`
+- Ready card: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/042-semantic-interaction-cues-research.md`
 - Governing architecture: `../../architecture/012-semantic-motion-policy.md`,
   `../../architecture/008-audio-control-family.md`,
   `../../architecture/010-native-presentation-construction-context.md`

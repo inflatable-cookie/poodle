@@ -2,7 +2,7 @@
 
 Status: complete — research only; promotion deferred
 Updated: 2026-09-01
-Origin: [g16.040 — Numeric Change Motion Research](../../roadmaps/g16/040-numeric-change-motion-research.md)
+Origin: [g16.040 — Numeric Change Motion Research](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/040-numeric-change-motion-research.md)
 Scope: display-only numeric updates; editing controls are excluded
 
 ## Decision

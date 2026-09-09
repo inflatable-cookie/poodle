@@ -17,7 +17,7 @@ revised because fixing every failed dimension would define a new system.
 This spec remains historical evidence. Do not add components, fields, cases,
 or adapters to it. `g14.021` deleted every surface it defines; the retained
 estate and the defect ledger are in
-`../roadmaps/g14/conformance-estate.md` and
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g14/conformance-estate.md` and
 `../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`.
 
 ## Purpose

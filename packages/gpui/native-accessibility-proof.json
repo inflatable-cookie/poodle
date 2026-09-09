@@ -1,6 +1,6 @@
 {
   "generation": "g16.001",
-  "sourceLedger": "docs/roadmaps/g16/parity-evidence-ledger.md",
+  "sourceLedger": "docs/evidence/nucleus/parity-evidence-ledger.md",
   "currentPosture": {
     "publicSvelteComponents": 176,
     "portableNativeComponents": 175,

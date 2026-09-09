@@ -1,57 +1,37 @@
-# Canonical Dispatch Manifest
+# Queue Dispatch Projection
 
 Status: active
-Owner: Chatterbox (planning authority) — the only writer
-Consumer: the coordinator, which launches every ready lane listed here and
-designs no lanes, edges, or concurrency of its own
-Updated: 2026-09-08 (revision 28: g17.004 merged; frontier empty)
-Promoted commit: the commit that last touched this file
-(`git log -1 --format=%H -- docs/roadmaps/dispatch.md`); the coordinator
-verifies it is an ancestor of current `origin/main` before dispatch
+Owner: Chatterbox
+Updated: 2026-09-09 (flattened-task switchover)
+Planning authority: [`g17/README.md`](g17/README.md)
 
-Each ready lane below names its card, readiness, prerequisites and completion
-conditions, owned mutable paths, reserved shared closeout surfaces, approved
-concurrent siblings and serial edges, worker capability class, acceptance
-evidence and review oracle, stop conditions, and escalation owner. The card
-file is the complete worker handoff body; this manifest is the frontier.
+This file is the control-plane projection of the generation README's approved
+frontier. It cannot make a task ready, create dependencies, or preserve a
+second roadmap. The coordinator dispatches only the exact task named below and
+verifies that this file and the generation README agree at the same pushed
+commit.
 
-Lanes not listed under **Ready frontier** are not dispatchable, whatever a
-card or triage note says.
+## Ready queue task
 
-## Ready frontier
+- **Northstar task:** [`g17.001`](g17/001-nucleus-v1-visual-receipts.md)
+- **State:** ready; serial; no concurrent sibling; no automatic successor.
+- **Prerequisite:** poodle-lab `g01.006` complete; Lab PR #8 merged at
+  `f99465f048d7c5c58603b99ae51f3209e581848e`; validated run
+  `2026-09-08T14-06-48` available.
+- **Completion:** immutable validated import, V1 receipts for every covered row,
+  receipt-backed ledger advancement, all findings retained without adjudication.
+- **Owned and reserved paths:** the task's inline dispatch manifest is exact.
+- **Worker:** general implementation.
+- **Review:** independent exact-head PR review required.
+- **Escalation:** Chatterbox for evidence mapping/policy; operator for expansion.
 
-Empty. `g17.004` merged in PR #231 at
-`8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983` and is closed out in the
-integration checkout.
+## Held planning horizons
 
-The lab repository's queue-managed `g01.006` thread remains the approved next
-step. It must adopt the merged `g17.004` repair and complete its separately
-authorized cohort capture; no replacement task is created here.
+V2, M2, A2, the switch packet, GPUI keyboard-origin focus, web-pair extraction,
+the contributor-guidance pilot, Jetstream, and triage holds are not queue tasks.
+Their gates remain in `g17/README.md` and current triage.
 
-## Held lanes (not dispatchable)
+## Historical queue evidence
 
-| Lane | Gate | Owner of the gate |
-| --- | --- | --- |
-| `g17.001` Nucleus V1 visual receipts (was `g16.123`) | first validated poodle-lab `g01.006` cohort bundle | Chatterbox |
-| poodle-lab `g01.006` GPUI leg | compiled in the lab repository's own dispatch surfaces, not this manifest | Poodle Chatterbox + coordinator |
-| Nucleus V2 / M2 and Nucleus adoption | V2 after Nucleus seeding; M2 Nucleus-owned; switch decision after V1/V2 | operator, via Chatterbox |
-| A2 platform accessibility via `gpui-unofficial` | gpui-apple builds from crates.io (`docs/triage/20260905-111233-gpui-unofficial-adoption-gates.md`) | Chatterbox |
-| `g16.052` contributor design-guidance pilot | named reviewers, approvals, run custody | operator |
-| Jetstream admission | `docs/triage/20260902-000959-jetstream-admission-hold.md` | operator |
-| Citations, nested menus, CS20, keyboard geometry, Tabs single-consumer asks | `docs/triage/20260902-000956-*.md`, `20260902-000957-*.md`, `20260904-151947-*.md` | Chatterbox |
-
-## Merged since revision 6
-
-`g16.103` (#208), `104` (#209), `105` (#210), `097` (v0.3.0 published from
-`85609d941`), `106` (#211), `108` (#212), `107` (#213), `110` (#214), `111`
-(#215), `114` (#216), `051` (#217), `117` (#218), `112` (#219), `116` (#220),
-`113` (#221), `115` (#222), `118` (#224), `119` (#223), `120` (#225), `121`
-(#226), `122` (#227), `109` (15 consumer PRs), `g17.003` (#230), `g17.004` (#231). Card status lines were
-reconciled to merge truth at the rollover; no README or index line is
-outstanding.
-
-## History
-
-The pre-2026-09-04 orchestrator-owned worker ledger is archived at
-`archive/2026-08-25-worker-dispatch-ledger.md`. Execution logs under
-`../logs/` remain the durable record of every merged lane.
+Completed execution remains in queue history, PRs, logs, and generation
+roll-ups. Historical queue records keep their original card/batch wording.

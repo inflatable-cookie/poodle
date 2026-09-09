@@ -76,7 +76,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   owned; hidden dependency). Narrow SOURCE_PATHS to rendered runtime, or
   document a headless identity bump for harness-only diffs. Surface:
   `scripts/nucleus-parity-receipts.ts` and
-  `docs/roadmaps/g16/nucleus-parity-receipts/`.
+  `docs/evidence/nucleus/nucleus-parity-receipts/`.
 
 - 2026-09-04 — Second sighting of the `web-preview.ts` origin/main classifier
   failure, now on a tag-ref release runner. Dry run `33908714014` at tag
@@ -1709,3 +1709,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   in the app until `effigy core:build` and `effigy svelte:package` rerun.
   Nothing in the pull path rebuilds. Candidate: one `web:dist` selector plus
   a README line for linked consumers; not a card.
+- 2026-09-09 — `effigy qa` repeatedly stops in
+  `scripts/web-distribution/cold-checkout-react-preview.test.ts`: the detached
+  three-suite positive control exceeds its fixed 120-second child timeout on
+  this machine, then spends several more minutes unwinding the child tree. A
+  focused rerun reproduced the same 2 pass / 1 timeout result. The flattened
+  task migration does not touch the tested React preview or build path.

@@ -10,7 +10,7 @@ in the surfaces they were promoted to. Do not reconstruct them here.
 ## Promoted (removed from this note)
 
 - Parity goal, Nucleus as the switch target, execution-backed ledger:
-  `../roadmaps/g16/nucleus-gpui-parity-programme.md`, `g16.062`–`g16.093`.
+  `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/nucleus-gpui-parity-programme.md`, `g16.062`–`g16.093`.
 - Release truth and scanner: `g16.053`, `g16.054`.
 - Compiled web distribution, `sideEffects`, `marked` as optional peer:
   `g16.056`–`g16.061`, architecture 014.

@@ -1,100 +1,36 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-08
+Updated: 2026-09-09
 
-## Active Track
+## Active generation
 
-- `g17`
-  - Status: active; operator-led planning slate opened 2026-09-06
-  - Range: `001` held (Nucleus V1 visual receipts, rehomed from `g16.123`);
-    `002` complete in PR #228; `003` complete in PR #230 at
-    `583aa173935dd66ea0d8bd17196115f5b211a01b`; `004` complete in PR #231 at
-    `8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983`
-  - Aim: finish the Nucleus switch evidence (V1, V2, M2, later A2) and put
-    the switch decision in front of the operator on receipts.
-  - Ready frontier: `dispatch.md`.
-  - Next move: Lab adoption of the merged `004` repair and `g01.006` cohort
-    batch → validated bundle → `001` ready.
+- [`g17`](g17/README.md) — Nucleus switch evidence
+  - Status: active
+  - Completed tasks: `g17.002`, `g17.003`, `g17.004`
+  - Approved frontier: [`g17.001`](g17/001-nucleus-v1-visual-receipts.md)
+  - Next checkpoint: choose which V2, M2, A2, focus, or switch-packet task to
+    compile after V1 closeout; no successor auto-starts.
 
-## Latest Completed Track
+## Compacted generations
 
-- `g16`
-  - Status: complete (2026-09-06)
-  - Range: `001`–`123`; `002` closed partial, `037`–`044` research-complete,
-    `052` gated and carried, `123` rehomed as `g17.001`, every other lane
-    complete
-  - Verdict: active-cohort parity became measurable from executed evidence
-    without a third conformance authority. Dependable drag-and-drop, shared
-    motion policy, compiled web distribution, HistoryCenter rejection
-    surface, Linux PR/main boards, validation and docs hygiene, and the
-    Svelte↔React drift gate closed. Nucleus reached M1 29/29 and A1 29/29
-    with a window-capture path for V1. The visual lab exists and admitted
-    icon geometry.
-  - Release: `v0.3.0` published 2026-09-05 from `85609d941` after two
-    retracted tags; the "Release Certification" rule (green gates and a
-    green branch dry run before any tag) came out of that. All 15 consumers
-    adopted `0.3.0`; `0.2.3` was never published.
-  - Evidence:
-    `docs/logs/2026-09/20260906-g16-g17-generation-rollover.md`,
-    `docs/logs/2026-09/20260905-front-door-compaction.md`
+| Generation | Durable result | Roll-up |
+| --- | --- | --- |
+| g01 | foundations, tokens, contracts, first shared surface | [`g01`](archive/g01.md) |
+| g02 | composite depth, docs, package/release baseline | [`g02`](archive/g02.md) |
+| g03 | ecosystem hardening and adoption | [`g03`](archive/g03.md) |
+| g04 | Underlay parity and specialist components | [`g04`](archive/g04.md) |
+| g05 | GPUI foundation and parity baseline | [`g05`](archive/g05.md) |
+| g06 | shared multi-renderer contracts | [`g06`](archive/g06.md) |
+| g07 | GPUI adapter build-out | [`g07`](archive/g07.md) |
+| g08 | GPUI production quality | [`g08`](archive/g08.md) |
+| g09 | native package consolidation | [`g09`](archive/g09.md) |
+| g10 | Jetstream feasibility and GPUI hardening | [`g10`](archive/g10.md) |
+| g11 | Svelte modernization and shared web machinery | [`g11`](archive/g11.md) |
+| g12 | React parity and native verification depth | [`g12`](archive/g12.md) |
+| g13 | rejected Rust-authored IR pilot | [`g13`](archive/g13.md) |
+| g14 | rejected executable-conformance pilot | [`g14`](archive/g14.md) |
+| g15 | v0.2.x release and adoption programme | [`g15`](archive/g15.md) |
+| g16 | v0.3.0, consumer adoption, Nucleus M1/A1 | [`g16`](archive/g16.md) |
 
-- `g15`
-  - Status: complete (2026-08-25)
-  - Range: `001`–`079`; `056` superseded, `078` cancelled after repository
-    removal, every other lane complete
-  - Verdict: the full 175-component Svelte denominator, paired React surface,
-    measured native cohort, human-centred specimens, headless native evidence,
-    primitive visual comparison, packed roots, release automation, corrected
-    crates.io-GPUI release, and 16-consumer adoption were closed without
-    inventing a third parity architecture.
-  - Release: immutable `v0.2.0` failed before publication; replacement
-    `v0.2.1` pointed to `3d914261` and run `32658293188` published core and
-    Svelte 0.2.1. The broken Git tag was later retracted after v0.2.2 replaced
-    it with corrected candidate `d5607def`; npm keeps 0.2.1 while `latest` is
-    0.2.2. React remains source-only and Jetstream backend admission remains
-    deferred.
-  - Evidence:
-    `docs/logs/2026-08/20260825-g15-g16-generation-boundary-consolidation.md`
-
-- `g14`
-  - Status: complete (`g14.022`)
-  - Range: `001` to `026`
-  - Verdict: `g14.008` **rejected** architecture 009/spec 066 as Poodle's
-    standing component-conformance mechanism.
-  - Evidence: 22,746 source LOC against 472 LOC replaced; HistoryCenter absent
-    from the comparator; 1,205 differences after correction; manual component
-    registries and incomplete authority consumption.
-  - Retained result: component/backend fixes, focused regression claims,
-    headless GPUI execution, and the human-centred specimen boundary.
-  - Disposition: `009`–`014` are retired. `021` preserved the evidence and
-    removed the rejected plane. `017` and `020` are superseded execution
-    plans; their approved web references stand and native completion
-    recompiles under the g15 runway. `026` is carried forward into g15 with
-    its human-centred rubric intact. `022` closed the generation
-    (`docs/logs/2026-08/16-g14-022-generation-closeout.md`).
-
-- `g13`
-  - Status: completed
-  - Range: `001` to `020` plus execution batch cards
-  - Verdict: **revise**, followed by retirement/unwind of the component IR.
-  - Durable evidence: Svelte remains the reference; the web and native pairs
-    keep one substrate each; behaviour codegen failed its cost/replacement
-    test; specimen structure still needs a smaller coordination method.
-  - Historical spec: `docs/specs/063-rust-authored-component-and-scene-ir.md`.
-
-## Completed Foundations
-
-- `g12` — React parity, verification depth, native hardening, package
-  consolidation, complete audio family (`001`–`027`)
-- `g11` — Svelte modernization, framework-free web machines, appearance
-  consolidation, audio controls (`001`–`022`)
-- `g10` — Jetstream feasibility and GPUI production hardening (`001`–`020`)
-- `g09` — native package consolidation, typed size/density migration,
-  cross-runtime parity (`001`–`020`)
-- `g01`–`g08` — historical foundation and parity generations
-
-## Archive Policy
-
-Completed generations stay in `docs/roadmaps/gNN/`. Superseded or abandoned
-runways move to `docs/roadmaps/archive/` when they would otherwise obscure the
-active sequence. Historical execution logs remain in `docs/logs/`.
+Only g17 remains expanded. Roll-ups are historical summaries, never executable
+task surfaces.

@@ -2,7 +2,7 @@
 
 Status: research complete; awaiting operator acceptance
 
-Card: `docs/roadmaps/g16/039-agent-task-list-research.md`
+Card: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/039-agent-task-list-research.md`
 
 Captured: 2026-09-01
 

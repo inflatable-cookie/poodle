@@ -401,4 +401,4 @@ stateDiagram-v2
 - Value track: [tk-cross-framework-contracts](../value-tracks/tk-cross-framework-contracts.md)
 - Source hub: [hub-gpui](../source-hubs/hub-gpui.md)
 - Source hub: [hub-bits](../source-hubs/hub-bits.md)
-- Milestone: [g01.004](../../roadmaps/g01/004-component-contract-template-and-documentation-ia.md)
+- Milestone: [g01.004](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/004-component-contract-template-and-documentation-ia.md)

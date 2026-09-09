@@ -11,7 +11,7 @@ Depends on: `062-headless-core-and-dual-layer-strategy.md`,
 ## Retirement (g14.001, 2026-08-13)
 
 This spec is the pilot's record, not a live contract. The g13.020 verdict
-(`../roadmaps/g13/020-consolidate-and-reassess.md`) retired the vocabulary
+(`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/020-consolidate-and-reassess.md`) retired the vocabulary
 authority as a corpus mechanism and unwound the three pilot slices; the
 drift-gate estate is the corpus-wide authority.
 
@@ -28,7 +28,7 @@ it.
 ## Scope, after the g13.008 revise verdict
 
 The pilot ran to completion and the verdict is **revise**
-(`../roadmaps/g13/pilot-verdict-evidence.md`). This spec is narrowed
+(`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/pilot-verdict-evidence.md`). This spec is narrowed
 accordingly, and the narrowing is the point — the original scope was measured
 and did not hold.
 
@@ -74,7 +74,7 @@ component needs new evidence, not this spec.
 
 **Amendments the pilot named** — both vocabulary rather than behaviour, both
 **delivered** by `g13.018` (batch card 051) and recorded in
-`../roadmaps/g13/018-capability-and-anatomy-amendments.md`:
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/018-capability-and-anatomy-amendments.md`:
 
 1. Per-runtime capability expression, **including absence** — delivered.
    `CapabilityRequirement` now carries per-runtime `runtimes` rows
@@ -402,7 +402,7 @@ Record the missing capability or revise the IR.
 ## Promotion
 
 `g13.008` recorded **revise** on 2026-08-13. Evidence:
-`../roadmaps/g13/pilot-verdict-evidence.md`.
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/pilot-verdict-evidence.md`.
 
 - ~~**adopt**~~ — not available: pass condition 5 failed.
 - **revise** — *recorded.* This spec is narrowed to vocabulary (see "Scope,

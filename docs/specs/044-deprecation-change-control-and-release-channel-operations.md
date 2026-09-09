@@ -98,7 +98,7 @@ The current operations baseline lives in:
 - `packages/release-manifest.json`
 - `packages/release-operations.json`
 - package-level release metadata in `package.json` or `Cargo.toml`
-- `docs/roadmaps/g03/011-deprecation-change-control-and-release-channel-operations.md`
+- `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g03/011-deprecation-change-control-and-release-channel-operations.md`
 
 ## Honesty Rule
 

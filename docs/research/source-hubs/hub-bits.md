@@ -427,7 +427,7 @@ A: Since Poodle wraps Bits components (not exposes them directly), internal Bits
 
 - Value track: [tk-svelte-headless-patterns](../value-tracks/tk-svelte-headless-patterns.md)
 - Translation memo: [tm-svelte-substrate](../translation-memos/tm-svelte-substrate.md) (pending)
-- Milestone: [g01.005](../../roadmaps/g01/005-svelte-substrate-and-bits-integration-policy.md)
+- Milestone: [g01.005](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/005-svelte-substrate-and-bits-integration-policy.md)
 - shadcn-svelte: https://shadcn-svelte.com/ (Bits consumer example)
 
 ---

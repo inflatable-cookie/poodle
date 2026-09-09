@@ -42,7 +42,7 @@ operator to settle them.
 
 ## Scope and evidence discipline
 
-The research follows the [g16.038 research card](../../roadmaps/g16/038-agent-citations-and-sources-research.md).
+The research follows the [g16.038 research card](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/038-agent-citations-and-sources-research.md).
 The local snapshot is Poodle commit `06a42e3cc36b865344d0bf9e3b5c81bbd1c0a32d`,
 captured on 2026-09-01. The card's source leads were inspected from the
 official routes and pinned public repositories. No source code, CSS, icon, or
@@ -543,7 +543,7 @@ These are intentionally recorded, not escalated during the research lane:
 
 ## Related
 
-- Research card: [g16.038](../../roadmaps/g16/038-agent-citations-and-sources-research.md)
+- Research card: [g16.038](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/038-agent-citations-and-sources-research.md)
 - Component contract: [AgentMessage](../../contracts/components/agent-message.md)
 - Component contract: [AgentTranscript](../../contracts/components/agent-transcript.md)
 - Component contract: [TextLink](../../contracts/components/text-link.md)

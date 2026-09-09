@@ -294,10 +294,10 @@ A: Via `Popover`, `Modal` in gpui-component. No native overlay in core GPUI.
 
 ## Related
 
-- Value track: [tk-gpui-idioms](./tk-gpui-idioms.md)
+- Value track: [tk-gpui-idioms](../value-tracks/tk-gpui-idioms.md)
 - Translation memo: [tm-token-system](../translation-memos/tm-token-system.md) (pending)
-- Milestone: [g01.006](../../roadmaps/g01/006-gpui-substrate-and-rust-token-binding-baseline.md)
-- Milestone: [g01.002](../../roadmaps/g01/002-token-system-and-artifact-emission.md)
+- Milestone: [g01.006](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/006-gpui-substrate-and-rust-token-binding-baseline.md)
+- Milestone: [g01.002](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/002-token-system-and-artifact-emission.md)
 
 ---
 

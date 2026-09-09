@@ -98,7 +98,7 @@ function parseFrozenNames(rosterMarkdown: string): string[] {
   const end = rosterMarkdown.indexOf("## Cross-Runtime Surfaces", start);
   if (start < 0 || end < 0) {
     throw new Error(
-      "Could not locate the frozen Svelte denominator tables in release-baseline-roster.md",
+      "Could not locate the frozen Svelte denominator tables in web-package-roster.md",
     );
   }
 
@@ -245,7 +245,7 @@ export function buildWebPackageRoster(
 export function readWebPackageRoster(repoRoot: string): WebPackageRoster {
   const frozenNames = parseFrozenNames(
     readFileSync(
-      join(repoRoot, "docs/roadmaps/g15/release-baseline-roster.md"),
+      join(repoRoot, "docs/evidence/releases/web-package-roster.md"),
       "utf8",
     ),
   );

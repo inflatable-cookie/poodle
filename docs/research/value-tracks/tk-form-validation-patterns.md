@@ -281,8 +281,8 @@ Layer 2 - Forms
 
 ## Related
 
-- Milestone: [g01.008](../../roadmaps/g01/008-action-and-text-entry-primitives.md)
-- Milestone: [g02.001](../../roadmaps/g02/001-forms-and-validation-system-depth.md)
+- Milestone: [g01.008](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/008-action-and-text-entry-primitives.md)
+- Milestone: [g02.001](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g02/001-forms-and-validation-system-depth.md)
 - Formsnap (Svelte): Form primitive library
 
 ---

@@ -64,9 +64,9 @@ Document Underlay's token/runtime system and integration constraints to inform:
 
 ## Related
 
-- Milestone: [g01.013](../../roadmaps/g01/013-underlay-bridge-and-token-ingestion-baseline.md)
+- Milestone: [g01.013](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/013-underlay-bridge-and-token-ingestion-baseline.md)
 - Milestone: `g02.013` now covers preview/docs usability hardening instead of adoption sequencing
-- Milestone: [g03.007](../../roadmaps/g03/007-underlay-bridge-hardening-and-zero-leak-adoption-proof.md)
+- Milestone: [g03.007](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g03/007-underlay-bridge-hardening-and-zero-leak-adoption-proof.md)
 
 ---
 

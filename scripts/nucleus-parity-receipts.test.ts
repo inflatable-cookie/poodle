@@ -116,7 +116,7 @@ describe("g16.062 Nucleus parity receipt contract", () => {
   it("requires every nonempty artifact to identify an existing file by SHA-256", () => {
     const manifest = loadNucleusManifest(root);
     const receipt = validButtonReceipt(manifest);
-    const artifactPath = "docs/roadmaps/g16/nucleus-parity-receipts/README.md";
+    const artifactPath = "docs/evidence/nucleus/nucleus-parity-receipts/README.md";
     const artifactHash = createHash("sha256").update(readFileSync(path.join(root, artifactPath))).digest("hex");
 
     expect(() => validateNucleusReceipt({ ...receipt, artifact_paths: [{ path: artifactPath, sha256: artifactHash }] }, manifest, root)).not.toThrow();
@@ -170,7 +170,7 @@ describe("g16.062 Nucleus parity receipt contract", () => {
 });
 
 describe("g16.111 Nucleus A1 paired accessibility receipts", () => {
-  const a1Path = "docs/roadmaps/g16/nucleus-parity-receipts/switch--nucleus-settings-switch--a1.json";
+  const a1Path = "docs/evidence/nucleus/nucleus-parity-receipts/switch--nucleus-settings-switch--a1.json";
   const committedA1 = (): NucleusReceipt => JSON.parse(readFileSync(path.join(root, a1Path), "utf8")) as NucleusReceipt;
 
   it("accepts the committed Switch A1 receipt with its paired snapshots", () => {

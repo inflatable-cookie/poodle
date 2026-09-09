@@ -86,7 +86,7 @@ Research GPUI-specific implementation patterns and idioms to inform:
 ## Related
 
 - Source hub: [hub-gpui](../source-hubs/hub-gpui.md)
-- Milestone: [g01.006](../../roadmaps/g01/006-gpui-substrate-and-rust-token-binding-baseline.md)
+- Milestone: [g01.006](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/006-gpui-substrate-and-rust-token-binding-baseline.md)
 
 ---
 

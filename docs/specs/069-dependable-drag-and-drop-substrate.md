@@ -1136,7 +1136,7 @@ Cards may split those batches further when file overlap or review size demands
 it. Cross-window and drag-out contracts shape the base even when their adapters
 land after the internal proof.
 
-The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
+The compiled runway is `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 through `028-drag-drop-migration-and-certification-closeout.md`, and it is
 complete. `g16.021`–`g16.028` are merged: the semantic kernels, the web
 custom-surface API, the simple and nested migrations, the Rust/GPUI

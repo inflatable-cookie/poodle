@@ -261,5 +261,5 @@ export type TokenPath =
 
 - Source hub: [hub-gpui](../source-hubs/hub-gpui.md)
 - Value track: [tk-design-token-systems](../value-tracks/tk-design-token-systems.md)
-- Milestone: [g01.002](../../roadmaps/g01/002-token-system-and-artifact-emission.md)
-- Milestone: [g01.003](../../roadmaps/g01/003-token-artifact-emission-themes-and-density-modes.md)
+- Milestone: [g01.002](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/002-token-system-and-artifact-emission.md)
+- Milestone: [g01.003](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/003-token-artifact-emission-themes-and-density-modes.md)

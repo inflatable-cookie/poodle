@@ -1,58 +1,99 @@
-# g17.001 — Nucleus V1 Visual Receipts
+# 001 — Nucleus V1 visual receipts
 
-Status: held — ready when poodle-lab `g01.006` has produced its first
-validated cohort bundle (GPUI leg pending an unlocked display); rehomed from
-`g16.123` at the 2026-09-06 rollover
-Type: evidence consumption — V1 receipts and ledger column
-Opened: 2026-09-05
-Depends on: merged `g16.122`; poodle-lab `g01.006` bundle
-Governing refs: `../g16/nucleus-gpui-parity-programme.md` (V1: deterministic
-component comparison for Nucleus-used states, Poodle-owned),
-`docs/logs/2026-09/…-g16-051-…` (how an imported lab bundle is cited),
-poodle-lab `docs/contracts/004-receipt-import.md`, `scripts/nucleus-parity-receipts.ts`
-Dispatch manifest: `../dispatch.md`
+Status: ready
+Owner: Poodle core
+Created: 2026-09-05
+Updated: 2026-09-09
+Governing refs: `../../evidence/nucleus/README.md`,
+`../../contracts/001-working-rules.md`, poodle-lab
+`docs/contracts/004-receipt-import.md`
+Depends on: `g17.004`; poodle-lab `g01.006` complete
 
-## Goal
+## Outcome
 
-Turn a validated lab cohort bundle into per-row V1 receipts and move the
-"GPUI visual" ledger column from `missing` to `compared` for each row whose
-web↔GPUI comparison passes under the g15.047 tolerance table, with findings
-recorded per row for those that do not.
+Import the validated Poodle Lab cohort bundle into immutable Poodle evidence,
+emit traceable V1 receipts for all covered Nucleus rows, and move the generated
+ledger's GPUI visual cells to `compared` without adjudicating renderer findings.
 
-## Fixed Boundary
+## Ready-State Rubric
 
-- Import the sanitized bundle by directory hash and validator version under
-  the execution log (the `051` shape). Never edit it.
-- Extend the receipt schema with `proof_level: "V1"` carrying the bundle
-  hash, the row's fixture ids, the pair verdicts, and the findings. Emit a
-  V1 receipt only for rows the bundle covers; findings do not block the
-  receipt, they are recorded in it.
-- Ledger: a validated V1 receipt moves the row's "GPUI visual" cell to
-  `compared`; a row with findings stays `compared` with the findings listed
-  in the known-delta axis if they are contracted, or as open findings if not.
-- Poodle decides nothing about pixels here; the tolerance table is the
-  g15.047 authority and does not change in this card.
+- [x] Objective is bounded and needs no fresh planning decision.
+- [x] Governing refs point at current canonical surfaces.
+- [x] Scope, acceptance, validation, evidence, and stop conditions are explicit.
+- [x] The high-risk import and ledger claims have an adversarial review oracle.
+- [x] No automatic successor is enabled; Chatterbox resumes after closeout.
+- [x] The poodle-lab prerequisite is complete and its closed bundle is available.
 
-## Review Oracle
+## Decisions
 
-| Invariant | Smallest counterexample | Required proof |
+- Import poodle-lab run `2026-09-08T14-06-48` from merged Lab commit
+  `f99465f048d7c5c58603b99ae51f3209e581848e` and closeout commit
+  `13ddc2fcbc0897a9f2ec78ee0dd061ce74c7f46d`.
+- Findings remain evidence. They neither block V1 receipt emission nor become
+  accepted deltas.
+- The g15.047 tolerance table remains fixed; this task does not change pixels,
+  thresholds, component behavior, or comparison policy.
+
+## Dispatch manifest
+
+- **State:** ready; one serial lane; no concurrent sibling or automatic successor.
+- **Completion:** imported bundle validates by directory hash and validator
+  version; every covered row has a valid V1 receipt; the generated ledger moves
+  only receipt-backed GPUI visual cells to `compared`; findings remain traceable.
+- **Owned mutable paths:** `scripts/nucleus-parity-receipts.ts`, its tests and
+  V1 schema extension, `docs/evidence/nucleus/`, one immutable imported bundle
+  under `docs/logs/2026-09/`, one execution log, `PAPERCUTS.md` append-only.
+- **Reserved closeout surfaces:** `docs/roadmaps/g17/README.md`,
+  `docs/roadmaps/generation-index.md`, `docs/roadmaps/dispatch.md`, this task's
+  final status/evidence block.
+- **Worker:** general implementation; exact evidence and schema work.
+- **Excluded:** Poodle Lab, Nucleus, Longhorn, component/pixel repair, tolerance
+  changes, V2/M2/A2, release work, windowed capture, and finding adjudication.
+- **Escalation:** Chatterbox owns scenario/fixture mapping or evidence-policy
+  decisions; operator owns any scope expansion.
+
+## Work
+
+1. Import the sanitized Lab bundle immutably and record its source commit,
+   directory hash, validator version, run id, capture count, and comparison count.
+2. Extend the closed Nucleus receipt schema and generator with
+   `proof_level: "V1"`, bundle identity, row fixture ids, pair verdicts, and
+   findings.
+3. Emit V1 receipts only for rows covered by validated fixtures. Refuse unknown,
+   duplicate, missing, or mismatched scenario/fixture identities.
+4. Regenerate the parity ledger so only validated V1 receipts move GPUI visual
+   cells to `compared`; retain findings as open or contract-linked evidence.
+5. Add focused tamper, mapping, and unbacked-ledger regressions. Record exact
+   validation and evidence in the execution log.
+
+## Acceptance and review oracle
+
+| Invariant | Adversarial counterexample | Required proof |
 | --- | --- | --- |
-| Bundle is validated, not trusted | tampered PNG hash | lab validator exit 1 recorded |
-| Receipts trace to fixtures | a receipt naming a fixture not in the bundle | validation fails |
-| Ledger moves only on receipts | a `compared` cell without a receipt | ledger check fails |
+| Bundle is validated, not trusted | tampered PNG or summary hash | validator exits non-zero; no receipt emitted |
+| Import is immutable and traceable | copied files without Lab commit, run id, validator, or directory hash | schema/check refuses the import |
+| Receipts map one-to-one | receipt names a fixture absent from the bundle, duplicates a state, or maps the wrong scenario | generator/check fails closed |
+| Findings are not adjudicated | reported pixel/role finding silently dropped or converted to accepted delta | receipt retains it; ledger links it without acceptance language |
+| Ledger moves only on evidence | `compared` cell without a valid V1 receipt | ledger check fails |
+| Existing M1/A1 evidence survives | V1 regeneration rewrites or invalidates an M1/A1 receipt | receipt and ledger tests fail |
 
-## Validation
+## Stop conditions
 
-`effigy check:parity-evidence-ledger`, `effigy docs:check`, `git diff
---check origin/main...HEAD`.
+- Stop if Lab fixture ids do not map one-to-one to the Poodle scenarios.
+- Stop if the bundle does not validate byte-for-byte from the named Lab commit.
+- Stop if a V1 schema change would weaken M1/A1 validation or require a
+  compatibility alias.
+- Stop rather than adjudicating any of the 160 reported findings.
 
-## Owned Paths
+## Evidence
 
-`scripts/nucleus-parity-receipts.ts` and schema (V1 level), receipts,
-ledger generator V1 path, execution log with the imported bundle,
-`PAPERCUTS.md` (append).
+Prerequisite evidence: Lab run `2026-09-08T14-06-48`; 174 captures covering
+58 fixtures × 3 runtimes with two agreeing repeats; 116 comparisons; 160
+reported findings; every foreground proof valid. Final evidence must add the PR,
+reviewed exact head, merge commit, imported bundle hash, emitted receipt count,
+ledger result, and validation actually run.
 
-## Stop Conditions
+## Next task
 
-Stop if the bundle's fixture ids do not map to scenario ids one to one.
-Escalation owner: Chatterbox.
+Return to Chatterbox after closeout. The generation runway names V2, M2, A2,
+and the operator switch packet, but none is automatically dispatchable.

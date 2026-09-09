@@ -256,7 +256,7 @@ Layer 3 - Workstation Shell
 ## Related
 
 - Source hub: [hub-gpui](../source-hubs/hub-gpui.md) (GPUI panel capabilities)
-- Milestone: [g01.012](../../roadmaps/g01/012-workstation-shell-composites-and-panel-system-baseline.md)
+- Milestone: [g01.012](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/012-workstation-shell-composites-and-panel-system-baseline.md)
 - External: [dockview.dev](https://dockview.dev/) - Reference implementation
 
 ---

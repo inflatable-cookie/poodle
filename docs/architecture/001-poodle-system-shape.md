@@ -206,7 +206,7 @@ to implement those workflows, but it does not own them.
 Consumer-facing integration is owned by the consumer. Underlay imports Poodle's
 published packages directly and keeps any translation in its own source. Poodle
 carries no directory named after a consumer product; see
-`../roadmaps/g12/022-underlay-bridge-extraction.md`.
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g12/022-underlay-bridge-extraction.md`.
 
 ## Extension Rules
 

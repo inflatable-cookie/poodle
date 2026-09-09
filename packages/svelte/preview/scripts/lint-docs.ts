@@ -2262,7 +2262,7 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     errors,
   );
   expect(
-    proof.sourceLedger === "docs/roadmaps/g16/parity-evidence-ledger.md",
+    proof.sourceLedger === "docs/evidence/nucleus/parity-evidence-ledger.md",
     "packages/gpui/native-accessibility-proof.json must point at the g16 evidence ledger.",
     errors,
   );
@@ -2540,7 +2540,7 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
 
   expect(report.artifact === "packages/gpui/cross-runtime-parity-report.json", "GPUI parity report artifact path is stale.", errors);
   expect(report.generation === "g16.001", "packages/gpui/cross-runtime-parity-report.json must target g16.001.", errors);
-  expect(report.sourceLedger === "docs/roadmaps/g16/parity-evidence-ledger.md", "GPUI parity report must point at the g16 evidence ledger.", errors);
+  expect(report.sourceLedger === "docs/evidence/nucleus/parity-evidence-ledger.md", "GPUI parity report must point at the g16 evidence ledger.", errors);
   expect(report.runtime === "gpui" && report.status === "current", "GPUI parity report must identify the current GPUI posture.", errors);
   expect(
     report.denominator.publicSvelteComponents === 176 &&

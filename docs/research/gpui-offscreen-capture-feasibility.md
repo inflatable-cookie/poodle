@@ -2,8 +2,8 @@
 
 Status: promoted decision — **go**
 Created: 2026-08-21
-Card: `../roadmaps/g15/044-gpui-offscreen-capture-feasibility.md`
-Parent: `../roadmaps/g15/012-visual-conformance-lane.md`
+Card: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g15/044-gpui-offscreen-capture-feasibility.md`
+Parent: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g15/012-visual-conformance-lane.md`
 Log: `../logs/2026-08/20260821-g15-044-gpui-offscreen-capture-feasibility.md`
 Reproduction: `../logs/2026-08/assets/g15-044/reproduce.sh` (complete recipe)
 Receipt: `../logs/2026-08/assets/g15-044/receipt.txt` (verbatim run output)

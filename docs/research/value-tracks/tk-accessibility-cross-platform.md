@@ -261,8 +261,8 @@ Each component contract must document:
 ## Related
 
 - W3C ARIA Authoring Practices: https://www.w3.org/WAI/ARIA/apg/
-- Milestone: [g01.007-010](../../roadmaps/g01/) - Primitive implementation
-- Milestone: [g02.011](../../roadmaps/g02/011-accessibility-focus-keyboard-and-state-semantics-hardening.md)
+- Milestone: [g01.007-010](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/) - Primitive implementation
+- Milestone: [g02.011](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g02/011-accessibility-focus-keyboard-and-state-semantics-hardening.md)
 
 ---
 

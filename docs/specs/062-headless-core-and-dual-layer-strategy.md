@@ -28,7 +28,7 @@ architecture.
 - g11.001 modernized the full Svelte surface to runes/callback-first/snippet
   composition and closed the consumer rollout. The consumer matrix, wave
   process, and validation baseline in
-  `docs/roadmaps/g11/001-svelte-modernization-and-consumer-rollout.md` are the
+  `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g11/001-svelte-modernization-and-consumer-rollout.md` are the
   reusable rollout machinery for this program.
 
 ## Decision: State-Machine Core, Not A Compiler

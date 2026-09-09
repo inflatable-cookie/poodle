@@ -8,7 +8,7 @@ import {
   type NucleusReceiptRow,
 } from "./nucleus-parity-receipts";
 
-export const LEDGER_PATH = "docs/roadmaps/g16/parity-evidence-ledger.md";
+export const LEDGER_PATH = "docs/evidence/nucleus/parity-evidence-ledger.md";
 
 const ROOT = path.resolve(import.meta.dir, "..");
 const COMPONENT_COLUMNS = [

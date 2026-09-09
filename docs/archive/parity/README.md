@@ -3,8 +3,8 @@
 This directory preserves the manual component audit completed before the
 g12.019 native-renderer consolidation. It is project history, not a current
 implementation register. It moved here from `docs/parity/` on 2026-09-05
-(g16.108 docs spine compaction); the old path keeps a
-[pointer](../../parity/README.md). Archived lanes never become edit targets
+(g16.108 docs spine compaction); git history retains the old path. Archived
+lanes never become edit targets
 again: they are evidence, not authority.
 
 The child files refer to native package tiers that no longer exist, including
@@ -19,7 +19,7 @@ Use these sources instead:
 
 1. [Component contracts](../../contracts/components/README.md) define the public
    inputs, behavior, accessibility, composition, and token use.
-2. The g16.001 [active-cohort evidence ledger](../../roadmaps/g16/parity-evidence-ledger.md)
+2. The [active-cohort evidence ledger](../../evidence/nucleus/parity-evidence-ledger.md)
    is the current component-level denominator and evidence authority: 175
    public Svelte components, 174 portable native routes, and one web-only
    MeterSurface exclusion.

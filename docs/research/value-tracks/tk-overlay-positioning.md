@@ -274,7 +274,7 @@ Overlay::new(
 
 - Floating UI: https://floating-ui.com/
 - CSS Anchor Positioning: https://developer.mozilla.org/en-US/docs/Web/CSS/anchor
-- Milestone: [g01.010](../../roadmaps/g01/010-overlay-navigation-and-interaction-primitives.md)
+- Milestone: [g01.010](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g01/010-overlay-navigation-and-interaction-primitives.md)
 
 ---
 

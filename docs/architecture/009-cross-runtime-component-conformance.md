@@ -19,7 +19,7 @@ This document records the rejected approach; it is not authority for new
 components or rollout. `g14.021` removed the pilot machinery, keeping the
 component fixes, the defects it caught (now owned by focused tests), and the
 headless GPUI test platform — see
-`../roadmaps/g14/conformance-estate.md` and
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g14/conformance-estate.md` and
 `../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`.
 Nothing described below exists in the tree any more. A replacement
 architecture needs a fresh decision.

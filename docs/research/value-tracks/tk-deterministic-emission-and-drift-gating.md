@@ -6,7 +6,7 @@ Updated: 2026-08-11
 Priority: critical (informs the `poodle-codegen` card rulings before `g13.003`)
 
 Evidence for batch card
-[`015-deterministic-emission-and-drift-gating.md`](../../roadmaps/g13/batch-cards/015-deterministic-emission-and-drift-gating.md),
+[`015-deterministic-emission-and-drift-gating.md`](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/batch-cards/015-deterministic-emission-and-drift-gating.md),
 governed by `docs/specs/063-rust-authored-component-and-scene-ir.md` §"Generated
 Artifact Contract" and `IR-07`, `IR-11`, and card
 `003-crate-placement-ruling-and-schema-handoff.md` (R1, R2).
@@ -468,9 +468,9 @@ each shape costs.
 
 ## Related
 
-- Batch card: [`015-deterministic-emission-and-drift-gating.md`](../../roadmaps/g13/batch-cards/015-deterministic-emission-and-drift-gating.md)
+- Batch card: [`015-deterministic-emission-and-drift-gating.md`](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/batch-cards/015-deterministic-emission-and-drift-gating.md)
 - Governing spec: [`063-rust-authored-component-and-scene-ir.md`](../../specs/063-rust-authored-component-and-scene-ir.md) (§Generated Artifact Contract, IR-07, IR-11)
-- Ruling record: [`003-crate-placement-ruling-and-schema-handoff.md`](../../roadmaps/g13/batch-cards/003-crate-placement-ruling-and-schema-handoff.md) (R1: `poodle-codegen` lib + `[[bin]]`; `#[path]` precedent)
+- Ruling record: [`003-crate-placement-ruling-and-schema-handoff.md`](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g13/batch-cards/003-crate-placement-ruling-and-schema-handoff.md) (R1: `poodle-codegen` lib + `[[bin]]`; `#[path]` precedent)
 - Papercuts: [`PAPERCUTS.md`](../../../PAPERCUTS.md) (docs:check rewrite; audit:tokens; doctor/cargo-fmt churn)
 - Batch log: [`11-g13-015-emission-drift-patterns.md`](../../logs/2026-08/11-g13-015-emission-drift-patterns.md)
 

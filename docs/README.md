@@ -51,7 +51,7 @@ details may differ when the contract permits it.
 - [Architecture index](architecture/README.md) identifies structural authority.
 - [Specs index](specs/README.md) collects repository-wide normative rules and
   generated baselines.
-- [Roadmaps](roadmaps/README.md) contain current milestone planning.
+- [Roadmaps](roadmaps/README.md) contain the active generation and Northstar tasks.
 
 Run documentation locally with:
 
@@ -71,7 +71,8 @@ effigy docs:check
 The remaining sections preserve decision and delivery context:
 
 - `vision/` — long-range intent and scope
-- `roadmaps/` — milestone sequencing and active work
+- `roadmaps/` — generation runway, Northstar tasks, and compact roll-ups
+- `evidence/` — current generated or validated evidence that spans generations
 - `logs/` — completed work and validation evidence
 - `research/` — external comparisons and early investigation
 - `handoffs/` — point-in-time continuation briefs. Retention rule: a handoff

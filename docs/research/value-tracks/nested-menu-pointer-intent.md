@@ -21,7 +21,7 @@ There is no implementation authorization in this dossier.
 ## Scope and authority
 
 The governing card is
-`docs/roadmaps/g16/044-nested-menu-pointer-intent-research.md`. Its writable
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/044-nested-menu-pointer-intent-research.md`. Its writable
 scope is this dossier and `PAPERCUTS.md` only for new execution friction. No
 contracts, source, packages, roadmaps, consumers, or retained disposable
 artifacts were changed for this research.
@@ -96,7 +96,7 @@ There are two pre-existing contract ambiguities relevant to promotion:
 This is an active-cohort parity gap, not a reason to edit the contracts in this
 research lane. The parity ledger records focused web and GPUI specimen evidence,
 but no named mounted submenu regression, no React recursive implementation, and
-no broad GPUI accessibility proof (`docs/roadmaps/g16/parity-evidence-ledger.md`,
+no broad GPUI accessibility proof (`docs/evidence/nucleus/parity-evidence-ledger.md`,
 Menu, ContextMenu, and Menubar rows and notes).
 
 ## Live runtime trace
@@ -497,7 +497,7 @@ defines the mounted Svelte, React, and GPUI evidence before source work begins.
 
 ## Related
 
-- Research card: `docs/roadmaps/g16/044-nested-menu-pointer-intent-research.md`
+- Research card: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/044-nested-menu-pointer-intent-research.md`
 - Working rules: `docs/contracts/001-working-rules.md`
 - Menu contract: `docs/contracts/components/menu.md`
 - ContextMenu contract: `docs/contracts/components/context-menu.md`
@@ -505,7 +505,7 @@ defines the mounted Svelte, React, and GPUI evidence before source work begins.
 - Anchored overlays: `docs/contracts/002-anchored-overlays.md`
 - Native accessibility: `docs/contracts/003-native-accessibility.md`
 - Research playbook: `docs/research/research-to-implementation-playbook.md`
-- Parity evidence: `docs/roadmaps/g16/parity-evidence-ledger.md`
+- Parity evidence: `docs/evidence/nucleus/parity-evidence-ledger.md`
 
 ## Follow-up
 

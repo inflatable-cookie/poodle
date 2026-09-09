@@ -5,7 +5,7 @@ consumer
 Created: 2026-09-01
 Checked: 2026-09-01
 Track: live windowed series vs sparkline, waveform, meter, and chart
-Origin: [`docs/roadmaps/g16/041-live-series-display-research.md`](../../roadmaps/g16/041-live-series-display-research.md)
+Origin: [`g16.041`](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/041-live-series-display-research.md)
 Intake: DesEngs candidate 5, merged in PR #126
 Primary lead: [Liveline](https://github.com/benjitaylor/liveline) at published
 `0.0.7`

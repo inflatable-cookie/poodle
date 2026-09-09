@@ -3,8 +3,8 @@
 Status: open — CS20 and keyboard geometry remain; release and Loophole adoption are promoted (`g16.097`, `g16.109`)
 Captured: 2026-09-02
 Owner: Chatterbox (planning)
-Canonical Poodle cards: `../roadmaps/g16/053-repository-security-audit-boundary-repair.md`,
-`../roadmaps/g16/054-historycenter-v030-release-candidate.md`
+Canonical Poodle cards: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/053-repository-security-audit-boundary-repair.md`,
+`https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/054-historycenter-v030-release-candidate.md`
 
 The drag programme and `g16.033` rejection surface are complete. The remaining
 work is unrelated to drag.

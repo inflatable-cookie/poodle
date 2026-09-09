@@ -4,7 +4,7 @@ Status: research complete; promotion-ready for an operator architecture decision
 Created: 2026-09-01
 Checked: 2026-09-01
 Track: in-place pending-to-settled toast lifecycle
-Origin: `docs/roadmaps/g16/043-in-place-toast-lifecycle-research.md`
+Origin: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/043-in-place-toast-lifecycle-research.md`
 Primary lead: [Sonner promise toast](https://sonner.emilkowal.ski/toast#promise)
 Pinned Sonner source: `emilkowalski/sonner` commit
 [`ecce1841c55e4a72dfe139a8992b56498660125e`](https://github.com/emilkowalski/sonner/commit/ecce1841c55e4a72dfe139a8992b56498660125e)
@@ -536,7 +536,7 @@ expiry.
 
 ## Related
 
-- Card: `../../roadmaps/g16/043-in-place-toast-lifecycle-research.md`
+- Card: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/043-in-place-toast-lifecycle-research.md`
 - Motion baseline: `../../architecture/012-semantic-motion-policy.md`,
   `../../logs/2026-09/20260901-g16-034-shared-motion-policy.md`
 - Notification rules: `../../specs/015-loading-empty-error-notification-and-remediation-rules.md`

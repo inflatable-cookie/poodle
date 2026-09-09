@@ -4,7 +4,7 @@ import { describe, expect, it, setDefaultTimeout } from "bun:test";
 import { deriveLiveRoster, generateLedgerMarkdown, validateLedgerText } from "./parity-evidence-ledger";
 
 const root = path.resolve(import.meta.dir, "..");
-const ledgerPath = path.join(root, "docs/roadmaps/g16/parity-evidence-ledger.md");
+const ledgerPath = path.join(root, "docs/evidence/nucleus/parity-evidence-ledger.md");
 setDefaultTimeout(30_000);
 
 describe("g16.001 parity evidence ledger", () => {
@@ -31,7 +31,7 @@ describe("g16.001 parity evidence ledger", () => {
     const ledger = generateLedgerMarkdown(root);
     const calloutRow = ledger.split("\n").find((line) => line.startsWith("| Callout |"));
     expect(calloutRow).toContain(
-      "mounted — validated `docs/roadmaps/g16/nucleus-parity-receipts/callout--nucleus-settings-callout.json#proof_level`",
+      "mounted — validated `docs/evidence/nucleus/nucleus-parity-receipts/callout--nucleus-settings-callout.json#proof_level`",
     );
     expect(calloutRow).not.toContain("no validated M1 receipt");
     expect(ledger).toContain(

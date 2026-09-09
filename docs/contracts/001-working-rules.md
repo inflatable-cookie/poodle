@@ -10,7 +10,12 @@ Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 - Architecture defines stable ownership and runtime boundaries.
 - Specs define repository-wide normative rules.
 - Component contracts define public component semantics.
-- Roadmaps define active sequencing.
+- The active generation README defines the roadmap and approved frontier.
+- A top-level `docs/roadmaps/gNN/NNN-<slug>.md` file is the sole executable
+  planning unit: a Northstar task referenced as `gNN.NNN`. No milestone wrapper,
+  nested batch-card hierarchy, or dual task authority is supported.
+- Queue tasks are control-plane records and Effigy tasks are command selectors;
+  neither becomes planning authority.
 - Logs record completed work and point-in-time evidence.
 
 Execution status does not belong in contracts. When two documents conflict,

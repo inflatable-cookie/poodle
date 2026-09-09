@@ -36,7 +36,7 @@
   "crossRuntime": {
     "artifact": "packages/gpui/cross-runtime-parity-report.json",
     "generation": "g16.001",
-    "sourceLedger": "docs/roadmaps/g16/parity-evidence-ledger.md",
+    "sourceLedger": "docs/evidence/nucleus/parity-evidence-ledger.md",
     "runtime": "gpui",
     "status": "current",
     "denominator": {

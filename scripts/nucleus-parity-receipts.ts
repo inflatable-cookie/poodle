@@ -15,10 +15,10 @@ import {
   type SnapshotFile,
 } from "../test/nucleus-a11y/contract";
 
-export const NUCLEUS_MANIFEST_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.json";
-export const NUCLEUS_MANIFEST_SCHEMA_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.schema.json";
-export const NUCLEUS_SCHEMA_PATH = "docs/roadmaps/g16/nucleus-parity-receipt.schema.json";
-export const NUCLEUS_RECEIPT_DIR = "docs/roadmaps/g16/nucleus-parity-receipts";
+export const NUCLEUS_MANIFEST_PATH = "docs/evidence/nucleus/nucleus-parity-manifest.json";
+export const NUCLEUS_MANIFEST_SCHEMA_PATH = "docs/evidence/nucleus/nucleus-parity-manifest.schema.json";
+export const NUCLEUS_SCHEMA_PATH = "docs/evidence/nucleus/nucleus-parity-receipt.schema.json";
+export const NUCLEUS_RECEIPT_DIR = "docs/evidence/nucleus/nucleus-parity-receipts";
 export const NUCLEUS_RECEIPT_SCHEMA = "poodle.g16-nucleus-parity-receipt.v1";
 export const NUCLEUS_RUNTIME = "gpui-headless";
 export const NUCLEUS_COMMAND = "effigy regressions:native";

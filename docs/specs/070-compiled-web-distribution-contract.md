@@ -87,7 +87,7 @@ wildcard can resolve those two files; the compiled contract closes that leak.
 ## Canonical component denominator
 
 The public component denominator is **176** names. One derived list must agree
-across this spec, `docs/roadmaps/g15/release-baseline-roster.md`, and
+across this spec, `docs/evidence/releases/web-package-roster.md`, and
 `test/package-install/roster.ts`. A 175/176 disagreement is a blocking defect.
 
 Markdown members stay in the 176. They leave shell **root barrels**. They

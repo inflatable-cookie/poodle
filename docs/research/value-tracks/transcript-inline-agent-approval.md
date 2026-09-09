@@ -3,7 +3,7 @@
 Status: research complete
 Disposition: reject a new shared transcript-inline approval semantic; compose the existing question and plan paths; keep novel workflows consumer-owned
 Research date: 2026-09-01
-Card: [g16.037 — Transcript-Inline Agent Approval Research](../../roadmaps/g16/037-transcript-inline-agent-approval-research.md)
+Card: [g16.037 — Transcript-Inline Agent Approval Research](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/037-transcript-inline-agent-approval-research.md)
 Baseline: Poodle HEAD 06a42e3cc36b865344d0bf9e3b5c81bbd1c0a32d
 
 ## Executive decision
@@ -163,7 +163,7 @@ an agent-specific transcript semantic.
 
 ### Downstream demand check
 
-The [g15 release baseline roster](../../roadmaps/g15/release-baseline-roster.md)
+The [g15 release baseline roster](https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g15/release-baseline-roster.md)
 records no downstream consumer use found for AgentPlan, AgentPlanRecord,
 AgentQuestion, AgentQuestionRecord, or AgentTranscript. This is not a release
 failure, but it is important research evidence: there is no product workflow

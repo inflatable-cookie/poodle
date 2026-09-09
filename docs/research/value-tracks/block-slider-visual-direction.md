@@ -150,14 +150,14 @@ The exact current recipe hooks are listed in `docs/contracts/components/range-sl
 
 **[LF]** Existing focused tests cover normalization, snapping, keyboard arrows/Home/End, embedded pointer traces, no-crossing, live change, one commit, disabled state, and some ARIA attributes. They do not cover the block-specific risks: inline-content collision, equal-thumb layering, 44×44 effective targets, `lostpointercapture`, focus-visible/hover/pressed render states, forced colors, reduced motion, contrast across themes, or native RangeSlider vertical behavior. The Svelte Range test is mostly standard-input coverage; the React test has more scrub tracing but the two runtimes’ standard commit paths differ.
 
-**[LF]** `docs/roadmaps/g16/parity-evidence-ledger.md:138` records Slider with focused web tests and a mounted GPUI regression, but native accessibility remains manual and a GPUI visual comparison fixture is missing. Its RangeSlider row records the same evidence shape and the existing mounted scrub regression. The ledger is evidence status, not a visual-admission decision.
+**[LF]** `docs/evidence/nucleus/parity-evidence-ledger.md:138` records Slider with focused web tests and a mounted GPUI regression, but native accessibility remains manual and a GPUI visual comparison fixture is missing. Its RangeSlider row records the same evidence shape and the existing mounted scrub regression. The ledger is evidence status, not a visual-admission decision.
 
 **[LF]** Current consumer references found in this tree:
 
 - Svelte `packages/svelte/preview/src/components/DisplayControls.svelte:126-137` and React `packages/react/preview/src/gallery/DisplayControls.tsx:110-121` use Slider for neutral contrast with `ariaLabel` and formatted `valueText`;
 - Svelte `packages/svelte/components/src/ColorPicker.svelte:430-462` and React `packages/react/components/src/ColorPicker.tsx:436-464` use Slider for Hue and Opacity;
 - Svelte `packages/svelte/components/src/audio/ModMatrixVisual.svelte:6-14` and React `packages/react/components/src/audio/ModMatrixVisual.tsx:4-11` use the raw `.poodle-slider` visual class for an aria-hidden embedded matrix cell, not the public Slider shell;
-- `docs/roadmaps/g15/release-baseline-roster.md:127-134` lists no current RangeSlider consumer and lists `acowtancy` and `loophole-legacy` for Slider. Those named products are not present as source in this worktree, so the roster is an inventory signal, not a complete downstream compile audit.
+- `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g15/release-baseline-roster.md:127-134` lists no current RangeSlider consumer and lists `acowtancy` and `loophole-legacy` for Slider. Those named products are not present as source in this worktree, so the roster is an inventory signal, not a complete downstream compile audit.
 
 Changing the default `.poodle-slider` structure or dimensions would therefore affect preview controls, color controls, raw audio visuals, public specimens, and external consumers. An explicit appearance selector limits that blast radius.
 
