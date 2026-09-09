@@ -9,26 +9,13 @@
     "component",
     "scenario_id",
     "proof_level",
-    "runtime",
-    "command",
-    "package",
-    "package_version",
-    "source_commit",
-    "lockfile",
-    "lockfile_sha256",
-    "lock_resolution",
-    "distribution",
-    "production_path_observation",
-    "actions",
-    "assertions",
-    "outcome",
-    "artifact_paths"
+    "outcome"
   ],
   "properties": {
     "schema": { "const": "poodle.g16-nucleus-parity-receipt.v1" },
     "component": { "type": "string", "minLength": 1 },
     "scenario_id": { "type": "string", "minLength": 1 },
-    "proof_level": { "enum": ["M1", "A1"] },
+    "proof_level": { "enum": ["M1", "A1", "V1"] },
     "runtime": { "const": "gpui-headless" },
     "command": { "const": "effigy regressions:native" },
     "package": { "const": "poodle-gpui-preview" },
@@ -51,13 +38,82 @@
     },
     "actions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
     "assertions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "outcome": { "const": "passed" },
+    "outcome": { "enum": ["passed", "compared"] },
     "artifact_paths": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
-    "accessibility": { "$ref": "#/$defs/accessibility" }
+    "accessibility": { "$ref": "#/$defs/accessibility" },
+    "lab_bundle": { "$ref": "#/$defs/lab_bundle" },
+    "fixtures": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "string", "pattern": "^cohort/[a-z0-9-]+/(initial|after-actions)$" }
+    },
+    "pairs": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/pair_verdict" }
+    },
+    "finding_count": { "type": "integer", "minimum": 0 }
   },
-  "if": { "properties": { "proof_level": { "const": "A1" } } },
-  "then": { "required": ["accessibility"] },
-  "else": { "not": { "required": ["accessibility"] } },
+  "allOf": [
+    {
+      "if": { "properties": { "proof_level": { "const": "V1" } } },
+      "then": {
+        "required": ["lab_bundle", "fixtures", "pairs", "finding_count"],
+        "properties": { "outcome": { "const": "compared" } },
+        "not": {
+          "anyOf": [
+            { "required": ["runtime"] },
+            { "required": ["command"] },
+            { "required": ["package"] },
+            { "required": ["package_version"] },
+            { "required": ["source_commit"] },
+            { "required": ["lockfile"] },
+            { "required": ["lockfile_sha256"] },
+            { "required": ["lock_resolution"] },
+            { "required": ["distribution"] },
+            { "required": ["production_path_observation"] },
+            { "required": ["actions"] },
+            { "required": ["assertions"] },
+            { "required": ["artifact_paths"] },
+            { "required": ["accessibility"] }
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "runtime",
+          "command",
+          "package",
+          "package_version",
+          "source_commit",
+          "lockfile",
+          "lockfile_sha256",
+          "lock_resolution",
+          "distribution",
+          "production_path_observation",
+          "actions",
+          "assertions",
+          "artifact_paths"
+        ],
+        "properties": { "outcome": { "const": "passed" } },
+        "not": {
+          "anyOf": [
+            { "required": ["lab_bundle"] },
+            { "required": ["fixtures"] },
+            { "required": ["pairs"] },
+            { "required": ["finding_count"] }
+          ]
+        }
+      }
+    },
+    {
+      "if": { "properties": { "proof_level": { "const": "A1" } } },
+      "then": { "required": ["accessibility"] },
+      "else": { "not": { "required": ["accessibility"] } }
+    }
+  ],
   "$defs": {
     "accessibility": {
       "description": "g16.111 A1: the paired GPUI node-tree / Svelte DOM accessibility snapshot record. Both snapshots are committed artifacts (also listed in artifact_paths); the diff is empty for a pass; every web-only exclusion is named with its reason.",
@@ -93,6 +149,84 @@
           }
         },
         "diff": { "type": "array", "maxItems": 0 }
+      }
+    },
+    "lab_bundle": {
+      "description": "g17.001 V1: the cited Poodle Lab cohort bundle identity. The directory hash covers every imported byte; the validator version names the checker that accepted it; the Lab merge and closeout commits and the Poodle pin name the exact evidence source.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dir",
+        "directory_sha256",
+        "summary_sha256",
+        "lab_merge_commit",
+        "lab_closeout_commit",
+        "run_id",
+        "validator_version",
+        "poodle_pin"
+      ],
+      "properties": {
+        "dir": { "const": "docs/logs/2026-09/08-140648-g01-006-cohort-batch-bundle" },
+        "directory_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "summary_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "lab_merge_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "lab_closeout_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "run_id": { "const": "2026-09-08T14-06-48" },
+        "validator_version": { "const": "1.0.0" },
+        "poodle_pin": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "pair_verdict": {
+      "description": "g17.001 V1: one Lab pair verdict retained verbatim. Findings are evidence only; they neither pass the row nor become accepted deltas.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixture", "pair", "ok", "channels"],
+      "properties": {
+        "fixture": { "type": "string", "pattern": "^cohort/[a-z0-9-]+/(initial|after-actions)$" },
+        "pair": { "enum": ["svelte-react", "svelte-gpui"] },
+        "ok": { "type": "boolean" },
+        "channels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dimensions", "geometry", "roles", "pixels"],
+          "properties": {
+            "dimensions": { "$ref": "#/$defs/channel_verdict" },
+            "geometry": { "$ref": "#/$defs/channel_verdict" },
+            "roles": { "$ref": "#/$defs/channel_verdict" },
+            "pixels": { "$ref": "#/$defs/channel_verdict" }
+          }
+        }
+      }
+    },
+    "channel_verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "findings"],
+      "properties": {
+        "status": { "enum": ["pass", "fail"] },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["channel", "subject", "detail"],
+            "properties": {
+              "channel": { "type": "string", "minLength": 1 },
+              "subject": { "type": "string", "minLength": 1 },
+              "detail": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["differingPixels", "totalPixels", "ratio"],
+          "properties": {
+            "differingPixels": { "type": "integer", "minimum": 0 },
+            "totalPixels": { "type": "integer", "minimum": 1 },
+            "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
       }
     },
     "locked_package": {

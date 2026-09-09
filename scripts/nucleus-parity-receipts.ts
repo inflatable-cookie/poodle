@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   A1_GPUI_RUNTIME,
@@ -14,6 +14,7 @@ import {
   type A1Exclusion,
   type SnapshotFile,
 } from "../test/nucleus-a11y/contract";
+import { GEOMETRY, PIXELS, ROLES } from "../test/visual/button-comparison/policy";
 
 export const NUCLEUS_MANIFEST_PATH = "docs/evidence/nucleus/nucleus-parity-manifest.json";
 export const NUCLEUS_MANIFEST_SCHEMA_PATH = "docs/evidence/nucleus/nucleus-parity-manifest.schema.json";
@@ -66,7 +67,7 @@ export type NucleusManifest = {
   components: NucleusEntry[];
 };
 
-export type NucleusProofLevel = "M1" | "A1";
+export type NucleusProofLevel = "M1" | "A1" | "V1";
 
 /// g16.111 A1: the paired accessibility record. Both snapshots are committed
 /// artifacts; the diff is empty for a pass.
@@ -85,7 +86,7 @@ export type NucleusReceipt = {
   schema: typeof NUCLEUS_RECEIPT_SCHEMA;
   component: string;
   scenario_id: string;
-  proof_level: NucleusProofLevel;
+  proof_level: "M1" | "A1";
   runtime: typeof NUCLEUS_RUNTIME;
   command: typeof NUCLEUS_COMMAND;
   package: string;
@@ -116,6 +117,9 @@ export type NucleusReceiptRow = {
   /// The validated A1 receipt, when one exists (g16.111).
   a1ReceiptPath?: string;
   a1Receipt?: NucleusReceipt;
+  /// The validated V1 receipt, when one exists (g17.001).
+  v1ReceiptPath?: string;
+  v1Receipt?: NucleusV1Receipt;
 };
 
 function rootPath(root: string, relativePath: string): string {
@@ -226,6 +230,7 @@ function manifestShapeErrors(manifest: unknown): string[] {
 }
 
 function receiptShapeErrors(receipt: unknown): string[] {
+  if (isJsonObject(receipt) && receipt.proof_level === "V1") return v1ReceiptShapeErrors(receipt);
   const errors: string[] = [];
   if (!assertExactObject(receipt, "receipt", RECEIPT_REQUIRED_KEYS, RECEIPT_OPTIONAL_KEYS, errors)) return errors;
   if (assertArray(receipt.lock_resolution, "receipt lock_resolution", errors)) {
@@ -395,7 +400,7 @@ function validateArtifact(artifact: unknown, index: number, root: string, errors
   }
 }
 
-export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadNucleusManifest(), root = ROOT): void {
+export function validateNucleusReceipt(receipt: NucleusReceipt | NucleusV1Receipt, manifest = loadNucleusManifest(), root = ROOT): void {
   const shapeErrors = receiptShapeErrors(receipt);
   if (shapeErrors.length > 0) throw new Error(shapeErrors.join("\n"));
   const errors: string[] = [];
@@ -403,7 +408,16 @@ export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadN
   assert(receipt.schema === NUCLEUS_RECEIPT_SCHEMA, "receipt schema is not current", errors);
   assert(entry !== undefined && entry.rendered !== false, `receipt component is not a rendered manifest entry: ${receipt.component}`, errors);
   if (entry !== undefined) assert(receipt.scenario_id === entry.scenario_id, `${receipt.component} receipt scenario does not match the manifest`, errors);
-  assert(receipt.proof_level === "M1" || receipt.proof_level === "A1", "receipt proof level must be M1 or A1; V1 requires separate evidence", errors);
+  assert(
+    receipt.proof_level === "M1" || receipt.proof_level === "A1" || receipt.proof_level === "V1",
+    "receipt proof level must be M1, A1, or V1",
+    errors,
+  );
+  if (receipt.proof_level === "V1") {
+    validateV1Receipt(receipt, manifest, root, errors);
+    if (errors.length > 0) throw new Error(errors.join("\n"));
+    return;
+  }
   if (receipt.proof_level === "M1") {
     assert(receipt.accessibility === undefined, "an M1 receipt carries no accessibility block", errors);
   } else if (receipt.proof_level === "A1") {
@@ -518,9 +532,11 @@ function validateAccessibilityBlock(receipt: NucleusReceipt, root: string, error
   assert(block.diff.length === 0, "receipt accessibility diff is not empty", errors);
 }
 
-export function receiptFileStem(receipt: Pick<NucleusReceipt, "component" | "scenario_id" | "proof_level">): string {
+export function receiptFileStem(receipt: { component: string; scenario_id: string; proof_level: NucleusProofLevel }): string {
   const stem = `${receipt.component.toLowerCase().replaceAll(" ", "-")}--${receipt.scenario_id.replaceAll(".", "-")}`;
-  return receipt.proof_level === "A1" ? `${stem}--a1` : stem;
+  if (receipt.proof_level === "A1") return `${stem}--a1`;
+  if (receipt.proof_level === "V1") return `${stem}--v1`;
+  return stem;
 }
 
 function currentSourceMatchesReceipt(manifest: NucleusManifest, root: string): boolean {
@@ -539,15 +555,15 @@ function canonicalReceiptFiles(root: string): string[] {
   return readdirSync(directory).filter((file) => file.endsWith(".json")).sort();
 }
 
-export function loadValidatedNucleusReceipts(root = ROOT): Array<{ path: string; receipt: NucleusReceipt }> {
+export function loadValidatedNucleusReceipts(root = ROOT): Array<{ path: string; receipt: AnyNucleusReceipt }> {
   const manifest = loadNucleusManifest(root);
-  const receipts: Array<{ path: string; receipt: NucleusReceipt }> = [];
+  const receipts: Array<{ path: string; receipt: AnyNucleusReceipt }> = [];
   const errors: string[] = [];
   const seenComponents = new Set<string>();
   for (const file of canonicalReceiptFiles(root)) {
     const relativePath = `${NUCLEUS_RECEIPT_DIR}/${file}`;
     try {
-      const receipt = readJson<NucleusReceipt>(root, relativePath);
+      const receipt = readJson<AnyNucleusReceipt>(root, relativePath);
       validateNucleusReceipt(receipt, manifest, root);
       const key = `${receipt.component}/${receipt.proof_level}`;
       if (seenComponents.has(key)) throw new Error(`duplicate ${receipt.proof_level} receipt component ${receipt.component}`);
@@ -570,18 +586,561 @@ export function deriveNucleusReceiptRows(root = ROOT): NucleusReceiptRow[] {
   const validated = loadValidatedNucleusReceipts(root);
   const m1 = new Map(validated.filter((item) => item.receipt.proof_level === "M1").map((item) => [item.receipt.component, item]));
   const a1 = new Map(validated.filter((item) => item.receipt.proof_level === "A1").map((item) => [item.receipt.component, item]));
+  const v1 = new Map(validated.filter((item) => item.receipt.proof_level === "V1").map((item) => [item.receipt.component, item]));
   return manifest.components.map((entry) => {
     const row: NucleusReceiptRow = { entry };
     const mounted = m1.get(entry.name);
-    if (mounted !== undefined) {
+    if (mounted !== undefined && mounted.receipt.proof_level !== "V1") {
       row.receiptPath = mounted.path;
       row.receipt = mounted.receipt;
     }
     const accessible = a1.get(entry.name);
-    if (accessible !== undefined) {
+    if (accessible !== undefined && accessible.receipt.proof_level !== "V1") {
       row.a1ReceiptPath = accessible.path;
       row.a1Receipt = accessible.receipt;
+    }
+    const visual = v1.get(entry.name);
+    if (visual !== undefined && visual.receipt.proof_level === "V1") {
+      row.v1ReceiptPath = visual.path;
+      row.v1Receipt = visual.receipt;
     }
     return row;
   });
 }
+
+/// g17.001 V1: deterministic component comparison evidence imported from the
+/// validated Poodle Lab cohort bundle. The bundle is evidence, not
+/// implementation input: it is copied byte-for-byte, re-validated by directory
+/// hash and validator version, and never edited. Reported findings are
+/// retained verbatim in every receipt; they adjudicate nothing.
+export const NUCLEUS_V1_BUNDLE_DIR = "docs/logs/2026-09/08-140648-g01-006-cohort-batch-bundle";
+export const NUCLEUS_V1_BUNDLE_SCHEMA = "poodle-lab.cohort-run.v1";
+export const NUCLEUS_V1_RUN_ID = "2026-09-08T14-06-48";
+export const NUCLEUS_V1_VALIDATOR_VERSION = "1.0.0";
+export const NUCLEUS_V1_DIRECTORY_SHA256 = "0512b830e94bc30a7f1d2c623c6e081c85d4aa0086a60f9adfd905badc612a99";
+export const NUCLEUS_V1_SUMMARY_SHA256 = "f1f32bb05d88d60d2d2e6cecb83251e024826b05c678dfd2ddd19826c80ce7e6";
+export const NUCLEUS_V1_REPORT_SHA256 = "3475132657b355a1c6b3246c3a21db2c660f5fb719c0986a6d791f3e9447d087";
+export const NUCLEUS_V1_LAB_MERGE_COMMIT = "f99465f048d7c5c58603b99ae51f3209e581848e";
+export const NUCLEUS_V1_LAB_CLOSEOUT_COMMIT = "13ddc2fcbc0897a9f2ec78ee0dd061ce74c7f46d";
+export const NUCLEUS_V1_POODLE_PIN = "8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983";
+export const NUCLEUS_V1_SUMMARY_FILE = "summary.json";
+export const NUCLEUS_V1_REPORT_FILE = "report.md";
+export const NUCLEUS_V1_STATES = ["initial", "after-actions"] as const;
+export const NUCLEUS_V1_PAIRS = ["svelte-react", "svelte-gpui"] as const;
+export const NUCLEUS_V1_CHANNELS = ["dimensions", "geometry", "roles", "pixels"] as const;
+export const NUCLEUS_V1_RUNTIMES = ["svelte", "react", "gpui"] as const;
+
+export type NucleusVisualChannelVerdict = {
+  status: "pass" | "fail";
+  findings: NucleusVisualFinding[];
+  metrics?: {
+    differingPixels: number;
+    totalPixels: number;
+    ratio: number;
+  };
+};
+
+export type NucleusVisualPairVerdict = {
+  fixture: string;
+  pair: (typeof NUCLEUS_V1_PAIRS)[number];
+  ok: boolean;
+  channels: Record<(typeof NUCLEUS_V1_CHANNELS)[number], NucleusVisualChannelVerdict>;
+};
+
+export type NucleusVisualBundle = {
+  dir: typeof NUCLEUS_V1_BUNDLE_DIR;
+  directory_sha256: string;
+  summary_sha256: string;
+  lab_merge_commit: string;
+  lab_closeout_commit: string;
+  run_id: typeof NUCLEUS_V1_RUN_ID;
+  validator_version: typeof NUCLEUS_V1_VALIDATOR_VERSION;
+  poodle_pin: string;
+};
+
+export type NucleusV1Receipt = {
+  schema: typeof NUCLEUS_RECEIPT_SCHEMA;
+  component: string;
+  scenario_id: string;
+  proof_level: "V1";
+  outcome: "compared";
+  lab_bundle: NucleusVisualBundle;
+  fixtures: string[];
+  pairs: NucleusVisualPairVerdict[];
+  finding_count: number;
+};
+
+export type AnyNucleusReceipt = NucleusReceipt | NucleusV1Receipt;
+
+const V1_RECEIPT_REQUIRED_KEYS = [
+  "schema",
+  "component",
+  "scenario_id",
+  "proof_level",
+  "outcome",
+  "lab_bundle",
+  "fixtures",
+  "pairs",
+  "finding_count",
+];
+const V1_BUNDLE_REQUIRED_KEYS = [
+  "dir",
+  "directory_sha256",
+  "summary_sha256",
+  "lab_merge_commit",
+  "lab_closeout_commit",
+  "run_id",
+  "validator_version",
+  "poodle_pin",
+];
+const V1_PAIR_REQUIRED_KEYS = ["fixture", "pair", "ok", "channels"];
+const V1_CHANNEL_REQUIRED_KEYS = ["status", "findings"];
+const V1_FINDING_REQUIRED_KEYS = ["channel", "subject", "detail"];
+const V1_METRICS_REQUIRED_KEYS = ["differingPixels", "totalPixels", "ratio"];
+
+function assertV1Metrics(value: unknown, label: string, required: boolean, errors: string[]): void {
+  if (value === undefined) {
+    assert(required === false, `${label} metrics is missing`, errors);
+    return;
+  }
+  if (!assertExactObject(value, `${label} metrics`, V1_METRICS_REQUIRED_KEYS, [], errors)) return;
+  assert(typeof value.differingPixels === "number" && Number.isInteger(value.differingPixels) && value.differingPixels >= 0, `${label} metrics differingPixels must be a non-negative integer`, errors);
+  assert(typeof value.totalPixels === "number" && Number.isInteger(value.totalPixels) && value.totalPixels > 0, `${label} metrics totalPixels must be a positive integer`, errors);
+  assert(typeof value.ratio === "number" && value.ratio >= 0 && value.ratio <= 1, `${label} metrics ratio must be between 0 and 1`, errors);
+}
+
+function v1ReceiptShapeErrors(receipt: JsonObject): string[] {
+  const errors: string[] = [];
+  if (Object.hasOwn(receipt, "production_path_observation") || Object.hasOwn(receipt, "runtime")) {
+    errors.push("a mounted M1/A1 body is not a visual receipt; V1 proof level requires the Lab visual block");
+  }
+  if (!assertExactObject(receipt, "receipt", V1_RECEIPT_REQUIRED_KEYS, [], errors)) return errors;
+  if (assertExactObject(receipt.lab_bundle, "receipt lab_bundle", V1_BUNDLE_REQUIRED_KEYS, [], errors)) {
+    const bundle = receipt.lab_bundle;
+    for (const key of V1_BUNDLE_REQUIRED_KEYS) {
+      assert(typeof bundle[key] === "string" && (bundle[key] as string).length > 0, `receipt lab_bundle ${key} must be a non-empty string`, errors);
+    }
+  }
+  if (
+    !assertArray(receipt.fixtures, "receipt fixtures", errors) ||
+    receipt.fixtures.length !== 2 ||
+    !receipt.fixtures.every((fixture) => typeof fixture === "string" && fixture.length > 0)
+  ) {
+    errors.push("receipt fixtures must be exactly two cohort fixture ids");
+  }
+  if (assertArray(receipt.pairs, "receipt pairs", errors)) {
+    if (receipt.pairs.length !== 4) errors.push("receipt pairs must be exactly four pair verdicts");
+    receipt.pairs.forEach((pair, index) => {
+      const label = `receipt pairs[${index}]`;
+      if (!assertExactObject(pair, label, V1_PAIR_REQUIRED_KEYS, [], errors)) return;
+      assert(typeof pair.fixture === "string" && pair.fixture.length > 0, `${label} fixture must be a non-empty string`, errors);
+      assert(pair.pair === "svelte-react" || pair.pair === "svelte-gpui", `${label} pair must be svelte-react or svelte-gpui`, errors);
+      assert(typeof pair.ok === "boolean", `${label} ok must be a boolean`, errors);
+      if (!isJsonObject(pair.channels)) {
+        errors.push(`${label} channels must be an object`);
+        return;
+      }
+      for (const channel of NUCLEUS_V1_CHANNELS) {
+        const verdict = (pair.channels as Record<string, unknown>)[channel];
+        const channelLabel = `${label} channels ${channel}`;
+        if (!assertExactObject(verdict, channelLabel, V1_CHANNEL_REQUIRED_KEYS, ["metrics"], errors)) continue;
+        assert(verdict.status === "pass" || verdict.status === "fail", `${channelLabel} status must be pass or fail`, errors);
+        assertV1Metrics(verdict.metrics, channelLabel, channel === "pixels", errors);
+        if (assertArray(verdict.findings, `${channelLabel} findings`, errors)) {
+          verdict.findings.forEach((finding, findingIndex) => {
+            if (!assertExactObject(finding, `${channelLabel} findings[${findingIndex}]`, V1_FINDING_REQUIRED_KEYS, [], errors)) return;
+            for (const key of V1_FINDING_REQUIRED_KEYS) {
+              assert(
+                typeof (finding as Record<string, unknown>)[key] === "string" && ((finding as Record<string, unknown>)[key] as string).length > 0,
+                `${channelLabel} findings[${findingIndex}] ${key} must be a non-empty string`,
+                errors,
+              );
+            }
+          });
+        }
+      }
+      const channelKeys = Object.keys(pair.channels);
+      assert(
+        channelKeys.length === NUCLEUS_V1_CHANNELS.length && NUCLEUS_V1_CHANNELS.every((channel) => channelKeys.includes(channel)),
+        `${label} channels must be exactly dimensions, geometry, roles, and pixels`,
+        errors,
+      );
+    });
+  }
+  assert(typeof receipt.finding_count === "number" && Number.isInteger(receipt.finding_count) && receipt.finding_count >= 0, "receipt finding_count must be a non-negative integer", errors);
+  return errors;
+}
+
+/// g17.001: the live Poodle scenario behind each Lab cohort slug. The mapping
+/// is derived, never assumed: a manifest row claims exactly one scenario file
+/// whose committed component and scenario id match the row.
+export type V1ScenarioMap = Map<string, { component: string; scenario_id: string }>;
+
+export function nucleusV1ScenarioMap(root = ROOT): V1ScenarioMap {
+  const map: V1ScenarioMap = new Map();
+  const directory = rootPath(root, "test/nucleus-a11y/scenarios");
+  for (const file of readdirSync(directory).filter((entry) => entry.endsWith(".json")).sort()) {
+    const stem = file.slice(0, -".json".length);
+    const loaded = readScenario(root, stem);
+    map.set(stem, { component: loaded.scenario.component, scenario_id: loaded.scenario.scenario_id });
+  }
+  return map;
+}
+
+export type ValidatedV1Bundle = {
+  slugs: string[];
+  fixtures: string[];
+  pairs: NucleusVisualPairVerdict[];
+  pairByKey: Map<string, NucleusVisualPairVerdict>;
+  slugByComponent: Map<string, string>;
+  findingCount: number;
+  pairsOk: number;
+};
+
+function v1SlugOf(fixture: unknown): string | undefined {
+  if (typeof fixture !== "string") return undefined;
+  const match = fixture.match(/^cohort\/([a-z0-9-]+)\/(initial|after-actions)$/);
+  return match?.[1];
+}
+
+function assertV1Policy(policy: unknown, errors: string[]): void {
+  if (!isJsonObject(policy)) {
+    errors.push("bundle policy must be an object");
+    return;
+  }
+  for (const [table, expected] of [["GEOMETRY", GEOMETRY], ["ROLES", ROLES], ["PIXELS", PIXELS]] as const) {
+    const actual = policy[table];
+    if (!isJsonObject(actual)) {
+      errors.push(`bundle policy ${table} must be an object`);
+      continue;
+    }
+    for (const [key, value] of Object.entries(expected)) {
+      assert(actual[key] === value, `bundle policy ${table}.${key} differs from the fixed g15.047 table`, errors);
+    }
+    assert(
+      Object.keys(actual).length === Object.keys(expected).length,
+      `bundle policy ${table} carries unexpected keys beside the fixed g15.047 table`,
+      errors,
+    );
+  }
+  assert(Object.keys(policy).length === 3, "bundle policy must carry exactly GEOMETRY, ROLES, and PIXELS", errors);
+}
+
+/// g17.001: fail-closed validation of the imported Lab bundle document. The
+/// document is trusted only after: pinned Lab and Poodle identity, the fixed
+/// g15.047 tolerance table, 174 captures with two agreeing repeats and proved
+/// foreground, a bijective slug/scenario/manifest mapping, 116 verdicts that
+/// cover every implied pair with ok agreeing with every channel, and verdict
+/// counts that recompute exactly.
+export function validateV1BundleDocument(document: unknown, scenarios: V1ScenarioMap, manifest: NucleusManifest): ValidatedV1Bundle {
+  const errors: string[] = [];
+  if (!isJsonObject(document)) throw new Error("bundle summary must be an object");
+  assert(document.schema === NUCLEUS_V1_BUNDLE_SCHEMA, `bundle schema is not ${NUCLEUS_V1_BUNDLE_SCHEMA}`, errors);
+  assert(document.lane === "cohort", "bundle lane is not cohort", errors);
+  assert(document.runId === NUCLEUS_V1_RUN_ID, `bundle run id is not ${NUCLEUS_V1_RUN_ID}`, errors);
+  assert(document.closedBatch === true, "bundle is not a closed batch", errors);
+  const manifestBlock = isJsonObject(document.manifest) ? document.manifest : undefined;
+  assert(manifestBlock?.fixtures === 58, "bundle manifest does not cover 58 fixtures", errors);
+  const poodle = isJsonObject(document.sources) && isJsonObject(document.sources.poodle) ? (document.sources.poodle as JsonObject) : undefined;
+  assert(poodle?.commit === NUCLEUS_V1_POODLE_PIN, `bundle Poodle pin is not ${NUCLEUS_V1_POODLE_PIN}`, errors);
+  assertV1Policy(document.policy, errors);
+
+  const slugToEntry = new Map<string, NucleusEntry>();
+  for (const entry of manifest.components) {
+    const matches = [...scenarios.entries()].filter(([, identity]) => identity.component === entry.name && identity.scenario_id === entry.scenario_id);
+    assert(matches.length === 1, `${entry.name} maps to ${matches.length} scenario files, expected exactly one`, errors);
+    if (matches.length === 1 && matches[0] !== undefined) {
+      const stem = matches[0][0];
+      assert(!slugToEntry.has(stem), `scenario ${stem} is claimed by more than one manifest row`, errors);
+      slugToEntry.set(stem, entry);
+    }
+  }
+
+  const slugs = new Set<string>();
+  const seenCaptures = new Set<string>();
+  if (assertArray(document.captures, "bundle captures", errors)) {
+    assert(document.captures.length === 174, `bundle carries ${document.captures.length} captures, expected 174`, errors);
+    document.captures.forEach((capture, index) => {
+      const label = `bundle captures[${index}]`;
+      if (!isJsonObject(capture)) {
+        errors.push(`${label} must be an object`);
+        return;
+      }
+      const slug = v1SlugOf(capture.fixture);
+      assert(slug !== undefined, `${label} fixture is not a cohort initial/after-actions id: ${String(capture.fixture)}`, errors);
+      if (slug !== undefined) slugs.add(slug);
+      assert(typeof capture.runtime === "string" && (NUCLEUS_V1_RUNTIMES as readonly string[]).includes(capture.runtime), `${label} runtime must be svelte, react, or gpui`, errors);
+      assert(typeof capture.pngSha256 === "string" && /^[0-9a-f]{64}$/.test(capture.pngSha256), `${label} pngSha256 must be 64 lowercase hex characters`, errors);
+      const repeats = isJsonObject(capture.repeats) ? (capture.repeats as JsonObject) : undefined;
+      const hashes = Array.isArray(repeats?.sha256) ? (repeats?.sha256 as unknown[]) : undefined;
+      assert(repeats?.count === 2, `${label} must carry exactly two repeats`, errors);
+      assert(hashes !== undefined && hashes.length === 2 && hashes.every((hash) => hash === capture.pngSha256), `${label} repeats do not agree exactly with the capture hash`, errors);
+      assert(repeats?.agreedExactly === true, `${label} repeats did not agree exactly`, errors);
+      const foreground = isJsonObject(capture.foreground) ? (capture.foreground as JsonObject) : undefined;
+      assert(foreground?.verdict === "proved", `${label} lacks proved foreground evidence`, errors);
+      const key = `${String(capture.fixture)}|${String(capture.runtime)}`;
+      assert(!seenCaptures.has(key), `${label} duplicates capture ${key}`, errors);
+      seenCaptures.add(key);
+    });
+  }
+  assert(slugs.size === 29, `bundle covers ${slugs.size} cohort slugs, expected 29`, errors);
+  for (const slug of slugs) {
+    assert(scenarios.has(slug), `bundle slug ${slug} has no Poodle scenario file`, errors);
+    assert(slugToEntry.has(slug), `bundle slug ${slug} maps to no manifest row`, errors);
+    for (const runtime of NUCLEUS_V1_RUNTIMES) {
+      assert(seenCaptures.has(`cohort/${slug}/initial|${runtime}`) && seenCaptures.has(`cohort/${slug}/after-actions|${runtime}`), `bundle lacks a ${runtime} capture for slug ${slug}`, errors);
+    }
+  }
+  for (const [stem] of slugToEntry) {
+    assert(slugs.has(stem), `manifest scenario ${stem} has no bundle coverage`, errors);
+  }
+
+  const pairs: NucleusVisualPairVerdict[] = [];
+  const pairByKey = new Map<string, NucleusVisualPairVerdict>();
+  let findingCount = 0;
+  if (assertArray(document.comparisons, "bundle comparisons", errors)) {
+    document.comparisons.forEach((comparison, index) => {
+      const label = `bundle comparisons[${index}]`;
+      if (!isJsonObject(comparison)) {
+        errors.push(`${label} must be an object`);
+        return;
+      }
+      const slug = v1SlugOf(comparison.fixture);
+      assert(slug !== undefined && slugs.has(slug), `${label} names a fixture absent from the bundle captures: ${String(comparison.fixture)}`, errors);
+      assert(comparison.pair === "svelte-react" || comparison.pair === "svelte-gpui", `${label} pair must be svelte-react or svelte-gpui`, errors);
+      assert(typeof comparison.ok === "boolean", `${label} ok must be a boolean`, errors);
+      const key = `${String(comparison.fixture)}|${String(comparison.pair)}`;
+      assert(!pairByKey.has(key), `${label} duplicates pair verdict ${key}`, errors);
+      if (!isJsonObject(comparison.channels)) {
+        errors.push(`${label} channels must be an object`);
+        return;
+      }
+      const channels = comparison.channels as Record<string, unknown>;
+      assert(
+        Object.keys(channels).length === NUCLEUS_V1_CHANNELS.length && NUCLEUS_V1_CHANNELS.every((channel) => Object.hasOwn(channels, channel)),
+        `${label} channels must be exactly dimensions, geometry, roles, and pixels`,
+        errors,
+      );
+      let pairOk = true;
+      for (const channel of NUCLEUS_V1_CHANNELS) {
+        const verdict = channels[channel];
+        const channelLabel = `${label} channels ${channel}`;
+        if (!isJsonObject(verdict)) {
+          errors.push(`${channelLabel} must be an object`);
+          pairOk = false;
+          continue;
+        }
+        assertV1Metrics(verdict.metrics, channelLabel, channel === "pixels", errors);
+        if (!assertArray(verdict.findings, `${channelLabel} findings`, errors)) {
+          pairOk = false;
+          continue;
+        }
+        for (const [findingIndex, finding] of verdict.findings.entries()) {
+          if (!isJsonObject(finding)) {
+            errors.push(`${channelLabel} findings[${findingIndex}] must be an object`);
+            pairOk = false;
+            continue;
+          }
+          assert(finding.channel === channel, `${channelLabel} findings[${findingIndex}] belongs to a different channel`, errors);
+          assert(typeof finding.subject === "string" && finding.subject.length > 0, `${channelLabel} findings[${findingIndex}] subject must be a non-empty string`, errors);
+          assert(typeof finding.detail === "string" && finding.detail.length > 0, `${channelLabel} findings[${findingIndex}] detail must be a non-empty string`, errors);
+          findingCount += 1;
+        }
+        if (verdict.status === "pass" && (verdict.findings as unknown[]).length > 0) {
+          errors.push(`${channelLabel} passes but carries findings`);
+          pairOk = false;
+        }
+        if (verdict.status === "fail" && (verdict.findings as unknown[]).length === 0) {
+          errors.push(`${channelLabel} fails but carries no finding`);
+          pairOk = false;
+        }
+        if (verdict.status !== "pass") pairOk = false;
+      }
+      assert(comparison.ok === pairOk, `${label} ok does not agree with its channels`, errors);
+      const verdict: NucleusVisualPairVerdict = {
+        fixture: comparison.fixture as string,
+        pair: comparison.pair as (typeof NUCLEUS_V1_PAIRS)[number],
+        ok: comparison.ok as boolean,
+        channels: comparison.channels as NucleusVisualPairVerdict["channels"],
+      };
+      pairs.push(verdict);
+      pairByKey.set(key, verdict);
+    });
+  }
+  for (const slug of slugs) {
+    for (const state of NUCLEUS_V1_STATES) {
+      for (const pair of NUCLEUS_V1_PAIRS) {
+        assert(pairByKey.has(`cohort/${slug}/${state}|${pair}`), `bundle lacks pair verdict cohort/${slug}/${state} ${pair}`, errors);
+      }
+    }
+  }
+  assert(pairs.length === 116, `bundle carries ${pairs.length} pair verdicts, expected 116`, errors);
+  const pairsOk = pairs.filter((pair) => pair.ok).length;
+  const verdictBlock = isJsonObject(document.verdict) ? (document.verdict as JsonObject) : undefined;
+  assert(verdictBlock?.capturesAdmitted === 174, "bundle verdict capturesAdmitted does not recompute to 174", errors);
+  assert(verdictBlock?.pairsCompared === 116, "bundle verdict pairsCompared does not recompute to 116", errors);
+  assert(verdictBlock?.pairsOk === pairsOk, "bundle verdict pairsOk does not match the verdicts", errors);
+  assert(verdictBlock?.findings === findingCount, "bundle verdict findings do not match the retained findings", errors);
+  const encoded = JSON.stringify(document);
+  assert(!encoded.includes("/Users/") && !encoded.includes("/private/"), "bundle summary names a machine path", errors);
+  if (errors.length > 0) throw new Error(errors.join("\n"));
+  pairs.sort((left, right) => (left.fixture < right.fixture ? -1 : left.fixture > right.fixture ? 1 : left.pair < right.pair ? -1 : 1));
+  const fixtures = [...slugs].sort().flatMap((slug) => NUCLEUS_V1_STATES.map((state) => `cohort/${slug}/${state}`));
+  const slugByComponent = new Map<string, string>();
+  for (const [stem, entry] of slugToEntry) slugByComponent.set(entry.name, stem);
+  return { slugs: [...slugs].sort(), fixtures, pairs, pairByKey, slugByComponent, findingCount, pairsOk };
+}
+
+/// g17.001: the Lab directory hash the citing card records. SHA-256 over each
+/// file's relative path and content hash in sorted path order, mirroring the
+/// Lab validator: any byte changed, added, or removed changes the digest.
+export function v1DirectoryHash(root: string, dir = NUCLEUS_V1_BUNDLE_DIR): { sha256: string; files: Array<{ path: string; sha256: string }> } {
+  const absolute = rootPath(root, dir);
+  const out: string[] = [];
+  const walk = (current: string): void => {
+    for (const entry of readdirSync(current).sort()) {
+      const full = path.join(current, entry);
+      if (lstatSync(full).isDirectory()) walk(full);
+      else out.push(path.relative(absolute, full).split(path.sep).join("/"));
+    }
+  };
+  walk(absolute);
+  out.sort();
+  const files = out.map((relativePath) => ({
+    path: relativePath,
+    sha256: createHash("sha256").update(readFileSync(path.join(absolute, relativePath))).digest("hex"),
+  }));
+  const digest = createHash("sha256");
+  for (const file of files) digest.update(`${file.path}\0${file.sha256}\n`);
+  return { sha256: digest.digest("hex"), files };
+}
+
+function readV1BundleFile(root: string, file: string, expectedSha256: string): string {
+  const relativePath = `${NUCLEUS_V1_BUNDLE_DIR}/${file}`;
+  const filePath = rootPath(root, relativePath);
+  if (!existsSync(filePath)) throw new Error(`imported bundle file is missing: ${relativePath}`);
+  const content = readFileSync(filePath, "utf8");
+  const actual = createHash("sha256").update(content).digest("hex");
+  if (actual !== expectedSha256) throw new Error(`imported bundle file does not match the Lab bytes: ${relativePath}`);
+  return content;
+}
+
+/// g17.001: import validation for the copied Lab bundle. Re-hashes every
+/// imported byte and refuses the import unless the directory hash, validator
+/// version, and document contents still identify the named Lab run.
+export function loadValidatedV1Bundle(root = ROOT, manifest = loadNucleusManifest(root)): { bundle: ValidatedV1Bundle; summarySha256: string } {
+  readV1BundleFile(root, NUCLEUS_V1_REPORT_FILE, NUCLEUS_V1_REPORT_SHA256);
+  const summary = readV1BundleFile(root, NUCLEUS_V1_SUMMARY_FILE, NUCLEUS_V1_SUMMARY_SHA256);
+  const hashed = v1DirectoryHash(root);
+  if (hashed.sha256 !== NUCLEUS_V1_DIRECTORY_SHA256) {
+    throw new Error(`imported bundle directory hash ${hashed.sha256} is not the cited Lab bundle ${NUCLEUS_V1_DIRECTORY_SHA256}`);
+  }
+  let document: unknown;
+  try {
+    document = JSON.parse(summary) as unknown;
+  } catch {
+    throw new Error(`imported bundle summary does not parse: ${NUCLEUS_V1_BUNDLE_DIR}/${NUCLEUS_V1_SUMMARY_FILE}`);
+  }
+  return { bundle: validateV1BundleDocument(document, nucleusV1ScenarioMap(root), manifest), summarySha256: NUCLEUS_V1_SUMMARY_SHA256 };
+}
+
+function expectedV1BundleBlock(summarySha256: string): NucleusVisualBundle {
+  return {
+    dir: NUCLEUS_V1_BUNDLE_DIR,
+    directory_sha256: NUCLEUS_V1_DIRECTORY_SHA256,
+    summary_sha256: summarySha256,
+    lab_merge_commit: NUCLEUS_V1_LAB_MERGE_COMMIT,
+    lab_closeout_commit: NUCLEUS_V1_LAB_CLOSEOUT_COMMIT,
+    run_id: NUCLEUS_V1_RUN_ID,
+    validator_version: NUCLEUS_V1_VALIDATOR_VERSION,
+    poodle_pin: NUCLEUS_V1_POODLE_PIN,
+  };
+}
+
+/// g17.001: derive one V1 receipt per covered manifest row. Only rows the
+/// validated bundle covers are emitted; unknown, duplicate, missing, or
+/// mismatched scenario/fixture identities refuse the whole batch.
+export function deriveV1Receipts(bundle: ValidatedV1Bundle, manifest: NucleusManifest, summarySha256: string): NucleusV1Receipt[] {
+  const lab_bundle = expectedV1BundleBlock(summarySha256);
+  return manifest.components.map((entry) => {
+    const slug = bundle.slugByComponent.get(entry.name);
+    if (slug === undefined) throw new Error(`${entry.name} has no validated bundle coverage`);
+    const fixtures = NUCLEUS_V1_STATES.map((state) => `cohort/${slug}/${state}`);
+    const pairs = fixtures.flatMap((fixture) =>
+      NUCLEUS_V1_PAIRS.map((pair) => {
+        const verdict = bundle.pairByKey.get(`${fixture}|${pair}`);
+        if (verdict === undefined) throw new Error(`bundle lacks pair verdict ${fixture} ${pair}`);
+        return verdict;
+      }),
+    );
+    const finding_count = pairs.reduce(
+      (count, pair) => count + NUCLEUS_V1_CHANNELS.reduce((channelCount, channel) => channelCount + pair.channels[channel].findings.length, 0),
+      0,
+    );
+    return {
+      schema: NUCLEUS_RECEIPT_SCHEMA,
+      component: entry.name,
+      scenario_id: entry.scenario_id,
+      proof_level: "V1",
+      outcome: "compared",
+      lab_bundle: { ...lab_bundle },
+      fixtures,
+      pairs,
+      finding_count,
+    };
+  });
+}
+
+/// g17.001: emit the validated V1 receipts. Validation runs first: a tampered
+/// bundle, an unknown fixture, or a broken mapping throws before any receipt
+/// is written.
+export function emitNucleusV1Receipts(root = ROOT): string[] {
+  const manifest = loadNucleusManifest(root);
+  const { bundle, summarySha256 } = loadValidatedV1Bundle(root, manifest);
+  const receipts = deriveV1Receipts(bundle, manifest, summarySha256);
+  mkdirSync(rootPath(root, NUCLEUS_RECEIPT_DIR), { recursive: true });
+  return receipts.map((receipt) => {
+    const relativePath = `${NUCLEUS_RECEIPT_DIR}/${receiptFileStem(receipt)}.json`;
+    writeFileSync(rootPath(root, relativePath), JSON.stringify(receipt, null, 2));
+    return relativePath;
+  });
+}
+
+function validateV1Receipt(receipt: NucleusV1Receipt, manifest: NucleusManifest, root: string, errors: string[]): void {
+  assert(receipt.schema === NUCLEUS_RECEIPT_SCHEMA, "receipt schema is not current", errors);
+  assert(receipt.outcome === "compared", "a V1 receipt outcome is compared, never passed", errors);
+  assert(
+    Object.hasOwn(receipt, "production_path_observation") === false,
+    "a V1 receipt carries no mounted production-path observation; V1 proof level requires the Lab visual block",
+    errors,
+  );
+  const expectedBundle = expectedV1BundleBlock(NUCLEUS_V1_SUMMARY_SHA256);
+  assert(JSON.stringify(receipt.lab_bundle) === JSON.stringify(expectedBundle), "receipt Lab bundle identity does not match the cited run", errors);
+  let expected: NucleusV1Receipt[] | undefined;
+  try {
+    const loaded = loadValidatedV1Bundle(root, manifest);
+    expected = deriveV1Receipts(loaded.bundle, manifest, loaded.summarySha256);
+  } catch (error) {
+    errors.push(`V1 bundle revalidation failed: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  }
+  if (expected !== undefined) {
+    const match = expected.find((candidate) => candidate.component === receipt.component);
+    assert(match !== undefined, `receipt component has no validated V1 coverage: ${receipt.component}`, errors);
+    if (match !== undefined) {
+      assert(receipt.scenario_id === match.scenario_id, `${receipt.component} receipt scenario does not match the manifest`, errors);
+      assert(JSON.stringify(receipt) === JSON.stringify(match), `${receipt.component} V1 receipt does not match the validated Lab bundle derivation`, errors);
+    }
+  }
+  const encoded = JSON.stringify(receipt);
+  assert(!encoded.includes("/Users/") && !encoded.includes("/private/") && !encoded.includes("timestamp"), "receipt contains a machine path or timestamp", errors);
+}
+
+function v1Main(): void {
+  if (process.argv.includes("--write-v1")) {
+    for (const file of emitNucleusV1Receipts(ROOT)) console.log(`Wrote ${file}.`);
+    return;
+  }
+  throw new Error("usage: bun scripts/nucleus-parity-receipts.ts --write-v1");
+}
+
+if (import.meta.main) v1Main();

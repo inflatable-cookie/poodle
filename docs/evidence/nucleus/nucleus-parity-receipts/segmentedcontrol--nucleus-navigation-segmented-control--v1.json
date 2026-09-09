@@ -1,0 +1,172 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "SegmentedControl",
+  "scenario_id": "nucleus.navigation.segmented-control",
+  "proof_level": "V1",
+  "outcome": "compared",
+  "lab_bundle": {
+    "dir": "docs/logs/2026-09/08-140648-g01-006-cohort-batch-bundle",
+    "directory_sha256": "0512b830e94bc30a7f1d2c623c6e081c85d4aa0086a60f9adfd905badc612a99",
+    "summary_sha256": "f1f32bb05d88d60d2d2e6cecb83251e024826b05c678dfd2ddd19826c80ce7e6",
+    "lab_merge_commit": "f99465f048d7c5c58603b99ae51f3209e581848e",
+    "lab_closeout_commit": "13ddc2fcbc0897a9f2ec78ee0dd061ce74c7f46d",
+    "run_id": "2026-09-08T14-06-48",
+    "validator_version": "1.0.0",
+    "poodle_pin": "8bd95d3a2cdf8c86edacb450cc33a0a4d02b9983"
+  },
+  "fixtures": [
+    "cohort/segmented-control/initial",
+    "cohort/segmented-control/after-actions"
+  ],
+  "pairs": [
+    {
+      "fixture": "cohort/segmented-control/initial",
+      "pair": "svelte-react",
+      "ok": true,
+      "channels": {
+        "dimensions": {
+          "status": "pass",
+          "findings": []
+        },
+        "geometry": {
+          "status": "pass",
+          "findings": []
+        },
+        "roles": {
+          "status": "pass",
+          "findings": []
+        },
+        "pixels": {
+          "status": "pass",
+          "findings": [],
+          "metrics": {
+            "differingPixels": 0,
+            "totalPixels": 115200,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "fixture": "cohort/segmented-control/initial",
+      "pair": "svelte-gpui",
+      "ok": false,
+      "channels": {
+        "dimensions": {
+          "status": "pass",
+          "findings": []
+        },
+        "geometry": {
+          "status": "fail",
+          "findings": [
+            {
+              "channel": "geometry",
+              "subject": "root",
+              "detail": "bottom edge differs by 20.000 logical px (limit 0.5)"
+            }
+          ]
+        },
+        "roles": {
+          "status": "fail",
+          "findings": [
+            {
+              "channel": "roles",
+              "subject": "border",
+              "detail": "colour differs by 222/255 in a channel (limit 1)"
+            }
+          ]
+        },
+        "pixels": {
+          "status": "fail",
+          "findings": [
+            {
+              "channel": "pixels",
+              "subject": "viewport",
+              "detail": "10009 of 115200 pixels differ (8.688%, limit 3.0%)"
+            }
+          ],
+          "metrics": {
+            "differingPixels": 10009,
+            "totalPixels": 115200,
+            "ratio": 0.08688368055555555
+          }
+        }
+      }
+    },
+    {
+      "fixture": "cohort/segmented-control/after-actions",
+      "pair": "svelte-react",
+      "ok": true,
+      "channels": {
+        "dimensions": {
+          "status": "pass",
+          "findings": []
+        },
+        "geometry": {
+          "status": "pass",
+          "findings": []
+        },
+        "roles": {
+          "status": "pass",
+          "findings": []
+        },
+        "pixels": {
+          "status": "pass",
+          "findings": [],
+          "metrics": {
+            "differingPixels": 0,
+            "totalPixels": 115200,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "fixture": "cohort/segmented-control/after-actions",
+      "pair": "svelte-gpui",
+      "ok": false,
+      "channels": {
+        "dimensions": {
+          "status": "pass",
+          "findings": []
+        },
+        "geometry": {
+          "status": "fail",
+          "findings": [
+            {
+              "channel": "geometry",
+              "subject": "root",
+              "detail": "bottom edge differs by 20.000 logical px (limit 0.5)"
+            }
+          ]
+        },
+        "roles": {
+          "status": "fail",
+          "findings": [
+            {
+              "channel": "roles",
+              "subject": "border",
+              "detail": "colour differs by 222/255 in a channel (limit 1)"
+            }
+          ]
+        },
+        "pixels": {
+          "status": "fail",
+          "findings": [
+            {
+              "channel": "pixels",
+              "subject": "viewport",
+              "detail": "10009 of 115200 pixels differ (8.688%, limit 3.0%)"
+            }
+          ],
+          "metrics": {
+            "differingPixels": 10009,
+            "totalPixels": 115200,
+            "ratio": 0.08688368055555555
+          }
+        }
+      }
+    }
+  ],
+  "finding_count": 6
+}

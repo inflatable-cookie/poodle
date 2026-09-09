@@ -69,3 +69,45 @@ describe("g16.001 parity evidence ledger", () => {
     expect(generateLedgerMarkdown(root)).toBe(fs.readFileSync(ledgerPath, "utf8"));
   });
 });
+
+describe("g17.001 Nucleus V1 ledger cells", () => {
+  it("moves only V1-backed GPUI visual cells to compared with findings open", () => {
+    const ledger = generateLedgerMarkdown(root);
+    expect(ledger).toContain("| GPUI visual | 0 | 0 | 0 | 29 | 0 | 146 | 1 | 0 |");
+    const buttonRow = ledger.split("\n").find((line) => line.startsWith("| Button |"));
+    expect(buttonRow).toContain("button--nucleus-shell-button--v1.json#proof_level");
+    expect(buttonRow).toContain("retained as open evidence");
+    expect(buttonRow).toContain("test/visual/fixtures/button-visual-inventory.json");
+    const v1Cells = ledger
+      .split("\n")
+      .flatMap((line) => line.split("|").map((cell) => cell.trim()))
+      .filter((cell) => cell.includes("--v1.json"));
+    expect(v1Cells.length).toBeGreaterThan(29);
+    for (const cell of v1Cells) {
+      expect(cell).toContain("open evidence");
+      expect(cell).not.toMatch(/accept/i);
+    }
+  });
+
+  it("rejects an unbacked compared GPUI visual cell", () => {
+    const ledger = fs.readFileSync(ledgerPath, "utf8");
+    const forged = ledger.replace(
+      "missing — Button-only comparison boundary; no GPUI comparison fixture for Accordion in",
+      "compared — fabricated without a validated V1 receipt for Accordion in",
+    );
+    expect(forged).not.toBe(ledger);
+    expect(() => validateLedgerText(forged, root)).toThrow(/differs from live evidence/);
+  });
+
+  it("keeps every Nucleus V1 cell compared with retained findings", () => {
+    const ledger = generateLedgerMarkdown(root);
+    const section = ledger.split("## Nucleus fixed cohort execution ledger")[1]?.split("## Historical")[0] ?? "";
+    const rows = section.split("\n").filter((line) => line.startsWith("| ") && !line.startsWith("| Component") && !line.startsWith("| ---"));
+    expect(rows).toHaveLength(29);
+    for (const row of rows) {
+      expect(row).toContain("--v1.json#proof_level");
+      expect(row).toContain("compared — validated");
+      expect(row).toContain("findings retained as open evidence");
+    }
+  });
+});

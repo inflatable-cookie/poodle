@@ -499,16 +499,28 @@ function expectedComponentRow(
             "manual",
             `${pathRef(nativeProofPath, "currentPosture")}; spec and bounded mounted evidence are not broad native assistive-technology proof`,
           );
-    base["GPUI visual"] =
-      name === "Button"
-        ? cell(
-            "compared",
-            `${pathRef(visualInventoryPath)} and ${pathRef(visualSummaryPath)}; 18 Button fixtures across Svelte, React, and GPUI; GPUI capture is operator-approved, non-activating, and windowed`,
-          )
-        : cell(
-            "missing",
-            `Button-only comparison boundary; no GPUI comparison fixture for ${name} in ${pathRef(visualInventoryPath)}`,
-          );
+    if (nucleus?.v1Receipt !== undefined && nucleus.v1ReceiptPath !== undefined) {
+      const visual = nucleus.v1Receipt;
+      const okPairs = visual.pairs.filter((pair) => pair.ok).length;
+      const retainedButton =
+        name === "Button"
+          ? `; retained ${pathRef(visualInventoryPath)} and ${pathRef(visualSummaryPath)} (18 Button fixtures; GPUI capture operator-approved, non-activating, and windowed)`
+          : "";
+      base["GPUI visual"] = cell(
+        "compared",
+        `validated ${pathRef(nucleus.v1ReceiptPath, "proof_level")}; Lab run ${visual.lab_bundle.run_id} ${visual.pairs.length} pair verdicts (${okPairs} ok) in ${pathRef(`${visual.lab_bundle.dir}/summary.json`, "runId")}; ${visual.finding_count} findings retained as open evidence${retainedButton}`,
+      );
+    } else if (name === "Button") {
+      base["GPUI visual"] = cell(
+        "compared",
+        `${pathRef(visualInventoryPath)} and ${pathRef(visualSummaryPath)}; 18 Button fixtures across Svelte, React, and GPUI; GPUI capture is operator-approved, non-activating, and windowed`,
+      );
+    } else {
+      base["GPUI visual"] = cell(
+        "missing",
+        `Button-only comparison boundary; no GPUI comparison fixture for ${name} in ${pathRef(visualInventoryPath)}`,
+      );
+    }
   }
 
   base["Web visual"] =
@@ -660,7 +672,7 @@ function rowMarkdown(row: ComponentRow): string {
 }
 
 function nucleusRow(nucleus: NucleusReceiptRow): string[] {
-  const { entry, receipt, receiptPath, a1Receipt, a1ReceiptPath } = nucleus;
+  const { entry, receipt, receiptPath, a1Receipt, a1ReceiptPath, v1Receipt, v1ReceiptPath } = nucleus;
   return [
     entry.name,
     pathRef(NUCLEUS_MANIFEST_PATH, entry.scenario_id),
@@ -674,7 +686,12 @@ function nucleusRow(nucleus: NucleusReceiptRow): string[] {
     a1Receipt === undefined || a1ReceiptPath === undefined
       ? cell("missing", "M1 does not infer executable accessibility semantics; no validated A1 receipt")
       : cell("mounted", `validated ${pathRef(a1ReceiptPath, "proof_level")}; ${pathRef(a1ReceiptPath, "accessibility")}`),
-    cell("missing", "M1 does not infer visual comparison"),
+    v1Receipt === undefined || v1ReceiptPath === undefined
+      ? cell("missing", "M1 does not infer visual comparison; no validated V1 receipt")
+      : cell(
+          "compared",
+          `validated ${pathRef(v1ReceiptPath, "proof_level")}; Lab run ${v1Receipt.lab_bundle.run_id} ${v1Receipt.pairs.length} pair verdicts in ${pathRef(`${v1Receipt.lab_bundle.dir}/summary.json`, "runId")}; ${v1Receipt.finding_count} findings retained as open evidence`,
+        ),
   ];
 }
 
@@ -766,10 +783,12 @@ ${componentRows}
 The Nucleus denominator is **29 rendered components**. \`IconProvider\` is one
 separate construction prerequisite and is not row 30. A row is \`mounted\` only
 when its validated receipt was emitted after the real GPUI render, node backend,
-and test-platform input path completed successfully. \`M1\` does not imply \`A1\`
 or \`V1\`. An \`A1\` row is \`mounted\` only when its validated paired receipt
 (g16.111) records an empty diff between the mounted GPUI node-tree projection
-and the mounted Svelte DOM for the same shared scenario file.
+and the mounted Svelte DOM for the same shared scenario file. A \`V1\` row is
+\`compared\` only when its validated receipt (g17.001) cites the pinned Lab
+bundle by run id, validator version, and directory hash and retains every
+reported finding as open evidence; findings adjudicate nothing.
 
 Manifest: ${pathRef(NUCLEUS_MANIFEST_PATH)}; receipt schema: \`${NUCLEUS_RECEIPT_SCHEMA}\`.
 Poodle resolution: \`${nucleusRows[0]?.receipt?.package ?? "poodle-gpui-preview"}@${nucleusRows[0]?.receipt?.package_version ?? "0.3.0"}\`;
@@ -800,10 +819,12 @@ ${expectedMapTable()}
   semantics, announcement, or assistive-technology parity (\`A2\`).
 - Web accessibility is asymmetric: the Svelte axe sweep covers the live Svelte
   surface; no React axe sweep currently exists.
-- The accepted three-runtime visual comparison is Button-only: 18 named
-  fixtures across Svelte, React, and GPUI. GPUI pixels require the
-  operator-approved, non-activating windowed diagnostic and are absent from
-  default QA/CI.
+- Outside the Nucleus V1 cohort, the accepted three-runtime visual comparison
+  is Button-only: 18 named fixtures across Svelte, React, and GPUI. GPUI pixels
+  require the operator-approved, non-activating windowed diagnostic and are
+  absent from default QA/CI. The 29-row Nucleus V1 cohort adds 58 fixtures × 3
+  runtimes from Lab run 2026-09-08T14-06-48 (174 captures, 116 comparisons);
+  its 160 findings remain open evidence and adjudicate nothing.
 - The next evidence decision should be chosen from the measured missing cells:
   semantic/interface, mounted behaviour, accessibility, web visual, or GPUI
   visual. \`g16.002\` closed three selection-control mounted rows. \`g16.003\`
