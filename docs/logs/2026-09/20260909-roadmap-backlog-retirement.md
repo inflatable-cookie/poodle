@@ -75,3 +75,7 @@ front-door paragraph now states `g17.001` is complete and the approved
 frontier is empty pending a Chatterbox planning checkpoint, agreeing with
 `g17/README.md`, `generation-index.md`, and `dispatch.md`. No task,
 generation, triage, or product-code change; history above unchanged.
+
+Status: complete-merged — PR #234 at `43737e011b5b65d041e602b8534e0d6d7a249d50` merged as `3c13bd59178bd7facb73a757fb69e967b4c32e4f` on 2026-09-09. Review: accepted exact-head `ready_to_merge` verdict in [review comment #5604322928](https://github.com/inflatable-cookie/poodle/pull/234#issuecomment-5604322928) at head `43737e011b5b65d041e602b8534e0d6d7a249d50`.
+
+Closeout re-verification on merged main `3c13bd59178bd7facb73a757fb69e967b4c32e4f`: `find docs -type d -name backlog -print` returns nothing; `docs/roadmaps/README.md` contains no `backlog` string; all four front doors state `g17.001` complete/merged PR #232 with the approved frontier empty and no task dispatchable; `bun packages/svelte/preview/scripts/lint-docs.ts` exits 0; `git diff --check` clean. No successor dispatch follows.
