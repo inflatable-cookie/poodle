@@ -30,8 +30,9 @@ receipts. No later horizon is dispatchable yet.
 - Use [`templates/task-template.md`](templates/task-template.md) for new tasks.
 - A queue task is a control-plane record, not planning authority. An Effigy task
   is a command selector, not a Northstar task.
-- Backlog items live in [`backlog/`](backlog/). Architecture lives in
-  `../architecture/`; temporary intake lives in `../triage/`.
+- Unresolved or deferred candidates live in [`../triage/`](../triage/) until
+  promoted; triage notes carry no execution authority. Architecture lives in
+  `../architecture/`.
 - Generation rollover is manual. Close, pause, supersede, or rehome every live
   task before opening the next generation.
 - Completed generations compact to `archive/gNN.md`; git preserves detail.
