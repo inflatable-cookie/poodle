@@ -1,0 +1,2866 @@
+{
+  "schema": "poodle.g18-capability-manifest.v1",
+  "task": "g18.001",
+  "entries": [
+    {
+      "component": "Accordion",
+      "portable": true,
+      "contract": "docs/contracts/components/accordion.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ActionDiscoveryPanel",
+      "portable": true,
+      "contract": "docs/contracts/components/action-discovery-panel.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentChatInput",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-chat-input.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentMessage",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-message.md",
+      "substrate": "agent-composites",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentPlan",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-plan.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentPlanRecord",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-plan-record.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentQuestion",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-question.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentQuestionRecord",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-question-record.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentSubagent",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-subagent.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AgentTranscript",
+      "portable": true,
+      "contract": "docs/contracts/components/agent-transcript.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AlertDialog",
+      "portable": true,
+      "contract": "docs/contracts/components/alert-dialog.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AppHeader",
+      "portable": true,
+      "contract": "docs/contracts/components/app-header.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AudioMeter",
+      "portable": true,
+      "contract": "docs/contracts/components/audio-meter.md",
+      "substrate": "media-data",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AudioPlayer",
+      "portable": true,
+      "contract": "docs/contracts/components/audio-player.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "AudioSwitch",
+      "portable": true,
+      "contract": "docs/contracts/components/audio-switch.md",
+      "substrate": "media-data",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Avatar",
+      "portable": true,
+      "contract": "docs/contracts/components/avatar.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "BlockEditor",
+      "portable": true,
+      "contract": "docs/contracts/components/block-editor.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Box",
+      "portable": true,
+      "contract": "docs/contracts/components/box.md",
+      "substrate": "layout-primitive",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/box.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/box.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/box.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Breadcrumbs",
+      "portable": true,
+      "contract": "docs/contracts/components/breadcrumbs.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "BulkActionBar",
+      "portable": true,
+      "contract": "docs/contracts/components/bulk-action-bar.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Button",
+      "portable": true,
+      "contract": "docs/contracts/components/button.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Calendar",
+      "portable": true,
+      "contract": "docs/contracts/components/calendar.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Callout",
+      "portable": true,
+      "contract": "docs/contracts/components/callout.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Card",
+      "portable": true,
+      "contract": "docs/contracts/components/card.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/card.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "CardRadioGroup",
+      "portable": true,
+      "contract": "docs/contracts/components/card-radio-group.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "CardToggleGroup",
+      "portable": true,
+      "contract": "docs/contracts/components/card-toggle-group.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ChangedFiles",
+      "portable": true,
+      "contract": "docs/contracts/components/changed-files.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Checkbox",
+      "portable": true,
+      "contract": "docs/contracts/components/checkbox.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Code",
+      "portable": true,
+      "contract": "docs/contracts/components/code.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/code.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "CodeInput",
+      "portable": true,
+      "contract": "docs/contracts/components/code-input.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "CollapseToggle",
+      "portable": true,
+      "contract": "docs/contracts/components/collapse-toggle.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Collapsible",
+      "portable": true,
+      "contract": "docs/contracts/components/collapsible.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ColorPicker",
+      "portable": true,
+      "contract": "docs/contracts/components/color-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "CommandPalette",
+      "portable": true,
+      "contract": "docs/contracts/components/command-palette.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ConfirmAction",
+      "portable": true,
+      "contract": "docs/contracts/components/confirm-action.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ContextMenu",
+      "portable": true,
+      "contract": "docs/contracts/components/context-menu.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DataTable",
+      "portable": true,
+      "contract": "docs/contracts/components/data-table.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DatePicker",
+      "portable": true,
+      "contract": "docs/contracts/components/date-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DateRangePicker",
+      "portable": true,
+      "contract": "docs/contracts/components/date-range-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DateTimePicker",
+      "portable": true,
+      "contract": "docs/contracts/components/date-time-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DateTimeRangePicker",
+      "portable": true,
+      "contract": "docs/contracts/components/date-time-range-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DateTimeZonePicker",
+      "portable": true,
+      "contract": "docs/contracts/components/date-time-zone-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DebugDialog",
+      "portable": true,
+      "contract": "docs/contracts/components/debug-dialog.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DetailItem",
+      "portable": true,
+      "contract": "docs/contracts/components/detail-item.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DetailSection",
+      "portable": true,
+      "contract": "docs/contracts/components/detail-section.md",
+      "substrate": "workstation-shell",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DetailSectionGroup",
+      "portable": true,
+      "contract": "docs/contracts/components/detail-section-group.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DetailShell",
+      "portable": true,
+      "contract": "docs/contracts/components/detail-shell.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Dialog",
+      "portable": true,
+      "contract": "docs/contracts/components/dialog.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DockRegion",
+      "portable": true,
+      "contract": "docs/contracts/components/dock-region.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DragNumberField",
+      "portable": true,
+      "contract": "docs/contracts/components/drag-number-field.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Drawer",
+      "portable": true,
+      "contract": "docs/contracts/components/drawer.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "DurationInput",
+      "portable": true,
+      "contract": "docs/contracts/components/duration-input.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "EditableLabel",
+      "portable": true,
+      "contract": "docs/contracts/components/editable-label.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "EditableList",
+      "portable": true,
+      "contract": "docs/contracts/components/editable-list.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "EmbedInput",
+      "portable": true,
+      "contract": "docs/contracts/components/embed-input.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "EmbedPreview",
+      "portable": true,
+      "contract": "docs/contracts/components/embed-preview.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "EmptyState",
+      "portable": true,
+      "contract": "docs/contracts/components/empty-state.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "EnvelopeEditor",
+      "portable": true,
+      "contract": "docs/contracts/components/envelope-editor.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ErrorBoundary",
+      "portable": true,
+      "contract": "docs/contracts/components/error-boundary.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Eyebrow",
+      "portable": true,
+      "contract": "docs/contracts/components/eyebrow.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/eyebrow.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/eyebrow.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/eyebrow.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Fader",
+      "portable": true,
+      "contract": "docs/contracts/components/fader.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Field",
+      "portable": true,
+      "contract": "docs/contracts/components/field.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/field.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "FieldSet",
+      "portable": true,
+      "contract": "docs/contracts/components/field-set.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "FileUpload",
+      "portable": true,
+      "contract": "docs/contracts/components/file-upload.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "FilterBuilder",
+      "portable": true,
+      "contract": "docs/contracts/components/filter-builder.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "FilterToolbar",
+      "portable": true,
+      "contract": "docs/contracts/components/filter-toolbar.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "FormActions",
+      "portable": true,
+      "contract": "docs/contracts/components/form-actions.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/form-actions.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "FormDialog",
+      "portable": true,
+      "contract": "docs/contracts/components/form-dialog.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "FormLayout",
+      "portable": true,
+      "contract": "docs/contracts/components/form-layout.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "GainReductionMeter",
+      "portable": true,
+      "contract": "docs/contracts/components/gain-reduction-meter.md",
+      "substrate": "media-data",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Grid",
+      "portable": true,
+      "contract": "docs/contracts/components/grid.md",
+      "substrate": "layout-primitive",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/grid.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/grid.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/grid.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "HistoryCenter",
+      "portable": true,
+      "contract": "docs/contracts/components/history-center.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "HoverCard",
+      "portable": true,
+      "contract": "docs/contracts/components/hover-card.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Icon",
+      "portable": true,
+      "contract": "docs/contracts/components/icon.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/icon.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "IconButton",
+      "portable": true,
+      "contract": "docs/contracts/components/icon-button.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "IconProvider",
+      "portable": true,
+      "contract": "docs/contracts/components/icon-provider.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/icon-provider.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "InlineListSection",
+      "portable": true,
+      "contract": "docs/contracts/components/inline-list-section.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Keyboard",
+      "portable": true,
+      "contract": "docs/contracts/components/keyboard.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Knob",
+      "portable": true,
+      "contract": "docs/contracts/components/knob.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "LicenceActivation",
+      "portable": true,
+      "contract": "docs/contracts/components/licence-activation.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "LicenceSeats",
+      "portable": true,
+      "contract": "docs/contracts/components/licence-seats.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "LicenceStatus",
+      "portable": true,
+      "contract": "docs/contracts/components/licence-status.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ListCard",
+      "portable": true,
+      "contract": "docs/contracts/components/list-card.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ListCardCounter",
+      "portable": true,
+      "contract": "docs/contracts/components/list-card-counter.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ListContainer",
+      "portable": true,
+      "contract": "docs/contracts/components/list-container.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ListGrid",
+      "portable": true,
+      "contract": "docs/contracts/components/list-grid.md",
+      "substrate": "layout-primitive",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "LogList",
+      "portable": true,
+      "contract": "docs/contracts/components/log-list.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MarkdownEditor",
+      "portable": true,
+      "contract": "docs/contracts/components/markdown-editor.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MediaBrowsePanel",
+      "portable": true,
+      "contract": "docs/contracts/components/media-browse-panel.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MediaPicker",
+      "portable": true,
+      "contract": "docs/contracts/components/media-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MediaPreview",
+      "portable": true,
+      "contract": "docs/contracts/components/media-preview.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MediaThumbnail",
+      "portable": true,
+      "contract": "docs/contracts/components/media-thumbnail.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Menu",
+      "portable": true,
+      "contract": "docs/contracts/components/menu.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Menubar",
+      "portable": true,
+      "contract": "docs/contracts/components/menubar.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MessageCenter",
+      "portable": true,
+      "contract": "docs/contracts/components/message-center.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MetaBar",
+      "portable": true,
+      "contract": "docs/contracts/components/meta-bar.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MetaItem",
+      "portable": true,
+      "contract": "docs/contracts/components/meta-item.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Meter",
+      "portable": true,
+      "contract": "docs/contracts/components/meter.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/meter.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/meter.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/meter.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "MetricTile",
+      "portable": true,
+      "contract": "docs/contracts/components/metric-tile.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/metric-tile.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "ModMatrixGrid",
+      "portable": true,
+      "contract": "docs/contracts/components/mod-matrix-grid.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ModelCatalogueEditor",
+      "portable": true,
+      "contract": "docs/contracts/components/model-catalogue-editor.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ModelConnectionCard",
+      "portable": true,
+      "contract": "docs/contracts/components/model-connection-card.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ModelConnectionPicker",
+      "portable": true,
+      "contract": "docs/contracts/components/model-connection-picker.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ModelConnectionSetup",
+      "portable": true,
+      "contract": "docs/contracts/components/model-connection-setup.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ModelPicker",
+      "portable": true,
+      "contract": "docs/contracts/components/model-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "MotionPolicyProvider",
+      "portable": true,
+      "contract": "docs/contracts/components/motion-policy-provider.md",
+      "substrate": "agent-composites",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "NavCard",
+      "portable": true,
+      "contract": "docs/contracts/components/nav-card.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "NavigationMenu",
+      "portable": true,
+      "contract": "docs/contracts/components/navigation-menu.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "NumberInput",
+      "portable": true,
+      "contract": "docs/contracts/components/number-input.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "OrderBy",
+      "portable": true,
+      "contract": "docs/contracts/components/order-by.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "PageHeader",
+      "portable": true,
+      "contract": "docs/contracts/components/page-header.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "PageLoading",
+      "portable": true,
+      "contract": "docs/contracts/components/page-loading.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Pagination",
+      "portable": true,
+      "contract": "docs/contracts/components/pagination.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "PaginationSummary",
+      "portable": true,
+      "contract": "docs/contracts/components/pagination-summary.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "PasswordRequirements",
+      "portable": true,
+      "contract": "docs/contracts/components/password-requirements.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/password-requirements.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "PickerShell",
+      "portable": true,
+      "contract": "docs/contracts/components/picker-shell.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/picker-shell.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "Pill",
+      "portable": true,
+      "contract": "docs/contracts/components/pill.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/pill.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/pill.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/pill.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Popover",
+      "portable": true,
+      "contract": "docs/contracts/components/popover.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Progress",
+      "portable": true,
+      "contract": "docs/contracts/components/progress.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/progress.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/progress.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/progress.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Radio",
+      "portable": true,
+      "contract": "docs/contracts/components/radio.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "RadioGroup",
+      "portable": true,
+      "contract": "docs/contracts/components/radio-group.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "RangeSlider",
+      "portable": true,
+      "contract": "docs/contracts/components/range-slider.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Rating",
+      "portable": true,
+      "contract": "docs/contracts/components/rating.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "RefSelect",
+      "portable": true,
+      "contract": "docs/contracts/components/ref-select.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Region",
+      "portable": true,
+      "contract": "docs/contracts/components/region.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "RelationPicker",
+      "portable": true,
+      "contract": "docs/contracts/components/relation-picker.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "RemediationBanner",
+      "portable": true,
+      "contract": "docs/contracts/components/remediation-banner.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ResizeHandle",
+      "portable": true,
+      "contract": "docs/contracts/components/resize-handle.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ScrollShell",
+      "portable": true,
+      "contract": "docs/contracts/components/scroll-shell.md",
+      "substrate": "workstation-shell",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "SegmentedControl",
+      "portable": true,
+      "contract": "docs/contracts/components/segmented-control.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Select",
+      "portable": true,
+      "contract": "docs/contracts/components/select.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "SelectionSummary",
+      "portable": true,
+      "contract": "docs/contracts/components/selection-summary.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Separator",
+      "portable": true,
+      "contract": "docs/contracts/components/separator.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/separator.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/separator.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "SettingsShell",
+      "portable": true,
+      "contract": "docs/contracts/components/settings-shell.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "SidebarNav",
+      "portable": true,
+      "contract": "docs/contracts/components/sidebar-nav.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Skeleton",
+      "portable": true,
+      "contract": "docs/contracts/components/skeleton.md",
+      "substrate": "layout-primitive",
+      "required": [
+        "semantic",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/skeleton.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/skeleton.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Slider",
+      "portable": true,
+      "contract": "docs/contracts/components/slider.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Spacer",
+      "portable": true,
+      "contract": "docs/contracts/components/spacer.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/spacer.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/spacer.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Spinner",
+      "portable": true,
+      "contract": "docs/contracts/components/spinner.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/spinner.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/spinner.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/spinner.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "SplitButton",
+      "portable": true,
+      "contract": "docs/contracts/components/split-button.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "SplitView",
+      "portable": true,
+      "contract": "docs/contracts/components/split-view.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Stack",
+      "portable": true,
+      "contract": "docs/contracts/components/stack.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/stack.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/stack.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/stack.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "StateTile",
+      "portable": true,
+      "contract": "docs/contracts/components/state-tile.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "StatusBar",
+      "portable": true,
+      "contract": "docs/contracts/components/status-bar.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/status-bar.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "StatusIndicator",
+      "portable": true,
+      "contract": "docs/contracts/components/status-indicator.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/status-indicator.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/status-indicator.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/status-indicator.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Stepper",
+      "portable": true,
+      "contract": "docs/contracts/components/stepper.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Surface",
+      "portable": true,
+      "contract": "docs/contracts/components/surface.md",
+      "substrate": "workstation-shell",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/surface.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/surface.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/surface.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "Switch",
+      "portable": true,
+      "contract": "docs/contracts/components/switch.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Table",
+      "portable": true,
+      "contract": "docs/contracts/components/table.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/table.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "Tabs",
+      "portable": true,
+      "contract": "docs/contracts/components/tabs.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Text",
+      "portable": true,
+      "contract": "docs/contracts/components/text.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "TextInput",
+      "portable": true,
+      "contract": "docs/contracts/components/text-input.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "TextLink",
+      "portable": true,
+      "contract": "docs/contracts/components/text-link.md",
+      "substrate": "text-display",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ThemeSelect",
+      "portable": true,
+      "contract": "docs/contracts/components/theme-select.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "TimeAgo",
+      "portable": true,
+      "contract": "docs/contracts/components/time-ago.md",
+      "substrate": "layout-primitive",
+      "required": [
+        "semantic",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/time-ago.md#5. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/time-ago.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "contractRef": "docs/contracts/components/time-ago.md#Keyboard"
+        }
+      ]
+    },
+    {
+      "component": "TimeInput",
+      "portable": true,
+      "contract": "docs/contracts/components/time-input.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "TimeZoneSelect",
+      "portable": true,
+      "contract": "docs/contracts/components/time-zone-select.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ToastHost",
+      "portable": true,
+      "contract": "docs/contracts/components/toast-host.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ToastStack",
+      "portable": true,
+      "contract": "docs/contracts/components/toast-stack.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ToggleGroup",
+      "portable": true,
+      "contract": "docs/contracts/components/toggle-group.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "TokenInput",
+      "portable": true,
+      "contract": "docs/contracts/components/token-input.md",
+      "substrate": "drag-resize-reorder",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ToolCall",
+      "portable": true,
+      "contract": "docs/contracts/components/tool-call.md",
+      "substrate": "feedback-status",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ToolCallGroup",
+      "portable": true,
+      "contract": "docs/contracts/components/tool-call-group.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Toolbar",
+      "portable": true,
+      "contract": "docs/contracts/components/toolbar.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/toolbar.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "Tooltip",
+      "portable": true,
+      "contract": "docs/contracts/components/tooltip.md",
+      "substrate": "layout-primitive",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "Tree",
+      "portable": true,
+      "contract": "docs/contracts/components/tree.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "TriStateSwitch",
+      "portable": true,
+      "contract": "docs/contracts/components/tri-state-switch.md",
+      "substrate": "selection-navigation",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "UiPresentationProvider",
+      "portable": true,
+      "contract": "docs/contracts/components/ui-presentation-provider.md",
+      "substrate": "workstation-shell",
+      "required": [
+        "semantic",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no events; layout or display primitive only.",
+          "contractRef": "docs/contracts/components/ui-presentation-provider.md#5. Events"
+        }
+      ]
+    },
+    {
+      "component": "UpdateCenter",
+      "portable": true,
+      "contract": "docs/contracts/components/update-center.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "UpdateStatus",
+      "portable": true,
+      "contract": "docs/contracts/components/update-status.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ValidationSummary",
+      "portable": true,
+      "contract": "docs/contracts/components/validation-summary.md",
+      "substrate": "form-editing",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "ValueReadout",
+      "portable": true,
+      "contract": "docs/contracts/components/value-readout.md",
+      "substrate": "media-data",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "VideoPlayer",
+      "portable": true,
+      "contract": "docs/contracts/components/video-player.md",
+      "substrate": "overlay-dismissal",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "WaveformDisplay",
+      "portable": true,
+      "contract": "docs/contracts/components/waveform-display.md",
+      "substrate": "general-composite",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    },
+    {
+      "component": "XYPad",
+      "portable": true,
+      "contract": "docs/contracts/components/xy-pad.md",
+      "substrate": "media-data",
+      "required": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
+      ],
+      "notApplicable": []
+    }
+  ]
+}

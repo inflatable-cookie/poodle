@@ -1,0 +1,270 @@
+{
+  "schema": "poodle.g18-expected-test-execution.v1",
+  "command": "effigy regressions:native",
+  "source_commit": "d8e174fb40b2634b7d00018c721816ffc037d712",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
+  "run_id": "2026-09-09-g18-001-expected",
+  "results": {
+    "a_mounted_button_carries_its_controls_target": {
+      "outcome": "passed",
+      "body_sha256": "3e8f73c0709cb298d457a3f15c4e5f53bad0920007fcd9c02b1fb8a0cf7c9fc4"
+    },
+    "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "906ac4b73bf343e60dd3d238fdb52a1bc087353e0e3458091651d9cc9866de19"
+    },
+    "switch_toggle_readonly_and_disabled_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "93788df7b5d1a4f661478c8a5ff482abb9d9e1201fdd49e578ce406b5c3fd517"
+    },
+    "segmented_control_exclusive_focus_identity_and_disabled_paths": {
+      "outcome": "passed",
+      "body_sha256": "c0fce166f06828e8c12bf88e615322f16aa800b50b730490f828868da30857c5"
+    },
+    "radio_group_exclusive_focus_identity_and_disabled_paths": {
+      "outcome": "passed",
+      "body_sha256": "e16557e51f0e85712cb894b37431c1a3ba93ba23560b335f395772a7208aaf2c"
+    },
+    "toggle_group_result_focus_identity_and_disabled_paths": {
+      "outcome": "passed",
+      "body_sha256": "5a13a3bdcc9862c5a6e44ebfd8f64be8492a80e55f06c61de302224b2fe27fb0"
+    },
+    "a_scrub_reports_change_while_dragging_and_commits_once_at_release": {
+      "outcome": "passed",
+      "body_sha256": "7b14bf38d54e1beee1689eb90cf5ed5ab505febdf1ef988d64896bd8d769268a"
+    },
+    "slider_axis_keyboard_and_disabled_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "8ded53e28c86a179c1bc4adb3d43f3f08b1e0eb696eac42b1b852d704edbe6d4"
+    },
+    "fader_mounted_parity_through_production_dispatch": {
+      "outcome": "passed",
+      "body_sha256": "677a715bb6b43ec99fe88edba153462fbd72023ef0548bdfde858579335b95cd"
+    },
+    "knob_mounted_parity_through_production_dispatch": {
+      "outcome": "passed",
+      "body_sha256": "4ddf620d4d676a9a54b3e843943923ba83f4d884bf62d84d63e53167d35889e4"
+    },
+    "xy_pad_mounted_parity_through_production_dispatch": {
+      "outcome": "passed",
+      "body_sha256": "9716c4c119a459be548d56baa1dc66fdc5a030e9f4e07b3f8544f1e4d199dde7"
+    },
+    "tabs_drag_keyboard_and_identity_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "8fe7198b282047cb98b28c09fb6627fd98bc1d26691c24eb70e23a5dbcb427b9"
+    },
+    "tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "839e027543ab9ff4ec36c3aff4f24a9e4ed161b68a6704ceba93414cc7ad800c"
+    },
+    "editable_list_substrate_reorder_rebuilds_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "330344dd38323393cef1727b5e5810517efd49583e36de5187640183d2078a22"
+    },
+    "order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "22399f6b8d668c2bcd67a081d77ef897771558acf587c752b040be8e9277dda9"
+    },
+    "block_editor_grip_drag_and_move_controls_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "3c8eb4f0820325144ed3965d50f1b0f2107327443bf911cf5d3c0ec6d08d18bb"
+    },
+    "text_input_controlled_editing_and_identity_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "c93441fccf67f5c3f63daf19286b3ddf3c9b1b41323a2b79e7039bb3fb669106"
+    },
+    "duration_input_segments_edit_and_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "fbf2f93d095ed10a3dfb375f30883f35999ee873d67893a3445ba5c079ed3ece"
+    },
+    "time_input_segmented_editor_commits_drafts_and_bounds": {
+      "outcome": "passed",
+      "body_sha256": "58d13754a5412c97a964dfb8635cdcb9027802491a52101a82822ba27a4ca683"
+    },
+    "number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value": {
+      "outcome": "passed",
+      "body_sha256": "845fadf37dee60d58e683d0e9f82680104ac979888dda98bc98470163ca34c8a"
+    },
+    "number_input_mounted_accessibility_projects_spin_button_surface": {
+      "outcome": "passed",
+      "body_sha256": "f0e77cd06f285a5c3723ce263e285a7ac6822644a362bb8631059265c9c73477"
+    },
+    "editable_label_commits_on_enter_and_once_through_the_blur_tab_causes": {
+      "outcome": "passed",
+      "body_sha256": "63e21bbe835285e19b3f2ded350ab415e22fbb075d14d43a60bd5a1182344c04"
+    },
+    "editable_label_live_draft_stays_off_the_committed_value": {
+      "outcome": "passed",
+      "body_sha256": "281b68ccc6963565b5a90ac4ae04150ce4f0f0aa15a5276b1ba211e54a9dab7a"
+    },
+    "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard": {
+      "outcome": "passed",
+      "body_sha256": "3a239cef0c510d560d69a6d217802a1e15d559bb208d05e390ce880513c32741"
+    },
+    "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard": {
+      "outcome": "passed",
+      "body_sha256": "0ccd6358857500b25bd1218dcfb4fd95ba59b74e690f74860af4fa6c99c95a52"
+    },
+    "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard": {
+      "outcome": "passed",
+      "body_sha256": "0e6878f53e397e3d33413ef75bef39ad20896bbd524ac7f1f21ab47e9d746f55"
+    },
+    "collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard": {
+      "outcome": "passed",
+      "body_sha256": "3218c5e5c7fb0c3026cacbcaf5134c6fa7162abd9f1a7f496e447cc1dc4e5f48"
+    },
+    "pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard": {
+      "outcome": "passed",
+      "body_sha256": "660be308328274821a183204ef05d80e99808948590fb157646635417e2f5e75"
+    },
+    "rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard": {
+      "outcome": "passed",
+      "body_sha256": "dd202d9eef6037d9bfe734666d849063b14815a870e98adbc10dfdaa97919c51"
+    },
+    "accordion_result_disclosure_focus_identity_and_disabled_paths": {
+      "outcome": "passed",
+      "body_sha256": "4999ed49139cad640f14a771af4da358f355463a17fa256e88f2ae910e49652d"
+    },
+    "tri_state_switch_value_focus_identity_and_disabled_paths": {
+      "outcome": "passed",
+      "body_sha256": "ca1215fe239481788298db4752651f4509a7727d6dec6767d5496ece970719b0"
+    },
+    "a_nested_popover_paints_without_nesting_deferred_draws": {
+      "outcome": "passed",
+      "body_sha256": "6b8f8b841695a37d0647a3d0ffac111371f6fac06538f07f7f3a860a0e3f9231"
+    },
+    "a_grouped_code_input_types_and_completes_through_the_real_tree": {
+      "outcome": "passed",
+      "body_sha256": "73fc9e293694791d53c8932ba7fe5e0ac237c75ba5e93af37b09c8b713bf0189"
+    },
+    "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam": {
+      "outcome": "passed",
+      "body_sha256": "c7784e471ce61cf81072cd8afc057ae436eccaf72c81e7c69c4fc4993c542589"
+    },
+    "licence_activation_key_entry_types_and_emits_through_the_real_tree": {
+      "outcome": "passed",
+      "body_sha256": "fa00d3ad79b430847899ada9b2702c0f0271454db8b05dc4b5a423ee9b1325b6"
+    },
+    "licence_activation_machine_name_enter_and_escape_restore_display_focus": {
+      "outcome": "passed",
+      "body_sha256": "be0816ccaa13fbba56e8f79926375fa2523202f6f4bd175190ffdddf1dd986ba"
+    },
+    "licence_seats_release_flows_through_confirm_in_a_mounted_window": {
+      "outcome": "passed",
+      "body_sha256": "43b0fc5ed4d5386ce77aa0c5f9afb154fbfb2a9f4b161f871851b8ea98c81256"
+    },
+    "licence_seats_seat_row_enter_and_escape_restore_display_focus": {
+      "outcome": "passed",
+      "body_sha256": "d547abe5f94c7e54da94dfb06917d1a65205f65a7b54669dde001400f1e9d3a0"
+    },
+    "licence_status_renders_state_and_authority_reads_in_a_mounted_window": {
+      "outcome": "passed",
+      "body_sha256": "4e3e1147d8d38df803ae3711bf640062f79294d2aec95e431a3aa932df5f3853"
+    },
+    "model_connection_picker_roving_focus_moves_real_backend_focus": {
+      "outcome": "passed",
+      "body_sha256": "03eabede2961232cc69667c23c1a9af96ffd93828cda645df7a26f37766f89e3"
+    },
+    "model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window": {
+      "outcome": "passed",
+      "body_sha256": "ea0e85b18e091ff5acb14d1e5a2200091eb27aba782d592f7e51ba25303974a9"
+    },
+    "model_connection_card_closes_and_returns_real_focus_to_the_disclosure": {
+      "outcome": "passed",
+      "body_sha256": "f2b5eeb015d41996624e60f2a4797f64501daf78d36a665ebbf50025ac3d6b9c"
+    },
+    "model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window": {
+      "outcome": "passed",
+      "body_sha256": "baf9a8a8532d63668fc2e21fee3235926f98beab169bdc25d3ae453defca5c43"
+    },
+    "radio_selects_on_activate_and_does_not_uncheck_itself": {
+      "outcome": "passed",
+      "body_sha256": "678c362bd33721a72b02791cdc207da660e4b60f01fd60bf908054ed4f6ba4b4"
+    },
+    "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds": {
+      "outcome": "passed",
+      "body_sha256": "7e3f1c4b9ae7a39a3b5363d448db488c62718f18a28e502abc4435ab6f0418ae"
+    },
+    "update_status_confirm_then_install_through_the_real_tree": {
+      "outcome": "passed",
+      "body_sha256": "ca4de5df77315bc0e5b4bc20654ce7f1d695042d1e8ff9a1cea2bda8355dc749"
+    },
+    "update_center_hidden_presence_mounts_nothing_and_open_shows_status": {
+      "outcome": "passed",
+      "body_sha256": "b5d3b98822cc9e0d6de1fdbb41764bb09e5bc4649779a7513589b6e84b11b98e"
+    },
+    "settings_shell_navigates_and_refused_close_stays_open": {
+      "outcome": "passed",
+      "body_sha256": "229ca2d1fda2d94e77b0e81cf71b7f990198c4e6beb1e9651cd725ed897e9394"
+    },
+    "a_focused_resize_handle_steps_the_pane_and_its_declared_value": {
+      "outcome": "passed",
+      "body_sha256": "b67f2c0dc0acad950e54a8cd22ed9836f7ed461832f64c5d007780d743a9fdf1"
+    },
+    "a_disabled_resize_handle_takes_no_focus_and_answers_no_key": {
+      "outcome": "passed",
+      "body_sha256": "6a55b868f94e634065eeca96d46fe4dc2528fe5efd1eea08da7fa956fdf8c6e4"
+    },
+    "two_composed_split_views_do_not_share_a_divider_focus_handle": {
+      "outcome": "passed",
+      "body_sha256": "48d42731994f8600ca5e1a809249ced447fdd1dab78737e5d048bcb90c66105f"
+    },
+    "callout_dismiss_rebuilds_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "ef3e38ff965105cb14dd8c1d6d2fb7ff0d609c5a8a8d2e3708509de38cfeeb41"
+    },
+    "remediation_banner_action_and_dismiss_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "2028f59e3a0f94120c95d878d56716d65d27e395cc6312179a2fd4100ff754d7"
+    },
+    "action_discovery_selection_rebuilds_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "964b5c615f8fecc7a8eb3ae352a718a07b743b6e1c23ce48ac233a1563d9b93b"
+    },
+    "dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "788c512d92936faaf9a55a6391c4a4f33ec4a1d47ce1e119003276e9814bbedd"
+    },
+    "agent_plan_decisions_rebuild_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "98809dbf9a94523998be0afebcec3f5b438de9140cb4c90de88ceedde8e393fc"
+    },
+    "agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "a6ee9aacd041ef8c47519c85c48c1474e2673ca2c39b02309c3bf42e8f9a6e13"
+    },
+    "agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "e65c7331b07ddcb6c4f2700f498cb21da77a1dc4b7583334061a47a71466b2a1"
+    },
+    "changed_files_disclosure_and_selection_rebuild_the_host_spec": {
+      "outcome": "passed",
+      "body_sha256": "1add0acad14b23bc95524dbefc81bdadb2ec20f25453abb18b0a6bd767e672e2"
+    },
+    "tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "d3aef1a6c08fc897a4c53a6a5f9570201a05c6b9b272bd49d98f89b14e0e5f0d"
+    },
+    "tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input": {
+      "outcome": "passed",
+      "body_sha256": "b4b22b07d10fc5142f5cd3bee103146a6e554dd3dfc00324eac04cc12c3ad958"
+    },
+    "stepper_selection_and_rerun_reach_separate_mounted_controls": {
+      "outcome": "passed",
+      "body_sha256": "4c8e185d33cbe70e3a2b73ce4aa1f63e436b9830292c4345a6b6b6015451bae0"
+    },
+    "stepper_collapse_stays_independent_in_a_mounted_window": {
+      "outcome": "passed",
+      "body_sha256": "fc3886d592b1c99b70e66e352029388fb0653bbe89efa465c359039d7ad78a10"
+    },
+    "stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press": {
+      "outcome": "passed",
+      "body_sha256": "0d8fa41a428367f2b7eb3aad052af667265c1992fffe3aeaf5101f069307f3b8"
+    },
+    "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring": {
+      "outcome": "passed",
+      "body_sha256": "0ad74cd9b88f6082c557ab6cde35741f44a63bc5380eb462a3f6335005690878"
+    }
+  }
+}
