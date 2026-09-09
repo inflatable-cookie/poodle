@@ -4,6 +4,8 @@ Date: 2026-09-09
 Repository: `inflatable-cookie/poodle`
 Integration branch: `main`
 Migration base: `85741961d60ac557974f4a4f3e2244b61c8f0b74`
+Migration commit: `16d6d93dbd8b63405477af4e083125f163baec54`
+Status: complete
 Authority: operator-provided flattened-task switchover prompt
 
 ## Preflight
@@ -118,8 +120,12 @@ repointed before landing. No other active executable surface reads a removed
 roadmap path; remaining source comments, schema IDs, old queue modes, logs,
 archived specs, and archived handoffs retain historical gNN/card vocabulary.
 
+The Chatterbox adversarial review accepted the migration at exact commit
+`16d6d93dbd8b63405477af4e083125f163baec54`. This canonical planning
+promotion used the integration checkout directly; no worker PR or product-code
+merge was created.
+
 The second lifecycle pass leaves only `g17` expanded, with unique task files
 `001`–`004`; no active `batch-cards/` file; no top-level stale handoff; and one
 frontier, `g17.001`, named consistently by the roadmap README, generation
-index, and queue projection. The promotion commit and final synchronized head
-are recorded by git history and the operator report.
+index, and queue projection.
