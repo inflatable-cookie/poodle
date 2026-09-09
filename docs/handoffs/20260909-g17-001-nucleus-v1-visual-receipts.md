@@ -19,7 +19,7 @@ queue:
 tags: [coordination, handoff, worker, g17, g17.001, nucleus, visual, receipts]
 ---
 
-## What This Thread Is Doing
+## What This Thread Was Doing
 
 Execute [`g17.001`](../roadmaps/g17/001-nucleus-v1-visual-receipts.md) from
 the exact pushed planning commit. Import the validated Poodle Lab cohort bundle
