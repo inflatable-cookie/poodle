@@ -84,7 +84,12 @@ describe("preview catalogue audit", () => {
   });
 
   it("keeps the web-only supplement out of the canonical manifest", () => {
-    expect(webOnlySlugs).toEqual(["meter-surface"]);
+    expect(webOnlySlugs).toEqual([
+      "meter-surface",
+      "code-editor",
+      "rich-text-editor",
+      "rich-text-renderer",
+    ]);
     for (const slug of webOnlySlugs) {
       expect(manifest.components.find((entry) => entry.slug === slug)).toBeUndefined();
       expect(allComponents.find((component) => component.slug === slug)).toBeDefined();

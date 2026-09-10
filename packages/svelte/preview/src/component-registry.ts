@@ -35,6 +35,33 @@ export const webOnlyComponents: CanonicalComponent[] = [
     kind: "display",
     collections: [] as const satisfies readonly CatalogueCollectionId[],
   },
+  {
+    slug: "code-editor",
+    displayName: "CodeEditor",
+    description: "Web-admitted controlled code editor over CodeMirror 6.",
+    section: "composition",
+    family: "forms-validation",
+    kind: "form",
+    collections: [] as const satisfies readonly CatalogueCollectionId[],
+  },
+  {
+    slug: "rich-text-editor",
+    displayName: "RichTextEditor",
+    description: "Web-admitted controlled rich-text editor over ProseMirror.",
+    section: "composition",
+    family: "forms-validation",
+    kind: "form",
+    collections: [] as const satisfies readonly CatalogueCollectionId[],
+  },
+  {
+    slug: "rich-text-renderer",
+    displayName: "RichTextRenderer",
+    description: "Read-only ProseMirror renderer matching the editor schema.",
+    section: "composition",
+    family: "forms-validation",
+    kind: "display",
+    collections: [] as const satisfies readonly CatalogueCollectionId[],
+  },
 ];
 
 export const allComponents: ComponentEntry[] = [...canonicalComponents, ...webOnlyComponents].map((component) => ({

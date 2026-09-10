@@ -12,6 +12,12 @@ export default defineConfig({
       "@inflatable-cookie/poodle-svelte/markdown": fileURLToPath(
         new URL("../components/src/markdown.ts", import.meta.url),
       ),
+      "@inflatable-cookie/poodle-svelte/editor": fileURLToPath(
+        new URL("../components/src/editor.ts", import.meta.url),
+      ),
+      "@inflatable-cookie/poodle-svelte/rich-text": fileURLToPath(
+        new URL("../components/src/rich-text.ts", import.meta.url),
+      ),
       "@inflatable-cookie/poodle-svelte/types": fileURLToPath(
         new URL("../components/src/types.ts", import.meta.url),
       ),
