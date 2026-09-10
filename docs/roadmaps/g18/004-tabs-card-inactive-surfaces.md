@@ -1,6 +1,6 @@
 # 004 — Tabs card inactive surfaces
 
-Status: ready — operator approved concurrent dispatch with g18.003 review
+Status: complete — merged as `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa` (PR #239) on 2026-09-10
 Owner: Poodle Tabs active cohort
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -102,7 +102,11 @@ Do not add a new prop, change Tabs behaviour, or start a release.
 
 ## Evidence
 
-Pending execution.
+Merged. Independent exact-head `ready_to_merge` review of head
+`19e9366ec4f0ce0070ceccd97f9d80f85b7180da`
+([comment #5625858043](https://github.com/inflatable-cookie/poodle/pull/239#issuecomment-5625858043));
+closeout record
+`docs/logs/2026-09/20260910-g18-004-tabs-card-inactive-surfaces.md`.
 
 ## Next task
 

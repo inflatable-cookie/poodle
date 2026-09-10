@@ -718,6 +718,7 @@ fn render_card(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
 
     let accent = ctx.theme().resolve_color(spec.indicator_token());
     let border = ctx.theme().resolve_color(spec.list_border_token());
+    let surface = ctx.theme().resolve_color("color.background.surface");
     let text_primary = ctx.theme().resolve_color("color.text.primary");
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
     let text_inverse = ctx.theme().resolve_color("color.text.inverse");
@@ -791,13 +792,17 @@ fn render_card(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
                 s.fill_width = true;
                 s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
             }
-            if is_active && spec.active_fill != ActiveFill::None {
-                s.descriptor.background = if solid {
-                    Some(accent)
-                } else {
-                    Some(with_alpha(accent, accent.3 * 0.18))
-                };
-            }
+            // Every card item keeps the surface fill. Selected tint/solid
+            // replace it; `ActiveFill::None` retains it so a selected card
+            // still reads as a card. The fill sits on this node, which wraps
+            // the label, count, and close affordance.
+            s.descriptor.background = if is_active && solid {
+                Some(accent)
+            } else if is_active && spec.active_fill == ActiveFill::Tint {
+                Some(with_alpha(accent, accent.3 * 0.18))
+            } else {
+                Some(surface)
+            };
             if is_disabled {
                 s.descriptor.opacity = disabled_opacity;
             }
@@ -1118,10 +1123,54 @@ mod tests {
         assert_eq!(active.style.descriptor.text_color, Some(inverse));
 
         let inactive = tab_of(&root, "b");
-        assert_eq!(inactive.style.descriptor.background, None);
+        assert_eq!(
+            inactive.style.descriptor.background,
+            Some(theme.resolve_color("color.background.surface"))
+        );
+        assert_eq!(inactive.style.descriptor.border.width, 0.0);
         assert_eq!(
             inactive.style.descriptor.text_color,
             Some(theme.resolve_color("color.text.secondary"))
+        );
+    }
+
+    #[test]
+    fn card_renderer_inactive_and_none_fill_keep_the_surface_on_the_item() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let surface = theme.resolve_color("color.background.surface");
+        let accent = theme.resolve_color("color.accent.base");
+        let tint = with_alpha(accent, accent.3 * 0.18);
+
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B").with_closable(true),
+            TabDefinition::new("c", "C").with_disabled(true),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_value("a");
+        let root = tabs(&spec, &ctx, None, None);
+
+        let selected = tab_of(&root, "a");
+        assert_eq!(selected.style.descriptor.background, Some(tint));
+        assert_eq!(selected.style.descriptor.border.width, 0.0);
+
+        let closable = tab_of(&root, "b");
+        assert_eq!(closable.style.descriptor.background, Some(surface));
+        assert_eq!(closable.style.descriptor.border.width, 0.0);
+        assert!(
+            closable
+                .children
+                .iter()
+                .any(|child| child.id.as_deref() == Some("tabs-close:b")),
+            "the item that owns the fill also owns the close affordance"
+        );
+
+        let disabled = tab_of(&root, "c");
+        assert_eq!(disabled.style.descriptor.background, Some(surface));
+        assert_eq!(
+            disabled.style.descriptor.opacity,
+            ctx.theme().resolve_opacity(spec.disabled_opacity_token())
         );
     }
 
@@ -1259,10 +1308,11 @@ mod tests {
     }
 
     #[test]
-    fn none_fill_suppresses_selected_background_on_every_variant() {
+    fn none_fill_keeps_card_surface_and_leaves_pill_block_unfilled() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let text_primary = theme.resolve_color("color.text.primary");
+        let surface = theme.resolve_color("color.background.surface");
         for variant in [TabVariant::Card, TabVariant::Pill, TabVariant::Block] {
             let spec = TabsSpec::new(vec![
                 TabDefinition::new("a", "A"),
@@ -1274,9 +1324,14 @@ mod tests {
 
             let root = tabs(&spec, &ctx, None, None);
             let active = tab_of(&root, "a");
+            let expected = if variant == TabVariant::Card {
+                Some(surface)
+            } else {
+                None
+            };
             assert_eq!(
-                active.style.descriptor.background, None,
-                "{variant:?} must not fill the selected tab under None"
+                active.style.descriptor.background, expected,
+                "{variant:?} none-fill must keep the variant idle surface"
             );
             // The selected text colour is unaffected: text-primary, never the
             // inverse swap solid uses.
@@ -1286,7 +1341,10 @@ mod tests {
                 "{variant:?} selected text colour must be unaffected"
             );
             let inactive = tab_of(&root, "b");
-            assert_eq!(inactive.style.descriptor.background, None);
+            assert_eq!(
+                inactive.style.descriptor.background, expected,
+                "{variant:?} inactive fill must match the idle surface"
+            );
         }
     }
 

@@ -335,16 +335,16 @@
     justify-content: center;
   }
 
-  /* Card variant: pill-shaped highlight on selected */
-  /* The chip is __item, not __tab. __item wraps the tab button and the close
-     button; __tab is a <button> and cannot contain another one, so filling
-     __tab would leave the close affordance outside the selected chip. `block`
-     already fills __item — `card` fills it too, and only differed
-     because it inherited this from the former text variant, which had no
-     close button to group. Matches poodle-render, where `close` is a child of
-     the styled `tab_el` (render/src/tabs.rs). */
+  /* Card variant: every item is a surface-filled chip. The chip is __item,
+     not __tab. __item wraps the tab button and the close button; __tab is a
+     <button> and cannot contain another one, so filling __tab would leave
+     the close affordance outside the card. Selected tint/solid replace this
+     base; `activeFill="none"` keeps it. Matches poodle-render, where `close`
+     is a child of the styled `tab_el` (render/src/tabs.rs). Inactive cards
+     do not add a border. */
   .poodle-tabs[data-variant="card"] .poodle-tabs__item {
     border-radius: var(--poodle-radius-control);
+    background: var(--poodle-recipe-tabs-card-item-fill, var(--poodle-color-background-surface));
   }
 
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {
@@ -521,21 +521,22 @@
     color: var(--poodle-recipe-tabs-active-solid-hover-close-text, var(--poodle-color-text-inverse));
   }
 
-  /* activeFill="none": the off state of the fill axis — the selected item
-     carries no fill, symmetric with activeEdge="none". Selection is then
-     marked only by the edge and the selected text colour. The selected fill
-     comes from the variant rules above (card/block/pill), so these suppress
-     them; the same one-step-more-specific trick the solid rules use. Block's
-     selected-hover fill is suppressed too — it is a selection fill (accent-
-     based, unlike the unselected hover), and the former strip's active item
-     never filled on hover. Only the fill goes: text colour and the edge are
-     untouched. */
+  /* activeFill="none": suppress the *selection* fill, not the variant's idle
+     surface. Pill and block stay unfilled. Card keeps the base surface so a
+     selected card still reads as a card; text colour and the edge are
+     untouched. Block's selected-hover fill is a selection fill (accent-
+     based, unlike the unselected hover) and is suppressed too. */
   .poodle-tabs[data-active-fill="none"] .poodle-tabs__item[data-selected="true"] {
     background: transparent;
   }
 
   .poodle-tabs[data-active-fill="none"] .poodle-tabs__item[data-selected="true"]:hover {
     background: transparent;
+  }
+
+  .poodle-tabs[data-variant="card"][data-active-fill="none"] .poodle-tabs__item[data-selected="true"],
+  .poodle-tabs[data-variant="card"][data-active-fill="none"] .poodle-tabs__item[data-selected="true"]:hover {
+    background: var(--poodle-recipe-tabs-card-item-fill, var(--poodle-color-background-surface));
   }
 
   /* Focus */

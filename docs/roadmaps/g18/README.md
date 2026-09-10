@@ -47,10 +47,12 @@ needed to compile honest repair tranches.
 | --- | --- | --- |
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
 | [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
-| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | reviewing | Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`; PR #237 |
-| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | ready and approved | independent alongside g18.003 review |
-| [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | ready and approved | independent changelog/parser lane; no release mutation |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | g18.003, g18.004, and g18.005; final source recheck and explicit operator release authority |
+| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
+| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
+| [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | verifying | retained PR #238; g18.007 repair merged, validation retry pending |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | g18.003, g18.004, g18.005, and g18.008; final source recheck and explicit operator release authority |
+| [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); retained g18.005 PR #238 retries next |
+| [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -60,13 +62,24 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-`g18.003` is under independent review through Northstar Queue. The operator
-approved `g18.004` and bounded `g18.005` preflight as concurrent siblings:
-Tabs gains the fill-only inactive-card surface while preflight repairs only the
-existing changelog/parser blocker. Release, Desktop adoption, native editor
-work, and GPUI repair tranches do not auto-start.
+`g18.003` and `g18.004` are complete after independent review and plugin-owned
+merge. The retained `g18.005` preflight remains bounded to the existing
+changelog/parser blocker and its `g18.007` structural repair; release, Desktop
+adoption, native editor work, and GPUI repair tranches do not auto-start.
 
-After both component tasks and preflight close, `g18.006` prepares and publishes the
+g18.005 is implemented and independently accepted, but ordinary web CI rejected
+every changelog change by path. The operator-selected g18.007 structural,
+content-aware maintenance rule merged as `ef2e46bb949a766e844e48f071119c9576c6f723`
+(PR #240). PR #238 and its Queue threads remain retained; Queue retries
+validation now that g18.007 merged.
+
+The merged editor tasks had omitted their baseline preview catalogue pages.
+Operator-confirmed g18.008 added separate CodeEditor, RichTextEditor, and
+RichTextRenderer specimens to both web previews through the existing web-only
+supplement (PR #241, merged `998b6ddc69f94e405b515f6bddd682a2e8916ea5`). It ran
+independently of g18.007 and added no native parity.
+
+After preflight closes, `g18.006` prepares and publishes the
 SemVer-minor `0.4.0` web release to unblock Desktop's retained g02.058 task and
 PR #215. It is not ready: Chatterbox must recheck the final package trees and
 the operator must explicitly authorize release mutation.

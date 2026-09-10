@@ -79,4 +79,45 @@ describe("Svelte catalogue navigation", () => {
       "#components/model-connection-picker",
     );
   });
+
+  it("finds the web editor specimens by search and direct route", async () => {
+    const search = render(ComponentsSection, { props: { search: "CodeEditor" } });
+    expect(
+      document.querySelector('[data-catalogue-result="code-editor"]')?.getAttribute("href"),
+    ).toBe("#components/code-editor");
+    search.unmount();
+
+    const richSearch = render(ComponentsSection, { props: { search: "RichTextEditor" } });
+    expect(
+      document.querySelector('[data-catalogue-result="rich-text-editor"]')?.getAttribute("href"),
+    ).toBe("#components/rich-text-editor");
+    richSearch.unmount();
+
+    const rendererSearch = render(ComponentsSection, {
+      props: { search: "RichTextRenderer" },
+    });
+    expect(
+      document.querySelector('[data-catalogue-result="rich-text-renderer"]')?.getAttribute("href"),
+    ).toBe("#components/rich-text-renderer");
+    rendererSearch.unmount();
+
+    render(ComponentsSection, {
+      props: { activeComponent: "code-editor", search: "" },
+    });
+    expect(
+      document.querySelector(
+        '.poodle-catalogue-sidebar [data-catalogue-family="forms-validation"][data-open="true"]',
+      ),
+    ).toBeTruthy();
+    expect(
+      document.querySelector('.poodle-catalogue-sidebar a[href="#components/code-editor"]')
+        ?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      document.querySelector('.poodle-catalogue-sidebar a[href="#components/rich-text-editor"]'),
+    ).toBeTruthy();
+    expect(
+      document.querySelector('.poodle-catalogue-sidebar a[href="#components/rich-text-renderer"]'),
+    ).toBeTruthy();
+  });
 });

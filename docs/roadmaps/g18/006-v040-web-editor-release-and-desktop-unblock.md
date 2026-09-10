@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release and Desktop unblock
 
-Status: planned — waits for g18.003 and g18.004; publication requires explicit operator release authority
+Status: planned — waits for g18.005 and g18.008; publication requires explicit operator release authority
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -9,7 +9,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../specs/070-compiled-web-distribution-contract.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
-Depends on: `g18.003`, `g18.004`, `g18.005`
+Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`
 
 ## Outcome
 
@@ -20,7 +20,7 @@ as private packed validation, keep Rust crates on source/tag distribution, and
 return registry-installed evidence that lets Desktop resume its retained
 `g02.058` task and PR #215.
 
-Do not publish before both dependencies close. Do not mutate Desktop.
+Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Ready-State Rubric
 
@@ -34,7 +34,7 @@ Do not publish before both dependencies close. Do not mutate Desktop.
   `ffb16fed0a8cec7f8a2448bed2f5e680d60a5366` and Svelte
   `de3a5f55d435689f2886e524613364fa2abc785d`.
 - [x] The release and Desktop proof boundaries are explicit.
-- [ ] g18.003, g18.004, and the g18.005 release preflight have merged with
+- [ ] g18.003, g18.004, g18.005, and g18.008 have merged with
   accepted exact-head review.
 - [ ] Final candidate package trees and full v0.3.0-to-candidate delta are known.
 - [ ] The operator explicitly authorizes candidate execution and public release
@@ -62,7 +62,7 @@ Do not publish before both dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** planned and serial after g18.003, g18.004, and g18.005; not dispatchable
+- **State:** planned and serial after g18.003, g18.004, g18.005, and g18.008; not dispatchable
   until Chatterbox rechecks the final source and the operator grants explicit
   release authority
 - **Completion:** one reviewed release-candidate PR merged to main; exact
@@ -119,7 +119,7 @@ Do not publish before both dependencies close. Do not mutate Desktop.
 
 | Invariant | Adversarial counterexample | Required proof |
 | --- | --- | --- |
-| Release waits for both changes | candidate omits rich text or Tabs result | both task merge commits are ancestors of the exact candidate |
+| Release waits for complete web admission | candidate omits rich text, Tabs, or editor preview admission | all four task merge commits are ancestors of the exact candidate |
 | Version reflects additive API | manifests prepare `0.3.1` or disagree | every release-bearing TS/Rust manifest and internal requirement is `0.4.0` |
 | Editor is really published | source link passes but packed `./editor` is absent | fresh registry install imports Svelte `./editor` in declared browser/SSR/type modes |
 | Rich text is isolated | root or `./editor` pulls TipTap/ProseMirror | packed graph/archive isolation checks on final tarballs |
@@ -133,7 +133,7 @@ Do not publish before both dependencies close. Do not mutate Desktop.
 
 ## Stop conditions
 
-- Stop if g18.003, g18.004, or g18.005 is not merged and accepted.
+- Stop if g18.003, g18.004, g18.005, or g18.008 is not merged and accepted.
 - Stop if the final delta contains an unclassified breaking public change or
   requires a version other than `0.4.0`.
 - Stop if local gates, candidate dry run, tag dry run, packing, publication, or

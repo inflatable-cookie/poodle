@@ -43,3 +43,33 @@ shell manifests and remain under the MIT License:
 [@codemirror/lang-yaml 6.1.3](https://codemirror.net/), and
 [@codemirror/legacy-modes 6.5.4](https://codemirror.net/) (TOML and shell
 stream parsers only).
+
+## TipTap 3 and ProseMirror
+
+The web `RichTextEditor` and `RichTextRenderer` (g18.003) run on TipTap 3 and
+ProseMirror behind the dedicated `./rich-text` entries of
+`@inflatable-cookie/poodle-svelte` and `@inflatable-cookie/poodle-react`. All
+packages are pinned exactly at 3.31.3 in both shell manifests and remain under
+the MIT License: [@tiptap/core 3.31.3](https://tiptap.dev/),
+[@tiptap/pm 3.31.3](https://tiptap.dev/) (the ProseMirror bundle:
+[prosemirror-model](https://prosemirror.net/), state, view, transform,
+keymap, inputrules, history, commands, schema-list, tables, dropcursor, and
+gapcursor), [@tiptap/extensions 3.31.3](https://tiptap.dev/) (UndoRedo and
+Placeholder only), and the admitted feature modules
+[@tiptap/extension-document 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-paragraph 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-text 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-hard-break 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-bold 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-italic 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-strike 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-code 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-heading 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-link 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-list 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-blockquote 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-code-block 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-horizontal-rule 3.31.3](https://tiptap.dev/),
+[@tiptap/extension-table 3.31.3](https://tiptap.dev/), and
+[@tiptap/extension-image 3.31.3](https://tiptap.dev/). The link extension
+pulls [linkifyjs 4.3.3](https://linkify.js.org/) transitively, also MIT.

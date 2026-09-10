@@ -158,6 +158,7 @@ export const CORE_STYLE_FILES = [
   "relation-picker.css",
   "remediation-banner.css",
   "resize-handle.css",
+  "rich-text.css",
   "scroll-shell.css",
   "segmented-control.css",
   "select.css",

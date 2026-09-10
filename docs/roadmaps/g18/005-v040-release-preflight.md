@@ -1,6 +1,6 @@
 # 005 — v0.4.0 release preflight
 
-Status: ready — operator approved concurrent dispatch with g18.003 review and g18.004
+Status: verifying — PR #238 retained; blocked on g18.007 scope repair
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../specs/044-deprecation-change-control-and-release-channel-operations.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
-Depends on: none; g18.003 and g18.004 are approved concurrent siblings
+Depends on: g18.007 for CI validation only; implementation and review complete
 
 ## Outcome
 
@@ -99,6 +99,11 @@ workflow, or mutate Desktop.
 Planning intake on 2026-09-10 reproduced the changelog parse failure through
 Effigy before any release mutation. Live registry inspection reported core and
 Svelte `latest=0.3.0`.
+
+PR #238 reached reviewed head `40f9e0a3d44f485fd24b4aa6ba55dff2bc759a51`.
+Web CI then exposed the deterministic ordinary-scope mismatch. The operator
+selected g18.007's structural classifier repair; PR #238 and all attached Queue
+threads/workspace remain retained for validation retry afterward.
 
 ## Next task
 
