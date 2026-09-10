@@ -1,6 +1,6 @@
 # 002 — CodeMirror web CodeEditor
 
-Status: ready — dispatch requires separate operator go
+Status: complete
 Owner: Poodle web components
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -109,7 +109,7 @@ release. Do not implement GPUI CodeEditor or adopt the package in Desktop.
 
 ## Evidence
 
-Pending execution.
+Shipped in PR #236, merged as `308fa52c5cd68d9c776f320c368e4fb0896e4d4d` on 2026-09-10 after independent exact-head `ready_to_merge` review ([comment #5623576100](https://github.com/inflatable-cookie/poodle/pull/236#issuecomment-5623576100)) of head `6d875b30c7f36612ec7acec369038a97920c6ddc`. Execution log: `docs/logs/2026-09/20260910-g18-002-codemirror-web-code-editor.md`. Paired Svelte/React CodeEditor over 13 pinned `@codemirror/*` packages with dedicated `./editor` entries; `TabItem.pinned` across core, both web runtimes, shared Rust, render, and mounted GPUI. Validation-gate repairs in-round: content-aware ordinary JS manifest classifier (strict g16.059 and candidate g16.054 paths unchanged) and Nucleus M1/A1 receipt repin (62 receipt files plus manifest, `source_commit` only) with ledger regeneration. Web-admitted only; no GPUI CodeEditor, no Desktop change, no release.
 
 ## Next task
 

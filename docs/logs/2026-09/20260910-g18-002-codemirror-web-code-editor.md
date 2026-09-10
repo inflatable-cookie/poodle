@@ -1,6 +1,6 @@
 # g18.002 — CodeMirror web CodeEditor
 
-Status: ready for review
+Status: merged
 Date: 2026-09-10
 Branch: `ns-04d0b9b3-a9d6-46a6-82e7-c2b5bbc8bfe7`
 Card: `docs/roadmaps/g18/002-codemirror-web-code-editor.md`
@@ -70,3 +70,11 @@ publication/transport mutations stay registry surfaces, unparsable/added/
 deleted manifests fail closed), with focused scope tests and
 package-install README documentation. Strict g16.059 and candidate g16.054
 paths are unchanged. Ordinary `test:web-pack-install` exits 0.
+
+## Closeout
+
+- Merge performed by the plugin as `308fa52c5cd68d9c776f320c368e4fb0896e4d4d` on 2026-09-10 (PR #236) after independent exact-head `ready_to_merge` review ([comment #5623576100](https://github.com/inflatable-cookie/poodle/pull/236#issuecomment-5623576100)) of head `6d875b30c7f36612ec7acec369038a97920c6ddc`.
+- In-round repairs after the round-2 approval: content-aware ordinary JS package-manifest classifier (`test/package-install/scope.ts`; strict g16.059 and candidate g16.054 paths unchanged) and Nucleus M1/A1 receipt repin (62 receipt files plus manifest, `source_commit 2cf135d1` to `de7a97b7`, zero other changed lines; ledger regenerated with zero delta; V1/Lab bundle untouched). The pre-existing nucleus receipt mismatch noted above as untouched was repaired by this repin; `check:gpui-census` and ledger checks are green at the reviewed head.
+- Reviewed-head validation (round 3): `test:core-build` 63 pass; `test:web-pack-install` exit 0; `check:gpui-census`, `test:gpui-census` 17 pass, `test:nucleus-parity-receipts` 17 pass; `regressions:native` 234 pass; component boards 3819 pass, parity 552, a11y 180 (round 2, unchanged surfaces); PR gates web + rust pass at `6d875b30`.
+- Non-blocking reviewer notes (deferred, no acceptance impact): execution-log narration gap for the repin/relocation commits; absent-vs-empty `publishConfig` treated as equal in transport comparison.
+- Deferred: release/tag/publish, Desktop adoption, GPUI CodeEditor, preview catalogue admission — all need separate authority. Return to Chatterbox.

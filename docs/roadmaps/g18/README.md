@@ -46,7 +46,7 @@ needed to compile honest repair tranches.
 | Task or planning horizon | State | Dependency or checkpoint |
 | --- | --- | --- |
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
-| [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | ready, dispatch held | separate operator go; bounded consumer interrupt |
+| [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -56,11 +56,9 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-`g18.002` is the sole approved ready task. Queue dispatch still requires a
-separate operator go. It is a bounded consumer interrupt: deliver the paired
-Svelte and React CodeEditor over CodeMirror 6, plus `Tabs.pinned` across the
-normal active cohort. It does not admit a GPUI CodeEditor, authorize release or
-Desktop adoption, or replace the pending GPUI repair-tranche compilation.
+No approved frontier. `g18.002` merged in PR #236 and is closed out in the
+integration checkout. Return to Chatterbox for release/adoption authority;
+no successor auto-starts.
 
 ## Held and recurring work
 
