@@ -33,6 +33,11 @@ prefer the narrower current authority and repair the stale document.
 
 ## Catalogue Specimens
 
+- Every public component has an addressable, representative specimen in every
+  runtime included by its admission. A staged web admission therefore requires
+  both Svelte and React catalogue pages before the task is complete; excluding
+  native parity does not exclude preview documentation. Distinct public editor
+  and renderer exports each get their own page.
 - Catalogue specimens are human-facing documentation. Their first job is to
   show what a component is for, what is available, and how it is normally
   composed.

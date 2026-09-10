@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Chatterbox
-Updated: 2026-09-10 (g18.005 blocked; g18.007 structural repair approved)
+Updated: 2026-09-10 (g18.007 and g18.008 approved in parallel)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -13,28 +13,22 @@ commit.
 
 ## Ready queue tasks
 
-[`g18.004`](g18/004-tabs-card-inactive-surfaces.md) — Tabs card inactive
-surfaces — is approved for independent dispatch alongside g18.003 review.
-
 [`g18.005`](g18/005-v040-release-preflight.md) — v0.4.0 release preflight — is
 implemented and reviewed in retained PR #238 but fails ordinary-scope CI.
 
 [`g18.007`](g18/007-ordinary-changelog-maintenance-scope.md) — ordinary
-changelog maintenance scope — is the approved structural repair. After its
-merge, Queue retries validation on the existing g18.005 task and PR.
+changelog maintenance scope — is reviewing in PR #240. After its merge, Queue
+retries validation on the existing g18.005 task and PR.
 
-## Active queue task
-
-[`g18.003`](g18/003-tiptap-prosemirror-rich-text-editor.md) —
-TipTap/ProseMirror rich-text editor, Queue task
-`edb2d303-38c9-44a8-aa2c-a6ff5821643e`. Queue owns its worker, review, merge,
-and closeout.
+[`g18.008`](g18/008-web-editor-preview-specimens.md) — web editor preview
+specimens — is approved for immediate independent dispatch alongside g18.007.
+It is serial before g18.006 release.
 
 ## Held planning horizons
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) is planned
-behind g18.003, g18.004, and g18.005. It cannot dispatch until final-source
-recheck and explicit operator release authority.
+behind g18.005 and g18.008. It cannot dispatch until final-source recheck and
+explicit operator release authority.
 
 GPUI repair tranches, GPUI/shared-Rust CodeEditor and RichTextEditor work,
 visual expansion, keyboard-origin focus, V2, M2, A2, the Nucleus switch packet,

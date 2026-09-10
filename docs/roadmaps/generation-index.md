@@ -10,14 +10,15 @@ Updated: 2026-09-10
   - Active task: `g18.005` v0.4.0 release preflight, retained PR #238;
     validation remains blocked on the approved `g18.007` ordinary-scope
     repair.
-  - Approved frontier: `g18.007` ordinary changelog maintenance scope;
-    g18.005 validation retries after its merge.
+  - Approved frontier: `g18.008` web editor preview specimens, independent of
+    the reviewing `g18.007` ordinary changelog maintenance scope; g18.005
+    validation retries after g18.007 merges.
   - Active blocker repair: `g18.007` ordinary changelog maintenance scope;
     unblocks retained g18.005 PR #238 without a CI exception.
   - Planned release: `g18.006` v0.4.0 web editor release and Desktop unblock;
-    waits for both component tasks and preflight, final source recheck, and
-    explicit release authority.
-  - Next checkpoint: close `g18.005`; then recheck and
+    waits for preflight and g18.008 preview admission, final source recheck,
+    and explicit release authority.
+  - Next checkpoint: close `g18.005` and `g18.008`; then recheck and
     authorize `g18.006` or compile the first GPUI repair tranche.
 
 ## Compacted generations
