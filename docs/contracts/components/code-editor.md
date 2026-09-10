@@ -218,6 +218,10 @@ engine classes to its semantic tokens inside the component distribution.
 - The implementation pins its exact CodeMirror packages and imports only the
   admitted feature and language set. TypeScript uses the JavaScript language
   package with its TypeScript parser mode.
+- The engine owns line-break representation: CR and CRLF load as LF, matching
+  CodeMirror's document model. Astral characters, tabs, and trailing spaces
+  are byte-exact. Every `onChange` payload replays exactly against the owned
+  previous document; hosts that persist CRLF sources compare accordingly.
 - Rust and GPUI are future admission work. They expose no placeholder and make
   no current parity claim. A later native editor uses its native text system
   against this semantic contract.

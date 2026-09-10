@@ -1,11 +1,18 @@
 //! Tabs machine. Mirror of core `tabs.ts` (main chart; the tooltip
 //! sub-machine and DOM drag plumbing stay adapter-side).
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TabPin {
+    Start,
+    End,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TabsItem {
     pub value: String,
     pub disabled: bool,
     pub closable: bool,
+    pub pinned: Option<TabPin>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -95,6 +102,53 @@ pub fn apply_reorder(
     (next, to_index)
 }
 
+/// Pinned partition rule, mirroring core `tabs.ts`: `Start` items form the
+/// leading contiguous run, `End` items the trailing contiguous run.
+pub fn is_valid_tabs_pinned_order(items: &[TabsItem]) -> bool {
+    #[derive(PartialEq)]
+    enum Phase {
+        Start,
+        Middle,
+        End,
+    }
+    let mut phase = Phase::Start;
+    for item in items {
+        match phase {
+            Phase::Start => match item.pinned {
+                Some(TabPin::Start) => {}
+                Some(TabPin::End) => phase = Phase::End,
+                None => phase = Phase::Middle,
+            },
+            Phase::Middle => match item.pinned {
+                Some(TabPin::Start) => return false,
+                Some(TabPin::End) => phase = Phase::End,
+                None => {}
+            },
+            Phase::End => {
+                if item.pinned != Some(TabPin::End) {
+                    return false;
+                }
+            }
+        }
+    }
+    true
+}
+
+/// Pinned items are never reorder sources; no move may land inside a pinned
+/// partition or cross one. Simulates the move and revalidates the partition.
+pub fn is_tabs_reorder_allowed(items: &[TabsItem], from_index: usize, to_index: usize) -> bool {
+    if from_index == to_index || from_index >= items.len() || to_index >= items.len() {
+        return false;
+    }
+    if items[from_index].pinned.is_some() {
+        return false;
+    }
+    let mut next = items.to_vec();
+    let moved = next.remove(from_index);
+    next.insert(to_index, moved);
+    is_valid_tabs_pinned_order(&next)
+}
+
 fn select(context: TabsContext, value: String) -> (TabsContext, Vec<TabsEffect>) {
     let index = context.items.iter().position(|item| item.value == value);
 
@@ -125,6 +179,7 @@ fn reorder(context: TabsContext, from_index: i64, to_index: i64) -> (TabsContext
         || to_index < 0
         || from_index >= count
         || to_index >= count
+        || !is_tabs_reorder_allowed(&context.items, from_index as usize, to_index as usize)
     {
         return (context, vec![]);
     }
@@ -229,5 +284,70 @@ pub fn tabs_transition(context: TabsContext, event: TabsEvent) -> (TabsContext, 
             from_index,
             to_index,
         } => reorder(context, from_index as i64, to_index as i64),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn item(value: &str, pinned: Option<TabPin>) -> TabsItem {
+        TabsItem {
+            value: value.to_string(),
+            disabled: false,
+            closable: false,
+            pinned,
+        }
+    }
+
+    fn context(items: Vec<TabsItem>) -> TabsContext {
+        TabsContext {
+            items,
+            value: None,
+            focus_index: 0,
+            activation_mode: ActivationMode::Automatic,
+            reorderable: true,
+        }
+    }
+
+    #[test]
+    fn pinned_partitions_validate() {
+        assert!(is_valid_tabs_pinned_order(&[
+            item("a", Some(TabPin::Start)),
+            item("b", None),
+            item("c", Some(TabPin::End)),
+        ]));
+        assert!(!is_valid_tabs_pinned_order(&[
+            item("a", None),
+            item("b", Some(TabPin::Start)),
+        ]));
+        assert!(!is_valid_tabs_pinned_order(&[
+            item("a", Some(TabPin::End)),
+            item("b", None),
+        ]));
+    }
+
+    #[test]
+    fn pinned_reorders_are_refused_without_effects() {
+        let items = vec![
+            item("a", Some(TabPin::Start)),
+            item("b", None),
+            item("c", None),
+            item("d", Some(TabPin::End)),
+        ];
+        assert!(!is_tabs_reorder_allowed(&items, 0, 1));
+        assert!(!is_tabs_reorder_allowed(&items, 1, 0));
+        assert!(!is_tabs_reorder_allowed(&items, 2, 3));
+        assert!(is_tabs_reorder_allowed(&items, 1, 2));
+
+        let (next, effects) = tabs_transition(
+            context(items),
+            TabsEvent::Reorder {
+                from_index: 0,
+                to_index: 1,
+            },
+        );
+        assert!(effects.is_empty());
+        assert_eq!(next.items[0].value, "a");
     }
 }

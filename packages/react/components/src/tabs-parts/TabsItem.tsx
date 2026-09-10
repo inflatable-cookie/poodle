@@ -34,7 +34,8 @@ export interface TabsItemProps {
   indexOfValue: (value: string) => number;
   /** Whether a subject id belongs to this strip at all. */
   ownsValue: (value: string) => boolean;
-  /** Accept a family member that is not in this strip, so an owning composite can insert. */
+  /** Whether a value is pinned in its partition; pinned items never move. */
+  isPinnedValue: (value: string) => boolean;
   acceptsForeign?: boolean;
   isVertical?: boolean;
   sourceId: string;
@@ -65,6 +66,7 @@ export function TabsItem({
   crossWindowSourceBridge,
   indexOfValue,
   ownsValue,
+  isPinnedValue,
   acceptsForeign = false,
   isVertical = false,
   sourceId,
@@ -81,8 +83,8 @@ export function TabsItem({
   content,
   tooltip,
 }: TabsItemProps) {
-  /** A disabled tab cannot be picked up. It is still a place to put one. */
-  const canDrag = reorderable && item.disabled !== true;
+  /** A disabled or pinned tab cannot be picked up. Pinned tabs are fixed in their partition. */
+  const canDrag = reorderable && item.disabled !== true && (item.pinned ?? null) === null;
   const foreignInsert = useTabsForeignInsert();
 
   const { getSourceProps, dragging } = useDragSource({
@@ -128,10 +130,12 @@ export function TabsItem({
         if (!acceptsForeign || !foreignInsert?.canAccept(subject.id)) {
           return { accepted: false, reason: "not this tab set" };
         }
+      } else if (subject.id === item.value) {
+        return { accepted: false, reason: "same tab" };
+      } else if (isPinnedValue(subject.id) || isPinnedValue(item.value)) {
+        return { accepted: false, reason: "pinned partition" };
       }
-      return subject.id === item.value
-        ? { accepted: false, reason: "same tab" }
-        : { accepted: true, intent };
+      return { accepted: true, intent };
     },
     onDrop,
   });
@@ -146,6 +150,7 @@ export function TabsItem({
       })}
       data-selected={selected}
       data-reorderable={canDrag || undefined}
+      data-pinned={item.pinned ?? undefined}
       data-drag-source={dragging || undefined}
       data-drop-target={accepted || undefined}
     >

@@ -1,0 +1,111 @@
+/**
+ * CodeEditor styles. Contract: docs/contracts/components/code-editor.md §7-8.
+ *
+ * The internal CodeMirror viewport owns both scroll axes; the document never
+ * expands the host pane. All engine-class overrides are scoped under
+ * `.poodle-code-editor` so consumers need no global editor-engine CSS.
+ */
+
+.poodle-code-editor {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--poodle-color-background-panel);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-surface);
+  color: var(--poodle-color-text-primary);
+  font-family: var(--poodle-typography-code-family);
+  font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+.poodle-code-editor__viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.poodle-code-editor__viewport .cm-editor {
+  block-size: 100%;
+}
+
+.poodle-code-editor__viewport .cm-scroller {
+  overflow: auto;
+}
+
+.poodle-code-editor__viewport .cm-content {
+  caret-color: var(--poodle-color-text-primary);
+}
+
+.poodle-code-editor__viewport .cm-gutters {
+  background: var(--poodle-color-background-panel);
+  border-inline-end: 0.0625rem solid var(--poodle-color-border-subtle);
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-code-editor__viewport .cm-activeLineGutter,
+.poodle-code-editor__viewport .cm-activeLine {
+  background: var(--poodle-color-surface-hover);
+}
+
+.poodle-code-editor__viewport .cm-selectionBackground,
+.poodle-code-editor__viewport ::selection {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 28%, transparent);
+}
+
+.poodle-code-editor__viewport .cm-cursor {
+  border-inline-start-color: var(--poodle-color-text-primary);
+}
+
+.poodle-code-editor__diagnostic--error {
+  text-decoration: underline wavy var(--poodle-color-status-danger);
+  text-underline-offset: 0.2em;
+}
+
+.poodle-code-editor__diagnostic--warning {
+  text-decoration: underline wavy var(--poodle-color-status-warning);
+  text-underline-offset: 0.2em;
+}
+
+.poodle-code-editor__diagnostic--info {
+  text-decoration: underline dotted var(--poodle-color-status-info);
+  text-underline-offset: 0.2em;
+}
+
+.poodle-code-editor__search-match {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  outline: 0.0625rem solid var(--poodle-color-accent-base);
+  border-radius: var(--poodle-radius-control);
+}
+
+/* Keyboard focus carries the shared treatment; pointer focus paints none. */
+:root[data-poodle-input-modality="keyboard"] .poodle-code-editor:focus-within {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}
+
+.poodle-code-editor[data-disabled="true"] {
+  opacity: var(--poodle-state-opacity-disabled);
+}
+
+.poodle-code-editor__diagnostic-message {
+  border-block-start: 0.0625rem solid var(--poodle-color-border-subtle);
+  padding: var(--poodle-space-stack-xs) var(--poodle-space-inline-md);
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-code-editor__diagnostic-message[data-severity="error"] {
+  color: var(--poodle-color-status-danger);
+}
+
+.poodle-code-editor__diagnostic-message[data-severity="warning"] {
+  color: var(--poodle-color-status-warning);
+}
+
+.poodle-code-editor__diagnostic-message[data-severity="info"] {
+  color: var(--poodle-color-text-secondary);
+}

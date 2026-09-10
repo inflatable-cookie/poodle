@@ -90,7 +90,7 @@ void units;
 
 describe("core compiled distribution", () => {
   test("frozen inventories and package exports match spec 070", () => {
-    expect(CORE_STYLE_FILES).toHaveLength(167);
+    expect(CORE_STYLE_FILES).toHaveLength(168); // g18.002 adds code-editor.css
     expect(CORE_ICON_MODULES).toHaveLength(108);
     const manifest = JSON.parse(readFileSync(join(coreRoot, "package.json"), "utf8")) as {
       exports: unknown;

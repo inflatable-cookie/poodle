@@ -341,7 +341,7 @@ pub use types::{
     InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
     Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus,
     PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
-    SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
+    SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabPin, TabStripItem,
     TabVariant, TimeZoneOption, TriStateValue, ValidationState, ZonedDateTimeValue,
     ToneFill,
 };
@@ -509,7 +509,7 @@ mod tests {
         ScrollShellSpec, SegmentedControlOption, SegmentedControlSpec, SelectSpec, SeparatorSpec,
         SliderSpec, StackSpec, StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone,
         SwitchSpec, TabActivationMode,
-        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeInputSpec,
+        TabDefinition, TabPin, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeInputSpec,
         TooltipSpec, ValidationState,
     };
 

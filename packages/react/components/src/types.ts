@@ -699,6 +699,7 @@ export interface TabItem {
   closable?: boolean;
   count?: number;
   separator?: boolean;
+  pinned?: "start" | "end" | null;
 }
 
 export type TabVariant = "card" | "pill" | "block";

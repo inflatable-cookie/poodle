@@ -409,6 +409,7 @@ impl TabsPreviewState {
                 value: t.value.clone(),
                 disabled: false,
                 closable: false,
+                pinned: None,
             })
             .collect();
         let (reordered, _) = poodle_headless::tabs::apply_reorder(&items, from_idx, to_idx);

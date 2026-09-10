@@ -41,7 +41,8 @@
     indexOfValue: (value: string) => number;
     /** Whether a subject id belongs to this strip at all. */
     ownsValue: (value: string) => boolean;
-    /** Accept a family member that is not in this strip, so an owning composite can insert. */
+    /** Whether a value is pinned in its partition; pinned items never move. */
+    isPinnedValue: (value: string) => boolean;
     acceptsForeign?: boolean;
     sourceId: string;
     targetId: string;
@@ -73,6 +74,7 @@
     crossWindowSourceBridge,
     indexOfValue,
     ownsValue,
+    isPinnedValue,
     acceptsForeign = false,
     sourceId,
     targetId,
@@ -92,8 +94,8 @@
   const snapshot = dragDropSnapshotStore(tryDragDrop()!.controller);
   const foreignInsert = getTabsForeignInsert();
 
-  /** A disabled tab cannot be picked up. It is still a place to put one. */
-  const canDrag = $derived(reorderable && item.disabled !== true);
+  /** A disabled or pinned tab cannot be picked up. Pinned tabs are fixed in their partition. */
+  const canDrag = $derived(reorderable && item.disabled !== true && (item.pinned ?? null) === null);
   const dragging = $derived(
     $snapshot.sourceId === sourceId &&
       ($snapshot.phase === "dragging" || $snapshot.phase === "dropping"),
@@ -149,10 +151,14 @@
         if (!acceptsForeign || !foreignInsert?.canAccept(subject.id)) {
           return { accepted: false, reason: "not this tab set" };
         }
+      } else if (subject.id === item.value) {
+        return { accepted: false, reason: "same tab" };
+      } else if (isPinnedValue(subject.id) || isPinnedValue(item.value)) {
+        // Pinned items are not sources or targets; refusing here lets
+        // arbitration hand the drop to an eligible ancestor composite.
+        return { accepted: false, reason: "pinned partition" };
       }
-      return subject.id === item.value
-        ? { accepted: false, reason: "same tab" }
-        : { accepted: true, intent };
+      return { accepted: true, intent };
     },
     onDrop,
   });
@@ -162,6 +168,7 @@
   class="poodle-tabs__item"
   role="presentation"
   data-selected={selected}
+  data-pinned={item.pinned ?? undefined}
   data-reorderable={canDrag || undefined}
   data-drag-source={dragging || undefined}
   data-drop-target={isDropTarget || undefined}

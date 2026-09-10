@@ -20,9 +20,9 @@ export interface TabsKeyboardTargetsProps {
   subjectKind: string;
   targetIdOf: (value: string) => string;
   ownsValue: (value: string) => boolean;
+  isPinnedValue: (value: string) => boolean;
   onDrop: (intent: DropIntent) => DragDropCommitResult;
 }
-
 function TabKeyboardTarget({
   item,
   index,
@@ -30,6 +30,7 @@ function TabKeyboardTarget({
   subjectKind,
   targetIdOf,
   ownsValue,
+  isPinnedValue,
   onDrop,
 }: {
   item: TabItem;
@@ -38,6 +39,7 @@ function TabKeyboardTarget({
   subjectKind: string;
   targetIdOf: (value: string) => string;
   ownsValue: (value: string) => boolean;
+  isPinnedValue: (value: string) => boolean;
   onDrop: (intent: DropIntent) => DragDropCommitResult;
 }) {
   useKeyboardDropTarget({
@@ -52,9 +54,13 @@ function TabKeyboardTarget({
       if (!ownsValue(subject.id)) {
         return { accepted: false, reason: "not this tab set" };
       }
-      return subject.id === item.value
-        ? { accepted: false, reason: "same tab" }
-        : { accepted: true, intent };
+      if (subject.id === item.value) {
+        return { accepted: false, reason: "same tab" };
+      }
+      if (isPinnedValue(subject.id) || isPinnedValue(item.value)) {
+        return { accepted: false, reason: "pinned partition" };
+      }
+      return { accepted: true, intent };
     },
     onDrop,
   });
@@ -67,6 +73,7 @@ export function TabsKeyboardTargets({
   subjectKind,
   targetIdOf,
   ownsValue,
+  isPinnedValue,
   onDrop,
 }: TabsKeyboardTargetsProps) {
   return (
@@ -80,6 +87,7 @@ export function TabsKeyboardTargets({
           subjectKind={subjectKind}
           targetIdOf={targetIdOf}
           ownsValue={ownsValue}
+          isPinnedValue={isPinnedValue}
           onDrop={onDrop}
         />
       ))}

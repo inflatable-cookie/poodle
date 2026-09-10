@@ -111,6 +111,25 @@ const ordinaryCargoLockBase = [
   "",
 ].join("\n");
 
+const ORDINARY_JS_MANIFEST = "packages/svelte/components/package.json";
+const ordinaryJsManifestBase = JSON.stringify(
+  {
+    name: "@inflatable-cookie/poodle-svelte",
+    version: "0.3.0",
+    type: "module",
+    exports: {
+      ".": "./dist/index.js",
+      "./types": "./dist/types.js",
+    },
+    dependencies: {
+      "@inflatable-cookie/poodle-core": "0.3.0",
+      marked: "^18.0.9",
+    },
+  },
+  null,
+  2,
+);
+
 async function plantOrdinaryCargoRange(
   headFiles: Record<string, string>,
 ): Promise<{ root: string; base: string; head: string }> {
@@ -321,6 +340,136 @@ describe("installed-package scope routing", () => {
         ),
       );
     }
+  });
+
+  test("ordinary exact pinned dependency and export additions are not a version surface", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n` });
+    const base = await commitAll(root, "ordinary js base");
+    const added = JSON.parse(ordinaryJsManifestBase) as Record<string, unknown>;
+    (added["dependencies"] as Record<string, string>)["@codemirror/state"] = "6.7.4";
+    (added["dependencies"] as Record<string, string>)["@codemirror/view"] = "6.43.11";
+    (added["exports"] as Record<string, unknown>)["./editor"] = {
+      types: "./dist/editor.d.ts",
+      browser: "./dist/editor.client.js",
+      default: "./dist/editor.server.js",
+    };
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${JSON.stringify(added, null, 2)}\n` });
+    const head = await commitAll(root, "ordinary js editor isolation");
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toEqual([ORDINARY_JS_MANIFEST]);
+    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
+  });
+
+  test("ordinary dependency refresh and manifest reformatting are not a version surface", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n` });
+    const base = await commitAll(root, "ordinary js base");
+    const refreshed = JSON.parse(ordinaryJsManifestBase) as Record<string, unknown>;
+    (refreshed["dependencies"] as Record<string, string>)["marked"] = "^18.1.0";
+    const reformatted: Record<string, unknown> = {};
+    for (const key of Object.keys(refreshed).sort().reverse()) {
+      reformatted[key] = refreshed[key];
+    }
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${JSON.stringify(reformatted)}\n` });
+    const head = await commitAll(root, "ordinary js refresh");
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toEqual([ORDINARY_JS_MANIFEST]);
+  });
+
+  test("ordinary JS version and name mutations stay a version surface", async () => {
+    for (const mutate of [
+      (manifest: Record<string, unknown>) => {
+        manifest["version"] = "0.4.0";
+      },
+      (manifest: Record<string, unknown>) => {
+        manifest["name"] = "@inflatable-cookie/poodle-evil";
+      },
+    ]) {
+      const root = await initPlant();
+      await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n` });
+      const base = await commitAll(root, "ordinary js base");
+      const mutated = JSON.parse(ordinaryJsManifestBase) as Record<string, unknown>;
+      mutate(mutated);
+      await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${JSON.stringify(mutated, null, 2)}\n` });
+      const head = await commitAll(root, "ordinary js mutation");
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        `certification scope rejected forbidden version surface: ${ORDINARY_JS_MANIFEST}`,
+      );
+    }
+  });
+
+  test("ordinary JS publication and registry mutations stay a registry surface", async () => {
+    const plants = {
+      unprivate: (manifest: Record<string, unknown>) => {
+        manifest["private"] = false;
+      },
+      publishAccess: (manifest: Record<string, unknown>) => {
+        manifest["publishConfig"] = { access: "public" };
+      },
+      registryTransport: (manifest: Record<string, unknown>) => {
+        (manifest["publishConfig"] as Record<string, string>)["registry"] =
+          "https://registry.example.invalid";
+      },
+    } as const;
+    for (const [kind, mutate] of Object.entries(plants)) {
+      const root = await initPlant();
+      const withPrivate = JSON.parse(ordinaryJsManifestBase) as Record<string, unknown>;
+      withPrivate["private"] = true;
+      withPrivate["publishConfig"] = { access: "restricted" };
+      await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${JSON.stringify(withPrivate, null, 2)}\n` });
+      const base = await commitAll(root, `ordinary js ${kind} base`);
+      const mutated = JSON.parse(JSON.stringify(withPrivate)) as Record<string, unknown>;
+      mutate(mutated);
+      await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${JSON.stringify(mutated, null, 2)}\n` });
+      const head = await commitAll(root, `ordinary js ${kind} plant`);
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        `certification scope rejected forbidden registry surface: ${ORDINARY_JS_MANIFEST}`,
+      );
+    }
+  });
+
+  test("ordinary JS added, deleted, and unparsable manifests fail closed", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "ordinary js closed base");
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n` });
+    const added = await commitAll(root, "ordinary js manifest added");
+    await expect(assertInstalledScope(root, base, added, "ordinary")).rejects.toThrow(
+      `certification scope rejected forbidden version surface: ${ORDINARY_JS_MANIFEST}`,
+    );
+    await writeFiles(root, { "README.md": "base\nmore\n" });
+    const deletedBase = await commitAll(root, "ordinary js present base");
+    await runGit(root, ["rm", "--quiet", ORDINARY_JS_MANIFEST]);
+    const deleted = await commitAll(root, "ordinary js manifest deleted");
+    await expect(assertInstalledScope(root, deletedBase, deleted, "ordinary")).rejects.toThrow(
+      `certification scope rejected forbidden version surface: ${ORDINARY_JS_MANIFEST}`,
+    );
+    await writeFiles(root, {
+      "README.md": "base\nmore\nagain\n",
+      [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n`,
+    });
+    const unparsableBase = await commitAll(root, "ordinary js parsable base");
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: "planted\n" });
+    const unparsable = await commitAll(root, "ordinary js unparsable");
+    await expect(assertInstalledScope(root, unparsableBase, unparsable, "ordinary")).rejects.toThrow(
+      `certification scope rejected forbidden version surface: ${ORDINARY_JS_MANIFEST}`,
+    );
+  });
+
+  test("strict still path-rejects a JS dependency-only edit", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${ordinaryJsManifestBase}\n` });
+    const base = await commitAll(root, "strict js base");
+    const edited = JSON.parse(ordinaryJsManifestBase) as Record<string, unknown>;
+    (edited["dependencies"] as Record<string, string>)["marked"] = "^18.1.0";
+    await writeFiles(root, { [ORDINARY_JS_MANIFEST]: `${JSON.stringify(edited, null, 2)}\n` });
+    const head = await commitAll(root, "strict js edit");
+    await expect(assertCertificationScope(root, base, head, "strict")).rejects.toThrow(
+      `certification scope rejected forbidden version surface: ${ORDINARY_JS_MANIFEST}`,
+    );
   });
 
   test("strict still path-rejects a Cargo dependency-only edit", async () => {

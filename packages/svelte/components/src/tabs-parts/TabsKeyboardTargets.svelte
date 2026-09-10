@@ -23,10 +23,11 @@
     subjectKind: string;
     targetIdOf: (value: string) => string;
     ownsValue: (value: string) => boolean;
+    isPinnedValue: (value: string) => boolean;
     onDrop: (intent: DropIntent) => DragDropCommitResult;
   }
 
-  let { items, reorderable, subjectKind, targetIdOf, ownsValue, onDrop }: Props = $props();
+  let { items, reorderable, subjectKind, targetIdOf, ownsValue, isPinnedValue, onDrop }: Props = $props();
 
   const { keyboardDropTarget } = useDragDrop();
 
@@ -44,9 +45,13 @@
           if (!ownsValue(subject.id)) {
             return { accepted: false, reason: "not this tab set" };
           }
-          return subject.id === item.value
-            ? { accepted: false, reason: "same tab" }
-            : { accepted: true, intent };
+          if (subject.id === item.value) {
+            return { accepted: false, reason: "same tab" };
+          }
+          if (isPinnedValue(subject.id) || isPinnedValue(item.value)) {
+            return { accepted: false, reason: "pinned partition" };
+          }
+          return { accepted: true, intent };
         },
         onDrop,
       }),

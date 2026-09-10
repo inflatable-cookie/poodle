@@ -224,6 +224,13 @@ function isCargoTomlPath(path: string): boolean {
   return isCargoManifestOrLockPath(path) && path.endsWith(".toml");
 }
 
+function isJsManifestPath(path: string): boolean {
+  return (
+    path === "package.json" ||
+    /^(?:packages|scripts)\/[^/]+(?:\/[^/]+)*\/package\.json$/.test(path)
+  );
+}
+
 export function isWritableCertificationPath(
   path: string,
   mode: CertificationScopeMode = "strict",
@@ -250,15 +257,14 @@ export function forbiddenCertificationSurfaceLabels(
   const filteredLabels = candidateReleaseHonestyPath
     ? labels.filter((label) => label !== "release")
     : labels;
-  const isPackageManifest =
-    path === "package.json" ||
-    /^(?:packages|scripts)\/[^/]+(?:\/[^/]+)*\/package\.json$/.test(path);
+  const isPackageManifest = isJsManifestPath(path);
   const candidateVersionPath =
     mode === CANDIDATE_SCOPE_MODE && isCandidatePath(path, CANDIDATE_VERSION_PATHS);
   if (
     isPackageManifest &&
     path !== PRIVATE_DECLARATION_TOOLS_MANIFEST &&
-    !candidateVersionPath
+    !candidateVersionPath &&
+    mode !== "ordinary"
   ) {
     filteredLabels.push("version");
   }
@@ -398,6 +404,57 @@ function ordinaryCargoForbiddenLabels(
   return labels;
 }
 
+/**
+ * Ordinary JS package-manifest labels are content-derived. Dependency and
+ * export changes are accepted only when the release-sensitive posture is
+ * unchanged: package version, package name, the private publication flag,
+ * and the publication/registry transport fields (`publishConfig`,
+ * top-level `registry`). Anything else about the manifest may move.
+ * Unparsable, added, or deleted manifests fail closed as version surfaces.
+ */
+function ordinaryJsForbiddenLabels(
+  before: string | null,
+  after: string | null,
+): string[] {
+  if (before === null || after === null) return ["version"];
+  let beforeJson: unknown;
+  let afterJson: unknown;
+  try {
+    beforeJson = JSON.parse(before);
+  } catch {
+    return ["version"];
+  }
+  try {
+    afterJson = JSON.parse(after);
+  } catch {
+    return ["version"];
+  }
+  if (!isJsonRecord(beforeJson) || !isJsonRecord(afterJson)) return ["version"];
+  const labels: string[] = [];
+  for (const key of ["version", "name"]) {
+    if (JSON.stringify(beforeJson[key]) !== JSON.stringify(afterJson[key])) {
+      labels.push("version");
+    }
+  }
+  if ((beforeJson["private"] === true) !== (afterJson["private"] === true)) {
+    labels.push("registry");
+  }
+  const transportLeaves = [
+    ...changedJsonLeafPaths(
+      beforeJson["publishConfig"] ?? {},
+      afterJson["publishConfig"] ?? {},
+      "publishConfig",
+    ),
+    ...changedJsonLeafPaths(
+      beforeJson["registry"] ?? null,
+      afterJson["registry"] ?? null,
+      "registry",
+    ),
+  ];
+  if (transportLeaves.length > 0) labels.push("registry");
+  return [...new Set(labels)];
+}
+
 function isJsonRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -462,6 +519,24 @@ async function gitShowFile(
   );
   if (exists.exitCode !== 0) return null;
   return runCapture(["git", "show", `${commit}:${path}`], checkoutRoot);
+}
+
+async function ordinaryJsForbiddenSurfaces(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<{ path: string; surface: string }[]> {
+  const forbidden: { path: string; surface: string }[] = [];
+  for (const path of changedPaths) {
+    if (!isJsManifestPath(path) || path === PRIVATE_DECLARATION_TOOLS_MANIFEST) continue;
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    for (const surface of ordinaryJsForbiddenLabels(before, after)) {
+      forbidden.push({ path, surface });
+    }
+  }
+  return forbidden;
 }
 
 async function ordinaryCargoForbiddenSurfaces(
@@ -746,6 +821,14 @@ export async function assertInstalledScope(
   if (mode === "ordinary") {
     forbidden.push(
       ...(await ordinaryCargoForbiddenSurfaces(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      )),
+    );
+    forbidden.push(
+      ...(await ordinaryJsForbiddenSurfaces(
         checkoutRoot,
         requiredBaseCommit,
         sourceCommit,

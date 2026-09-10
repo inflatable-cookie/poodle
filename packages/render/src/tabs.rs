@@ -88,6 +88,10 @@ fn tabs_items(spec: &TabsSpec) -> Vec<poodle_headless::tabs::TabsItem> {
             value: item.value.clone(),
             disabled: item.is_disabled,
             closable: item.is_closable,
+            pinned: item.pinned.map(|pin| match pin {
+                poodle_specs::TabPin::Start => poodle_headless::tabs::TabPin::Start,
+                poodle_specs::TabPin::End => poodle_headless::tabs::TabPin::End,
+            }),
         })
         .collect()
 }
@@ -483,7 +487,9 @@ fn wire_select(node: &mut Node, is_disabled: bool, value: &str, on_change: Optio
 
 fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsHandlers) {
     let tab = &spec.tabs[index];
-    if !spec.is_reorderable || tab.is_disabled {
+    // Pinned items are fixed in their partition: never sources or targets.
+    // The headless machine revalidates every commit as a backstop.
+    if !spec.is_reorderable || tab.is_disabled || tab.pinned.is_some() {
         return;
     }
     node.style.descriptor.cursor = CursorHint::Grab;
@@ -556,6 +562,9 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
                 to_index,
             },
         );
+        let reordered = effects
+            .iter()
+            .any(|effect| matches!(effect, poodle_headless::tabs::TabsEffect::EmitReorder { .. }));
         apply_tab_effects(
             effects,
             &next.items,
@@ -566,7 +575,13 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
             on_focus.as_ref(),
             true,
         );
-        NodeDropCommit::Committed
+        if reordered {
+            NodeDropCommit::Committed
+        } else {
+            NodeDropCommit::Rejected {
+                reason: Some("The move crosses a pinned tab partition".to_string()),
+            }
+        }
     }));
     crate::drag_drop::attach_target(node, true, target);
 }
@@ -1384,6 +1399,41 @@ mod tests {
         ])
         .with_reorderable(true)
         .with_value("a")
+    }
+
+    /// g18.002. Pinned tabs carry their partition through the spec mapping,
+    /// wire no drag source or target, and refuse crossing commits at the
+    /// headless machine.
+    #[test]
+    fn pinned_tabs_stay_fixed_in_their_partitions() {
+        use poodle_specs::TabPin;
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("home", "Home").with_pinned(TabPin::Start),
+            TabDefinition::new("mix", "Mix"),
+            TabDefinition::new("master", "Master"),
+            TabDefinition::new("logs", "Logs").with_pinned(TabPin::End),
+        ])
+        .with_reorderable(true)
+        .with_value("mix");
+        let root = tabs(&spec, &ctx, None, None);
+
+        for pinned in ["home", "logs"] {
+            let tab = tab_of(&root, pinned);
+            assert!(tab.interaction.drag_source.is_none(), "{pinned} wires no source");
+            assert!(tab.interaction.drop_target.is_none(), "{pinned} wires no target");
+        }
+        let middle = tab_of(&root, "mix");
+        assert!(middle.interaction.drag_source.is_some(), "unpinned tabs still wire sources");
+        assert!(middle.interaction.drop_target.is_some(), "unpinned tabs still wire targets");
+
+        let mapped = super::tabs_items(&spec);
+        assert_eq!(mapped[0].pinned, Some(poodle_headless::tabs::TabPin::Start));
+        assert_eq!(mapped[3].pinned, Some(poodle_headless::tabs::TabPin::End));
+        assert!(!poodle_headless::tabs::is_tabs_reorder_allowed(&mapped, 1, 0));
+        assert!(!poodle_headless::tabs::is_tabs_reorder_allowed(&mapped, 2, 3));
+        assert!(poodle_headless::tabs::is_tabs_reorder_allowed(&mapped, 1, 2));
     }
 
     /// g16.026. The semantic family is choosable; the registration namespace

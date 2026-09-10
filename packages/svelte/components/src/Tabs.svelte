@@ -8,6 +8,8 @@
 
   import {
     createDragDropController,
+    isTabsReorderAllowed,
+    isValidTabsPinnedOrder,
     nextTabsControlledFocusDestination,
     resolveTabsControlledFocusDestination,
     tabIndicatorBox,
@@ -223,10 +225,10 @@
         closable: item.closable ?? false,
         count: item.count ?? null,
         separator: item.separator ?? false,
+        pinned: item.pinned ?? null,
       })),
     );
   }
-
   $effect.pre(() => {
     const itemsSignature = getItemsSignature(items);
     if (itemsSignature === lastItemsSignature) {
@@ -235,9 +237,9 @@
 
     lastItemsSignature = itemsSignature;
     renderedItems = items;
-  });
-
-  $effect.pre(() => {
+    if (!isValidTabsPinnedOrder(items)) {
+      console.warn("tabs: pinned items must form leading start and trailing end partitions");
+    }
     if (!seededDefaultValue) {
       uncontrolledValue = defaultValue;
       seededDefaultValue = true;
@@ -726,6 +728,11 @@
     return indexOfValue(value) >= 0;
   }
 
+  /** Whether a value is pinned in its partition; pinned items never move. */
+  function isPinnedValue(value: string): boolean {
+    return (renderedItems[indexOfValue(value)]?.pinned ?? null) !== null;
+  }
+
   /**
    * Turn one revalidated intent into the machine's reorder.
    *
@@ -756,9 +763,12 @@
         : from < target
           ? target
           : target + 1;
-
     if (from === to) {
       return { status: "rejected", reason: "same tab" };
+    }
+
+    if (!isTabsReorderAllowed(renderedItems, from, to)) {
+      return { status: "rejected", reason: "pinned partition" };
     }
 
     send({ type: "REORDER", fromIndex: from, toIndex: to });
@@ -816,6 +826,7 @@
   {subjectKind}
   {targetIdOf}
   {ownsValue}
+  {isPinnedValue}
   onDrop={handleDrop}
 />
 <div
@@ -922,9 +933,9 @@
           {hasPanel}
           {hasTooltips}
           {isVertical}
-          {crossWindowSourceBridge}
           {indexOfValue}
           {ownsValue}
+          {isPinnedValue}
           acceptsForeign={foreignInsert !== null}
           sourceId={sourceIdOf(item.value)}
           targetId={targetIdOf(item.value)}

@@ -61,12 +61,14 @@ actual Svelte prop, snippet, bindable, and callback types; a bare generic
 | Package | Externalized | Peers | Parser |
 | --- | --- | --- | --- |
 | core | none of svelte/react/marked | none | no `marked` edge |
-| Svelte | `svelte`, core, `marked` | `svelte: >=5.56.8 <6`; optional `marked: ^18.0.9` | only `./markdown` |
-| React | `react`, `react-dom`, core, `marked` | `react`/`react-dom` as today; optional `marked: ^18.0.9` | only `./markdown` |
+| Svelte | `svelte`, core, `marked`, pinned `@codemirror/*` (editor graph only) | `svelte: >=5.56.8 <6`; optional `marked: ^18.0.9` | only `./markdown` |
+| React | `react`, `react-dom`, core, `marked`, pinned `@codemirror/*` (editor graph only) | `react`/`react-dom` as today; optional `marked: ^18.0.9` | only `./markdown` |
 
 Optional `marked` is required when a consumer imports `./markdown`. Ordinary
-root or direct Button/Select graphs must not resolve `marked`. Lowering the
-Svelte floor needs a separately proven older compiler/runtime build.
+root or direct Button/Select graphs must not resolve `marked`. The pinned
+`@codemirror/*` dependencies are required when a consumer imports `./editor`;
+root-only graphs must not resolve them. Lowering the Svelte floor needs a
+separately proven older compiler/runtime build.
 
 ## Stable names
 
@@ -680,6 +682,11 @@ browser and SSR resolution are separately proven.
     "browser": "./dist/markdown.client.js",
     "default": "./dist/markdown.server.js"
   },
+  "./editor": {
+    "types": "./dist/editor.d.ts",
+    "browser": "./dist/editor.client.js",
+    "default": "./dist/editor.server.js"
+  },
   "./types": {
     "types": "./dist/types.d.ts",
     "browser": "./dist/types.js",
@@ -705,6 +712,27 @@ Laws:
   `./MarkdownEditor.svelte` remain valid.
   They are not a compatibility shim for the retired root import.
 
+## Editor entries
+`CodeEditor` (g18.002) ships behind dedicated `./editor` entries so the
+CodeMirror engine and its admitted language chunks never enter root-only
+consumers. `CodeEditor` is not a member of the 176-name denominator, the root
+barrel, or any successor denominator: the roster, the `./*.svelte` match law,
+and the root `.` law above are unchanged. The svelte and react `./editor`
+shapes are `./dist/editor.d.ts` plus `./dist/editor.client.js` /
+`./dist/editor.server.js` (svelte, `browser` then `default`) and
+`./dist/editor.js` (react, `default` only).
+
+Laws:
+
+- `./editor` exports `CodeEditor` and its public contract types only. No
+  engine type crosses the entry.
+- CodeMirror packages resolve as external imports of the `./editor` graph.
+  A bundled engine copy inside `dist/` fails the root-light audit.
+- Root `.`, every roster barrel, and every roster chunk must not resolve a
+  `@codemirror/*` module or the editor engine from a root-only import.
+- Each admitted language stays in its own chunk behind a literal dynamic
+  import; the base `./editor` entry never pays for unrequested grammars.
+
 ## React export map
 
 React is one JavaScript lane. No `browser`/`import` environment selector.
@@ -718,6 +746,10 @@ React is one JavaScript lane. No `browser`/`import` environment selector.
   "./markdown": {
     "types": "./dist/markdown.d.ts",
     "default": "./dist/markdown.js"
+  },
+  "./editor": {
+    "types": "./dist/editor.d.ts",
+    "default": "./dist/editor.js"
   },
   "./types": {
     "types": "./dist/types.d.ts",
