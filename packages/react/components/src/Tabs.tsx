@@ -14,6 +14,8 @@ import {
 import {
   createDragDropController,
   firstEnabledIndex,
+  isTabsReorderAllowed,
+  isValidTabsPinnedOrder,
   nextTabsControlledFocusDestination,
   resolveTabsControlledFocusDestination,
   tabIndicatorBox,
@@ -153,6 +155,7 @@ function getItemsSignature(nextItems: TabItem[]): string {
       closable: item.closable ?? false,
       count: item.count ?? null,
       separator: item.separator ?? false,
+      pinned: item.pinned ?? null,
     })),
   );
 }
@@ -255,6 +258,9 @@ export function Tabs({
   if (itemsSignature !== lastItemsSignature.current) {
     lastItemsSignature.current = itemsSignature;
     setRenderedItems(items);
+    if (!isValidTabsPinnedOrder(items)) {
+      console.warn("tabs: pinned items must form leading start and trailing end partitions");
+    }
   }
 
   const isControlled = controlledValue !== null && controlledValue !== undefined;
@@ -720,6 +726,11 @@ export function Tabs({
     return indexOfValue(value) >= 0;
   }
 
+  /** Whether a value is pinned in its partition; pinned items never move. */
+  function isPinnedValue(value: string): boolean {
+    return (renderedItemsRef.current[indexOfValue(value)]?.pinned ?? null) !== null;
+  }
+
   /**
    * Turn one revalidated intent into the machine's reorder.
    *
@@ -752,6 +763,10 @@ export function Tabs({
 
     if (from === to) {
       return { status: "rejected", reason: "same tab" };
+    }
+
+    if (!isTabsReorderAllowed(renderedItemsRef.current, from, to)) {
+      return { status: "rejected", reason: "pinned partition" };
     }
 
     send({ type: "REORDER", fromIndex: from, toIndex: to });
@@ -823,6 +838,7 @@ export function Tabs({
         subjectKind={subjectKind}
         targetIdOf={targetIdOf}
         ownsValue={ownsValue}
+        isPinnedValue={isPinnedValue}
         onDrop={handleDrop}
       />
       <div
@@ -905,6 +921,7 @@ export function Tabs({
                 crossWindowSourceBridge={crossWindowSourceBridge}
                 indexOfValue={indexOfValue}
                 ownsValue={ownsValue}
+                isPinnedValue={isPinnedValue}
                 acceptsForeign={foreignInsert !== null}
                 isVertical={isVertical}
                 sourceId={sourceIdOf(item.value)}

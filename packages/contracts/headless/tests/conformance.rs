@@ -640,6 +640,7 @@ fn tabs_conformance() {
                 value: s(item, "value").to_string(),
                 disabled: b(item, "disabled"),
                 closable: b(item, "closable"),
+                pinned: None,
             })
             .collect();
         let context = TabsContext {

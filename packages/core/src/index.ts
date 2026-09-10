@@ -753,6 +753,8 @@ export {
   tabsTooltipTransition,
   resolveTabsValue,
   applyReorder,
+  isValidTabsPinnedOrder,
+  isTabsReorderAllowed,
   tabsListParts,
   tabsTabParts,
   tabsPanelParts,
@@ -761,17 +763,35 @@ export {
   nextTabsControlledFocusDestination,
   resolveTabsControlledFocusDestination,
   type TabsItem,
-  type TabsState,
+  type TabsPin,
   type TabsContext,
   type TabsEvent,
   type TabsEffect,
   type TabsResult,
   type TabsTooltipState,
   type TabsTooltipEvent,
-  type TabsTooltipEffect,
   type TabsPartProps,
   type TabsFocusOnValueChange,
 } from "./tabs";
+
+export {
+  CODE_EDITOR_LANGUAGES,
+  CODE_EDITOR_MAX_BYTES,
+  isCodeEditorLanguage,
+  codeEditorByteLength,
+  isCodeEditorValueAdmissible,
+  toCodeEditorChange,
+  applyCodeEditorEdits,
+  validateCodeEditorDiagnostics,
+  type CodeEditorLanguage,
+  type CodeEditorRange,
+  type CodeEditorDiagnostic,
+  type CodeEditorTextEdit,
+  type CodeEditorChange,
+  type CodeEditorTabBehavior,
+  type CodeEditorPerformanceMode,
+  type ValidatedDiagnostics,
+} from "./code-editor";
 
 
 export {

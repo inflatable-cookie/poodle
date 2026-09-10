@@ -12,10 +12,13 @@
 import type { PartAttrs, TransitionResult } from "./machine";
 import { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
+export type TabsPin = "start" | "end";
+
 export interface TabsItem {
   value: string;
   disabled?: boolean;
   closable?: boolean;
+  pinned?: TabsPin | null;
 }
 
 export type TabsState = "idle";
@@ -51,6 +54,46 @@ export function resolveTabsValue<T extends TabsItem>(items: T[], value: string |
   }
 
   return items[firstEnabledIndex(items)]?.value ?? null;
+}
+/**
+ * Pinned partition rule: `start` items form the leading contiguous run,
+ * `end` items the trailing contiguous run. Anything else is an invalid
+ * partition the machine refuses to produce.
+ */
+export function isValidTabsPinnedOrder<T extends TabsItem>(items: T[]): boolean {
+  let phase: "start" | "middle" | "end" = "start";
+  for (const item of items) {
+    const pinned = item.pinned ?? null;
+    if (phase === "start") {
+      if (pinned === "start") continue;
+      phase = pinned === "end" ? "end" : "middle";
+    } else if (phase === "middle") {
+      if (pinned === "start") return false;
+      if (pinned === "end") phase = "end";
+    } else if (pinned !== "end") {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Reorder permission: pinned items are never sources, and no move may land
+ * inside a pinned partition or cross one. Checked by simulating the move and
+ * revalidating the partition, so drag, Alt+Arrow, and machine events agree.
+ */
+export function isTabsReorderAllowed<T extends TabsItem>(
+  items: T[],
+  fromIndex: number,
+  toIndex: number,
+): boolean {
+  if (fromIndex === toIndex) return false;
+  const moved = items[fromIndex];
+  if (!moved || (moved.pinned ?? null) !== null) return false;
+  const next = [...items];
+  next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return isValidTabsPinnedOrder(next);
 }
 
 export function applyReorder<T>(
@@ -98,7 +141,8 @@ function reorder<T extends TabsItem>(
     fromIndex < 0 ||
     toIndex < 0 ||
     fromIndex >= context.items.length ||
-    toIndex >= context.items.length
+    toIndex >= context.items.length ||
+    !isTabsReorderAllowed(context.items, fromIndex, toIndex)
   ) {
     return { state: "idle", context, effects: [] };
   }

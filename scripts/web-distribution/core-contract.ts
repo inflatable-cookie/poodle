@@ -64,6 +64,7 @@ export const CORE_STYLE_FILES = [
   "card.css",
   "changed-files.css",
   "checkbox.css",
+  "code-editor.css",
   "code-input.css",
   "code.css",
   "collapse-toggle.css",

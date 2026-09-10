@@ -942,6 +942,12 @@ impl MenubarEntry {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TabPin {
+    Start,
+    End,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TabDefinition {
     pub value: String,
@@ -953,6 +959,10 @@ pub struct TabDefinition {
     pub icon: Option<String>,
     /// Optional count shown as a badge next to the label, e.g. "12".
     pub count: Option<u32>,
+    /// Fixes the item in the leading (`Start`) or trailing (`End`) partition.
+    /// Pinned items are not reorder sources or targets and unpinned items
+    /// cannot cross them. Matches web `TabItem.pinned`.
+    pub pinned: Option<TabPin>,
 }
 
 impl TabDefinition {
@@ -964,6 +974,7 @@ impl TabDefinition {
             is_closable: false,
             icon: None,
             count: None,
+            pinned: None,
         }
     }
 
@@ -984,6 +995,10 @@ impl TabDefinition {
 
     pub fn with_count(mut self, count: u32) -> Self {
         self.count = Some(count);
+        self
+    }
+    pub fn with_pinned(mut self, pinned: TabPin) -> Self {
+        self.pinned = Some(pinned);
         self
     }
 }

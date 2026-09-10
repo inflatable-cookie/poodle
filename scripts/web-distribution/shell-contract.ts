@@ -196,6 +196,31 @@ export const MARKDOWN_COMPONENT_NAMES = [
   "MarkdownEditor",
 ] as const;
 export const INTERNAL_SVELTE_NAMES = ["DragDropProvider", "MenuSurface"] as const;
+/**
+ * The CodeEditor engine lives behind dedicated `./editor` entries so root
+ * consumers never load CodeMirror or its language chunks. `CodeEditor` is
+ * deliberately absent from `SHELL_ROSTER_NAMES`: it must not join the root
+ * barrel, the 176-name roster, or any successor denominator.
+ */
+export const EDITOR_ENTRY_NAME = "editor";
+export const EDITOR_SVELTE_NAMES = ["CodeEditor"] as const;
+
+export const CODEMIRROR_EXTERNAL_MODULES = [
+  "@codemirror/commands",
+  "@codemirror/lang-css",
+  "@codemirror/lang-html",
+  "@codemirror/lang-javascript",
+  "@codemirror/lang-json",
+  "@codemirror/lang-markdown",
+  "@codemirror/lang-rust",
+  "@codemirror/lang-yaml",
+  "@codemirror/language",
+  "@codemirror/legacy-modes/mode/shell",
+  "@codemirror/legacy-modes/mode/toml",
+  "@codemirror/search",
+  "@codemirror/state",
+  "@codemirror/view",
+] as const;
 
 export const SHELL_EXTERNAL_MODULES = [
   "svelte",
@@ -209,6 +234,7 @@ export const SVELTE_EXTERNAL_MODULES = [
   "svelte",
   "@inflatable-cookie/poodle-core",
   "marked",
+  ...CODEMIRROR_EXTERNAL_MODULES,
 ] as const;
 
 export const REACT_EXTERNAL_MODULES = [
@@ -216,6 +242,7 @@ export const REACT_EXTERNAL_MODULES = [
   "react-dom",
   "@inflatable-cookie/poodle-core",
   "marked",
+  ...CODEMIRROR_EXTERNAL_MODULES,
 ] as const;
 
 assertSorted([...SHELL_ROSTER_NAMES], "SHELL_ROSTER_NAMES");
@@ -256,6 +283,11 @@ export function sveltePackageExports() {
       "./dist/markdown.client.js",
       "./dist/markdown.server.js",
     ),
+    "./editor": svelteCondition(
+      "./dist/editor.d.ts",
+      "./dist/editor.client.js",
+      "./dist/editor.server.js",
+    ),
     "./types": svelteCondition("./dist/types.d.ts", "./dist/types.js", "./dist/types.js"),
   };
 }
@@ -264,6 +296,7 @@ export function reactPackageExports() {
   const exports: Record<string, { types: string; default: string }> = {
     ".": reactCondition("./dist/index.d.ts", "./dist/index.js"),
     "./markdown": reactCondition("./dist/markdown.d.ts", "./dist/markdown.js"),
+    "./editor": reactCondition("./dist/editor.d.ts", "./dist/editor.js"),
     "./types": reactCondition("./dist/types.d.ts", "./dist/types.js"),
   };
   for (const name of SHELL_ROSTER_NAMES) {
@@ -276,6 +309,7 @@ export function svelteDualEntries(): LibraryEntry[] {
   const entries: LibraryEntry[] = [
     { name: "index", source: "src/index.ts", outputExt: ".js" },
     { name: "markdown", source: "src/markdown.ts", outputExt: ".js" },
+    { name: EDITOR_ENTRY_NAME, source: "src/editor.ts", outputExt: ".js" },
     ...SHELL_ROSTER_NAMES.map((name) => ({
       name,
       source: `src/${name}.svelte`,
@@ -294,6 +328,7 @@ export function reactLibraryEntries(): LibraryEntry[] {
   const entries: LibraryEntry[] = [
     { name: "index", source: "src/index.ts", outputExt: ".js" },
     { name: "markdown", source: "src/markdown.ts", outputExt: ".js" },
+    { name: EDITOR_ENTRY_NAME, source: "src/editor.ts", outputExt: ".js" },
     { name: "types", source: "src/types.ts", outputExt: ".js" },
     ...SHELL_ROSTER_NAMES.map((name) => ({
       name,
@@ -313,6 +348,9 @@ export function sveltePublicFiles(): string[] {
     "dist/markdown.client.js",
     "dist/markdown.server.js",
     "dist/markdown.d.ts",
+    "dist/editor.client.js",
+    "dist/editor.server.js",
+    "dist/editor.d.ts",
     "dist/types.js",
     "dist/types.d.ts",
   ];
@@ -327,7 +365,8 @@ export function reactPublicFiles(): string[] {
     "dist/index.js",
     "dist/index.d.ts",
     "dist/markdown.js",
-    "dist/markdown.d.ts",
+    "dist/editor.js",
+    "dist/editor.d.ts",
     "dist/types.js",
     "dist/types.d.ts",
   ];
@@ -350,7 +389,7 @@ function listBasenames(directory: string, suffix: string): string[] {
 export function assertSvelteInventoriesMatchDisk(repoRoot: string): void {
   const packageRoot = join(repoRoot, SVELTE_PACKAGE_DIR);
   const svelteFiles = listBasenames(join(packageRoot, "src"), ".svelte");
-  const expected = [...SHELL_ROSTER_NAMES, ...INTERNAL_SVELTE_NAMES].sort();
+  const expected = [...SHELL_ROSTER_NAMES, ...INTERNAL_SVELTE_NAMES, ...EDITOR_SVELTE_NAMES].sort();
   if (svelteFiles.join("\n") !== expected.join("\n")) {
     throw new Error("Svelte *.svelte inventory disagrees with spec 070 roster plus internals");
   }
