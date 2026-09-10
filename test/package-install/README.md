@@ -15,7 +15,14 @@ release, package-manager version, and registry/publish ranges fail before
 build/pack. Ordinary Cargo classification is content-aware: `[package]` and
 `[workspace.package]` version mutations stay forbidden, as do publication,
 registry, source, `[patch]`, and `[replace]` content. Dependency requirements,
-features, and lock resolution are not version surfaces. Ordinary runs emit no
+features, and lock resolution are not version surfaces. Ordinary JS
+package-manifest classification is content-aware the same way: dependency and
+export-map changes are accepted only while package version, package name, the
+`private` publication flag, and the publication/registry transport fields
+(`publishConfig`, top-level `registry`) remain byte-identical in effect.
+Version or name mutations stay version surfaces; publication or transport
+mutations stay registry surfaces. Unparsable, added, or deleted manifests
+fail closed as version surfaces. Ordinary runs emit no
 certification receipt or receipt hash.
 
 Exact certification requires `POODLE_WEB_PACK_INSTALL_SCOPE_MODE=strict` and
