@@ -35243,3 +35243,70 @@ fn tabs_pinned_partitions_refuse_crossing_through_mounted_gpui() {
     });
 }
 
+#[test]
+fn tabs_card_item_surfaces_project_through_mounted_gpui() {
+    // g18.004. Every card item keeps the semantic surface fill on the node
+    // that encloses label, count, and close. Selected tint replaces it;
+    // `activeFill="none"` retains it. GPUI receives the same background
+    // through the shared style map.
+    run_headless(|cx| {
+        let theme_instance = theme();
+        let ctx = RenderContext::new(&theme_instance);
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B").with_closable(true),
+            TabDefinition::new("c", "C").with_disabled(true),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_value("a");
+        let mut node = poodle_render::tabs_with_handlers(
+            &spec,
+            &ctx,
+            TabsHandlers {
+                instance_id: Some("card-fill".into()),
+                focused_value: Some("a".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.wait_for_focus_handle("tabs:card-fill:tab:a");
+
+        let root = mounted.lock().expect("mount lock");
+        let surface = ctx.theme().resolve_color("color.background.surface");
+        let accent = ctx.theme().resolve_color("color.accent.base");
+        let tint = poodle_render::color::with_alpha(accent, accent.3 * 0.18);
+
+        let selected = tab_at(&root, "tabs:card-fill:tab:a");
+        assert_eq!(selected.style.descriptor.background, Some(tint));
+        assert_eq!(selected.style.descriptor.border.width, 0.0);
+        assert_eq!(
+            poodle_gpui::map_style(&selected.style.descriptor).background,
+            Some(tint.into())
+        );
+
+        let closable = tab_at(&root, "tabs:card-fill:tab:b");
+        assert_eq!(closable.style.descriptor.background, Some(surface));
+        assert_eq!(closable.style.descriptor.border.width, 0.0);
+        assert!(
+            closable
+                .children
+                .iter()
+                .any(|child| child.id.as_deref() == Some("tabs-close:b")),
+            "the filled item encloses the close affordance"
+        );
+        assert_eq!(
+            poodle_gpui::map_style(&closable.style.descriptor).background,
+            Some(surface.into())
+        );
+
+        let disabled = tab_at(&root, "tabs:card-fill:tab:c");
+        assert_eq!(disabled.style.descriptor.background, Some(surface));
+        assert_eq!(
+            poodle_gpui::map_style(&disabled.style.descriptor).background,
+            Some(surface.into())
+        );
+    });
+}
+
