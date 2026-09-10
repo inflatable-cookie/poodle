@@ -22,8 +22,10 @@ Northstar roadmaps use one generation-plus-task model:
 `g18.002` merged in PR #236 on 2026-09-10 after independent exact-head
 review. It delivered the paired Svelte and React CodeEditor over CodeMirror 6
 and the accepted `Tabs.pinned` contract. GPUI CodeEditor parity is a future
-planning horizon and the g18 GPUI repair runway remains open. Return to
-Chatterbox for release/adoption authority.
+planning horizon and the g18 GPUI repair runway remains open. `g18.003` is now
+the sole approved ready task: a paired Svelte/React rich-text editor and
+read-only renderer over TipTap 3 and ProseMirror. It still requires a separate
+operator go before queue dispatch.
 
 ## Rules
 

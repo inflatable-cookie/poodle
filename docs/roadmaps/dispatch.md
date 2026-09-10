@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Chatterbox
-Updated: 2026-09-10 (g18.002 merged; frontier empty)
+Updated: 2026-09-10 (g18.003 promoted; separate operator go required)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -13,17 +13,18 @@ commit.
 
 ## Ready queue task
 
-Empty. `g18.002` merged in PR #236 at
-`308fa52c5cd68d9c776f320c368e4fb0896e4d4d` and is closed out in the
-integration checkout. No task is approved for queue dispatch; return to
-Chatterbox for the next planning checkpoint. No successor auto-starts.
+[`g18.003`](g18/003-tiptap-prosemirror-rich-text-editor.md) —
+TipTap/ProseMirror rich-text editor. Sole approved ready task. Dispatch still
+requires a separate operator go; planning promotion alone is not execution
+authority. No successor auto-starts.
 
 ## Held planning horizons
 
-GPUI repair tranches, GPUI/shared-Rust CodeEditor work, visual expansion,
-keyboard-origin focus, V2, M2, A2, the Nucleus switch packet, web-pair
-extraction, the contributor-guidance pilot, Jetstream, and triage holds are not
-yet queue tasks. Their gates remain in `g18/README.md` and current triage.
+GPUI repair tranches, GPUI/shared-Rust CodeEditor and RichTextEditor work,
+visual expansion, keyboard-origin focus, V2, M2, A2, the Nucleus switch packet,
+web-pair extraction, the contributor-guidance pilot, Jetstream, and triage
+holds are not yet queue tasks. Their gates remain in `g18/README.md` and
+current triage.
 
 ## Historical queue evidence
 

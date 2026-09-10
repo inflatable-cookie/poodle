@@ -95,6 +95,14 @@ web-admitted, keeps engine objects private, and reserves the same semantic
 contract for a later GPUI implementation. This does not weaken the cohort rule
 for another component or for portable surfaces composed beside the editor.
 
+`RichTextEditor` and its matching `RichTextRenderer` use the same staged web
+admission by operator decision on 2026-09-10. ProseMirror owns document and
+schema semantics; TipTap is the paired Svelte/React integration engine. Poodle
+owns curated feature configuration, controls, tokens, validation,
+accessibility, and the editor/renderer projection, but does not invent a second
+document model or expose arbitrary engine extensions. Native work remains a
+future admission with no placeholder or parity credit.
+
 The g14 attempt to bind the cohort through one generated portable interface,
 case corpus, normalized observation, and completion gate was rejected on cost
 and correctness evidence. Component contracts, shared substrate tests,
@@ -143,6 +151,13 @@ keeps the engine out of unrelated consumer bundles.
 the extension set, maps Poodle themes, converts transactions into the public
 change payload, and owns accessibility behavior above the engine defaults.
 Consumers receive no CodeMirror extension slot or raw view/model handle.
+
+`RichTextEditor` uses TipTap 3 over ProseMirror for both web frameworks.
+ProseMirror JSON and schema semantics are the public document authority; live
+engine objects, transactions, plugins, and raw commands remain private. Poodle
+exports composable supported feature modules instead of arbitrary extension
+injection. The paired `RichTextRenderer` consumes the same document and feature
+configuration without mounting an editor.
 
 ## Native Architecture
 

@@ -138,6 +138,7 @@ primitives and layout surfaces through higher-order application components.
 - `range-slider.md`
 - `rating.md`
 - `ref-select.md`
+- `rich-text-editor.md`
 - `region.md`
 - `relation-picker.md`
 - `remediation-banner.md`

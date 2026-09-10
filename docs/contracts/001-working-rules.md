@@ -151,6 +151,25 @@ This is a component-specific staged admission, not a general web-only escape:
 - existing portable components touched by the task, including `Tabs`, still
   satisfy the normal active-cohort rule.
 
+### RichTextEditor staged web admission
+
+Operator decision 2026-09-10: `RichTextEditor` and `RichTextRenderer` may ship
+first as one complete TypeScript/web pair over TipTap 3 and ProseMirror. Svelte
+and React remain one admission; neither may ship alone. Rust, `poodle-render`,
+and GPUI are named future work and do not block the web package.
+
+This exception preserves upstream document authority and a configurable seam:
+
+- ProseMirror document JSON and schema semantics are authoritative; Poodle does
+  not define a parallel rich-text document model;
+- TipTap editor instances, transactions, plugins, commands, and arbitrary
+  extensions remain private;
+- Poodle exposes curated composable feature modules, with tables in the
+  standard set and images optional per project; embeds are deferred;
+- the read-only renderer ships in the same admission and uses the identical
+  document and feature configuration;
+- no native placeholder or accepted-absence record improves GPUI counts.
+
 ## Component Ownership
 
 - Poodle owns reusable primitives, composites, and general workstation shells.

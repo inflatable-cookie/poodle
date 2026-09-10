@@ -180,6 +180,7 @@ contract references the rule rather than restating it:
 - `components/range-slider.md`
 - `components/rating.md`
 - `components/ref-select.md`
+- `components/rich-text-editor.md`
 - `components/region.md`
 - `components/relation-picker.md`
 - `components/remediation-banner.md`

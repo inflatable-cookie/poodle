@@ -47,6 +47,7 @@ needed to compile honest repair tranches.
 | --- | --- | --- |
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
 | [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
+| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | ready — dispatch requires separate operator go | none; web-only staged admission |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -56,9 +57,10 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-No approved frontier. `g18.002` merged in PR #236 and is closed out in the
-integration checkout. Return to Chatterbox for release/adoption authority;
-no successor auto-starts.
+`g18.003` is the sole approved ready task. It may dispatch only after a
+separate operator go. It ships paired Svelte/React rich-text editor and
+read-only renderer surfaces over ProseMirror authority; release, Desktop
+adoption, and native work do not auto-start.
 
 ## Held and recurring work
 
@@ -69,6 +71,8 @@ no successor auto-starts.
 - Jetstream admission remains a separate held programme.
 - GPUI and shared-Rust CodeEditor work is a future planning horizon. The web
   admission earns no native parity credit.
+- GPUI and shared-Rust rich-text editing are future planning horizons. The
+  `g18.003` web admission earns no native parity credit.
 - Citations, nested menus, keyboard geometry, consumer requests, repository
   settings, and `gpui-unofficial` adoption gates remain in current triage.
 

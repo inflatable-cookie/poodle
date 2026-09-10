@@ -7,11 +7,10 @@ Updated: 2026-09-10
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
   - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236)
-  - Approved frontier: none. `g18.002` merged and closed out; return to
-    Chatterbox for release/adoption authority.
-  - Next checkpoint: Chatterbox compilation of the first GPUI repair tranche
-    from the accepted `g18.001` census; release/adoption decisions for the
-    accepted `g18.002` editor.
+  - Approved frontier: `g18.003` TipTap/ProseMirror rich-text editor; dispatch
+    requires a separate operator go.
+  - Next checkpoint: execute `g18.003` after approval, or compile the first
+    GPUI repair tranche from the accepted `g18.001` census.
 
 ## Compacted generations
 

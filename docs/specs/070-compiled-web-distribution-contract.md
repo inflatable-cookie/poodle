@@ -687,6 +687,11 @@ browser and SSR resolution are separately proven.
     "browser": "./dist/editor.client.js",
     "default": "./dist/editor.server.js"
   },
+  "./rich-text": {
+    "types": "./dist/rich-text.d.ts",
+    "browser": "./dist/rich-text.client.js",
+    "default": "./dist/rich-text.server.js"
+  },
   "./types": {
     "types": "./dist/types.d.ts",
     "browser": "./dist/types.js",
@@ -733,6 +738,34 @@ Laws:
 - Each admitted language stays in its own chunk behind a literal dynamic
   import; the base `./editor` entry never pays for unrequested grammars.
 
+## Rich-text entries
+
+`RichTextEditor` and `RichTextRenderer` ship behind dedicated `./rich-text`
+entries. TipTap, ProseMirror, and feature modules never enter root-only or
+`./editor` consumers. The rich-text pair is not a member of the public roster,
+the `./*.svelte` match law, the root barrel, or a native parity denominator.
+
+The Svelte entry uses `./dist/rich-text.d.ts` plus
+`./dist/rich-text.client.js` / `./dist/rich-text.server.js` (`browser` then
+`default`). React uses `./dist/rich-text.d.ts` plus
+`./dist/rich-text.js` (`default` only).
+
+Laws:
+
+- `./rich-text` exports `RichTextEditor`, `RichTextRenderer`, the structural
+  ProseMirror JSON carrier types, curated feature and command identifiers, and
+  the standard feature set.
+- Live TipTap/ProseMirror editor, node, transaction, plugin, command, and
+  extension objects do not cross the public entry.
+- TipTap and ProseMirror packages resolve as external imports of the
+  `./rich-text` graph. A bundled engine copy inside `dist/` fails.
+- Root `.`, roster barrels/chunks, `./markdown`, and `./editor` must not resolve
+  TipTap, ProseMirror, or the rich-text engine from their own imports.
+- Optional feature modules are reachable only from the rich-text graph.
+- Client and SSR consumers accept the same controlled ProseMirror JSON and
+  feature configuration. SSR import and `RichTextRenderer` do not create a live
+  editor or touch browser globals.
+
 ## React export map
 
 React is one JavaScript lane. No `browser`/`import` environment selector.
@@ -750,6 +783,10 @@ React is one JavaScript lane. No `browser`/`import` environment selector.
   "./editor": {
     "types": "./dist/editor.d.ts",
     "default": "./dist/editor.js"
+  },
+  "./rich-text": {
+    "types": "./dist/rich-text.d.ts",
+    "default": "./dist/rich-text.js"
   },
   "./types": {
     "types": "./dist/types.d.ts",
