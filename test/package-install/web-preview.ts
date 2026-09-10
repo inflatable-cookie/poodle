@@ -1655,6 +1655,89 @@ async function scopeFalsificationPlant(
   }
 }
 
+async function ordinaryChangelogMaintenanceFalsificationPlant(
+  kind: "semantic-entry" | "mixed-range",
+): Promise<void> {
+  const plantRoot = mkdtempSync(join(runRoot, "changelog-maintenance-plant-"));
+  try {
+    await run(["git", "init", "--quiet", plantRoot], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "config", "user.email", "poodle-certification@example.invalid"],
+      repoRoot,
+    );
+    await run(
+      ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
+      repoRoot,
+    );
+    const changelogPath = join(plantRoot, "CHANGELOG.md");
+    const before = `# Changelog
+
+Notable changes to Poodle are recorded here.
+
+## [Unreleased]
+
+Nothing yet.
+
+## [0.3.0] - 2026-09-05
+
+Published from the certified tag.
+
+### Changed
+
+- Existing release entry.
+
+[Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.3.0]: docs/release-notes/0.3.0.md
+`;
+    await Bun.write(changelogPath, before);
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(["git", "-C", plantRoot, "commit", "--quiet", "-m", "changelog base"], repoRoot);
+    const plantBaseCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "changelog maintenance falsification base commit",
+    );
+    const after = before
+      .replace("Nothing yet.\n\n", "")
+      .replace("Published from the certified tag.", "- **Release status.** Published from the certified tag.")
+      .replace(
+        "Existing release entry.",
+        kind === "semantic-entry" ? "Planted semantic release entry." : "Existing release entry.",
+      );
+    await Bun.write(changelogPath, after);
+    const logPath = join(
+      plantRoot,
+      "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md",
+    );
+    mkdirSync(join(logPath, ".."), { recursive: true });
+    await Bun.write(logPath, "# Changelog maintenance\n");
+    if (kind === "mixed-range") {
+      const sourcePath = join(plantRoot, "packages/core/src/release-stowaway.ts");
+      mkdirSync(join(sourcePath, ".."), { recursive: true });
+      await Bun.write(sourcePath, "export {};\n");
+    }
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "changelog plant"],
+      repoRoot,
+    );
+    const plantProofCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "changelog maintenance falsification proof commit",
+    );
+    const acceptedScope = await assertInstalledScope(
+      plantRoot,
+      plantBaseCommit,
+      plantProofCommit,
+      "ordinary",
+    );
+    throw new Error(
+      `ordinary changelog maintenance accepted ${kind}: ${acceptedScope.changedPaths.join(", ")}`,
+    );
+  } finally {
+    rmSync(plantRoot, { recursive: true, force: true });
+  }
+}
+
 const CANDIDATE_CARGO_PLANT_MANIFEST = "packages/contracts/tokens/Cargo.toml";
 
 const candidateCargoPlantBase = [
@@ -1950,6 +2033,14 @@ const falsificationReceipts = [
   await expectedFailure(
     "ordinary scope rejects a release surface",
     () => scopeFalsificationPlant("ordinary", "CHANGELOG.md"),
+  ),
+  await expectedFailure(
+    "ordinary changelog maintenance rejects a semantic entry mutation",
+    () => ordinaryChangelogMaintenanceFalsificationPlant("semantic-entry"),
+  ),
+  await expectedFailure(
+    "ordinary changelog maintenance rejects a mixed range",
+    () => ordinaryChangelogMaintenanceFalsificationPlant("mixed-range"),
   ),
   await expectedFailure(
     "ordinary scope rejects a registry surface",

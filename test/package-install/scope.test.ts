@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -130,6 +130,29 @@ const ordinaryJsManifestBase = JSON.stringify(
   2,
 );
 
+// Exact retained normalization fixture, committed locally so tests do not
+// depend on the retained PR, branch, or Git object at runtime.
+const ordinaryChangelogBefore = readFileSync(
+  join(import.meta.dir, "fixtures/changelog-maintenance-before.md"),
+  "utf8",
+);
+const ordinaryChangelogAfter = readFileSync(
+  join(import.meta.dir, "fixtures/changelog-maintenance-after.md"),
+  "utf8",
+);
+
+async function plantOrdinaryChangelogRange(
+  after: string,
+  extraFiles: Record<string, string> = {},
+): Promise<{ root: string; base: string; head: string }> {
+  const root = await initPlant();
+  await writeFiles(root, { "CHANGELOG.md": ordinaryChangelogBefore });
+  const base = await commitAll(root, "ordinary changelog base");
+  await writeFiles(root, { "CHANGELOG.md": after, ...extraFiles });
+  const head = await commitAll(root, "ordinary changelog head");
+  return { root, base, head };
+}
+
 async function plantOrdinaryCargoRange(
   headFiles: Record<string, string>,
 ): Promise<{ root: string; base: string; head: string }> {
@@ -237,6 +260,72 @@ describe("installed-package scope routing", () => {
       const head = await commitAll(root, "forbidden mutation");
       await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
         new RegExp(`certification scope rejected forbidden ${surface} surface: ${path}`),
+      );
+    }
+  });
+
+  test("ordinary admits the bound changelog normalization with one execution log", async () => {
+    const executionLog = "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md";
+    const { root, base, head } = await plantOrdinaryChangelogRange(
+      ordinaryChangelogAfter,
+      { [executionLog]: "# Changelog maintenance\n" },
+    );
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toEqual(["CHANGELOG.md", executionLog]);
+  });
+
+  test("ordinary changelog maintenance rejects semantic inventory mutations", async () => {
+    const executionLog = {
+      "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md": "# Changelog maintenance\n",
+    };
+    const plants = {
+      version: ordinaryChangelogAfter.replace("## [0.3.0]", "## [0.3.1]"),
+      date: ordinaryChangelogAfter.replace("2026-09-05", "2026-09-06"),
+      link: ordinaryChangelogAfter.replace(
+        "docs/release-notes/0.3.0.md",
+        "docs/release-notes/changed.md",
+      ),
+      entry: ordinaryChangelogAfter.replace("shared motion policy", "changed motion policy"),
+      unreleased: ordinaryChangelogAfter.replace(
+        "## [Unreleased]\n",
+        "## [Unreleased]\n\n- A real unreleased entry.\n",
+      ),
+      removedRelease: ordinaryChangelogAfter.replace(
+        /\n## \[0\.2\.2\][\s\S]*?(?=\n## \[0\.2\.0\])/, "",
+      ),
+    };
+    for (const [kind, changelog] of Object.entries(plants)) {
+      const { root, base, head } = await plantOrdinaryChangelogRange(changelog, executionLog);
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        "certification scope rejected forbidden release surface: CHANGELOG.md",
+      );
+    }
+  });
+
+  test("ordinary changelog maintenance rejects missing logs, mixed ranges, and ambiguity", async () => {
+    const cases = [
+      { after: ordinaryChangelogAfter, extraFiles: {} },
+      {
+        after: ordinaryChangelogAfter,
+        extraFiles: {
+          "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md": "# Log\n",
+          "packages/core/src/release-stowaway.ts": "export {};\n",
+        },
+      },
+      {
+        after: ordinaryChangelogAfter.replace(
+          "### Added\n",
+          "#### Unsupported nested release heading\n",
+        ),
+        extraFiles: {
+          "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md": "# Log\n",
+        },
+      },
+    ];
+    for (const { after, extraFiles } of cases) {
+      const { root, base, head } = await plantOrdinaryChangelogRange(after, extraFiles);
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        "certification scope rejected forbidden release surface: CHANGELOG.md",
       );
     }
   });

@@ -231,6 +231,181 @@ function isJsManifestPath(path: string): boolean {
   );
 }
 
+const CHANGELOG_PATH = "CHANGELOG.md";
+const EXECUTION_LOG_PATH = /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g\d{2}-\d{3}-[a-z0-9-]+\.md$/;
+
+type ChangelogInventory = {
+  preamble: string;
+  releases: { version: string; date: string; entries: string[] }[];
+  links: { label: string; target: string }[];
+};
+
+function normalizedChangelogEntry(lines: string[]): string {
+  return lines
+    .join(" ")
+    .replace(/^\s*-\s+/, "")
+    .replace(/^\*\*(?:Release status|Release posture|Downstream checks)\.\*\*\s+/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Parse the release-semantic inventory from the repository's Keep a Changelog
+ * shape. Structural headings, wrapping, and the three prose-to-entry labels
+ * used by changelog cleanup are syntax; versions, dates, links, and entry text
+ * are not. Unsupported shapes throw so ordinary scope fails closed.
+ */
+function changelogInventory(text: string): ChangelogInventory {
+  const lines = text.replaceAll("\r\n", "\n").split("\n");
+  if (lines[0] !== "# Changelog") throw new Error("missing changelog title");
+
+  const preambleLines: string[] = [];
+  const links: { label: string; target: string }[] = [];
+  const releases: { version: string; date: string; entries: string[] }[] = [];
+  let release: { version: string; date: string; entries: string[] } | null = null;
+  let entryLines: string[] = [];
+  let sawUnreleased = false;
+  let sawReferenceLinks = false;
+  const preparedUnpublishedVersions = new Set<string>();
+  const changelogSections = new Set([
+    "Added",
+    "Added and changed",
+    "Breaking",
+    "Changed",
+    "Deprecated",
+    "Downstream checks",
+    "Fixed",
+    "Removed",
+    "Security",
+  ]);
+
+  const flushEntry = () => {
+    const entry = normalizedChangelogEntry(entryLines);
+    entryLines = [];
+    if (!entry) return;
+    if (!release) throw new Error("changelog entry outside a release");
+    if (release.version === "Unreleased" && entry === "Nothing yet.") return;
+    release.entries.push(entry);
+  };
+
+  for (const line of lines.slice(1)) {
+    const releaseHeading = /^## \[([^\]]+)\](?: - (\d{4}-\d{2}-\d{2})(?: \((.+)\))?)?$/.exec(line);
+    if (releaseHeading) {
+      if (sawReferenceLinks) throw new Error("release found after changelog links");
+      flushEntry();
+      const version = releaseHeading[1];
+      const date = releaseHeading[2] ?? "";
+      const annotation = releaseHeading[3];
+      if ((version === "Unreleased") !== (date === "")) {
+        throw new Error("invalid changelog release heading");
+      }
+      if (annotation !== undefined) {
+        if (annotation !== "prepared — unpublished" || version === "Unreleased") {
+          throw new Error("unsupported changelog release annotation");
+        }
+        preparedUnpublishedVersions.add(version);
+      }
+      if (releases.some((candidate) => candidate.version === version)) {
+        throw new Error("duplicate changelog release");
+      }
+      release = { version, date, entries: [] };
+      releases.push(release);
+      if (version === "Unreleased") sawUnreleased = true;
+      continue;
+    }
+    const link = /^\[([^\]]+)\]:\s+(\S+)\s*$/.exec(line);
+    if (link) {
+      flushEntry();
+      sawReferenceLinks = true;
+      links.push({ label: link[1], target: link[2] });
+      continue;
+    }
+    const sectionHeading = /^###\s+(.+)$/.exec(line);
+    if (sectionHeading) {
+      if (sawReferenceLinks || !changelogSections.has(sectionHeading[1])) {
+        throw new Error("unsupported changelog section");
+      }
+      flushEntry();
+      if (!release) throw new Error("changelog section outside a release");
+      continue;
+    }
+    if (/^#{1,6}\s/.test(line)) throw new Error("unsupported changelog heading");
+    if (!release) {
+      preambleLines.push(line);
+      continue;
+    }
+    if (sawReferenceLinks && line.trim() !== "") {
+      throw new Error("content found after changelog links");
+    }
+    if (line.trim() === "") {
+      flushEntry();
+      continue;
+    }
+    if (/^-\s+/.test(line)) flushEntry();
+    entryLines.push(line);
+  }
+  flushEntry();
+
+  if (!sawUnreleased || releases[0]?.version !== "Unreleased") {
+    throw new Error("missing leading Unreleased section");
+  }
+  const unreleased = releases[0];
+  if (unreleased.entries.length > 0) throw new Error("Unreleased is not empty");
+  for (const version of preparedUnpublishedVersions) {
+    const annotatedRelease = releases.find((candidate) => candidate.version === version);
+    if (
+      !annotatedRelease?.entries.some(
+        (entry) =>
+          entry.includes("was prepared") &&
+          (entry.includes("unpublished") || entry.includes("never tagged or published")),
+      )
+    ) {
+      throw new Error("release annotation lacks matching entry payload");
+    }
+  }
+  if (links.length !== releases.length) throw new Error("release links are incomplete");
+  const linkLabels = new Set(links.map(({ label }) => label));
+  if (linkLabels.size !== links.length || releases.some(({ version }) => !linkLabels.has(version))) {
+    throw new Error("release links do not match releases");
+  }
+
+  return {
+    preamble: preambleLines.join(" ").replace(/\s+/g, " ").trim(),
+    releases: releases.map(({ version, date, entries }) => ({
+      version,
+      date,
+      entries: [...entries].sort(),
+    })),
+    links: [...links].sort((left, right) => left.label.localeCompare(right.label)),
+  };
+}
+
+function isChangelogMaintenanceRange(changedPaths: string[]): boolean {
+  if (!changedPaths.includes(CHANGELOG_PATH)) return false;
+  const logs = changedPaths.filter((path) => EXECUTION_LOG_PATH.test(path));
+  return (
+    logs.length === 1 &&
+    changedPaths.every((path) => path === CHANGELOG_PATH || EXECUTION_LOG_PATH.test(path))
+  );
+}
+
+async function ordinaryChangelogMaintenancePermitted(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  if (!isChangelogMaintenanceRange(changedPaths)) return false;
+  const before = await gitShowFile(checkoutRoot, requiredBaseCommit, CHANGELOG_PATH);
+  const after = await gitShowFile(checkoutRoot, sourceCommit, CHANGELOG_PATH);
+  if (before === null || after === null) return false;
+  try {
+    return JSON.stringify(changelogInventory(before)) === JSON.stringify(changelogInventory(after));
+  } catch {
+    return false;
+  }
+}
+
 export function isWritableCertificationPath(
   path: string,
   mode: CertificationScopeMode = "strict",
@@ -815,10 +990,22 @@ export async function assertInstalledScope(
   if (mode === CANDIDATE_SCOPE_MODE) {
     await assertDirectCandidateSource(checkoutRoot, requiredBaseCommit, sourceCommit);
   }
-  const forbidden = changedPaths.flatMap((path) =>
+  let forbidden = changedPaths.flatMap((path) =>
     forbiddenCertificationSurfaceLabels(path, mode).map((surface) => ({ path, surface })),
   );
   if (mode === "ordinary") {
+    if (
+      await ordinaryChangelogMaintenancePermitted(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      )
+    ) {
+      forbidden = forbidden.filter(
+        ({ path, surface }) => path !== CHANGELOG_PATH || surface !== "release",
+      );
+    }
     forbidden.push(
       ...(await ordinaryCargoForbiddenSurfaces(
         checkoutRoot,

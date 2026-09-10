@@ -22,8 +22,13 @@ export-map changes are accepted only while package version, package name, the
 (`publishConfig`, top-level `registry`) remain byte-identical in effect.
 Version or name mutations stay version surfaces; publication or transport
 mutations stay registry surfaces. Unparsable, added, or deleted manifests
-fail closed as version surfaces. Ordinary runs emit no
-certification receipt or receipt hash.
+fail closed as version surfaces. Ordinary changelog maintenance is the single
+content-aware release-path exception: the range must contain only
+`CHANGELOG.md` and one dated Northstar execution log, both changelog revisions
+must parse, Unreleased must remain empty, and versions, dates, reference links,
+and normalized entry payloads must be identical. Ambiguous shapes, semantic
+mutations, missing or extra logs, and mixed ranges remain forbidden release
+surfaces. Ordinary runs emit no certification receipt or receipt hash.
 
 Exact certification requires `POODLE_WEB_PACK_INSTALL_SCOPE_MODE=strict` and
 keeps the g16.059 writable allowlist, non-empty range, receipt bytes, and
