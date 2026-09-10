@@ -1,6 +1,6 @@
 # 003 — TipTap/ProseMirror rich-text editor
 
-Status: in execution — Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`
+Status: complete — merged as `fb0b73732b5c0a2a9361fddd75962eccd2710b0f` (PR #237) on 2026-09-10
 Owner: Poodle web components
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -132,7 +132,11 @@ rich-text editing.
 
 ## Evidence
 
-Pending execution.
+Merged. Independent exact-head `ready_to_merge` review of head
+`efae0be0cd7cb27f0bf9c6c683151e6386e19e3f`
+([comment #5625982954](https://github.com/inflatable-cookie/poodle/pull/237#issuecomment-5625982954));
+closeout record
+`docs/logs/2026-09/20260910-g18-003-tiptap-prosemirror-rich-text-editor.md`.
 
 ## Next task
 

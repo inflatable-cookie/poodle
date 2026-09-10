@@ -1,6 +1,7 @@
 # g18.003 — TipTap/ProseMirror rich-text editor
 
-Status: ready for review
+Status: merged
+Merge: `fb0b73732b5c0a2a9361fddd75962eccd2710b0f` (PR #237) on 2026-09-10
 Date: 2026-09-10
 Branch: `ns-edb2d303-38c9-44a8-aa2c-a6ff5821643e`
 Card: `docs/roadmaps/g18/003-tiptap-prosemirror-rich-text-editor.md`
@@ -108,3 +109,25 @@ resolves), `drift:roles` (invokes a script path that does not exist on
 disk), `check:react-components` and `check:react-preview` (265 + specimen
 pre-existing TS errors). None of these touch rich-text surfaces; recorded in
 `PAPERCUTS.md` for the ordinary-JS repair lane.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `fb0b73732b5c0a2a9361fddd75962eccd2710b0f` on 2026-09-10 (PR #237),
+  with parents `249301348` (main) and `efae0be0` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `efae0be0cd7cb27f0bf9c6c683151e6386e19e3f` by betterthanclay
+  ([comment #5625982954](https://github.com/inflatable-cookie/poodle/pull/237#issuecomment-5625982954)).
+  The five blocking engine findings were fixed and re-proven on both shells;
+  no merge blockers remained.
+- Reviewed-head validation (reviewer-ran, tree left clean): Svelte focused
+  and packaging 60 pass; React focused 42 pass; core rich-text 12 pass; SSR
+  2 pass; GitHub `ci-web` and `ci-rust` success; `git diff --check` clean.
+- Non-blocking reviewer notes (deferred, no acceptance impact): one legacy
+  test title still describes the pre-repair host-revert/paste coverage;
+  sanitizer output retains inline event-handler attributes before schema
+  parsing; TipTap Image's markdown input rule remains inherited; table-cell
+  Tab navigation is not separately asserted.
+- Deferred: release/tag/publish, Desktop adoption, native/GPUI rich-text
+  work, and preview-catalogue admission. Return to Chatterbox for the
+  separately authorized release/adoption decision.
