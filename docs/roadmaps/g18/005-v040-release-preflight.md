@@ -1,6 +1,6 @@
 # 005 — v0.4.0 release preflight
 
-Status: verifying — PR #238 retained; blocked on g18.007 scope repair
+Status: complete — merged as `93e165fd072aea27f44ede5a794042948654b265` (PR #238) on 2026-09-11
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../specs/044-deprecation-change-control-and-release-channel-operations.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
-Depends on: g18.007 for CI validation only; implementation and review complete
+Depends on: g18.007 for CI validation only; merged after the classifier repair landed
 
 ## Outcome
 
@@ -104,6 +104,19 @@ PR #238 reached reviewed head `40f9e0a3d44f485fd24b4aa6ba55dff2bc759a51`.
 Web CI then exposed the deterministic ordinary-scope mismatch. The operator
 selected g18.007's structural classifier repair; PR #238 and all attached Queue
 threads/workspace remain retained for validation retry afterward.
+
+Merged. Worker merged `origin/main` (`89e541d6f`) into the retained branch
+as head `f5ca2e78d0ae48dd0be939c6d687fae4e5ea0ae9` with no content change to
+the reviewed diff (`CHANGELOG.md` + execution log); independent exact-head
+`ready_to_merge` round-2 review
+([comment #5627082172](https://github.com/inflatable-cookie/poodle/pull/238#issuecomment-5627082172)).
+Rust and web CI pass on the merged head. Tags remain
+`v0.1.0 v0.2.0 v0.2.2 v0.3.0`; npm core/Svelte `latest` remains `0.3.0`; no
+manifest, lock, workflow, release-note, product-code, or Desktop mutation.
+Full-board QA failures in `test/parity/specimen-axis-census.test.tsx` are
+unrelated to this diff and stay deferred outside it. Candidate trees, packed
+artifacts, gates, dry runs, tagging, and publish remain g18.006's
+responsibility.
 
 ## Next task
 

@@ -132,4 +132,4 @@ closeout record
 ## Next task
 
 After merge and closeout, g18.006 may perform its final source/package recheck
-once g18.005 is also complete and the operator grants explicit release authority.
+now that g18.005 is complete, once the operator grants explicit release authority.

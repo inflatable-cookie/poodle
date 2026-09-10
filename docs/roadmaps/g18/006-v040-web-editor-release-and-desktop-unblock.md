@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release and Desktop unblock
 
-Status: planned — waits for g18.005 and g18.008; publication requires explicit operator release authority
+Status: planned — g18.005 and g18.008 merged; publication requires explicit operator release authority
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -34,7 +34,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
   `ffb16fed0a8cec7f8a2448bed2f5e680d60a5366` and Svelte
   `de3a5f55d435689f2886e524613364fa2abc785d`.
 - [x] The release and Desktop proof boundaries are explicit.
-- [ ] g18.003, g18.004, g18.005, and g18.008 have merged with
+- [x] g18.003, g18.004, g18.005, and g18.008 have merged with
   accepted exact-head review.
 - [ ] Final candidate package trees and full v0.3.0-to-candidate delta are known.
 - [ ] The operator explicitly authorizes candidate execution and public release

@@ -16,7 +16,8 @@ range is maintenance-only and preserves release semantics. Continue rejecting
 new or changed releases, versions, dates, links, Unreleased content, release
 transport, registry surfaces, and mixed release preparation before builds.
 
-After merge, retry validation on the retained g18.005 PR #238. Do not copy,
+Validation was retried on retained g18.005 PR #238 after merge; it merged as
+`93e165fd072aea27f44ede5a794042948654b265` (PR #238) on 2026-09-11. Do not copy,
 replace, close, or merge that PR from this task.
 
 ## Ready-State Rubric
