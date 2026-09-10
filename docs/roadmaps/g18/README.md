@@ -48,7 +48,7 @@ needed to compile honest repair tranches.
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
 | [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | reviewing | Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`; PR #237 |
-| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | ready and approved | independent alongside g18.003 review |
+| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | verifying | retained PR #238 blocked on g18.007 ordinary-scope repair |
 | [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | g18.003, g18.004, and g18.005; final source recheck and explicit operator release authority |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | ready and approved | unblocks retained g18.005 PR #238 without a CI exception |
