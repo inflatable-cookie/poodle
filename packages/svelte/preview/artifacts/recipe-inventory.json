@@ -1,9 +1,9 @@
 {
   "summary": {
     "components": 147,
-    "recipeHooks": 1175,
+    "recipeHooks": 1176,
     "hookCandidates": 7,
-    "metricVariables": 409
+    "metricVariables": 410
   },
   "inventory": {
     "accordion": {
@@ -2227,6 +2227,7 @@
         "--poodle-recipe-tabs-block-selected-hover-item-fill",
         "--poodle-recipe-tabs-block-selected-item-fill",
         "--poodle-recipe-tabs-block-selected-tab-text",
+        "--poodle-recipe-tabs-card-item-fill",
         "--poodle-recipe-tabs-card-panel-fill",
         "--poodle-recipe-tabs-card-selected-tab-fill",
         "--poodle-recipe-tabs-card-selected-tab-text",
@@ -2253,6 +2254,7 @@
         "--poodle-tabs-control-x",
         "--poodle-tabs-label-size",
         "--poodle-tabs-list-gap",
+        "--poodle-tabs-panel-padding",
         "--poodle-tabs-separator-margin"
       ]
     },
