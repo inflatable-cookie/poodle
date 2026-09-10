@@ -76,55 +76,11 @@
   let activeDiagnostic: CodeEditorActiveDiagnostic | null = $state(null);
   let messageId = `poodle-code-editor-${Math.random().toString(36).slice(2)}`;
 
-  onMount(() => {
-    assertAdmittedLanguage(language);
-    installInputModality();
-    let cancelled = false;
-    createCodeEditorEngine(
-      hostElement as HTMLDivElement,
-      {
-        value,
-        language,
-        lineNumbers,
-        searchable,
-        readOnly,
-        disabled,
-        placeholder,
-        ariaLabel,
-        wrapLines,
-        tabSize,
-        tabBehavior,
-        performanceMode,
-        diagnostics,
-      },
-      {
-        onChange: (change) => onChange?.(change),
-        onActiveDiagnostic: (active) => {
-          activeDiagnostic = active;
-        },
-      },
-    ).then((created) => {
-      if (cancelled) {
-        created.destroy();
-        return;
-      }
-      engine = created;
-    });
-    return () => {
-      cancelled = true;
-    };
-  });
-
-  onDestroy(() => {
-    engine?.destroy();
-    engine = null;
-  });
-
-  $effect(() => {
-    // Read every prop unconditionally: `engine` is null until the async
-    // mount resolves, and an `engine?.update()` short-circuit would subscribe
-    // to nothing, leaving this effect dead after rerenders.
-    const next = {
+  // Live prop snapshot. Reads of $props bindings stay current, so the
+  // post-creation flush below picks up host updates that landed while the
+  // engine was still loading.
+  function currentOptions() {
+    return {
       value,
       language,
       lineNumbers,
@@ -139,6 +95,52 @@
       performanceMode,
       diagnostics,
     };
+  }
+
+  onMount(() => {
+    assertAdmittedLanguage(language);
+    installInputModality();
+    if (!isCodeEditorValueAdmissible(value)) {
+      console.warn(
+        "code-editor: value exceeds the 2 MiB envelope; hosts must refuse larger sources before mounting",
+      );
+    }
+    let cancelled = false;
+    createCodeEditorEngine(
+      hostElement as HTMLDivElement,
+      currentOptions(),
+      {
+        onChange: (change) => onChange?.(change),
+        onActiveDiagnostic: (active) => {
+          activeDiagnostic = active;
+        },
+      },
+    ).then((created) => {
+      if (cancelled) {
+        created.destroy();
+        return;
+      }
+      engine = created;
+      // Host updates may have landed while the engine was loading; the sync
+      // effect possibly ran with no engine to receive them. Flush the live
+      // props so the host value stays authoritative.
+      void engine.update(currentOptions());
+    });
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  onDestroy(() => {
+    engine?.destroy();
+    engine = null;
+  });
+
+  $effect(() => {
+    // Read every prop unconditionally before touching `engine`: `engine` is
+    // null until the async mount resolves, and an `engine?.update(...)`
+    // short-circuit would subscribe to nothing, leaving this effect dead.
+    const next = currentOptions();
     void engine?.update(next);
   });
 </script>

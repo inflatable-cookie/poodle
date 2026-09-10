@@ -37,10 +37,16 @@ Recorded in `THIRD_PARTY_NOTICES.md`.
 - Core: 1284 pass (`bun test` in `packages/core`), including exact
   multi-range replay, UTF-16 astral offsets, diagnostic refusal, closed
   language set, 2 MiB envelope, and Tabs pinned partition/machine guards.
-- Svelte + React component boards: 2802 pass, including 12 CodeEditor and
+- Svelte + React component boards: 2826 pass, including 24 CodeEditor and
   5 Tabs-pinned cases per shell, 2 MiB boundary mounts (100 000 lines mount
   36 `.cm-line` nodes), SSR root-without-engine, and engine-leak/packaging
-  proofs.
+  proofs. Per-shell CodeEditor cases cover exact mount, no-echo updates and
+  reverts, diagnostic mapping/refusal, read-only/disabled, unsupported
+  language refusal, destroy/remount, Tab focus exit, Tab indent exactness,
+  Escape-Tab exit, F8 walk/announce plus active-diagnostic retention across
+  unrelated re-renders, search open/traversal-gating/close with focus return,
+  Enter/undo/redo exact round-trips, CRLF load without echo, plain-mode
+  grammar absence, and creation-window host authority.
 - a11y sweep 180 pass, Svelte↔React parity sweep 178 pass (CodeEditor
   covered by both automatically).
 - Rust: `poodle-headless` 221 lib pass, headless tabs conformance pass,
@@ -48,6 +54,24 @@ Recorded in `THIRD_PARTY_NOTICES.md`.
   plus the 5 pre-existing mounted GPUI tabs regressions.
 - Distribution: core-build/pack-archive/scope/gate suites 57 pass,
   shell-build suites pass, both packages build clean with receipts.
+
+## Review follow-ups (independent review, same branch)
+
+- Engine `update` diffs every key against the applied options (diagnostics by
+  content signature): unrelated parent re-renders no longer reconfigure
+  compartments or clear the F8 active diagnostic. Proven by a direct engine
+  probe plus both wrapper retention tests.
+- Both wrappers flush live props after async engine creation, so host updates
+  landing in the creation window win. Proven by creation-window tests that
+  rerender synchronously with a grammar load in flight.
+- `tabSize` updates reconfigure a dedicated compartment (previously
+  mount-only). `value` type failure throws loudly instead of a deep
+  `undefined.length` rejection.
+- IME composition cannot be driven in happy-dom (no trusted editing input:
+  synthetic `beforeinput`/`compositionupdate` never reach the engine), so
+  there is no IME keystroke test. Composition commits flow through the same
+  `updateListener` → `transactionToChange` path proven exact by the
+  Enter/Tab/undo/redo round-trips.
 
 ## Known staged-admission limits (unchanged by this task)
 

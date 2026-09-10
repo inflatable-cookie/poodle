@@ -76,6 +76,38 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   const engineRef = useRef<CodeEditorEngine | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  // Live prop snapshot for the post-creation flush: renders that land while
+  // the engine is still loading must not be silently dropped.
+  const latestRef = useRef({
+    value,
+    language,
+    lineNumbers,
+    searchable,
+    readOnly,
+    disabled,
+    placeholder,
+    ariaLabel,
+    wrapLines,
+    tabSize,
+    tabBehavior,
+    performanceMode,
+    diagnostics,
+  });
+  latestRef.current = {
+    value,
+    language,
+    lineNumbers,
+    searchable,
+    readOnly,
+    disabled,
+    placeholder,
+    ariaLabel,
+    wrapLines,
+    tabSize,
+    tabBehavior,
+    performanceMode,
+    diagnostics,
+  };
   const [activeDiagnostic, setActiveDiagnostic] = useState<CodeEditorActiveDiagnostic | null>(null);
   const [messageId] = useState(() => `poodle-code-editor-${Math.random().toString(36).slice(2)}`);
 
@@ -87,26 +119,17 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
 
   useEffect(() => {
     installInputModality();
+    if (!isCodeEditorValueAdmissible(value)) {
+      console.warn(
+        "code-editor: value exceeds the 2 MiB envelope; hosts must refuse larger sources before mounting",
+      );
+    }
     const host = hostRef.current;
     if (!host) return;
     let cancelled = false;
     createCodeEditorEngine(
       host,
-      {
-        value,
-        language,
-        lineNumbers,
-        searchable,
-        readOnly,
-        disabled,
-        placeholder,
-        ariaLabel,
-        wrapLines,
-        tabSize,
-        tabBehavior,
-        performanceMode,
-        diagnostics,
-      },
+      latestRef.current,
       {
         onChange: (change) => onChangeRef.current?.(change),
         onActiveDiagnostic: setActiveDiagnostic,
@@ -117,6 +140,9 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
         return;
       }
       engineRef.current = created;
+      // Flush the live props: host updates may have landed while the engine
+      // was loading, and the sync effect possibly ran with no engine.
+      void engineRef.current.update(latestRef.current);
     });
     return () => {
       cancelled = true;

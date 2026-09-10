@@ -98,6 +98,10 @@ function normalizeTabSize(tabSize: number): number {
  * The engine owns line-break representation: CR and CRLF load as LF. The
  * comparison honors that without changing any text the host can observe.
  */
+function diagnosticSignature(diagnostics: readonly CodeEditorDiagnostic[]): string {
+  return JSON.stringify(diagnostics);
+}
+
 function sameDocumentText(propValue: string, docText: string): boolean {
   return propValue === docText || propValue.replace(/\r\n?/g, "\n") === docText;
 }
@@ -135,6 +139,7 @@ export async function createCodeEditorEngine(
   const readOnlyCompartment = new Compartment();
   const diagnosticsCompartment = new Compartment();
   const wrapCompartment = new Compartment();
+  const tabSizeCompartment = new Compartment();
 
   function buildDiagnosticDecorations(valid: CodeEditorDiagnostic[]): DecorationSet {
     const builder = new RangeSetBuilder<Decoration>();
@@ -276,7 +281,7 @@ export async function createCodeEditorEngine(
         wrapCompartment.of(options.wrapLines ? EditorView.lineWrapping : []),
         ...(options.lineNumbers ? [lineNumbers()] : []),
         ...(options.placeholder ? [placeholder(options.placeholder)] : []),
-        EditorState.tabSize.of(normalizeTabSize(options.tabSize)),
+        tabSizeCompartment.of(EditorState.tabSize.of(normalizeTabSize(options.tabSize))),
         EditorView.updateListener.of((update: ViewUpdate) => {
           if (!update.docChanged || applyingHostValue) return;
           callbacks.onChange(
@@ -293,20 +298,34 @@ export async function createCodeEditorEngine(
   let updateEpoch = 0;
 
   async function update(next: Partial<CodeEditorEngineOptions>): Promise<void> {
-    const previousOptions = options;
+    // Change detection against the applied options: wrappers resend the full
+    // prop set on every sync, so a key present with an unchanged value must
+    // not reconfigure anything. In particular, resending `diagnostics` must
+    // not clear the F8 active diagnostic or rebuild its decorations.
+    const previous = options;
     options = { ...options, ...next };
     if (typeof next.language === "string") assertAdmittedLanguage(next.language);
     const epoch = ++updateEpoch;
     const effects: StateEffect<unknown>[] = [];
-    if (next.language !== undefined || next.performanceMode !== undefined) {
+    if (
+      (next.language !== undefined && next.language !== previous.language) ||
+      (next.performanceMode !== undefined && next.performanceMode !== previous.performanceMode)
+    ) {
       const language = await languageFor(options.language, options.performanceMode);
       if (epoch !== updateEpoch) return;
       effects.push(languageCompartment.reconfigure(language) as StateEffect<unknown>);
     }
-    if (next.searchable !== undefined || next.tabBehavior !== undefined || next.disabled !== undefined) {
+    if (
+      (next.searchable !== undefined && next.searchable !== previous.searchable) ||
+      (next.tabBehavior !== undefined && next.tabBehavior !== previous.tabBehavior) ||
+      (next.disabled !== undefined && next.disabled !== previous.disabled)
+    ) {
       effects.push(behaviorCompartment.reconfigure(behaviorExtension()));
     }
-    if (next.readOnly !== undefined || next.disabled !== undefined) {
+    if (
+      (next.readOnly !== undefined && next.readOnly !== previous.readOnly) ||
+      (next.disabled !== undefined && next.disabled !== previous.disabled)
+    ) {
       effects.push(
         readOnlyCompartment.reconfigure([
           EditorState.readOnly.of(options.readOnly || options.disabled),
@@ -314,7 +333,10 @@ export async function createCodeEditorEngine(
         ]),
       );
     }
-    if (next.diagnostics !== undefined) {
+    if (
+      next.diagnostics !== undefined &&
+      diagnosticSignature(next.diagnostics) !== diagnosticSignature(previous.diagnostics)
+    ) {
       activeDiagnosticIndex = null;
       announceDiagnostic([], null);
       effects.push(
@@ -323,13 +345,20 @@ export async function createCodeEditorEngine(
         ),
       );
     }
-    if (next.wrapLines !== undefined) {
+    if (next.wrapLines !== undefined && next.wrapLines !== previous.wrapLines) {
       effects.push(wrapCompartment.reconfigure(options.wrapLines ? EditorView.lineWrapping : []));
     }
-    if (next.ariaLabel !== undefined && next.ariaLabel !== previousOptions.ariaLabel) {
+    if (next.tabSize !== undefined && next.tabSize !== previous.tabSize) {
+      effects.push(
+        tabSizeCompartment.reconfigure(
+          EditorState.tabSize.of(normalizeTabSize(options.tabSize)),
+        ),
+      );
+    }
+    if (next.ariaLabel !== undefined && next.ariaLabel !== previous.ariaLabel) {
       view.contentDOM.setAttribute("aria-label", options.ariaLabel);
     }
-    if (next.disabled !== undefined && next.disabled !== previousOptions.disabled) {
+    if (next.disabled !== undefined && next.disabled !== previous.disabled) {
       if (options.disabled) view.contentDOM.setAttribute("aria-disabled", "true");
       else view.contentDOM.removeAttribute("aria-disabled");
     }
