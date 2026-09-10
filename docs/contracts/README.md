@@ -78,6 +78,7 @@ contract references the rule rather than restating it:
 - `components/card.md`
 - `components/changed-files.md`
 - `components/checkbox.md`
+- `components/code-editor.md`
 - `components/code-input.md`
 - `components/code.md`
 - `components/collapse-toggle.md`

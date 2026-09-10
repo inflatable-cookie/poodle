@@ -36,6 +36,7 @@ primitives and layout surfaces through higher-order application components.
 - `card.md`
 - `changed-files.md`
 - `checkbox.md`
+- `code-editor.md`
 - `code-input.md`
 - `code.md`
 - `collapse-toggle.md`

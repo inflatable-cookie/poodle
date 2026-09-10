@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-09-04
+Updated: 2026-09-10
 
 ## 1. Purpose
 
@@ -12,8 +12,9 @@ Updated: 2026-09-04
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, visual variants
   (card/pill/block), reorderable tabs, closable tabs, tab counts,
-  optional visual separators, trailing actions snippet, lightweight URL query sync,
-  full-width flex layout, overflow collapse into a menu
+  optional visual separators, pinned start/end items, trailing actions snippet,
+  lightweight URL query sync, full-width flex layout, overflow collapse into a
+  menu
 - Out of scope: docking
 
 ## 2. Anatomy
@@ -126,6 +127,7 @@ all end as cancellation. End fires exactly once in every case, so host-owned
 | `icon` | `string \| null` | `null` | no | icon registry identifier, renders Icon with supporting semantic sizing |
 | `disabled` | `boolean` | `false` | no | prevents activation |
 | `closable` | `boolean` | `false` | no | shows close button |
+| `pinned` | `"start" \| "end" \| null` | `null` | no | fixes the item in the leading or trailing partition; pinned items are not reorder sources or targets and unpinned items cannot cross them |
 | `count` | `number` | - | no | optional count badge rendered after the label |
 | `separator` | `boolean` | `false` | no | draws a visual separator before this tab |
 
@@ -246,7 +248,7 @@ measurement are environment effects, not machine states.
 |-------|------|---------|--------------|---------|
 | `value` | `string \| null` | `defaultValue`, else first enabled item | yes | selected tab value |
 | `focusIndex` | `number` | selected index | no | roving-tabindex position; follows selection when selection changes |
-| `items` | `TabItem[]` | prop | input | ordered tab descriptors (value, label, disabled, closable, ...) |
+| `items` | `TabItem[]` | prop | input | ordered tab descriptors (value, label, disabled, closable, pinned, ...) |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | input | whether focus movement commits selection |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | input | maps arrow keys |
 | `reorderable` | `boolean` | `false` | input | enables Alt+Arrow and drag reorder |
@@ -300,14 +302,23 @@ own tab index.
 | `idle` | `FOCUS_MOVE` | — | `idle` | move `focusIndex` to next enabled item, wrapping and skipping disabled; effect `focusTab`; when `activationMode="automatic"`, also commit selection as `SELECT` |
 | `idle` | `ACTIVATE` | `activationMode="manual"` | `idle` | commit selection as `SELECT` |
 | `idle` | `CLOSE` | item `closable` | `idle` | `onClose(value)` only — parent owns item removal |
-| `idle` | `REORDER_STEP` | `reorderable`, target in bounds | `idle` | reorder items, keep focus on moved tab (effect `focusTab`), `onReorder(order)` |
-| `idle` | `REORDER` | substrate committed a drop | `idle` | apply the move, `onReorder(order)` |
+| `idle` | `REORDER_STEP` | `reorderable`, source unpinned, target in the same unpinned partition | `idle` | reorder items, keep focus on moved tab (effect `focusTab`), `onReorder(order)` |
+| `idle` | `REORDER` | substrate committed a drop between valid boundaries in the same unpinned partition | `idle` | apply the move, `onReorder(order)` |
 | `idle` | `URL_POP` | `historyKey` set | `idle` | set `value` from URL, falling back to first enabled item |
 | `idle` | `OVERFLOW_CHANGE` | `collapseWhenOverflow`, horizontal | `idle` | set `collapsedByOverflow`; collapsed rendering delegates selection to a Menu, which re-enters via `SELECT` |
 
 Disabled items: never selectable, never focus targets (`FOCUS_MOVE` skips
 them, wrapping modulo item count), never drag sources, and never tooltip
 targets. A disabled tab is still a place to put one.
+
+Pinned items remain selectable unless also disabled. They are never reorder
+sources or reorder targets. Items pinned to `start` retain their declared order
+before every unpinned item; items pinned to `end` retain their declared order
+after every unpinned item. Keyboard and pointer reorder refuse any move that
+would change either pinned partition or let an unpinned item cross it.
+`items` must already be ordered as start-pinned, unpinned, then end-pinned.
+Invalid interleaving renders in declared order, disables reorder, and reports a
+development diagnostic rather than silently normalizing host state.
 
 #### Effects
 
@@ -380,7 +391,7 @@ the spec.
 | `Home` | moves focus to first enabled tab |
 | `End` | moves focus to last enabled tab |
 | `Enter` or `Space` | activates focused tab in manual mode |
-| `Alt+Arrow` | reorders tab (when reorderable) |
+| `Alt+Arrow` | reorders an unpinned tab within its partition (when reorderable) |
 | `Delete` | closes tab (when closable) |
 | `Tab` | moves between the tablist and active panel |
 
@@ -1034,10 +1045,14 @@ Card tabs simulating file tabs, with close buttons wired to `onClose`:
 
 | Tab label | Props |
 |-----------|-------|
-| index.ts | active (default) |
+| Details | active (default), `pinned="start"`, not closable |
+| index.ts | closable |
 | App.svelte | closable |
 | utils.ts | closable |
 | types.ts | closable |
+
+The specimen proves that file tabs reorder only after Details, and that neither
+drag nor Alt+Arrow can move Details or place a file tab before it.
 
 ### Card variant (active outline)
 
