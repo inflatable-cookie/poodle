@@ -23,14 +23,15 @@ Northstar roadmaps use one generation-plus-task model:
 review. It delivered the paired Svelte and React CodeEditor over CodeMirror 6
 and the accepted `Tabs.pinned` contract. GPUI CodeEditor parity is a future
 planning horizon and the g18 GPUI repair runway remains open. `g18.003`, the
-paired TipTap/ProseMirror web editor and renderer, is executing through Queue.
-`g18.004` is the sole approved next task: every card Tabs item receives a
-fill-only semantic surface while the existing selection-strength axis remains
-unchanged. It waits for g18.003 closeout and a separate operator go.
+paired TipTap/ProseMirror web editor and renderer, is reviewing through Queue.
+`g18.004` and the bounded `g18.005` release preflight are approved to run
+alongside the g18.003 review. Tabs receives the fill-only semantic surface;
+preflight repairs only the existing changelog/parser blocker.
 
-After both component tasks close, `g18.005` is the planned `0.4.0` web release
-and Desktop unblock. It remains held for final-source review and explicit
-operator release authority; planning does not publish, tag, or mutate Desktop.
+After both component tasks and preflight close, `g18.006` is the planned
+`0.4.0` web release and Desktop unblock. It remains held for final-source
+review and explicit operator release authority; planning does not publish,
+tag, or mutate Desktop.
 
 ## Rules
 

@@ -9,13 +9,13 @@ Updated: 2026-09-10
   - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236)
   - Active task: `g18.003` TipTap/ProseMirror rich-text editor, Queue task
     `edb2d303-38c9-44a8-aa2c-a6ff5821643e`.
-  - Approved next frontier: `g18.004` Tabs card inactive surfaces; waits for
-    `g18.003` closeout and a separate operator go.
-  - Planned release: `g18.005` v0.4.0 web editor release and Desktop unblock;
-    waits for both component tasks, final source recheck, and explicit release
-    authority.
-  - Next checkpoint: close `g18.003`, then execute `g18.004`; only afterward
-    recheck and authorize `g18.005` or compile the first GPUI repair tranche.
+  - Approved concurrent frontier: `g18.004` Tabs card inactive surfaces and
+    `g18.005` v0.4.0 release preflight may execute alongside g18.003 review.
+  - Planned release: `g18.006` v0.4.0 web editor release and Desktop unblock;
+    waits for both component tasks and preflight, final source recheck, and
+    explicit release authority.
+  - Next checkpoint: close `g18.003`, `g18.004`, and `g18.005`; then recheck and
+    authorize `g18.006` or compile the first GPUI repair tranche.
 
 ## Compacted generations
 

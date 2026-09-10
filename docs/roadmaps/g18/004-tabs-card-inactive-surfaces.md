@@ -1,13 +1,13 @@
 # 004 — Tabs card inactive surfaces
 
-Status: ready — waits for g18.003 closeout and separate operator go
+Status: ready — operator approved concurrent dispatch with g18.003 review
 Owner: Poodle Tabs active cohort
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/tabs.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../specs/070-compiled-web-distribution-contract.md`
-Depends on: `g18.003` closeout
+Depends on: none; `g18.003` is an approved concurrent sibling
 
 ## Outcome
 
@@ -26,8 +26,9 @@ Do not add a new prop, change Tabs behaviour, or start a release.
 - [x] Existing `activeFill` already owns tint/solid/none selection strength.
 - [x] Web and native currently share the same missing inactive-fill behaviour.
 - [x] Active-cohort scope, package limits, negative cases, and stop gates are explicit.
-- [ ] `g18.003` has closed so shared manifests, generated docs, and closeout surfaces are free.
-- [ ] A separate operator go authorizes queue dispatch.
+- [x] The g18.003 PR is in independent review and its rich-text/package paths
+  are distinct from the Tabs implementation paths.
+- [x] The operator explicitly approved concurrent queue dispatch with g18.003.
 
 ## Decisions
 
@@ -44,14 +45,15 @@ Do not add a new prop, change Tabs behaviour, or start a release.
 
 ## Dispatch manifest
 
-- **State:** ready after `g18.003` closeout and separate operator go; serial on
-  generated component docs/evidence and canonical closeout surfaces
+- **State:** ready for independent dispatch alongside g18.003 review; keep
+  rich-text/package-manifest paths reserved to g18.003 and let Queue serialize
+  integration/closeout against current main
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** Tabs contract; shared Tabs styles and focused tests;
   Svelte and React Tabs shells/tests only where needed; Tabs Rust spec/render
-  mapping and focused headless/GPUI tests; generated component docs/evidence;
-  required current receipt source-commit repin; one execution log
+  mapping and focused headless/GPUI tests; Tabs-scoped generated component
+  docs/evidence; required current receipt source-commit repin; one execution log
 - **Reserved closeout surfaces:** g18 README, generation index, dispatch
   projection, task status/evidence, release records
 - **Worker:** cross-runtime component worker comfortable with CSS recipe hooks,
@@ -105,4 +107,4 @@ Pending execution.
 ## Next task
 
 After merge and accepted review, return to Chatterbox to recheck and seek the
-explicit release go for `g18.005`. No successor auto-starts.
+explicit release go for `g18.006`. No successor auto-starts.

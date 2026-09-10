@@ -47,9 +47,10 @@ needed to compile honest repair tranches.
 | --- | --- | --- |
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
 | [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
-| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | in execution | Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`; web-only staged admission |
-| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | ready after dependency and separate operator go | `g18.003` closeout; serial generated docs/evidence |
-| [`g18.005`](005-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | `g18.003` and `g18.004`; final source recheck and explicit operator release authority |
+| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | reviewing | Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`; PR #237 |
+| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | ready and approved | independent alongside g18.003 review |
+| [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | ready and approved | independent changelog/parser lane; no release mutation |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | g18.003, g18.004, and g18.005; final source recheck and explicit operator release authority |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -59,13 +60,13 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-`g18.003` is executing through Northstar Queue. `g18.004` is the sole approved
-next task: a fill-only correction that makes every card Tabs item carry the
-semantic surface background while preserving existing selection strength. It
-waits for `g18.003` closeout and a separate operator go. Release, Desktop
-adoption, native editor work, and GPUI repair tranches do not auto-start.
+`g18.003` is under independent review through Northstar Queue. The operator
+approved `g18.004` and bounded `g18.005` preflight as concurrent siblings:
+Tabs gains the fill-only inactive-card surface while preflight repairs only the
+existing changelog/parser blocker. Release, Desktop adoption, native editor
+work, and GPUI repair tranches do not auto-start.
 
-After both component tasks close, `g18.005` prepares and publishes the
+After both component tasks and preflight close, `g18.006` prepares and publishes the
 SemVer-minor `0.4.0` web release to unblock Desktop's retained g02.058 task and
 PR #215. It is not ready: Chatterbox must recheck the final package trees and
 the operator must explicitly authorize release mutation.

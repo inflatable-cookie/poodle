@@ -1,4 +1,4 @@
-# 005 — v0.4.0 web editor release and Desktop unblock
+# 006 — v0.4.0 web editor release and Desktop unblock
 
 Status: planned — waits for g18.003 and g18.004; publication requires explicit operator release authority
 Owner: Poodle release operations
@@ -9,7 +9,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../specs/070-compiled-web-distribution-contract.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
-Depends on: `g18.003`, `g18.004`
+Depends on: `g18.003`, `g18.004`, `g18.005`
 
 ## Outcome
 
@@ -34,7 +34,8 @@ Do not publish before both dependencies close. Do not mutate Desktop.
   `ffb16fed0a8cec7f8a2448bed2f5e680d60a5366` and Svelte
   `de3a5f55d435689f2886e524613364fa2abc785d`.
 - [x] The release and Desktop proof boundaries are explicit.
-- [ ] g18.003 and g18.004 have merged with accepted exact-head review.
+- [ ] g18.003, g18.004, and the g18.005 release preflight have merged with
+  accepted exact-head review.
 - [ ] Final candidate package trees and full v0.3.0-to-candidate delta are known.
 - [ ] The operator explicitly authorizes candidate execution and public release
   mutation after reviewing the final package set.
@@ -61,7 +62,7 @@ Do not publish before both dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** planned and serial after g18.003 plus g18.004; not dispatchable
+- **State:** planned and serial after g18.003, g18.004, and g18.005; not dispatchable
   until Chatterbox rechecks the final source and the operator grants explicit
   release authority
 - **Completion:** one reviewed release-candidate PR merged to main; exact
@@ -132,7 +133,7 @@ Do not publish before both dependencies close. Do not mutate Desktop.
 
 ## Stop conditions
 
-- Stop if g18.003 or g18.004 is not merged and accepted.
+- Stop if g18.003, g18.004, or g18.005 is not merged and accepted.
 - Stop if the final delta contains an unclassified breaking public change or
   requires a version other than `0.4.0`.
 - Stop if local gates, candidate dry run, tag dry run, packing, publication, or
