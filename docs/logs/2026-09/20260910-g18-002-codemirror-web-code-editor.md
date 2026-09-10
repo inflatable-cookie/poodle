@@ -56,3 +56,17 @@ Web-admitted only; native CodeEditor is future work with no placeholder.
 Preview catalogue admission is reserved generation-index closeout. Release
 and Desktop adoption need separate authority (see the adoption-request
 handoff).
+
+## Follow-up: content-aware ordinary JS scope (same branch)
+
+The `web` gate false-positived on the owned manifest work: the ordinary
+installed-package classifier labeled any `package.json` path a version
+surface. Chatterbox ruling keeps the accepted dependency/export design and
+repairs the classifier instead: `test/package-install/scope.ts` now derives
+ordinary JS labels from manifest content (dependency/export changes accepted
+only while version, name, `private`, and `publishConfig`/`registry`
+transport posture hold; version/name mutations stay version surfaces,
+publication/transport mutations stay registry surfaces, unparsable/added/
+deleted manifests fail closed), with focused scope tests and
+package-install README documentation. Strict g16.059 and candidate g16.054
+paths are unchanged. Ordinary `test:web-pack-install` exits 0.
