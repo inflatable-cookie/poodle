@@ -44,14 +44,16 @@ the fifteen admitted feature modules (`document`, `paragraph`, `text`,
   feature/command registries, feature-to-command ownership, toolbar
   derivation (images require a present `requestImage`), and the
   2 MiB / 10,000-node envelope.
-- Svelte board: 41 focused rich-text cases (engine validation, no-echo and
-  host-revert control, toolbar derivation and arrow roving, table insertion
-  and Escape-Tab focus escape, optional images with resolve/cancel/reject/
-  unmount/disable/insert-once races, feature reconfiguration with refusal,
-  renderer equivalence, large-document refusal, SSR cleanup), plus the full
+- Svelte board: 50 focused rich-text cases (engine validation, no-echo and
+  host-revert control, toolbar derivation and arrow roving, table insertion,
+  host-echo no-op, and Escape-Tab focus escape, optional images with resolve/
+  cancel/reject/unmount/disable/insert-once/URL-admission races, feature
+  reconfiguration with refusal and a fresh validator, image onChange
+  round-trip, heading gating, real paste sanitization, renderer equivalence,
+  large-document refusal, SSR cleanup), plus the full
   component board 2906 pass across both shells (a11y and parity sweeps cover
   both rich-text components automatically).
-- React board: 32 focused rich-text cases mirroring the Svelte families.
+- React board: 42 focused rich-text cases mirroring the Svelte families.
 - SSR: `RichTextSsr.test.ts` proves server HTML carries roots/viewport/
   content region with no `ProseMirror`, `contenteditable`, or document
   markup; the engine imports clean in the node-like lane.

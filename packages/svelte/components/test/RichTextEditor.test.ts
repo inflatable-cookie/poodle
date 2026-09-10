@@ -870,25 +870,37 @@ describe("rich-text engine lifecycle (svelte)", () => {
     expect(container.querySelector(".ProseMirror")).toBeNull();
   });
 
-  it("paste through the active schema discards unsafe HTML", () => {
-    const schema = createRichTextSchema(STANDARD_FEATURES);
-    // The DOM parser the engine relies on only creates schema-admitted nodes;
-    // script-bearing HTML cannot survive, and Poodle makes no lossless claim.
-    const fragment = new DOMParser().parseFromString(
-      '<p>safe<script>alert(1)</script><span onclick="x()">more</span></p>',
+  it("paste emits exactly one controlled document and discards unsafe HTML", async () => {
+    const onChange = vi.fn();
+    const { container } = render(RichTextEditor, {
+      props: { value: EMPTY, features: [...STANDARD_FEATURES, "images"], onChange },
+    });
+    await waitFor(() => {
+      expect(container.querySelector(".ProseMirror")).not.toBeNull();
+    });
+    const surface = surfaceOf(container);
+    const clipboard = new DataTransfer();
+    clipboard.setData(
       "text/html",
+      '<p onmouseover="x()">pasted <script>alert(1)</script><strong>bold</strong></p>' +
+        '<img src="javascript:alert(1)"><img src="https://ok.test/a.png">' +
+        '<a href="javascript:alert(2)">bad link</a>',
     );
-    expect(fragment.querySelector("script")).not.toBeNull();
-    // ProseMirror's schema-driven parse only admits known nodes/marks.
-    const editor = document.createElement("div");
-    const engine = createRichTextEngine(
-      editor,
-      baseOptions(),
-      { onChange: () => {}, onToolbar: () => {} },
+    const accepted = surface.dispatchEvent(
+      new ClipboardEvent("paste", { clipboardData: clipboard, bubbles: true, cancelable: true }),
     );
-    engine.runCommand("undo");
-    engine.destroy();
-    expect(editor.querySelector(".ProseMirror")).toBeNull();
+    expect(accepted).toBe(false); // handled paste
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    const surface2 = surfaceOf(container);
+    expect(surface2.querySelector("script")).toBeNull();
+    expect(surface2.querySelector("[onmouseover]")).toBeNull();
+    expect(surface2.querySelectorAll("img")).toHaveLength(1);
+    expect(surface2.querySelector("img")?.getAttribute("src")).toBe("https://ok.test/a.png");
+    expect(surface2.querySelector("a[href]")).toBeNull();
+    // The resulting document round-trips through the same validator.
+    assertValidRichTextDocument(createRichTextSchema([...STANDARD_FEATURES, "images"]), onChange.mock.calls[0][0]);
   });
 
   it("feature registry refuses unknown features at the engine boundary", () => {
@@ -900,5 +912,234 @@ describe("rich-text engine lifecycle (svelte)", () => {
         { onChange: () => {}, onToolbar: () => {} },
       ),
     ).toThrow(/unsupported or duplicate feature/);
+  });
+});
+
+describe("heading feature gating (svelte)", () => {
+  it("headings disabled: the schema refuses heading nodes", () => {
+    const HEADING_DOC: ProseMirrorDocumentJSON = {
+      type: "doc",
+      content: [{ type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "T" }] }],
+    };
+    expect(() =>
+      assertValidRichTextDocument(createRichTextSchema(["formatting"]), HEADING_DOC),
+    ).toThrow(/unsupported node type/);
+    expect(() =>
+      assertValidRichTextDocument(createRichTextSchema(["headings"]), HEADING_DOC),
+    ).not.toThrow();
+  });
+
+  it("headings disabled: heading commands are inert and unavailable", () => {
+    const host = document.createElement("div");
+    const onChange = vi.fn();
+    const engine = createRichTextEngine(
+      host,
+      baseOptions({ features: ["formatting"] }),
+      { onChange, onToolbar: () => {} },
+    );
+    expect(engine.commandState("heading-1")).toEqual({ available: false, active: false });
+    engine.runCommand("heading-1");
+    engine.destroy();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("headings disabled: the component refuses a heading document pre-mount", () => {
+    const HEADING_DOC: ProseMirrorDocumentJSON = {
+      type: "doc",
+      content: [{ type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "T" }] }],
+    };
+    const onChange = vi.fn();
+    expect(() =>
+      render(RichTextEditor, { props: { value: HEADING_DOC, features: ["formatting"], onChange } }),
+    ).toThrow(/unsupported node type/);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("host revert of a user edit (svelte)", () => {
+  it("restores the prior document without a second callback (engine)", () => {
+    const host = document.createElement("div");
+    const onChange = vi.fn();
+    const engine = createRichTextEngine(
+      host,
+      baseOptions({ features: ["headings"] }),
+      { onChange, onToolbar: () => {} },
+    );
+    engine.runCommand("heading-1");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(host.querySelector("h1")).not.toBeNull();
+    // The host restores the pre-edit value; the edit is rejected without echo.
+    engine.update({ value: PLAIN });
+    expect(host.querySelector("h1")).toBeNull();
+    expect(onChange).toHaveBeenCalledTimes(1);
+    engine.destroy();
+  });
+
+  it("restores the prior document without a second callback (component)", async () => {
+    const onChange = vi.fn();
+    const view = render(RichTextEditor, {
+      props: { value: PLAIN, features: ["headings"], onChange },
+    });
+    await waitFor(() => {
+      expect(view.container.querySelector(".ProseMirror")).not.toBeNull();
+    });
+    const heading = view.container.querySelector<HTMLButtonElement>(
+      'button[data-command="heading-1"]',
+    );
+    if (!heading) throw new Error("missing heading command");
+    heading.click();
+    await waitFor(() => {
+      expect(view.container.querySelector("h1")).not.toBeNull();
+    });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    // The host restores the pre-edit value (a genuinely new value object,
+    // as a controlled host state update would send).
+    await view.rerender({ value: { ...PLAIN }, features: ["headings"], onChange });
+    await waitFor(() => {
+      expect(view.container.querySelector("h1")).toBeNull();
+    });
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("a host echo of the engine's own payload is a no-op (table normalization)", async () => {
+    const onChange = vi.fn();
+    const view = render(RichTextEditor, {
+      props: { value: EMPTY, features: ["tables"], onChange },
+    });
+    await waitFor(() => {
+      expect(view.container.querySelector('button[data-command="insert-table"]')).not.toBeNull();
+    });
+    view.container.querySelector<HTMLButtonElement>('button[data-command="insert-table"]')?.click();
+    await waitFor(() => {
+      expect(view.container.querySelector("table")).not.toBeNull();
+    });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const emitted = onChange.mock.calls[0][0] as ProseMirrorDocumentJSON;
+    await view.rerender({ value: emitted, features: ["tables"], onChange });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(view.container.querySelector("table")).not.toBeNull();
+    });
+  });
+});
+
+describe("live reconfiguration keeps the validator fresh (svelte)", () => {
+  it("a later value-only update mounts a newly enabled feature", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const onChange = vi.fn();
+      const view = render(RichTextEditor, {
+        props: { value: PLAIN, features: ["headings"], onChange },
+      });
+      await waitFor(() => {
+        expect(view.container.querySelector(".ProseMirror")).not.toBeNull();
+      });
+      await view.rerender({
+        value: PLAIN,
+        features: ["headings", "horizontal-rule"],
+        onChange,
+      });
+      // Value-only update after the feature change mounts the new module's
+      // content with no refusal.
+      await view.rerender({
+        value: {
+          type: "doc",
+          content: [
+            { type: "paragraph", content: [{ type: "text", text: "a" }] },
+            { type: "horizontalRule" },
+          ],
+        },
+        features: ["headings", "horizontal-rule"],
+        onChange,
+      });
+      await waitFor(() => {
+        expect(view.container.querySelector("hr")).not.toBeNull();
+      });
+      expect(onChange).not.toHaveBeenCalled();
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+});
+
+describe("requestImage URL admission (svelte)", () => {
+  it("refuses executable URLs and non-string alt without inserting", async () => {
+    const deferred: { resolve: (value: RichTextImageInput | null) => void } = {
+      resolve: () => {},
+    };
+    const requestImage = (): Promise<RichTextImageInput | null> =>
+      new Promise((resolve) => {
+        deferred.resolve = resolve;
+      });
+    const onChange = vi.fn();
+    const view = render(RichTextEditor, {
+      props: { value: PLAIN, features: ["images"], requestImage, onChange },
+    });
+    await waitFor(() => {
+      expect(view.container.querySelector('button[data-command="insert-image"]')).not.toBeNull();
+    });
+    const insert = view.container.querySelector<HTMLButtonElement>(
+      'button[data-command="insert-image"]',
+    );
+    if (!insert) throw new Error("missing insert-image");
+    insert.click();
+    await waitFor(() => {
+      expect(insert.disabled).toBe(true);
+    });
+    deferred.resolve({ src: "javascript:alert(1)", alt: "x" });
+    await waitFor(() => {
+      expect(insert.disabled).toBe(false);
+    });
+    expect(view.container.querySelector("img")).toBeNull();
+    expect(onChange).not.toHaveBeenCalled();
+    // Focus is recoverable: the command is available for a new request.
+    insert.click();
+    await waitFor(() => {
+      expect(insert.disabled).toBe(true);
+    });
+    deferred.resolve({ src: "https://ok.test/a.png", alt: undefined as never });
+    await waitFor(() => {
+      expect(insert.disabled).toBe(false);
+    });
+    expect(view.container.querySelector("img")).toBeNull();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("image onChange round-trip (svelte)", () => {
+  it("emits only admitted attributes that pass the same validator", async () => {
+    const deferred: { resolve: (value: RichTextImageInput | null) => void } = {
+      resolve: () => {},
+    };
+    const requestImage = (): Promise<RichTextImageInput | null> =>
+      new Promise((resolve) => {
+        deferred.resolve = resolve;
+      });
+    const onChange = vi.fn();
+    const view = render(RichTextEditor, {
+      props: { value: PLAIN, features: ["images"], requestImage, onChange },
+    });
+    await waitFor(() => {
+      expect(view.container.querySelector('button[data-command="insert-image"]')).not.toBeNull();
+    });
+    view.container.querySelector<HTMLButtonElement>('button[data-command="insert-image"]')?.click();
+    deferred.resolve({ src: "https://x.test/a.png", alt: "chart" });
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    const emitted = onChange.mock.calls[0][0] as ProseMirrorDocumentJSON;
+    const imageNode = emitted.content?.find((child) => child.type === "image");
+    if (!imageNode) throw new Error("no image in the emitted document");
+    for (const key of Object.keys(imageNode.attrs ?? {})) {
+      expect(["src", "alt", "title"]).toContain(key);
+    }
+    assertValidRichTextDocument(createRichTextSchema(["images"]), emitted);
+    // The host echo of its own onChange payload is a no-op.
+    await view.rerender({ value: emitted, features: ["images"], requestImage, onChange });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(view.container.querySelector("img")).not.toBeNull();
+    });
   });
 });

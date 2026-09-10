@@ -95,6 +95,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     }
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
+    // The last host value object pushed to the engine: only a genuinely new
+    // value object is a controlled push; re-renders with the previous value
+    // never count as a host revert.
+    const sentValueRef = useRef(value);
     const [snapshot, setSnapshot] = useState<RichTextToolbarSnapshot | null>(null);
     const [linkEditorOpen, setLinkEditorOpen] = useState(false);
     const [linkValue, setLinkValue] = useState("");
@@ -144,7 +148,19 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     }, []);
 
     useEffect(() => {
-      engineRef.current?.update(latestRef.current);
+      const engine = engineRef.current;
+      if (!engine) return;
+      const next = latestRef.current;
+      // Push the value only when the host actually sent a new value object.
+      // Snapshot-driven re-renders carry the previous host value, which must
+      // never be treated as a host revert.
+      if (next.value !== sentValueRef.current) {
+        engine.update(next);
+        sentValueRef.current = next.value;
+      } else {
+        const { value: _sentValue, ...rest } = next;
+        engine.update(rest);
+      }
     });
 
     const runToolbarCommand = (command: RichTextCommand): void => {
@@ -216,7 +232,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           <div
             className="poodle-rich-text-editor__toolbar"
             role="toolbar"
-            aria-label={ariaLabel}
+            aria-label={`${ariaLabel} toolbar`}
             aria-controls={surfaceId}
             onKeyDown={handleToolbarKeydown}
           >

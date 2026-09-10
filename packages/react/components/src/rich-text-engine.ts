@@ -44,6 +44,7 @@ import {
   RICH_TEXT_MAX_NODES,
   isRichTextCommand,
   resolveRichTextToolbar,
+  richTextAdmittedCommands,
   validateRichTextFeatures,
   type ProseMirrorDocumentJSON,
   type ProseMirrorNodeJSON,
@@ -349,9 +350,13 @@ function extensionsFor(features: readonly RichTextFeature[]): Extensions {
     Text,
     HardBreak,
     UndoRedo,
-    Heading.configure({ levels: [...ADMITTED_HEADING_LEVELS] as Level[] }),
   ];
+  // Every feature module is real: a feature not in the list contributes no
+  // nodes, marks, commands, input rules, or keyboard shortcuts.
   if (features.includes("formatting")) extensions.push(Bold, Italic, Strike, Code);
+  if (features.includes("headings")) {
+    extensions.push(Heading.configure({ levels: [...ADMITTED_HEADING_LEVELS] as Level[] }));
+  }
   if (features.includes("links")) extensions.push(Link);
   if (features.includes("lists")) extensions.push(BulletList, OrderedList, ListItem, ListKeymap);
   if (features.includes("blockquote")) extensions.push(Blockquote);
@@ -360,9 +365,26 @@ function extensionsFor(features: readonly RichTextFeature[]): Extensions {
   if (features.includes("tables")) {
     extensions.push(Table, TableRow, TableCell, TableHeader);
   }
-  if (features.includes("images")) extensions.push(Image);
+  if (features.includes("images")) extensions.push(PoodleImage);
   return extensions;
 }
+
+/**
+ * The Poodle image node admits exactly the contract attributes `src`, `alt`,
+ * and optional `title`. TipTap's stock Image serializes `width` and `height`
+ * (null defaults) into every document JSON, which would make the engine's own
+ * `onChange` payload invalid for the same validator; redeclaring `addAttributes`
+ * keeps the public image model closed.
+ */
+const PoodleImage = Image.extend({
+  addAttributes() {
+    return {
+      src: { default: null },
+      alt: { default: null },
+      title: { default: null },
+    };
+  },
+});
 
 export function createRichTextSchema(features: readonly RichTextFeature[]): Schema {
   assertAdmittedFeatures(features);
@@ -468,6 +490,34 @@ function editorAttributes(options: RichTextEngineOptions): Record<string, string
   };
 }
 
+/**
+ * Paste and drop sanitization. Supported content is parsed through the active
+ * schema; before that parse, script/style/embedded-content elements and
+ * elements carrying refused URLs are discarded. Poodle makes no
+ * lossless-import claim for clipboard HTML.
+ */
+export function sanitizeRichTextPastedHtml(html: string): string {
+  const parsed = new DOMParser().parseFromString(html, "text/html");
+  parsed
+    .querySelectorAll("script, style, iframe, frame, object, embed, link, meta, base, form")
+    .forEach((element) => element.remove());
+  parsed.querySelectorAll("img").forEach((element) => {
+    if (!isAdmittedImageUrl(element.getAttribute("src") ?? "")) {
+      element.remove();
+      return;
+    }
+    // Images always carry the configured alt value; pasted markup without one
+    // becomes an explicit decorative image (empty string).
+    if (element.getAttribute("alt") === null) element.setAttribute("alt", "");
+  });
+  parsed.querySelectorAll("a").forEach((element) => {
+    if (!isAdmittedLinkHref(element.getAttribute("href") ?? "")) {
+      element.removeAttribute("href");
+    }
+  });
+  return parsed.body.innerHTML;
+}
+
 export function createRichTextEngine(
   host: HTMLElement,
   options: RichTextEngineOptions,
@@ -504,6 +554,9 @@ export function createRichTextEngine(
 
   const commandState = (command: RichTextCommand): RichTextCommandState => {
     if (destroyed || !editable() || !isRichTextCommand(command)) {
+      return { available: false, active: false };
+    }
+    if (!richTextAdmittedCommands(features).includes(command)) {
       return { available: false, active: false };
     }
     const can = editor.can();
@@ -583,6 +636,10 @@ export function createRichTextEngine(
 
   function run(command: RichTextCommand): void {
     if (destroyed || !editable() || !isRichTextCommand(command)) return;
+    // Command dispatch is gated on admitted features: a disabled module's
+    // commands do not exist, so no input rule, shortcut, or command can
+    // produce its nodes or marks.
+    if (!richTextAdmittedCommands(features).includes(command)) return;
     switch (command) {
       case "undo":
         editor.chain().focus().undo().run();
@@ -683,6 +740,17 @@ export function createRichTextEngine(
           if (!destroyed) callbacks.onToolbar(snapshot());
           return;
         }
+        // Poodle refuses executable URL schemes everywhere, including the
+        // host-owned asset choice; a refused result changes nothing and
+        // leaves focus recoverable.
+        if (
+          typeof result.src !== "string" ||
+          !isAdmittedImageUrl(result.src) ||
+          typeof result.alt !== "string"
+        ) {
+          if (!destroyed) callbacks.onToolbar(snapshot());
+          return;
+        }
         let from = pending.from;
         let to = pending.to;
         for (const map of pending.mappings) {
@@ -714,7 +782,10 @@ export function createRichTextEngine(
     content: state.value,
     extensions: assembleExtensions(features, () => state.placeholder, editable),
     editable: editable(),
-    editorProps: { attributes: editorAttributes(state) },
+    editorProps: {
+      attributes: editorAttributes(state),
+      transformPastedHTML: sanitizeRichTextPastedHtml,
+    },
   });
   wire(editor);
 
@@ -749,6 +820,11 @@ export function createRichTextEngine(
   // engine-side table normalization is engine state and never re-dispatches
   // a controlled update.
   let lastHostJson = JSON.stringify(state.value);
+  // The engine serialization at the last settle point (accept, revert, or
+  // reconfiguration): a later host value equal to the last accepted host
+  // value but diverging from this serialization is a host revert of a user
+  // edit, restored without an echo.
+  let lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
 
   // The wrapper's toolbar renders from this initial snapshot; user
   // transactions refresh it. Nothing here is a document change.
@@ -806,11 +882,19 @@ export function createRichTextEngine(
           content: state.value,
           extensions: assembleExtensions(features, () => state.placeholder, editable),
           editable: editable(),
-          editorProps: { attributes: editorAttributes(state) },
+          editorProps: {
+            attributes: editorAttributes(state),
+            transformPastedHTML: sanitizeRichTextPastedHtml,
+          },
         });
         wire(replacement);
         editor = replacement;
+        // The validator schema tracks the running features exactly; a stale
+        // schema would refuse later value-only updates that use the newly
+        // enabled module.
+        schema = createRichTextSchema(features);
         lastHostJson = JSON.stringify(state.value);
+        lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
         callbacks.onToolbar(snapshot());
         return;
       }
@@ -840,6 +924,16 @@ export function createRichTextEngine(
           }
           editor.commands.setContent(state.value, { emitUpdate: false });
           lastHostJson = nextJson;
+          lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
+        } else {
+          // Host revert of a user edit: the engine document diverged from the
+          // last accepted document, so restore the accepted host value with
+          // no callback echo. Normalization stays engine state.
+          const engineJson = JSON.stringify(editor.getJSON());
+          if (engineJson !== lastAcceptedEngineJson) {
+            editor.commands.setContent(state.value, { emitUpdate: false });
+            lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
+          }
         }
       }
       if (

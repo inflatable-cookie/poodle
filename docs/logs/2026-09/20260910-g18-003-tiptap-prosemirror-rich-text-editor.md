@@ -29,14 +29,18 @@ no release.
   2 MiB / 10,000-node envelope.
 - Engines (`rich-text-engine.ts`, mirrored in both shells): curated schema
   assembly from features only (always `doc`/`paragraph`/`text`/`hardBreak` +
-  UndoRedo; each feature module adds exactly its nodes/marks), exact
+  UndoRedo; each admitted feature module adds exactly its nodes/marks/
+  commands/input rules/shortcuts), exact
   pre-mount validation (unknown node/mark/attribute, URL scheme, heading
   level, content-fit `check()`), controlled no-echo sync with host-revert
-  rejection, schema-valid live reconfiguration with closed-refusal,
-  toolbar command state, editor-owned link affordance (no browser prompt),
-  retained-selection image insertion with position mapping and
-  resolve/cancel/reject/disable/unmount insert-once semantics, table
-  commands, Escape-then-Tab focus escape, internal placeholder.
+  rejection, schema-valid live reconfiguration with a fresh validator schema
+  and closed refusal, toolbar command state gated on admitted features,
+  editor-owned link affordance (no browser prompt), retained-selection image
+  insertion with position mapping, URL/alt admission on the resolved choice,
+  and resolve/cancel/reject/disable/unmount insert-once semantics, table
+  commands, Escape-then-Tab focus escape, internal placeholder, and
+  paste/drop sanitization (script/style/embed removal, refused URL removal,
+  pasted images coerced to the explicit decorative empty alt).
 - Shells: `RichTextEditor.svelte` / `RichTextEditor.tsx` and
   `RichTextRenderer.svelte` / `RichTextRenderer.tsx` (SSR-safe mount/update/
   destroy; renderer has no contenteditable state), `src/rich-text.ts`
@@ -51,14 +55,45 @@ no release.
 ## Validation
 
 Core 1296 pass (12 new rich-text tests). Component boards 2906 pass across
-both shells (a11y + parity sweeps cover both rich-text components); 41
-focused Svelte cases and 32 focused React cases; SSR 2 pass; packaging
+both shells (a11y + parity sweeps cover both rich-text components); 50
+focused Svelte cases and 42 focused React cases; SSR 2 pass; packaging
 proofs pass; distribution suites 63 pass; shell-build suites pass;
 `svelte:package`, `react:package`, both preview builds clean;
 `web-preview.ts` certification passes with all 23 falsification oracles;
 docs drift selectors (contract, capability, react-prop, value-domain,
 snippet, callback, spec, focus-ring) and drift selectors pass;
 `git diff --check` clean.
+
+## Review repair round (same branch)
+
+Independent review of the first head (`59a744a3`) found five blocking engine
+bugs; each fix below is covered by real engine and component tests on both
+shells:
+
+1. `headings` was always in the schema (no real feature module). Now `Heading`
+   is omitted with its input rules and shortcuts unless `headings` is
+   admitted; `runCommand`/`commandState` gate on admitted features.
+2. A host revert of a user edit was a no-op. The engine now tracks the last
+   accepted engine serialization and restores the accepted host value
+   (emitUpdate false, no echo) when the incoming host value equals the last
+   accepted host value while the engine diverged. Wrappers push the value
+   only when the host sends a genuinely new value object, so unrelated
+   re-renders never count as reverts.
+3. Live reconfiguration left a stale validator schema; the schema now
+   reassigns on feature change, so later value-only updates mount newly
+   enabled content.
+4. `requestImage` results were not URL-checked; executable schemes and
+   non-string `alt` now change nothing, emit nothing, and leave focus
+   recoverable.
+5. Image `onChange` JSON carried unadmitted `width`/`height`; the Poodle
+   image node redeclares `addAttributes` to `src`/`alt`/`title` so the
+   engine's own payload passes the same validator and host echoes are no-ops.
+
+Also from review feedback: real paste fixtures on both shells (one controlled
+paste event emitting exactly one validator-clean document; script, inline
+handlers, refused `javascript:` images/links discarded; admitted image kept
+with explicit decorative alt), a table-normalization host-echo no-op proof,
+and distinct toolbar accessible names (`"<label> toolbar"`).
 
 ## Remaining staged-admission limits
 

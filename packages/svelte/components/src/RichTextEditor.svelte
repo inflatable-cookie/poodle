@@ -71,6 +71,10 @@
   let hostElement: HTMLDivElement | null = $state(null);
   let engine: RichTextEngine | null = null;
   let snapshot: RichTextToolbarSnapshot | null = $state(null);
+  // The last host value object pushed to the engine: only a genuinely new
+  // value object is a controlled push; re-renders with the previous value
+  // never count as a host revert.
+  let sentValue: ProseMirrorDocumentJSON | undefined;
   let linkEditorOpen = $state(false);
   let linkValue = $state("");
   const surfaceId = `poodle-rich-text-editor-${Math.random().toString(36).slice(2)}`;
@@ -116,7 +120,17 @@
   $effect(() => {
     // Read every prop unconditionally before touching `engine`.
     const next = currentOptions();
-    engine?.update(next);
+    // Push the value only when the host actually sent a new value object:
+    // effects that re-run for unrelated prop changes (label, placeholder)
+    // carry the previous host value, which must never count as a revert.
+    const valueChanged = next.value !== sentValue;
+    if (valueChanged) {
+      engine?.update(next);
+      sentValue = next.value;
+    } else if (engine) {
+      const { value: _sentValue, ...rest } = next;
+      engine.update(rest);
+    }
   });
 
   function runToolbarCommand(command: RichTextCommand): void {
@@ -187,7 +201,7 @@
       class="poodle-rich-text-editor__toolbar"
       role="toolbar"
       tabindex="-1"
-      aria-label={ariaLabel}
+      aria-label={`${ariaLabel} toolbar`}
       aria-controls={surfaceId}
       onkeydown={handleToolbarKeydown}
     >
