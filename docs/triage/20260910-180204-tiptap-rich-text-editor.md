@@ -1,6 +1,6 @@
 # TipTap-backed rich-text editor
 
-Status: open — structured-document direction confirmed; schema scope unresolved
+Status: open — v1 content scope confirmed; schema authority unresolved
 Owner: Poodle Chatterbox
 Created: 2026-09-10
 Related: `../contracts/components/code-editor.md`,
@@ -20,6 +20,9 @@ under a separately confirmed staged admission.
 Operator decision 2026-09-10: the target is structured rich-text documents,
 not a WYSIWYG view over authored Markdown. Markdown source and conversion stay
 outside this editor contract.
+
+Operator decision 2026-09-10: tables belong in the first useful schema. Images
+and embeds do not; both remain later explicit schema migrations.
 
 ## Evidence
 
@@ -69,9 +72,10 @@ surface behind dedicated `./rich-text` entries:
 
 Candidate first schema: paragraph, text, heading, bold, italic, strike, inline
 code, link, blockquote, bullet list, ordered list, list item, hard break,
-horizontal rule, and code block. Tables, images, embeds, mentions, custom
-nodes, collaboration, comments, tracked changes, Markdown conversion, and
-consumer save/recovery policy stay out of the first seam.
+horizontal rule, code block, table, table row, table header, and table cell.
+Images, embeds, mentions, custom nodes, collaboration, comments, tracked
+changes, Markdown conversion, and consumer save/recovery policy stay out of
+the first seam.
 
 The consumer remains responsible for translating between the Poodle document
 and any Silo/Farmyard/Bovine envelope. Unsupported input must fail closed; it
@@ -79,16 +83,14 @@ must never be normalized or stripped and then emitted as if lossless.
 
 ## Decisions needed
 
-1. Does the first useful editor need images, tables, embeds, or domain nodes?
-   If yes, name them before fixing the closed schema.
-2. Should Poodle own the versioned generic document schema, or should an
+1. Should Poodle own the versioned generic document schema, or should an
    existing upstream rich-text contract become the semantic authority while
    Poodle owns only its editor projection?
-3. Is the matching read-only renderer part of the first delivery? Recommendation:
+2. Is the matching read-only renderer part of the first delivery? Recommendation:
    yes, because persistence without a stable display path is incomplete.
 
 ## Next check
 
-Confirm the minimum node/mark set and schema authority with the operator. Then
-reconcile the answer with the current upstream rich-text authority before
-promoting a component contract or roadmap task.
+Resolve schema authority with the operator, then reconcile it with the current
+upstream rich-text authority before promoting a component contract or roadmap
+task.
