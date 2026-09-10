@@ -49,8 +49,9 @@ needed to compile honest repair tranches.
 | [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | reviewing | Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`; PR #237 |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | ready and approved | independent alongside g18.003 review |
-| [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | ready and approved | independent changelog/parser lane; no release mutation |
+| [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | verifying | retained PR #238 blocked on g18.007 ordinary-scope repair |
 | [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | g18.003, g18.004, and g18.005; final source recheck and explicit operator release authority |
+| [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | ready and approved | unblocks retained g18.005 PR #238 without a CI exception |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -65,6 +66,11 @@ approved `g18.004` and bounded `g18.005` preflight as concurrent siblings:
 Tabs gains the fill-only inactive-card surface while preflight repairs only the
 existing changelog/parser blocker. Release, Desktop adoption, native editor
 work, and GPUI repair tranches do not auto-start.
+
+g18.005 is implemented and independently accepted, but ordinary web CI rejects
+every changelog change by path. The operator selected g18.007's structural,
+content-aware maintenance rule. PR #238 and its Queue threads remain retained;
+validation retries after g18.007 merges.
 
 After both component tasks and preflight close, `g18.006` prepares and publishes the
 SemVer-minor `0.4.0` web release to unblock Desktop's retained g02.058 task and

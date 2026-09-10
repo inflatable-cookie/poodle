@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Chatterbox
-Updated: 2026-09-10 (g18.003 reviewing; g18.004 and g18.005 approved concurrent)
+Updated: 2026-09-10 (g18.005 blocked; g18.007 structural repair approved)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -17,8 +17,11 @@ commit.
 surfaces — is approved for independent dispatch alongside g18.003 review.
 
 [`g18.005`](g18/005-v040-release-preflight.md) — v0.4.0 release preflight — is
-approved for independent dispatch alongside g18.003 review and g18.004. It may
-repair changelog grammar and inspect release state only; no release mutation.
+implemented and reviewed in retained PR #238 but fails ordinary-scope CI.
+
+[`g18.007`](g18/007-ordinary-changelog-maintenance-scope.md) — ordinary
+changelog maintenance scope — is the approved structural repair. After its
+merge, Queue retries validation on the existing g18.005 task and PR.
 
 ## Active queue task
 

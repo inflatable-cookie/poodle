@@ -11,6 +11,8 @@ Updated: 2026-09-10
     `edb2d303-38c9-44a8-aa2c-a6ff5821643e`.
   - Approved concurrent frontier: `g18.004` Tabs card inactive surfaces and
     `g18.005` v0.4.0 release preflight may execute alongside g18.003 review.
+  - Active blocker repair: `g18.007` ordinary changelog maintenance scope;
+    unblocks retained g18.005 PR #238 without a CI exception.
   - Planned release: `g18.006` v0.4.0 web editor release and Desktop unblock;
     waits for both component tasks and preflight, final source recheck, and
     explicit release authority.

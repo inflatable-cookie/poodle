@@ -24,9 +24,10 @@ review. It delivered the paired Svelte and React CodeEditor over CodeMirror 6
 and the accepted `Tabs.pinned` contract. GPUI CodeEditor parity is a future
 planning horizon and the g18 GPUI repair runway remains open. `g18.003`, the
 paired TipTap/ProseMirror web editor and renderer, is reviewing through Queue.
-`g18.004` and the bounded `g18.005` release preflight are approved to run
-alongside the g18.003 review. Tabs receives the fill-only semantic surface;
-preflight repairs only the existing changelog/parser blocker.
+`g18.004` runs alongside the g18.003 review. The bounded g18.005 release
+preflight is implemented in retained PR #238 but blocked by ordinary-scope CI;
+the operator-approved g18.007 structural classifier repair is the active
+unblock lane. No CI exception is authorized.
 
 After both component tasks and preflight close, `g18.006` is the planned
 `0.4.0` web release and Desktop unblock. It remains held for final-source
