@@ -47,7 +47,8 @@ needed to compile honest repair tranches.
 | --- | --- | --- |
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
 | [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | complete | PR #236 (merge `308fa52c5cd68d9c776f320c368e4fb0896e4d4d`) |
-| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | ready — dispatch requires separate operator go | none; web-only staged admission |
+| [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | in execution | Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`; web-only staged admission |
+| [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | ready after dependency and separate operator go | `g18.003` closeout; serial generated docs/evidence |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -57,10 +58,11 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-`g18.003` is the sole approved ready task. It may dispatch only after a
-separate operator go. It ships paired Svelte/React rich-text editor and
-read-only renderer surfaces over ProseMirror authority; release, Desktop
-adoption, and native work do not auto-start.
+`g18.003` is executing through Northstar Queue. `g18.004` is the sole approved
+next task: a fill-only correction that makes every card Tabs item carry the
+semantic surface background while preserving existing selection strength. It
+waits for `g18.003` closeout and a separate operator go. Release, Desktop
+adoption, native editor work, and GPUI repair tranches do not auto-start.
 
 ## Held and recurring work
 

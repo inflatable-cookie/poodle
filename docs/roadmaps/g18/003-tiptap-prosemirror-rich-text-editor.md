@@ -1,6 +1,6 @@
 # 003 — TipTap/ProseMirror rich-text editor
 
-Status: ready — dispatch requires separate operator go
+Status: in execution — Queue task `edb2d303-38c9-44a8-aa2c-a6ff5821643e`
 Owner: Poodle web components
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,

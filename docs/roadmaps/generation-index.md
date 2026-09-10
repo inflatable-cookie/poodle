@@ -7,10 +7,12 @@ Updated: 2026-09-10
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
   - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236)
-  - Approved frontier: `g18.003` TipTap/ProseMirror rich-text editor; dispatch
-    requires a separate operator go.
-  - Next checkpoint: execute `g18.003` after approval, or compile the first
-    GPUI repair tranche from the accepted `g18.001` census.
+  - Active task: `g18.003` TipTap/ProseMirror rich-text editor, Queue task
+    `edb2d303-38c9-44a8-aa2c-a6ff5821643e`.
+  - Approved next frontier: `g18.004` Tabs card inactive surfaces; waits for
+    `g18.003` closeout and a separate operator go.
+  - Next checkpoint: close `g18.003`, then execute `g18.004` or compile the
+    first GPUI repair tranche from the accepted `g18.001` census.
 
 ## Compacted generations
 

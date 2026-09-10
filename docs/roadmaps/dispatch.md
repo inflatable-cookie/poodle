@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Chatterbox
-Updated: 2026-09-10 (g18.003 promoted; separate operator go required)
+Updated: 2026-09-10 (g18.003 executing; g18.004 promoted behind dependency)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -13,10 +13,17 @@ commit.
 
 ## Ready queue task
 
+[`g18.004`](g18/004-tabs-card-inactive-surfaces.md) — Tabs card inactive
+surfaces. Sole approved next task. Dispatch waits for g18.003 closeout and a
+separate operator go; planning promotion alone is not execution authority. No
+successor auto-starts.
+
+## Active queue task
+
 [`g18.003`](g18/003-tiptap-prosemirror-rich-text-editor.md) —
-TipTap/ProseMirror rich-text editor. Sole approved ready task. Dispatch still
-requires a separate operator go; planning promotion alone is not execution
-authority. No successor auto-starts.
+TipTap/ProseMirror rich-text editor, Queue task
+`edb2d303-38c9-44a8-aa2c-a6ff5821643e`. Queue owns its worker, review, merge,
+and closeout.
 
 ## Held planning horizons
 

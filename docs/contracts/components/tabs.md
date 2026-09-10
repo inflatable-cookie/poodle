@@ -59,7 +59,7 @@ Updated: 2026-09-10
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
 | `variant` | `"card" \| "pill" \| "block"` | `"card"` | no | visual variant; `"card"` is the default |
 | `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the active tab; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the active item (the decoration the former `card` variant had by default — selected item border `accent-base` 32% mixed with `border-subtle`), `"underline"` draws the accent edge along the inline-end side (bottom horizontal, right vertical — the former `strip` variant's indicator). The edge axis is mutually exclusive by construction |
-| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `none` draws no fill (the edge and the selected text colour carry selection alone — `block` + `activeFill="none"` + `activeEdge="underline"` is exactly the deleted `strip` variant), `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
+| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `none` draws no **selection** fill (the variant's idle surface, edge, and selected text colour remain — `block` + `activeFill="none"` + `activeEdge="underline"` is exactly the deleted `strip` variant), `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 | `bordered` | `boolean` | `false` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. `card` is a plain baseline by default — `bordered` for tabs above content, `activeEdge`/`activeFill` for selection emphasis. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `layout` | `"auto" \| "fill"` | `"auto"` | no | fill-layout seam. `"fill"` makes the root take its container's block size (`height: 100%`) and the active panel scroll within it while the strip keeps its natural height; `"auto"` keeps the natural-height grid. Orientation-independent — vertical fill stretches a single row instead. `fill` requires a sized container: in a parent without a definite block size it renders the auto grid at natural height |
@@ -212,7 +212,7 @@ props for parity and ignore them, as they already do for `collapseWhenOverflow`.
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| idle | non-selected tab | `color: text-secondary` |
+| idle | non-selected tab | `color: text-secondary`; card variant also keeps a rounded `background-surface` fill |
 | selected | active value match | variant-specific bg + `color: text-primary` |
 | focus | keyboard focus | `outline: border-width-focus solid accent-focusRing`, `outline-offset: 0.125rem` |
 | disabled | `disabled=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
@@ -601,6 +601,7 @@ to the semantic token, so with no override active rendering is identical.
 |------|------------|----------|
 | `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))` |
 | `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-color-accent-base)` |
+| `--poodle-recipe-tabs-card-item-fill` | every card item background before selection treatment | `var(--poodle-color-background-surface)` |
 | `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-color-accent-base)` |
 | `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-color-text-inverse)` |
 
@@ -646,6 +647,12 @@ One rule, applied by every variant and both opt-in switches:
 | Property | Value |
 |----------|-------|
 | `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` through `--poodle-recipe-tabs-card-item-fill` |
+
+Every card item carries this fill, including inactive, disabled, closable, and
+pinned items. The fill is the card boundary: inactive cards do not add a
+border. Selected fill rules replace it; they do not create the only visible
+card in the strip.
 
 ### Item — Card variant (selected)
 
@@ -679,12 +686,13 @@ switches to `text-inverse`, the same token the primary Button uses on
 
 | Property | Value |
 |----------|-------|
-| `background` | `transparent` |
+| `background` | the variant's idle background (`background-surface` for card; otherwise transparent) |
 
 `activeFill="none"` suppresses the selected fill on every variant: the item
-keeps its idle background (none, on every variant) in both the selected and
-selected-hover states. The selected text colour and the `activeEdge`
-treatment are unaffected — only the fill goes. `block` + `activeFill="none"` +
+keeps its idle background in both the selected and selected-hover states. Card
+therefore remains a surface-filled card; pill and block remain unfilled. The
+selected text colour and the `activeEdge` treatment are unaffected — only the
+selection fill goes. `block` + `activeFill="none"` +
 `activeEdge="underline"` is the deleted `strip` variant: underline, no fill.
 
 ### Tab — Pill variant
@@ -954,7 +962,10 @@ does not read the hook.
   paint-only indicator node. GPUI may use the named static/opacity
   approximation until generic translation and scale exist; semantic selection
   and the measured endpoint remain exact.
-- `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground. `activeFill="none"` maps to **no** background on the selected tab (the `is_active` branch skips the fill assignment entirely); the selected text colour and the `activeEdge` treatment are unaffected.
+- Every native card item maps `color.background.surface` onto its item node,
+  matching the web chip around label, count, and close. Inactive card items do
+  not add a border.
+- `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground. `activeFill="none"` skips the selection fill assignment: card retains its idle `background.surface`, while pill and block remain unfilled; selected text colour and `activeEdge` are unaffected.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
@@ -995,7 +1006,7 @@ does not read the hook.
 ### Tier 2: Visual Parity
 
 - [ ] all three variants render with exact token/dimension match
-- [ ] color-mix percentages match (82%, 18%, 74%, 90%, 96%; outline edge 32%)
+- [ ] card idle `background-surface` and color-mix percentages match (82%, 18%, 74%, 90%, 96%; outline edge 32%)
 - [ ] font-size 0.75rem, font-weight 600, line-height 1 match
 - [ ] min-height calc expressions match per variant
 - [ ] padding values match per variant
@@ -1057,7 +1068,8 @@ drag nor Alt+Arrow can move Details or place a file tab before it.
 ### Card variant (active outline)
 
 Card tabs with `activeEdge="outline"`. The selected tab carries the former
-`card` variant's outline (accent 32% border); everything else is flat:
+`card` variant's outline (accent 32% border); every inactive tab remains a
+surface-filled card without a border:
 
 | Tab label | State |
 |-----------|-------|
