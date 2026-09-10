@@ -1,6 +1,6 @@
 # TipTap-backed rich-text editor
 
-Status: open — operator interest confirmed; document authority unresolved
+Status: open — structured-document direction confirmed; schema scope unresolved
 Owner: Poodle Chatterbox
 Created: 2026-09-10
 Related: `../contracts/components/code-editor.md`,
@@ -16,6 +16,10 @@ CodeMirror-backed `CodeEditor`: Poodle owns the public semantics, controls,
 tokens, accessibility, package boundary, and Svelte/React alignment; the engine
 and ProseMirror types stay private. GPUI/native support may remain future work
 under a separately confirmed staged admission.
+
+Operator decision 2026-09-10: the target is structured rich-text documents,
+not a WYSIWYG view over authored Markdown. Markdown source and conversion stay
+outside this editor contract.
 
 ## Evidence
 
@@ -75,20 +79,16 @@ must never be normalized or stripped and then emitted as if lossless.
 
 ## Decisions needed
 
-1. Is the Desktop target structured rich-text JSON, or a WYSIWYG view over
-   authored Markdown? These are different contracts. The first is the cleaner
-   TipTap seam; the second depends on a lossless Markdown round-trip that the
-   current beta extension does not yet justify.
-2. Does the first useful editor need images, tables, embeds, or domain nodes?
+1. Does the first useful editor need images, tables, embeds, or domain nodes?
    If yes, name them before fixing the closed schema.
-3. Should Poodle own the versioned generic document schema, or should an
+2. Should Poodle own the versioned generic document schema, or should an
    existing upstream rich-text contract become the semantic authority while
    Poodle owns only its editor projection?
-4. Is the matching read-only renderer part of the first delivery? Recommendation:
+3. Is the matching read-only renderer part of the first delivery? Recommendation:
    yes, because persistence without a stable display path is incomplete.
 
 ## Next check
 
-Confirm the intended persisted content model and minimum node/mark set with the
-operator. Then reconcile the answer with the current upstream rich-text
-authority before promoting a component contract or roadmap task.
+Confirm the minimum node/mark set and schema authority with the operator. Then
+reconcile the answer with the current upstream rich-text authority before
+promoting a component contract or roadmap task.
