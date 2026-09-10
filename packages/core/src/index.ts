@@ -793,6 +793,36 @@ export {
   type ValidatedDiagnostics,
 } from "./code-editor";
 
+export {
+  RICH_TEXT_FEATURES,
+  RICH_TEXT_COMMANDS,
+  RICH_TEXT_STANDARD_FEATURES,
+  RICH_TEXT_FEATURE_COMMANDS,
+  RICH_TEXT_BASE_COMMANDS,
+  RICH_TEXT_COMMAND_LABELS,
+  RICH_TEXT_TOGGLE_COMMANDS,
+  RICH_TEXT_MAX_BYTES,
+  RICH_TEXT_MAX_NODES,
+  isRichTextFeature,
+  isRichTextCommand,
+  validateRichTextFeatures,
+  richTextAdmittedCommands,
+  validateRichTextToolbar,
+  resolveRichTextToolbar,
+  richTextSerializedByteLength,
+  countRichTextNodes,
+  isRichTextDocumentAdmissible,
+  type ProseMirrorMarkJSON,
+  type ProseMirrorNodeJSON,
+  type ProseMirrorDocumentJSON,
+  type RichTextImageInput,
+  type RichTextFeature,
+  type RichTextCommand,
+  type RichTextFeatureValidation,
+  type RichTextToolbarValidation,
+  type RichTextToolbarResult,
+} from "./rich-text";
+
 
 export {
   decodeDockPanelSubject,

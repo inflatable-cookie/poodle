@@ -1,0 +1,272 @@
+/**
+ * RichTextEditor / RichTextRenderer styles.
+ * Contract: docs/contracts/components/rich-text-editor.md §7-8.
+ *
+ * All engine-class overrides (TipTap/ProseMirror) are scoped under
+ * `.poodle-rich-text-editor` and `.poodle-rich-text-renderer` so consumers
+ * need no global TipTap or ProseMirror CSS. The editing viewport owns
+ * overflow; tables scroll horizontally inside it rather than widening the page.
+ */
+
+.poodle-rich-text-editor {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--poodle-color-background-panel);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-surface);
+  color: var(--poodle-color-text-primary);
+  overflow: hidden;
+}
+
+.poodle-rich-text-editor__toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--poodle-space-inline-xs);
+  padding: var(--poodle-space-inline-xs) var(--poodle-space-inline-md);
+  background: var(--poodle-color-background-subtle);
+  border-block-end: 0.0625rem solid var(--poodle-color-border-subtle);
+}
+
+.poodle-rich-text-editor__toolbar-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  border-radius: var(--poodle-radius-control);
+  background: transparent;
+  color: var(--poodle-color-text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  padding: var(--poodle-space-stack-2xs) var(--poodle-space-inline-sm);
+  min-inline-size: 0;
+  cursor: pointer;
+}
+
+.poodle-rich-text-editor__toolbar-button:hover {
+  background: var(--poodle-color-surface-hover);
+}
+
+.poodle-rich-text-editor__toolbar-button[data-pressed="true"] {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-rich-text-editor__toolbar-button:disabled {
+  opacity: var(--poodle-state-opacity-disabled);
+  cursor: default;
+}
+
+/* Keyboard focus carries the shared treatment; pointer focus paints none. */
+:root[data-poodle-input-modality="keyboard"] .poodle-rich-text-editor__toolbar-button:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}
+
+.poodle-rich-text-editor__link-editor {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-inline-xs);
+  padding: var(--poodle-space-inline-xs) var(--poodle-space-inline-md);
+  border-block-end: 0.0625rem solid var(--poodle-color-border-subtle);
+}
+
+.poodle-rich-text-editor__link-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--poodle-color-text-primary);
+  background: var(--poodle-color-background-panel);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-control);
+  padding: var(--poodle-space-stack-2xs) var(--poodle-space-inline-sm);
+}
+
+:root[data-poodle-input-modality="keyboard"] .poodle-rich-text-editor__link-input:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}
+
+.poodle-rich-text-editor__viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+}
+
+/* The ProseMirror surface fills the viewport; the viewport owns scrolling. */
+.poodle-rich-text-editor__viewport .ProseMirror {
+  min-height: 100%;
+  outline: none;
+  padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-lg);
+  caret-color: var(--poodle-color-text-primary);
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror-focused,
+.poodle-rich-text-editor__viewport .ProseMirror:focus {
+  outline: none;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror ::selection {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 28%, transparent);
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror-selectednode {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-base);
+}
+
+/* The placeholder shows only for one empty editable first paragraph. */
+.poodle-rich-text-editor__viewport .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  inline-size: 0;
+  block-size: 0;
+  pointer-events: none;
+  color: var(--poodle-color-text-secondary);
+}
+
+/* Links */
+.poodle-rich-text-editor__viewport .ProseMirror a,
+.poodle-rich-text-renderer a {
+  color: var(--poodle-color-accent-base);
+  text-decoration: underline;
+}
+
+:root[data-poodle-input-modality="keyboard"] .poodle-rich-text-editor__viewport .ProseMirror a:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}
+
+/* Code */
+.poodle-rich-text-editor__viewport .ProseMirror code,
+.poodle-rich-text-renderer code {
+  font-family: var(--poodle-typography-code-family);
+  font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
+  background: var(--poodle-color-background-subtle);
+  border-radius: var(--poodle-radius-control);
+  padding: 0 var(--poodle-space-inline-2xs);
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror pre,
+.poodle-rich-text-renderer pre {
+  font-family: var(--poodle-typography-code-family);
+  font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
+  background: var(--poodle-color-background-subtle);
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  border-radius: var(--poodle-radius-surface);
+  padding: var(--poodle-space-stack-sm) var(--poodle-space-inline-md);
+  overflow: auto;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror pre code,
+.poodle-rich-text-renderer pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Blockquote */
+.poodle-rich-text-editor__viewport .ProseMirror blockquote,
+.poodle-rich-text-renderer blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--poodle-space-inline-md);
+  border-inline-start: 0.25rem solid var(--poodle-color-border-strong);
+  color: var(--poodle-color-text-secondary);
+}
+
+/* Tables: default borders, header surface, cell focus/selection; bounded
+ * tables scroll inside the viewport instead of widening the host page. */
+.poodle-rich-text-editor__viewport .ProseMirror table,
+.poodle-rich-text-renderer table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  inline-size: 100%;
+  margin-block: var(--poodle-space-stack-sm);
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror th,
+.poodle-rich-text-editor__viewport .ProseMirror td,
+.poodle-rich-text-renderer th,
+.poodle-rich-text-renderer td {
+  border: 0.0625rem solid var(--poodle-color-border-subtle);
+  padding: var(--poodle-space-stack-xs) var(--poodle-space-inline-sm);
+  text-align: start;
+  vertical-align: top;
+  min-inline-size: 1rem;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror th,
+.poodle-rich-text-renderer th {
+  background: var(--poodle-color-background-subtle);
+  font-weight: 600;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror .selectedCell {
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror .selectedCell:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror .column-resize-handle {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 0.25rem;
+  background: var(--poodle-color-accent-base);
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+/* Images: media radius, selection outline, fallback surface; intrinsic size
+ * stays inside the content width with the aspect ratio preserved. */
+.poodle-rich-text-editor__viewport .ProseMirror img,
+.poodle-rich-text-renderer img {
+  max-inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--poodle-radius-surface);
+  background: var(--poodle-color-background-subtle);
+  display: block;
+}
+
+.poodle-rich-text-editor__viewport .ProseMirror img.ProseMirror-selectednode {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-base);
+}
+
+.poodle-rich-text-editor[data-disabled="true"] {
+  opacity: var(--poodle-state-opacity-disabled);
+}
+
+.poodle-rich-text-editor[data-readonly="true"] .poodle-rich-text-editor__toolbar {
+  display: none;
+}
+
+/* Renderer: ordinary document content; same document tokens. */
+.poodle-rich-text-renderer {
+  min-width: 0;
+  display: flow-root;
+  inline-size: 100%;
+  color: var(--poodle-color-text-primary);
+  overflow-wrap: break-word;
+}
+
+.poodle-rich-text-renderer__content > :first-child {
+  margin-block-start: 0;
+}
+
+.poodle-rich-text-renderer__content > :last-child {
+  margin-block-end: 0;
+}

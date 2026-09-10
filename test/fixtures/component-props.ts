@@ -187,6 +187,19 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   // The controlled value is required: mounting without one is a host error,
   // not an empty state.
   CodeEditor: { value: "const x = 1;" },
+  RichTextEditor: {
+    value: {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "Rich text" }] }],
+    },
+    features: ["formatting", "links"],
+  },
+  RichTextRenderer: {
+    value: {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "Rich text" }] }],
+    },
+  },
   Radio: { value: "a", label: "Option A" },
   Switch: { label: "Enabled" },
   NumberInput: { ariaLabel: "Amount" },

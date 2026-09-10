@@ -46,6 +46,11 @@
       "browser": "./dist/editor.client.js",
       "default": "./dist/editor.server.js"
     },
+    "./rich-text": {
+      "types": "./dist/rich-text.d.ts",
+      "browser": "./dist/rich-text.client.js",
+      "default": "./dist/rich-text.server.js"
+    },
     "./types": {
       "types": "./dist/types.d.ts",
       "browser": "./dist/types.js",
@@ -88,6 +93,25 @@
     "@codemirror/search": "6.7.2",
     "@codemirror/state": "6.7.4",
     "@codemirror/view": "6.43.11",
-    "@inflatable-cookie/poodle-core": "0.3.0"
+    "@inflatable-cookie/poodle-core": "0.3.0",
+    "@tiptap/core": "3.31.3",
+    "@tiptap/extension-blockquote": "3.31.3",
+    "@tiptap/extension-bold": "3.31.3",
+    "@tiptap/extension-code": "3.31.3",
+    "@tiptap/extension-code-block": "3.31.3",
+    "@tiptap/extension-document": "3.31.3",
+    "@tiptap/extension-hard-break": "3.31.3",
+    "@tiptap/extension-heading": "3.31.3",
+    "@tiptap/extension-horizontal-rule": "3.31.3",
+    "@tiptap/extension-image": "3.31.3",
+    "@tiptap/extension-italic": "3.31.3",
+    "@tiptap/extension-link": "3.31.3",
+    "@tiptap/extension-list": "3.31.3",
+    "@tiptap/extension-paragraph": "3.31.3",
+    "@tiptap/extension-strike": "3.31.3",
+    "@tiptap/extension-table": "3.31.3",
+    "@tiptap/extension-text": "3.31.3",
+    "@tiptap/extensions": "3.31.3",
+    "@tiptap/pm": "3.31.3"
   }
 }

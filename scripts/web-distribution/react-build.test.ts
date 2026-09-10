@@ -87,7 +87,7 @@ void size;
 
 describe("React compiled distribution", () => {
   test("frozen exports stay private and match spec 070", () => {
-    expect(Object.keys(reactPackageExports())).toHaveLength(4 + SHELL_ROSTER_NAMES.length); // g18.002 adds ./editor
+    expect(Object.keys(reactPackageExports())).toHaveLength(5 + SHELL_ROSTER_NAMES.length); // g18.002 adds ./editor, g18.003 adds ./rich-text
     const manifest = JSON.parse(readFileSync(join(reactRoot, "package.json"), "utf8")) as {
       private?: boolean;
       publishConfig?: { access?: string };

@@ -205,6 +205,38 @@ export const INTERNAL_SVELTE_NAMES = ["DragDropProvider", "MenuSurface"] as cons
 export const EDITOR_ENTRY_NAME = "editor";
 export const EDITOR_SVELTE_NAMES = ["CodeEditor"] as const;
 
+/**
+ * The rich-text engine lives behind dedicated `./rich-text` entries so root,
+ * `./markdown`, and `./editor` consumers never load TipTap or ProseMirror.
+ * `RichTextEditor` and `RichTextRenderer` are deliberately absent from
+ * `SHELL_ROSTER_NAMES`: they must not join the root barrel, the 176-name
+ * roster, or any successor denominator.
+ */
+export const RICH_TEXT_ENTRY_NAME = "rich-text";
+export const RICH_TEXT_SVELTE_NAMES = ["RichTextEditor", "RichTextRenderer"] as const;
+
+export const TIPTAP_EXTERNAL_MODULES = [
+  "@tiptap/core",
+  "@tiptap/extension-blockquote",
+  "@tiptap/extension-bold",
+  "@tiptap/extension-code",
+  "@tiptap/extension-code-block",
+  "@tiptap/extension-document",
+  "@tiptap/extension-hard-break",
+  "@tiptap/extension-heading",
+  "@tiptap/extension-horizontal-rule",
+  "@tiptap/extension-image",
+  "@tiptap/extension-italic",
+  "@tiptap/extension-link",
+  "@tiptap/extension-list",
+  "@tiptap/extension-paragraph",
+  "@tiptap/extension-strike",
+  "@tiptap/extension-table",
+  "@tiptap/extension-text",
+  "@tiptap/extensions",
+  "@tiptap/pm",
+] as const;
+
 export const CODEMIRROR_EXTERNAL_MODULES = [
   "@codemirror/commands",
   "@codemirror/lang-css",
@@ -235,6 +267,7 @@ export const SVELTE_EXTERNAL_MODULES = [
   "@inflatable-cookie/poodle-core",
   "marked",
   ...CODEMIRROR_EXTERNAL_MODULES,
+  ...TIPTAP_EXTERNAL_MODULES,
 ] as const;
 
 export const REACT_EXTERNAL_MODULES = [
@@ -243,6 +276,7 @@ export const REACT_EXTERNAL_MODULES = [
   "@inflatable-cookie/poodle-core",
   "marked",
   ...CODEMIRROR_EXTERNAL_MODULES,
+  ...TIPTAP_EXTERNAL_MODULES,
 ] as const;
 
 assertSorted([...SHELL_ROSTER_NAMES], "SHELL_ROSTER_NAMES");
@@ -288,6 +322,11 @@ export function sveltePackageExports() {
       "./dist/editor.client.js",
       "./dist/editor.server.js",
     ),
+    "./rich-text": svelteCondition(
+      "./dist/rich-text.d.ts",
+      "./dist/rich-text.client.js",
+      "./dist/rich-text.server.js",
+    ),
     "./types": svelteCondition("./dist/types.d.ts", "./dist/types.js", "./dist/types.js"),
   };
 }
@@ -297,6 +336,7 @@ export function reactPackageExports() {
     ".": reactCondition("./dist/index.d.ts", "./dist/index.js"),
     "./markdown": reactCondition("./dist/markdown.d.ts", "./dist/markdown.js"),
     "./editor": reactCondition("./dist/editor.d.ts", "./dist/editor.js"),
+    "./rich-text": reactCondition("./dist/rich-text.d.ts", "./dist/rich-text.js"),
     "./types": reactCondition("./dist/types.d.ts", "./dist/types.js"),
   };
   for (const name of SHELL_ROSTER_NAMES) {
@@ -310,6 +350,7 @@ export function svelteDualEntries(): LibraryEntry[] {
     { name: "index", source: "src/index.ts", outputExt: ".js" },
     { name: "markdown", source: "src/markdown.ts", outputExt: ".js" },
     { name: EDITOR_ENTRY_NAME, source: "src/editor.ts", outputExt: ".js" },
+    { name: RICH_TEXT_ENTRY_NAME, source: "src/rich-text.ts", outputExt: ".js" },
     ...SHELL_ROSTER_NAMES.map((name) => ({
       name,
       source: `src/${name}.svelte`,
@@ -329,6 +370,7 @@ export function reactLibraryEntries(): LibraryEntry[] {
     { name: "index", source: "src/index.ts", outputExt: ".js" },
     { name: "markdown", source: "src/markdown.ts", outputExt: ".js" },
     { name: EDITOR_ENTRY_NAME, source: "src/editor.ts", outputExt: ".js" },
+    { name: RICH_TEXT_ENTRY_NAME, source: "src/rich-text.ts", outputExt: ".js" },
     { name: "types", source: "src/types.ts", outputExt: ".js" },
     ...SHELL_ROSTER_NAMES.map((name) => ({
       name,
@@ -351,6 +393,9 @@ export function sveltePublicFiles(): string[] {
     "dist/editor.client.js",
     "dist/editor.server.js",
     "dist/editor.d.ts",
+    "dist/rich-text.client.js",
+    "dist/rich-text.server.js",
+    "dist/rich-text.d.ts",
     "dist/types.js",
     "dist/types.d.ts",
   ];
@@ -367,6 +412,8 @@ export function reactPublicFiles(): string[] {
     "dist/markdown.js",
     "dist/editor.js",
     "dist/editor.d.ts",
+    "dist/rich-text.js",
+    "dist/rich-text.d.ts",
     "dist/types.js",
     "dist/types.d.ts",
   ];
@@ -389,7 +436,12 @@ function listBasenames(directory: string, suffix: string): string[] {
 export function assertSvelteInventoriesMatchDisk(repoRoot: string): void {
   const packageRoot = join(repoRoot, SVELTE_PACKAGE_DIR);
   const svelteFiles = listBasenames(join(packageRoot, "src"), ".svelte");
-  const expected = [...SHELL_ROSTER_NAMES, ...INTERNAL_SVELTE_NAMES, ...EDITOR_SVELTE_NAMES].sort();
+  const expected = [
+    ...SHELL_ROSTER_NAMES,
+    ...INTERNAL_SVELTE_NAMES,
+    ...EDITOR_SVELTE_NAMES,
+    ...RICH_TEXT_SVELTE_NAMES,
+  ].sort();
   if (svelteFiles.join("\n") !== expected.join("\n")) {
     throw new Error("Svelte *.svelte inventory disagrees with spec 070 roster plus internals");
   }
