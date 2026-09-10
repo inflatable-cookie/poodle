@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-09-09
+Updated: 2026-09-10
 
 Northstar roadmaps use one generation-plus-task model:
 
@@ -19,8 +19,10 @@ Northstar roadmaps use one generation-plus-task model:
 - [`../evidence/nucleus/`](../evidence/nucleus/) holds the current Nucleus
   cohort, M1/A1 receipts, schemas, and generated ledger.
 
-`g18.001` is the approved ready task. It establishes a contract-bound GPUI
-functionality census before component repair tranches are compiled.
+`g18.002` is the sole approved ready task, pending a separate operator queue
+go. It delivers the paired Svelte and React CodeEditor over CodeMirror 6 and
+the already accepted `Tabs.pinned` contract. GPUI CodeEditor parity is a future
+planning horizon and the g18 GPUI repair runway remains open.
 
 ## Rules
 

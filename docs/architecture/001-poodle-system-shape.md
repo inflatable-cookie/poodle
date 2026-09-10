@@ -88,6 +88,13 @@ admission runway can exercise real renderer behaviour without requiring every
 Poodle worktree to clone or link the sibling engine repository. Deferral does
 not make Jetstream passing.
 
+`CodeEditor` has one narrower staged admission by operator decision on
+2026-09-10. Its Svelte and React wrappers may ship together over CodeMirror 6
+before a native implementation exists. The surface remains labelled
+web-admitted, keeps engine objects private, and reserves the same semantic
+contract for a later GPUI implementation. This does not weaken the cohort rule
+for another component or for portable surfaces composed beside the editor.
+
 The g14 attempt to bind the cohort through one generated portable interface,
 case corpus, normalized observation, and completion gate was rejected on cost
 and correctness evidence. Component contracts, shared substrate tests,
@@ -124,6 +131,18 @@ used by Svelte and native renderers.
 
 Bits Svelte may be used inside the Svelte implementation where useful. It is
 not part of Poodle's public contract and does not constrain other runtimes.
+
+### Engine-backed web surfaces
+
+An admitted engine-backed surface wraps the engine; it does not re-export it.
+Shared TypeScript owns semantic types and engine-independent state translation.
+Framework shells own mount, update, and teardown. A dedicated package subpath
+keeps the engine out of unrelated consumer bundles.
+
+`CodeEditor` uses CodeMirror 6 for both web frameworks. Poodle selects and pins
+the extension set, maps Poodle themes, converts transactions into the public
+change payload, and owns accessibility behavior above the engine defaults.
+Consumers receive no CodeMirror extension slot or raw view/model handle.
 
 ## Native Architecture
 

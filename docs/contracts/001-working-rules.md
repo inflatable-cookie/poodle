@@ -134,6 +134,23 @@ Where a web capability has no native equivalent, the native target implements
 the *observable result* by its own means, or the contract records why it
 cannot.
 
+### CodeEditor staged web admission
+
+Operator decision 2026-09-10: `CodeEditor` may ship first as a complete
+TypeScript/web pair over CodeMirror 6. Svelte and React remain one admission;
+neither may ship alone. Its Rust spec, `poodle-render` composition, and GPUI
+implementation are a named future admission and do not block the web package.
+
+This is a component-specific staged admission, not a general web-only escape:
+
+- the contract and evidence say `web-admitted`, never parity-complete;
+- CodeMirror types, transactions, themes, and extensions stay private;
+- no native placeholder, fake construction route, or accepted-absence receipt
+  improves GPUI counts;
+- native work later implements the same public semantics by native means;
+- existing portable components touched by the task, including `Tabs`, still
+  satisfy the normal active-cohort rule.
+
 ## Component Ownership
 
 - Poodle owns reusable primitives, composites, and general workstation shells.

@@ -25,8 +25,20 @@ general seam: pinned tabs cannot move, and unpinned tabs cannot cross them.
 ## Package posture
 
 No released package or accepted source pin contains this surface. The intake
-does not authorize implementation, release, or Desktop adoption. A future
-implementation must ship through the full active cohort and should isolate its
-editor dependency behind a dedicated `./editor` package subpath. Desktop
-g02.058 remains gated until that separately approved work is merged and
-released or explicitly source-pinned.
+does not authorize implementation, release, or Desktop adoption. The initial
+implementation isolates its editor dependency behind a dedicated `./editor`
+package subpath. Desktop g02.058 remains gated until that separately approved
+work is merged and released or explicitly source-pinned.
+
+## Operator follow-up
+
+The operator confirmed CodeMirror 6 on 2026-09-10 and prioritized complete
+TypeScript/web support. Svelte and React ship together; TypeScript syntax is in
+the first language set. GPUI and shared Rust are a future admission and do not
+block the web package. The component remains labelled web-admitted rather than
+parity-complete.
+
+The public contract now uses UTF-16 offsets and exact replacement edits,
+matching CodeMirror without leaking its transactions. It drops guessed
+edit-origin labels. CodeMirror stays private behind dedicated `./editor`
+entries, with no arbitrary extension surface.

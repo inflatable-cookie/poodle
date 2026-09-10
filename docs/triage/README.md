@@ -23,5 +23,3 @@ Current open notes:
   only single-consumer Tabs asks remain after `0.3.0` adoption.
 - `20260905-111233-gpui-unofficial-adoption-gates.md` — published
   `gpui-apple` build failure and live AccessKit-tree proof still block A2.
-- `20260910-code-editor-implementation-hold.md` — accepted reusable editor and
-  pinned-tab contracts await separate implementation and release authority.

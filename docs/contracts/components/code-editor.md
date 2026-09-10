@@ -7,14 +7,14 @@ Updated: 2026-09-10
 
 - Component name: `CodeEditor`
 - Layer: `composites`
-- Summary: a controlled code and plain-text editing surface with syntax,
-  search, line numbers, diagnostics, and bounded large-document behavior
+- Summary: a web-admitted controlled code and plain-text editing surface with
+  syntax, search, line numbers, diagnostics, and bounded large-document behavior
 - In scope: exact text editing, semantic change intent, language mode, search,
   line numbers, diagnostic decoration and navigation, read-only and disabled
   states, keyboard/focus behavior, editor-local scrolling
 - Out of scope: paths, file loading, persistence, drafts, revisions, saves,
   recovery, Markdown/frontmatter projection, review policy, diffs, validity,
-  collaboration, arbitrary editor plugins
+  collaboration, arbitrary editor plugins, native parity in the first admission
 
 `CodeEditor` edits the string the host supplies. It never interprets that
 string as a file or claims authority over what it means. `CodeInput` remains
@@ -43,7 +43,7 @@ an unrelated painted copy is not conforming.
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
 | `value` | `string` | - | yes | Host-controlled exact text. No newline, Unicode, or whitespace normalization. |
-| `language` | `CodeEditorLanguage` | `"plain-text"` | no | Syntax and language-service hint. |
+| `language` | `CodeEditorLanguage` | `"plain-text"` | no | Syntax hint from the closed admitted set. |
 | `lineNumbers` | `boolean` | `true` | no | Shows the logical-line gutter. |
 | `searchable` | `boolean` | `true` | no | Enables the editor-owned find panel and search shortcuts. |
 | `diagnostics` | `CodeEditorDiagnostic[]` | `[]` | no | Host-authored messages attached to positions in the current value. |
@@ -56,7 +56,7 @@ an unrelated painted copy is not conforming.
 | `tabBehavior` | `"focus" \| "indent"` | `"focus"` | no | `focus` lets Tab leave. `indent` inserts indentation; Escape then Tab leaves. |
 | `performanceMode` | `"full" \| "plain"` | `"full"` | no | Explicit host choice. `plain` disables syntax tokenization but preserves editing, line numbers, search, diagnostics, and exact events. |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit spacing-density override. |
-| `onChange` | `((change: CodeEditorChange) => void) \| null` | `null` | no | One semantic callback for each committed user edit transaction. |
+| `onChange` | `((change: CodeEditorChange) => void) \| null` | `null` | no | One exact callback for each committed user edit transaction. |
 
 ### Supporting Types
 
@@ -69,20 +69,14 @@ type CodeEditorLanguage =
   | "toml"
   | "javascript"
   | "typescript"
-  | "svelte"
   | "html"
   | "css"
   | "rust"
   | "shell";
 
-interface CodeEditorPosition {
-  line: number;
-  column: number;
-}
-
 interface CodeEditorRange {
-  start: CodeEditorPosition;
-  end: CodeEditorPosition;
+  from: number;
+  to: number;
 }
 
 interface CodeEditorDiagnostic {
@@ -102,14 +96,14 @@ interface CodeEditorTextEdit {
 interface CodeEditorChange {
   value: string;
   edits: CodeEditorTextEdit[];
-  origin: "input" | "paste" | "cut" | "drop" | "undo" | "redo";
 }
 ```
 
-Positions are one-based logical line and one-based Unicode-scalar column.
-Ranges are start-inclusive and end-exclusive. Every edit range is measured
-against the previous `value`. Edits in one callback are ordered and
+Offsets count UTF-16 code units, matching JavaScript strings and CodeMirror's
+document model. Ranges are start-inclusive and end-exclusive. Every edit range
+is measured against the previous `value`. Edits in one callback are ordered and
 non-overlapping. `value` is the exact complete result after applying them.
+Poodle does not guess edit origin from browser events.
 
 Diagnostics with an invalid or out-of-bounds range are omitted and reported
 through development diagnostics. They are never clamped onto different text.
@@ -170,7 +164,7 @@ public payloads.
 | F8 / Shift+F8 | Next / previous diagnostic, moving the caret to its range and announcing it. |
 | Tab | Leaves when `tabBehavior="focus"`; inserts indentation in `indent` mode. |
 | Escape then Tab | Leaves an editor in `indent` mode without changing text. |
-| platform undo/redo | Emits one exact `undo` or `redo` change when editable. |
+| platform undo/redo | Emits one exact change when editable. |
 
 Keyboard editing follows the platform text system, including IME. Composition
 does not emit partial callbacks; the committed composition emits one `input`
@@ -216,21 +210,26 @@ engine classes to its semantic tokens inside the component distribution.
 
 ## 9. Runtime Notes
 
-- Svelte is the reference implementation, but the contract is not Svelte-only.
-- React uses the same value, language, diagnostic, and `onChange` semantics.
-- Shared Rust carries the closed language domain, positions, diagnostics,
-  performance mode, and semantic change payload without DOM or engine types.
-- GPUI uses its native text system and may use a different tokenization engine.
-  Observable text, keyboard, search, diagnostic, and focus results still match.
+- Svelte and React form the first complete admission. Both use CodeMirror 6 and
+  expose the same value, language, diagnostic, and `onChange` semantics.
+- Shared TypeScript owns engine-independent types and transaction translation.
+- CodeMirror `EditorView`, extensions, transactions, decorations, and themes
+  stay private. There is no arbitrary extension prop or raw editor handle.
+- The implementation pins its exact CodeMirror packages and imports only the
+  admitted feature and language set. TypeScript uses the JavaScript language
+  package with its TypeScript parser mode.
+- Rust and GPUI are future admission work. They expose no placeholder and make
+  no current parity claim. A later native editor uses its native text system
+  against this semantic contract.
 - Jetstream remains deferred under the programme-wide working rule.
-- Syntax engine, parser packages, viewport implementation, and undo storage are
-  implementation choices. No engine type crosses the public API.
+- Syntax parser internals, viewport implementation, and undo storage remain
+  private. No engine type crosses the public API.
 
 ## 10. Parity Checklist
 
 ### Strict
 
-- [ ] exact value, line endings, whitespace, and Unicode survive editing
+- [ ] Svelte and React preserve exact value, line endings, whitespace, and Unicode
 - [ ] one user transaction emits one complete value plus prior-value edits
 - [ ] prop updates and rejected edits do not echo callbacks
 - [ ] language modes, line numbers, search, read-only, disabled, and plain
@@ -279,7 +278,8 @@ Required focused selector families:
 - diagnostic coordinate refusal, F8 navigation, and accessible announcement;
 - read-only, disabled, Tab exit, pointer/keyboard focus origin;
 - viewport ownership and 2 MiB bounded-document behavior;
-- Svelte/React public-surface parity and shared Rust/GPUI semantic parity.
+- Svelte/React public-surface and packed-distribution parity;
+- explicit proof that root imports do not load the editor engine.
 
 ## 13. Adoption Boundary
 
@@ -287,3 +287,14 @@ Poodle owns this reusable surface. A consumer owns source identity, byte
 admission, language selection, diagnostics meaning, drafts, revision tokens,
 save/review/recovery policy, and any conversion between source projections.
 No consumer semantics enter the component API.
+
+## 14. Admission And Distribution
+
+- First admission: Svelte and React together, implemented in TypeScript over
+  CodeMirror 6.
+- Package entries: `@inflatable-cookie/poodle-svelte/editor` and
+  `@inflatable-cookie/poodle-react/editor`.
+- Root package entries do not eagerly import CodeMirror or its language
+  packages.
+- Status until native admission: `web-admitted`, not parity-complete.
+- GPUI and shared Rust are a future task and do not block the web release.

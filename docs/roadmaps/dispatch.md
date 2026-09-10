@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Chatterbox
-Updated: 2026-09-09 (g18.001 merged; frontier empty)
+Updated: 2026-09-10 (g18.002 ready; dispatch held for operator go)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -13,17 +13,16 @@ commit.
 
 ## Ready queue task
 
-Empty. `g18.001` merged in PR #235 at
-`8185a9758f146e901499a8a8704a41202f99ca9e` and is closed out in the
-integration checkout. No task is approved for queue dispatch; return to
-Chatterbox for the next planning checkpoint. No successor auto-starts.
+[`g18.002`](g18/002-codemirror-web-code-editor.md) is the sole approved ready
+task. Dispatch is held until the operator gives a separate queue go. No release,
+Desktop adoption, GPUI CodeEditor work, or successor task auto-starts.
 
 ## Held planning horizons
 
-GPUI repair tranches, visual expansion, keyboard-origin focus, V2, M2, A2, the
-Nucleus switch packet, web-pair extraction, the contributor-guidance pilot,
-Jetstream, and triage holds are not yet queue tasks. Their gates remain in
-`g18/README.md` and current triage.
+GPUI repair tranches, GPUI/shared-Rust CodeEditor work, visual expansion,
+keyboard-origin focus, V2, M2, A2, the Nucleus switch packet, web-pair
+extraction, the contributor-guidance pilot, Jetstream, and triage holds are not
+yet queue tasks. Their gates remain in `g18/README.md` and current triage.
 
 ## Historical queue evidence
 

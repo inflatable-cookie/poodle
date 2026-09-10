@@ -1,15 +1,17 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-09
+Updated: 2026-09-10
 
 ## Active generation
 
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
   - Completed tasks: `g18.001` contract-bound GPUI functionality census
-  - Approved frontier: none; `g18.001` merged in PR #235 at `8185a9758f146e901499a8a8704a41202f99ca9e`
-  - Next checkpoint: Chatterbox compiles the first functional repair tranche
-    from the accepted census; no successor auto-starts.
+  - Approved frontier: `g18.002` CodeMirror web CodeEditor; dispatch awaits a
+    separate operator go
+  - Next checkpoint: dispatch decision for `g18.002`; the first GPUI repair
+    tranche remains the next Chatterbox compilation after this consumer
+    interrupt.
 
 ## Compacted generations
 

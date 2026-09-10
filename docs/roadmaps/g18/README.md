@@ -2,7 +2,7 @@
 
 Status: active
 Opened: 2026-09-09
-Updated: 2026-09-09
+Updated: 2026-09-10
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
@@ -46,6 +46,7 @@ needed to compile honest repair tranches.
 | Task or planning horizon | State | Dependency or checkpoint |
 | --- | --- | --- |
 | [`g18.001`](001-contract-bound-gpui-functionality-census.md) — contract-bound GPUI functionality census | complete | PR #235 (merge `8185a9758f146e901499a8a8704a41202f99ca9e`) |
+| [`g18.002`](002-codemirror-web-code-editor.md) — CodeMirror web CodeEditor | ready, dispatch held | separate operator go; bounded consumer interrupt |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -55,9 +56,11 @@ needed to compile honest repair tranches.
 
 ## Approved frontier
 
-No approved frontier. `g18.001` merged in PR #235 and is closed out in the
-integration checkout. Chatterbox compiles the first repair tranche from the
-accepted census; no successor auto-starts.
+`g18.002` is the sole approved ready task. Queue dispatch still requires a
+separate operator go. It is a bounded consumer interrupt: deliver the paired
+Svelte and React CodeEditor over CodeMirror 6, plus `Tabs.pinned` across the
+normal active cohort. It does not admit a GPUI CodeEditor, authorize release or
+Desktop adoption, or replace the pending GPUI repair-tranche compilation.
 
 ## Held and recurring work
 
@@ -66,6 +69,8 @@ accepted census; no successor auto-starts.
 - Contributor design-guidance pilot remains operator-gated on named reviewers,
   approvals, and run custody.
 - Jetstream admission remains a separate held programme.
+- GPUI and shared-Rust CodeEditor work is a future planning horizon. The web
+  admission earns no native parity credit.
 - Citations, nested menus, keyboard geometry, consumer requests, repository
   settings, and `gpui-unofficial` adoption gates remain in current triage.
 
