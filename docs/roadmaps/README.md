@@ -28,6 +28,10 @@ paired TipTap/ProseMirror web editor and renderer, is executing through Queue.
 fill-only semantic surface while the existing selection-strength axis remains
 unchanged. It waits for g18.003 closeout and a separate operator go.
 
+After both component tasks close, `g18.005` is the planned `0.4.0` web release
+and Desktop unblock. It remains held for final-source review and explicit
+operator release authority; planning does not publish, tag, or mutate Desktop.
+
 ## Rules
 
 - Keep task work bounded by current architecture, contracts, and accepted intent.

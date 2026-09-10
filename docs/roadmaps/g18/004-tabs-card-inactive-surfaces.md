@@ -104,5 +104,5 @@ Pending execution.
 
 ## Next task
 
-After merge and accepted review, return to Chatterbox for release/adoption or
-the first compiled GPUI functional repair tranche. No successor auto-starts.
+After merge and accepted review, return to Chatterbox to recheck and seek the
+explicit release go for `g18.005`. No successor auto-starts.

@@ -11,8 +11,11 @@ Updated: 2026-09-10
     `edb2d303-38c9-44a8-aa2c-a6ff5821643e`.
   - Approved next frontier: `g18.004` Tabs card inactive surfaces; waits for
     `g18.003` closeout and a separate operator go.
-  - Next checkpoint: close `g18.003`, then execute `g18.004` or compile the
-    first GPUI repair tranche from the accepted `g18.001` census.
+  - Planned release: `g18.005` v0.4.0 web editor release and Desktop unblock;
+    waits for both component tasks, final source recheck, and explicit release
+    authority.
+  - Next checkpoint: close `g18.003`, then execute `g18.004`; only afterward
+    recheck and authorize `g18.005` or compile the first GPUI repair tranche.
 
 ## Compacted generations
 

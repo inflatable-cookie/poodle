@@ -27,6 +27,10 @@ and closeout.
 
 ## Held planning horizons
 
+[`g18.005`](g18/005-v040-web-editor-release-and-desktop-unblock.md) is planned
+behind g18.003 and g18.004. It cannot dispatch until final-source recheck and
+explicit operator release authority.
+
 GPUI repair tranches, GPUI/shared-Rust CodeEditor and RichTextEditor work,
 visual expansion, keyboard-origin focus, V2, M2, A2, the Nucleus switch packet,
 web-pair extraction, the contributor-guidance pilot, Jetstream, and triage
