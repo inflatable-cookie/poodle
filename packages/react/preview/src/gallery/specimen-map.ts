@@ -31,6 +31,7 @@ import { CardRadioGroupSpecimen } from "./specimens/CardRadioGroupSpecimen";
 import { CardSpecimen } from "./specimens/CardSpecimen";
 import { CardToggleGroupSpecimen } from "./specimens/CardToggleGroupSpecimen";
 import { CheckboxSpecimen } from "./specimens/CheckboxSpecimen";
+import { CodeEditorSpecimen } from "./specimens/CodeEditorSpecimen";
 import { CodeInputSpecimen } from "./specimens/CodeInputSpecimen";
 import { CodeSpecimen } from "./specimens/CodeSpecimen";
 import { CollapseToggleSpecimen } from "./specimens/CollapseToggleSpecimen";
@@ -95,6 +96,8 @@ import { ModelConnectionPickerSpecimen } from "./specimens/ModelConnectionPicker
 import { ModelConnectionSetupSpecimen } from "./specimens/ModelConnectionSetupSpecimen";
 import { LogListSpecimen } from "./specimens/LogListSpecimen";
 import { MarkdownEditorSpecimen } from "./specimens/MarkdownEditorSpecimen";
+import { RichTextEditorSpecimen } from "./specimens/RichTextEditorSpecimen";
+import { RichTextRendererSpecimen } from "./specimens/RichTextRendererSpecimen";
 import { MediaBrowsePanelSpecimen } from "./specimens/MediaBrowsePanelSpecimen";
 import { MediaPickerSpecimen } from "./specimens/MediaPickerSpecimen";
 import { MediaPreviewSpecimen } from "./specimens/MediaPreviewSpecimen";
@@ -215,6 +218,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "card-toggle-group": CardToggleGroupSpecimen,
   "checkbox": CheckboxSpecimen,
   "code": CodeSpecimen,
+  "code-editor": CodeEditorSpecimen,
   "code-input": CodeInputSpecimen,
   "collapse-toggle": CollapseToggleSpecimen,
   "collapsible": CollapsibleSpecimen,
@@ -280,6 +284,8 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "model-connection-setup": ModelConnectionSetupSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
+  "rich-text-editor": RichTextEditorSpecimen,
+  "rich-text-renderer": RichTextRendererSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,
   "media-picker": MediaPickerSpecimen,
   "media-preview": MediaPreviewSpecimen,

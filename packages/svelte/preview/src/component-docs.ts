@@ -2693,6 +2693,91 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "code-editor": {
+    props: [
+      { name: "value", type: "string", required: true, description: "Host-controlled exact text. No newline, Unicode, or whitespace normalization." },
+      { name: "language", type: "CodeEditorLanguage", default: '"plain-text"', description: "Syntax hint from the closed admitted set." },
+      { name: "lineNumbers", type: "boolean", default: "true", description: "Shows the logical-line gutter." },
+      { name: "searchable", type: "boolean", default: "true", description: "Enables the editor-owned find panel and search shortcuts." },
+      { name: "diagnostics", type: "CodeEditorDiagnostic[]", default: "[]", description: "Host-authored messages attached to positions in the current value." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Keeps selection, copy, search, scrolling, and diagnostic navigation; refuses text mutation." },
+      { name: "disabled", type: "boolean", default: "false", description: "Removes the editor from interaction and focus order." },
+      { name: "placeholder", type: "string", default: '""', description: "Shown only for an empty editable value." },
+      { name: "ariaLabel", type: "string", default: '"Code editor"', description: "Accessible name for the editing surface." },
+      { name: "wrapLines", type: "boolean", default: "false", description: "Wraps long logical lines inside the viewport." },
+      { name: "tabSize", type: "number", default: "2", description: "Positive integer used for indentation width and tab display." },
+      { name: "tabBehavior", type: '"focus" | "indent"', default: '"focus"', description: "focus lets Tab leave. indent inserts indentation; Escape then Tab leaves." },
+      { name: "performanceMode", type: '"full" | "plain"', default: '"full"', description: "plain disables syntax tokenization but preserves editing, line numbers, search, diagnostics, and exact events." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit spacing-density override." },
+    ],
+    slots: [],
+    events: [
+      { name: "onChange", payload: "(change: CodeEditorChange) => void", description: "One exact callback for each committed user edit transaction." },
+    ],
+    usage: `<script lang="ts">
+  import { CodeEditor } from "@inflatable-cookie/poodle-svelte/editor";
+
+  let source = "export const ready = true;\\n";
+</script>
+
+<CodeEditor
+  value={source}
+  language="typescript"
+  onChange={(change) => (source = change.value)}
+/>`,
+  },
+
+  "rich-text-editor": {
+    props: [
+      { name: "value", type: "ProseMirrorDocumentJSON", required: true, description: "Host-controlled ProseMirror document JSON." },
+      { name: "features", type: "readonly RichTextFeature[]", default: "richTextStandardFeatures", description: "Unique curated feature modules; order has no semantic meaning." },
+      { name: "toolbar", type: '"auto" | readonly RichTextCommand[]', default: '"auto"', description: "auto derives commands from enabled features. An explicit list may only use commands those features provide." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Preserves selection, copy, links, scrolling, and accessible reading." },
+      { name: "disabled", type: "boolean", default: "false", description: "Removes editing and toolbar controls from interaction and focus order." },
+      { name: "placeholder", type: "string", default: '""', description: "Shown only for one empty editable paragraph." },
+      { name: "ariaLabel", type: "string", default: '"Rich text editor"', description: "Accessible name for the editing surface." },
+      { name: "requestImage", type: "(() => Promise<RichTextImageInput | null>) | null", default: "null", description: "Host-owned asset choice for insert-image; valid only with images." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit spacing-density override." },
+    ],
+    slots: [],
+    events: [
+      { name: "onChange", payload: "(document: ProseMirrorDocumentJSON) => void", description: "Fires once for each committed user transaction that changes the document." },
+    ],
+    usage: `<script lang="ts">
+  import { RichTextEditor } from "@inflatable-cookie/poodle-svelte/rich-text";
+
+  let document = {
+    type: "doc",
+    content: [{ type: "paragraph", content: [{ type: "text", text: "Hello" }] }],
+  };
+</script>
+
+<RichTextEditor
+  value={document}
+  onChange={(next) => (document = next)}
+/>`,
+  },
+
+  "rich-text-renderer": {
+    props: [
+      { name: "value", type: "ProseMirrorDocumentJSON", required: true, description: "Same controlled document representation as the editor." },
+      { name: "features", type: "readonly RichTextFeature[]", default: "richTextStandardFeatures", description: "Must admit every node and mark in value." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Optional accessible name when the rendered document is a labelled region." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { RichTextRenderer } from "@inflatable-cookie/poodle-svelte/rich-text";
+
+  const document = {
+    type: "doc",
+    content: [{ type: "paragraph", content: [{ type: "text", text: "Hello" }] }],
+  };
+</script>
+
+<RichTextRenderer value={document} />`,
+  },
+
   "media-picker": {
     props: [
       { name: "open", type: "boolean | null | undefined", default: "undefined", description: "Picker visibility. Omit for the internal closed path; when supplied, the host owns updates through onOpenChange." },

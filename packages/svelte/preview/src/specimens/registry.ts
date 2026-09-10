@@ -76,6 +76,8 @@ import ModelConnectionSetupSpecimen from "./ModelConnectionSetupSpecimen.svelte"
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
+import RichTextEditorSpecimen from "./RichTextEditorSpecimen.svelte";
+import RichTextRendererSpecimen from "./RichTextRendererSpecimen.svelte";
 import MediaBrowsePanelSpecimen from "./MediaBrowsePanelSpecimen.svelte";
 import MediaPickerSpecimen from "./MediaPickerSpecimen.svelte";
 import MetaBarSpecimen from "./MetaBarSpecimen.svelte";
@@ -98,6 +100,7 @@ import PaginationSummarySpecimen from "./PaginationSummarySpecimen.svelte";
 import PasswordRequirementsSpecimen from "./PasswordRequirementsSpecimen.svelte";
 import PickerShellSpecimen from "./PickerShellSpecimen.svelte";
 
+import CodeEditorSpecimen from "./CodeEditorSpecimen.svelte";
 import CodeInputSpecimen from "./CodeInputSpecimen.svelte";
 import PopoverSpecimen from "./PopoverSpecimen.svelte";
 import ProgressSpecimen from "./ProgressSpecimen.svelte";
@@ -211,6 +214,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   callout: SceneSpecimen,
   "remediation-banner": RemediationBannerSpecimen,
   code: CodeSpecimen,
+  "code-editor": CodeEditorSpecimen,
   "color-picker": ColorPickerSpecimen,
   card: CardSpecimen,
   "card-radio-group": CardRadioGroupSpecimen,
@@ -262,6 +266,8 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "model-connection-setup": ModelConnectionSetupSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
+  "rich-text-editor": RichTextEditorSpecimen,
+  "rich-text-renderer": RichTextRendererSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,
   "media-picker": MediaPickerSpecimen,
   "media-preview": MediaPreviewSpecimen,
