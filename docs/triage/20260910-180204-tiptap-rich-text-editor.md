@@ -1,6 +1,6 @@
 # TipTap-backed rich-text editor
 
-Status: open — v1 content scope confirmed; schema authority unresolved
+Status: open — ProseMirror authority confirmed; configuration model unresolved
 Owner: Poodle Chatterbox
 Created: 2026-09-10
 Related: `../contracts/components/code-editor.md`,
@@ -14,15 +14,21 @@ Bovine Desktop will probably need a reusable rich-text editing interface.
 Assess a Poodle `RichTextEditor` wrapper over TipTap in the same posture as the
 CodeMirror-backed `CodeEditor`: Poodle owns the public semantics, controls,
 tokens, accessibility, package boundary, and Svelte/React alignment; the engine
-and ProseMirror types stay private. GPUI/native support may remain future work
-under a separately confirmed staged admission.
+wrapper stays TipTap-specific, while ProseMirror's document and schema model is
+the public semantic authority. GPUI/native support may remain future work under
+a separately confirmed staged admission.
 
 Operator decision 2026-09-10: the target is structured rich-text documents,
 not a WYSIWYG view over authored Markdown. Markdown source and conversion stay
 outside this editor contract.
 
-Operator decision 2026-09-10: tables belong in the first useful schema. Images
-and embeds do not; both remain later explicit schema migrations.
+Operator decision 2026-09-10: tables belong in the first useful configuration.
+Images and embeds are not needed by Bovine Desktop yet, but image support varies
+by project. The reusable editor must therefore support deliberate schema
+configuration rather than baking one permanently closed Poodle schema.
+
+Operator decision 2026-09-10: ProseMirror is the document/schema authority.
+Poodle must not invent a parallel engine-neutral rich-text document model.
 
 ## Evidence
 
@@ -54,43 +60,50 @@ Sources:
 
 ## Tentative recommendation
 
-Use TipTap 3, but do not expose TipTap JSON, ProseMirror nodes, transactions,
-extensions, commands, or an editor instance as Poodle's public API.
+Use TipTap 3 as the Svelte/React integration layer over ProseMirror. Persist and
+exchange ProseMirror document JSON; do not translate it into a Poodle-authored
+document schema. Keep the live TipTap editor instance, transactions, and raw
+commands out of the ordinary component API.
 
 The smallest credible Poodle package is a paired Svelte/React TypeScript web
 surface behind dedicated `./rich-text` entries:
 
-- one controlled, versioned, engine-neutral `RichTextDocument`;
-- one closed initial schema and toolbar;
+- one controlled ProseMirror JSON document value;
+- one explicit schema/feature configuration and matching toolbar projection;
 - exact document-change callbacks with prop-update no-echo behavior;
 - read-only and disabled states, selection/focus and keyboard behavior, paste
   filtering, links, accessibility, and bounded document behavior;
 - a matching read-only renderer or generation path so stored documents do not
   require a live editor to display;
-- no raw extension escape hatch; later schema growth is an explicit contract
-  migration.
+- a supported-extension boundary that can vary by project without silently
+  accepting or stripping nodes.
 
-Candidate first schema: paragraph, text, heading, bold, italic, strike, inline
-code, link, blockquote, bullet list, ordered list, list item, hard break,
-horizontal rule, code block, table, table row, table header, and table cell.
-Images, embeds, mentions, custom nodes, collaboration, comments, tracked
-changes, Markdown conversion, and consumer save/recovery policy stay out of
-the first seam.
+Candidate baseline configuration: paragraph, text, heading, bold, italic,
+strike, inline code, link, blockquote, bullet list, ordered list, list item,
+hard break, horizontal rule, code block, table, table row, table header, and
+table cell.
+Images should be an optional supported feature rather than part of every
+project's schema. Embeds, mentions, arbitrary custom nodes, collaboration,
+comments, tracked changes, Markdown conversion, and consumer save/recovery
+policy stay out of the first seam.
 
-The consumer remains responsible for translating between the Poodle document
-and any Silo/Farmyard/Bovine envelope. Unsupported input must fail closed; it
-must never be normalized or stripped and then emitted as if lossless.
+The consumer remains responsible for its Silo/Farmyard/Bovine envelope and for
+choosing the admitted editor configuration. Poodle passes the ProseMirror
+document through without inventing another representation. Unsupported input
+must fail closed; it must never be normalized or stripped and then emitted as
+if lossless.
 
 ## Decisions needed
 
-1. Should Poodle own the versioned generic document schema, or should an
-   existing upstream rich-text contract become the semantic authority while
-   Poodle owns only its editor projection?
+1. Should v1 expose only Poodle-supported feature modules/profiles, or accept
+   arbitrary consumer-supplied TipTap/ProseMirror extensions? Recommendation:
+   start with composable supported modules, including optional images, and
+   reserve arbitrary extension injection until its typing, styling, security,
+   serialization, and read-only rendering contract is explicit.
 2. Is the matching read-only renderer part of the first delivery? Recommendation:
    yes, because persistence without a stable display path is incomplete.
 
 ## Next check
 
-Resolve schema authority with the operator, then reconcile it with the current
-upstream rich-text authority before promoting a component contract or roadmap
-task.
+Confirm the extension-configuration boundary and read-only renderer scope,
+then promote a component contract and roadmap task.
