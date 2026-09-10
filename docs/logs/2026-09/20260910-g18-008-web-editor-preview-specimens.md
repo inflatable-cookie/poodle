@@ -1,6 +1,7 @@
 # g18.008 — Web editor preview specimens
 
-Status: ready for review
+Status: merged
+Merge: `998b6ddc69f94e405b515f6bddd682a2e8916ea5` (PR #241) on 2026-09-10
 Date: 2026-09-10
 Branch: `ns-d8e89ac2-2c5e-45b3-9c7a-ebfd36ff9550`
 Card: `docs/roadmaps/g18/008-web-editor-preview-specimens.md`
@@ -59,3 +60,29 @@ backlog; the two new density axes are cast to `ControlDensity`.
 
 Web-admitted only. Native CodeEditor/RichTextEditor stay future work with
 no placeholder. Release and Desktop adoption need separate authority.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `998b6ddc69f94e405b515f6bddd682a2e8916ea5` on 2026-09-10 (PR #241),
+  with parents `958bf340d` (main) and `9ad76cace` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `9ad76cace3a8ac9948696d8a87b5623789ae7477` by betterthanclay
+  ([comment #5626460237](https://github.com/inflatable-cookie/poodle/pull/241#issuecomment-5626460237)).
+  No merge blockers remained.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): svelte-preview 13 files / 72 tests pass (6 new specimen
+  interaction tests, catalogue audit, catalogue nav); react-preview 4
+  files / 14 tests pass (6 mirrored interaction tests);
+  `check:svelte-preview` 0 errors; `svelte:build` and `react:build` clean;
+  specimen/prop drift checks aligned (179 registered);
+  full `docs:check` sequence succeeded with `gate:clean`;
+  `git diff --check` clean. Native denominator unchanged: GPUI
+  construction routes stay 175.
+- Non-blocking reviewer notes (deferred, no acceptance impact):
+  `check:react-preview` fails repo-wide on the pre-existing
+  string/`ControlSize` backlog (zero errors in PR-touched files, kept off
+  `ci:web` by effigy.toml); one tautological route assertion noted as a nit.
+- Deferred: no release, tag, publish, Desktop, or native editor work starts
+  from this task. `g18.006` still needs g18.005 completion plus explicit
+  operator release authority.

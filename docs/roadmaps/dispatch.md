@@ -1,8 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Owner: Chatterbox
-Updated: 2026-09-10 (g18.007 and g18.008 approved in parallel)
+Updated: 2026-09-10 (g18.007 and g18.008 merged; g18.005 validation retries)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -22,8 +21,8 @@ changelog maintenance scope — merged as `ef2e46bb949a766e844e48f071119c9576c6f
 task and PR next.
 
 [`g18.008`](g18/008-web-editor-preview-specimens.md) — web editor preview
-specimens — is approved for immediate independent dispatch alongside g18.007.
-It is serial before g18.006 release.
+specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
+(PR #241) on 2026-09-10. It was serial before g18.006 release.
 
 ## Held planning horizons
 

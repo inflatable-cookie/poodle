@@ -1,6 +1,6 @@
 # 008 — Web editor preview specimens
 
-Status: ready — operator-confirmed baseline correction
+Status: complete — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5` (PR #241) on 2026-09-10
 Owner: Poodle web previews
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -122,6 +122,12 @@ RichTextRenderer entry in either preview registry or specimen map. g18.002 and
 g18.003 had incorrectly deferred preview catalogue admission to generation
 closeout despite owning preview paths. The existing `webOnlyComponents`
 supplement already feeds both web galleries without entering portable codegen.
+
+Merged. Independent exact-head `ready_to_merge` review of head
+`9ad76cace3a8ac9948696d8a87b5623789ae7477`
+([comment #5626460237](https://github.com/inflatable-cookie/poodle/pull/241#issuecomment-5626460237));
+closeout record
+`docs/logs/2026-09/20260910-g18-008-web-editor-preview-specimens.md`.
 
 ## Next task
 

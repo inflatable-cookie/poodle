@@ -24,11 +24,11 @@ web CodeEditor, paired rich-text editor/renderer, and Tabs card fill. GPUI
 editor parity remains future work and the g18 GPUI repair runway stays open.
 The bounded g18.005 release preflight is implemented in retained PR #238.
 Operator-approved g18.007 merged as the structural unblock lane (PR #240);
-Queue retries g18.005 validation next. Operator-approved g18.008
-independently corrects the missed baseline Svelte/React catalogue pages for
-CodeEditor, RichTextEditor, and RichTextRenderer. No CI exception is authorized.
+Queue retries g18.005 validation next. Operator-approved g18.008 merged the
+baseline Svelte/React catalogue pages for CodeEditor, RichTextEditor, and
+RichTextRenderer (PR #241). No CI exception is authorized.
 
-After preflight and g18.008 close, `g18.006` is the planned `0.4.0` web release
+After preflight closes, `g18.006` is the planned `0.4.0` web release
 and Desktop unblock. It remains held for final-source review and explicit
 operator release authority; planning does not publish, tag, or mutate Desktop.
 

@@ -52,7 +52,7 @@ needed to compile honest repair tranches.
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | verifying | retained PR #238; g18.007 repair merged, validation retry pending |
 | [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release and Desktop unblock | planned | g18.003, g18.004, g18.005, and g18.008; final source recheck and explicit operator release authority |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); retained g18.005 PR #238 retries next |
-| [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | ready and approved | corrects missed Svelte/React catalogue admission; independent of g18.007, serial before g18.006 |
+| [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -73,12 +73,13 @@ content-aware maintenance rule merged as `ef2e46bb949a766e844e48f071119c9576c6f7
 (PR #240). PR #238 and its Queue threads remain retained; Queue retries
 validation now that g18.007 merged.
 
-The merged editor tasks omitted their baseline preview catalogue pages.
-Operator-confirmed g18.008 adds separate CodeEditor, RichTextEditor, and
+The merged editor tasks had omitted their baseline preview catalogue pages.
+Operator-confirmed g18.008 added separate CodeEditor, RichTextEditor, and
 RichTextRenderer specimens to both web previews through the existing web-only
-supplement. It runs independently of g18.007 and does not add native parity.
+supplement (PR #241, merged `998b6ddc69f94e405b515f6bddd682a2e8916ea5`). It ran
+independently of g18.007 and added no native parity.
 
-After preflight and g18.008 close, `g18.006` prepares and publishes the
+After preflight closes, `g18.006` prepares and publishes the
 SemVer-minor `0.4.0` web release to unblock Desktop's retained g02.058 task and
 PR #215. It is not ready: Chatterbox must recheck the final package trees and
 the operator must explicitly authorize release mutation.
