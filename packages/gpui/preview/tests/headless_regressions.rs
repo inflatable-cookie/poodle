@@ -5521,87 +5521,6 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
     );
 }
 
-/// g18.002. Pinned tabs stay fixed in their partitions through mounted GPUI:
-/// Alt+Arrow from a pinned source is inert, unpinned tabs cannot cross into
-/// or over a pinned partition, and unpinned tabs still reorder among
-/// themselves with the complete next order.
-#[test]
-fn tabs_pinned_partitions_refuse_crossing_through_mounted_gpui() {
-    fn definitions() -> Vec<TabDefinition> {
-        vec![
-            TabDefinition::new("home", "Home").with_pinned(TabPin::Start),
-            TabDefinition::new("mix", "Mix"),
-            TabDefinition::new("master", "Master"),
-            TabDefinition::new("logs", "Logs").with_pinned(TabPin::End),
-        ]
-    }
-
-    run_headless(|cx| {
-        let orders: Arc<Mutex<Vec<Vec<String>>>> = Arc::new(Mutex::new(Vec::new()));
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        let build = |mounted: &Arc<Mutex<Node>>, orders: &Arc<Mutex<Vec<Vec<String>>>>| {
-            let orders_sink = Arc::clone(orders);
-            let mount = Arc::clone(mounted);
-            let spec = TabsSpec::new(definitions())
-                .with_value("mix")
-                .with_reorderable(true);
-            let mut node = poodle_render::tabs_with_handlers(
-                &spec,
-                &RenderContext::new(&theme()),
-                TabsHandlers {
-                    on_reorder: Some(Arc::new(move |next: Vec<String>| {
-                        orders_sink.lock().expect("orders lock").push(next.clone());
-                        let rebuild_spec = TabsSpec::new(
-                            next.iter()
-                                .map(|value| {
-                                    definitions()
-                                        .into_iter()
-                                        .find(|item| &item.value == value)
-                                        .expect("reordered value resolves")
-                                })
-                                .collect(),
-                        )
-                        .with_value("mix")
-                        .with_reorderable(true);
-                        let rebuilt = poodle_render::tabs_with_handlers(
-                            &rebuild_spec,
-                            &RenderContext::new(&theme()),
-                            TabsHandlers {
-                                instance_id: Some("pinned".into()),
-                                ..TabsHandlers::default()
-                            },
-                        );
-                        *mount.lock().expect("mount lock") = rebuilt;
-                    })),
-                    instance_id: Some("pinned".into()),
-                    focused_value: Some("mix".into()),
-                    ..TabsHandlers::default()
-                },
-            );
-            node.id = Some(FIXTURE_ID.to_owned());
-            node
-        };
-        *mounted.lock().expect("mount lock") = build(&mounted, &orders);
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
-        driver.wait_for_focus_handle("tabs:pinned:tab:mix");
-
-        // Alt+Left from "mix" would cross the start pin: refused, no reorder.
-        driver.keyboard_key("tabs:pinned:tab:mix", "alt-left");
-        assert!(orders.lock().expect("orders lock").is_empty());
-
-        // Alt+Right from "master" would cross the end pin: refused, no reorder.
-        driver.keyboard_key("tabs:pinned:tab:master", "alt-right");
-        assert!(orders.lock().expect("orders lock").is_empty());
-
-        // Alt+Right from "mix" stays inside the unpinned middle: commits.
-        driver.keyboard_key("tabs:pinned:tab:mix", "alt-right");
-        assert_eq!(
-            orders.lock().expect("orders lock").last().map(Vec::as_slice),
-            Some(["home", "master", "mix", "logs"].map(str::to_string).as_slice())
-        );
-    });
-}
-
 /// g16.065. Compact chrome Tabs project `shows_tooltips` onto `Node.tooltip`.
 /// Nucleus-shaped fixture, no Nucleus source. Lifecycle is the g16.066
 /// backend: 300ms delay, leave, focus departure, Escape, disable, removal,
@@ -35242,3 +35161,85 @@ fn disabled_pointer_routing_blocks_a_live_activation_sink() {
         assert!(driver.mounted_observation().is_valid());
     });
 }
+
+#[test]
+fn tabs_pinned_partitions_refuse_crossing_through_mounted_gpui() {
+    // g18.002. Pinned tabs stay fixed in their partitions through mounted GPUI:
+    // Alt+Arrow from a pinned source is inert, unpinned tabs cannot cross into
+    // or over a pinned partition, and unpinned tabs still reorder among
+    // themselves with the complete next order.
+    fn definitions() -> Vec<TabDefinition> {
+        vec![
+            TabDefinition::new("home", "Home").with_pinned(TabPin::Start),
+            TabDefinition::new("mix", "Mix"),
+            TabDefinition::new("master", "Master"),
+            TabDefinition::new("logs", "Logs").with_pinned(TabPin::End),
+        ]
+    }
+
+    run_headless(|cx| {
+        let orders: Arc<Mutex<Vec<Vec<String>>>> = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let build = |mounted: &Arc<Mutex<Node>>, orders: &Arc<Mutex<Vec<Vec<String>>>>| {
+            let orders_sink = Arc::clone(orders);
+            let mount = Arc::clone(mounted);
+            let spec = TabsSpec::new(definitions())
+                .with_value("mix")
+                .with_reorderable(true);
+            let mut node = poodle_render::tabs_with_handlers(
+                &spec,
+                &RenderContext::new(&theme()),
+                TabsHandlers {
+                    on_reorder: Some(Arc::new(move |next: Vec<String>| {
+                        orders_sink.lock().expect("orders lock").push(next.clone());
+                        let rebuild_spec = TabsSpec::new(
+                            next.iter()
+                                .map(|value| {
+                                    definitions()
+                                        .into_iter()
+                                        .find(|item| &item.value == value)
+                                        .expect("reordered value resolves")
+                                })
+                                .collect(),
+                        )
+                        .with_value("mix")
+                        .with_reorderable(true);
+                        let rebuilt = poodle_render::tabs_with_handlers(
+                            &rebuild_spec,
+                            &RenderContext::new(&theme()),
+                            TabsHandlers {
+                                instance_id: Some("pinned".into()),
+                                ..TabsHandlers::default()
+                            },
+                        );
+                        *mount.lock().expect("mount lock") = rebuilt;
+                    })),
+                    instance_id: Some("pinned".into()),
+                    focused_value: Some("mix".into()),
+                    ..TabsHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        };
+        *mounted.lock().expect("mount lock") = build(&mounted, &orders);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.wait_for_focus_handle("tabs:pinned:tab:mix");
+
+        // Alt+Left from "mix" would cross the start pin: refused, no reorder.
+        driver.keyboard_key("tabs:pinned:tab:mix", "alt-left");
+        assert!(orders.lock().expect("orders lock").is_empty());
+
+        // Alt+Right from "master" would cross the end pin: refused, no reorder.
+        driver.keyboard_key("tabs:pinned:tab:master", "alt-right");
+        assert!(orders.lock().expect("orders lock").is_empty());
+
+        // Alt+Right from "mix" stays inside the unpinned middle: commits.
+        driver.keyboard_key("tabs:pinned:tab:mix", "alt-right");
+        assert_eq!(
+            orders.lock().expect("orders lock").last().map(Vec::as_slice),
+            Some(["home", "master", "mix", "logs"].map(str::to_string).as_slice())
+        );
+    });
+}
+
