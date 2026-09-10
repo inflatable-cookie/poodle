@@ -7,11 +7,7 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
-Nothing yet.
-
 ## [0.3.0] - 2026-09-05
-
-Published from the certified `v0.3.0` tag on 2026-09-05.
 
 ### Breaking
 
@@ -31,7 +27,7 @@ Published from the certified `v0.3.0` tag on 2026-09-05.
   package roots into explicit `/markdown` entries. Their direct component
   entries remain available. There is no compatibility alias or root fallback.
 
-### Added and changed
+### Added
 
 - The public-intent delta accumulated after immutable `v0.2.2` includes the
   triggerless `ContextMenu` composition prepared as `0.2.3`, cross-runtime
@@ -39,6 +35,11 @@ Published from the certified `v0.3.0` tag on 2026-09-05.
   TimeInput and NumberInput value/draft contracts, continuous audio controls,
   shared motion policy, EditableLabel, block Slider/RangeSlider appearance,
   and same-id Toast updates.
+
+### Changed
+
+- **Release status.** Published from the certified `v0.3.0` tag on
+  2026-09-05.
 - Core, Svelte, the private React validation package, and the Rust source/tag
   distribution set are versioned at `0.3.0`. Core and Svelte are the only
   eventual npm publication set; React remains private and Rust remains
@@ -47,19 +48,21 @@ Published from the certified `v0.3.0` tag on 2026-09-05.
 - The web package boundary is compiled `dist/` JavaScript plus declarations.
   The candidate consumes the accepted installed certification and records its
   own exact tarball identities separately.
+- **Downstream checks.** Migrate root markdown imports to `/markdown`, and
+  update HistoryCenter callers from the v2 `branches` / `paths` /
+  `branchCount` vocabulary to v3 `pages`, `continuationCount`, and
+  host-owned continuation operations.
+- **Downstream checks.** Pin a separately published exact version after
+  certification. `0.2.3` was prepared but unpublished, and `0.2.4` is
+  skipped.
 
-### Downstream checks
+## [0.2.3] - 2026-08-30
 
-- Migrate root markdown imports to `/markdown`, and update HistoryCenter
-  callers from the v2 `branches` / `paths` / `branchCount` vocabulary to v3
-  `pages`, `continuationCount`, and host-owned continuation operations.
-- Pin a separately published exact version after certification. `0.2.3` was
-  prepared but unpublished, and `0.2.4` is skipped.
+### Changed
 
-## [0.2.3] - 2026-08-30 (prepared — unpublished)
-
-`0.2.3` was prepared in the repository but was never tagged or published. Its
-intended delta is carried into the `0.3.0` candidate above; `0.2.4` is skipped.
+- **Release status.** `0.2.3` was prepared in the repository but was never
+  tagged or published. Its intended delta is carried into the `0.3.0`
+  candidate above; `0.2.4` is skipped.
 
 ### Added
 
@@ -110,11 +113,10 @@ intended delta is carried into the `0.3.0` candidate above; `0.2.4` is skipped.
 - Source policy is fail-closed: the approved-Git-revision allowlist is empty,
   `gpui` and `gpui_platform` are rejected from any Git source, and
   `deny.toml` carries `allow-git = []`.
-
-The web packages carry no code change in this patch. `@inflatable-cookie/poodle-core`
-and `@inflatable-cookie/poodle-svelte` move to `0.2.2` so the ecosystem
-version set stays aligned across one tag. See the
-[0.2.2 release notes](docs/release-notes/0.2.2.md).
+- The web packages carry no code change in this patch.
+  `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-svelte`
+  move to `0.2.2` so the ecosystem version set stays aligned across one tag.
+  See the [0.2.2 release notes](docs/release-notes/0.2.2.md).
 
 ## [0.2.1] - 2026-08-23
 
@@ -127,14 +129,6 @@ version set stays aligned across one tag. See the
   Version `0.2.1` carries the same product changes prepared for `0.2.0`.
 
 ## [0.2.0] - 2026-08-23
-
-The tagged candidate prepared against a frozen, measured denominator: 175 public
-Svelte components, each with a contract, implementation, export, specimen,
-focused tests, and packed-tarball import proof. Its release workflow failed
-before validation or npm publication; `0.2.1` is the replacement release. See the
-[full 0.2.0 release notes](docs/release-notes/0.2.0.md) for the publication
-set, per-runtime evidence posture, the visual-comparison boundary, and the
-complete migration checklist.
 
 ### Added
 
@@ -213,6 +207,14 @@ complete migration checklist.
 
 ### Changed
 
+- **Release posture.** The tagged candidate prepared against a frozen,
+  measured denominator: 175 public Svelte components, each with a contract,
+  implementation, export, specimen, focused tests, and packed-tarball import
+  proof. Its release workflow failed before validation or npm publication;
+  `0.2.1` is the replacement release. See the
+  [full 0.2.0 release notes](docs/release-notes/0.2.0.md) for the
+  publication set, per-runtime evidence posture, the visual-comparison
+  boundary, and the complete migration checklist.
 - **Breaking — Popover interactive trigger composition.** Composing a real
   Button or IconButton as a Popover trigger no longer forces a choice between
   nested interactive semantics and a missing disclosure relationship. In
