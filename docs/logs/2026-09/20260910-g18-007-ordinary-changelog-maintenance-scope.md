@@ -1,6 +1,7 @@
 # g18.007 — Ordinary changelog maintenance scope
 
-Status: implementation complete — awaiting independent exact-head review
+Status: merged
+Merge: `ef2e46bb949a766e844e48f071119c9576c6f723` (PR #240) on 2026-09-10
 Date: 2026-09-10
 Branch: `ns-e914c1a0-63cc-45f5-9b7f-5bbad4bb0f03`
 Card: `docs/roadmaps/g18/007-ordinary-changelog-maintenance-scope.md`
@@ -52,3 +53,26 @@ section. Strict and historical candidate modes are unchanged.
 No changelog, workflow, package version, release candidate, registry, publish,
 tag, product, Desktop, or retained g18.005 lane was edited. After this PR
 merges, Queue should retry validation on retained g18.005 PR #238.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `ef2e46bb949a766e844e48f071119c9576c6f723` on 2026-09-10 (PR #240),
+  with parents `d34bb322f` (main) and `1ee1f4c3c` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `1ee1f4c3c8ad2c0b6acc0942fded0e74bfe7aaa7` by betterthanclay
+  ([comment #5626126027](https://github.com/inflatable-cookie/poodle/pull/240#issuecomment-5626126027)).
+  No merge blockers remained.
+- Reviewed-head validation (reviewer re-ran at the exact head, tree left
+  clean): `test:core-build` 66 pass including 30 focused scope tests;
+  `test:web-pack-install` 22/22 packed-consumer tests with both new
+  changelog falsification receipts rejecting as required; `ci:web` 3819
+  component tests plus the full headless web board; `docs:check` clean;
+  `doctor` 18 ok, 3 warning-only scans, 0 errors; `git diff --check` clean.
+  PR CI at the reviewed head: `rust` and `web` pass.
+- Non-blocking reviewer notes (deferred, no acceptance impact): entry
+  section membership is pooled per release, so same-release entry reorder or
+  section moves are admitted; swapping among the three closed canonical
+  labels over an identical payload is treated as syntax.
+- Deferred: retry validation on retained g18.005 PR #238. No release, tag,
+  publish, or Desktop work starts from this task.

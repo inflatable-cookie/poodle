@@ -1,6 +1,6 @@
 # 007 — Ordinary changelog maintenance scope
 
-Status: ready — operator selected structural repair for the g18.005 CI blocker
+Status: complete — merged as `ef2e46bb949a766e844e48f071119c9576c6f723` (PR #240) on 2026-09-10
 Owner: Poodle distribution certification
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -112,6 +112,12 @@ replace, close, or merge that PR from this task.
   ordinary mode and exempted only by the historical release-candidate mode.
 - The g18.005 independent reviewer accepted exact head `40f9e0a3...` before CI
   verification exposed the scope mismatch.
+
+- Merged. Independent exact-head `ready_to_merge` review of head
+  `1ee1f4c3c8ad2c0b6acc0942fded0e74bfe7aaa7`
+  ([comment #5626126027](https://github.com/inflatable-cookie/poodle/pull/240#issuecomment-5626126027));
+  closeout record
+  `docs/logs/2026-09/20260910-g18-007-ordinary-changelog-maintenance-scope.md`.
 
 ## Next task
 

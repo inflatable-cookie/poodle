@@ -6,14 +6,14 @@ Updated: 2026-09-10
 
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
-  - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239)
+  - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.007` ordinary changelog maintenance scope (PR #240)
   - Active task: `g18.005` v0.4.0 release preflight, retained PR #238;
-    validation remains blocked on the approved `g18.007` ordinary-scope
-    repair.
+    validation retry is pending now that the `g18.007` ordinary-scope repair
+    merged.
   - Approved frontier: `g18.008` web editor preview specimens, independent of
-    the reviewing `g18.007` ordinary changelog maintenance scope; g18.005
-    validation retries after g18.007 merges.
-  - Active blocker repair: `g18.007` ordinary changelog maintenance scope;
+    the merged `g18.007` ordinary changelog maintenance scope; g18.005
+    validation retries next.
+  - Merged repair: `g18.007` ordinary changelog maintenance scope;
     unblocks retained g18.005 PR #238 without a CI exception.
   - Planned release: `g18.006` v0.4.0 web editor release and Desktop unblock;
     waits for preflight and g18.008 preview admission, final source recheck,

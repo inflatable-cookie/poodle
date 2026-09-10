@@ -22,11 +22,11 @@ Northstar roadmaps use one generation-plus-task model:
 `g18.002`, `g18.003`, and `g18.004` are complete. They delivered the paired
 web CodeEditor, paired rich-text editor/renderer, and Tabs card fill. GPUI
 editor parity remains future work and the g18 GPUI repair runway stays open.
-The bounded g18.005 release preflight is implemented in retained PR #238 but
-blocked by ordinary-scope CI; operator-approved g18.007 is the active
-structural unblock lane. Operator-approved g18.008 independently corrects the
-missed baseline Svelte/React catalogue pages for CodeEditor, RichTextEditor,
-and RichTextRenderer. No CI exception is authorized.
+The bounded g18.005 release preflight is implemented in retained PR #238.
+Operator-approved g18.007 merged as the structural unblock lane (PR #240);
+Queue retries g18.005 validation next. Operator-approved g18.008
+independently corrects the missed baseline Svelte/React catalogue pages for
+CodeEditor, RichTextEditor, and RichTextRenderer. No CI exception is authorized.
 
 After preflight and g18.008 close, `g18.006` is the planned `0.4.0` web release
 and Desktop unblock. It remains held for final-source review and explicit

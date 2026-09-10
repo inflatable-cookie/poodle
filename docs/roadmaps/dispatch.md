@@ -17,8 +17,9 @@ commit.
 implemented and reviewed in retained PR #238 but fails ordinary-scope CI.
 
 [`g18.007`](g18/007-ordinary-changelog-maintenance-scope.md) — ordinary
-changelog maintenance scope — is reviewing in PR #240. After its merge, Queue
-retries validation on the existing g18.005 task and PR.
+changelog maintenance scope — merged as `ef2e46bb949a766e844e48f071119c9576c6f723`
+(PR #240) on 2026-09-10. Queue retries validation on the existing g18.005
+task and PR next.
 
 [`g18.008`](g18/008-web-editor-preview-specimens.md) — web editor preview
 specimens — is approved for immediate independent dispatch alongside g18.007.
