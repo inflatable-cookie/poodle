@@ -1,6 +1,6 @@
 # RichTextEditor
 
-Status: detailed contract
+Status: implemented web-admitted (g18.003) — not parity-complete
 Updated: 2026-09-10
 
 ## 1. Purpose
@@ -240,6 +240,25 @@ classes to semantic tokens inside the dedicated distribution.
   paired editor/renderer proof.
 - SSR imports do not touch the DOM. Editor creation occurs only on mount;
   teardown removes listeners, plugins, observers, and engine state.
+- Controlled sync compares host values against the last accepted host value,
+  not the engine's own serialization: the engine normalizes table structure
+  (column widths, span bookkeeping) on its own transactions, and that
+  normalization is engine state that must never re-dispatch a controlled
+  update. Every `onChange` payload is the complete engine document JSON with
+  only admitted attributes; a host that echoes it back changes nothing.
+- Wrappers push the controlled value to the engine only when the host sends
+  a genuinely new value object. Re-renders carrying the previous host value
+  (snapshot or unrelated prop changes) never count as a host revert; a
+  restored prior value rejects the user edit without a callback echo.
+- The image node admits exactly `src`, `alt`, and optional `title`; the
+  engine never serializes unadmitted image attributes.
+- Paste and drop run the pasted markup through a URL/element sanitizer
+  before the schema parse: script, style, and embedded-content elements are
+  discarded, refused URLs are discarded, and pasted images without alt text
+  become explicit decorative images (empty string). No lossless-import
+  claim.
+- The editing surface's Escape-then-Tab escape runs in a capture-phase
+  listener installed on the editor composition and removed at destroy.
 - Rust, GPUI, and Jetstream expose no placeholder and receive no parity credit
   from this web admission.
 

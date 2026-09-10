@@ -1715,3 +1715,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   this machine, then spends several more minutes unwinding the child tree. A
   focused rerun reproduced the same 2 pass / 1 timeout result. The flattened
   task migration does not touch the tested React preview or build path.
+- 2026-09-10 — `bun scripts/audit-license-compliance.ts` fails on the clean
+  g18.003 dispatch head (`deny.toml: still claims bzip2, which no lockfile
+  resolves`). The retired-notice sweep scans `deny.toml`, which still carries
+  a `[licenses] skipped`/comment reference to bzip2 from before g16.006.
+  Candidate: scrub the bzip2 mention from `deny.toml`; unrelated to g18.003,
+  which added no Cargo dependency.
+- 2026-09-10 — Verified on the clean g18.003 dispatch head, three checks are
+  already red before any rich-text change: `drift:roles` (invokes
+  `packages/svelte/preview/scripts/contract-role-drift.ts`, which does not
+  exist on disk), `check:react-components` (265 pre-existing TS errors in
+  `Tree.tsx`, `EditableList.tsx`, `BlockEditorBlock.tsx`, `LicenceActivation`,
+  `ModelConnection*`, `TextInput`), and `check:react-preview` (specimen
+  literal-string `ControlDensity`/`ControlSize` props). g18.003 adds none of
+  these errors; the branch output diffs byte-identically from `main`.

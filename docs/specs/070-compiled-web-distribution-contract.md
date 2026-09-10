@@ -61,13 +61,15 @@ actual Svelte prop, snippet, bindable, and callback types; a bare generic
 | Package | Externalized | Peers | Parser |
 | --- | --- | --- | --- |
 | core | none of svelte/react/marked | none | no `marked` edge |
-| Svelte | `svelte`, core, `marked`, pinned `@codemirror/*` (editor graph only) | `svelte: >=5.56.8 <6`; optional `marked: ^18.0.9` | only `./markdown` |
-| React | `react`, `react-dom`, core, `marked`, pinned `@codemirror/*` (editor graph only) | `react`/`react-dom` as today; optional `marked: ^18.0.9` | only `./markdown` |
+| Svelte | `svelte`, core, `marked`, pinned `@codemirror/*` (editor graph only), pinned `@tiptap/*` (rich-text graph only) | `svelte: >=5.56.8 <6`; optional `marked: ^18.0.9` | only `./markdown` |
+| React | `react`, `react-dom`, core, `marked`, pinned `@codemirror/*` (editor graph only), pinned `@tiptap/*` (rich-text graph only) | `react`/`react-dom` as today; optional `marked: ^18.0.9` | only `./markdown` |
 
 Optional `marked` is required when a consumer imports `./markdown`. Ordinary
 root or direct Button/Select graphs must not resolve `marked`. The pinned
 `@codemirror/*` dependencies are required when a consumer imports `./editor`;
-root-only graphs must not resolve them. Lowering the Svelte floor needs a
+root-only graphs must not resolve them. The pinned `@tiptap/*` dependencies
+are required when a consumer imports `./rich-text`; root-only, `./markdown`,
+and `./editor` graphs must not resolve them. Lowering the Svelte floor needs a
 separately proven older compiler/runtime build.
 
 ## Stable names
