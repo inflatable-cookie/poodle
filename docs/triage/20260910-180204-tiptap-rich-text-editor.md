@@ -30,6 +30,10 @@ configuration rather than baking one permanently closed Poodle schema.
 Operator decision 2026-09-10: ProseMirror is the document/schema authority.
 Poodle must not invent a parallel engine-neutral rich-text document model.
 
+Operator decision 2026-09-10: the matching read-only renderer is part of the
+first delivery. Persisted documents must have a stable display path that uses
+the same configured schema without requiring a live editor.
+
 ## Evidence
 
 - TipTap 3 is a headless ProseMirror-based editor whose schema is assembled
@@ -73,8 +77,8 @@ surface behind dedicated `./rich-text` entries:
 - exact document-change callbacks with prop-update no-echo behavior;
 - read-only and disabled states, selection/focus and keyboard behavior, paste
   filtering, links, accessibility, and bounded document behavior;
-- a matching read-only renderer or generation path so stored documents do not
-  require a live editor to display;
+- a matching read-only renderer using the same schema configuration so stored
+  documents do not require a live editor to display;
 - a supported-extension boundary that can vary by project without silently
   accepting or stripping nodes.
 
@@ -100,10 +104,8 @@ if lossless.
    start with composable supported modules, including optional images, and
    reserve arbitrary extension injection until its typing, styling, security,
    serialization, and read-only rendering contract is explicit.
-2. Is the matching read-only renderer part of the first delivery? Recommendation:
-   yes, because persistence without a stable display path is incomplete.
 
 ## Next check
 
-Confirm the extension-configuration boundary and read-only renderer scope,
-then promote a component contract and roadmap task.
+Confirm the extension-configuration boundary, then promote a component
+contract and roadmap task.
