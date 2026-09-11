@@ -91,7 +91,10 @@ void units;
 describe("core compiled distribution", () => {
   test("frozen inventories and package exports match spec 070", () => {
     expect(CORE_STYLE_FILES).toHaveLength(169); // g18.002 adds code-editor.css, g18.003 adds rich-text.css
-    expect(CORE_ICON_MODULES).toHaveLength(108);
+    // g18.013 adds six component-owned RichTextEditor toolbar icons:
+    // strikethrough, list-ordered, square-code, table, and the
+    // between-horizontal/vertical-start add-row/add-column pair.
+    expect(CORE_ICON_MODULES).toHaveLength(114);
     const manifest = JSON.parse(readFileSync(join(coreRoot, "package.json"), "utf8")) as {
       exports: unknown;
       files: string[];
