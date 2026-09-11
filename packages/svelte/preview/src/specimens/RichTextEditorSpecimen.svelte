@@ -78,7 +78,13 @@
       label="Image policy"
       description="Images are an explicit project choice. Embeds are not a v1 feature."
     >
-      <button type="button" data-part="images-toggle" aria-pressed={imagesOn} onclick={toggleImages}>
+      <button
+        type="button"
+        class="images-toggle"
+        data-part="images-toggle"
+        aria-pressed={imagesOn}
+        onclick={toggleImages}
+      >
         {imagesOn ? "Images on" : "Images off"}
       </button>
       <div class="editor-frame" data-part="image-policy-editor">
@@ -115,6 +121,28 @@
 </SpecimenLayout>
 
 <style>
+  /* Explicit paired chrome: the raw toggle must not inherit either
+     gallery's page-level button layout, or the visual gate reads the
+     specimen pair as divergent (g18.013). */
+  .images-toggle {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.625rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+  .images-toggle[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+  }
   .editor-frame {
     height: 20rem;
     margin-top: 0.75rem;

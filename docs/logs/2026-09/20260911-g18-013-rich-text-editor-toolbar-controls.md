@@ -54,12 +54,26 @@ icons or components.
   the destructive remove).
 - Paired specimens expose default, active/selection, disabled, table-context,
   explicit-subset, and images-enabled postures; paired preview tests cover
-  them. Paired component tests cover control chrome, names, glyphs, clusters,
-  pressed/disabled truth, exact subsets, destructive tone, and the link
-  editor keyboard journey. Core tests pin the presentation map, its derived
-  exports, the icon-name existence, and the destructive-tone reservation.
+  them. The images on/off specimen toggle now carries explicit identical
+  chrome in both galleries (inline-flex, fit-content, bordered): the raw
+  button previously inherited each gallery's page-level layout and the pair
+  pixel-diffed at 1.072% on eclipse-compact-md — a pre-existing g18.008
+  delta this branch repairs. Paired component tests cover control chrome,
+  names, glyphs, clusters, pressed/disabled truth, exact subsets, destructive
+  tone, and the link editor keyboard journey. Core tests pin the presentation
+  map, its derived exports, the icon-name existence, and the destructive-tone
+  reservation. Selector note: `data-command` moved from the button to a
+  wrapper span (IconButton takes no data attributes); the old bespoke
+  `data-pressed` attribute is replaced by IconButton's own `data-pressed`,
+  and the unused `apply-link`/`remove-link` data hooks are gone (Apply and
+  Remove are identified by `poodle-button` chrome inside the link editor).
 - `docs/contracts/components/rich-text-editor.md`: shared-map toolbar
   semantics and cluster wrapping added to §6 and §7.
+- Nucleus M1/A1 receipt `source_commit` repinned (5ce59be43 →
+  10f3f335a) across the manifest and all 58 receipts, following the
+  g18.004 precedent: the six new SVGs under `packages/render/assets/icons`
+  are inside the ledger SOURCE_PATHS, and no observation, capture, or
+  V1/Lab bundle changed. Ledger regenerates with zero delta.
 
 ## Validation
 
@@ -79,12 +93,15 @@ icons or components.
 - `effigy docs:check`: full sequence exit 0.
 - `effigy test:web-pack-install`: pass. `effigy svelte:surface-audit`: 171
   components with full coverage, 0 gaps.
-- Browser/visual (headless sweep-tier comparisons with `--slug`):
-  `rich-text-editor` pairs match Svelte vs React at the exact head; the
-  `rich-text-renderer` goto/pixel flakiness reproduces identically on the
-  stashed clean tree, as does the broader full-sweep local failure set
-  (avatar, embed-preview, pill, dock-region, audio-*), so no regression is
-  attributable to this branch. Full-sweep parity remains the ci:visual gate.
+- Browser/visual (headless sweep-tier comparisons with `--slug`, against
+  healthy same-worktree previews): `rich-text-editor` pairs match Svelte vs
+  React at the exact head — 2 compared, 0 failing on both axes — after the
+  specimen toggle-chrome repair; before that repair the pair failed at
+  1.072% on eclipse-compact-md, reproducing a delta that already exists on
+  main. `rich-text-renderer` remains as on main: a 0.047% iceberg pixel
+  delta and an intermittent svelte goto timeout, both reproduced on the
+  stashed clean tree and unrelated to this branch. Full-sweep parity remains
+  the ci:visual gate.
 - `git diff --check`: clean.
 
 ## Remaining limits

@@ -252,7 +252,9 @@
               {#if RICH_TEXT_COMMAND_PRESENTATION[command].glyph}
                 <IconButton
                   {...controlProps(command)}
-                  pressed={snapshot.states[command].active}
+                  pressed={RICH_TEXT_COMMAND_PRESENTATION[command].toggle
+                    ? snapshot.states[command].active
+                    : null}
                 >
                   <span class="poodle-rich-text-editor__glyph" aria-hidden="true">
                     {RICH_TEXT_COMMAND_PRESENTATION[command].glyph}

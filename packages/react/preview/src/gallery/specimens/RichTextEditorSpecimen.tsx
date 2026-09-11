@@ -89,6 +89,7 @@ export function RichTextEditorSpecimen() {
       >
         <button
           type="button"
+          className="images-toggle"
           data-part="images-toggle"
           aria-pressed={imagesOn}
           onClick={() => setImagesOn(!imagesOn)}
@@ -114,6 +115,11 @@ export function RichTextEditorSpecimen() {
         </div>
       </SpecimenGroup>
       <style>{`
+        /* Explicit paired chrome: the raw toggle must not inherit either
+           gallery's page-level button layout, or the visual gate reads the
+           specimen pair as divergent (g18.013). */
+        .images-toggle { appearance: none; display: inline-flex; align-items: center; width: fit-content; gap: 0.375rem; padding: 0.3125rem 0.625rem; border: 0.0625rem solid var(--poodle-color-border-default); border-radius: var(--poodle-radius-control); background: var(--poodle-color-background-surface); color: var(--poodle-color-text-primary); font: inherit; font-size: 0.8125rem; line-height: 1.2; cursor: pointer; }
+        .images-toggle[aria-pressed="true"] { background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent); }
         .rich-text-editor-frame { height: 20rem; margin-top: 0.75rem; }
         .rich-text-editor-readout { margin: 0.75rem 0 0; padding: 0.5rem; border-radius: 0.25rem; background: var(--poodle-color-background-surface); font-size: 0.75rem; white-space: pre-wrap; max-height: 8rem; overflow: auto; }
       `}</style>
