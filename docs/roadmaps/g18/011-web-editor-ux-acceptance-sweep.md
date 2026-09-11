@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: dependency-queued behind g18.012 and g18.014/g18.018→g18.020 — operator-required release gate
+Status: blocked on F1 — g18.021 syntax-presentation repair awaiting operator-approved dispatch
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: g18.012 and g18.013–g18.020 complete and merged
+Depends on: g18.012–g18.020 complete and merged; g18.021 repair pending
 
 ## Outcome
 
@@ -179,9 +179,19 @@ language-loading baseline. The operator corrected that order on 2026-09-11:
 g18.012 owns its before/after baseline and this sweep accepts the completed
 extensible registry.
 
+The first sweep pass at `a639b1b78` stopped correctly on release-blocking F1.
+Real TypeScript and JSON loaders produced zero syntax spans and one default
+text colour in Svelte and React under Chromium and WebKit. Both CodeEditor
+engines load the grammar extension but install no CodeMirror highlight style.
+Chatterbox promoted bounded repair g18.021; this task and its accepted blocked
+callback remain canonical and will resume after that repair merges. Follow-up
+F12 records that React preview accepts `#components/code-editor` but not the
+canonical `#/components/code-editor` spelling; it did not block the sweep.
+
 ## Next task
 
-After g18.012 and g18.020 merge, return findings to Chatterbox. Promote and merge every other
-blocking repair, then seek the operator's explicit sweep acceptance before
-resuming retained g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep
-g18.009 remains dependency-queued meanwhile.
+Dispatch and merge g18.021, add it to this existing Queue task in place, then
+resume the interrupted sweep. Promote and merge every other blocking repair,
+then seek the operator's explicit sweep acceptance before resuming retained
+g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep g18.009
+dependency-queued meanwhile.

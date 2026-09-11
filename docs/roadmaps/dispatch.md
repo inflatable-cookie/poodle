@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.020 merged; g18.011 sweep is next; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.011 blocked on F1; g18.021 repair awaits dispatch approval)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -96,6 +96,14 @@ The version-57 dependency mutation made it wait exactly on g18.012 task
 `276cd890-5904-4c79-a08f-253c704e4185`. It sweeps all four editor surfaces in
 both web previews and is serial before any g18.006 continuation.
 
+Its first pass stopped with an accepted blocked callback after proving that
+both CodeEditor engines load TypeScript/JSON grammars but install no visible
+syntax presentation. Preserve task `aad6b776-1c3e-438c-bc9c-4e8ba8750462`
+and its thread. [`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md)
+is the bounded repair awaiting operator-approved dispatch; once submitted,
+add it as an in-place dependency of g18.011 and retry that same sweep task only
+after the repair merges.
+
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is merged (PR #250).
 It replaced the closed grammar catalogue with consumer-selected lazy CodeMirror
 language providers before the sweep; Queue task
@@ -128,6 +136,10 @@ pages. The MarkdownRenderer leg of g18.011 is unblocked.
 It replaced fixed H1–H3 buttons with one consumer-configurable Normal/H1–H6
 Select and extended real document support through H6. The heading-mode leg of
 g18.011 is unblocked.
+
+[`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md) is ready
+for operator-approved dispatch. It adds internal token-bound CodeMirror syntax
+presentation without bundling grammars or widening the public extension API.
 
 ## Held planning horizons
 
