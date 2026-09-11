@@ -132,6 +132,9 @@ usage docs.
 effigy react:preview
 ```
 
+`react:preview` rebuilds core and the React package before Vite. `react:run`
+starts Vite only and can serve stale ignored dist output.
+
 ## Stability
 
 - Public entry point is the package root; import components and types from it.
