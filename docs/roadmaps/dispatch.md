@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.005 merged as 93e165fd072aea27f44ede5a794042948654b265)
+Updated: 2026-09-11 (g18.006 promoted after final-source recheck and operator release go)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -24,11 +24,17 @@ changelog maintenance scope — merged as `ef2e46bb949a766e844e48f071119c9576c6f
 specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
 (PR #241) on 2026-09-10. It was serial before g18.006 release.
 
-## Held planning horizons
+## Ready queue task
 
-[`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) is planned
-after merged g18.005 and g18.008. It cannot dispatch until final-source
-recheck and explicit operator release authority.
+[`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
+preparation is ready after all four dependencies, final-source recheck at
+`70b59890`, and Tom's 2026-09-11 authority. Dispatch only its committed handoff.
+
+[`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
+certification is ready behind g18.006. Queue it only with the immutable g18.006
+task ID as its dependency; it tags and publishes the accepted merged candidate.
+
+## Held planning horizons
 
 GPUI repair tranches, GPUI/shared-Rust CodeEditor and RichTextEditor work,
 visual expansion, keyboard-origin focus, V2, M2, A2, the Nucleus switch packet,

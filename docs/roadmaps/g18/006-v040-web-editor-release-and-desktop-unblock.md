@@ -1,6 +1,6 @@
-# 006 — v0.4.0 web editor release and Desktop unblock
+# 006 — v0.4.0 web editor release candidate
 
-Status: planned — g18.005 and g18.008 merged; publication requires explicit operator release authority
+Status: ready — final source rechecked; operator authorized candidate execution 2026-09-11
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -13,12 +13,9 @@ Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`
 
 ## Outcome
 
-Prepare, certify, and publish Poodle `0.4.0` after the rich-text and Tabs work
-has merged. Publish `@inflatable-cookie/poodle-core` and
-`@inflatable-cookie/poodle-svelte` from one exact candidate/tag, retain React
-as private packed validation, keep Rust crates on source/tag distribution, and
-return registry-installed evidence that lets Desktop resume its retained
-`g02.058` task and PR #215.
+Prepare and certify the immutable Poodle `0.4.0` candidate after the rich-text,
+Tabs and preview work has merged. Merge one independently reviewed candidate
+tree that g18.009 can tag and publish. Do not release from this task.
 
 Do not publish before all dependencies close. Do not mutate Desktop.
 
@@ -36,9 +33,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - [x] The release and Desktop proof boundaries are explicit.
 - [x] g18.003, g18.004, g18.005, and g18.008 have merged with
   accepted exact-head review.
-- [ ] Final candidate package trees and full v0.3.0-to-candidate delta are known.
-- [ ] The operator explicitly authorizes candidate execution and public release
-  mutation after reviewing the final package set.
+- [x] Final source package trees and the full v0.3.0-to-current-main delta are
+  known. Candidate-time trees remain worker evidence after version preparation.
+- [x] The operator explicitly authorized candidate execution and public release
+  mutation on 2026-09-11 to unblock Desktop g02.058.
 
 ## Decisions
 
@@ -56,34 +54,32 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - Repair the current Keep-a-Changelog parser incompatibility before treating
   Effigy's release status/plan as healthy. Preserve historical meaning; do not
   bypass the parser or release gates.
-- Follow the repository's two-step `release.yml` protocol: exact-candidate
-  branch dry run, tag only after green evidence, tag dry run, then publication.
-  Any red step stops. Never retag a failed published release.
+- Preserve the repository's two-step `release.yml` protocol. This candidate
+  task owns the exact-candidate branch dry run only; g18.009 owns the later tag,
+  tag dry run and publication sequence.
 
 ## Dispatch manifest
 
-- **State:** planned and serial after g18.003, g18.004, g18.005, and g18.008; not dispatchable
-  until Chatterbox rechecks the final source and the operator grants explicit
-  release authority
+- **State:** ready and serial after completed g18.003, g18.004, g18.005, and
+  g18.008; final source rechecked at `70b59890cb3f069d9f43139bf1072dbcc2ff7364`
+  and operator release authority granted 2026-09-11
 - **Completion:** one reviewed release-candidate PR merged to main; exact
-  candidate local gates and branch dry run green; immutable `v0.4.0` tag; tag
-  dry run and publish workflow green; npm core/Svelte `0.4.0` available; fresh
-  ordinary installed consumer proves `./editor`; Desktop blocker capsule sent
+  candidate local gates and branch dry run green; final version set, package
+  trees, packed archives and release notes recorded for g18.009
 - **Owned mutable paths:** package and Cargo version manifests; intra-repo
   version requirements; lockfiles; `CHANGELOG.md`; `docs/release-notes/0.4.0.md`
   and release-notes index; release evidence/log; required generated package
   artifacts and release metadata
 - **Reserved closeout surfaces:** g18 README, generation index, dispatch
   projection, task status/evidence, Desktop repository/task/PR
-- **Worker:** release-capable high-reasoning worker comfortable with lockstep
-  TypeScript/Rust versioning, packed-library certification, hosted workflow
-  evidence, npm trusted publishing, and cross-repo proof
+- **Worker:** release-candidate high-reasoning worker comfortable with lockstep
+  TypeScript/Rust versioning, packed-library certification and hosted dry-run
+  evidence
 - **Excluded:** Desktop edits; React npm publication; crates.io publication;
   stable-channel claims; feature implementation; workflow edits; gate bypasses;
   windowed selectors; unrelated dependency updates
-- **Escalation:** operator through Chatterbox for the final release go, any
-  failed gate/tag/publication, package-set change, version change, or registry
-  discrepancy
+- **Escalation:** operator through Chatterbox for any failed candidate gate,
+  package-set change, version change or unclassified public delta
 
 ## Work
 
@@ -98,22 +94,12 @@ Do not publish before all dependencies close. Do not mutate Desktop.
    additive and Tabs card fill as behavioral.
 4. Prove source-free packed core/Svelte archives, private packed React, root
    isolation, SSR/browser imports, declarations, licenses, exact dependencies,
-   and a fresh ordinary installed consumer of Svelte `./editor`.
+   and a fresh source-free consumer installed from the packed Svelte archive.
 5. Open one non-draft candidate PR. Independent review must bind the exact head,
    version set, final package trees, package contents, release notes, and
    Desktop unblock oracle. The worker never merges, tags, or publishes.
-6. After merge and explicit operator release authority, run local release gates
-   on the exact clean pushed candidate. Dispatch `release.yml` dry-run against
-   that exact commit and require green evidence before tagging.
-7. Create and push `v0.4.0` only after the candidate dry run passes.
-   Run the tag dry run, then the tag publication workflow. Stop on any failure.
-8. Query npm until exact core and Svelte `0.4.0` metadata and tarballs are
-   available. Install them in a fresh unlinked consumer and prove `./editor`
-   loads with the expected declarations and browser/SSR boundaries.
-9. Return Desktop Chatterbox the exact version, release/tag/candidate commits,
-   final package-tree hashes, tarball integrity/registry evidence, and installed
-   `./editor` result. Direct it to resume the same g02.058 task/workspace/PR for
-   repin, unlink, ordinary install, exact-head review, and closeout.
+6. Return the exact candidate identity for queue review and merge. Closeout
+   passes the merged identity to g18.009. Do not tag, publish or mutate npm.
 
 ## Acceptance and review oracle
 
@@ -121,14 +107,13 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 | --- | --- | --- |
 | Release waits for complete web admission | candidate omits rich text, Tabs, or editor preview admission | all four task merge commits are ancestors of the exact candidate |
 | Version reflects additive API | manifests prepare `0.3.1` or disagree | every release-bearing TS/Rust manifest and internal requirement is `0.4.0` |
-| Editor is really published | source link passes but packed `./editor` is absent | fresh registry install imports Svelte `./editor` in declared browser/SSR/type modes |
+| Editor is in the candidate | source link passes but packed `./editor` is absent | source-free packed install imports Svelte `./editor` in browser/SSR/type modes |
 | Rich text is isolated | root or `./editor` pulls TipTap/ProseMirror | packed graph/archive isolation checks on final tarballs |
 | Desktop proof is honest | report repeats obsolete g18.002 whole-tree hashes as final | lineage records old hashes; final candidate/tag/package trees and integrity are reported separately |
 | Candidate is exact | CI success belongs to another head | branch dry-run `headSha` equals clean pushed candidate commit |
-| Publication is gated | tag or npm publish happens before dry runs pass | ordered workflow/run IDs show candidate dry run, tag, tag dry run, publish |
-| Registry is usable | npm metadata exists but tarball or export is stale | exact registry metadata, integrity, fresh install, and runtime/type import proof |
+| Publication stays separate | candidate task creates a tag or changes npm | tag absence and no release workflow dispatch; g18.009 owns release mutation |
 | Changelog is valid | release proceeds by skipping the parser | Effigy status/plan parses and local release gates remain green |
-| Public set stays bounded | React or crates are published accidentally | registry queries plus workflow/package-set inspection show core/Svelte only |
+| Public set stays bounded | candidate config admits React or crates | manifest, pack and workflow package-set inspection show core/Svelte only |
 | Desktop remains consumer-owned | Poodle worker edits PR #215 or its checkout | Poodle diff has no Desktop path; handoff contains evidence and resume instruction only |
 
 ## Stop conditions
@@ -136,9 +121,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - Stop if g18.003, g18.004, g18.005, or g18.008 is not merged and accepted.
 - Stop if the final delta contains an unclassified breaking public change or
   requires a version other than `0.4.0`.
-- Stop if local gates, candidate dry run, tag dry run, packing, publication, or
-  installed-registry proof fails. Do not bypass or retag.
-- Stop before any release mutation without explicit operator release authority.
+- Stop if local gates, candidate dry run or packing fails. Do not bypass.
+- Stop before every tag, publication or registry mutation; g18.009 owns them.
 - Stop before editing workflows, publishing React/crates, or mutating Desktop.
 
 ## Evidence
@@ -151,12 +135,24 @@ Planning intake verified on 2026-09-10:
   `ffb16fed0a8cec7f8a2448bed2f5e680d60a5366`, Svelte
   `de3a5f55d435689f2886e524613364fa2abc785d`.
 - Svelte source manifest contains `./editor`; immutable `v0.3.0` does not.
-- `effigy release status --check-gates` currently stops on existing
-  `CHANGELOG.md` grammar errors. The release task must repair, not bypass, this
-  preflight before certification.
+- g18.005 plus g18.007 repaired the existing Keep-a-Changelog parser conflict;
+  PR #238 merged after release status/planning and the bounded preflight passed.
+
+Promotion recheck on 2026-09-11:
+
+- current pushed main is `70b59890cb3f069d9f43139bf1072dbcc2ff7364`;
+- g18.002, g18.003, g18.004, g18.005 and g18.008 accepted merges are all
+  ancestors;
+- final source trees are core
+  `86412853ee4b490f5630e9573ebaa0abf3f77c17`, Svelte components
+  `a76b9b5163469aadedab78ba8c471086df777d1b`, and React components
+  `3a662d815efc0e158943579f4a9b4d0c8070eb96`;
+- the accumulated public-intent delta from immutable `v0.3.0` contains the
+  accepted CodeEditor, rich-text, Tabs and paired preview work; and
+- Tom explicitly authorized this release lane to unblock Desktop g02.058.
 
 ## Next task
 
-After registry and installed-consumer proof, Desktop resumes its retained
-g02.058 task and PR #215. Poodle returns to Chatterbox for the next GPUI repair
-tranche or release/adoption need; no successor auto-starts.
+After the candidate merges and closes, g18.009 performs the separately queued
+release certification and Desktop unblock. Desktop then resumes retained
+g02.058 and PR #215.

@@ -28,9 +28,9 @@ was authorized. Operator-approved g18.008 merged the baseline Svelte/React
 catalogue pages for CodeEditor, RichTextEditor, and RichTextRenderer (PR
 #241).
 
-Preflight is closed; `g18.006` is the planned `0.4.0` web release
-and Desktop unblock. It remains held for final-source review and explicit
-operator release authority; planning does not publish, tag, or mutate Desktop.
+Preflight is closed; `g18.006` is the ready `0.4.0` candidate and g18.009 is
+the serial certification/publication step that unblocks Desktop. Final source
+was rechecked and Tom granted explicit authority for both on 2026-09-11.
 
 ## Rules
 

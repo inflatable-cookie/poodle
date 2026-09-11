@@ -7,18 +7,19 @@ Updated: 2026-09-11
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
   - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.005` v0.4.0 release preflight (PR #238); `g18.007` ordinary changelog maintenance scope (PR #240); `g18.008` web editor preview specimens (PR #241)
-  - Active task: none; preflight is closed.
+  - Ready task: `g18.006`; g18.009 waits serially behind it.
   - Merged specimen admission: `g18.008` web editor preview specimens;
     Svelte/React catalogue pages for the three editor surfaces are live
     through the web-only supplement with no native parity change.
   - Merged repair: `g18.007` ordinary changelog maintenance scope;
     unblocked retained g18.005 PR #238 without a CI exception, and g18.005
     merged after exact-head re-review.
-  - Planned release: `g18.006` v0.4.0 web editor release and Desktop unblock;
-    preflight complete; waits for final source recheck
-    and explicit release authority.
-  - Next checkpoint: recheck and
-    authorize `g18.006` or compile the first GPUI repair tranche.
+  - Ready candidate: `g18.006`; dependencies complete, final source rechecked,
+    operator authority granted.
+  - Queued release: `g18.009`; certify and publish the exact merged candidate,
+    then return the ordinary-install proof to retained Desktop PR #215.
+  - Next checkpoint: dispatch g18.006, then queue g18.009 behind its immutable
+    task ID.
 
 ## Compacted generations
 
