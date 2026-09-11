@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.010 merged; g18.006 paused; g18.011 held behind g18.013/g18.014; g18.009 held)
+Updated: 2026-09-11 (g18.010 merged; g18.006 paused; g18.011 held behind g18.013/g18.014/g18.015; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -34,8 +34,9 @@ rust/web checks at the reviewed head.
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010, g18.013 and g18.014, the held g18.011 sweep, g18.012, and
-all other blocking repairs close and the operator accepts the sweep.
+only after g18.010, g18.013, g18.014 and g18.015, the held g18.011 sweep,
+g18.012, and all other blocking repairs close and the operator accepts the
+sweep.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is already dependency-queued behind g18.006 and is now explicitly
@@ -43,22 +44,27 @@ held. Do not release it until the repaired candidate is accepted.
 
 ## Ready queue task
 
-[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued
-behind merged g18.010 and explicitly Queue-held until parallel g18.013 and its serial
-g18.014 also merge. It sweeps all three editor surfaces in both web previews
-and is serial before any g18.006 continuation.
+[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is explicitly Queue-held
+until serial g18.013→g18.014 and parallel g18.015 merge. It sweeps all three
+editor surfaces in both web previews and is serial before any g18.006
+continuation.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is
 dependency-queued behind g18.011. It replaces the closed grammar catalogue
 with consumer-selected lazy CodeMirror language providers before g18.006.
 
-[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is approved for
-immediate dispatch; it ran in parallel with merged g18.010. It replaces the
-link-like command row with proper grouped Poodle controls before g18.011 is released.
+[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is active. It replaces
+the link-like command row with proper grouped Poodle controls before g18.011 is
+released.
 
 [`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is
 dependency-queued behind g18.013. It replaces the dead external image fixture
 with visible deterministic seeded/insertion proof before g18.011 is released.
+
+[`g18.015`](g18/015-preview-distribution-build-preflight.md) is approved for
+immediate dispatch in parallel with g18.013. It rebuilds core and the matching
+framework package before each public preview starts and must merge before
+g18.011 is released.
 
 ## Held planning horizons
 
