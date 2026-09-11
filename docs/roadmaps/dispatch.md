@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.018 merged; g18.020 converges on g18.011; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.020 merged; g18.011 sweep is next; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -68,6 +68,11 @@ controlled-echo selection preservation — merged as
 `08e377517af58a2033a145af2fe5c5875fb38215` (PR #248) on 2026-09-11 after
 exact-head independent review and green rust/web checks at the reviewed head.
 
+[`g18.020`](g18/020-rich-text-heading-mode-select.md) — RichTextEditor heading
+mode select — merged as `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9` (PR #251) on
+2026-09-11 after exact-head independent review and green rust/web checks at the
+reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -84,7 +89,7 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind merged g18.018 and ready
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind merged g18.018 and merged
 g18.020 (g18.012 merged as `f011df5e0a97856bfe022569d77faf69a9f75553`, PR #250).
 The version-57 dependency mutation made it wait exactly on g18.012 task
 `697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
@@ -119,11 +124,10 @@ It added the paired standalone MarkdownRenderer surfaces, shared one
 safe/trusted content path with MarkdownEditor preview, and added both specimen
 pages. The MarkdownRenderer leg of g18.011 is unblocked.
 
-[`g18.020`](g18/020-rich-text-heading-mode-select.md) is ready behind merged
-g18.018 (PR #248). It replaces fixed H1–H3 buttons with one
-consumer-configurable Normal/H1–H6 Select and extends real document support
-through H6. Queue task `276cd890-5904-4c79-a08f-253c704e4185` is already a
-dependency of existing g18.011 without replacement.
+[`g18.020`](g18/020-rich-text-heading-mode-select.md) is merged (PR #251).
+It replaced fixed H1–H3 buttons with one consumer-configurable Normal/H1–H6
+Select and extended real document support through H6. The heading-mode leg of
+g18.011 is unblocked.
 
 ## Held planning horizons
 

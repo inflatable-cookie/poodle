@@ -1,6 +1,6 @@
 # g18.020 — RichTextEditor heading mode select
 
-Status: ready for review
+Status: complete — merged as `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9` (PR #251) on 2026-09-11 after exact-head independent review (PR comment `5636831897`, `ready_to_merge`) at `7e5162b22dc3e5a7811faa8ef2e98c7301ef6ca0` with green rust/web checks
 Date: 2026-09-11
 Branch: `ns-276cd890-5904-4c79-a08f-253c704e4185`
 Card: `docs/roadmaps/g18/020-rich-text-heading-mode-select.md`
@@ -111,8 +111,9 @@ the old behavior and pass only against the new contract.
 - No arbitrary extensions, toolbar slots, H7+, engine object exposure, Markdown
   conversion, image/embed work, native parity, release, Desktop, workflow, or
   consumer change.
-- g18.011 stays gated behind this repair; g18.006/g18.009/g18.012 and release
-  state are untouched.
+- Merged as `d8ad00b84` (PR #251); g18.011 is next with every repair dependency
+  merged; g18.006/g18.009/g18.012 and release state are untouched, and nothing
+  was released, published, or tagged.
 
 ## Validation
 
@@ -142,6 +143,7 @@ the old behavior and pass only against the new contract.
 
 ## Continuation
 
-One non-draft PR from the queue-owned branch, exact-head review, then merge by
-the orchestrator. g18.011 remains the next gated task; no release, Desktop,
-native, or retained work starts from this log.
+Merged. g18.011 four-surface web editor acceptance sweep is next with every
+repair dependency merged, then operator acceptance and retained g18.006.
+g18.009 waits on g18.006. No release, Desktop, native, or retained task work
+starts from this log.

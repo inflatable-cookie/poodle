@@ -36,10 +36,9 @@ the closed CodeEditor grammar catalogue with a consumer-selected lazy language
 registry (PR #250); and g18.018 made accepted RichTextEditor controlled echoes
 preserve caret, selection, history and focus in both web wrappers (PR #248).
 
-Operator-approved g18.020 is ready behind merged g18.018 and replaces fixed
-H1–H3 controls with one consumer-configurable Normal/H1–H6 selector backed by
-real H4–H6 document support. It converges on g18.011, which then performs the
-four-surface acceptance sweep. The retained g18.006
+Merged g18.020 replaced fixed H1–H3 controls with one consumer-configurable
+Normal/H1–H6 selector backed by real H4–H6 document support (PR #251).
+g18.011 performs the four-surface acceptance sweep next. The retained g18.006
 `0.4.0` candidate and serial g18.009 certification/publication lanes remain at
 the end and unblock Desktop only after accepted product source stops moving.
 

@@ -1,6 +1,6 @@
 # 020 — RichTextEditor heading mode select
 
-Status: ready behind g18.014 and g18.018 — operator-confirmed release blocker
+Status: complete — merged as `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9` (PR #251) on 2026-09-11
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/rich-text-editor.md`,
@@ -62,8 +62,8 @@ Svelte and React, not toolbar-only labels.
 
 ## Dispatch manifest
 
-- **State:** dependency-queued behind active g18.014/g18.018; explicit
-  prerequisite of g18.011, g18.012, retained g18.006 and g18.009
+- **State:** complete; merged g18.020 unblocks the heading-mode leg of g18.011;
+  `g18.011` stays serial before retained g18.006; g18.009 waits on g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** RichTextEditor contract; shared rich-text command,
@@ -142,8 +142,20 @@ domain and admitted heading levels stop at 3, while the existing custom Select
 supports rendered trigger/options. The operator approved H1–H6 plus Normal text
 and explicitly selected per-consumer configurable levels.
 
+Merged outcome: PR #251 merged as `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9`
+after exact-head independent review (PR comment `5636831897`, `ready_to_merge`)
+at `7e5162b22dc3e5a7811faa8ef2e98c7301ef6ca0` with green rust/web checks.
+Review-reported validation: `test:core` 1376 pass; `test:components` 415 files,
+4124 pass; focused paired suites 132 pass; `test:rich-text-heading-mode` 96
+checks across headless Chromium and WebKit for both wrappers; paired package
+and preview builds, `docs:lint`, and `git diff --check` clean. Deferred
+failures: `check:react-*` errors are the documented pre-existing backlog in
+untouched files; the browser probe stays out of `ci:web` by the g18-008
+precedent.
+
 ## Next task
 
-After g18.014, g18.018 and this task merge, Queue releases g18.011 for the full
-four-surface acceptance sweep. g18.012 remains next, followed by operator sweep
-acceptance and retained g18.006; g18.009 stays dependency-queued behind it.
+g18.020 is merged with g18.014, g18.018 and g18.012 already merged. g18.011
+performs the full four-surface acceptance sweep next, followed by operator
+sweep acceptance and retained g18.006; g18.009 stays dependency-queued behind
+it.
