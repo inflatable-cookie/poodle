@@ -157,6 +157,10 @@ export {
   INPUT_MODALITY_ATTR,
   type InputModality,
 } from "./dom/input-modality";
+export {
+  CODE_EDITOR_FOCUS_ENTRY_ATTR,
+  installCodeEditorFocusEntry,
+} from "./dom/code-editor-focus-entry";
 
 export {
   disclosureTransition,

@@ -33,6 +33,7 @@ import {
   indentMore,
 } from "@codemirror/commands";
 import {
+  installCodeEditorFocusEntry,
   isCodeEditorLanguage,
   toCodeEditorChange,
   validateCodeEditorDiagnostics,
@@ -295,6 +296,10 @@ export async function createCodeEditorEngine(
   view.contentDOM.setAttribute("aria-label", options.ariaLabel);
   if (options.disabled) view.contentDOM.setAttribute("aria-disabled", "true");
 
+  // The outer focus treatment is a keyboard-entry affordance. It lives on the
+  // root element as a local attribute, never on the document modality.
+  const disposeFocusEntry = installCodeEditorFocusEntry(host);
+
   let updateEpoch = 0;
 
   async function update(next: Partial<CodeEditorEngineOptions>): Promise<void> {
@@ -379,6 +384,7 @@ export async function createCodeEditorEngine(
   }
 
   function destroy(): void {
+    disposeFocusEntry();
     closeSearchPanel(view);
     view.destroy();
   }
