@@ -24,6 +24,10 @@ import type {
 import {
   RICH_TEXT_COMMAND_GROUP_LABELS,
   RICH_TEXT_COMMAND_PRESENTATION,
+  RICH_TEXT_HEADING_LEVELS,
+  RICH_TEXT_HEADING_MIXED_LABEL,
+  RICH_TEXT_HEADING_NORMAL_LABEL,
+  RICH_TEXT_HEADING_NORMAL_VALUE,
 } from "@inflatable-cookie/poodle-core";
 
 const EMPTY: ProseMirrorDocumentJSON = {
@@ -116,6 +120,25 @@ function press(target: Element, key: string, init: KeyboardEventInit = {}): bool
   return target.dispatchEvent(
     new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key, ...init }),
   );
+}
+
+/** The heading selector trigger is the one toolbar stop for all heading levels. */
+function headingSelectTrigger(container: HTMLElement): HTMLButtonElement {
+  const trigger = container.querySelector<HTMLButtonElement>(
+    '[data-command="heading-select"] button.poodle-select__trigger',
+  );
+  if (!trigger) throw new Error("missing heading select trigger");
+  return trigger;
+}
+
+/** Open the portalled heading listbox and choose Normal text or one level. */
+function chooseHeadingOption(container: HTMLElement, value: string): void {
+  act(() => headingSelectTrigger(container).click());
+  const option = document.querySelector<HTMLButtonElement>(
+    `.poodle-select__option[data-value="${value}"]`,
+  );
+  if (!option) throw new Error(`missing heading option ${value}`);
+  act(() => option.click());
 }
 
 afterEach(() => cleanup());
@@ -237,7 +260,9 @@ describe("RichTextEditor (react)", () => {
     expect(container.querySelector(".poodle-rich-text-editor")?.getAttribute("data-readonly")).toBe(
       "true",
     );
-    const buttons = [...container.querySelectorAll<HTMLButtonElement>("[data-command] button")];
+    const buttons = [
+      ...container.querySelectorAll<HTMLButtonElement>('[data-command] button:not([tabindex="-1"])'),
+    ];
     expect(buttons.length).toBeGreaterThan(10);
     for (const button of buttons) expect(button.disabled).toBe(true);
   });
@@ -275,9 +300,10 @@ describe("RichTextEditor toolbar (react)", () => {
     const commands = [...container.querySelectorAll("[data-command]")].map((button) =>
       button.getAttribute("data-command"),
     );
-    for (const expected of ["undo", "bold", "heading-1", "link", "insert-table", "add-row", "delete-table"]) {
+    for (const expected of ["undo", "bold", "heading-select", "link", "insert-table", "add-row", "delete-table"]) {
       expect(commands).toContain(expected);
     }
+    expect(commands).not.toContain("heading-1");
     expect(commands).not.toContain("insert-image");
   });
 
@@ -314,9 +340,8 @@ describe("RichTextEditor toolbar (react)", () => {
         onChange,
       }),
     );
-    const heading = container.querySelector<HTMLButtonElement>('[data-command="heading-1"] button');
-    if (!heading) throw new Error("missing heading command");
-    act(() => heading.click());
+    expect(container.querySelector('[data-command="heading-select"]')).not.toBeNull();
+    chooseHeadingOption(container, "heading-1");
     expect(onChange).toHaveBeenCalledTimes(1);
     const document1 = onChange.mock.calls[0][0] as ProseMirrorDocumentJSON;
     expect(document1.type).toBe("doc");
@@ -746,12 +771,10 @@ describe("host revert of a user edit (react)", () => {
     const view = render(
       createElement(RichTextEditor, { value: PLAIN, features: ["headings"], onChange }),
     );
-    const heading = view.container.querySelector<HTMLButtonElement>(
-      '[data-command="heading-1"] button',
-    );
-    if (!heading) throw new Error("missing heading command");
-    act(() => heading.click());
+    const trigger = headingSelectTrigger(view.container);
+    chooseHeadingOption(view.container, "heading-1");
     expect(view.container.querySelector("h1")).not.toBeNull();
+    expect(trigger).not.toBeNull();
     expect(onChange).toHaveBeenCalledTimes(1);
     // The host restores the pre-edit value (a genuinely new value object,
     // as a controlled host state update would send).
@@ -968,7 +991,9 @@ describe("RichTextEditor toolbar presentation (react)", () => {
 
   it("renders every admitted command as a real Poodle icon button with the shared name", () => {
     const { container } = renderAutoToolbar();
-    const wrappers = [...container.querySelectorAll("[data-command]")];
+    const wrappers = [...container.querySelectorAll("[data-command]")].filter(
+      (wrapper) => wrapper.getAttribute("data-command") !== "heading-select",
+    );
     expect(wrappers.length).toBeGreaterThan(10);
     for (const wrapper of wrappers) {
       const command = commandOf(wrapper);
@@ -980,6 +1005,9 @@ describe("RichTextEditor toolbar presentation (react)", () => {
       // Control chrome belongs to Poodle primitives; no bespoke toolbar class.
       expect(wrapper.querySelector(".poodle-rich-text-editor__toolbar-button")).toBeNull();
     }
+    // Heading levels are not buttons at all: they are one Poodle Select.
+    expect(container.querySelector('[data-command="heading-1"]')).toBeNull();
+    expect(headingSelectTrigger(container)).not.toBeNull();
   });
 
   it("groups consecutive same-group commands into intact labelled clusters", () => {
@@ -991,11 +1019,16 @@ describe("RichTextEditor toolbar presentation (react)", () => {
       expect(group.getAttribute("role")).toBe("group");
       clusterGroups.push(group.getAttribute("aria-label") ?? "");
       for (const wrapper of group.querySelectorAll("[data-command]")) {
-        const presentation =
-          RICH_TEXT_COMMAND_PRESENTATION[commandOf(wrapper) as keyof typeof RICH_TEXT_COMMAND_PRESENTATION];
-        expect(RICH_TEXT_COMMAND_GROUP_LABELS[presentation.group]).toBe(
-          group.getAttribute("aria-label"),
-        );
+        const command = commandOf(wrapper);
+        const expectedGroup =
+          command === "heading-select"
+            ? RICH_TEXT_COMMAND_GROUP_LABELS.headings
+            : RICH_TEXT_COMMAND_GROUP_LABELS[
+                RICH_TEXT_COMMAND_PRESENTATION[
+                  command as keyof typeof RICH_TEXT_COMMAND_PRESENTATION
+                ].group
+              ];
+        expect(expectedGroup).toBe(group.getAttribute("aria-label"));
       }
     }
     // Every cluster label is a known group name and neighbours never repeat.
@@ -1007,11 +1040,16 @@ describe("RichTextEditor toolbar presentation (react)", () => {
 
   it("heading controls carry typographic glyphs; icon controls carry SVG icons", () => {
     const { container } = renderAutoToolbar();
-    const h1 = container.querySelector('[data-command="heading-1"] button');
-    expect(h1?.textContent).toContain("H1");
-    expect(h1?.querySelector("svg")).toBeNull();
+    for (const level of RICH_TEXT_HEADING_LEVELS) {
+      expect(container.querySelector(`[data-command="heading-${level}"]`)).toBeNull();
+    }
     const bold = container.querySelector('[data-command="bold"] button');
     expect(bold?.querySelector("svg")).not.toBeNull();
+    act(() => headingSelectTrigger(container).click());
+    const h1Option = document.querySelector<HTMLElement>('[data-heading-level="1"]');
+    expect(h1Option?.textContent).toContain("H1");
+    expect(h1Option?.textContent).toContain("Heading 1");
+    expect(document.querySelector('[data-heading-level="6"]')?.textContent).toContain("Heading 6");
   });
 
   it("the destructive table command renders distinguishably without changing semantics", () => {
@@ -1035,16 +1073,16 @@ describe("RichTextEditor toolbar presentation (react)", () => {
     const onChange = vi.fn();
     const view = renderEditor({ toolbar: ["bold", "heading-1"], onChange });
     expect(view.container.querySelector('[data-command="bold"] button')).not.toBeNull();
-    // Exactly the admitted subset: no feature-derived extras reappear.
+    // Exactly the admitted subset: a sparse heading list resolves to one
+    // selector of exactly those levels, and no feature-derived extras reappear.
     const commands = [...view.container.querySelectorAll("[data-command]")].map(commandOf);
-    expect(commands).toEqual(["bold", "heading-1"]);
-    const heading = view.container.querySelector<HTMLButtonElement>('[data-command="heading-1"] button');
-    if (!heading) throw new Error("missing heading control");
-    act(() => heading.click());
+    expect(commands).toEqual(["bold", "heading-select"]);
+    const select = view.container.querySelector('[data-command="heading-select"]');
+    expect(select?.getAttribute("data-heading-commands")).toBe("heading-1");
+    chooseHeadingOption(view.container, "heading-1");
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(JSON.stringify(onChange.mock.calls[0][0])).toContain('"level":1');
-    // The pressed state of the executed heading toggle turns truthful.
-    expect(heading.getAttribute("aria-pressed")).toBe("true");
+    expect(headingSelectTrigger(view.container).getAttribute("aria-label")).toContain("Heading 1");
   });
 
   it("table-context commands stay disabled outside a table", () => {
@@ -1097,6 +1135,224 @@ describe("RichTextEditor toolbar presentation (react)", () => {
     });
     expect(editor()).toBeNull();
     expect(document.activeElement?.classList.contains("ProseMirror")).toBe(true);
+  });
+});
+
+/**
+ * g18.020: heading levels are consumer-configurable document modes projected
+ * as one toolbar selector. These tests bind the projection, the Normal /
+ * Heading / Mixed trigger, exact setting semantics, H4–H6 document behavior,
+ * and the selector's keyboard ownership over the real engine.
+ */
+describe("RichTextEditor heading mode select (react)", () => {
+  const HEADING_DOC: ProseMirrorDocumentJSON = {
+    type: "doc",
+    content: [
+      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Title" }] },
+      { type: "paragraph", content: [{ type: "text", text: "Body copy" }] },
+      { type: "heading", attrs: { level: 6 }, content: [{ type: "text", text: "Deep" }] },
+    ],
+  };
+
+  const restores: (() => void)[] = [];
+  afterEach(() => {
+    for (const restore of restores) restore();
+    restores.length = 0;
+  });
+
+  function captureHeadingEditor(): () => Editor {
+    let captured: Editor | null = null;
+    const descriptor = Object.getOwnPropertyDescriptor(Editor.prototype, "getJSON");
+    if (!descriptor?.value) throw new Error("TipTap Editor.getJSON is missing");
+    const getJSON = descriptor.value as (this: Editor) => ReturnType<Editor["getJSON"]>;
+    const spy = vi.spyOn(Editor.prototype, "getJSON").mockImplementation(function (this: Editor) {
+      captured = this;
+      return getJSON.call(this);
+    });
+    restores.push(() => spy.mockRestore());
+    return () => {
+      if (!captured) throw new Error("rich-text editor was not captured");
+      return captured;
+    };
+  }
+
+  function triggerMode(container: HTMLElement): string | null {
+    return (
+      container
+        .querySelector(".poodle-rich-text-editor__heading-value")
+        ?.getAttribute("data-heading-mode") ?? null
+    );
+  }
+
+  it("projects every configured level as one selector and never as buttons", () => {
+    const { container } = render(createElement(RichTextEditor, { value: PLAIN }));
+    const select = container.querySelector('[data-command="heading-select"]');
+    expect(select?.getAttribute("data-heading-commands")).toBe(
+      RICH_TEXT_HEADING_LEVELS.map((level) => `heading-${level}`).join(" "),
+    );
+    for (const level of RICH_TEXT_HEADING_LEVELS) {
+      expect(container.querySelector(`[data-command="heading-${level}"]`)).toBeNull();
+    }
+    act(() => headingSelectTrigger(container).click());
+    const values = [...document.querySelectorAll<HTMLElement>(".poodle-select__option")].map(
+      (option) => option.getAttribute("data-value"),
+    );
+    expect(values).toEqual([
+      RICH_TEXT_HEADING_NORMAL_VALUE,
+      ...RICH_TEXT_HEADING_LEVELS.map((level) => `heading-${level}`),
+    ]);
+    expect(document.querySelector('[data-heading-level="normal"]')?.textContent).toContain(
+      RICH_TEXT_HEADING_NORMAL_LABEL,
+    );
+  });
+
+  it("the trigger reports Normal, one active level, and Mixed truthfully", () => {
+    const editorOf = captureHeadingEditor();
+    const { container } = render(createElement(RichTextEditor, { value: HEADING_DOC }));
+    const editor = editorOf();
+
+    act(() => {
+      editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 3)));
+    });
+    expect(triggerMode(container)).toBe("heading");
+    expect(container.querySelector(".poodle-rich-text-editor__heading-value")?.textContent).toContain(
+      "Heading 2",
+    );
+    expect(headingSelectTrigger(container).getAttribute("aria-label")).toContain("Heading 2");
+
+    let paragraphPos = 1;
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === "paragraph") {
+        paragraphPos = pos + 1;
+        return false;
+      }
+      return true;
+    });
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, paragraphPos)),
+      );
+    });
+    expect(triggerMode(container)).toBe("normal");
+    expect(container.querySelector(".poodle-rich-text-editor__heading-value")?.textContent).toContain(
+      RICH_TEXT_HEADING_NORMAL_LABEL,
+    );
+
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(
+          TextSelection.create(editor.state.doc, 1, editor.state.doc.content.size - 1),
+        ),
+      );
+    });
+    expect(triggerMode(container)).toBe("mixed");
+    expect(container.querySelector(".poodle-rich-text-editor__heading-value")?.textContent).toContain(
+      RICH_TEXT_HEADING_MIXED_LABEL,
+    );
+  });
+
+  it("setting a level is exact, Normal converts back, and one action is one change", () => {
+    const onChange = vi.fn();
+    const view = render(
+      createElement(RichTextEditor, { value: PLAIN, features: ["headings"], onChange }),
+    );
+    chooseHeadingOption(view.container, "heading-6");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(onChange.mock.calls[0][0])).toContain('"level":6');
+    expect(view.container.querySelector("h6")?.textContent).toBe("hello world");
+
+    // Choosing the already-active level never toggles it off.
+    chooseHeadingOption(view.container, "heading-6");
+    expect(triggerMode(view.container)).toBe("heading");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(view.container.querySelector("h6")?.textContent).toBe("hello world");
+
+    // Normal text converts the same block back to a paragraph.
+    chooseHeadingOption(view.container, RICH_TEXT_HEADING_NORMAL_VALUE);
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(view.container.querySelector("h6")).toBeNull();
+    expect(view.container.querySelector(".ProseMirror p")?.textContent).toBe("hello world");
+  });
+
+  it("H4–H6 are real editor and renderer behavior while H7 stays closed", () => {
+    const schema = createRichTextSchema(["headings"]);
+    const document7: ProseMirrorDocumentJSON = {
+      type: "doc",
+      content: RICH_TEXT_HEADING_LEVELS.map((level) => ({
+        type: "heading",
+        attrs: { level },
+        content: [{ type: "text", text: `H${level}` }],
+      })),
+    };
+    assertValidRichTextDocument(schema, document7);
+    const host = document.createElement("div");
+    renderRichTextDocument(host, document7, ["headings"]);
+    for (const level of RICH_TEXT_HEADING_LEVELS) {
+      expect(host.querySelector(`h${level}`)?.textContent).toBe(`H${level}`);
+    }
+    expect(() =>
+      assertValidRichTextDocument(schema, {
+        type: "doc",
+        content: [{ type: "heading", attrs: { level: 7 }, content: [] }],
+      }),
+    ).toThrow(/unsupported heading level/);
+
+    const onChange = vi.fn();
+    const engineHost = document.createElement("div");
+    const engine = createRichTextEngine(
+      engineHost,
+      baseOptions({ features: ["headings"] }),
+      { onChange, onToolbar: () => {} },
+    );
+    engine.runCommand("heading-4");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(engineHost.querySelector("h4")).not.toBeNull();
+    expect(JSON.stringify(onChange.mock.calls[0][0])).toContain('"level":4');
+    expect(engine.headingMode()).toEqual({ kind: "heading", level: 4 });
+    engine.runCommand("heading-4");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    engine.setHeadingMode(null);
+    expect(engine.headingMode()).toEqual({ kind: "normal" });
+    engine.destroy();
+  });
+
+  it("the trigger is one roving stop and an open listbox owns its arrows", async () => {
+    const { container } = render(createElement(RichTextEditor, { value: PLAIN }));
+    const toolbar = container.querySelector(".poodle-rich-text-editor__toolbar") as HTMLElement;
+    const trigger = headingSelectTrigger(container);
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    // The anchored listbox observes scroll/resize/mutation; flush those
+    // geometry updates inside act so the journey and the trap stay honest.
+    await act(async () => {
+      // Closed: the trigger is the single heading cluster stop and roves on.
+      trigger.focus();
+      expect(press(toolbar, "ArrowRight")).toBe(false);
+      expect(document.activeElement).not.toBe(trigger);
+
+      // Open: the toolbar does not steal arrows behind the listbox.
+      trigger.focus();
+      trigger.click();
+      await flush();
+      expect(document.querySelector(".poodle-select__listbox")).not.toBeNull();
+      press(trigger, "ArrowRight");
+      expect(document.activeElement).toBe(trigger);
+      press(trigger, "ArrowDown");
+      await flush();
+      expect(document.activeElement).toBe(trigger);
+      expect(
+        document.querySelector('.poodle-select__option[data-highlighted="true"]'),
+      ).not.toBeNull();
+
+      // Escape closes and restores the ordinary roving journey.
+      press(trigger, "Escape");
+      await flush();
+      expect(document.querySelector(".poodle-select__listbox")).toBeNull();
+      trigger.focus();
+      expect(press(toolbar, "ArrowRight")).toBe(false);
+      expect(document.activeElement).not.toBe(trigger);
+      await flush();
+    });
   });
 });
 

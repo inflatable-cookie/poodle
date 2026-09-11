@@ -100,12 +100,13 @@ describe("select helpers", () => {
   });
 
   test("query highlight is the first enabled visible option, even when the selected option also matches later", () => {
-    expect(selectQueryHighlightValue(ctx({ value: "c" }))).toBe("a");
-    expect(selectQueryHighlightValue(ctx({ value: "c", query: "ch" }))).toBe("c");
+    expect(selectQueryHighlightValue(ctx({ value: "c", searchable: true }))).toBe("a");
+    expect(selectQueryHighlightValue(ctx({ value: "c", query: "ch", searchable: true }))).toBe("c");
     expect(
       selectQueryHighlightValue(
         ctx({
           options: [{ value: "b", label: "Banana", disabled: true }],
+          searchable: true,
         }),
       ),
     ).toBeNull();
@@ -131,6 +132,35 @@ describe("selectTransition", () => {
   test("Home and End while closed are inert", () => {
     expect(selectTransition(ctx(), { type: "HIGHLIGHT_FIRST" }).effects).toEqual([]);
     expect(selectTransition(ctx(), { type: "HIGHLIGHT_LAST" }).effects).toEqual([]);
+  });
+
+  test("a committed value never filters keyboard navigation of a non-searchable list", () => {
+    // Closing commits the selected label as the query so the trigger can show
+    // it; that label is not a search term, and the menu still renders every
+    // option, so Home/End/arrows must traverse every enabled option.
+    const opened = selectTransition(ctx({ value: "c", query: "Cherry" }), { type: "OPEN" });
+    expect(opened.context.highlightedValue).toBe("c");
+    expect(
+      selectTransition(opened.context, { type: "HIGHLIGHT_FIRST" }).context.highlightedValue,
+    ).toBe("a");
+    expect(
+      selectTransition(opened.context, { type: "HIGHLIGHT_LAST" }).context.highlightedValue,
+    ).toBe("c");
+    expect(
+      selectTransition(opened.context, { type: "HIGHLIGHT_NEXT" }).context.highlightedValue,
+    ).toBe("c");
+  });
+
+  test("a searchable list keeps narrowing keyboard navigation by the typed query", () => {
+    const opened = selectTransition(
+      ctx({ value: "c", query: "ch", searchable: true }),
+      { type: "OPEN" },
+    );
+    expect(opened.context.highlightedValue).toBe("c");
+    expect(
+      selectTransition(opened.context, { type: "HIGHLIGHT_FIRST" }).context.highlightedValue,
+    ).toBe("c");
+    expect(selectQueryHighlightValue(ctx({ value: "c", query: "zz", searchable: true }))).toBeNull();
   });
 
   test("query prefers the first enabled match when the selected option also matches later", () => {

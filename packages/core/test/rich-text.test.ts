@@ -11,12 +11,22 @@ import {
   RICH_TEXT_COMMAND_PRESENTATION,
   RICH_TEXT_FEATURES,
   RICH_TEXT_FEATURE_COMMANDS,
+  RICH_TEXT_HEADING_LEVELS,
+  RICH_TEXT_HEADING_MIXED_LABEL,
+  RICH_TEXT_HEADING_NORMAL_LABEL,
+  RICH_TEXT_HEADING_NORMAL_VALUE,
   RICH_TEXT_MAX_BYTES,
   RICH_TEXT_MAX_NODES,
   RICH_TEXT_STANDARD_FEATURES,
   RICH_TEXT_TOGGLE_COMMANDS,
+  isRichTextHeadingCommand,
+  projectRichTextToolbar,
   resolveRichTextToolbar,
   richTextAdmittedCommands,
+  richTextHeadingCommand,
+  richTextHeadingCommandLevel,
+  richTextHeadingModeLabel,
+  richTextHeadingOptions,
   richTextSerializedByteLength,
   validateRichTextFeatures,
   validateRichTextToolbar,
@@ -60,7 +70,7 @@ describe("rich-text feature registry", () => {
 
 describe("rich-text command registry", () => {
   test("the command set is closed and every command has a label", () => {
-    expect(RICH_TEXT_COMMANDS).toHaveLength(20);
+    expect(RICH_TEXT_COMMANDS).toHaveLength(23);
     for (const command of RICH_TEXT_COMMANDS) {
       expect(isRichTextCommand(command)).toBe(true);
       expect(RICH_TEXT_COMMAND_LABELS[command]).toBeTruthy();
@@ -115,11 +125,147 @@ describe("rich-text command registry", () => {
   });
 });
 
+describe("rich-text heading registry", () => {
+  test("the headings module admits exactly levels 1 through 6", () => {
+    expect(RICH_TEXT_HEADING_LEVELS).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(RICH_TEXT_FEATURE_COMMANDS.headings).toEqual([
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+    ]);
+    for (const level of RICH_TEXT_HEADING_LEVELS) {
+      const command = richTextHeadingCommand(level);
+      expect(command).toBe(`heading-${level}`);
+      expect(isRichTextHeadingCommand(command as string)).toBe(true);
+      expect(richTextHeadingCommandLevel(command as never)).toBe(level);
+      expect(RICH_TEXT_COMMANDS).toContain(command);
+    }
+    // Out-of-range levels never resolve to a command and stay closed.
+    expect(richTextHeadingCommand(0)).toBeNull();
+    expect(richTextHeadingCommand(7)).toBeNull();
+    expect(isRichTextHeadingCommand("paragraph")).toBe(false);
+    expect(isRichTextHeadingCommand("heading-9")).toBe(false);
+  });
+
+  test("selector options are Normal text plus exactly the configured levels", () => {
+    const full = richTextHeadingOptions([
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+    ]);
+    expect(full.map((option) => option.value)).toEqual([
+      RICH_TEXT_HEADING_NORMAL_VALUE,
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+    ]);
+    expect(full[0]?.label).toBe(RICH_TEXT_HEADING_NORMAL_LABEL);
+    expect(full[0]?.level).toBeNull();
+    expect(full.slice(1).map((option) => option.level)).toEqual([1, 2, 3, 4, 5, 6]);
+
+    // Sparse subsets expose exactly the admitted levels, never the full set.
+    const sparse = richTextHeadingOptions(["heading-4", "heading-6"]);
+    expect(sparse.map((option) => option.value)).toEqual([
+      RICH_TEXT_HEADING_NORMAL_VALUE,
+      "heading-4",
+      "heading-6",
+    ]);
+    expect(sparse.map((option) => option.label)).toEqual([
+      RICH_TEXT_HEADING_NORMAL_LABEL,
+      "Heading 4",
+      "Heading 6",
+    ]);
+  });
+
+  test("mode labels name Normal, one heading level, and Mixed", () => {
+    expect(richTextHeadingModeLabel({ kind: "normal" })).toBe(RICH_TEXT_HEADING_NORMAL_LABEL);
+    expect(richTextHeadingModeLabel({ kind: "heading", level: 4 })).toBe("Heading 4");
+    expect(richTextHeadingModeLabel({ kind: "mixed" })).toBe(RICH_TEXT_HEADING_MIXED_LABEL);
+  });
+});
+
+describe("rich-text toolbar projection", () => {
+  test("all admitted heading commands collapse into one selector at the first heading position", () => {
+    const items = projectRichTextToolbar([
+      "bold",
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+      "link",
+    ]);
+    expect(items).toEqual([
+      { kind: "command", command: "bold" },
+      {
+        kind: "heading-select",
+        commands: ["heading-1", "heading-2", "heading-3", "heading-4", "heading-5", "heading-6"],
+        levels: [1, 2, 3, 4, 5, 6],
+      },
+      { kind: "command", command: "link" },
+    ]);
+    const headingItems = items.filter((item) => item.kind === "heading-select");
+    expect(headingItems).toHaveLength(1);
+  });
+
+  test("a sparse heading subset projects as exactly one selector of those levels", () => {
+    const items = projectRichTextToolbar(["heading-4", "bold", "heading-6"]);
+    expect(items).toEqual([
+      { kind: "heading-select", commands: ["heading-4", "heading-6"], levels: [4, 6] },
+      { kind: "command", command: "bold" },
+    ]);
+  });
+
+  test("non-heading order survives and no heading buttons remain", () => {
+    const items = projectRichTextToolbar([
+      "undo",
+      "bold",
+      "heading-2",
+      "link",
+      "bullet-list",
+      "heading-5",
+    ]);
+    const commands = items
+      .filter((item): item is { kind: "command"; command: string } => item.kind === "command")
+      .map((item) => item.command);
+    expect(commands).toEqual(["undo", "bold", "link", "bullet-list"]);
+    const heading = items.find((item) => item.kind === "heading-select");
+    expect(heading && heading.kind === "heading-select" ? heading.commands : []).toEqual([
+      "heading-2",
+      "heading-5",
+    ]);
+  });
+
+  test("the automatic toolbar projects its six heading commands as one selector", () => {
+    const { commands } = resolveRichTextToolbar("auto", RICH_TEXT_STANDARD_FEATURES, null);
+    const items = projectRichTextToolbar(commands);
+    const heading = items.filter((item) => item.kind === "heading-select");
+    expect(heading).toHaveLength(1);
+    if (heading[0]?.kind === "heading-select") {
+      expect(heading[0].levels).toEqual([1, 2, 3, 4, 5, 6]);
+    }
+    expect(commands.indexOf("heading-4")).toBeLessThan(commands.indexOf("link"));
+  });
+});
+
 describe("rich-text toggle commands", () => {
   test("toggle commands are pressed-state controls", () => {
-    expect(RICH_TEXT_TOGGLE_COMMANDS).toHaveLength(12);
+    expect(RICH_TEXT_TOGGLE_COMMANDS).toHaveLength(9);
     expect(RICH_TEXT_TOGGLE_COMMANDS).not.toContain("undo");
     expect(RICH_TEXT_TOGGLE_COMMANDS).not.toContain("insert-table");
+    // Heading levels are a mode selector, not pressed-state buttons.
+    expect(RICH_TEXT_TOGGLE_COMMANDS).not.toContain("heading-1");
+    expect(RICH_TEXT_TOGGLE_COMMANDS).not.toContain("heading-6");
   });
 });
 

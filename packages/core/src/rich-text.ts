@@ -56,6 +56,9 @@ export type RichTextCommand =
   | "heading-1"
   | "heading-2"
   | "heading-3"
+  | "heading-4"
+  | "heading-5"
+  | "heading-6"
   | "link"
   | "bullet-list"
   | "ordered-list"
@@ -95,6 +98,9 @@ export const RICH_TEXT_COMMANDS: readonly RichTextCommand[] = [
   "heading-1",
   "heading-2",
   "heading-3",
+  "heading-4",
+  "heading-5",
+  "heading-6",
   "link",
   "bullet-list",
   "ordered-list",
@@ -135,7 +141,7 @@ export const RICH_TEXT_FEATURE_COMMANDS: Readonly<
   Record<RichTextFeature, readonly RichTextCommand[]>
 > = {
   formatting: ["bold", "italic", "strike", "inline-code"],
-  headings: ["heading-1", "heading-2", "heading-3"],
+  headings: ["heading-1", "heading-2", "heading-3", "heading-4", "heading-5", "heading-6"],
   links: ["link"],
   lists: ["bullet-list", "ordered-list"],
   blockquote: ["blockquote"],
@@ -239,6 +245,9 @@ const RICH_TEXT_AUTO_TOOLBAR_ORDER: readonly RichTextCommand[] = [
   "heading-1",
   "heading-2",
   "heading-3",
+  "heading-4",
+  "heading-5",
+  "heading-6",
   "link",
   "bullet-list",
   "ordered-list",
@@ -325,9 +334,12 @@ export const RICH_TEXT_COMMAND_PRESENTATION: Readonly<
   italic: { label: "Italic", group: "inline", icon: "italic", glyph: null, toggle: true, destructive: false },
   strike: { label: "Strikethrough", group: "inline", icon: "strikethrough", glyph: null, toggle: true, destructive: false },
   "inline-code": { label: "Inline code", group: "inline", icon: "code", glyph: null, toggle: true, destructive: false },
-  "heading-1": { label: "Heading 1", group: "headings", icon: "heading", glyph: "H1", toggle: true, destructive: false },
-  "heading-2": { label: "Heading 2", group: "headings", icon: "heading", glyph: "H2", toggle: true, destructive: false },
-  "heading-3": { label: "Heading 3", group: "headings", icon: "heading", glyph: "H3", toggle: true, destructive: false },
+  "heading-1": { label: "Heading 1", group: "headings", icon: "heading", glyph: "H1", toggle: false, destructive: false },
+  "heading-2": { label: "Heading 2", group: "headings", icon: "heading", glyph: "H2", toggle: false, destructive: false },
+  "heading-3": { label: "Heading 3", group: "headings", icon: "heading", glyph: "H3", toggle: false, destructive: false },
+  "heading-4": { label: "Heading 4", group: "headings", icon: "heading", glyph: "H4", toggle: false, destructive: false },
+  "heading-5": { label: "Heading 5", group: "headings", icon: "heading", glyph: "H5", toggle: false, destructive: false },
+  "heading-6": { label: "Heading 6", group: "headings", icon: "heading", glyph: "H6", toggle: false, destructive: false },
   link: { label: "Link", group: "link", icon: "link", glyph: null, toggle: true, destructive: false },
   "bullet-list": { label: "Bulleted list", group: "lists", icon: "list", glyph: null, toggle: true, destructive: false },
   "ordered-list": { label: "Numbered list", group: "lists", icon: "list-ordered", glyph: null, toggle: true, destructive: false },
@@ -362,6 +374,141 @@ export const RICH_TEXT_COMMAND_GROUP_LABELS: Readonly<Record<RichTextCommandGrou
   table: "Tables",
   media: "Media",
 } as const;
+
+/**
+ * Heading levels the curated headings module admits, in document order. The
+ * schema, validation, editor commands, renderer, and selector option projection
+ * all read this one list; there is no second level authority.
+ */
+export const RICH_TEXT_HEADING_LEVELS: readonly number[] = [1, 2, 3, 4, 5, 6] as const;
+
+/** The document level a granular heading command selects, or null. */
+export function richTextHeadingCommandLevel(command: RichTextCommand): number | null {
+  const match = /^heading-([1-6])$/.exec(command);
+  return match ? Number(match[1]) : null;
+}
+
+/** The granular heading command for a level, or null when out of range. */
+export function richTextHeadingCommand(level: number): RichTextCommand | null {
+  return RICH_TEXT_HEADING_LEVELS.includes(level)
+    ? (`heading-${level}` as RichTextCommand)
+    : null;
+}
+
+/** Whether a command names one configured heading level. */
+export function isRichTextHeadingCommand(command: string): boolean {
+  return isRichTextCommand(command) && richTextHeadingCommandLevel(command) !== null;
+}
+
+/**
+ * Intrinsic text-mode state of the toolbar heading selector. `normal` covers a
+ * paragraph and any other non-heading text block, `heading` names one active
+ * level, and `mixed` covers a selection whose blocks span different modes.
+ */
+export type RichTextHeadingMode =
+  | { kind: "normal" }
+  | { kind: "heading"; level: number }
+  | { kind: "mixed" };
+
+/** Select value meaning "Normal text"; selector chrome, never a public command. */
+export const RICH_TEXT_HEADING_NORMAL_VALUE = "normal" as const;
+/** Select value meaning "the blocks span different text modes". */
+export const RICH_TEXT_HEADING_MIXED_VALUE = "mixed" as const;
+
+/** Human labels for the selector's intrinsic Normal and Mixed states. */
+export const RICH_TEXT_HEADING_NORMAL_LABEL = "Normal text";
+export const RICH_TEXT_HEADING_MIXED_LABEL = "Mixed";
+
+/** Accessible name of the toolbar heading selector as a whole. */
+export const RICH_TEXT_HEADING_SELECT_LABEL = "Text mode";
+
+/** The trigger label for a resolved heading mode. */
+export function richTextHeadingModeLabel(mode: RichTextHeadingMode): string {
+  if (mode.kind === "mixed") return RICH_TEXT_HEADING_MIXED_LABEL;
+  if (mode.kind === "normal") return RICH_TEXT_HEADING_NORMAL_LABEL;
+  const command = richTextHeadingCommand(mode.level);
+  return command ? RICH_TEXT_COMMAND_LABELS[command] : RICH_TEXT_HEADING_NORMAL_LABEL;
+}
+
+/** One rendered option of the heading selector. */
+export interface RichTextHeadingOption {
+  /** Select value: `normal` or the granular heading command. */
+  value: string;
+  /** Plain accessible label; the menu previews type scale around it. */
+  label: string;
+  /** Document level to preview, or null for Normal text. */
+  level: number | null;
+}
+
+/**
+ * Normal text plus the configured heading levels, in configured order. The
+ * selector never invents levels: only commands the resolved toolbar admits
+ * become options.
+ */
+export function richTextHeadingOptions(
+  headingCommands: readonly RichTextCommand[],
+): RichTextHeadingOption[] {
+  const options: RichTextHeadingOption[] = [
+    { value: RICH_TEXT_HEADING_NORMAL_VALUE, label: RICH_TEXT_HEADING_NORMAL_LABEL, level: null },
+  ];
+  for (const command of headingCommands) {
+    const level = richTextHeadingCommandLevel(command);
+    if (level === null) continue;
+    options.push({ value: command, label: RICH_TEXT_COMMAND_LABELS[command], level });
+  }
+  return options;
+}
+
+/** A rendered toolbar control for one non-heading command. */
+export interface RichTextToolbarCommandItem {
+  kind: "command";
+  command: RichTextCommand;
+}
+
+/**
+ * The one resolved heading control: Normal text, the active heading, and Mixed
+ * are intrinsic selector states, while `commands` are exactly the admitted
+ * granular heading commands in resolved order.
+ */
+export interface RichTextToolbarHeadingSelectItem {
+  kind: "heading-select";
+  commands: readonly RichTextCommand[];
+  levels: readonly number[];
+}
+
+export type RichTextToolbarItem =
+  | RichTextToolbarCommandItem
+  | RichTextToolbarHeadingSelectItem;
+
+/**
+ * Project resolved toolbar commands into render items. Every admitted heading
+ * command collapses into one heading selector at the first heading command's
+ * position; every other command keeps its resolved order. This is presentation
+ * only: the public toolbar configuration stays granular and no composite
+ * command exists.
+ */
+export function projectRichTextToolbar(
+  commands: readonly RichTextCommand[],
+): RichTextToolbarItem[] {
+  const items: RichTextToolbarItem[] = [];
+  let headingCommands: RichTextCommand[] | null = null;
+  let headingLevels: number[] | null = null;
+  for (const command of commands) {
+    const level = richTextHeadingCommandLevel(command);
+    if (level === null) {
+      items.push({ kind: "command", command });
+      continue;
+    }
+    if (headingCommands === null || headingLevels === null) {
+      headingCommands = [];
+      headingLevels = [];
+      items.push({ kind: "heading-select", commands: headingCommands, levels: headingLevels });
+    }
+    headingCommands.push(command);
+    headingLevels.push(level);
+  }
+  return items;
+}
 
 /**
  * Supported document envelope: at most 2 MiB of UTF-8 JSON and at most 10,000

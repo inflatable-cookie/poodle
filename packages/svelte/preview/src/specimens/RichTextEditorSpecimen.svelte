@@ -10,11 +10,13 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import {
+    RICH_TEXT_HEADING_DOCUMENT,
     RICH_TEXT_IMAGE_DOCUMENT,
     RICH_TEXT_IMAGE_FEATURES,
     RICH_TEXT_IMAGE_REQUEST_DELAY_MS,
     RICH_TEXT_PICKED_IMAGE_ALT,
     RICH_TEXT_PICKED_IMAGE_SRC,
+    RICH_TEXT_SPARSE_HEADING_TOOLBAR,
     RICH_TEXT_STANDARD_DOCUMENT,
     countRichTextImages,
   } from "./web-editor-documents";
@@ -67,6 +69,27 @@
         />
       </div>
       <pre class="readout" data-part="host-document">{JSON.stringify(document)}</pre>
+    </SpecimenGroup>
+
+    <SpecimenGroup
+      label="Text modes"
+      description="One text-mode selector replaces the separate heading buttons. Consumers choose the admitted levels: the full toolbar offers Normal text plus H1–H6, the sparse toolbar offers Normal text plus only H2 and H4, and a selection spanning different blocks reads Mixed. Choosing the active level keeps it; choosing Normal text converts back."
+    >
+      <div class="editor-frame" data-part="heading-mode-editor">
+        <RichTextEditor
+          value={RICH_TEXT_HEADING_DOCUMENT}
+          features={standardFeatures}
+          ariaLabel="Heading modes"
+        />
+      </div>
+      <div class="editor-frame editor-frame--constrained" data-part="sparse-heading-editor">
+        <RichTextEditor
+          value={RICH_TEXT_HEADING_DOCUMENT}
+          features={standardFeatures}
+          toolbar={RICH_TEXT_SPARSE_HEADING_TOOLBAR}
+          ariaLabel="Sparse heading modes"
+        />
+      </div>
     </SpecimenGroup>
 
     <SpecimenGroup
@@ -183,6 +206,11 @@
   .editor-frame {
     height: 20rem;
     margin-top: 0.75rem;
+  }
+  /* Constrained posture: a narrow pane where the selector must stay one stop
+     and the toolbar wraps by cluster instead of overflowing the page. */
+  .editor-frame--constrained {
+    max-width: 22rem;
   }
   .image-policy-feedback {
     margin-top: 0.75rem;

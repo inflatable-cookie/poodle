@@ -3,20 +3,36 @@
   import {
     RICH_TEXT_COMMAND_GROUP_LABELS,
     RICH_TEXT_COMMAND_PRESENTATION,
+    RICH_TEXT_HEADING_MIXED_VALUE,
+    RICH_TEXT_HEADING_NORMAL_LABEL,
+    RICH_TEXT_HEADING_NORMAL_VALUE,
+    RICH_TEXT_HEADING_SELECT_LABEL,
     RICH_TEXT_STANDARD_FEATURES,
     installInputModality,
+    projectRichTextToolbar,
+    richTextHeadingCommand,
+    richTextHeadingCommandLevel,
+    richTextHeadingModeLabel,
+    richTextHeadingOptions,
   } from "@inflatable-cookie/poodle-core";
   import type {
     ProseMirrorDocumentJSON,
     RichTextCommand,
     RichTextFeature,
     RichTextCommandGroup,
+    RichTextHeadingMode,
+    RichTextToolbarItem,
   } from "@inflatable-cookie/poodle-core";
-  import type { ControlDensity } from "./types";
+  import type {
+    ControlDensity,
+    SelectOptionRenderState,
+    SelectTriggerRenderState,
+  } from "./types";
   import { onDestroy, onMount } from "svelte";
 
   import { default as Button } from "./Button.svelte";
   import { default as IconButton } from "./IconButton.svelte";
+  import { default as Select } from "./Select.svelte";
   import {
     assertAdmittedFeatures,
     assertAdmittedToolbar,
@@ -73,13 +89,14 @@
 
   let hostElement: HTMLDivElement | null = $state(null);
   let engine: RichTextEngine | null = null;
-  let snapshot: RichTextToolbarSnapshot | null = $state(null);
+  let snapshot = $state<RichTextToolbarSnapshot | null>(null);
   // The last host value object pushed to the engine: only a genuinely new
   // value object is a controlled push; re-renders with the previous value
   // never count as a host revert.
   let sentValue: ProseMirrorDocumentJSON | undefined;
   let linkEditorOpen = $state(false);
   let linkValue = $state("");
+  let headingSelectOpen = $state(false);
   const surfaceId = `poodle-rich-text-editor-${Math.random().toString(36).slice(2)}`;
 
   function currentOptions() {
@@ -145,6 +162,26 @@
     engine?.runCommand(command);
   }
 
+  /**
+   * The text-mode selector is one control: Normal text maps to the intrinsic
+   * off state, every other value to one exact heading level. Selecting the
+   * active level again re-runs the same set command, which changes nothing.
+   */
+  function selectHeadingMode(value: string): void {
+    if (value === RICH_TEXT_HEADING_NORMAL_VALUE) {
+      engine?.setHeadingMode(null);
+      return;
+    }
+    const level = richTextHeadingCommandLevel(value as RichTextCommand);
+    if (level !== null) engine?.setHeadingMode(level);
+  }
+
+  function headingOptionLevel(value: string): string {
+    if (value === RICH_TEXT_HEADING_NORMAL_VALUE) return "normal";
+    const level = richTextHeadingCommandLevel(value as RichTextCommand);
+    return level === null ? "normal" : String(level);
+  }
+
   /** Shared control props: one command-presentation map drives chrome, name,
    *  tooltip, icon, tone, and availability for every admitted command. */
   function controlProps(command: RichTextCommand) {
@@ -196,8 +233,20 @@
   function handleToolbarKeydown(event: KeyboardEvent): void {
     // Rove between visible toolbar controls with the arrow keys.
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    // An open heading listbox owns its keyboard events: the toolbar consumes
+    // the arrow keys instead of roving behind it, and closing it restores the
+    // ordinary roving journey. This also stops a browser's own arrow-key
+    // focus navigation from pulling focus out of the open composition.
+    if (headingSelectOpen) {
+      event.preventDefault();
+      return;
+    }
     const root = event.currentTarget as HTMLElement;
-    const buttons = [...root.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
+    // One roving stop per control: the text-mode Select trigger counts once,
+    // and its decorative indicator (tabindex="-1") never becomes a stop.
+    const buttons = [
+      ...root.querySelectorAll<HTMLButtonElement>('button:not(:disabled):not([tabindex="-1"])'),
+    ];
     if (buttons.length === 0) return;
     event.preventDefault();
     const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
@@ -208,18 +257,52 @@
 
   interface RichTextToolbarCluster {
     group: RichTextCommandGroup;
-    commands: RichTextCommand[];
+    items: RichTextToolbarItem[];
   }
 
-  /** Feature-derived order is preserved; consecutive same-group commands form
+  /** Resolved toolbar items: every admitted heading command is projected as one
+   *  selector at the first heading position. */
+  const toolbarItems = $derived.by<RichTextToolbarItem[]>(() =>
+    projectRichTextToolbar(snapshot?.commands ?? []),
+  );
+
+  const headingCommands = $derived.by<readonly RichTextCommand[]>(() => {
+    const item = toolbarItems.find((entry) => entry.kind === "heading-select");
+    return item && item.kind === "heading-select" ? item.commands : [];
+  });
+
+  /** The engine recomputes the selector mode with every toolbar snapshot, so
+   *  caret and selection changes update the trigger without a second channel. */
+  const headingMode = $derived(snapshot?.headingMode ?? null);
+
+  const headingValue = $derived.by<string>(() => {
+    const mode = headingMode;
+    if (mode === null) return "";
+    if (mode.kind === "mixed") return RICH_TEXT_HEADING_MIXED_VALUE;
+    if (mode.kind === "normal") return RICH_TEXT_HEADING_NORMAL_VALUE;
+    return richTextHeadingCommand(mode.level) ?? RICH_TEXT_HEADING_NORMAL_VALUE;
+  });
+
+  const headingLabel = $derived(
+    headingMode ? richTextHeadingModeLabel(headingMode) : RICH_TEXT_HEADING_NORMAL_LABEL,
+  );
+
+  const headingAriaLabel = $derived(`${RICH_TEXT_HEADING_SELECT_LABEL}, ${headingLabel}`);
+
+  const headingOptions = $derived(richTextHeadingOptions(headingCommands));
+
+  /** Feature-derived order is preserved; consecutive same-group controls form
    *  one intact cluster that wraps as a unit at constrained widths. */
   const clusters = $derived.by<RichTextToolbarCluster[]>(() => {
     const result: RichTextToolbarCluster[] = [];
-    for (const command of snapshot?.commands ?? []) {
-      const group = RICH_TEXT_COMMAND_PRESENTATION[command].group;
+    for (const item of toolbarItems) {
+      const group =
+        item.kind === "heading-select"
+          ? "headings"
+          : RICH_TEXT_COMMAND_PRESENTATION[item.command].group;
       const last = result[result.length - 1];
-      if (last && last.group === group) last.commands.push(command);
-      else result.push({ group, commands: [command] });
+      if (last && last.group === group) last.items.push(item);
+      else result.push({ group, items: [item] });
     }
     return result;
   });
@@ -241,34 +324,65 @@
       aria-controls={surfaceId}
       onkeydown={handleToolbarKeydown}
     >
-      {#each clusters as cluster (cluster.commands[0])}
+      {#each clusters as cluster (cluster.items[0].kind === "command" ? cluster.items[0].command : "heading-select")}
         <div
           class="poodle-rich-text-editor__group"
           role="group"
           aria-label={RICH_TEXT_COMMAND_GROUP_LABELS[cluster.group]}
         >
-          {#each cluster.commands as command (command)}
-            <span class="poodle-rich-text-editor__command" data-command={command}>
-              {#if RICH_TEXT_COMMAND_PRESENTATION[command].glyph}
-                <IconButton
-                  {...controlProps(command)}
-                  pressed={RICH_TEXT_COMMAND_PRESENTATION[command].toggle
-                    ? snapshot.states[command].active
-                    : null}
+          {#each cluster.items as item (item.kind === "command" ? item.command : "heading-select")}
+            {#if item.kind === "heading-select"}
+              <span
+                class="poodle-rich-text-editor__command poodle-rich-text-editor__heading-select"
+                data-command="heading-select"
+                data-heading-commands={item.commands.join(" ")}
+              >
+                <Select
+                  value={headingValue}
+                  options={headingOptions}
+                  sizeRole="chrome"
+                  density={resolvedDensity}
+                  variant="ghost"
+                  disabled={disabled || readOnly}
+                  menuMinWidth="12rem"
+                  ariaLabel={headingAriaLabel}
+                  onOpenChange={(open) => (headingSelectOpen = open)}
+                  onValueChange={selectHeadingMode}
                 >
-                  <span class="poodle-rich-text-editor__glyph" aria-hidden="true">
-                    {RICH_TEXT_COMMAND_PRESENTATION[command].glyph}
-                  </span>
-                </IconButton>
-              {:else}
+                  {#snippet trigger(_state: SelectTriggerRenderState)}
+                    <span
+                      class="poodle-rich-text-editor__heading-value"
+                      data-heading-mode={headingMode?.kind ?? "normal"}
+                    >
+                      {headingLabel}
+                    </span>
+                  {/snippet}
+                  {#snippet option(state: SelectOptionRenderState)}
+                    <span
+                      class="poodle-rich-text-editor__heading-option"
+                      data-heading-level={headingOptionLevel(state.option.value)}
+                    >
+                      {#if state.option.value !== RICH_TEXT_HEADING_NORMAL_VALUE}
+                        <span class="poodle-rich-text-editor__glyph" aria-hidden="true">
+                          {RICH_TEXT_COMMAND_PRESENTATION[state.option.value as RichTextCommand].glyph}
+                        </span>
+                      {/if}
+                      <span class="poodle-rich-text-editor__heading-option-label">{state.option.label}</span>
+                    </span>
+                  {/snippet}
+                </Select>
+              </span>
+            {:else}
+              {@const command = item.command}
+              <span class="poodle-rich-text-editor__command" data-command={command}>
                 <IconButton
                   {...controlProps(command)}
                   pressed={RICH_TEXT_COMMAND_PRESENTATION[command].toggle
                     ? snapshot.states[command].active
                     : null}
                 />
-              {/if}
-            </span>
+              </span>
+            {/if}
           {/each}
         </div>
       {/each}

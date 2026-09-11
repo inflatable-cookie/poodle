@@ -10,11 +10,13 @@ import {
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 import {
+  RICH_TEXT_HEADING_DOCUMENT,
   RICH_TEXT_IMAGE_DOCUMENT,
   RICH_TEXT_IMAGE_FEATURES,
   RICH_TEXT_IMAGE_REQUEST_DELAY_MS,
   RICH_TEXT_PICKED_IMAGE_ALT,
   RICH_TEXT_PICKED_IMAGE_SRC,
+  RICH_TEXT_SPARSE_HEADING_TOOLBAR,
   RICH_TEXT_STANDARD_DOCUMENT,
   countRichTextImages,
 } from "../../../../../svelte/preview/src/specimens/web-editor-documents";
@@ -80,6 +82,30 @@ export function RichTextEditorSpecimen() {
         <pre className="rich-text-editor-readout" data-part="host-document">
           {JSON.stringify(document)}
         </pre>
+      </SpecimenGroup>
+
+      <SpecimenGroup
+        label="Text modes"
+        description="One text-mode selector replaces the separate heading buttons. Consumers choose the admitted levels: the full toolbar offers Normal text plus H1–H6, the sparse toolbar offers Normal text plus only H2 and H4, and a selection spanning different blocks reads Mixed. Choosing the active level keeps it; choosing Normal text converts back."
+      >
+        <div className="rich-text-editor-frame" data-part="heading-mode-editor">
+          <RichTextEditor
+            value={RICH_TEXT_HEADING_DOCUMENT}
+            features={RICH_TEXT_STANDARD_FEATURES}
+            ariaLabel="Heading modes"
+          />
+        </div>
+        <div
+          className="rich-text-editor-frame rich-text-editor-frame--constrained"
+          data-part="sparse-heading-editor"
+        >
+          <RichTextEditor
+            value={RICH_TEXT_HEADING_DOCUMENT}
+            features={RICH_TEXT_STANDARD_FEATURES}
+            toolbar={RICH_TEXT_SPARSE_HEADING_TOOLBAR}
+            ariaLabel="Sparse heading modes"
+          />
+        </div>
       </SpecimenGroup>
 
       <SpecimenGroup
@@ -164,6 +190,7 @@ export function RichTextEditorSpecimen() {
         .images-toggle { appearance: none; display: inline-flex; align-items: center; width: fit-content; gap: 0.375rem; padding: 0.3125rem 0.625rem; border: 0.0625rem solid var(--poodle-color-border-default); border-radius: var(--poodle-radius-control); background: var(--poodle-color-background-surface); color: var(--poodle-color-text-primary); font: inherit; font-size: 0.8125rem; line-height: 1.2; cursor: pointer; }
         .images-toggle[aria-pressed="true"] { background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent); }
         .rich-text-editor-frame { height: 20rem; margin-top: 0.75rem; }
+        .rich-text-editor-frame--constrained { max-width: 22rem; }
         .image-policy-feedback { margin-top: 0.75rem; }
         .image-policy-metric { margin: 0; font-size: 0.8125rem; line-height: 1.4; color: var(--poodle-color-text-secondary); }
         .rich-text-editor-readout { margin: 0.75rem 0 0; padding: 0.5rem; border-radius: 0.25rem; background: var(--poodle-color-background-surface); font-size: 0.75rem; white-space: pre-wrap; max-height: 8rem; overflow: auto; }

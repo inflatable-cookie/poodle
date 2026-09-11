@@ -40,16 +40,19 @@ import { Text } from "@tiptap/extension-text";
 import { UndoRedo } from "@tiptap/extensions";
 
 import {
+  RICH_TEXT_HEADING_LEVELS,
   RICH_TEXT_MAX_BYTES,
   RICH_TEXT_MAX_NODES,
   isRichTextCommand,
   resolveRichTextToolbar,
   richTextAdmittedCommands,
+  richTextHeadingCommandLevel,
   validateRichTextFeatures,
   type ProseMirrorDocumentJSON,
   type ProseMirrorNodeJSON,
   type RichTextCommand,
   type RichTextFeature,
+  type RichTextHeadingMode,
 } from "@inflatable-cookie/poodle-core";
 
 export type {
@@ -57,6 +60,7 @@ export type {
   ProseMirrorNodeJSON,
   RichTextCommand,
   RichTextFeature,
+  RichTextHeadingMode,
 } from "@inflatable-cookie/poodle-core";
 
 export interface RichTextImageInput {
@@ -87,6 +91,10 @@ export interface RichTextCommandState {
 export interface RichTextToolbarSnapshot {
   commands: readonly RichTextCommand[];
   states: Readonly<Record<RichTextCommand, RichTextCommandState>>;
+  /** Resolved text-mode selector state, or null when headings are not
+   *  admitted. Recomputed with every toolbar snapshot, so caret and selection
+   *  moves update the selector trigger. */
+  headingMode: RichTextHeadingMode | null;
 }
 
 export interface RichTextEngineCallbacks {
@@ -98,6 +106,13 @@ export interface RichTextEngine {
   readonly commands: readonly RichTextCommand[];
   commandState: (command: RichTextCommand) => RichTextCommandState;
   runCommand: (command: RichTextCommand) => void;
+  /** Resolved text-mode selector state, or null when headings are not
+   *  admitted. `normal` covers paragraph and other non-heading text blocks;
+   *  `mixed` covers a selection whose blocks span different modes. */
+  headingMode: () => RichTextHeadingMode | null;
+  /** Set one exact heading level, or Normal text (null). One choice is at most
+   *  one document-changing transaction; the active level is never toggled off. */
+  setHeadingMode: (level: number | null) => void;
   /** Editor-owned link affordance state. Never invokes a browser prompt. */
   linkHref: () => string | null;
   applyLink: (href: string) => void;
@@ -165,8 +180,9 @@ const ADMITTED_MARK_ATTRS: Readonly<Record<string, readonly string[]>> = {
   link: ["href", "target", "rel", "class", "title"],
 };
 
-/** Heading levels the curated feature set exposes (heading-1 through heading-3). */
-const ADMITTED_HEADING_LEVELS: readonly number[] = [1, 2, 3];
+/** Heading levels the curated feature set exposes; the shared registry is the
+ *  single authority for schema, validation, commands, and selector options. */
+const ADMITTED_HEADING_LEVELS: readonly number[] = RICH_TEXT_HEADING_LEVELS;
 
 /**
  * URL admission posture. Poodle refuses executable URL schemes; consumers own
@@ -334,7 +350,7 @@ function assertDocumentNodes(schema: Schema, value: ProseMirrorNodeJSON): void {
     const level = ((node.attrs ?? {}) as Record<string, unknown>).level;
     if (typeof level !== "number" || !ADMITTED_HEADING_LEVELS.includes(level)) {
       throw new Error(
-        `rich-text: unsupported heading level ${JSON.stringify(level)}; Poodle admits levels 1 to 3.`,
+        `rich-text: unsupported heading level ${JSON.stringify(level)}; Poodle admits levels 1 to 6.`,
       );
     }
   }
@@ -559,6 +575,48 @@ export function createRichTextEngine(
 
   const editable = () => !state.readOnly && !state.disabled;
 
+  /**
+   * The text modes of the blocks the current selection covers. A caret reads
+   * its own block; a range reads every text block it touches. Non-text blocks
+   * (code, rules, tables, media) contribute nothing, so a heading selector
+   * never claims a document mode the editing model does not have.
+   */
+  const selectedTextblockModes = (): Array<number | null> => {
+    const selection = editor.state.selection;
+    if (selection.empty) {
+      const parent = selection.$from.parent;
+      return [
+        parent.type.name === "heading" ? (parent.attrs.level as number) : null,
+      ];
+    }
+    const modes: Array<number | null> = [];
+    editor.state.doc.nodesBetween(selection.from, selection.to, (node) => {
+      if (!node.isTextblock) return;
+      modes.push(node.type.name === "heading" ? (node.attrs.level as number) : null);
+    });
+    return modes;
+  };
+
+  const headingMode = (): RichTextHeadingMode | null => {
+    if (destroyed || !features.includes("headings")) return null;
+    const modes = selectedTextblockModes();
+    if (modes.length === 0) return { kind: "normal" };
+    const distinct = new Set(modes.map((mode) => (mode === null ? "normal" : `heading-${mode}`)));
+    if (distinct.size > 1) return { kind: "mixed" };
+    const only = modes[0];
+    return only === null ? { kind: "normal" } : { kind: "heading", level: only };
+  };
+
+  const setHeadingMode = (level: number | null): void => {
+    if (destroyed || !editable() || !features.includes("headings")) return;
+    if (level === null) {
+      editor.chain().focus().setParagraph().run();
+      return;
+    }
+    if (!ADMITTED_HEADING_LEVELS.includes(level)) return;
+    editor.chain().focus().setHeading({ level: level as Level }).run();
+  };
+
   const wire = (editor: Editor) => {
     editor.on("transaction", ({ transaction }) => {
       if (pendingImage && transaction.docChanged) {
@@ -598,20 +656,17 @@ export function createRichTextEngine(
       case "inline-code":
         return { available: can.toggleCode(), active: editor.isActive("code") };
       case "heading-1":
-        return {
-          available: can.toggleHeading({ level: 1 }),
-          active: editor.isActive("heading", { level: 1 }),
-        };
       case "heading-2":
-        return {
-          available: can.toggleHeading({ level: 2 }),
-          active: editor.isActive("heading", { level: 2 }),
-        };
       case "heading-3":
+      case "heading-4":
+      case "heading-5":
+      case "heading-6": {
+        const level = richTextHeadingCommandLevel(command) as number;
         return {
-          available: can.toggleHeading({ level: 3 }),
-          active: editor.isActive("heading", { level: 3 }),
+          available: can.setHeading({ level: level as Level }),
+          active: editor.isActive("heading", { level }),
         };
+      }
       case "link":
         return {
           available: can.setLink({ href: "https://poodle.invalid" }),
@@ -655,7 +710,7 @@ export function createRichTextEngine(
       RichTextCommandState
     >;
     for (const command of list) states[command] = commandState(command);
-    return { commands: list, states };
+    return { commands: list, states, headingMode: headingMode() };
   };
 
   function run(command: RichTextCommand): void {
@@ -684,14 +739,15 @@ export function createRichTextEngine(
         editor.chain().focus().toggleCode().run();
         return;
       case "heading-1":
-        editor.chain().focus().toggleHeading({ level: 1 }).run();
-        return;
       case "heading-2":
-        editor.chain().focus().toggleHeading({ level: 2 }).run();
-        return;
       case "heading-3":
-        editor.chain().focus().toggleHeading({ level: 3 }).run();
+      case "heading-4":
+      case "heading-5":
+      case "heading-6": {
+        const level = richTextHeadingCommandLevel(command) as number;
+        editor.chain().focus().setHeading({ level: level as Level }).run();
         return;
+      }
       case "link":
         // The wrapper opens the editor-owned link affordance for `link`;
         // engine insertion goes through applyLink/removeLink.
@@ -858,6 +914,8 @@ export function createRichTextEngine(
     commands: commands(),
     commandState,
     runCommand: run,
+    headingMode,
+    setHeadingMode,
     linkHref: () => {
       if (destroyed || !editor.isActive("link")) return null;
       const href = editor.getAttributes("link").href;
