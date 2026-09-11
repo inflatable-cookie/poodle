@@ -315,6 +315,17 @@
   { task = "test:code-editor-line-numbers-chromium" },
   { task = "test:code-editor-line-numbers-webkit" },
 ]
+# g18.014 RichTextEditor Image Policy specimen proof. Paired Svelte + React
+# journeys over the real preview specimen: the inline raster seeds and inserts
+# with decoded geometry, one host request inserts exactly one image at the
+# retained selection, and images off/on remounts without echo or data loss.
+# Headless Chromium and WebKit, one engine per run; not in ci:web.
+"test:rich-text-image-policy-chromium" = "bun test/rich-text-image-policy/probe.ts --browser=chromium"
+"test:rich-text-image-policy-webkit" = "bun test/rich-text-image-policy/probe.ts --browser=webkit"
+"test:rich-text-image-policy" = [
+  { task = "test:rich-text-image-policy-chromium" },
+  { task = "test:rich-text-image-policy-webkit" },
+]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
 "test:meter-surface-perf" = "bun test/visual/meter-surface-perf.ts"
