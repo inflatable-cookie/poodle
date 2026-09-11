@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: dependency-queued behind g18.014, g18.018 and g18.020 — operator-required release gate
+Status: dependency-queued behind g18.012 and g18.014/g18.018→g18.020 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: merged g18.010; g18.013–g18.020 complete and merged
+Depends on: g18.012 and g18.013–g18.020 complete and merged
 
 ## Outcome
 
@@ -51,6 +51,8 @@ unbounded findings in place.
 - [ ] g18.020 replaces the fixed H1–H3 buttons with one configurable
   Normal/H1–H6 text-mode select and extends real schema/renderer support through
   H6.
+- [ ] g18.012 replaces the closed language catalogue with consumer-selected
+  lazy providers before this final sweep begins.
 
 ## Decisions
 
@@ -67,10 +69,10 @@ unbounded findings in place.
 - Blocking findings return to Chatterbox for bounded repair promotion. g18.006
   resumes only after those repairs merge and the operator accepts the final
   sweep capsule.
-- Extensible syntax-language support is an accepted release requirement.
-  Measure the current closed switch and dependency footprint precisely so the
-  bounded follow-up can replace it with consumer-selected language modules.
-  Do not redesign the API inside the sweep.
+- Extensible syntax-language support is an accepted release requirement already
+  owned by g18.012. Exercise its final public registry, lazy loading, refusal,
+  language switching and package-cost claims; do not redesign the API inside
+  the sweep.
 - Heading levels remain granular toolbar configuration. Sweep both a full H1–H6
   selector and a sparse configured subset, including Normal and Mixed state;
   do not reinterpret g18.020 as an all-levels fixed control.
@@ -78,10 +80,9 @@ unbounded findings in place.
 ## Dispatch manifest
 
 - **State:** dependency-queued as task
-  `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind active g18.014/g18.018 and
-  their serial g18.020; the coordinator adds g18.020 through in-place Queue
-  dependency mutation after submission. It then remains serial before g18.012
-  and retained g18.006.
+  `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind parallel g18.012 and active
+  g18.014/g18.018→g18.020. The coordinator mutates those dependencies in place;
+  this task remains serial before retained g18.006.
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep
@@ -123,10 +124,10 @@ unbounded findings in place.
 6. Compare Svelte and React side by side. Capture reproducible browser evidence
    for every discrepancy or visible defect; do not normalize differences in
    prose.
-7. Inspect package loading for CodeMirror languages: distinguish initial-load,
-   emitted-chunk, and installed-dependency cost. Establish the reproducible
-   baseline for individually imported, consumer-selected Poodle language
-   modules; do not change the API in this task.
+7. Verify g18.012 package loading for CodeMirror languages: distinguish
+   initial-load, emitted-chunk, installed-dependency and active-loader cost.
+   Exercise individually imported consumer-selected providers; do not change
+   the API in this task.
 8. Publish the severity-ranked capsule with exact routes, actions, expected and
    observed results. Run the focused browser board, both preview builds,
    relevant accessibility checks, docs QA, and `git diff --check`.
@@ -144,7 +145,8 @@ unbounded findings in place.
 | Read-only rendering is inert | RichTextRenderer mounts `contenteditable`, editor plugins, or mutation paths | DOM and interaction refusal proof |
 | Accessibility survives ordinary use | keyboard cannot enter/leave, focus vanishes, toolbar state is unnamed | keyboard journey and accessibility assertions on all interactive surfaces |
 | Layout is usable | editor expands the page, clips controls, or collapses at Desktop-like width | normal and constrained viewport evidence across themes/density |
-| Language cost is measured honestly | “dynamic” is claimed from source while all grammars ship/install | bundle graph, emitted chunks and installed dependency inventory |
+| Language registry is accepted | sweep covers only the former closed catalogue or ignores refusal/switching | consumer-defined ids, lazy-loader counts, live switching and failure journeys |
+| Language cost is measured honestly | “dynamic” is claimed from source while all grammars ship/install | before/after bundle graph, emitted chunks and installed dependency inventory |
 | Findings cannot disappear | a red behavior is called non-blocking without owner or rationale | severity, evidence, owner and next action for every observation |
 | Release remains gated | g18.006 resumes because the sweep PR exists despite open blockers | operator acceptance plus merged repairs before Queue continuation |
 
@@ -172,10 +174,14 @@ The operator then replaced the fixed H1–H3 toolbar posture with one text-mode
 select and chose consumer-configurable heading levels. g18.020 owns that
 schema/editor/renderer repair and is a new Queue prerequisite of this sweep.
 
+The original graph put g18.012 after this sweep so the sweep could collect a
+language-loading baseline. The operator corrected that order on 2026-09-11:
+g18.012 owns its before/after baseline and this sweep accepts the completed
+extensible registry.
+
 ## Next task
 
-After g18.020 merges, return findings to Chatterbox. g18.012 consumes the language-loading baseline
-and implements the accepted extensible registry. Promote and merge every other
+After g18.012 and g18.020 merge, return findings to Chatterbox. Promote and merge every other
 blocking repair, then seek the operator's explicit sweep acceptance before
 resuming retained g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep
 g18.009 remains dependency-queued meanwhile.

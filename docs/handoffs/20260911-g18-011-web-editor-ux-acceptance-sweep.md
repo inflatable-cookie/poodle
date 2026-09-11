@@ -27,7 +27,8 @@ tags: [coordination, handoff, worker, g18, g18.011, editor, ux, qa]
 ## What This Thread Was Doing
 
 Execute [`g18.011`](../roadmaps/g18/011-web-editor-ux-acceptance-sweep.md) after
-its Queue prerequisites, including new serial g18.020, close. Sweep CodeEditor, RichTextEditor,
+its Queue prerequisites, including parallel g18.012 and serial g18.020, close.
+Sweep CodeEditor, RichTextEditor,
 RichTextRenderer, and MarkdownRenderer across their real Svelte and React
 previews before g18.012 and release work.
 
@@ -48,9 +49,10 @@ CodeEditor line-number configuration; g18.017 owns the block Slider visual
 repair; g18.018 owns controlled-echo selection; g18.019 owns MarkdownRenderer.
 g18.020 follows g18.014/g18.018 and owns the configurable Normal/H1–H6
 selector plus H4–H6 schema/renderer support. The coordinator must add the new
-task as an in-place dependency of this retained Queue task; no replacement or
-manual hold is needed. Existing editor pages come from g18.008; g18.019 adds
-the renderer pair.
+task and g18.012 as in-place dependencies of this retained Queue task; no
+replacement or manual hold is needed. g18.012 now owns its own before/after
+language-loading evidence. Existing editor pages come from g18.008; g18.019
+adds the renderer pair.
 
 ## Boundaries
 
@@ -66,9 +68,9 @@ real editing, controlled state, keyboard/pointer behavior, accessibility,
 configuration, themes and constrained layout. Both renderers are distinct
 surfaces. Bind the full and sparse heading selectors, Normal/Mixed state, and
 real H4–H6 rendering. Measure CodeMirror language loading honestly across runtime load,
-emitted chunks and installed dependencies. The operator has already decided
-that the language boundary must be extensible; collect the baseline needed by
-the bounded follow-up, but do not redesign it in this sweep.
+emitted chunks and installed dependencies. Exercise the merged extensible
+registry, selected-provider loading, switching and refusal; do not redesign it
+in this sweep.
 
 ## Suggested Next Move
 

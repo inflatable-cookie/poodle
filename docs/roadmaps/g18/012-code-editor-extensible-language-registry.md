@@ -1,6 +1,6 @@
 # 012 — CodeEditor extensible language registry
 
-Status: ready behind g18.011 — operator-confirmed release requirement
+Status: ready — operator-confirmed release requirement; parallel with active rich-text work
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,8 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/components/src/editor.ts`,
 `../../../packages/react/components/src/editor.ts`
-Depends on: g18.011 Queue task `aad6b776-1c3e-438c-bc9c-4e8ba8750462`
-complete and accepted
+Depends on: merged g18.002, g18.008, g18.010, g18.015 and g18.016
 
 ## Outcome
 
@@ -29,11 +28,12 @@ union through aliases or fallback behavior.
   extensibility the required boundary.
 - [x] The current closed switch and direct grammar dependencies are located in
   both web component packages.
-- [x] g18.011 owns the reproducible package/runtime baseline and remains serial
-  before this repair.
+- [x] This task can establish its own reproducible before/after package,
+  emitted-chunk and runtime-loading baseline.
 - [x] g18.006 remains paused and g18.009 remains dependency-queued until this
   repair and the complete editor sweep are accepted.
-- [ ] g18.011 is complete and its language-loading evidence is available.
+- [x] The operator corrected the ordering: implementation precedes final
+  acceptance, and existing Queue dependencies may be changed in place.
 
 ## Decisions
 
@@ -58,8 +58,9 @@ union through aliases or fallback behavior.
 
 ## Dispatch manifest
 
-- **State:** dependency-queued behind g18.011; serial before retained g18.006
-  resumes; g18.009 remains dependency-queued behind g18.006
+- **State:** ready and path-independent from active g18.014/g18.018/g18.020;
+  explicit prerequisite of g18.011 and serial before retained g18.006 resumes;
+  g18.009 remains dependency-queued behind g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** CodeEditor contract and focused guides; shared editor
@@ -80,8 +81,9 @@ union through aliases or fallback behavior.
 
 ## Work
 
-1. Consume g18.011’s initial-load, emitted-chunk and installed-dependency
-   baseline. Bind tests that fail against the closed catalogue.
+1. Capture the current closed catalogue's initial-load, emitted-chunk,
+   installed-dependency and active-loader baseline. Bind tests that fail against
+   it, then preserve the same measurements as before/after evidence.
 2. Replace `CodeEditorLanguage`’s fixed union with the shared language-id and
    opaque registry contract. Add the explicit CodeMirror adapter constructor
    for typed lazy loaders.
@@ -109,6 +111,7 @@ union through aliases or fallback behavior.
 | Selection fails closed | missing id silently becomes plain text | exact thrown/refused state before false ready presentation |
 | Frameworks agree | Svelte and React use different registry shapes or errors | shared type plus paired browser cases |
 | Controlled switching works | new id leaves old parser active or loses text/selection unexpectedly | live switch and remount assertions with exact host state |
+| Acceptance sees final behavior | g18.011 runs before the registry exists and cannot exercise it | merged registry before the sweep, with full/sparse consumer journeys in g18.011 |
 | Release remains gated | candidate resumes with closed catalogue or before sweep acceptance | merged repair and operator acceptance before Queue continuation |
 
 ## Stop conditions
@@ -127,7 +130,8 @@ permanent boundary: language support must be extensible and consumer-selected.
 
 ## Next task
 
-Return to Chatterbox with the merged repair and g18.011 evidence. Obtain the
-operator’s acceptance of the complete four-surface sweep, then resume retained
-g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. g18.009 then dispatches
-only after that repaired candidate closes.
+After this repair and the parallel rich-text chain through g18.020 merge,
+g18.011 runs the complete four-surface sweep against the final product shape.
+Obtain operator acceptance, then resume retained g18.006 task
+`17ac3fee-de90-4b32-9672-1134770bb086`. g18.009 dispatches only after that
+repaired candidate closes.
