@@ -3,6 +3,7 @@
     RICH_TEXT_STANDARD_FEATURES,
     RichTextEditor,
     type ProseMirrorDocumentJSON,
+    type RichTextCommand,
     type RichTextFeature,
     type RichTextImageInput,
   } from "@inflatable-cookie/poodle-svelte/rich-text";
@@ -22,6 +23,8 @@
 
   const imageFeatures: readonly RichTextFeature[] = RICH_TEXT_IMAGE_FEATURES;
   const standardFeatures: readonly RichTextFeature[] = RICH_TEXT_STANDARD_FEATURES;
+  /** Consumers choose commands, not their icons or grouping. */
+  const subsetToolbar: readonly RichTextCommand[] = ["bold", "italic", "link"];
 
   async function requestImage(): Promise<RichTextImageInput | null> {
     return { src: RICH_TEXT_IMAGE_SRC, alt: RICH_TEXT_IMAGE_ALT };
@@ -47,6 +50,28 @@
         />
       </div>
       <pre class="readout" data-part="host-document">{JSON.stringify(document)}</pre>
+    </SpecimenGroup>
+
+    <SpecimenGroup
+      label="Command postures"
+      description="Explicit toolbar subset and a disabled editor. Selection drives active and table-context states: click into the bold text and the Bold control lights up; enter the table to enable the row, column, and delete actions."
+    >
+      <div class="editor-frame" data-part="subset-editor">
+        <RichTextEditor
+          value={document}
+          features={standardFeatures}
+          toolbar={subsetToolbar}
+          ariaLabel="Subset rich text"
+        />
+      </div>
+      <div class="editor-frame" data-part="disabled-editor">
+        <RichTextEditor
+          value={RICH_TEXT_STANDARD_DOCUMENT}
+          features={standardFeatures}
+          disabled
+          ariaLabel="Disabled rich text"
+        />
+      </div>
     </SpecimenGroup>
 
     <SpecimenGroup

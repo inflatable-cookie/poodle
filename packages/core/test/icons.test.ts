@@ -17,7 +17,10 @@ describe("icon catalogue boundary", () => {
     // then to 108 by g15.053's Breadcrumbs item icons — the canonical `house`
     // plus its `home` alias, which the accessible icon-only root crumb needs.
     // All four are component-owned, not catalogue creep.
-    expect(Object.keys(defaultLucideIconSet)).toHaveLength(108);
+    // 114: g18.013's RichTextEditor toolbar — strikethrough, list-ordered,
+    // square-code, table, and the between-horizontal/vertical-start pair that
+    // distinguishes the add-row/add-column table actions.
+    expect(Object.keys(defaultLucideIconSet)).toHaveLength(114);
     expect(defaultLucideIconSet.search).toBe(search);
     expect(defaultLucideIconSet.x).toBe(x);
     expect("biohazard" in defaultLucideIconSet).toBe(false);

@@ -8,6 +8,8 @@ import { arrowUp } from "./icons/arrow-up";
 import { arrowUpDown } from "./icons/arrow-up-down";
 import { audioWaveform } from "./icons/audio-waveform";
 import { bell } from "./icons/bell";
+import { betweenHorizontalStart } from "./icons/between-horizontal-start";
+import { betweenVerticalStart } from "./icons/between-vertical-start";
 import { bold } from "./icons/bold";
 import { calendar } from "./icons/calendar";
 import { check } from "./icons/check";
@@ -61,6 +63,7 @@ import { italic } from "./icons/italic";
 import { link } from "./icons/link";
 import { list } from "./icons/list";
 import { listFilter } from "./icons/list-filter";
+import { listOrdered } from "./icons/list-ordered";
 import { loader } from "./icons/loader";
 import { loaderCircle } from "./icons/loader-circle";
 import { lock } from "./icons/lock";
@@ -91,7 +94,10 @@ import { settings } from "./icons/settings";
 import { spinner } from "./icons/spinner";
 import { square } from "./icons/square";
 import { squareCheck } from "./icons/square-check";
+import { squareCode } from "./icons/square-code";
 import { star } from "./icons/star";
+import { strikethrough } from "./icons/strikethrough";
+import { table } from "./icons/table";
 import { tag } from "./icons/tag";
 import { terminal } from "./icons/terminal";
 import { trash2 } from "./icons/trash-2";
@@ -119,6 +125,8 @@ export {
   arrowUpDown,
   audioWaveform,
   bell,
+  betweenHorizontalStart,
+  betweenVerticalStart,
   bold,
   calendar,
   check,
@@ -172,6 +180,7 @@ export {
   link,
   list,
   listFilter,
+  listOrdered,
   loader,
   loaderCircle,
   lock,
@@ -202,7 +211,10 @@ export {
   spinner,
   square,
   squareCheck,
+  squareCode,
   star,
+  strikethrough,
+  table,
   tag,
   terminal,
   trash2,
@@ -231,6 +243,8 @@ export const defaultLucideIconSet: IconSet = {
   "arrow-up-down": arrowUpDown,
   "audio-waveform": audioWaveform,
   "bell": bell,
+  "between-horizontal-start": betweenHorizontalStart,
+  "between-vertical-start": betweenVerticalStart,
   "bold": bold,
   "calendar": calendar,
   "check": check,
@@ -284,6 +298,7 @@ export const defaultLucideIconSet: IconSet = {
   "link": link,
   "list": list,
   "list-filter": listFilter,
+  "list-ordered": listOrdered,
   "loader": loader,
   "loader-circle": loaderCircle,
   "lock": lock,
@@ -314,7 +329,10 @@ export const defaultLucideIconSet: IconSet = {
   "spinner": spinner,
   "square": square,
   "square-check": squareCheck,
+  "square-code": squareCode,
   "star": star,
+  "strikethrough": strikethrough,
+  "table": table,
   "tag": tag,
   "terminal": terminal,
   "trash-2": trash2,

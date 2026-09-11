@@ -1,19 +1,22 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/rich-text.css";
   import {
-    RICH_TEXT_COMMAND_LABELS,
+    RICH_TEXT_COMMAND_GROUP_LABELS,
+    RICH_TEXT_COMMAND_PRESENTATION,
     RICH_TEXT_STANDARD_FEATURES,
-    RICH_TEXT_TOGGLE_COMMANDS,
     installInputModality,
   } from "@inflatable-cookie/poodle-core";
   import type {
     ProseMirrorDocumentJSON,
     RichTextCommand,
     RichTextFeature,
+    RichTextCommandGroup,
   } from "@inflatable-cookie/poodle-core";
   import type { ControlDensity } from "./types";
   import { onDestroy, onMount } from "svelte";
 
+  import { default as Button } from "./Button.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
   import {
     assertAdmittedFeatures,
     assertAdmittedToolbar,
@@ -142,6 +145,24 @@
     engine?.runCommand(command);
   }
 
+  /** Shared control props: one command-presentation map drives chrome, name,
+   *  tooltip, icon, tone, and availability for every admitted command. */
+  function controlProps(command: RichTextCommand) {
+    const presentation = RICH_TEXT_COMMAND_PRESENTATION[command];
+    const state = snapshot?.states[command];
+    return {
+      variant: "ghost" as const,
+      tone: presentation.destructive ? ("danger" as const) : ("default" as const),
+      sizeRole: "chrome" as const,
+      density: resolvedDensity,
+      icon: presentation.icon,
+      ariaLabel: presentation.label,
+      tooltip: presentation.label,
+      disabled: !state?.available || disabled,
+      onClick: () => runToolbarCommand(command),
+    };
+  }
+
   function submitLink(): void {
     if (!engine) return;
     engine.applyLink(linkValue);
@@ -185,8 +206,23 @@
     if (next) next.focus();
   }
 
-  const isToggle = (command: RichTextCommand): boolean =>
-    (RICH_TEXT_TOGGLE_COMMANDS as readonly string[]).includes(command);
+  interface RichTextToolbarCluster {
+    group: RichTextCommandGroup;
+    commands: RichTextCommand[];
+  }
+
+  /** Feature-derived order is preserved; consecutive same-group commands form
+   *  one intact cluster that wraps as a unit at constrained widths. */
+  const clusters = $derived.by<RichTextToolbarCluster[]>(() => {
+    const result: RichTextToolbarCluster[] = [];
+    for (const command of snapshot?.commands ?? []) {
+      const group = RICH_TEXT_COMMAND_PRESENTATION[command].group;
+      const last = result[result.length - 1];
+      if (last && last.group === group) last.commands.push(command);
+      else result.push({ group, commands: [command] });
+    }
+    return result;
+  });
 </script>
 
 <div
@@ -205,20 +241,34 @@
       aria-controls={surfaceId}
       onkeydown={handleToolbarKeydown}
     >
-      {#each snapshot.commands as command (command)}
-        <button
-          type="button"
-          class="poodle-rich-text-editor__toolbar-button"
-          data-command={command}
-          data-pressed={snapshot.states[command].active || undefined}
-          aria-pressed={isToggle(command)
-            ? (snapshot.states[command].active ? "true" : "false")
-            : undefined}
-          disabled={!snapshot.states[command].available || disabled}
-          onclick={() => runToolbarCommand(command)}
+      {#each clusters as cluster (cluster.commands[0])}
+        <div
+          class="poodle-rich-text-editor__group"
+          role="group"
+          aria-label={RICH_TEXT_COMMAND_GROUP_LABELS[cluster.group]}
         >
-          {RICH_TEXT_COMMAND_LABELS[command]}
-        </button>
+          {#each cluster.commands as command (command)}
+            <span class="poodle-rich-text-editor__command" data-command={command}>
+              {#if RICH_TEXT_COMMAND_PRESENTATION[command].glyph}
+                <IconButton
+                  {...controlProps(command)}
+                  pressed={snapshot.states[command].active}
+                >
+                  <span class="poodle-rich-text-editor__glyph" aria-hidden="true">
+                    {RICH_TEXT_COMMAND_PRESENTATION[command].glyph}
+                  </span>
+                </IconButton>
+              {:else}
+                <IconButton
+                  {...controlProps(command)}
+                  pressed={RICH_TEXT_COMMAND_PRESENTATION[command].toggle
+                    ? snapshot.states[command].active
+                    : null}
+                />
+              {/if}
+            </span>
+          {/each}
+        </div>
       {/each}
     </div>
   {/if}
@@ -231,23 +281,19 @@
         bind:value={linkValue}
         onkeydown={handleLinkInputKeydown}
       />
-      <button
-        type="button"
-        class="poodle-rich-text-editor__toolbar-button"
-        data-command="apply-link"
-        onclick={submitLink}
-      >
+      <Button variant="secondary" sizeRole="chrome" density={resolvedDensity} onclick={submitLink}>
         Apply
-      </button>
+      </Button>
       {#if snapshot?.states.link.active}
-        <button
-          type="button"
-          class="poodle-rich-text-editor__toolbar-button"
-          data-command="remove-link"
+        <Button
+          variant="ghost"
+          tone="danger"
+          sizeRole="chrome"
+          density={resolvedDensity}
           onclick={removeLink}
         >
           Remove link
-        </button>
+        </Button>
       {/if}
     </div>
   {/if}

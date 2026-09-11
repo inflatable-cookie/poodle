@@ -4,6 +4,7 @@ import {
   RICH_TEXT_STANDARD_FEATURES,
   RichTextEditor,
   type ProseMirrorDocumentJSON,
+  type RichTextCommand,
   type RichTextImageInput,
 } from "@inflatable-cookie/poodle-react/rich-text";
 import { SpecimenGroup } from "../SpecimenGroup";
@@ -19,6 +20,9 @@ import {
 async function requestImage(): Promise<RichTextImageInput | null> {
   return { src: RICH_TEXT_IMAGE_SRC, alt: RICH_TEXT_IMAGE_ALT };
 }
+
+/** Consumers choose commands, not their icons or grouping. */
+const SUBSET_TOOLBAR: readonly RichTextCommand[] = ["bold", "italic", "link"];
 
 export function RichTextEditorSpecimen() {
   const [document, setDocument] = useState<ProseMirrorDocumentJSON>(RICH_TEXT_STANDARD_DOCUMENT);
@@ -55,6 +59,28 @@ export function RichTextEditorSpecimen() {
         <pre className="rich-text-editor-readout" data-part="host-document">
           {JSON.stringify(document)}
         </pre>
+      </SpecimenGroup>
+
+      <SpecimenGroup
+        label="Command postures"
+        description="Explicit toolbar subset and a disabled editor. Selection drives active and table-context states: click into the bold text and the Bold control lights up; enter the table to enable the row, column, and delete actions."
+      >
+        <div className="rich-text-editor-frame" data-part="subset-editor">
+          <RichTextEditor
+            value={document}
+            features={RICH_TEXT_STANDARD_FEATURES}
+            toolbar={SUBSET_TOOLBAR}
+            ariaLabel="Subset rich text"
+          />
+        </div>
+        <div className="rich-text-editor-frame" data-part="disabled-editor">
+          <RichTextEditor
+            value={RICH_TEXT_STANDARD_DOCUMENT}
+            features={RICH_TEXT_STANDARD_FEATURES}
+            disabled
+            ariaLabel="Disabled rich text"
+          />
+        </div>
       </SpecimenGroup>
 
       <SpecimenGroup

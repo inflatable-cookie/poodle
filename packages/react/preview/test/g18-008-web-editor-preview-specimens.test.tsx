@@ -80,7 +80,7 @@ describe("g18.008 web editor preview specimens (react)", () => {
     });
     const before = container.querySelector("[data-part='host-document']")?.textContent ?? "";
     expect(before).toContain('"table"');
-    const insert = live!.querySelector<HTMLButtonElement>('button[data-command="insert-table"]');
+    const insert = live!.querySelector<HTMLButtonElement>('[data-command="insert-table"] button');
     expect(insert).not.toBeNull();
     fireEvent.click(insert!);
     await waitFor(() => {
@@ -98,7 +98,7 @@ describe("g18.008 web editor preview specimens (react)", () => {
     await waitFor(() => {
       expect(policy?.querySelector(".ProseMirror")).not.toBeNull();
     });
-    expect(policy?.querySelector('button[data-command="insert-image"]')).toBeNull();
+    expect(policy?.querySelector('[data-command="insert-image"] button')).toBeNull();
     expect(policy?.querySelector("img")).toBeNull();
     fireEvent.click(container.querySelector("[data-part='images-toggle']")!);
     await waitFor(() => {
@@ -107,7 +107,7 @@ describe("g18.008 web editor preview specimens (react)", () => {
       ).toBe(RICH_TEXT_IMAGE_ALT);
     });
     expect(
-      container.querySelector("[data-part='image-policy-editor'] button[data-command='insert-image']"),
+      container.querySelector("[data-part='image-policy-editor'] [data-command='insert-image'] button"),
     ).not.toBeNull();
   });
 
