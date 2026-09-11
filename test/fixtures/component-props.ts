@@ -200,6 +200,7 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
       content: [{ type: "paragraph", content: [{ type: "text", text: "Rich text" }] }],
     },
   },
+  MarkdownRenderer: { value: "# Title\n\nRendered **markdown**." },
   Radio: { value: "a", label: "Option A" },
   Switch: { label: "Enabled" },
   NumberInput: { ariaLabel: "Amount" },

@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.010 merged; g18.006 paused; g18.011 held behind g18.013–g18.017; g18.009 held)
+Updated: 2026-09-11 (g18.013 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -29,52 +29,69 @@ editing focus treatment — merged as `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`
 (PR #242) on 2026-09-11 after exact-head independent re-review and green
 rust/web checks at the reviewed head.
 
+[`g18.015`](g18/015-preview-distribution-build-preflight.md) — preview
+distribution build preflight — merged as `0cf6073eb2067c4fc4127ec5c318a0f682c5859f`
+(PR #243) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
+[`g18.016`](g18/016-code-editor-live-line-number-reconfiguration.md) — CodeEditor
+live line-number reconfiguration — merged as `5932bd0027cab2cf86c07a7878c3b48193252306`
+(PR #244) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
+[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) — RichTextEditor
+toolbar controls — merged as `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70`
+(PR #245) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010 and g18.013–g18.017, the held g18.011 sweep,
+only after g18.010 and g18.013–g18.019, the dependency-queued g18.011 sweep,
 g18.012, and all other blocking repairs close and the operator accepts the
 sweep.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
-certification is already dependency-queued behind g18.006 and is now explicitly
-held. Do not release it until the repaired candidate is accepted.
+certification is dependency-queued behind g18.006 with no manual hold. It
+dispatches only after the repaired candidate closes.
 
-## Ready queue task
+## Active and dependency-queued product tasks
 
-[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is explicitly Queue-held
-until serial g18.013→g18.014 and parallel g18.015–g18.017 merge. It sweeps all
-three editor surfaces in both web previews and is serial before any g18.006
-continuation.
+[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014, g18.017,
+g18.018 and g18.019. It sweeps all four editor surfaces in both web previews
+and is serial before g18.012 and any g18.006 continuation.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is
 dependency-queued behind g18.011. It replaces the closed grammar catalogue
 with consumer-selected lazy CodeMirror language providers before g18.006.
 
-[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is active. It replaces
-the link-like command row with proper grouped Poodle controls before g18.011 is
-released.
+[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is merged (PR #245).
+It replaced the link-like command row with proper grouped Poodle controls;
+g18.014 and g18.018 are unblocked.
 
-[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is
-dependency-queued behind g18.013. It replaces the dead external image fixture
+[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is ready,
+unblocked by merged g18.013. It replaces the dead external image fixture
 with visible deterministic seeded/insertion proof before g18.011 is released.
 
-[`g18.015`](g18/015-preview-distribution-build-preflight.md) is approved for
-immediate dispatch in parallel with g18.013. It rebuilds core and the matching
-framework package before each public preview starts and must merge before
-g18.011 is released.
-
-[`g18.016`](g18/016-code-editor-live-line-number-reconfiguration.md) is
-approved for immediate dispatch in parallel. It makes the existing mounted
-CodeEditor line-number prop live in both wrappers and must merge before g18.011
-is released.
-
 [`g18.017`](g18/017-block-slider-fixed-inline-presentation.md) is approved for
-immediate dispatch in parallel. It gives the block Slider family rounded-square
+parallel execution. It gives the block Slider family rounded-square
 corners and keeps single-Slider text fixed inside the track with split-colour
 crossover across active runtimes. It must merge before g18.011 is released.
+
+[`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is ready,
+unblocked by merged g18.013. It touches the same RichTextEditor shells, so it
+runs beside g18.014 and g18.017. It
+makes accepted controlled echoes preserve caret, selection, history and focus
+in both web wrappers and must merge before g18.011 is released.
+
+[`g18.019`](g18/019-markdown-renderer.md) is active as Queue task
+`eac944cd-2ee0-4810-bd60-0976e3270e56`. It adds paired standalone
+MarkdownRenderer surfaces, shares one safe/trusted content path with
+MarkdownEditor preview, and adds both specimen pages. It is independent of the
+rich-text and Slider lanes and is an explicit g18.011 prerequisite.
 
 ## Held planning horizons
 

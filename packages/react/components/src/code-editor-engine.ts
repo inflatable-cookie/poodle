@@ -140,6 +140,7 @@ export async function createCodeEditorEngine(
   const readOnlyCompartment = new Compartment();
   const diagnosticsCompartment = new Compartment();
   const wrapCompartment = new Compartment();
+  const lineNumbersCompartment = new Compartment();
   const tabSizeCompartment = new Compartment();
 
   function buildDiagnosticDecorations(valid: CodeEditorDiagnostic[]): DecorationSet {
@@ -280,7 +281,7 @@ export async function createCodeEditorEngine(
         ]),
         diagnosticsCompartment.of(diagnosticField(reportDiagnostics(options.value.length))),
         wrapCompartment.of(options.wrapLines ? EditorView.lineWrapping : []),
-        ...(options.lineNumbers ? [lineNumbers()] : []),
+        lineNumbersCompartment.of(options.lineNumbers ? lineNumbers() : []),
         ...(options.placeholder ? [placeholder(options.placeholder)] : []),
         tabSizeCompartment.of(EditorState.tabSize.of(normalizeTabSize(options.tabSize))),
         EditorView.updateListener.of((update: ViewUpdate) => {
@@ -359,6 +360,9 @@ export async function createCodeEditorEngine(
     }
     if (next.wrapLines !== undefined && next.wrapLines !== previous.wrapLines) {
       effects.push(wrapCompartment.reconfigure(options.wrapLines ? EditorView.lineWrapping : []));
+    }
+    if (next.lineNumbers !== undefined && next.lineNumbers !== previous.lineNumbers) {
+      effects.push(lineNumbersCompartment.reconfigure(options.lineNumbers ? lineNumbers() : []));
     }
     if (next.tabSize !== undefined && next.tabSize !== previous.tabSize) {
       effects.push(

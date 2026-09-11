@@ -712,4 +712,176 @@ describe("CodeEditor engine diagnostics", () => {
       host.remove();
     }
   });
+
+  it("line-number reconfiguration preserves the view, document, and selection", async () => {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    try {
+      const onChange = vi.fn();
+      const engine = await createCodeEditorEngine(
+        host,
+        { ...base, lineNumbers: true },
+        { onChange, onActiveDiagnostic: () => {} },
+      );
+      const editor = host.querySelector(".cm-editor");
+      expect(editor).not.toBeNull();
+      expect(host.querySelector(".cm-gutters .cm-lineNumbers")).not.toBeNull();
+      await engine.update({ lineNumbers: false });
+      expect(host.querySelector(".cm-gutters .cm-lineNumbers")).toBeNull();
+      expect(host.querySelector(".cm-editor")).toBe(editor);
+      await engine.update({ lineNumbers: true });
+      expect(host.querySelector(".cm-gutters .cm-lineNumbers")).not.toBeNull();
+      expect(host.querySelector(".cm-editor")).toBe(editor);
+      expect(host.querySelector(".cm-content")?.textContent).toContain("one");
+      engine.destroy();
+    } finally {
+      host.remove();
+    }
+  });
+});
+
+/**
+ * Contract `lineNumbers` is a live boolean configuration prop: a host change
+ * must reconfigure the mounted gutter without remounting or losing editor
+ * state. These cases plant the review oracle: both directions, rapid
+ * controlled updates, stable identity, value/selection/focus/history, and
+ * active diagnostics.
+ */
+describe("CodeEditor line-number reconfiguration (react)", () => {
+  function lineGutter(container: HTMLElement): Element | null {
+    return container.querySelector(".cm-gutters .cm-lineNumbers");
+  }
+
+  async function mountedOn(extra: Record<string, unknown> = {}) {
+    const view = render(<CodeEditor value={"one\ntwo"} {...(extra as object)} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).not.toBeNull();
+    });
+    return view;
+  }
+
+  it("a live false removes the gutter and a live true restores it without a new editor", async () => {
+    const view = await mountedOn();
+    const editor = view.container.querySelector(".cm-editor");
+    expect(editor).not.toBeNull();
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={false} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).toBeNull();
+    });
+    expect(view.container.querySelector(".cm-editor")).toBe(editor);
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={true} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).not.toBeNull();
+    });
+    expect(view.container.querySelector(".cm-editor")).toBe(editor);
+    await vi.waitFor(() => {
+      expect(visibleText(view.container)).toBe("one\ntwo");
+    });
+  });
+
+  it("an initial false mounts without a gutter and toggles live in both directions", async () => {
+    const view = render(<CodeEditor value={"one\ntwo"} lineNumbers={false} />);
+    await vi.waitFor(() => {
+      expect(contentOf(view.container).textContent).toContain("one");
+    });
+    expect(lineGutter(view.container)).toBeNull();
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={true} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).not.toBeNull();
+    });
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={false} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).toBeNull();
+    });
+  });
+
+  it("rapid controlled updates leave the latest host value applied", async () => {
+    const view = await mountedOn();
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={false} />);
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={true} />);
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={false} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).toBeNull();
+    });
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={true} />);
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={false} />);
+    view.rerender(<CodeEditor value={"one\ntwo"} lineNumbers={true} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).not.toBeNull();
+    });
+  });
+
+  it("value, selection, focus, and undo history survive both transitions", async () => {
+    const onChange = vi.fn();
+    const view = await mountedOn({ onChange });
+    const content = contentOf(view.container);
+    content.focus();
+    expect(document.activeElement).toBe(content);
+    press(content, "Enter");
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    expect(visibleText(view.container)).toBe("\none\ntwo");
+    // Move the caret to the end of line 2 (offset 4) before toggling.
+    press(content, "End");
+    view.rerender(<CodeEditor value={"\none\ntwo"} lineNumbers={false} onChange={onChange} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).toBeNull();
+    });
+    expect(document.activeElement).toBe(content);
+    view.rerender(<CodeEditor value={"\none\ntwo"} lineNumbers={true} onChange={onChange} />);
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).not.toBeNull();
+    });
+    expect(document.activeElement).toBe(content);
+    // Enter at the preserved caret (end of "one") proves the selection held.
+    press(content, "Enter");
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(2);
+    });
+    const entered = onChange.mock.calls[1][0] as CodeEditorChange;
+    expect(entered.value).toBe("\none\n\ntwo");
+    expect(visibleText(view.container)).toBe("\none\n\ntwo");
+    // Undo after two toggles restores the pre-toggle document.
+    press(content, "z", CONTROL);
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(3);
+    });
+    const undone = onChange.mock.calls[2][0] as CodeEditorChange;
+    expect(undone.value).toBe("\none\ntwo");
+    expect(visibleText(view.container)).toBe("\none\ntwo");
+  });
+
+  it("an active diagnostic and F8 navigation survive the toggle", async () => {
+    const view = render(<CodeEditor value={DIAGNOSTIC_VALUE} diagnostics={DIAGNOSTICS} />);
+    await vi.waitFor(() => {
+      expect(contentOf(view.container).textContent).toContain("one");
+    });
+    act(() => {
+      press(contentOf(view.container), "F8");
+    });
+    await vi.waitFor(() => {
+      expect(diagnosticMessage(view.container)).toBe("error 1:1 — first");
+    });
+    view.rerender(
+      <CodeEditor value={DIAGNOSTIC_VALUE} diagnostics={DIAGNOSTICS} lineNumbers={false} />,
+    );
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).toBeNull();
+    });
+    expect(diagnosticMessage(view.container)).toBe("error 1:1 — first");
+    act(() => {
+      press(contentOf(view.container), "F8");
+    });
+    await vi.waitFor(() => {
+      expect(diagnosticMessage(view.container)).toBe("warning 2:1 — second");
+    });
+    view.rerender(
+      <CodeEditor value={DIAGNOSTIC_VALUE} diagnostics={DIAGNOSTICS} lineNumbers={true} />,
+    );
+    await vi.waitFor(() => {
+      expect(lineGutter(view.container)).not.toBeNull();
+    });
+    expect(diagnosticMessage(view.container)).toBe("warning 2:1 — second");
+  });
 });

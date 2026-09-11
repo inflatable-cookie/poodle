@@ -1,6 +1,6 @@
 # 016 — CodeEditor live line-number reconfiguration
 
-Status: ready — operator-confirmed paired CodeEditor repair
+Status: complete — merged as `5932bd0027cab2cf86c07a7878c3b48193252306` (PR #244) on 2026-09-11
 Owner: Poodle web editors
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -125,6 +125,6 @@ unchanged.
 
 ## Next task
 
-After g18.013–g18.015, this repair and parallel g18.017 merge, Chatterbox
-releases held g18.011 for the full three-surface acceptance sweep. Keep g18.006
-blocked and g18.009 held.
+After g18.013, g18.014, and g18.017 merge, Chatterbox releases held g18.011
+for the full three-surface acceptance sweep. Keep g18.006 blocked and
+g18.009 held.

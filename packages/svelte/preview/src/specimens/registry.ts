@@ -76,6 +76,7 @@ import ModelConnectionSetupSpecimen from "./ModelConnectionSetupSpecimen.svelte"
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
+import MarkdownRendererSpecimen from "./MarkdownRendererSpecimen.svelte";
 import RichTextEditorSpecimen from "./RichTextEditorSpecimen.svelte";
 import RichTextRendererSpecimen from "./RichTextRendererSpecimen.svelte";
 import MediaBrowsePanelSpecimen from "./MediaBrowsePanelSpecimen.svelte";
@@ -266,6 +267,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "model-connection-setup": ModelConnectionSetupSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
+  "markdown-renderer": MarkdownRendererSpecimen,
   "rich-text-editor": RichTextEditorSpecimen,
   "rich-text-renderer": RichTextRendererSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

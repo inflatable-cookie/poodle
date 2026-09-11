@@ -96,6 +96,7 @@ import { ModelConnectionPickerSpecimen } from "./specimens/ModelConnectionPicker
 import { ModelConnectionSetupSpecimen } from "./specimens/ModelConnectionSetupSpecimen";
 import { LogListSpecimen } from "./specimens/LogListSpecimen";
 import { MarkdownEditorSpecimen } from "./specimens/MarkdownEditorSpecimen";
+import { MarkdownRendererSpecimen } from "./specimens/MarkdownRendererSpecimen";
 import { RichTextEditorSpecimen } from "./specimens/RichTextEditorSpecimen";
 import { RichTextRendererSpecimen } from "./specimens/RichTextRendererSpecimen";
 import { MediaBrowsePanelSpecimen } from "./specimens/MediaBrowsePanelSpecimen";
@@ -284,6 +285,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "model-connection-setup": ModelConnectionSetupSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
+  "markdown-renderer": MarkdownRendererSpecimen,
   "rich-text-editor": RichTextEditorSpecimen,
   "rich-text-renderer": RichTextRendererSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

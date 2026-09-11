@@ -1,6 +1,6 @@
 # 013 — RichTextEditor toolbar controls
 
-Status: ready — operator-confirmed UX repair; parallel with g18.010
+Status: complete — merged as `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70` (PR #245) on 2026-09-11
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -32,7 +32,7 @@ not a new toolbar plugin API.
   semantics are already centralized and can be preserved.
 - [x] The task is path-separate from g18.010’s CodeEditor focus work and may run
   in parallel.
-- [x] g18.011 is Queue-held until this known repair and g18.010 merge.
+- [x] g18.011 names this task as a Queue prerequisite.
 
 ## Decisions
 
@@ -60,8 +60,9 @@ not a new toolbar plugin API.
 
 ## Dispatch manifest
 
-- **State:** ready for immediate Queue dispatch in parallel with g18.010;
-  g18.011 remains held until both close; serial before retained g18.006
+- **State:** complete; merged g18.013 unblocks g18.014 and g18.018;
+  g18.011 names this chain plus parallel g18.017/g18.019 as prerequisites;
+  serial before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** RichTextEditor contract; shared rich-text command
@@ -131,6 +132,7 @@ proper buttons and selected MarkdownEditor as the visual/interaction reference.
 
 ## Next task
 
-After this repair merges, g18.014 rebases onto it and proves the image-policy
-specimen. Chatterbox releases held g18.011 only after g18.014 and parallel
-g18.015–g18.017 also merge. Keep g18.006 blocked and g18.009 held.
+After this repair merges, g18.014 proves the image-policy specimen and g18.018
+repairs controlled echoes. Queue dependencies dispatch g18.011 only after those
+tasks and parallel g18.017/g18.019 close. Keep g18.006 paused; g18.009 waits on
+it.

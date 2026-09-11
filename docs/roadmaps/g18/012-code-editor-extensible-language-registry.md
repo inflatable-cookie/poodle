@@ -31,8 +31,8 @@ union through aliases or fallback behavior.
   both web component packages.
 - [x] g18.011 owns the reproducible package/runtime baseline and remains serial
   before this repair.
-- [x] g18.006 and g18.009 remain held until this repair and the complete editor
-  sweep are accepted.
+- [x] g18.006 remains paused and g18.009 remains dependency-queued until this
+  repair and the complete editor sweep are accepted.
 - [ ] g18.011 is complete and its language-loading evidence is available.
 
 ## Decisions
@@ -59,7 +59,7 @@ union through aliases or fallback behavior.
 ## Dispatch manifest
 
 - **State:** dependency-queued behind g18.011; serial before retained g18.006
-  resumes; g18.009 remains held
+  resumes; g18.009 remains dependency-queued behind g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** CodeEditor contract and focused guides; shared editor
@@ -128,6 +128,6 @@ permanent boundary: language support must be extensible and consumer-selected.
 ## Next task
 
 Return to Chatterbox with the merged repair and g18.011 evidence. Obtain the
-operator’s acceptance of the complete three-surface sweep, then resume retained
-g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep g18.009 held until
-that repaired candidate closes.
+operator’s acceptance of the complete four-surface sweep, then resume retained
+g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. g18.009 then dispatches
+only after that repaired candidate closes.

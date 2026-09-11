@@ -1,15 +1,24 @@
-# MarkdownEditor
+# MarkdownEditor and MarkdownRenderer
 
 Status: detailed contract
-Updated: 2026-09-01
+Updated: 2026-09-11
 
 ## 1. Purpose
 
-- Component name: `MarkdownEditor`
+- Component name: `MarkdownEditor` (paired with `MarkdownRenderer` in the same
+  web package contract)
 - Layer: `composites`
-- Summary: a rich-text markdown editing surface with formatting toolbar, live preview, and split-view mode
-- In scope: markdown toolbar (bold, italic, heading, link, code, quote, list), edit/preview/split view modes, inline markdown-to-HTML rendering, text insertion helpers
+- Summary: a Markdown editing surface with formatting toolbar, live preview,
+  and split-view mode, paired with a standalone semantic document renderer
+- In scope: markdown toolbar (bold, italic, heading, link, code, quote, list),
+  edit/preview/split view modes, shared safe/trusted HTML policy, standalone
+  read-only rendering, inline markdown-to-HTML rendering, text insertion helpers
 - Out of scope: file uploads, image drag-and-drop, syntax highlighting, collaborative editing, plugin system, custom toolbar actions
+
+`MarkdownEditor` preview and `MarkdownRenderer` use one private rendering path
+per framework. They must not drift in parsing, sanitization, prose styling, SSR
+output, link handling, or empty-document semantics. `MarkdownRenderer` never
+mounts a textarea, toolbar, editor state, or contenteditable surface.
 
 ## 2. Anatomy
 
@@ -33,6 +42,9 @@ Updated: 2026-09-01
         └── [Preview Pane]  (hidden in edit mode)
               ├── [Rendered HTML]  (when value has content)
               └── [Empty Preview]  (when value is empty)
+
+[Renderer root]
+  └── [Rendered Markdown content]  (non-editable shared preview path)
 ```
 
 ### Parts
@@ -49,6 +61,7 @@ Updated: 2026-09-01
 | textarea | `<textarea>` | Markdown input area; monospace font; resizable vertically |
 | preview | `<div>` | Rendered HTML preview of markdown content, `aria-label="Preview"` |
 | preview-empty | `<p>` | "Nothing to preview" italic placeholder |
+| renderer-root | `<div>` | Standalone semantic Markdown output with no editor chrome or editing state |
 
 ## 3. Props And Inputs
 
@@ -63,10 +76,42 @@ Updated: 2026-09-01
 | `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea (applied via inline style) |
 | `mode` | `"edit" \| "preview" \| "split"` | `"edit"` | no | Active view mode |
 | `renderHtml` | `((markdown: string) => string) \| null` | `null` | no | Custom markdown-to-HTML renderer; when provided, replaces the built-in `marked` library fallback |
+| `htmlPolicy` | `"safe" \| "trusted"` | `"safe"` | no | Safe sanitizes built-in and custom-renderer output. Trusted bypasses sanitization and requires fully trusted caller-owned content. |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar and mode controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for toolbar and pane spacing |
 | `onValueChange` | `((value: string) => void) \| null` | `null` | no | Optional callback fired when the markdown content changes |
+
+### Renderer Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `value` | `string` | - | yes | Markdown source rendered as read-only semantic document content |
+| `renderHtml` | `((markdown: string) => string) \| null` | `null` | no | Same parser customization seam as the editor preview; output remains governed by `htmlPolicy` |
+| `htmlPolicy` | `"safe" \| "trusted"` | `"safe"` | no | Same policy as the editor preview |
+| `ariaLabel` | `string \| null` | `null` | no | When supplied, exposes the renderer as a labelled region; null leaves ordinary document semantics |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit spacing-density override for rendered prose |
+
+### Shared HTML Policy
+
+- `safe` is the default for both components and both parser paths. It sanitizes
+  the complete HTML result after built-in `marked` parsing or custom
+  `renderHtml` execution and before DOM or SSR output.
+- Safe mode removes executable elements and attributes, refuses executable URL
+  schemes, and preserves only the admitted semantic Markdown document surface.
+  Svelte and React use the same policy and produce equivalent output.
+- `trusted` is an explicit caller-owned bypass. It renders the complete parser
+  result without sanitization. It is valid only when both Markdown source and
+  custom renderer are fully trusted; the consumer owns CSP and provenance.
+- There is no implicit trust based on which parser produced the HTML. Supplying
+  `renderHtml` does not switch policy.
+- Policy changes are live, deterministic, and do not emit editor callbacks.
+- Safe and trusted output use the same prose styles. Safety posture must not be
+  inferred from visual treatment.
+- Migration: before `g18.019`, editor preview injected the parser result
+  unsanitized. Consumers that relied on raw Markdown HTML must pass
+  `htmlPolicy="trusted"` for fully trusted content; no compatibility fallback
+  restores trust implicitly.
 
 ### Slots
 
@@ -102,6 +147,8 @@ inside the component are not emitted through a callback.
 | edit | Only textarea visible; all tools enabled (unless disabled) |
 | preview | Only preview pane visible; toolbar tools disabled |
 | split | Both textarea and preview visible side by side |
+| renderer | Read-only semantic Markdown output with no editor mechanics |
+| renderer-empty | Empty root with no editor-specific "Nothing to preview" copy |
 
 ### Behavior Machine
 
@@ -125,6 +172,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Tool buttons each have `aria-label` matching their action label ("Bold", "Italic", "Heading", "Link", "Code", "Quote", "List")
 - Tool buttons also have `title` matching their action label
 - Preview pane has `aria-label="Preview"`
+- `MarkdownRenderer` is ordinary document content by default. A non-null
+  `ariaLabel` adds one labelled region without changing heading semantics.
+- Renderer output has no textarea, toolbar, contenteditable state, or focus
+  target added by Poodle. Rendered links retain ordinary link keyboard behavior.
 - Disabled tool buttons use native `disabled` attribute
 - Mode controls expose `ariaLabel` and tooltip text through `IconButton`
 
@@ -352,6 +403,30 @@ Mode button chrome delegates to the `IconButton` contract:
 | font-style | `italic` |
 | margin | `0` |
 
+### Shared Prose `.poodle-md-prose`
+
+The editor preview pane and the standalone renderer's content element both
+carry `.poodle-md-prose`. It owns the body typography
+(`--poodle-typography-body-family`, `0.875rem`, `1.6` line-height, text-primary
+colour) and the rendered-element rules above, so safe and trusted output and
+the editor preview versus the renderer cannot drift. The preview pane adds only
+layout (`flex: 1`, density-aware padding, `overflow-y: auto`); the renderer adds
+only its own root padding and wrapping.
+
+### Renderer Root `.poodle-md-renderer`
+
+| Property | Value |
+|----------|-------|
+| padding | `0.75rem` (default), `0.625rem` (`compact`), `0.875rem` (`comfortable`), selected by `data-density` |
+| min-width | `0` |
+
+### Renderer Content `.poodle-md-renderer__content`
+
+| Property | Value |
+|----------|-------|
+| min-width | `0` |
+| overflow-wrap | `break-word` |
+
 ### Size Adjustments
 
 | Size | Tool button size | Mode X | Mode controls |
@@ -383,9 +458,11 @@ The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizont
 - Built-in markdown rendering uses the `marked` library (`import { marked } from "marked"`)
   called with `marked.parse(value, { async: false })` — tree-shakes out when the
   component is not used in a bundle
-- `renderHtml` prop: when provided (non-null), replaces the built-in `marked` renderer;
-  the reactive derivation is `previewHtml = renderHtml ? renderHtml(value) : marked.parse(value, { async: false })`
-- Preview uses `{@html previewHtml}` for reactive rendering
+- `renderHtml` prop: when provided (non-null), replaces the built-in `marked`
+  renderer; its result passes through the same selected HTML policy as built-in
+  output
+- Preview and `MarkdownRenderer` use one private parsed/sanitized content path;
+  safe output reaches `{@html}` only after sanitization
 - `tick()` used after insertion to restore cursor selection
 - `mode` is reactive; changing it shows/hides textarea and preview
 - `handleInput()` calls `onValueChange` on every textarea input while the host
@@ -413,6 +490,8 @@ The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizont
 - [ ] Toolbar actions produce correct markdown syntax
 - [ ] Edit/Preview/Split mode switching behavior matches
 - [ ] Disabled state disables all tools and editing
+- [ ] Editor preview and standalone renderer produce equivalent safe/trusted output
+- [ ] Renderer remains non-editable and SSR deterministic
 
 ### Tier 2: Visual Parity
 
@@ -424,7 +503,7 @@ The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizont
 ### Tier 3: Implementation Freedom
 
 - [ ] Built-in markdown rendering engine may differ (Svelte uses `marked`)
-- [ ] `renderHtml` callback allows consumer to override rendering entirely
+- [ ] `renderHtml` callback may replace parsing but never silently changes HTML policy
 - [ ] Text insertion mechanics may differ
 - [ ] Cursor restoration approach may differ
 
@@ -447,6 +526,15 @@ The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizont
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Preview mode | `mode="preview"`, pre-filled markdown content | Rendered HTML only; toolbar tools disabled |
+
+### Standalone Renderer
+
+| Label | Props / Config | Expected Visual |
+|-------|----------------|-----------------|
+| Safe document | representative headings, links, lists, quote and code; default policy | Same prose output as editor preview; executable HTML removed |
+| Trusted document | controlled trusted HTML fixture; `htmlPolicy="trusted"` | Explicitly unsanitized output with specimen warning and no editor chrome |
+| Custom renderer | `renderHtml`, default safe policy | Custom parser output rendered after the same sanitizer |
+| Empty document | `value=""` | Empty semantic renderer root with no editor placeholder copy |
 
 ### Disabled
 

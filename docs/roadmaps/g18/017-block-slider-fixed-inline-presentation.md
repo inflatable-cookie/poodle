@@ -159,5 +159,6 @@ either selected or remainder segment cannot hold its assigned string.
 
 ## Next task
 
-After g18.013–g18.017 merge, Chatterbox releases held g18.011 for the complete
-three-surface editor acceptance sweep. Keep g18.006 blocked and g18.009 held.
+After this task and g18.013/g18.014/g18.018/g18.019 close, Queue dependencies
+dispatch g18.011 for the complete four-surface editor acceptance sweep. Keep
+g18.006 paused; g18.009 waits on it.

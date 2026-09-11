@@ -89,6 +89,7 @@ describe("preview catalogue audit", () => {
       "code-editor",
       "rich-text-editor",
       "rich-text-renderer",
+      "markdown-renderer",
     ]);
     for (const slug of webOnlySlugs) {
       expect(manifest.components.find((entry) => entry.slug === slug)).toBeUndefined();

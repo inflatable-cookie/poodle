@@ -11,7 +11,7 @@ import {
   statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 import { packedMemberMissing } from "./archive-membership";
 import { resolvePackArchivePath } from "./pack-archives";
@@ -1127,19 +1127,39 @@ for (let index = 0; index < firstPackedPackages.length; index += 1) {
 const packedPackages = secondPackedPackages;
 
 function assertCssAndParserGraphs(): Record<string, unknown> {
+  // A shared module (the Markdown content path) may be emitted as a stable
+  // `dist/chunks/*` file that the public entry re-exports. The proof is about
+  // the transitive direct-entry graph, so follow relative imports one level
+  // at a time instead of assuming each public file is self-contained.
+  function readDistGraph(entryPath: string): string {
+    const seen = new Set<string>();
+    const parts: string[] = [];
+    const visit = (file: string): void => {
+      if (seen.has(file) || !existsSync(file)) return;
+      seen.add(file);
+      const source = readFileSync(file, "utf8");
+      parts.push(source);
+      for (const match of source.matchAll(/from "(\.\/[^"]+)"/g)) {
+        visit(join(dirname(file), match[1]));
+      }
+    };
+    visit(entryPath);
+    return parts.join("\n");
+  }
+
   const graphs = {
     svelte: {
       button: readFileSync(join(repoRoot, "packages/svelte/components/dist/Button.client.js"), "utf8"),
       select: readFileSync(join(repoRoot, "packages/svelte/components/dist/Select.client.js"), "utf8"),
-      markdownMessage: readFileSync(join(repoRoot, "packages/svelte/components/dist/AgentMessage.client.js"), "utf8"),
-      markdownEditor: readFileSync(join(repoRoot, "packages/svelte/components/dist/MarkdownEditor.client.js"), "utf8"),
+      markdownMessage: readDistGraph(join(repoRoot, "packages/svelte/components/dist/AgentMessage.client.js")),
+      markdownEditor: readDistGraph(join(repoRoot, "packages/svelte/components/dist/MarkdownEditor.client.js")),
       root: readFileSync(join(repoRoot, "packages/svelte/components/dist/index.client.js"), "utf8"),
     },
     react: {
       button: readFileSync(join(repoRoot, "packages/react/components/dist/Button.js"), "utf8"),
       select: readFileSync(join(repoRoot, "packages/react/components/dist/Select.js"), "utf8"),
-      markdownMessage: readFileSync(join(repoRoot, "packages/react/components/dist/AgentMessage.js"), "utf8"),
-      markdownEditor: readFileSync(join(repoRoot, "packages/react/components/dist/MarkdownEditor.js"), "utf8"),
+      markdownMessage: readDistGraph(join(repoRoot, "packages/react/components/dist/AgentMessage.js")),
+      markdownEditor: readDistGraph(join(repoRoot, "packages/react/components/dist/MarkdownEditor.js")),
       root: readFileSync(join(repoRoot, "packages/react/components/dist/index.js"), "utf8"),
     },
   };
@@ -1317,11 +1337,11 @@ import React from "react";
 import { Button as SvelteButton, Select as SvelteSelect } from "@inflatable-cookie/poodle-svelte";
 import SvelteButtonDirect from "@inflatable-cookie/poodle-svelte/Button.svelte";
 import SvelteSelectDirect from "@inflatable-cookie/poodle-svelte/Select.svelte";
-import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
+import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor, MarkdownRenderer } from "@inflatable-cookie/poodle-svelte/markdown";
 import { Button as ReactButton, Select as ReactSelect } from "@inflatable-cookie/poodle-react";
 import { Button as ReactButtonDirect } from "@inflatable-cookie/poodle-react/Button";
 import { Select as ReactSelectDirect } from "@inflatable-cookie/poodle-react/Select";
-import { AgentMessage as ReactMessage, AgentPlan as ReactPlan, AgentPlanRecord as ReactRecord, AgentTranscript as ReactTranscript, MarkdownEditor as ReactEditor } from "@inflatable-cookie/poodle-react/markdown";
+import { AgentMessage as ReactMessage, AgentPlan as ReactPlan, AgentPlanRecord as ReactRecord, AgentTranscript as ReactTranscript, MarkdownEditor as ReactEditor, MarkdownRenderer as ReactMarkdownRenderer } from "@inflatable-cookie/poodle-react/markdown";
 
 const svelteRendered = [
   renderSvelte(SvelteButton), renderSvelte(SvelteSelect, { props: { options: [] } }),
@@ -1329,6 +1349,7 @@ const svelteRendered = [
   renderSvelte(AgentMessage, { props: { markdown: "ssr" } }), renderSvelte(AgentPlan, { props: { plan: "ssr" } }),
   renderSvelte(AgentPlanRecord, { props: { plan: "ssr", status: "accepted" } }), renderSvelte(AgentTranscript, { props: { items: [] } }),
   renderSvelte(MarkdownEditor),
+  renderSvelte(MarkdownRenderer, { props: { value: "# ssr" } }),
 ];
 const reactRendered = [
   renderToString(React.createElement(ReactButton)), renderToString(React.createElement(ReactSelect, { options: [] })),
@@ -1336,6 +1357,7 @@ const reactRendered = [
   renderToString(React.createElement(ReactMessage, { markdown: "ssr" })), renderToString(React.createElement(ReactPlan, { plan: "ssr" })),
   renderToString(React.createElement(ReactRecord, { plan: "ssr", status: "accepted" })), renderToString(React.createElement(ReactTranscript, { items: [] })),
   renderToString(React.createElement(ReactEditor)),
+  renderToString(React.createElement(ReactMarkdownRenderer, { value: "# ssr" })),
 ];
 if (svelteRendered.some((entry) => !entry.body) || reactRendered.some((entry) => entry.length === 0)) {
   throw new Error("installed SSR probe produced an empty render");
@@ -1491,12 +1513,12 @@ await Bun.write(
 import { Button as SvelteButton, Select as SvelteSelect } from "@inflatable-cookie/poodle-svelte";
 import SvelteButtonDirect from "@inflatable-cookie/poodle-svelte/Button.svelte";
 import SvelteSelectDirect from "@inflatable-cookie/poodle-svelte/Select.svelte";
-import type { AgentMessage as SvelteMessage } from "@inflatable-cookie/poodle-svelte/markdown";
+import type { AgentMessage as SvelteMessage, MarkdownRenderer as SvelteMarkdownRenderer } from "@inflatable-cookie/poodle-svelte/markdown";
 import type { ButtonProps, SelectProps } from "@inflatable-cookie/poodle-react";
 import { Button as ReactButton, Select as ReactSelect } from "@inflatable-cookie/poodle-react";
 import { Button as ReactButtonDirect } from "@inflatable-cookie/poodle-react/Button";
 import { Select as ReactSelectDirect } from "@inflatable-cookie/poodle-react/Select";
-import type { AgentMessage as ReactMessage } from "@inflatable-cookie/poodle-react/markdown";
+import type { AgentMessage as ReactMessage, MarkdownRenderer as ReactMarkdownRenderer } from "@inflatable-cookie/poodle-react/markdown";
 
 const svelteButton: ComponentProps<typeof SvelteButton> = {};
 const svelteButtonDirect: ComponentProps<typeof SvelteButtonDirect> = { disabled: true };
@@ -1506,10 +1528,13 @@ const reactButton: ButtonProps = {};
 const reactSelect: SelectProps = { options: [] };
 const reactMessage: typeof ReactMessage | null = null;
 const svelteMessage: typeof SvelteMessage | null = null;
+const reactMarkdownRenderer: typeof ReactMarkdownRenderer | null = null;
+const svelteMarkdownRenderer: typeof SvelteMarkdownRenderer | null = null;
 void SvelteButton; void SvelteSelect; void SvelteButtonDirect; void SvelteSelectDirect;
 void ReactButton; void ReactSelect; void ReactButtonDirect; void ReactSelectDirect;
 void svelteButton; void svelteButtonDirect; void svelteSelect; void svelteSelectDirect;
 void reactButton; void reactSelect; void reactMessage; void svelteMessage;
+void reactMarkdownRenderer; void svelteMarkdownRenderer;
 `,
 );
 const declarationSurfaceProof: Record<string, unknown>[] = [];
@@ -2161,9 +2186,9 @@ const evidence = {
   packedTreeReorderProof,
   installedRuntimeProof: {
     svelteRootAndDirectButtonSelect: true,
-    svelteMarkdownEntries: ["AgentMessage", "AgentPlan", "AgentPlanRecord", "AgentTranscript", "MarkdownEditor"],
+    svelteMarkdownEntries: ["AgentMessage", "AgentPlan", "AgentPlanRecord", "AgentTranscript", "MarkdownEditor", "MarkdownRenderer"],
     reactRootAndDirectButtonSelect: true,
-    reactMarkdownEntries: ["AgentMessage", "AgentPlan", "AgentPlanRecord", "AgentTranscript", "MarkdownEditor"],
+    reactMarkdownEntries: ["AgentMessage", "AgentPlan", "AgentPlanRecord", "AgentTranscript", "MarkdownEditor", "MarkdownRenderer"],
     browser: true,
     ssr: true,
     workerLikeDefaultResolution: true,

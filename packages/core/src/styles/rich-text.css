@@ -23,49 +23,55 @@
 }
 
 .poodle-rich-text-editor__toolbar {
+  --poodle-rich-text-toolbar-y: 0.375rem;
+  --poodle-rich-text-toolbar-x: 0.5rem;
+  --poodle-rich-text-group-gap: 0.125rem;
   flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--poodle-space-inline-xs);
-  padding: var(--poodle-space-inline-xs) var(--poodle-space-inline-md);
-  background: var(--poodle-color-background-subtle);
+  /* Row gap keeps wrapped clusters intact; column gap separates them. */
+  gap: var(--poodle-rich-text-toolbar-y) var(--poodle-space-inline-sm);
+  padding: var(--poodle-rich-text-toolbar-y) var(--poodle-rich-text-toolbar-x);
+  background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
   border-block-end: 0.0625rem solid var(--poodle-color-border-subtle);
 }
 
-.poodle-rich-text-editor__toolbar-button {
-  appearance: none;
-  display: inline-flex;
+.poodle-rich-text-editor[data-density="compact"] {
+  --poodle-rich-text-toolbar-y: 0.25rem;
+  --poodle-rich-text-toolbar-x: 0.375rem;
+  --poodle-rich-text-group-gap: 0.0625rem;
+}
+
+.poodle-rich-text-editor[data-density="comfortable"] {
+  --poodle-rich-text-toolbar-y: 0.5rem;
+  --poodle-rich-text-toolbar-x: 0.625rem;
+  --poodle-rich-text-group-gap: 0.1875rem;
+}
+
+/* Command clusters: IconButton carries all control chrome; the cluster only
+ * owns grouping and the divider between neighbouring groups. */
+.poodle-rich-text-editor__group {
+  display: flex;
   align-items: center;
-  border: none;
-  border-radius: var(--poodle-radius-control);
-  background: transparent;
-  color: var(--poodle-color-text-primary);
-  font: inherit;
-  font-size: 0.875rem;
-  padding: var(--poodle-space-stack-2xs) var(--poodle-space-inline-sm);
-  min-inline-size: 0;
-  cursor: pointer;
+  gap: var(--poodle-rich-text-group-gap);
 }
 
-.poodle-rich-text-editor__toolbar-button:hover {
-  background: var(--poodle-color-surface-hover);
+.poodle-rich-text-editor__group + .poodle-rich-text-editor__group {
+  padding-inline-start: var(--poodle-space-inline-sm);
+  border-inline-start: 0.0625rem solid var(--poodle-color-border-subtle);
 }
 
-.poodle-rich-text-editor__toolbar-button[data-pressed="true"] {
-  background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
-  color: var(--poodle-color-text-primary);
+.poodle-rich-text-editor__command {
+  display: inline-flex;
 }
 
-.poodle-rich-text-editor__toolbar-button:disabled {
-  opacity: var(--poodle-state-opacity-disabled);
-  cursor: default;
-}
-
-/* Keyboard focus carries the shared treatment; pointer focus paints none. */
-:root[data-poodle-input-modality="keyboard"] .poodle-rich-text-editor__toolbar-button:focus-visible {
-  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-  outline-offset: 0.125rem;
+/* Typographic glyphs (H1, H2, H3) inside the icon-button glyph span. */
+.poodle-rich-text-editor__glyph {
+  font-family: var(--poodle-typography-code-family);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .poodle-rich-text-editor__link-editor {

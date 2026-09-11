@@ -128,14 +128,18 @@
 "capture:gpui-inset-shadows-windowed" = "bun packages/gpui/preview/scripts/inset-shadow-evidence.ts"
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
+# Low-level Vite only. Can start against stale ignored `packages/*/dist`.
 "svelte:run" = "bun run --cwd packages/svelte/preview dev"
-"svelte:preview" = [{ task = "svelte:run"}]
+# Public selector: rebuild core + Svelte package, then Vite. Fail-closed.
+"svelte:preview" = [{ task = "svelte:package" }, { task = "svelte:run"}]
 "svelte:surface-audit" = "bun packages/svelte/components/scripts/surface-audit.ts"
 
 # React preview (component gallery, mirrors the Svelte preview)
 "react:build" = "bun run --cwd packages/react/preview build"
+# Low-level Vite only. Can start against stale ignored `packages/*/dist`.
 "react:run" = "bun run --cwd packages/react/preview dev"
-"react:preview" = [{ task = "react:run" }]
+# Public selector: rebuild core + React package, then Vite. Fail-closed.
+"react:preview" = [{ task = "react:package" }, { task = "react:run" }]
 "react:docs" = "bun run --cwd packages/react/preview docs:export"
 "react:reports" = "bun run --cwd packages/react/preview reports"
 
@@ -189,6 +193,10 @@
   { run = "bun install --frozen-lockfile --cwd scripts/web-distribution/declaration-tools" },
   { run = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/svelte-build.test.ts scripts/web-distribution/react-build.test.ts scripts/web-distribution/shell-smoke.test.ts" },
 ]
+# g18.015: public `*:preview` rebuilds package dist before Vite. Isolated
+# stale/missing distributions, live HTTP module-graph proof, fail-closed
+# startup, and process/port cleanup. Does not touch live ignored output.
+"test:preview-preflight" = "bun test scripts/web-distribution/preview-distribution-preflight.test.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
@@ -305,6 +313,17 @@
 "test:code-editor-focus-entry" = [
   { task = "test:code-editor-focus-entry-chromium" },
   { task = "test:code-editor-focus-entry-webkit" },
+]
+# g18.016 CodeEditor live line-number reconfiguration. Paired Svelte + React
+# fixtures drive the specimen line-numbers control and prove the mounted
+# gutter reconfigures without remounting while value, selection, focus,
+# history, and diagnostics survive. Headless Chromium and WebKit, one engine
+# per run; not in ci:web.
+"test:code-editor-line-numbers-chromium" = "bun test/code-editor-line-numbers/probe.ts --browser=chromium"
+"test:code-editor-line-numbers-webkit" = "bun test/code-editor-line-numbers/probe.ts --browser=webkit"
+"test:code-editor-line-numbers" = [
+  { task = "test:code-editor-line-numbers-chromium" },
+  { task = "test:code-editor-line-numbers-webkit" },
 ]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
@@ -539,6 +558,10 @@
   # g16.098: detached worktree without shell dist. Bites if react-preview
   # loses its workspace alias or ci:web tests components before package builds.
   { run = "bun test scripts/web-distribution/cold-checkout-react-preview.test.ts" },
+  # g18.015: preview selectors that skip package preflight serve a stale
+  # core export graph. Bind composition and the live rebuild-before-listen
+  # proof, not merely TOML text.
+  { task = "test:preview-preflight" },
   # Export and docs audits inspect compiled shells. Build dist before
   # test:components so a cold checkout cannot resolve through missing exports.
   { task = "svelte:package" },
@@ -632,7 +655,7 @@
 
 # Documentation
 "docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
-"docs:dev" = [{ task = "svelte:run" }]
+"docs:dev" = [{ task = "svelte:preview" }]
 "docs:build" = [{ task = "svelte:build" }]
 # Guide snippets must compile against the live poodle-svelte surface
 # (g16.108): every fenced ```svelte block in docs/guides/*.md is checked in

@@ -60,6 +60,9 @@ bun install
 effigy docs:dev
 ```
 
+`docs:dev` is `svelte:preview`: it rebuilds package distributions before Vite.
+Use `svelte:run` only when you already trust the ignored dist trees.
+
 Validate documentation changes with:
 
 ```sh

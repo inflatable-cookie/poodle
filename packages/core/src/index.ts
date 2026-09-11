@@ -445,6 +445,12 @@ export {
 } from "./markdown-blocks";
 
 export {
+  decodeHtmlEntities,
+  sanitizeMarkdownHtml,
+  type MarkdownHtmlPolicy,
+} from "./markdown-html";
+
+export {
   flattenVisibleTreeRows,
   findTreeNode,
   isTreeBranch,
@@ -804,6 +810,8 @@ export {
   RICH_TEXT_BASE_COMMANDS,
   RICH_TEXT_COMMAND_LABELS,
   RICH_TEXT_TOGGLE_COMMANDS,
+  RICH_TEXT_COMMAND_PRESENTATION,
+  RICH_TEXT_COMMAND_GROUP_LABELS,
   RICH_TEXT_MAX_BYTES,
   RICH_TEXT_MAX_NODES,
   isRichTextFeature,
@@ -821,6 +829,8 @@ export {
   type RichTextImageInput,
   type RichTextFeature,
   type RichTextCommand,
+  type RichTextCommandGroup,
+  type RichTextCommandPresentation,
   type RichTextFeatureValidation,
   type RichTextToolbarValidation,
   type RichTextToolbarResult,

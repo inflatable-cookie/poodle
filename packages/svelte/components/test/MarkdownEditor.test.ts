@@ -93,6 +93,40 @@ describe("MarkdownEditor (svelte)", () => {
     expect(textarea.value).toBe("**hello**");
   });
 
+  it("sanitizes built-in preview HTML by default", () => {
+    const { container } = render(MarkdownEditor, {
+      props: { mode: "preview", value: `<script>window.__pwned = true;</script>\n\ntext` },
+    });
+    const preview = container.querySelector(".poodle-md-editor__preview") as HTMLElement;
+    expect(preview.querySelector("script")).toBeNull();
+    expect(preview.textContent).toContain("text");
+  });
+
+  it("sanitizes custom renderHtml output unless trusted is explicit", () => {
+    const renderHtml = () => `<p onclick="x">kept</p><custom-trusted data-trusted="1">trusted</custom-trusted>`;
+    const safe = render(MarkdownEditor, { props: { mode: "preview", value: "x", renderHtml } });
+    const safePreview = safe.container.querySelector(".poodle-md-editor__preview") as HTMLElement;
+    expect(safePreview.querySelector("custom-trusted")).toBeNull();
+    expect(safePreview.querySelector("p")?.getAttribute("onclick")).toBeNull();
+    expect(safePreview.textContent).toContain("trusted");
+
+    const trusted = render(MarkdownEditor, {
+      props: { mode: "preview", value: "x", renderHtml, htmlPolicy: "trusted" },
+    });
+    const trustedPreview = trusted.container.querySelector(
+      ".poodle-md-editor__preview",
+    ) as HTMLElement;
+    expect(trustedPreview.querySelector("custom-trusted")?.getAttribute("data-trusted")).toBe("1");
+  });
+
+  it("keeps preview typography on the shared prose class", () => {
+    const { container } = render(MarkdownEditor, {
+      props: { mode: "preview", value: "# Hello" },
+    });
+    const preview = container.querySelector(".poodle-md-editor__preview") as HTMLElement;
+    expect(preview.classList.contains("poodle-md-prose")).toBe(true);
+  });
+
   it("keeps the preview pane as the vertical scroll owner in the shared stylesheet", () => {
     injectStyles();
     const { container } = render(MarkdownEditor, {

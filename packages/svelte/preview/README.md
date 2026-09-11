@@ -14,7 +14,9 @@ effigy tokens:build
 effigy svelte:preview
 ```
 
-Then open `http://localhost:4173`.
+`svelte:preview` rebuilds core and the Svelte package, then starts Vite.
+`svelte:run` is the low-level Vite command and can serve stale ignored dist
+output. Then open `http://localhost:4173`.
 
 To validate the docs baseline before a publish candidate:
 

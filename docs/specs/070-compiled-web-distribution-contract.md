@@ -713,6 +713,10 @@ Laws:
   `AgentPlanRecord`, `AgentTranscript`, or `MarkdownEditor`.
 - `./markdown` exports those five components and their public types. No root
   alias points at it.
+- `./markdown` additionally exports the web-only `MarkdownRenderer` (g18.019).
+  It has no native counterpart and is not a member of the 176-name roster; it is
+  certified through the web-only catalogue supplement and the installed
+  `./markdown` SSR/declaration smoke.
 - `./types` is compiled JS plus declarations. Declarations-only fails.
 - Direct `./AgentMessage.svelte`, `./AgentPlan.svelte`,
   `./AgentPlanRecord.svelte`, `./AgentTranscript.svelte`, and
@@ -803,7 +807,9 @@ export `./N` → `./dist/N.js` + `./dist/N.d.ts`. A wildcard that can resolve
 
 Root `.` keeps today's non-component helpers and the 171 non-markdown
 components. `AgentMessage`, `AgentPlan`, `AgentPlanRecord`, `AgentTranscript`,
-and `MarkdownEditor` move to `./markdown`.
+and `MarkdownEditor` move to `./markdown`. `MarkdownRenderer` (g18.019) is a
+new web-only `./markdown` export with no native counterpart and no roster
+membership.
 `./types` keeps runtime plus declaration reachability even when the source
 module is type-only.
 

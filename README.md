@@ -131,6 +131,10 @@ effigy gpui:preview
 effigy jetstream:preview
 ```
 
+`svelte:preview` and `react:preview` rebuild core and the matching framework
+package before Vite starts. Use `svelte:run` / `react:run` only as low-level
+Vite entry points; they can serve stale ignored `packages/*/dist` output.
+
 The Jetstream preview is an opt-in paired-repository integration. Normal
 Poodle worktrees and `effigy qa` do not require a sibling Jetstream checkout.
 Use `effigy qa:jetstream` only in a prepared paired workspace.
