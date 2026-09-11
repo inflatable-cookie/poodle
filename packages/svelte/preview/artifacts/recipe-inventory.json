@@ -1,7 +1,7 @@
 {
   "summary": {
     "components": 147,
-    "recipeHooks": 1176,
+    "recipeHooks": 1175,
     "hookCandidates": 7,
     "metricVariables": 410
   },
@@ -2049,7 +2049,6 @@
     },
     "slider": {
       "recipe": [
-        "--poodle-recipe-slider-block-fallback-text",
         "--poodle-recipe-slider-block-focus-ring",
         "--poodle-recipe-slider-block-handle-border",
         "--poodle-recipe-slider-block-handle-fill",

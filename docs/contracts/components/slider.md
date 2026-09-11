@@ -332,8 +332,11 @@ browser-owned and is not part of strict cross-runtime parity.
 - `--poodle-recipe-slider-block-handle-fill`
 - `--poodle-recipe-slider-block-handle-border`
 - `--poodle-recipe-slider-block-focus-ring`
-- `--poodle-recipe-slider-block-fallback-text` (RangeSlider block only; unused
-  by single Slider, which never renders a fallback line)
+
+The `--poodle-recipe-slider-block-fallback-text` hook is no longer part of the
+Slider recipe surface: since g18.017 no runtime consumes it. Block RangeSlider
+keeps its separately named `--poodle-recipe-range-slider-block-fallback-text`
+hook for its retained fallback line.
 
 ### Root `.slider`
 

@@ -6299,6 +6299,58 @@ fn block_slider_text_layers_stay_fixed_while_the_boundary_moves() {
     }
 }
 
+/// g18.017: the same fixed inline presentation mirrored for RTL on the
+/// mounted host. The selected clip anchors to the physical right and the
+/// remainder to the physical left, while the label keeps the logical start
+/// (physical right) and the value the logical end (physical left).
+#[test]
+fn block_slider_rtl_mirrors_the_clip_geometry_and_keeps_logical_anchors() {
+    let spec = SliderSpec::new(30.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_direction(SliderDirection::Rtl)
+        .with_visible_label("Blur")
+        .with_visible_value_text("67");
+    run_headless(|cx| {
+        let mut driver = mount_block_slider_host(cx, spec, 240.0);
+        let selected = poodle_gpui_node_backend::bounds_for("block-slider-clip-selected")
+            .expect("selected clip");
+        let remainder = poodle_gpui_node_backend::bounds_for("block-slider-clip-remainder")
+            .expect("remainder clip");
+        let label = poodle_gpui_node_backend::bounds_for("block-slider-label-selected")
+            .expect("label slot");
+        let value = poodle_gpui_node_backend::bounds_for("block-slider-value-selected")
+            .expect("value slot");
+        let capsule_left = f32::from(remainder.origin.x);
+        let capsule_right = f32::from(selected.origin.x) + f32::from(selected.size.width);
+        assert!(
+            (capsule_right - capsule_left - 240.0).abs() < 0.5,
+            "the two clips tile the capsule"
+        );
+        // RTL: the 30% selected span is the physical right region.
+        assert!(
+            (f32::from(selected.size.width) - 72.0).abs() < 0.5,
+            "selected clip tracks the value from the right, got {}",
+            selected.size.width
+        );
+        assert!((f32::from(remainder.size.width) - 168.0).abs() < 0.5);
+        // Logical anchors survive the mirror: label at the physical right
+        // (logical start), value at the physical left (logical end).
+        assert!(
+            f32::from(label.origin.x) > f32::from(value.origin.x),
+            "label must sit physically right of the value in RTL"
+        );
+        assert!(
+            (capsule_right - (f32::from(label.origin.x) + f32::from(label.size.width)) - 8.0).abs() < 2.0,
+            "label stays inset at the logical start edge"
+        );
+        assert!(
+            (f32::from(value.origin.x) - (capsule_left + 8.0)).abs() < 2.0,
+            "value stays inset at the logical end edge"
+        );
+    });
+}
+
 /// g16.046 repair, amended by g18.017: the single Slider production host
 /// always reserves exactly the surface height (no fallback line exists),
 /// while the block RangeSlider still grows for its narrow fallback line and

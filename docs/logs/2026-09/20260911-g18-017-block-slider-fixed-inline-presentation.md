@@ -49,9 +49,16 @@ identity only. No public prop, callback, keyboard, pointer, or ARIA change.
   the layers. `range-slider.css` changes the capsule radius only.
 - `packages/core/src/slider.ts`: `layoutSliderBlock` is now the whole-track
   collision law returning `{ labelInline, valueInline }` — it takes no
-  selected span, so the decision cannot depend on the value. The
-  single-Slider-only `sliderFallbackText` export was removed as part of the
-  approved migration (no shim); `rangeSliderFallbackText` is untouched.
+  selected span, so the decision cannot depend on the value.
+  **Operator-visible surface removal:** the core root export
+  `sliderFallbackText` (`@inflatable-cookie/poodle-core`, re-exported from
+  `packages/core/src/index.ts`) is deleted by this migration, not aliased —
+  pre-v1, no compatibility shim. It existed only to render the single-Slider
+  external fallback line this card retires; no in-repo consumer remained
+  after the law replacement, and RangeSlider's fallback helper
+  (`rangeSliderFallbackText`) is untouched. Downstream code still importing
+  `sliderFallbackText` must drop the single-Slider fallback per this card or
+  render its own line.
 - Svelte (`Slider.svelte`) and React (`Slider.tsx`) render the identical two
   clipped layers; the external fallback element is gone from the block
   branch. Slot elements stay in the DOM (empty) when an item is absent or
@@ -115,6 +122,31 @@ identity only. No public prop, callback, keyboard, pointer, or ARIA change.
   suppresses only the label, absent channels keep their slots, and the law
   takes no selected-span input.
 
+## Review round (2026-09-11, head e3ce0d8ba)
+
+Independent review required two changes, both applied:
+
+1. `packages/svelte/preview/artifacts/recipe-inventory.json` was stale after
+   the slider.css rewrite. Regenerated with the architecture-007 generator
+   (`bun packages/svelte/preview/scripts/build-recipe-inventory.ts`):
+   `--poodle-recipe-slider-block-fallback-text` drops out of the slider
+   section and `summary.recipeHooks` returns to 1175. No other component or
+   count moved.
+2. The contract no longer implies any runtime consumes the Slider-named
+   fallback hook. `--poodle-recipe-slider-block-fallback-text` is removed
+   from the Slider recipe-hook list with an explicit note: no runtime
+   consumes it since g18.017; block RangeSlider keeps its separately named
+   `--poodle-recipe-range-slider-block-fallback-text` for its retained
+   fallback line.
+
+Review also flagged, as non-blocking, the missing mounted native RTL
+text-position assertion. Added:
+`block_slider_rtl_mirrors_the_clip_geometry_and_keeps_logical_anchors`
+mounts an RTL block Slider and proves the selected clip anchors to the
+physical right (72px at value 30, 240px span), the remainder to the physical
+left, the label keeps the logical start (physical right, inset 8px) and the
+value the logical end (physical left, inset 8px).
+
 ## Explicitly not done
 
 - No RangeSlider text redesign: its assigned regions, per-region fit law,
@@ -153,6 +185,11 @@ identity only. No public prop, callback, keyboard, pointer, or ARIA change.
   BlockEditorBlock errors pre-exist and are unrelated files).
 - `effigy docs:lint` — pass after `core:build` + `svelte:build` +
   `react:build` (paired preview dist builds).
+- Recipe inventory regenerated against the review head
+  (`bun packages/svelte/preview/scripts/build-recipe-inventory.ts`): 147
+  components, 1175 recipe hooks, 7 candidates, 410 metric variables — the
+  slider section no longer lists the unconsumed
+  `--poodle-recipe-slider-block-fallback-text`.
 - `effigy test:visual-smoke` — slider compares clean; the single failing pair
   (`pill` 0.665%) reproduces identically on the clean base commit and is
   unrelated.
