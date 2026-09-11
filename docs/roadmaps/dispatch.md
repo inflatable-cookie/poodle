@@ -75,14 +75,16 @@ dispatches only after the repaired candidate closes.
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
 task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind parallel g18.012 and
-g18.018→g18.020, with g18.020 to be added in place after its Queue submission.
-It sweeps all four editor surfaces in both web previews and is serial before
-any g18.006 continuation.
+g18.018→g18.020. Live version 57 waits exactly on g18.012 task
+`697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
+`276cd890-5904-4c79-a08f-253c704e4185`. It sweeps all four editor surfaces in
+both web previews and is serial before any g18.006 continuation.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) runs in
-parallel with g18.018→g18.020 as a second prerequisite of g18.011. It replaces
-the closed grammar catalogue with consumer-selected lazy CodeMirror language
-providers before the sweep.
+parallel with g18.018→g18.020 as Queue task
+`697c0380-bcc4-4433-9bce-a6c77fa0452a`, with its former g18.011 edge cleared at
+version 10. It replaces the closed grammar catalogue with consumer-selected
+lazy CodeMirror language providers before the sweep.
 
 [`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is merged (PR #245).
 It replaced the link-like command row with proper grouped Poodle controls;
@@ -111,8 +113,8 @@ pages. The MarkdownRenderer leg of g18.011 is unblocked.
 [`g18.020`](g18/020-rich-text-heading-mode-select.md) is ready behind active
 g18.018. It replaces fixed H1–H3 buttons with one
 consumer-configurable Normal/H1–H6 Select and extends real document support
-through H6. After Queue submission, add it as a new dependency of existing
-g18.011 task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` without replacement.
+through H6. Queue task `276cd890-5904-4c79-a08f-253c704e4185` is already a
+dependency of existing g18.011 without replacement.
 
 ## Held planning horizons
 

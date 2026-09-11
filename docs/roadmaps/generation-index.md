@@ -13,8 +13,9 @@ Updated: 2026-09-11
     g18.012 and g18.018→g18.020 converge on `g18.011`.
   - Queued task: `g18.011` four-surface web editor UX acceptance sweep,
     dependency-ordered behind parallel g18.012 and g18.018→g18.020.
-  - Queued task: `g18.012` CodeEditor extensible language registry, running in
-    parallel with g18.018→g18.020 as a second prerequisite of g18.011.
+  - Ready Queue task: `g18.012` CodeEditor extensible language registry,
+    dependency-free and dispatchable in parallel with g18.018→g18.020 as a
+    second prerequisite of g18.011.
   - Merged repair: `g18.013` RichTextEditor toolbar controls (PR #245);
     both web toolbars now use grouped Poodle controls modelled on
     MarkdownEditor.

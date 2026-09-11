@@ -63,8 +63,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** operator-paused in retained dispatched Queue task/workspace; resume
-  only after g18.013→g18.014/g18.018→g18.020, parallel g18.017/g18.019, g18.011,
-  g18.012, and every other blocking sweep repair complete and the operator
+  only after parallel g18.012 and g18.013→g18.014/g18.018→g18.020, then g18.011,
+  and every other blocking sweep repair complete and the operator
   accepts the sweep; then rebase and recompute final-source identity. Use the
   Queue's in-place dependency mutation to preserve this retained task and
   worker while encoding the remaining serial work; do not replace either.
@@ -161,7 +161,7 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-Complete g18.013→g18.014/g18.018→g18.020, parallel g18.017/g18.019, g18.011, g18.012,
+Complete parallel g18.012 and g18.013→g18.014/g18.018→g18.020, then g18.011,
 and every other blocking finding. Resume this retained task only after operator
 acceptance, then rebuild the candidate from the accepted source. After that
 candidate merges and closes, g18.009 dispatches from its dependency. Desktop
