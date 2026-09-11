@@ -23,8 +23,8 @@ tags: [coordination, handoff, worker, g18, g18.011, editor, ux, qa]
 ## What This Thread Was Doing
 
 Execute [`g18.011`](../roadmaps/g18/011-web-editor-ux-acceptance-sweep.md) after
-g18.013, g18.014 and g18.015 close and Chatterbox releases this task's Queue
-hold. g18.010 is merged. Sweep CodeEditor, RichTextEditor, and RichTextRenderer
+g18.013–g18.016 close and Chatterbox releases this task's Queue hold. g18.010
+is merged. Sweep CodeEditor, RichTextEditor, and RichTextRenderer
 across their real Svelte and React previews before release work resumes.
 
 ## Why It Matters
@@ -39,9 +39,9 @@ and presentation have been reviewed systematically.
 g18.006 is blocked with its original workspace and clean pre-candidate state
 preserved. g18.009 is Queue-held. g18.010's focus correction is merged; g18.013
 owns the RichTextEditor toolbar repair; g18.014 owns the inert Image Policy
-specimen; g18.015 owns safe preview distribution startup. This task is
-explicitly held until all three open repairs merge. All editor pages exist in
-both previews from g18.008.
+specimen; g18.015 owns safe preview distribution startup; g18.016 owns live
+CodeEditor line-number configuration. This task is explicitly held until all
+four open repairs merge. All editor pages exist in both previews from g18.008.
 
 ## Boundaries
 

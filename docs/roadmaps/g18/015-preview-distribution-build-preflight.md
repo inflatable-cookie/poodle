@@ -130,6 +130,6 @@ aliases of their run tasks even though safe package builders already existed.
 
 ## Next task
 
-After this task, g18.013, and g18.014 merge, Chatterbox releases held g18.011
-for the full three-surface acceptance sweep. Keep g18.006 blocked and g18.009
-held.
+After this task, g18.013, g18.014 and parallel g18.016 merge, Chatterbox
+releases held g18.011 for the full three-surface acceptance sweep. Keep g18.006
+blocked and g18.009 held.

@@ -126,6 +126,6 @@ explains why neither the initial image nor a newly inserted one is visible.
 
 ## Next task
 
-After g18.013, this repair, and parallel g18.015 merge, Chatterbox releases held
-g18.011 for the complete three-surface acceptance sweep. Keep g18.006 blocked
-and g18.009 held.
+After g18.013, this repair, and parallel g18.015/g18.016 merge, Chatterbox
+releases held g18.011 for the complete three-surface acceptance sweep. Keep
+g18.006 blocked and g18.009 held.

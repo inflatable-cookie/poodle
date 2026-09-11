@@ -10,7 +10,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
-`g18.012`, `g18.013`, `g18.014`, `g18.015`
+`g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`
 
 ## Outcome
 
@@ -62,7 +62,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** operator-paused in retained Queue task/workspace; resume only after
-  g18.010, g18.013, g18.014 and g18.015 merge, g18.011 completes, g18.012 and every
+  g18.010 and g18.013–g18.016 merge, g18.011 completes, g18.012 and every
   other blocking sweep repair merge, and the operator accepts the sweep; then
   rebase and recompute final-source identity
 - **Completion:** one reviewed release-candidate PR merged to main; exact

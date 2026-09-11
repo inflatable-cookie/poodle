@@ -124,7 +124,7 @@ The shared modality installer writes `keyboard` for every non-modifier
 
 ## Next task
 
-After merge and closeout, keep g18.011 held until parallel g18.013, its serial
-g18.014, and parallel g18.015 also merge; then perform the operator-required
+After merge and closeout, keep g18.011 held until g18.013, its serial g18.014,
+and parallel g18.015/g18.016 also merge; then perform the operator-required
 acceptance sweep across all three new editor surfaces. Keep g18.006 blocked and
 g18.009 held until the sweep and all release-blocking repairs are accepted.

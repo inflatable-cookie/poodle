@@ -50,16 +50,17 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after g18.010–g18.015, other blocking repairs and operator acceptance |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after g18.010–g18.016, other blocking repairs and operator acceptance |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | held behind g18.006 | Queue-held during g18.010 repair; release only from the accepted repaired candidate |
-| [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); g18.011 stays held until g18.013, g18.014 and g18.015 merge, g18.006 stays blocked, g18.009 stays held |
-| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | Queue-held behind g18.013, g18.014 and g18.015 | paired Svelte/React sweep of CodeEditor, RichTextEditor and RichTextRenderer; operator release checkpoint |
+| [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); g18.011 stays held until g18.013–g18.016 merge, g18.006 stays blocked, g18.009 stays held |
+| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | Queue-held behind g18.013–g18.016 | paired Svelte/React sweep of CodeEditor, RichTextEditor and RichTextRenderer; operator release checkpoint |
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | ready behind g18.011 | consumer-selected lazy CodeMirror language providers; remove Poodle-owned closed grammar catalogue |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | active | proper grouped Poodle controls modelled on MarkdownEditor; known blocker before g18.011 |
 | [`g18.014`](014-rich-text-image-policy-specimen-proof.md) — rich-text image-policy specimen proof | ready behind g18.013 | deterministic visible seeded image and insert-once host proof in both previews |
 | [`g18.015`](015-preview-distribution-build-preflight.md) — preview distribution build preflight | ready in parallel with g18.013 | rebuild core and matching framework distributions before either public Vite preview starts |
+| [`g18.016`](016-code-editor-live-line-number-reconfiguration.md) — CodeEditor live line-number reconfiguration | ready in parallel | mounted true/false gutter changes preserve editor state in both web wrappers |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -94,7 +95,10 @@ consumer-selected registry. Serial g18.014 fixes the inert image-policy example
 before the sweep begins. Parallel g18.015 makes both public preview selectors
 rebuild their package graph before Vite listens, preventing stale ignored
 distributions after merges. g18.006 is paused with its work preserved until
-the sweep, repairs, and operator acceptance complete. g18.009 remains held; no
+distributions after merges. Parallel g18.016 repairs the configuration
+specimen's inert live line-number toggle without remounting the editor. g18.006
+is paused with its work preserved until the sweep, repairs, and operator
+acceptance complete. g18.009 remains held; no
 candidate is tagged or published while the accepted UX is moving.
 
 ## Held and recurring work

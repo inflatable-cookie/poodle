@@ -1,6 +1,6 @@
 # 009 — v0.4.0 release certification and Desktop unblock
 
-Status: held — operator requires g18.010–g18.015 editor acceptance work first
+Status: held — operator requires g18.010–g18.016 editor acceptance work first
 Owner: Poodle release operations
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -42,7 +42,7 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 
 ## Dispatch manifest
 
-- **State:** queue-held behind g18.006; release only after g18.010–g18.015 and
+- **State:** queue-held behind g18.006; release only after g18.010–g18.016 and
   all other blocking repairs are operator-accepted and the retained candidate
   is rebuilt/reviewed from that source
 - **Completion:** exact candidate local gates and branch dry run green;
