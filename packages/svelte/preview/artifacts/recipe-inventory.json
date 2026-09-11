@@ -1,9 +1,9 @@
 {
   "summary": {
-    "components": 147,
+    "components": 148,
     "recipeHooks": 1175,
     "hookCandidates": 7,
-    "metricVariables": 410
+    "metricVariables": 413
   },
   "inventory": {
     "accordion": {
@@ -1902,6 +1902,15 @@
         "--poodle-resize-handle-hit-offset",
         "--poodle-resize-handle-hit-size",
         "--poodle-resize-handle-thickness"
+      ]
+    },
+    "rich-text": {
+      "recipe": [],
+      "candidates": [],
+      "metric": [
+        "--poodle-rich-text-group-gap",
+        "--poodle-rich-text-toolbar-x",
+        "--poodle-rich-text-toolbar-y"
       ]
     },
     "segmented-control": {
