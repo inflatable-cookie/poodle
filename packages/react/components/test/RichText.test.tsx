@@ -1,6 +1,8 @@
-import { cleanup, render } from "@testing-library/react";
-import { act, createElement, type ReactElement } from "react";
+import { cleanup, render, waitFor } from "@testing-library/react";
+import { act, createElement, useState, type ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { Editor } from "@tiptap/core";
+import { TextSelection } from "@tiptap/pm/state";
 
 import { RichTextEditor } from "../src/RichTextEditor";
 import { RichTextRenderer } from "../src/RichTextRenderer";
@@ -1095,5 +1097,344 @@ describe("RichTextEditor toolbar presentation (react)", () => {
     });
     expect(editor()).toBeNull();
     expect(document.activeElement?.classList.contains("ProseMirror")).toBe(true);
+  });
+});
+
+/**
+ * g18.018: an accepted controlled echo is a true no-op. Each test drives the
+ * real editing engine through public DOM/state surface, echoes the emitted
+ * document back through `value` exactly as both public specimens do, and binds
+ * the caret, selection, focus, history and replacement path the defect moved.
+ */
+describe("controlled echo selection preservation (react)", () => {
+  const MID_DOC: ProseMirrorDocumentJSON = {
+    type: "doc",
+    content: [
+      { type: "paragraph", content: [{ type: "text", text: "alpha beta" }] },
+      { type: "paragraph", content: [{ type: "text", text: "second block" }] },
+    ],
+  };
+  const ECHO_FEATURES: RichTextEngineOptions["features"] = ["formatting"];
+  // After "alpha" in the first paragraph, so the caret is genuinely mid-block.
+  const MID_CARET = 6;
+
+  const echoRestores: (() => void)[] = [];
+  afterEach(() => {
+    for (const restore of echoRestores) restore();
+    echoRestores.length = 0;
+  });
+
+  function captureRichTextEditor(): () => Editor {
+    let captured: Editor | null = null;
+    const descriptor = Object.getOwnPropertyDescriptor(Editor.prototype, "getJSON");
+    if (!descriptor?.value) throw new Error("TipTap Editor.getJSON is missing");
+    const getJSON = descriptor.value as (this: Editor) => ReturnType<Editor["getJSON"]>;
+    const spy = vi.spyOn(Editor.prototype, "getJSON").mockImplementation(function (this: Editor) {
+      captured = this;
+      return getJSON.call(this);
+    });
+    echoRestores.push(() => spy.mockRestore());
+    return () => {
+      if (!captured) throw new Error("rich-text editor was not captured");
+      return captured;
+    };
+  }
+
+  /**
+   * The document replacement path (`editor.commands.setContent`) is private;
+   * trace it where the engine reaches it so the accepted-echo journeys can
+   * prove it is never invoked, and genuine host replacement still is.
+   */
+  function traceReplacementPath(): ProseMirrorDocumentJSON[] {
+    const documents: ProseMirrorDocumentJSON[] = [];
+    const descriptor = Object.getOwnPropertyDescriptor(Editor.prototype, "commands");
+    if (!descriptor?.get) throw new Error("TipTap Editor.commands is missing");
+    const commands = descriptor.get;
+    const spy = vi.spyOn(Editor.prototype, "commands", "get").mockImplementation(function (
+      this: Editor,
+    ) {
+      const live = commands.call(this);
+      return {
+        ...live,
+        setContent: (...args: unknown[]) => {
+          documents.push(args[0] as ProseMirrorDocumentJSON);
+          return (live.setContent as (...inner: unknown[]) => boolean)(...args);
+        },
+      } as unknown as ReturnType<typeof commands>;
+    });
+    echoRestores.push(() => spy.mockRestore());
+    return documents;
+  }
+
+  /** Structurally identical echo with every object key order reversed. */
+  function reorderRichTextKeys(value: ProseMirrorDocumentJSON): ProseMirrorDocumentJSON {
+    const reverse = (input: unknown): unknown => {
+      if (Array.isArray(input)) return input.map(reverse);
+      if (input !== null && typeof input === "object") {
+        return Object.fromEntries(
+          Object.entries(input as Record<string, unknown>)
+            .reverse()
+            .map(([key, child]) => [key, reverse(child)]),
+        );
+      }
+      return input;
+    };
+    return reverse(value) as ProseMirrorDocumentJSON;
+  }
+
+  /** Realistic host: echoes every committed transaction straight back through `value`. */
+  function EchoingEditor({
+    echo = "same",
+    onChange,
+  }: {
+    echo?: "same" | "reordered";
+    onChange?: (document: ProseMirrorDocumentJSON) => void;
+  }) {
+    const [value, setValue] = useState<ProseMirrorDocumentJSON>(MID_DOC);
+    return createElement(RichTextEditor, {
+      value,
+      features: ECHO_FEATURES,
+      onChange: (next: ProseMirrorDocumentJSON) => {
+        onChange?.(next);
+        setValue(echo === "reordered" ? reorderRichTextKeys(next) : next);
+      },
+    });
+  }
+
+  function renderEchoingEditor(options: { echo?: "same" | "reordered" } = {}) {
+    const echoes: ProseMirrorDocumentJSON[] = [];
+    const view = render(
+      createElement(EchoingEditor, {
+        echo: options.echo,
+        onChange: (next: ProseMirrorDocumentJSON) => echoes.push(next),
+      }),
+    );
+    return { view, echoes };
+  }
+
+  async function typeThroughEchoes(
+    editor: Editor,
+    characters: string,
+    echoes: ProseMirrorDocumentJSON[],
+  ): Promise<number> {
+    let caret = editor.state.selection.from;
+    for (const [index, character] of [...characters].entries()) {
+      act(() => {
+        editor.view.dispatch(editor.state.tr.insertText(character, caret));
+      });
+      caret += 1;
+      await waitFor(() => {
+        expect(echoes.length).toBe(index + 1);
+      });
+      await waitFor(() => {
+        expect(editor.state.selection.empty).toBe(true);
+        expect(editor.state.selection.from).toBe(caret);
+      });
+    }
+    return caret;
+  }
+
+  it("keeps focus and the exact advancing caret through immediate same-object echoes", async () => {
+    const editorOf = captureRichTextEditor();
+    const replacements = traceReplacementPath();
+    const { view, echoes } = renderEchoingEditor();
+    const surface = surfaceOf(view.container);
+    act(() => surface.focus());
+    const editor = editorOf();
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, MID_CARET)),
+      );
+    });
+
+    const caret = await typeThroughEchoes(editor, "XYZ", echoes);
+
+    expect(caret).toBe(MID_CARET + 3);
+    expect(editor.state.doc.firstChild?.textContent).toBe("alphaXYZ beta");
+    expect(echoes.at(-1)?.content?.[0]?.content?.[0]?.text).toBe("alphaXYZ beta");
+    expect(document.activeElement).toBe(surface);
+    expect(replacements).toHaveLength(0);
+  });
+
+  it("treats a structurally equal echo with reordered keys as a no-op", async () => {
+    const editorOf = captureRichTextEditor();
+    const replacements = traceReplacementPath();
+    const { echoes } = renderEchoingEditor({ echo: "reordered" });
+    const editor = editorOf();
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, MID_CARET)),
+      );
+    });
+
+    const caret = await typeThroughEchoes(editor, "Q", echoes);
+
+    expect(caret).toBe(MID_CARET + 1);
+    expect(editor.state.doc.firstChild?.textContent).toBe("alphaQ beta");
+    expect(replacements).toHaveLength(0);
+  });
+
+  it("keeps the resulting caret through a non-collapsed replacement and a paste", async () => {
+    const editorOf = captureRichTextEditor();
+    const replacements = traceReplacementPath();
+    const { view, echoes } = renderEchoingEditor();
+    const editor = editorOf();
+    // Replace " beta" (the selection a user drags) with " tau" and echo it.
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(
+          TextSelection.create(editor.state.doc, MID_CARET, MID_CARET + 5),
+        ),
+      );
+      editor.view.dispatch(editor.state.tr.insertText(" tau", MID_CARET, MID_CARET + 5));
+    });
+    await waitFor(() => {
+      expect(echoes.length).toBe(1);
+    });
+    await waitFor(() => {
+      expect(editor.state.selection.empty).toBe(true);
+      expect(editor.state.selection.from).toBe(MID_CARET + 4);
+    });
+    expect(editor.state.doc.firstChild?.textContent).toBe("alpha tau");
+
+    // Paste at the resulting caret; the committed transaction keeps its place.
+    const surface = surfaceOf(view.container);
+    const pasteFrom = editor.state.selection.from;
+    const clipboard = new DataTransfer();
+    clipboard.setData("text/plain", " pasted");
+    let accepted = true;
+    act(() => {
+      accepted = surface.dispatchEvent(
+        new ClipboardEvent("paste", { clipboardData: clipboard, bubbles: true, cancelable: true }),
+      );
+    });
+    expect(accepted).toBe(false);
+    await waitFor(() => {
+      expect(echoes.length).toBe(2);
+    });
+    await waitFor(() => {
+      expect(editor.state.selection.from).toBe(pasteFrom + 7);
+    });
+    expect(editor.state.doc.firstChild?.textContent).toBe("alpha tau pasted");
+    expect(replacements).toHaveLength(0);
+  });
+
+  it("commits a composed IME input once at the input position", async () => {
+    const editorOf = captureRichTextEditor();
+    const replacements = traceReplacementPath();
+    const { view, echoes } = renderEchoingEditor();
+    const editor = editorOf();
+    const surface = surfaceOf(view.container);
+    act(() => surface.focus());
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, MID_CARET)),
+      );
+    });
+
+    // The browser mutates the composing text and leaves the caret after it; the
+    // engine reads that DOM change when composition commits.
+    act(() => {
+      surface.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+      const textNode = surface.querySelector("p")?.firstChild as Text;
+      textNode.nodeValue = "alpha\u6f22 beta";
+      const domSelection = document.getSelection();
+      if (!domSelection) throw new Error("no DOM selection available");
+      const range = document.createRange();
+      range.setStart(textNode, MID_CARET);
+      range.setEnd(textNode, MID_CARET);
+      domSelection.removeAllRanges();
+      domSelection.addRange(range);
+      surface.dispatchEvent(
+        new CompositionEvent("compositionend", { data: "\u6f22", bubbles: true }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(echoes.length).toBe(1);
+    });
+    await waitFor(() => {
+      expect(editor.state.selection.from).toBe(MID_CARET + 1);
+    });
+    expect(editor.state.doc.firstChild?.textContent).toBe("alpha\u6f22 beta");
+    expect(replacements).toHaveLength(0);
+  });
+
+  it("keeps undo and redo history across accepted echoes", async () => {
+    const editorOf = captureRichTextEditor();
+    const replacements = traceReplacementPath();
+    const { view, echoes } = renderEchoingEditor();
+    const editor = editorOf();
+    const surface = surfaceOf(view.container);
+    act(() => surface.focus());
+    act(() => {
+      editor.view.dispatch(
+        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, MID_CARET)),
+      );
+    });
+    const caret = await typeThroughEchoes(editor, "XYZ", echoes);
+    expect(editor.state.doc.firstChild?.textContent).toBe("alphaXYZ beta");
+    expect(caret).toBe(MID_CARET + 3);
+
+    const undo = view.container.querySelector<HTMLButtonElement>('[data-command="undo"] button');
+    if (!undo) throw new Error("missing undo command");
+    act(() => undo.click());
+    await waitFor(() => {
+      expect(editor.state.doc.firstChild?.textContent).not.toBe("alphaXYZ beta");
+    });
+    expect(["alpha beta", "alphaX beta", "alphaXY beta"]).toContain(
+      editor.state.doc.firstChild?.textContent,
+    );
+
+    const redo = view.container.querySelector<HTMLButtonElement>('[data-command="redo"] button');
+    if (!redo) throw new Error("missing redo command");
+    act(() => redo.click());
+    await waitFor(() => {
+      expect(editor.state.doc.firstChild?.textContent).toBe("alphaXYZ beta");
+    });
+    expect(replacements).toHaveLength(0);
+  });
+
+  it("still replaces the document when the host sends a genuinely different value", () => {
+    const replacements = traceReplacementPath();
+    const onChange = vi.fn();
+    const view = render(
+      createElement(RichTextEditor, { value: MID_DOC, features: ECHO_FEATURES, onChange }),
+    );
+    const replacement: ProseMirrorDocumentJSON = {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "host authority" }] }],
+    };
+    act(() => {
+      view.rerender(
+        createElement(RichTextEditor, { value: replacement, features: ECHO_FEATURES, onChange }),
+      );
+    });
+    expect(surfaceOf(view.container).textContent).toContain("host authority");
+    expect(replacements).toHaveLength(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("lets a delayed stale host value win over newer local state", () => {
+    const host = document.createElement("div");
+    const onChange = vi.fn();
+    const engine = createRichTextEngine(host, baseOptions({ value: EMPTY, features: ["tables"] }), {
+      onChange,
+      onToolbar: () => {},
+    });
+    try {
+      engine.runCommand("insert-table");
+      const oneRow = onChange.mock.calls[0][0] as ProseMirrorDocumentJSON;
+      const oneRowCount = host.querySelectorAll("tr").length;
+      engine.runCommand("add-row");
+      expect(onChange).toHaveBeenCalledTimes(2);
+      expect(host.querySelectorAll("tr")).toHaveLength(oneRowCount + 1);
+      // A delayed host value (an older emitted document) is still authoritative.
+      engine.update({ value: oneRow });
+      expect(host.querySelectorAll("tr")).toHaveLength(oneRowCount);
+      expect(onChange).toHaveBeenCalledTimes(2);
+    } finally {
+      engine.destroy();
+    }
   });
 });

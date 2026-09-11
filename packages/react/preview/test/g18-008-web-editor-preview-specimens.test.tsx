@@ -129,4 +129,53 @@ describe("g18.008 web editor preview specimens (react)", () => {
     );
     expect(JSON.stringify(RICH_TEXT_STANDARD_DOCUMENT)).toContain("Release notes");
   });
+
+  it("keeps the caret through the live specimen's immediate controlled echo", async () => {
+    // The specimen echoes each onChange straight back through `value`: the
+    // exact host journey that moved the caret to the document end. Typing is
+    // driven entirely through the DOM, the way a browser and IME commit do.
+    const { container } = render(<RichTextEditorSpecimen />);
+    const live = container.querySelector("[data-part='live-editor']");
+    await waitFor(() => {
+      expect(live?.querySelector(".ProseMirror")).not.toBeNull();
+    });
+    const surface = live!.querySelector<HTMLElement>(".ProseMirror")!;
+    await act(async () => {
+      surface.focus();
+    });
+    const readout = () => container.querySelector("[data-part='host-document']")?.textContent ?? "";
+    let caret = 5;
+    let inserted = "";
+    for (const character of ["X", "Y", "Z"]) {
+      await act(async () => {
+        surface.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+        const textNode = surface.querySelector("h1")?.firstChild as Text;
+        const text = textNode.nodeValue ?? "";
+        textNode.nodeValue = `${text.slice(0, caret)}${character}${text.slice(caret)}`;
+        const domSelection = document.getSelection();
+        if (!domSelection) throw new Error("no DOM selection available");
+        const range = document.createRange();
+        range.setStart(textNode, caret + 1);
+        range.setEnd(textNode, caret + 1);
+        domSelection.removeAllRanges();
+        domSelection.addRange(range);
+        surface.dispatchEvent(
+          new CompositionEvent("compositionend", { data: character, bubbles: true }),
+        );
+        // Let ProseMirror's composition-end flush and the controlled echo
+        // settle before the next composed character.
+        await new Promise((resolve) => setTimeout(resolve, 80));
+      });
+      caret += 1;
+      inserted += character;
+      // React flushes controlled state at the act boundary, so the host
+      // document and caret are asserted after each committed character.
+      expect(document.getSelection()?.focusOffset).toBe(caret);
+      expect(readout()).toContain(`Relea${inserted}se notes`);
+    }
+    await waitFor(() => {
+      expect(readout()).toContain("ReleaXYZse notes");
+    });
+    expect(surface.querySelector("h1")?.textContent).toBe("ReleaXYZse notes");
+  });
 });
