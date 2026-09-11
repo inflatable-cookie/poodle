@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: Queue-held behind g18.013–g18.018 — operator-required release gate
+Status: Queue-held behind g18.013–g18.019 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,23 +8,25 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: merged g18.010; g18.013–g18.018 complete and merged
+Depends on: merged g18.010; g18.013–g18.019 complete and merged
 
 ## Outcome
 
 Perform a systematic pre-release UX and interaction sweep of `CodeEditor`,
-`RichTextEditor`, and `RichTextRenderer` across their real Svelte and React
-specimen pages. Produce reproducible evidence and a complete severity-ranked
-finding set. Do not resume the 0.4.0 candidate until every release-blocking
-finding is repaired and the operator accepts the sweep outcome.
+`RichTextEditor`, `RichTextRenderer`, and `MarkdownRenderer` across their real
+Svelte and React specimen pages. Produce reproducible evidence and a complete
+severity-ranked finding set. Do not resume the 0.4.0 candidate until every
+release-blocking finding is repaired and the operator accepts the sweep outcome.
 
 This is an acceptance sweep, not permission to redesign APIs or silently fix
 unbounded findings in place.
 
 ## Ready-State Rubric
 
-- [x] All three public surfaces have matched Svelte and React specimen pages.
-- [x] The operator explicitly made the completed three-component sweep a gate
+- [x] All four public surfaces have matched or planned Svelte and React specimen
+  pages; g18.019 owns the missing MarkdownRenderer pair.
+- [x] The operator made the original three-component sweep a gate, then
+  expanded it to four surfaces with MarkdownRenderer
   before g18.006 resumes.
 - [x] g18.006 is blocked with a clean retained workspace and no candidate
   mutations; g18.009 is Queue-held.
@@ -44,6 +46,8 @@ unbounded findings in place.
   text movement across active runtimes.
 - [ ] g18.018 makes accepted RichTextEditor controlled echoes preserve caret,
   selection, history and focus in both web wrappers.
+- [ ] g18.019 adds paired standalone MarkdownRenderer specimens on the shared
+  safe/trusted MarkdownEditor preview path.
 
 ## Decisions
 
@@ -68,8 +72,8 @@ unbounded findings in place.
 ## Dispatch manifest
 
 - **State:** Queue-held behind g18.013→g18.014/g18.018 and parallel
-  g18.015–g18.017; release the hold only after all six merge; serial before
-  retained g18.006; g18.009 held
+  g18.015–g18.017/g18.019; release the hold only after all seven merge; serial
+  before retained g18.006; g18.009 held
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep
@@ -91,8 +95,8 @@ unbounded findings in place.
 
 ## Work
 
-1. Build both previews from the exact accepted g18.010 source. Bind direct
-   routes for all three specimens and record viewport/theme/density fixtures.
+1. Build both previews from the exact accepted repair source. Bind direct
+   routes for all four specimens and record viewport/theme/density fixtures.
 2. Sweep CodeEditor: exact editing and host echo, syntax visibility and language
    switching, search, line numbers, diagnostics/navigation, read-only/disabled,
    clipboard/undo/redo/IME, Tab escape, corrected focus treatment, scrolling,
@@ -104,14 +108,17 @@ unbounded findings in place.
 4. Sweep RichTextRenderer against the same representative documents and
    feature configuration: no editable state, faithful typography/tables,
    safe links/images, invalid-document refusal, themes and constrained layout.
-5. Compare Svelte and React side by side. Capture reproducible browser evidence
+5. Sweep MarkdownRenderer against MarkdownEditor preview: safe and trusted
+   policy, built-in and custom parsing, links/code/lists/quotes, empty output,
+   SSR, themes, density and constrained layout. Prove no editor mechanics.
+6. Compare Svelte and React side by side. Capture reproducible browser evidence
    for every discrepancy or visible defect; do not normalize differences in
    prose.
-6. Inspect package loading for CodeMirror languages: distinguish initial-load,
+7. Inspect package loading for CodeMirror languages: distinguish initial-load,
    emitted-chunk, and installed-dependency cost. Establish the reproducible
    baseline for individually imported, consumer-selected Poodle language
    modules; do not change the API in this task.
-7. Publish the severity-ranked capsule with exact routes, actions, expected and
+8. Publish the severity-ranked capsule with exact routes, actions, expected and
    observed results. Run the focused browser board, both preview builds,
    relevant accessibility checks, docs QA, and `git diff --check`.
 
@@ -119,7 +126,7 @@ unbounded findings in place.
 
 | Invariant | Adversarial counterexample | Required proof |
 | --- | --- | --- |
-| All three surfaces are genuinely swept | report checks only CodeEditor or treats renderer as editor mode | named checklist and evidence for three distinct pages in both frameworks |
+| All four surfaces are genuinely swept | report omits either renderer or treats one as an editor mode | named checklist and evidence for four distinct pages in both frameworks |
 | UX evidence is real | tests assert component presence but never interact or inspect rendering | browser actions, screenshots and computed/semantic assertions at representative states |
 | Framework parity is honest | one wrapper fails but report averages results | paired result for every blocking scenario with discrepancies called out |
 | Editing stays controlled | local editor changes diverge from host value or echo loops | exact before/action/callback/host-after evidence for both editors |
@@ -136,7 +143,7 @@ unbounded findings in place.
 - Stop and report when a release-blocking defect is reproduced. Do not repair
   product code under the sweep task.
 - Stop if representative browser evidence cannot run from the exact merged
-  g18.010 source.
+  repair source.
 - Stop before public API decisions, release/candidate mutations, Desktop edits,
   or resuming g18.006/g18.009.
 
@@ -147,6 +154,9 @@ all three new components is complete. The three surfaces are CodeEditor,
 RichTextEditor, and RichTextRenderer; admission is paired Svelte and React.
 The operator also rejected a permanently closed Poodle language catalogue:
 language support must be extensible because Poodle cannot own every grammar.
+Later on 2026-09-11, the operator added the paired MarkdownRenderer to the same
+pre-release sweep and confirmed safe HTML by default with an explicit trusted
+opt-in. The release gate therefore now covers four surfaces.
 
 ## Next task
 

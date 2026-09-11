@@ -11,8 +11,9 @@ Updated: 2026-09-11
     block Slider fixed inline presentation is ready in parallel.
     `g18.018` RichTextEditor controlled-echo selection preservation is queued
     behind g18.013. `g18.011` stays held until g18.013, g18.014, g18.017 and
-    g18.018 merge.
-  - Queued task: `g18.011` three-component web editor UX acceptance sweep,
+    g18.018 merge. `g18.019` MarkdownRenderer is ready for separate dispatch
+    approval and must also merge before g18.011.
+  - Queued task: `g18.011` four-surface web editor UX acceptance sweep,
     dependency-ordered behind g18.010.
   - Queued task: `g18.012` CodeEditor extensible language registry,
     dependency-ordered behind g18.011.
@@ -30,6 +31,8 @@ Updated: 2026-09-11
   - Queued task: `g18.018` RichTextEditor controlled-echo selection
     preservation, dependency-ordered behind g18.013 and required before
     g18.011 is released.
+  - Ready task: `g18.019` MarkdownRenderer shared safe/trusted rendering,
+    awaiting separate dispatch approval and required before g18.011.
   - Merged specimen admission: `g18.008` web editor preview specimens;
   - Merged repair: `g18.007` ordinary changelog maintenance scope;
     unblocked retained g18.005 PR #238 without a CI exception, and g18.005
@@ -38,10 +41,10 @@ Updated: 2026-09-11
     the outer ring is now a local keyboard-entry affordance dismissed on
     committed edits, with the document modality left truthful.
   - Paused candidate: retained g18.006 task/workspace resumes only after
-    g18.010–g18.018, all other blocking repairs, and operator sweep acceptance.
+    g18.010–g18.019, all other blocking repairs, and operator sweep acceptance.
   - Held release: queued g18.009 remains behind g18.006 but is explicitly held;
     no tag or publication while candidate source is moving.
-  - Next checkpoint: merge g18.013, complete g18.014, g18.017 and g18.018,
+  - Next checkpoint: merge g18.013, complete g18.014 and g18.017–g18.019,
     release and complete g18.011, complete g18.012, repair other blocking
     findings, and get operator acceptance before resuming g18.006.
 
