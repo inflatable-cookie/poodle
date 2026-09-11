@@ -304,6 +304,17 @@
   { task = "test:code-editor-focus-entry-chromium" },
   { task = "test:code-editor-focus-entry-webkit" },
 ]
+# g18.016 CodeEditor live line-number reconfiguration. Paired Svelte + React
+# fixtures drive the specimen line-numbers control and prove the mounted
+# gutter reconfigures without remounting while value, selection, focus,
+# history, and diagnostics survive. Headless Chromium and WebKit, one engine
+# per run; not in ci:web.
+"test:code-editor-line-numbers-chromium" = "bun test/code-editor-line-numbers/probe.ts --browser=chromium"
+"test:code-editor-line-numbers-webkit" = "bun test/code-editor-line-numbers/probe.ts --browser=webkit"
+"test:code-editor-line-numbers" = [
+  { task = "test:code-editor-line-numbers-chromium" },
+  { task = "test:code-editor-line-numbers-webkit" },
+]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
 "test:meter-surface-perf" = "bun test/visual/meter-surface-perf.ts"
