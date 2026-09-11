@@ -35,6 +35,9 @@ describe("CodeEditor packaging", () => {
       "@codemirror/search",
       "@codemirror/state",
       "@codemirror/view",
+      // g18.021: the private token-bound highlight style imports Lezer tags;
+      // this is base editor presentation machinery, not a grammar package.
+      "@lezer/highlight",
     ];
     const forbidden = [
       "@codemirror/lang-css",

@@ -253,6 +253,10 @@ export const CODEMIRROR_EXTERNAL_MODULES = [
   "@codemirror/search",
   "@codemirror/state",
   "@codemirror/view",
+  // g18.021: base editor presentation machinery. The internal token-bound
+  // highlight style imports Lezer tags; this stays external like the pinned
+  // base set and is not a grammar package.
+  "@lezer/highlight",
 ] as const;
 
 /**
