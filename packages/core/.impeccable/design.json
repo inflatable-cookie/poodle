@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-11T14:28:31Z",
+  "title": "Design System: Poodle",
+  "extensions": {
+    "colorMeta": {
+      "signal-blue": {
+        "role": "primary",
+        "displayName": "Signal Blue",
+        "canonical": "#2d86f3",
+        "tonalRamp": ["oklch(24% 0.11 254)", "oklch(34% 0.14 254)", "oklch(44% 0.17 254)", "#2d86f3", "#57a7ff", "oklch(76% 0.11 254)", "oklch(87% 0.06 254)", "oklch(95% 0.025 254)"]
+      },
+      "signal-blue-hover": {
+        "role": "primary",
+        "displayName": "Signal Blue Hover",
+        "canonical": "#57a7ff",
+        "tonalRamp": ["oklch(24% 0.11 254)", "oklch(34% 0.14 254)", "oklch(44% 0.17 254)", "#2d86f3", "#57a7ff", "oklch(76% 0.11 254)", "oklch(87% 0.06 254)", "oklch(95% 0.025 254)"]
+      },
+      "success-lime": {
+        "role": "secondary",
+        "displayName": "Success Lime",
+        "canonical": "#7fd24d",
+        "tonalRamp": ["oklch(22% 0.08 135)", "oklch(32% 0.11 135)", "oklch(43% 0.14 135)", "oklch(55% 0.16 135)", "#7fd24d", "#9fe870", "oklch(87% 0.08 135)", "oklch(95% 0.03 135)"]
+      },
+      "warning-amber": {
+        "role": "secondary",
+        "displayName": "Warning Amber",
+        "canonical": "#f0b24d",
+        "tonalRamp": ["oklch(22% 0.07 75)", "oklch(32% 0.10 75)", "oklch(44% 0.13 75)", "oklch(56% 0.15 75)", "#f0b24d", "#ffca73", "oklch(88% 0.08 75)", "oklch(95% 0.03 75)"]
+      },
+      "danger-coral": {
+        "role": "tertiary",
+        "displayName": "Danger Coral",
+        "canonical": "#e06a5f",
+        "tonalRamp": ["oklch(22% 0.07 25)", "oklch(32% 0.10 25)", "oklch(43% 0.13 25)", "oklch(54% 0.15 25)", "#e06a5f", "oklch(76% 0.11 25)", "oklch(87% 0.06 25)", "oklch(95% 0.025 25)"]
+      },
+      "glacial-canvas": {
+        "role": "neutral",
+        "displayName": "Glacial Canvas",
+        "canonical": "#e7eef5",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "glacial-surface": {
+        "role": "neutral",
+        "displayName": "Glacial Surface",
+        "canonical": "#dbe5ef",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "glacial-panel": {
+        "role": "neutral",
+        "displayName": "Glacial Panel",
+        "canonical": "#f7fafd",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "glacial-elevated": {
+        "role": "neutral",
+        "displayName": "Glacial Elevated",
+        "canonical": "#fcfdff",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "ink-primary": {
+        "role": "neutral",
+        "displayName": "Primary Ink",
+        "canonical": "#131a22",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Secondary Ink",
+        "canonical": "#314255",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#75869b",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "frost-border": {
+        "role": "neutral",
+        "displayName": "Frost Border",
+        "canonical": "#c9d4e0",
+        "tonalRamp": ["#131a22", "#314255", "#75869b", "#c9d4e0", "#dbe5ef", "#e7eef5", "#f7fafd", "#fcfdff"]
+      },
+      "eclipse-canvas": {
+        "role": "neutral",
+        "displayName": "Eclipse Canvas",
+        "canonical": "#0e1012",
+        "tonalRamp": ["#0b0f14", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#59636d", "#99a4b0", "#eef2f6"]
+      },
+      "eclipse-surface": {
+        "role": "neutral",
+        "displayName": "Eclipse Surface",
+        "canonical": "#15181b",
+        "tonalRamp": ["#0b0f14", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#59636d", "#99a4b0", "#eef2f6"]
+      },
+      "eclipse-panel": {
+        "role": "neutral",
+        "displayName": "Eclipse Panel",
+        "canonical": "#1b1f23",
+        "tonalRamp": ["#0b0f14", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#59636d", "#99a4b0", "#eef2f6"]
+      },
+      "eclipse-elevated": {
+        "role": "neutral",
+        "displayName": "Eclipse Elevated",
+        "canonical": "#20252a",
+        "tonalRamp": ["#0b0f14", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#59636d", "#99a4b0", "#eef2f6"]
+      },
+      "eclipse-text": {
+        "role": "neutral",
+        "displayName": "Eclipse Text",
+        "canonical": "#eef2f6",
+        "tonalRamp": ["#0b0f14", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#59636d", "#99a4b0", "#eef2f6"]
+      },
+      "eclipse-muted": {
+        "role": "neutral",
+        "displayName": "Eclipse Muted",
+        "canonical": "#99a4b0",
+        "tonalRamp": ["#0b0f14", "#0e1012", "#15181b", "#1b1f23", "#20252a", "#59636d", "#99a4b0", "#eef2f6"]
+      },
+      "eclipse-accent": {
+        "role": "primary",
+        "displayName": "Eclipse Amber",
+        "canonical": "#f0b24d",
+        "tonalRamp": ["oklch(22% 0.07 75)", "oklch(32% 0.10 75)", "oklch(44% 0.13 75)", "oklch(56% 0.15 75)", "#f0b24d", "#ffca73", "oklch(88% 0.08 75)", "oklch(95% 0.03 75)"]
+      }
+    },
+    "typographyMeta": {
+      "heading": { "displayName": "Heading", "purpose": "Section and component titles." },
+      "body": { "displayName": "Body", "purpose": "Primary interface and supporting content." },
+      "label": { "displayName": "Label", "purpose": "Controls, fields, and navigation." },
+      "caption": { "displayName": "Caption", "purpose": "Dense metadata and tertiary explanation." },
+      "code": { "displayName": "Code", "purpose": "Source text, identifiers, counters, and machine values." }
+    },
+    "shadows": [
+      { "name": "surface", "value": "0 0.25rem 0.75rem rgba(17, 22, 29, 0.08)", "purpose": "Low ambient separation for raised surfaces." },
+      { "name": "overlay", "value": "0 0.75rem 2rem rgba(17, 22, 29, 0.16)", "purpose": "Menus, popovers, and floating utility surfaces." },
+      { "name": "dialog", "value": "0 1.5rem 3.75rem rgba(11, 15, 20, 0.32)", "purpose": "Modal separation above the overlay scrim." }
+    ],
+    "motion": [
+      { "name": "interaction", "value": "180ms cubic-bezier(0.2, 0, 0, 1)", "purpose": "Default hover, focus, border, fill, and compact transform response." },
+      { "name": "overlay", "value": "120ms cubic-bezier(0.2, 0, 0, 1)", "purpose": "Fast menu, popover, and overlay state changes." },
+      { "name": "emphasized", "value": "260ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Bounded high-salience transitions that remain subject to motion policy." }
+    ],
+    "breakpoints": [
+      { "name": "compact-shell", "value": "45rem" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Signal-colored primary action with compact tactile depth.",
+      "html": "<button class=\"ds-button ds-button-primary\">Save changes</button>",
+      "css": ".ds-button { height: var(--poodle-size-control-height, 2.25rem); padding: 0 var(--poodle-space-control-x, .75rem); border: .0625rem solid var(--poodle-color-border-default, #75869b); border-radius: var(--poodle-radius-control, .375rem); font: 500 var(--poodle-typography-label-size, .8125rem)/1 var(--poodle-typography-label-family, Inter, sans-serif); cursor: pointer; transition: background 180ms cubic-bezier(.2,0,0,1), border-color 180ms cubic-bezier(.2,0,0,1), transform 180ms cubic-bezier(.2,0,0,1); } .ds-button-primary { background: var(--poodle-color-accent-base, #2d86f3); color: var(--poodle-color-text-inverse, #fcfdff); border-color: color-mix(in srgb, var(--poodle-color-accent-base, #2d86f3) 84%, black); box-shadow: inset 0 .0625rem 0 color-mix(in srgb, white 14%, transparent), 0 .375rem 1.125rem color-mix(in srgb, black 18%, transparent); } .ds-button-primary:hover { background: color-mix(in srgb, white 12%, var(--poodle-color-accent-base, #2d86f3)); } .ds-button-primary:active { transform: translateY(.03125rem); } .ds-button-primary:focus-visible { outline: .125rem solid var(--poodle-color-accent-focusRing, #57a7ff); outline-offset: .125rem; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Default action with tonal fill and a structural border.",
+      "html": "<button class=\"ds-button ds-button-secondary\">Open details</button>",
+      "css": ".ds-button { height: var(--poodle-size-control-height, 2.25rem); padding: 0 var(--poodle-space-control-x, .75rem); border: .0625rem solid var(--poodle-color-border-default, #75869b); border-radius: var(--poodle-radius-control, .375rem); font: 500 var(--poodle-typography-label-size, .8125rem)/1 var(--poodle-typography-label-family, Inter, sans-serif); cursor: pointer; transition: background 180ms cubic-bezier(.2,0,0,1), border-color 180ms cubic-bezier(.2,0,0,1); } .ds-button-secondary { background: color-mix(in srgb, var(--poodle-color-background-surface, #dbe5ef) 88%, var(--poodle-color-text-primary, #131a22)); color: var(--poodle-color-text-primary, #131a22); box-shadow: inset 0 .0625rem 0 color-mix(in srgb, white 8%, transparent); } .ds-button-secondary:hover { background: color-mix(in srgb, var(--poodle-color-background-surface, #dbe5ef) 80%, var(--poodle-color-text-primary, #131a22)); } .ds-button-secondary:active { transform: translateY(.03125rem); } .ds-button-secondary:focus-visible { outline: .125rem solid var(--poodle-color-accent-focusRing, #57a7ff); outline-offset: .125rem; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "Bounded tonal field with explicit focus and validation surfaces.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Project name</span><input class=\"ds-input\" value=\"Northstar\" /></label>",
+      "css": ".ds-field { display: grid; gap: .25rem; color: var(--poodle-color-text-primary, #131a22); font-family: var(--poodle-typography-label-family, Inter, sans-serif); } .ds-field-label { font-size: var(--poodle-typography-label-size, .8125rem); font-weight: 500; } .ds-input { box-sizing: border-box; width: 100%; height: var(--poodle-size-control-height, 2.25rem); padding: .5rem .75rem; border: .0625rem solid var(--poodle-color-border-default, #75869b); border-radius: var(--poodle-radius-control, .375rem); background: var(--poodle-color-background-surface, #dbe5ef); color: var(--poodle-color-text-primary, #131a22); font: 400 var(--poodle-typography-body-size, .875rem)/1.25rem var(--poodle-typography-body-family, Inter, sans-serif); transition: border-color 180ms cubic-bezier(.2,0,0,1), box-shadow 180ms cubic-bezier(.2,0,0,1); } .ds-input:focus { outline: none; border-color: var(--poodle-color-accent-focusRing, #57a7ff); box-shadow: 0 0 0 .125rem color-mix(in srgb, var(--poodle-color-accent-focusRing, #57a7ff) 28%, transparent); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Quiet elevated container with nested tonal definition.",
+      "html": "<article class=\"ds-card\"><strong>Source workspace</strong><p>Shared context remains available across the task.</p></article>",
+      "css": ".ds-card { display: grid; gap: .75rem; padding: 1rem; border: .0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle, #c9d4e0) 18%, transparent); border-radius: var(--poodle-radius-surface, .625rem); background: color-mix(in srgb, var(--poodle-color-background-panel, #f7fafd) 10%, var(--poodle-color-background-elevated, #fcfdff)); color: var(--poodle-color-text-primary, #131a22); box-shadow: inset 0 0 0 .0625rem color-mix(in srgb, var(--poodle-color-border-subtle, #c9d4e0) 18%, transparent); font: 400 var(--poodle-typography-body-size, .875rem)/1.25rem var(--poodle-typography-body-family, Inter, sans-serif); transition: background 180ms cubic-bezier(.2,0,0,1), border-color 180ms cubic-bezier(.2,0,0,1); } .ds-card strong { font-weight: 600; } .ds-card p { margin: 0; color: var(--poodle-color-text-secondary, #314255); } .ds-card:hover { border-color: color-mix(in srgb, var(--poodle-color-accent-base, #2d86f3) 28%, var(--poodle-color-border-subtle, #c9d4e0)); background: color-mix(in srgb, var(--poodle-color-background-elevated, #fcfdff) 94%, var(--poodle-color-background-panel, #f7fafd)); } .ds-card:focus-within { outline: .125rem solid var(--poodle-color-accent-focusRing, #57a7ff); outline-offset: .125rem; }"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "Compact semantic status capsule with color-independent text.",
+      "html": "<span class=\"ds-pill\">Ready for review</span>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; min-height: 1.25rem; padding: .1875rem .625rem; border: .0625rem solid color-mix(in srgb, var(--poodle-color-status-success, #7fd24d) 38%, var(--poodle-color-border-subtle, #c9d4e0)); border-radius: 999rem; background: color-mix(in srgb, var(--poodle-color-status-success, #7fd24d) 14%, var(--poodle-color-background-surface, #dbe5ef)); color: var(--poodle-color-text-primary, #131a22); font: 600 .6875rem/1 var(--poodle-typography-label-family, Inter, sans-serif); white-space: nowrap; } .ds-pill:hover { background: color-mix(in srgb, var(--poodle-color-status-success, #7fd24d) 20%, var(--poodle-color-background-surface, #dbe5ef)); } .ds-pill:focus-visible { outline: .125rem solid var(--poodle-color-accent-focusRing, #57a7ff); outline-offset: .125rem; }"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "description": "Compact grouped navigation with an accent edge and quiet active fill.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-label\">Components</span><a class=\"ds-nav-item ds-nav-active\" href=\"#\">Editors</a><a class=\"ds-nav-item\" href=\"#\">Controls</a></nav>",
+      "css": ".ds-nav { display: grid; gap: .125rem; padding: .75rem .375rem; background: var(--poodle-color-background-panel, #f7fafd); font-family: var(--poodle-typography-label-family, Inter, sans-serif); } .ds-nav-label { padding: 0 .75rem .1875rem; color: var(--poodle-color-accent-base, #2d86f3); font-size: .5625rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; } .ds-nav-item { min-height: 1.875rem; padding: .375rem .75rem; border-left: .1875rem solid transparent; border-radius: .1875rem .25rem .25rem .1875rem; color: var(--poodle-color-text-secondary, #314255); font-size: .8125rem; font-weight: 500; line-height: 1.3; text-decoration: none; transition: color 180ms cubic-bezier(.2,0,0,1), background 180ms cubic-bezier(.2,0,0,1); } .ds-nav-item:hover { color: var(--poodle-color-text-primary, #131a22); background: color-mix(in srgb, var(--poodle-color-background-elevated, #fcfdff) 60%, transparent); } .ds-nav-active { border-left-color: var(--poodle-color-accent-base, #2d86f3); background: color-mix(in srgb, var(--poodle-color-accent-base, #2d86f3) 10%, transparent); color: var(--poodle-color-text-primary, #131a22); font-weight: 600; box-shadow: inset 0 0 0 .0625rem color-mix(in srgb, var(--poodle-color-accent-base, #2d86f3) 20%, transparent); } .ds-nav-item:focus-visible { outline: .125rem solid var(--poodle-color-accent-focusRing, #57a7ff); outline-offset: .125rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Precision Workbench",
+    "overview": "Poodle is calm, precise, and adaptable. It should feel like a well-calibrated professional workspace: dense enough for real work, quiet enough for sustained attention, and exact enough that state changes never depend on decoration or guesswork. Its visual identity comes from disciplined semantic roles rather than one fixed theme.\n\nThe system is compact, tactile, and restrained. Hairline borders, small radii, tonal layers, and subtle inset detail give controls physical definition without turning the interface ornamental. Accent color is a signal for action, focus, selection, or status. It is not ambient decoration.\n\nPoodle supports a broad theme family, but each theme must preserve the same hierarchy and interaction truth. Avoid AI slop and unnecessary noise: no generic oversized cards, arbitrary gradients, decorative pill fields, filler copy, redundant labels, or motion without state meaning.",
+    "keyCharacteristics": [
+      "Compact workstation density with independent density and control-size axes.",
+      "Semantic, themeable color roles rather than component-local palettes.",
+      "Tactile controls built from borders, tonal fill, and restrained inset depth.",
+      "Clear keyboard focus, selection, validation, and disabled states.",
+      "Equivalent visual intent across Svelte, React, GPUI, and admitted runtimes."
+    ],
+    "rules": [
+      { "name": "The Semantic Color Rule", "body": "Components consume background, text, border, accent, and status roles. They do not hard-code a theme's hue.", "section": "colors" },
+      { "name": "The Signal, Not Decoration Rule", "body": "Accent color marks action, state, or orientation. If a colored element communicates none of those, remove the color.", "section": "colors" },
+      { "name": "The Role Before Size Rule", "body": "Choose the semantic type role first. Size and density variants may scale it, but one-off typography must not create a second hierarchy.", "section": "typography" },
+      { "name": "The Mono Has Meaning Rule", "body": "Monospace communicates code or machine data; it is never a shortcut for making ordinary UI feel technical.", "section": "typography" },
+      { "name": "The Two-Axis Rule", "body": "Density controls space; control size controls footprint. Never collapse them into one implicit size choice.", "section": "layout" },
+      { "name": "The Bounded Work Surface Rule", "body": "Editors, lists, panels, and overlays own their scroll and minimum-size behavior so one component cannot expand or clip the surrounding workstation.", "section": "layout" },
+      { "name": "The Structural Elevation Rule", "body": "Shadows explain stacking or response. Never add a shadow solely to make a flat layout look more designed.", "section": "elevation" },
+      { "name": "The Rounded Square Rule", "body": "Controls and cards use compact radii that preserve their edges. Do not turn every button, tab, input, or container into a pill.", "section": "shapes" },
+      { "name": "The Shape Communicates Rule", "body": "Full rounding identifies a pill-like semantic or continuous track. It is not the default expression of friendliness.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do use semantic roles so every component remains coherent across the twelve admitted themes.",
+      "Do preserve compact information density while maintaining target size, focus visibility, and readable state contrast.",
+      "Do use tonal layering and hairline borders before reaching for shadow.",
+      "Do keep Svelte, React, and native visual intent aligned through tokens and documented component contracts.",
+      "Do let density, control size, theme, and motion policy remain independent."
+    ],
+    "donts": [
+      "Don't add AI-slop composition: oversized generic cards, arbitrary gradients, excessive pills, fake metrics, filler labels, or empty decorative space.",
+      "Don't add visual noise that does not clarify hierarchy, state, navigation, or interaction.",
+      "Don't hard-code one theme's colors inside a reusable component.",
+      "Don't use monospace, uppercase tracking, shadows, or motion as decoration without a semantic reason.",
+      "Don't hide unsupported runtime behavior behind a visual fallback that implies parity."
+    ]
+  }
+}
