@@ -1,6 +1,6 @@
 # g18.021 — CodeEditor token-bound syntax presentation
 
-Status: ready for review
+Status: complete — merged as `e69512038a4f032ecfad398562bbab28d40e9ffc` (PR #252) on 2026-09-11 after exact-head independent review (PR comment `5640455224`, `ready_to_merge`) at `d831b559c6e5cf4d2e4e9fd233043641422f4c8d` with green rust/web checks
 Date: 2026-09-11
 Branch: `ns-7ff96ca9-20a1-43e4-afa3-f2025c8f6409`
 Card: `docs/roadmaps/g18/021-code-editor-token-bound-syntax-presentation.md`
@@ -121,7 +121,7 @@ frameworks.
   byte-identical with and without this branch's changes (documented
   backlog). `effigy check:svelte-preview` — 0 errors. `effigy
   check:react-preview` — 265 pre-existing errors, unchanged by this branch.
-- `effigy docs:check` — pass. `git diff --check` — clean.
+- `effigy docs:check` — pass. `git diff --check` — clean. Merge gate: PR #252 merged as `e69512038a4f032ecfad398562bbab28d40e9ffc` with green rust/web checks; the first `web` run failed on a transient preview-preflight listener timeout unrelated to the diff and passed on retry.
 
 ## Explicitly not done
 
@@ -135,7 +135,7 @@ frameworks.
 
 ## Continuation
 
-g18.021 is ready for review. After merge, the existing blocked g18.011 task
+g18.021 is merged. The existing blocked g18.011 task
 is retried from this head with this task added to its dependency graph; the
 four-surface sweep resumes on the same task thread, g18.006 stays closed
 until operator sweep acceptance, and g18.009 stays dependency-queued.

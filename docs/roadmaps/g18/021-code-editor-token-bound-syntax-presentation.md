@@ -1,6 +1,6 @@
 # 021 — CodeEditor token-bound syntax presentation
 
-Status: approved for Queue dispatch — release-blocking g18.011 repair
+Status: complete — merged as `e69512038a4f032ecfad398562bbab28d40e9ffc` (PR #252) on 2026-09-11
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/code-editor.md`,
@@ -62,9 +62,8 @@ the accepted repair head.
 
 ## Dispatch manifest
 
-- **State:** ready for operator-approved dispatch; once submitted, add this
-  task as an in-place dependency of blocked g18.011; g18.006 and g18.009 remain
-  closed
+- **State:** complete; merged g18.021 is an in-place dependency of blocked
+  g18.011; g18.006 and g18.009 remain closed
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** paired CodeEditor engine twins and focused tests;
@@ -142,9 +141,24 @@ the paired engine extension arrays as the source: they install the language
 compartment but no `syntaxHighlighting`/`HighlightStyle` extension. The sweep
 stopped before the three remaining surfaces, as required.
 
+Merged outcome: PR #252 merged as `e69512038a4f032ecfad398562bbab28d40e9ffc`
+after exact-head independent review (PR comment `5640455224`, `ready_to_merge`)
+at `d831b559c6e5cf4d2e4e9fd233043641422f4c8d` with green rust/web checks.
+Review-reported validation: paired Chromium/WebKit registry probes, 66 checks
+each, all pass; focused component suites, 105 pass; `test:parity`, 555 pass;
+paired package builds clean with `@lezer/highlight` external and no bundled
+grammar; `test:web-pack-install` clean against this head; `docs:check` and
+`git diff --check` clean; the new module-scope style evaluates with no DOM for
+SSR. The first `web` run failed on a transient preview-preflight listener
+timeout unrelated to the diff and passed on retry. Deferred: four non-blocking
+reviewer notes (eclipse warning/accent coincidence, invalid-mark CSS rule
+placement, tree-change recompute condition, unused probe constants) for the
+resumed g18.011 sweep; `check:react-*` errors remain the documented
+pre-existing backlog.
+
 ## Next task
 
-After g18.021 merges, retry the existing g18.011 task from the accepted repair
+g18.021 is merged. Retry the existing g18.011 task from the accepted repair
 head. Continue the full four-surface sweep, retain F12 as a follow-up, return
 any further blocker to Chatterbox, and keep g18.006 closed until operator sweep
 acceptance.

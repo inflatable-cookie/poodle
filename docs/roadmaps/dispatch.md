@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.011 blocked on F1; g18.021 repair approved for dispatch)
+Updated: 2026-09-11 (g18.021 merged; g18.011 sweep is next; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -73,6 +73,11 @@ mode select — merged as `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9` (PR #251) o
 2026-09-11 after exact-head independent review and green rust/web checks at the
 reviewed head.
 
+[`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md) — CodeEditor
+token-bound syntax presentation — merged as `e69512038a4f032ecfad398562bbab28d40e9ffc` (PR #252) on
+2026-09-11 after exact-head independent review and green rust/web checks at the
+reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -89,8 +94,8 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind merged g18.018 and merged
-g18.020 (g18.012 merged as `f011df5e0a97856bfe022569d77faf69a9f75553`, PR #250).
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind merged g18.018, merged
+g18.020 and merged g18.021 (g18.012 merged as `f011df5e0a97856bfe022569d77faf69a9f75553`, PR #250).
 The version-57 dependency mutation made it wait exactly on g18.012 task
 `697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
 `276cd890-5904-4c79-a08f-253c704e4185`. It sweeps all four editor surfaces in
@@ -100,9 +105,8 @@ Its first pass stopped with an accepted blocked callback after proving that
 both CodeEditor engines load TypeScript/JSON grammars but install no visible
 syntax presentation. Preserve task `aad6b776-1c3e-438c-bc9c-4e8ba8750462`
 and its thread. [`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md)
-is the bounded repair approved for dispatch; once submitted,
-add it as an in-place dependency of g18.011 and retry that same sweep task only
-after the repair merges.
+is merged (PR #252) with F1 repaired; it is an in-place dependency of g18.011.
+Retry that same sweep task from the merged head.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is merged (PR #250).
 It replaced the closed grammar catalogue with consumer-selected lazy CodeMirror
@@ -137,9 +141,10 @@ It replaced fixed H1–H3 buttons with one consumer-configurable Normal/H1–H6
 Select and extended real document support through H6. The heading-mode leg of
 g18.011 is unblocked.
 
-[`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md) is approved
-for Queue dispatch. It adds internal token-bound CodeMirror syntax
-presentation without bundling grammars or widening the public extension API.
+[`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md) is merged (PR #252).
+It added internal token-bound CodeMirror syntax presentation without bundling
+grammars or widening the public extension API. The syntax-presentation leg of
+g18.011 is unblocked.
 
 ## Held planning horizons
 
