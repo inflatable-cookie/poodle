@@ -9,7 +9,10 @@ Governing refs: `docs/contracts/001-working-rules.md`,
 `docs/contracts/components/rich-text-editor.md`,
 `packages/svelte/components/src/rich-text-engine.ts`,
 `packages/react/components/src/rich-text-engine.ts`
-Base: `origin/main` at `c478170886b587a0d296d6ddc625150d274b8647`
+Base: `origin/main` at `417b81472a0d6aa3da8de72c5b8d0335774379a3`
+(refresh: rebased past g18.012/g18.014; the only conflict was
+`tasks/effigy.tasks.toml`, resolved by keeping their language-registry and
+image-policy selectors beside the new controlled-echo selectors)
 
 ## Outcome
 
@@ -103,14 +106,14 @@ applied, all pass.
 
 ## Validation
 
-- `effigy test:components` — 411 files, 4080 pass.
+- `effigy test:components` — 415 files, 4110 pass, 4 skipped.
 - Focused suites at the rebased head: Svelte `RichTextEditor` 65 pass, React
   `RichText` 57 pass (7 new paired cases per wrapper); Svelte and React
   `g18-008-web-editor-preview-specimens` 7 pass each (1 new specimen journey
   per preview).
 - `effigy test:rich-text-controlled-echo` — all Chromium and WebKit checks
   passed for both frameworks (36 checks).
-- `effigy svelte:package`, `effigy react:package` — clean.
+- `effigy core:build`, `effigy svelte:package`, `effigy react:package` — clean.
 - `effigy svelte:build`, `effigy react:build` — clean (pre-existing chunk
   size warnings only).
 - `effigy check:svelte-components` — 0 errors (4 pre-existing warnings).
