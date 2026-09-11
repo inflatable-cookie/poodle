@@ -433,10 +433,6 @@ export function blockInlineFits(
   });
 }
 
-export function sliderFallbackText(label: string | null, valueText: string | null): string | null {
-  return omitEmptyVisibleText([label, valueText].filter((part): part is string => part != null && part !== "").join(" "));
-}
-
 export function rangeSliderFallbackText(label: string | null, rangeText: string | null): string | null {
   return omitEmptyVisibleText([label, rangeText].filter((part): part is string => part != null && part !== "").join(" "));
 }
@@ -446,23 +442,35 @@ export function physicalToValueNorm(physicalNorm: number, direction: SliderDirec
   return direction === "rtl" ? 1 - clamped : clamped;
 }
 
+/** Result of the single-Slider whole-track collision law (contract §4). */
+export interface SliderBlockTextLayout {
+  /** The optional visible label paints inline at the logical start. */
+  labelInline: boolean;
+  /** The exact numeric value paints inline at the logical end. Never suppressed. */
+  valueInline: boolean;
+}
+
+/**
+ * Fixed block inline placement for a single Slider (g18.017).
+ *
+ * Geometry is whole-track: the label and value are pinned to the logical
+ * inline edges at every value, so the fit decision never depends on the
+ * selected span. When the two strings cannot coexist across the track the
+ * optional label is suppressed and the exact value stays put. There is no
+ * external fallback in this appearance.
+ */
 export function layoutSliderBlock(input: {
   capsuleSpan: number;
-  selectedNorm: number;
   label: string | null;
   valueText: string | null;
   measure: (text: string) => number;
-}): { inline: boolean; fallback: string | null } {
-  const selectedSpan = Math.max(input.selectedNorm, 0) * input.capsuleSpan;
-  const remainderSpan = Math.max(1 - input.selectedNorm, 0) * input.capsuleSpan;
-  const inline = blockInlineFits(
-    [
-      { text: input.label, unoccludedSpan: selectedSpan },
-      { text: input.valueText, unoccludedSpan: remainderSpan },
-    ],
-    input.measure,
-  );
-  return { inline, fallback: inline ? null : sliderFallbackText(input.label, input.valueText) };
+}): SliderBlockTextLayout {
+  const available = blockRegionAvailable(input.capsuleSpan);
+  const labelAdvance = input.label ? Math.ceil(input.measure(input.label)) : 0;
+  const valueAdvance = input.valueText ? Math.ceil(input.measure(input.valueText)) : 0;
+  const valueInline = input.valueText != null;
+  const labelInline = input.label != null && available >= labelAdvance + valueAdvance;
+  return { labelInline, valueInline };
 }
 
 export function layoutRangeSliderBlock(input: {

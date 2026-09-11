@@ -91,11 +91,10 @@
   const visibleValueText = $derived(resolveSliderVisibleValue(displayValue, formatVisibleValue));
   const visibleLabelText = $derived(visibleLabel && visibleLabel !== "" ? visibleLabel : null);
   const blockLayout = $derived.by(() => {
-    if (!block) return { inline: false, fallback: null };
+    if (!block) return { labelInline: false, valueInline: false };
     const font = capsule ? getComputedStyle(capsule).font : "14px sans-serif";
     return layoutSliderBlock({
       capsuleSpan,
-      selectedNorm: visualState.valueNorm,
       label: visibleLabelText,
       valueText: visibleValueText,
       measure: (text) => measureInlineAdvance(text, font),
@@ -200,14 +199,28 @@
   {#if block}
     <span bind:this={capsule} class="poodle-slider__capsule" aria-hidden="true">
       <span class="poodle-slider__track">
-        <span class="poodle-slider__fill">{#if blockLayout.inline && visibleLabelText}{visibleLabelText}{/if}</span>
-        <span class="poodle-slider__remainder">{#if blockLayout.inline && visibleValueText}{visibleValueText}{/if}</span>
+        <span class="poodle-slider__fill"></span>
+        <span class="poodle-slider__remainder"></span>
+        {#if blockLayout.labelInline || blockLayout.valueInline}
+          <!-- One stable row painted twice; the clip moves, the glyphs never do. -->
+          <span class="poodle-slider__inline poodle-slider__inline--selected">
+            <span class="poodle-slider__inline-row">
+              <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+            </span>
+          </span>
+          <span class="poodle-slider__inline poodle-slider__inline--remainder">
+            <span class="poodle-slider__inline-row">
+              <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+            </span>
+          </span>
+        {/if}
         <span class="poodle-slider__center"></span>
       </span>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span class="poodle-slider__hit" data-part="hit" onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-slider__thumb"></span></span>
     </span>
-    {#if blockLayout.fallback}<span class="poodle-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span>{/if}
   {:else}
   <span class="poodle-slider__track" aria-hidden="true">
     <span class="poodle-slider__fill"></span>

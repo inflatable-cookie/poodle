@@ -248,7 +248,7 @@
     display: block;
     width: 100%;
     min-height: var(--poodle-range-slider-block-min-height);
-    border-radius: 999px;
+    border-radius: var(--poodle-radius-control);
     overflow: visible;
     background: var(--poodle-recipe-range-slider-block-remainder-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
     color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));

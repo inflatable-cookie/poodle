@@ -6093,8 +6093,10 @@ fn bounds_contain(outer: gpui::Bounds<Pixels>, inner: gpui::Bounds<Pixels>) -> b
         && inner.right() <= outer.right() + px(0.5)
 }
 
-/// g16.046 repair. Fit uses the mounted parent width and GPUI shaped advance,
-/// not a fixed 160px span or `chars * font * 0.5`.
+/// g16.046 repair carried through g18.017: fit uses the mounted parent width
+/// and GPUI shaped advance. g18.017 removes the external fallback for a
+/// single Slider — a narrow span suppresses the optional label slot while the
+/// exact value keeps painting inside the capsule.
 #[test]
 fn block_slider_fit_uses_parent_width_and_shaped_advance() {
     let label = SliderSpec::new(50.0)
@@ -6105,15 +6107,34 @@ fn block_slider_fit_uses_parent_width_and_shaped_advance() {
     run_headless(|cx| {
         let _driver = mount_block_slider_host(cx, label.clone(), 80.0);
         assert!(
-            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_some(),
-            "narrow parent-owned span must miss and paint fallback"
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
+            "single Slider must never paint an external fallback line"
+        );
+        let label_slot = poodle_gpui_node_backend::bounds_for("block-slider-label-selected")
+            .expect("label slot stays in the row");
+        assert!(
+            f32::from(label_slot.size.width) < 0.5,
+            "collision must suppress the label advance, got {:?}",
+            label_slot.size.width
+        );
+        let value_slot = poodle_gpui_node_backend::bounds_for("block-slider-value-selected")
+            .expect("value slot");
+        assert!(
+            f32::from(value_slot.size.width) > 0.0,
+            "exact numeric value keeps painting in-track"
         );
     });
     run_headless(|cx| {
         let _driver = mount_block_slider_host(cx, label.clone(), 400.0);
         assert!(
             poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
-            "wide parent-owned span must fit inline"
+            "wide parent-owned span must inline"
+        );
+        let label_slot = poodle_gpui_node_backend::bounds_for("block-slider-label-selected")
+            .expect("label slot stays in the row");
+        assert!(
+            f32::from(label_slot.size.width) > 0.0,
+            "wide parent-owned span must coexist both strings"
         );
     });
 
@@ -6141,7 +6162,10 @@ fn block_slider_fit_uses_parent_width_and_shaped_advance() {
         "this platform's shaped advance must disagree with chars*font*0.5 (shaped={shaped}, heuristic={heuristic}, font={font_px})"
     );
     let available = shaped_need.min(heuristic_need);
-    let width = 2.0 * (available + 16.0);
+    // g18.017 whole-track law: the track-wide available span is
+    // floor(width - 2 * inset). Sizing the host so the whole-track span equals
+    // the smaller need makes the two metrics disagree about the label.
+    let width = available + 16.0;
     let sample = SliderSpec::new(50.0)
         .with_bounds(0.0, 100.0)
         .with_appearance(SliderAppearance::Block)
@@ -6150,7 +6174,10 @@ fn block_slider_fit_uses_parent_width_and_shaped_advance() {
     let mut missed = false;
     run_headless(|cx| {
         let _driver = mount_block_slider_host(cx, sample, width);
-        missed = poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_some();
+        let label_slot = poodle_gpui_node_backend::bounds_for("block-slider-label-selected");
+        missed = label_slot
+            .map(|bounds| f32::from(bounds.size.width) < 0.5)
+            .unwrap_or(true);
     });
     if shaped_need > heuristic_need {
         assert!(
@@ -6165,11 +6192,119 @@ fn block_slider_fit_uses_parent_width_and_shaped_advance() {
     }
 }
 
-/// g16.046 repair. Production GPUI host height follows the fit decision:
-/// inline reserves the 44px surface; fallback reserves the surface plus its
-/// line. A following sibling must sit below the fallback, not under it.
+/// g18.017: the block capsule resolves the rounded-square control radius in
+/// shared composition across both block components while the visible thumb
+/// keeps its circular radius.
 #[test]
-fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
+fn block_capsule_is_rounded_square_while_the_thumb_stays_circular() {
+    let theme = theme();
+    let control_radius = poodle_adapter::ThemeProvider::resolve_radius(&theme, "radius.control");
+    let root = RenderContext::new(&theme);
+    let ctx = root.with_block_layout_width(240.0);
+
+    let spec = SliderSpec::new(25.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("Blur")
+        .with_visible_value_text("25");
+    let node = poodle_render::slider(&spec, &ctx, &SliderHandlers::default());
+    let capsule = &node
+        .find(&|n| n.roles.get("part").map(String::as_str) == Some("block-surface"))
+        .expect("block surface")
+        .children[0];
+    let corners = &capsule.style.descriptor.corner_radii;
+    assert_eq!(corners.top_left, control_radius);
+    assert_eq!(corners.top_right, control_radius);
+    assert_eq!(corners.bottom_right, control_radius);
+    assert_eq!(corners.bottom_left, control_radius);
+    let thumb = &node
+        .find(&|n| n.roles.get("part").map(String::as_str) == Some("hit"))
+        .expect("block hit")
+        .children[0];
+    let thumb_radius = thumb.style.descriptor.corner_radii.top_left;
+    assert!(thumb_radius > 0.0);
+    assert_eq!(thumb_radius, thumb.style.descriptor.corner_radii.top_right);
+    assert_eq!(thumb_radius, thumb.style.descriptor.corner_radii.bottom_left);
+    assert_eq!(thumb_radius, thumb.style.descriptor.corner_radii.bottom_right);
+
+    let range_spec = RangeSliderSpec::new(20.0, 80.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("Price");
+    let range_node = poodle_render::range_slider(&range_spec, &ctx, poodle_render::RangeSliderHandlers::default());
+    let range_capsule = &range_node
+        .find(&|n| n.roles.get("part").map(String::as_str) == Some("block-surface"))
+        .expect("range block surface")
+        .children[0];
+    let range_corners = &range_capsule.style.descriptor.corner_radii;
+    assert_eq!(range_corners.top_left, control_radius);
+    assert_eq!(range_corners.top_right, control_radius);
+    assert_eq!(range_corners.bottom_right, control_radius);
+    assert_eq!(range_corners.bottom_left, control_radius);
+}
+
+/// g18.017: fixed inline presentation on the mounted host. The label and
+/// value glyph boxes stay at identical coordinates at low, mid and high
+/// values while the two clip boxes track the moving selected span.
+#[test]
+fn block_slider_text_layers_stay_fixed_while_the_boundary_moves() {
+    #[derive(Clone, Copy)]
+    struct Journey {
+        selected_clip: (f32, f32),
+        remainder_clip: (f32, f32),
+        label: (f32, f32),
+        value: (f32, f32),
+    }
+    let mut journey: Vec<(f64, Journey)> = Vec::new();
+    for value in [10.0f64, 50.0, 90.0] {
+        let spec = SliderSpec::new(value)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_visible_label("Blur")
+            .with_visible_value_text("67");
+        run_headless(|cx| {
+            let mut driver = mount_block_slider_host(cx, spec, 240.0);
+            let selected = poodle_gpui_node_backend::bounds_for("block-slider-clip-selected")
+                .expect("selected clip");
+            let remainder = poodle_gpui_node_backend::bounds_for("block-slider-clip-remainder")
+                .expect("remainder clip");
+            let label = poodle_gpui_node_backend::bounds_for("block-slider-label-selected")
+                .expect("label slot");
+            let value_slot = poodle_gpui_node_backend::bounds_for("block-slider-value-selected")
+                .expect("value slot");
+            journey.push((
+                value,
+                Journey {
+                    selected_clip: (f32::from(selected.origin.x), f32::from(selected.size.width)),
+                    remainder_clip: (f32::from(remainder.origin.x), f32::from(remainder.size.width)),
+                    label: (f32::from(label.origin.x), f32::from(label.size.width)),
+                    value: (f32::from(value_slot.origin.x), f32::from(value_slot.size.width)),
+                },
+            ));
+        });
+    }
+    assert_eq!(journey.len(), 3);
+    let first = journey[0].1;
+    for (value, step) in &journey {
+        assert_eq!(step.label, first.label, "label glyphs must not move at {value}");
+        assert_eq!(step.value, first.value, "value glyphs must not move at {value}");
+    }
+    // The clip boundary tracks the value: widths sum to the capsule span and
+    // the remainder starts where the selected span ends.
+    assert!(journey[0].1.selected_clip.1 < journey[1].1.selected_clip.1);
+    assert!(journey[1].1.selected_clip.1 < journey[2].1.selected_clip.1);
+    for step in &journey {
+        assert!((step.1.selected_clip.1 + step.1.remainder_clip.1 - 240.0).abs() < 0.5);
+        assert!((step.1.selected_clip.0 + step.1.selected_clip.1 - step.1.remainder_clip.0).abs() < 0.5);
+    }
+}
+
+/// g16.046 repair, amended by g18.017: the single Slider production host
+/// always reserves exactly the surface height (no fallback line exists),
+/// while the block RangeSlider still grows for its narrow fallback line and
+/// the following sibling never sits under it.
+#[test]
+fn block_slider_production_host_height_matches_surface_and_range_keeps_fallback() {
     let slider = SliderSpec::new(50.0)
         .with_bounds(0.0, 100.0)
         .with_appearance(SliderAppearance::Block)
@@ -6201,21 +6336,21 @@ fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
             80.0,
         );
         let host = poodle_gpui_node_backend::bounds_for("block-slider-host").expect("slider host");
-        let fallback =
-            poodle_gpui_node_backend::bounds_for("block-slider-fallback").expect("slider fallback");
         let next = poodle_gpui_node_backend::bounds_for("block-slider-next").expect("slider sibling");
+        // g18.017: a single Slider never paints a fallback line, so the narrow
+        // host reserves exactly the surface height and the sibling follows it.
         assert!(
-            bounds_contain(host, fallback),
-            "fallback {fallback:?} must sit inside production host {host:?}"
-        );
-        assert!(
-            next.origin.y >= fallback.bottom() - px(0.5),
-            "sibling {next:?} must sit below fallback {fallback:?}"
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
+            "single Slider must not paint a fallback line"
         );
         slider_narrow_h = f32::from(host.size.height);
         assert!(
-            slider_narrow_h > slider_surface + 4.0,
-            "narrow host {slider_narrow_h} must reserve more than surface {slider_surface}"
+            (slider_narrow_h - slider_surface).abs() <= 1.0,
+            "narrow host {slider_narrow_h} must reserve only the surface {slider_surface}"
+        );
+        assert!(
+            next.origin.y >= host.bottom() - px(0.5),
+            "sibling {next:?} must sit below the surface host {host:?}"
         );
     });
     run_headless(|cx| {
@@ -6250,8 +6385,8 @@ fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
             "wide sibling {next:?} must sit below the surface host {host:?}"
         );
         assert!(
-            slider_wide_h + 4.0 < slider_narrow_h,
-            "wide {slider_wide_h} must not retain narrow fallback height {slider_narrow_h}"
+            (slider_wide_h - slider_narrow_h).abs() <= 1.0,
+            "host height {slider_wide_h} must not depend on width now that the fallback is gone (narrow {slider_narrow_h})"
         );
     });
 

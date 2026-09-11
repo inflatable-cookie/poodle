@@ -22,7 +22,7 @@ import {
   physicalToValueNorm,
   resolveRangeVisibleRange,
   resolveSliderVisibleValue,
-  sliderFallbackText,
+  rangeSliderFallbackText,
   layoutSliderBlock,
   type RangeSliderContext,
   type SliderContext,
@@ -250,8 +250,8 @@ describe("block appearance helpers", () => {
     expect(resolveSliderVisibleValue(67)).toBe("67");
     expect(resolveSliderVisibleValue(67, () => "")).toBeNull();
     expect(resolveRangeVisibleRange(20, 80)).toBe("20 – 80");
-    expect(sliderFallbackText("Blur", "67")).toBe("Blur 67");
-    expect(sliderFallbackText(null, "")).toBeNull();
+    expect(rangeSliderFallbackText("Price", "20 – 80")).toBe("Price 20 – 80");
+    expect(rangeSliderFallbackText(null, "")).toBeNull();
   });
 
   test("vertical block is rejected before paint", () => {
@@ -285,24 +285,51 @@ describe("block appearance helpers", () => {
     expect(result.context.value).toEqual([20, 50]);
   });
 
-  test("layoutSliderBlock falls back when one item misses by a pixel", () => {
-    const fit = layoutSliderBlock({
-      capsuleSpan: 80,
-      selectedNorm: 0.5,
-      label: "Blur",
-      valueText: "67",
-      measure: (text) => (text === "Blur" ? 20 : 24.1),
-    });
-    expect(fit.inline).toBe(false);
-    expect(fit.fallback).toBe("Blur 67");
+  test("layoutSliderBlock coexists on whole-track fit and suppresses the label on collision", () => {
+    // 80px capsule → 64px available; 40+24 fits exactly, one pixel more misses.
     const equal = layoutSliderBlock({
       capsuleSpan: 80,
-      selectedNorm: 0.5,
       label: "Blur",
       valueText: "67",
-      measure: (text) => (text === "Blur" ? 20 : 24),
+      measure: (text) => (text === "Blur" ? 40 : 24),
     });
-    expect(equal.inline).toBe(true);
-    expect(equal.fallback).toBeNull();
+    expect(equal.labelInline).toBe(true);
+    expect(equal.valueInline).toBe(true);
+    const collision = layoutSliderBlock({
+      capsuleSpan: 80,
+      label: "Blur",
+      valueText: "67",
+      measure: (text) => (text === "Blur" ? 40 : 25),
+    });
+    expect(collision.labelInline).toBe(false);
+    // The exact numeric value is never suppressed.
+    expect(collision.valueInline).toBe(true);
+  });
+
+  test("layoutSliderBlock is value-independent: it never reads a selected span", () => {
+    const layout = layoutSliderBlock({
+      capsuleSpan: 160,
+      label: "Blur",
+      valueText: "67",
+      measure: (text) => text.length * 10,
+    });
+    expect(layout).toEqual({ labelInline: true, valueInline: true });
+  });
+
+  test("layoutSliderBlock keeps an absent channel in its slot", () => {
+    const soloLabel = layoutSliderBlock({
+      capsuleSpan: 160,
+      label: "Blur",
+      valueText: null,
+      measure: (text) => text.length * 10,
+    });
+    expect(soloLabel).toEqual({ labelInline: true, valueInline: false });
+    const soloValue = layoutSliderBlock({
+      capsuleSpan: 160,
+      label: null,
+      valueText: "67",
+      measure: (text) => text.length * 10,
+    });
+    expect(soloValue).toEqual({ labelInline: false, valueInline: true });
   });
 });

@@ -607,7 +607,6 @@ export {
   blockRegionAvailable,
   blockItemFits,
   blockInlineFits,
-  sliderFallbackText,
   rangeSliderFallbackText,
   physicalToValueNorm,
   layoutSliderBlock,

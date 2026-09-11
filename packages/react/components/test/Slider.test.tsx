@@ -287,6 +287,72 @@ describe("Slider (react) block appearance", () => {
     expect(onValueCommit).toHaveBeenCalledOnce();
   });
 
+  it("paints one stable row through two clipped layers and never a fallback", () => {
+    const { container } = render(<Slider appearance="block" value={50} visibleLabel="Blur" ariaLabel="Gain" />);
+    const selected = container.querySelector<HTMLElement>(".poodle-slider__inline--selected")!;
+    const remainder = container.querySelector<HTMLElement>(".poodle-slider__inline--remainder")!;
+    expect(selected).not.toBeNull();
+    expect(remainder).not.toBeNull();
+    for (const layer of [selected, remainder]) {
+      expect(layer.querySelector(".poodle-slider__inline-label")).not.toBeNull();
+      expect(layer.querySelector(".poodle-slider__inline-value")!.textContent).toBe("50");
+    }
+    expect(container.querySelector(".poodle-slider__fill")!.textContent).toBe("");
+    expect(container.querySelector(".poodle-slider__remainder")!.textContent).toBe("");
+    expect(container.querySelector(".poodle-slider__fallback")).toBeNull();
+  });
+
+  it("suppresses the optional label before the exact value at zero-width spans", () => {
+    const { container } = render(<Slider appearance="block" value={67} visibleLabel="Blur" ariaLabel="Gain" />);
+    const label = container.querySelector(".poodle-slider__inline--selected .poodle-slider__inline-label")!;
+    expect(label.textContent).toBe("");
+    const value = container.querySelector(".poodle-slider__inline--selected .poodle-slider__inline-value")!;
+    expect(value.textContent).toBe("67");
+    expect(container.querySelector(".poodle-slider__fallback")).toBeNull();
+  });
+
+  it("keeps the block capsule rounded-square and the thumb circular in CSS", () => {
+    const css = readFileSync(
+      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+      "utf8",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-min-height);\n    border-radius: var(--poodle-radius-control);",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
+    );
+  });
+
+  it("clips the selected layer at the fill boundary and mirrors the clip in RTL", () => {
+    const css = readFileSync(
+      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+      "utf8",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--selected {\n    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-appearance=\"block\"][data-direction=\"rtl\"] .poodle-slider__inline--selected {\n    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-appearance=\"block\"][data-direction=\"rtl\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);",
+    );
+  });
+
+  it("renders the same layers in RTL", () => {
+    const { container } = render(
+      <Slider appearance="block" direction="rtl" value={20} visibleLabel="Opacity" ariaLabel="Opacity" />,
+    );
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-direction")).toBe("rtl");
+    expect(container.querySelector(".poodle-slider__inline--selected")).not.toBeNull();
+    expect(container.querySelector(".poodle-slider__inline--remainder")).not.toBeNull();
+  });
+
   it("maps selected fill to Highlight and remainder to Canvas", () => {
     const css = readFileSync(
       new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
@@ -294,6 +360,8 @@ describe("Slider (react) block appearance", () => {
     );
     expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
     expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
+    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--selected {\n      color: HighlightText;");
+    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--remainder {\n      color: CanvasText;");
     expect(css).not.toMatch(/\.poodle-slider__fill \{\s*background: Canvas/);
   });
 });
