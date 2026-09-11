@@ -75,8 +75,8 @@ dispatches only after the repaired candidate closes.
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
 task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind parallel g18.012 and
-g18.018→g18.020. Live version 57 waits exactly on g18.012 task
-`697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
+g18.018→g18.020. The version-57 dependency mutation made it wait exactly on
+g18.012 task `697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
 `276cd890-5904-4c79-a08f-253c704e4185`. It sweeps all four editor surfaces in
 both web previews and is serial before any g18.006 continuation.
 
