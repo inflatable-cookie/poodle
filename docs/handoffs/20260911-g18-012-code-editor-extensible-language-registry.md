@@ -39,7 +39,8 @@ escape hatch.
 The current contract exposes a closed `CodeEditorLanguage` union. Both web
 engines contain matching switches with literal `@codemirror/lang-*` imports,
 and both component manifests declare the fixed grammar set. g18.011 owns the
-exact install/bundle/runtime baseline. g18.006 is blocked and g18.009 is held.
+exact install/bundle/runtime baseline. g18.006 is paused at the final candidate
+gate and g18.009 is dependency-queued behind it.
 
 ## Boundaries
 

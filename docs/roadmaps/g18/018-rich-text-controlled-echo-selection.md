@@ -63,9 +63,9 @@ replaces or rejects the local edit without a callback echo.
 
 ## Dispatch manifest
 
-- **State:** dependency-queue behind g18.013; may run in parallel with g18.014
-  and g18.017 after that dependency closes; serial before held g18.011 and
-  retained g18.006; g18.009 remains held
+- **State:** dependency-queued behind g18.013; may run in parallel with g18.014
+  and g18.017 after that dependency closes; explicit prerequisite of g18.011
+  and serial before retained g18.006; g18.009 waits on g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** paired RichTextEditor shells and private engines;
@@ -141,6 +141,6 @@ asserts only content retention and callback count, leaving selection unbound.
 
 ## Next task
 
-After g18.013, g18.014, g18.017 and g18.018 merge, release held g18.011 for the
-complete three-surface editor acceptance sweep. Keep g18.006 paused and g18.009
-held.
+After this task and g18.013/g18.014/g18.017/g18.019 close, Queue dependencies
+dispatch g18.011 for the complete four-surface editor acceptance sweep. Keep
+g18.006 paused; g18.009 waits on it.

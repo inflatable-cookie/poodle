@@ -1,6 +1,6 @@
 # 009 — v0.4.0 release certification and Desktop unblock
 
-Status: held — operator requires g18.010–g18.017 acceptance work first
+Status: dependency-queued behind g18.006 — final release lane
 Owner: Poodle release operations
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -42,9 +42,9 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 
 ## Dispatch manifest
 
-- **State:** queue-held behind g18.006; release only after g18.010–g18.017 and
-  all other blocking repairs are operator-accepted and the retained candidate
-  is rebuilt/reviewed from that source
+- **State:** dependency-queued behind g18.006 with no manual hold; g18.006 stays
+  paused until all product work, the four-surface sweep, g18.012, all blocking
+  repairs, and operator acceptance are complete
 - **Completion:** exact candidate local gates and branch dry run green;
   `v0.4.0` at that commit; tag dry run and publish green; npm core/Svelte 0.4.0
   metadata and tarballs verified; fresh ordinary install proves `./editor`;

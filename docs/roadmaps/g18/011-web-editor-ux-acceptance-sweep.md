@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: Queue-held behind g18.013–g18.019 — operator-required release gate
+Status: dependency-queued behind g18.013, g18.014, g18.017, g18.018 and g18.019 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -29,7 +29,7 @@ unbounded findings in place.
   expanded it to four surfaces with MarkdownRenderer
   before g18.006 resumes.
 - [x] g18.006 is blocked with a clean retained workspace and no candidate
-  mutations; g18.009 is Queue-held.
+  mutations; g18.009 is dependency-queued behind it without a manual hold.
 - [x] The sweep dimensions, evidence, severity, and continuation checkpoint are
   explicit.
 - [x] g18.010 focus treatment is merged and both previews are built from that
@@ -71,9 +71,10 @@ unbounded findings in place.
 
 ## Dispatch manifest
 
-- **State:** Queue-held behind g18.013→g18.014/g18.018 and parallel
-  g18.015–g18.017/g18.019; release the hold only after all seven merge; serial
-  before retained g18.006; g18.009 held
+- **State:** dependency-queued as task
+  `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.013→g18.014/g18.018 and
+  parallel g18.017/g18.019; it dispatches automatically after those five tasks
+  close and remains serial before g18.012 and retained g18.006
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep
@@ -164,4 +165,4 @@ Return findings to Chatterbox. g18.012 consumes the language-loading baseline
 and implements the accepted extensible registry. Promote and merge every other
 blocking repair, then seek the operator's explicit sweep acceptance before
 resuming retained g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep
-g18.009 held meanwhile.
+g18.009 remains dependency-queued meanwhile.

@@ -1,6 +1,6 @@
 # 019 — MarkdownRenderer shared safe/trusted rendering
 
-Status: ready for operator dispatch approval
+Status: active — Queue task `eac944cd-2ee0-4810-bd60-0976e3270e56`
 Owner: Poodle web editors
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -21,7 +21,7 @@ and make both `MarkdownEditor` preview and `MarkdownRenderer` use it.
 Default all rendered Markdown to the shared safe HTML policy. Provide the
 operator-approved explicit `htmlPolicy="trusted"` bypass for fully trusted
 consumer content. Add dedicated specimen pages in both web previews before the
-held editor acceptance sweep and release candidate.
+dependency-queued editor acceptance sweep and release candidate.
 
 ## Ready-State Rubric
 
@@ -74,9 +74,10 @@ held editor acceptance sweep and release candidate.
 
 ## Dispatch manifest
 
-- **State:** ready for Queue dispatch after a separate operator execution go;
-  independent and safe in parallel with g18.014, g18.017, and g18.018; serial
-  before held g18.011 and retained g18.006; g18.009 remains held
+- **State:** active in Queue task `eac944cd-2ee0-4810-bd60-0976e3270e56`;
+  independent and running in parallel with g18.017 and the g18.013 chain;
+  explicit prerequisite of g18.011 and therefore serial before g18.012,
+  retained g18.006, and g18.009
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** MarkdownEditor shells/tests; new paired
@@ -158,6 +159,6 @@ specimen pages, safe default output, and an explicit trusted opt-in.
 
 ## Next task
 
-After operator execution approval, dispatch g18.019 independently. Merge it and
-the other editor/Slider blockers before releasing g18.011 as a four-surface web
-editor acceptance sweep. Keep g18.006 paused and g18.009 held.
+Merge g18.019 and the other editor/Slider blockers. Queue dependencies then
+dispatch g18.011 as a four-surface web editor acceptance sweep and g18.012 after
+it. Keep g18.006 paused until operator acceptance; g18.009 waits on g18.006.

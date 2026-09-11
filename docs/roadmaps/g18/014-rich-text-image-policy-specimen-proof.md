@@ -32,7 +32,7 @@ request/insertion path itself is broken after the fixture becomes loadable.
 - [x] The operator reproduced the failure and approved repair.
 - [x] g18.013 already owns the same paired specimen files and must merge first
   to avoid concurrent edits.
-- [x] g18.011 remains Queue-held until this visible proof is accepted.
+- [x] g18.011 names this task as a Queue prerequisite.
 
 ## Decisions
 
@@ -54,8 +54,8 @@ request/insertion path itself is broken after the fixture becomes loadable.
 
 ## Dispatch manifest
 
-- **State:** dependency-queued behind g18.013; serial before held g18.011 and
-  retained g18.006; g18.009 remains held
+- **State:** dependency-queued behind g18.013; explicit prerequisite of g18.011
+  and serial before retained g18.006; g18.009 waits on g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** shared web-editor specimen documents/assets; paired
@@ -126,6 +126,6 @@ explains why neither the initial image nor a newly inserted one is visible.
 
 ## Next task
 
-After g18.013, this repair, and parallel g18.015–g18.017 merge, Chatterbox
-releases held g18.011 for the complete three-surface acceptance sweep. Keep
-g18.006 blocked and g18.009 held.
+After g18.013, this repair, and parallel g18.017/g18.019 merge, Queue
+dependencies dispatch g18.011 for the complete four-surface acceptance sweep.
+Keep g18.006 paused; g18.009 waits on it.
