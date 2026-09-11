@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: ready behind g18.010 — operator-required release gate
+Status: Queue-held behind g18.010 and g18.013 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -9,7 +9,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
 Depends on: g18.010 Queue task `d5ece513-5f28-4bfe-9132-12a70cf7a89f`
-complete and merged
+and g18.013 complete and merged
 
 ## Outcome
 
@@ -33,6 +33,8 @@ unbounded findings in place.
   explicit.
 - [ ] g18.010 focus treatment is merged and both previews are built from that
   exact source.
+- [ ] g18.013 replaces the link-like RichTextEditor command row with accepted
+  grouped Poodle controls in both previews.
 
 ## Decisions
 
@@ -56,8 +58,8 @@ unbounded findings in place.
 
 ## Dispatch manifest
 
-- **State:** dependency-queue behind g18.010; serial before resuming retained
-  g18.006; g18.009 remains held
+- **State:** Queue-held behind g18.010 and parallel g18.013; release the hold
+  only after both merge; serial before retained g18.006; g18.009 remains held
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep
