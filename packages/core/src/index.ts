@@ -445,6 +445,12 @@ export {
 } from "./markdown-blocks";
 
 export {
+  decodeHtmlEntities,
+  sanitizeMarkdownHtml,
+  type MarkdownHtmlPolicy,
+} from "./markdown-html";
+
+export {
   flattenVisibleTreeRows,
   findTreeNode,
   isTreeBranch,

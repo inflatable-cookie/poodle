@@ -3,3 +3,5 @@ export { AgentPlan, type AgentPlanProps } from "./AgentPlan";
 export { AgentPlanRecord, type AgentPlanRecordProps } from "./AgentPlanRecord";
 export { AgentTranscript, type AgentTranscriptProps } from "./AgentTranscript";
 export { MarkdownEditor, type MarkdownEditorProps } from "./MarkdownEditor";
+export { MarkdownRenderer, type MarkdownRendererProps } from "./MarkdownRenderer";
+export type { MarkdownHtmlPolicy } from "./markdown-content";

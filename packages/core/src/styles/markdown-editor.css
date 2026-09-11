@@ -168,45 +168,44 @@
     color: var(--poodle-recipe-markdown-editor-placeholder-textarea-text, var(--poodle-color-text-tertiary));
   }
 
-  .poodle-md-editor__preview {
-    flex: 1;
-    min-height: 0;
-    min-width: 0;
-    padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
+  /* Shared Markdown prose. This is the single typography and colour surface
+     for rendered Markdown: the editor preview pane and the standalone
+     MarkdownRenderer content both carry it, so safe/trusted and editor-free
+     output cannot drift in presentation. */
+  .poodle-md-prose {
     font-family: var(--poodle-typography-body-family);
     font-size: 0.875rem;
     line-height: 1.6;
     color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-primary));
-    overflow-y: auto;
   }
 
-  .poodle-md-editor__preview h1 {
+  .poodle-md-prose h1 {
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 0.5rem;
   }
 
-  .poodle-md-editor__preview h2 {
+  .poodle-md-prose h2 {
     font-size: 1.0625rem;
     font-weight: 600;
     margin: 0 0 0.375rem;
   }
 
-  .poodle-md-editor__preview h3 {
+  .poodle-md-prose h3 {
     font-size: 0.9375rem;
     font-weight: 600;
     margin: 0 0 0.25rem;
   }
 
-  .poodle-md-editor__preview p {
+  .poodle-md-prose p {
     margin: 0 0 0.5rem;
   }
 
-  .poodle-md-editor__preview strong {
+  .poodle-md-prose strong {
     font-weight: 700;
   }
 
-  .poodle-md-editor__preview code {
+  .poodle-md-prose code {
     padding: 0.125rem 0.25rem;
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-markdown-editor-preview-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
@@ -214,36 +213,71 @@
     font-size: 0.8125rem;
   }
 
-  .poodle-md-editor__preview blockquote {
+  .poodle-md-prose blockquote {
     margin: 0 0 0.5rem;
     padding: 0.375rem 0.75rem;
     border-left: 0.1875rem solid var(--poodle-color-border-default);
     color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-secondary));
   }
 
-  .poodle-md-editor__preview ul,
-  .poodle-md-editor__preview ol {
+  .poodle-md-prose ul,
+  .poodle-md-prose ol {
     margin: 0 0 0.5rem;
     padding-left: 1.25rem;
   }
 
-  .poodle-md-editor__preview li {
+  .poodle-md-prose li {
     margin: 0 0 0.125rem;
   }
 
-  .poodle-md-editor__preview hr {
+  .poodle-md-prose hr {
     border: 0;
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     margin: 0.75rem 0;
   }
 
-  .poodle-md-editor__preview a {
+  .poodle-md-prose a {
     color: var(--poodle-recipe-markdown-editor-preview-link-text, var(--poodle-color-accent-base));
     text-decoration: underline;
+  }
+
+  /* Editor preview pane: layout only. Typography and element styling come
+     from `.poodle-md-prose`, which this element also carries. */
+  .poodle-md-editor__preview {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
+    overflow-y: auto;
   }
 
   .poodle-md-editor__preview-empty {
     color: var(--poodle-recipe-markdown-editor-preview-empty-text, var(--poodle-color-text-tertiary));
     font-style: italic;
     margin: 0;
+  }
+
+  /* Standalone Markdown renderer: the same prose without editor chrome,
+     toolbar, border, or split-pane layout. Density mirrors the editor pane
+     padding values so editor preview and renderer stay aligned. */
+  .poodle-md-renderer {
+    --poodle-md-renderer-pad-x: 0.75rem;
+    --poodle-md-renderer-pad-y: 0.75rem;
+    min-width: 0;
+    padding: var(--poodle-md-renderer-pad-y) var(--poodle-md-renderer-pad-x);
+  }
+
+  .poodle-md-renderer[data-density="compact"] {
+    --poodle-md-renderer-pad-x: 0.625rem;
+    --poodle-md-renderer-pad-y: 0.625rem;
+  }
+
+  .poodle-md-renderer[data-density="comfortable"] {
+    --poodle-md-renderer-pad-x: 0.875rem;
+    --poodle-md-renderer-pad-y: 0.875rem;
+  }
+
+  .poodle-md-renderer__content {
+    min-width: 0;
+    overflow-wrap: break-word;
   }

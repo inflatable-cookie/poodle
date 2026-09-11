@@ -2,10 +2,13 @@ import "@inflatable-cookie/poodle-core/styles/markdown-editor.css";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
-import { marked } from "marked";
-
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
+import {
+  renderMarkdownHtml,
+  type MarkdownHtmlPolicy,
+  type MarkdownHtmlRenderer,
+} from "./markdown-content";
 import { UiPresentationProvider, resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -19,8 +22,11 @@ export interface MarkdownEditorProps {
   minHeight?: string;
   mode?: "edit" | "preview" | "split";
   /** Custom markdown-to-HTML renderer. When provided, replaces the built-in
-   *  fallback. Use this to plug in a real parser (marked, remark, etc.). */
-  renderHtml?: ((markdown: string) => string) | null;
+   *  fallback. Use this to plug in a real parser (marked, remark, etc.). The
+   *  result still passes through `htmlPolicy`; this prop never implies trust. */
+  renderHtml?: MarkdownHtmlRenderer;
+  /** Safe sanitizes every parser result. Trusted bypasses sanitization and requires fully trusted caller-owned content. */
+  htmlPolicy?: MarkdownHtmlPolicy;
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
@@ -47,6 +53,7 @@ export function MarkdownEditor({
   minHeight = "12rem",
   mode = "edit",
   renderHtml = null,
+  htmlPolicy = "safe",
   size = null,
   sizeRole = "control",
   density = null,
@@ -139,7 +146,7 @@ export function MarkdownEditor({
     setValue(event.currentTarget.value);
   }
 
-  const previewHtml = renderHtml ? renderHtml(currentValue) : (marked.parse(currentValue, { async: false }) as string);
+  const previewHtml = renderMarkdownHtml(currentValue, renderHtml, htmlPolicy);
 
   return (
     <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
@@ -212,12 +219,12 @@ export function MarkdownEditor({
           {currentMode !== "edit" ? (
             currentValue.trim() ? (
               <div
-                className="poodle-md-editor__preview"
+                className="poodle-md-editor__preview poodle-md-prose"
                 aria-label="Preview"
                 dangerouslySetInnerHTML={{ __html: previewHtml }}
               />
             ) : (
-              <div className="poodle-md-editor__preview" aria-label="Preview">
+              <div className="poodle-md-editor__preview poodle-md-prose" aria-label="Preview">
                 <p className="poodle-md-editor__preview-empty">Nothing to preview</p>
               </div>
             )

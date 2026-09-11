@@ -108,6 +108,10 @@ mounts a textarea, toolbar, editor state, or contenteditable surface.
 - Policy changes are live, deterministic, and do not emit editor callbacks.
 - Safe and trusted output use the same prose styles. Safety posture must not be
   inferred from visual treatment.
+- Migration: before `g18.019`, editor preview injected the parser result
+  unsanitized. Consumers that relied on raw Markdown HTML must pass
+  `htmlPolicy="trusted"` for fully trusted content; no compatibility fallback
+  restores trust implicitly.
 
 ### Slots
 
@@ -398,6 +402,30 @@ Mode button chrome delegates to the `IconButton` contract:
 | color | `var(--poodle-color-text-tertiary)` |
 | font-style | `italic` |
 | margin | `0` |
+
+### Shared Prose `.poodle-md-prose`
+
+The editor preview pane and the standalone renderer's content element both
+carry `.poodle-md-prose`. It owns the body typography
+(`--poodle-typography-body-family`, `0.875rem`, `1.6` line-height, text-primary
+colour) and the rendered-element rules above, so safe and trusted output and
+the editor preview versus the renderer cannot drift. The preview pane adds only
+layout (`flex: 1`, density-aware padding, `overflow-y: auto`); the renderer adds
+only its own root padding and wrapping.
+
+### Renderer Root `.poodle-md-renderer`
+
+| Property | Value |
+|----------|-------|
+| padding | `0.75rem` (default), `0.625rem` (`compact`), `0.875rem` (`comfortable`), selected by `data-density` |
+| min-width | `0` |
+
+### Renderer Content `.poodle-md-renderer__content`
+
+| Property | Value |
+|----------|-------|
+| min-width | `0` |
+| overflow-wrap | `break-word` |
 
 ### Size Adjustments
 

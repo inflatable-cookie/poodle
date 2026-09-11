@@ -1,11 +1,15 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/markdown-editor.css";
   import { tick } from "svelte";
-  import { marked } from "marked";
 
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
+  import {
+    renderMarkdownHtml,
+    type MarkdownHtmlPolicy,
+    type MarkdownHtmlRenderer,
+  } from "./markdown-content";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -22,7 +26,8 @@
     ariaLabel?: string;
     minHeight?: string;
     mode?: "edit" | "preview" | "split";
-    renderHtml?: ((markdown: string) => string) | null;
+    renderHtml?: MarkdownHtmlRenderer;
+    htmlPolicy?: MarkdownHtmlPolicy;
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
@@ -39,6 +44,7 @@
     minHeight = "12rem",
     mode = "edit",
     renderHtml = null,
+    htmlPolicy = "safe",
     size = null,
     sizeRole = "control",
     density = null,
@@ -46,7 +52,8 @@
   }: Props = $props();
 
   /** Custom markdown-to-HTML renderer. When provided, replaces the built-in
-   *  fallback. Use this to plug in a real parser (marked, remark, etc.). */
+   *  fallback. Use this to plug in a real parser (marked, remark, etc.). The
+   *  result still passes through `htmlPolicy`; this prop never implies trust. */
   let textareaEl = $state<HTMLTextAreaElement | null>(null);
   const uiPresentation = getUiPresentation();
   let uncontrolledValue = $state("");
@@ -144,9 +151,7 @@
     setValue((event.currentTarget as HTMLTextAreaElement).value);
   }
 
-  const previewHtml = $derived(
-    renderHtml ? renderHtml(currentValue) : (marked.parse(currentValue, { async: false }) as string)
-  );
+  const previewHtml = $derived(renderMarkdownHtml(currentValue, renderHtml, htmlPolicy));
 
   const toolbarActions = [
     { label: "Bold", icon: "bold", action: () => insertMarkdown("**", "**") },
@@ -227,7 +232,7 @@
       {/if}
 
       {#if currentMode !== "edit"}
-        <div class="poodle-md-editor__preview" aria-label="Preview">
+        <div class="poodle-md-editor__preview poodle-md-prose" aria-label="Preview">
           {#if currentValue.trim()}
             {@html previewHtml}
           {:else}

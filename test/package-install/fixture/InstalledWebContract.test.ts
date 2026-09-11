@@ -10,6 +10,7 @@ import {
   AgentPlanRecord,
   AgentTranscript,
   MarkdownEditor,
+  MarkdownRenderer,
 } from "@inflatable-cookie/poodle-svelte/markdown";
 
 describe("installed Svelte web contract", () => {
@@ -28,12 +29,14 @@ describe("installed Svelte web contract", () => {
       renderSvelte(AgentPlanRecord, { props: { plan: "1. Installed record", status: "accepted" } }),
       renderSvelte(AgentTranscript, { props: { items: [] } }),
       renderSvelte(MarkdownEditor),
+      renderSvelte(MarkdownRenderer, { props: { value: "# Installed renderer" } }),
     ];
     expect(markdown[0].container.textContent).toContain("installed markdown");
     expect(markdown[1].container.textContent).toContain("Installed plan");
     expect(markdown[2].container.textContent).toContain("Installed record");
     expect(markdown[3].container).toBeTruthy();
     expect(markdown[4].container.querySelector("textarea")).not.toBeNull();
+    expect(markdown[5].container.textContent).toContain("Installed renderer");
 
     for (const view of [...controls, ...markdown]) view.unmount();
   });

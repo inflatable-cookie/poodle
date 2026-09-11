@@ -28,6 +28,7 @@ describe("g18.008 web editor preview specimens (svelte)", () => {
     expect(webOnlyComponents.map((component) => component.slug)).toEqual([
       "meter-surface",
       ...EDITOR_SLUGS,
+      "markdown-renderer",
     ]);
     for (const slug of EDITOR_SLUGS) {
       const entry = allComponents.find((component) => component.slug === slug);
