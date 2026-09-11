@@ -1,6 +1,6 @@
 # 014 — Rich-text image-policy specimen proof
 
-Status: ready behind g18.013 — operator-confirmed specimen repair
+Status: complete — merged as `72c7a9e5e6ce288780c7a2e3e44715949a035221` (PR #249) on 2026-09-11
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -54,8 +54,9 @@ request/insertion path itself is broken after the fixture becomes loadable.
 
 ## Dispatch manifest
 
-- **State:** dependency-queued behind g18.013; explicit prerequisite of g18.011
-  and serial before retained g18.006; g18.009 waits on g18.006
+- **State:** complete; merged g18.014 unblocks the image-policy leg of
+  g18.011; `g18.011` still waits on parallel g18.012 and g18.018→g18.020,
+  and stays serial before retained g18.006; g18.009 waits on g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** shared web-editor specimen documents/assets; paired
@@ -126,6 +127,6 @@ explains why neither the initial image nor a newly inserted one is visible.
 
 ## Next task
 
-After g18.013, this repair, and parallel g18.017/g18.019 merge, Queue
-dependencies dispatch g18.011 for the complete four-surface acceptance sweep.
-Keep g18.006 paused; g18.009 waits on it.
+g18.014 is merged. Parallel g18.012 and g18.018→g18.020 now converge on
+g18.011 as a four-surface web editor acceptance sweep; then operator
+acceptance and retained g18.006. g18.009 waits on g18.006.

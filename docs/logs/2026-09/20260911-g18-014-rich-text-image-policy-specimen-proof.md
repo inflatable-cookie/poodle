@@ -1,6 +1,7 @@
 # g18.014 — RichTextEditor Image Policy specimen proof
 
-Status: implemented, awaiting merge
+Status: merged
+Merge: `72c7a9e5e6ce288780c7a2e3e44715949a035221` (PR #249) on 2026-09-11
 Date: 2026-09-11
 Branch: `ns-5b42e240-5e63-4bdd-8035-7f2285776c6e`
 Card: `docs/roadmaps/g18/014-rich-text-image-policy-specimen-proof.md`
@@ -108,6 +109,38 @@ by the specimen, whose callback is deliberately deterministic. The new browser
 probe needs built `packages/core/dist` and the two preview dev servers, like
 the existing `test:visual` and `test:*-browser` probes, so it stays out of
 `ci:web`.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `72c7a9e5e6ce288780c7a2e3e44715949a035221` on 2026-09-11 (PR #249),
+  with parents `2018876d10686f1dc2a36114720527a42a4cbe6d` (main) and
+  `71f2d3104a6bfb54907521c11266cf18f678979c` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `71f2d3104a6bfb54907521c11266cf18f678979c` by betterthanclay
+  ([comment #5633674856](https://github.com/inflatable-cookie/poodle/pull/249#issuecomment-5633674856)).
+  No blocking findings; two non-blocking notes (paired-but-different
+  internal feedback class names, and the 300 ms delay plus host counters
+  being specimen-host behavior rather than Poodle API), both safe to defer.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): Svelte + React preview suites 25 files / 116 tests pass
+  (includes the 10 new g18.014 cases);
+  `effigy test:rich-text-image-policy-chromium` and
+  `effigy test:rich-text-image-policy-webkit` 72/72 checks each;
+  `effigy test:components` 413 files / 4064 tests pass;
+  `effigy test:a11y` exit 0; `effigy svelte:build` and
+  `effigy react:build` exit 0; `effigy docs:check` exit 0;
+  `effigy check:svelte-preview` 0 errors with 6 pre-existing warnings;
+  `effigy check:react-preview` red on the pre-existing repo-wide
+  string/`ControlSize` specimen backlog (265 errors, verified identical on
+  `main`, none in the touched files); visual sweep tier 4 pairs compared,
+  0 failing; `git diff --check` clean; CI `rust` and `web` pass on PR #249.
+- Worker validation at the branch head is recorded above under Validation;
+  the merged head adds no source over the reviewed head (merge only).
+- Deferred: no release, tag, publish, Desktop, native, or retained-task work
+  starts from this task. `g18.011` stays held until parallel g18.012 and
+  g18.018→g18.020 converge on it; then operator acceptance and retained
+  `g18.006`. `g18.009` stays held.
 
 ## Handoff
 

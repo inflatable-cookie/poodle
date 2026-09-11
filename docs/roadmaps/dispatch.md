@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.020 promoted; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.014 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -53,6 +53,10 @@ rust/web checks at the reviewed head.
 fixed inline presentation — merged as `f91be412b60739e96c29a45e9c17969c05b85f49`
 (PR #246) on 2026-09-11 after exact-head independent re-review and green
 rust/web checks at the reviewed head.
+[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) — rich-text
+image-policy specimen proof — merged as `72c7a9e5e6ce288780c7a2e3e44715949a035221`
+(PR #249) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
 
 ## Active and paused queue tasks
 
@@ -70,22 +74,23 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014 and g18.018, with
-g18.020 to be added in place after its Queue submission. It sweeps all four
-editor surfaces in both web previews and is serial before g18.012 and any
-g18.006 continuation.
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind parallel g18.012 and
+g18.018→g18.020, with g18.020 to be added in place after its Queue submission.
+It sweeps all four editor surfaces in both web previews and is serial before
+any g18.006 continuation.
 
-[`g18.012`](g18/012-code-editor-extensible-language-registry.md) is
-dependency-queued behind g18.011. It replaces the closed grammar catalogue
-with consumer-selected lazy CodeMirror language providers before g18.006.
+[`g18.012`](g18/012-code-editor-extensible-language-registry.md) runs in
+parallel with g18.018→g18.020 as a second prerequisite of g18.011. It replaces
+the closed grammar catalogue with consumer-selected lazy CodeMirror language
+providers before the sweep.
 
 [`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is merged (PR #245).
 It replaced the link-like command row with proper grouped Poodle controls;
 g18.014 and g18.018 are unblocked.
 
-[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is active,
-unblocked by merged g18.013. It replaces the dead external image fixture
-with visible deterministic seeded/insertion proof before g18.011 is released.
+[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is merged (PR #249).
+It replaced the dead external image fixture with visible deterministic
+seeded/insertion proof. The image-policy leg of g18.011 is unblocked.
 
 [`g18.017`](g18/017-block-slider-fixed-inline-presentation.md) is merged (PR #246).
 It gave the block Slider family rounded-square corners and kept
@@ -93,8 +98,8 @@ single-Slider text fixed inside the track with split-colour crossover across
 active runtimes. The Slider leg of g18.011 is unblocked.
 
 [`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is in review as PR
-#248, unblocked by merged g18.013. It touches the same RichTextEditor shells, so
-it runs beside g18.014. It
+#248, unblocked by merged g18.013. It touches the same RichTextEditor shells
+and now runs in parallel with g18.012 before the sweep. It
 makes accepted controlled echoes preserve caret, selection, history and focus
 in both web wrappers and must merge before g18.011 is released.
 
@@ -104,7 +109,7 @@ safe/trusted content path with MarkdownEditor preview, and added both specimen
 pages. The MarkdownRenderer leg of g18.011 is unblocked.
 
 [`g18.020`](g18/020-rich-text-heading-mode-select.md) is ready behind active
-g18.014 and g18.018. It replaces fixed H1–H3 buttons with one
+g18.018. It replaces fixed H1–H3 buttons with one
 consumer-configurable Normal/H1–H6 Select and extends real document support
 through H6. After Queue submission, add it as a new dependency of existing
 g18.011 task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` without replacement.
