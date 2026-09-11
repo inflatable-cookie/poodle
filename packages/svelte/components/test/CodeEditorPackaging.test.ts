@@ -25,9 +25,18 @@ describe("CodeEditor packaging", () => {
     expect(react).toContain("./CodeEditor");
   });
 
-  it("both manifests pin the exact CodeMirror set with no ranges", () => {
+  it("both manifests pin the exact base CodeMirror set with no grammar packages", () => {
+    // g18.012: language support is consumer-owned. The shells pin the base
+    // engine substrate only; every `@codemirror/lang-*` and legacy-modes
+    // package is refused so the closed catalogue cannot return.
     const expected = [
       "@codemirror/commands",
+      "@codemirror/language",
+      "@codemirror/search",
+      "@codemirror/state",
+      "@codemirror/view",
+    ];
+    const forbidden = [
       "@codemirror/lang-css",
       "@codemirror/lang-html",
       "@codemirror/lang-javascript",
@@ -35,11 +44,7 @@ describe("CodeEditor packaging", () => {
       "@codemirror/lang-markdown",
       "@codemirror/lang-rust",
       "@codemirror/lang-yaml",
-      "@codemirror/language",
       "@codemirror/legacy-modes",
-      "@codemirror/search",
-      "@codemirror/state",
-      "@codemirror/view",
     ];
     for (const manifestPath of [
       "packages/svelte/components/package.json",
@@ -50,8 +55,23 @@ describe("CodeEditor packaging", () => {
         const specifier = manifest.dependencies?.[name];
         expect(specifier, `${manifestPath} ${name}`).toMatch(/^\d+\.\d+\.\d+$/);
       }
+      for (const name of forbidden) {
+        expect(manifest.dependencies?.[name], `${manifestPath} ${name}`).toBeUndefined();
+      }
       const raw = read(manifestPath);
       expect(raw).toContain('"./editor"');
+      expect(raw).toContain('"./editor/codemirror"');
+    }
+  });
+
+  it("both shells expose the CodeMirror adapter subpath exporting the registry constructor", () => {
+    for (const adapter of [
+      "packages/svelte/components/src/editor-codemirror.ts",
+      "packages/react/components/src/editor-codemirror.ts",
+    ]) {
+      const source = read(adapter);
+      expect(source).toContain("export function createCodeEditorLanguageRegistry");
+      expect(source).toContain("LanguageSupport");
     }
   });
 
@@ -74,6 +94,10 @@ describe("CodeEditor packaging", () => {
       "packages/react/components/dist/editor.js",
       "packages/svelte/components/dist/editor.d.ts",
       "packages/react/components/dist/editor.d.ts",
+      "packages/svelte/components/dist/editor-codemirror.js",
+      "packages/react/components/dist/editor-codemirror.js",
+      "packages/svelte/components/dist/editor-codemirror.d.ts",
+      "packages/react/components/dist/editor-codemirror.d.ts",
     ];
     const available = distFiles.every((file) => existsSync(file));
 
@@ -86,6 +110,21 @@ describe("CodeEditor packaging", () => {
         const bundle = read(root);
         expect(bundle).not.toContain("codemirror");
         expect(bundle).not.toContain("code-editor-engine");
+      }
+    });
+
+    it.skipIf(!available)("no emitted bundle names a grammar package", () => {
+      const bundles = [
+        "packages/svelte/components/dist/editor.client.js",
+        "packages/svelte/components/dist/editor.server.js",
+        "packages/react/components/dist/editor.js",
+        "packages/svelte/components/dist/editor-codemirror.js",
+        "packages/react/components/dist/editor-codemirror.js",
+      ];
+      for (const bundle of bundles) {
+        const source = read(bundle);
+        expect(source).not.toMatch(/@codemirror\/lang-[a-z]+/);
+        expect(source).not.toContain("@codemirror/legacy-modes");
       }
     });
 

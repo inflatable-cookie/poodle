@@ -19,6 +19,8 @@
     "reports": "bun scripts/export-component-docs.ts && bun scripts/build-parity-report.ts && bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/lang-json": "6.0.2",
     "@inflatable-cookie/poodle-react": "workspace:*",
     "@inflatable-cookie/poodle-core": "workspace:*",
     "lucide-static": "1.31.0",
@@ -26,6 +28,8 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@codemirror/language": "6.12.4",
+    "@codemirror/state": "6.7.4",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",

@@ -1,10 +1,8 @@
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { EditorState } from "@codemirror/state";
-import { syntaxTree } from "@codemirror/language";
 
 import { CodeEditor } from "../src/CodeEditor";
-import { languageFor } from "../src/code-editor-languages";
 import {
   assertAdmittedLanguage,
   createCodeEditorEngine,
@@ -16,8 +14,12 @@ import type {
 } from "../src/code-editor-engine";
 import {
   applyCodeEditorEdits,
+  createCodeEditorLanguageRegistry,
   type CodeEditorChange,
 } from "@inflatable-cookie/poodle-core";
+
+/** A valid, harmless CodeMirror extension standing in for a consumer grammar. */
+const STANDIN_LANGUAGE = EditorState.allowMultipleSelections.of(true);
 
 function contentOf(container: HTMLElement): HTMLElement {
   const content = container.querySelector<HTMLElement>(".cm-content");
@@ -112,7 +114,13 @@ describe("CodeEditor (react)", () => {
   });
 
   it("an unsupported language fails closed instead of falling back", () => {
-    expect(() => assertAdmittedLanguage("svelte")).toThrow(/unsupported language/);
+    expect(() => assertAdmittedLanguage("svelte", null)).toThrow(/unsupported language/);
+    const registry = createCodeEditorLanguageRegistry({
+      python: () => Promise.resolve(STANDIN_LANGUAGE),
+    });
+    expect(() => assertAdmittedLanguage("svelte", registry)).toThrow(/unsupported language/);
+    expect(() => assertAdmittedLanguage("python", registry)).not.toThrow();
+    expect(() => assertAdmittedLanguage("plain-text", null)).not.toThrow();
   });
 
   it("unmount destroys the engine view", async () => {
@@ -165,19 +173,34 @@ describe("CodeEditor transactions", () => {
     expect(applyCodeEditorEdits(previous, change.edits)).toBe(change.value);
   });
 
-  it("TypeScript mode parses interfaces; the admitted set refuses svelte at runtime", async () => {
-    const support = await languageFor("typescript", "full");
-    const state = EditorState.create({
-      doc: "interface Point { x: number; }",
-      extensions: [support],
+  it("a consumer-defined id absent from Poodle source mounts through the registry", async () => {
+    let loads = 0;
+    const registry = createCodeEditorLanguageRegistry({
+      "brand/lang+2026": () => {
+        loads += 1;
+        return Promise.resolve(STANDIN_LANGUAGE);
+      },
     });
-    const names: string[] = [];
-    const cursor = syntaxTree(state).cursor();
-    do {
-      names.push(cursor.name);
-    } while (cursor.next());
-    expect(names).toContain("InterfaceDeclaration");
-    await expect(languageFor("svelte" as never, "full")).rejects.toThrow();
+    const onChange = vi.fn();
+    const { container } = render(
+      <CodeEditor
+        value="one"
+        language="brand/lang+2026"
+        languageRegistry={registry}
+        onChange={onChange}
+      />,
+    );
+    await vi.waitFor(() => {
+      expect(visibleText(container)).toBe("one");
+    });
+    expect(loads).toBe(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("an unknown id is refused before any editor mounts", () => {
+    expect(() => render(<CodeEditor value="one" language="cobol" />)).toThrow(
+      /unsupported language "cobol"/,
+    );
   });
 });
 
@@ -377,15 +400,69 @@ describe("CodeEditor user transactions (react)", () => {
   });
 
   it("plain performance mode loads no language extension", async () => {
-    await expect(languageFor("typescript", "plain")).resolves.toEqual([]);
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    try {
+      let loads = 0;
+      const registry = createCodeEditorLanguageRegistry({
+        python: () => {
+          loads += 1;
+          return Promise.resolve(STANDIN_LANGUAGE);
+        },
+      });
+      const engine = await createCodeEditorEngine(
+        host,
+        {
+          value: "one",
+          language: "python",
+          languageRegistry: registry,
+          performanceMode: "plain",
+          lineNumbers: false,
+          searchable: false,
+          readOnly: false,
+          disabled: false,
+          placeholder: "",
+          ariaLabel: "Code editor",
+          wrapLines: false,
+          tabSize: 2,
+          tabBehavior: "focus",
+          diagnostics: [],
+        },
+        { onChange: () => {}, onActiveDiagnostic: () => {} },
+      );
+      expect(loads).toBe(0);
+      engine.destroy();
+    } finally {
+      host.remove();
+    }
   });
 
   it("host updates in the creation window still win", async () => {
+    const resolver: { resolve?: (extension: unknown) => void } = {};
+    const registry = createCodeEditorLanguageRegistry({
+      python: () =>
+        new Promise((resolve) => {
+          resolver.resolve = resolve;
+        }),
+    });
     const onChange = vi.fn();
     const view = render(
-      <CodeEditor value="first" language="typescript" onChange={onChange} />,
+      <CodeEditor
+        value="first"
+        language="python"
+        languageRegistry={registry}
+        onChange={onChange}
+      />,
     );
-    view.rerender(<CodeEditor value="second" language="typescript" onChange={onChange} />);
+    view.rerender(
+      <CodeEditor
+        value="second"
+        language="python"
+        languageRegistry={registry}
+        onChange={onChange}
+      />,
+    );
+    resolver.resolve?.(STANDIN_LANGUAGE);
     await vi.waitFor(() => {
       expect(visibleText(view.container)).toBe("second");
     });
@@ -635,6 +712,7 @@ describe("CodeEditor focus entry (react)", () => {
         {
           value: "one",
           language: "plain-text",
+          languageRegistry: null,
           lineNumbers: false,
           searchable: false,
           readOnly: false,
@@ -671,6 +749,7 @@ describe("CodeEditor engine diagnostics", () => {
   const base: CodeEditorEngineOptions = {
     value: "one\ntwo",
     language: "plain-text",
+    languageRegistry: null,
     lineNumbers: false,
     searchable: false,
     readOnly: false,
@@ -883,5 +962,179 @@ describe("CodeEditor line-number reconfiguration (react)", () => {
       expect(lineGutter(view.container)).not.toBeNull();
     });
     expect(diagnosticMessage(view.container)).toBe("warning 2:1 — second");
+  });
+});
+
+/**
+ * g18.012 registry semantics over the engine: controlled switching loads each
+ * language once, plain text never consults the registry, and rejected loads
+ * refuse engine creation before any editor can present false syntax state.
+ */
+describe("CodeEditor language registry engine (react)", () => {
+  function engineHost(): { host: HTMLDivElement; cleanup: () => void } {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    return { host, cleanup: () => host.remove() };
+  }
+
+  function options(
+    overrides: Partial<CodeEditorEngineOptions> = {},
+  ): CodeEditorEngineOptions {
+    return {
+      value: "one",
+      language: "plain-text",
+      languageRegistry: null,
+      lineNumbers: false,
+      searchable: false,
+      readOnly: false,
+      disabled: false,
+      placeholder: "",
+      ariaLabel: "Code editor",
+      wrapLines: false,
+      tabSize: 2,
+      tabBehavior: "focus",
+      performanceMode: "full",
+      diagnostics: [],
+      ...overrides,
+    };
+  }
+
+  const callbacks = { onChange: () => {}, onActiveDiagnostic: () => {} };
+
+  it("switching between registered ids reconfigures without remounting and loads each id once", async () => {
+    const { host, cleanup } = engineHost();
+    try {
+      const loads: string[] = [];
+      const registry = createCodeEditorLanguageRegistry({
+        python: () => {
+          loads.push("python");
+          return Promise.resolve(STANDIN_LANGUAGE);
+        },
+        kdl: () => {
+          loads.push("kdl");
+          return Promise.resolve(STANDIN_LANGUAGE);
+        },
+      });
+      const engine = await createCodeEditorEngine(
+        host,
+        options({ language: "python", languageRegistry: registry }),
+        callbacks,
+      );
+      const editor = host.querySelector(".cm-editor");
+      expect(editor).not.toBeNull();
+      expect(loads).toEqual(["python"]);
+      await engine.update({ language: "kdl" });
+      expect(loads).toEqual(["python", "kdl"]);
+      expect(host.querySelector(".cm-editor")).toBe(editor);
+      // Switching back reuses the memoized load.
+      await engine.update({ language: "python" });
+      expect(loads).toEqual(["python", "kdl"]);
+      expect(host.querySelector(".cm-editor")).toBe(editor);
+      expect(host.querySelector(".cm-content")?.textContent).toContain("one");
+      engine.destroy();
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("switching to plain-text reconfigures to no language without consulting the registry", async () => {
+    const { host, cleanup } = engineHost();
+    try {
+      let loads = 0;
+      const registry = createCodeEditorLanguageRegistry({
+        python: () => {
+          loads += 1;
+          return Promise.resolve(STANDIN_LANGUAGE);
+        },
+      });
+      const engine = await createCodeEditorEngine(
+        host,
+        options({ language: "python", languageRegistry: registry }),
+        callbacks,
+      );
+      expect(loads).toBe(1);
+      await engine.update({ language: "plain-text" });
+      expect(loads).toBe(1);
+      expect(host.querySelector(".cm-content")?.textContent).toContain("one");
+      engine.destroy();
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("a registry swap re-resolves through the new registry", async () => {
+    const { host, cleanup } = engineHost();
+    try {
+      const firstLoads: string[] = [];
+      const secondLoads: string[] = [];
+      const first = createCodeEditorLanguageRegistry({
+        python: () => {
+          firstLoads.push("python");
+          return Promise.resolve(STANDIN_LANGUAGE);
+        },
+      });
+      const second = createCodeEditorLanguageRegistry({
+        python: () => {
+          secondLoads.push("python");
+          return Promise.resolve(STANDIN_LANGUAGE);
+        },
+      });
+      const engine = await createCodeEditorEngine(
+        host,
+        options({ language: "python", languageRegistry: first }),
+        callbacks,
+      );
+      expect(firstLoads).toEqual(["python"]);
+      await engine.update({ languageRegistry: second });
+      expect(secondLoads).toEqual(["python"]);
+      engine.destroy();
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("an id the registry does not admit rejects engine creation", async () => {
+    const { host, cleanup } = engineHost();
+    try {
+      const registry = createCodeEditorLanguageRegistry({
+        python: () => Promise.resolve(STANDIN_LANGUAGE),
+      });
+      await expect(
+        createCodeEditorEngine(host, options({ language: "cobol", languageRegistry: registry }), callbacks),
+      ).rejects.toThrow(/unsupported language "cobol"/);
+      expect(host.querySelector(".cm-editor")).toBeNull();
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("a rejected load refuses engine creation instead of presenting false syntax state", async () => {
+    const { host, cleanup } = engineHost();
+    try {
+      const registry = createCodeEditorLanguageRegistry({
+        python: () => Promise.reject(new Error("grammar exploded")),
+      });
+      await expect(
+        createCodeEditorEngine(host, options({ language: "python", languageRegistry: registry }), callbacks),
+      ).rejects.toThrow("grammar exploded");
+      expect(host.querySelector(".cm-editor")).toBeNull();
+    } finally {
+      cleanup();
+    }
+  });
+
+  it("a loader resolving a non-extension is refused before reaching the editor", async () => {
+    const { host, cleanup } = engineHost();
+    try {
+      const registry = createCodeEditorLanguageRegistry({
+        python: () => Promise.resolve("not an extension" as never),
+      });
+      await expect(
+        createCodeEditorEngine(host, options({ language: "python", languageRegistry: registry }), callbacks),
+      ).rejects.toThrow(/did not resolve to a CodeMirror language extension/);
+      expect(host.querySelector(".cm-editor")).toBeNull();
+    } finally {
+      cleanup();
+    }
   });
 });

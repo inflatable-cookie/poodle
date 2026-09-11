@@ -61,16 +61,20 @@ actual Svelte prop, snippet, bindable, and callback types; a bare generic
 | Package | Externalized | Peers | Parser |
 | --- | --- | --- | --- |
 | core | none of svelte/react/marked | none | no `marked` edge |
-| Svelte | `svelte`, core, `marked`, pinned `@codemirror/*` (editor graph only), pinned `@tiptap/*` (rich-text graph only) | `svelte: >=5.56.8 <6`; optional `marked: ^18.0.9` | only `./markdown` |
-| React | `react`, `react-dom`, core, `marked`, pinned `@codemirror/*` (editor graph only), pinned `@tiptap/*` (rich-text graph only) | `react`/`react-dom` as today; optional `marked: ^18.0.9` | only `./markdown` |
+| Svelte | `svelte`, core, `marked`, pinned base `@codemirror/*` (editor graph only, no grammar packages), pinned `@tiptap/*` (rich-text graph only) | `svelte: >=5.56.8 <6`; optional `marked: ^18.0.9` | only `./markdown` |
+| React | `react`, `react-dom`, core, `marked`, pinned base `@codemirror/*` (editor graph only, no grammar packages), pinned `@tiptap/*` (rich-text graph only) | `react`/`react-dom` as today; optional `marked: ^18.0.9` | only `./markdown` |
 
 Optional `marked` is required when a consumer imports `./markdown`. Ordinary
-root or direct Button/Select graphs must not resolve `marked`. The pinned
-`@codemirror/*` dependencies are required when a consumer imports `./editor`;
-root-only graphs must not resolve them. The pinned `@tiptap/*` dependencies
-are required when a consumer imports `./rich-text`; root-only, `./markdown`,
-and `./editor` graphs must not resolve them. Lowering the Svelte floor needs a
-separately proven older compiler/runtime build.
+root or direct Button/Select graphs must not resolve `marked`. The pinned base
+`@codemirror/*` dependencies (`commands`, `language`, `search`, `state`,
+`view`) are required when a consumer imports `./editor` or
+`./editor/codemirror`; root-only graphs must not resolve them. No
+`@codemirror/lang-*` or `@codemirror/legacy-modes` package is a Poodle
+dependency: language support is consumer-owned (g18.012), and consumers
+install exactly the grammar packages their registry loaders name. The pinned
+`@tiptap/*` dependencies are required when a consumer imports `./rich-text`;
+root-only, `./markdown`, and `./editor` graphs must not resolve them. Lowering
+the Svelte floor needs a separately proven older compiler/runtime build.
 
 ## Stable names
 
@@ -689,6 +693,11 @@ browser and SSR resolution are separately proven.
     "browser": "./dist/editor.client.js",
     "default": "./dist/editor.server.js"
   },
+  "./editor/codemirror": {
+    "types": "./dist/editor-codemirror.d.ts",
+    "browser": "./dist/editor-codemirror.js",
+    "default": "./dist/editor-codemirror.js"
+  },
   "./rich-text": {
     "types": "./dist/rich-text.d.ts",
     "browser": "./dist/rich-text.client.js",
@@ -737,12 +746,20 @@ Laws:
 
 - `./editor` exports `CodeEditor` and its public contract types only. No
   engine type crosses the entry.
+- `./editor/codemirror` exports only the opaque language-registry constructor
+  and its loader/input types (g18.012). It is the one supported registry
+  constructor; loaders are typed to resolve a CodeMirror `LanguageSupport`, so
+  arbitrary editor extensions, themes, keymaps, plugins, and DOM hooks have no
+  public path. Like `./types`, it is a single isomorphic compiled file used
+  for both `browser` and `default` conditions, not a dual component entry.
 - CodeMirror packages resolve as external imports of the `./editor` graph.
   A bundled engine copy inside `dist/` fails the root-light audit.
 - Root `.`, every roster barrel, and every roster chunk must not resolve a
   `@codemirror/*` module or the editor engine from a root-only import.
-- Each admitted language stays in its own chunk behind a literal dynamic
-  import; the base `./editor` entry never pays for unrequested grammars.
+- No `@codemirror/lang-*` or `@codemirror/legacy-modes` module may appear in
+  any dependency section of the shell manifests or in any emitted graph of
+  the shell packages (g18.012). Consumers own grammar installation through
+  the loaders they pass to `createCodeEditorLanguageRegistry`.
 
 ## Rich-text entries
 
@@ -789,6 +806,10 @@ React is one JavaScript lane. No `browser`/`import` environment selector.
   "./editor": {
     "types": "./dist/editor.d.ts",
     "default": "./dist/editor.js"
+  },
+  "./editor/codemirror": {
+    "types": "./dist/editor-codemirror.d.ts",
+    "default": "./dist/editor-codemirror.js"
   },
   "./rich-text": {
     "types": "./dist/rich-text.d.ts",

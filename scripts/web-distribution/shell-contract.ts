@@ -249,6 +249,19 @@ export const TIPTAP_EXTERNAL_MODULES = [
 
 export const CODEMIRROR_EXTERNAL_MODULES = [
   "@codemirror/commands",
+  "@codemirror/language",
+  "@codemirror/search",
+  "@codemirror/state",
+  "@codemirror/view",
+] as const;
+
+/**
+ * Grammar packages Poodle must never depend on or import (g18.012): language
+ * support is consumer-owned. Consumers install exactly the `@codemirror/lang-*`
+ * packages their registry loads; these names must stay out of the shell
+ * manifests and out of every emitted graph.
+ */
+export const FORBIDDEN_GRAMMAR_MODULES = [
   "@codemirror/lang-css",
   "@codemirror/lang-html",
   "@codemirror/lang-javascript",
@@ -256,12 +269,7 @@ export const CODEMIRROR_EXTERNAL_MODULES = [
   "@codemirror/lang-markdown",
   "@codemirror/lang-rust",
   "@codemirror/lang-yaml",
-  "@codemirror/language",
-  "@codemirror/legacy-modes/mode/shell",
-  "@codemirror/legacy-modes/mode/toml",
-  "@codemirror/search",
-  "@codemirror/state",
-  "@codemirror/view",
+  "@codemirror/legacy-modes",
 ] as const;
 
 export const SHELL_EXTERNAL_MODULES = [
@@ -293,6 +301,7 @@ assertSorted([...SHELL_ROSTER_NAMES], "SHELL_ROSTER_NAMES");
 assertSorted([...MARKDOWN_COMPONENT_NAMES], "MARKDOWN_COMPONENT_NAMES");
 assertSorted([...MARKDOWN_RENDERER_SVELTE_NAMES], "MARKDOWN_RENDERER_SVELTE_NAMES");
 assertSorted([...INTERNAL_SVELTE_NAMES], "INTERNAL_SVELTE_NAMES");
+assertSorted([...FORBIDDEN_GRAMMAR_MODULES], "FORBIDDEN_GRAMMAR_MODULES");
 
 const markdownSet = new Set<string>(MARKDOWN_COMPONENT_NAMES);
 
@@ -333,6 +342,11 @@ export function sveltePackageExports() {
       "./dist/editor.client.js",
       "./dist/editor.server.js",
     ),
+    "./editor/codemirror": svelteCondition(
+      "./dist/editor-codemirror.d.ts",
+      "./dist/editor-codemirror.js",
+      "./dist/editor-codemirror.js",
+    ),
     "./rich-text": svelteCondition(
       "./dist/rich-text.d.ts",
       "./dist/rich-text.client.js",
@@ -347,6 +361,10 @@ export function reactPackageExports() {
     ".": reactCondition("./dist/index.d.ts", "./dist/index.js"),
     "./markdown": reactCondition("./dist/markdown.d.ts", "./dist/markdown.js"),
     "./editor": reactCondition("./dist/editor.d.ts", "./dist/editor.js"),
+    "./editor/codemirror": reactCondition(
+      "./dist/editor-codemirror.d.ts",
+      "./dist/editor-codemirror.js",
+    ),
     "./rich-text": reactCondition("./dist/rich-text.d.ts", "./dist/rich-text.js"),
     "./types": reactCondition("./dist/types.d.ts", "./dist/types.js"),
   };
@@ -376,11 +394,21 @@ export function svelteTypesEntry(): LibraryEntry {
   return { name: "types", source: "src/types.ts", outputExt: ".js" };
 }
 
+/**
+ * The `./editor/codemirror` adapter is isomorphic TypeScript, so like `types`
+ * it is a single-lane entry: one compiled file serves browser and default
+ * conditions. It is not a dual (client/server) Svelte component entry.
+ */
+export function svelteEditorAdapterEntry(): LibraryEntry {
+  return { name: "editor-codemirror", source: "src/editor-codemirror.ts", outputExt: ".js" };
+}
+
 export function reactLibraryEntries(): LibraryEntry[] {
   const entries: LibraryEntry[] = [
     { name: "index", source: "src/index.ts", outputExt: ".js" },
     { name: "markdown", source: "src/markdown.ts", outputExt: ".js" },
     { name: EDITOR_ENTRY_NAME, source: "src/editor.ts", outputExt: ".js" },
+    { name: "editor-codemirror", source: "src/editor-codemirror.ts", outputExt: ".js" },
     { name: RICH_TEXT_ENTRY_NAME, source: "src/rich-text.ts", outputExt: ".js" },
     { name: "types", source: "src/types.ts", outputExt: ".js" },
     ...SHELL_ROSTER_NAMES.map((name) => ({
@@ -404,6 +432,8 @@ export function sveltePublicFiles(): string[] {
     "dist/editor.client.js",
     "dist/editor.server.js",
     "dist/editor.d.ts",
+    "dist/editor-codemirror.js",
+    "dist/editor-codemirror.d.ts",
     "dist/rich-text.client.js",
     "dist/rich-text.server.js",
     "dist/rich-text.d.ts",
@@ -423,6 +453,8 @@ export function reactPublicFiles(): string[] {
     "dist/markdown.js",
     "dist/editor.js",
     "dist/editor.d.ts",
+    "dist/editor-codemirror.js",
+    "dist/editor-codemirror.d.ts",
     "dist/rich-text.js",
     "dist/rich-text.d.ts",
     "dist/types.js",

@@ -34,24 +34,23 @@ import {
 } from "@codemirror/commands";
 import {
   installCodeEditorFocusEntry,
-  isCodeEditorLanguage,
   toCodeEditorChange,
   validateCodeEditorDiagnostics,
 } from "@inflatable-cookie/poodle-core";
 import type {
   CodeEditorChange,
   CodeEditorDiagnostic,
-  CodeEditorLanguage,
+  CodeEditorLanguageId,
+  CodeEditorLanguageRegistry,
   CodeEditorPerformanceMode,
   CodeEditorTabBehavior,
   CodeEditorTextEdit,
 } from "@inflatable-cookie/poodle-core";
 
-import { languageFor } from "./code-editor-languages";
-
 export interface CodeEditorEngineOptions {
   value: string;
-  language: CodeEditorLanguage;
+  language: CodeEditorLanguageId;
+  languageRegistry: CodeEditorLanguageRegistry | null;
   lineNumbers: boolean;
   searchable: boolean;
   readOnly: boolean;
@@ -82,13 +81,54 @@ export interface CodeEditorEngine {
   destroy: () => void;
 }
 
-/** Fail closed: unknown language strings never silently fall back. */
-export function assertAdmittedLanguage(language: string): asserts language is CodeEditorLanguage {
-  if (!isCodeEditorLanguage(language)) {
+/**
+ * Fail closed: an unknown id never silently becomes plain text. `plain-text`
+ * is built in; every other id must be admitted by the registry the host
+ * supplied.
+ */
+export function assertAdmittedLanguage(
+  language: string,
+  languageRegistry: CodeEditorLanguageRegistry | null,
+): asserts language is CodeEditorLanguageId {
+  if (language === "plain-text") return;
+  if (!languageRegistry || !languageRegistry.has(language)) {
     throw new Error(
-      `code-editor: unsupported language "${language}". Request "plain-text" explicitly or use an admitted language.`,
+      `code-editor: unsupported language "${language}". Register it through a language registry or request "plain-text" explicitly.`,
     );
   }
+}
+
+/** Substrate shape check: a loaded value must look like a CodeMirror extension. */
+function isLanguageExtension(value: unknown): value is Extension {
+  return (
+    Array.isArray(value) ||
+    (typeof value === "object" && value !== null && "extension" in value)
+  );
+}
+
+/**
+ * Resolve the active id through the host's registry. Plain text (and plain
+ * performance mode) load no language; anything else must be admitted and must
+ * resolve to a real language extension before it can reach the editor.
+ */
+async function resolveLanguageExtension(
+  options: Pick<CodeEditorEngineOptions, "language" | "languageRegistry" | "performanceMode">,
+): Promise<Extension> {
+  if (options.performanceMode === "plain" || options.language === "plain-text") return [];
+  const registry = options.languageRegistry;
+  if (!registry) {
+    throw new Error(
+      `code-editor: unsupported language "${options.language}". Register it through a language registry or request "plain-text" explicitly.`,
+    );
+  }
+  assertAdmittedLanguage(options.language, registry);
+  const loaded = await registry.load(options.language);
+  if (!isLanguageExtension(loaded)) {
+    throw new Error(
+      `code-editor: language "${options.language}" did not resolve to a CodeMirror language extension.`,
+    );
+  }
+  return loaded;
 }
 
 function normalizeTabSize(tabSize: number): number {
@@ -128,7 +168,7 @@ export async function createCodeEditorEngine(
   if (typeof initial.value !== "string") {
     throw new Error("code-editor: value must be a string; the component has no uncontrolled mode.");
   }
-  assertAdmittedLanguage(initial.language);
+  assertAdmittedLanguage(initial.language, initial.languageRegistry);
 
   let options: CodeEditorEngineOptions = { ...initial };
   let applyingHostValue = false;
@@ -273,7 +313,7 @@ export async function createCodeEditorEngine(
       doc: options.value,
       extensions: [
         history(),
-        languageCompartment.of(await languageFor(options.language, options.performanceMode)),
+        languageCompartment.of(await resolveLanguageExtension(options)),
         behaviorCompartment.of(behaviorExtension()),
         readOnlyCompartment.of([
           EditorState.readOnly.of(options.readOnly || options.disabled),
@@ -317,14 +357,18 @@ export async function createCodeEditorEngine(
     // not clear the F8 active diagnostic or rebuild its decorations.
     const previous = options;
     options = { ...options, ...next };
-    if (typeof next.language === "string") assertAdmittedLanguage(next.language);
+    if (typeof next.language === "string") {
+      assertAdmittedLanguage(next.language, options.languageRegistry);
+    }
     const epoch = ++updateEpoch;
     const effects: StateEffect<unknown>[] = [];
     if (
       (next.language !== undefined && next.language !== previous.language) ||
-      (next.performanceMode !== undefined && next.performanceMode !== previous.performanceMode)
+      (next.performanceMode !== undefined &&
+        next.performanceMode !== previous.performanceMode) ||
+      (next.languageRegistry !== undefined && next.languageRegistry !== previous.languageRegistry)
     ) {
-      const language = await languageFor(options.language, options.performanceMode);
+      const language = await resolveLanguageExtension(options);
       if (epoch !== updateEpoch) return;
       effects.push(languageCompartment.reconfigure(language) as StateEffect<unknown>);
     }

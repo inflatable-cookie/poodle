@@ -2,7 +2,8 @@ export { CodeEditor, type CodeEditorHandle, type CodeEditorProps } from "./CodeE
 export type {
   CodeEditorChange,
   CodeEditorDiagnostic,
-  CodeEditorLanguage,
+  CodeEditorLanguageId,
+  CodeEditorLanguageRegistry,
   CodeEditorPerformanceMode,
   CodeEditorRange,
   CodeEditorTabBehavior,

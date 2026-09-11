@@ -9,36 +9,97 @@
  * through the dedicated `./editor` entries).
  */
 
-export type CodeEditorLanguage =
-  | "plain-text"
-  | "markdown"
-  | "json"
-  | "yaml"
-  | "toml"
-  | "javascript"
-  | "typescript"
-  | "html"
-  | "css"
-  | "rust"
-  | "shell";
+/**
+ * Serializable, consumer-defined language id. Poodle fixes no vocabulary:
+ * `plain-text` is built in, and every other id means whatever the host's
+ * language registry says it means. Unknown ids fail closed; they never
+ * silently fall back to plain text.
+ */
+export type CodeEditorLanguageId = string;
 
-export const CODE_EDITOR_LANGUAGES: readonly CodeEditorLanguage[] = [
-  "plain-text",
-  "markdown",
-  "json",
-  "yaml",
-  "toml",
-  "javascript",
-  "typescript",
-  "html",
-  "css",
-  "rust",
-  "shell",
-] as const;
+/** The one built-in language. It never needs a registry or grammar package. */
+export const CODE_EDITOR_PLAIN_TEXT: CodeEditorLanguageId = "plain-text";
 
-/** Closed admitted set. Unknown strings never silently fall back. */
-export function isCodeEditorLanguage(value: string): value is CodeEditorLanguage {
-  return (CODE_EDITOR_LANGUAGES as readonly string[]).includes(value);
+/**
+ * Lazy language loader. Opaque to the engines: the value is produced by a
+ * substrate adapter (CodeMirror), which owns the loader's return type and the
+ * runtime guarantee that a resolved value really is a language extension.
+ */
+export type CodeEditorLanguageLoader = () => Promise<unknown>;
+
+/**
+ * The opaque registry both web engines resolve the selected `language` id
+ * through. Constructed through an explicit substrate adapter subpath
+ * (`./editor/codemirror`); the component prop accepts only this shape, never
+ * arbitrary editor extensions, themes, or keymaps.
+ */
+export interface CodeEditorLanguageRegistry {
+  /** True when the registry admits the id. Synchronous, fail-closed gate. */
+  has(language: CodeEditorLanguageId): boolean;
+  /**
+   * Load the language for an admitted id. Each id loads exactly once per
+   * registry instance: the first load's promise (settled or rejected) is
+   * memoized, so switching back never re-invokes the loader. Unknown ids
+   * reject; they never fall back.
+   */
+  load(language: CodeEditorLanguageId): Promise<unknown>;
+}
+
+/** Registry construction input: id/loader pairs or a plain record. */
+export type CodeEditorLanguageRegistryInput =
+  | Iterable<readonly [CodeEditorLanguageId, CodeEditorLanguageLoader]>
+  | Record<string, CodeEditorLanguageLoader>;
+
+/**
+ * Shared registry construction and refusal semantics for every framework
+ * adapter. Fail closed: empty or non-string ids, non-function loaders,
+ * duplicate ids, and a `plain-text` entry (built in; registries admit syntax
+ * languages only) throw before any registry exists.
+ */
+export function createCodeEditorLanguageRegistry(
+  input: CodeEditorLanguageRegistryInput,
+): CodeEditorLanguageRegistry {
+  const loaders = new Map<CodeEditorLanguageId, CodeEditorLanguageLoader>();
+  const pairs: Iterable<readonly [CodeEditorLanguageId, CodeEditorLanguageLoader]> =
+    Symbol.iterator in input ? input : Object.entries(input);
+  for (const [language, loader] of pairs) {
+    if (typeof language !== "string" || language === "") {
+      throw new Error("code-editor: language ids must be non-empty strings.");
+    }
+    if (language === CODE_EDITOR_PLAIN_TEXT) {
+      throw new Error(
+        `code-editor: "${CODE_EDITOR_PLAIN_TEXT}" is built in; registries admit syntax languages only.`,
+      );
+    }
+    if (typeof loader !== "function") {
+      throw new Error(`code-editor: language "${language}" needs a lazy loader function.`);
+    }
+    if (loaders.has(language)) {
+      throw new Error(`code-editor: duplicate language "${language}" in the registry.`);
+    }
+    loaders.set(language, loader);
+  }
+  const loaded = new Map<CodeEditorLanguageId, Promise<unknown>>();
+  return {
+    has(language) {
+      return loaders.has(language);
+    },
+    load(language) {
+      const memoized = loaded.get(language);
+      if (memoized) return memoized;
+      const loader = loaders.get(language);
+      if (!loader) {
+        return Promise.reject(
+          new Error(
+            `code-editor: unsupported language "${String(language)}". Register it through a language registry or request "${CODE_EDITOR_PLAIN_TEXT}" explicitly.`,
+          ),
+        );
+      }
+      const pending = loader();
+      loaded.set(language, pending);
+      return pending;
+    },
+  };
 }
 
 export interface CodeEditorRange {

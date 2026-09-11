@@ -784,15 +784,18 @@ export {
 } from "./tabs";
 
 export {
-  CODE_EDITOR_LANGUAGES,
+  CODE_EDITOR_PLAIN_TEXT,
   CODE_EDITOR_MAX_BYTES,
-  isCodeEditorLanguage,
   codeEditorByteLength,
+  createCodeEditorLanguageRegistry,
   isCodeEditorValueAdmissible,
   toCodeEditorChange,
   applyCodeEditorEdits,
   validateCodeEditorDiagnostics,
-  type CodeEditorLanguage,
+  type CodeEditorLanguageId,
+  type CodeEditorLanguageLoader,
+  type CodeEditorLanguageRegistry,
+  type CodeEditorLanguageRegistryInput,
   type CodeEditorRange,
   type CodeEditorDiagnostic,
   type CodeEditorTextEdit,

@@ -6,7 +6,8 @@ import {
 import type {
   CodeEditorChange,
   CodeEditorDiagnostic,
-  CodeEditorLanguage,
+  CodeEditorLanguageId,
+  CodeEditorLanguageRegistry,
   CodeEditorPerformanceMode,
   CodeEditorTabBehavior,
 } from "@inflatable-cookie/poodle-core";
@@ -23,7 +24,8 @@ import { useUiPresentation } from "./presentation";
 
 export interface CodeEditorProps {
   value: string;
-  language?: CodeEditorLanguage;
+  language?: CodeEditorLanguageId;
+  languageRegistry?: CodeEditorLanguageRegistry | null;
   lineNumbers?: boolean;
   searchable?: boolean;
   diagnostics?: CodeEditorDiagnostic[];
@@ -52,6 +54,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   {
     value,
     language = "plain-text",
+    languageRegistry = null,
     lineNumbers = true,
     searchable = true,
     diagnostics = [],
@@ -68,7 +71,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   }: CodeEditorProps,
   ref,
 ) {
-  assertAdmittedLanguage(language);
+  assertAdmittedLanguage(language, languageRegistry);
 
   const uiPresentation = useUiPresentation();
   const resolvedDensity = density ?? uiPresentation.density;
@@ -81,6 +84,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   const latestRef = useRef({
     value,
     language,
+    languageRegistry,
     lineNumbers,
     searchable,
     readOnly,
@@ -96,6 +100,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   latestRef.current = {
     value,
     language,
+    languageRegistry,
     lineNumbers,
     searchable,
     readOnly,
@@ -155,6 +160,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
     void engineRef.current?.update({
       value,
       language,
+      languageRegistry,
       lineNumbers,
       searchable,
       readOnly,

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { CodeEditor } from "@inflatable-cookie/poodle-svelte/editor";
-  import type { CodeEditorLanguage } from "@inflatable-cookie/poodle-svelte/editor";
+  import type { CodeEditorLanguageId } from "@inflatable-cookie/poodle-svelte/editor";
+  import { createCodeEditorLanguageRegistry } from "@inflatable-cookie/poodle-svelte/editor/codemirror";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import {
@@ -10,8 +11,18 @@
     CODE_TYPESCRIPT_SOURCE,
   } from "./web-editor-documents";
 
+  // Consumer-owned language registry (g18.012): this preview app installs
+  // exactly the grammar packages it names here. Poodle carries no grammar
+  // dependencies; ids are plain serializable strings, and "plain-text" needs
+  // no registry entry at all.
+  const languageRegistry = createCodeEditorLanguageRegistry({
+    typescript: async () =>
+      (await import("@codemirror/lang-javascript")).javascript({ typescript: true }),
+    json: async () => (await import("@codemirror/lang-json")).json(),
+  });
+
   let value = $state(CODE_TYPESCRIPT_SOURCE);
-  let language = $state<CodeEditorLanguage>("typescript");
+  let language = $state<CodeEditorLanguageId>("typescript");
   let lineNumbers = $state(true);
   const axisSource = "export const ready = true;\n";
 </script>
@@ -26,6 +37,7 @@
         <CodeEditor
           {value}
           language="typescript"
+          {languageRegistry}
           ariaLabel="TypeScript editor"
           onChange={(change) => (value = change.value)}
         />
@@ -38,6 +50,7 @@
         <CodeEditor
           value={CODE_DIAGNOSTIC_SOURCE}
           language="typescript"
+          {languageRegistry}
           diagnostics={CODE_DIAGNOSTICS}
           ariaLabel="Diagnostics editor"
         />
@@ -49,6 +62,7 @@
         <CodeEditor
           value={CODE_TYPESCRIPT_SOURCE}
           language="typescript"
+          {languageRegistry}
           readOnly
           ariaLabel="Read-only TypeScript"
         />
@@ -57,6 +71,14 @@
 
     <SpecimenGroup label="Configuration">
       <div class="controls">
+        <button
+          type="button"
+          data-part="language-plain-text"
+          aria-pressed={language === "plain-text"}
+          onclick={() => (language = "plain-text")}
+        >
+          Plain text
+        </button>
         <button
           type="button"
           data-part="language-typescript"
@@ -86,6 +108,7 @@
         <CodeEditor
           value={language === "json" ? CODE_JSON_SOURCE : CODE_TYPESCRIPT_SOURCE}
           {language}
+          {languageRegistry}
           {lineNumbers}
           ariaLabel="Configured editor"
         />
@@ -96,7 +119,13 @@
   {#snippet densities(density)}
     <SpecimenGroup label={density}>
       <div class="editor-frame">
-        <CodeEditor value={axisSource} language="typescript" {density} ariaLabel="Density sample" />
+        <CodeEditor
+          value={axisSource}
+          language="typescript"
+          {languageRegistry}
+          {density}
+          ariaLabel="Density sample"
+        />
       </div>
     </SpecimenGroup>
   {/snippet}
