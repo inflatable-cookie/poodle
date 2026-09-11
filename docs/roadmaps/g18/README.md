@@ -54,7 +54,7 @@ needed to compile honest repair tranches.
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | held behind g18.006 | Queue-held during g18.010 repair; release only from the accepted repaired candidate |
-| [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | ready and approved | immediate UX repair; g18.006 resumes afterward and g18.009 remains held |
+| [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); g18.011 stays held until g18.013 and g18.014 merge, g18.006 stays blocked, g18.009 stays held |
 | [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | Queue-held behind g18.010, g18.013 and g18.014 | paired Svelte/React sweep of CodeEditor, RichTextEditor and RichTextRenderer; operator release checkpoint |
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | ready behind g18.011 | consumer-selected lazy CodeMirror language providers; remove Poodle-owned closed grammar catalogue |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | ready in parallel with g18.010 | proper grouped Poodle controls modelled on MarkdownEditor; known blocker before g18.011 |
@@ -82,9 +82,10 @@ supplement (PR #241, merged `998b6ddc69f94e405b515f6bddd682a2e8916ea5`). It ran
 independently of g18.007 and added no native parity.
 
 The Svelte CodeEditor specimen exposed a focus-origin UX defect: ordinary
-typing flips the document modality to keyboard and the editor's live
-`:focus-within` rule paints a persistent outer ring. Operator-approved g18.010
-repairs both web wrappers with local navigation-entry state. g18.011 then sweeps
+typing flipped the document modality to keyboard and the editor's live
+`:focus-within` rule painted a persistent outer ring. Operator-approved g18.010
+repaired both web wrappers with local navigation-entry state and
+transaction-driven dismissal (PR #242, merged `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`). g18.011 then sweeps
 CodeEditor, RichTextEditor, and RichTextRenderer across both previews after
 parallel g18.013 replaces the link-like rich-text toolbar. g18.012
 uses that evidence to replace the closed grammar catalogue with a

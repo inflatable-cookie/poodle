@@ -1,6 +1,6 @@
 # 010 — CodeEditor editing focus treatment
 
-Status: ready — operator-confirmed UX correction
+Status: complete — merged as `a71b48573c7253dfd45f35e482b9bbc7432ea0ca` (PR #242) on 2026-09-11
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,

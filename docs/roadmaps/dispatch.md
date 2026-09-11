@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.006 paused; g18.010–g18.014 editor acceptance lane approved; g18.009 held)
+Updated: 2026-09-11 (g18.010 merged; g18.006 paused; g18.011 held behind g18.013/g18.014; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -24,6 +24,11 @@ changelog maintenance scope — merged as `ef2e46bb949a766e844e48f071119c9576c6f
 specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
 (PR #241) on 2026-09-10. It was serial before g18.006 release.
 
+[`g18.010`](g18/010-code-editor-editing-focus-treatment.md) — CodeEditor
+editing focus treatment — merged as `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`
+(PR #242) on 2026-09-11 after exact-head independent re-review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -38,12 +43,8 @@ held. Do not release it until the repaired candidate is accepted.
 
 ## Ready queue task
 
-[`g18.010`](g18/010-code-editor-editing-focus-treatment.md) corrects the outer
-focus ring during active editing in both web wrappers. It is approved for
-immediate dispatch.
-
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued
-behind g18.010 and explicitly Queue-held until parallel g18.013 and its serial
+behind merged g18.010 and explicitly Queue-held until parallel g18.013 and its serial
 g18.014 also merge. It sweeps all three editor surfaces in both web previews
 and is serial before any g18.006 continuation.
 
@@ -52,8 +53,8 @@ dependency-queued behind g18.011. It replaces the closed grammar catalogue
 with consumer-selected lazy CodeMirror language providers before g18.006.
 
 [`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is approved for
-immediate dispatch in parallel with g18.010. It replaces the link-like command
-row with proper grouped Poodle controls before g18.011 is released.
+immediate dispatch; it ran in parallel with merged g18.010. It replaces the
+link-like command row with proper grouped Poodle controls before g18.011 is released.
 
 [`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is
 dependency-queued behind g18.013. It replaces the dead external image fixture

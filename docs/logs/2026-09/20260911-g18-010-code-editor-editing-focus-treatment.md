@@ -1,6 +1,7 @@
 # g18.010 — CodeEditor editing focus treatment
 
-Status: ready for review
+Status: merged
+Merge: `a71b48573c7253dfd45f35e482b9bbc7432ea0ca` (PR #242) on 2026-09-11
 Date: 2026-09-11
 Branch: `ns-d5ece513-5f28-4bfe-9132-12a70cf7a89f`
 Card: `docs/roadmaps/g18/010-code-editor-editing-focus-treatment.md`
@@ -134,3 +135,39 @@ blocking repairs, and operator acceptance complete.
   remains an outline on the ring element).
 - `effigy docs:check` — pass.
 - `git diff --check` — clean.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `a71b48573c7253dfd45f35e482b9bbc7432ea0ca` on 2026-09-11 (PR #242),
+  with parents `9736952d2` (main) and `5a0c7ce9f` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `5a0c7ce9f3037376bb6f2e7d712b71ef6927ef89` by betterthanclay
+  ([comment #5631470927](https://github.com/inflatable-cookie/poodle/pull/242#issuecomment-5631470927)).
+  Round 1 (`changes_required` at `c638b2c3a`,
+  [comment #5631113407](https://github.com/inflatable-cookie/poodle/pull/242#issuecomment-5631113407))
+  named three blockers — copyLineDown/indent-Tab mutations keeping the
+  ring, find-panel traversal dismissing it, copy/select-all chords
+  dismissing it — plus a stale pointer-press ring; round 2 re-ran the
+  same adversarial scenarios at the exact head and confirmed all fixed.
+  No merge blockers remained.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): `effigy test:core` 1301 pass; `bunx vitest run --project
+  svelte-components --project react-components` 361 files / 2960 pass
+  (35 focus-entry cases per wrapper); paired
+  `test:code-editor-focus-entry` probe pass in Chromium and WebKit for
+  both frameworks including the planted oracle cases;
+  `check:svelte-components` 0 errors (4 pre-existing warnings);
+  `check:react-components` 12 errors, all pre-existing in untouched
+  files; `git diff --check` clean; CI `web` and `rust` pass at the head.
+- Non-blocking reviewer notes (deferred, no acceptance impact): the PR
+  description still describes the superseded keydown/`beforeinput`
+  mechanism and stale pass counts; one log wording nit on the
+  pre-existing error span; a TDZ hazard note on the update-listener
+  install order; keyboard focus moving into the find panel re-arms a
+  dismissed treatment, consistent with the oracle.
+- Deferred: no release, tag, publish, Desktop, or native editor work
+  starts from this task. `g18.011` stays held until parallel g18.013
+  and its serial g18.014 merge; `g18.006` stays blocked and `g18.009`
+  held until the sweep, all other blocking repairs, and operator
+  acceptance complete.
