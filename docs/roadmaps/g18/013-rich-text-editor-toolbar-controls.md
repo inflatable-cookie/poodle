@@ -1,6 +1,6 @@
 # 013 — RichTextEditor toolbar controls
 
-Status: ready — operator-confirmed UX repair; parallel with g18.010
+Status: complete — merged as `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70` (PR #245) on 2026-09-11
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -60,7 +60,7 @@ not a new toolbar plugin API.
 
 ## Dispatch manifest
 
-- **State:** active; g18.014 and g18.018 are dependency-queued behind it;
+- **State:** complete; merged g18.013 unblocks g18.014 and g18.018;
   g18.011 names this chain plus parallel g18.017/g18.019 as prerequisites;
   serial before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head

@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.013 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -39,6 +39,11 @@ live line-number reconfiguration — merged as `5932bd0027cab2cf86c07a7878c3b481
 (PR #244) on 2026-09-11 after exact-head independent review and green
 rust/web checks at the reviewed head.
 
+[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) — RichTextEditor
+toolbar controls — merged as `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70`
+(PR #245) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -55,7 +60,7 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.013, g18.014, g18.017,
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014, g18.017,
 g18.018 and g18.019. It sweeps all four editor surfaces in both web previews
 and is serial before g18.012 and any g18.006 continuation.
 
@@ -63,12 +68,12 @@ and is serial before g18.012 and any g18.006 continuation.
 dependency-queued behind g18.011. It replaces the closed grammar catalogue
 with consumer-selected lazy CodeMirror language providers before g18.006.
 
-[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is active. It replaces
-the link-like command row with proper grouped Poodle controls before g18.011 is
-released.
+[`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is merged (PR #245).
+It replaced the link-like command row with proper grouped Poodle controls;
+g18.014 and g18.018 are unblocked.
 
-[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is
-dependency-queued behind g18.013. It replaces the dead external image fixture
+[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is ready,
+unblocked by merged g18.013. It replaces the dead external image fixture
 with visible deterministic seeded/insertion proof before g18.011 is released.
 
 [`g18.017`](g18/017-block-slider-fixed-inline-presentation.md) is approved for
@@ -76,9 +81,9 @@ parallel execution. It gives the block Slider family rounded-square
 corners and keeps single-Slider text fixed inside the track with split-colour
 crossover across active runtimes. It must merge before g18.011 is released.
 
-[`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is approved and
-dependency-queued behind g18.013 because it touches the same RichTextEditor
-shells. After that dependency closes it may run beside g18.014 and g18.017. It
+[`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is ready,
+unblocked by merged g18.013. It touches the same RichTextEditor shells, so it
+runs beside g18.014 and g18.017. It
 makes accepted controlled echoes preserve caret, selection, history and focus
 in both web wrappers and must merge before g18.011 is released.
 

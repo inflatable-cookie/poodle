@@ -1,6 +1,7 @@
 # g18.013 — RichTextEditor toolbar controls
 
-Status: ready for review
+Status: merged
+Merge: `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70` (PR #245) on 2026-09-11
 Date: 2026-09-11
 Branch: `ns-e3a0e8cb-287c-447d-90c3-c226bca3d763`
 Card: `docs/roadmaps/g18/013-rich-text-editor-toolbar-controls.md`
@@ -114,6 +115,25 @@ blocked; g18.009 stays held.
 
 ## Closeout
 
-One open non-draft PR from the queue-owned branch at the clean pushed head;
-independent exact-head review before merge. Never merge from the worker; no
-release, publish, Desktop, or retained-task mutations.
+- Merge performed by the plugin as
+  `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70` on 2026-09-11 (PR #245),
+  with parents `251c44f17ee7f4abadbf819819d5efabeec4c392` (main) and
+  `60712e6571f8811270c2d341b7cd15abfbff81a2` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `60712e6571f8811270c2d341b7cd15abfbff81a2` by betterthanclay
+  ([comment #5633182322](https://github.com/inflatable-cookie/poodle/pull/245#issuecomment-5633182322)).
+  No blocking findings; one non-blocking note asking that the execution log
+  name the `core-build.test.ts` frozen-inventory repair (108 → 114)
+  explicitly, which this record does.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): `effigy docs:check` full sequence exit 0; `rich-text-editor`
+  Svelte-vs-React pairs match on both sweep axes, 2 compared, 0 failing;
+  Svelte + React component rich-text suites 108 pass; Svelte + React preview
+  `g18-013` suites 8 pass; `git diff --check` clean; CI `rust` and `web`
+  pass at the merge.
+- Worker validation at the branch head is recorded above under Validation;
+  the merged head adds exactly the frozen core icon inventory repin (108 →
+  114) over the previously approved `3d71f7a4b`.
+- Deferred: no release, tag, publish, Desktop, native, or retained-task work
+  starts from this task. `g18.011` stays held until g18.014, g18.017, g18.018
+  and g18.019 merge; `g18.006` stays blocked and `g18.009` stays held.
