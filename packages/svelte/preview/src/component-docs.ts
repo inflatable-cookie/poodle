@@ -2672,6 +2672,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string", default: '"Markdown editor"', description: "Accessible label for the editor." },
       { name: "minHeight", type: "string", default: '"12rem"', description: "Minimum height of the editor." },
       { name: "mode", type: '"edit" | "preview" | "split"', default: '"edit"', description: "Display mode of the editor." },
+      { name: "renderHtml", type: "((markdown: string) => string) | null", default: "null", description: "Custom markdown-to-HTML renderer. Its output still passes through htmlPolicy." },
+      { name: "htmlPolicy", type: '"safe" | "trusted"', default: '"safe"', description: "Safe sanitizes built-in and custom parser output. Trusted is an explicit caller-owned bypass for fully trusted content." },
       { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit semantic control size override for toolbar and mode controls." },
       { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
       { name: "density", type: 'ControlDensity | null', default: "null", description: "Explicit density override for toolbar and pane spacing." },
@@ -2691,6 +2693,25 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   mode="split"
   minHeight="20rem"
 />`,
+  },
+
+  "markdown-renderer": {
+    props: [
+      { name: "value", type: "string", required: true, description: "Markdown source rendered as read-only semantic document content." },
+      { name: "renderHtml", type: "((markdown: string) => string) | null", default: "null", description: "Same parser customization seam as the editor preview. Its output still passes through htmlPolicy." },
+      { name: "htmlPolicy", type: '"safe" | "trusted"', default: '"safe"', description: "Safe sanitizes built-in and custom parser output. Trusted is an explicit caller-owned bypass for fully trusted content." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "When supplied, exposes the renderer as a labelled region; null keeps ordinary document semantics." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit spacing-density override for rendered prose." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { MarkdownRenderer } from "@inflatable-cookie/poodle-svelte/markdown";
+
+  const document = "# Release notes\\n\\nRendered read-only.";
+</script>
+
+<MarkdownRenderer value={document} />`,
   },
 
   "code-editor": {

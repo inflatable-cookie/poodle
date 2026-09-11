@@ -195,6 +195,16 @@ export const MARKDOWN_COMPONENT_NAMES = [
   "AgentTranscript",
   "MarkdownEditor",
 ] as const;
+
+/**
+ * `MarkdownRenderer` is a web-only companion to `MarkdownEditor`: it shares the
+ * `./markdown` entry and the editor's private rendering path but has no native
+ * counterpart, no direct `./MarkdownRenderer.svelte` entry, and no membership
+ * in the 176-name native-boundary roster. It is inventoried here so the Svelte
+ * source/roster audit can still see it, and it is certified through the
+ * web-only catalogue supplement and the installed `./markdown` smoke.
+ */
+export const MARKDOWN_RENDERER_SVELTE_NAMES = ["MarkdownRenderer"] as const;
 export const INTERNAL_SVELTE_NAMES = ["DragDropProvider", "MenuSurface"] as const;
 /**
  * The CodeEditor engine lives behind dedicated `./editor` entries so root
@@ -281,6 +291,7 @@ export const REACT_EXTERNAL_MODULES = [
 
 assertSorted([...SHELL_ROSTER_NAMES], "SHELL_ROSTER_NAMES");
 assertSorted([...MARKDOWN_COMPONENT_NAMES], "MARKDOWN_COMPONENT_NAMES");
+assertSorted([...MARKDOWN_RENDERER_SVELTE_NAMES], "MARKDOWN_RENDERER_SVELTE_NAMES");
 assertSorted([...INTERNAL_SVELTE_NAMES], "INTERNAL_SVELTE_NAMES");
 
 const markdownSet = new Set<string>(MARKDOWN_COMPONENT_NAMES);
@@ -437,10 +448,13 @@ export function assertSvelteInventoriesMatchDisk(repoRoot: string): void {
   const packageRoot = join(repoRoot, SVELTE_PACKAGE_DIR);
   const svelteFiles = listBasenames(join(packageRoot, "src"), ".svelte");
   const expected = [
-    ...SHELL_ROSTER_NAMES,
-    ...INTERNAL_SVELTE_NAMES,
-    ...EDITOR_SVELTE_NAMES,
-    ...RICH_TEXT_SVELTE_NAMES,
+    ...new Set<string>([
+      ...SHELL_ROSTER_NAMES,
+      ...MARKDOWN_RENDERER_SVELTE_NAMES,
+      ...INTERNAL_SVELTE_NAMES,
+      ...EDITOR_SVELTE_NAMES,
+      ...RICH_TEXT_SVELTE_NAMES,
+    ]),
   ].sort();
   if (svelteFiles.join("\n") !== expected.join("\n")) {
     throw new Error("Svelte *.svelte inventory disagrees with spec 070 roster plus internals");

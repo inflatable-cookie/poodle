@@ -29,6 +29,7 @@ import {
   AgentPlanRecord,
   AgentTranscript,
   MarkdownEditor,
+  MarkdownRenderer,
 } from "@inflatable-cookie/poodle-react/markdown";
 
 const licenceKeyFormat: LicenceKeyFormat = {
@@ -165,6 +166,7 @@ describe("packed @inflatable-cookie/poodle-react", () => {
         <AgentPlanRecord plan="1. Installed record" status="accepted" />
         <AgentTranscript items={[]} />
         <MarkdownEditor />
+        <MarkdownRenderer value="# Installed renderer" />
       </>,
     );
 
@@ -173,5 +175,6 @@ describe("packed @inflatable-cookie/poodle-react", () => {
     expect(view.container.textContent).toContain("installed markdown");
     expect(view.container.textContent).toContain("Installed plan");
     expect(view.container.textContent).toContain("Installed record");
+    expect(view.container.textContent).toContain("Installed renderer");
   });
 });

@@ -62,6 +62,15 @@ export const webOnlyComponents: CanonicalComponent[] = [
     kind: "display",
     collections: [] as const satisfies readonly CatalogueCollectionId[],
   },
+  {
+    slug: "markdown-renderer",
+    displayName: "MarkdownRenderer",
+    description: "Read-only Markdown document renderer sharing the editor's safe/trusted path.",
+    section: "composition",
+    family: "forms-validation",
+    kind: "display",
+    collections: [] as const satisfies readonly CatalogueCollectionId[],
+  },
 ];
 
 export const allComponents: ComponentEntry[] = [...canonicalComponents, ...webOnlyComponents].map((component) => ({
