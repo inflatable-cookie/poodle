@@ -10,17 +10,16 @@
  * Run from the repository root:
  *   effigy test:g18-011-ux-sweep-code-editor
  */
-import { chromium, type Browser, type Page } from "playwright";
+import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { startPreviews } from "../visual/server";
 
 const browserFlag =
-  process.argv.find((a) => a.startsWith("--browser="))?.slice("--browser=".length) ?? "chromium";
+  process.argv.find((a) => a.startsWith("--browser="))?.slice("--browser=".length) ?? "";
 
-const OUT = fileURLToPath(new URL(`./out/${browserFlag}`, import.meta.url));
-mkdirSync(OUT, { recursive: true });
+const OUT_BASE = fileURLToPath(new URL("./out", import.meta.url));
 
 type Severity = "blocking" | "follow-up" | "accepted";
 interface Finding {
@@ -134,8 +133,8 @@ async function clickPart(page: Page, part: string): Promise<void> {
   await page.locator(`[data-part='${part}']`).first().click();
 }
 
-async function shoot(page: Page, name: string): Promise<string> {
-  const file = `${OUT}/${name}.png`;
+async function shoot(page: Page, name: string, outDir: string): Promise<string> {
+  const file = `${outDir}/${name}.png`;
   await page.screenshot({ path: file, fullPage: false });
   return file;
 }
@@ -155,15 +154,17 @@ function grammarHits(net: NetLog): { javascript: number; json: number; other: nu
 }
 
 /** Svelte router accepts `#/components/x`; React router only `#components/x`. */
-function specimenUrl(base: string, framework: "svelte" | "react", slug: string, theme = "eclipse"): string {
+function specimenUrl(base: string, framework: "svelte" | "react", slug: string, theme = "eclipse", density = ""): string {
   const hash = framework === "svelte" ? `#/components/${slug}` : `#components/${slug}`;
-  return `${base}/?theme=${theme}${hash}`;
+  const densityParam = density ? `&density=${density}` : "";
+  return `${base}/?theme=${theme}${densityParam}${hash}`;
 }
 
 async function runFramework(
   browser: Browser,
   framework: "svelte" | "react",
   base: string,
+  outDir: string,
 ): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
@@ -226,7 +227,7 @@ async function runFramework(
       "mount the live TypeScript editor (language=typescript, registry with typescript+json) and wait for the lazy grammar to resolve",
       "syntax tokens visibly colored: code spans carry token classes/styles with non-default color (performanceMode=full tokenization observable)",
       `zero visible tokenization: ${ts.tokenSpans} spans in .cm-content, ${ts.coloredSpans} colored; all ${ts.lineColors.length} line color value(s) identical (${[...ts.lineColors].join(", ")})`,
-      [await shoot(page, `${framework}-1-typescript-no-tokens`)],
+      [await shoot(page, `${framework}-1-typescript-no-tokens`, outDir)],
     );
 
   // language switching still works at the configuration level
@@ -249,7 +250,7 @@ async function runFramework(
       "switch the configured editor to language=json and wait for the lazy grammar",
       "JSON syntax tokens visibly colored",
       `zero visible tokenization: ${jsonRead.tokenSpans} spans, ${jsonRead.coloredSpans} colored`,
-      [await shoot(page, `${framework}-2-json-no-tokens`)],
+      [await shoot(page, `${framework}-2-json-no-tokens`, outDir)],
     );
 
   const pressed = await page.evaluate(
@@ -263,11 +264,19 @@ async function runFramework(
     ok(`${framework}: language buttons report aria-pressed truthfully`);
   else fail("F-lang-pressed", framework, "follow-up", "inspect language buttons", "active language aria-pressed=true", JSON.stringify(pressed));
 
-  // plain-text posture
+  // plain-text posture: selection state moves and the editor keeps rendering
   await clickPart(page, "language-plain-text");
   await settle(page, 600);
   const plain = await readEditor(page, "config-editor");
-  ok(`${framework}: plain-text selection renders without refusal`);
+  const plainPressed = await page.evaluate(() => ({
+    plain: document.querySelector("[data-part='language-plain-text']")?.getAttribute("aria-pressed") ?? null,
+    typescript: document.querySelector("[data-part='language-typescript']")?.getAttribute("aria-pressed") ?? null,
+    configText: (document.querySelector("[data-part='config-editor'] .cm-content")?.textContent ?? "").length,
+  }));
+  if (plainPressed.plain === "true" && plainPressed.typescript === "false" && plainPressed.configText > 0)
+    ok(`${framework}: plain-text selection moves aria-pressed and the editor keeps rendering its source`);
+  else
+    fail("F-lang-plain", framework, "follow-up", "select plain-text", "plain pressed, typescript unpressed, source still rendered", JSON.stringify(plainPressed));
 
   // back to typescript for later journeys
   await clickPart(page, "language-typescript");
@@ -375,6 +384,12 @@ async function runFramework(
   );
   await page.locator("[data-part='read-only-editor'] .cm-content").click();
   await page.keyboard.press(`${MODED}+a`);
+  await settle(page, 200);
+  const roSelection = await page.evaluate(() => window.getSelection()?.toString().length ?? 0);
+  if (roSelection > 0)
+    ok(`${framework}: read-only keeps the selection available for copy (select-all held ${roSelection} chars)`);
+  else
+    fail("F6-readonly", framework, "follow-up", "select all in the read-only editor", "selection preserved for copy", "empty selection");
   await page.keyboard.type("MUTATED");
   await settle(page, 400);
   const roTextAfter = await page.evaluate(
@@ -382,10 +397,6 @@ async function runFramework(
   );
   if (roTextAfter === roTextBefore) ok(`${framework}: read-only refuses text mutation`);
   else fail("F6-readonly", framework, "blocking", "select all and type in the read-only editor", "text unchanged", "text mutated");
-  const roEditable = await page.evaluate(
-    () => document.querySelector("[data-part='read-only-editor'] .cm-content")?.getAttribute("contenteditable") ?? null,
-  );
-  ok(`${framework}: read-only contenteditable=${roEditable} (refusal enforced by editor state; selection/copy preserved)`);
 
   // ---- journey 8: Tab escape ----
   await page.locator("[data-part='live-editor'] .cm-content").click();
@@ -459,7 +470,10 @@ async function runFramework(
   else
     fail("F9-focus", framework, "follow-up", "Tab from the document origin into the editing surface", "data-focus-entry=keyboard on keyboard entry", `focused=${kbEntry.focused} entry=${kbEntry.entry}`);
   const modality1 = await page.evaluate(() => document.documentElement.getAttribute("data-poodle-input-modality"));
-  ok(`${framework}: document modality attribute reads ${modality0} → ${modality1} (never written by the editor)`);
+  if (modality0 === modality1 && (modality1 === "keyboard" || modality1 === "pointer"))
+    ok(`${framework}: the editor never writes the document modality (${modality0} → ${modality1})`);
+  else
+    fail("F9-focus", framework, "follow-up", "compare the document modality across the editor journeys", "unchanged and always a known modality", `${modality0} → ${modality1}`);
 
   // ---- journey 11: constrained layout at Desktop-like width ----
   await page.setViewportSize({ width: 900, height: 700 });
@@ -469,13 +483,13 @@ async function runFramework(
   );
   if (overflow <= 1) ok(`${framework}: no page-level horizontal overflow at 900px`);
   else fail("F10-layout", framework, "blocking", "view the code-editor specimen at 900px width", "no horizontal page overflow", `overflow of ${overflow}px`);
-  await shoot(page, `${framework}-3-constrained-900`);
+  await shoot(page, `${framework}-3-constrained-900`, outDir);
   await page.setViewportSize({ width: 1280, height: 900 });
 
   await context.close();
 }
 
-async function themeJourney(browser: Browser, framework: "svelte" | "react", base: string): Promise<void> {
+async function themeJourney(browser: Browser, framework: "svelte" | "react", base: string, outDir: string): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
   const bg: Record<string, string> = {};
@@ -487,11 +501,50 @@ async function themeJourney(browser: Browser, framework: "svelte" | "react", bas
       const root = document.querySelector("[data-part='live-editor'] .poodle-code-editor");
       return root ? getComputedStyle(root).backgroundColor : "missing";
     });
-    await shoot(page, `${framework}-theme-${theme}`);
+    await shoot(page, `${framework}-theme-${theme}`, outDir);
   }
   const distinct = new Set(Object.values(bg)).size;
   if (distinct >= 2) ok(`${framework}: editor surface follows themes (${JSON.stringify(bg)})`);
   else fail("F11-theme", framework, "follow-up", "load the specimen under eclipse/clay/nord", "surface background varies by theme", JSON.stringify(bg));
+  await context.close();
+}
+
+/** The route must honor the preview's density configuration (card work item 2). */
+async function densityJourney(browser: Browser, framework: "svelte" | "react", base: string, outDir: string): Promise<void> {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  const seen: Array<{ density: string; shellAttr: string | null; panelX: string; editors: number; editorHeight: number }> = [];
+  for (const density of ["comfortable", "compact"]) {
+    await page.goto(specimenUrl(base, framework, "code-editor", "eclipse", density), { waitUntil: "load" });
+    await page.waitForSelector(".poodle-code-editor", { timeout: 30_000 });
+    await settle(page, 700);
+    seen.push(
+      await page.evaluate((density) => {
+        const shell = document.querySelector(".poodle-app-shell") ?? document.documentElement;
+        const cs = shell ? getComputedStyle(shell) : null;
+        const editor = document.querySelector(".poodle-code-editor");
+        return {
+          density,
+          shellAttr: shell?.getAttribute("data-density") ?? null,
+          panelX: cs?.getPropertyValue("--poodle-space-panel-x").trim() ?? "",
+          editors: document.querySelectorAll(".poodle-code-editor").length,
+          editorHeight: editor ? Math.round(editor.getBoundingClientRect().height) : 0,
+        };
+      }, density),
+    );
+    await shoot(page, `${framework}-density-${density}`, outDir);
+  }
+  const [a, b] = seen;
+  if (
+    a && b &&
+    a.shellAttr === "comfortable" && b.shellAttr === "compact" &&
+    a.panelX !== b.panelX &&
+    a.editors >= 4 && b.editors >= 4 &&
+    a.editorHeight > 0 && b.editorHeight > 0
+  )
+    ok(`${framework}: route honors density (${a.density}: panel-x ${a.panelX}, ${b.density}: panel-x ${b.panelX}) with all editors mounted`);
+  else
+    fail("F13-density", framework, "follow-up", "load the code-editor specimen under comfortable and compact densities", "density attribute and density-driven spacing change while every editor stays mounted", JSON.stringify(seen));
   await context.close();
 }
 
@@ -500,35 +553,66 @@ const BASES: Record<"svelte" | "react", string> = {
   react: "",
 };
 
+/** Launch exactly the engine(s) named by --browser (sibling-probe convention). */
+const ENGINES: Array<[string, BrowserType]> = (
+  [
+    ["chromium", chromium],
+    ["webkit", webkit],
+  ] as Array<[string, BrowserType]>
+).filter(([name]) => !browserFlag || browserFlag === name);
+
+if (ENGINES.length === 0) {
+  console.error(`unknown --browser=${browserFlag}`);
+  process.exit(2);
+}
+
 const servers = await startPreviews();
 BASES.svelte = servers.urls.svelte;
 BASES.react = servers.urls.react;
 
-const browser = await chromium.launch();
 try {
-  for (const fw of ["svelte", "react"] as const) {
-    await runFramework(browser, fw, BASES[fw]);
-    await themeJourney(browser, fw, BASES[fw]);
+  for (const [engineName, engine] of ENGINES) {
+    const outDir = `${OUT_BASE}/${engineName}`;
+    mkdirSync(outDir, { recursive: true });
+    const passesBefore = passes;
+    const findingsBefore = findings.length;
+    const browser = await engine.launch();
+    try {
+      for (const fw of ["svelte", "react"] as const) {
+        await runFramework(browser, fw, BASES[fw], outDir);
+        await themeJourney(browser, fw, BASES[fw], outDir);
+        await densityJourney(browser, fw, BASES[fw], outDir);
+      }
+    } finally {
+      await browser.close();
+    }
+    const engineFindings = findings.slice(findingsBefore);
+    const engineBlocking = engineFindings.filter((f) => f.severity === "blocking").length;
+    writeFileSync(
+      `${outDir}/report.json`,
+      JSON.stringify(
+        { browser: engineName, passes: passes - passesBefore, findings: engineFindings, blockingCount: engineBlocking },
+        null,
+        2,
+      ),
+    );
+    console.log(`\n=== sweep summary (${engineName}) ===`);
+    console.log(`passes: ${passes - passesBefore}`);
+    console.log(`findings: ${engineFindings.length} (blocking: ${engineBlocking})`);
+    for (const f of engineFindings) {
+      console.log(`\n[${f.severity.toUpperCase()}] ${f.id} — ${f.framework}`);
+      console.log(`  action:   ${f.action}`);
+      console.log(`  expected: ${f.expected}`);
+      console.log(`  observed: ${f.observed}`);
+    }
   }
 } finally {
-  await browser.close();
   await servers.stop();
 }
 
 const blocking = findings.filter((f) => f.severity === "blocking");
-const report = {
-  browser: browserFlag,
-  passes,
-  findings,
-  blockingCount: blocking.length,
-};
-writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2));
-console.log(`\n=== sweep summary (${browserFlag}) ===`);
-console.log(`passes: ${passes}`);
-console.log(`findings: ${findings.length} (blocking: ${blocking.length})`);
-for (const f of findings) {
-  console.log(`\n[${f.severity.toUpperCase()}] ${f.id} — ${f.framework}`);
-  console.log(`  action:   ${f.action}`);
-  console.log(`  expected: ${f.expected}`);
-  console.log(`  observed: ${f.observed}`);
+if (blocking.length > 0) {
+  console.error(`\n${blocking.length} blocking finding(s) across ${ENGINES.map(([n]) => n).join(", ")}`);
+  process.exit(1);
 }
+console.log(`\nall CodeEditor UX sweep checks passed (${ENGINES.map(([n]) => n).join(", ")})`);

@@ -11,16 +11,15 @@
  * Run from the repository root:
  *   effigy test:g18-011-ux-sweep-editors
  */
-import { chromium, type Browser, type Page } from "playwright";
+import { chromium, webkit, type Browser, type BrowserType, type Page } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { startPreviews } from "../visual/server";
 
 const browserFlag =
-  process.argv.find((a) => a.startsWith("--browser="))?.slice("--browser=".length) ?? "chromium";
-const OUT = fileURLToPath(new URL(`./out/${browserFlag}`, import.meta.url));
-mkdirSync(OUT, { recursive: true });
+  process.argv.find((a) => a.startsWith("--browser="))?.slice("--browser=".length) ?? "";
+const OUT_BASE = fileURLToPath(new URL("./out", import.meta.url));
 
 type Severity = "blocking" | "follow-up" | "accepted";
 interface Finding {
@@ -70,9 +69,10 @@ function fail(
 
 const MODED = process.platform === "darwin" ? "Meta" : "Control";
 
-function specimenUrl(base: string, framework: "svelte" | "react", slug: string, theme = "eclipse"): string {
+function specimenUrl(base: string, framework: "svelte" | "react", slug: string, theme = "eclipse", density = ""): string {
   const hash = framework === "svelte" ? `#/components/${slug}` : `#components/${slug}`;
-  return `${base}/?theme=${theme}${hash}`;
+  const densityParam = density ? `&density=${density}` : "";
+  return `${base}/?theme=${theme}${densityParam}${hash}`;
 }
 
 async function settle(page: Page, ms = 350): Promise<void> {
@@ -85,8 +85,8 @@ async function settle(page: Page, ms = 350): Promise<void> {
   );
 }
 
-async function shoot(page: Page, name: string): Promise<string> {
-  const file = `${OUT}/${name}.png`;
+async function shoot(page: Page, name: string, outDir: string): Promise<string> {
+  const file = `${outDir}/${name}.png`;
   await page.screenshot({ path: file, fullPage: false });
   return file;
 }
@@ -179,6 +179,7 @@ async function runRichTextEditor(
   browser: Browser,
   framework: "svelte" | "react",
   base: string,
+  outDir: string,
 ): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
@@ -428,7 +429,7 @@ async function runRichTextEditor(
   );
   if (overflow <= 1) ok(`${fw}: no page-level horizontal overflow at 900px`);
   else fail("F32-layout", "RichTextEditor", fw, "blocking", "view the rich-text-editor specimen at 900px", "no horizontal page overflow", `${overflow}px overflow`);
-  await shoot(page, `${fw}-rte-constrained-900`);
+  await shoot(page, `${fw}-rte-constrained-900`, outDir);
   await page.setViewportSize({ width: 1280, height: 900 });
 
   await context.close();
@@ -440,6 +441,7 @@ async function runRichTextRenderer(
   browser: Browser,
   framework: "svelte" | "react",
   base: string,
+  outDir: string,
 ): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
@@ -532,7 +534,7 @@ async function runRichTextRenderer(
   );
   if (overflow <= 1) ok(`${fw}: no page-level horizontal overflow at 900px`);
   else fail("F44-layout", "RichTextRenderer", fw, "blocking", "view the rich-text-renderer at 900px", "no horizontal page overflow", `${overflow}px overflow`);
-  await shoot(page, `${fw}-rtr-constrained-900`);
+  await shoot(page, `${fw}-rtr-constrained-900`, outDir);
   await context.close();
 }
 
@@ -542,6 +544,7 @@ async function runMarkdownRenderer(
   browser: Browser,
   framework: "svelte" | "react",
   base: string,
+  outDir: string,
 ): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
@@ -665,7 +668,7 @@ async function runMarkdownRenderer(
   );
   if (overflow <= 1) ok(`${fw}: no page-level horizontal overflow at 900px`);
   else fail("F56-layout", "MarkdownRenderer", fw, "blocking", "view the markdown-renderer at 900px", "no horizontal page overflow", `${overflow}px overflow`);
-  await shoot(page, `${fw}-mdr-constrained-900`);
+  await shoot(page, `${fw}-mdr-constrained-900`, outDir);
 
   // ---- themes on a typography surface ----
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -678,7 +681,7 @@ async function runMarkdownRenderer(
       const el = document.querySelector(".poodle-md-renderer__content h1");
       return el ? getComputedStyle(el).color : "missing";
     });
-    await shoot(page, `${fw}-mdr-theme-${theme}`);
+    await shoot(page, `${fw}-mdr-theme-${theme}`, outDir);
   }
   if (Object.values(bg)[0] !== Object.values(bg)[1] && !Object.values(bg).includes("missing"))
     ok(`${fw}: renderer typography follows themes (${JSON.stringify(bg)})`);
@@ -687,7 +690,63 @@ async function runMarkdownRenderer(
   await context.close();
 }
 
+/** The renderer routes must honor the preview's density configuration (card work item 5). */
+async function densityJourney(browser: Browser, framework: "svelte" | "react", base: string, outDir: string): Promise<void> {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = await context.newPage();
+  const seen: Array<{ route: string; density: string; shellAttr: string | null; panelX: string; mounted: boolean }> = [];
+  for (const slug of ["rich-text-renderer", "markdown-renderer"]) {
+    for (const density of ["comfortable", "compact"]) {
+      await page.goto(specimenUrl(base, framework, slug, "eclipse", density), { waitUntil: "load" });
+      const selector = slug === "markdown-renderer" ? ".poodle-md-renderer" : "[data-part='standard-renderer']";
+      await page.waitForSelector(selector, { timeout: 30_000 });
+      await settle(page, 500);
+      seen.push(
+        await page.evaluate(
+          ([slug, density]) => {
+            const shell = document.querySelector(".poodle-app-shell") ?? document.documentElement;
+            const cs = shell ? getComputedStyle(shell) : null;
+            return {
+              route: slug as string,
+              density: density as string,
+              shellAttr: shell?.getAttribute("data-density") ?? null,
+              panelX: cs?.getPropertyValue("--poodle-space-panel-x").trim() ?? "",
+              mounted: true,
+            };
+          },
+          [slug, density] as [string, string],
+        ),
+      );
+    }
+  }
+  await page.goto(specimenUrl(base, framework, "markdown-renderer", "eclipse", "compact"), { waitUntil: "load" });
+  await page.waitForSelector(".poodle-md-renderer", { timeout: 30_000 });
+  await settle(page, 400);
+  await shoot(page, `${framework}-renderers-density-compact`, outDir);
+  const allDensityApplied = seen.every((s) => s.shellAttr === s.density);
+  const compact = seen.find((s) => s.density === "compact");
+  const comfortable = seen.find((s) => s.density === "comfortable");
+  if (allDensityApplied && compact && comfortable && compact.panelX !== comfortable.panelX && seen.every((s) => s.mounted))
+    ok(`${framework}: renderer routes honor density (panel-x ${comfortable.panelX} comfortable vs ${compact.panelX} compact) with content mounted`);
+  else
+    fail("F58-density", "renderers", framework, "follow-up", "load the renderer routes under comfortable and compact densities", "density attribute and spacing change while content stays mounted", JSON.stringify(seen));
+  await context.close();
+}
+
 /* ================= main ================= */
+
+/** Launch exactly the engine(s) named by --browser (sibling-probe convention). */
+const ENGINES: Array<[string, BrowserType]> = (
+  [
+    ["chromium", chromium],
+    ["webkit", webkit],
+  ] as Array<[string, BrowserType]>
+).filter(([name]) => !browserFlag || browserFlag === name);
+
+if (ENGINES.length === 0) {
+  console.error(`unknown --browser=${browserFlag}`);
+  process.exit(2);
+}
 
 const servers = await startPreviews();
 const BASES: Record<"svelte" | "react", string> = {
@@ -695,26 +754,50 @@ const BASES: Record<"svelte" | "react", string> = {
   react: servers.urls.react,
 };
 
-const browser = await chromium.launch();
 try {
-  for (const fw of ["svelte", "react"] as const) {
-    await runRichTextEditor(browser, fw, BASES[fw]);
-    await runRichTextRenderer(browser, fw, BASES[fw]);
-    await runMarkdownRenderer(browser, fw, BASES[fw]);
+  for (const [engineName, engine] of ENGINES) {
+    const outDir = `${OUT_BASE}/${engineName}`;
+    mkdirSync(outDir, { recursive: true });
+    const passesBefore = passes;
+    const findingsBefore = findings.length;
+    const browser = await engine.launch();
+    try {
+      for (const fw of ["svelte", "react"] as const) {
+        await runRichTextEditor(browser, fw, BASES[fw], outDir);
+        await runRichTextRenderer(browser, fw, BASES[fw], outDir);
+        await runMarkdownRenderer(browser, fw, BASES[fw], outDir);
+        await densityJourney(browser, fw, BASES[fw], outDir);
+      }
+    } finally {
+      await browser.close();
+    }
+    const engineFindings = findings.slice(findingsBefore);
+    const engineBlocking = engineFindings.filter((f) => f.severity === "blocking").length;
+    writeFileSync(
+      `${outDir}/editors-report.json`,
+      JSON.stringify(
+        { browser: engineName, passes: passes - passesBefore, findings: engineFindings, blockingCount: engineBlocking },
+        null,
+        2,
+      ),
+    );
+    console.log(`\n=== editors sweep summary (${engineName}) ===`);
+    console.log(`passes: ${passes - passesBefore}`);
+    console.log(`findings: ${engineFindings.length} (blocking: ${engineBlocking})`);
+    for (const f of engineFindings) {
+      console.log(`\n[${f.severity.toUpperCase()}] ${f.surface}/${f.id} — ${f.framework}`);
+      console.log(`  action:   ${f.action}`);
+      console.log(`  expected: ${f.expected}`);
+      console.log(`  observed: ${f.observed}`);
+    }
   }
 } finally {
-  await browser.close();
   await servers.stop();
 }
 
 const blocking = findings.filter((f) => f.severity === "blocking");
-writeFileSync(`${OUT}/editors-report.json`, JSON.stringify({ browser: browserFlag, passes, findings, blockingCount: blocking.length }, null, 2));
-console.log(`\n=== editors sweep summary (${browserFlag}) ===`);
-console.log(`passes: ${passes}`);
-console.log(`findings: ${findings.length} (blocking: ${blocking.length})`);
-for (const f of findings) {
-  console.log(`\n[${f.severity.toUpperCase()}] ${f.surface}/${f.id} — ${f.framework}`);
-  console.log(`  action:   ${f.action}`);
-  console.log(`  expected: ${f.expected}`);
-  console.log(`  observed: ${f.observed}`);
+if (blocking.length > 0) {
+  console.error(`\n${blocking.length} blocking finding(s) across ${ENGINES.map(([n]) => n).join(", ")}`);
+  process.exit(1);
 }
+console.log(`\nall editor UX sweep checks passed (${ENGINES.map(([n]) => n).join(", ")})`);
