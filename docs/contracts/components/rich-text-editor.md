@@ -147,6 +147,14 @@ browser prompt.
 - A user edit updates the visible document immediately and emits `onChange`.
   The next host value is authoritative. Restoring the prior value rejects the
   edit without callback echo.
+- Controlled equality is semantic document equality, not JavaScript object
+  identity or JSON key order. An echo of the document the engine just emitted
+  advances acceptance bookkeeping without replacing editor state: caret,
+  selection, focus, scroll, history, and IME composition stay where the user
+  left them.
+- A host value different from the live editor document remains authoritative
+  and may replace or reject the local edit without a callback echo. A delayed
+  or stale host value is not mistaken for acceptance of newer editor state.
 - Prop-driven document, configuration, toolbar, state, or label changes never
   emit `onChange`.
 - An image request retains the insertion selection while the host chooses an
@@ -270,8 +278,10 @@ classes to semantic tokens inside the dedicated distribution.
   not the engine's own serialization: the engine normalizes table structure
   (column widths, span bookkeeping) on its own transactions, and that
   normalization is engine state that must never re-dispatch a controlled
-  update. Every `onChange` payload is the complete engine document JSON with
-  only admitted attributes; a host that echoes it back changes nothing.
+  update. Comparison is semantic document equality (key order is not
+  identity), so a host that echoes the emitted JSON back changes nothing. Every
+  `onChange` payload is the complete engine document JSON with only admitted
+  attributes.
 - Wrappers push the controlled value to the engine only when the host sends
   a genuinely new value object. Re-renders carrying the previous host value
   (snapshot or unrelated prop changes) never count as a host revert; a

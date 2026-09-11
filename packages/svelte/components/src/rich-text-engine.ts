@@ -481,6 +481,30 @@ function richTextEscapeFocusTarget(
   return after[0] ?? candidates[0] ?? null;
 }
 
+/**
+ * Controlled-state equality is document semantics, not JavaScript object
+ * identity or JSON key order. ProseMirror serializes a fresh JSON object for
+ * every user transaction and the host echoes it straight back through
+ * `value`; sorting object keys gives both sides one stable comparison. Array
+ * order is left alone because ProseMirror content order is semantic.
+ */
+function canonicalRichTextJson(value: unknown): string {
+  return JSON.stringify(canonicalizeRichTextJson(value));
+}
+
+function canonicalizeRichTextJson(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalizeRichTextJson);
+  if (value !== null && typeof value === "object") {
+    const source = value as Record<string, unknown>;
+    const result: Record<string, unknown> = {};
+    for (const key of Object.keys(source).sort()) {
+      result[key] = canonicalizeRichTextJson(source[key]);
+    }
+    return result;
+  }
+  return value;
+}
+
 function editorAttributes(options: RichTextEngineOptions): Record<string, string> {
   return {
     role: "textbox",
@@ -819,12 +843,12 @@ export function createRichTextEngine(
   // The last accepted host value, not the engine's own serialization:
   // engine-side table normalization is engine state and never re-dispatches
   // a controlled update.
-  let lastHostJson = JSON.stringify(state.value);
-  // The engine serialization at the last settle point (accept, revert, or
-  // reconfiguration): a later host value equal to the last accepted host
+  let lastHostJson = canonicalRichTextJson(state.value);
+  // The engine serialization at the last settle point (accept, echo, revert,
+  // or reconfiguration): a later host value equal to the last accepted host
   // value but diverging from this serialization is a host revert of a user
   // edit, restored without an echo.
-  let lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
+  let lastAcceptedEngineJson = canonicalRichTextJson(editor.getJSON());
 
   // The wrapper's toolbar renders from this initial snapshot; user
   // transactions refresh it. Nothing here is a document change.
@@ -893,8 +917,8 @@ export function createRichTextEngine(
         // schema would refuse later value-only updates that use the newly
         // enabled module.
         schema = createRichTextSchema(features);
-        lastHostJson = JSON.stringify(state.value);
-        lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
+        lastHostJson = canonicalRichTextJson(state.value);
+        lastAcceptedEngineJson = canonicalRichTextJson(editor.getJSON());
         callbacks.onToolbar(snapshot());
         return;
       }
@@ -907,10 +931,11 @@ export function createRichTextEngine(
         callbacks.onToolbar(snapshot());
       }
       if (next.value !== undefined) {
-        // Host values are compared against the last accepted host value, not
-        // the engine's normalized serialization: table normalization is
-        // engine state and must never re-dispatch a controlled update.
-        const nextJson = JSON.stringify(state.value);
+        // Host values are compared semantically against the last accepted host
+        // value, not the engine's normalized serialization: table
+        // normalization is engine state and must never re-dispatch a controlled
+        // update.
+        const nextJson = canonicalRichTextJson(state.value);
         if (nextJson !== lastHostJson) {
           // The host value is authoritative; a host revert rejects the edit
           // without a callback echo.
@@ -922,17 +947,26 @@ export function createRichTextEngine(
             callbacks.onToolbar(snapshot());
             return;
           }
-          editor.commands.setContent(state.value, { emitUpdate: false });
-          lastHostJson = nextJson;
-          lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
+          if (nextJson === canonicalRichTextJson(editor.getJSON())) {
+            // Accepted controlled echo: the host is handing back the document
+            // the engine just emitted. Advance host bookkeeping only. Calling
+            // `setContent` here would replace the document and move the caret
+            // to its end after every typed character.
+            lastHostJson = nextJson;
+            lastAcceptedEngineJson = nextJson;
+          } else {
+            editor.commands.setContent(state.value, { emitUpdate: false });
+            lastHostJson = nextJson;
+            lastAcceptedEngineJson = canonicalRichTextJson(editor.getJSON());
+          }
         } else {
           // Host revert of a user edit: the engine document diverged from the
           // last accepted document, so restore the accepted host value with
           // no callback echo. Normalization stays engine state.
-          const engineJson = JSON.stringify(editor.getJSON());
+          const engineJson = canonicalRichTextJson(editor.getJSON());
           if (engineJson !== lastAcceptedEngineJson) {
             editor.commands.setContent(state.value, { emitUpdate: false });
-            lastAcceptedEngineJson = JSON.stringify(editor.getJSON());
+            lastAcceptedEngineJson = canonicalRichTextJson(editor.getJSON());
           }
         }
       }
