@@ -30,13 +30,15 @@ g18.010 fixed CodeEditor editing focus (PR #242); g18.015 fixed preview
 distribution startup (PR #243); g18.016 fixed live line-number configuration
 (PR #244); g18.013 introduced grouped RichTextEditor controls (PR #245);
 g18.017 fixed block Slider presentation (PR #246); g18.019 added the paired
-MarkdownRenderer (PR #247); and g18.014 proved the RichTextEditor image-policy
-specimens with a self-contained offline fixture (PR #249).
+MarkdownRenderer (PR #247); g18.014 proved the RichTextEditor image-policy
+specimens with a self-contained offline fixture (PR #249); and g18.012 replaced
+the closed CodeEditor grammar catalogue with a consumer-selected lazy language
+registry (PR #250).
 
 g18.018 is active. Operator-approved g18.020 follows it and
 replaces fixed H1–H3 controls with one consumer-configurable Normal/H1–H6
-selector backed by real H4–H6 document support. g18.012 runs in parallel as a
-second prerequisite; both converge on g18.011, which then performs the
+selector backed by real H4–H6 document support. With g18.012 merged, the
+remaining g18.018→g18.020 chain converges on g18.011, which then performs the
 four-surface acceptance sweep. The retained g18.006
 `0.4.0` candidate and serial g18.009 certification/publication lanes remain at
 the end and unblock Desktop only after accepted product source stops moving.

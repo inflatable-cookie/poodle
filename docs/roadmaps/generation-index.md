@@ -6,16 +6,15 @@ Updated: 2026-09-11
 
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
-  - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.005` v0.4.0 release preflight (PR #238); `g18.007` ordinary changelog maintenance scope (PR #240); `g18.008` web editor preview specimens (PR #241); `g18.010` CodeEditor editing focus treatment (PR #242); `g18.013` RichTextEditor toolbar controls (PR #245); `g18.015` preview distribution build preflight (PR #243); `g18.016` CodeEditor live line-number reconfiguration (PR #244); `g18.017` block Slider fixed inline presentation (PR #246); `g18.019` MarkdownRenderer shared safe/trusted rendering (PR #247); `g18.014` rich-text image-policy specimen proof (PR #249)
+  - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.005` v0.4.0 release preflight (PR #238); `g18.007` ordinary changelog maintenance scope (PR #240); `g18.008` web editor preview specimens (PR #241); `g18.010` CodeEditor editing focus treatment (PR #242); `g18.013` RichTextEditor toolbar controls (PR #245); `g18.015` preview distribution build preflight (PR #243); `g18.016` CodeEditor live line-number reconfiguration (PR #244); `g18.017` block Slider fixed inline presentation (PR #246); `g18.019` MarkdownRenderer shared safe/trusted rendering (PR #247); `g18.014` rich-text image-policy specimen proof (PR #249); `g18.012` CodeEditor extensible language registry (PR #250)
   - Active tasks: `g18.018` RichTextEditor controlled-echo selection
-    preservation, unblocked by merged g18.013, and `g18.012` CodeEditor
-    extensible language registry. `g18.020` is ready behind g18.018; parallel
-    g18.012 and g18.018→g18.020 converge on `g18.011`.
+    preservation, unblocked by merged g18.013. `g18.020` is ready behind
+    g18.018; g18.018→g18.020 converge on `g18.011` with `g18.012` merged.
   - Queued task: `g18.011` four-surface web editor UX acceptance sweep,
-    dependency-ordered behind parallel g18.012 and g18.018→g18.020.
-  - Ready Queue task: `g18.012` CodeEditor extensible language registry,
-    dependency-free and dispatchable in parallel with g18.018→g18.020 as a
-    second prerequisite of g18.011.
+    dependency-ordered behind g18.018→g18.020 (`g18.012` merged).
+  - Merged task: `g18.012` CodeEditor extensible language registry (PR #250);
+    both web wrappers now take a consumer-owned lazy language registry with
+    `plain-text` built in and fail-closed unknown/rejected loads.
   - Merged repair: `g18.013` RichTextEditor toolbar controls (PR #245);
     both web toolbars now use grouped Poodle controls modelled on
     MarkdownEditor.
@@ -53,9 +52,8 @@ Updated: 2026-09-11
     g18.010–g18.020, all other blocking repairs, and operator sweep acceptance.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; no tag or publication while candidate source is moving.
-  - Next checkpoint: converge parallel g18.012 and g18.018→g18.020 on
-    g18.011, get operator acceptance, repair other blocking findings, and
-    resume g18.006.
+  - Next checkpoint: converge g18.018→g18.020 on g18.011 (`g18.012` merged),
+    get operator acceptance, repair other blocking findings, and resume g18.006.
 
 ## Compacted generations
 

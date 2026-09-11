@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.014 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.012 merged; g18.018→g18.020 converge on g18.011; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -58,6 +58,11 @@ image-policy specimen proof — merged as `72c7a9e5e6ce288780c7a2e3e44715949a035
 (PR #249) on 2026-09-11 after exact-head independent review and green
 rust/web checks at the reviewed head.
 
+[`g18.012`](g18/012-code-editor-extensible-language-registry.md) — CodeEditor
+extensible language registry — merged as `f011df5e0a97856bfe022569d77faf69a9f75553`
+(PR #250) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -74,17 +79,18 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind parallel g18.012 and
-g18.018→g18.020. The version-57 dependency mutation made it wait exactly on
-g18.012 task `697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.018→g18.020
+(g18.012 merged as `f011df5e0a97856bfe022569d77faf69a9f75553`, PR #250).
+The version-57 dependency mutation made it wait exactly on g18.012 task
+`697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
 `276cd890-5904-4c79-a08f-253c704e4185`. It sweeps all four editor surfaces in
 both web previews and is serial before any g18.006 continuation.
 
-[`g18.012`](g18/012-code-editor-extensible-language-registry.md) runs in
-parallel with g18.018→g18.020 as Queue task
-`697c0380-bcc4-4433-9bce-a6c77fa0452a`, with its former g18.011 edge cleared at
-version 10. It replaces the closed grammar catalogue with consumer-selected
-lazy CodeMirror language providers before the sweep.
+[`g18.012`](g18/012-code-editor-extensible-language-registry.md) is merged (PR #250).
+It replaced the closed grammar catalogue with consumer-selected lazy CodeMirror
+language providers before the sweep; Queue task
+`697c0380-bcc4-4433-9bce-a6c77fa0452a` is closed with its former g18.011 edge
+satisfied at version 10.
 
 [`g18.013`](g18/013-rich-text-editor-toolbar-controls.md) is merged (PR #245).
 It replaced the link-like command row with proper grouped Poodle controls;
@@ -101,7 +107,7 @@ active runtimes. The Slider leg of g18.011 is unblocked.
 
 [`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is in review as PR
 #248, unblocked by merged g18.013. It touches the same RichTextEditor shells
-and now runs in parallel with g18.012 before the sweep. It
+and runs ahead of the sweep with g18.012 already merged. It
 makes accepted controlled echoes preserve caret, selection, history and focus
 in both web wrappers and must merge before g18.011 is released.
 

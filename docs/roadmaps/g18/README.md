@@ -55,8 +55,8 @@ needed to compile honest repair tranches.
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
 | [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); product work continues through g18.012 before release resumes |
-| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | dependency-queued behind parallel g18.012 and g18.018→g18.020 | paired Svelte/React sweep of CodeEditor, RichTextEditor, RichTextRenderer and MarkdownRenderer; operator release checkpoint |
-| [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | queued, ready to dispatch in parallel with g18.018→g18.020 | consumer-selected lazy CodeMirror language providers; last planned product change before the sweep |
+| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | dependency-queued behind g18.018→g18.020 (g18.012 merged) | paired Svelte/React sweep of CodeEditor, RichTextEditor, RichTextRenderer and MarkdownRenderer; operator release checkpoint |
+| [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | complete | PR #250 (merge `f011df5e0a97856bfe022569d77faf69a9f75553`); consumer-selected lazy CodeMirror language providers; last planned product change before the sweep |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | complete | PR #245 (merge `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70`) |
 | [`g18.014`](014-rich-text-image-policy-specimen-proof.md) — rich-text image-policy specimen proof | complete | PR #249 (merge `72c7a9e5e6ce288780c7a2e3e44715949a035221`); self-contained offline seeded/insertion fixtures with visible host proof in both previews |
 | [`g18.015`](015-preview-distribution-build-preflight.md) — preview distribution build preflight | complete | PR #243 (merge `0cf6073eb2067c4fc4127ec5c318a0f682c5859f`); accepted prerequisite evidence for the later sweep |
@@ -91,9 +91,8 @@ The Svelte CodeEditor specimen exposed a focus-origin UX defect: ordinary
 typing flipped the document modality to keyboard and the editor's live
 `:focus-within` rule painted a persistent outer ring. Operator-approved g18.010
 repaired both web wrappers with local navigation-entry state and
-transaction-driven dismissal (PR #242, merged `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`). Operator-confirmed g18.012 runs in parallel as a second
-prerequisite of the g18.011 sweep, replacing the closed grammar catalogue with
-a consumer-selected registry. g18.011 then sweeps CodeEditor, RichTextEditor,
+transaction-driven dismissal (PR #242, merged `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`). Merged g18.012 replaced the closed grammar catalogue with
+a consumer-selected registry (PR #250, merged `f011df5e0a97856bfe022569d77faf69a9f75553`). g18.011 then sweeps CodeEditor, RichTextEditor,
 RichTextRenderer, and MarkdownRenderer across both previews after merged
 g18.013 replaced the link-like rich-text toolbar. Merged g18.014 fixed the
 inert image-policy example with a self-contained offline fixture and visible
@@ -106,11 +105,10 @@ g18.017 replaced pill block-slider corners and value-dependent external text
 with stable in-track crossover treatment across web and GPUI. Dependency-queued
 g18.018 then repairs the controlled rich-text echo that currently calls
 `setContent` and moves the caret to the document end after every character.
-With g18.013, g18.014 and g18.017 merged, g18.018 runs in parallel with g18.012. Merged g18.019 added
+With g18.013, g18.014 and g18.017 merged, g18.018 runs ahead of the sweep with g18.012 already merged. Merged g18.019 added
 a standalone MarkdownRenderer through the existing `./markdown` entry, routed
 MarkdownEditor preview through the same safe-by-default rendering path, and kept
-raw output only behind explicit `htmlPolicy="trusted"`. The queue now encodes
-parallel g18.012 and g18.018→g18.020 converging on g18.011 without manual holds.
+raw output only behind explicit `htmlPolicy="trusted"`. The queue now encodes merged g18.012 with remaining g18.018→g18.020 converging on g18.011 without manual holds.
 Operator-confirmed g18.020 follows the remaining active rich-text task,
 replacing the fixed H1–H3 buttons with one configurable Normal/H1–H6 Select,
 and extends

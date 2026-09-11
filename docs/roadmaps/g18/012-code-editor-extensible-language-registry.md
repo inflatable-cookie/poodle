@@ -1,6 +1,6 @@
 # 012 — CodeEditor extensible language registry
 
-Status: ready — operator-confirmed release requirement; parallel with active rich-text work
+Status: complete — merged as `f011df5e0a97856bfe022569d77faf69a9f75553` (PR #250) on 2026-09-11
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -58,9 +58,9 @@ union through aliases or fallback behavior.
 
 ## Dispatch manifest
 
-- **State:** ready and path-independent from active g18.014/g18.018/g18.020;
-  explicit prerequisite of g18.011 and serial before retained g18.006 resumes;
-  g18.009 remains dependency-queued behind g18.006
+- **State:** complete; merged g18.012 unblocks the registry leg of g18.011;
+  `g18.011` still waits on g18.018→g18.020, and stays serial before retained
+  g18.006; g18.009 waits on g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** CodeEditor contract and focused guides; shared editor
@@ -128,10 +128,24 @@ packages still declared the full fixed grammar set and the engines referenced
 every loader from one switch. The operator ruled that this cannot be Poodle’s
 permanent boundary: language support must be extensible and consumer-selected.
 
+Merged outcome: PR #250 merged as `f011df5e0a97856bfe022569d77faf69a9f75553`
+after exact-head independent review (PR comment `5634758864`, `ready_to_merge`)
+at `02dcde3a2b5d90a339efc0c6b15e81d0772cc800`. Round-1 review found the React
+frozen export-count assertion stale for the new `./editor/codemirror` subpath;
+the fix was a test-only one-line count bump with no product change, re-validated
+green at the reviewed head. Review-reported validation: `effigy test:shell-build`
+31 pass; core registry suite 17 pass; full `bunx vitest run` board 415 files /
+4098 tests pass; paired Chromium + WebKit `test:code-editor-language-registry`
+probes pass for Svelte and React; `effigy test:web-pack-install` isolated
+consumer installs only the selected grammar with unselected grammars absent;
+`svelte:package`/`react:package` audits, both preview builds,
+`test:preview-preflight`, `svelte-check`, frozen lockfile, `git diff --check`,
+and the docs lint/drift board clean. Deferred failure: `check:react` /
+`check:react-preview` errors are the documented pre-existing backlog,
+reproduced on `main` with none in files this repair touches.
+
 ## Next task
 
-After this repair and the parallel rich-text chain through g18.020 merge,
-g18.011 runs the complete four-surface sweep against the final product shape.
-Obtain operator acceptance, then resume retained g18.006 task
-`17ac3fee-de90-4b32-9672-1134770bb086`. g18.009 dispatches only after that
-repaired candidate closes.
+g18.012 is merged. g18.018→g18.020 now converge on g18.011 as a four-surface
+web editor acceptance sweep; then operator acceptance and retained g18.006.
+g18.009 waits on g18.006.
