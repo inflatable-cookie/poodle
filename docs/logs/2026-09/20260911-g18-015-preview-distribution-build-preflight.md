@@ -1,6 +1,7 @@
 # g18.015 — Preview distribution build preflight
 
-Status: complete — awaiting orchestrator review
+Status: merged
+Merge: `0cf6073eb2067c4fc4127ec5c318a0f682c5859f` (PR #243) on 2026-09-11
 Date: 2026-09-11
 Card: `docs/roadmaps/g18/015-preview-distribution-build-preflight.md`
 Handoff: `docs/handoffs/20260911-g18-015-preview-distribution-build-preflight.md`
@@ -62,7 +63,34 @@ or native-visual selector was run.
 This worker has not merged, released g18.011, or resumed g18.006/g18.009.
 Continuous package watch after startup stays out of scope.
 
+## Closeout
+
+- Merge performed by the plugin as
+  `0cf6073eb2067c4fc4127ec5c318a0f682c5859f` on 2026-09-11 (PR #243),
+  with parents `cc67412d8` (main) and `54c3a24ab` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `54c3a24abff00df03a23e8a210d7b92ef506a219` by betterthanclay
+  ([comment #5632044289](https://github.com/inflatable-cookie/poodle/pull/243#issuecomment-5632044289)).
+  No changes required; three non-blocking observations only.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): `bun test scripts/web-distribution/preview-distribution-preflight.test.ts`
+  2 pass / 0 fail, 62 expects; `effigy docs:lint` pass;
+  `git diff --check` clean; CI `web` pass 7m51s including
+  `test:preview-preflight` (2 pass, 65.4s) inside `ci:web`; CI `rust` pass.
+- Non-blocking reviewer notes (deferred, no acceptance impact): the
+  "fresh before listen" check polls at 150 ms, so it proves the invariant
+  for the current sequential composition but would not catch a
+  sub-poll-order race if a concurrent builder were introduced;
+  `listenersOn` relies on `lsof` and degrades silently if absent
+  (present on the ubuntu runner and locally); `ci:web` wall time rises
+  roughly 65–80 s against the job's 10-minute timeout.
+- Deferred: no release, tag, publish, Desktop, native, watcher, workflow,
+  or package-API work starts from this task. `g18.011` stays held until
+  g18.013, g18.014, g18.016, and g18.017 merge; `g18.006` stays blocked
+  and `g18.009` held until the sweep, all other blocking repairs, and
+  operator acceptance complete.
+
 ## Continuation
 
-Orchestrator exact-head review remains. After this task, g18.013, and g18.014
-merge, Chatterbox releases held g18.011.
+After g18.013, g18.014, g18.016, and g18.017 merge, Chatterbox releases
+held g18.011.

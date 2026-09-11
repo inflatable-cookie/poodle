@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.010 merged; g18.006 paused; g18.011 held behind g18.013–g18.017; g18.009 held)
+Updated: 2026-09-11 (g18.010 and g18.015 merged; g18.006 paused; g18.011 held behind g18.013, g18.014, g18.016 and g18.017; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -29,6 +29,11 @@ editing focus treatment — merged as `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`
 (PR #242) on 2026-09-11 after exact-head independent re-review and green
 rust/web checks at the reviewed head.
 
+[`g18.015`](g18/015-preview-distribution-build-preflight.md) — preview
+distribution build preflight — merged as `0cf6073eb2067c4fc4127ec5c318a0f682c5859f`
+(PR #243) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -45,7 +50,7 @@ held. Do not release it until the repaired candidate is accepted.
 ## Ready queue task
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is explicitly Queue-held
-until serial g18.013→g18.014 and parallel g18.015–g18.017 merge. It sweeps all
+until serial g18.013→g18.014 and parallel g18.016–g18.017 merge. It sweeps all
 three editor surfaces in both web previews and is serial before any g18.006
 continuation.
 
@@ -60,11 +65,6 @@ released.
 [`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is
 dependency-queued behind g18.013. It replaces the dead external image fixture
 with visible deterministic seeded/insertion proof before g18.011 is released.
-
-[`g18.015`](g18/015-preview-distribution-build-preflight.md) is approved for
-immediate dispatch in parallel with g18.013. It rebuilds core and the matching
-framework package before each public preview starts and must merge before
-g18.011 is released.
 
 [`g18.016`](g18/016-code-editor-live-line-number-reconfiguration.md) is
 approved for immediate dispatch in parallel. It makes the existing mounted

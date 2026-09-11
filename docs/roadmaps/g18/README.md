@@ -59,7 +59,7 @@ needed to compile honest repair tranches.
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | ready behind g18.011 | consumer-selected lazy CodeMirror language providers; remove Poodle-owned closed grammar catalogue |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | active | proper grouped Poodle controls modelled on MarkdownEditor; known blocker before g18.011 |
 | [`g18.014`](014-rich-text-image-policy-specimen-proof.md) — rich-text image-policy specimen proof | ready behind g18.013 | deterministic visible seeded image and insert-once host proof in both previews |
-| [`g18.015`](015-preview-distribution-build-preflight.md) — preview distribution build preflight | ready in parallel with g18.013 | rebuild core and matching framework distributions before either public Vite preview starts |
+| [`g18.015`](015-preview-distribution-build-preflight.md) — preview distribution build preflight | complete | PR #243 (merge `0cf6073eb2067c4fc4127ec5c318a0f682c5859f`); g18.011 stays held until g18.013, g18.014, g18.016 and g18.017 merge, g18.006 stays blocked, g18.009 stays held |
 | [`g18.016`](016-code-editor-live-line-number-reconfiguration.md) — CodeEditor live line-number reconfiguration | ready in parallel | mounted true/false gutter changes preserve editor state in both web wrappers |
 | [`g18.017`](017-block-slider-fixed-inline-presentation.md) — block Slider fixed inline presentation | ready in parallel | rounded-square family corners and stable split-colour in-track Slider text across active runtimes |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
@@ -93,7 +93,7 @@ CodeEditor, RichTextEditor, and RichTextRenderer across both previews after
 parallel g18.013 replaces the link-like rich-text toolbar. g18.012
 uses that evidence to replace the closed grammar catalogue with a
 consumer-selected registry. Serial g18.014 fixes the inert image-policy example
-before the sweep begins. Parallel g18.015 makes both public preview selectors
+before the sweep begins. Merged g18.015 makes both public preview selectors
 rebuild their package graph before Vite listens, preventing stale ignored
 distributions after merges. Parallel g18.016 repairs the configuration
 specimen's inert live line-number toggle without remounting the editor. Parallel

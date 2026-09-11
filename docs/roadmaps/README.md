@@ -26,8 +26,8 @@ The bounded g18.005 release preflight merged (PR #238) after the
 operator-approved g18.007 structural unblock lane (PR #240); no CI exception
 was authorized. Operator-approved g18.008 merged the baseline Svelte/React
 catalogue pages for CodeEditor, RichTextEditor, and RichTextRenderer (PR
-#241). Operator-approved g18.010 merged the CodeEditor editing focus repair
-in both web wrappers (PR #242).
+in both web wrappers (PR #242). Operator-approved g18.015 merged the preview
+distribution build preflight so both public preview selectors rebuild their package graph before Vite listens (PR #243).
 
 Preflight is closed; `g18.006` is the ready `0.4.0` candidate and g18.009 is
 the serial certification/publication step that unblocks Desktop. Final source

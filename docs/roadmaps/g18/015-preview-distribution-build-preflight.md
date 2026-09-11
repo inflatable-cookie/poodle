@@ -1,6 +1,6 @@
 # 015 — Preview distribution build preflight
 
-Status: ready — operator-confirmed startup repair; parallel with g18.013
+Status: complete — merged as `0cf6073eb2067c4fc4127ec5c318a0f682c5859f` (PR #243) on 2026-09-11
 Owner: Poodle developer tooling
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
