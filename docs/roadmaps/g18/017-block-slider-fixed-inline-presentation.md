@@ -1,6 +1,6 @@
 # 017 — Block Slider fixed inline presentation
 
-Status: ready — operator-confirmed cross-runtime visual repair
+Status: complete — merged as `f91be412b60739e96c29a45e9c17969c05b85f49` (PR #246) on 2026-09-11
 Owner: Poodle Slider family
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -73,9 +73,9 @@ pointer, keyboard, accessibility and callback semantics.
 
 ## Dispatch manifest
 
-- **State:** ready for immediate Queue dispatch in parallel with g18.013,
-  g18.015 and g18.016; serial before held g18.011 and retained g18.006; g18.009
-  remains held
+- **State:** complete; merged g18.017 unblocks the Slider leg of g18.011;
+  `g18.011` still waits on g18.014 and g18.018, and stays serial before
+  g18.012, retained g18.006, and g18.009
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** Slider/RangeSlider contracts only for the approved
@@ -159,6 +159,7 @@ either selected or remainder segment cannot hold its assigned string.
 
 ## Next task
 
-After this task and g18.013/g18.014/g18.018/g18.019 close, Queue dependencies
-dispatch g18.011 for the complete four-surface editor acceptance sweep. Keep
-g18.006 paused; g18.009 waits on it.
+g18.017 is merged. Merge the remaining blockers (g18.014, g18.018), then
+dispatch g18.011 as a four-surface web editor acceptance sweep and g18.012
+after it. Keep g18.006 paused until operator acceptance; g18.009 waits on
+g18.006.

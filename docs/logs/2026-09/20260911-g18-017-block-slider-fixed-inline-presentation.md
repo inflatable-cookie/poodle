@@ -1,6 +1,7 @@
 # g18.017 — Block Slider fixed inline presentation
 
-Status: in review
+Status: merged
+Merge: `f91be412b60739e96c29a45e9c17969c05b85f49` (PR #246) on 2026-09-11
 Date: 2026-09-11
 Branch: `ns-be813655-c1eb-4b57-af4b-974d2f8c84de`
 Card: `docs/roadmaps/g18/017-block-slider-fixed-inline-presentation.md`
@@ -194,3 +195,45 @@ value the logical end (physical left, inset 8px).
   (`pill` 0.665%) reproduces identically on the clean base commit and is
   unrelated.
 - `git diff --check` — clean.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `f91be412b60739e96c29a45e9c17969c05b85f49` on 2026-09-11 (PR #246),
+  with parents `9cc62661d7f9cacdec287d82e356f45331fb81b8` (main) and
+  `666ca0fbfdd14189bcfa6ae5fca9fd6c338ca323` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` re-review of
+  head `666ca0fbfdd14189bcfa6ae5fca9fd6c338ca323` by betterthanclay
+  ([comment #5633380283](https://github.com/inflatable-cookie/poodle/pull/246#issuecomment-5633380283)).
+  No findings; the g18.017 implementation is untouched since the earlier
+  approved `69ed890ca`, and the delta to the reviewed head holds no
+  implementation file.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): `effigy check:parity-evidence-ledger` exit 0 (176 component
+  evidence rows); `effigy check:gpui-census` exit 0;
+  `bun test scripts/nucleus-parity-receipts.test.ts` 17 pass;
+  `effigy audit:tokens` and `effigy drift:recipes` pass;
+  `effigy test:block-slider-inline` exit 0, 144 checks pass on Chromium and
+  WebKit for Svelte and React; `cargo test --test headless_regressions
+  block` 9 pass including the four g18.017 mounted proofs and the RTL
+  clip/anchor test; `bun test packages/core/test/wave1.test.ts` 28 pass;
+  Svelte/React Slider suites 45 pass; `git diff --check` clean;
+  `git status --porcelain` empty. Round-1 carryover still applies:
+  `poodle-headless` 223 pass, `poodle-render slider` 35 pass. CI `rust`
+  and `web` pass at the merge.
+- Worker validation at the branch head is recorded above under Validation;
+  the merged head adds only main-side docs commits (g18.019 closeout,
+  triage note) over the reviewed head, no source.
+- Deferred: the two `poodle-render` failures
+  (`context::tests::the_provider_adds_no_wrapper...`,
+  `segmented_control::tests::icon_only_without_an_icon...`) and the single
+  `pill` visual-smoke pair reproduce identically on the clean base commit
+  and stay unrelated to this task. No release, tag, publish, Desktop,
+  native, or retained-task work starts from this task. `g18.011` stays
+  queued behind g18.014 and g18.018; `g18.006` stays paused and `g18.009`
+  stays queued behind it.
+
+## Continuation
+
+Merge before the queued g18.011 web-editor acceptance sweep. Do not resume
+g18.006 or g18.009 from this task.

@@ -6,15 +6,14 @@ Updated: 2026-09-11
 
 - [`g18`](g18/README.md) — GPUI functional completion
   - Status: active
-  - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.005` v0.4.0 release preflight (PR #238); `g18.007` ordinary changelog maintenance scope (PR #240); `g18.008` web editor preview specimens (PR #241); `g18.010` CodeEditor editing focus treatment (PR #242); `g18.013` RichTextEditor toolbar controls (PR #245); `g18.015` preview distribution build preflight (PR #243); `g18.016` CodeEditor live line-number reconfiguration (PR #244); `g18.019` MarkdownRenderer shared safe/trusted rendering (PR #247)
-  - Active tasks: `g18.017`
-    block Slider fixed inline presentation.
+  - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.005` v0.4.0 release preflight (PR #238); `g18.007` ordinary changelog maintenance scope (PR #240); `g18.008` web editor preview specimens (PR #241); `g18.010` CodeEditor editing focus treatment (PR #242); `g18.013` RichTextEditor toolbar controls (PR #245); `g18.015` preview distribution build preflight (PR #243); `g18.016` CodeEditor live line-number reconfiguration (PR #244); `g18.017` block Slider fixed inline presentation (PR #246); `g18.019` MarkdownRenderer shared safe/trusted rendering (PR #247)
+  - Active tasks: none.
     `g18.014` rich-text image-policy specimen proof and `g18.018`
     RichTextEditor controlled-echo selection preservation are ready,
     unblocked by merged g18.013. `g18.011` is dependency-queued behind
-    g18.014, g18.017 and g18.018.
+    g18.014 and g18.018.
   - Queued task: `g18.011` four-surface web editor UX acceptance sweep,
-    dependency-ordered behind all three open product prerequisites.
+    dependency-ordered behind both open product prerequisites.
   - Queued task: `g18.012` CodeEditor extensible language registry,
     dependency-ordered behind g18.011.
   - Merged repair: `g18.013` RichTextEditor toolbar controls (PR #245);
@@ -27,8 +26,10 @@ Updated: 2026-09-11
     before Vite listens.
   - Merged repair: `g18.016` CodeEditor live line-number reconfiguration (PR
     #244); the mounted gutter now follows the host prop without remounting.
-  - Active task: `g18.017` block Slider fixed inline presentation, parallel and
-    required before g18.011 is released.
+  - Merged repair: `g18.017` block Slider fixed inline presentation (PR
+    #246); the block Slider family now uses rounded-square corners and
+    single-Slider text stays fixed inside the track with split-colour
+    crossover across active runtimes.
   - Ready task: `g18.018` RichTextEditor controlled-echo selection
     preservation, unblocked by merged g18.013 and required before
     g18.011 is released.
@@ -47,7 +48,7 @@ Updated: 2026-09-11
     g18.010–g18.019, all other blocking repairs, and operator sweep acceptance.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; no tag or publication while candidate source is moving.
-  - Next checkpoint: complete g18.014, g18.017 and g18.018,
+  - Next checkpoint: complete g18.014 and g18.018,
     complete g18.011, complete g18.012, repair other blocking
     findings, and get operator acceptance before resuming g18.006.
 
