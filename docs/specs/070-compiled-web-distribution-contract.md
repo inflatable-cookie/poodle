@@ -67,7 +67,9 @@ actual Svelte prop, snippet, bindable, and callback types; a bare generic
 Optional `marked` is required when a consumer imports `./markdown`. Ordinary
 root or direct Button/Select graphs must not resolve `marked`. The pinned base
 `@codemirror/*` dependencies (`commands`, `language`, `search`, `state`,
-`view`) are required when a consumer imports `./editor` or
+`view`) and the pinned `@lezer/highlight` tag substrate (g18.021, the
+highlight style's tag import — not a grammar package) are required when a
+consumer imports `./editor` or
 `./editor/codemirror`; root-only graphs must not resolve them. No
 `@codemirror/lang-*` or `@codemirror/legacy-modes` package is a Poodle
 dependency: language support is consumer-owned (g18.012), and consumers

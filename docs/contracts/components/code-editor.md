@@ -232,6 +232,18 @@ transaction.
 | focus | shared keyboard focus ring |
 | diagnostic error / warning / info | matching status colour plus non-colour mark |
 | search match | accent tint; active match receives stronger outline |
+| syntax tokens | token groups bound to the semantic palette (below) |
+
+Syntax presentation is visible only when a non-plain language is active in
+`performanceMode="full"`. The internal editor engine maps stable Lezer tag
+groups onto the semantic palette: comments and metadata read as secondary
+text, keywords as accent, strings as success, numbers, booleans, and constants
+as info, types and definitions as warning, and invalid syntax as danger.
+Ordinary names keep primary text. Colours resolve from the semantic CSS
+variables, so switching themes restyles a mounted editor live; weight or style
+never substitutes for colour. `plain-text` and `performanceMode="plain"`
+render no syntax spans and load no grammar. The mapping stays private: no
+CodeMirror tags, highlight styles, or editor extensions cross the public API.
 
 Consumers must not need global editor-engine CSS overrides. Poodle maps any
 engine classes to its semantic tokens inside the component distribution.
@@ -243,9 +255,10 @@ engine classes to its semantic tokens inside the component distribution.
 - Shared TypeScript owns engine-independent types and transaction translation.
 - CodeMirror `EditorView`, extensions, transactions, decorations, and themes
   stay private. There is no arbitrary extension prop or raw editor handle.
-- The implementation pins its exact base CodeMirror packages. It imports no
-  grammar package; language extensions arrive only through consumer loaders at
-  runtime.
+- The implementation pins its exact base CodeMirror packages plus the
+  `@lezer/highlight` tag substrate its internal highlight style imports. It
+  imports no grammar package; language extensions arrive only through consumer
+  loaders at runtime.
 - The engine owns line-break representation: CR and CRLF load as LF, matching
   CodeMirror's document model. Astral characters, tabs, and trailing spaces
   are byte-exact. Every `onChange` payload replays exactly against the owned

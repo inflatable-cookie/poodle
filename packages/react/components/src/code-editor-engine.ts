@@ -19,11 +19,18 @@ import {
 } from "@codemirror/state";
 import type { ChangeSet, Extension, StateEffect, TransactionSpec } from "@codemirror/state";
 import {
+  HighlightStyle,
+  syntaxHighlighting,
+  syntaxTree,
+} from "@codemirror/language";
+import { tags as lezerTags } from "@lezer/highlight";
+import {
   Decoration,
   EditorView,
   keymap,
   lineNumbers,
   placeholder,
+  ViewPlugin,
 } from "@codemirror/view";
 import type { DecorationSet, KeyBinding, ViewUpdate } from "@codemirror/view";
 import {
@@ -107,9 +114,114 @@ function isLanguageExtension(value: unknown): value is Extension {
 }
 
 /**
+ * Token-bound syntax presentation (g18.021). One private highlight style maps
+ * stable Lezer tag groups onto Poodle semantic CSS variables, so a live theme
+ * change restyles mounted editors without engine recreation. Ordinary names
+ * stay unmapped and inherit the primary text colour; weight or style never
+ * substitutes for colour.
+ *
+ * Poodle ships no grammar: these tags are base editor presentation machinery,
+ * and the style is installed exclusively with a full-mode non-plain language.
+ */
+const codeEditorHighlightStyle = HighlightStyle.define([
+  {
+    // Comments, metadata, and their subtags read as secondary text.
+    tag: [lezerTags.comment, lezerTags.meta],
+    color: "var(--poodle-color-text-secondary)",
+  },
+  {
+    // The whole keyword family — control, definition, module, and operator
+    // keywords — reads as accent. `null`, `super`, `this`, and boolean
+    // literals carry their own more specific rules below.
+    tag: lezerTags.keyword,
+    color: "var(--poodle-color-accent-base)",
+  },
+  {
+    // Strings (and string specialisations such as templates) read as success.
+    tag: lezerTags.string,
+    color: "var(--poodle-color-status-success)",
+  },
+  {
+    // Numbers, booleans, and literal constants read as info.
+    tag: [lezerTags.number, lezerTags.bool, lezerTags.null, lezerTags.atom],
+    color: "var(--poodle-color-status-info)",
+  },
+  {
+    // Types and definitions read as warning; ordinary names stay primary.
+    tag: [
+      lezerTags.typeName,
+      lezerTags.className,
+      lezerTags.definition(lezerTags.variableName),
+      lezerTags.definition(lezerTags.propertyName),
+    ],
+    color: "var(--poodle-color-status-warning)",
+  },
+  {
+    // Grammars that tag malformed input directly read as danger. Parser error
+    // nodes of grammars that do not are marked by the plugin below.
+    tag: lezerTags.invalid,
+    color: "var(--poodle-color-status-danger)",
+  },
+]);
+
+/**
+ * Parser error nodes carry no Lezer tag, so the tag-bound style cannot reach
+ * them. This private plugin marks visible error nodes with the danger token
+ * so invalid syntax is legible without replacing host diagnostics. The style
+ * is an inline CSS variable, so it follows live theme changes like the rest
+ * of the presentation.
+ */
+const invalidSyntaxMark = Decoration.mark({
+  class: "poodle-code-editor__syntax-invalid",
+  attributes: { style: "color: var(--poodle-color-status-danger)" },
+});
+
+function invalidSyntaxDecorations(view: EditorView): DecorationSet {
+  const builder = new RangeSetBuilder<Decoration>();
+  const tree = syntaxTree(view.state);
+  for (const { from, to } of view.visibleRanges) {
+    tree.iterate({
+      from,
+      to,
+      enter: (node) => {
+        if (!node.type.isError) return true;
+        if (node.to > node.from) builder.add(node.from, node.to, invalidSyntaxMark);
+        return false;
+      },
+    });
+  }
+  return builder.finish();
+}
+
+const invalidSyntaxHighlighter = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+
+    constructor(view: EditorView) {
+      this.decorations = invalidSyntaxDecorations(view);
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = invalidSyntaxDecorations(update.view);
+      }
+    }
+  },
+  { decorations: (plugin) => plugin.decorations },
+);
+
+/** Full-mode, non-plain syntax presentation installed with the language. */
+const codeEditorSyntaxPresentation: Extension = [
+  syntaxHighlighting(codeEditorHighlightStyle),
+  invalidSyntaxHighlighter,
+];
+
+/**
  * Resolve the active id through the host's registry. Plain text (and plain
- * performance mode) load no language; anything else must be admitted and must
- * resolve to a real language extension before it can reach the editor.
+ * performance mode) load no language and no syntax presentation; anything
+ * else must be admitted and must resolve to a real language extension before
+ * it can reach the editor, and it carries the private token-bound
+ * presentation with it.
  */
 async function resolveLanguageExtension(
   options: Pick<CodeEditorEngineOptions, "language" | "languageRegistry" | "performanceMode">,
@@ -128,7 +240,7 @@ async function resolveLanguageExtension(
       `code-editor: language "${options.language}" did not resolve to a CodeMirror language extension.`,
     );
   }
-  return loaded;
+  return [loaded, codeEditorSyntaxPresentation];
 }
 
 function normalizeTabSize(tabSize: number): number {
