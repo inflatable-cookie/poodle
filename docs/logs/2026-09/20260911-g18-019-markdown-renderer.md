@@ -1,6 +1,7 @@
 # g18.019 — MarkdownRenderer shared safe/trusted rendering
 
-Status: ready for review (queue-owned merge pending)
+Status: merged
+Merge: `cc26dd3c09e12addab7c0b6c5a243f83f33cff94` (PR #247) on 2026-09-11
 Date: 2026-09-11
 Branch: `ns-eac944cd-2ee0-4810-bd60-0976e3270e56`
 Card: `docs/roadmaps/g18/019-markdown-renderer.md`
@@ -140,8 +141,30 @@ all 47 paired component/SSR cases to green.
 
 ## Closeout
 
-- Worker opened one non-draft PR from the queue-owned branch; the plugin owns
-  review and merge. This log is updated by closeout, not by the worker.
+- Merge performed by the plugin as
+  `cc26dd3c09e12addab7c0b6c5a243f83f33cff94` on 2026-09-11 (PR #247),
+  with parents `9f2771bb90f5a5b642a169cefdd2cd49c888d1ea` (main) and
+  `beef7905dee2b9c7dd1cd02f98df045ff4da84b9` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `beef7905dee2b9c7dd1cd02f98df045ff4da84b9` by betterthanclay
+  ([comment #5633239316](https://github.com/inflatable-cookie/poodle/pull/247#issuecomment-5633239316)).
+  No blocking findings; two non-blocking notes (case-sensitive
+  `DROP_CONTENT_ELEMENTS` keeps mixed-case raw-text content as escaped text,
+  and `ATTRIBUTE_NAME_PATTERN` is dead code), both safe to defer.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): `effigy test:core` 1357 pass (includes the 56-case sanitizer
+  corpus); paired component/SSR Markdown suites 47 pass across 5 files;
+  preview g18-019 plus catalogue-audit and g18-008 specimen suites 28 pass
+  across 5 files; full `bunx vitest run` board 409 files, 4030 pass;
+  `effigy svelte:package` / `effigy react:package` exit 0;
+  `effigy docs:check` exit 0; `git diff --check` clean; an independent
+  22-vector adversarial sanitizer probe neutralized on every vector; CI
+  `rust` and `web` pass at the merge.
+- Worker validation at the branch head is recorded above under Validation;
+  the merged head adds no source over the reviewed head (merge only).
+- Deferred: no release, tag, publish, Desktop, native, or retained-task work
+  starts from this task. `g18.011` stays held until g18.014, g18.017 and
+  g18.018 merge; `g18.006` stays blocked and `g18.009` stays held.
 
 ## Continuation
 

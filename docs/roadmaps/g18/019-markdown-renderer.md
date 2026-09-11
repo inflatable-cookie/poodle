@@ -1,6 +1,6 @@
 # 019 — MarkdownRenderer shared safe/trusted rendering
 
-Status: active — Queue task `eac944cd-2ee0-4810-bd60-0976e3270e56`
+Status: complete — merged as `cc26dd3c09e12addab7c0b6c5a243f83f33cff94` (PR #247) on 2026-09-11
 Owner: Poodle web editors
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -74,10 +74,9 @@ dependency-queued editor acceptance sweep and release candidate.
 
 ## Dispatch manifest
 
-- **State:** active in Queue task `eac944cd-2ee0-4810-bd60-0976e3270e56`;
-  independent and running in parallel with g18.017 and the g18.013 chain;
-  explicit prerequisite of g18.011 and therefore serial before g18.012,
-  retained g18.006, and g18.009
+- **State:** complete; merged g18.019 unblocks the MarkdownRenderer leg of
+  g18.011; `g18.011` still waits on g18.014, g18.017 and g18.018, and stays
+  serial before g18.012, retained g18.006, and g18.009
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** MarkdownEditor shells/tests; new paired
@@ -159,6 +158,6 @@ specimen pages, safe default output, and an explicit trusted opt-in.
 
 ## Next task
 
-Merge g18.019 and the other editor/Slider blockers. Queue dependencies then
-dispatch g18.011 as a four-surface web editor acceptance sweep and g18.012 after
+g18.019 is merged. Merge the remaining blockers (g18.014, g18.017, g18.018),
+then dispatch g18.011 as a four-surface web editor acceptance sweep and g18.012 after
 it. Keep g18.006 paused until operator acceptance; g18.009 waits on g18.006.

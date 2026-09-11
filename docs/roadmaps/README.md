@@ -27,7 +27,7 @@ operator-approved g18.007 structural unblock lane (PR #240); no CI exception
 was authorized. Operator-approved g18.008 merged the baseline Svelte/React
 catalogue pages for CodeEditor, RichTextEditor, and RichTextRenderer (PR
 in both web wrappers (PR #242). Operator-approved g18.015 merged the preview
-distribution build preflight so both public preview selectors rebuild their package graph before Vite listens (PR #243). Operator-approved g18.016 merged the CodeEditor live line-number reconfiguration so the mounted gutter follows the host prop without remounting (PR #244). Operator-approved g18.013 merged the RichTextEditor toolbar controls so both web toolbars use grouped Poodle controls modelled on MarkdownEditor (PR #245).
+distribution build preflight so both public preview selectors rebuild their package graph before Vite listens (PR #243). Operator-approved g18.016 merged the CodeEditor live line-number reconfiguration so the mounted gutter follows the host prop without remounting (PR #244). Operator-approved g18.013 merged the RichTextEditor toolbar controls so both web toolbars use grouped Poodle controls modelled on MarkdownEditor (PR #245). Operator-approved g18.019 merged the paired MarkdownRenderer with shared safe/trusted rendering through the existing `./markdown` entry (PR #247).
 
 Preflight is closed; `g18.006` is the ready `0.4.0` candidate and g18.009 is
 the serial certification/publication step that unblocks Desktop. Final source

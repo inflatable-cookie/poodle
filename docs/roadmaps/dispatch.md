@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.013 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.019 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -44,6 +44,11 @@ toolbar controls — merged as `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70`
 (PR #245) on 2026-09-11 after exact-head independent review and green
 rust/web checks at the reviewed head.
 
+[`g18.019`](g18/019-markdown-renderer.md) — MarkdownRenderer shared
+safe/trusted rendering — merged as `cc26dd3c09e12addab7c0b6c5a243f83f33cff94`
+(PR #247) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -60,8 +65,8 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014, g18.017,
-g18.018 and g18.019. It sweeps all four editor surfaces in both web previews
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014, g18.017
+and g18.018. It sweeps all four editor surfaces in both web previews
 and is serial before g18.012 and any g18.006 continuation.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is
@@ -87,11 +92,10 @@ runs beside g18.014 and g18.017. It
 makes accepted controlled echoes preserve caret, selection, history and focus
 in both web wrappers and must merge before g18.011 is released.
 
-[`g18.019`](g18/019-markdown-renderer.md) is active as Queue task
-`eac944cd-2ee0-4810-bd60-0976e3270e56`. It adds paired standalone
-MarkdownRenderer surfaces, shares one safe/trusted content path with
-MarkdownEditor preview, and adds both specimen pages. It is independent of the
-rich-text and Slider lanes and is an explicit g18.011 prerequisite.
+[`g18.019`](g18/019-markdown-renderer.md) is merged (PR #247).
+It added the paired standalone MarkdownRenderer surfaces, shared one
+safe/trusted content path with MarkdownEditor preview, and added both specimen
+pages. The MarkdownRenderer leg of g18.011 is unblocked.
 
 ## Held planning horizons
 
