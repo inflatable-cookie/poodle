@@ -28,7 +28,8 @@ specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is ready after all four dependencies, final-source recheck at
-`70b59890`, and Tom's 2026-09-11 authority. Dispatch only its committed handoff.
+`70b59890`, and Tom's 2026-09-11 authority. Queue task:
+`17ac3fee-de90-4b32-9672-1134770bb086`.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is ready behind g18.006. Queue it only with the immutable g18.006

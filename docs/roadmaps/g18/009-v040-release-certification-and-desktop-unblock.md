@@ -9,7 +9,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../specs/070-compiled-web-distribution-contract.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
-Depends on: g18.006 complete with accepted exact candidate on pushed main
+Depends on: g18.006 queue task `17ac3fee-de90-4b32-9672-1134770bb086`
+complete with accepted exact candidate on pushed main
 
 ## Outcome
 
