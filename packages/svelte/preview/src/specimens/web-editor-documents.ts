@@ -2,6 +2,7 @@ import type {
   CodeEditorDiagnostic,
   ProseMirrorDocumentJSON,
   ProseMirrorNodeJSON,
+  RichTextCommand,
   RichTextFeature,
 } from "@inflatable-cookie/poodle-core";
 import { RICH_TEXT_STANDARD_FEATURES } from "@inflatable-cookie/poodle-core";
@@ -163,4 +164,35 @@ export const RICH_TEXT_IMAGE_DOCUMENT: ProseMirrorDocumentJSON = {
 export const RICH_TEXT_IMAGE_FEATURES: readonly RichTextFeature[] = [
   ...RICH_TEXT_STANDARD_FEATURES,
   "images",
+];
+
+/**
+ * Every admitted heading level as real document behavior (g18.020). The
+ * heading-mode specimen loads this so H4–H6 are visible document structure,
+ * not toolbar-only labels, and a selection across these blocks reads Mixed.
+ */
+export const RICH_TEXT_HEADING_DOCUMENT: ProseMirrorDocumentJSON = {
+  type: "doc",
+  content: [
+    { type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "Heading one" }] },
+    { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Heading two" }] },
+    { type: "heading", attrs: { level: 3 }, content: [{ type: "text", text: "Heading three" }] },
+    { type: "heading", attrs: { level: 4 }, content: [{ type: "text", text: "Heading four" }] },
+    { type: "heading", attrs: { level: 5 }, content: [{ type: "text", text: "Heading five" }] },
+    { type: "heading", attrs: { level: 6 }, content: [{ type: "text", text: "Heading six" }] },
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "Body copy sits below the heading levels." }],
+    },
+  ],
+};
+
+/**
+ * A sparse heading configuration: the selector offers Normal text, Heading 2,
+ * and Heading 4 only, proving consumers choose exactly the levels they admit.
+ */
+export const RICH_TEXT_SPARSE_HEADING_TOOLBAR: readonly RichTextCommand[] = [
+  "bold",
+  "heading-2",
+  "heading-4",
 ];

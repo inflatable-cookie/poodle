@@ -360,6 +360,18 @@
   { task = "test:rich-text-controlled-echo-chromium" },
   { task = "test:rich-text-controlled-echo-webkit" },
 ]
+# g18.020 RichTextEditor heading mode select. Paired Svelte + React fixtures
+# prove consumer-configurable levels project as one Poodle Select (full and
+# sparse), Normal/Heading/Mixed trigger states, exact set-instead-of-toggle
+# semantics, real H4–H6 document behavior, stable trigger geometry, bounded
+# option previews, and listbox-owned keyboard behavior. Headless Chromium and
+# WebKit, one engine per run; not in ci:web.
+"test:rich-text-heading-mode-chromium" = "bun test/rich-text-heading-mode/probe.ts --browser=chromium"
+"test:rich-text-heading-mode-webkit" = "bun test/rich-text-heading-mode/probe.ts --browser=webkit"
+"test:rich-text-heading-mode" = [
+  { task = "test:rich-text-heading-mode-chromium" },
+  { task = "test:rich-text-heading-mode-webkit" },
+]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
 "test:meter-surface-perf" = "bun test/visual/meter-surface-perf.ts"

@@ -138,8 +138,13 @@ export function selectMatchesQuery(label: string, query: string): boolean {
   return label.toLowerCase().includes(query.toLowerCase());
 }
 
-/** Visible options for the current query, including disabled rows. */
+/** Visible options for the current query, including disabled rows. A list
+ * that cannot be searched never narrows by its committed label: closing a
+ * non-searchable Select seeds `query` with the selected label so the trigger
+ * can display it, and treating that label as a search term would hide every
+ * other option from keyboard navigation while the menu still renders them. */
 export function selectVisibleOptions(context: SelectContext): SelectOptionState[] {
+  if (!context.searchable && !context.freeform) return context.options;
   return context.options.filter((option) => selectMatchesQuery(option.label, context.query));
 }
 

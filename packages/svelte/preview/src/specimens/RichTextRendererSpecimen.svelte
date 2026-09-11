@@ -6,6 +6,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import {
+    RICH_TEXT_HEADING_DOCUMENT,
     RICH_TEXT_IMAGE_DOCUMENT,
     RICH_TEXT_IMAGE_FEATURES,
     RICH_TEXT_STANDARD_DOCUMENT,
@@ -22,6 +23,19 @@
         value={RICH_TEXT_STANDARD_DOCUMENT}
         features={RICH_TEXT_STANDARD_FEATURES}
         ariaLabel="Formatted document"
+      />
+    </div>
+  </SpecimenGroup>
+
+  <SpecimenGroup
+    label="Heading levels"
+    description="H1–H6 are real document structure, not toolbar labels. The renderer keeps the same heading scale the editor admits."
+  >
+    <div class="renderer-frame" data-part="heading-renderer">
+      <RichTextRenderer
+        value={RICH_TEXT_HEADING_DOCUMENT}
+        features={RICH_TEXT_STANDARD_FEATURES}
+        ariaLabel="Heading levels document"
       />
     </div>
   </SpecimenGroup>
