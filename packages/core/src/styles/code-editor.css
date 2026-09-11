@@ -82,8 +82,16 @@
   border-radius: var(--poodle-radius-control);
 }
 
-/* Keyboard focus carries the shared treatment; pointer focus paints none. */
-:root[data-poodle-input-modality="keyboard"] .poodle-code-editor:focus-within {
+/*
+ * Focus-entry treatment: an entry affordance for keyboard navigation, not a
+ * persistent editing border. The local `data-focus-entry` attribute arms on
+ * Tab/Shift+Tab entry and dismisses on the first real editing intent while
+ * the document modality stays truthful; pointer entry never arms it and a
+ * pointer press inside the editor yields it. Contract:
+ * docs/contracts/components/code-editor.md §6 Focus.
+ */
+:root[data-poodle-input-modality="keyboard"]
+  .poodle-code-editor[data-focus-entry="keyboard"]:focus-within {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.125rem;
 }

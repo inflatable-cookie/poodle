@@ -33,6 +33,7 @@ import {
   indentMore,
 } from "@codemirror/commands";
 import {
+  installCodeEditorFocusEntry,
   isCodeEditorLanguage,
   toCodeEditorChange,
   validateCodeEditorDiagnostics,
@@ -284,6 +285,10 @@ export async function createCodeEditorEngine(
         tabSizeCompartment.of(EditorState.tabSize.of(normalizeTabSize(options.tabSize))),
         EditorView.updateListener.of((update: ViewUpdate) => {
           if (!update.docChanged || applyingHostValue) return;
+          // A committed user edit transaction — typing, deletion, line
+          // commands, indentation, clipboard, history, drop — dismisses the
+          // entry treatment in the same update that changes the document.
+          focusEntry.dismiss();
           callbacks.onChange(
             transactionToChange(update.startState.doc.toString(), update.changes),
           );
@@ -294,6 +299,13 @@ export async function createCodeEditorEngine(
 
   view.contentDOM.setAttribute("aria-label", options.ariaLabel);
   if (options.disabled) view.contentDOM.setAttribute("aria-disabled", "true");
+
+  // The outer focus treatment is a keyboard-entry affordance. It lives on the
+  // root element as a local attribute, never on the document modality. Real
+  // editing intent is transaction-driven: every committed user edit below
+  // dismisses, so bindings that repurpose key names (indent Tab, copy-line
+  // arrows) and readOnly context are honored by construction.
+  const focusEntry = installCodeEditorFocusEntry(host);
 
   let updateEpoch = 0;
 
@@ -379,6 +391,7 @@ export async function createCodeEditorEngine(
   }
 
   function destroy(): void {
+    focusEntry.destroy();
     closeSearchPanel(view);
     view.destroy();
   }
