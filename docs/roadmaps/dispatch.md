@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.006 paused; g18.010 repair and g18.011 sweep approved; g18.009 held)
+Updated: 2026-09-11 (g18.006 paused; g18.010–g18.012 editor acceptance lane approved; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -29,8 +29,8 @@ specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010 and the dependent g18.011 sweep close, all blocking repairs
-merge, and the operator accepts the sweep.
+only after g18.010, the dependent g18.011 sweep, g18.012, and all other
+blocking repairs close and the operator accepts the sweep.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is already dependency-queued behind g18.006 and is now explicitly
@@ -45,6 +45,10 @@ immediate dispatch.
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued
 behind g18.010. It sweeps all three editor surfaces in both web previews and is
 serial before any g18.006 continuation.
+
+[`g18.012`](g18/012-code-editor-extensible-language-registry.md) is
+dependency-queued behind g18.011. It replaces the closed grammar catalogue
+with consumer-selected lazy CodeMirror language providers before g18.006.
 
 ## Held planning horizons
 

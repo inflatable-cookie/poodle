@@ -138,6 +138,8 @@ language support must be extensible because Poodle cannot own every grammar.
 
 ## Next task
 
-Return findings to Chatterbox. Promote and merge every blocking repair, then
-seek the operator's explicit sweep acceptance before resuming retained g18.006
-task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep g18.009 held meanwhile.
+Return findings to Chatterbox. g18.012 consumes the language-loading baseline
+and implements the accepted extensible registry. Promote and merge every other
+blocking repair, then seek the operator's explicit sweep acceptance before
+resuming retained g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep
+g18.009 held meanwhile.

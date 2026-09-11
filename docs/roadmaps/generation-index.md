@@ -10,6 +10,8 @@ Updated: 2026-09-11
   - Active task: `g18.010` CodeEditor editing focus treatment.
   - Queued task: `g18.011` three-component web editor UX acceptance sweep,
     dependency-ordered behind g18.010.
+  - Queued task: `g18.012` CodeEditor extensible language registry,
+    dependency-ordered behind g18.011.
   - Merged specimen admission: `g18.008` web editor preview specimens;
     Svelte/React catalogue pages for the three editor surfaces are live
     through the web-only supplement with no native parity change.
@@ -17,11 +19,11 @@ Updated: 2026-09-11
     unblocked retained g18.005 PR #238 without a CI exception, and g18.005
     merged after exact-head re-review.
   - Paused candidate: retained g18.006 task/workspace resumes only after
-    g18.011, all blocking repairs, and operator sweep acceptance.
+    g18.011, g18.012, all other blocking repairs, and operator sweep acceptance.
   - Held release: queued g18.009 remains behind g18.006 but is explicitly held;
     no tag or publication while candidate source is moving.
-  - Next checkpoint: merge g18.010, complete g18.011, repair blocking findings,
-    and get operator acceptance before resuming retained g18.006.
+  - Next checkpoint: merge g18.010, complete g18.011 and g18.012, repair other
+    blocking findings, and get operator acceptance before resuming g18.006.
 
 ## Compacted generations
 
