@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: Queue-held behind g18.010 and g18.013 — operator-required release gate
+Status: Queue-held behind g18.010, g18.013 and g18.014 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,8 +8,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: g18.010 Queue task `d5ece513-5f28-4bfe-9132-12a70cf7a89f`
-and g18.013 complete and merged
+Depends on: g18.010 Queue task `d5ece513-5f28-4bfe-9132-12a70cf7a89f`,
+g18.013 and g18.014 complete and merged
 
 ## Outcome
 
@@ -35,6 +35,8 @@ unbounded findings in place.
   exact source.
 - [ ] g18.013 replaces the link-like RichTextEditor command row with accepted
   grouped Poodle controls in both previews.
+- [ ] g18.014 makes the Image Policy specimen visibly prove seeded and inserted
+  images without external networking.
 
 ## Decisions
 
@@ -58,8 +60,8 @@ unbounded findings in place.
 
 ## Dispatch manifest
 
-- **State:** Queue-held behind g18.010 and parallel g18.013; release the hold
-  only after both merge; serial before retained g18.006; g18.009 remains held
+- **State:** Queue-held behind g18.010 and serial g18.013→g18.014; release the
+  hold only after all three merge; serial before retained g18.006; g18.009 held
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep

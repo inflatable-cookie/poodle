@@ -2,7 +2,7 @@
 
 Status: active
 Opened: 2026-09-09
-Updated: 2026-09-10
+Updated: 2026-09-11
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
@@ -50,14 +50,15 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after g18.010–g18.013, other blocking repairs and operator acceptance |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after g18.010–g18.014, other blocking repairs and operator acceptance |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | held behind g18.006 | Queue-held during g18.010 repair; release only from the accepted repaired candidate |
 | [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | ready and approved | immediate UX repair; g18.006 resumes afterward and g18.009 remains held |
-| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | Queue-held behind g18.010 and g18.013 | paired Svelte/React sweep of CodeEditor, RichTextEditor and RichTextRenderer; operator release checkpoint |
+| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | Queue-held behind g18.010, g18.013 and g18.014 | paired Svelte/React sweep of CodeEditor, RichTextEditor and RichTextRenderer; operator release checkpoint |
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | ready behind g18.011 | consumer-selected lazy CodeMirror language providers; remove Poodle-owned closed grammar catalogue |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | ready in parallel with g18.010 | proper grouped Poodle controls modelled on MarkdownEditor; known blocker before g18.011 |
+| [`g18.014`](014-rich-text-image-policy-specimen-proof.md) — rich-text image-policy specimen proof | ready behind g18.013 | deterministic visible seeded image and insert-once host proof in both previews |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -87,7 +88,8 @@ repairs both web wrappers with local navigation-entry state. g18.011 then sweeps
 CodeEditor, RichTextEditor, and RichTextRenderer across both previews after
 parallel g18.013 replaces the link-like rich-text toolbar. g18.012
 uses that evidence to replace the closed grammar catalogue with a
-consumer-selected registry. g18.006 is paused with its work preserved until the
+consumer-selected registry. Serial g18.014 fixes the inert image-policy example
+before the sweep begins. g18.006 is paused with its work preserved until the
 sweep, repairs, and operator acceptance complete. g18.009 remains held; no
 candidate is tagged or published while the accepted UX is moving.
 
