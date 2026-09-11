@@ -595,7 +595,9 @@ fn range_slider_block(
     let capsule_h = rem_to_px(capsule_height_rem(effective_size));
     let font_px = rem_to_px(font_size_rem(effective_size));
     let hit_px = SLIDER_BLOCK_HIT_PX;
-    let pill = ctx.theme().resolve_radius("radius.pill");
+    // g18.017: the block family capsule uses the rounded-square control
+    // radius. A radius-only change — inline placement and thumbs are unchanged.
+    let capsule_radius = ctx.theme().resolve_radius("radius.control");
     let accent = ctx.theme().resolve_color(spec.range_fill_token());
     let negative = ctx.theme().resolve_color("color.status.danger");
     let surface = ctx.theme().resolve_color("color.background.surface");
@@ -935,10 +937,10 @@ fn range_slider_block(
     capsule.style.descriptor.layout.direction = LayoutDirection::Row;
     capsule.style.descriptor.background = Some(remainder_fill);
     let corners = &mut capsule.style.descriptor.corner_radii;
-    corners.top_left = pill;
-    corners.top_right = pill;
-    corners.bottom_right = pill;
-    corners.bottom_left = pill;
+    corners.top_left = capsule_radius;
+    corners.top_right = capsule_radius;
+    corners.bottom_right = capsule_radius;
+    corners.bottom_left = capsule_radius;
     capsule.position = NodePosition::Relative;
     stamp_forced_color(&mut capsule, "canvas", "canvas-text");
     capsule = capsule.child(leading).child(selected).child(trailing);

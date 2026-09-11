@@ -286,6 +286,16 @@
   { task = "test:block-slider-hit-chromium" },
   { task = "test:block-slider-hit-webkit" },
 ]
+# g18.017 block Slider fixed inline presentation: paired Svelte + React
+# journeys over stable glyph coordinates, split-colour crossover, whole-track
+# collision priority, family radius identity, and RTL mirroring in Chromium
+# and WebKit. Stays out of ci:web like the other probes.
+"test:block-slider-inline-chromium" = "bun test/block-slider-inline-probe/probe.ts --browser=chromium"
+"test:block-slider-inline-webkit" = "bun test/block-slider-inline-probe/probe.ts --browser=webkit"
+"test:block-slider-inline" = [
+  { task = "test:block-slider-inline-chromium" },
+  { task = "test:block-slider-inline-webkit" },
+]
 # g17.002 TokenInput composer focus treatment vs input modality. Headless
 # Chromium and WebKit, one engine per run; not in ci:web.
 "test:focus-ring-modality-chromium" = "bun test/focus-ring-modality/probe.ts --browser=chromium"

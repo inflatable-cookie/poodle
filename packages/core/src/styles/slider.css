@@ -193,7 +193,7 @@
     display: block;
     width: 100%;
     min-height: var(--poodle-slider-block-min-height);
-    border-radius: 999px;
+    border-radius: var(--poodle-radius-control);
     overflow: visible;
     background: var(--poodle-recipe-slider-block-remainder-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
     color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
@@ -219,10 +219,6 @@
     width: var(--poodle-slider-percent);
     left: auto;
     background: var(--poodle-recipe-slider-block-selected-fill, var(--poodle-color-accent-base));
-    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));
-    display: flex;
-    align-items: center;
-    padding-inline: 0.5rem;
     overflow: hidden;
   }
   .poodle-slider[data-appearance="block"] .poodle-slider__remainder {
@@ -230,12 +226,44 @@
     inset-block: 0;
     inset-inline-start: var(--poodle-slider-percent);
     inset-inline-end: 0;
+    overflow: hidden;
+  }
+  /* g18.017 fixed inline presentation: one stable text row painted twice and
+     clipped at the selected-fill boundary. Positions never depend on the
+     current value; only the painted foreground crosses over. */
+  .poodle-slider[data-appearance="block"] .poodle-slider__inline {
+    position: absolute;
+    inset-block: 0;
+    inset-inline: 0;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
     padding-inline: 0.5rem;
     overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .poodle-slider[data-appearance="block"] .poodle-slider__inline-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .poodle-slider[data-appearance="block"] .poodle-slider__inline-row > * {
+    flex: none;
+  }
+  .poodle-slider[data-appearance="block"] .poodle-slider__inline--selected {
+    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));
+    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);
+  }
+  .poodle-slider[data-appearance="block"] .poodle-slider__inline--remainder {
     color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
+    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));
+  }
+  .poodle-slider[data-appearance="block"][data-direction="rtl"] .poodle-slider__inline--selected {
+    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));
+  }
+  .poodle-slider[data-appearance="block"][data-direction="rtl"] .poodle-slider__inline--remainder {
+    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);
   }
   .poodle-slider[data-appearance="block"] .poodle-slider__inline-label,
   .poodle-slider[data-appearance="block"] .poodle-slider__inline-value {
@@ -270,12 +298,6 @@
   .poodle-slider[data-appearance="block"]:focus-visible .poodle-slider__thumb {
     box-shadow: 0 0 0 0.1875rem var(--poodle-recipe-slider-block-focus-ring, var(--poodle-color-accent-focusRing));
   }
-  .poodle-slider[data-appearance="block"] .poodle-slider__fallback {
-    margin-block-start: 0.25rem;
-    color: var(--poodle-recipe-slider-block-fallback-text, var(--poodle-color-text-secondary));
-    font-variant-numeric: tabular-nums;
-    pointer-events: none;
-  }
 
   @media (forced-colors: active) {
     .poodle-slider[data-appearance="block"] .poodle-slider__capsule {
@@ -286,7 +308,10 @@
       background: Highlight;
       color: HighlightText;
     }
-    .poodle-slider[data-appearance="block"] .poodle-slider__remainder {
+    .poodle-slider[data-appearance="block"] .poodle-slider__inline--selected {
+      color: HighlightText;
+    }
+    .poodle-slider[data-appearance="block"] .poodle-slider__inline--remainder {
       color: CanvasText;
     }
     .poodle-slider[data-appearance="block"] .poodle-slider__thumb {
@@ -297,7 +322,7 @@
       box-shadow: 0 0 0 0.1875rem Highlight;
     }
     .poodle-slider[data-appearance="block"][data-disabled="true"] .poodle-slider__capsule,
-    .poodle-slider[data-appearance="block"][data-disabled="true"] .poodle-slider__fallback {
+    .poodle-slider[data-appearance="block"][data-disabled="true"] .poodle-slider__inline {
       color: GrayText;
       border-color: GrayText;
     }

@@ -14,7 +14,8 @@ Updated: 2026-09-02
   adjustment, value commit semantics, horizontal and vertical orientation,
   standard and embedded variants, unipolar and bipolar fill geometry, an
   opt-in horizontal `appearance="block"` treatment with explicit visible
-  label/value content, fit fallback, and `ltr`/`rtl` direction
+  label/value content, fixed inline text with whole-track collision priority,
+  and `ltr`/`rtl` direction
 - Out of scope: dual-thumb range editing (see RangeSlider), knob/fader
   semantics, tick marks, vertical block appearance, PageUp/PageDown
   convergence, invalid/read-only/indeterminate states, a generic tooltip or
@@ -36,13 +37,19 @@ Block appearance (`appearance="block"`), horizontal only:
 ```text
 [Root .slider data-appearance="block"]  <div>
   ├── [Capsule .slider__capsule]  <span>
-  │     ├── [Selected .slider__fill]  <span>
-  │     │     └── [Label .slider__inline-label]  (when every assigned item fits)
-  │     ├── [Remainder .slider__remainder]  <span>
-  │     │     └── [Value .slider__inline-value]
+  │     ├── [Selected .slider__fill]  <span>  (selected paint only)
+  │     ├── [Remainder .slider__remainder]  <span>  (remainder paint only)
+  │     ├── [Inline selected layer .slider__inline--selected]  <span>
+  │     │     └── [Row .slider__inline-row]  (label at logical start, value at logical end;
+  │     │       clipped to the selected span; selected text role)
+  │     ├── [Inline remainder layer .slider__inline--remainder]  <span>
+  │     │     └── [Row .slider__inline-row]  (same stable row, clipped to the remainder;
+  │     │       remainder text role)
   │     └── [Hit .slider__hit]  (44×44 effective target; small visible thumb)
-  └── [Fallback .slider__fallback]  (one stable line when inline text does not fit)
 ```
+
+Single Slider block text never renders an external fallback line. The
+`.slider__fallback` part exists only in the RangeSlider contract.
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
@@ -52,7 +59,7 @@ Block appearance (`appearance="block"`), horizontal only:
 | Control | yes, track standard | native range input overlaid on the track for interaction | thumb styling, focus ring, appearance reset |
 | Capsule | yes, block appearance | labelled rounded track that is the visual subject | selected/remainder fill |
 | Hit | yes, block appearance | measurable 44×44 logical-pixel effective target around a small thumb | handle fill/border, focus |
-| Fallback | when inline text does not fit | one noninteractive, accessibility-hidden line immediately after the capsule | remainder text |
+| Inline layers | yes, block appearance | two clipped copies of one stable text row above the fill paint, below the thumb; pointer-inert | selected/remainder text |
 
 ## 3. Props And Inputs
 
@@ -177,20 +184,27 @@ Visible content is a separate channel from accessibility copy:
 - Default visible value text is `String(value)`. Empty label or formatter
   output omits that assigned item.
 
-Inline text is all-or-nothing. Assigned regions are the selected fill (label)
-and the remainder (value). For each non-empty item:
+Inline text is fixed and value-independent. The visible label stays pinned to
+the logical inline start and the visible value stays pinned to the logical
+inline end at every value. One stable text row paints twice: the selected
+layer is clipped to the selected span and paints the selected text role, the
+remainder layer is clipped to the complement and paints the remainder text
+role. Crossing a glyph with the fill boundary changes only its painted
+foreground; it never moves, hides, or reflows either string.
+
+Placement uses the whole track, not the current segments:
 
 ```text
-available = floor(unoccluded region span - 2 * content inset)
-required  = ceil(shaped inline text advance)
-fits      iff available >= required
+available = floor(capsule span - 2 * content inset)
+coexist   iff available >= ceil(label advance) + ceil(value advance)
 ```
 
-Equality fits. Required-minus-one falls back. When any assigned item misses,
-no inline text paints and one stable, noninteractive, accessibility-hidden
-line renders immediately after the capsule. The fallback never follows the
-thumb and does not change on focus or overlap. Content inset is an internal
-metric, not a public fit threshold.
+Equality fits. When the two strings cannot coexist, the optional visible
+label is suppressed and the exact numeric value stays at the logical end.
+The value is never suppressed, moved, or truncated by the fit law, and no
+external line renders below the capsule. Content inset is an internal
+metric, not a public fit threshold. (RangeSlider keeps the per-region
+all-or-nothing fit and its external fallback; see the RangeSlider contract.)
 
 Block value feedback is static under architecture 012. Add no motion role.
 
@@ -198,7 +212,8 @@ Every Slider control owns a measurable 44×44 logical-pixel effective target at
 every size and density. The visible thumb may be smaller. Proof is the hit
 rectangle, not only the painted thumb.
 
-Forced-color roles for block appearance:
+Forced-color roles for block appearance (the two inline text layers carry the
+selected/remainder text roles across the clip boundary):
 
 | Role | Web system colors | Native role names |
 |------|-------------------|-------------------|
@@ -317,7 +332,11 @@ browser-owned and is not part of strict cross-runtime parity.
 - `--poodle-recipe-slider-block-handle-fill`
 - `--poodle-recipe-slider-block-handle-border`
 - `--poodle-recipe-slider-block-focus-ring`
-- `--poodle-recipe-slider-block-fallback-text`
+
+The `--poodle-recipe-slider-block-fallback-text` hook is no longer part of the
+Slider recipe surface: since g18.017 no runtime consumes it. Block RangeSlider
+keeps its separately named `--poodle-recipe-range-slider-block-fallback-text`
+hook for its retained fallback line.
 
 ### Root `.slider`
 
@@ -484,9 +503,10 @@ track at every size.
 ### Block appearance metrics
 
 Block capsule cross-size follows a size ladder that can hold inline label
-text. Visible thumb diameter is smaller than the track-appearance thumb. The
-effective hit target is 44×44 logical pixels at every size and density and is
-not a public metric.
+text. The capsule corner radius resolves the rounded-square control radius
+(`--poodle-radius-control` / `radius.control`), not the pill; the visible
+thumb stays circular. The effective hit target is 44×44 logical pixels at
+every size and density and is not a public metric.
 
 | Size | capsule min-height | visible thumb |
 |------|--------------------|---------------|
@@ -514,7 +534,7 @@ of an assigned region. Do not expose it.
 | `min-height` | capsule size table (`2rem` at `md`) |
 | `dir` | from `direction` |
 
-Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling back to a surface mix. Selected fill uses `--poodle-recipe-slider-block-selected-fill` falling back to accent. Inline label/value use the selected/remainder text hooks. The visible thumb uses the handle fill/border hooks.
+Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling back to a surface mix. Selected fill uses `--poodle-recipe-slider-block-selected-fill` falling back to accent. The two inline text layers use the selected/remainder text hooks, crossed at the fill boundary by clipping. The visible thumb uses the handle fill/border hooks. The capsule corner radius is `--poodle-radius-control`.
 
 ## 9. Svelte Notes
 
@@ -537,7 +557,9 @@ Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling 
   state styling
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Block appearance sets `dir` from `direction` and uses logical inline
-  geometry. Vertical block input throws before paint.
+  geometry. The stable text row paints through two layers clipped at the fill
+  boundary (`clip-path` inset), mirrored under `[data-direction="rtl"]`.
+  Vertical block input throws before paint.
 
 ## 10. GPUI Notes
 
@@ -557,6 +579,11 @@ Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling 
   matching the web throw, before any node is returned
 - native specs carry resolved `visible_label` and `visible_value_text`
   strings, never formatter closures
+- the split-colour inline paint is expressed with the shared node substrate:
+  two absolutely positioned per-region clip containers
+  (`LayoutOverflow::Hidden`) over one full-capsule-width text row each, built
+  from the block-layout span the host supplies. No new vocabulary was needed,
+  so the operator-approved larger-side fallback is not invoked
 - GPUI block metadata and hit bounds are not mounted assistive-technology proof
 
 ## 10a. Jetstream Notes

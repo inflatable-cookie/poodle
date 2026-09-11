@@ -647,32 +647,30 @@ pub fn measure_block_advance(text: &str, font_size: f32) -> f32 {
     text.chars().count() as f32 * font_size * 0.5
 }
 
-#[derive(Debug, Clone, PartialEq)]
+/// Fixed inline placement for a single Slider (g18.017): whole-track fit.
+/// Label and value pin to the logical inline edges at every value; when they
+/// cannot coexist the optional label is suppressed and the exact value stays
+/// at the logical end. There is no external fallback in this appearance.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SliderBlockLayout {
-    pub inline: bool,
-    pub fallback: Option<String>,
+    pub label_inline: bool,
+    pub value_inline: bool,
 }
 
 pub fn layout_slider_block(
     capsule_span: f32,
-    selected_norm: f32,
     label: Option<&str>,
     value_text: Option<&str>,
     measure: impl Fn(&str) -> f32,
 ) -> SliderBlockLayout {
-    let selected_span = selected_norm.max(0.0) * capsule_span;
-    let remainder_span = (1.0 - selected_norm).max(0.0) * capsule_span;
-    let inline = block_inline_fits(
-        &[(label, selected_span), (value_text, remainder_span)],
-        measure,
-    );
+    let available = block_region_available(capsule_span, SLIDER_BLOCK_CONTENT_INSET_PX);
+    let label_advance = label.map_or(0.0, |text| measure(text).ceil());
+    let value_advance = value_text.map_or(0.0, |text| measure(text).ceil());
+    let value_inline = value_text.is_some();
+    let label_inline = label.is_some() && available >= label_advance + value_advance;
     SliderBlockLayout {
-        inline,
-        fallback: if inline {
-            None
-        } else {
-            slider_fallback_text(label, value_text)
-        },
+        label_inline,
+        value_inline,
     }
 }
 
@@ -885,22 +883,60 @@ mod control_tests {
             &[(Some("Blur"), 56.0), (Some("too-long-value"), 56.0)],
             |text| text.len() as f32 * 10.0
         ));
-        let miss = layout_slider_block(80.0, 0.5, Some("Blur"), Some("67"), |text| {
+        // Whole-track law: 80px capsule → 64px available. 40+24 fits exactly;
+        // one pixel more on the value suppresses the label.
+        let miss = layout_slider_block(80.0, Some("Blur"), Some("67"), |text| {
             if text == "Blur" {
-                20.0
+                40.0
             } else {
-                24.1
+                25.0
             }
         });
-        assert!(!miss.inline);
-        let equal = layout_slider_block(80.0, 0.5, Some("Blur"), Some("67"), |text| {
+        assert!(!miss.label_inline);
+        assert!(miss.value_inline);
+        let equal = layout_slider_block(80.0, Some("Blur"), Some("67"), |text| {
             if text == "Blur" {
-                20.0
+                40.0
             } else {
                 24.0
             }
         });
-        assert!(equal.inline);
+        assert!(equal.label_inline);
+        assert!(equal.value_inline);
+    }
+
+    #[test]
+    fn block_fit_is_value_independent() {
+        // The whole-track law takes no selected span at all: low, mid and high
+        // values decide identically at the same capsule width. The signature is
+        // the proof — there is no value input to depend on.
+        let fits = layout_slider_block(160.0, Some("Blur"), Some("67"), |text| {
+            text.len() as f32 * 10.0
+        });
+        assert!(fits.label_inline);
+        assert!(fits.value_inline);
+    }
+
+    #[test]
+    fn collision_suppresses_label_and_keeps_exact_value() {
+        // 100px capsule: 84px available. "Compressor" (100) + "12" (20) miss;
+        // the value keeps painting, the label never renders a fallback line.
+        let tight = layout_slider_block(100.0, Some("Compressor makeup gain"), Some("12"), |text| {
+            text.len() as f32 * 10.0
+        });
+        assert!(!tight.label_inline);
+        assert!(tight.value_inline);
+        // No value at all: the label stands alone at the logical start.
+        let solo = layout_slider_block(100.0, Some("Blur"), None, |text| {
+            text.len() as f32 * 10.0
+        });
+        assert!(solo.label_inline);
+        assert!(!solo.value_inline);
+        let gone = layout_slider_block(100.0, Some("Compressor makeup gain"), None, |text| {
+            text.len() as f32 * 10.0
+        });
+        assert!(!gone.label_inline);
+        assert!(!gone.value_inline);
     }
 
     #[test]

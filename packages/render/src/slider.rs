@@ -16,8 +16,9 @@ use poodle_headless::slider::{
     SliderEffect, SLIDER_BLOCK_HIT_PX,
 };
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node,
-    NodeKey, NodeModifiers, NodePosition, NodeRole, ScrubAxis, ScrubPhase, ShadowValue,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutOverflow,
+    LayoutSizing, MainAxisAlignment, Node, NodeKey, NodeModifiers, NodePosition, NodeRole,
+    ScrubAxis, ScrubPhase, ShadowValue,
 };
 use poodle_specs::{
     reject_vertical_block, ControlSize, Orientation, SliderAppearance, SliderSpec, SliderVariant,
@@ -326,7 +327,6 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
             surface,
             border_default,
             elevated,
-            pill_radius,
             scrub_handler,
             key_handler,
             interactive,
@@ -509,6 +509,7 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
     el
 }
 
+#[allow(clippy::too_many_arguments)]
 fn paint_slider_block(
     spec: &SliderSpec,
     ctx: &RenderContext<'_>,
@@ -520,7 +521,6 @@ fn paint_slider_block(
     surface: ColorValue,
     border_default: ColorValue,
     elevated: ColorValue,
-    pill_radius: f32,
     scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>>,
     key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
     interactive: bool,
@@ -538,12 +538,14 @@ fn paint_slider_block(
     let remainder_fill = with_alpha(surface, surface.3 * 0.88);
     let selected_text_color = ctx.theme().resolve_color("color.text.inverse");
     let remainder_text_color = ctx.theme().resolve_color("color.text.primary");
+    // g18.017: the block family uses the rounded-square control radius, not
+    // the pill. The visible thumb stays circular.
+    let control_radius = ctx.theme().resolve_radius("radius.control");
     let label = omit_empty_owned(spec.visible_label.as_deref());
     let value_text = resolved_visible_text(visual.value, spec.visible_value_text.as_deref());
     let (capsule_span, measure) = ctx.require_block_layout("Slider");
     let layout = layout_slider_block(
         capsule_span,
-        fraction,
         label.as_deref(),
         value_text.as_deref(),
         |text| measure(text, font_px),
@@ -554,22 +556,107 @@ fn paint_slider_block(
     selected.style.fill_height = true;
     selected.style.descriptor.background = Some(selected_color);
     stamp_forced_color(&mut selected, "selection", "selection-text");
-    if layout.inline {
-        if let Some(label) = &label {
-            selected = selected.child(inline_text(label, selected_text_color, font_px));
-        }
-    }
 
     let mut remainder = Node::container();
     remainder.style.flex_fill = true;
     remainder.style.fill_height = true;
     remainder.style.descriptor.background = Some(remainder_fill);
     stamp_forced_color(&mut remainder, "canvas", "canvas-text");
-    if layout.inline {
-        if let Some(value) = &value_text {
-            remainder = remainder.child(inline_text(value, remainder_text_color, font_px));
-        }
-    }
+
+    // g18.017 fixed inline presentation: one stable row painted twice. Each
+    // layer is a per-region clip container holding a full-capsule-width row,
+    // so glyph coordinates never depend on the current value; crossing the
+    // boundary changes only the painted foreground. The shared node substrate
+    // expresses this with LayoutOverflow::Hidden — the preferred split-colour
+    // path, not the larger-side fallback.
+    let text_layers = if layout.label_inline || layout.value_inline {
+        let selected_span = fraction.clamp(0.0, 1.0) * capsule_span;
+        let remainder_span = (capsule_span - selected_span).max(0.0);
+        let selected_row_left = if rtl { selected_span - capsule_span } else { 0.0 };
+        let remainder_row_left = if rtl { 0.0 } else { -selected_span };
+
+        let mut selected_clip = Node::container();
+        selected_clip.id = Some("block-slider-clip-selected".to_owned());
+        selected_clip.position = if rtl {
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: None,
+                right: Some(0.0),
+                bottom: Some(0.0),
+            }
+        } else {
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: None,
+                bottom: Some(0.0),
+            }
+        };
+        selected_clip.style.descriptor.layout.width = LayoutSizing::Fixed(selected_span);
+        selected_clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        let mut selected_row = block_text_row(
+            label.clone().filter(|_| layout.label_inline),
+            value_text.clone().filter(|_| layout.value_inline),
+            selected_text_color,
+            font_px,
+            capsule_span,
+            capsule_h,
+            rtl,
+            "block-slider-label-selected",
+            "block-slider-value-selected",
+        );
+        stamp_forced_color(&mut selected_row, "selection", "selection-text");
+        selected_row.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(selected_row_left),
+            right: None,
+            bottom: None,
+        };
+        selected_clip = selected_clip.child(selected_row);
+
+        let mut remainder_clip = Node::container();
+        remainder_clip.id = Some("block-slider-clip-remainder".to_owned());
+        remainder_clip.position = if rtl {
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: None,
+                bottom: Some(0.0),
+            }
+        } else {
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(selected_span),
+                right: None,
+                bottom: Some(0.0),
+            }
+        };
+        remainder_clip.style.descriptor.layout.width = LayoutSizing::Fixed(remainder_span);
+        remainder_clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        let mut remainder_row = block_text_row(
+            label.clone().filter(|_| layout.label_inline),
+            value_text.clone().filter(|_| layout.value_inline),
+            remainder_text_color,
+            font_px,
+            capsule_span,
+            capsule_h,
+            rtl,
+            "block-slider-label-remainder",
+            "block-slider-value-remainder",
+        );
+        stamp_forced_color(&mut remainder_row, "canvas", "canvas-text");
+        remainder_row.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(remainder_row_left),
+            right: None,
+            bottom: None,
+        };
+        remainder_clip = remainder_clip.child(remainder_row);
+
+        Some((selected_clip, remainder_clip))
+    } else {
+        None
+    };
 
     let mut capsule = Node::container();
     capsule.style.fill_width = true;
@@ -579,10 +666,10 @@ fn paint_slider_block(
     capsule.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     capsule.style.descriptor.background = Some(remainder_fill);
     let corners = &mut capsule.style.descriptor.corner_radii;
-    corners.top_left = pill_radius;
-    corners.top_right = pill_radius;
-    corners.bottom_right = pill_radius;
-    corners.bottom_left = pill_radius;
+    corners.top_left = control_radius;
+    corners.top_right = control_radius;
+    corners.bottom_right = control_radius;
+    corners.bottom_left = control_radius;
     capsule.position = NodePosition::Relative;
     stamp_forced_color(&mut capsule, "canvas", "canvas-text");
     capsule = if rtl {
@@ -590,6 +677,9 @@ fn paint_slider_block(
     } else {
         capsule.child(selected).child(remainder)
     };
+    if let Some((selected_clip, remainder_clip)) = text_layers {
+        capsule = capsule.child(selected_clip).child(remainder_clip);
+    }
 
     let thumb = visible_thumb(effective_size, elevated, border_default);
     let mut hit = block_hit(hit_px, thumb, "value");
@@ -634,16 +724,8 @@ fn paint_slider_block(
         if rtl { "rtl" } else { "ltr" }.to_owned(),
     );
     root = root.child(surface);
-    if let Some(fallback) = layout.fallback {
-        let mut line = inline_text(&fallback, remainder_text_color, font_px);
-        line.roles.insert("part".to_owned(), "fallback".to_owned());
-        line.id = Some("block-slider-fallback".to_owned());
-        stamp_forced_color(&mut line, "canvas", "canvas-text");
-        if spec.is_disabled {
-            stamp_disabled_roles(&mut line);
-        }
-        root = root.child(line);
-    }
+    // g18.017: single Slider block text never renders an external fallback
+    // line; whole-track collision suppresses the optional label instead.
     if spec.is_disabled {
         root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         stamp_disabled_roles(&mut root);
@@ -658,12 +740,52 @@ fn omit_empty_owned(text: Option<&str>) -> Option<String> {
     }
 }
 
-fn inline_text(content: &str, color: ColorValue, size: f32) -> Node {
-    let mut node = Node::text(content);
+/// One slot of the stable block text row. An absent/suppressed item keeps its
+/// slot as empty text so the surviving item stays pinned to its logical edge
+/// (`MainAxisAlignment::SpaceBetween` moves a lone child to the start).
+fn block_text_slot(content: Option<String>, color: ColorValue, size: f32, id: &str) -> Node {
+    let mut node = Node::text(content.unwrap_or_default());
+    node.id = Some(id.to_owned());
     node.style.descriptor.text_color = Some(color);
     node.style.text_size = Some(size);
     node.style.no_wrap = true;
+    node.style.flex_none = true;
     node
+}
+
+/// The full-capsule-width row shared by both clipped text layers: optional
+/// label pinned to the logical inline start, exact value pinned to the
+/// logical inline end, at every value. Padding matches the fit law's content
+/// inset convention (0.5rem web / 8px native).
+#[allow(clippy::too_many_arguments)]
+fn block_text_row(
+    label: Option<String>,
+    value: Option<String>,
+    color: ColorValue,
+    size: f32,
+    row_span: f32,
+    row_height: f32,
+    rtl: bool,
+    label_id: &str,
+    value_id: &str,
+) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.width = LayoutSizing::Fixed(row_span);
+    row.style.descriptor.layout.height = LayoutSizing::Fixed(row_height);
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    let inset = rem_to_px(0.5);
+    row.style.descriptor.layout.spacing.padding.left = inset;
+    row.style.descriptor.layout.spacing.padding.right = inset;
+    let label_slot = block_text_slot(label, color, size, label_id);
+    let value_slot = block_text_slot(value, color, size, value_id);
+    row = if rtl {
+        row.child(value_slot).child(label_slot)
+    } else {
+        row.child(label_slot).child(value_slot)
+    };
+    row
 }
 
 #[cfg(test)]
@@ -932,23 +1054,73 @@ mod tests {
     }
 
     #[test]
-    fn block_falls_back_when_an_item_misses() {
+    fn collision_suppresses_the_label_and_keeps_the_exact_value() {
         let spec = SliderSpec::new(10.0)
             .with_bounds(0.0, 100.0)
             .with_appearance(SliderAppearance::Block)
             .with_visible_label("Compressor makeup gain")
             .with_visible_value_text("10");
         let (node, _) = armed(spec);
-        let fallback = node
+        // 22-char label + 2-char value cannot coexist at the 160px context
+        // span, so the optional label is suppressed while the exact value
+        // keeps painting inside the capsule.
+        assert!(node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "Compressor makeup gain"))
+            .is_none());
+        assert!(node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "10"))
+            .is_some());
+        // A single Slider never renders the external fallback line.
+        assert!(node
             .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
-            .expect("fallback");
-        assert!(matches!(fallback.kind, NodeKind::Text { .. }));
-        assert!(
-            node.find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "Compressor makeup gain"))
-                .is_none()
-                || node
-                    .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
-                    .is_some()
+            .is_none());
+    }
+
+    #[test]
+    fn block_text_layers_split_at_the_fill_boundary() {
+        let spec = SliderSpec::new(25.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_visible_label("Blur")
+            .with_visible_value_text("25");
+        let (node, _) = armed(spec);
+        let selected_clip = node
+            .find(&|n| n.id.as_deref() == Some("block-slider-clip-selected"))
+            .expect("selected clip");
+        let remainder_clip = node
+            .find(&|n| n.id.as_deref() == Some("block-slider-clip-remainder"))
+            .expect("remainder clip");
+        let LayoutSizing::Fixed(selected_w) = selected_clip.style.descriptor.layout.width else {
+            panic!("selected clip width");
+        };
+        let LayoutSizing::Fixed(remainder_w) = remainder_clip.style.descriptor.layout.width
+        else {
+            panic!("remainder clip width");
+        };
+        assert!((selected_w - 40.0).abs() < 1e-4, "clip tracks the 25% fill");
+        assert!((remainder_w - 120.0).abs() < 1e-4);
+        assert!(matches!(
+            selected_clip.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Hidden
+        ));
+        // One stable full-capsule row per layer: same span, same glyph
+        // metrics, different foreground role.
+        let selected_slot = node
+            .find(&|n| n.id.as_deref() == Some("block-slider-value-selected"))
+            .expect("selected value slot");
+        let remainder_slot = node
+            .find(&|n| n.id.as_deref() == Some("block-slider-value-remainder"))
+            .expect("remainder value slot");
+        assert_eq!(selected_slot.style.text_size, remainder_slot.style.text_size);
+        let selected_row = &selected_clip.children[0];
+        let remainder_row = &remainder_clip.children[0];
+        assert_eq!(
+            selected_row.roles.get("forced-color-text").map(String::as_str),
+            Some("selection-text")
+        );
+        assert_eq!(
+            remainder_row.roles.get("forced-color-text").map(String::as_str),
+            Some("canvas-text")
         );
     }
 
@@ -1012,17 +1184,28 @@ mod tests {
         let measure: crate::context::BlockTextMeasure =
             Arc::new(|text: &str, _font| text.chars().count() as f32 * 30.0);
         let root = RenderContext::new(&theme);
+        // 200px span: 184 available, 120 needed — both strings coexist.
         let wide = root.with_block_layout(200.0, Arc::clone(&measure));
         let wide_node = slider(&spec, &wide, &SliderHandlers::default());
+        assert!(wide_node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "AB"))
+            .is_some());
         assert!(wide_node
             .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
             .is_none());
 
+        // 100px span: 84 available — the label suppresses, the value stays.
         let narrow = root.with_block_layout(100.0, measure);
         let narrow_node = slider(&spec, &narrow, &SliderHandlers::default());
         assert!(narrow_node
-            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "AB"))
+            .is_none());
+        assert!(narrow_node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "50"))
             .is_some());
+        assert!(narrow_node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_none());
     }
 
     #[should_panic(

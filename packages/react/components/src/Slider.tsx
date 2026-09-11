@@ -105,12 +105,11 @@ export function Slider({
   const blockLayout = block
     ? layoutSliderBlock({
       capsuleSpan,
-      selectedNorm: visualState.valueNorm,
       label: visibleLabelText,
       valueText: visibleValueText,
       measure: (text) => measureInlineAdvance(text, font),
     })
-    : { inline: false, fallback: null };
+    : { labelInline: false, valueInline: false };
 
   function send(type: "INPUT" | "COMMIT", event: FormEvent<HTMLInputElement>): void {
     const raw = Number(event.currentTarget.value);
@@ -245,13 +244,29 @@ export function Slider({
         <>
           <span ref={capsule} className="poodle-slider__capsule" aria-hidden="true">
             <span className="poodle-slider__track">
-              <span className="poodle-slider__fill">{blockLayout.inline && visibleLabelText ? visibleLabelText : null}</span>
-              <span className="poodle-slider__remainder">{blockLayout.inline && visibleValueText ? visibleValueText : null}</span>
+              <span className="poodle-slider__fill" />
+              <span className="poodle-slider__remainder" />
+              {blockLayout.labelInline || blockLayout.valueInline ? (
+                <>
+                  {/* One stable row painted twice; the clip moves, the glyphs never do. */}
+                  <span className="poodle-slider__inline poodle-slider__inline--selected">
+                    <span className="poodle-slider__inline-row">
+                      <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                      <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                    </span>
+                  </span>
+                  <span className="poodle-slider__inline poodle-slider__inline--remainder">
+                    <span className="poodle-slider__inline-row">
+                      <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                      <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                    </span>
+                  </span>
+                </>
+              ) : null}
               <span className="poodle-slider__center" />
             </span>
             <span className="poodle-slider__hit" data-part="hit" {...(block ? pointerHandlers : {})}><span className="poodle-slider__thumb" /></span>
           </span>
-          {blockLayout.fallback ? <span className="poodle-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span> : null}
         </>
       ) : (
         <>

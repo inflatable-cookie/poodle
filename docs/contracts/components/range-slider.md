@@ -200,10 +200,16 @@ Assigned inline regions:
 
 When `visibleLabel` is present, range text is fallback-only so two items never
 share one region. Fit is all-or-nothing across every non-empty assigned item
-using the same floor/ceil law as Slider. Equality fits. Required-minus-one
-falls back to one stable, noninteractive, accessibility-hidden line immediately
-after the capsule. The fallback never follows a thumb and does not change on
-focus or overlap.
+using the same floor/ceil law as before (g18.017 migrated only the single
+Slider to fixed whole-track placement; this per-region law is unchanged for
+RangeSlider). Equality fits. Required-minus-one falls back to one stable,
+noninteractive, accessibility-hidden line immediately after the capsule. The
+fallback never follows a thumb and does not change on focus or overlap.
+
+The block capsule corner radius resolves the rounded-square control radius
+(`--poodle-radius-control` / `radius.control`), matching the Slider block
+family. Thumbs stay circular. This is a radius-only shape change: the
+three-region inline placement, fit law, and fallback above are untouched.
 
 Each thumb owns a measurable 44×44 logical-pixel effective target at every
 size and density. Proof is the per-thumb hit rectangle, not only the painted
