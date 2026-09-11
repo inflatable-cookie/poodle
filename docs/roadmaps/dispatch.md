@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.017 merged; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.020 promoted; product work dependency-ordered through g18.012; g18.006 and g18.009 are the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -59,7 +59,7 @@ rust/web checks at the reviewed head.
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010 and g18.013–g18.019, the dependency-queued g18.011 sweep,
+only after g18.010 and g18.013–g18.020, the dependency-queued g18.011 sweep,
 g18.012, and all other blocking repairs close and the operator accepts the
 sweep.
 
@@ -70,9 +70,10 @@ dispatches only after the repaired candidate closes.
 ## Active and dependency-queued product tasks
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014 and g18.018.
-It sweeps all four editor surfaces in both web previews
-and is serial before g18.012 and any g18.006 continuation.
+task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.014 and g18.018, with
+g18.020 to be added in place after its Queue submission. It sweeps all four
+editor surfaces in both web previews and is serial before g18.012 and any
+g18.006 continuation.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is
 dependency-queued behind g18.011. It replaces the closed grammar catalogue
@@ -82,7 +83,7 @@ with consumer-selected lazy CodeMirror language providers before g18.006.
 It replaced the link-like command row with proper grouped Poodle controls;
 g18.014 and g18.018 are unblocked.
 
-[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is ready,
+[`g18.014`](g18/014-rich-text-image-policy-specimen-proof.md) is active,
 unblocked by merged g18.013. It replaces the dead external image fixture
 with visible deterministic seeded/insertion proof before g18.011 is released.
 
@@ -91,9 +92,9 @@ It gave the block Slider family rounded-square corners and kept
 single-Slider text fixed inside the track with split-colour crossover across
 active runtimes. The Slider leg of g18.011 is unblocked.
 
-[`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is ready,
-unblocked by merged g18.013. It touches the same RichTextEditor shells, so it
-runs beside g18.014. It
+[`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is in review as PR
+#248, unblocked by merged g18.013. It touches the same RichTextEditor shells, so
+it runs beside g18.014. It
 makes accepted controlled echoes preserve caret, selection, history and focus
 in both web wrappers and must merge before g18.011 is released.
 
@@ -101,6 +102,12 @@ in both web wrappers and must merge before g18.011 is released.
 It added the paired standalone MarkdownRenderer surfaces, shared one
 safe/trusted content path with MarkdownEditor preview, and added both specimen
 pages. The MarkdownRenderer leg of g18.011 is unblocked.
+
+[`g18.020`](g18/020-rich-text-heading-mode-select.md) is ready behind active
+g18.014 and g18.018. It replaces fixed H1–H3 buttons with one
+consumer-configurable Normal/H1–H6 Select and extends real document support
+through H6. After Queue submission, add it as a new dependency of existing
+g18.011 task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` without replacement.
 
 ## Held planning horizons
 

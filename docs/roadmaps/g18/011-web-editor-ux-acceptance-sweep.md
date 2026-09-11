@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: dependency-queued behind g18.013, g18.014, g18.017, g18.018 and g18.019 — operator-required release gate
+Status: dependency-queued behind g18.014, g18.018 and g18.020 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: merged g18.010; g18.013–g18.019 complete and merged
+Depends on: merged g18.010; g18.013–g18.020 complete and merged
 
 ## Outcome
 
@@ -48,6 +48,9 @@ unbounded findings in place.
   selection, history and focus in both web wrappers.
 - [ ] g18.019 adds paired standalone MarkdownRenderer specimens on the shared
   safe/trusted MarkdownEditor preview path.
+- [ ] g18.020 replaces the fixed H1–H3 buttons with one configurable
+  Normal/H1–H6 text-mode select and extends real schema/renderer support through
+  H6.
 
 ## Decisions
 
@@ -68,13 +71,17 @@ unbounded findings in place.
   Measure the current closed switch and dependency footprint precisely so the
   bounded follow-up can replace it with consumer-selected language modules.
   Do not redesign the API inside the sweep.
+- Heading levels remain granular toolbar configuration. Sweep both a full H1–H6
+  selector and a sparse configured subset, including Normal and Mixed state;
+  do not reinterpret g18.020 as an all-levels fixed control.
 
 ## Dispatch manifest
 
 - **State:** dependency-queued as task
-  `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind g18.013→g18.014/g18.018 and
-  parallel g18.017/g18.019; it dispatches automatically after those five tasks
-  close and remains serial before g18.012 and retained g18.006
+  `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind active g18.014/g18.018 and
+  their serial g18.020; the coordinator adds g18.020 through in-place Queue
+  dependency mutation after submission. It then remains serial before g18.012
+  and retained g18.006.
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep
@@ -103,7 +110,8 @@ unbounded findings in place.
    clipboard/undo/redo/IME, Tab escape, corrected focus treatment, scrolling,
    wrapping, empty and large-document postures.
 3. Sweep RichTextEditor: controlled updates, selection and toolbar state,
-   headings/marks/lists/code/quotes/rules, tables and table actions, links,
+   configurable Normal/H1–H6 heading selection, Mixed state,
+   marks/lists/code/quotes/rules, tables and table actions, links,
    images disabled/enabled, paste sanitization, keyboard/focus, read-only or
    disabled states defined by contract, scrolling and constrained layout.
 4. Sweep RichTextRenderer against the same representative documents and
@@ -132,6 +140,7 @@ unbounded findings in place.
 | Framework parity is honest | one wrapper fails but report averages results | paired result for every blocking scenario with discrepancies called out |
 | Editing stays controlled | local editor changes diverge from host value or echo loops | exact before/action/callback/host-after evidence for both editors |
 | Configuration is truthful | rich-text image or table behavior ignores selected feature policy | images-off/on and standard-table cases in both wrappers and renderer |
+| Heading configuration is truthful | sparse configuration still exposes every level, or H4–H6 exist only as labels | full/sparse selector plus editor/renderer semantic proof in both wrappers |
 | Read-only rendering is inert | RichTextRenderer mounts `contenteditable`, editor plugins, or mutation paths | DOM and interaction refusal proof |
 | Accessibility survives ordinary use | keyboard cannot enter/leave, focus vanishes, toolbar state is unnamed | keyboard journey and accessibility assertions on all interactive surfaces |
 | Layout is usable | editor expands the page, clips controls, or collapses at Desktop-like width | normal and constrained viewport evidence across themes/density |
@@ -159,9 +168,13 @@ Later on 2026-09-11, the operator added the paired MarkdownRenderer to the same
 pre-release sweep and confirmed safe HTML by default with an explicit trusted
 opt-in. The release gate therefore now covers four surfaces.
 
+The operator then replaced the fixed H1–H3 toolbar posture with one text-mode
+select and chose consumer-configurable heading levels. g18.020 owns that
+schema/editor/renderer repair and is a new Queue prerequisite of this sweep.
+
 ## Next task
 
-Return findings to Chatterbox. g18.012 consumes the language-loading baseline
+After g18.020 merges, return findings to Chatterbox. g18.012 consumes the language-loading baseline
 and implements the accepted extensible registry. Promote and merge every other
 blocking repair, then seek the operator's explicit sweep acceptance before
 resuming retained g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep

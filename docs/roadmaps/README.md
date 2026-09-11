@@ -25,13 +25,19 @@ editor parity remains future work and the g18 GPUI repair runway stays open.
 The bounded g18.005 release preflight merged (PR #238) after the
 operator-approved g18.007 structural unblock lane (PR #240); no CI exception
 was authorized. Operator-approved g18.008 merged the baseline Svelte/React
-catalogue pages for CodeEditor, RichTextEditor, and RichTextRenderer (PR
-in both web wrappers (PR #242). Operator-approved g18.015 merged the preview
-distribution build preflight so both public preview selectors rebuild their package graph before Vite listens (PR #243). Operator-approved g18.016 merged the CodeEditor live line-number reconfiguration so the mounted gutter follows the host prop without remounting (PR #244). Operator-approved g18.013 merged the RichTextEditor toolbar controls so both web toolbars use grouped Poodle controls modelled on MarkdownEditor (PR #245). Operator-approved g18.019 merged the paired MarkdownRenderer with shared safe/trusted rendering through the existing `./markdown` entry (PR #247). Operator-approved g18.017 merged the block Slider fixed inline presentation so the family uses rounded-square corners and single-Slider text stays fixed inside the track with split-colour crossover (PR #246).
+catalogue pages for CodeEditor, RichTextEditor, and RichTextRenderer (PR #241).
+g18.010 fixed CodeEditor editing focus (PR #242); g18.015 fixed preview
+distribution startup (PR #243); g18.016 fixed live line-number configuration
+(PR #244); g18.013 introduced grouped RichTextEditor controls (PR #245);
+g18.017 fixed block Slider presentation (PR #246); and g18.019 added the paired
+MarkdownRenderer (PR #247).
 
-Preflight is closed; `g18.006` is the ready `0.4.0` candidate and g18.009 is
-the serial certification/publication step that unblocks Desktop. Final source
-was rechecked and Tom granted explicit authority for both on 2026-09-11.
+g18.014 and g18.018 are active. Operator-approved g18.020 follows both and
+replaces fixed H1–H3 controls with one consumer-configurable Normal/H1–H6
+selector backed by real H4–H6 document support. g18.011 then performs the
+four-surface acceptance sweep, followed by g18.012. The retained g18.006
+`0.4.0` candidate and serial g18.009 certification/publication lanes remain at
+the end and unblock Desktop only after accepted product source stops moving.
 
 ## Rules
 

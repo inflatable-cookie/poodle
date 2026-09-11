@@ -104,6 +104,7 @@ type RichTextCommand =
   | "undo" | "redo"
   | "bold" | "italic" | "strike" | "inline-code"
   | "heading-1" | "heading-2" | "heading-3"
+  | "heading-4" | "heading-5" | "heading-6"
   | "link" | "bullet-list" | "ordered-list"
   | "blockquote" | "code-block" | "horizontal-rule"
   | "insert-table" | "add-row" | "add-column" | "delete-table"
@@ -117,6 +118,13 @@ ProseMirror schema assembled by Poodle's supported modules.
 The schema always contains `doc`, `paragraph`, `text`, and `hardBreak`.
 `richTextStandardFeatures` enables every listed feature except `images`.
 Projects opt into images explicitly. Embeds are not a v1 feature.
+
+Heading commands stay granular configuration values. When the resolved toolbar
+contains one or more heading commands, the toolbar projects them as one text-mode
+select at the first heading command's position. Its options are Normal text plus
+the exact admitted heading levels; a consumer may expose any subset of levels
+1–6. Normal text is intrinsic selector behavior rather than a separate public
+command. Other commands retain their relative order.
 
 The `images` module uses the standard image node attributes `src`, `alt`, and
 optional `title`. It does not upload, browse, proxy, rewrite, or persist assets.
@@ -183,6 +191,10 @@ plugins, and extension objects never appear in public event payloads.
   glyphs, tooltips, accessible names, pressed state where relevant, a
   destructive tone without changed semantics, and grouped command clusters.
   The toolbar keeps one logical relationship to the editor.
+- Admitted heading commands render as one Poodle Select rather than separate
+  heading buttons. The stable trigger shows Normal text, the active heading, or
+  Mixed for a selection spanning different text modes. Menu options keep plain
+  accessible names while visually previewing their document typography.
 - Tables expose row/header/cell structure. Header cells are not inferred from
   visual styling.
 - Images always carry the configured alt value.
@@ -198,6 +210,7 @@ plugins, and extension objects never appear in public event payloads.
 | Escape then Tab | Always provides a focus escape from a table or other engine-owned Tab behavior. |
 | toolbar arrow keys | Rove between visible toolbar controls. |
 | Enter / Space on toolbar control | Runs the named command when enabled. |
+| text-mode select keys | The trigger is one roving toolbar stop; while open, the Select listbox owns arrow, Home, End, Enter, Space, and Escape behavior. |
 | standard text and selection keys | Follow the platform editing model and IME lifecycle. |
 
 Focus must not be trapped. Prop updates and schema-valid reconfiguration do not
@@ -208,6 +221,9 @@ steal focus. Disabled removes the full editor composition from focus order.
 - The editor and renderer fill their sized container with `min-width: 0`.
 - The toolbar wraps as intact command clusters at constrained widths and never
   becomes one undifferentiated label row or forces page-width overflow.
+- The text-mode trigger keeps stable dimensions across Normal, Mixed, and
+  heading states. Its bounded menu may show heading-scale previews without
+  causing page-width overflow or an excessively tall H1 row.
 - The editor viewport owns overflow; tables may scroll horizontally inside it
   rather than widening the page.
 - A supported document is at most 2 MiB when serialized as UTF-8 JSON and at
@@ -237,6 +253,11 @@ classes to semantic tokens inside the dedicated distribution.
 
 - Svelte and React form the first admission and share one TypeScript engine
   assembly, schema validation, feature registry, command registry, and renderer.
+- The headings module admits and renders levels 1–6 in editor and renderer.
+  Choosing a heading sets that exact level rather than toggling it off; choosing
+  Normal text converts eligible selected text blocks to paragraphs. One choice
+  produces at most one document-changing transaction and preserves the
+  selection/focus/controlled-state rules above.
 - TipTap and ProseMirror package versions are pinned exactly. Their runtime
   objects remain implementation details even though ProseMirror JSON and schema
   semantics are public authority.
@@ -320,6 +341,8 @@ Required selector families:
 - exact controlled change, rejection, no-echo, IME, clipboard, undo, and redo;
 - schema validation, unknown node/mark/attribute refusal, and feature changes;
 - toolbar derivation and explicit-command compatibility;
+- configurable heading-level projection, Normal/Mixed state, H4–H6 schema and
+  renderer equivalence, and open-listbox keyboard isolation from toolbar roving;
 - table structure, editing, overflow, keyboard navigation, and focus escape;
 - optional-image absence/presence, URL refusal, alt semantics, and bounds;
 - image-request cancellation, rejection, stale selection, and insert-once;

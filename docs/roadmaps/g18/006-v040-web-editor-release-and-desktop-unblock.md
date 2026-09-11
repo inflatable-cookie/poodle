@@ -11,7 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../../packages/release-operations.json`
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
-`g18.019`
+`g18.019`, `g18.020`
 
 ## Outcome
 
@@ -63,11 +63,11 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** operator-paused in retained dispatched Queue task/workspace; resume
-  only after g18.013→g18.014/g18.018, parallel g18.017/g18.019, g18.011,
+  only after g18.013→g18.014/g18.018→g18.020, parallel g18.017/g18.019, g18.011,
   g18.012, and every other blocking sweep repair complete and the operator
-  accepts the sweep; then rebase and recompute final-source identity. Queue
-  dependencies cannot be added after dispatch, so this explicit resume gate
-  carries the same end-of-sequence ordering.
+  accepts the sweep; then rebase and recompute final-source identity. Use the
+  Queue's in-place dependency mutation to preserve this retained task and
+  worker while encoding the remaining serial work; do not replace either.
 - **Completion:** one reviewed release-candidate PR merged to main; exact
   candidate local gates and branch dry run green; final version set, package
   trees, packed archives and release notes recorded for g18.009
@@ -161,7 +161,7 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-Complete g18.013→g18.014/g18.018, parallel g18.017/g18.019, g18.011, g18.012,
+Complete g18.013→g18.014/g18.018→g18.020, parallel g18.017/g18.019, g18.011, g18.012,
 and every other blocking finding. Resume this retained task only after operator
 acceptance, then rebuild the candidate from the accepted source. After that
 candidate merges and closes, g18.009 dispatches from its dependency. Desktop
