@@ -124,7 +124,6 @@ The shared modality installer writes `keyboard` for every non-modifier
 
 ## Next task
 
-After merge and closeout, resume retained g18.006 task
-`17ac3fee-de90-4b32-9672-1134770bb086` in its existing workspace, rebase its
-candidate work onto the repair, then keep g18.009 held until that exact
-candidate is accepted.
+After merge and closeout, g18.011 performs the operator-required acceptance
+sweep across all three new editor surfaces. Keep g18.006 blocked and g18.009
+held until the sweep and all release-blocking repairs are accepted.

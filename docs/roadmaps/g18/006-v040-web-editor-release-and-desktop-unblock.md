@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: paused — retained Queue task/workspace; resume after g18.010 merges
+Status: paused — retained Queue task/workspace; resume after g18.011 sweep and accepted repairs
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -9,7 +9,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../specs/070-compiled-web-distribution-contract.md`,
 `../../../packages/release-manifest.json`,
 `../../../packages/release-operations.json`
-Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`
+Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`
 
 ## Outcome
 
@@ -60,9 +60,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** operator-paused in retained Queue task/workspace; resume after
-  g18.010 merges, rebase onto that repair, and recompute final-source identity
-  before accepting the candidate
+- **State:** operator-paused in retained Queue task/workspace; resume only after
+  g18.011 completes, every blocking sweep finding is repaired, and the operator
+  accepts the sweep; then rebase and recompute final-source identity
 - **Completion:** one reviewed release-candidate PR merged to main; exact
   candidate local gates and branch dry run green; final version set, package
   trees, packed archives and release notes recorded for g18.009
@@ -156,6 +156,7 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-After g18.010 merges, resume this retained task and rebuild the candidate from
-the repaired source. After that candidate merges and closes, release the held
-g18.009 certification task. Desktop then resumes retained g02.058 and PR #215.
+After g18.010 merges, run g18.011 and repair every blocking finding. Resume this
+retained task only after operator acceptance, then rebuild the candidate from
+the accepted source. After that candidate merges and closes, release held
+g18.009. Desktop then resumes retained g02.058 and PR #215.

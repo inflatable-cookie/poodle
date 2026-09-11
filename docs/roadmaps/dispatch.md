@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.006 paused; g18.010 UX repair approved; g18.009 held)
+Updated: 2026-09-11 (g18.006 paused; g18.010 repair and g18.011 sweep approved; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -29,7 +29,8 @@ specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010 merges.
+only after g18.010 and the dependent g18.011 sweep close, all blocking repairs
+merge, and the operator accepts the sweep.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is already dependency-queued behind g18.006 and is now explicitly
@@ -39,7 +40,11 @@ held. Do not release it until the repaired candidate is accepted.
 
 [`g18.010`](g18/010-code-editor-editing-focus-treatment.md) corrects the outer
 focus ring during active editing in both web wrappers. It is approved for
-immediate dispatch and is serial before resuming g18.006.
+immediate dispatch.
+
+[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued
+behind g18.010. It sweeps all three editor surfaces in both web previews and is
+serial before any g18.006 continuation.
 
 ## Held planning horizons
 
