@@ -7,20 +7,23 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import {
-  RICH_TEXT_COMMAND_LABELS,
+  RICH_TEXT_COMMAND_GROUP_LABELS,
+  RICH_TEXT_COMMAND_PRESENTATION,
   RICH_TEXT_STANDARD_FEATURES,
-  RICH_TEXT_TOGGLE_COMMANDS,
   installInputModality,
 } from "@inflatable-cookie/poodle-core";
 import type {
   ProseMirrorDocumentJSON,
   RichTextCommand,
+  RichTextCommandGroup,
   RichTextFeature,
 } from "@inflatable-cookie/poodle-core";
 import type { ControlDensity } from "./types";
 
 import "@inflatable-cookie/poodle-core/styles/rich-text.css";
 
+import { Button } from "./Button";
+import { IconButton } from "./IconButton";
 import {
   assertAdmittedFeatures,
   assertAdmittedToolbar,
@@ -52,8 +55,23 @@ export interface RichTextEditorHandle {
   focus: () => void;
 }
 
-const isToggle = (command: RichTextCommand): boolean =>
-  (RICH_TEXT_TOGGLE_COMMANDS as readonly string[]).includes(command);
+interface RichTextToolbarCluster {
+  group: RichTextCommandGroup;
+  commands: RichTextCommand[];
+}
+
+/** Feature-derived order is preserved; consecutive same-group commands form
+ *  one intact cluster that wraps as a unit at constrained widths. */
+function toolbarClusters(commands: readonly RichTextCommand[]): RichTextToolbarCluster[] {
+  const clusters: RichTextToolbarCluster[] = [];
+  for (const command of commands) {
+    const group = RICH_TEXT_COMMAND_PRESENTATION[command].group;
+    const last = clusters[clusters.length - 1];
+    if (last && last.group === group) last.commands.push(command);
+    else clusters.push({ group, commands: [command] });
+  }
+  return clusters;
+}
 
 /**
  * Web-admitted controlled rich-text editing surface over TipTap 3 and
@@ -236,25 +254,40 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             aria-controls={surfaceId}
             onKeyDown={handleToolbarKeydown}
           >
-            {snapshot.commands.map((command) => (
-              <button
-                key={command}
-                type="button"
-                className="poodle-rich-text-editor__toolbar-button"
-                data-command={command}
-                data-pressed={snapshot.states[command].active || undefined}
-                aria-pressed={
-                  isToggle(command)
-                    ? snapshot.states[command].active
-                      ? "true"
-                      : "false"
-                    : undefined
-                }
-                disabled={!snapshot.states[command].available || disabled}
-                onClick={() => runToolbarCommand(command)}
+            {toolbarClusters(snapshot.commands).map((cluster) => (
+              <div
+                key={cluster.commands[0]}
+                className="poodle-rich-text-editor__group"
+                role="group"
+                aria-label={RICH_TEXT_COMMAND_GROUP_LABELS[cluster.group]}
               >
-                {RICH_TEXT_COMMAND_LABELS[command]}
-              </button>
+                {cluster.commands.map((command) => {
+                  const presentation = RICH_TEXT_COMMAND_PRESENTATION[command];
+                  const state = snapshot.states[command];
+                  return (
+                    <span key={command} className="poodle-rich-text-editor__command" data-command={command}>
+                      <IconButton
+                        variant="ghost"
+                        tone={presentation.destructive ? "danger" : "default"}
+                        sizeRole="chrome"
+                        density={resolvedDensity}
+                        icon={presentation.icon}
+                        ariaLabel={presentation.label}
+                        tooltip={presentation.label}
+                        pressed={presentation.toggle ? state.active : null}
+                        disabled={!state.available || disabled}
+                        onClick={() => runToolbarCommand(command)}
+                      >
+                        {presentation.glyph ? (
+                          <span className="poodle-rich-text-editor__glyph" aria-hidden="true">
+                            {presentation.glyph}
+                          </span>
+                        ) : null}
+                      </IconButton>
+                    </span>
+                  );
+                })}
+              </div>
             ))}
           </div>
         ) : null}
@@ -268,23 +301,19 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               onChange={(event) => setLinkValue(event.target.value)}
               onKeyDown={handleLinkInputKeydown}
             />
-            <button
-              type="button"
-              className="poodle-rich-text-editor__toolbar-button"
-              data-command="apply-link"
-              onClick={submitLink}
-            >
+            <Button variant="secondary" sizeRole="chrome" density={resolvedDensity} onClick={submitLink}>
               Apply
-            </button>
+            </Button>
             {snapshot?.states.link.active ? (
-              <button
-                type="button"
-                className="poodle-rich-text-editor__toolbar-button"
-                data-command="remove-link"
+              <Button
+                variant="ghost"
+                tone="danger"
+                sizeRole="chrome"
+                density={resolvedDensity}
                 onClick={removeLink}
               >
                 Remove link
-              </button>
+              </Button>
             ) : null}
           </div>
         ) : null}

@@ -282,45 +282,86 @@ export function resolveRichTextToolbar(
   return { commands: resolved.commands, refused: resolved.refused };
 }
 
-/** Human labels for the curated commands. Toolbar controls carry these names. */
-export const RICH_TEXT_COMMAND_LABELS: Readonly<Record<RichTextCommand, string>> = {
-  undo: "Undo",
-  redo: "Redo",
-  bold: "Bold",
-  italic: "Italic",
-  strike: "Strikethrough",
-  "inline-code": "Inline code",
-  "heading-1": "Heading 1",
-  "heading-2": "Heading 2",
-  "heading-3": "Heading 3",
-  link: "Link",
-  "bullet-list": "Bulleted list",
-  "ordered-list": "Numbered list",
-  blockquote: "Block quote",
-  "code-block": "Code block",
-  "horizontal-rule": "Horizontal rule",
-  "insert-table": "Insert table",
-  "add-row": "Add table row",
-  "add-column": "Add table column",
-  "delete-table": "Delete table",
-  "insert-image": "Insert image",
+/** Semantic toolbar clusters. Consecutive commands sharing a group render as
+ * one intact control cluster that wraps as a unit at constrained widths. */
+export type RichTextCommandGroup =
+  | "history"
+  | "inline"
+  | "headings"
+  | "link"
+  | "lists"
+  | "block"
+  | "table"
+  | "media";
+
+export interface RichTextCommandPresentation {
+  /** Toolbar control label; the accessible name and tooltip text. */
+  label: string;
+  /** Semantic cluster the command belongs to. */
+  group: RichTextCommandGroup;
+  /** Poodle default icon-set name for the control. */
+  icon: string;
+  /** Short typographic glyph rendered instead of the icon when more
+   *  legible (H1, H2, H3); null renders the icon. */
+  glyph: string | null;
+  /** Whether the command renders with a pressed state. */
+  toggle: boolean;
+  /** Destructive commands render distinguishably without changing semantics. */
+  destructive: boolean;
+}
+
+/**
+ * The one shared command-presentation map: label, group, icon/glyph, toggle
+ * posture, and destructive tone. Svelte and React compose their toolbars from
+ * this record and must not maintain independent visual vocabularies. Icon
+ * names resolve against Poodle's default Lucide set.
+ */
+export const RICH_TEXT_COMMAND_PRESENTATION: Readonly<
+  Record<RichTextCommand, RichTextCommandPresentation>
+> = {
+  undo: { label: "Undo", group: "history", icon: "undo", glyph: null, toggle: false, destructive: false },
+  redo: { label: "Redo", group: "history", icon: "redo", glyph: null, toggle: false, destructive: false },
+  bold: { label: "Bold", group: "inline", icon: "bold", glyph: null, toggle: true, destructive: false },
+  italic: { label: "Italic", group: "inline", icon: "italic", glyph: null, toggle: true, destructive: false },
+  strike: { label: "Strikethrough", group: "inline", icon: "strikethrough", glyph: null, toggle: true, destructive: false },
+  "inline-code": { label: "Inline code", group: "inline", icon: "code", glyph: null, toggle: true, destructive: false },
+  "heading-1": { label: "Heading 1", group: "headings", icon: "heading", glyph: "H1", toggle: true, destructive: false },
+  "heading-2": { label: "Heading 2", group: "headings", icon: "heading", glyph: "H2", toggle: true, destructive: false },
+  "heading-3": { label: "Heading 3", group: "headings", icon: "heading", glyph: "H3", toggle: true, destructive: false },
+  link: { label: "Link", group: "link", icon: "link", glyph: null, toggle: true, destructive: false },
+  "bullet-list": { label: "Bulleted list", group: "lists", icon: "list", glyph: null, toggle: true, destructive: false },
+  "ordered-list": { label: "Numbered list", group: "lists", icon: "list-ordered", glyph: null, toggle: true, destructive: false },
+  blockquote: { label: "Block quote", group: "block", icon: "quote", glyph: null, toggle: true, destructive: false },
+  "code-block": { label: "Code block", group: "block", icon: "square-code", glyph: null, toggle: true, destructive: false },
+  "horizontal-rule": { label: "Horizontal rule", group: "block", icon: "minus", glyph: null, toggle: false, destructive: false },
+  "insert-table": { label: "Insert table", group: "table", icon: "table", glyph: null, toggle: false, destructive: false },
+  "add-row": { label: "Add table row", group: "table", icon: "between-horizontal-start", glyph: null, toggle: false, destructive: false },
+  "add-column": { label: "Add table column", group: "table", icon: "between-vertical-start", glyph: null, toggle: false, destructive: false },
+  "delete-table": { label: "Delete table", group: "table", icon: "trash-2", glyph: null, toggle: false, destructive: true },
+  "insert-image": { label: "Insert image", group: "media", icon: "image", glyph: null, toggle: false, destructive: false },
 } as const;
 
+/** Human labels for the curated commands. Toolbar controls carry these names. */
+export const RICH_TEXT_COMMAND_LABELS: Readonly<Record<RichTextCommand, string>> = Object.fromEntries(
+  RICH_TEXT_COMMANDS.map((command) => [command, RICH_TEXT_COMMAND_PRESENTATION[command].label]),
+) as Readonly<Record<RichTextCommand, string>>;
+
 /** Commands rendered as pressed-state toggles rather than plain actions. */
-export const RICH_TEXT_TOGGLE_COMMANDS: readonly RichTextCommand[] = [
-  "bold",
-  "italic",
-  "strike",
-  "inline-code",
-  "heading-1",
-  "heading-2",
-  "heading-3",
-  "link",
-  "bullet-list",
-  "ordered-list",
-  "blockquote",
-  "code-block",
-] as const;
+export const RICH_TEXT_TOGGLE_COMMANDS: readonly RichTextCommand[] = RICH_TEXT_COMMANDS.filter(
+  (command) => RICH_TEXT_COMMAND_PRESENTATION[command].toggle,
+);
+
+/** Human group names, one per semantic toolbar cluster. */
+export const RICH_TEXT_COMMAND_GROUP_LABELS: Readonly<Record<RichTextCommandGroup, string>> = {
+  history: "History",
+  inline: "Text formatting",
+  headings: "Headings",
+  link: "Links",
+  lists: "Lists",
+  block: "Blocks",
+  table: "Tables",
+  media: "Media",
+} as const;
 
 /**
  * Supported document envelope: at most 2 MiB of UTF-8 JSON and at most 10,000

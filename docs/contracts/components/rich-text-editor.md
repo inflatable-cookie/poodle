@@ -1,7 +1,7 @@
 # RichTextEditor
 
 Status: implemented web-admitted (g18.003) — not parity-complete
-Updated: 2026-09-10
+Updated: 2026-09-11
 
 ## 1. Purpose
 
@@ -178,8 +178,11 @@ plugins, and extension objects never appear in public event payloads.
 - The editing surface exposes a labelled multiline rich-text input.
 - Headings, paragraphs, blockquotes, lists, links, code blocks, tables, and
   images keep their native semantic structure in both editor and renderer.
-- Toolbar controls have names, pressed state where relevant, and one logical
-  toolbar relationship to the editor.
+- Toolbar controls come from one shared command-presentation map and reuse
+  Poodle control primitives: real control chrome, icons or short conventional
+  glyphs, tooltips, accessible names, pressed state where relevant, a
+  destructive tone without changed semantics, and grouped command clusters.
+  The toolbar keeps one logical relationship to the editor.
 - Tables expose row/header/cell structure. Header cells are not inferred from
   visual styling.
 - Images always carry the configured alt value.
@@ -203,6 +206,8 @@ steal focus. Disabled removes the full editor composition from focus order.
 ## 7. Layout And Bounds
 
 - The editor and renderer fill their sized container with `min-width: 0`.
+- The toolbar wraps as intact command clusters at constrained widths and never
+  becomes one undifferentiated label row or forces page-width overflow.
 - The editor viewport owns overflow; tables may scroll horizontally inside it
   rather than widening the page.
 - A supported document is at most 2 MiB when serialized as UTF-8 JSON and at

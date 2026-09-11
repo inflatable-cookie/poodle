@@ -3,6 +3,7 @@
     RICH_TEXT_STANDARD_FEATURES,
     RichTextEditor,
     type ProseMirrorDocumentJSON,
+    type RichTextCommand,
     type RichTextFeature,
     type RichTextImageInput,
   } from "@inflatable-cookie/poodle-svelte/rich-text";
@@ -22,6 +23,8 @@
 
   const imageFeatures: readonly RichTextFeature[] = RICH_TEXT_IMAGE_FEATURES;
   const standardFeatures: readonly RichTextFeature[] = RICH_TEXT_STANDARD_FEATURES;
+  /** Consumers choose commands, not their icons or grouping. */
+  const subsetToolbar: readonly RichTextCommand[] = ["bold", "italic", "link"];
 
   async function requestImage(): Promise<RichTextImageInput | null> {
     return { src: RICH_TEXT_IMAGE_SRC, alt: RICH_TEXT_IMAGE_ALT };
@@ -50,10 +53,38 @@
     </SpecimenGroup>
 
     <SpecimenGroup
+      label="Command postures"
+      description="Explicit toolbar subset and a disabled editor. Selection drives active and table-context states: click into the bold text and the Bold control lights up; enter the table to enable the row, column, and delete actions."
+    >
+      <div class="editor-frame" data-part="subset-editor">
+        <RichTextEditor
+          value={document}
+          features={standardFeatures}
+          toolbar={subsetToolbar}
+          ariaLabel="Subset rich text"
+        />
+      </div>
+      <div class="editor-frame" data-part="disabled-editor">
+        <RichTextEditor
+          value={RICH_TEXT_STANDARD_DOCUMENT}
+          features={standardFeatures}
+          disabled
+          ariaLabel="Disabled rich text"
+        />
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup
       label="Image policy"
       description="Images are an explicit project choice. Embeds are not a v1 feature."
     >
-      <button type="button" data-part="images-toggle" aria-pressed={imagesOn} onclick={toggleImages}>
+      <button
+        type="button"
+        class="images-toggle"
+        data-part="images-toggle"
+        aria-pressed={imagesOn}
+        onclick={toggleImages}
+      >
         {imagesOn ? "Images on" : "Images off"}
       </button>
       <div class="editor-frame" data-part="image-policy-editor">
@@ -90,6 +121,28 @@
 </SpecimenLayout>
 
 <style>
+  /* Explicit paired chrome: the raw toggle must not inherit either
+     gallery's page-level button layout, or the visual gate reads the
+     specimen pair as divergent (g18.013). */
+  .images-toggle {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.625rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+  .images-toggle[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+  }
   .editor-frame {
     height: 20rem;
     margin-top: 0.75rem;

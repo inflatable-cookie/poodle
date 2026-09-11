@@ -6,7 +6,9 @@ import {
   isRichTextDocumentAdmissible,
   isRichTextFeature,
   RICH_TEXT_COMMANDS,
+  RICH_TEXT_COMMAND_GROUP_LABELS,
   RICH_TEXT_COMMAND_LABELS,
+  RICH_TEXT_COMMAND_PRESENTATION,
   RICH_TEXT_FEATURES,
   RICH_TEXT_FEATURE_COMMANDS,
   RICH_TEXT_MAX_BYTES,
@@ -20,6 +22,7 @@ import {
   validateRichTextToolbar,
   type ProseMirrorDocumentJSON,
 } from "../src/rich-text.ts";
+import { defaultLucideIconSet } from "../src/icons/generated.ts";
 
 const DOC: ProseMirrorDocumentJSON = {
   type: "doc",
@@ -117,6 +120,42 @@ describe("rich-text toggle commands", () => {
     expect(RICH_TEXT_TOGGLE_COMMANDS).toHaveLength(12);
     expect(RICH_TEXT_TOGGLE_COMMANDS).not.toContain("undo");
     expect(RICH_TEXT_TOGGLE_COMMANDS).not.toContain("insert-table");
+  });
+});
+
+describe("rich-text command presentation", () => {
+  test("every command carries exactly one shared presentation record", () => {
+    expect(Object.keys(RICH_TEXT_COMMAND_PRESENTATION).sort()).toEqual(
+      [...RICH_TEXT_COMMANDS].sort(),
+    );
+    for (const command of RICH_TEXT_COMMANDS) {
+      const presentation = RICH_TEXT_COMMAND_PRESENTATION[command];
+      expect(presentation.label, command).toBeTruthy();
+      expect(RICH_TEXT_COMMAND_GROUP_LABELS[presentation.group], command).toBeTruthy();
+      // Every control carries an icon; glyphs only override legible cases.
+      expect(defaultLucideIconSet[presentation.icon], command).toBeDefined();
+      if (presentation.glyph !== null) {
+        expect(presentation.glyph.length, command).toBeLessThanOrEqual(2);
+      }
+    }
+  });
+
+  test("labels and toggle posture derive from the one shared map", () => {
+    for (const command of RICH_TEXT_COMMANDS) {
+      expect(RICH_TEXT_COMMAND_LABELS[command]).toBe(
+        RICH_TEXT_COMMAND_PRESENTATION[command].label,
+      );
+    }
+    expect(RICH_TEXT_TOGGLE_COMMANDS).toEqual(
+      RICH_TEXT_COMMANDS.filter((command) => RICH_TEXT_COMMAND_PRESENTATION[command].toggle),
+    );
+  });
+
+  test("destructive tone is reserved for destructive table removal", () => {
+    const destructive = RICH_TEXT_COMMANDS.filter(
+      (command) => RICH_TEXT_COMMAND_PRESENTATION[command].destructive,
+    );
+    expect(destructive).toEqual(["delete-table"]);
   });
 });
 

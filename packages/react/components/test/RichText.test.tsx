@@ -19,6 +19,10 @@ import type {
   ProseMirrorDocumentJSON,
   RichTextImageInput,
 } from "@inflatable-cookie/poodle-core";
+import {
+  RICH_TEXT_COMMAND_GROUP_LABELS,
+  RICH_TEXT_COMMAND_PRESENTATION,
+} from "@inflatable-cookie/poodle-core";
 
 const EMPTY: ProseMirrorDocumentJSON = {
   type: "doc",
@@ -231,7 +235,7 @@ describe("RichTextEditor (react)", () => {
     expect(container.querySelector(".poodle-rich-text-editor")?.getAttribute("data-readonly")).toBe(
       "true",
     );
-    const buttons = [...container.querySelectorAll("button[data-command]")];
+    const buttons = [...container.querySelectorAll<HTMLButtonElement>("[data-command] button")];
     expect(buttons.length).toBeGreaterThan(10);
     for (const button of buttons) expect(button.disabled).toBe(true);
   });
@@ -266,7 +270,7 @@ describe("RichTextEditor (react)", () => {
 describe("RichTextEditor toolbar (react)", () => {
   it("auto derives commands from the standard features", () => {
     const { container } = render(createElement(RichTextEditor, { value: PLAIN }));
-    const commands = [...container.querySelectorAll("button[data-command]")].map((button) =>
+    const commands = [...container.querySelectorAll("[data-command]")].map((button) =>
       button.getAttribute("data-command"),
     );
     for (const expected of ["undo", "bold", "heading-1", "link", "insert-table", "add-row", "delete-table"]) {
@@ -280,13 +284,13 @@ describe("RichTextEditor toolbar (react)", () => {
     const withImages = render(
       createElement(RichTextEditor, { value: PLAIN, features: ["images", "tables"], requestImage }),
     );
-    expect(withImages.container.querySelector('button[data-command="insert-image"]')).not.toBeNull();
+    expect(withImages.container.querySelector('[data-command="insert-image"] button')).not.toBeNull();
     withImages.unmount();
     const withoutChoice = render(
       createElement(RichTextEditor, { value: PLAIN, features: ["images"] }),
     );
     expect(
-      withoutChoice.container.querySelector('button[data-command="insert-image"]'),
+      withoutChoice.container.querySelector('[data-command="insert-image"] button'),
     ).toBeNull();
     withoutChoice.unmount();
   });
@@ -295,7 +299,7 @@ describe("RichTextEditor toolbar (react)", () => {
     const { container } = render(createElement(RichTextEditor, { value: RICH }));
     const toolbar = container.querySelector(".poodle-rich-text-editor__toolbar");
     expect(toolbar?.getAttribute("role")).toBe("toolbar");
-    const bold = container.querySelector<HTMLButtonElement>('button[data-command="bold"]');
+    const bold = container.querySelector<HTMLButtonElement>('[data-command="bold"] button');
     expect(bold?.getAttribute("aria-pressed")).toBe("false");
   });
 
@@ -308,7 +312,7 @@ describe("RichTextEditor toolbar (react)", () => {
         onChange,
       }),
     );
-    const heading = container.querySelector<HTMLButtonElement>('button[data-command="heading-1"]');
+    const heading = container.querySelector<HTMLButtonElement>('[data-command="heading-1"] button');
     if (!heading) throw new Error("missing heading command");
     act(() => heading.click());
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -325,7 +329,7 @@ describe("RichTextEditor tables (react)", () => {
     const { container } = render(
       createElement(RichTextEditor, { value: EMPTY, features: ["tables"], onChange }),
     );
-    const insert = container.querySelector<HTMLButtonElement>('button[data-command="insert-table"]');
+    const insert = container.querySelector<HTMLButtonElement>('[data-command="insert-table"] button');
     if (!insert) throw new Error("missing insert-table");
     act(() => insert.click());
     expect(container.querySelector("table")).not.toBeNull();
@@ -390,7 +394,7 @@ describe("RichTextEditor optional images (react)", () => {
         onChange,
       }),
     );
-    const insert = container.querySelector<HTMLButtonElement>('button[data-command="insert-image"]');
+    const insert = container.querySelector<HTMLButtonElement>('[data-command="insert-image"] button');
     if (!insert) throw new Error("missing insert-image");
     act(() => insert.click());
     expect(calls).toBe(1);
@@ -419,7 +423,7 @@ describe("RichTextEditor optional images (react)", () => {
     const { container } = render(
       createElement(RichTextEditor, { value: PLAIN, features: ["images"], requestImage, onChange }),
     );
-    const insert = container.querySelector<HTMLButtonElement>('button[data-command="insert-image"]');
+    const insert = container.querySelector<HTMLButtonElement>('[data-command="insert-image"] button');
     if (!insert) throw new Error("missing insert-image");
     act(() => insert.click());
     await act(async () => {
@@ -450,7 +454,7 @@ describe("RichTextEditor optional images (react)", () => {
       createElement(RichTextEditor, { value: PLAIN, features: ["images"], requestImage, onChange }),
     );
     act(() => {
-      container.querySelector<HTMLButtonElement>('button[data-command="insert-image"]')?.click();
+      container.querySelector<HTMLButtonElement>('[data-command="insert-image"] button')?.click();
     });
     unmount();
     await act(async () => {
@@ -473,7 +477,7 @@ describe("RichTextEditor optional images (react)", () => {
     );
     act(() => {
       view.container
-        .querySelector<HTMLButtonElement>('button[data-command="insert-image"]')
+        .querySelector<HTMLButtonElement>('[data-command="insert-image"] button')
         ?.click();
     });
     view.rerender(
@@ -504,12 +508,12 @@ describe("RichTextEditor controlled reconfiguration (react)", () => {
         onChange,
       }),
     );
-    expect(view.container.querySelector('button[data-command="horizontal-rule"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-command="horizontal-rule"] button')).not.toBeNull();
     expect(onChange).not.toHaveBeenCalled();
     view.rerender(
       createElement(RichTextEditor, { value: PLAIN, features: ["headings"], onChange }),
     );
-    expect(view.container.querySelector('button[data-command="horizontal-rule"]')).toBeNull();
+    expect(view.container.querySelector('[data-command="horizontal-rule"] button')).toBeNull();
     expect(onChange).not.toHaveBeenCalled();
   });
 
@@ -553,7 +557,7 @@ describe("RichTextEditor controlled reconfiguration (react)", () => {
       expect(view.container.querySelector(".ProseMirror")).not.toBeNull();
       expect(view.container.querySelector("hr")).not.toBeNull();
       expect(
-        view.container.querySelector('button[data-command="horizontal-rule"]'),
+        view.container.querySelector('[data-command="horizontal-rule"] button'),
       ).not.toBeNull();
       expect(onChange).not.toHaveBeenCalled();
       expect(errorSpy).toHaveBeenCalled();
@@ -741,7 +745,7 @@ describe("host revert of a user edit (react)", () => {
       createElement(RichTextEditor, { value: PLAIN, features: ["headings"], onChange }),
     );
     const heading = view.container.querySelector<HTMLButtonElement>(
-      'button[data-command="heading-1"]',
+      '[data-command="heading-1"] button',
     );
     if (!heading) throw new Error("missing heading command");
     act(() => heading.click());
@@ -764,7 +768,7 @@ describe("host revert of a user edit (react)", () => {
       createElement(RichTextEditor, { value: EMPTY, features: ["tables"], onChange }),
     );
     const insert = view.container.querySelector<HTMLButtonElement>(
-      'button[data-command="insert-table"]',
+      '[data-command="insert-table"] button',
     );
     if (!insert) throw new Error("missing insert-table");
     act(() => insert.click());
@@ -841,7 +845,7 @@ describe("requestImage URL admission (react)", () => {
       }),
     );
     const insert = view.container.querySelector<HTMLButtonElement>(
-      'button[data-command="insert-image"]',
+      '[data-command="insert-image"] button',
     );
     if (!insert) throw new Error("missing insert-image");
     act(() => insert.click());
@@ -883,7 +887,7 @@ describe("image onChange round-trip (react)", () => {
       }),
     );
     const insert = view.container.querySelector<HTMLButtonElement>(
-      'button[data-command="insert-image"]',
+      '[data-command="insert-image"] button',
     );
     if (!insert) throw new Error("missing insert-image");
     act(() => insert.click());
@@ -944,5 +948,152 @@ describe("paste through the active schema (react)", () => {
       createRichTextSchema([...STANDARD_FEATURES, "images"]),
       onChange.mock.calls[0][0],
     );
+  });
+});
+
+describe("RichTextEditor toolbar presentation (react)", () => {
+  const commandOf = (wrapper: Element): string => wrapper.getAttribute("data-command") ?? "";
+
+  function renderEditor(props: Record<string, unknown> = {}) {
+    return render(createElement(RichTextEditor, { value: PLAIN, ...props }));
+  }
+
+  function renderAutoToolbar() {
+    const view = renderEditor();
+    expect(view.container.querySelector('[data-command="bold"] button')).not.toBeNull();
+    return view;
+  }
+
+  it("renders every admitted command as a real Poodle icon button with the shared name", () => {
+    const { container } = renderAutoToolbar();
+    const wrappers = [...container.querySelectorAll("[data-command]")];
+    expect(wrappers.length).toBeGreaterThan(10);
+    for (const wrapper of wrappers) {
+      const command = commandOf(wrapper);
+      const button = wrapper.querySelector("button.poodle-icon-button");
+      expect(button, command).not.toBeNull();
+      expect(button?.getAttribute("aria-label")).toBe(
+        RICH_TEXT_COMMAND_PRESENTATION[command as keyof typeof RICH_TEXT_COMMAND_PRESENTATION].label,
+      );
+      // Control chrome belongs to Poodle primitives; no bespoke toolbar class.
+      expect(wrapper.querySelector(".poodle-rich-text-editor__toolbar-button")).toBeNull();
+    }
+  });
+
+  it("groups consecutive same-group commands into intact labelled clusters", () => {
+    const { container } = renderAutoToolbar();
+    const groups = [...container.querySelectorAll(".poodle-rich-text-editor__group")];
+    expect(groups.length).toBeGreaterThan(1);
+    const clusterGroups: string[] = [];
+    for (const group of groups) {
+      expect(group.getAttribute("role")).toBe("group");
+      clusterGroups.push(group.getAttribute("aria-label") ?? "");
+      for (const wrapper of group.querySelectorAll("[data-command]")) {
+        const presentation =
+          RICH_TEXT_COMMAND_PRESENTATION[commandOf(wrapper) as keyof typeof RICH_TEXT_COMMAND_PRESENTATION];
+        expect(RICH_TEXT_COMMAND_GROUP_LABELS[presentation.group]).toBe(
+          group.getAttribute("aria-label"),
+        );
+      }
+    }
+    // Every cluster label is a known group name and neighbours never repeat.
+    expect(new Set(clusterGroups).size).toBe(clusterGroups.length);
+    const featureOrder = [...container.querySelectorAll("[data-command]")].map(commandOf);
+    expect(featureOrder[0]).toBe("undo");
+    expect(featureOrder.indexOf("insert-table")).toBeGreaterThan(featureOrder.indexOf("link"));
+  });
+
+  it("heading controls carry typographic glyphs; icon controls carry SVG icons", () => {
+    const { container } = renderAutoToolbar();
+    const h1 = container.querySelector('[data-command="heading-1"] button');
+    expect(h1?.textContent).toContain("H1");
+    expect(h1?.querySelector("svg")).toBeNull();
+    const bold = container.querySelector('[data-command="bold"] button');
+    expect(bold?.querySelector("svg")).not.toBeNull();
+  });
+
+  it("the destructive table command renders distinguishably without changing semantics", () => {
+    const { container } = renderAutoToolbar();
+    const remove = container.querySelector('[data-command="delete-table"] button');
+    expect(remove?.getAttribute("data-tone")).toBe("danger");
+    expect(remove?.getAttribute("aria-label")).toBe("Delete table");
+  });
+
+  it("pressed state is truthful: only toggle commands expose aria-pressed", () => {
+    const { container } = renderAutoToolbar();
+    const bold = container.querySelector('[data-command="bold"] button');
+    expect(bold?.getAttribute("aria-pressed")).toBe("false");
+    const undo = container.querySelector('[data-command="undo"] button');
+    expect(undo?.getAttribute("aria-pressed")).toBeNull();
+    const insertTable = container.querySelector('[data-command="insert-table"] button');
+    expect(insertTable?.getAttribute("aria-pressed")).toBeNull();
+  });
+
+  it("toolbar subsets render and operate exactly, with no feature-derived extras", () => {
+    const onChange = vi.fn();
+    const view = renderEditor({ toolbar: ["bold", "heading-1"], onChange });
+    expect(view.container.querySelector('[data-command="bold"] button')).not.toBeNull();
+    // Exactly the admitted subset: no feature-derived extras reappear.
+    const commands = [...view.container.querySelectorAll("[data-command]")].map(commandOf);
+    expect(commands).toEqual(["bold", "heading-1"]);
+    const heading = view.container.querySelector<HTMLButtonElement>('[data-command="heading-1"] button');
+    if (!heading) throw new Error("missing heading control");
+    act(() => heading.click());
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(onChange.mock.calls[0][0])).toContain('"level":1');
+    // The pressed state of the executed heading toggle turns truthful.
+    expect(heading.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("table-context commands stay disabled outside a table", () => {
+    const view = renderEditor({ features: ["tables"] });
+    expect(view.container.querySelector('[data-command="insert-table"] button')).not.toBeNull();
+    expect(
+      view.container.querySelector<HTMLButtonElement>('[data-command="insert-table"] button')
+        ?.disabled,
+    ).toBe(false);
+    for (const command of ["add-row", "add-column", "delete-table"]) {
+      const button = view.container.querySelector<HTMLButtonElement>(
+        `[data-command="${command}"] button`,
+      );
+      expect(button, command).not.toBeNull();
+      expect(button?.disabled, command).toBe(true);
+    }
+  });
+
+  it("link actions are proper Poodle buttons and the keyboard flow stays coherent", () => {
+    const { container } = renderEditor();
+    const link = container.querySelector<HTMLButtonElement>('[data-command="link"] button');
+    if (!link) throw new Error("missing link control");
+    act(() => link.click());
+    const editor = () => container.querySelector(".poodle-rich-text-editor__link-editor");
+    expect(editor()).not.toBeNull();
+    const apply = container.querySelector<HTMLButtonElement>(
+      ".poodle-rich-text-editor__link-editor button.poodle-button",
+    );
+    expect(apply?.textContent).toContain("Apply");
+    expect(container.querySelector(".poodle-rich-text-editor__link-editor .poodle-icon-button")).toBeNull();
+    const input = container.querySelector<HTMLInputElement>(".poodle-rich-text-editor__link-input");
+    if (!input) throw new Error("missing link input");
+    input.focus();
+    act(() => {
+      input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Escape" }));
+    });
+    // Escape cancels: the editor closes and editor focus is restored.
+    expect(editor()).toBeNull();
+    expect(document.activeElement?.classList.contains("ProseMirror")).toBe(true);
+
+    // Reopen and submit with Enter.
+    act(() => link.click());
+    expect(editor()).not.toBeNull();
+    const reopened = container.querySelector<HTMLInputElement>(".poodle-rich-text-editor__link-input");
+    if (!reopened) throw new Error("missing reopened link input");
+    reopened.value = "https://example.test";
+    reopened.dispatchEvent(new Event("input", { bubbles: true }));
+    act(() => {
+      reopened.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter" }));
+    });
+    expect(editor()).toBeNull();
+    expect(document.activeElement?.classList.contains("ProseMirror")).toBe(true);
   });
 });
