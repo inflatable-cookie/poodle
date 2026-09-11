@@ -1,6 +1,7 @@
 # g18.016 — CodeEditor live line-number reconfiguration
 
-Status: in review
+Status: merged
+Merge: `5932bd0027cab2cf86c07a7878c3b48193252306` (PR #244) on 2026-09-11
 Date: 2026-09-11
 Branch: `ns-d5d7913c-e6f2-458c-a1e0-8eb12abf56d8`
 Card: `docs/roadmaps/g18/016-code-editor-live-line-number-reconfiguration.md`
@@ -99,3 +100,37 @@ applied, all pass.
   files (same count as the g18.010 baseline).
 - `effigy docs:check` — pass.
 - `git diff --check` — clean.
+
+## Closeout
+
+- Merge performed by the plugin as
+  `5932bd0027cab2cf86c07a7878c3b48193252306` on 2026-09-11 (PR #244),
+  with parents `37adebc2d7efbd99546bbca06693bb0b93291c53` (main) and
+  `f63523ee488ef4d0183e1525769d4686ea3f5263` (reviewed head).
+- Accepted review: independent exact-head `ready_to_merge` approval of
+  head `f63523ee488ef4d0183e1525769d4686ea3f5263` by betterthanclay
+  ([comment #5632111084](https://github.com/inflatable-cookie/poodle/pull/244#issuecomment-5632111084)).
+  No blocking findings; no changes required.
+- Reviewed-head validation (reviewer ran at the exact head, tree left
+  clean): both `CodeEditor` component suites 41 svelte + 41 react pass;
+  specimen tests `g18-016-code-editor-line-numbers` 2 svelte + 2 react pass;
+  `effigy test:code-editor-line-numbers` all Chromium and WebKit checks pass
+  for both frameworks; `bunx vitest run --project a11y` 182 pass;
+  `effigy docs:check` pass; `git diff --check` clean; CI `rust` and `web`
+  pass at the merge.
+- Worker validation at the branch head: `CodeEditor` suites 82 pass (12 new
+  line-number cases per wrapper); preview suites 19 files, 90 pass (4 new
+  specimen cases); full component projects 2965 pass, 7 skipped; package and
+  preview build selectors clean (pre-existing chunk-size warnings only);
+  `check:svelte-components` 0 errors (4 pre-existing warnings);
+  `check:react-components` 12 errors, all pre-existing in untouched files
+  (same count as the g18.010 baseline).
+- Deferred: no release, tag, publish, Desktop, native, language-registry,
+  workflow, or package-API work starts from this task. `g18.011` stays held
+  until g18.013, g18.014, and g18.017 merge; `g18.006` stays blocked and
+  `g18.009` held until the sweep, all other blocking repairs, and operator
+  acceptance complete.
+
+## Continuation
+
+After g18.013, g18.014, and g18.017 merge, Chatterbox releases held g18.011.

@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.010 and g18.015 merged; g18.006 paused; g18.011 held behind g18.013, g18.014, g18.016 and g18.017; g18.009 held)
+Updated: 2026-09-11 (g18.010, g18.015 and g18.016 merged; g18.006 paused; g18.011 held behind g18.013, g18.014, g18.017 and g18.018; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -34,12 +34,17 @@ distribution build preflight — merged as `0cf6073eb2067c4fc4127ec5c318a0f682c5
 (PR #243) on 2026-09-11 after exact-head independent review and green
 rust/web checks at the reviewed head.
 
+[`g18.016`](g18/016-code-editor-live-line-number-reconfiguration.md) — CodeEditor
+live line-number reconfiguration — merged as `5932bd0027cab2cf86c07a7878c3b48193252306`
+(PR #244) on 2026-09-11 after exact-head independent review and green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010 and g18.013–g18.017, the held g18.011 sweep,
+only after g18.010 and g18.013–g18.018, the held g18.011 sweep,
 g18.012, and all other blocking repairs close and the operator accepts the
 sweep.
 
@@ -50,7 +55,7 @@ held. Do not release it until the repaired candidate is accepted.
 ## Ready queue task
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is explicitly Queue-held
-until serial g18.013→g18.014 and parallel g18.016–g18.017 merge. It sweeps all
+until g18.013→g18.014/g18.018 and parallel g18.017 merge. It sweeps all
 three editor surfaces in both web previews and is serial before any g18.006
 continuation.
 
@@ -66,15 +71,16 @@ released.
 dependency-queued behind g18.013. It replaces the dead external image fixture
 with visible deterministic seeded/insertion proof before g18.011 is released.
 
-[`g18.016`](g18/016-code-editor-live-line-number-reconfiguration.md) is
-approved for immediate dispatch in parallel. It makes the existing mounted
-CodeEditor line-number prop live in both wrappers and must merge before g18.011
-is released.
-
 [`g18.017`](g18/017-block-slider-fixed-inline-presentation.md) is approved for
 immediate dispatch in parallel. It gives the block Slider family rounded-square
 corners and keeps single-Slider text fixed inside the track with split-colour
 crossover across active runtimes. It must merge before g18.011 is released.
+
+[`g18.018`](g18/018-rich-text-controlled-echo-selection.md) is approved and
+dependency-queued behind g18.013 because it touches the same RichTextEditor
+shells. After that dependency closes it may run beside g18.014 and g18.017. It
+makes accepted controlled echoes preserve caret, selection, history and focus
+in both web wrappers and must merge before g18.011 is released.
 
 ## Held planning horizons
 
