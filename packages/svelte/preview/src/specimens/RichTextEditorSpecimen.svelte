@@ -10,24 +10,41 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import {
-    RICH_TEXT_IMAGE_ALT,
     RICH_TEXT_IMAGE_DOCUMENT,
     RICH_TEXT_IMAGE_FEATURES,
-    RICH_TEXT_IMAGE_SRC,
+    RICH_TEXT_IMAGE_REQUEST_DELAY_MS,
+    RICH_TEXT_PICKED_IMAGE_ALT,
+    RICH_TEXT_PICKED_IMAGE_SRC,
     RICH_TEXT_STANDARD_DOCUMENT,
+    countRichTextImages,
   } from "./web-editor-documents";
 
   let document = $state<ProseMirrorDocumentJSON>(RICH_TEXT_STANDARD_DOCUMENT);
   let imagesOn = $state(false);
   let imageDocument = $state<ProseMirrorDocumentJSON>(RICH_TEXT_IMAGE_DOCUMENT);
+  let imageRequests = $state(0);
+  let imageChanges = $state(0);
+  const imageCount = $derived(countRichTextImages(imageDocument));
 
   const imageFeatures: readonly RichTextFeature[] = RICH_TEXT_IMAGE_FEATURES;
   const standardFeatures: readonly RichTextFeature[] = RICH_TEXT_STANDARD_FEATURES;
   /** Consumers choose commands, not their icons or grouping. */
   const subsetToolbar: readonly RichTextCommand[] = ["bold", "italic", "link"];
 
+  /**
+   * Host-owned asset choice, standing in for a consumer media picker. The
+   * fixture is a self-contained raster data URL: no network, no DNS, no
+   * mutable remote content.
+   */
   async function requestImage(): Promise<RichTextImageInput | null> {
-    return { src: RICH_TEXT_IMAGE_SRC, alt: RICH_TEXT_IMAGE_ALT };
+    imageRequests += 1;
+    await new Promise((resolve) => setTimeout(resolve, RICH_TEXT_IMAGE_REQUEST_DELAY_MS));
+    return { src: RICH_TEXT_PICKED_IMAGE_SRC, alt: RICH_TEXT_PICKED_IMAGE_ALT };
+  }
+
+  function onImageDocumentChange(next: ProseMirrorDocumentJSON): void {
+    imageChanges += 1;
+    imageDocument = next;
   }
 
   function toggleImages(): void {
@@ -76,7 +93,7 @@
 
     <SpecimenGroup
       label="Image policy"
-      description="Images are an explicit project choice. Embeds are not a v1 feature."
+      description="Images are an explicit project choice. Embeds are not a v1 feature. The seeded document loads offline; Insert image asks the host for an asset and inserts exactly one image at the retained selection. The host document below is retained while images are off."
     >
       <button
         type="button"
@@ -94,7 +111,7 @@
             features={imageFeatures}
             requestImage={requestImage}
             ariaLabel="Rich text with images"
-            onChange={(next) => (imageDocument = next)}
+            onChange={onImageDocumentChange}
           />
         {:else}
           <RichTextEditor
@@ -103,6 +120,26 @@
             ariaLabel="Rich text without images"
           />
         {/if}
+      </div>
+      <div class="image-policy-feedback" data-part="image-policy-feedback">
+        <p class="image-policy-metric" data-part="image-count" data-count={String(imageCount)}>
+          Host document images: {imageCount}
+        </p>
+        <p
+          class="image-policy-metric"
+          data-part="image-request-count"
+          data-count={String(imageRequests)}
+        >
+          Host image requests: {imageRequests}
+        </p>
+        <p
+          class="image-policy-metric"
+          data-part="image-change-count"
+          data-count={String(imageChanges)}
+        >
+          Host document changes: {imageChanges}
+        </p>
+        <pre class="readout" data-part="image-host-document">{JSON.stringify(imageDocument)}</pre>
       </div>
     </SpecimenGroup>
   {/snippet}
@@ -146,6 +183,15 @@
   .editor-frame {
     height: 20rem;
     margin-top: 0.75rem;
+  }
+  .image-policy-feedback {
+    margin-top: 0.75rem;
+  }
+  .image-policy-metric {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--poodle-color-text-secondary);
   }
   .readout {
     margin: 0.75rem 0 0;

@@ -10,15 +10,23 @@ import {
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 import {
-  RICH_TEXT_IMAGE_ALT,
   RICH_TEXT_IMAGE_DOCUMENT,
   RICH_TEXT_IMAGE_FEATURES,
-  RICH_TEXT_IMAGE_SRC,
+  RICH_TEXT_IMAGE_REQUEST_DELAY_MS,
+  RICH_TEXT_PICKED_IMAGE_ALT,
+  RICH_TEXT_PICKED_IMAGE_SRC,
   RICH_TEXT_STANDARD_DOCUMENT,
+  countRichTextImages,
 } from "../../../../../svelte/preview/src/specimens/web-editor-documents";
 
+/**
+ * Host-owned asset choice, standing in for a consumer media picker. The
+ * fixture is a self-contained raster data URL: no network, no DNS, no mutable
+ * remote content.
+ */
 async function requestImage(): Promise<RichTextImageInput | null> {
-  return { src: RICH_TEXT_IMAGE_SRC, alt: RICH_TEXT_IMAGE_ALT };
+  await new Promise((resolve) => setTimeout(resolve, RICH_TEXT_IMAGE_REQUEST_DELAY_MS));
+  return { src: RICH_TEXT_PICKED_IMAGE_SRC, alt: RICH_TEXT_PICKED_IMAGE_ALT };
 }
 
 /** Consumers choose commands, not their icons or grouping. */
@@ -29,6 +37,19 @@ export function RichTextEditorSpecimen() {
   const [imagesOn, setImagesOn] = useState(false);
   const [imageDocument, setImageDocument] =
     useState<ProseMirrorDocumentJSON>(RICH_TEXT_IMAGE_DOCUMENT);
+  const [imageRequests, setImageRequests] = useState(0);
+  const [imageChanges, setImageChanges] = useState(0);
+  const imageCount = countRichTextImages(imageDocument);
+
+  const onImageDocumentChange = (next: ProseMirrorDocumentJSON): void => {
+    setImageChanges((count) => count + 1);
+    setImageDocument(next);
+  };
+
+  const hostRequestImage = async (): Promise<RichTextImageInput | null> => {
+    setImageRequests((count) => count + 1);
+    return requestImage();
+  };
 
   return (
     <SpecimenLayout
@@ -85,7 +106,7 @@ export function RichTextEditorSpecimen() {
 
       <SpecimenGroup
         label="Image policy"
-        description="Images are an explicit project choice. Embeds are not a v1 feature."
+        description="Images are an explicit project choice. Embeds are not a v1 feature. The seeded document loads offline; Insert image asks the host for an asset and inserts exactly one image at the retained selection. The host document below is retained while images are off."
       >
         <button
           type="button"
@@ -101,9 +122,9 @@ export function RichTextEditorSpecimen() {
             <RichTextEditor
               value={imageDocument}
               features={RICH_TEXT_IMAGE_FEATURES}
-              requestImage={requestImage}
+              requestImage={hostRequestImage}
               ariaLabel="Rich text with images"
-              onChange={setImageDocument}
+              onChange={onImageDocumentChange}
             />
           ) : (
             <RichTextEditor
@@ -113,6 +134,28 @@ export function RichTextEditorSpecimen() {
             />
           )}
         </div>
+        <div className="image-policy-feedback" data-part="image-policy-feedback">
+          <p className="image-policy-metric" data-part="image-count" data-count={String(imageCount)}>
+            Host document images: {imageCount}
+          </p>
+          <p
+            className="image-policy-metric"
+            data-part="image-request-count"
+            data-count={String(imageRequests)}
+          >
+            Host image requests: {imageRequests}
+          </p>
+          <p
+            className="image-policy-metric"
+            data-part="image-change-count"
+            data-count={String(imageChanges)}
+          >
+            Host document changes: {imageChanges}
+          </p>
+          <pre className="rich-text-editor-readout" data-part="image-host-document">
+            {JSON.stringify(imageDocument)}
+          </pre>
+        </div>
       </SpecimenGroup>
       <style>{`
         /* Explicit paired chrome: the raw toggle must not inherit either
@@ -121,6 +164,8 @@ export function RichTextEditorSpecimen() {
         .images-toggle { appearance: none; display: inline-flex; align-items: center; width: fit-content; gap: 0.375rem; padding: 0.3125rem 0.625rem; border: 0.0625rem solid var(--poodle-color-border-default); border-radius: var(--poodle-radius-control); background: var(--poodle-color-background-surface); color: var(--poodle-color-text-primary); font: inherit; font-size: 0.8125rem; line-height: 1.2; cursor: pointer; }
         .images-toggle[aria-pressed="true"] { background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent); }
         .rich-text-editor-frame { height: 20rem; margin-top: 0.75rem; }
+        .image-policy-feedback { margin-top: 0.75rem; }
+        .image-policy-metric { margin: 0; font-size: 0.8125rem; line-height: 1.4; color: var(--poodle-color-text-secondary); }
         .rich-text-editor-readout { margin: 0.75rem 0 0; padding: 0.5rem; border-radius: 0.25rem; background: var(--poodle-color-background-surface); font-size: 0.75rem; white-space: pre-wrap; max-height: 8rem; overflow: auto; }
       `}</style>
     </SpecimenLayout>
