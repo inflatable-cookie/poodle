@@ -11,7 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../../packages/release-operations.json`
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
-`g18.019`, `g18.020`, `g18.021`, `g18.022`
+`g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`
 
 ## Outcome
 
@@ -57,6 +57,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
   formatting surface. Do not add compatibility aliases in the candidate.
+- Include the accepted g18.023 dual syntax palettes. Do not release the
+  temporary accent/status mapping from g18.021 as the final CodeEditor theme.
 - Repair the current Keep-a-Changelog parser incompatibility before treating
   Effigy's release status/plan as healthy. Preserve historical meaning; do not
   bypass the parser or release gates.
@@ -67,9 +69,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** operator-paused in retained dispatched Queue task/workspace; resume
-  only after g18.011 completes with operator acceptance, g18.022 merges, and
-  every other blocking repair closes; then rebase and recompute final-source
-  identity. Use the
+  only after g18.011 completes with operator acceptance, g18.022 and g18.023
+  merge, and every other blocking repair closes; then rebase and recompute
+  final-source identity. Use the
   Queue's in-place dependency mutation to preserve this retained task and
   worker while encoding the remaining serial work; do not replace either.
 - **Completion:** one reviewed release-candidate PR merged to main; exact
@@ -166,8 +168,8 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-Complete retained g18.011 and parallel g18.022, then resolve any blocking
-finding. Resume this retained task only after operator sweep acceptance and
-merged g18.022, then rebuild the candidate from the accepted source. After that
-candidate merges and closes, g18.009 dispatches from its dependency. Desktop
-then resumes retained g02.058 and PR #215.
+Complete retained g18.011 and parallel g18.022/g18.023, then resolve any
+blocking finding. Resume this retained task only after operator sweep
+acceptance and merged g18.022/g18.023, then rebuild the candidate from the
+accepted source. After that candidate merges and closes, g18.009 dispatches
+from its dependency. Desktop then resumes retained g02.058 and PR #215.

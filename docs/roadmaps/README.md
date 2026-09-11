@@ -40,9 +40,10 @@ Merged g18.020 replaced fixed H1–H3 controls with one consumer-configurable
 Normal/H1–H6 selector backed by real H4–H6 document support (PR #251).
 Merged g18.021 repaired the g18.011 F1 blocker with one private Poodle-token
 highlight style in both CodeEditor engines (PR #252). g18.011 performs the
-four-surface acceptance sweep while operator-planned g18.022 completes the
-block-first Slider family, including fixed RangeSlider text and vertical block
-parity. The retained g18.006 `0.4.0` candidate and serial g18.009
+four-surface acceptance sweep while dispatched g18.022 completes the
+block-first Slider family. Operator-planned g18.023 replaces the rejected
+accent/status syntax mapping with designed dark/light palettes. The retained
+g18.006 `0.4.0` candidate and serial g18.009
 certification/publication lanes remain at the end and unblock Desktop only
 after accepted product source stops moving.
 

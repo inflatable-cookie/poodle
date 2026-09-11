@@ -224,6 +224,10 @@ transaction.
 
 ## 8. Token Usage
 
+g18.023 is the approved next token revision. Until it merges, the implementation
+still carries the temporary g18.021 UI-semantic mapping described in the
+evidence note below; that mapping is not the target contract.
+
 | Part | Semantic token purpose |
 | --- | --- |
 | root / viewport | surface background, default border, surface radius |
@@ -232,18 +236,27 @@ transaction.
 | focus | shared keyboard focus ring |
 | diagnostic error / warning / info | matching status colour plus non-colour mark |
 | search match | accent tint; active match receives stronger outline |
-| syntax tokens | token groups bound to the semantic palette (below) |
+| syntax tokens | token groups bound to dedicated light/dark syntax roles |
 
 Syntax presentation is visible only when a non-plain language is active in
-`performanceMode="full"`. The internal editor engine maps stable Lezer tag
-groups onto the semantic palette: comments and metadata read as secondary
-text, keywords as accent, strings as success, numbers, booleans, and constants
-as info, types and definitions as warning, and invalid syntax as danger.
-Ordinary names keep primary text. Colours resolve from the semantic CSS
-variables, so switching themes restyles a mounted editor live; weight or style
-never substitutes for colour. `plain-text` and `performanceMode="plain"`
-render no syntax spans and load no grammar. The mapping stays private: no
-CodeMirror tags, highlight styles, or editor extensions cross the public API.
+`performanceMode="full"`. The internal editor maps stable Lezer tags to
+dedicated `color.syntax.*` roles: comment, keyword, string, literal, type,
+callable, property/attribute, operator, punctuation, and invalid. Ordinary
+identifiers keep primary text. These roles draw from independently tuned dark
+and light primitive syntax palettes; light Poodle theme modes select the light
+palette and any named theme may override one role without replacing the whole
+palette. UI status and product-accent tokens are not syntax roles.
+
+Every syntax foreground meets AA text contrast against its theme’s editor
+panel. At least keyword, string, literal, type, and callable are perceptually
+distinct in representative source; comments and punctuation may use restrained
+neutrals. Invalid syntax also carries a non-colour mark. Colours resolve from
+generated semantic CSS variables, so switching themes restyles a mounted
+editor live without remount or grammar reload. `plain-text` and
+`performanceMode="plain"` render no syntax spans and load no grammar. The
+mapping stays private: no CodeMirror tags, highlight styles, or editor
+extensions cross the public API. Consumers can override ordinary documented
+syntax CSS variables through Poodle theming, not a component prop.
 
 Consumers must not need global editor-engine CSS overrides. Poodle maps any
 engine classes to its semantic tokens inside the component distribution.

@@ -10,8 +10,12 @@ Updated: 2026-09-11
   - Active task: `g18.011` four-surface web editor UX acceptance sweep is
     unblocked by merged `g18.021`; its task/thread remains retained for
     continuation.
-  - Ready task: `g18.022` block-first Slider family is operator-approved for
-    dispatch; it can run beside g18.011 and must merge before g18.006 resumes.
+  - Active task: `g18.022` block-first Slider family is Queue task
+    `28f7942c-6586-497a-8d18-045602f654df`; it runs beside editor work and must
+    merge before g18.006 resumes.
+  - Ready task: `g18.023` CodeEditor dual syntax palettes awaits operator
+    dispatch approval; it may run beside g18.011/g18.022 and must merge before
+    g18.006 resumes.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
     repair is an in-place g18.011 dependency.
@@ -51,12 +55,11 @@ Updated: 2026-09-11
     the outer ring is now a local keyboard-entry affordance dismissed on
     committed edits, with the document modality left truthful.
   - Paused candidate: retained g18.006 task/workspace resumes only after
-    accepted g18.011, merged g18.022, and all other blocking repairs.
+    accepted g18.011, merged g18.022/g18.023, and all other blocking repairs.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; no tag or publication while candidate source is moving.
-  - Next checkpoint: finish the existing `g18.011` sweep while g18.022 runs in
-    parallel; get operator acceptance, merge required repairs, then resume
-    g18.006.
+  - Next checkpoint: finish g18.011 while g18.022 runs and dispatch g18.023;
+    get operator acceptance, merge required repairs, then resume g18.006.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.011 active; g18.022 approved for dispatch; both precede the final release lanes)
+Updated: 2026-09-11 (g18.011 and g18.022 active; g18.023 awaits approval; all precede release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -84,7 +84,7 @@ reviewed head.
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
 only after g18.010 and g18.013–g18.020, the dependency-queued g18.011 sweep,
-g18.012, g18.021, g18.022, and all other blocking repairs close and the
+g18.012, g18.021, g18.022, g18.023, and all other blocking repairs close and the
 operator accepts the sweep.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
@@ -146,12 +146,17 @@ It added internal token-bound CodeMirror syntax presentation without bundling
 grammars or widening the public extension API. The syntax-presentation leg of
 g18.011 is unblocked.
 
-[`g18.022`](g18/022-block-first-slider-family.md) is operator-approved for
-dispatch beside the editor-only g18.011 task. It makes block the
+[`g18.022`](g18/022-block-first-slider-family.md) is dispatched as Queue task
+`28f7942c-6586-497a-8d18-045602f654df` beside the editor-only g18.011 task. It makes block the
 default and embedded the sole alternate for both Slider controls, removes the
 old presentation vocabulary, gives RangeSlider fixed endpoint/center text,
 adds vertical block parity, and proves block Slider bipolar geometry. It must
 merge before retained g18.006 resumes.
+
+[`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) awaits operator
+dispatch approval. It replaces g18.021’s accent/status mapping with dedicated
+dark/light syntax ramps and sparse theme overrides. It may run beside g18.011
+and g18.022, but must merge before retained g18.006 resumes.
 
 ## Held planning horizons
 
