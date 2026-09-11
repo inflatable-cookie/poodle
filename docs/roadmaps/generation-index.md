@@ -10,8 +10,8 @@ Updated: 2026-09-11
   - Active task: `g18.011` four-surface web editor UX acceptance sweep is
     blocked on missing CodeEditor syntax presentation; its task/thread remains
     retained for continuation.
-  - Ready repair: `g18.021` token-bound CodeEditor syntax presentation awaits
-    operator-approved dispatch and will become an in-place g18.011 dependency.
+  - Approved repair: `g18.021` token-bound CodeEditor syntax presentation is
+    ready for Queue dispatch and will become an in-place g18.011 dependency.
   - Merged task: `g18.012` CodeEditor extensible language registry (PR #250);
     both web wrappers now take a consumer-owned lazy language registry with
     `plain-text` built in and fail-closed unknown/rejected loads.

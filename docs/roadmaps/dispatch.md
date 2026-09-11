@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.011 blocked on F1; g18.021 repair awaits dispatch approval)
+Updated: 2026-09-11 (g18.011 blocked on F1; g18.021 repair approved for dispatch)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -100,7 +100,7 @@ Its first pass stopped with an accepted blocked callback after proving that
 both CodeEditor engines load TypeScript/JSON grammars but install no visible
 syntax presentation. Preserve task `aad6b776-1c3e-438c-bc9c-4e8ba8750462`
 and its thread. [`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md)
-is the bounded repair awaiting operator-approved dispatch; once submitted,
+is the bounded repair approved for dispatch; once submitted,
 add it as an in-place dependency of g18.011 and retry that same sweep task only
 after the repair merges.
 
@@ -137,8 +137,8 @@ It replaced fixed H1–H3 buttons with one consumer-configurable Normal/H1–H6
 Select and extended real document support through H6. The heading-mode leg of
 g18.011 is unblocked.
 
-[`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md) is ready
-for operator-approved dispatch. It adds internal token-bound CodeMirror syntax
+[`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md) is approved
+for Queue dispatch. It adds internal token-bound CodeMirror syntax
 presentation without bundling grammars or widening the public extension API.
 
 ## Held planning horizons

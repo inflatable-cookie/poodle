@@ -65,7 +65,7 @@ needed to compile honest repair tranches.
 | [`g18.018`](018-rich-text-controlled-echo-selection.md) — RichTextEditor controlled-echo selection preservation | complete | PR #248 (merge `08e377517af58a2033a145af2fe5c5875fb38215`); accepted controlled echoes preserve caret, selection, history and focus in both web wrappers |
 | [`g18.019`](019-markdown-renderer.md) — MarkdownRenderer shared safe/trusted rendering | complete | PR #247 (merge `cc26dd3c09e12addab7c0b6c5a243f83f33cff94`); standalone paired renderer, shared editor-preview path, safe default and explicit trusted opt-in |
 | [`g18.020`](020-rich-text-heading-mode-select.md) — RichTextEditor heading mode select | complete | PR #251 (merge `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9`); consumer-configurable Normal/H1–H6 selector plus real H4–H6 schema/editor/renderer support |
-| [`g18.021`](021-code-editor-token-bound-syntax-presentation.md) — CodeEditor token-bound syntax presentation | ready for operator-approved dispatch | bounded g18.011 F1 repair; private Poodle-token CodeMirror highlight style in both web engines |
+| [`g18.021`](021-code-editor-token-bound-syntax-presentation.md) — CodeEditor token-bound syntax presentation | approved for Queue dispatch | bounded g18.011 F1 repair; private Poodle-token CodeMirror highlight style in both web engines |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -114,8 +114,8 @@ the fixed H1–H3 buttons with one configurable Normal/H1–H6 Select and extend
 schema/editor/renderer semantics through H6. The first g18.011 pass then found
 a real release blocker: both CodeEditor engines load consumer-selected grammars
 but install no CodeMirror highlight style, leaving full mode visually identical
-to plain text. g18.021 is the bounded internal presentation repair awaiting
-operator-approved dispatch. The existing g18.011 task/thread stays retained
+to plain text. g18.021 is the bounded internal presentation repair approved
+for Queue dispatch. The existing g18.011 task/thread stays retained
 for continuation after it merges. g18.006 is the retained final
 candidate lane and stays paused until the sweep, repairs, and operator
 acceptance complete. g18.009 waits on g18.006; no candidate is tagged or

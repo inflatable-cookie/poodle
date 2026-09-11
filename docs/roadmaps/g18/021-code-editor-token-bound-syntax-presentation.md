@@ -1,6 +1,6 @@
 # 021 — CodeEditor token-bound syntax presentation
 
-Status: ready for operator-approved dispatch — release-blocking g18.011 repair
+Status: approved for Queue dispatch — release-blocking g18.011 repair
 Owner: Poodle web components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/code-editor.md`,
@@ -32,7 +32,8 @@ the accepted repair head.
 - [x] g18.012 keeps grammar packages outside Poodle; this repair needs no
   closed language catalogue or grammar dependency.
 - [x] The repair can remain private to the paired engine distributions.
-- [ ] Operator approves Queue dispatch and the in-place g18.011 dependency.
+- [x] Operator approved Queue dispatch and the in-place g18.011 dependency on
+  2026-09-11.
 
 ## Decisions
 
