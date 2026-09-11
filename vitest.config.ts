@@ -18,6 +18,10 @@ const workspaceAliases = {
     repoRoot,
     "packages/svelte/components/src/markdown.ts",
   ),
+  "@inflatable-cookie/poodle-svelte/editor/codemirror": join(
+    repoRoot,
+    "packages/svelte/components/src/editor-codemirror.ts",
+  ),
   "@inflatable-cookie/poodle-svelte/editor": join(
     repoRoot,
     "packages/svelte/components/src/editor.ts",
@@ -37,6 +41,10 @@ const workspaceAliases = {
   "@inflatable-cookie/poodle-react/markdown": join(
     repoRoot,
     "packages/react/components/src/markdown.ts",
+  ),
+  "@inflatable-cookie/poodle-react/editor/codemirror": join(
+    repoRoot,
+    "packages/react/components/src/editor-codemirror.ts",
   ),
   "@inflatable-cookie/poodle-react/editor": join(
     repoRoot,

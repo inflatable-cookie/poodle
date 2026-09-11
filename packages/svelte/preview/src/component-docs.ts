@@ -2717,7 +2717,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "code-editor": {
     props: [
       { name: "value", type: "string", required: true, description: "Host-controlled exact text. No newline, Unicode, or whitespace normalization." },
-      { name: "language", type: "CodeEditorLanguage", default: '"plain-text"', description: "Syntax hint from the closed admitted set." },
+      { name: "language", type: "CodeEditorLanguageId", default: '"plain-text"', description: "Serializable language id. plain-text is built in; every other id resolves through languageRegistry." },
+      { name: "languageRegistry", type: "CodeEditorLanguageRegistry | null", default: "null", description: "Opaque consumer-constructed registry mapping admitted ids to lazy language loaders, built through the ./editor/codemirror adapter subpath. Required for any non-plain-text language." },
       { name: "lineNumbers", type: "boolean", default: "true", description: "Shows the logical-line gutter." },
       { name: "searchable", type: "boolean", default: "true", description: "Enables the editor-owned find panel and search shortcuts." },
       { name: "diagnostics", type: "CodeEditorDiagnostic[]", default: "[]", description: "Host-authored messages attached to positions in the current value." },
@@ -2737,13 +2738,20 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { CodeEditor } from "@inflatable-cookie/poodle-svelte/editor";
+  import { createCodeEditorLanguageRegistry } from "@inflatable-cookie/poodle-svelte/editor/codemirror";
+
+  // Consumers install exactly the grammar packages their loaders name.
+  const languages = createCodeEditorLanguageRegistry({
+    json: async () => (await import("@codemirror/lang-json")).json(),
+  });
 
   let source = "export const ready = true;\\n";
 </script>
 
 <CodeEditor
   value={source}
-  language="typescript"
+  language="json"
+  languageRegistry={languages}
   onChange={(change) => (source = change.value)}
 />`,
   },

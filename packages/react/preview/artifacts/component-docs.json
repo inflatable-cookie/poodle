@@ -6748,9 +6748,15 @@
       },
       {
         "name": "language",
-        "type": "CodeEditorLanguage",
+        "type": "CodeEditorLanguageId",
         "default": "\"plain-text\"",
-        "description": "Syntax hint from the closed admitted set."
+        "description": "Serializable language id. plain-text is built in; every other id resolves through languageRegistry."
+      },
+      {
+        "name": "languageRegistry",
+        "type": "CodeEditorLanguageRegistry | null",
+        "default": "null",
+        "description": "Opaque consumer-constructed registry mapping admitted ids to lazy language loaders, built through the ./editor/codemirror adapter subpath. Required for any non-plain-text language."
       },
       {
         "name": "lineNumbers",
@@ -6833,7 +6839,7 @@
         "description": "One exact callback for each committed user edit transaction."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { CodeEditor } from \"@inflatable-cookie/poodle-svelte/editor\";\n\n  let source = \"export const ready = true;\\n\";\n</script>\n\n<CodeEditor\n  value={source}\n  language=\"typescript\"\n  onChange={(change) => (source = change.value)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { CodeEditor } from \"@inflatable-cookie/poodle-svelte/editor\";\n  import { createCodeEditorLanguageRegistry } from \"@inflatable-cookie/poodle-svelte/editor/codemirror\";\n\n  // Consumers install exactly the grammar packages their loaders name.\n  const languages = createCodeEditorLanguageRegistry({\n    json: async () => (await import(\"@codemirror/lang-json\")).json(),\n  });\n\n  let source = \"export const ready = true;\\n\";\n</script>\n\n<CodeEditor\n  value={source}\n  language=\"json\"\n  languageRegistry={languages}\n  onChange={(change) => (source = change.value)}\n/>"
   },
   "rich-text-editor": {
     "props": [

@@ -325,6 +325,19 @@
   { task = "test:code-editor-line-numbers-chromium" },
   { task = "test:code-editor-line-numbers-webkit" },
 ]
+# g18.012 CodeEditor extensible language registry. Paired Svelte + React
+# fixtures construct consumer-owned registries over real dynamically imported
+# grammar packages and prove lazy single loads, memoized re-selection, live
+# switching without remount, plain-text built-in behavior, fail-closed
+# rejected loads, and real mount-time unknown-id refusal through each
+# framework's boundary mechanism. Headless Chromium and WebKit, one engine
+# per run; not in ci:web.
+"test:code-editor-language-registry-chromium" = "bun test/code-editor-language-registry/probe.ts --browser=chromium"
+"test:code-editor-language-registry-webkit" = "bun test/code-editor-language-registry/probe.ts --browser=webkit"
+"test:code-editor-language-registry" = [
+  { task = "test:code-editor-language-registry-chromium" },
+  { task = "test:code-editor-language-registry-webkit" },
+]
 # g18.014 RichTextEditor Image Policy specimen proof. Paired Svelte + React
 # journeys over the real preview specimen: the inline raster seeds and inserts
 # with decoded geometry, one host request inserts exactly one image at the

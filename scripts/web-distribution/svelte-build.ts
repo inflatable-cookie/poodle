@@ -17,12 +17,14 @@ import {
 } from "./receipt";
 import { cleanStaging } from "./staging";
 import {
+  FORBIDDEN_GRAMMAR_MODULES,
   SVELTE_EXTERNAL_MODULES,
   SVELTE_PACKAGE_DIR,
   SVELTE_PACKAGE_NAME,
   assertSvelteInventoriesMatchDisk,
   readPackageVersion,
   svelteDualEntries,
+  svelteEditorAdapterEntry,
   sveltePackageExports,
   sveltePublicFiles,
   svelteTypesEntry,
@@ -41,7 +43,8 @@ function mergeGraphs(graphs: ViteLibraryGraph[]): ViteLibraryGraph {
 export function svelteBuildSpec(repoRoot: string): PackageBuildSpec {
   assertSvelteInventoriesMatchDisk(repoRoot);
   const types = svelteTypesEntry();
-  const entries = [...svelteDualEntries(), types].sort((left, right) =>
+  const adapter = svelteEditorAdapterEntry();
+  const entries = [...svelteDualEntries(), types, adapter].sort((left, right) =>
     left.name < right.name ? -1 : left.name > right.name ? 1 : 0,
   );
   return {
@@ -54,7 +57,7 @@ export function svelteBuildSpec(repoRoot: string): PackageBuildSpec {
     entries,
     assets: [],
     declarationTsconfig: "tsconfig.declarations.json",
-    forbiddenModules: [],
+    forbiddenModules: [...FORBIDDEN_GRAMMAR_MODULES],
     externalModules: [...SVELTE_EXTERNAL_MODULES],
   };
 }
@@ -101,7 +104,9 @@ export function assertSvelteManifest(repoRoot: string): void {
   if (manifest.dependencies?.marked) {
     throw new Error("marked must not be a hard Svelte dependency");
   }
-  auditPackageDependencies(manifest, ["react", "react-dom"]);
+  // g18.012: language support is consumer-owned. A grammar package in any
+  // dependency section re-introduces the closed catalogue.
+  auditPackageDependencies(manifest, [...FORBIDDEN_GRAMMAR_MODULES, "react", "react-dom"]);
 }
 
 export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<BuiltPackage> {
@@ -112,12 +117,18 @@ export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<Bu
   const outDir = cleanStaging(packageRoot);
   const dual = svelteDualEntries();
   const types = svelteTypesEntry();
+  const adapter = svelteEditorAdapterEntry();
   const dualEntries: Record<string, string> = {};
   for (const entry of dual) dualEntries[entry.name] = join(packageRoot, entry.source);
-  const clientEntries: Record<string, string> = {
-    ...dualEntries,
-    [types.name]: join(packageRoot, types.source),
-  };
+  // types and the editor adapter are single-lane client entries; vite requires
+  // entry maps in sorted name order.
+  const clientEntries: Record<string, string> = { ...dualEntries };
+  for (const entry of [types, adapter]) {
+    clientEntries[entry.name] = join(packageRoot, entry.source);
+  }
+  const sortedClientNames = Object.keys(clientEntries).sort();
+  const orderedClientEntries: Record<string, string> = {};
+  for (const name of sortedClientNames) orderedClientEntries[name] = clientEntries[name];
   const plugins = [
     svelte({
       compilerOptions: { css: "external" },
@@ -131,8 +142,11 @@ export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<Bu
   const client = await buildViteLibrary({
     root: packageRoot,
     outDir,
-    entries: clientEntries,
-    fileName: (entryName) => (entryName === "types" ? "types.js" : `${entryName}.client.js`),
+    entries: orderedClientEntries,
+    fileName: (entryName) =>
+      entryName === "types" || entryName === "editor-codemirror"
+        ? `${entryName}.js`
+        : `${entryName}.client.js`,
     externals: spec.externalModules,
     plugins,
     chunkFileNames: "chunks/[name].client.js",

@@ -43,7 +43,8 @@ an unrelated painted copy is not conforming.
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
 | `value` | `string` | - | yes | Host-controlled exact text. No newline, Unicode, or whitespace normalization. |
-| `language` | `CodeEditorLanguage` | `"plain-text"` | no | Syntax hint from the closed admitted set. |
+| `language` | `CodeEditorLanguageId` | `"plain-text"` | no | Serializable language id. `plain-text` is built in; every other id resolves through `languageRegistry`. |
+| `languageRegistry` | `CodeEditorLanguageRegistry \| null` | `null` | no | Opaque, consumer-constructed registry mapping admitted ids to lazy language loaders, built through the substrate adapter subpath. Required for any non-plain-text `language`. |
 | `lineNumbers` | `boolean` | `true` | no | Shows the logical-line gutter. |
 | `searchable` | `boolean` | `true` | no | Enables the editor-owned find panel and search shortcuts. |
 | `diagnostics` | `CodeEditorDiagnostic[]` | `[]` | no | Host-authored messages attached to positions in the current value. |
@@ -61,18 +62,20 @@ an unrelated painted copy is not conforming.
 ### Supporting Types
 
 ```ts
-type CodeEditorLanguage =
-  | "plain-text"
-  | "markdown"
-  | "json"
-  | "yaml"
-  | "toml"
-  | "javascript"
-  | "typescript"
-  | "html"
-  | "css"
-  | "rust"
-  | "shell";
+type CodeEditorLanguageId = string;
+
+const CODE_EDITOR_PLAIN_TEXT: CodeEditorLanguageId; // "plain-text"
+
+type CodeEditorLanguageLoader = () => Promise<unknown>;
+
+interface CodeEditorLanguageRegistry {
+  has(language: CodeEditorLanguageId): boolean;
+  load(language: CodeEditorLanguageId): Promise<unknown>;
+}
+
+type CodeEditorLanguageRegistryInput =
+  | Iterable<readonly [CodeEditorLanguageId, CodeEditorLanguageLoader]>
+  | Record<string, CodeEditorLanguageLoader>;
 
 interface CodeEditorRange {
   from: number;
@@ -98,6 +101,22 @@ interface CodeEditorChange {
   edits: CodeEditorTextEdit[];
 }
 ```
+
+Poodle does not enumerate languages. `plain-text` is built in; every other
+language id is consumer-defined and must be admitted by the registry the host
+supplies through `languageRegistry`. The registry maps admitted ids to lazy
+language loaders and is constructed through the substrate adapter subpath
+(`@inflatable-cookie/poodle-svelte/editor/codemirror` and
+`@inflatable-cookie/poodle-react/editor/codemirror`), whose loaders are typed
+to resolve a CodeMirror `LanguageSupport`. Consumers install exactly the
+grammar packages their loaders name; Poodle ships none.
+
+Registry construction and resolution fail closed: empty ids, non-function
+loaders, duplicate ids, a built-in `plain-text` entry, unknown ids, rejected
+loads, and loads that do not resolve to a language extension all throw or
+reject before an editor can present false syntax state. A selected language
+loads lazily and at most once per registry instance; re-selecting it reuses
+the memoized load. `performanceMode="plain"` never consults the registry.
 
 Offsets count UTF-16 code units, matching JavaScript strings and CodeMirror's
 document model. Ranges are start-inclusive and end-exclusive. Every edit range
@@ -224,9 +243,9 @@ engine classes to its semantic tokens inside the component distribution.
 - Shared TypeScript owns engine-independent types and transaction translation.
 - CodeMirror `EditorView`, extensions, transactions, decorations, and themes
   stay private. There is no arbitrary extension prop or raw editor handle.
-- The implementation pins its exact CodeMirror packages and imports only the
-  admitted feature and language set. TypeScript uses the JavaScript language
-  package with its TypeScript parser mode.
+- The implementation pins its exact base CodeMirror packages. It imports no
+  grammar package; language extensions arrive only through consumer loaders at
+  runtime.
 - The engine owns line-break representation: CR and CRLF load as LF, matching
   CodeMirror's document model. Astral characters, tabs, and trailing spaces
   are byte-exact. Every `onChange` payload replays exactly against the owned
@@ -270,8 +289,12 @@ engine classes to its semantic tokens inside the component distribution.
 - Valid UTF-8 text only, through 2 MiB inclusive.
 - No binary, remote stream, rich-text document, notebook, collaborative model,
   or arbitrary plugin contract.
-- The initial language domain is closed. Unknown strings do not silently fall
-  back to plain text; hosts request `plain-text` explicitly.
+- The language domain is open and consumer-owned. Poodle fixes no language
+  vocabulary: an id the registry does not admit is refused, never silently
+  downgraded to plain text; hosts request `plain-text` explicitly.
+- The component prop accepts only the opaque registry. Arbitrary CodeMirror
+  extensions, themes, keymaps, plugins, and DOM hooks have no path through the
+  adapter subpath or the component.
 - Diagnostics are annotations only. Quick fixes, code actions, hover docs,
   completion, formatting, and language servers require later contracts.
 - `MarkdownEditor` may sit beside this component, but neither owns conversion
@@ -286,7 +309,9 @@ wrapped long line; plain performance mode; 2 MiB boundary fixture.
 Required focused selector families:
 
 - exact controlled change, rejection, no-echo, IME, clipboard, undo, and redo;
-- language and syntax-domain refusal;
+- language registry resolution: consumer-defined ids absent from Poodle source,
+  lazy single loads across controlled switching, missing-id and rejected-load
+  refusal before false ready presentation, and Svelte/React parity;
 - search keyboard, focus return, and result traversal;
 - diagnostic coordinate refusal, F8 navigation, and accessible announcement;
 - read-only, disabled, Tab exit, pointer/keyboard focus origin, and focus-ring
@@ -307,8 +332,12 @@ No consumer semantics enter the component API.
 - First admission: Svelte and React together, implemented in TypeScript over
   CodeMirror 6.
 - Package entries: `@inflatable-cookie/poodle-svelte/editor` and
-  `@inflatable-cookie/poodle-react/editor`.
+  `@inflatable-cookie/poodle-react/editor`, plus the CodeMirror language
+  adapter subpaths `@inflatable-cookie/poodle-svelte/editor/codemirror` and
+  `@inflatable-cookie/poodle-react/editor/codemirror` (the only supported
+  registry constructor).
 - Root package entries do not eagerly import CodeMirror or its language
-  packages.
+  packages, and no Poodle web package depends on a `@codemirror/lang-*` or
+  legacy-modes grammar package.
 - Status until native admission: `web-admitted`, not parity-complete.
 - GPUI and shared Rust are a future task and do not block the web release.

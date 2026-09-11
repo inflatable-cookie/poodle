@@ -1243,6 +1243,10 @@ const consumerManifest = {
     "react-dom": "18.0.0",
     svelte: "5.56.8",
     marked: "^18.0.9",
+    // g18.012: the consumer chooses its own grammar packages. Exactly one is
+    // installed here; the EditorLanguageRegistry fixture proves unselected
+    // grammars stay absent from this isolated install graph.
+    "@codemirror/lang-json": "6.0.2",
   },
   overrides: tarballDependencies,
   devDependencies: {

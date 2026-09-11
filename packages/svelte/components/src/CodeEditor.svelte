@@ -7,7 +7,8 @@
   import type {
     CodeEditorChange,
     CodeEditorDiagnostic,
-    CodeEditorLanguage,
+    CodeEditorLanguageId,
+    CodeEditorLanguageRegistry,
     CodeEditorPerformanceMode,
     CodeEditorTabBehavior,
   } from "@inflatable-cookie/poodle-core";
@@ -28,7 +29,8 @@
    */
   interface Props {
     value: string;
-    language?: CodeEditorLanguage;
+    language?: CodeEditorLanguageId;
+    languageRegistry?: CodeEditorLanguageRegistry | null;
     lineNumbers?: boolean;
     searchable?: boolean;
     diagnostics?: CodeEditorDiagnostic[];
@@ -47,6 +49,7 @@
   let {
     value,
     language = "plain-text",
+    languageRegistry = null,
     lineNumbers = true,
     searchable = true,
     diagnostics = [],
@@ -64,8 +67,9 @@
 
   const uiPresentation = getUiPresentation();
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  // `language` is validated when the engine mounts and on every language
-  // update; asserting here would capture only the initial prop value.
+  // `language` is validated against `languageRegistry` when the engine mounts
+  // and on every language update; asserting here would capture only the
+  // initial prop values.
   /** Imperative escape hatch: focus the editing surface. Documented as a method, not a prop. */
   export function focus(): void {
     (hostElement?.querySelector(".cm-content") as HTMLElement | null)?.focus();
@@ -83,6 +87,7 @@
     return {
       value,
       language,
+      languageRegistry,
       lineNumbers,
       searchable,
       readOnly,
@@ -98,7 +103,7 @@
   }
 
   onMount(() => {
-    assertAdmittedLanguage(language);
+    assertAdmittedLanguage(language, languageRegistry);
     installInputModality();
     if (!isCodeEditorValueAdmissible(value)) {
       console.warn(

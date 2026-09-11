@@ -5,6 +5,7 @@ import { auditPackageDependencies, auditStagedDist } from "./audit";
 import { buildCore, findRepoRoot } from "./core-build";
 import { buildPackage } from "./driver";
 import {
+  FORBIDDEN_GRAMMAR_MODULES,
   REACT_EXTERNAL_MODULES,
   REACT_PACKAGE_DIR,
   REACT_PACKAGE_NAME,
@@ -30,7 +31,7 @@ export function reactBuildSpec(repoRoot: string): PackageBuildSpec {
     entries: reactLibraryEntries(),
     assets: [],
     declarationTsconfig: "tsconfig.build.json",
-    forbiddenModules: [],
+    forbiddenModules: [...FORBIDDEN_GRAMMAR_MODULES],
     externalModules: [...REACT_EXTERNAL_MODULES],
   };
 }
@@ -75,7 +76,9 @@ export function assertReactManifest(repoRoot: string): void {
   if (manifest.dependencies?.marked) {
     throw new Error("marked must not be a hard React dependency");
   }
-  auditPackageDependencies(manifest, ["svelte"]);
+  // g18.012: language support is consumer-owned. A grammar package in any
+  // dependency section re-introduces the closed catalogue.
+  auditPackageDependencies(manifest, [...FORBIDDEN_GRAMMAR_MODULES, "svelte"]);
 }
 
 export async function buildReact(repoRoot: string = findRepoRoot()) {

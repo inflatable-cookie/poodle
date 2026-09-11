@@ -2,10 +2,10 @@ import { describe, expect, test } from "bun:test";
 
 import {
   applyCodeEditorEdits,
-  CODE_EDITOR_LANGUAGES,
   CODE_EDITOR_MAX_BYTES,
+  CODE_EDITOR_PLAIN_TEXT,
   codeEditorByteLength,
-  isCodeEditorLanguage,
+  createCodeEditorLanguageRegistry,
   isCodeEditorValueAdmissible,
   toCodeEditorChange,
   validateCodeEditorDiagnostics,
@@ -57,29 +57,77 @@ describe("code-editor change translation", () => {
   });
 });
 
-describe("code-editor language admission", () => {
-  test("the admitted set is exactly the eleven contract languages", () => {
-    const expected = [
-      "plain-text",
-      "markdown",
-      "json",
-      "yaml",
-      "toml",
-      "javascript",
-      "typescript",
-      "html",
-      "css",
-      "rust",
-      "shell",
-    ];
-    expect([...CODE_EDITOR_LANGUAGES].sort()).toEqual(expected.sort());
+describe("code-editor language registry", () => {
+  const loader = () => Promise.resolve({ extension: true });
+
+  test("record and entry inputs build equivalent registries", () => {
+    const fromRecord = createCodeEditorLanguageRegistry({ python: loader, kdl: loader });
+    const fromEntries = createCodeEditorLanguageRegistry([
+      ["python", loader],
+      ["kdl", loader],
+    ] as const);
+    expect(fromRecord.has("python")).toBe(true);
+    expect(fromEntries.has("python")).toBe(true);
+    expect(fromRecord.has("haskell")).toBe(false);
   });
 
-  test("svelte and unknown strings fail closed", () => {
-    expect(isCodeEditorLanguage("svelte")).toBe(false);
-    expect(isCodeEditorLanguage("python")).toBe(false);
-    expect(isCodeEditorLanguage("TypeScript")).toBe(false);
-    expect(isCodeEditorLanguage("typescript")).toBe(true);
+  test("admits arbitrary consumer-defined ids, including ids absent from Poodle source", () => {
+    const registry = createCodeEditorLanguageRegistry({ "brand/lang+2026": loader });
+    expect(registry.has("brand/lang+2026")).toBe(true);
+    expect(registry.load("brand/lang+2026")).resolves.toEqual({ extension: true });
+  });
+
+  test("construction fails closed on empty ids, non-function loaders, and duplicates", () => {
+    expect(() => createCodeEditorLanguageRegistry({ "": loader })).toThrow(/non-empty strings/);
+    expect(() => createCodeEditorLanguageRegistry([["kdl", "not a function"]] as never)).toThrow(
+      /lazy loader function/,
+    );
+    expect(() =>
+      createCodeEditorLanguageRegistry([
+        ["kdl", loader],
+        ["kdl", loader],
+      ] as const),
+    ).toThrow(/duplicate language/);
+  });
+
+  test("plain-text is built in and cannot be registered", () => {
+    expect(CODE_EDITOR_PLAIN_TEXT).toBe("plain-text");
+    expect(() => createCodeEditorLanguageRegistry({ "plain-text": loader })).toThrow(
+      /built in/,
+    );
+  });
+
+  test("unknown ids reject and never fall back to plain text", async () => {
+    const registry = createCodeEditorLanguageRegistry({ python: loader });
+    await expect(registry.load("cobol")).rejects.toThrow(/unsupported language/);
+  });
+
+  test("each admitted id loads exactly once per registry, including across switches", async () => {
+    let calls = 0;
+    const registry = createCodeEditorLanguageRegistry({
+      slow: () => {
+        calls += 1;
+        return new Promise((resolve) => setTimeout(() => resolve({ extension: true }), 0));
+      },
+    });
+    const [first, second] = await Promise.all([registry.load("slow"), registry.load("slow")]);
+    expect(calls).toBe(1);
+    expect(first).toBe(second);
+    await registry.load("slow");
+    expect(calls).toBe(1);
+  });
+
+  test("a rejected load stays memoized as the failure it is", async () => {
+    let calls = 0;
+    const registry = createCodeEditorLanguageRegistry({
+      broken: () => {
+        calls += 1;
+        return Promise.reject(new Error("grammar exploded"));
+      },
+    });
+    await expect(registry.load("broken")).rejects.toThrow("grammar exploded");
+    await expect(registry.load("broken")).rejects.toThrow("grammar exploded");
+    expect(calls).toBe(1);
   });
 });
 
