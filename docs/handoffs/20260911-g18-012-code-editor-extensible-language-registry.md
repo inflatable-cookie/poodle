@@ -13,7 +13,8 @@ base_required: pushed-main
 queue_dispatch: northstar-queue
 queue_approval: "Tom confirmed on 2026-09-11 that Poodle cannot support every language directly and CodeEditor language support must be extensible."
 queue:
-  dependsOn: []
+  dependsOn:
+    - aad6b776-1c3e-438c-bc9c-4e8ba8750462
   capability: complex
   skipPRReview: false
 tags: [coordination, handoff, worker, g18, g18.012, code-editor, codemirror, packaging]
@@ -22,7 +23,7 @@ tags: [coordination, handoff, worker, g18, g18.012, code-editor, codemirror, pac
 ## What This Thread Was Doing
 
 Execute [`g18.012`](../roadmaps/g18/012-code-editor-extensible-language-registry.md)
-before the g18.011 acceptance sweep. Replace the fixed CodeEditor language
+after the g18.011 acceptance sweep. Replace the fixed CodeEditor language
 catalogue with consumer-selected lazy language providers in Svelte and React.
 
 ## Why It Matters
@@ -37,10 +38,8 @@ escape hatch.
 
 The current contract exposes a closed `CodeEditorLanguage` union. Both web
 engines contain matching switches with literal `@codemirror/lang-*` imports,
-and both component manifests declare the fixed grammar set. This task owns its
-before/after install, bundle and runtime baseline. It may run beside the active
-rich-text chain. g18.011 waits for both; g18.006 remains paused at the final
-candidate gate and g18.009 is dependency-queued behind it.
+and both component manifests declare the fixed grammar set. g18.011 owns the
+exact install/bundle/runtime baseline. g18.006 is blocked and g18.009 is held.
 
 ## Boundaries
 
@@ -60,8 +59,8 @@ This is a deliberate pre-1.0 contract correction, not a compatibility exercise.
 
 ## Suggested Next Move
 
-Capture the closed union/package/runtime baseline and plant isolated-consumer
-tests against it. Then define the smallest shared opaque registry plus explicit
+Read g18.011’s evidence, plant isolated-consumer tests against the closed union
+and package graph, then define the smallest shared opaque registry plus explicit
 CodeMirror loader adapter before changing either wrapper.
 
 ## Completion Protocol
@@ -69,5 +68,4 @@ CodeMirror loader adapter before changing either wrapper.
 Open one non-draft PR from the queue-owned branch, prove the exact head with
 focused package/component/browser checks, both preview builds, declaration and
 export checks, docs QA, and `git diff --check`, then report `ready_for_review`.
-Never merge, release, publish, resume g18.006/g18.009, or edit Desktop. Its
-accepted merge becomes a prerequisite of g18.011.
+Never merge, release, publish, resume g18.006/g18.009, or edit Desktop.
