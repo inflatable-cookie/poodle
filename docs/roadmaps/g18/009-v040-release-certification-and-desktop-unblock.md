@@ -1,6 +1,6 @@
 # 009 — v0.4.0 release certification and Desktop unblock
 
-Status: ready behind g18.006
+Status: held — operator paused release sequencing for g18.010 UX correction
 Owner: Poodle release operations
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -42,7 +42,8 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 
 ## Dispatch manifest
 
-- **State:** queued behind g18.006
+- **State:** queue-held behind g18.006; release only after g18.010 merges and
+  the retained candidate is rebuilt/reviewed from that source
 - **Completion:** exact candidate local gates and branch dry run green;
   `v0.4.0` at that commit; tag dry run and publish green; npm core/Svelte 0.4.0
   metadata and tarballs verified; fresh ordinary install proves `./editor`;

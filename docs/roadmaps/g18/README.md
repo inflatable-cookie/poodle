@@ -50,10 +50,11 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | ready | dependencies complete; final source rechecked and operator candidate authority granted 2026-09-11 |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after g18.010 merges so the candidate includes the UX correction |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
-| [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | ready behind g18.006 | exact merged candidate; operator release authority granted 2026-09-11 |
+| [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | held behind g18.006 | Queue-held during g18.010 repair; release only from the accepted repaired candidate |
+| [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | ready and approved | immediate UX repair; g18.006 resumes afterward and g18.009 remains held |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -76,11 +77,12 @@ RichTextRenderer specimens to both web previews through the existing web-only
 supplement (PR #241, merged `998b6ddc69f94e405b515f6bddd682a2e8916ea5`). It ran
 independently of g18.007 and added no native parity.
 
-After preflight closes, `g18.006` prepares and merges the SemVer-minor `0.4.0`
-candidate. g18.009 then certifies and publishes that exact tree to unblock
-Desktop's retained g02.058 task and PR #215. Chatterbox rechecked final source
-at `70b59890`; Tom authorized both stages on 2026-09-11. g18.006 is the ready
-frontier and g18.009 is queued serially behind it.
+The Svelte CodeEditor specimen exposed a focus-origin UX defect: ordinary
+typing flips the document modality to keyboard and the editor's live
+`:focus-within` rule paints a persistent outer ring. Operator-approved g18.010
+repairs both web wrappers with local navigation-entry state. g18.006 is paused
+with its work preserved and resumes after that repair merges. g18.009 remains
+held; no candidate is tagged or published while the accepted UX is moving.
 
 ## Held and recurring work
 

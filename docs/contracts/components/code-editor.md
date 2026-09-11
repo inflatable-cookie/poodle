@@ -172,7 +172,16 @@ transaction.
 
 ### Focus
 
-- Keyboard focus has the shared Poodle focus treatment. Pointer focus does not.
+- Keyboard navigation into the editing surface has the shared Poodle focus
+  treatment. Pointer focus does not.
+- The outer treatment locates newly navigated focus; it is not a persistent
+  editing-state border. The first text-editing intent, including composition,
+  paste, cut, undo, or redo, removes it while the caret and selection remain
+  visible. Ordinary typing must not recreate it merely because the document's
+  last input modality is keyboard.
+- Focus leaving the component resets this local entry state. A later Tab or
+  Shift+Tab entry may show the treatment again. Internal search and toolbar
+  controls keep their own `:focus-visible` treatment.
 - Prop updates, diagnostics, and external tab selection never steal focus.
 - Opening find moves focus into its input; closing it returns focus to the
   editing surface when focus was inside the find panel.
@@ -280,7 +289,8 @@ Required focused selector families:
 - language and syntax-domain refusal;
 - search keyboard, focus return, and result traversal;
 - diagnostic coordinate refusal, F8 navigation, and accessible announcement;
-- read-only, disabled, Tab exit, pointer/keyboard focus origin;
+- read-only, disabled, Tab exit, pointer/keyboard focus origin, and focus-ring
+  dismissal on the first editing intent without mutating global modality;
 - viewport ownership and 2 MiB bounded-document behavior;
 - Svelte/React public-surface and packed-distribution parity;
 - explicit proof that root imports do not load the editor engine.

@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.006 promoted after final-source recheck and operator release go)
+Updated: 2026-09-11 (g18.006 paused; g18.010 UX repair approved; g18.009 held)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -24,16 +24,22 @@ changelog maintenance scope — merged as `ef2e46bb949a766e844e48f071119c9576c6f
 specimens — merged as `998b6ddc69f94e405b515f6bddd682a2e8916ea5`
 (PR #241) on 2026-09-10. It was serial before g18.006 release.
 
-## Ready queue task
+## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
-preparation is ready after all four dependencies, final-source recheck at
-`70b59890`, and Tom's 2026-09-11 authority. Queue task:
-`17ac3fee-de90-4b32-9672-1134770bb086`.
+preparation is operator-paused with its worker/workspace and any progress
+preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
+only after g18.010 merges.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
-certification is ready behind g18.006. Queue it only with the immutable g18.006
-task ID as its dependency; it tags and publishes the accepted merged candidate.
+certification is already dependency-queued behind g18.006 and is now explicitly
+held. Do not release it until the repaired candidate is accepted.
+
+## Ready queue task
+
+[`g18.010`](g18/010-code-editor-editing-focus-treatment.md) corrects the outer
+focus ring during active editing in both web wrappers. It is approved for
+immediate dispatch and is serial before resuming g18.006.
 
 ## Held planning horizons
 
