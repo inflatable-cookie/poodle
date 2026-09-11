@@ -1,6 +1,6 @@
 # g18.018 — RichTextEditor controlled-echo selection preservation
 
-Status: implementation complete — awaiting orchestrator review
+Status: complete — merged as `08e377517af58a2033a145af2fe5c5875fb38215` (PR #248) on 2026-09-11 after exact-head independent review (PR comment `5635865293`, `ready_to_merge`) at `bcd412336a8b9035ee127127cfdf11f89df2a735` with green rust/web checks
 Date: 2026-09-11
 Branch: `ns-6bb46544-966a-4af0-af7c-e53846ad0407`
 Card: `docs/roadmaps/g18/018-rich-text-controlled-echo-selection.md`
@@ -101,8 +101,8 @@ applied, all pass.
 - No toolbar or image-policy redesign, no uncontrolled mode, no selection
   callbacks, no new schema or commands.
 - g18.011 remains gated behind this repair and the remaining tasks; g18.006
-  stays paused and g18.009 waits on it. Nothing was merged, released,
-  published, or tagged.
+  stays paused and g18.009 waits on it. Merged as `08e37751` (PR #248);
+  nothing was released, published, or tagged.
 
 ## Validation
 
@@ -127,6 +127,6 @@ applied, all pass.
 
 ## Continuation
 
-After g18.011's dependency window closes, Queue releases the held
-`g18.011` web-editor acceptance sweep. No release, Desktop, native, or retained
-task work starts from this log.
+Merged. Ready g18.020 converges on the held `g18.011` web-editor acceptance
+sweep, then operator acceptance and retained g18.006. No release, Desktop,
+native, or retained task work starts from this log.

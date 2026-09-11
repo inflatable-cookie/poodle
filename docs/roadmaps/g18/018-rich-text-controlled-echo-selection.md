@@ -1,6 +1,6 @@
 # 018 — RichTextEditor controlled-echo selection preservation
 
-Status: ready behind g18.013 — operator-confirmed release blocker
+Status: complete — merged as `08e377517af58a2033a145af2fe5c5875fb38215` (PR #248) on 2026-09-11
 Owner: Poodle web editors
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -63,9 +63,9 @@ replaces or rejects the local edit without a callback echo.
 
 ## Dispatch manifest
 
-- **State:** dependency-queued behind g18.013; may run in parallel with g18.014
-  and g18.017 after that dependency closes; explicit prerequisite of g18.011
-  and serial before retained g18.006; g18.009 waits on g18.006
+- **State:** complete; merged g18.018 unblocks the controlled-echo leg of
+  g18.011; `g18.011` still waits on ready g18.020, and stays serial before
+  retained g18.006; g18.009 waits on g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** paired RichTextEditor shells and private engines;
@@ -139,8 +139,19 @@ character on 2026-09-11. Source inspection traced the path from fresh
 and TipTap `setContent(..., { emitUpdate: false })`. The current host-echo test
 asserts only content retention and callback count, leaving selection unbound.
 
+Merged outcome: PR #248 merged as `08e377517af58a2033a145af2fe5c5875fb38215`
+after exact-head independent review (PR comment `5635865293`, `ready_to_merge`)
+at `bcd412336a8b9035ee127127cfdf11f89df2a735` with green rust/web checks.
+Review-reported validation: 122 paired component tests, 14 preview specimen
+tests, all 36 Chromium + WebKit browser-probe checks, paired package and
+preview builds, `docs:lint`, `docs:check`, and `git diff --check` clean, plus
+a planted-regression proof that fails exactly the caret/selection/IME/history
+journeys with the pre-fix engines. Deferred failures: `check:react-components`
+errors are the documented pre-existing backlog in untouched files; the browser
+probe stays out of `ci:web` by the g18-008 precedent.
+
 ## Next task
 
-After this task and g18.013/g18.014/g18.017/g18.019 close, Queue dependencies
-dispatch g18.011 for the complete four-surface editor acceptance sweep. Keep
-g18.006 paused; g18.009 waits on it.
+g18.018 is merged. Ready g18.020 converges on g18.011 as a four-surface web
+editor acceptance sweep; then operator acceptance and retained g18.006.
+g18.009 waits on g18.006.

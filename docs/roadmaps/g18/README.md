@@ -55,16 +55,16 @@ needed to compile honest repair tranches.
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
 | [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); product work continues through g18.012 before release resumes |
-| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | dependency-queued behind g18.018→g18.020 (g18.012 merged) | paired Svelte/React sweep of CodeEditor, RichTextEditor, RichTextRenderer and MarkdownRenderer; operator release checkpoint |
+| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | dependency-queued behind g18.020 (g18.018 merged) | paired Svelte/React sweep of CodeEditor, RichTextEditor, RichTextRenderer and MarkdownRenderer; operator release checkpoint |
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | complete | PR #250 (merge `f011df5e0a97856bfe022569d77faf69a9f75553`); consumer-selected lazy CodeMirror language providers; last planned product change before the sweep |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | complete | PR #245 (merge `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70`) |
 | [`g18.014`](014-rich-text-image-policy-specimen-proof.md) — rich-text image-policy specimen proof | complete | PR #249 (merge `72c7a9e5e6ce288780c7a2e3e44715949a035221`); self-contained offline seeded/insertion fixtures with visible host proof in both previews |
 | [`g18.015`](015-preview-distribution-build-preflight.md) — preview distribution build preflight | complete | PR #243 (merge `0cf6073eb2067c4fc4127ec5c318a0f682c5859f`); accepted prerequisite evidence for the later sweep |
 | [`g18.016`](016-code-editor-live-line-number-reconfiguration.md) — CodeEditor live line-number reconfiguration | complete | PR #244 (merge `5932bd0027cab2cf86c07a7878c3b48193252306`); accepted prerequisite evidence for the later sweep |
 | [`g18.017`](017-block-slider-fixed-inline-presentation.md) — block Slider fixed inline presentation | complete | PR #246 (merge `f91be412b60739e96c29a45e9c17969c05b85f49`); rounded-square family corners and stable split-colour in-track Slider text across active runtimes |
-| [`g18.018`](018-rich-text-controlled-echo-selection.md) — RichTextEditor controlled-echo selection preservation | reviewing | PR #248; accepted controlled echoes preserve caret, selection, history and focus in both web wrappers |
+| [`g18.018`](018-rich-text-controlled-echo-selection.md) — RichTextEditor controlled-echo selection preservation | complete | PR #248 (merge `08e377517af58a2033a145af2fe5c5875fb38215`); accepted controlled echoes preserve caret, selection, history and focus in both web wrappers |
 | [`g18.019`](019-markdown-renderer.md) — MarkdownRenderer shared safe/trusted rendering | complete | PR #247 (merge `cc26dd3c09e12addab7c0b6c5a243f83f33cff94`); standalone paired renderer, shared editor-preview path, safe default and explicit trusted opt-in |
-| [`g18.020`](020-rich-text-heading-mode-select.md) — RichTextEditor heading mode select | ready behind g18.018 | consumer-configurable Normal/H1–H6 selector plus real H4–H6 schema/editor/renderer support |
+| [`g18.020`](020-rich-text-heading-mode-select.md) — RichTextEditor heading mode select | ready (g18.018 merged) | consumer-configurable Normal/H1–H6 selector plus real H4–H6 schema/editor/renderer support |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -102,14 +102,14 @@ rebuild their package graph before Vite listens, preventing stale ignored
 distributions after merges. Merged g18.016 repaired the configuration
 specimen's inert live line-number toggle without remounting the editor. Merged
 g18.017 replaced pill block-slider corners and value-dependent external text
-with stable in-track crossover treatment across web and GPUI. Dependency-queued
-g18.018 then repairs the controlled rich-text echo that currently calls
-`setContent` and moves the caret to the document end after every character.
-With g18.013, g18.014 and g18.017 merged, g18.018 runs ahead of the sweep with g18.012 already merged. Merged g18.019 added
+with stable in-track crossover treatment across web and GPUI.
+Merged g18.018 repaired the controlled rich-text echo that called
+`setContent` and moved the caret to the document end after every character.
+With g18.013, g18.014 and g18.017 merged, g18.018 ran ahead of the sweep with g18.012 already merged. Merged g18.019 added
 a standalone MarkdownRenderer through the existing `./markdown` entry, routed
 MarkdownEditor preview through the same safe-by-default rendering path, and kept
-raw output only behind explicit `htmlPolicy="trusted"`. The queue now encodes merged g18.012 with remaining g18.018→g18.020 converging on g18.011 without manual holds.
-Operator-confirmed g18.020 follows the remaining active rich-text task,
+raw output only behind explicit `htmlPolicy="trusted"`. The queue now encodes merged g18.018 with remaining g18.020 converging on g18.011 without manual holds.
+Operator-confirmed g18.020 follows merged g18.018,
 replacing the fixed H1–H3 buttons with one configurable Normal/H1–H6 Select,
 and extends
 schema/editor/renderer semantics through H6 before acceptance begins. g18.006 is the retained final
