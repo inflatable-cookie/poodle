@@ -11,7 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../../packages/release-operations.json`
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
-`g18.019`, `g18.020`
+`g18.019`, `g18.020`, `g18.021`, `g18.022`
 
 ## Outcome
 
@@ -53,6 +53,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - The final core and Svelte tree hashes will therefore supersede Desktop's
   g18.002-only hashes. Evidence must preserve those hashes as lineage, report
   final candidate/tag/package trees, and prove installed `./editor` behavior.
+- Include the g18.022 pre-v1 Slider-family migration. Release notes must name
+  the new default `variant="block"`, retained `variant="embedded"`, and removed
+  `appearance`, `standard`, `track`, and combined RangeSlider visible-range
+  formatting surface. Do not add compatibility aliases in the candidate.
 - Repair the current Keep-a-Changelog parser incompatibility before treating
   Effigy's release status/plan as healthy. Preserve historical meaning; do not
   bypass the parser or release gates.
@@ -63,9 +67,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** operator-paused in retained dispatched Queue task/workspace; resume
-  only after parallel g18.012 and g18.013→g18.014/g18.018→g18.020, then g18.011,
-  and every other blocking sweep repair complete and the operator
-  accepts the sweep; then rebase and recompute final-source identity. Use the
+  only after g18.011 completes with operator acceptance, g18.022 merges, and
+  every other blocking repair closes; then rebase and recompute final-source
+  identity. Use the
   Queue's in-place dependency mutation to preserve this retained task and
   worker while encoding the remaining serial work; do not replace either.
 - **Completion:** one reviewed release-candidate PR merged to main; exact
@@ -96,7 +100,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
    --check-gates` and release plans parse rather than bypassing them.
 3. Prepare lockstep `0.4.0` manifests, intra-repository requirements, locks,
    release notes, and package evidence. Classify CodeEditor and rich-text as
-   additive and Tabs card fill as behavioral.
+   additive, Tabs card fill as behavioral, and the g18.022 Slider-family API
+   replacement as an explicit pre-v1 breaking migration.
 4. Prove source-free packed core/Svelte archives, private packed React, root
    isolation, SSR/browser imports, declarations, licenses, exact dependencies,
    and a fresh source-free consumer installed from the packed Svelte archive.
@@ -161,8 +166,8 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-Complete parallel g18.012 and g18.013→g18.014/g18.018→g18.020, then g18.011,
-and every other blocking finding. Resume this retained task only after operator
-acceptance, then rebuild the candidate from the accepted source. After that
+Complete retained g18.011 and parallel g18.022, then resolve any blocking
+finding. Resume this retained task only after operator sweep acceptance and
+merged g18.022, then rebuild the candidate from the accepted source. After that
 candidate merges and closes, g18.009 dispatches from its dependency. Desktop
 then resumes retained g02.058 and PR #215.

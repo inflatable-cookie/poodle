@@ -1,28 +1,34 @@
 # Range Slider
 
-Status: detailed contract
-Updated: 2026-09-02
+Status: approved target contract — g18.022 pending implementation
+Updated: 2026-09-11
+
+The prose below is the approved post-g18.022 contract. Until that task merges,
+the checked-in implementation still exposes the temporary pre-migration
+`variant="standard" | "embedded"` plus `appearance="track" | "block"`
+surface recorded in the public-props table. g18.022 replaces it atomically;
+there is no mixed or compatibility state.
 
 ## 1. Purpose
 
 - Component name: `RangeSlider`
 - Layer: `foundation`
-- Summary: a dual-thumb range control representing lower and upper numeric
-  bounds, built on two overlapping native range inputs with a custom track and
-  fill visualization driven by CSS custom properties
+- Summary: a dual-thumb range control whose default rounded-square block keeps
+  lower/upper values and its label fixed while selected paint crosses them; a
+  dense track-and-thumb presentation remains for embedded composite use
 - In scope: lower/upper value pair, min/max bounds, stepped adjustment,
   separate thumb focus, horizontal and vertical orientation, value commit
-  semantics, standard and embedded variants, unipolar and bipolar reference
-  geometry, an opt-in horizontal `appearance="block"` treatment with explicit
-  visible label/value/range content, fit fallback, and `ltr`/`rtl` direction
+  semantics, block and embedded variants, unipolar and bipolar reference
+  geometry, fixed visible label/endpoint content, horizontal and vertical block
+  presentation, and `ltr`/`rtl` direction
 - Out of scope: histogram overlays, arbitrary multi-thumb editing beyond two
-  thumbs, single-value selection (see Slider), vertical block appearance,
-  PageUp/PageDown convergence, invalid/read-only/indeterminate states, a
-  generic tooltip or public fit-metric API
+  thumbs, single-value selection (see Slider), PageUp/PageDown convergence,
+  invalid/read-only/indeterminate states, a generic tooltip or public
+  fit-metric API
 
 ## 2. Anatomy
 
-Track appearance (`appearance="track"`, the default):
+Embedded variant (`variant="embedded"`):
 
 ```text
 [Root .range-slider]  <div>
@@ -32,16 +38,19 @@ Track appearance (`appearance="track"`, the default):
   └── [Upper Control .range-slider__control]  <input type="range"> (upper thumb)
 ```
 
-Block appearance (`appearance="block"`), horizontal only:
+Block variant (`variant="block"`, the default; horizontal form shown):
 
 ```text
-[Root .range-slider data-appearance="block"]  <div>
+[Root .range-slider data-variant="block"]  <div>
   ├── [Capsule .range-slider__capsule]  <span>
-  │     ├── [Lower remainder][Selected window][Upper remainder]
+  │     ├── [Remainder text layer] lower start · label center · upper end
+  │     ├── [Selected text layer] same fixed layout, clipped to selected window
   │     ├── [Lower hit .range-slider__hit--lower]  (44×44)
   │     └── [Upper hit .range-slider__hit--upper]  (44×44)
-  └── [Fallback .range-slider__fallback]
 ```
+
+Vertical block uses the same paint stack with upright text: upper value at the
+physical top, optional label centered, and lower value at the physical bottom.
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
@@ -61,15 +70,15 @@ Block appearance (`appearance="block"`), horizontal only:
 | `min` | `number` | `0` | no | lower bound |
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
-| `variant` | `"standard" \| "embedded"` | `"standard"` | no | native-input control or dense composite control |
-| `appearance` | `"track" \| "block"` | `"track"` | no | visual treatment; orthogonal to `variant`. Omitting it preserves today's anatomy. `block` accepts omitted `orientation` or `orientation="horizontal"` only |
+| `variant` | `"standard" \| "embedded"` | `"standard"` | no | temporary implementation domain; g18.022 replaces it with block/embedded and block default |
+| `appearance` | `"track" \| "block"` | `"track"` | no | temporary pre-g18.022 switch; removed by g18.022 without an alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
-| `visibleLabel` | `string \| null` | `null` | no | visible label for block appearance. Empty text omits the item. Never derived from `ariaLabel` |
+| `visibleLabel` | `string \| null` | `null` | no | centered visible label for the block variant. Empty text omits it. Never derived from `ariaLabel` |
 | `formatVisibleValue` | `((value: number, thumb: "lower" \| "upper") => string) \| undefined` | `undefined` | no | **Web targets only** — formats a per-thumb visible value from the normalized, bounds-guarded, step-snapped number. Default is `String(value)`. Native specs carry resolved strings |
-| `formatVisibleRange` | `((lower: number, upper: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the combined visible range. Default joins resolved lower and upper text with `" – "`. Native specs carry the resolved string |
+| `formatVisibleRange` | `((lower: number, upper: number) => string) \| undefined` | `undefined` | no | temporary pre-g18.022 combined fallback formatter; removed when fixed endpoint anchors replace the fallback |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | ordinary range or range with an explicit bipolar center reference |
 | `centerValue` | `number \| null` | `null` | no | bipolar reference; defaults to zero when zero is inside the range, otherwise the midpoint |
-| `law` | `AudioValueLaw` | `linear` | no | embedded-variant value mapping; standard remains the native linear range path |
+| `law` | `AudioValueLaw` | `linear` | no | value mapping used by adapter-owned block and embedded controls |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `ariaLabel` | `string \| null` | `null` | no | base accessible name for the control |
@@ -98,10 +107,10 @@ Block appearance (`appearance="block"`), horizontal only:
   terminal emits one commit with the latest accepted pair; later terminals are
   inert. Cancellation does not roll back
 
-On the web both fall out of the two overlapping native range inputs. The Rust
-targets have no native input, so a single grab overlay spanning the track
-reports the pointer's position as a fraction (`Interaction::on_scrub`) and the
-component picks the thumb on the press.
+Embedded web may use two overlapping native range inputs. Block web and the
+Rust targets use adapter-owned interaction; a single grab overlay spanning the
+track reports the pointer's axis position as a fraction
+(`Interaction::on_scrub`) and the component picks the thumb on the press.
 
 The fraction matters: an earlier implementation converted pixel *deltas* using a
 fixed 10rem track width, so any range slider not rendered at exactly 160px
@@ -171,45 +180,44 @@ negative segment uses the negative status color and the positive segment uses
 the accent color. It does not reinterpret the pair as two unrelated scalar
 values. Unipolar publishes an empty negative segment and one positive segment.
 
-### Block Appearance
+### Block Variant
 
-`appearance="block"` is additive and orthogonal to `variant`. It does not fork
-value math, paging, thumb identity, or callback ordering.
-
-Horizontal-only admission matches Slider: `block` accepts omitted orientation
-or `orientation="horizontal"` only. `appearance="block"` with
-`orientation="vertical"` is invalid in Svelte, React, shared Rust composition,
-and GPUI. Adapters reject it before paint or construction. They must not
-coerce orientation, silently render track appearance, or split that rejection
-by runtime.
+`variant="block"` is the default standalone control. It does not fork value
+math, polarity, paging, thumb identity, or callback ordering. Both horizontal
+and vertical orientations are required in Svelte, React, shared Rust
+composition, and GPUI. Vertical implementations use native axis geometry and
+keep text upright; rotating the entire capsule or its text is not conforming.
 
 Visible content never reads `ariaLabel`, `lowerValueText`, or `upperValueText`
 and never writes those fields. `visibleLabel` is not a thumb accessible name;
 thumbs keep the §6 names (`"{ariaLabel} minimum/maximum"` or the defaults).
 Formatter inputs are normalized, bounds-guarded,
 step-snapped values. Empty label or formatter text omits that item. Default
-endpoint text is `String(value)`. Default range text joins resolved lower and
-upper text with `" – "`. Native specs carry resolved `visible_label`,
-`visible_lower_text`, `visible_upper_text`, and `visible_range_text`.
+endpoint text is `String(value)`. Native specs carry resolved `visible_label`,
+`visible_lower_text`, and `visible_upper_text`. The former combined visible
+range formatter/string is removed because block always presents the two
+endpoint values at their scale anchors.
 
-Assigned inline regions:
+Text uses one fixed whole-capsule layout:
 
-- selected window: `visibleLabel` when non-empty, otherwise the formatted range
-- lower remainder: formatted lower value
-- upper remainder: formatted upper value
+- horizontal: lower value at logical start (left in LTR), optional label
+  centered, upper value at logical end (right in LTR);
+- vertical: upper value at physical top, optional label centered, lower value
+  at physical bottom.
 
-When `visibleLabel` is present, range text is fallback-only so two items never
-share one region. Fit is all-or-nothing across every non-empty assigned item
-using the same floor/ceil law as before (g18.017 migrated only the single
-Slider to fixed whole-track placement; this per-region law is unchanged for
-RangeSlider). Equality fits. Required-minus-one falls back to one stable,
-noninteractive, accessibility-hidden line immediately after the capsule. The
-fallback never follows a thumb and does not change on focus or overlap.
+Horizontal endpoint positions mirror with the existing RTL scale and pointer
+normalization: lower stays at logical start and upper at logical end.
+
+The identical layout paints through remainder and selected-window clipping
+layers. Thumb or fill crossover changes only the foreground role; it never
+moves, hides, rotates, or reflows a string. Handles paint above text. Fit uses
+the whole capsule, not the three current value regions. Endpoint values are
+required. If all three items cannot coexist, suppress only the optional label;
+never suppress or move an endpoint and never render an external fallback.
 
 The block capsule corner radius resolves the rounded-square control radius
 (`--poodle-radius-control` / `radius.control`), matching the Slider block
-family. Thumbs stay circular. This is a radius-only shape change: the
-three-region inline placement, fit law, and fallback above are untouched.
+family. Thumbs stay circular.
 
 Each thumb owns a measurable 44×44 logical-pixel effective target at every
 size and density. Proof is the per-thumb hit rectangle, not only the painted
@@ -229,9 +237,9 @@ under architecture 012.
 
 ### Semantics
 
-- Role: two related `<input type="range">` elements (slider role each)
-- Embedded variant: two adapter-owned slider focus stops expose the same
-  per-thumb semantics while pointer capture remains on the shared root
+- Role: two related slider focus stops. Embedded web may use two native
+  `<input type="range">` elements; custom web and native controls expose the
+  same per-thumb roles while pointer capture remains on the shared root
 - Lower input `aria-label`: `"{ariaLabel} minimum"` when ariaLabel is provided,
   otherwise `"Minimum value"`
 - Upper input `aria-label`: `"{ariaLabel} maximum"` when ariaLabel is provided,
@@ -241,7 +249,8 @@ under architecture 012.
 - `aria-valuenow`: lower value on lower input, upper value on upper input
 - `aria-valuetext`: from lowerValueText on lower input, upperValueText on upper
   input
-- `aria-orientation`, standard variant: NOT set on the native range inputs.
+- `aria-orientation`, embedded native-input implementation: NOT set on the
+  native range inputs.
   `<input type="range">` carries implicit slider semantics and the browser
   conveys orientation to assistive technology; an explicit `aria-orientation`
   there is redundant. Orientation is conveyed via `data-orientation` on the root
@@ -287,7 +296,10 @@ under architecture 012.
 ### Sizing
 
 - horizontal: width is 100% of parent; cross-size follows the size table
-- vertical: cross-size follows the size table; min-height 10rem; height is 100%
+- vertical embedded: cross-size follows the size table; min-height 10rem;
+  height is 100%
+- vertical block: width follows the block capsule cross-size ladder;
+  min-height 10rem; height is parent-owned
 - track thickness follows the shared Slider size ladder: 0.1875rem (`xs`),
   0.25rem (`sm`), 0.375rem (`md`), 0.5rem (`lg`), and 0.625rem (`xl`)
 - thumb diameter follows the size table (`1rem` at `md`)
@@ -324,7 +336,9 @@ under architecture 012.
 - `--poodle-recipe-range-slider-block-handle-fill`
 - `--poodle-recipe-range-slider-block-handle-border`
 - `--poodle-recipe-range-slider-block-focus-ring`
-- `--poodle-recipe-range-slider-block-fallback-text`
+
+No RangeSlider fallback-text recipe hook is public. Required endpoint text
+stays inside the block capsule and the optional label yields under narrow fit.
 
 ### Root `.range-slider`
 
@@ -528,7 +542,7 @@ so the control geometry is unchanged — only the grabbable margin grows.
 - `onValueChange` fires on the `input` event (live during drag); `onValueCommit`
   fires on the `change` event (on release)
 - `data-orientation`, `data-disabled`, `data-size`, `data-density`,
-  `data-appearance`, and `data-direction` attributes on root drive
+  `data-variant`, and `data-direction` attributes on root drive
   layout and state styling
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Per-thumb aria-label is constructed by appending "minimum"/"maximum" to the
@@ -537,8 +551,9 @@ so the control geometry is unchanged — only the grabbable margin grows.
   is not emitted on the inputs. §6 matches this (Svelte is the parity authority,
   and the Slider contract aligns the same way), so there is no contract↔Svelte
   divergence on orientation reporting.
-- Block appearance sets `dir` from `direction` and uses logical inline
-  geometry. Vertical block input throws before paint.
+- Block variant sets `dir` from `direction`; horizontal endpoint anchors mirror
+  with the scale in RTL. Vertical block uses axis-native capsule and fill
+  geometry while keeping endpoint values and label upright.
 
 ## 10. GPUI Notes
 
@@ -552,8 +567,6 @@ so the control geometry is unchanged — only the grabbable margin grows.
 - vertical orientation must be implemented natively rather than via CSS rotation
 - pointer overlap handling (determining which thumb to grab when thumbs are at
   the same position) is implementation-specific but must produce a usable result
-- `appearance="block"` with `orientation="vertical"` panics at construction,
-  matching the web throw, before any node is returned
 - native specs carry resolved visible strings, never formatter closures
 - GPUI per-thumb metadata and hit bounds are not mounted assistive-technology
   proof
@@ -613,7 +626,6 @@ so the control geometry is unchanged — only the grabbable margin grows.
 | vertical via CSS rotation vs native | Svelte uses rotate(-90deg); GPUI implements natively | allowed | same visual and interaction result required |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | embedded `aria-orientation` absent on native targets | `poodle-node` carries no orientation channel in its accessibility vocabulary, so neither native adapter can project it today | temporary | add an orientation field to the node a11y vocabulary; lands with native vertical orientation (which is itself unimplemented on both Rust targets) |
-| vertical block appearance | native RangeSlider axis geometry is still deferred; block stays horizontal in every runtime | allowed | later all-runtime migration after mounted native axis proof |
 
 ## 13. Specimen Definitions
 
@@ -646,13 +658,17 @@ so the control geometry is unchanged — only the grabbable margin grows.
 `variant="embedded"`, and `polarity="bipolar"`. Density specimens use the
 same variant.
 
-The Sizes tab renders standard unipolar, embedded unipolar, and embedded
-bipolar controls at every `xs`–`xl` size.
+The Sizes tab renders block unipolar, block bipolar, embedded unipolar, and
+embedded bipolar controls at every `xs`–`xl` size.
 
-### Group: Block appearance
+### Group: Block variant
 
-`appearance="block"`, `visibleLabel="Price"`, `value=[20, 80]`. Horizontal
-only. Do not render a vertical block specimen.
+Render the default horizontal block with `visibleLabel="Price"` and
+`value=[20, 80]`; lower value stays at logical start, label centered, and upper
+value at logical end.
+Render a vertical block where upper stays top, label centered, and lower stays
+bottom. Include narrow-fit, equal-thumb, extrema, RTL, unipolar, and bipolar
+cases. Text bounds remain identical while selected paint crosses them.
 
 ## 14. Approval And Adoption Notes
 

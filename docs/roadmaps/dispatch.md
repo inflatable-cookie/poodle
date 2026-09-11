@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.021 merged; g18.011 sweep is next; g18.006 and g18.009 are the final release lanes)
+Updated: 2026-09-11 (g18.011 active; g18.022 awaits dispatch approval; both precede the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -84,8 +84,8 @@ reviewed head.
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
 only after g18.010 and g18.013–g18.020, the dependency-queued g18.011 sweep,
-g18.012, and all other blocking repairs close and the operator accepts the
-sweep.
+g18.012, g18.021, g18.022, and all other blocking repairs close and the
+operator accepts the sweep.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
@@ -145,6 +145,13 @@ g18.011 is unblocked.
 It added internal token-bound CodeMirror syntax presentation without bundling
 grammars or widening the public extension API. The syntax-presentation leg of
 g18.011 is unblocked.
+
+[`g18.022`](g18/022-block-first-slider-family.md) awaits operator dispatch
+approval. It may run beside the editor-only g18.011 task. It makes block the
+default and embedded the sole alternate for both Slider controls, removes the
+old presentation vocabulary, gives RangeSlider fixed endpoint/center text,
+adds vertical block parity, and proves block Slider bipolar geometry. It must
+merge before retained g18.006 resumes.
 
 ## Held planning horizons
 
