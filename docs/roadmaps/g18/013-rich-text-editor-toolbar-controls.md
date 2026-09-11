@@ -133,4 +133,4 @@ proper buttons and selected MarkdownEditor as the visual/interaction reference.
 
 After this repair merges, g18.014 rebases onto it and proves the image-policy
 specimen. Chatterbox releases held g18.011 only after g18.014 and parallel
-g18.015/g18.016 also merge. Keep g18.006 blocked and g18.009 held.
+g18.015–g18.017 also merge. Keep g18.006 blocked and g18.009 held.

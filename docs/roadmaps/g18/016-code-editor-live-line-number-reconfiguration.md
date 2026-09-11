@@ -125,6 +125,6 @@ unchanged.
 
 ## Next task
 
-After g18.013, g18.014, g18.015 and this repair merge, Chatterbox releases held
-g18.011 for the full three-surface acceptance sweep. Keep g18.006 blocked and
-g18.009 held.
+After g18.013–g18.015, this repair and parallel g18.017 merge, Chatterbox
+releases held g18.011 for the full three-surface acceptance sweep. Keep g18.006
+blocked and g18.009 held.

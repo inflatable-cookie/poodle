@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: Queue-held behind g18.013–g18.016 — operator-required release gate
+Status: Queue-held behind g18.013–g18.017 — operator-required release gate
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: merged g18.010; g18.013–g18.016 complete and merged
+Depends on: merged g18.010; g18.013–g18.017 complete and merged
 
 ## Outcome
 
@@ -40,6 +40,8 @@ unbounded findings in place.
   distributions before Vite starts.
 - [ ] g18.016 makes the mounted CodeEditor line-number gutter follow live host
   configuration in both previews.
+- [ ] g18.017 fixes the block Slider shape and removes value-dependent external
+  text movement across active runtimes.
 
 ## Decisions
 
@@ -64,7 +66,7 @@ unbounded findings in place.
 ## Dispatch manifest
 
 - **State:** Queue-held behind serial g18.013→g18.014 and parallel
-  g18.015/g18.016; release the hold only after all four merge; serial before
+  g18.015–g18.017; release the hold only after all five merge; serial before
   retained g18.006; g18.009 held
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
