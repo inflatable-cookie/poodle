@@ -31,35 +31,74 @@ redesign, no other component touched.
   barrel (`CODE_EDITOR_FOCUS_ENTRY_ATTR`, `installCodeEditorFocusEntry`). It
   arms `data-focus-entry="keyboard"` on the component root when focus enters
   the editing surface while the document modality reads `keyboard` (pointer
-  entry reads `pointer` because `pointerdown` precedes focus), disarms on
-  keydown/beforeinput editing intent (typing, named edit keys CodeMirror
-  keymaps handle, chords Ctrl/Cmd+X/V/Z/Y, IME `Dead`/`Process`/composing,
-  clipboard/history `beforeinput` input types), resets on focusout to a
-  target outside the component (search-panel round trips keep the state), and
-  never writes the document modality.
+  entry reads `pointer` because `pointerdown` precedes focus). Dismissal is
+  transaction-driven: the engine reports every committed user edit
+  transaction (typing, deletion, line commands, indentation, clipboard,
+  history, drop), so bindings that repurpose key names (indent-mode Tab,
+  copy-line arrows) and readOnly context are honored by construction. IME
+  composition dismisses on `compositionstart` at the editing surface only.
+  A pointer press inside the editor yields the affordance. Focusout to a
+  target outside the component resets the state (search-panel round trips
+  keep it). The document modality is never written.
 - Shared CSS `packages/core/src/styles/code-editor.css`: the ring rule moved
   from
   `:root[data-poodle-input-modality="keyboard"] .poodle-code-editor:focus-within`
-  to `.poodle-code-editor[data-focus-entry="keyboard"]:focus-within`. The
-  document attribute no longer keys this component's ring.
+  to
+  `:root[data-poodle-input-modality="keyboard"]
+  .poodle-code-editor[data-focus-entry="keyboard"]:focus-within`. The
+  document attribute still gates the ring, so a pointer press can never
+  leave it painted, but the local entry attribute decides arming and
+  dismissal.
 - Identical wiring in both engines (`packages/svelte/components/src/
   code-editor-engine.ts`, `packages/react/components/src/code-editor-engine.ts`):
-  install on engine creation against the viewport host, dispose in
-  `destroy()`. Engines remain byte-identical except their header comment.
+  install on engine creation against the viewport host, dismiss from the
+  committed-edit update listener, dispose in `destroy()`. Engines remain
+  byte-identical except their header comment.
 - Component tests in both wrappers
   (`packages/svelte/components/test/CodeEditor.test.ts`,
   `packages/react/components/test/CodeEditor.test.tsx`): entry arming,
   pointer non-arming, navigation preservation, first-intent dismissal with
-  document modality still `keyboard`, clipboard/history/composition routes,
-  search-panel round trip, engine-destroy cleanup.
+  document modality still `keyboard`, planted review oracle cases
+  (Shift+Alt+ArrowDown copyLineDown and indent-mode Tab dismiss; copy and
+  select-all chords and find-panel traversal preserve; pointer press inside
+  the armed editor yields), clipboard/history/composition routes, host-value
+  non-dismissal, search-panel round trip, engine-destroy cleanup.
 - Paired browser fixture `test/code-editor-focus-entry/` (Svelte + React
   public components, real focus and typing in Chromium and WebKit) with
   effigy selectors `test:code-editor-focus-entry{-chromium,-webkit}`. The
   probe proves, per engine: pointer entry paints no outline, typing after
   pointer entry never paints one while the document modality flips to
-  `keyboard`, Tab entry arms the treatment, Arrow/End preserve it, the first
-  edit dismisses it with modality still `keyboard` and the caret still
-  visible, exit resets, and keyboard re-entry restores it.
+  `keyboard`, Tab entry arms the treatment, Arrow/End preserve it, copy and
+  select-all chords preserve it, find-panel Mod+F/Enter traversal preserves
+  it, the first edit dismisses it with modality still `keyboard` and the
+  caret still visible, Shift+Alt+ArrowDown copyLineDown duplicates the line
+  and dismisses, exit resets, keyboard re-entry restores, and a pointer
+  press inside the armed editor clears it.
+
+## Review round (2026-09-11, head c638b2c3a)
+
+Independent review verified the primary behavior and required three changes,
+all rooted in the original keydown-name inference of editing intent:
+
+1. Real editing mutations kept the ring: Shift+Alt+ArrowDown (copyLineDown)
+   and indent-mode Tab (indentMore) changed the document without dismissal
+   because `NON_EDITING_KEYS` was binding- and modifier-blind.
+2. Find-panel search traversal (Mod+F then Enter) dismissed the treatment
+   although the document was untouched — the planted "search traversal"
+   navigation case.
+3. Non-edit chords Ctrl/Cmd+C (copy) and Ctrl/Cmd+A (select all) dismissed
+   because `key.length === 1` ignored the modifier context.
+4. Minor: a pointer press inside an armed editor left the ring painted under
+   pointer modality.
+
+Fix: dismissal moved out of key/beforeinput name inference entirely. The
+helper now only arms (keyboard-modality focus entry), yields on pointerdown
+inside the editor, resets on focusout, and handles IME `compositionstart` at
+the editing surface; the engine dismisses on committed user edit
+transactions in the update listener, which already carries binding and
+readOnly context. The CSS rule re-adds the document-modality gate so a
+pointer press can never leave the ring painted. Planted oracle cases cover
+each review finding in both component suites and the paired probe.
 
 ## Explicitly not done
 
@@ -81,10 +120,11 @@ blocking repairs, and operator acceptance complete.
 - `bun test packages/core/test/code-editor.test.ts` — 12 pass.
 - `effigy test:core` — 1301 pass, 0 fail.
 - `bunx vitest run --project svelte-components --project react-components` —
-  361 files, 2947 pass, 7 skipped.
+  2960 pass, 0 fail (35 focus-entry cases per wrapper after the review round).
 - `bunx vitest run --project a11y` — 182 pass.
 - `effigy test:code-editor-focus-entry` — all paired Chromium and WebKit
-  checks passed (both frameworks, all invariants above).
+  checks passed (both frameworks, all invariants above, including the planted
+  review oracle cases).
 - `effigy core:build` (declaration emit for the new core export), `effigy
   svelte:build`, `effigy react:build` — clean.
 - `effigy check:svelte-components` — 0 errors (4 pre-existing warnings).

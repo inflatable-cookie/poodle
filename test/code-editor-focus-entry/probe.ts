@@ -120,6 +120,26 @@ async function readRing(page: Page, framework: "svelte" | "react"): Promise<Ring
   }, framework);
 }
 
+/** Dispatch a Mod-chord keydown on the editing surface (platform-correct Mod). */
+async function pressModChord(page: Page, framework: "svelte" | "react", key: string): Promise<void> {
+  await page.evaluate(
+    ([fw, chordKey]) => {
+      const surface = document.querySelector(`[data-framework="${fw}"] .cm-content`);
+      if (!(surface instanceof HTMLElement)) throw new Error("missing editing surface");
+      surface.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          cancelable: true,
+          key: chordKey,
+          // CodeMirror reads metaKey for Mod on macOS and ctrlKey elsewhere.
+          ...(navigator.platform.includes("Mac") ? { metaKey: true } : { ctrlKey: true }),
+        }),
+      );
+    },
+    [framework, key],
+  );
+}
+
 async function runFramework(page: Page, framework: "svelte" | "react", browserName: string): Promise<void> {
   const section = `[data-framework="${framework}"]`;
   const before = page.locator(`${section} [data-before]`);
@@ -177,14 +197,51 @@ async function runFramework(page: Page, framework: "svelte" | "react", browserNa
   await page.keyboard.press("End");
   await settle(page);
   const navigation = await readRing(page, framework);
-  console.log(`  evidence  ${browserName} ${framework} navigation  ${formatRing(navigation)}`);
   check(
     `${browserName} ${framework} navigation-only keys preserve the treatment`,
     armed(navigation),
     formatRing(navigation),
   );
 
-  // 5. The first editing intent dismisses it; global modality stays keyboard.
+  // 5. Non-edit chords (copy, select all) keep it too: the document is
+  //    untouched and the contract's dismissal list names editing intent only.
+  await pressModChord(page, framework, "c");
+  await pressModChord(page, framework, "a");
+  await settle(page);
+  const chords = await readRing(page, framework);
+  check(
+    `${browserName} ${framework} copy and select-all chords preserve the treatment`,
+    armed(chords),
+    formatRing(chords),
+  );
+
+  // 6. Find panel traversal (Mod+F, Enter for next result) keeps it: the
+  //    document is untouched.
+  await pressModChord(page, framework, "f");
+  await settle(page);
+  const panel = page.locator(`${section} .cm-search input[name="search"]`);
+  await panel.waitFor();
+  await panel.focus();
+  await page.keyboard.press("Enter");
+  await settle(page);
+  const traversal = await readRing(page, framework);
+  console.log(`  evidence  ${browserName} ${framework} search traversal  ${formatRing(traversal)}`);
+  check(
+    `${browserName} ${framework} find-panel traversal preserves the treatment`,
+    armed(traversal),
+    formatRing(traversal),
+  );
+
+  // 7. Close find (focus returns to the editing surface per the contract).
+  await page.keyboard.press("Escape");
+  await settle(page);
+  const closed = await readRing(page, framework);
+  check(`${browserName} ${framework} closing find keeps the treatment armed`, armed(closed), formatRing(closed));
+
+  // 8. Collapse the select-all range (navigation-only), then the first
+  //    editing intent dismisses it; global modality stays keyboard.
+  await page.keyboard.press("ArrowDown");
+  await settle(page);
   await page.keyboard.press("y");
   await settle(page);
   const editing = await readRing(page, framework);
@@ -200,7 +257,27 @@ async function runFramework(page: Page, framework: "svelte" | "react", browserNa
   }, framework);
   check(`${browserName} ${framework} caret remains visible after dismissal`, caretVisible);
 
-  // 6. Leaving and re-entering by keyboard restores the treatment.
+  // 9. A binding that repurposes navigation keys still counts as an edit:
+  //    Shift+Alt+ArrowDown runs copyLineDown and duplicates the line.
+  await page.keyboard.press("Shift+Alt+ArrowDown");
+  await settle(page);
+  const lineCopy = await readRing(page, framework);
+  console.log(`  evidence  ${browserName} ${framework} copyLineDown  ${formatRing(lineCopy)}`);
+  const copiedDoc = await page.evaluate((fw) => {
+    const surface = document.querySelector(`[data-framework="${fw}"] .cm-content`);
+    if (!(surface instanceof HTMLElement)) return null;
+    return [...surface.querySelectorAll(".cm-line")].map((line) => line.textContent ?? "").join("\n");
+  }, framework);
+  const lineCopied = copiedDoc === "const answer = 42;xy\nconst answer = 42;xy";
+  console.log(`  evidence  ${browserName} ${framework} copyLineDown doc  ${JSON.stringify(copiedDoc)}`);
+  check(`${browserName} ${framework} copyLineDown duplicates the document line`, lineCopied);
+  check(
+    `${browserName} ${framework} a committed line command dismisses the treatment`,
+    disarmed(lineCopy),
+    formatRing(lineCopy),
+  );
+
+  // 10. Leaving and re-entering by keyboard restores the treatment.
   await before.click();
   await settle(page);
   const exited = await readRing(page, framework);
@@ -215,8 +292,25 @@ async function runFramework(page: Page, framework: "svelte" | "react", browserNa
     formatRing(reentry),
   );
 
-  // 7. Dismiss again and prove IME-style insertion input also dismisses:
-  //    composition routes reach the same local state.
+  // 11. A pointer press inside the armed editor yields the affordance; the
+  //     document modality agrees.
+  await content.click();
+  await settle(page);
+  const pointerPress = await readRing(page, framework);
+  check(
+    `${browserName} ${framework} pointer press inside the armed editor clears it`,
+    pointerPress.modality === "pointer" && disarmed(pointerPress),
+    formatRing(pointerPress),
+  );
+
+  // 12. Keyboard re-entry after the pointer press re-arms, and typing
+  //     dismisses again.
+  await before.click();
+  await settle(page);
+  await page.keyboard.press("Tab");
+  await settle(page);
+  const rearmed = await readRing(page, framework);
+  check(`${browserName} ${framework} keyboard re-entry re-arms after pointer press`, armed(rearmed), formatRing(rearmed));
   await page.keyboard.press("q");
   await settle(page);
   const dismissedAgain = await readRing(page, framework);

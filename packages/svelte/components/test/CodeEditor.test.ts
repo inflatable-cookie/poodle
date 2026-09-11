@@ -394,8 +394,8 @@ describe("CodeEditor user transactions (svelte)", () => {
 describe("CodeEditor focus entry (svelte)", () => {
   const ATTR = "data-focus-entry";
 
-  async function mounted(onChange?: (change: CodeEditorChange) => void) {
-    const view = render(CodeEditor, { props: { value: "one", onChange } });
+  async function mounted(onChange?: (change: CodeEditorChange) => void, extra = {}) {
+    const view = render(CodeEditor, { props: { value: "one", onChange, ...extra } });
     await vi.waitFor(() => {
       expect(contentOf(view.container).textContent).toContain("one");
     });
@@ -414,21 +414,23 @@ describe("CodeEditor focus entry (svelte)", () => {
     );
   }
 
-  function inputEvent(target: Element, inputType: string): boolean {
-    return target.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType }));
+  function arm(container: HTMLElement): HTMLElement {
+    const content = contentOf(container);
+    document.documentElement.setAttribute("data-poodle-input-modality", "keyboard");
+    content.dispatchEvent(new FocusEvent("focusin", { relatedTarget: document.body }));
+    return content;
   }
 
   it("keyboard navigation entry arms the local treatment without writing document modality", async () => {
     const { container } = await mounted();
     const root = rootOf(container);
-    const content = contentOf(container);
     expect(root.hasAttribute(ATTR)).toBe(false);
     document.documentElement.setAttribute("data-poodle-input-modality", "keyboard");
-    content.dispatchEvent(new FocusEvent("focusin", { relatedTarget: document.body }));
+    arm(container);
     expect(root.getAttribute(ATTR)).toBe("keyboard");
     expect(document.documentElement.getAttribute("data-poodle-input-modality")).toBe("keyboard");
     // Leaving resets.
-    content.dispatchEvent(new FocusEvent("focusout", { relatedTarget: document.body }));
+    contentOf(container).dispatchEvent(new FocusEvent("focusout", { relatedTarget: document.body }));
     expect(root.hasAttribute(ATTR)).toBe(false);
   });
 
@@ -461,55 +463,148 @@ describe("CodeEditor focus entry (svelte)", () => {
   it("navigation-only keys preserve the armed entry treatment", async () => {
     const { container } = await mounted();
     const root = rootOf(container);
-    const content = contentOf(container);
-    content.dispatchEvent(new FocusEvent("focusin", { relatedTarget: document.body }));
+    const content = arm(container);
     for (const key of ["ArrowLeft", "ArrowUp", "Home", "PageDown", "End", "Escape", "F8"]) {
       typeKey(content, key);
     }
     expect(root.getAttribute(ATTR)).toBe("keyboard");
   });
 
-  it("the first editing intent dismisses the treatment; typing never recreates it", async () => {
+  it("the first committed edit dismisses the treatment; further edits never recreate it", async () => {
+    const onChange = vi.fn();
+    const { container } = await mounted(onChange);
+    const root = rootOf(container);
+    const content = arm(container);
+    expect(root.getAttribute(ATTR)).toBe("keyboard");
+    typeKey(content, "Enter");
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    expect(root.hasAttribute(ATTR)).toBe(false);
+    // Global modality stays truthful while the local treatment is dismissed.
+    expect(document.documentElement.getAttribute("data-poodle-input-modality")).toBe("keyboard");
+    // Further real edits do not recreate the treatment.
+    typeKey(content, "Enter");
+    typeKey(content, "z", { ctrlKey: true });
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(3);
+    });
+    expect(root.hasAttribute(ATTR)).toBe(false);
+  });
+
+  it("bindings that repurpose key names still count as real edits", async () => {
+    // copyLineDown: Shift+Alt+ArrowDown duplicates the line — a committed edit.
+    const copyView = await mounted();
+    const copyRoot = rootOf(copyView.container);
+    const copyContent = arm(copyView.container);
+    typeKey(copyContent, "ArrowDown", { altKey: true, shiftKey: true });
+    await vi.waitFor(() => {
+      expect(visibleText(copyView.container)).toBe("one\none");
+    });
+    expect(copyRoot.hasAttribute(ATTR)).toBe(false);
+
+    // indent-mode Tab inserts indentation — a committed edit, not navigation.
+    const indentView = await mounted(undefined, { tabBehavior: "indent" });
+    const indentRoot = rootOf(indentView.container);
+    const indentContent = arm(indentView.container);
+    typeKey(indentContent, "Tab");
+    await vi.waitFor(() => {
+      expect(visibleText(indentView.container)).toBe("  one");
+    });
+    expect(indentRoot.hasAttribute(ATTR)).toBe(false);
+  });
+
+  it("copy and select-all chords keep the armed treatment; search traversal keeps it", async () => {
+    const onChange = vi.fn();
+    const { container } = await mounted(onChange);
+    const root = rootOf(container);
+    const content = arm(container);
+    typeKey(content, "c", { ctrlKey: true });
+    typeKey(content, "a", { ctrlKey: true });
+    expect(root.getAttribute(ATTR)).toBe("keyboard");
+    expect(onChange).not.toHaveBeenCalled();
+
+    // Find panel: open, type a query, traverse results — the document is
+    // untouched, so the entry treatment survives the whole round trip.
+    typeKey(content, "f", { ctrlKey: true });
+    await vi.waitFor(() => {
+      expect(container.querySelector(".cm-search")).not.toBeNull();
+    });
+    const input = container.querySelector(".cm-search input") as HTMLInputElement;
+    input.focus();
+    input.value = "one";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter" }),
+    );
+    expect(root.getAttribute(ATTR)).toBe("keyboard");
+    expect(onChange).not.toHaveBeenCalled();
+    content.dispatchEvent(new FocusEvent("focusout", { relatedTarget: document.body }));
+    expect(root.hasAttribute(ATTR)).toBe(false);
+    document.documentElement.setAttribute("data-poodle-input-modality", "keyboard");
+  });
+
+  it("clipboard, history, and composition routes dismiss the treatment", async () => {
     const onChange = vi.fn();
     const { container } = await mounted(onChange);
     const root = rootOf(container);
     const content = contentOf(container);
-    content.dispatchEvent(new FocusEvent("focusin", { relatedTarget: document.body }));
+
+    // Enter then undo then redo: each is a committed history transaction.
+    typeKey(content, "Enter");
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    root.setAttribute(ATTR, "keyboard");
+    typeKey(content, "z", { ctrlKey: true });
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(2);
+    });
+    expect(root.hasAttribute(ATTR)).toBe(false);
+    root.setAttribute(ATTR, "keyboard");
+    typeKey(content, "y", { ctrlKey: true });
+    await vi.waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(3);
+    });
+    expect(root.hasAttribute(ATTR)).toBe(false);
+
+    // IME composition on the editing surface dismisses before commit.
+    root.setAttribute(ATTR, "keyboard");
+    content.dispatchEvent(new Event("compositionstart", { bubbles: true }));
+    expect(root.hasAttribute(ATTR)).toBe(false);
+
+    // Composition inside editor chrome (find input) is not document editing.
+    root.setAttribute(ATTR, "keyboard");
+    container.querySelector(".poodle-code-editor__viewport")?.dispatchEvent(
+      new Event("compositionstart", { bubbles: true }),
+    );
     expect(root.getAttribute(ATTR)).toBe("keyboard");
-    typeKey(content, "x");
-    expect(root.hasAttribute(ATTR)).toBe(false);
-    // Global modality stays truthful while the local treatment is dismissed.
-    expect(document.documentElement.getAttribute("data-poodle-input-modality")).toBe("keyboard");
-    // Further typing does not recreate the treatment.
-    typeKey(content, "a");
-    typeKey(content, "Backspace");
-    expect(root.hasAttribute(ATTR)).toBe(false);
+    root.removeAttribute(ATTR);
   });
 
-  it("clipboard, history, and composition routes dismiss the treatment", async () => {
-    const { container } = await mounted();
-    const root = rootOf(container);
-    const content = contentOf(container);
-    for (const intent of [
-      () => inputEvent(content, "insertFromPaste"),
-      () => inputEvent(content, "deleteByCut"),
-      () => inputEvent(content, "historyUndo"),
-      () => inputEvent(content, "historyRedo"),
-      () => inputEvent(content, "insertCompositionText"),
-      () => typeKey(content, "v", { ctrlKey: true }),
-      () => typeKey(content, "z", { metaKey: true }),
-    ]) {
-      root.setAttribute(ATTR, "keyboard");
-      intent();
-      expect(root.hasAttribute(ATTR)).toBe(false);
-    }
+  it("host value updates never dismiss; pointer press inside the editor yields", async () => {
+    const onChange = vi.fn();
+    const view = await mounted(onChange);
+    const root = rootOf(view.container);
+    const content = arm(view.container);
+    expect(root.getAttribute(ATTR)).toBe("keyboard");
+    await view.rerender({ value: "two", onChange, ...{} });
+    await vi.waitFor(() => {
+      expect(contentOf(view.container).textContent).toContain("two");
+    });
+    // A prop-driven document change is not user editing intent.
+    expect(root.getAttribute(ATTR)).toBe("keyboard");
+    expect(onChange).not.toHaveBeenCalled();
+
+    // A pointer press inside the armed editor yields the affordance.
+    content.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    expect(root.hasAttribute(ATTR)).toBe(false);
   });
 
   it("focus moving into the search panel keeps the entry state; leaving resets", async () => {
     const { container } = await mounted();
     const root = rootOf(container);
-    const content = contentOf(container);
-    content.dispatchEvent(new FocusEvent("focusin", { relatedTarget: document.body }));
+    const content = arm(container);
     expect(root.getAttribute(ATTR)).toBe("keyboard");
     content.dispatchEvent(
       new FocusEvent("focusout", { relatedTarget: root.querySelector(".cm-content") as Node }),
@@ -527,6 +622,7 @@ describe("CodeEditor focus entry (svelte)", () => {
     root.appendChild(host);
     document.body.appendChild(root);
     try {
+      const onChange = vi.fn();
       const engine = await createCodeEditorEngine(
         host,
         {
@@ -544,12 +640,15 @@ describe("CodeEditor focus entry (svelte)", () => {
           performanceMode: "plain",
           diagnostics: [],
         },
-        { onChange: () => {}, onActiveDiagnostic: () => {} },
+        { onChange, onActiveDiagnostic: () => {} },
       );
       const content = host.querySelector(".cm-content") as HTMLElement;
       content.dispatchEvent(new FocusEvent("focusin", { relatedTarget: document.body }));
       expect(root.getAttribute(ATTR)).toBe("keyboard");
-      typeKey(content, "a");
+      typeKey(content, "Enter");
+      await vi.waitFor(() => {
+        expect(onChange).toHaveBeenCalledTimes(1);
+      });
       expect(root.hasAttribute(ATTR)).toBe(false);
       engine.destroy();
       // After destroy, the listeners are gone: no re-arm on focusin.
