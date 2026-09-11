@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.011 active; g18.022 awaits dispatch approval; both precede the final release lanes)
+Updated: 2026-09-11 (g18.011 active; g18.022 approved for dispatch; both precede the final release lanes)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -146,8 +146,8 @@ It added internal token-bound CodeMirror syntax presentation without bundling
 grammars or widening the public extension API. The syntax-presentation leg of
 g18.011 is unblocked.
 
-[`g18.022`](g18/022-block-first-slider-family.md) awaits operator dispatch
-approval. It may run beside the editor-only g18.011 task. It makes block the
+[`g18.022`](g18/022-block-first-slider-family.md) is operator-approved for
+dispatch beside the editor-only g18.011 task. It makes block the
 default and embedded the sole alternate for both Slider controls, removes the
 old presentation vocabulary, gives RangeSlider fixed endpoint/center text,
 adds vertical block parity, and proves block Slider bipolar geometry. It must

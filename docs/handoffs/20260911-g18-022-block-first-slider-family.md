@@ -5,12 +5,13 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: awaiting-operator-approval
+status: ready-to-launch
 owner: Poodle Northstar orchestrator
 created: 2026-09-11
 updated: 2026-09-11
 base_required: pushed-main
 queue_dispatch: northstar-queue
+queue_approval: "Tom explicitly approved dispatch in the Poodle Chatterbox thread on 2026-09-11."
 queue:
   dependsOn: []
   capability: complex

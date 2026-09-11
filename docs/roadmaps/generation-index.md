@@ -10,8 +10,8 @@ Updated: 2026-09-11
   - Active task: `g18.011` four-surface web editor UX acceptance sweep is
     unblocked by merged `g18.021`; its task/thread remains retained for
     continuation.
-  - Ready task: `g18.022` block-first Slider family awaits operator dispatch
-    approval; it can run beside g18.011 and must merge before g18.006 resumes.
+  - Ready task: `g18.022` block-first Slider family is operator-approved for
+    dispatch; it can run beside g18.011 and must merge before g18.006 resumes.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
     repair is an in-place g18.011 dependency.

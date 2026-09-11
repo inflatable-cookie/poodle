@@ -1,6 +1,6 @@
 # 022 — block-first Slider family
 
-Status: awaiting operator dispatch approval
+Status: ready to dispatch — operator approved 2026-09-11
 Owner: Poodle cross-runtime components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/slider.md`,
@@ -107,7 +107,7 @@ release-candidate work resumes.
 
 ## Dispatch manifest
 
-- **State:** ready for operator approval; safe to dispatch in parallel with
+- **State:** operator-approved for dispatch; safe to run in parallel with
   retained g18.011; serial before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge

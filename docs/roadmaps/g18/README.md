@@ -66,7 +66,7 @@ needed to compile honest repair tranches.
 | [`g18.019`](019-markdown-renderer.md) — MarkdownRenderer shared safe/trusted rendering | complete | PR #247 (merge `cc26dd3c09e12addab7c0b6c5a243f83f33cff94`); standalone paired renderer, shared editor-preview path, safe default and explicit trusted opt-in |
 | [`g18.020`](020-rich-text-heading-mode-select.md) — RichTextEditor heading mode select | complete | PR #251 (merge `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9`); consumer-configurable Normal/H1–H6 selector plus real H4–H6 schema/editor/renderer support |
 | [`g18.021`](021-code-editor-token-bound-syntax-presentation.md) — CodeEditor token-bound syntax presentation | complete | PR #252 (merge `e69512038a4f032ecfad398562bbab28d40e9ffc`); private Poodle-token CodeMirror highlight style in both web engines |
-| [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | awaiting operator dispatch approval | may run beside g18.011; breaking block-default API, fixed RangeSlider text, vertical block parity and bipolar Slider proof; serial before g18.006 |
+| [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | ready to dispatch | operator-approved; may run beside g18.011; breaking block-default API, fixed RangeSlider text, vertical block parity and bipolar Slider proof; serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
