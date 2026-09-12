@@ -1,6 +1,6 @@
 # g18.029 — v0.4.0 candidate-scope admission
 
-Status: complete — second review repair applied, awaiting orchestrator review
+Status: complete — PR #261 merged as `01bb0dd84236f69bf55d5556c56b46513191a586` on 2026-09-12 after exact-head independent review
 Date: 2026-09-12
 Branch: `ns-cbbe9d2d-0d1b-49f1-9d24-6af92c6de3ad`
 Card: `docs/roadmaps/g18/029-v040-candidate-scope-admission.md`
@@ -156,3 +156,7 @@ edit versions, locks, changelog or receipts, resume retained g18.006, run the
 release gate, tag, publish, mutate Desktop or edit workflows. No release
 mutation, windowed selector or `*-windowed` conformance selector was run. The
 hosted branch dry run remains post-merge g18.009 work.
+
+## Merge
+
+PR #261 merged `01bb0dd84236f69bf55d5556c56b46513191a586` on 2026-09-12 with parents `b6a8dd7a4dff2933b73696292b3a1abb772779da` (main) and `e569e83acc32c42e64d4af2a0e3d1901f5727232` (reviewed head): the merge matches the reviewed head exactly, no refresh was needed. Accepted review is issue comment `5648702922` (`ready_to_merge`, no blocking findings remain at the exact head). Exact-head GitHub `web` and `rust` checks were green at merge. Closeout reran no suites; validation above is the worker's recorded evidence plus the coordinator's exact-head verification. No failures deferred. Next: resume retained Queue task `17ac3fee-de90-4b32-9672-1134770bb086` (g18.006) onto the admitted policy, per the card.

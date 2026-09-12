@@ -1,6 +1,6 @@
 # 029 — v0.4.0 candidate-scope admission
 
-Status: ready
+Status: complete — PR #261 merged as `01bb0dd84236f69bf55d5556c56b46513191a586` on 2026-09-12 after exact-head independent review
 Owner: Poodle installed web distribution certification
 Created: 2026-09-12
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -130,6 +130,8 @@ reaches `test:web-pack-install`, where ordinary certification rejects
 `g16.054-candidate` accepts only `0.3.0` and is not selected by PR CI. The
 release workflow supplies no scope environment. g18.028 is complete, and the
 retained g18.006 branch/workspace is clean at main with no candidate mutation.
+
+PR #261 merged `01bb0dd84236f69bf55d5556c56b46513191a586` on 2026-09-12 with parents `b6a8dd7a4dff2933b73696292b3a1abb772779da` (main) and `e569e83acc32c42e64d4af2a0e3d1901f5727232` (reviewed head): the merge matches the reviewed head exactly, no refresh was needed. Independent review (issue comment `5648702922`, `ready_to_merge`) verified no blocking findings remain at the exact head after both P1 repairs (exact JS/Cargo lockstep, dependency-table-keyed Cargo requirements). Exact-head GitHub `web` and `rust` checks were green at merge. No failures deferred; the admitted policy unblocks retained g18.006.
 
 ## Next task
 
