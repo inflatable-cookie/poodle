@@ -68,7 +68,7 @@ needed to compile honest repair tranches.
 | [`g18.021`](021-code-editor-token-bound-syntax-presentation.md) — CodeEditor token-bound syntax presentation | complete | PR #252 (merge `e69512038a4f032ecfad398562bbab28d40e9ffc`); private Poodle-token CodeMirror highlight style in both web engines |
 | [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | complete | PR #254 (merge `02ab7f7ec9122d85364beca77d05d681fa4d0124`); block-default two-variant Slider/RangeSlider API, fixed RangeSlider anchors, vertical block parity, repinned evidence |
 | [`g18.023`](023-code-editor-dual-syntax-palettes.md) — CodeEditor dual syntax palettes | complete | PR #255 (merge `155dbc7d82fe04479a986c1f5f5698770e366c17`); designed dark/light syntax ramps plus sparse Poodle-theme overrides; ran beside g18.024; serial before g18.006 |
-| [`g18.024`](024-slider-family-layout-and-vertical-repair.md) — Slider-family layout and vertical repair | ready for Queue dispatch | operator approved; shared size alignment, layout-neutral hit targets, step-aware visible values, and complete vertical block geometry; parallel with g18.023; serial before g18.006 |
+| [`g18.024`](024-slider-family-layout-and-vertical-repair.md) — Slider-family layout and vertical repair | complete | PR #256 (merge `c73db47d0de36dd0ce99ba697424dedb7c7b82da`); shared size alignment, layout-neutral hit targets, step-aware visible values, centred thumbs and xl-anchored vertical geometry; ran beside g18.023; serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -125,10 +125,11 @@ Merged g18.022 made block the default Slider-family variant, removed the old
 standard/track surface, fixed RangeSlider text placement, and added vertical
 block parity. Merged g18.023 replaced the rejected accent/status syntax mapping
 with designed dark/light palettes (PR #255, merged `155dbc7d82fe04479a986c1f5f5698770e366c17`).
-Post-merge inspection of the Slider family exposed size/alignment, numeric display,
-and vertical geometry defects now owned by g18.024. g18.006 is the retained
+Merged g18.024 repaired the Slider family's size/alignment, numeric display,
+and vertical geometry defects (PR #256, merged `c73db47d0de36dd0ce99ba697424dedb7c7b82da`).
+g18.006 is the retained
 final candidate lane and stays paused until operator acceptance of merged
-g18.011 and merged g18.024 close. g18.009 waits on g18.006; no candidate
+g18.011 and the merged g18.024 repair. g18.009 waits on g18.006; no candidate
 is tagged or published while accepted product source is moving.
 
 ## Held and recurring work

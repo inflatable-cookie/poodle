@@ -43,9 +43,9 @@ highlight style in both CodeEditor engines (PR #252). Merged g18.011 swept
 all four editor surfaces across both web previews under paired Chromium and
 WebKit engines (PR #253): zero unresolved release-blocking findings, one
 retained non-blocking follow-up (F12, preview-harness owner); operator
-acceptance is the remaining gate. Merged g18.022 established the block-first
-Slider family (PR #254); operator-approved g18.024 repairs its shared-size
-alignment, layout-neutral targets, numeric display, and vertical geometry.
+Slider family (PR #254); merged g18.024 repaired its shared-size
+alignment, layout-neutral targets, numeric display, and vertical geometry
+(PR #256).
 Merged g18.023 replaced the rejected accent/status syntax mapping with
 designed dark/light palettes (PR #255). The retained
 g18.006 `0.4.0` candidate and serial g18.009

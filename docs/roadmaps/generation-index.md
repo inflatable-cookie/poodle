@@ -17,8 +17,10 @@ Updated: 2026-09-12
   - Merged task: `g18.023` CodeEditor dual syntax palettes (PR #255);
     accent/status highlighting is replaced by designed dark/light ramps with
     sparse theme overrides after exact-head review.
-  - Ready task: operator-approved `g18.024` Slider-family layout and vertical
-    repair may dispatch; it must merge before g18.006 resumes.
+  - Merged task: `g18.024` Slider-family layout and vertical repair (PR
+    #256); the block family is on the shared size axis with layout-neutral
+    targets, step-aware display, and complete vertical geometry after
+    exact-head review.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
     repair is an in-place g18.011 dependency.
@@ -60,7 +62,7 @@ Updated: 2026-09-12
   - Paused candidate: retained g18.006 task/workspace resumes only after
     accepted g18.011 and merged g18.023/g18.024.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
-  - Next checkpoint: merge g18.024, accept the repaired specimens, then resume g18.006.
+  - Next checkpoint: accept the repaired specimens, then resume g18.006.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

@@ -1,6 +1,6 @@
 # 024 — Slider-family layout and vertical repair
 
-Status: ready for Queue dispatch — operator approved 2026-09-12
+Status: complete — merged as `c73db47d0de36dd0ce99ba697424dedb7c7b82da` (PR #256) on 2026-09-12
 Owner: Poodle cross-runtime components
 Created: 2026-09-12
 Governing refs: `../../contracts/components/slider.md`,
@@ -91,9 +91,10 @@ before retained g18.006 resumes.
 
 ## Dispatch manifest
 
-- **State:** ready; parallel-safe with g18.023; serial before retained g18.006
+- **State:** complete; merged g18.024 ran beside g18.023 CodeEditor work;
+  serial before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
-  independent review; never merge
+  independent review; merged by the plugin, never by the worker
 - **Owned mutable paths:** Slider/RangeSlider contracts; shared TypeScript and
   Rust slider value/visual helpers; Svelte and React Slider/RangeSlider wrappers
   and styles; shared Rust composition and GPUI slider renderers; paired slider
@@ -174,5 +175,7 @@ Post-merge inspection on 2026-09-12 found:
 
 ## Next task
 
-After g18.023 and g18.024 merge, accept the repaired specimens and resume the
-same retained g18.006 release-candidate task. g18.009 remains serial after it.
+g18.024 is merged. After the repaired specimens are accepted, resume the same
+retained g18.006 release-candidate task. Recompute final package trees and
+include both repairs in the `0.4.0` source identity. g18.009 remains serial
+after it.

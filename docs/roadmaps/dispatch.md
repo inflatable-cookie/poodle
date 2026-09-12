@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.023 merged; g18.024 operator-approved; both precede release)
+Updated: 2026-09-12 (g18.023 and g18.024 merged; both precede release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -99,13 +99,21 @@ rust/web checks at the reviewed head. Three non-blocking findings retained:
 unthemed-base contrast, active-line overlay proof, and single-role override
 coverage (see the g18.023 closeout log).
 
+[`g18.024`](g18/024-slider-family-layout-and-vertical-repair.md) — Slider-family
+layout and vertical repair — merged as `c73db47d0de36dd0ce99ba697424dedb7c7b82da` (PR #256) on
+2026-09-12 after exact-head independent review (PR comment `5645742372`,
+`ready_to_merge`) at `8f05b316c39e77121934c84208877fed543bcc85` with green
+rust/web checks at the reviewed head. Two non-blocking notes retained: the
+execution-log tidy-up (applied at closeout) and the optional native
+focus-ring contract note (see the g18.024 closeout log).
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after operator acceptance of merged g18.011 and both g18.023/g18.024
-close.
+only after operator acceptance of merged g18.011 and the merged g18.023/g18.024
+repairs.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
@@ -172,11 +180,12 @@ merge `155dbc7d82fe04479a986c1f5f5698770e366c17`). Queue task
 mapping replaced by designed dark/light syntax ramps, sparse theme overrides,
 and real palette, contrast, and live-theme proof.
 
-[`g18.024`](g18/024-slider-family-layout-and-vertical-repair.md) is
-operator-approved for Queue dispatch. It repairs the merged block family’s
-shared-size alignment, layout-neutral 44×44 targets, step-aware visible values,
-and vertical block geometry. It may run beside g18.023 but must merge before
-retained g18.006 resumes.
+[`g18.024`](g18/024-slider-family-layout-and-vertical-repair.md) is merged (PR #256,
+merge `c73db47d0de36dd0ce99ba697424dedb7c7b82da`). Queue task
+`0d7f161b-615a-4570-be16-0bc1cab8c2ef` is closed with the block family on the
+shared control-size axis, layout-neutral 44×44 targets, step-aware visible
+values, and complete native-axis vertical geometry with centred thumbs and
+xl-anchored hits.
 
 ## Held planning horizons
 

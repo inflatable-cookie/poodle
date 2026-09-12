@@ -1,6 +1,6 @@
 # g18.024 — Slider-family layout and vertical repair
 
-Status: in review — round 2 at the native-vertical head
+Status: complete — merged as `c73db47d0de36dd0ce99ba697424dedb7c7b82da` (PR #256) on 2026-09-12 after exact-head independent review (PR comment `5645742372`, `ready_to_merge`) at `8f05b316c39e77121934c84208877fed543bcc85` with green rust/web checks
 Date: 2026-09-12
 Branch: `ns-0d7f161b-615a-4570-be16-0bc1cab8c2ef`
 Card: `docs/roadmaps/g18/024-slider-family-layout-and-vertical-repair.md`
@@ -27,27 +27,29 @@ Base: `origin/main` at `4255c62ee16b0f35447189509142fc5b7e6e50ae`
   bottom-referenced scrub axis (range lower thumb above upper). The review
   also flagged the missing mounted vertical coverage and noted the exported
   core helper signature change as non-blocking.
-- Round 2 at `00d90ba64…`: all four round-1 findings verified fixed by
-  independent mounted probes, but two blocking native defects remained:
-  the visible thumb painted at the hit's top-left (an unaligned in-flow
-  child — the card's "handles float outside the rail" counterexample), and
-  at xl the clamped hit inset left the 44×44 target flush with the surface
-  start edge (4px off the rail centre). Fixed in round 3.
-- Round 3 at this head: `block_hit` centres the visible thumb (matching
-  web's grid place-items:center) and stamps thumb ids; the anchor layers
-  use a signed `(cross - hit)/2` offset so the hit centres at every size
-  (negative below `lg`, positive at `lg`/`xl`); mounted regressions assert
-  the thumb node and the xl centring on both orientations. Focus intent
-  confirmed and documented: the ring lives on the focusable 44×44 hit
-  because the node vocabulary resolves ring painting through the ringed
-  node's own focus handle; web styles the thumb as a descendant of its
-  focused control — both stay visible and unclipped.
-- Round 2 at `00d90ba64…`: all four findings fixed in
-  `packages/render` (`slider_block.rs`, `slider.rs`, `range_slider.rs`) with
-  three new mounted regressions in `headless_regressions.rs` (vertical single
-  Slider geometry, vertical RangeSlider geometry, horizontal xs band
-  coverage/dispatch); `effigy regressions:native` re-run at this head
-  (241/0) and the Nucleus/GPUI census evidence repinned per precedent.
+- Round 2 at `ec094159d…` (PR comment `5645682270`): **changes required** —
+  all four round-1 findings verified fixed by independent mounted probes, but
+  two blocking native defects remained: the visible thumb painted at the hit's
+  top-left (an unaligned in-flow child — the card's "handles float outside
+  the rail" counterexample), and at `xl` the clamped hit inset left the 44×44
+  target flush with the surface start edge (4px off the rail centre).
+- Round-3 fix at `ed48044bd…` → `8f05b316c…`: `block_hit` centres the visible
+  thumb (matching web's grid place-items:center) and stamps thumb ids; the
+  anchor layers use the signed `(cross - hit) / 2` offset so the hit centres
+  at every size (negative below `lg`, positive at `lg`/`xl`); mounted
+  regressions assert the thumb node and the `xl` centring on both
+  orientations. Focus intent confirmed and documented: the ring lives on the
+  focusable 44×44 hit because the node vocabulary resolves ring painting
+  through the ringed node's own focus handle; web styles the thumb as a
+  descendant of its focused control — both stay visible and unclipped.
+- Round 3 at `8f05b316c…` (PR comment `5645742372`): **ready to merge** —
+  both round-2 blockers independently re-measured fixed (thumb centre = hit
+  centre = rail centre at every shared size, both families, both
+  orientations; `xl` hit centred on the 52px capsule), all round-1/2 findings
+  still hold, web half unchanged and green. Evidence repinned to the
+  thumb-centring head (`source_commit` → `ed48044bd`, run id
+  `2026-09-12-g18-024-thumb-centring-expected`); receipts differ only in
+  `source_commit`/run id, no observation or capture change.
 
 ## Outcome
 
@@ -134,7 +136,9 @@ as a complete, aligned control at every size and orientation:
   0.665%) reproduces identically on the base commit and is environmental.
 - Census/evidence hygiene: source changes move the receipts' SOURCE_PATHS, so
   the Nucleus/GPUI census evidence was repinned — first to the round-1 source
-  head, then to the native-vertical head (`00d90ba64`) following the g18.022
+  head, then to the native-vertical head (`00d90ba64`), then to the
+  thumb-centring head (`ed48044bd`, run id
+  `2026-09-12-g18-024-thumb-centring-expected`) following the g18.022
   precedent (receipts differ only in `source_commit`/run id;
   `effigy regressions:native` re-run at each head; no observation or capture
   change; admitted capabilities identical: 73 admitted rows, 65 mounted
@@ -158,7 +162,45 @@ as a complete, aligned control at every size and orientation:
   unchanged, and pre-v1 rules forbid compatibility shims. The reviewer
   classified it non-blocking.
 
+## Review and merge
+
+Independent round-3 review at `8f05b316c39e77121934c84208877fed543bcc85` (PR
+comment `5645742372`): **ready to merge**. The reviewer re-measured both
+round-2 blockers on a mounted `HeadlessDriver` tree (thumb centre = hit centre
+= rail centre at every shared size, both families, both orientations; `xl`
+hit centred on the 52px capsule through the signed offset) and confirmed all
+round-1/2 findings still hold (bottom-referenced vertical scrub axis,
+RangeSlider vertical ordering, window fill, horizontal geometry, unchanged web
+half).
+
+Validation at the reviewed head: `effigy regressions:native` —
+`headless_regressions` 242/0 (241 plus the new `xl` anchor-centring
+regression); `cargo test -p poodle-render` 645 pass with the same 2
+pre-existing unrelated failures (`context.rs:589`,
+`segmented_control.rs:1006`); `effigy test:block-slider-hit` 248/0 and
+`effigy test:block-slider-inline` 192/0 across Chromium + WebKit;
+`effigy test:core` 1378/0; Svelte + React slider vitest 77/0;
+`effigy check:gpui-census` and `effigy check:parity-evidence-ledger` pass; the
+`docs/evidence` repin is mechanical only (`source_commit` → `ed48044bd`, run
+id `2026-09-12-g18-024-thumb-centring-expected`).
+
+Two non-blocking notes, each deferred rather than repaired here:
+
+- The round-3 review flagged this execution log as stale (old `Status:` line,
+  doubled "Round 2" bullets, census hygiene stopping at the native-vertical
+  repin). Fixed here at closeout; behaviour unaffected.
+- Focus intent is accepted and documented (the ring sits on the focusable
+  44×44 hit; web styles the thumb as a descendant of its focused control).
+  Optional follow-up only: one native note in
+  `docs/contracts/components/{slider,range-slider}.md` next to the focus-ring
+  row so both realizations are explicit. Out of scope for this task.
+
+Merge gate: PR #256 merged as `c73db47d0de36dd0ce99ba697424dedb7c7b82da`
+with green rust/web checks.
+
 ## Continuation
 
-After both repairs merge, the retained g18.006 release-candidate task resumes
-with operator acceptance; g18.009 stays serial behind it.
+g18.024 is merged. After the repaired specimens are accepted, the retained
+g18.006 release-candidate task resumes with both repairs in the `0.4.0`
+source identity; g18.009 stays serial behind it. Further planning direction
+needs the operator.
