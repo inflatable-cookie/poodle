@@ -1,6 +1,6 @@
 # 031 — Release metadata and GPUI census provenance
 
-Status: changes requested — operator corrected root version policy on PR #263
+Status: complete — PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8` on 2026-09-12 after exact-head independent review
 Owner: Poodle release and evidence infrastructure
 Created: 2026-09-12
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -59,7 +59,7 @@ census once, then return to the preserved g18.006 task.
 
 ## Dispatch manifest
 
-- **State:** ready; independent structural precursor before retained g18.006
+- **State:** complete; merged structural precursor before retained g18.006
 - **Completion:** one independently reviewed PR merged with explicit release
   authority, manifest-derived census version, planted stale-version laws and
   one deterministic current census regeneration
@@ -140,10 +140,36 @@ metadata and now moves with the lockstep release. The accepted v0.3.0 candidate
 ran `effigy release gates --json`; it did not use post-prepare `release status`
 as its gate.
 
+PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8` on 2026-09-12
+with parents `5635ab184cda6610f1f91eae1eff585db5e817b2` (main) and
+`a3f2a513a1d684a60a639c4904a606c6598c1f4d` (reviewed head). The merge
+matches the reviewed head exactly; no base refresh was needed.
+
+The accepted independent review is [PR comment
+5649246995](https://github.com/inflatable-cookie/poodle/pull/264#issuecomment-5649246995),
+bound to the exact reviewed head with `ready_to_merge`. It found no blocking
+findings. Exact-head GitHub `rust` and `web` checks were green at the merge
+gate; the `web` repair (ordinary precursor admission plus production-path
+closed-candidate root fixture) is proved by the leaf proof and 48-plant scope
+suite recorded in the execution log.
+
+## Closeout
+
+- The integration checkout was verified clean on `main` at the merged commit,
+  matching both `origin/main` and the provider's merged PR identity before this
+  closeout batch.
+- Closeout reran no implementation or broad validation suites. It consumes the
+  worker/reviewer evidence recorded in the execution log and the plugin's
+  exact-head merge gate. No task-specific validation failure is deferred.
+- Broader release work remains deliberately deferred: retained g18.006 now
+  resumes the `0.4.0` candidate on current main, and g18.009 owns the hosted
+  branch dry run, tag and publication sequence. No release, tag, workflow or
+  Desktop mutation occurred here.
+
 ## Next task
 
-After this PR merges, resume Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086` in its retained workspace. Prepare the
-immutable `0.4.0` candidate and run the complete local release gate once.
-g18.009 remains dependency-queued behind that task and owns hosted branch/tag
-proof, publication and the Desktop return.
+This PR has merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`. Resume Queue
+task `17ac3fee-de90-4b32-9672-1134770bb086` in its retained workspace on
+current main. Prepare the immutable `0.4.0` candidate and run the complete
+local release gate once. g18.009 remains dependency-queued behind that task
+and owns hosted branch/tag proof, publication and the Desktop return.

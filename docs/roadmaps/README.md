@@ -51,7 +51,7 @@ designed dark/light palettes (PR #255). Operator-approved g18.025 fixes all
 preview header controls at one selected size with `sm` as the default. Merged
 g18.029 admits the closed `0.4.0` candidate surface. Merged g18.030 removes
 the receipt emitter's hard-coded lock provenance and repins the complete
-current cohort. Operator-corrected g18.031 aligns root release metadata, keeps
+current cohort. Merged g18.031 (PR #264) aligns root release metadata, keeps
 it in the exact lockstep candidate surface and derives GPUI census receipt
 versions before the retained g18.006 task resumes; g18.009 owns post-merge branch certification
 and publication. Desktop unblocks

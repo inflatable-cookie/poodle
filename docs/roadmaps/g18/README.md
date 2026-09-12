@@ -50,7 +50,7 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | blocked | retained Queue task/workspace; g18.031 precursor runs first |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | ready | retained Queue task/workspace; g18.031 merged, resume on current main |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
@@ -75,7 +75,7 @@ needed to compile honest repair tranches.
 | [`g18.028`](028-release-gate-accessibility-assertion-repair.md) — release-gate accessibility assertion repair | complete | PR #260 (merge `018b9214cb2eb88cb9651d9ec8a17808e53410cd`); two stale `poodle-render` expectations repaired plus complete Nucleus cohort repin; serial before retained g18.006 resumes |
 | [`g18.029`](029-v040-candidate-scope-admission.md) — v0.4.0 candidate-scope admission | complete | PR #261 (merge `01bb0dd84236f69bf55d5556c56b46513191a586`); closed 0.4.0 candidate admission with exact lockstep JS/Cargo requirements; serial before retained g18.006 resumes |
 | [`g18.030`](030-nucleus-receipt-lock-provenance.md) — Nucleus receipt lock provenance | complete | PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85`; derived lock provenance and complete current evidence repin accepted before g18.006 resumes |
-| [`g18.031`](031-release-metadata-and-census-provenance.md) — release metadata and GPUI census provenance | changes requested | align root release metadata, admit its exact lockstep transition and derive census receipt versions before retained g18.006 resumes |
+| [`g18.031`](031-release-metadata-and-census-provenance.md) — release metadata and GPUI census provenance | complete | PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`; truthful root release metadata, exact lockstep transition and derived census receipt versions accepted before g18.006 resumes |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -153,10 +153,11 @@ derives them from the lock and repins the complete current evidence in
 PR #262 at `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85`; g18.006 now resumes and
 g18.009 owns the post-merge branch dry run.
 That continuation exposed two more metadata defects rather than candidate
-code: root repository metadata remains at `0.1.0`, and the GPUI census
-generator embeds `0.3.0` in 65 receipts. Operator-corrected g18.031 aligns root
-to current `0.3.0`, keeps it in the exact lockstep candidate surface and
-derives census versions from the preview crate before g18.006 resumes.
+code: root repository metadata stayed at `0.1.0`, and the GPUI census
+generator embedded `0.3.0` in 65 receipts. Merged g18.031 (PR #264,
+`aa659504b2a6222eb34c7423fcfd877a32138ba8`) aligned root to current `0.3.0`,
+kept it in the exact lockstep candidate surface and derived census versions
+from the preview crate; g18.006 now resumes.
 g18.009 waits on g18.006; no candidate is tagged or
 published while accepted product source is moving. After `0.4.0` unblocks
 Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any

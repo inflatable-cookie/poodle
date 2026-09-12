@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: complete — PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`
 owner: Poodle Northstar orchestrator
 created: 2026-09-12
 updated: 2026-09-12
@@ -34,12 +34,24 @@ Fix both recurring infrastructure faults and keep publication scope unchanged.
 
 ## Current State
 
-Main is clean and pushed at
-`9f30dc6277581aa451c326054bee621d4ad2c330`. Retained Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086`, workspace `wks_85bb63e05d4b3f90`,
-branch `ns-17ac3fee-de90-4b32-9672-1134770bb086` and worker history remain
-preserved with no candidate commit or PR. g18.030 is complete. npm public
-latest remains `0.3.0`.
+Main is clean and merged at
+`aa659504b2a6222eb34c7423fcfd877a32138ba8` (PR #264, reviewed head
+`a3f2a513a1d684a60a639c4904a606c6598c1f4d`, accepted review `5649246995`).
+Retained Queue task `17ac3fee-de90-4b32-9672-1134770bb086`, workspace
+`wks_85bb63e05d4b3f90`, branch
+`ns-17ac3fee-de90-4b32-9672-1134770bb086` remain preserved for the next
+candidate lane with no candidate commit or PR. npm public latest remains
+`0.3.0`.
+
+## Post-merge closeout
+
+Accepted review is [PR comment
+5649246995](https://github.com/inflatable-cookie/poodle/pull/264#issuecomment-5649246995),
+bound to the reviewed head with `ready_to_merge`; it found no blocking findings.
+The worker/reviewer validation and exact-head merge evidence are recorded in
+the execution log. Closeout reran no suites. No task-specific failure is
+deferred; retained g18.006 resumes the `0.4.0` candidate on current main, and
+g18.009 owns the later hosted release sequence.
 
 ## Boundaries
 

@@ -115,19 +115,20 @@ rust/web checks at the reviewed head. The complete current Nucleus cohort is
 repinned from the actual preview lockfile; no blocking findings remain.
 
 [`g18.031`](g18/031-release-metadata-and-census-provenance.md) — release
-metadata and GPUI census provenance — changes requested on the structural precursor that
-aligns root repository metadata, admits its exact lockstep transition and
-removes the census generator's embedded `0.3.0` before retained g18.006
-resumes.
+metadata and GPUI census provenance — merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8` (PR #264) on
+2026-09-12 after exact-head independent review (PR comment `5649246995`,
+`ready_to_merge`) at `a3f2a513a1d684a60a639c4904a606c6598c1f4d` with green
+rust/web checks at the reviewed head. Root release metadata is truthful, its
+exact lockstep transition is admitted and census receipt versions derive from
+the preview crate manifest; no blocking findings remain.
 
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
-preparation is blocked with its worker/workspace and progress preserved. It is
-clean at current main after g18.030, with no candidate mutation or PR. Run
-g18.031, then resume the same Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086` on its accepted merged main; the task,
-worker, workspace and evidence remain intact.
+preparation is ready with its worker/workspace and progress preserved. It is
+clean at current main after g18.031 merged, with no candidate mutation or PR.
+Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086` on its
+accepted merged main; the task, worker, workspace and evidence remain intact.
 
 [`g18.028`](g18/028-release-gate-accessibility-assertion-repair.md) is complete
 after PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd`.
@@ -139,11 +140,12 @@ after PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd`.
 receipt SHA/version provenance from the actual preview lockfile and performed
 one complete current evidence repin before retained g18.006 resumes.
 
-[`g18.031`](g18/031-release-metadata-and-census-provenance.md) has changes
-requested. It owns truthful root release metadata, exact root lockstep
-candidate admission, manifest-derived census receipt version and one
-deterministic current census regeneration. It does not prepare the candidate
-or run the full release board.
+[`g18.031`](g18/031-release-metadata-and-census-provenance.md) is complete
+after PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`. It
+delivered truthful root release metadata, exact root lockstep candidate
+admission, manifest-derived census receipt version and one deterministic
+current census regeneration. It did not prepare the candidate or run the full
+release board.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It

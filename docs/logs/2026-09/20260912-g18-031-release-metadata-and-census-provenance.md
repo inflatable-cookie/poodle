@@ -1,7 +1,7 @@
 # g18.031 — Release metadata and GPUI census provenance
 
-Status: ready for review — fresh exact-head review requested under queue
-ownership (PR #264)
+Status: complete — merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8` (PR #264)
+on 2026-09-12 after exact-head independent review
 Date: 2026-09-12
 Branch: `ns-e58c6d92-5f97-4263-8bc6-7756f749727a`
 Card: `docs/roadmaps/g18/031-release-metadata-and-census-provenance.md`
@@ -159,6 +159,34 @@ conformance selectors were run.
   (read-only).
 - `effigy docs:lint` — pass.
 - `git diff --check` — clean.
+
+## Merge and review
+
+- PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8` on 2026-09-12
+  with parents `5635ab184cda6610f1f91eae1eff585db5e817b2` (main) and
+  `a3f2a513a1d684a60a639c4904a606c6598c1f4d` (reviewed head). The merge
+  matches the reviewed head exactly; no base refresh was needed.
+- Accepted independent review is [PR comment
+  5649246995](https://github.com/inflatable-cookie/poodle/pull/264#issuecomment-5649246995),
+  bound to the exact head with `ready_to_merge`; it found no blocking findings.
+- Exact-head GitHub `rust` (34s) and `web` (7m30s) checks were green at the
+  merge gate. The `web` repair cycle is recorded above: the ordinary precursor
+  admission plus the production-path closed-candidate root fixture restored
+  the positive admission while all 37 negative oracles kept rejecting.
+
+## Closeout (integration checkout, 2026-09-12)
+
+- Verified `/Users/tom/Dev/projects/poodle` clean on `main` at
+  `aa659504b2a6222eb34c7423fcfd877a32138ba8`, matching `origin/main` and the
+  provider merge before this closeout batch.
+- Closeout reran no implementation or broad validation suites. The validation
+  above is the worker/reviewer evidence plus plugin-owned exact-head merge
+  verification. No task-specific failure is deferred.
+- Retained g18.006 now resumes on current main for the immutable `0.4.0`
+  candidate and its final version-bound census repin. g18.009 remains
+  dependency-queued behind that candidate for the hosted branch dry run, tag
+  and publication. No release, tag, workflow or Desktop mutation occurred in
+  g18.031.
 
 ## Limits
 

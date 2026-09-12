@@ -77,15 +77,18 @@ Updated: 2026-09-12
     provenance from the actual preview lockfile and repins the current cohort
     once; PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` after
     accepted exact-head review and green checks.
-  - Changes-requested precursor: g18.031 aligns truthful root release metadata,
-    admits its exact lockstep transition and derives GPUI census receipt
-    versions from the preview crate manifest.
-  - Blocked candidate: retained g18.006 is clean at current main with no
-    candidate mutation; it resumes in the same task/workspace after g18.031.
+  - Completed precursor: g18.031 aligned truthful root release metadata,
+    admitted its exact lockstep transition and derived GPUI census receipt
+    versions from the preview crate manifest; PR #264 merged as
+    `aa659504b2a6222eb34c7423fcfd877a32138ba8` after accepted exact-head
+    review and green checks.
+  - Ready candidate: retained g18.006 is clean at current main with no
+    candidate mutation; it resumes in the same task/workspace now that g18.031
+    merged.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; it publishes only the accepted candidate and returns the Desktop
     unblock capsule.
-  - Next checkpoint: merge g18.031, then resume retained g18.006.
+  - Next checkpoint: resume retained g18.006 on current main.
     Publish `0.4.0` through g18.009, unblock Desktop, and route compatible
     sweep findings to `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations

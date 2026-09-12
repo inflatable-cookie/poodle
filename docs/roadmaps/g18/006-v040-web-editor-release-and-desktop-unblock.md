@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: blocked — retained Queue task/workspace; g18.031 precursor ready
+Status: ready — retained Queue task/workspace; g18.031 merged, resume on current main
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -12,8 +12,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
 `g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
-`g18.026`, `g18.027`, `g18.028`, `g18.029`; completed precursor:
-`g18.030` (PR #262); current continuation gate: `g18.031`
+`g18.026`, `g18.027`, `g18.028`, `g18.029`; completed precursors:
+`g18.030` (PR #262), `g18.031` (PR #264)
 
 ## Outcome
 
@@ -93,9 +93,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** blocked in retained dispatched Queue task/workspace at clean main
-  while g18.031 repairs the release-version source and remaining hard-coded
-  census receipt version. The
+- **State:** ready in retained dispatched Queue task/workspace at clean main
+  after g18.031 merged. The
   task's dependency list froze on first dispatch, so preserve the same task,
   worker and workspace; do not replace them or pretend a later dependency
   mutation is available.
@@ -123,7 +122,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 1. After g18.028 closes, consume the full public-intent delta from `v0.3.0` to
    current main. Record final core/Svelte tree hashes and verify the g18.002
    editor-bearing hashes occur in their lineage.
-2. Consume g18.031's explicit core release-version authority. Preserve the
+2. Consume g18.031's explicit root release-version authority. Preserve the
    repaired Keep a Changelog grammar and validate the candidate changelog
    directly; do not treat post-prepare `release status` with an intentionally
    empty Unreleased section as the release gate.
@@ -239,11 +238,17 @@ keeps it lockstep as the explicit release source. It also corrects this
 candidate's gate command to the stage-appropriate
 `release gates --json`; accepting a red status result is not authorized.
 
+Merged g18.031 (PR #264, merge `aa659504b2a6222eb34c7423fcfd877a32138ba8`)
+aligned root to current `0.3.0` as the explicit release source, keeps it
+lockstep in this candidate's version-only `0.3.0` -> `0.4.0` surface, and
+derives census versions from the preview crate after exact-head review with
+green `rust`/`web` checks. No candidate mutation exists.
+
 ## Next task
 
-Complete g18.031, then resume this retained task on its merged main. The Queue
-cannot add dependencies to this
-already-dispatched task, so preserve its worker and workspace. After the candidate merges and closes,
+Resume this retained task on current main now that g18.031 has merged. The
+Queue cannot add dependencies to this already-dispatched task, so preserve
+its worker and workspace. After the candidate merges and closes,
 g18.009 dispatches from its existing dependency, performs the hosted branch
 dry run, and completes release. Desktop then resumes retained g02.058 and PR
 #215.
