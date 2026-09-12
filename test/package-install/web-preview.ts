@@ -1997,6 +1997,19 @@ function closedCandidateChangelog(version: string): string {
 
 function closedCandidateFiles(version: string): Record<string, string> {
   const files: Record<string, string> = {
+    // g18.031: the private root repository manifest is a required lockstep
+    // release input. Its shape is stable across versions; only `version`
+    // moves 0.3.0 -> 0.4.0.
+    "package.json": `${JSON.stringify(
+      {
+        name: "poodle",
+        version,
+        private: true,
+        scripts: { test: "vitest run" },
+      },
+      null,
+      2,
+    )}\n`,
     "packages/core/package.json": `${JSON.stringify(
       { name: "@inflatable-cookie/poodle-core", version, type: "module" },
       null,

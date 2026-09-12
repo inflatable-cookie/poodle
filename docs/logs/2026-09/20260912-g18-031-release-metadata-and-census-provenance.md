@@ -105,6 +105,19 @@ the closed g18.006 candidate rule.
 | precursor alignment plus a `.npmrc` registry change | `certification scope rejected forbidden` |
 | lone `0.3.0` -> `0.4.0` root bump without the closed candidate | `forbidden version surface: package.json` |
 
+### Production-path closed-candidate plant (ci-web repair)
+
+`test/package-install/web-preview.ts`'s synthetic `0.3.0` -> `0.4.0` candidate
+fixture, `closedCandidateFiles(version)`, omitted root `package.json`. Once the
+closed policy required root as a lockstep release input, the production-path
+positive plant changed every other release surface but not root, so
+`ordinaryAdmitsClosedCandidate` failed and reported all forbidden surfaces.
+
+The fixture now carries a minimal private root manifest (`name`, version,
+`private: true`, one stable script) with only `version` parameterized. The
+positive production-path proof admits the complete closed candidate again, and
+no plant semantics change.
+
 ## Census provenance proof
 
 - `parsePreviewPackageVersion` reads exactly one `[package]` table and one
@@ -135,6 +148,9 @@ conformance selectors were run.
 - Read-only ordinary-mode scope probe over the real base-to-head range
   (`assertInstalledScope(repo, main, HEAD, "ordinary")`) — admitted after the
   repair; it rejected before.
+- `effigy test:web-pack-install` — the production-path leaf proof (one run,
+  clean checkout) admits the complete closed candidate after the root fixture
+  repair.
 - `effigy test:gpui-census` — 21 pass / 0 fail (17 existing oracles plus 4
   provenance laws).
 - `effigy check:gpui-census` — checked-in artifacts match the generator and
