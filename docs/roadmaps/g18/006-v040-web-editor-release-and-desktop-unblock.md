@@ -54,6 +54,11 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - The final core and Svelte tree hashes will therefore supersede Desktop's
   g18.002-only hashes. Evidence must preserve those hashes as lineage, report
   final candidate/tag/package trees, and prove installed `./editor` behavior.
+- g18.028's assertion-only `packages/render` repair intentionally leaves the 29
+  source-bound Nucleus M1/A1 receipts stale. Repin the complete cohort once in
+  this task after the `0.4.0` Cargo manifest changes, then require the whole
+  parity-ledger, GPUI-census and release gate to pass. Do not carry an
+  intermediate g18.028 repin.
 - Include the g18.022 pre-v1 Slider-family migration. Release notes must name
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
@@ -84,7 +89,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - **Owned mutable paths:** package and Cargo version manifests; intra-repo
   version requirements; lockfiles; `CHANGELOG.md`; `docs/release-notes/0.4.0.md`
   and release-notes index; release evidence/log; required generated package
-  artifacts and release metadata
+  artifacts and release metadata; the complete source-bound Nucleus receipt,
+  ledger and GPUI-census repin required by the final `packages/render` tree
 - **Reserved closeout surfaces:** g18 README, generation index, dispatch
   projection, task status/evidence, Desktop repository/task/PR
 - **Worker:** release-candidate high-reasoning worker comfortable with lockstep
@@ -108,13 +114,16 @@ Do not publish before all dependencies close. Do not mutate Desktop.
    release notes, and package evidence. Classify CodeEditor and rich-text as
    additive, Tabs card fill as behavioral, and the g18.022 Slider-family API
    replacement as an explicit pre-v1 breaking migration.
-4. Prove source-free packed core/Svelte archives, private packed React, root
+4. Regenerate and repin all 29 Nucleus M1/A1 receipts, the parity ledger and
+   GPUI census against the final candidate `packages/render` source identity.
+   Refuse a partial cohort, mixed source commits or a second repin source.
+5. Prove source-free packed core/Svelte archives, private packed React, root
    isolation, SSR/browser imports, declarations, licenses, exact dependencies,
    and a fresh source-free consumer installed from the packed Svelte archive.
-5. Open one non-draft candidate PR. Independent review must bind the exact head,
+6. Open one non-draft candidate PR. Independent review must bind the exact head,
    version set, final package trees, package contents, release notes, and
    Desktop unblock oracle. The worker never merges, tags, or publishes.
-6. Return the exact candidate identity for queue review and merge. Closeout
+7. Return the exact candidate identity for queue review and merge. Closeout
    passes the merged identity to g18.009. Do not tag, publish or mutate npm.
 
 ## Acceptance and review oracle
@@ -129,6 +138,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 | Candidate is exact | CI success belongs to another head | branch dry-run `headSha` equals clean pushed candidate commit |
 | Publication stays separate | candidate task creates a tag or changes npm | tag absence and no release workflow dispatch; g18.009 owns release mutation |
 | Changelog is valid | release proceeds by skipping the parser | Effigy status/plan parses and local release gates remain green |
+| Nucleus evidence binds the candidate once | receipts remain at the predecessor commit or mix repair/version identities | all 29 receipts, ledger and census resolve to the final candidate source commit and the complete release gate is green |
 | Public set stays bounded | candidate config admits React or crates | manifest, pack and workflow package-set inspection show core/Svelte only |
 | Desktop remains consumer-owned | Poodle worker edits PR #215 or its checkout | Poodle diff has no Desktop path; handoff contains evidence and resume instruction only |
 
