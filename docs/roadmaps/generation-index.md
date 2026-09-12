@@ -21,6 +21,8 @@ Updated: 2026-09-12
     #256); the block family is on the shared size axis with layout-neutral
     targets, step-aware display, and complete vertical geometry after
     exact-head review.
+  - Ready task: operator-approved `g18.025` Preview header control sizing fixes
+    all five paired-preview controls at stable `md` chrome before release.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
     repair is an in-place g18.011 dependency.
@@ -60,9 +62,10 @@ Updated: 2026-09-12
     the outer ring is now a local keyboard-entry affordance dismissed on
     committed edits, with the document modality left truthful.
   - Paused candidate: retained g18.006 task/workspace resumes only after
-    accepted g18.011 and merged g18.023/g18.024.
+    accepted g18.011 and completed g18.025.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
-  - Next checkpoint: accept the repaired specimens, then resume g18.006.
+  - Next checkpoint: merge g18.025, accept the repaired previews, then resume
+    g18.006.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

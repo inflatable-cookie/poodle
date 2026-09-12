@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.023 and g18.024 merged; both precede release)
+Updated: 2026-09-12 (g18.023/g18.024 merged; g18.025 ready before release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -112,8 +112,7 @@ focus-ring contract note (see the g18.024 closeout log).
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after operator acceptance of merged g18.011 and the merged g18.023/g18.024
-repairs.
+only after operator acceptance of merged g18.011 and g18.025 closes.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
@@ -186,6 +185,11 @@ merge `c73db47d0de36dd0ce99ba697424dedb7c7b82da`). Queue task
 shared control-size axis, layout-neutral 44×44 targets, step-aware visible
 values, and complete native-axis vertical geometry with centred thumbs and
 xl-anchored hits.
+
+[`g18.025`](g18/025-preview-header-control-sizing.md) is operator-approved for
+Queue dispatch. It fixes every header control at shared `md` size in both web
+previews and prevents the specimen Size axis from resizing its own controls. It
+must close before retained g18.006 resumes.
 
 ## Held planning horizons
 

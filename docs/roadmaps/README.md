@@ -47,7 +47,8 @@ Slider family (PR #254); merged g18.024 repaired its shared-size
 alignment, layout-neutral targets, numeric display, and vertical geometry
 (PR #256).
 Merged g18.023 replaced the rejected accent/status syntax mapping with
-designed dark/light palettes (PR #255). The retained
+designed dark/light palettes (PR #255). Operator-approved g18.025 fixes all
+preview header controls at one stable `md` chrome size. The retained
 g18.006 `0.4.0` candidate and serial g18.009
 certification/publication lanes remain at the end and unblock Desktop only
 after accepted product source stops moving.
