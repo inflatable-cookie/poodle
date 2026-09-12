@@ -21,10 +21,16 @@ function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.releasePointerCapture ??= () => {};
 }
 
-const css = readFileSync(
-  new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
-  "utf8",
-);
+const css = [
+  readFileSync(
+    new URL("../../../core/src/styles/slider-family.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  ),
+  readFileSync(
+    new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  ),
+].join("\n");
 
 describe("RangeSlider (svelte)", () => {
   it("omitting variant renders the fixed-anchor block as the default", () => {
@@ -168,13 +174,13 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
 
   it("clips the window layer between start and end and mirrors in RTL", () => {
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--selected {\n    color: var(--poodle-recipe-range-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start));\n  }",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--selected {\n    clip-path: inset(0 calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start));\n  }",
     );
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-start {\n    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 calc(100% - var(--poodle-range-start)) 0 0);",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-start {\n    clip-path: inset(0 calc(100% - var(--poodle-range-start)) 0 0);",
     );
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-end {\n    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-range-end));",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-end {\n    clip-path: inset(0 0 0 var(--poodle-range-end));",
     );
     // RTL mirrors the window; lower stays at the logical start.
     expect(css).toContain(
@@ -197,12 +203,12 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     const root = container.querySelector(".poodle-range-slider") as HTMLElement;
     const hits = container.querySelectorAll(".poodle-range-slider__hit");
     expect(hits).toHaveLength(2);
-    expect(css).toContain("--poodle-range-slider-block-hit: 44px");
+    expect(css).toContain("--poodle-slider-family-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
     // g18.024: the hit envelope is measurable but never spacing.
-    expect(css).toContain("min-height: var(--poodle-range-slider-block-height)");
-    expect(css).not.toContain("max(var(--poodle-range-slider-block");
-    expect(css).not.toContain("--poodle-range-slider-block-min-height");
+    expect(css).toContain("min-height: var(--poodle-slider-family-block-height)");
+    expect(css).not.toContain("max(var(--poodle-slider-family-block");
+    expect(css).not.toContain("--poodle-slider-family-block-min-height");
     mockTrack(root, 100, 32);
     await fireEvent.pointerDown(root, { button: 0, clientX: 50, clientY: 16, pointerId: 1 });
     await fireEvent.pointerMove(root, { clientX: 20, clientY: 16, pointerId: 1 });
@@ -229,17 +235,27 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     expect(css).toContain(
       ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-range-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start) 0);",
     );
+    // Both handles use the shared family marker offset.
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-range-slider__hit--lower {\n    inset-inline-start: auto;\n    bottom: calc(var(--poodle-range-start) - (var(--poodle-range-slider-block-hit) / 2));",
+      "--poodle-range-slider-block-marker-start: clamp(",
+    );
+    expect(css).toContain(
+      "--poodle-range-slider-block-marker-end: clamp(",
+    );
+    expect(css).toContain(
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__hit--lower {\n    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-start);",
+    );
+    expect(css).toContain(
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__hit--upper {\n    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-end);",
     );
     // g18.024 vertical repair: the label centers on the exact rail middle
     // as an absolute overlay, so the three upright rows never clip, shift,
     // or collapse each other, and the rail is the shared capsule size.
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline-row--vertical .poodle-range-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
+      ":is(.poodle-slider__inline-row--vertical, .poodle-range-slider__inline-row--vertical) :is(.poodle-slider__inline-label, .poodle-range-slider__inline-label) {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
     );
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] {\n    width: var(--poodle-range-slider-block-height);\n    min-width: var(--poodle-range-slider-block-height);",
+      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] {\n    width: var(--poodle-slider-family-block-height);\n    min-width: var(--poodle-slider-family-block-height);',
     );
     // Vertical never mirrors with direction.
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
@@ -276,5 +292,81 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
       container.querySelectorAll(".poodle-range-slider__inline--selected .poodle-range-slider__inline-value"),
     ).map((slot) => slot.textContent);
     expect(values).toEqual(["0.30", "0.85"]);
+  });
+});
+
+describe("RangeSlider (svelte) shared family foundation", () => {
+  const rangeOnlyCss = readFileSync(
+    new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  );
+
+  it("composes the shared bounded inset line handle twice", () => {
+    const { container } = render(RangeSlider, {
+      props: { value: [20, 80], visibleLabel: "Band", ariaLabel: "Band" },
+    });
+    // Two handles, one primitive: the block renders the shared thumb.
+    expect(container.querySelectorAll(".poodle-range-slider__thumb")).toHaveLength(2);
+    expect(css).toContain(
+      ":is(.poodle-slider__thumb, .poodle-range-slider__thumb) {\n    box-sizing: border-box;\n    width: var(--poodle-slider-family-marker-thickness);\n    height: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));\n    border-radius: calc(var(--poodle-slider-family-marker-thickness) / 2);",
+    );
+    // Each handle is clamped inside the capsule toward the window interior.
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-start: clamp(");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-end: clamp(");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-start: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-start),");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-end: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-end),");
+    // The range sheet never re-implements a private handle or size ladder.
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-thumb");
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-marker-thickness");
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-marker-inset");
+    expect(rangeOnlyCss).not.toMatch(/border-radius: 999px;[\s\S]*poodle-range-slider__thumb/);
+  });
+
+  it("paints both endpoint text copies above the shared handle", () => {
+    // The inline layers sit above the hit (z-index 2) so a glyph masks the
+    // marker instead of becoming illegible, exactly like Slider.
+    expect(css).toMatch(/:is\(\.poodle-slider__hit, \.poodle-range-slider__hit\) \{[\s\S]*?z-index: 2;/);
+    expect(css).toMatch(/:is\(\.poodle-slider__inline, \.poodle-range-slider__inline\) \{[\s\S]*?z-index: 3;/);
+    expect(css).toContain(
+      ":is(.poodle-slider__inline--selected, .poodle-range-slider__inline--selected) {\n    z-index: 4;",
+    );
+  });
+
+  it("keeps the fill at the value while the handles stay inset", () => {
+    const { container } = render(RangeSlider, {
+      props: { value: [0, 100], ariaLabel: "Band" },
+    });
+    const root = container.querySelector(".poodle-range-slider")!;
+    const style = root.getAttribute("style") ?? "";
+    // The fill window is the exact pair; only the handles are clamped.
+    expect(style).toContain("--poodle-range-start: 0%");
+    expect(style).toContain("--poodle-range-end: 100%");
+    expect(rangeOnlyCss).toContain(
+      "inset-inline-start: var(--poodle-range-positive-start);",
+    );
+    expect(rangeOnlyCss).toContain(
+      "inset-inline-start: var(--poodle-range-negative-start);",
+    );
+  });
+
+  it("consumes the shared control-size and block-height ladders", () => {
+    for (const [size, rem] of [
+      ["xs", "1.5rem"],
+      ["sm", "1.75rem"],
+      ["md", "2.25rem"],
+      ["lg", "2.75rem"],
+      ["xl", "3.25rem"],
+    ] as const) {
+      expect(css).toContain(`[data-size="${size}"] { --poodle-slider-family-block-height: ${rem}; }`);
+    }
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-height: 1.5rem");
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-control-min-height");
+  });
+
+  it("mirrors the full forced-colour handle table through the foundation", () => {
+    expect(css).toContain(
+      ":is(.poodle-slider__thumb, .poodle-range-slider__thumb) {\n      background: ButtonText;",
+    );
+    expect(rangeOnlyCss).not.toContain("ButtonFace");
   });
 });

@@ -21,10 +21,16 @@ function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.releasePointerCapture ??= () => {};
 }
 
-const css = readFileSync(
-  new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-  "utf8",
-);
+const css = [
+  readFileSync(
+    new URL("../../../core/src/styles/slider-family.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  ),
+  readFileSync(
+    new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  ),
+].join("\n");
 
 describe("Slider (svelte)", () => {
   it("drives the fill percentage custom property from the value", () => {
@@ -227,12 +233,12 @@ describe("Slider (svelte) block variant", () => {
     expect(root.getAttribute("data-variant")).toBe("block");
     const hit = container.querySelector(".poodle-slider__hit") as HTMLElement;
     expect(hit).not.toBeNull();
-    expect(css).toContain("--poodle-slider-block-hit: 44px");
+    expect(css).toContain("--poodle-slider-family-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
     // g18.024: the accessibility envelope is measurable but never spacing.
-    expect(css).toContain("min-height: var(--poodle-slider-block-height)");
-    expect(css).not.toContain("max(var(--poodle-slider-block");
-    expect(css).not.toContain("--poodle-slider-block-min-height");
+    expect(css).toContain("min-height: var(--poodle-slider-family-block-height)");
+    expect(css).not.toContain("max(var(--poodle-slider-family-block");
+    expect(css).not.toContain("--poodle-slider-family-block-min-height");
   });
 
   it("consumes the shared control-size axis with no private ladder", () => {
@@ -246,11 +252,11 @@ describe("Slider (svelte) block variant", () => {
       ["xl", "3.25rem"],
     ] as const) {
       expect(css).toContain(
-        `.poodle-slider[data-variant="block"][data-size="${size}"] { --poodle-slider-block-height: ${rem};`,
+        `[data-size="${size}"] { --poodle-slider-family-block-height: ${rem}; }`,
       );
     }
     // Density never inflates the block capsule.
-    expect(css).toContain('.poodle-slider[data-variant="embedded"][data-density="compact"]');
+    expect(css).toContain('[data-variant="embedded"][data-density="compact"]');
     expect(css).not.toContain('.poodle-slider[data-density="compact"]');
   });
 
@@ -310,20 +316,26 @@ describe("Slider (svelte) block variant", () => {
   });
 
   it("keeps the block capsule rounded-square and uses an inset marker line", () => {
+    // Both families share one capsule rule in the family foundation.
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-height);\n    border-radius: var(--poodle-radius-control);",
+      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-family-block-height);\n    border-radius: var(--poodle-radius-control);',
     );
     expect(css).toContain(
-      "width: var(--poodle-slider-block-marker-thickness);\n    height: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));",
+      "width: var(--poodle-slider-family-marker-thickness);\n    height: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));",
     );
+    // The single-thumb sheet keeps only the clamp formula, not a copied handle.
+    expect(css).toContain("--poodle-slider-block-marker-position: clamp(");
+    expect(css).toContain("--poodle-slider-family-marker: var(--poodle-slider-block-marker-position);");
   });
 
   it("clips selected text to the center-anchored fill and mirrors it in RTL", () => {
     expect(css).toContain(
       "clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));",
     );
+    // The remainder copy is unclipped in the component sheet; its colour
+    // lives in the shared foundation for both families.
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));",
+      ":is(.poodle-slider__inline--remainder, .poodle-range-slider__inline--remainder-start, .poodle-range-slider__inline--remainder-end, .poodle-range-slider__inline--remainder-top, .poodle-range-slider__inline--remainder-bottom) {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));",
     );
     expect(css).toContain(
       "clip-path: inset(0 var(--poodle-slider-fill-start) 0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)));",
@@ -344,35 +356,43 @@ describe("Slider (svelte) block variant", () => {
     expect(container.querySelector(".poodle-slider__inline--selected")).not.toBeNull();
     expect(container.querySelector(".poodle-slider__inline--remainder")).not.toBeNull();
     expect(css).toMatch(
-      /\.poodle-slider\[data-variant="block"\] \.poodle-slider__inline \{[\s\S]*?z-index: 3;[\s\S]*?padding-inline: 0\.75rem;[\s\S]*?pointer-events: none;/,
+      /:is\(\.poodle-slider__inline, \.poodle-range-slider__inline\) \{[\s\S]*?z-index: 3;[\s\S]*?padding-inline: 0\.75rem;[\s\S]*?pointer-events: none;/,
     );
   });
 
   it("maps selected fill to Highlight and remainder to Canvas", () => {
-    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
-    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
-    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--selected {\n      color: HighlightText;");
-    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n      color: CanvasText;");
+    expect(css).toContain(
+      ':is(.poodle-slider__capsule, .poodle-range-slider__capsule) {\n      background: Canvas;',
+    );
+    expect(css).toContain(
+      ':is(.poodle-slider__fill, .poodle-range-slider__fill, .poodle-range-slider__fill--positive, .poodle-range-slider__fill--negative) {\n      background: Highlight;',
+    );
+    expect(css).toContain(
+      ':is(.poodle-slider__inline--selected, .poodle-range-slider__inline--selected) {\n      color: HighlightText;',
+    );
+    expect(css).toContain(
+      ':is(.poodle-slider__inline--remainder, .poodle-range-slider__inline--remainder-start, .poodle-range-slider__inline--remainder-end, .poodle-range-slider__inline--remainder-top, .poodle-range-slider__inline--remainder-bottom) {\n      color: CanvasText;',
+    );
     expect(css).not.toMatch(/\.poodle-slider__fill \{\s*background: Canvas/);
   });
 
   it("keeps vertical block upright: value top, label centered, clip along the block axis", () => {
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    position: relative;\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    height: 100%;\n    box-sizing: border-box;\n    /* g18.024: a fixed, value-independent block inset keeps the anchored\n       text fully inside the rail at every shared size. */\n    padding-block: 0.25rem;\n  }",
+      ':is(.poodle-slider__inline-row--vertical, .poodle-range-slider__inline-row--vertical) {\n    position: relative;\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    height: 100%;\n    box-sizing: border-box;\n    /* g18.024: a fixed, value-independent block inset keeps the anchored\n       text fully inside the rail at every shared size. */\n    padding-block: 0.25rem;\n  }',
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
+      ':is(.poodle-slider__inline-row--vertical, .poodle-range-slider__inline-row--vertical) :is(.poodle-slider__inline-label, .poodle-range-slider__inline-label) {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }',
     );
     expect(css).toContain(
       "clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-block-marker-position) - (var(--poodle-slider-block-hit) / 2));",
+      'bottom: calc(var(--poodle-slider-family-marker) - (var(--poodle-slider-family-block-hit) / 2));',
     );
     // g18.024: the vertical rail is the shared capsule size, not the hit
     // envelope.
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] {\n    width: var(--poodle-slider-block-height);\n    min-width: var(--poodle-slider-block-height);",
+      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] {\n    width: var(--poodle-slider-family-block-height);\n    min-width: var(--poodle-slider-family-block-height);',
     );
     // Vertical never mirrors with direction: the RTL clip rules stay
     // horizontal-only.

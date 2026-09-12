@@ -1,52 +1,16 @@
-/* Styles for RangeSlider. Extracted from the Svelte component (g12.001
-   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+/* Styles for RangeSlider. The shared family foundation (size ladder,
+   capsule, track, inline text scaffolding, 44x44 targets and the bounded
+   inset line handle) lives in `slider-family.css`; this sheet keeps only the
+   genuine two-thumb differences. Unique poodle-* selectors; safe as global
+   CSS. */
+@import "./slider-family.css";
 
   .poodle-range-slider {
-    --poodle-range-slider-control-min-height: 1.5rem;
-    --poodle-range-slider-thumb-size: 1rem;
-    --poodle-range-slider-track-thickness: 0.375rem;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    width: 100%;
-    min-height: var(--poodle-range-slider-control-min-height);
+    --poodle-slider-family-center: var(--poodle-range-center);
     --poodle-range-center: 0%;
   }
 
-  .poodle-range-slider[data-orientation="vertical"] {
-    width: var(--poodle-range-slider-control-min-height);
-    min-width: var(--poodle-range-slider-control-min-height);
-    min-height: 10rem;
-    height: 100%;
-    justify-content: center;
-  }
-
-  .poodle-range-slider[data-disabled="true"] {
-    opacity: var(--poodle-state-opacity-disabled);
-  }
-
-  .poodle-range-slider__track {
-    position: absolute;
-    inset: 50% 0 0;
-    height: var(--poodle-range-slider-track-thickness);
-    transform: translateY(-50%);
-    border-radius: 999px;
-    background: var(--poodle-recipe-range-slider-track-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
-  }
-
-  .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__track {
-    inset: 0 auto 0 50%;
-    width: var(--poodle-range-slider-track-thickness);
-    height: 100%;
-    transform: translateX(-50%);
-  }
-
-  .poodle-range-slider__fill {
-    position: absolute;
-    height: 100%;
-    border-radius: inherit;
-    background: var(--poodle-recipe-range-slider-fill-fill, var(--poodle-color-accent-base));
-  }
+  /* ── Embedded fills (window between the two thumbs) ── */
 
   .poodle-range-slider__fill--negative {
     left: var(--poodle-range-negative-start);
@@ -57,6 +21,7 @@
   .poodle-range-slider__fill--positive {
     left: var(--poodle-range-positive-start);
     width: var(--poodle-range-positive-span);
+    background: var(--poodle-recipe-range-slider-fill-fill, var(--poodle-color-accent-base));
   }
 
   .poodle-range-slider[data-fill-split="true"][data-orientation="horizontal"] .poodle-range-slider__fill--negative {
@@ -67,64 +32,6 @@
   .poodle-range-slider[data-fill-split="true"][data-orientation="horizontal"] .poodle-range-slider__fill--positive {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-  }
-
-  .poodle-range-slider__center { display: none; }
-  .poodle-range-slider__embedded-control { display: none; }
-
-  .poodle-range-slider[data-variant="embedded"] {
-    min-width: 2.5rem;
-    min-height: var(--poodle-range-slider-control-min-height);
-    border: 0.0625rem solid var(--poodle-recipe-range-slider-track-border, var(--poodle-color-border-default));
-    border-radius: 0.25rem;
-    background: var(--poodle-recipe-range-slider-control-fill, var(--poodle-color-background-canvas));
-    cursor: pointer;
-    touch-action: none;
-  }
-  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__track { inset-inline: 0.25rem; }
-  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__center {
-    display: block;
-    position: absolute;
-    inset-block: 18%;
-    left: var(--poodle-range-center);
-    width: 0.0625rem;
-    background: var(--poodle-recipe-range-slider-center-fill, var(--poodle-color-border-strong));
-  }
-  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control {
-    display: block;
-    position: absolute;
-    z-index: 2;
-    top: 50%;
-    width: 0.75rem;
-    height: 0.75rem;
-    transform: translate(-50%, -50%);
-    border-radius: 999px;
-    outline: none;
-  }
-  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control--lower { left: var(--poodle-range-start); }
-  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control--upper { left: var(--poodle-range-end); }
-  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control:focus-visible {
-    box-shadow: 0 0 0 0.125rem var(--poodle-recipe-range-slider-focus-ring, var(--poodle-color-accent-focusRing));
-  }
-  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__track { inset: 0.25rem auto; }
-  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__center {
-    inset-inline: 18%;
-    bottom: var(--poodle-range-center);
-    left: auto;
-    width: auto;
-    height: 0.0625rem;
-  }
-  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__embedded-control {
-    top: auto;
-    left: 50%;
-    transform: translate(-50%, 50%);
-  }
-  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__embedded-control--lower { bottom: var(--poodle-range-start); }
-  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__embedded-control--upper { bottom: var(--poodle-range-end); }
-
-  .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__fill {
-    left: 0;
-    width: 100%;
   }
 
   .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__fill--negative {
@@ -147,133 +54,36 @@
     border-bottom-left-radius: 0;
   }
 
-  .poodle-range-slider__control {
+  /* ── Embedded two-thumb controls ── */
+
+  .poodle-range-slider__embedded-control { display: none; }
+
+  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control {
+    display: block;
     position: absolute;
+    z-index: 2;
     top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    width: 100%;
-    margin: 0;
-    background: var(--poodle-recipe-range-slider-control-fill, transparent);
-    appearance: none;
-    pointer-events: none;
-  }
-
-  .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__control {
-    width: 10rem;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
-  }
-
-  .poodle-range-slider__control::-webkit-slider-runnable-track {
-    height: var(--poodle-range-slider-track-thickness);
-    background: var(--poodle-recipe-range-slider-control-track-fill, transparent);
-  }
-
-  .poodle-range-slider__control::-moz-range-track {
-    height: var(--poodle-range-slider-track-thickness);
-    background: var(--poodle-recipe-range-slider-control-track-fill, transparent);
-  }
-
-  .poodle-range-slider__control::-webkit-slider-thumb {
-    width: var(--poodle-range-slider-thumb-size);
-    height: var(--poodle-range-slider-thumb-size);
-    margin-top: calc((var(--poodle-range-slider-thumb-size) - var(--poodle-range-slider-track-thickness)) / -2);
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    width: 0.75rem;
+    height: 0.75rem;
+    transform: translate(-50%, -50%);
     border-radius: 999px;
-    background: var(--poodle-recipe-range-slider-control-thumb-fill, var(--poodle-color-background-elevated));
-    box-shadow: var(--poodle-recipe-range-slider-control-thumb-shadow, 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
-    appearance: none;
-    cursor: pointer;
-    pointer-events: auto;
-  }
-
-  .poodle-range-slider__control::-moz-range-thumb {
-    width: var(--poodle-range-slider-thumb-size);
-    height: var(--poodle-range-slider-thumb-size);
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: 999px;
-    background: var(--poodle-recipe-range-slider-control-thumb-fill, var(--poodle-color-background-elevated));
-    box-shadow: var(--poodle-recipe-range-slider-control-thumb-shadow, 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
-    cursor: pointer;
-    pointer-events: auto;
-  }
-
-  .poodle-range-slider__control:focus-visible {
     outline: none;
   }
-
-  .poodle-range-slider__control:focus-visible::-webkit-slider-thumb {
-    box-shadow: var(--poodle-recipe-range-slider-focus-control-thumb-shadow, 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
-      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
+  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control--lower { left: var(--poodle-range-start); }
+  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control--upper { left: var(--poodle-range-end); }
+  .poodle-range-slider[data-variant="embedded"] .poodle-range-slider__embedded-control:focus-visible {
+    box-shadow: 0 0 0 0.125rem var(--poodle-recipe-range-slider-focus-ring, var(--poodle-color-accent-focusRing));
   }
-
-  .poodle-range-slider__control:focus-visible::-moz-range-thumb {
-    box-shadow: var(--poodle-recipe-range-slider-focus-control-thumb-shadow, 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
-      0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent));
+  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__embedded-control {
+    top: auto;
+    left: 50%;
+    transform: translate(-50%, 50%);
   }
+  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__embedded-control--lower { bottom: var(--poodle-range-start); }
+  .poodle-range-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-range-slider__embedded-control--upper { bottom: var(--poodle-range-end); }
 
-  /* Size variants */
-  .poodle-range-slider[data-size="xs"] { --poodle-range-slider-control-min-height: 1.25rem; --poodle-range-slider-thumb-size: 0.75rem; --poodle-range-slider-track-thickness: 0.1875rem; }
-  .poodle-range-slider[data-size="sm"] { --poodle-range-slider-control-min-height: 1.375rem; --poodle-range-slider-thumb-size: 0.875rem; --poodle-range-slider-track-thickness: 0.25rem; }
-  .poodle-range-slider[data-size="md"] { --poodle-range-slider-control-min-height: 1.5rem; --poodle-range-slider-thumb-size: 1rem; --poodle-range-slider-track-thickness: 0.375rem; }
-  .poodle-range-slider[data-size="lg"] { --poodle-range-slider-control-min-height: 1.625rem; --poodle-range-slider-thumb-size: 1.125rem; --poodle-range-slider-track-thickness: 0.5rem; }
-  .poodle-range-slider[data-size="xl"] { --poodle-range-slider-control-min-height: 1.75rem; --poodle-range-slider-thumb-size: 1.25rem; --poodle-range-slider-track-thickness: 0.625rem; }
+  /* ── Block window fill ── */
 
-  /* Density variants — embedded only. Density must not inflate the block
-     capsule's layout box or make the accessibility envelope visible as
-     spacing (g18.024). */
-  .poodle-range-slider[data-variant="embedded"][data-density="compact"] { padding: 0.25rem 0; }
-  .poodle-range-slider[data-variant="embedded"][data-density="comfortable"] { padding: 0.75rem 0; }
-
-  .poodle-range-slider[data-variant="block"] {
-    /* g18.024: the block capsule consumes the shared control-height axis
-       (24/28/36/44/52px for xs–xl); there is no Slider-only height ladder.
-       The root's measured cross-axis size equals the visible capsule; the
-       ≥44×44 hit targets stay measurable and interactive but never add
-       margin, padding, minimum size, or row height. */
-    --poodle-range-slider-block-height: var(--poodle-size-control-height);
-    --poodle-range-slider-block-thumb: 0.5rem;
-    --poodle-range-slider-block-hit: 44px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    min-height: var(--poodle-range-slider-block-height);
-    overflow: visible;
-    touch-action: pan-y;
-  }
-  .poodle-range-slider[data-variant="block"][data-size="xs"] { --poodle-range-slider-block-height: 1.5rem; --poodle-range-slider-block-thumb: 0.375rem; }
-  .poodle-range-slider[data-variant="block"][data-size="sm"] { --poodle-range-slider-block-height: 1.75rem; --poodle-range-slider-block-thumb: 0.4375rem; }
-  .poodle-range-slider[data-variant="block"][data-size="md"] { --poodle-range-slider-block-height: 2.25rem; --poodle-range-slider-block-thumb: 0.5rem; }
-  .poodle-range-slider[data-variant="block"][data-size="lg"] { --poodle-range-slider-block-height: 2.75rem; --poodle-range-slider-block-thumb: 0.5625rem; }
-  .poodle-range-slider[data-variant="block"][data-size="xl"] { --poodle-range-slider-block-height: 3.25rem; --poodle-range-slider-block-thumb: 0.625rem; }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__capsule {
-    position: relative;
-    display: block;
-    width: 100%;
-    min-height: var(--poodle-range-slider-block-height);
-    border-radius: var(--poodle-radius-control);
-    overflow: visible;
-    background: var(--poodle-recipe-range-slider-block-remainder-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
-    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));
-    font-variant-numeric: tabular-nums;
-    font-size: 0.875rem;
-  }
-  .poodle-range-slider[data-variant="block"][data-size="xs"] .poodle-range-slider__capsule { font-size: 0.75rem; }
-  .poodle-range-slider[data-variant="block"][data-size="sm"] .poodle-range-slider__capsule { font-size: 0.8125rem; }
-  .poodle-range-slider[data-variant="block"][data-size="lg"] .poodle-range-slider__capsule { font-size: 1rem; }
-  .poodle-range-slider[data-variant="block"][data-size="xl"] .poodle-range-slider__capsule { font-size: 1.125rem; }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__track {
-    position: absolute;
-    inset: 0;
-    height: auto;
-    transform: none;
-    overflow: hidden;
-    border-radius: inherit;
-  }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__fill--positive,
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__fill--negative {
     left: auto;
@@ -284,66 +94,32 @@
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__fill--negative {
     inset-inline-start: var(--poodle-range-negative-start);
   }
-  /* g18.022 fixed whole-capsule anchors: one stable text row (lower value
-     at the logical start, label centered, upper value at the logical end)
-     painted through window/remainder clip layers. Positions never depend on
-     the selected window; only the painted foreground crosses over. */
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    padding-inline: 0.5rem;
-    overflow: hidden;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__fill--positive {
+    inset-inline-start: auto;
+    bottom: var(--poodle-range-positive-start);
     width: 100%;
+    height: var(--poodle-range-positive-span);
   }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline-row--vertical {
-    position: relative;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
-    /* g18.024: a fixed, value-independent block inset keeps the anchored
-       text fully inside the rail at every shared size. */
-    padding-block: 0.25rem;
+  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__fill--negative {
+    inset-inline-start: auto;
+    bottom: var(--poodle-range-negative-start);
+    width: 100%;
+    height: var(--poodle-range-negative-span);
   }
-  /* g18.024 vertical repair: the optional label centers on the exact rail
-     middle as an absolute overlay, so the two required endpoint values stay
-     pinned to the physical top and bottom and the glyphs never clip, shift,
-     or collapse the label at any height. */
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline-row--vertical .poodle-range-slider__inline-label {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline-label,
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline-value {
-    flex: none;
-    white-space: nowrap;
-    pointer-events: none;
-  }
+
+  /* ── Block text clips ──
+     One stable row (lower at the logical start, label centered, upper at the
+     logical end) painted through selected and remainder layers. Positions
+     never depend on the selected window; only the painted foreground crosses
+     over. */
+
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline--selected {
-    color: var(--poodle-recipe-range-slider-block-selected-text, var(--poodle-color-text-inverse));
     clip-path: inset(0 calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start));
   }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline--remainder-start {
-    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));
     clip-path: inset(0 calc(100% - var(--poodle-range-start)) 0 0);
   }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline--remainder-end {
-    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));
     clip-path: inset(0 0 0 var(--poodle-range-end));
   }
   .poodle-range-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"] .poodle-range-slider__inline--selected {
@@ -355,25 +131,6 @@
   .poodle-range-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"] .poodle-range-slider__inline--remainder-end {
     clip-path: inset(0 var(--poodle-range-end) 0 0);
   }
-  /* g18.022 vertical block: upright text with the upper value at the
-     physical top, the label centered, and the lower value at the physical
-     bottom; the selected window clips along the block axis. */
-  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] {
-    width: var(--poodle-range-slider-block-height);
-    min-width: var(--poodle-range-slider-block-height);
-    min-height: 10rem;
-    height: 100%;
-    justify-content: center;
-    touch-action: pan-x;
-  }
-  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__capsule {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-  }
-  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__inline-row--vertical {
-    height: 100%;
-  }
   .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__inline--selected {
     clip-path: inset(calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start) 0);
   }
@@ -383,82 +140,33 @@
   .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__inline--remainder-bottom {
     clip-path: inset(0 0 var(--poodle-range-start) 0);
   }
-  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__hit {
-    top: auto;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__hit--lower {
-    inset-inline-start: auto;
-    bottom: calc(var(--poodle-range-start) - (var(--poodle-range-slider-block-hit) / 2));
-  }
-  .poodle-range-slider[data-variant="block"][data-orientation="vertical"] .poodle-range-slider__hit--upper {
-    inset-inline-start: auto;
-    bottom: calc(var(--poodle-range-end) - (var(--poodle-range-slider-block-hit) / 2));
-    z-index: 3;
-  }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit {
-    position: absolute;
-    z-index: 2;
-    width: var(--poodle-range-slider-block-hit);
-    height: var(--poodle-range-slider-block-hit);
-    top: 50%;
-    transform: translateY(-50%);
-    display: grid;
-    place-items: center;
-    pointer-events: auto;
-    cursor: pointer;
-    touch-action: none;
+
+  /* ── Block bounded inset handles ──
+     Both markers use the shared family marker offset (inset + half
+     thickness) as the clamp bound, exactly like Slider. The genuine two-thumb
+     difference is the anchor: each handle sits at its own value and is only
+     pushed inside by the bound, so a pair that meets or overlaps can never
+     cross its sibling the way a symmetric interior inset would. */
+
+  .poodle-range-slider[data-variant="block"] {
+    --poodle-range-slider-block-marker-start: clamp(
+      var(--poodle-slider-family-marker-offset),
+      var(--poodle-range-start),
+      calc(100% - var(--poodle-slider-family-marker-offset))
+    );
+    --poodle-range-slider-block-marker-end: clamp(
+      var(--poodle-slider-family-marker-offset),
+      var(--poodle-range-end),
+      calc(100% - var(--poodle-slider-family-marker-offset))
+    );
   }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit--lower {
-    inset-inline-start: calc(var(--poodle-range-start) - (var(--poodle-range-slider-block-hit) / 2));
+    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-start);
   }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit--upper {
-    inset-inline-start: calc(var(--poodle-range-end) - (var(--poodle-range-slider-block-hit) / 2));
+    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-end);
     z-index: 3;
   }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit:focus-visible {
-    outline: none;
     z-index: 4;
-  }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit:focus-visible .poodle-range-slider__thumb {
-    box-shadow: 0 0 0 0.1875rem var(--poodle-recipe-range-slider-block-focus-ring, var(--poodle-color-accent-focusRing));
-  }
-  .poodle-range-slider[data-variant="block"] .poodle-range-slider__thumb {
-    width: var(--poodle-range-slider-block-thumb);
-    height: var(--poodle-range-slider-block-thumb);
-    border-radius: 999px;
-    background: var(--poodle-recipe-range-slider-block-handle-fill, var(--poodle-color-background-elevated));
-    border: 0.0625rem solid var(--poodle-recipe-range-slider-block-handle-border, var(--poodle-color-border-default));
-    pointer-events: none;
-  }
-
-  @media (forced-colors: active) {
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__capsule {
-      background: Canvas;
-      color: CanvasText;
-    }
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__fill--positive,
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__fill--negative {
-      background: Highlight;
-      color: HighlightText;
-    }
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline--selected {
-      color: HighlightText;
-    }
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline--remainder-start,
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__inline--remainder-end {
-      color: CanvasText;
-    }
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__thumb {
-      background: ButtonFace;
-      border-color: ButtonText;
-    }
-    .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit:focus-visible .poodle-range-slider__thumb {
-      box-shadow: 0 0 0 0.1875rem Highlight;
-    }
-    .poodle-range-slider[data-variant="block"][data-disabled="true"] .poodle-range-slider__capsule {
-      color: GrayText;
-      border-color: GrayText;
-    }
   }

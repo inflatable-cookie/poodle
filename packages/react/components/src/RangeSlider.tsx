@@ -4,12 +4,13 @@ import {
   layoutRangeSliderBlock,
   measureInlineAdvance,
   normalizeRangeValue,
-  physicalToValueNorm,
   rangeSliderControlTransition,
   rangeSliderTransition,
   rangeSliderVisualState,
   resolveRangeVisibleValue,
   safeSliderMax,
+  sliderFamilyCapsuleSpan,
+  sliderFamilyValueNorm,
   type AudioValueLaw, type RangeSliderContext, type RangeSliderControlContext,
   type SliderDirection, type SliderPolarity, type SliderVariant,
 } from "@inflatable-cookie/poodle-core";
@@ -120,11 +121,13 @@ export function RangeSlider({
     }
   }
   function pointNorm(event: ReactPointerEvent<HTMLElement>): number {
-    const rect = root.current!.getBoundingClientRect();
-    const physical = orientation === "horizontal"
-      ? (event.clientX - rect.left) / Math.max(rect.width, 1)
-      : 1 - (event.clientY - rect.top) / Math.max(rect.height, 1);
-    return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
+    return sliderFamilyValueNorm({
+      rect: root.current!.getBoundingClientRect(),
+      orientation,
+      direction,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   }
   const block = variant === "block";
   const visibleLabelText = visibleLabel && visibleLabel !== "" ? visibleLabel : null;
@@ -200,11 +203,11 @@ export function RangeSlider({
     const node = capsule.current;
     const observer = new ResizeObserver(() => {
       const rect = node.getBoundingClientRect();
-      setCapsuleSpan(orientation === "vertical" ? rect.height : rect.width);
+      setCapsuleSpan(sliderFamilyCapsuleSpan(rect, orientation));
     });
     observer.observe(node);
     const rect = node.getBoundingClientRect();
-    setCapsuleSpan(orientation === "vertical" ? rect.height : rect.width);
+    setCapsuleSpan(sliderFamilyCapsuleSpan(rect, orientation));
     return () => observer.disconnect();
   }, [block, orientation]);
   useEffect(() => { if (disabled) terminate(); }, [disabled]);

@@ -637,6 +637,21 @@ export {
 } from "./slider";
 
 export {
+  sliderFamilyCapsuleSpan,
+  sliderFamilyValueNorm,
+  sliderFamilyValueDockedToMarker,
+  sliderFamilyBlockMarkerPercent,
+  SLIDER_FAMILY_BLOCK_HIT_PX,
+  SLIDER_FAMILY_BLOCK_MARKER_INSET_PX,
+  SLIDER_FAMILY_BLOCK_MARKER_THICKNESS_PX,
+  SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX,
+  SLIDER_FAMILY_TEXT_DOCK_GAP_PX,
+  SLIDER_FAMILY_TEXT_END_INSET_PX,
+  type SliderFamilyOrientation,
+  type SliderFamilyRect,
+} from "./slider-family";
+
+export {
   resolveOverlayPosition,
   type OverlaySide,
   type OverlayPlacement,

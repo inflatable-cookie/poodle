@@ -5,12 +5,13 @@
     layoutRangeSliderBlock,
     measureInlineAdvance,
     normalizeRangeValue,
-    physicalToValueNorm,
     rangeSliderControlTransition,
     rangeSliderVisualState,
     rangeSliderTransition,
     resolveRangeVisibleValue,
     safeSliderMax,
+    sliderFamilyCapsuleSpan,
+    sliderFamilyValueNorm,
     type AudioValueLaw, type RangeSliderContext, type RangeSliderControlContext,
     type SliderDirection, type SliderPolarity, type SliderVariant,
   } from "@inflatable-cookie/poodle-core";
@@ -121,11 +122,13 @@
     }
   }
   function pointNorm(event: PointerEvent): number {
-    const rect = root.getBoundingClientRect();
-    const physical = orientation === "horizontal"
-      ? (event.clientX - rect.left) / Math.max(rect.width, 1)
-      : 1 - (event.clientY - rect.top) / Math.max(rect.height, 1);
-    return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
+    return sliderFamilyValueNorm({
+      rect: root.getBoundingClientRect(),
+      orientation,
+      direction,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   }
   function pointerDown(event: PointerEvent): void {
     if (event.button !== 0 || disabled) return;
@@ -168,14 +171,13 @@
 
   $effect(() => {
     if (!block || !capsule) return;
-    const axis = orientation;
     const observer = new ResizeObserver(() => {
       const rect = capsule?.getBoundingClientRect();
-      capsuleSpan = !rect ? 0 : axis === "vertical" ? rect.height : rect.width;
+      capsuleSpan = !rect ? 0 : sliderFamilyCapsuleSpan(rect, orientation);
     });
     observer.observe(capsule);
     const rect = capsule.getBoundingClientRect();
-    capsuleSpan = axis === "vertical" ? rect.height : rect.width;
+    capsuleSpan = sliderFamilyCapsuleSpan(rect, orientation);
     return () => observer.disconnect();
   });
   $effect(() => { if (disabled) terminate(); });

@@ -2,8 +2,9 @@
   import "@inflatable-cookie/poodle-core/styles/slider.css";
   import {
     createSliderControlContext, layoutSliderBlock, measureInlineAdvance,
-    normalizeSliderValue, physicalToValueNorm, resolveSliderVisibleValue, safeSliderMax,
-    sliderControlTransition, sliderTransition, sliderVisualState,
+    normalizeSliderValue, resolveSliderVisibleValue, safeSliderMax,
+    sliderControlTransition, sliderFamilyCapsuleSpan, sliderFamilyValueDockedToMarker,
+    sliderFamilyValueNorm, sliderTransition, sliderVisualState,
     type AudioValueLaw, type SliderContext, type SliderControlContext,
     type SliderDirection, type SliderPolarity, type SliderVariant,
   } from "@inflatable-cookie/poodle-core";
@@ -98,7 +99,7 @@
     const font = getComputedStyle(capsule).font;
     const valueAdvance = measureInlineAdvance(visibleValueText, font);
     // 12px end inset + 4px breathing room between the glyph and marker.
-    return (1 - visualState.valueNorm) * capsuleSpan < valueAdvance + 16;
+    return sliderFamilyValueDockedToMarker({ valueNorm: visualState.valueNorm, span: capsuleSpan, advance: valueAdvance });
   });
 
   function send(type: "INPUT" | "COMMIT", event: Event): void {
@@ -127,11 +128,13 @@
   }
 
   function pointNorm(event: PointerEvent): number {
-    const rect = root.getBoundingClientRect();
-    const physical = orientation === "horizontal"
-      ? (event.clientX - rect.left) / Math.max(rect.width, 1)
-      : 1 - (event.clientY - rect.top) / Math.max(rect.height, 1);
-    return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
+    return sliderFamilyValueNorm({
+      rect: root.getBoundingClientRect(),
+      orientation,
+      direction,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   }
 
   function pointerDown(event: PointerEvent): void {
@@ -175,14 +178,13 @@
 
   $effect(() => {
     if (!block || !capsule) return;
-    const axis = orientation;
     const observer = new ResizeObserver(() => {
       const rect = capsule?.getBoundingClientRect();
-      capsuleSpan = !rect ? 0 : axis === "vertical" ? rect.height : rect.width;
+      capsuleSpan = !rect ? 0 : sliderFamilyCapsuleSpan(rect, orientation);
     });
     observer.observe(capsule);
     const rect = capsule.getBoundingClientRect();
-    capsuleSpan = axis === "vertical" ? rect.height : rect.width;
+    capsuleSpan = sliderFamilyCapsuleSpan(rect, orientation);
     return () => observer.disconnect();
   });
 
