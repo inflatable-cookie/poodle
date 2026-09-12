@@ -51,10 +51,26 @@ export const LOCKSTEP_JS_MANIFEST_PATHS = [
   "packages/react/components/package.json",
 ] as const;
 
+/**
+ * g18.006 additionally locks the root repository manifest. It stays private
+ * and unpublished, but its repository version moves with the lockstep release,
+ * so the closed candidate admits exactly its version-only transition.
+ */
+export const G18_006_JS_MANIFEST_PATHS = [
+  ...LOCKSTEP_JS_MANIFEST_PATHS,
+  "package.json",
+] as const;
+
 export const CANDIDATE_VERSION_PATHS = [
   ...LOCKSTEP_CARGO_MANIFEST_PATHS,
   ...LOCKSTEP_CARGO_LOCK_PATHS,
   ...LOCKSTEP_JS_MANIFEST_PATHS,
+] as const;
+
+/** The g18.006 version-file surface: the lockstep set plus the root manifest. */
+export const G18_006_VERSION_PATHS = [
+  ...CANDIDATE_VERSION_PATHS,
+  "package.json",
 ] as const;
 
 export const CANDIDATE_GENERATED_STAMP_PATHS = [
@@ -131,6 +147,7 @@ export const G18_006_RELEASE_INPUT_PATHS = [
   "bun.lock",
   "docs/release-notes/README.md",
   "docs/release-notes/0.4.0.md",
+  "package.json",
   ...LOCKSTEP_CARGO_MANIFEST_PATHS,
   ...LOCKSTEP_CARGO_LOCK_PATHS,
   ...LOCKSTEP_JS_MANIFEST_PATHS,
@@ -204,8 +221,8 @@ const G18_006_CANDIDATE_POLICY: CandidatePolicy = {
   sourceVersion: "0.3.0",
   targetVersion: "0.4.0",
   cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
-  jsManifestPaths: LOCKSTEP_JS_MANIFEST_PATHS,
-  versionPaths: CANDIDATE_VERSION_PATHS,
+  jsManifestPaths: G18_006_JS_MANIFEST_PATHS,
+  versionPaths: G18_006_VERSION_PATHS,
   writablePaths: G18_006_WRITABLE_PATHS,
   writablePathPatterns: [G18_006_EXECUTION_RECORD_PATTERN],
   evidencePaths: G18_006_EVIDENCE_PATHS,
@@ -871,6 +888,42 @@ async function ordinaryCargoForbiddenSurfaces(
   return forbidden;
 }
 
+const PRECURSOR_ROOT_ALIGNMENT_SOURCE = "0.1.0";
+const PRECURSOR_ROOT_ALIGNMENT_TARGET = "0.3.0";
+
+/**
+ * One-time operator-ordered g18.031 precursor: the private root repository
+ * manifest moves 0.1.0 -> 0.3.0 so its version is truthful beside the accepted
+ * release. Ordinary CI admits exactly that alignment - private preserved,
+ * every other leaf unchanged - and nothing broader. The later 0.3.0 -> 0.4.0
+ * transition stays the closed g18.006 candidate rule.
+ */
+async function ordinaryAdmitsPrecursorRootAlignment(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  if (!changedPaths.includes("package.json")) return false;
+  const beforeText = await gitShowFile(checkoutRoot, requiredBaseCommit, "package.json");
+  const afterText = await gitShowFile(checkoutRoot, sourceCommit, "package.json");
+  if (beforeText === null || afterText === null) return false;
+  let before: unknown;
+  let after: unknown;
+  try {
+    before = JSON.parse(beforeText);
+    after = JSON.parse(afterText);
+  } catch {
+    return false;
+  }
+  if (!isJsonRecord(before) || !isJsonRecord(after)) return false;
+  if (before.version !== PRECURSOR_ROOT_ALIGNMENT_SOURCE) return false;
+  if (after.version !== PRECURSOR_ROOT_ALIGNMENT_TARGET) return false;
+  if (before.private !== true || after.private !== true) return false;
+  const changes = changedJsonLeafPaths(before, after);
+  return changes.length === 1 && changes[0] === "version";
+}
+
 function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
@@ -883,6 +936,7 @@ export function requireExactCommit(value: string, label: string): string {
 }
 
 const CANDIDATE_MANIFEST_LEAF_ALLOWLIST: Record<string, readonly string[]> = {
+  "package.json": ["version"],
   "packages/core/package.json": ["version"],
   "packages/svelte/components/package.json": [
     "version",
@@ -962,8 +1016,13 @@ async function assertCandidateManifestHonesty(
     if (after.version !== policy.targetVersion) {
       throw new Error(`candidate scope requires ${path} version ${policy.targetVersion}`);
     }
-    if (path === "packages/react/components/package.json" && after.private !== true) {
-      throw new Error("candidate scope rejected React admission: package must remain private");
+    if (
+      (path === "package.json" || path === "packages/react/components/package.json") &&
+      after.private !== true
+    ) {
+      throw new Error(
+        `candidate scope rejected ${path} admission: package must remain private`,
+      );
     }
     const beforeInternal = internalJsDependencies(before);
     const afterInternal = internalJsDependencies(after);
@@ -1544,6 +1603,23 @@ export async function assertInstalledScope(
         changedPaths,
       )),
     );
+    // The one-time g18.031 precursor aligns the private root manifest from
+    // 0.1.0 to the accepted 0.3.0. That exact version-only alignment is
+    // admitted; any broader root manifest change, or any other forbidden
+    // surface beside it, still fails closed. The 0.3.0 -> 0.4.0 transition
+    // remains the closed g18.006 candidate rule.
+    if (
+      await ordinaryAdmitsPrecursorRootAlignment(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      )
+    ) {
+      forbidden = forbidden.filter(
+        ({ path, surface }) => !(path === "package.json" && surface === "version"),
+      );
+    }
     // Ordinary CI has no candidate environment variable. A release-bearing
     // range (a forbidden version/release surface or any staged release note)
     // is admitted only when the complete diff satisfies the closed g18.006

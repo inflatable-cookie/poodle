@@ -708,6 +708,16 @@ function closedCandidateChangelog(version: string): string {
 
 function closedCandidateFiles(version: string): Record<string, string> {
   const files: Record<string, string> = {
+    "package.json": `${JSON.stringify(
+      {
+        name: "poodle",
+        version,
+        private: true,
+        scripts: { test: "vitest run" },
+      },
+      null,
+      2,
+    )}\n`,
     "packages/core/package.json": `${JSON.stringify(
       { name: "@inflatable-cookie/poodle-core", version, type: "module" },
       null,
@@ -866,6 +876,80 @@ describe("closed 0.4.0 candidate scope admission", () => {
         G18_006_CANDIDATE_SCOPE_MODE,
       ),
     ).rejects.toThrow(/candidate scope rejected unauthorized Cargo manifest change/);
+  });
+
+  test("closed candidate scope requires the exact root version-only transition", async () => {
+    const { root, base, head } = await plantClosedCandidate();
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toContain("package.json");
+
+    const unchanged = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["package.json"] = (files["package.json"] as string).replace(
+          '"version": "0.4.0"',
+          '"version": "0.3.0"',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        unchanged.root,
+        unchanged.base,
+        unchanged.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(
+      /requires the complete 0\.4\.0 release-input set; missing: .*package\.json/,
+    );
+
+    const wrongVersion = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["package.json"] = (files["package.json"] as string).replace(
+          '"version": "0.4.0"',
+          '"version": "0.4.1"',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        wrongVersion.root,
+        wrongVersion.base,
+        wrongVersion.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope requires package\.json version 0\.4\.0/);
+
+    const scriptsDrift = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        const manifest = JSON.parse(files["package.json"] as string);
+        manifest.scripts.test = "echo planted";
+        files["package.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        scriptsDrift.root,
+        scriptsDrift.base,
+        scriptsDrift.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope rejected unauthorized package\.json changes: scripts\.test/);
+
+    const unprivate = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        const manifest = JSON.parse(files["package.json"] as string);
+        manifest.private = false;
+        files["package.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        unprivate.root,
+        unprivate.base,
+        unprivate.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope rejected/);
   });
 
   test("closed candidate scope rejects arbitrary source and transport surfaces", async () => {
@@ -1046,5 +1130,90 @@ describe("closed 0.4.0 candidate scope admission", () => {
     await expect(
       assertCertificationScope(root, base, head, G16_054_CANDIDATE_SCOPE_MODE),
     ).rejects.toThrow(/candidate scope requires packages\/core\/package\.json/);
+  });
+});
+
+describe("g18.031 precursor root version alignment", () => {
+  const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+    name: "poodle",
+    version: "0.1.0",
+    private: true,
+    scripts: { test: "vitest run" },
+    dependencies: { "left-pad": "1.0.0" },
+    ...overrides,
+  });
+
+  async function plantRootRange(
+    mutateHead: (manifest: Record<string, unknown>) => void,
+    extraHeadFiles: Record<string, string> = {},
+  ): Promise<{ root: string; base: string; head: string }> {
+    const root = await initPlant();
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest(), null, 2)}\n`,
+    });
+    const base = await commitAll(root, "precursor root base");
+    const target = rootManifest({ version: "0.3.0" });
+    mutateHead(target);
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(target, null, 2)}\n`,
+      ...extraHeadFiles,
+    });
+    const head = await commitAll(root, "precursor root head");
+    return { root, base, head };
+  }
+
+  test("ordinary CI admits the exact 0.1.0 -> 0.3.0 version-only alignment", async () => {
+    const { root, base, head } = await plantRootRange(() => {});
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toContain("package.json");
+  });
+
+  test("ordinary CI rejects anything broader than the precursor alignment", async () => {
+    const plants: Record<string, (manifest: Record<string, unknown>) => void> = {
+      "wrong target": (manifest) => {
+        manifest.version = "0.4.0";
+      },
+      "scripts drift": (manifest) => {
+        (manifest.scripts as Record<string, unknown>).test = "echo planted";
+      },
+      "dependency drift": (manifest) => {
+        (manifest.dependencies as Record<string, unknown>)["left-pad"] = "2.0.0";
+      },
+      "private flip": (manifest) => {
+        manifest.private = false;
+      },
+    };
+    for (const [kind, mutate] of Object.entries(plants)) {
+      const { root, base, head } = await plantRootRange(mutate);
+      await expect(
+        assertInstalledScope(root, base, head, "ordinary"),
+        kind,
+      ).rejects.toThrow(/forbidden version surface: package\.json/);
+    }
+  });
+
+  test("ordinary CI keeps other forbidden surfaces beside the precursor alignment", async () => {
+    const { root, base, head } = await plantRootRange(() => {}, {
+      ".npmrc": "registry=https://registry.example.invalid\n",
+    });
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /certification scope rejected forbidden/,
+    );
+  });
+
+  test("ordinary CI still refuses a 0.3.0 -> 0.4.0 root bump without the closed candidate", async () => {
+    const root = await initPlant();
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest({ version: "0.3.0" }), null, 2)}\n`,
+    });
+    const base = await commitAll(root, "post-precursor base");
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest({ version: "0.4.0" }), null, 2)}\n`,
+    });
+    const head = await commitAll(root, "post-precursor head");
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /forbidden version surface: package\.json/,
+    );
   });
 });

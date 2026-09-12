@@ -9,6 +9,16 @@ include = [
   "demos/effigy.demos.toml",
 ]
 
+[release]
+# Release authority is the root repository manifest, aligned to the lockstep
+# release. The version is truthful repository metadata: it moves 0.3.0 ->
+# 0.4.0 with the closed g18.006 candidate. The root package stays private and
+# unpublished; core and Svelte remain the only published packages.
+version-file = "package.json"
+changelog = "CHANGELOG.md"
+tag-format = "v{version}"
+pre-1-0 = true
+
 [release.gates.headless]
 command = "effigy qa"
 description = "Run Poodle's complete self-contained headless release board"
