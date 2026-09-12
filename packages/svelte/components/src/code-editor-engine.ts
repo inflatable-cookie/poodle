@@ -114,66 +114,95 @@ function isLanguageExtension(value: unknown): value is Extension {
 }
 
 /**
- * Token-bound syntax presentation (g18.021). One private highlight style maps
- * stable Lezer tag groups onto Poodle semantic CSS variables, so a live theme
- * change restyles mounted editors without engine recreation. Ordinary names
- * stay unmapped and inherit the primary text colour; weight or style never
- * substitutes for colour.
+ * Dual syntax palettes (g18.023). One private highlight style maps stable
+ * Lezer tag groups onto dedicated `color.syntax.*` Poodle CSS variables, so a
+ * live theme change restyles mounted editors without engine recreation. The
+ * semantic roles resolve from designed dark-surface primitives by default and
+ * from light-surface primitives in light theme modes; named themes may
+ * override individual roles. Ordinary names stay unmapped and inherit the
+ * primary text colour; weight or style never substitutes for colour.
  *
  * Poodle ships no grammar: these tags are base editor presentation machinery,
  * and the style is installed exclusively with a full-mode non-plain language.
  */
 const codeEditorHighlightStyle = HighlightStyle.define([
   {
-    // Comments, metadata, and their subtags read as secondary text.
+    // Comments, metadata, and their subtags recede into a restrained neutral.
     tag: [lezerTags.comment, lezerTags.meta],
-    color: "var(--poodle-color-text-secondary)",
+    color: "var(--poodle-color-syntax-comment)",
   },
   {
-    // The whole keyword family — control, definition, module, and operator
-    // keywords — reads as accent. `null`, `super`, `this`, and boolean
-    // literals carry their own more specific rules below.
+    // The whole keyword family — control, definition, module, modifier, and
+    // operator keywords, plus `this` — reads as one calm violet. `null`,
+    // `super`, and boolean literals carry their own more specific literal
+    // rule below, and more-specific mappings win over this generic one.
     tag: lezerTags.keyword,
-    color: "var(--poodle-color-accent-base)",
+    color: "var(--poodle-color-syntax-keyword)",
   },
   {
-    // Strings (and string specialisations such as templates) read as success.
-    tag: lezerTags.string,
-    color: "var(--poodle-color-status-success)",
+    // Strings, their specialisations (templates, doc strings), regexps, and
+    // escape sequences read as calm green.
+    tag: [lezerTags.string, lezerTags.special(lezerTags.string), lezerTags.regexp, lezerTags.escape],
+    color: "var(--poodle-color-syntax-string)",
   },
   {
-    // Numbers, booleans, and literal constants read as info.
+    // Numbers, booleans, null, and atomic constants read as warm amber. The
+    // latter three beat the generic keyword rule by tag specificity.
     tag: [lezerTags.number, lezerTags.bool, lezerTags.null, lezerTags.atom],
-    color: "var(--poodle-color-status-info)",
+    color: "var(--poodle-color-syntax-literal)",
   },
   {
-    // Types and definitions read as warning; ordinary names stay primary.
+    // Types, classes, namespaces, and their definitions read as cyan;
+    // definitions of types are matched through the name tags they carry.
+    tag: [lezerTags.typeName, lezerTags.className, lezerTags.namespace],
+    color: "var(--poodle-color-syntax-type)",
+  },
+  {
+    // Variable definitions, function calls, and method calls read as blue.
+    // Function declarations carry a function modifier over a variable
+    // definition, so the definition entry reaches them too.
     tag: [
-      lezerTags.typeName,
-      lezerTags.className,
+      lezerTags.function(lezerTags.variableName),
+      lezerTags.function(lezerTags.propertyName),
       lezerTags.definition(lezerTags.variableName),
-      lezerTags.definition(lezerTags.propertyName),
     ],
-    color: "var(--poodle-color-status-warning)",
+    color: "var(--poodle-color-syntax-callable)",
   },
   {
-    // Grammars that tag malformed input directly read as danger. Parser error
-    // nodes of grammars that do not are marked by the plugin below.
+    // Properties, attributes, member names, and their definitions read as
+    // rose. Ordinary identifiers never reach this rule: plain variable names
+    // are a sibling of property names, not a subtag.
+    tag: lezerTags.propertyName,
+    color: "var(--poodle-color-syntax-property)",
+  },
+  {
+    // Operators and their specialisations read as a calm neutral.
+    tag: lezerTags.operator,
+    color: "var(--poodle-color-syntax-operator)",
+  },
+  {
+    // Punctuation, separators, and brackets recede further than operators.
+    tag: lezerTags.punctuation,
+    color: "var(--poodle-color-syntax-punctuation)",
+  },
+  {
+    // Grammars that tag malformed input directly read as invalid; parser
+    // error nodes of grammars that do not are marked by the plugin below.
     tag: lezerTags.invalid,
-    color: "var(--poodle-color-status-danger)",
+    color: "var(--poodle-color-syntax-invalid)",
   },
 ]);
 
 /**
  * Parser error nodes carry no Lezer tag, so the tag-bound style cannot reach
- * them. This private plugin marks visible error nodes with the danger token
- * so invalid syntax is legible without replacing host diagnostics. The style
- * is an inline CSS variable, so it follows live theme changes like the rest
- * of the presentation.
+ * them. This private plugin marks visible error nodes with the invalid syntax
+ * role so malformed input is legible without replacing host diagnostics. The
+ * inline colour variable follows live theme changes, and the paired
+ * stylesheet adds the wavy underline that keeps the cue non-colour-based.
  */
 const invalidSyntaxMark = Decoration.mark({
   class: "poodle-code-editor__syntax-invalid",
-  attributes: { style: "color: var(--poodle-color-status-danger)" },
+  attributes: { style: "color: var(--poodle-color-syntax-invalid)" },
 });
 
 function invalidSyntaxDecorations(view: EditorView): DecorationSet {

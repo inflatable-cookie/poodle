@@ -224,9 +224,8 @@ transaction.
 
 ## 8. Token Usage
 
-g18.023 is the approved next token revision. Until it merges, the implementation
-still carries the temporary g18.021 UI-semantic mapping described in the
-evidence note below; that mapping is not the target contract.
+The g18.023 dual syntax palettes are the shipped token revision; the mapping
+described below is the implemented contract, not a pending target.
 
 | Part | Semantic token purpose |
 | --- | --- |

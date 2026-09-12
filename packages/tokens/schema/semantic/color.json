@@ -100,6 +100,58 @@
         "$type": "color",
         "$value": "{color.text.secondary}"
       }
+    },
+    "syntax": {
+      "comment": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.comment}",
+        "$description": "Syntax comments and metadata. Dark base by default; light theme modes reference the light primitives."
+      },
+      "keyword": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.keyword}",
+        "$description": "Syntax keyword family. Dark base by default; light theme modes reference the light primitives."
+      },
+      "string": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.string}",
+        "$description": "Syntax strings, regex, and escapes. Dark base by default; light theme modes reference the light primitives."
+      },
+      "literal": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.literal}",
+        "$description": "Syntax numeric and atomic literals. Dark base by default; light theme modes reference the light primitives."
+      },
+      "type": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.type}",
+        "$description": "Syntax types, classes, and namespaces. Dark base by default; light theme modes reference the light primitives."
+      },
+      "callable": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.callable}",
+        "$description": "Syntax definitions and callables. Dark base by default; light theme modes reference the light primitives."
+      },
+      "property": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.property}",
+        "$description": "Syntax properties, attributes, and member names. Dark base by default; light theme modes reference the light primitives."
+      },
+      "operator": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.operator}",
+        "$description": "Syntax operators. Dark base by default; light theme modes reference the light primitives."
+      },
+      "punctuation": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.punctuation}",
+        "$description": "Syntax punctuation and brackets. Dark base by default; light theme modes reference the light primitives."
+      },
+      "invalid": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.dark.invalid}",
+        "$description": "Syntax invalid or malformed text; always paired with a non-colour cue. Dark base by default; light theme modes reference the light primitives."
+      }
     }
   }
 }

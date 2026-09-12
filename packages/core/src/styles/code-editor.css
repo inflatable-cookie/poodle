@@ -76,6 +76,16 @@
   text-underline-offset: 0.2em;
 }
 
+/*
+ * Invalid parser syntax: the engine's private mark carries the syntax-invalid
+ * role inline; this rule adds the wavy underline so the cue never depends on
+ * hue alone. Diagnostics stay host-owned and keep their own marks above.
+ */
+.poodle-code-editor__viewport .poodle-code-editor__syntax-invalid {
+  text-decoration: underline wavy var(--poodle-color-syntax-invalid);
+  text-underline-offset: 0.2em;
+}
+
 .poodle-code-editor__search-match {
   background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
   outline: 0.0625rem solid var(--poodle-color-accent-base);

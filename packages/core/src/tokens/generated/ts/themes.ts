@@ -20,7 +20,17 @@ export const themes = {
       "color.accent.hover": "#d97757",
       "color.accent.focusRing": "#c96442",
       "color.icon.primary": "#2a2622",
-      "color.icon.muted": "#6b6157"
+      "color.icon.muted": "#6b6157",
+      "color.syntax.comment": "#5b6b7b",
+      "color.syntax.keyword": "#6c2fd2",
+      "color.syntax.string": "#237a38",
+      "color.syntax.literal": "#95580a",
+      "color.syntax.type": "#0c7089",
+      "color.syntax.callable": "#2559cf",
+      "color.syntax.property": "#ad2678",
+      "color.syntax.operator": "#54616f",
+      "color.syntax.punctuation": "#5e6e7e",
+      "color.syntax.invalid": "#c22f38"
     }
   },
   "cobalt": {
@@ -155,6 +165,16 @@ export const themes = {
       "color.border.default": "#75869b",
       "color.icon.primary": "#131a22",
       "color.icon.muted": "#314255",
+      "color.syntax.comment": "#5b6b7b",
+      "color.syntax.keyword": "#6c2fd2",
+      "color.syntax.string": "#237a38",
+      "color.syntax.literal": "#95580a",
+      "color.syntax.type": "#0c7089",
+      "color.syntax.callable": "#2559cf",
+      "color.syntax.property": "#ad2678",
+      "color.syntax.operator": "#54616f",
+      "color.syntax.punctuation": "#5e6e7e",
+      "color.syntax.invalid": "#c22f38",
       "color.accent.base": "#1668d6",
       "color.accent.hover": "#2d86f3",
       "color.accent.focusRing": "#1668d6"
@@ -179,7 +199,17 @@ export const themes = {
       "color.accent.hover": "#22a862",
       "color.accent.focusRing": "#188f52",
       "color.icon.primary": "#1b241e",
-      "color.icon.muted": "#5b655d"
+      "color.icon.muted": "#5b655d",
+      "color.syntax.comment": "#5b6b7b",
+      "color.syntax.keyword": "#6c2fd2",
+      "color.syntax.string": "#237a38",
+      "color.syntax.literal": "#95580a",
+      "color.syntax.type": "#0c7089",
+      "color.syntax.callable": "#2559cf",
+      "color.syntax.property": "#ad2678",
+      "color.syntax.operator": "#54616f",
+      "color.syntax.punctuation": "#5e6e7e",
+      "color.syntax.invalid": "#c22f38"
     }
   },
   "midnight": {

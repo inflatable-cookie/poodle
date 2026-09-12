@@ -18,4 +18,14 @@
   --poodle-color-accent-focusRing: #188f52;
   --poodle-color-icon-primary: #1b241e;
   --poodle-color-icon-muted: #5b655d;
+  --poodle-color-syntax-comment: #5b6b7b;
+  --poodle-color-syntax-keyword: #6c2fd2;
+  --poodle-color-syntax-string: #237a38;
+  --poodle-color-syntax-literal: #95580a;
+  --poodle-color-syntax-type: #0c7089;
+  --poodle-color-syntax-callable: #2559cf;
+  --poodle-color-syntax-property: #ad2678;
+  --poodle-color-syntax-operator: #54616f;
+  --poodle-color-syntax-punctuation: #5e6e7e;
+  --poodle-color-syntax-invalid: #c22f38;
 }
