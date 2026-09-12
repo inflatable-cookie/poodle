@@ -1,54 +1,20 @@
-/* Styles for Slider. Extracted from the Svelte component (g12.001
-   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+/* Styles for Slider. The shared family foundation (size ladder, capsule,
+   track, inline text scaffolding, 44x44 targets and the bounded inset line
+   handle) lives in `slider-family.css`; this sheet keeps only the genuine
+   single-thumb differences. Unique poodle-* selectors; safe as global CSS. */
+@import "./slider-family.css";
 
   .poodle-slider {
-    --poodle-slider-control-min-height: 1.5rem;
-    --poodle-slider-thumb-size: 1rem;
-    --poodle-slider-track-thickness: 0.375rem;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    width: 100%;
-    min-height: var(--poodle-slider-control-min-height);
+    --poodle-slider-family-center: var(--poodle-slider-center);
     --poodle-slider-fill-start: 0%;
     --poodle-slider-fill-span: var(--poodle-slider-percent, 0%);
     --poodle-slider-center: 0%;
   }
 
-  .poodle-slider[data-orientation="vertical"] {
-    width: var(--poodle-slider-control-min-height);
-    min-width: var(--poodle-slider-control-min-height);
-    min-height: 10rem;
-    height: 100%;
-    justify-content: center;
-  }
-
-  .poodle-slider[data-disabled="true"] {
-    opacity: var(--poodle-state-opacity-disabled);
-  }
-
-  .poodle-slider__track {
-    position: absolute;
-    inset: 50% 0 0;
-    height: var(--poodle-slider-track-thickness);
-    transform: translateY(-50%);
-    border-radius: 999px;
-    background: var(--poodle-recipe-slider-track-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
-  }
-
-  .poodle-slider[data-orientation="vertical"] .poodle-slider__track {
-    inset: 0 auto 0 50%;
-    width: var(--poodle-slider-track-thickness);
-    height: 100%;
-    transform: translateX(-50%);
-  }
-
-  .poodle-slider__fill {
-    position: absolute;
+  /* Embedded selected span (block overrides it below). */
+  .poodle-slider .poodle-slider__fill {
     left: var(--poodle-slider-fill-start);
     width: var(--poodle-slider-fill-span);
-    height: 100%;
-    border-radius: inherit;
     background: var(--poodle-recipe-slider-fill-fill, var(--poodle-color-accent-base));
   }
 
@@ -56,265 +22,14 @@
     background: var(--poodle-recipe-slider-fill-negative, var(--poodle-color-status-danger));
   }
 
-  .poodle-slider[data-orientation="vertical"] .poodle-slider__fill {
-    position: absolute;
-    bottom: var(--poodle-slider-fill-start);
-    width: 100%;
-    height: var(--poodle-slider-fill-span);
-  }
-
-  .poodle-slider__center { display: none; }
-
-  .poodle-slider[data-variant="embedded"] {
-    min-width: 2.5rem;
-    min-height: var(--poodle-slider-control-min-height);
-    border: 0.0625rem solid var(--poodle-recipe-slider-track-border, var(--poodle-color-border-default));
-    border-radius: 0.25rem;
-    background: var(--poodle-recipe-slider-control-fill, var(--poodle-color-background-canvas));
-    cursor: pointer;
-    touch-action: none;
-  }
-
-  .poodle-slider[data-variant="embedded"] .poodle-slider__track { inset-inline: 0.25rem; }
-  .poodle-slider[data-variant="embedded"] .poodle-slider__center {
-    display: block;
-    position: absolute;
-    inset-block: 18%;
-    left: var(--poodle-slider-center);
-    width: 0.0625rem;
-    background: var(--poodle-recipe-slider-center-fill, var(--poodle-color-border-strong));
-  }
-  .poodle-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-slider__track { inset: 0.25rem auto; }
-  .poodle-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-slider__center {
-    inset-inline: 18%;
-    bottom: var(--poodle-slider-center);
-    left: auto;
-    width: auto;
-    height: 0.0625rem;
-  }
-  .poodle-slider[data-variant="embedded"]:focus-visible {
-    outline: 0.125rem solid var(--poodle-recipe-slider-focus-ring, var(--poodle-color-accent-focusRing));
-    outline-offset: 0.0625rem;
-  }
-  .poodle-slider[data-variant="embedded"][data-state="active"] .poodle-slider__fill {
-    filter: brightness(1.08);
-  }
-
-
-
-
-
-
-
-
-
-
-  /* Size variants */
-  .poodle-slider[data-size="xs"] { --poodle-slider-control-min-height: 1.25rem; --poodle-slider-thumb-size: 0.75rem; --poodle-slider-track-thickness: 0.1875rem; }
-  .poodle-slider[data-size="sm"] { --poodle-slider-control-min-height: 1.375rem; --poodle-slider-thumb-size: 0.875rem; --poodle-slider-track-thickness: 0.25rem; }
-  .poodle-slider[data-size="md"] { --poodle-slider-control-min-height: 1.5rem; --poodle-slider-thumb-size: 1rem; --poodle-slider-track-thickness: 0.375rem; }
-  .poodle-slider[data-size="lg"] { --poodle-slider-control-min-height: 1.625rem; --poodle-slider-thumb-size: 1.125rem; --poodle-slider-track-thickness: 0.5rem; }
-  .poodle-slider[data-size="xl"] { --poodle-slider-control-min-height: 1.75rem; --poodle-slider-thumb-size: 1.25rem; --poodle-slider-track-thickness: 0.625rem; }
-
-  /* Density variants — embedded only. Density must not inflate the block
-     capsule's layout box or make the accessibility envelope visible as
-     spacing (g18.024). */
-  .poodle-slider[data-variant="embedded"][data-density="compact"] { padding: 0.25rem 0; }
-  .poodle-slider[data-variant="embedded"][data-density="comfortable"] { padding: 0.75rem 0; }
-
-  .poodle-slider[data-variant="block"] {
-    /* g18.024: the block capsule consumes the shared control-height axis
-       (24/28/36/44/52px for xs–xl); there is no Slider-only height ladder.
-       The root's measured cross-axis size equals the visible capsule; the
-       ≥44×44 hit target stays measurable and interactive but never adds
-       margin, padding, minimum size, or row height. */
-    --poodle-slider-block-height: var(--poodle-size-control-height);
-    --poodle-slider-block-hit: 44px;
-    --poodle-slider-block-marker-inset: 0.25rem;
-    --poodle-slider-block-marker-thickness: 0.25rem;
-    --poodle-slider-block-marker-offset: calc(var(--poodle-slider-block-marker-inset) + (var(--poodle-slider-block-marker-thickness) / 2));
-    --poodle-slider-block-marker-position: clamp(
-      var(--poodle-slider-block-marker-offset),
-      calc(var(--poodle-slider-percent) - var(--poodle-slider-block-marker-offset)),
-      calc(100% - var(--poodle-slider-block-marker-offset))
-    );
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    min-height: var(--poodle-slider-block-height);
-    overflow: visible;
-    touch-action: pan-y;
-  }
-  .poodle-slider[data-variant="block"][data-size="xs"] { --poodle-slider-block-height: 1.5rem; }
-  .poodle-slider[data-variant="block"][data-size="sm"] { --poodle-slider-block-height: 1.75rem; }
-  .poodle-slider[data-variant="block"][data-size="md"] { --poodle-slider-block-height: 2.25rem; }
-  .poodle-slider[data-variant="block"][data-size="lg"] { --poodle-slider-block-height: 2.75rem; }
-  .poodle-slider[data-variant="block"][data-size="xl"] { --poodle-slider-block-height: 3.25rem; }
-  .poodle-slider[data-variant="block"] .poodle-slider__capsule {
-    position: relative;
-    display: block;
-    width: 100%;
-    min-height: var(--poodle-slider-block-height);
-    border-radius: var(--poodle-radius-control);
-    overflow: visible;
-    background: var(--poodle-recipe-slider-block-remainder-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
-    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
-    font-variant-numeric: tabular-nums;
-    font-size: 0.875rem;
-  }
-  .poodle-slider[data-variant="block"][data-size="xs"] .poodle-slider__capsule { font-size: 0.75rem; }
-  .poodle-slider[data-variant="block"][data-size="sm"] .poodle-slider__capsule { font-size: 0.8125rem; }
-  .poodle-slider[data-variant="block"][data-size="lg"] .poodle-slider__capsule { font-size: 1rem; }
-  .poodle-slider[data-variant="block"][data-size="xl"] .poodle-slider__capsule { font-size: 1.125rem; }
-  .poodle-slider[data-variant="block"] .poodle-slider__track {
-    position: absolute;
-    inset: 0;
-    height: auto;
-    transform: none;
-    overflow: hidden;
-    border-radius: inherit;
-  }
+  /* Block: one center-relative selected segment painted under the text. */
   .poodle-slider[data-variant="block"] .poodle-slider__fill {
-    position: absolute;
     inset-block: 0;
     left: auto;
     inset-inline-start: var(--poodle-slider-fill-start);
     width: var(--poodle-slider-fill-span);
     background: var(--poodle-recipe-slider-block-selected-fill, var(--poodle-color-accent-base));
     overflow: hidden;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__remainder {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-  /* One stable text row is painted twice. The selected copy is clipped to
-     the fill segment, including a bipolar center-to-value segment; glyph
-     positions never depend on the current value. */
-  .poodle-slider[data-variant="block"] .poodle-slider__inline {
-    position: absolute;
-    z-index: 3;
-    inset-block: 0;
-    inset-inline: 0;
-    display: flex;
-    align-items: center;
-    /* Keep the fixed edge labels clear of the inset marker at its extremes. */
-    padding-inline: 0.75rem;
-    overflow: hidden;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-row > * {
-    flex: none;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline--selected {
-    z-index: 4;
-    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));
-    clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline--remainder {
-    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
-  }
-  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"] .poodle-slider__inline--selected {
-    clip-path: inset(0 var(--poodle-slider-fill-start) 0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)));
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-row--vertical {
-    position: relative;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    /* g18.024: a fixed, value-independent block inset keeps the anchored
-       text fully inside the rail at every shared size. */
-    padding-block: 0.25rem;
-  }
-  /* The optional label centers on the exact capsule middle: it is anchored
-     to the whole capsule (absolute, translateY(-50%)), so the value slot at
-     the top never shifts the center at any height. The transform is
-     constant, so the glyphs stay spatially fixed like every other part of
-     the stable text layout. */
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-spacer {
-    flex: 1 1 0;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-label,
-  .poodle-slider[data-variant="block"] .poodle-slider__inline-value {
-    white-space: nowrap;
-    pointer-events: none;
-  }
-  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-value-docked="marker"] .poodle-slider__inline-value {
-    position: absolute;
-    inset-inline-start: var(--poodle-slider-block-marker-position);
-    inset-inline-end: auto;
-    transform: translateX(calc(-100% - 0.25rem));
-  }
-  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"][data-value-docked="marker"] .poodle-slider__inline-value {
-    transform: translateX(calc(100% + 0.25rem));
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__hit {
-    position: absolute;
-    z-index: 2;
-    width: var(--poodle-slider-block-hit);
-    height: var(--poodle-slider-block-hit);
-    inset-inline-start: calc(var(--poodle-slider-block-marker-position) - (var(--poodle-slider-block-hit) / 2));
-    top: 50%;
-    transform: translateY(-50%);
-    display: grid;
-    place-items: center;
-    pointer-events: auto;
-    cursor: pointer;
-    touch-action: none;
-  }
-  .poodle-slider[data-variant="block"] .poodle-slider__thumb {
-    box-sizing: border-box;
-    width: var(--poodle-slider-block-marker-thickness);
-    height: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));
-    border-radius: calc(var(--poodle-slider-block-marker-thickness) / 2);
-    background: var(--poodle-recipe-slider-block-handle-fill, var(--poodle-color-background-elevated));
-    box-shadow: 0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default));
-    pointer-events: none;
-  }
-  .poodle-slider[data-variant="block"][data-fill-tone="negative"] {
-    --poodle-slider-block-marker-position: clamp(
-      var(--poodle-slider-block-marker-offset),
-      calc(var(--poodle-slider-percent) + var(--poodle-slider-block-marker-offset)),
-      calc(100% - var(--poodle-slider-block-marker-offset))
-    );
-  }
-  /* g18.022 vertical block: the capsule fills the block axis, text stays
-     upright with the value at the physical top and the optional label
-     centered, and the selected fill grows upward from the logical bottom. */
-  .poodle-slider[data-variant="block"][data-orientation="vertical"] {
-    width: var(--poodle-slider-block-height);
-    min-width: var(--poodle-slider-block-height);
-    min-height: 10rem;
-    height: 100%;
-    justify-content: center;
-    touch-action: pan-x;
-  }
-  .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__capsule {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
   }
   .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__fill {
     inset-block: auto;
@@ -323,53 +38,40 @@
     width: 100%;
     height: var(--poodle-slider-fill-span);
   }
+
+  /* The selected text copy follows the center-relative segment; the
+     remainder copy is unclipped (its layer sits under the selected one). */
+  .poodle-slider[data-variant="block"] .poodle-slider__inline--selected {
+    clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));
+  }
+  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"] .poodle-slider__inline--selected {
+    clip-path: inset(0 var(--poodle-slider-fill-start) 0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)));
+  }
   .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__inline--selected {
     clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);
   }
-  .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__hit {
-    inset-inline-start: auto;
-    left: 50%;
-    top: auto;
-    bottom: calc(var(--poodle-slider-block-marker-position) - (var(--poodle-slider-block-hit) / 2));
-    transform: translateX(-50%);
+
+  /* Bounded inset marker: the handle is clamped inside the capsule at every
+     value and sits toward the fill interior, matching the family handle. */
+  .poodle-slider[data-variant="block"] {
+    --poodle-slider-block-marker-position: clamp(
+      var(--poodle-slider-family-marker-offset),
+      calc(var(--poodle-slider-percent) - var(--poodle-slider-family-marker-offset)),
+      calc(100% - var(--poodle-slider-family-marker-offset))
+    );
+    --poodle-slider-family-marker: var(--poodle-slider-block-marker-position);
   }
-  .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__thumb {
-    width: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));
-    height: var(--poodle-slider-block-marker-thickness);
-  }
-  .poodle-slider[data-variant="block"]:focus-visible {
-    outline: none;
-  }
-  .poodle-slider[data-variant="block"]:focus-visible .poodle-slider__thumb {
-    box-shadow:
-      0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default)),
-      0 0 0 0.1875rem var(--poodle-recipe-slider-block-focus-ring, var(--poodle-color-accent-focusRing));
+  .poodle-slider[data-variant="block"][data-fill-tone="negative"] {
+    --poodle-slider-block-marker-position: clamp(
+      var(--poodle-slider-family-marker-offset),
+      calc(var(--poodle-slider-percent) + var(--poodle-slider-family-marker-offset)),
+      calc(100% - var(--poodle-slider-family-marker-offset))
+    );
   }
 
-  @media (forced-colors: active) {
-    .poodle-slider[data-variant="block"] .poodle-slider__capsule {
-      background: Canvas;
-      color: CanvasText;
-    }
-    .poodle-slider[data-variant="block"] .poodle-slider__fill {
-      background: Highlight;
-      color: HighlightText;
-    }
-    .poodle-slider[data-variant="block"] .poodle-slider__inline--selected {
-      color: HighlightText;
-    }
-    .poodle-slider[data-variant="block"] .poodle-slider__inline--remainder {
-      color: CanvasText;
-    }
-    .poodle-slider[data-variant="block"] .poodle-slider__thumb {
-      background: ButtonText;
-    }
-    .poodle-slider[data-variant="block"]:focus-visible .poodle-slider__thumb {
-      box-shadow: 0 0 0 0.1875rem Highlight;
-    }
-    .poodle-slider[data-variant="block"][data-disabled="true"] .poodle-slider__capsule,
-    .poodle-slider[data-variant="block"][data-disabled="true"] .poodle-slider__inline {
-      color: GrayText;
-      border-color: GrayText;
-    }
+  /* The block root is the single focusable element. The ring itself is
+     painted on the shared handle in the family foundation; this sheet keeps
+     the focused root's UA outline suppressed. */
+  .poodle-slider[data-variant="block"]:focus-visible {
+    outline: none;
   }

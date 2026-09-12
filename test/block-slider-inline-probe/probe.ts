@@ -137,6 +137,61 @@ async function measure(page: Page, caseSel: string): Promise<Case> {
   );
 }
 
+/** RangeSlider block geometry: capsule, window fill and both handles. */
+async function measureRange(page: Page, caseSel: string): Promise<{
+  capsule: Rect;
+  window: Rect;
+  lowerThumb: Rect;
+  upperThumb: Rect;
+  lowerCenter: number;
+  upperCenter: number;
+  inlineZ: number;
+  hitZ: number;
+}> {
+  return page.evaluate(
+    (caseSel) => {
+      const rect = (el: Element) => {
+        const box = el.getBoundingClientRect();
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+        };
+      };
+      const capsule = document.querySelector<HTMLElement>(`${caseSel} .poodle-range-slider__capsule`)!;
+      const positive = document.querySelector<HTMLElement>(`${caseSel} .poodle-range-slider__fill--positive`)!;
+      const negative = document.querySelector<HTMLElement>(`${caseSel} .poodle-range-slider__fill--negative`)!;
+      const windowEl = positive.getBoundingClientRect().width > 0 ? positive : negative;
+      const lowerThumb = document.querySelector<HTMLElement>(
+        `${caseSel} .poodle-range-slider__hit--lower .poodle-range-slider__thumb`,
+      )!;
+      const upperThumb = document.querySelector<HTMLElement>(
+        `${caseSel} .poodle-range-slider__hit--upper .poodle-range-slider__thumb`,
+      )!;
+      const lowerBox = lowerThumb.getBoundingClientRect();
+      const upperBox = upperThumb.getBoundingClientRect();
+      const inline = document.querySelector<HTMLElement>(
+        `${caseSel} .poodle-range-slider__inline--selected`,
+      )!;
+      const lowerHit = document.querySelector<HTMLElement>(`${caseSel} .poodle-range-slider__hit--lower`)!;
+      return {
+        capsule: rect(capsule),
+        window: rect(windowEl),
+        lowerThumb: rect(lowerThumb),
+        upperThumb: rect(upperThumb),
+        lowerCenter: lowerBox.left + lowerBox.width / 2,
+        upperCenter: upperBox.left + upperBox.width / 2,
+        inlineZ: Number(getComputedStyle(inline).zIndex),
+        hitZ: Number(getComputedStyle(lowerHit).zIndex),
+      };
+    },
+    caseSel,
+  );
+}
+
 function sameRect(a: Rect, b: Rect, tolerance = 0.5): boolean {
   return (
     Math.abs(a.left - b.left) <= tolerance &&
@@ -168,7 +223,7 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
     check(
       `${prefix} ${caseName} thumb is an inset marker line`,
       metrics.thumb.width <= 4 &&
-        Math.abs(metrics.thumb.height - (metrics.capsule.height - 4)) <= 0.75 &&
+        Math.abs(metrics.thumb.height - (metrics.capsule.height - 8)) <= 0.75 &&
         metrics.thumb.top - metrics.capsule.top >= 1.5 &&
         metrics.capsule.bottom - metrics.thumb.bottom >= 1.5,
       `${metrics.thumbRadius} ${metrics.thumb.width}x${metrics.thumb.height}`,
@@ -206,23 +261,36 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
       );
     }
     if (caseName === "slider-high") {
-      const inside =
-        metrics.selectedValue.left < boundaryX - 1 && metrics.selectedValue.right > boundaryX + 1;
-      check(`${prefix} high value crosses the value glyphs`, inside, `boundary ${boundaryX}`);
+      // Collision docking (g18.026 family law): the high value docks before
+      // the handle instead of straddling the fill boundary.
       check(
-        `${prefix} value crossover changes only the foreground`,
-        metrics.selectedValueColor !== metrics.remainderValueColor,
-        `${metrics.selectedValueColor} vs ${metrics.remainderValueColor}`,
+        `${prefix} high docked value stays left of the fill boundary`,
+        metrics.selectedValue.right <= boundaryX + 1,
+        `value right ${metrics.selectedValue.right} boundary ${boundaryX}`,
       );
     }
   }
 
-  // Stable glyph coordinates: identical x boxes across the whole journey.
+  // Glyph stability: the label never moves. The value stays at the logical
+  // end anchor until the marker enters its reserved box, then docks before
+  // the handle (g18.026) rather than becoming illegible.
   const low = await measure(page, `${base} [data-case="slider-low"]`);
   const mid = await measure(page, `${base} [data-case="slider-mid"]`);
   const high = await measure(page, `${base} [data-case="slider-high"]`);
   check(`${prefix} label glyphs never move`, sameX(low.selectedLabel, mid.selectedLabel) && sameX(mid.selectedLabel, high.selectedLabel), `${low.selectedLabel.left}, ${mid.selectedLabel.left}, ${high.selectedLabel.left}`);
-  check(`${prefix} value glyphs never move`, sameX(low.selectedValue, mid.selectedValue) && sameX(mid.selectedValue, high.selectedValue), `${low.selectedValue.left},${mid.selectedValue.left},${high.selectedValue.left}`);
+  check(
+    `${prefix} low and mid keep the value at the logical end anchor`,
+    sameX(low.selectedValue, mid.selectedValue),
+    `${low.selectedValue.left},${mid.selectedValue.left}`,
+  );
+  const highBoundaryX = high.capsule.left + (high.capsule.width * 90) / 100;
+  check(
+    `${prefix} high docks the value before the handle`,
+    high.selectedValue.right < mid.selectedValue.left - 4 &&
+      highBoundaryX - high.selectedValue.right >= 2 &&
+      high.selectedValue.right <= highBoundaryX,
+    `value right ${high.selectedValue.right} mid left ${mid.selectedValue.left} boundary ${highBoundaryX}`,
+  );
   check(`${prefix} boundary moves across the journey`, low.fill.width < mid.fill.width && mid.fill.width < high.fill.width);
 
   // Whole-track collision: label suppressed, exact value stays in-track.
@@ -317,8 +385,8 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
     rangeFractionSel,
   );
   check(
-    `${prefix} both range endpoints render short decimals`,
-    rangeFractionTexts.join("/") === "0.3/0.85",
+    `${prefix} both range endpoints render fixed-width decimals`,
+    rangeFractionTexts.join("/") === "0.30/0.85",
     rangeFractionTexts.join("/"),
   );
 
@@ -378,7 +446,9 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
     `${rv.capsule.right - rv.capsule.left}`,
   );
 
-  // RangeSlider: radius-only family change; inline placement untouched.
+  // RangeSlider family parity (g18.026): the same capsule, window fill,
+  // bounded inset line handles and text-above-handle paint order, composing
+  // the shared handle primitive twice.
   const rangeSel = `${base} [data-case="range-block"]`;
   const rangeCapsule = page.locator(`${rangeSel} .poodle-range-slider__capsule`);
   check(
@@ -392,6 +462,89 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
   check(
     `${prefix} range paints no fallback at the specimen width`,
     (await page.locator(`${rangeSel} .poodle-range-slider__fallback`).count()) === 0,
+  );
+  const rangeMetrics = await measureRange(page, rangeSel);
+  const rangeStart = rangeMetrics.capsule.left + rangeMetrics.capsule.width * 0.2;
+  const rangeEnd = rangeMetrics.capsule.left + rangeMetrics.capsule.width * 0.8;
+  check(
+    `${prefix} range window fill spans the pair exactly`,
+    Math.abs(rangeMetrics.window.left - rangeStart) <= 1.5 && Math.abs(rangeMetrics.window.right - rangeEnd) <= 1.5,
+    `${rangeMetrics.window.left}..${rangeMetrics.window.right} vs ${rangeStart}..${rangeEnd}`,
+  );
+  for (const [name, thumb] of [
+    ["lower", rangeMetrics.lowerThumb],
+    ["upper", rangeMetrics.upperThumb],
+  ] as const) {
+    check(
+      `${prefix} range ${name} handle is the shared inset marker line`,
+      thumb.width <= 4 &&
+        Math.abs(thumb.height - (rangeMetrics.capsule.height - 8)) <= 0.75 &&
+        thumb.top >= rangeMetrics.capsule.top + 1.5 &&
+        thumb.bottom <= rangeMetrics.capsule.bottom - 1.5,
+      `${thumb.width}x${thumb.height}`,
+    );
+  }
+  check(
+    `${prefix} range handles sit at their own values`,
+    Math.abs(rangeMetrics.lowerCenter - rangeStart) <= 1.5 && Math.abs(rangeMetrics.upperCenter - rangeEnd) <= 1.5,
+    `${rangeMetrics.lowerCenter},${rangeMetrics.upperCenter}`,
+  );
+  check(
+    `${prefix} range text paints above the shared handle`,
+    rangeMetrics.inlineZ > rangeMetrics.hitZ,
+    `${rangeMetrics.inlineZ} vs ${rangeMetrics.hitZ}`,
+  );
+
+  const extrema = await measureRange(page, `${base} [data-case="range-extrema"]`);
+  check(
+    `${prefix} extrema handles are clamped inside the capsule`,
+    Math.abs(extrema.lowerCenter - (extrema.capsule.left + 6)) <= 1.5 &&
+      Math.abs(extrema.upperCenter - (extrema.capsule.right - 6)) <= 1.5,
+    `${extrema.lowerCenter} ${extrema.upperCenter} capsule ${extrema.capsule.left}..${extrema.capsule.right}`,
+  );
+  check(
+    `${prefix} extrema handles are fully inside the capsule`,
+    extrema.lowerThumb.left >= extrema.capsule.left - 0.5 &&
+      extrema.upperThumb.right <= extrema.capsule.right + 0.5,
+    `${extrema.lowerThumb.left} ${extrema.upperThumb.right}`,
+  );
+  check(
+    `${prefix} extrema window fill spans the capsule`,
+    Math.abs(extrema.window.left - extrema.capsule.left) <= 1.5 &&
+      Math.abs(extrema.window.right - extrema.capsule.right) <= 1.5,
+    `${extrema.window.left}..${extrema.window.right}`,
+  );
+
+  const equality = await measureRange(page, `${base} [data-case="range-equality"]`);
+  const equalityCenter = equality.capsule.left + equality.capsule.width / 2;
+  check(
+    `${prefix} equality handles meet at the value without crossing`,
+    equality.lowerCenter <= equality.upperCenter + 0.5 &&
+      Math.abs(equality.lowerCenter - equalityCenter) <= 1.5 &&
+      Math.abs(equality.upperCenter - equalityCenter) <= 1.5,
+    `${equality.lowerCenter} ${equality.upperCenter} center ${equalityCenter}`,
+  );
+
+  const rangeVert = await measureRange(page, `${base} [data-case="range-vertical"]`);
+  for (const [name, thumb] of [
+    ["lower", rangeVert.lowerThumb],
+    ["upper", rangeVert.upperThumb],
+  ] as const) {
+    check(
+      `${prefix} vertical range ${name} handle is the shared inset marker line`,
+      thumb.height <= 4 &&
+        Math.abs(thumb.width - (rangeVert.capsule.width - 8)) <= 0.75 &&
+        thumb.left >= rangeVert.capsule.left + 1.5 &&
+        thumb.right <= rangeVert.capsule.right - 1.5,
+      `${thumb.width}x${thumb.height}`,
+    );
+  }
+  const rangeVertLowerY = rangeVert.lowerThumb.top + rangeVert.lowerThumb.height / 2;
+  const rangeVertUpperY = rangeVert.upperThumb.top + rangeVert.upperThumb.height / 2;
+  check(
+    `${prefix} vertical range handles clamp inside the rail`,
+    rangeVert.capsule.bottom - rangeVertLowerY >= 4 && rangeVertUpperY - rangeVert.capsule.top >= 4,
+    `lower ${rangeVertLowerY} upper ${rangeVertUpperY} capsule ${rangeVert.capsule.top}..${rangeVert.capsule.bottom}`,
   );
 
   // Overlays must not steal the pointer: a click at the thumb dispatches.

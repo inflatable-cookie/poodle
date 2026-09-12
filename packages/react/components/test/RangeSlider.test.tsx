@@ -21,10 +21,16 @@ function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.releasePointerCapture ??= () => {};
 }
 
-const css = readFileSync(
-  new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
-  "utf8",
-);
+const css = [
+  readFileSync(
+    new URL("../../../core/src/styles/slider-family.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  ),
+  readFileSync(
+    new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  ),
+].join("\n");
 
 describe("RangeSlider (react)", () => {
   it("omitting variant renders the fixed-anchor block as the default", () => {
@@ -178,13 +184,13 @@ describe("RangeSlider (react) fixed block anchors", () => {
 
   it("clips the window layer between start and end and mirrors in RTL", () => {
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--selected {\n    color: var(--poodle-recipe-range-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start));\n  }",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--selected {\n    clip-path: inset(0 calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start));\n  }",
     );
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-start {\n    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 calc(100% - var(--poodle-range-start)) 0 0);",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-start {\n    clip-path: inset(0 calc(100% - var(--poodle-range-start)) 0 0);",
     );
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-end {\n    color: var(--poodle-recipe-range-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-range-end));",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline--remainder-end {\n    clip-path: inset(0 0 0 var(--poodle-range-end));",
     );
     // RTL mirrors the window; lower stays at the logical start.
     expect(css).toContain(
@@ -207,7 +213,7 @@ describe("RangeSlider (react) fixed block anchors", () => {
     const root = container.querySelector(".poodle-range-slider") as HTMLElement;
     const lower = container.querySelector(".poodle-range-slider__hit--lower") as HTMLElement;
     expect(container.querySelectorAll(".poodle-range-slider__hit")).toHaveLength(2);
-    expect(css).toContain("--poodle-range-slider-block-hit: 44px");
+    expect(css).toContain("--poodle-slider-family-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
     mockTrack(root, 100, 32);
     lower.setPointerCapture = vi.fn();
@@ -236,8 +242,15 @@ describe("RangeSlider (react) fixed block anchors", () => {
     expect(css).toContain(
       ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-range-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start) 0);",
     );
+    // Both handles use the shared family marker offset, clamped inside the
+    // capsule toward the window interior.
+    expect(css).toContain("--poodle-range-slider-block-marker-start: clamp(");
+    expect(css).toContain("--poodle-range-slider-block-marker-end: clamp(");
     expect(css).toContain(
-      ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-range-slider__hit--lower {\n    inset-inline-start: auto;\n    bottom: calc(var(--poodle-range-start) - (var(--poodle-range-slider-block-hit) / 2));",
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__hit--lower {\n    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-start);",
+    );
+    expect(css).toContain(
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__hit--upper {\n    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-end);",
     );
     // Vertical never mirrors with direction.
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
@@ -256,5 +269,66 @@ describe("RangeSlider (react) fixed block anchors", () => {
       expect(slots).toEqual([String(value![0]), "", String(value![1])]);
       unmount();
     }
+  });
+});
+
+describe("RangeSlider (react) shared family foundation", () => {
+  const rangeOnlyCss = readFileSync(
+    new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
+    "utf8",
+  );
+
+  it("composes the shared bounded inset line handle twice", () => {
+    const { container } = render(
+      <RangeSlider value={[20, 80]} visibleLabel="Band" ariaLabel="Band" />,
+    );
+    expect(container.querySelectorAll(".poodle-range-slider__thumb")).toHaveLength(2);
+    expect(css).toContain(
+      ":is(.poodle-slider__thumb, .poodle-range-slider__thumb) {\n    box-sizing: border-box;\n    width: var(--poodle-slider-family-marker-thickness);\n    height: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));\n    border-radius: calc(var(--poodle-slider-family-marker-thickness) / 2);",
+    );
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-start: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-start),");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-end: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-end),");
+    // The range sheet never re-implements a private handle or size ladder.
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-thumb");
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-marker-thickness");
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-marker-inset");
+  });
+
+  it("paints both endpoint text copies above the shared handle", () => {
+    expect(css).toMatch(/:is\(\.poodle-slider__hit, \.poodle-range-slider__hit\) \{[\s\S]*?z-index: 2;/);
+    expect(css).toMatch(/:is\(\.poodle-slider__inline, \.poodle-range-slider__inline\) \{[\s\S]*?z-index: 3;/);
+    expect(css).toContain(
+      ":is(.poodle-slider__inline--selected, .poodle-range-slider__inline--selected) {\n    z-index: 4;",
+    );
+  });
+
+  it("keeps the fill at the value while the handles stay inset", () => {
+    const { container } = render(<RangeSlider value={[0, 100]} ariaLabel="Band" />);
+    const style = container.querySelector(".poodle-range-slider")!.getAttribute("style") ?? "";
+    expect(style).toContain("--poodle-range-start: 0%");
+    expect(style).toContain("--poodle-range-end: 100%");
+    expect(rangeOnlyCss).toContain("inset-inline-start: var(--poodle-range-positive-start);");
+    expect(rangeOnlyCss).toContain("inset-inline-start: var(--poodle-range-negative-start);");
+  });
+
+  it("consumes the shared control-size and block-height ladders", () => {
+    for (const [size, rem] of [
+      ["xs", "1.5rem"],
+      ["sm", "1.75rem"],
+      ["md", "2.25rem"],
+      ["lg", "2.75rem"],
+      ["xl", "3.25rem"],
+    ] as const) {
+      expect(css).toContain(`[data-size="${size}"] { --poodle-slider-family-block-height: ${rem}; }`);
+    }
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-height: 1.5rem");
+    expect(rangeOnlyCss).not.toContain("--poodle-range-slider-control-min-height");
+  });
+
+  it("mirrors the full forced-colour handle table through the foundation", () => {
+    expect(css).toContain(
+      ":is(.poodle-slider__thumb, .poodle-range-slider__thumb) {\n      background: ButtonText;",
+    );
+    expect(rangeOnlyCss).not.toContain("ButtonFace");
   });
 });

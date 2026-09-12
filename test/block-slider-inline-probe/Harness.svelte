@@ -18,6 +18,8 @@
   let fraction = $state(0.85);
   let rangeFraction = $state<[number, number]>([0.3, 0.85]);
   let rangeVertical = $state<[number, number]>([20, 80]);
+  let rangeExtrema = $state<[number, number]>([0, 100]);
+  let rangeEquality = $state<[number, number]>([50, 50]);
   let dispatches = $state(0);
   let trace = $state("idle");
 </script>
@@ -162,6 +164,28 @@
       value={rangeVertical}
       visibleLabel="Price"
       ariaLabel="Vertical range"
+    />
+  </div>
+  <!-- g18.026 family handle parity: both markers stay inside the capsule at
+       the extrema and at equality, inset toward the window interior. -->
+  <div data-case="range-extrema" style="width: 240px; padding: 24px;">
+    <RangeSlider
+      min={0}
+      max={100}
+      step={1}
+      value={rangeExtrema}
+      visibleLabel="Price"
+      ariaLabel="Extrema range"
+    />
+  </div>
+  <div data-case="range-equality" style="width: 240px; padding: 24px;">
+    <RangeSlider
+      min={0}
+      max={100}
+      step={1}
+      value={rangeEquality}
+      visibleLabel="Price"
+      ariaLabel="Equality range"
     />
   </div>
 </section>

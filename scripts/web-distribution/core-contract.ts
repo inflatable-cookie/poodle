@@ -167,6 +167,7 @@ export const CORE_STYLE_FILES = [
   "settings-shell.css",
   "sidebar-nav.css",
   "skeleton.css",
+  "slider-family.css",
   "slider.css",
   "spacer.css",
   "spinner.css",

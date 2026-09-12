@@ -1,0 +1,362 @@
+/* Private Slider-family rendering foundation (g18.026).
+ *
+ * Slider and RangeSlider are separate public components with separate value
+ * machines, but one visual family. This sheet carries the shared size ladder,
+ * axis geometry, capsule/track, fill appearance, center marker, inline text
+ * scaffolding, 44x44 effective targets and the bounded inset handle. Both
+ * component sheets import it and keep only genuine single/range modifiers.
+ *
+ * Unique poodle-* selectors; safe as global CSS. The family is addressed with
+ * `:is(<slider>, <range-slider>)` so neither component needs a wrapper class.
+ *
+ * Family custom properties (set here or by the component sheet):
+ *   --poodle-slider-family-control-min-height  embedded control box
+ *   --poodle-slider-family-thumb-size          embedded thumb
+ *   --poodle-slider-family-track-thickness     track/capsule thickness
+ *   --poodle-slider-family-block-height        block capsule cross size
+ *   --poodle-slider-family-marker-inset        handle inset from the capsule
+ *   --poodle-slider-family-marker-thickness    handle line thickness
+ *   --poodle-slider-family-marker-offset       inset + half thickness
+ *   --poodle-slider-family-marker              clamped marker position per hit
+ */
+
+  :is(.poodle-slider, .poodle-range-slider) {
+    --poodle-slider-family-control-min-height: 1.5rem;
+    --poodle-slider-family-thumb-size: 1rem;
+    --poodle-slider-family-track-thickness: 0.375rem;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    min-height: var(--poodle-slider-family-control-min-height);
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-orientation="vertical"] {
+    width: var(--poodle-slider-family-control-min-height);
+    min-width: var(--poodle-slider-family-control-min-height);
+    min-height: 10rem;
+    height: 100%;
+    justify-content: center;
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  /* Size variants — the shared control ladder. */
+  :is(.poodle-slider, .poodle-range-slider)[data-size="xs"] { --poodle-slider-family-control-min-height: 1.25rem; --poodle-slider-family-thumb-size: 0.75rem; --poodle-slider-family-track-thickness: 0.1875rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-size="sm"] { --poodle-slider-family-control-min-height: 1.375rem; --poodle-slider-family-thumb-size: 0.875rem; --poodle-slider-family-track-thickness: 0.25rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-size="md"] { --poodle-slider-family-control-min-height: 1.5rem; --poodle-slider-family-thumb-size: 1rem; --poodle-slider-family-track-thickness: 0.375rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-size="lg"] { --poodle-slider-family-control-min-height: 1.625rem; --poodle-slider-family-thumb-size: 1.125rem; --poodle-slider-family-track-thickness: 0.5rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-size="xl"] { --poodle-slider-family-control-min-height: 1.75rem; --poodle-slider-family-thumb-size: 1.25rem; --poodle-slider-family-track-thickness: 0.625rem; }
+
+  /* ── Embedded track / fill / center marker ── */
+
+  :is(.poodle-slider, .poodle-range-slider) :is(.poodle-slider__track, .poodle-range-slider__track) {
+    position: absolute;
+    inset: 50% 0 0;
+    height: var(--poodle-slider-family-track-thickness);
+    transform: translateY(-50%);
+    border-radius: 999px;
+    background: var(--poodle-recipe-slider-track-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-orientation="vertical"] :is(.poodle-slider__track, .poodle-range-slider__track) {
+    inset: 0 auto 0 50%;
+    width: var(--poodle-slider-family-track-thickness);
+    height: 100%;
+    transform: translateX(-50%);
+  }
+
+  :is(.poodle-slider, .poodle-range-slider) :is(.poodle-slider__fill, .poodle-range-slider__fill, .poodle-range-slider__fill--positive, .poodle-range-slider__fill--negative) {
+    position: absolute;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-orientation="vertical"] :is(.poodle-slider__fill, .poodle-range-slider__fill, .poodle-range-slider__fill--positive, .poodle-range-slider__fill--negative) {
+    left: 0;
+    width: 100%;
+  }
+
+  :is(.poodle-slider, .poodle-range-slider) :is(.poodle-slider__center, .poodle-range-slider__center) { display: none; }
+
+  /* ── Embedded surface ── */
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"] {
+    min-width: 2.5rem;
+    min-height: var(--poodle-slider-family-control-min-height);
+    border: 0.0625rem solid var(--poodle-recipe-slider-track-border, var(--poodle-color-border-default));
+    border-radius: 0.25rem;
+    background: var(--poodle-recipe-slider-control-fill, var(--poodle-color-background-canvas));
+    cursor: pointer;
+    touch-action: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"] :is(.poodle-slider__track, .poodle-range-slider__track) { inset-inline: 0.25rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"] :is(.poodle-slider__center, .poodle-range-slider__center) {
+    display: block;
+    position: absolute;
+    inset-block: 18%;
+    left: var(--poodle-slider-family-center);
+    width: 0.0625rem;
+    background: var(--poodle-recipe-slider-center-fill, var(--poodle-color-border-strong));
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"][data-orientation="vertical"] :is(.poodle-slider__track, .poodle-range-slider__track) { inset: 0.25rem auto; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"][data-orientation="vertical"] :is(.poodle-slider__center, .poodle-range-slider__center) {
+    inset-inline: 18%;
+    bottom: var(--poodle-slider-family-center);
+    left: auto;
+    width: auto;
+    height: 0.0625rem;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"]:focus-visible {
+    outline: 0.125rem solid var(--poodle-recipe-slider-focus-ring, var(--poodle-color-accent-focusRing));
+    outline-offset: 0.0625rem;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"][data-state="active"] :is(.poodle-slider__fill, .poodle-range-slider__fill, .poodle-range-slider__fill--positive, .poodle-range-slider__fill--negative) {
+    filter: brightness(1.08);
+  }
+
+  /* Density variants — embedded only. Density must not inflate the block
+     capsule's layout box or make the accessibility envelope visible as
+     spacing (g18.024). */
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"][data-density="compact"] { padding: 0.25rem 0; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="embedded"][data-density="comfortable"] { padding: 0.75rem 0; }
+
+  /* Vertical block: the capsule fills the block axis and the cross axis is
+     the shared ladder size; the pointer scrubs the opposite axis. */
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] {
+    width: var(--poodle-slider-family-block-height);
+    min-width: var(--poodle-slider-family-block-height);
+    min-height: 10rem;
+    height: 100%;
+    justify-content: center;
+    touch-action: pan-x;
+  }
+
+  /* ── Block root and capsule ── */
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] {
+    /* g18.024: the block capsule consumes the shared control-height axis
+       (24/28/36/44/52px for xs–xl). The root's measured cross-axis size
+       equals the visible capsule; the ≥44×44 hit target stays measurable
+       and interactive but never adds margin, padding, minimum size, or row
+       height. */
+    --poodle-slider-family-block-height: var(--poodle-size-control-height);
+    --poodle-slider-family-block-hit: 44px;
+    --poodle-slider-family-marker-inset: 0.25rem;
+    --poodle-slider-family-marker-thickness: 0.25rem;
+    --poodle-slider-family-marker-offset: calc(var(--poodle-slider-family-marker-inset) + (var(--poodle-slider-family-marker-thickness) / 2));
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    min-height: var(--poodle-slider-family-block-height);
+    overflow: visible;
+    touch-action: pan-y;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="xs"] { --poodle-slider-family-block-height: 1.5rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="sm"] { --poodle-slider-family-block-height: 1.75rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="md"] { --poodle-slider-family-block-height: 2.25rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="lg"] { --poodle-slider-family-block-height: 2.75rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="xl"] { --poodle-slider-family-block-height: 3.25rem; }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: var(--poodle-slider-family-block-height);
+    border-radius: var(--poodle-radius-control);
+    overflow: visible;
+    background: var(--poodle-recipe-slider-block-remainder-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="xs"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) { font-size: 0.75rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="sm"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) { font-size: 0.8125rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="lg"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) { font-size: 1rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="xl"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) { font-size: 1.125rem; }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__track, .poodle-range-slider__track) {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    transform: none;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__remainder, .poodle-range-slider__remainder) {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* ── Block inline text scaffolding ──
+     One stable text layout is painted twice (selected and remainder clips).
+     The layers sit above the fill and above the handle so a glyph masks the
+     marker rather than becoming illegible; they are pointer-inert. */
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline, .poodle-range-slider__inline) {
+    position: absolute;
+    z-index: 3;
+    inset-block: 0;
+    inset-inline: 0;
+    display: flex;
+    align-items: center;
+    /* Keep the fixed edge labels clear of the inset marker at its extremes. */
+    padding-inline: 0.75rem;
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-row, .poodle-range-slider__inline-row) {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-row, .poodle-range-slider__inline-row) > * {
+    flex: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline--selected, .poodle-range-slider__inline--selected) {
+    z-index: 4;
+    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline--remainder, .poodle-range-slider__inline--remainder-start, .poodle-range-slider__inline--remainder-end, .poodle-range-slider__inline--remainder-top, .poodle-range-slider__inline--remainder-bottom) {
+    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-row--vertical, .poodle-range-slider__inline-row--vertical) {
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    /* g18.024: a fixed, value-independent block inset keeps the anchored
+       text fully inside the rail at every shared size. */
+    padding-block: 0.25rem;
+  }
+  /* The optional label centers on the exact capsule middle as an absolute
+     overlay, so the required value rows never shift it at any height. */
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-row--vertical, .poodle-range-slider__inline-row--vertical) :is(.poodle-slider__inline-label, .poodle-range-slider__inline-label) {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-spacer, .poodle-range-slider__inline-spacer) {
+    flex: 1 1 0;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-label, .poodle-slider__inline-value, .poodle-range-slider__inline-label, .poodle-range-slider__inline-value) {
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* Horizontal collision docking: once the marker enters the reserved end
+     text box the value docks 4px before it, mirrored in RTL. RangeSlider's
+     endpoint anchors are fixed by contract and never dock. */
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="horizontal"][data-value-docked="marker"] :is(.poodle-slider__inline-value, .poodle-range-slider__inline-value) {
+    position: absolute;
+    inset-inline-start: var(--poodle-slider-family-marker);
+    inset-inline-end: auto;
+    transform: translateX(calc(-100% - 0.25rem));
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"][data-value-docked="marker"] :is(.poodle-slider__inline-value, .poodle-range-slider__inline-value) {
+    transform: translateX(calc(100% + 0.25rem));
+  }
+
+  /* ── Layout-neutral 44x44 effective targets ── */
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__hit, .poodle-range-slider__hit) {
+    position: absolute;
+    z-index: 2;
+    width: var(--poodle-slider-family-block-hit);
+    height: var(--poodle-slider-family-block-hit);
+    inset-inline-start: calc(var(--poodle-slider-family-marker) - (var(--poodle-slider-family-block-hit) / 2));
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__hit, .poodle-range-slider__hit) {
+    inset-inline-start: auto;
+    left: 50%;
+    top: auto;
+    bottom: calc(var(--poodle-slider-family-marker) - (var(--poodle-slider-family-block-hit) / 2));
+    transform: translateX(-50%);
+  }
+
+  /* ── Shared bounded inset line handle ── */
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__thumb, .poodle-range-slider__thumb) {
+    box-sizing: border-box;
+    width: var(--poodle-slider-family-marker-thickness);
+    height: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));
+    border-radius: calc(var(--poodle-slider-family-marker-thickness) / 2);
+    background: var(--poodle-recipe-slider-block-handle-fill, var(--poodle-color-background-elevated));
+    box-shadow: 0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default));
+    pointer-events: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__thumb, .poodle-range-slider__thumb) {
+    width: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));
+    height: var(--poodle-slider-family-marker-thickness);
+  }
+
+  /* Focus: the ring is painted on the shared thumb whether the focusable
+     element is the block root (Slider) or the per-thumb hit (RangeSlider).
+     The UA outline is suppressed on whichever element owns focus. */
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"]:focus-visible,
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__hit, .poodle-range-slider__hit):focus-visible {
+    outline: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"]:focus-visible :is(.poodle-slider__thumb, .poodle-range-slider__thumb),
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__hit, .poodle-range-slider__hit):focus-visible :is(.poodle-slider__thumb, .poodle-range-slider__thumb) {
+    box-shadow:
+      0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default)),
+      0 0 0 0.1875rem var(--poodle-recipe-slider-block-focus-ring, var(--poodle-color-accent-focusRing));
+  }
+
+  @media (forced-colors: active) {
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule) {
+      background: Canvas;
+      color: CanvasText;
+    }
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__fill, .poodle-range-slider__fill, .poodle-range-slider__fill--positive, .poodle-range-slider__fill--negative) {
+      background: Highlight;
+      color: HighlightText;
+    }
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline--selected, .poodle-range-slider__inline--selected) {
+      color: HighlightText;
+    }
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline--remainder, .poodle-range-slider__inline--remainder-start, .poodle-range-slider__inline--remainder-end, .poodle-range-slider__inline--remainder-top, .poodle-range-slider__inline--remainder-bottom) {
+      color: CanvasText;
+    }
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__thumb, .poodle-range-slider__thumb) {
+      background: ButtonText;
+    }
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__hit, .poodle-range-slider__hit):focus-visible :is(.poodle-slider__thumb, .poodle-range-slider__thumb) {
+      box-shadow: 0 0 0 0.1875rem Highlight;
+    }
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-disabled="true"] :is(.poodle-slider__capsule, .poodle-range-slider__capsule),
+    :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-disabled="true"] :is(.poodle-slider__inline, .poodle-range-slider__inline) {
+      color: GrayText;
+      border-color: GrayText;
+    }
+  }

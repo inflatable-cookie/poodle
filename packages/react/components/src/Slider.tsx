@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import {
   createSliderControlContext, layoutSliderBlock, measureInlineAdvance,
-  normalizeSliderValue, physicalToValueNorm, resolveSliderVisibleValue, safeSliderMax,
-  sliderControlTransition, sliderTransition, sliderVisualState,
+  normalizeSliderValue, resolveSliderVisibleValue, safeSliderMax,
+  sliderControlTransition, sliderFamilyCapsuleSpan, sliderFamilyValueDockedToMarker,
+  sliderFamilyValueNorm, sliderTransition, sliderVisualState,
   type AudioValueLaw, type SliderContext, type SliderControlContext,
   type SliderDirection, type SliderPolarity, type SliderVariant,
 } from "@inflatable-cookie/poodle-core";
@@ -109,7 +110,11 @@ export function Slider({
     && orientation === "horizontal"
     && capsuleSpan > 0
     && visibleValueText != null
-    && (1 - visualState.valueNorm) * capsuleSpan < measureInlineAdvance(visibleValueText, font) + 16;
+    && sliderFamilyValueDockedToMarker({
+      valueNorm: visualState.valueNorm,
+      span: capsuleSpan,
+      advance: measureInlineAdvance(visibleValueText, font),
+    });
 
   function runControl(event: Parameters<typeof sliderControlTransition>[1]): void {
     const result = sliderControlTransition(controlRef.current, event);
@@ -123,11 +128,13 @@ export function Slider({
     }
   }
   function pointNorm(event: ReactPointerEvent<HTMLElement>): number {
-    const rect = root.current!.getBoundingClientRect();
-    const physical = orientation === "horizontal"
-      ? (event.clientX - rect.left) / Math.max(rect.width, 1)
-      : 1 - (event.clientY - rect.top) / Math.max(rect.height, 1);
-    return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
+    return sliderFamilyValueNorm({
+      rect: root.current!.getBoundingClientRect(),
+      orientation,
+      direction,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   }
   function pointerDown(event: ReactPointerEvent<HTMLElement>): void {
     if (event.button !== 0 || disabled) return;
@@ -189,11 +196,11 @@ export function Slider({
     const node = capsule.current;
     const observer = new ResizeObserver(() => {
       const rect = node.getBoundingClientRect();
-      setCapsuleSpan(orientation === "vertical" ? rect.height : rect.width);
+      setCapsuleSpan(sliderFamilyCapsuleSpan(rect, orientation));
     });
     observer.observe(node);
     const rect = node.getBoundingClientRect();
-    setCapsuleSpan(orientation === "vertical" ? rect.height : rect.width);
+    setCapsuleSpan(sliderFamilyCapsuleSpan(rect, orientation));
     return () => observer.disconnect();
   }, [block, orientation]);
 

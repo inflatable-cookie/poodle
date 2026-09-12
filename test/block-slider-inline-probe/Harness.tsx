@@ -18,6 +18,8 @@ export function Harness() {
   const [fraction, setFraction] = useState(0.85);
   const [rangeFraction, setRangeFraction] = useState<[number, number]>([0.3, 0.85]);
   const [rangeVertical, setRangeVertical] = useState<[number, number]>([20, 80]);
+  const [rangeExtrema, setRangeExtrema] = useState<[number, number]>([0, 100]);
+  const [rangeEquality, setRangeEquality] = useState<[number, number]>([50, 50]);
   const [dispatches, setDispatches] = useState(0);
   const [trace, setTrace] = useState("idle");
 
@@ -161,6 +163,28 @@ export function Harness() {
           value={rangeVertical}
           visibleLabel="Price"
           ariaLabel="Vertical range"
+        />
+      </div>
+      {/* g18.026 family handle parity: both markers stay inside the capsule
+          at the extrema and at equality, inset toward the window interior. */}
+      <div data-case="range-extrema" style={{ width: 240, padding: 24 }}>
+        <RangeSlider
+          min={0}
+          max={100}
+          step={1}
+          value={rangeExtrema}
+          visibleLabel="Price"
+          ariaLabel="Extrema range"
+        />
+      </div>
+      <div data-case="range-equality" style={{ width: 240, padding: 24 }}>
+        <RangeSlider
+          min={0}
+          max={100}
+          step={1}
+          value={rangeEquality}
+          visibleLabel="Price"
+          ariaLabel="Equality range"
         />
       </div>
     </section>
