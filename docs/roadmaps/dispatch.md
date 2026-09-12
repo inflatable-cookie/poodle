@@ -115,9 +115,10 @@ rust/web checks at the reviewed head. The complete current Nucleus cohort is
 repinned from the actual preview lockfile; no blocking findings remain.
 
 [`g18.031`](g18/031-release-metadata-and-census-provenance.md) — release
-metadata and GPUI census provenance — ready as the structural precursor that
-selects the public core manifest for Effigy and removes the census generator's
-embedded `0.3.0` before retained g18.006 resumes.
+metadata and GPUI census provenance — changes requested on the structural precursor that
+aligns root repository metadata, admits its exact lockstep transition and
+removes the census generator's embedded `0.3.0` before retained g18.006
+resumes.
 
 ## Active and paused queue tasks
 
@@ -138,10 +139,11 @@ after PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd`.
 receipt SHA/version provenance from the actual preview lockfile and performed
 one complete current evidence repin before retained g18.006 resumes.
 
-[`g18.031`](g18/031-release-metadata-and-census-provenance.md) is ready. It
-owns the explicit core release-version source, manifest-derived census receipt
-version and one deterministic current census regeneration. It does not prepare
-the candidate or run the full release board.
+[`g18.031`](g18/031-release-metadata-and-census-provenance.md) has changes
+requested. It owns truthful root release metadata, exact root lockstep
+candidate admission, manifest-derived census receipt version and one
+deterministic current census regeneration. It does not prepare the candidate
+or run the full release board.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It

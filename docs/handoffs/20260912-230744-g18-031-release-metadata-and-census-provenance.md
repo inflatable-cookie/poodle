@@ -28,10 +28,9 @@ release version.
 
 ## Why It Matters
 
-The `0.4.0` candidate cannot be coherent while release status reads unrelated
-root tooling as `0.1.0` and 65 GPUI receipts are regenerated with a literal
-`0.3.0`. Both are recurring infrastructure faults outside the closed candidate
-surface. Fix them once without widening that surface.
+The `0.4.0` candidate cannot be coherent while root repository metadata stays
+at `0.1.0` and 65 GPUI receipts are regenerated with a literal `0.3.0`.
+Fix both recurring infrastructure faults and keep publication scope unchanged.
 
 ## Current State
 
@@ -44,18 +43,20 @@ latest remains `0.3.0`.
 
 ## Boundaries
 
-Follow g18.031 exactly. Do not change any package or Cargo version, root
-`package.json`, g18.029's candidate policy, changelog, release notes, locks,
-workflows, tags, registries, Desktop or the retained task. Do not run mounted
-tests, full `qa` or release gates. The worker never merges or resumes g18.006.
+Follow g18.031 exactly. Align only root `package.json` to current `0.3.0` and
+add only its exact version transition to g18.029's candidate policy. Do not
+change any other package/Cargo version, root manifest field, changelog, release
+notes, locks, workflows, tags, registries, Desktop or the retained task. Do not
+run mounted tests, full `qa` or release gates. The worker never merges or
+resumes g18.006.
 
 ## Important Context
 
 Configure `[release]` in `effigy.toml` with explicit
-`version-file = "packages/core/package.json"`, the existing changelog,
+`version-file = "package.json"`, the existing changelog,
 `tag-format = "v{version}"` and `pre-1-0 = true`; preserve the existing
-headless release gate. Root `package.json` is private workspace tooling, not a
-release package.
+headless release gate. Root `package.json` stays private and unpublished, but
+its version is truthful repository metadata and moves in lockstep.
 
 Derive expected-test receipt `package_version` from
 `packages/gpui/preview/Cargo.toml`. Add fail-closed pure parsing and stale-file
@@ -65,14 +66,16 @@ body should change.
 
 ## Suggested Next Move
 
-Plant focused release-source and manifest-version laws first. Then implement
-the two derivations, run one deterministic census regeneration and inspect the
-diff before focused validation.
+Plant focused release-source, exact root candidate-transition and
+manifest-version laws first. Then implement the derivations, run one
+deterministic census regeneration and inspect the diff before focused
+validation.
 
 ## Completion Protocol
 
-Run only `test:gpui-census`, `check:gpui-census`, a read-only release
-status/config probe, `docs:lint` and `git diff --check`. Open one non-draft PR
+Run only the focused candidate-scope suite, `test:gpui-census`,
+`check:gpui-census`, a read-only release status/config probe, `docs:lint` and
+`git diff --check`. Open one non-draft PR
 and report `ready_for_review` immediately with the exact head, resolved Effigy
 version source, receipt count and provenance-only regeneration diff. Queue owns
 CI, review and merge. No release mutation or g18.006 continuation occurs here.

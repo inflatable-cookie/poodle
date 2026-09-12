@@ -65,10 +65,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - g18.030 removes the Nucleus emitter's hard-coded preview-lock hash and
   release versions before candidate preparation. Consume its derived
   provenance from main; the final `0.4.0` repin must require no emitter edit.
-- g18.031 selects the public core manifest as Effigy's explicit repository
-  release-version source and derives GPUI census receipt versions from the
-  preview crate manifest. Consume it before candidate preparation; do not bump
-  or admit the private root workspace manifest.
+- g18.031 aligns root repository metadata to current `0.3.0`, makes it Effigy's
+  explicit release-version source, admits only its lockstep version transition
+  to the closed candidate surface, and derives GPUI census receipt versions
+  from the preview crate manifest.
 - Include the g18.022 pre-v1 Slider-family migration. Release notes must name
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
@@ -232,11 +232,11 @@ that provenance from the lockfile and repinned current evidence; no candidate
 mutation exists.
 
 Post-g18.030 continuation proved two further release-identity defects on clean
-main: the GPUI census generator still embeds `0.3.0` in 65 receipts, and
-Effigy auto-detects the private root workspace manifest at `0.1.0` as the
-repository release version. g18.031 derives the census version from the
-preview crate and explicitly selects the public core manifest for release
-status. It also corrects this candidate's gate command to the stage-appropriate
+main: the GPUI census generator still embeds `0.3.0` in 65 receipts, and root
+repository metadata remains misleadingly at `0.1.0`. g18.031 derives the
+census version from the preview crate, aligns root to current `0.3.0`, and
+keeps it lockstep as the explicit release source. It also corrects this
+candidate's gate command to the stage-appropriate
 `release gates --json`; accepting a red status result is not authorized.
 
 ## Next task
