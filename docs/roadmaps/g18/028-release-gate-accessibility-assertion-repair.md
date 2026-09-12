@@ -1,6 +1,6 @@
 # 028 — Release-gate accessibility assertion repair
 
-Status: in review — PR #260 at `390095f6f3653846af0d95d16d35a91c944389a0`
+Status: changes requested — PR #260 must repin the invalidated Nucleus cohort
 Owner: Poodle Rust render contracts
 Created: 2026-09-12
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -36,21 +36,22 @@ without changing product behavior, then reopen retained g18.006's release gate.
 - Do not remove, suppress or special-case the current labels to satisfy stale
   tests. No public or runtime behavior changes in this task.
 - Any edit under `packages/render` invalidates the source commit bound into the
-  29 Nucleus M1/A1 receipts. Tom ruled on 2026-09-12 that g18.006 owns one
-  final cohort repin alongside its required `Cargo.toml` version change. This
-  task records and bounds that expected failure instead of generating evidence
-  that the candidate would immediately replace.
+  29 Nucleus M1/A1 receipts. Tom initially preferred one later repin in
+  g18.006, then ruled on 2026-09-12 that PR #260 must not merge with a red web
+  check. This task therefore regenerates the complete cohort against its exact
+  repaired head. g18.006 performs its own later final repin after changing the
+  release-bearing Cargo manifest.
 
 ## Dispatch manifest
 
 - **State:** ready; independent release-blocking repair; serial before retained
   g18.006 resumes
-- **Completion:** one independently reviewed assertion-only PR merged with both
-  focused tests and the full `poodle-render` library tests green; the release
-  status gate may fail only on the exactly diagnosed Nucleus source-commit
-  invalidation delegated to g18.006
+- **Completion:** one independently reviewed repair PR merged with both focused
+  tests, the full `poodle-render` library tests and web/release gates green
 - **Owned mutable paths:** `packages/render/src/context.rs`,
-  `packages/render/src/segmented_control.rs`; focused execution evidence only
+  `packages/render/src/segmented_control.rs`; the complete generated Nucleus
+  receipt, manifest, parity-ledger and GPUI-census cohort required by the exact
+  repaired source identity; focused execution evidence
 - **Reserved closeout surfaces:** g18 README, generation index, dispatch
   projection, task status/evidence, g18.006 task/workspace, versions, locks,
   changelog, release notes, workflows and Desktop
@@ -68,10 +69,12 @@ without changing product behavior, then reopen retained g18.006's release gate.
    history before editing.
 3. Replace only the two stale expectations with `Some("Save")` and
    `Some("Grid")`, preserving each test's original negative assertion.
-4. Run the two focused tests, `cargo test -p poodle-render --lib`, and
-   `effigy release status --check-gates`. Record the exact Nucleus
-   source-commit failures; refuse any additional red gate.
-5. Open one non-draft PR and return exact-head evidence for independent review.
+4. Regenerate and repin the complete Nucleus receipt, manifest, parity-ledger
+   and GPUI-census cohort against the exact repaired source identity. Refuse a
+   partial cohort or mixed source commits.
+5. Run the two focused tests, `cargo test -p poodle-render --lib`, and the
+   complete web/release gates.
+6. Update PR #260 and return the new exact head for independent re-review.
 
 ## Acceptance and review oracle
 
@@ -79,15 +82,15 @@ without changing product behavior, then reopen retained g18.006's release gate.
 | --- | --- | --- |
 | Provider remains semantics-neutral | test passes by deleting the button's own label | assertion sees `Some("Save")` while existing wrapper/layout negatives remain |
 | Visible segment label remains accessible | icon-only fallback paints `Grid` but accessibility is unnamed | assertion sees `Some("Grid")` |
-| Repair is test-only | renderer logic changes to manufacture a passing result | exact diff contains assertion/evidence changes only |
-| Remaining release failure is bounded | an unrelated gate is red or receipt failure has another cause | full library green; release status fails only because the 29 receipts still bind the predecessor `packages/render` source commit |
+| Product repair is assertion-only | renderer logic changes to manufacture a passing result | non-generated product diff contains only the two expectations |
+| Evidence binds the repaired head | receipts retain `d0554d84`, mix source commits or only suppress validation | all 29 receipts plus manifest, ledger and census regenerate coherently and the web/release gates pass |
 
 ## Stop conditions
 
 - Stop if current contracts do not require either label.
 - Stop if a production-code change is needed.
-- Stop and report any release failure beyond the diagnosed Nucleus
-  source-commit invalidation; do not widen this repair.
+- Stop and report any red gate remaining after the complete cohort repin; do
+  not widen into another product or release repair.
 - Stop before candidate, version, tag, publication, workflow or Desktop work.
 
 ## Evidence
@@ -100,13 +103,13 @@ label projection from NP-4 commit `51b820a5d` and g16.119 commit `cceb6646a`.
 PR #260 changes only the two assertions at
 `390095f6f3653846af0d95d16d35a91c944389a0`. Worker evidence records 2 focused
 tests and all 647 `poodle-render` library tests green. Release status advances
-to the expected parity-ledger/GPUI-census refusal because the 29 receipts bind
-source commit `d0554d844598725782fb5c6cc16190fdae9b83ca`. No other gate failure is
-accepted.
+to the parity-ledger/GPUI-census refusal because the 29 receipts bind source
+commit `d0554d844598725782fb5c6cc16190fdae9b83ca`. PR #260 may not merge with
+that red web check; the complete cohort is now part of this repair.
 
 ## Next task
 
-After exact-head independent review and merge, resume the existing g18.006
-Queue task, worker and workspace on current main. It repins the full cohort once
-after its release-bearing changes, then proves the complete release gate. Do
-not replace its task or candidate lane.
+After green checks, exact-head independent re-review and merge, resume the
+existing g18.006 Queue task, worker and workspace on current main. It performs
+the later final repin after its release-bearing changes. Do not replace its
+task or candidate lane.

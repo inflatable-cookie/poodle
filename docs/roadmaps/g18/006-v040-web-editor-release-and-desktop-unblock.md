@@ -54,11 +54,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - The final core and Svelte tree hashes will therefore supersede Desktop's
   g18.002-only hashes. Evidence must preserve those hashes as lineage, report
   final candidate/tag/package trees, and prove installed `./editor` behavior.
-- g18.028's assertion-only `packages/render` repair intentionally leaves the 29
-  source-bound Nucleus M1/A1 receipts stale. Repin the complete cohort once in
-  this task after the `0.4.0` Cargo manifest changes, then require the whole
-  parity-ledger, GPUI-census and release gate to pass. Do not carry an
-  intermediate g18.028 repin.
+- g18.028 repins the 29 source-bound Nucleus M1/A1 receipts so its own web gate
+  remains green. Repin the complete cohort again in this task after the `0.4.0`
+  Cargo manifest changes, then require the whole parity-ledger, GPUI-census and
+  release gate to pass against the final candidate identity.
 - Include the g18.022 pre-v1 Slider-family migration. Release notes must name
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
