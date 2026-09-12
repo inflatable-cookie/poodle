@@ -125,12 +125,13 @@ pub fn block_grab_with_axis(
     cross_inset: f32,
 ) -> Node {
     let mut grab = Node::container();
-    grab.style.fill_width = true;
-    grab.style.fill_height = true;
     // g18.024: the scrub surface covers the 44×44 effective target even
     // where it overflows the capsule-sized surface, so the hit envelope
     // stays interactive without participating in layout. The cross axis is
     // vertical for a horizontal scrub and horizontal for a vertical scrub.
+    // The box derives from opposing inset anchors (no fill sizing — a fill
+    // percentage would win over the insets and shrink the overlay back to
+    // the capsule, leaving the overflow band dead).
     grab.position = match axis {
         ScrubAxis::Vertical => NodePosition::Absolute {
             top: Some(0.0),
@@ -185,9 +186,10 @@ pub fn fraction_anchor(
 
 /// Vertical companion of [`fraction_anchor`]: the fraction seeds a spacer
 /// along the block axis and the child hangs centred on its cross axis
-/// (g18.022). `height` is the anchor row height along the block axis;
+/// (g18.022). `width` is the anchor row width along the cross axis;
 /// `layer_offset` centres the overflowing hit layer on the capsule-sized
-/// surface (g18.024).
+/// surface along the cross axis — a negative `left`, not a `top` shift
+/// (g18.024 review fix).
 pub fn fraction_anchor_vertical(
     fraction: f32,
     width: f32,
@@ -208,8 +210,8 @@ pub fn fraction_anchor_vertical(
     };
     let mut layer = Node::container();
     layer.position = NodePosition::Absolute {
-        top: Some(layer_offset),
-        left: Some(0.0),
+        top: Some(0.0),
+        left: Some(layer_offset),
         right: None,
         bottom: Some(0.0),
     };

@@ -6534,6 +6534,218 @@ fn block_slider_production_host_height_matches_surface_and_range_suppresses_labe
     });
 }
 
+/// g18.024 vertical repair, mounted: the block rail is the shared capsule
+/// size, the handle rides the bottom-referenced scrub axis on the rail's
+/// centre axis, the fill grows along the block axis inside [lo, hi], and the
+/// scrub overlay covers the 44×44 hit band that overflows the capsule.
+#[test]
+fn vertical_block_slider_geometry_on_the_mounted_host() {
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new(25.0f64));
+        let sink = Arc::clone(&live);
+        let spec = SliderSpec::new(25.0)
+            .with_bounds(0.0, 100.0)
+            .with_orientation(Orientation::Vertical)
+            .with_size(ControlSize::Xs);
+        let mut spec = spec;
+        spec.aria_label = Some("Vertical".into());
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        let node = poodle_render::slider(
+            &spec,
+            &ctx,
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: None,
+            },
+        );
+        let mut node = node;
+        stamp_slider_id(&mut node, "vertical-slider-hit");
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 240.0);
+        driver.wait_for_focus_handle("vertical-slider-hit");
+
+        let mount = driver.mount_box_bounds();
+        // The rail is the 24px xs capsule, centred in the mount box, and the
+        // capsule-sized surface fills the host-owned length.
+        let rail_left = f32::from(mount.origin.x) + 68.0;
+        let rail_centre_x = rail_left + 12.0;
+        let rail_top = f32::from(mount.origin.y);
+        let rail_bottom = rail_top + 240.0;
+
+        // Handle: 44×44, centred on the rail axis (g18.024 review fix: it
+        // used to hang off the cross axis), and riding the bottom-referenced
+        // axis: value 25 puts its centre 25% above the rail bottom.
+        let hit = poodle_gpui_node_backend::bounds_for("vertical-slider-hit").expect("hit");
+        assert_eq!(f32::from(hit.size.width), 44.0);
+        assert_eq!(f32::from(hit.size.height), 44.0);
+        let hit_centre_x = f32::from(hit.origin.x) + 22.0;
+        assert!(
+            (hit_centre_x - rail_centre_x).abs() <= 0.75,
+            "hit centre x {hit_centre_x} must sit on the rail axis {rail_centre_x}"
+        );
+        let hit_centre_y = f32::from(hit.origin.y) + 22.0;
+        let expected_y = rail_bottom - 0.25 * 240.0;
+        assert!(
+            (hit_centre_y - expected_y).abs() <= 0.75,
+            "hit centre y {hit_centre_y} must track the value ({expected_y})"
+        );
+
+        // Fill: grows along the block axis (60px of 240 at 25%), fills the
+        // cross axis, and sits at the physical bottom of the rail.
+        let fill = poodle_gpui_node_backend::bounds_for("block-slider-fill").expect("fill");
+        assert_eq!(f32::from(fill.size.width), 24.0);
+        assert!((f32::from(fill.size.height) - 60.0).abs() <= 0.75);
+        assert!((f32::from(fill.bottom()) - rail_bottom).abs() <= 0.75);
+
+        // Scrub overlay: covers the hit band across the cross axis (44px
+        // wide, centred) and the full rail length (g18.024 review fix: it
+        // stayed capsule-sized and left the band dead).
+        let grab = poodle_gpui_node_backend::bounds_for("block-slider-grab").expect("grab");
+        assert_eq!(f32::from(grab.size.width), 44.0);
+        assert!((f32::from(grab.size.height) - 240.0).abs() <= 0.75);
+
+        // A press inside the overflow band — outside the 24px capsule but
+        // inside the 44×44 target — dispatches.
+        let band_x = rail_centre_x - 15.0;
+        let press_y = rail_top + 240.0 * 0.7;
+        driver.pointer_press(point(px(band_x), px(press_y)));
+        driver.pointer_release(point(px(band_x), px(press_y)));
+        assert_eq!(*live.lock().expect("value lock"), 30.0);
+    });
+}
+
+/// g18.024 vertical repair, mounted: the RangeSlider rail anchors the upper
+/// value at the physical top and the lower value at the physical bottom
+/// (matching the bottom-referenced scrub axis and the contract), paints the
+/// window at [lo, hi] along the block axis, and covers the hit band.
+#[test]
+fn vertical_range_block_geometry_on_the_mounted_host() {
+    run_headless(|cx| {
+        let spec = RangeSliderSpec::new(20.0, 80.0)
+            .with_bounds(0.0, 100.0)
+            .with_orientation(Orientation::Vertical)
+            .with_size(ControlSize::Xs)
+            .with_aria_label("Vertical range");
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        // The handler arms the scrub overlay; the grab bounds assert needs it.
+        let node = poodle_render::range_slider(
+            &spec,
+            &ctx,
+            poodle_render::RangeSliderHandlers {
+                on_change: Some(Arc::new(|_, _| {})),
+                on_value_commit: None,
+            },
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 240.0);
+        driver.wait_for_focus_handle("range-slider-lower");
+
+        let mount = driver.mount_box_bounds();
+        let rail_left = f32::from(mount.origin.x) + 68.0;
+        let rail_centre_x = rail_left + 12.0;
+        let rail_bottom = f32::from(mount.origin.y) + 240.0;
+
+        // Anchor direction (g18.024 review fix: lower used to sit above
+        // upper): value 20 rides low, value 80 rides high, both on the rail
+        // axis with 44×44 rectangles.
+        let lower = poodle_gpui_node_backend::bounds_for("range-slider-lower").expect("lower");
+        let upper = poodle_gpui_node_backend::bounds_for("range-slider-upper").expect("upper");
+        for (name, hit) in [("lower", lower), ("upper", upper)] {
+            assert_eq!(f32::from(hit.size.width), 44.0, "{name} width");
+            assert_eq!(f32::from(hit.size.height), 44.0, "{name} height");
+            let centre_x = f32::from(hit.origin.x) + 22.0;
+            assert!(
+                (centre_x - rail_centre_x).abs() <= 0.75,
+                "{name} centre x {centre_x} must sit on the rail axis {rail_centre_x}"
+            );
+        }
+        let lower_centre_y = f32::from(lower.origin.y) + 22.0;
+        let upper_centre_y = f32::from(upper.origin.y) + 22.0;
+        let expected_lower_y = rail_bottom - 0.2 * 240.0;
+        let expected_upper_y = rail_bottom - 0.8 * 240.0;
+        assert!(
+            (lower_centre_y - expected_lower_y).abs() <= 0.75,
+            "lower centre y {lower_centre_y} must track the value ({expected_lower_y})"
+        );
+        assert!(
+            (upper_centre_y - expected_upper_y).abs() <= 0.75,
+            "upper centre y {upper_centre_y} must track the value ({expected_upper_y})"
+        );
+        assert!(
+            upper_centre_y < lower_centre_y,
+            "upper value must sit above lower value on a vertical rail"
+        );
+
+        // Window fill: [lo, hi] above the logical bottom (144px of 240),
+        // filling the 24px cross axis (g18.024 review fix: it grew sideways
+        // from the rail's top edge). The bottom edge floats `lo` above the
+        // rail bottom where the offset spacer sits.
+        let fill = poodle_gpui_node_backend::bounds_for("block-range-slider-fill").expect("fill");
+        assert_eq!(f32::from(fill.size.width), 24.0);
+        assert!((f32::from(fill.size.height) - 144.0).abs() <= 0.75);
+        assert!((rail_bottom - f32::from(fill.bottom()) - 48.0).abs() <= 0.75);
+
+        // Scrub overlay covers the hit band.
+        let grab = poodle_gpui_node_backend::bounds_for("block-range-slider-grab").expect("grab");
+        assert_eq!(f32::from(grab.size.width), 44.0);
+        assert!((f32::from(grab.size.height) - 240.0).abs() <= 0.75);
+    });
+}
+
+/// g18.024 horizontal band coverage: at xs the scrub overlay is 44px tall
+/// (the full hit envelope) and a press in the overflow band above the 24px
+/// capsule dispatches (g18.024 review fix: the overlay stayed capsule-sized
+/// so the band was dead).
+#[test]
+fn horizontal_block_scrub_overlay_covers_the_hit_band_at_xs() {
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new(50.0f64));
+        let sink = Arc::clone(&live);
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_size(ControlSize::Xs);
+        let mut spec = spec;
+        spec.aria_label = Some("Band".into());
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        let node = poodle_render::slider(
+            &spec,
+            &ctx,
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: None,
+            },
+        );
+        let mut node = node;
+        stamp_slider_id(&mut node, "band-slider-hit");
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 60.0);
+        driver.wait_for_focus_handle("band-slider-hit");
+
+        let grab = poodle_gpui_node_backend::bounds_for("block-slider-grab").expect("grab");
+        assert_eq!(f32::from(grab.size.height), 44.0);
+        assert_eq!(f32::from(grab.size.width), 160.0);
+
+        // Press 15px above the box mid-line: outside the 24px capsule, inside
+        // the 44px envelope. x maps to 30% of the full-width capsule.
+        let mount = driver.mount_box_bounds();
+        let x = f32::from(mount.origin.x) + 0.3 * 160.0;
+        let y = f32::from(mount.origin.y) + 30.0 - 15.0;
+        driver.pointer_press(point(px(x), px(y)));
+        driver.pointer_release(point(px(x), px(y)));
+        assert_eq!(*live.lock().expect("value lock"), 30.0);
+    });
+}
+
 /// g14.005 retained regression. The overlay layer registry is frame-scoped,
 /// not conversion-scoped: a real page converts many components independently
 /// within one frame, and every open overlay has to register inside that frame
