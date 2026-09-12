@@ -1003,7 +1003,7 @@ mod tests {
         let node = segmented_control(&spec, &ctx, None);
         assert!(node.has_text("Grid"));
         let seg = find_segment(&node, "Grid");
-        assert!(seg.a11y.label.is_none());
+        assert_eq!(seg.a11y.label.as_deref(), Some("Grid"));
         assert!(seg.tooltip.is_none());
         assert!(seg
             .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { .. }))
