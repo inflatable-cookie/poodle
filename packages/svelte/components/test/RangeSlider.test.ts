@@ -260,7 +260,7 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     }
   });
 
-  it("renders fractional endpoint values as short step-aware decimals", () => {
+  it("renders fractional endpoint values as fixed-width step-aware decimals", () => {
     // step 0.01 implies two decimals; neither endpoint may leak a binary
     // tail. The custom formatter remains the authoritative override.
     const { container } = render(RangeSlider, {
@@ -275,6 +275,6 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     const values = Array.from(
       container.querySelectorAll(".poodle-range-slider__inline--selected .poodle-range-slider__inline-value"),
     ).map((slot) => slot.textContent);
-    expect(values).toEqual(["0.3", "0.85"]);
+    expect(values).toEqual(["0.30", "0.85"]);
   });
 });

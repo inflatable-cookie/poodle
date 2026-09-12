@@ -206,6 +206,7 @@
     pointer-events: none;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline-row {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -259,6 +260,15 @@
   .poodle-slider[data-variant="block"] .poodle-slider__inline-value {
     white-space: nowrap;
     pointer-events: none;
+  }
+  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-value-docked="marker"] .poodle-slider__inline-value {
+    position: absolute;
+    inset-inline-start: var(--poodle-slider-block-marker-position);
+    inset-inline-end: auto;
+    transform: translateX(calc(-100% - 0.25rem));
+  }
+  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"][data-value-docked="marker"] .poodle-slider__inline-value {
+    transform: translateX(calc(100% + 0.25rem));
   }
   .poodle-slider[data-variant="block"] .poodle-slider__hit {
     position: absolute;

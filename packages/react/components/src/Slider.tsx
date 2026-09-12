@@ -105,6 +105,11 @@ export function Slider({
       measure: (text) => measureInlineAdvance(text, font),
     })
     : { labelInline: false, valueInline: false };
+  const valueDockedToMarker = block
+    && orientation === "horizontal"
+    && capsuleSpan > 0
+    && visibleValueText != null
+    && (1 - visualState.valueNorm) * capsuleSpan < measureInlineAdvance(visibleValueText, font) + 16;
 
   function runControl(event: Parameters<typeof sliderControlTransition>[1]): void {
     const result = sliderControlTransition(controlRef.current, event);
@@ -212,6 +217,7 @@ export function Slider({
       data-polarity={visualState.polarity}
       data-fill-tone={visualState.fillTone}
       data-state={visualState.pointerActive ? "active" : "idle"}
+      data-value-docked={valueDockedToMarker ? "marker" : undefined}
       dir={direction === "rtl" ? direction : undefined}
       role="slider"
       tabIndex={disabled ? undefined : 0}

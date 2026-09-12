@@ -360,7 +360,7 @@ describe("Slider (react) block variant", () => {
       "clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-block-marker-position) - (var(--poodle-slider-block-hit) / 2));",
     );
     // g18.024: the vertical rail is the shared capsule size, not the hit
     // envelope.
@@ -371,7 +371,7 @@ describe("Slider (react) block variant", () => {
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
   });
 
-  it("renders fractional default values as short step-aware decimals", () => {
+  it("renders fractional default values as fixed-width step-aware decimals", () => {
     // step 0.01 implies two decimals; the snapped 0.85 must never leak a
     // binary tail. The custom formatter remains the authoritative override.
     const { container } = render(
@@ -394,7 +394,7 @@ describe("Slider (react) block variant", () => {
     );
   });
 
-  it("keeps the row glyph slots value-independent across the whole range", () => {
+  it("keeps the row glyph content intact across the whole range", () => {
     const journeys: Array<{ label: string; value: string }> = [];
     for (const value of [0, 50, 100]) {
       const { container, unmount } = render(

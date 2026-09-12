@@ -93,6 +93,13 @@
       measure: (text) => measureInlineAdvance(text, font),
     });
   });
+  const valueDockedToMarker = $derived.by(() => {
+    if (!block || orientation !== "horizontal" || !capsule || capsuleSpan <= 0 || visibleValueText == null) return false;
+    const font = getComputedStyle(capsule).font;
+    const valueAdvance = measureInlineAdvance(visibleValueText, font);
+    // 12px end inset + 4px breathing room between the glyph and marker.
+    return (1 - visualState.valueNorm) * capsuleSpan < valueAdvance + 16;
+  });
 
   function send(type: "INPUT" | "COMMIT", event: Event): void {
     const raw = Number((event.currentTarget as HTMLInputElement).value);
@@ -188,7 +195,7 @@
 
 <!-- Block is the standalone capsule; embedded is the dense track-and-thumb composite. -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-direction={direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={direction === "rtl" ? direction : undefined}
+<div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-direction={direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} data-value-docked={valueDockedToMarker ? "marker" : undefined} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={direction === "rtl" ? direction : undefined}
   role="slider" tabindex={disabled ? undefined : 0}
   aria-label={ariaLabel ?? undefined} aria-valuemin={min} aria-valuemax={safeMax} aria-valuenow={visualState.value} aria-valuetext={valueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd} onkeydown={controlKey}>

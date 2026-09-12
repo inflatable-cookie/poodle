@@ -71,8 +71,18 @@ export interface SliderResult {
   effects: SliderEffect[];
 }
 
-export function normalizeSliderValue(context: SliderContext, raw: number): number {
-  return clampValue(snapToStep(raw, context.min, context.step), context.min, safeSliderMax(context.min, context.max));
+export function normalizeSliderValue(
+  context: Pick<SliderContext, "min" | "max" | "step">,
+  raw: number,
+): number {
+  const max = safeSliderMax(context.min, context.max);
+
+  // Bounds are authoritative stops even when the configured step does not
+  // divide the range evenly. Only values strictly inside the range snap.
+  if (raw <= context.min) return context.min;
+  if (raw >= max) return max;
+
+  return clampValue(snapToStep(raw, context.min, context.step), context.min, max);
 }
 
 export function sliderTransition(context: SliderContext, event: SliderEvent): SliderResult {
@@ -223,7 +233,7 @@ export function rangeSliderTransition(
     case "COMMIT": {
       const max = safeSliderMax(context.min, context.max);
       const [lower, upper] = normalizeRangeValue(context);
-      const snapped = snapToStep(event.raw, context.min, context.step);
+      const snapped = normalizeSliderValue(context, event.raw);
       // A thumb cannot cross its sibling: lower clamps to [min, upper], upper to [lower, max].
       const value: [number, number] =
         event.thumb === "lower"
@@ -295,7 +305,7 @@ export function createRangeSliderControlContext(input: Partial<RangeSliderContro
 
 function rangeControlValueAt(context: RangeSliderControlContext, valueNorm: number): number {
   const value = denormalizeAudioValue(valueNorm, context.min, safeSliderMax(context.min, context.max), context.law);
-  return clampValue(snapToStep(value, context.min, context.step), context.min, safeSliderMax(context.min, context.max));
+  return normalizeSliderValue(context, value);
 }
 
 export function rangeSliderVisualState(context: RangeSliderControlContext): RangeSliderVisualState {
@@ -385,20 +395,19 @@ export function sliderDisplayPrecision(min: number, step: number): number {
 }
 
 /**
- * g18.024 default visible value: a short step-aware decimal. The value must
- * already be step-snapped; with a finite positive `step` it is rounded to
- * the precision implied by `min` and `step`, insignificant zeroes are
- * trimmed, and negative zero normalizes to `"0"`. Binary tails never
- * survive. Without a finite positive step no snapping happened, so the
- * value keeps its shortest exact form.
+ * Default visible value: a fixed-width step-aware decimal. The value must
+ * already be step-snapped; with a finite positive `step` it is rounded and
+ * zero-filled to the precision implied by `min` and `step`, and negative zero
+ * normalizes at that same precision. Binary tails never survive. Without a
+ * finite positive step no snapping happened, so the value keeps its shortest
+ * exact form.
  */
 export function defaultVisibleValueText(value: number, min: number, step: number): string {
   if (!Number.isFinite(value)) return String(value);
   if (!Number.isFinite(step) || step <= 0) return String(value);
-  const rounded = Number(value.toFixed(sliderDisplayPrecision(min, step)));
-  // Number→String prints the shortest exact decimal (and `-0` as `"0"`),
-  // which performs the trimming and negative-zero normalization for free.
-  return String(rounded);
+  const precision = sliderDisplayPrecision(min, step);
+  const rounded = value.toFixed(precision);
+  return Number(rounded) === 0 ? (0).toFixed(precision) : rounded;
 }
 
 

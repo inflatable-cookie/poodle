@@ -1,6 +1,6 @@
 # Slider
 
-Status: approved contract — g18.024 repair queued
+Status: approved contract — g18.024 merged; web collision docking adopted
 Updated: 2026-09-12
 
 
@@ -9,13 +9,13 @@ Updated: 2026-09-12
 - Component name: `Slider`
 - Layer: `foundation`
 - Summary: a single-value continuous or stepped range control whose default
-  block capsule keeps its visible label and value fixed while selected paint
-  crosses them; a dense track-and-thumb presentation remains available for
-  embedded composite use
+  block capsule keeps its visible label fixed and its value end-anchored until
+  the thumb would obscure it; a dense track-and-thumb presentation remains
+  available for embedded composite use
 - In scope: current value, min/max bounds, step behavior, keyboard and pointer
   adjustment, value commit semantics, horizontal and vertical orientation,
-  block and embedded variants, unipolar and bipolar fill geometry, fixed
-  visible label/value content, horizontal and vertical block presentation,
+  block and embedded variants, unipolar and bipolar fill geometry, stable
+  visible label/value content, horizontal collision docking, vertical block presentation,
   and `ltr`/`rtl` direction
 - Out of scope: dual-thumb range editing (see RangeSlider), knob/fader
   semantics, tick marks, PageUp/PageDown convergence,
@@ -41,7 +41,7 @@ Block variant (`variant="block"`, the default; horizontal form shown):
   │     ├── [Selected .slider__fill]  <span>  (selected paint only)
   │     ├── [Remainder .slider__remainder]  <span>  (remainder paint only)
   │     ├── [Inline selected layer .slider__inline--selected]  <span>
-  │     │     └── [Row .slider__inline-row]  (label at logical start, value at logical end;
+  │     │     └── [Row .slider__inline-row]  (label at logical start, value normally at logical end;
   │     │       clipped to the selected span; selected text role)
   │     ├── [Inline remainder layer .slider__inline--remainder]  <span>
   │     │     └── [Row .slider__inline-row]  (same stable row, clipped to the remainder;
@@ -60,7 +60,7 @@ upright: value at the physical top and optional label centered.
 | Control | yes, embedded variant | adapter-owned value control overlaid on the track | thumb styling, focus ring, appearance reset |
 | Capsule | yes, block variant | labelled rounded-square range surface | selected/remainder fill |
 | Hit | yes, block variant | measurable 44×44 logical-pixel effective target around a small thumb | handle fill/border, focus |
-| Inline layers | yes, block variant | clipped copies of one stable text layout above fill paint and below the thumb; pointer-inert | selected/remainder text |
+| Inline layers | yes, block variant | clipped copies of one text layout above fill and thumb paint; pointer-inert | selected/remainder text |
 
 ## 3. Props And Inputs
 
@@ -75,7 +75,7 @@ upright: value at the physical top and optional label centered.
 | `variant` | `"block" \| "embedded"` | `"block"` | no | presentation variant. `block` is the ordinary rounded-square capsule; `embedded` is the dense track-and-thumb alternative for composites. The removed `standard`/`track` vocabulary has no alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
 | `visibleLabel` | `string \| null` | `null` | no | visible label for the block variant. Empty text omits the item. Never derived from `ariaLabel` |
-| `formatVisibleValue` | `((value: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the visible value from the normalized, bounds-guarded, step-snapped number. The custom formatter takes precedence. The default emits the shortest ordinary decimal at the precision implied by `min` and a finite positive `step`, trims insignificant trailing zeroes, normalizes negative zero, and never exposes binary floating-point debris. Native specs carry the resolved string, not the closure |
+| `formatVisibleValue` | `((value: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the visible value from the normalized, bounds-guarded, step-snapped number. The custom formatter takes precedence. The default rounds and zero-fills to the decimal precision implied by `min` and a finite positive `step`, normalizes negative zero at that precision, and never exposes binary floating-point debris. Native specs carry the resolved string, not the closure |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | fill from minimum or from the resolved center |
 | `centerValue` | `number \| null` | `null` | no | bipolar fill anchor; defaults to zero when zero is inside the range, otherwise the midpoint |
 | `law` | `AudioValueLaw` | `linear` | no | value mapping used by adapter-owned block and embedded controls |
@@ -138,8 +138,11 @@ semantics remain unchanged.
 - Context: `value` (controllable), `min`, `max`, `step`, `disabled`
 - Events: `INPUT { raw }` (native input), `COMMIT { raw }` (native change),
   `SET_VALUE` (programmatic)
-- Normalization: snap to step from `min` (quantize `(raw - min) / step` to a
-  step index), clamp into `[min, safeMax]` where a degenerate range
+- Normalization: exact or out-of-range bound input resolves directly to `min`
+  or `safeMax`, so both endpoints remain reachable when `step` does not divide
+  the range evenly. Values strictly inside the range snap to step from `min`
+  (quantize `(raw - min) / step` to a step index), then clamp into
+  `[min, safeMax]` where a degenerate range
   (`max <= min`) widens to `min + 1`; non-positive step passes values through
   unsnapped. The step-index tie law is portable: an index exactly halfway
   between two steps rounds toward positive infinity (JavaScript `Math.round`
@@ -173,18 +176,20 @@ Visible content is a separate channel from accessibility copy:
 - Block `visibleLabel` is not the accessible name. The control still needs
   `ariaLabel` or an external label.
 - Formatter input is the normalized, bounds-guarded, step-snapped value.
-- Default visible value text is the shortest ordinary decimal at the precision
-  implied by `min` and a finite positive `step`. It trims insignificant
-  trailing zeroes, normalizes negative zero to `0`, and never exposes binary
-  floating-point debris. A custom `formatVisibleValue` remains authoritative.
+- Default visible value text is rounded and zero-filled to the decimal precision
+  implied by `min` and a finite positive `step`. It normalizes negative zero at
+  that precision and never exposes binary floating-point debris. A custom
+  `formatVisibleValue` remains authoritative.
   Empty label or formatter output omits that assigned item.
 
-Inline text is fixed and value-independent. Horizontally, the visible label
-stays at logical inline start and the visible value at logical inline end.
-Vertically, the value stays at the physical top and the visible label is
-centered. One stable layout paints through selected and remainder clipping
-layers. Crossing a glyph with the fill boundary changes only its foreground;
-it never moves, hides, rotates, or reflows either string.
+The visible label is fixed and value-independent. Horizontally, it stays at
+logical inline start. The numeric value normally stays at logical inline end;
+when the thumb enters that reserved text box, web adapters dock the value 4px
+before the thumb until the end anchor clears. Vertically, the value stays at
+the physical top and the visible label is centered. Both selected and remainder
+copies always share one placement, so fill-boundary clipping changes foreground
+without splitting, hiding, rotating, or reflowing either string. Text paints
+over the thumb so a glyph masks the marker rather than becoming illegible.
 
 Placement uses the whole track, not the current segments:
 
@@ -196,9 +201,9 @@ coexist   iff available >= ceil(label advance) + ceil(value advance)
 Equality fits. When the two strings cannot coexist, the optional visible
 label is suppressed and the exact numeric value stays at its orientation
 anchor.
-The value is never suppressed, moved, or truncated by the fit law, and no
-external line renders outside the capsule. Horizontally it stays at logical
-end; vertically it stays at physical top. Content inset is an internal metric,
+The value is never suppressed or truncated by the fit law, and no external line
+renders outside the capsule. Horizontal collision docking is the only movement;
+vertically the value stays at physical top. Content inset is an internal metric,
 not a public fit threshold.
 
 Block value feedback is static under architecture 012. Add no motion role.
@@ -233,8 +238,8 @@ negative status color. All other values publish `fillTone="positive"`.
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
-| `onValueChange` | value changes during interaction (input event) | `number` | live updates during drag or keyboard; payload is the clamped, step-snapped value (`clamp(snapToStep(raw, min, step), min, safeMax)`), not the raw input value |
-| `onValueCommit` | interaction finishes (change event) | `number` | fires on mouseup/touchend/keyup commit; payload is likewise the clamped, step-snapped value |
+| `onValueChange` | value changes during interaction (input event) | `number` | live updates during drag or keyboard; payload preserves exact bounds and otherwise carries the clamped, step-snapped value, not the raw input value |
+| `onValueCommit` | interaction finishes (change event) | `number` | fires on mouseup/touchend/keyup commit; payload follows the same bound-preserving normalization |
 
 ## 6. Accessibility
 
@@ -627,6 +632,7 @@ does not require Jetstream execution or evidence while that deferral stands.
 | webkit/moz thumb pseudo-elements | browser-specific CSS selectors | allowed | GPUI renders thumb directly |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | Page Up/Down increment amount | native range inputs keep browser-owned paging behavior | allowed | strict parity covers arrows, Home, and End |
+| horizontal block numeric collision docking | web prevents marker occlusion; GPUI still uses the fixed end anchor | provisional operator-approved UX | mirror docking in GPUI before visual-parity closure |
 
 ## 13. Specimen Definitions
 

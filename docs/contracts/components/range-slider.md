@@ -68,7 +68,7 @@ physical top, optional label centered, and lower value at the physical bottom.
 | `variant` | `"block" \| "embedded"` | `"block"` | no | presentation variant. `block` is the ordinary rounded-square capsule; `embedded` is the dense track-and-thumb alternative for composites. The removed `standard`/`track` vocabulary has no alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
 | `visibleLabel` | `string \| null` | `null` | no | centered visible label for the block variant. Empty text omits it. Never derived from `ariaLabel` |
-| `formatVisibleValue` | `((value: number, thumb: "lower" \| "upper") => string) \| undefined` | `undefined` | no | **Web targets only** — formats a per-thumb visible value from the normalized, bounds-guarded, step-snapped number. The custom formatter takes precedence. The default emits the shortest ordinary decimal at the precision implied by `min` and a finite positive `step`, trims insignificant trailing zeroes, normalizes negative zero, and never exposes binary floating-point debris. Native specs carry resolved strings |
+| `formatVisibleValue` | `((value: number, thumb: "lower" \| "upper") => string) \| undefined` | `undefined` | no | **Web targets only** — formats a per-thumb visible value from the normalized, bounds-guarded, step-snapped number. The custom formatter takes precedence. The default rounds and zero-fills to the decimal precision implied by `min` and a finite positive `step`, normalizes negative zero at that precision, and never exposes binary floating-point debris. Native specs carry resolved strings |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | ordinary range or range with an explicit bipolar center reference |
 | `centerValue` | `number \| null` | `null` | no | bipolar reference; defaults to zero when zero is inside the range, otherwise the midpoint |
 | `law` | `AudioValueLaw` | `linear` | no | value mapping used by adapter-owned block and embedded controls |
@@ -146,8 +146,10 @@ interaction.
   `disabled`
 - Events: `INPUT { thumb, raw }`, `COMMIT { thumb, raw }`, `SET_VALUE`
 - Normalization: `normalizeRangeValue` orders the pair and clamps both ends
-  into `[min, safeMax]`; per-event, the raw value snaps to step from `min`
-  and a thumb cannot cross its sibling (lower clamps to `[min, upper]`,
+  into `[min, safeMax]`; per-event, exact or out-of-range bound input resolves
+  directly to `min` or `safeMax`, so both endpoints remain reachable when
+  `step` does not divide the range evenly. Values strictly inside the range
+  snap to step from `min`, and a thumb cannot cross its sibling (lower clamps to `[min, upper]`,
   upper to `[lower, max]`). The step-index tie law is the Slider contract's
   portable law: an index exactly halfway between two steps rounds toward
   positive infinity (`Math.round` semantics), identically in core and

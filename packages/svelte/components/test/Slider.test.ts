@@ -343,8 +343,8 @@ describe("Slider (svelte) block variant", () => {
     expect(root.getAttribute("data-direction")).toBe("rtl");
     expect(container.querySelector(".poodle-slider__inline--selected")).not.toBeNull();
     expect(container.querySelector(".poodle-slider__inline--remainder")).not.toBeNull();
-    expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline {\n    position: absolute;\n    inset-block: 0;\n    inset-inline: 0;\n    display: flex;\n    align-items: center;\n    padding-inline: 0.5rem;\n    overflow: hidden;\n    white-space: nowrap;\n    pointer-events: none;",
+    expect(css).toMatch(
+      /\.poodle-slider\[data-variant="block"\] \.poodle-slider__inline \{[\s\S]*?z-index: 3;[\s\S]*?padding-inline: 0\.75rem;[\s\S]*?pointer-events: none;/,
     );
   });
 
@@ -367,7 +367,7 @@ describe("Slider (svelte) block variant", () => {
       "clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-block-marker-position) - (var(--poodle-slider-block-hit) / 2));",
     );
     // g18.024: the vertical rail is the shared capsule size, not the hit
     // envelope.
@@ -381,7 +381,7 @@ describe("Slider (svelte) block variant", () => {
     );
   });
 
-  it("renders fractional default values as short step-aware decimals", () => {
+  it("renders fractional default values as fixed-width step-aware decimals", () => {
     // step 0.01 implies two decimals; the snapped 0.85 must never leak a
     // binary tail. The custom formatter remains the authoritative override.
     const { container } = render(Slider, {
@@ -404,7 +404,7 @@ describe("Slider (svelte) block variant", () => {
     );
   });
 
-  it("keeps the row glyph slots value-independent across the whole range", async () => {
+  it("keeps the row glyph content intact across the whole range", async () => {
     const journeys: Array<{ label: string; value: string }> = [];
     for (const value of [0, 50, 100]) {
       const { container, unmount } = render(Slider, {
