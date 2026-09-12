@@ -4,6 +4,7 @@ import {
   TextInput,
   ThemeSelect,
   ToggleGroup,
+  UiPresentationProvider,
   type ToggleGroupOption,
 } from "@inflatable-cookie/poodle-react";
 import { themeOptions, densityModes, controlSizes } from "@inflatable-cookie/poodle-core/tokens";
@@ -11,7 +12,13 @@ import { previewShell } from "../generated/preview-shell";
 
 export interface DisplayControlsProps {
   theme: string;
-  density: string;
+  // g18.025: the header is fixed `md` chrome. The app shell scopes the
+  // specimen `controlSize` selection (xs–xl) to the catalogue below, so this
+  // subtree re-scopes the size scale through the existing presentation
+  // provider — no preview-only heights, no component API change. Density
+  // stays ambient: the header keeps following the Density axis. The prop is
+  // the token domain name so it can feed the provider directly.
+  density: DensityName;
   controlSize: string;
   search?: string;
   contrast?: number;
@@ -70,71 +77,73 @@ export function DisplayControls({
   onContrastChange = () => {},
 }: DisplayControlsProps) {
   return (
-    <div className="poodle-display-controls">
-      {themeControl && (
-        <div className="poodle-display-controls__group">
-          <Eyebrow>{themeControl.label}</Eyebrow>
-          <ThemeSelect
-            value={theme}
-            themes={themeList}
-            ariaLabel={themeControl.label}
-            onChange={onThemeChange}
-          />
-        </div>
-      )}
+    <UiPresentationProvider density={density} sizeScale="md">
+      <div className="poodle-display-controls">
+        {themeControl && (
+          <div className="poodle-display-controls__group">
+            <Eyebrow>{themeControl.label}</Eyebrow>
+            <ThemeSelect
+              value={theme}
+              themes={themeList}
+              ariaLabel={themeControl.label}
+              onChange={onThemeChange}
+            />
+          </div>
+        )}
 
-      {densityControl && (
-        <div className="poodle-display-controls__group">
-          <Eyebrow>{densityControl.label}</Eyebrow>
-          <ToggleGroup
-            value={density}
-            options={densityOptions}
-            ariaLabel={densityControl.label}
-            onValueChange={(value) => onDensityChange(value as string)}
-          />
-        </div>
-      )}
+        {densityControl && (
+          <div className="poodle-display-controls__group">
+            <Eyebrow>{densityControl.label}</Eyebrow>
+            <ToggleGroup
+              value={density}
+              options={densityOptions}
+              ariaLabel={densityControl.label}
+              onValueChange={(value) => onDensityChange(value as string)}
+            />
+          </div>
+        )}
 
-      {sizeControl && (
-        <div className="poodle-display-controls__group">
-          <Eyebrow>{sizeControl.label}</Eyebrow>
-          <ToggleGroup
-            value={controlSize}
-            options={controlSizeOptions}
-            ariaLabel="Control size"
-            onValueChange={(value) => onControlSizeChange(value as string)}
-          />
-        </div>
-      )}
+        {sizeControl && (
+          <div className="poodle-display-controls__group">
+            <Eyebrow>{sizeControl.label}</Eyebrow>
+            <ToggleGroup
+              value={controlSize}
+              options={controlSizeOptions}
+              ariaLabel="Control size"
+              onValueChange={(value) => onControlSizeChange(value as string)}
+            />
+          </div>
+        )}
 
-      {contrastControl && (
-        <div className="poodle-display-controls__group">
-          <Eyebrow>{contrastControl.label}</Eyebrow>
-          <Slider
-            value={contrast}
-            min={contrastControl.min}
-            max={contrastControl.max}
-            step={0.05}
-            ariaLabel="Neutral contrast"
-            valueText={`${contrast.toFixed(2)}x`}
-            onValueChange={(value) => onContrastChange(value)}
-          />
-        </div>
-      )}
+        {contrastControl && (
+          <div className="poodle-display-controls__group">
+            <Eyebrow>{contrastControl.label}</Eyebrow>
+            <Slider
+              value={contrast}
+              min={contrastControl.min}
+              max={contrastControl.max}
+              step={0.05}
+              ariaLabel="Neutral contrast"
+              valueText={`${contrast.toFixed(2)}x`}
+              onValueChange={(value) => onContrastChange(value)}
+            />
+          </div>
+        )}
 
-      {searchControl && (
-        <div className="poodle-display-controls__group poodle-display-controls__group--search">
-          <Eyebrow>{searchControl.label}</Eyebrow>
-          <TextInput
-            type="search"
-            placeholder={searchControl.placeholder}
-            value={search}
-            ariaLabel="Search components"
-            onValueChange={onSearchChange}
-            onClear={() => onSearchChange("")}
-          />
-        </div>
-      )}
-    </div>
+        {searchControl && (
+          <div className="poodle-display-controls__group poodle-display-controls__group--search">
+            <Eyebrow>{searchControl.label}</Eyebrow>
+            <TextInput
+              type="search"
+              placeholder={searchControl.placeholder}
+              value={search}
+              ariaLabel="Search components"
+              onValueChange={onSearchChange}
+              onClear={() => onSearchChange("")}
+            />
+          </div>
+        )}
+      </div>
+    </UiPresentationProvider>
   );
 }
