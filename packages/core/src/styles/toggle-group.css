@@ -46,7 +46,7 @@
   }
 
   .poodle-toggle-group__item {
-    min-height: calc(var(--poodle-toggle-group-height) - 0.25rem);
+    min-height: var(--poodle-toggle-group-height);
     padding: 0 var(--poodle-toggle-group-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
     border-radius: var(--poodle-radius-control);

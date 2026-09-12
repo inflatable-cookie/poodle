@@ -5,21 +5,17 @@
  *   bun test/g18-025-preview-header-sizing/probe.ts --browser=webkit
  *
  * Law under test, on both live preview applications (Svelte, React):
- * - every painted header control resolves the fixed `md` stop through the
- *   size context — the specimen `controlSize` axis never reaches the header;
+ * - every painted header control resolves the selected `controlSize` stop
+ *   through the size context;
  * - all five painted controls (ThemeSelect, both ToggleGroups, block Slider,
- *   search TextInput) measure the shared 36px md ladder and share top and
- *   bottom edges per row — the card oracle, completed by the Chatterbox
- *   ruling (card revision b14aeb04b): the authorized paired-header treatment
- *   neutralizes ToggleGroup's reusable 0.25rem item inset inside these two
- *   headers only;
- * - the neutralization does not leak: a ToggleGroup outside the header still
- *   paints its documented item contract (ladder − 0.25rem), identically in
- *   both frameworks;
- * - selecting specimen xs–xl moves the catalogue/pills, never the header;
- * - density changes never inflate the md chrome;
+ *   search TextInput) measure the selected shared ladder and share top and
+ *   bottom edges per row;
+ * - ToggleGroup uses the same shared ladder outside the header too,
+ *   identically in both frameworks;
+ * - selecting specimen xs–xl moves the catalogue, pills, and header together;
+ * - density changes never alter the selected size geometry;
  * - Size, Density, Theme, Contrast, Search, wrapping, and keyboard journeys
- *   keep working with the chrome pinned.
+ *   keep working while the five controls stay aligned.
  */
 import { chromium, webkit, type BrowserType, type Page } from "playwright";
 
@@ -92,31 +88,21 @@ async function measureHeader(page: Page): Promise<HeaderMeasure> {
   });
 }
 
-// ── Oracle (reconciled after the Chatterbox ruling, card revision
-// b14aeb04b) ───────────────────────────────────────────
-//
-// The round-2 probe deliberately kept the card oracle (36px for all five)
-// and the component contract (ToggleGroup items at ladder − 0.25rem) in
-// tension so any movement would force reconciliation. The ruling has now
-// landed: ToggleGroup keeps its reusable inset globally, and the two
-// generated preview headers neutralize it locally. The probe therefore
-// asserts the unified card oracle — all five painted controls at the 36px
-// md ladder with shared row edges — and adds a leak guard proving a
-// ToggleGroup outside the header still paints the documented item contract.
-const MD_LADDER_PX = 36;
-const TOGGLE_ITEM_CONTRACT_INSET_PX = 4;
+// ── Shared size oracle ────────────────────────────────────────────────
 // The shared control-size ladder in px, by ToggleGroup data-size.
 const SIZE_LADDER_PX: Record<string, number> = { xs: 24, sm: 28, md: 36, lg: 44, xl: 52 };
 
-/** Assert the md-chrome geometry for one measured header. */
-function assertChromeGeometry(prefix: string, measure: HeaderMeasure): void {
+/** Assert the selected chrome geometry for one measured header. */
+function assertChromeGeometry(prefix: string, measure: HeaderMeasure, expectedSize: string): void {
+  const expectedHeight = SIZE_LADDER_PX[expectedSize];
+  if (expectedHeight === undefined) throw new Error(`unknown expected header size ${expectedSize}`);
   const names = measure.controls.map((control) => control.name).sort().join(",");
   check(`${prefix} all five painted controls measured`, measure.controls.length === 5, names);
   for (const { name, box, size } of measure.controls) {
-    check(`${prefix} ${name} resolves the md stop`, size === "md", `data-size=${size}`);
+    check(`${prefix} ${name} resolves the ${expectedSize} stop`, size === expectedSize, `data-size=${size}`);
     check(
-      `${prefix} ${name} paints the ${MD_LADDER_PX}px md ladder (card oracle, Chatterbox ruling b14aeb04b)`,
-      near(box.height, MD_LADDER_PX),
+      `${prefix} ${name} paints the ${expectedHeight}px ${expectedSize} ladder`,
+      near(box.height, expectedHeight),
       `${box.height}px`,
     );
   }
@@ -175,42 +161,36 @@ async function probe(
   engine: string,
   framework: string,
   base: string,
-  baseline: { headerHeight: number } | undefined,
-): Promise<{ headerHeight: number }> {
+): Promise<void> {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(base, { waitUntil: "domcontentloaded", timeout: 120_000 });
   await page.locator(HEADER).waitFor({ timeout: 60_000 });
   await page.locator(".poodle-app-top-bar__pills .poodle-pill").first().waitFor({ timeout: 30_000 });
 
-  // Header stability baseline: the header height at the first size stop must
-  // survive every later stop, density change, and theme change.
-  await selectSize(page, framework, "md");
+  // Start from the shell default and prove all five controls resolve sm.
+  await selectSize(page, framework, "sm");
   const first = await measureHeader(page);
-  assertChromeGeometry(`${engine} ${framework} md stop`, first);
-  const headerHeight = baseline?.headerHeight ?? first.header.height;
+  assertChromeGeometry(`${engine} ${framework} sm stop`, first, "sm");
 
   for (const size of SIZES) {
     await selectSize(page, framework, size);
     const measure = await measureHeader(page);
-    assertChromeGeometry(`${engine} ${framework} ${size} stop`, measure);
-    check(
-      `${engine} ${framework} header height stable through ${size}`,
-      near(measure.header.height, headerHeight, 1),
-      `height ${measure.header.height} vs ${headerHeight}`,
-    );
+    assertChromeGeometry(`${engine} ${framework} ${size} stop`, measure, size);
   }
 
-  // Density journey: the ambient density axis still flows (the app state
-  // changes) and the md chrome never inflates.
+  // Density journey: reset to sm, then prove density changes app state without
+  // changing the selected size geometry.
+  await selectSize(page, framework, "sm");
+  const beforeDensity = await measureHeader(page);
   await page.locator('.poodle-toggle-group[aria-label="Density"] [data-toggle-value="comfortable"]').click();
   const densityPill = page.locator(".poodle-app-top-bar__pills .poodle-pill").nth(1);
   await densityPill.filter({ hasText: "comfortable" }).waitFor({ timeout: 5000 });
   const comfortable = await measureHeader(page);
-  assertChromeGeometry(`${engine} ${framework} comfortable density`, comfortable);
+  assertChromeGeometry(`${engine} ${framework} comfortable density`, comfortable, "sm");
   check(
-    `${engine} ${framework} density change never inflates the md chrome`,
-    near(comfortable.header.height, headerHeight, 1),
-    `height ${comfortable.header.height} vs ${headerHeight}`,
+    `${engine} ${framework} density change preserves sm header geometry`,
+    near(comfortable.header.height, beforeDensity.header.height, 1),
+    `height ${comfortable.header.height} vs ${beforeDensity.header.height}`,
   );
   await page.locator('.poodle-toggle-group[aria-label="Density"] [data-toggle-value="compact"]').click();
   await densityPill.filter({ hasText: "compact" }).waitFor({ timeout: 5000 });
@@ -234,7 +214,7 @@ async function probe(
   const after = await page.locator(".poodle-app-top-bar__pills .poodle-pill").first().innerText();
   check(`${engine} ${framework} theme selection reaches the shell`, before !== after, `${before} -> ${after}`);
 
-  // Contrast journey: keyboard moves the slider, chrome stays pinned.
+  // Contrast journey: keyboard moves the slider without disturbing alignment.
   const handle = page.locator(`${HEADER} [role="slider"]`);
   const beforeValue = Number(await handle.getAttribute("aria-valuenow"));
   await handle.focus();
@@ -246,7 +226,7 @@ async function probe(
   );
   check(`${engine} ${framework} contrast ArrowRight moves the value`, true, `${beforeValue} ->`);
   const afterContrast = await measureHeader(page);
-  assertChromeGeometry(`${engine} ${framework} after contrast keypress`, afterContrast);
+  assertChromeGeometry(`${engine} ${framework} after contrast keypress`, afterContrast, "sm");
 
   // Search journey: typing swaps the catalogue to results and back.
   const familyCountBefore = await page.locator("[data-catalogue-family]").count();
@@ -263,26 +243,20 @@ async function probe(
     `${familyCountBefore} -> ${familyCountAfter}`,
   );
   const afterSearch = await measureHeader(page);
-  assertChromeGeometry(`${engine} ${framework} after search journey`, afterSearch);
+  assertChromeGeometry(`${engine} ${framework} after search journey`, afterSearch, "sm");
 
   // Wrapping: a narrow viewport must wrap rows without stretching controls.
   await page.setViewportSize({ width: 560, height: 900 });
   const wrapped = await measureHeader(page);
   const rows = new Set(wrapped.controls.map((control) => Math.round(control.rowTop / 4)));
   check(`${engine} ${framework} narrow viewport wraps the header`, rows.size > 1, `${rows.size} rows`);
-  assertChromeGeometry(`${engine} ${framework} wrapped`, wrapped);
+  assertChromeGeometry(`${engine} ${framework} wrapped`, wrapped, "sm");
   await page.setViewportSize({ width: 1280, height: 900 });
 
-  return { headerHeight };
 }
 
-/**
- * Leak guard: outside the header, ToggleGroup must still paint its
- * documented item contract (ladder − 0.25rem). Drives the toggle-group
- * specimen route so the ruling's scoped exception is proven not to reach
- * catalogue specimens.
- */
-async function probeLeakGuard(page: Page, engine: string, framework: string, base: string): Promise<void> {
+/** ToggleGroup uses the same ladder in ordinary catalogue content too. */
+async function probeToggleGroupLadder(page: Page, engine: string, framework: string, base: string): Promise<void> {
   const route = framework === "svelte" ? "#/components/toggle-group" : "#components/toggle-group";
   await page.goto(`${base}/${route}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
   await page.locator(".poodle-toggle-group__item").first().waitFor({ timeout: 60_000 });
@@ -298,20 +272,19 @@ async function probeLeakGuard(page: Page, engine: string, framework: string, bas
     });
   });
   check(
-    `${engine} ${framework} leak guard found catalogue toggle items outside the header`,
+    `${engine} ${framework} found catalogue toggle items outside the header`,
     samples.length > 0,
     `${samples.length} items`,
   );
   for (const [index, sample] of samples.entries()) {
     const ladder = SIZE_LADDER_PX[sample.size];
     if (ladder === undefined) {
-      check(`${engine} ${framework} leak guard item ${index} has a known size stop`, false, sample.size);
+      check(`${engine} ${framework} catalogue item ${index} has a known size stop`, false, sample.size);
       continue;
     }
-    const expected = ladder - TOGGLE_ITEM_CONTRACT_INSET_PX;
     check(
-      `${engine} ${framework} leak guard item ${index} (${sample.size}) still paints the documented item contract (${expected}px)`,
-      near(sample.height, expected),
+      `${engine} ${framework} catalogue item ${index} (${sample.size}) paints the shared ladder (${ladder}px)`,
+      near(sample.height, ladder),
       `${sample.height}px`,
     );
   }
@@ -325,7 +298,7 @@ try {
     console.log(`\n[g18-025-preview-header-sizing] ${name}`);
     const browser = await engine.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    // One measured header per framework at the md stop, for parity.
+    // One measured header per framework at the default sm stop, for parity.
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(servers.urls.svelte, { waitUntil: "domcontentloaded", timeout: 120_000 });
     await page.locator(HEADER).waitFor({ timeout: 60_000 });
@@ -334,12 +307,11 @@ try {
     await page.locator(HEADER).waitFor({ timeout: 60_000 });
     const react = await measureHeader(page);
     assertFrameworkParity(svelte, react, `${name} parity`);
-    // Full journeys per framework, sharing one stability baseline per engine.
-    const svelteRun = await probe(page, name, "svelte", servers.urls.svelte, undefined);
-    await probe(page, name, "react", servers.urls.react, svelteRun);
-    // The ruling's exception must not leak into catalogue specimens.
-    await probeLeakGuard(page, name, "svelte", servers.urls.svelte);
-    await probeLeakGuard(page, name, "react", servers.urls.react);
+    // Full journeys per framework.
+    await probe(page, name, "svelte", servers.urls.svelte);
+    await probe(page, name, "react", servers.urls.react);
+    await probeToggleGroupLadder(page, name, "svelte", servers.urls.svelte);
+    await probeToggleGroupLadder(page, name, "react", servers.urls.react);
     await browser.close();
   }
 } finally {

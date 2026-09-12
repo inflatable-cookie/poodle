@@ -1,7 +1,7 @@
 <script lang="ts">
   // g18.025 paired harness: mounts the preview header inside an app-shell-like
-  // UiPresentationProvider so the tests can prove the header re-scopes any
-  // ambient specimen scale (xs–xl) to its fixed `md` chrome.
+  // UiPresentationProvider so the tests can prove all header controls follow
+  // the selected specimen scale (xs–xl) together.
   import {
     UiPresentationProvider,
     type ControlDensity,
@@ -24,9 +24,9 @@
   }
 
   const {
-    sizeScale = "md",
+    sizeScale = "sm",
     density = "compact",
-    controlSize = "md",
+    controlSize = "sm",
     theme = "eclipse",
     search = "",
     contrast = 0.5,

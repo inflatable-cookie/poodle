@@ -12,14 +12,11 @@ import { previewShell } from "../generated/preview-shell";
 
 export interface DisplayControlsProps {
   theme: string;
-  // g18.025: the header is fixed `md` chrome. The app shell scopes the
-  // specimen `controlSize` selection (xs–xl) to the catalogue below, so this
-  // subtree re-scopes the size scale through the existing presentation
-  // provider — no preview-only heights, no component API change. Density
-  // stays ambient: the header keeps following the Density axis. The prop is
-  // the token domain name so it can feed the provider directly.
+  // The header follows the specimen `controlSize` selection (xs–xl), so every
+  // painted control resolves the same shared ladder stop. Density stays
+  // ambient too.
   density: DensityName;
-  controlSize: string;
+  controlSize: ControlSizeName;
   search?: string;
   contrast?: number;
   onThemeChange?: (value: string) => void;
@@ -77,7 +74,7 @@ export function DisplayControls({
   onContrastChange = () => {},
 }: DisplayControlsProps) {
   return (
-    <UiPresentationProvider density={density} sizeScale="md">
+    <UiPresentationProvider density={density} sizeScale={controlSize}>
       <div className="poodle-display-controls">
         {themeControl && (
           <div className="poodle-display-controls__group">

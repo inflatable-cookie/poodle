@@ -222,6 +222,13 @@ with green rust/web checks.
 
 ## Continuation
 
+Post-merge operator correction on 2026-09-12: the header was never meant to be
+fixed-size. All five controls now follow the specimen Size selector together;
+`sm` remains the initial shell value rather than a permanent override.
+ToggleGroup now follows the shared control-height ladder directly, so the
+preview-only inset override is gone; the paired browser geometry oracle covers
+every `xs`–`xl` ladder stop.
+
 g18.025 is merged. After the corrected preview experience is accepted, the
 retained g18.006 release-candidate task resumes with the repair in the `0.4.0`
 source identity; g18.009 stays serial behind it. Further planning direction

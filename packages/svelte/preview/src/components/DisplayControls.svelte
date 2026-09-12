@@ -29,7 +29,7 @@
   }: {
     theme: string;
     density: DensityName;
-    controlSize: string;
+    controlSize: ControlSizeName;
     search?: string;
     onThemeChange?: (value: string) => void;
     onDensityChange?: (value: string) => void;
@@ -41,11 +41,9 @@
 
   type DensityName = keyof typeof densityModes;
 
-  // g18.025: the header is fixed `md` chrome. The app shell scopes the
-  // specimen `controlSize` selection (xs–xl) to the catalogue below, so this
-  // subtree re-scopes the size scale through the existing presentation
-  // provider — no preview-only heights, no component API change. Density
-  // stays ambient: the header keeps following the Density axis.
+  // The header follows the specimen `controlSize` selection (xs–xl), so every
+  // painted control resolves the same shared ladder stop. Density stays
+  // ambient too.
   type ControlSizeName = keyof typeof controlSizes;
 
   // The control surface is the scene's (card 035 R3/R4): the capability set
@@ -93,7 +91,7 @@
     : [];
 </script>
 
-<UiPresentationProvider density={density} sizeScale="md">
+<UiPresentationProvider density={density} sizeScale={controlSize}>
   <div class="poodle-display-controls">
     {#if themeControl}
       <div class="poodle-display-controls__group">
@@ -182,15 +180,5 @@
   .poodle-display-controls__group--search {
     flex: 1;
     min-width: 10rem;
-  }
-
-  /* g18.025 Chatterbox ruling (card revision b14aeb04b): within this
-     generated preview header only, neutralize ToggleGroup's reusable 0.25rem
-     item inset so Density and Size paint the same 36px md ladder as the other
-     header controls. Restores the item to the component's own resolved
-     ladder variable — no hard-coded heights; ToggleGroup's public contract
-     is unchanged and catalogue specimens are untouched. */
-  .poodle-display-controls :global(.poodle-toggle-group__item) {
-    min-height: var(--poodle-toggle-group-height);
   }
 </style>

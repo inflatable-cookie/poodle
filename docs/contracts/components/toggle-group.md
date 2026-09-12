@@ -3,7 +3,7 @@
 > **Surface elevation**: ToggleGroup is a surface consumer (93% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-08-26
+Updated: 2026-09-12
 
 ## 1. Purpose
 
@@ -182,7 +182,7 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `calc(var(--poodle-toggle-group-height) - 0.25rem)` |
+| `min-height` | `var(--poodle-toggle-group-height)` |
 | `padding` | `0 var(--poodle-toggle-group-x)` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 | `border-radius` | `var(--poodle-radius-control)` |
