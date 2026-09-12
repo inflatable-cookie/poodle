@@ -171,9 +171,41 @@ export const G18_006_EVIDENCE_PATHS = [
 export const G18_006_EXECUTION_RECORD_PATTERN =
   /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g18-006-[a-z0-9-]+\.md$/;
 
+/**
+ * g18.006 in-lane test-infrastructure repair. The `cfg(test)` receipt-lock laws
+ * planted the release version itself, so they collided with the `0.4.0` lock
+ * and failed the native lane they exist to protect. This admits the emitter's
+ * `#[cfg(test)]` module (its production source must stay byte-identical) plus
+ * the guard implementation and its focused laws that make the admission
+ * fail-closed. Broader preview source stays rejected.
+ */
+export const G18_006_TEST_REPAIR_PATHS = [
+  "packages/gpui/preview/src/nucleus_receipts.rs",
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+] as const;
+
+/**
+ * The mechanism halves of that repair: the guard and its focused laws. They may
+ * only grow, never rewrite or delete an existing law, and only inside a bounded
+ * allowance, so the existing arbitrary-source plant keeps biting.
+ */
+export const G18_006_TEST_REPAIR_GUARD_PATHS = [
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+] as const;
+const G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT = 150;
+
+/** The one admitted test-repair source path and its module marker. */
+export const G18_006_TEST_REPAIR_SOURCE_PATH =
+  "packages/gpui/preview/src/nucleus_receipts.rs";
+export const G18_006_TEST_MODULE_MARKER = "#[cfg(test)]";
+const G18_006_TEST_MODULE_NAME = "mod receipt_lock_tests";
+
 export const G18_006_WRITABLE_PATHS = [
   ...G18_006_RELEASE_INPUT_PATHS,
   ...G18_006_EVIDENCE_PATHS,
+  ...G18_006_TEST_REPAIR_PATHS,
 ] as const;
 
 /**
@@ -1474,6 +1506,94 @@ async function assertFrozenCandidateRange(
  * `g18.006-candidate` certification mode and by ordinary CI recognition, so a
  * PR lane and a local certification run cannot disagree about admission.
  */
+/**
+ * `before` must survive intact and in order inside `after`: no closed-admission
+ * law may be rewritten or deleted by the candidate that it admits.
+ */
+function lineSubsequenceHolds(before: string, after: string): boolean {
+  const head = after.split("\n");
+  let index = 0;
+  for (const line of before.split("\n")) {
+    while (index < head.length && head[index] !== line) index += 1;
+    if (index === head.length) return false;
+    index += 1;
+  }
+  return true;
+}
+
+/**
+ * The in-lane test repair is content-bound. The emitter's production source
+ * (everything before the `#[cfg(test)]` marker) must be byte-identical, the
+ * head must still declare the receipt-lock module, and the module itself must
+ * change. The guard and its laws may only grow, inside a bounded allowance.
+ * A production-line edit, a deleted module, a rewritten guard law or any other
+ * preview source path stays rejected.
+ */
+async function assertCandidateTestRepairHonesty(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<void> {
+  for (const path of G18_006_TEST_REPAIR_GUARD_PATHS) {
+    if (!changedPaths.includes(path)) continue;
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (before === null || after === null) {
+      throw new Error(`certification scope rejected added or removed candidate test-repair path ${path}`);
+    }
+    if (!lineSubsequenceHolds(before, after)) {
+      throw new Error(
+        `certification scope rejected rewritten or deleted guard content in ${path}; the closed admission may only grow`,
+      );
+    }
+    const added = after.split("\n").length - before.split("\n").length;
+    if (added > G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT) {
+      throw new Error(
+        `certification scope rejected ${path} growth of ${added} lines beyond the ${G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT} line allowance`,
+      );
+    }
+  }
+  if (!changedPaths.includes(G18_006_TEST_REPAIR_SOURCE_PATH)) return;
+  const before = await gitShowFile(
+    checkoutRoot,
+    requiredBaseCommit,
+    G18_006_TEST_REPAIR_SOURCE_PATH,
+  );
+  const after = await gitShowFile(
+    checkoutRoot,
+    sourceCommit,
+    G18_006_TEST_REPAIR_SOURCE_PATH,
+  );
+  if (before === null || after === null) {
+    throw new Error(
+      `certification scope rejected added or removed candidate test-repair path ${G18_006_TEST_REPAIR_SOURCE_PATH}`,
+    );
+  }
+  const beforeMarker = before.indexOf(G18_006_TEST_MODULE_MARKER);
+  const afterMarker = after.indexOf(G18_006_TEST_MODULE_MARKER);
+  if (beforeMarker < 0 || afterMarker < 0) {
+    throw new Error(
+      `certification scope rejected ${G18_006_TEST_REPAIR_SOURCE_PATH} without a ${G18_006_TEST_MODULE_MARKER} module`,
+    );
+  }
+  if (before.slice(0, beforeMarker) !== after.slice(0, afterMarker)) {
+    throw new Error(
+      `certification scope rejected production source changes in ${G18_006_TEST_REPAIR_SOURCE_PATH}; only the ${G18_006_TEST_MODULE_MARKER} module may move`,
+    );
+  }
+  if (!after.includes(G18_006_TEST_MODULE_NAME)) {
+    throw new Error(
+      `certification scope rejected ${G18_006_TEST_REPAIR_SOURCE_PATH} without the ${G18_006_TEST_MODULE_NAME} module`,
+    );
+  }
+  if (before.slice(beforeMarker) === after.slice(afterMarker)) {
+    throw new Error(
+      `certification scope rejected ${G18_006_TEST_REPAIR_SOURCE_PATH} without a ${G18_006_TEST_MODULE_MARKER} change`,
+    );
+  }
+}
+
 async function assertClosedCandidateRange(
   checkoutRoot: string,
   requiredBaseCommit: string,
@@ -1524,6 +1644,12 @@ async function assertClosedCandidateRange(
     policy,
   );
   await assertCandidateReleaseHonesty(checkoutRoot, sourceCommit, policy);
+  await assertCandidateTestRepairHonesty(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+  );
 }
 
 /**

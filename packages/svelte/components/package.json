@@ -1,6 +1,6 @@
 {
   "name": "@inflatable-cookie/poodle-svelte",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publishConfig": {
     "access": "public"
   },
@@ -90,7 +90,7 @@
     "@codemirror/search": "6.7.2",
     "@codemirror/state": "6.7.4",
     "@codemirror/view": "6.43.11",
-    "@inflatable-cookie/poodle-core": "0.3.0",
+    "@inflatable-cookie/poodle-core": "0.4.0",
     "@lezer/highlight": "1.2.3",
     "@tiptap/core": "3.31.3",
     "@tiptap/extension-blockquote": "3.31.3",

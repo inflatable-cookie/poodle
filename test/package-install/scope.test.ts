@@ -1133,6 +1133,151 @@ describe("closed 0.4.0 candidate scope admission", () => {
   });
 });
 
+const TEST_REPAIR_PATH = "packages/gpui/preview/src/nucleus_receipts.rs";
+
+function receiptEmitterSource(
+  planted: string,
+  production = 'const LOCKFILE: &str = "packages/gpui/preview/Cargo.lock";',
+): string {
+  return [
+    'const RECEIPT_SCHEMA: &str = "poodle.g16-nucleus-parity-receipt.v1";',
+    production,
+    "",
+    "fn lock_provenance(bytes: &[u8]) -> Result<(), String> {",
+    "    let _ = bytes;",
+    "    Ok(())",
+    "}",
+    "",
+    "#[cfg(test)]",
+    "mod receipt_lock_tests {",
+    "    use super::*;",
+    "",
+    `    const PLANTED_RELEASE_VERSION: &str = "${planted}";`,
+    "",
+    "    #[test]",
+    "    fn receipt_lock_planted_version_never_collides() {",
+    '        assert_ne!(PLANTED_RELEASE_VERSION, env!("CARGO_PKG_VERSION"));',
+    "    }",
+    "}",
+    "",
+  ].join("\n");
+}
+
+describe("g18.006 in-lane receipt test repair admission", () => {
+  const baseEmitter = receiptEmitterSource("0.3.0");
+  const repairedEmitter = receiptEmitterSource("9.9.9");
+
+  test("admits the cfg(test)-only emitter repair in ordinary and explicit modes", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+      },
+    });
+    const ordinary = await assertInstalledScope(plant.root, plant.base, plant.head, "ordinary");
+    expect(ordinary.mode).toBe("ordinary");
+    expect(ordinary.changedPaths).toContain(TEST_REPAIR_PATH);
+    const explicit = await assertCertificationScope(
+      plant.root,
+      plant.base,
+      plant.head,
+      G18_006_CANDIDATE_SCOPE_MODE,
+    );
+    expect(explicit.mode).toBe(G18_006_CANDIDATE_SCOPE_MODE);
+  });
+
+  test("rejects a production-line change to the admitted emitter", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = receiptEmitterSource(
+          "9.9.9",
+          'const LOCKFILE: &str = "planted/Cargo.lock";',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/only the #\[cfg\(test\)\] module may move/);
+  });
+
+  test("rejects a repair that drops the receipt-lock module", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter.replace("mod receipt_lock_tests", "mod planted_tests");
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/without the mod receipt_lock_tests module/);
+  });
+
+  test("rejects broader preview source beside the repair", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+        files["packages/gpui/preview/src/headless_driver.rs"] = "// planted\n";
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      /paths outside writable allowlist: packages\/gpui\/preview\/src\/headless_driver\.rs/,
+    );
+  });
+
+  test("rejects a rewritten guard law beside the repair", async () => {
+    const guard = ["export function lawA() {}", "export function lawB() {}", ""].join("\n");
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+        files["test/package-install/scope.ts"] = guard;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+      },
+      afterEvidence: {
+        "test/package-install/scope.ts": guard.replace(
+          "export function lawB() {}",
+          "export function lawB() { return true; }",
+        ),
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/the closed admission may only grow/);
+  });
+
+  test("rejects unbounded growth of the guard beside the repair", async () => {
+    const guard = "export function lawA() {}\n";
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+        files["test/package-install/scope.ts"] = guard;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+      },
+      afterEvidence: {
+        "test/package-install/scope.ts": `${guard}${"// planted growth\n".repeat(200)}`,
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/beyond the 150 line allowance/);
+  });
+});
+
 describe("g18.031 precursor root version alignment", () => {
   const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
     name: "poodle",

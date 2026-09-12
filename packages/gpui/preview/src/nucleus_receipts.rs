@@ -976,6 +976,15 @@ pub(crate) fn publish_a1_divergence_if_configured(
 mod receipt_lock_tests {
     use super::*;
 
+    /// The version these laws plant into a disposable copy of the committed
+    /// lock. It must never equal a version the committed lock actually carries,
+    /// or every `planted_lock` replacement becomes a silent no-op and the whole
+    /// module fails with a misleading fixture error. The sentinel is
+    /// intentionally not a Poodle release version, and
+    /// `receipt_lock_planted_version_never_collides` fails first, with the
+    /// reason, if that ever stops being true.
+    const PLANTED_RELEASE_VERSION: &str = "9.9.9";
+
     fn committed_lock_text() -> String {
         fs::read_to_string(repository_root().join(LOCKFILE))
             .expect("the committed GPUI preview Cargo.lock is readable")
@@ -1103,13 +1112,13 @@ mod receipt_lock_tests {
     fn receipt_lock_derives_a_planted_release_version() {
         let current = committed_lock_text();
         let baseline = derived(current.as_bytes());
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         assert_ne!(planted, current);
         let provenance = derived(planted.as_bytes());
         assert_eq!(provenance.lockfile_sha256, sha256_hex(planted.as_bytes()));
         assert_ne!(provenance.lockfile_sha256, baseline.lockfile_sha256);
         for name in &LOCKED_PACKAGES[1..] {
-            assert_eq!(entry(&provenance, name).version, "0.4.0");
+            assert_eq!(entry(&provenance, name).version, PLANTED_RELEASE_VERSION);
         }
         // The external entry is untouched: only the Poodle release moved.
         assert_eq!(
@@ -1118,9 +1127,26 @@ mod receipt_lock_tests {
         );
     }
 
+    /// The planted sentinel must never collide with the committed lock. A
+    /// collision turns every fixture replacement in this module into a no-op,
+    /// which failed the release it was written for; fail here first, naming the
+    /// package, so the sentinel is re-planted deliberately instead.
+    #[test]
+    fn receipt_lock_planted_version_never_collides() {
+        assert_ne!(PLANTED_RELEASE_VERSION, env!("CARGO_PKG_VERSION"));
+        let committed = derived(committed_lock_text().as_bytes());
+        for name in LOCKED_PACKAGES {
+            assert_ne!(
+                entry(&committed, name).version,
+                PLANTED_RELEASE_VERSION,
+                "the committed {name} lock version equals the planted sentinel; plant a different version"
+            );
+        }
+    }
+
     #[test]
     fn receipt_lock_rejects_a_missing_package() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let block = block_of(&planted, "poodle-node");
         let removed = planted.replacen(block, "", 1);
         let error = rejection(&removed);
@@ -1130,7 +1156,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_a_duplicate_package() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let duplicated = format!("{planted}{}", block_of(&planted, "poodle-gpui"));
         let error = rejection(&duplicated);
         assert!(error.contains("more than once"), "{error}");
@@ -1139,7 +1165,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_an_incomplete_package() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let incomplete = remove_field(&planted, "poodle-render", "version");
         let error = rejection(&incomplete);
         assert!(error.contains("poodle-render"), "{error}");
@@ -1148,7 +1174,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_a_workspace_package_with_a_source() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let mutated = replace_in_block(
             &planted,
             "poodle-gpui",
@@ -1162,7 +1188,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_a_workspace_package_with_a_checksum() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let mutated = replace_in_block(
             &planted,
             "poodle-node",
@@ -1179,7 +1205,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_a_registry_package_without_a_source() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let mutated = remove_field(&planted, REGISTRY_PACKAGE, "source");
         let error = rejection(&mutated);
         assert!(error.contains(REGISTRY_PACKAGE), "{error}");
@@ -1188,7 +1214,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_an_unexpected_registry_source() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let block = block_of(&planted, REGISTRY_PACKAGE);
         let source_line = matching_line(block, REGISTRY_PACKAGE, "source");
         let mutated = replace_in_block(
@@ -1203,7 +1229,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_a_registry_package_without_a_checksum() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let mutated = remove_field(&planted, REGISTRY_PACKAGE, "checksum");
         let error = rejection(&mutated);
         assert!(error.contains(REGISTRY_PACKAGE), "{error}");
@@ -1212,7 +1238,7 @@ mod receipt_lock_tests {
 
     #[test]
     fn receipt_lock_rejects_a_malformed_checksum() {
-        let planted = planted_lock("0.4.0");
+        let planted = planted_lock(PLANTED_RELEASE_VERSION);
         let block = block_of(&planted, REGISTRY_PACKAGE);
         let checksum_line = matching_line(block, REGISTRY_PACKAGE, "checksum");
         let mutated = replace_in_block(

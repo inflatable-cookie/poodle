@@ -1,6 +1,6 @@
 [package]
 name = "poodle-jetstream"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -12,14 +12,14 @@ keywords = ["design-system", "renderer", "ui"]
 publish = false
 
 [dependencies]
-poodle-adapter = { version = "0.3.0", path = "../../contracts/adapter" }
-poodle-headless = { version = "0.3.0", path = "../../contracts/headless" }
-poodle-events = { version = "0.3.0", path = "../../contracts/events" }
-poodle-layout = { version = "0.3.0", path = "../../contracts/layout" }
-poodle-specs = { version = "0.3.0", path = "../../contracts/components" }
-poodle-style = { version = "0.3.0", path = "../../contracts/style" }
-poodle-tokens = { version = "0.3.0", path = "../../contracts/tokens" }
-poodle-node = { version = "0.3.0", path = "../../contracts/node" }
+poodle-adapter = { version = "0.4.0", path = "../../contracts/adapter" }
+poodle-headless = { version = "0.4.0", path = "../../contracts/headless" }
+poodle-events = { version = "0.4.0", path = "../../contracts/events" }
+poodle-layout = { version = "0.4.0", path = "../../contracts/layout" }
+poodle-specs = { version = "0.4.0", path = "../../contracts/components" }
+poodle-style = { version = "0.4.0", path = "../../contracts/style" }
+poodle-tokens = { version = "0.4.0", path = "../../contracts/tokens" }
+poodle-node = { version = "0.4.0", path = "../../contracts/node" }
 # These types cross the Jetstream adapter boundary and must match the sibling
 # Jetstream workspace. Upgrade them in both repositories as one migration.
 taffy = "0.9"
