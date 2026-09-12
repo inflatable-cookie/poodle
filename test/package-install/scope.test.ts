@@ -767,6 +767,7 @@ function closedCandidateFiles(version: string): Record<string, string> {
 }
 
 type ClosedCandidatePlant = {
+  mutateBase?: (files: Record<string, string>) => void;
   mutateCandidate?: (files: Record<string, string>) => void;
   evidenceSourceCommit?: (frozen: string, base: string) => string;
   afterEvidence?: Record<string, string>;
@@ -779,7 +780,9 @@ async function plantClosedCandidate(plant: ClosedCandidatePlant = {}): Promise<{
   head: string;
 }> {
   const root = await initPlant();
-  await writeFiles(root, closedCandidateFiles("0.3.0"));
+  const baseFiles = closedCandidateFiles("0.3.0");
+  plant.mutateBase?.(baseFiles);
+  await writeFiles(root, baseFiles);
   const base = await commitAll(root, "closed candidate base");
   const candidateFiles = closedCandidateFiles("0.4.0");
   candidateFiles["docs/release-notes/0.4.0.md"] = "# Poodle 0.4.0\n";
@@ -952,7 +955,35 @@ describe("closed 0.4.0 candidate scope admission", () => {
     await expect(
       assertCertificationScope(root, base, head, G18_006_CANDIDATE_SCOPE_MODE),
     ).rejects.toThrow(
-      /requires intra-repository Cargo requirement poodle-ir in packages\/contracts\/tokens\/Cargo\.toml to move 0\.3\.0 -> 0\.4\.0, found 0\.3\.0 -> 0\.3\.0/,
+      /requires intra-repository Cargo requirement poodle-ir in \[dependencies\] of packages\/contracts\/tokens\/Cargo\.toml to move 0\.3\.0 -> 0\.4\.0, found 0\.3\.0 -> 0\.3\.0/,
+    );
+  });
+
+  test("closed candidate scope validates duplicate-section Cargo requirements independently", async () => {
+    const tokensPath = "packages/contracts/tokens/Cargo.toml";
+    const appendDevRequirement = (version: string) => (files: Record<string, string>) => {
+      files[tokensPath] = `${files[tokensPath] as string}[dev-dependencies]\npoodle-ir = { version = "${version}", path = "../../contracts/ir" }\n`;
+    };
+    const { root, base, head } = await plantClosedCandidate({
+      mutateBase: appendDevRequirement("0.3.0"),
+      mutateCandidate: (files) => {
+        appendDevRequirement("0.4.0")(files);
+        // Leave the runtime [dependencies] requirement stale while the later
+        // [dev-dependencies] entry moves to 0.4.0. A name-only key would let
+        // the dev entry shadow the stale runtime requirement.
+        files[tokensPath] = (files[tokensPath] as string).replace(
+          'poodle-ir = { version = "0.4.0", path = "../../contracts/ir" }',
+          'poodle-ir = { version = "0.3.0", path = "../../contracts/ir" }',
+        );
+      },
+    });
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /certification scope rejected forbidden/,
+    );
+    await expect(
+      assertCertificationScope(root, base, head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      /requires intra-repository Cargo requirement poodle-ir in \[dependencies\] of packages\/contracts\/tokens\/Cargo\.toml to move 0\.3\.0 -> 0\.4\.0, found 0\.3\.0 -> 0\.3\.0/,
     );
   });
 

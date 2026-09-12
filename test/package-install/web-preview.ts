@@ -2059,7 +2059,14 @@ type ClosedCandidatePlantKind =
   | "react-admission"
   | "stale-js-dependency"
   | "arbitrary-js-dependency"
-  | "stale-cargo-requirement";
+  | "stale-cargo-requirement"
+  | "shadowed-cargo-requirement";
+
+/** Add the same crate to `[dev-dependencies]` after the runtime dependency. */
+function appendTokensDevRequirement(files: Record<string, string>, version: string): void {
+  files["packages/contracts/tokens/Cargo.toml"] =
+    `${files["packages/contracts/tokens/Cargo.toml"] as string}[dev-dependencies]\npoodle-ir = { version = "${version}", path = "../../contracts/ir" }\n`;
+}
 
 /**
  * Build a synthetic `0.3.0` → `0.4.0` candidate range with a frozen
@@ -2081,7 +2088,11 @@ async function closedCandidateScopePlant(
       ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
       repoRoot,
     );
-    await writePlantFiles(plantRoot, closedCandidateFiles("0.3.0"));
+    const baseFiles = closedCandidateFiles("0.3.0");
+    if (kind === "shadowed-cargo-requirement") {
+      appendTokensDevRequirement(baseFiles, "0.3.0");
+    }
+    await writePlantFiles(plantRoot, baseFiles);
     await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
     await run(["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate base"], repoRoot);
     const plantBaseCommit = requireExactCommit(
@@ -2117,6 +2128,18 @@ async function closedCandidateScopePlant(
       candidateFiles[manifestPath] = `${JSON.stringify(manifest, null, 2)}\n`;
     }
     if (kind === "stale-cargo-requirement") {
+      candidateFiles["packages/contracts/tokens/Cargo.toml"] = (
+        candidateFiles["packages/contracts/tokens/Cargo.toml"] as string
+      ).replace(
+        'poodle-ir = { version = "0.4.0", path = "../../contracts/ir" }',
+        'poodle-ir = { version = "0.3.0", path = "../../contracts/ir" }',
+      );
+    }
+    if (kind === "shadowed-cargo-requirement") {
+      appendTokensDevRequirement(candidateFiles, "0.4.0");
+      // Leave the runtime [dependencies] requirement stale at 0.3.0 while the
+      // later [dev-dependencies] entry moves to 0.4.0. A name-only key would
+      // let the dev entry shadow the stale runtime requirement.
       candidateFiles["packages/contracts/tokens/Cargo.toml"] = (
         candidateFiles["packages/contracts/tokens/Cargo.toml"] as string
       ).replace(
@@ -2449,6 +2472,11 @@ const falsificationReceipts = [
   await expectedFailure(
     "closed 0.4.0 candidate scope rejects a stale Cargo requirement",
     () => closedCandidateScopePlant("stale-cargo-requirement", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects a stale runtime requirement shadowed by a dev-dependency",
+    () =>
+      closedCandidateScopePlant("shadowed-cargo-requirement", G18_006_CANDIDATE_SCOPE_MODE),
   ),
   await expectedFailure(
     "ordinary scope rejects a non-lockstep 0.4.0 candidate",

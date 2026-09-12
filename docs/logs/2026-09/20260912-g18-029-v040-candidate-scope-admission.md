@@ -1,6 +1,6 @@
 # g18.029 — v0.4.0 candidate-scope admission
 
-Status: complete — review repair applied, awaiting orchestrator review
+Status: complete — second review repair applied, awaiting orchestrator review
 Date: 2026-09-12
 Branch: `ns-cbbe9d2d-0d1b-49f1-9d24-6af92c6de3ad`
 Card: `docs/roadmaps/g18/029-v040-candidate-scope-admission.md`
@@ -88,6 +88,16 @@ Both checks run for every changed manifest, not only the changed lines, so
 stale or arbitrary requirements can no longer ride a version bump in either
 the explicit `g18.006-candidate` mode or ordinary recognition.
 
+Re-review (PR #261 comment `5648655527`) found one remaining blocking defect at
+head `5983509e9b158497be330163fbd40f6d16c6fb21`: Cargo requirements were keyed
+by crate name only, so a correct later `[dev-dependencies]` entry shadowed a
+stale runtime `[dependencies]` entry with the same crate name (a legal Cargo
+shape already present in `packages/contracts/components/Cargo.toml`), and a
+synthetic candidate was admitted in both ordinary and explicit modes. The
+repair keys every intra-repository Cargo requirement by owning dependency
+table and crate name, validates every occurrence independently, and fails
+closed on a duplicate requirement in the same table.
+
 ## Acceptance and falsification
 
 The focused suite `test/package-install/scope.test.ts` exercises the closed
@@ -111,7 +121,8 @@ the production guard. All observed results:
 | Lockstep is exact in content | stale internal JS dependency left at `0.3.0` | `requires internal JS dependency dependencies:@inflatable-cookie/poodle-core ... to move 0.3.0 -> 0.4.0` |
 | Lockstep is exact in content | arbitrary internal JS dependency (`^0.4.0`) | same exact specifier requirement rejects the range |
 | Lockstep is exact in content | removed internal JS dependency | `rejected added or removed internal JS dependency` |
-| Lockstep is exact in content | unchanged stale Cargo requirement | `requires intra-repository Cargo requirement poodle-ir in packages/contracts/tokens/Cargo.toml to move 0.3.0 -> 0.4.0, found 0.3.0 -> 0.3.0` |
+| Lockstep is exact in content | unchanged stale Cargo requirement | `requires intra-repository Cargo requirement poodle-ir in [dependencies] of packages/contracts/tokens/Cargo.toml to move 0.3.0 -> 0.4.0, found 0.3.0 -> 0.3.0` |
+| Lockstep is exact in content | stale runtime requirement shadowed by a correct `[dev-dependencies]` entry | same `[dependencies]` requirement rejection in ordinary and explicit modes |
 | Precursor is not a candidate | arbitrary source path | `paths outside writable allowlist` |
 | Historical proof remains immutable | `0.3.0` manifest under g16.054 | `candidate scope requires packages/core/package.json` (still `0.2.3`-bound) |
 
@@ -122,19 +133,21 @@ pass.
 
 ## Validation
 
-- `effigy test:core-build` — pass; 78 tests across 6 files, including the
-  focused `scope.test.ts` laws (42 scope tests).
+Validation budget for the second repair: focused `scope.test.ts` plus one
+`test:web-pack-install` proof, with `docs:lint` because this log changed.
+
+- `bun test test/package-install/scope.test.ts` — pass; 43 focused scope
+  tests, including the duplicate-section Cargo requirement regression (the
+  new plant fails against the pre-repair `scope.ts`, stash-verified).
 - `effigy test:web-pack-install` (ordinary, unset scope mode) — pass; the
   clean checkout certified the ordinary range and recorded every closed
   0.4.0 plant as a falsification receipt, including the positive ordinary
-  admission.
-- `effigy docs:check` — pass on the built package trees; the package-install
-  README documents the closed policy, ordinary recognition and the unchanged
-  g16.054 contract.
+  admission and the new shadowed-requirement plant.
+- `effigy docs:lint` — pass.
 - `git diff --check` — pass.
-- `bunx tsc -p tsconfig.json --noEmit` — no `test/package-install` diagnostics
-  (the repository-wide board has pre-existing unrelated errors and is not a
-  supported selector).
+- `effigy test:core-build` and `effigy docs:check` from the first repair are
+  carried forward for unaffected surfaces; they were not re-run under the
+  second-repair validation budget.
 
 ## Limits
 

@@ -1049,9 +1049,14 @@ const INLINE_CARGO_REQUIREMENT_SECTIONS = new Set([
   "build-dependencies",
 ]);
 
-type InlineCargoRequirement = { name: string; version: string | null; path: string | null };
+type InlineCargoRequirement = {
+  section: string;
+  name: string;
+  version: string | null;
+  path: string | null;
+};
 
-function parseInlineCargoRequirement(line: string): InlineCargoRequirement | null {
+function parseInlineCargoRequirement(line: string): Omit<InlineCargoRequirement, "section"> | null {
   const match = /^\s*(poodle-[A-Za-z0-9_-]+)\s*=\s*\{(.*)\}\s*(?:#.*)?$/.exec(line);
   if (!match) return null;
   const entries = new Map<string, string>();
@@ -1068,10 +1073,12 @@ function parseInlineCargoRequirement(line: string): InlineCargoRequirement | nul
 
 /**
  * Every intra-repository Poodle requirement a Cargo manifest carries, keyed by
- * crate name. Version-carrying requirements must move `sourceVersion` ->
- * `targetVersion`; path-only requirements must stay byte-identical in
- * identity, so a manifest cannot leave a stale or arbitrary requirement behind
- * a lockstep `[package]` version bump.
+ * owning dependency section and crate name. Version-carrying requirements must
+ * move `sourceVersion` -> `targetVersion`; path-only requirements must stay
+ * byte-identical in identity. The section is part of the key because Cargo
+ * legalises the same crate in more than one dependency table, and a
+ * name-only key would let a correct later `[dev-dependencies]` entry shadow a
+ * stale runtime `[dependencies]` entry.
  */
 function cargoIntraRepoRequirements(text: string): Map<string, InlineCargoRequirement> {
   const requirements = new Map<string, InlineCargoRequirement>();
@@ -1084,7 +1091,14 @@ function cargoIntraRepoRequirements(text: string): Map<string, InlineCargoRequir
     }
     if (!INLINE_CARGO_REQUIREMENT_SECTIONS.has(section)) continue;
     const requirement = parseInlineCargoRequirement(raw);
-    if (requirement) requirements.set(requirement.name, requirement);
+    if (!requirement) continue;
+    const key = `${section}:${requirement.name}`;
+    if (requirements.has(key)) {
+      throw new Error(
+        `candidate scope rejected duplicate intra-repository Cargo requirement ${requirement.name} in [${section}]`,
+      );
+    }
+    requirements.set(key, { section, ...requirement });
   }
   return requirements;
 }
@@ -1163,26 +1177,27 @@ async function assertCandidateCargoManifestHonesty(
     );
     const beforeRequirements = cargoIntraRepoRequirements(baseText);
     const afterRequirements = cargoIntraRepoRequirements(sourceText);
-    for (const name of sortedUnique([
+    for (const key of sortedUnique([
       ...beforeRequirements.keys(),
       ...afterRequirements.keys(),
     ])) {
-      const beforeRequirement = beforeRequirements.get(name);
-      const afterRequirement = afterRequirements.get(name);
+      const beforeRequirement = beforeRequirements.get(key);
+      const afterRequirement = afterRequirements.get(key);
+      const { section, name } = beforeRequirement ?? afterRequirement!;
       if (!beforeRequirement || !afterRequirement) {
         throw new Error(
-          `candidate scope rejected added or removed intra-repository Cargo requirement ${name} in ${path}`,
+          `candidate scope rejected added or removed intra-repository Cargo requirement ${name} in [${section}] of ${path}`,
         );
       }
       if (beforeRequirement.path !== afterRequirement.path) {
         throw new Error(
-          `candidate scope rejected retargeted intra-repository Cargo requirement ${name} in ${path}`,
+          `candidate scope rejected retargeted intra-repository Cargo requirement ${name} in [${section}] of ${path}`,
         );
       }
       if (afterRequirement.version === null) {
         if (beforeRequirement.version !== null) {
           throw new Error(
-            `candidate scope rejected version removal from intra-repository Cargo requirement ${name} in ${path}`,
+            `candidate scope rejected version removal from intra-repository Cargo requirement ${name} in [${section}] of ${path}`,
           );
         }
         continue;
@@ -1192,7 +1207,7 @@ async function assertCandidateCargoManifestHonesty(
         afterRequirement.version !== policy.targetVersion
       ) {
         throw new Error(
-          `candidate scope requires intra-repository Cargo requirement ${name} in ${path} to move ${policy.sourceVersion} -> ${policy.targetVersion}, found ${beforeRequirement.version} -> ${afterRequirement.version}`,
+          `candidate scope requires intra-repository Cargo requirement ${name} in [${section}] of ${path} to move ${policy.sourceVersion} -> ${policy.targetVersion}, found ${beforeRequirement.version} -> ${afterRequirement.version}`,
         );
       }
     }
