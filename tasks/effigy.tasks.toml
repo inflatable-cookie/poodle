@@ -304,6 +304,17 @@
   { task = "test:focus-ring-modality-chromium" },
   { task = "test:focus-ring-modality-webkit" },
 ]
+# g18.025 preview header control sizing. Paired live-preview journeys prove
+# the DisplayControls chrome resolves fixed md at every specimen Size stop,
+# stays stable through Size/Density/Theme/Contrast/Search/wrapping journeys,
+# and paints identically across Svelte and React in Chromium and WebKit.
+# One engine per run; not in ci:web.
+"test:g18-025-preview-header-sizing-chromium" = "bun test/g18-025-preview-header-sizing/probe.ts --browser=chromium"
+"test:g18-025-preview-header-sizing-webkit" = "bun test/g18-025-preview-header-sizing/probe.ts --browser=webkit"
+"test:g18-025-preview-header-sizing" = [
+  { task = "test:g18-025-preview-header-sizing-chromium" },
+  { task = "test:g18-025-preview-header-sizing-webkit" },
+]
 # g18.010 CodeEditor editing focus treatment. Paired Svelte + React mounted
 # specimens prove the outer treatment arms on keyboard entry, dismisses on the
 # first editing intent, and never writes the document modality. Headless

@@ -5,6 +5,7 @@
     TextInput,
     ThemeSelect,
     ToggleGroup,
+    UiPresentationProvider,
     type ToggleGroupOption,
   } from "@inflatable-cookie/poodle-svelte";
   import {
@@ -27,7 +28,7 @@
     onContrastChange = () => {},
   }: {
     theme: string;
-    density: string;
+    density: DensityName;
     controlSize: string;
     search?: string;
     onThemeChange?: (value: string) => void;
@@ -39,6 +40,12 @@
   } = $props();
 
   type DensityName = keyof typeof densityModes;
+
+  // g18.025: the header is fixed `md` chrome. The app shell scopes the
+  // specimen `controlSize` selection (xs–xl) to the catalogue below, so this
+  // subtree re-scopes the size scale through the existing presentation
+  // provider — no preview-only heights, no component API change. Density
+  // stays ambient: the header keeps following the Density axis.
   type ControlSizeName = keyof typeof controlSizes;
 
   // The control surface is the scene's (card 035 R3/R4): the capability set
@@ -86,72 +93,74 @@
     : [];
 </script>
 
-<div class="poodle-display-controls">
-  {#if themeControl}
-    <div class="poodle-display-controls__group">
-      <Eyebrow>{themeControl.label}</Eyebrow>
-      <ThemeSelect
-        themes={themeList}
-        value={theme}
-        ariaLabel={themeControl.label}
-        onChange={(value) => onThemeChange(value)}
-      />
-    </div>
-  {/if}
+<UiPresentationProvider density={density} sizeScale="md">
+  <div class="poodle-display-controls">
+    {#if themeControl}
+      <div class="poodle-display-controls__group">
+        <Eyebrow>{themeControl.label}</Eyebrow>
+        <ThemeSelect
+          themes={themeList}
+          value={theme}
+          ariaLabel={themeControl.label}
+          onChange={(value) => onThemeChange(value)}
+        />
+      </div>
+    {/if}
 
-  {#if densityControl}
-    <div class="poodle-display-controls__group">
-      <Eyebrow>{densityControl.label}</Eyebrow>
-      <ToggleGroup
-        value={density}
-        options={densityOptions}
-        ariaLabel={densityControl.label}
-        onValueChange={(value) => onDensityChange(value as string)}
-      />
-    </div>
-  {/if}
+    {#if densityControl}
+      <div class="poodle-display-controls__group">
+        <Eyebrow>{densityControl.label}</Eyebrow>
+        <ToggleGroup
+          value={density}
+          options={densityOptions}
+          ariaLabel={densityControl.label}
+          onValueChange={(value) => onDensityChange(value as string)}
+        />
+      </div>
+    {/if}
 
-  {#if sizeControl}
-    <div class="poodle-display-controls__group">
-      <Eyebrow>{sizeControl.label}</Eyebrow>
-      <ToggleGroup
-        value={controlSize}
-        options={controlSizeOptions}
-        ariaLabel="Control size"
-        onValueChange={(value) => onControlSizeChange(value as string)}
-      />
-    </div>
-  {/if}
+    {#if sizeControl}
+      <div class="poodle-display-controls__group">
+        <Eyebrow>{sizeControl.label}</Eyebrow>
+        <ToggleGroup
+          value={controlSize}
+          options={controlSizeOptions}
+          ariaLabel="Control size"
+          onValueChange={(value) => onControlSizeChange(value as string)}
+        />
+      </div>
+    {/if}
 
-  {#if contrastControl}
-    <div class="poodle-display-controls__group">
-      <Eyebrow>{contrastControl.label}</Eyebrow>
-      <Slider
-        value={contrast}
-        min={contrastControl.min}
-        max={contrastControl.max}
-        step={0.05}
-        ariaLabel="Neutral contrast"
-        valueText={`${contrast.toFixed(2)}x`}
-        onValueChange={(value) => onContrastChange(value)}
-      />
-    </div>
-  {/if}
+    {#if contrastControl}
+      <div class="poodle-display-controls__group">
+        <Eyebrow>{contrastControl.label}</Eyebrow>
+        <Slider
+          value={contrast}
+          min={contrastControl.min}
+          max={contrastControl.max}
+          step={0.05}
+          ariaLabel="Neutral contrast"
+          valueText={`${contrast.toFixed(2)}x`}
+          onValueChange={(value) => onContrastChange(value)}
+        />
+      </div>
+    {/if}
 
-  {#if searchControl}
-    <div class="poodle-display-controls__group poodle-display-controls__group--search">
-      <Eyebrow>{searchControl.label}</Eyebrow>
-      <TextInput
-        type="search"
-        placeholder={searchControl.placeholder}
-        value={search}
-        ariaLabel="Search components"
-        onValueChange={onSearchChange}
-        onClear={() => onSearchChange("")}
-      />
-    </div>
-  {/if}
-</div>
+    {#if searchControl}
+      <div class="poodle-display-controls__group poodle-display-controls__group--search">
+        <Eyebrow>{searchControl.label}</Eyebrow>
+        <TextInput
+          type="search"
+          placeholder={searchControl.placeholder}
+          value={search}
+          ariaLabel="Search components"
+          onValueChange={onSearchChange}
+          onClear={() => onSearchChange("")}
+        />
+      </div>
+    {/if}
+  </div>
+</UiPresentationProvider>
 
 <style>
   .poodle-display-controls {
