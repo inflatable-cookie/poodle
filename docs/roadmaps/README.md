@@ -51,8 +51,10 @@ designed dark/light palettes (PR #255). Operator-approved g18.025 fixes all
 preview header controls at one selected size with `sm` as the default. Merged
 g18.029 admits the closed `0.4.0` candidate surface. Merged g18.030 removes
 the receipt emitter's hard-coded lock provenance and repins the complete
-current cohort before retained g18.006 resumes; g18.009 owns post-merge branch
-certification and publication. Desktop unblocks
+current cohort. Ready g18.031 selects the public core manifest as Effigy's
+release-version authority and derives GPUI census receipt versions before the
+retained g18.006 task resumes; g18.009 owns post-merge branch certification
+and publication. Desktop unblocks
 only after the accepted release reaches npm.
 
 ## Rules

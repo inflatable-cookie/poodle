@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.030 removes hard-coded Nucleus lock provenance)
+Updated: 2026-09-12 (g18.031 repairs release and census version authority)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -114,13 +114,18 @@ provenance — merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` (PR #262) on
 rust/web checks at the reviewed head. The complete current Nucleus cohort is
 repinned from the actual preview lockfile; no blocking findings remain.
 
+[`g18.031`](g18/031-release-metadata-and-census-provenance.md) — release
+metadata and GPUI census provenance — ready as the structural precursor that
+selects the public core manifest for Effigy and removes the census generator's
+embedded `0.3.0` before retained g18.006 resumes.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
-preparation is ready to resume with its worker/workspace and progress
-preserved. It is clean at current main after g18.030, with no candidate
-mutation or PR. Resume the same Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086` on the accepted merged main; the task,
+preparation is blocked with its worker/workspace and progress preserved. It is
+clean at current main after g18.030, with no candidate mutation or PR. Run
+g18.031, then resume the same Queue task
+`17ac3fee-de90-4b32-9672-1134770bb086` on its accepted merged main; the task,
 worker, workspace and evidence remain intact.
 
 [`g18.028`](g18/028-release-gate-accessibility-assertion-repair.md) is complete
@@ -132,6 +137,11 @@ after PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd`.
 [`g18.030`](g18/030-nucleus-receipt-lock-provenance.md) is complete. It derives
 receipt SHA/version provenance from the actual preview lockfile and performed
 one complete current evidence repin before retained g18.006 resumes.
+
+[`g18.031`](g18/031-release-metadata-and-census-provenance.md) is ready. It
+owns the explicit core release-version source, manifest-derived census receipt
+version and one deterministic current census regeneration. It does not prepare
+the candidate or run the full release board.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It

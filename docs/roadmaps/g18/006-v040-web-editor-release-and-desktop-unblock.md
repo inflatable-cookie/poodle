@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: ready — retained Queue task/workspace; g18.030 merged, resume on current main
+Status: blocked — retained Queue task/workspace; g18.031 precursor ready
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -12,8 +12,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
 `g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
-`g18.026`, `g18.027`, `g18.028`, `g18.029`; current continuation gate:
-`g18.030` (merged as PR #262)
+`g18.026`, `g18.027`, `g18.028`, `g18.029`; completed precursor:
+`g18.030` (PR #262); current continuation gate: `g18.031`
 
 ## Outcome
 
@@ -65,6 +65,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - g18.030 removes the Nucleus emitter's hard-coded preview-lock hash and
   release versions before candidate preparation. Consume its derived
   provenance from main; the final `0.4.0` repin must require no emitter edit.
+- g18.031 selects the public core manifest as Effigy's explicit repository
+  release-version source and derives GPUI census receipt versions from the
+  preview crate manifest. Consume it before candidate preparation; do not bump
+  or admit the private root workspace manifest.
 - Include the g18.022 pre-v1 Slider-family migration. Release notes must name
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
@@ -82,16 +86,16 @@ Do not publish before all dependencies close. Do not mutate Desktop.
   owns the hosted branch dry run after this candidate merges, then the tag,
   tag dry run and publication sequence.
 - Use narrow selectors while assembling the candidate. Run
-  `effigy release status --check-gates` once, only after versions, locks,
+  `effigy release gates --json` once, only after versions, locks,
   changelog, release notes, package evidence and the final Nucleus repin are
   complete on a stable candidate head. Do not restart the full board to
   diagnose a known component failure; return to its focused selector.
 
 ## Dispatch manifest
 
-- **State:** ready in retained dispatched Queue task/workspace at clean main
-  after g18.030 merged. Its release probe exposed hard-coded receipt
-  provenance that is now derived from the lockfile. The
+- **State:** blocked in retained dispatched Queue task/workspace at clean main
+  while g18.031 repairs the release-version source and remaining hard-coded
+  census receipt version. The
   task's dependency list froze on first dispatch, so preserve the same task,
   worker and workspace; do not replace them or pretend a later dependency
   mutation is available.
@@ -119,9 +123,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 1. After g18.028 closes, consume the full public-intent delta from `v0.3.0` to
    current main. Record final core/Svelte tree hashes and verify the g18.002
    editor-bearing hashes occur in their lineage.
-2. Repair `CHANGELOG.md` into the supported Keep a Changelog category grammar
-   without losing historical release meaning. Prove `effigy release status
-   --check-gates` and release plans parse rather than bypassing them.
+2. Consume g18.031's explicit core release-version authority. Preserve the
+   repaired Keep a Changelog grammar and validate the candidate changelog
+   directly; do not treat post-prepare `release status` with an intentionally
+   empty Unreleased section as the release gate.
 3. Prepare lockstep `0.4.0` manifests, intra-repository requirements, locks,
    release notes, and package evidence. Classify CodeEditor and rich-text as
    additive, Tabs card fill as behavioral, and the g18.022 Slider-family API
@@ -133,7 +138,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
    isolation, SSR/browser imports, declarations, licenses, exact dependencies,
    and a fresh source-free consumer installed from the packed Svelte archive.
 6. Once the candidate is stable, run one local
-   `effigy release status --check-gates`. Do not follow it with a redundant
+   `effigy release gates --json`. Do not follow it with a redundant
    local `qa`, `ci:web` or `docs:check`. Push the exact head and require the
    ordinary PR `web`/`rust` checks through the merged g18.029 admission.
 7. Open one non-draft candidate PR and report `ready_for_review` immediately;
@@ -162,7 +167,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 - During assembly, run only selectors focused on the release input currently
   changing and the required generator/checker pair for regenerated evidence.
-- Run `effigy release status --check-gates` once on the frozen candidate. It
+- Run `effigy release gates --json` once on the frozen candidate. It
   subsumes `qa`, `ci:web`, `ci:rust`, packed-install and documentation checks;
   do not run those separately afterward.
 - A review repair reruns its affected leaf selector. Rerun the release gate
@@ -219,17 +224,25 @@ before build/pack, while the only explicit candidate policy is the historical
 widening this live task. The same ruling moves the hosted branch dry run to
 post-merge g18.009.
 
-Post-g18.029 continuation proved one remaining structural conflict. The
+Post-g18.029 continuation proved one structural conflict. The
 mandatory future `packages/gpui/preview/Cargo.lock` bump changes its SHA and
 Poodle package versions, while `nucleus_receipts.rs` hard-coded the current
 values and sat outside the closed candidate surface. Merged g18.030 now derives
 that provenance from the lockfile and repinned current evidence; no candidate
 mutation exists.
 
+Post-g18.030 continuation proved two further release-identity defects on clean
+main: the GPUI census generator still embeds `0.3.0` in 65 receipts, and
+Effigy auto-detects the private root workspace manifest at `0.1.0` as the
+repository release version. g18.031 derives the census version from the
+preview crate and explicitly selects the public core manifest for release
+status. It also corrects this candidate's gate command to the stage-appropriate
+`release gates --json`; accepting a red status result is not authorized.
+
 ## Next task
 
-Resume this retained task on current main now that g18.030's derived Nucleus
-receipt provenance PR has merged. The Queue cannot add dependencies to this
+Complete g18.031, then resume this retained task on its merged main. The Queue
+cannot add dependencies to this
 already-dispatched task, so preserve its worker and workspace. After the candidate merges and closes,
 g18.009 dispatches from its existing dependency, performs the hosted branch
 dry run, and completes release. Desktop then resumes retained g02.058 and PR
