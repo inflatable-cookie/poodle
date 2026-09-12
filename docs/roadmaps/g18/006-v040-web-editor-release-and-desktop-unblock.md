@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: paused — retained Queue task/workspace; resume only after g18.026 and g18.027
+Status: blocked — retained Queue task/workspace; resume after g18.028 repairs the Rust release gate
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -12,7 +12,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
 `g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
-`g18.026`, `g18.027`
+`g18.026`, `g18.027`; current continuation gate: `g18.028`
 
 ## Outcome
 
@@ -72,11 +72,12 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** operator-paused in retained dispatched Queue task/workspace; resume
-  only after g18.026 and g18.027 merge, then rebase and recompute final-source
-  identity. The task's dependency list froze on first dispatch, so preserve the
-  same task, worker and workspace in the visible blocked state; do not replace
-  them or pretend a later dependency mutation is available.
+- **State:** blocked in retained dispatched Queue task/workspace after rebasing
+  onto accepted g18.026/g18.027 main. Its release gate found two stale Rust
+  accessibility assertions. Resume only after separate g18.028 merges. The
+  task's dependency list froze on first dispatch, so preserve the same task,
+  worker and workspace; do not replace them or pretend a later dependency
+  mutation is available.
 - **Completion:** one reviewed release-candidate PR merged to main; exact
   candidate local gates and branch dry run green; final version set, package
   trees, packed archives and release notes recorded for g18.009
@@ -171,9 +172,9 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-Complete g18.026, then g18.027. Resume this retained task only after the
-Slider-family parity repair and exact final public-surface freeze report merge.
-The Queue cannot add dependencies to this already-dispatched task, so its
-blocked state is the explicit serial gate; preserve its worker and workspace.
+Complete g18.028's test-only Rust accessibility assertion repair. Resume this
+retained task only after that PR merges and the full library/release gate is
+green. The Queue cannot add dependencies to this already-dispatched task, so
+its blocked state is the explicit serial gate; preserve its worker and workspace.
 After the candidate merges and closes, g18.009 dispatches from its existing
 dependency. Desktop then resumes retained g02.058 and PR #215.

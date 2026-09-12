@@ -67,14 +67,15 @@ Updated: 2026-09-12
   - Merged repair: `g18.010` CodeEditor editing focus treatment;
     the outer ring is now a local keyboard-entry affordance dismissed on
     committed edits, with the document modality left truthful.
-  - Paused candidate: retained g18.006 task/workspace resumes only after
-    merged g18.026 and g18.027; its already-dispatched Queue dependency list is
-    frozen, so the blocked state preserves the serial gate.
+  - Blocked candidate: retained g18.006 reached the release gate after merged
+    g18.026 and g18.027, then stopped on two stale `poodle-render`
+    accessibility assertions. Operator-approved g18.028 repairs those tests in
+    a separate lane before the same task/workspace resumes.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; it publishes only the accepted candidate and returns the Desktop
     unblock capsule.
-  - Next checkpoint: execute g18.026, then g18.027, then resume g18.006.
-    Publish `0.4.0` through g18.009, unblock Desktop, and route compatible
+  - Next checkpoint: execute g18.028, then resume retained g18.006. Publish
+    `0.4.0` through g18.009, unblock Desktop, and route compatible
     sweep findings to `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations
 

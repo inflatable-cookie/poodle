@@ -50,7 +50,7 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after merged g18.026 and g18.027 |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | blocked | retained Queue task/workspace; resume after g18.028 reopens the Rust release gate |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
@@ -72,6 +72,7 @@ needed to compile honest repair tranches.
 | [`g18.025`](025-preview-header-control-sizing.md) — Preview header control sizing | complete | PR #257 (merge `90c40defe86e4841ad248c72200f7333f37c342d`) plus direct correction `a6bed8420`; all controls share the selected size, default `sm` |
 | [`g18.026`](026-slider-foundation-and-range-parity.md) — Slider foundation and RangeSlider parity | complete | PR #258 (merge `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`); separate public controls over one private family renderer with accepted Slider fixes ported to RangeSlider; serial before g18.027 |
 | [`g18.027`](027-v040-public-surface-freeze-audit.md) — `v0.4.0` public-surface freeze audit | complete | PR #259 (merge `8a1f7dc4cb7fa23077c06bc2ad5040db20760182`); frozen `v0.3.0`→post-g18.026 classification with migration text for every breaking row; serial before retained g18.006 |
+| [`g18.028`](028-release-gate-accessibility-assertion-repair.md) — release-gate accessibility assertion repair | ready | test-only repair for two stale `poodle-render` expectations; serial before retained g18.006 resumes |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -137,8 +138,10 @@ Merged g18.026 consolidated Slider-family private rendering and ported the
 accepted Slider fixes to RangeSlider without merging their public APIs (PR
 #258, merged `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`). Merged g18.027 froze
 and classified the exact `v0.3.0`→main public delta (PR #259, merged
-`8a1f7dc4cb7fa23077c06bc2ad5040db20760182`). g18.006 remains the retained final candidate lane,
-now unblocked on the frozen report. g18.009 waits on g18.006; no candidate is tagged or
+`8a1f7dc4cb7fa23077c06bc2ad5040db20760182`). g18.006 remains the retained final candidate lane.
+Its first release-gate run exposed two deterministic stale accessibility assertions;
+operator-approved g18.028 repairs those tests separately before the same worker resumes.
+g18.009 waits on g18.006; no candidate is tagged or
 published while accepted product source is moving. After `0.4.0` unblocks
 Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
 later breaking change waits for `0.5.0`.

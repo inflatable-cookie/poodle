@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.026 ready; g18.027 serial before retained release)
+Updated: 2026-09-12 (g18.028 repairs the retained candidate's Rust gate)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -110,11 +110,16 @@ focus-ring contract note (see the g18.024 closeout log).
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
-preparation is operator-paused with its worker/workspace and any progress
-preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.026 and g18.027 merge. Its dependencies are frozen because it
-already dispatched; the visible blocked state is the serial gate and the task,
-worker and workspace must remain intact.
+preparation is blocked with its worker/workspace and progress preserved. It
+reached the release gate after g18.026 and g18.027, then stopped on two stale
+`poodle-render` accessibility assertions. Resume the same Queue task
+`17ac3fee-de90-4b32-9672-1134770bb086` only after g18.028 merges; the task,
+worker and workspace remain intact.
+
+[`g18.028`](g18/028-release-gate-accessibility-assertion-repair.md) is ready as
+the operator-selected separate repair. It changes only the two stale Rust test
+expectations, proves the full library and release gates, and merges before
+retained g18.006 resumes.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
