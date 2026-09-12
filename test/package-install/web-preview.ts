@@ -2032,6 +2032,10 @@ function closedCandidateFiles(version: string): Record<string, string> {
     )}\n`,
   };
   for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
+    const dependency =
+      path === "packages/contracts/tokens/Cargo.toml"
+        ? [`poodle-ir = { version = "${version}", path = "../../contracts/ir" }`, ""]
+        : [];
     files[path] = [
       "[package]",
       'name = "planted"',
@@ -2039,6 +2043,7 @@ function closedCandidateFiles(version: string): Record<string, string> {
       'edition = "2021"',
       "publish = false",
       "",
+      ...(dependency.length > 0 ? ["[dependencies]", ...dependency] : []),
     ].join("\n");
   }
   for (const path of LOCKSTEP_CARGO_LOCK_PATHS) {
@@ -2051,7 +2056,10 @@ type ClosedCandidatePlantKind =
   | "partial-version-bump"
   | "later-input-drift"
   | "evidence-misbound"
-  | "react-admission";
+  | "react-admission"
+  | "stale-js-dependency"
+  | "arbitrary-js-dependency"
+  | "stale-cargo-requirement";
 
 /**
  * Build a synthetic `0.3.0` → `0.4.0` candidate range with a frozen
@@ -2097,6 +2105,24 @@ async function closedCandidateScopePlant(
         null,
         2,
       )}\n`;
+    }
+    if (kind === "stale-js-dependency" || kind === "arbitrary-js-dependency") {
+      const manifestPath =
+        kind === "stale-js-dependency"
+          ? "packages/svelte/components/package.json"
+          : "packages/react/components/package.json";
+      const manifest = JSON.parse(candidateFiles[manifestPath] as string);
+      manifest.dependencies["@inflatable-cookie/poodle-core"] =
+        kind === "stale-js-dependency" ? "0.3.0" : "^0.4.0";
+      candidateFiles[manifestPath] = `${JSON.stringify(manifest, null, 2)}\n`;
+    }
+    if (kind === "stale-cargo-requirement") {
+      candidateFiles["packages/contracts/tokens/Cargo.toml"] = (
+        candidateFiles["packages/contracts/tokens/Cargo.toml"] as string
+      ).replace(
+        'poodle-ir = { version = "0.4.0", path = "../../contracts/ir" }',
+        'poodle-ir = { version = "0.3.0", path = "../../contracts/ir" }',
+      );
     }
     await writePlantFiles(plantRoot, candidateFiles);
     await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
@@ -2411,6 +2437,22 @@ const falsificationReceipts = [
   await expectedFailure(
     "closed 0.4.0 candidate scope rejects misbound evidence",
     () => closedCandidateScopePlant("evidence-misbound", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects a stale internal JS dependency",
+    () => closedCandidateScopePlant("stale-js-dependency", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects an arbitrary internal JS dependency",
+    () => closedCandidateScopePlant("arbitrary-js-dependency", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects a stale Cargo requirement",
+    () => closedCandidateScopePlant("stale-cargo-requirement", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "ordinary scope rejects a non-lockstep 0.4.0 candidate",
+    () => closedCandidateScopePlant("stale-js-dependency", "ordinary"),
   ),
 ];
 

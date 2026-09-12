@@ -894,6 +894,40 @@ const CANDIDATE_MANIFEST_LEAF_ALLOWLIST: Record<string, readonly string[]> = {
   ],
 };
 
+const INTERNAL_JS_DEPENDENCY_SECTIONS = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+] as const;
+
+const INTERNAL_JS_DEPENDENCY_PREFIX = "@inflatable-cookie/poodle-";
+
+/**
+ * Every internal Poodle dependency an installed JS manifest declares. The
+ * closed candidate policy requires the same dependency identity at the base
+ * and the head with an exact `sourceVersion` -> `targetVersion` transition, so
+ * a stale or arbitrary specifier cannot ride a lockstep version bump.
+ */
+function internalJsDependencies(manifest: Record<string, unknown>): Map<string, string> {
+  const dependencies = new Map<string, string>();
+  for (const section of INTERNAL_JS_DEPENDENCY_SECTIONS) {
+    const entries = manifest[section];
+    if (entries === undefined) continue;
+    if (!isJsonRecord(entries)) {
+      throw new Error(`candidate scope rejected non-record JS dependency section ${section}`);
+    }
+    for (const [name, specifier] of Object.entries(entries)) {
+      if (!name.startsWith(INTERNAL_JS_DEPENDENCY_PREFIX)) continue;
+      if (typeof specifier !== "string") {
+        throw new Error(`candidate scope rejected non-string internal JS dependency ${name}`);
+      }
+      dependencies.set(`${section}:${name}`, specifier);
+    }
+  }
+  return dependencies;
+}
+
 async function assertCandidateManifestHonesty(
   checkoutRoot: string,
   requiredBaseCommit: string,
@@ -930,6 +964,28 @@ async function assertCandidateManifestHonesty(
     }
     if (path === "packages/react/components/package.json" && after.private !== true) {
       throw new Error("candidate scope rejected React admission: package must remain private");
+    }
+    const beforeInternal = internalJsDependencies(before);
+    const afterInternal = internalJsDependencies(after);
+    for (const dependency of sortedUnique([
+      ...beforeInternal.keys(),
+      ...afterInternal.keys(),
+    ])) {
+      const beforeSpecifier = beforeInternal.get(dependency);
+      const afterSpecifier = afterInternal.get(dependency);
+      if (beforeSpecifier === undefined || afterSpecifier === undefined) {
+        throw new Error(
+          `candidate scope rejected added or removed internal JS dependency ${dependency} in ${path}`,
+        );
+      }
+      if (
+        beforeSpecifier !== policy.sourceVersion ||
+        afterSpecifier !== policy.targetVersion
+      ) {
+        throw new Error(
+          `candidate scope requires internal JS dependency ${dependency} in ${path} to move ${policy.sourceVersion} -> ${policy.targetVersion}, found ${beforeSpecifier} -> ${afterSpecifier}`,
+        );
+      }
     }
   }
 }
@@ -985,6 +1041,52 @@ function parseCandidateCargoRequirement(
   ).exec(line);
   if (!match) return null;
   return { name: match[1], path: match[2] };
+}
+
+const INLINE_CARGO_REQUIREMENT_SECTIONS = new Set([
+  "dependencies",
+  "dev-dependencies",
+  "build-dependencies",
+]);
+
+type InlineCargoRequirement = { name: string; version: string | null; path: string | null };
+
+function parseInlineCargoRequirement(line: string): InlineCargoRequirement | null {
+  const match = /^\s*(poodle-[A-Za-z0-9_-]+)\s*=\s*\{(.*)\}\s*(?:#.*)?$/.exec(line);
+  if (!match) return null;
+  const entries = new Map<string, string>();
+  for (const part of match[2].split(",")) {
+    const keyValue = /^\s*([A-Za-z0-9_.-]+)\s*=\s*"([^"]*)"\s*$/.exec(part);
+    if (keyValue) entries.set(keyValue[1], keyValue[2]);
+  }
+  return {
+    name: match[1],
+    version: entries.get("version") ?? null,
+    path: entries.get("path") ?? null,
+  };
+}
+
+/**
+ * Every intra-repository Poodle requirement a Cargo manifest carries, keyed by
+ * crate name. Version-carrying requirements must move `sourceVersion` ->
+ * `targetVersion`; path-only requirements must stay byte-identical in
+ * identity, so a manifest cannot leave a stale or arbitrary requirement behind
+ * a lockstep `[package]` version bump.
+ */
+function cargoIntraRepoRequirements(text: string): Map<string, InlineCargoRequirement> {
+  const requirements = new Map<string, InlineCargoRequirement>();
+  let section = "";
+  for (const raw of text.split(/\r?\n/)) {
+    const table = cargoTableName(raw);
+    if (table !== null) {
+      section = table;
+      continue;
+    }
+    if (!INLINE_CARGO_REQUIREMENT_SECTIONS.has(section)) continue;
+    const requirement = parseInlineCargoRequirement(raw);
+    if (requirement) requirements.set(requirement.name, requirement);
+  }
+  return requirements;
 }
 
 async function assertCandidateCargoManifestHonesty(
@@ -1052,6 +1154,45 @@ async function assertCandidateCargoManifestHonesty(
       if (!packageVersionChange && !dependencyVersionChange) {
         throw new Error(
           `candidate scope rejected unauthorized Cargo manifest change in ${path}: ${oldLine} -> ${newLine}; only [package] version and same-identity intra-repository Poodle requirement version changes may appear`,
+        );
+      }
+    }
+    const baseText = await runCapture(
+      ["git", "show", `${requiredBaseCommit}:${path}`],
+      checkoutRoot,
+    );
+    const beforeRequirements = cargoIntraRepoRequirements(baseText);
+    const afterRequirements = cargoIntraRepoRequirements(sourceText);
+    for (const name of sortedUnique([
+      ...beforeRequirements.keys(),
+      ...afterRequirements.keys(),
+    ])) {
+      const beforeRequirement = beforeRequirements.get(name);
+      const afterRequirement = afterRequirements.get(name);
+      if (!beforeRequirement || !afterRequirement) {
+        throw new Error(
+          `candidate scope rejected added or removed intra-repository Cargo requirement ${name} in ${path}`,
+        );
+      }
+      if (beforeRequirement.path !== afterRequirement.path) {
+        throw new Error(
+          `candidate scope rejected retargeted intra-repository Cargo requirement ${name} in ${path}`,
+        );
+      }
+      if (afterRequirement.version === null) {
+        if (beforeRequirement.version !== null) {
+          throw new Error(
+            `candidate scope rejected version removal from intra-repository Cargo requirement ${name} in ${path}`,
+          );
+        }
+        continue;
+      }
+      if (
+        beforeRequirement.version !== policy.sourceVersion ||
+        afterRequirement.version !== policy.targetVersion
+      ) {
+        throw new Error(
+          `candidate scope requires intra-repository Cargo requirement ${name} in ${path} to move ${policy.sourceVersion} -> ${policy.targetVersion}, found ${beforeRequirement.version} -> ${afterRequirement.version}`,
         );
       }
     }

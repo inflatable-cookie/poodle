@@ -54,7 +54,11 @@ requires exactly one frozen release-input commit, permits only an
 evidence/log-only suffix, keeps the final release inputs byte-identical to
 that frozen commit, binds changed evidence `source_commit` values to it, and
 rejects component source, workflows, publish/registry transport, React
-admission, Cargo retargeting and arbitrary documentation. Unknown modes
+admission, Cargo retargeting and arbitrary documentation. Lockstep is exact:
+every internal JS dependency and every version-carrying intra-repository
+Cargo requirement in a changed manifest must move from the `0.3.0` source to
+the `0.4.0` target, and path-only requirements must keep their identity, so a
+stale or arbitrary specifier cannot ride a version bump. Unknown modes
 reject. Changed filenames never promote a run into certification.
 
 The certification receipt has schema `poodle-installed-web-distribution`. Its

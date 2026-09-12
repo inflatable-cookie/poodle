@@ -912,6 +912,50 @@ describe("closed 0.4.0 candidate scope admission", () => {
     ).rejects.toThrow(/candidate scope rejected unauthorized Cargo manifest change/);
   });
 
+  test("closed candidate scope rejects stale or arbitrary internal JS dependencies", async () => {
+    const mutateDependency = (
+      manifestPath: string,
+      specifier: string | null,
+    ) => (files: Record<string, string>) => {
+      const manifest = JSON.parse(files[manifestPath] as string);
+      if (specifier === null) {
+        delete manifest.dependencies["@inflatable-cookie/poodle-core"];
+      } else {
+        manifest.dependencies["@inflatable-cookie/poodle-core"] = specifier;
+      }
+      files[manifestPath] = `${JSON.stringify(manifest, null, 2)}\n`;
+    };
+    const plants = {
+      stale: mutateDependency("packages/svelte/components/package.json", "0.3.0"),
+      arbitrary: mutateDependency("packages/react/components/package.json", "^0.4.0"),
+      removed: mutateDependency("packages/svelte/components/package.json", null),
+    };
+    for (const mutateCandidate of Object.values(plants)) {
+      const { root, base, head } = await plantClosedCandidate({ mutateCandidate });
+      await expect(
+        assertCertificationScope(root, base, head, G18_006_CANDIDATE_SCOPE_MODE),
+      ).rejects.toThrow(/internal JS dependency/);
+    }
+  });
+
+  test("closed candidate scope rejects an unchanged stale Cargo requirement", async () => {
+    const { root, base, head } = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["packages/contracts/tokens/Cargo.toml"] = (
+          files["packages/contracts/tokens/Cargo.toml"] as string
+        ).replace(
+          'poodle-ir = { version = "0.4.0", path = "../../contracts/ir" }',
+          'poodle-ir = { version = "0.3.0", path = "../../contracts/ir" }',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(root, base, head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      /requires intra-repository Cargo requirement poodle-ir in packages\/contracts\/tokens\/Cargo\.toml to move 0\.3\.0 -> 0\.4\.0, found 0\.3\.0 -> 0\.3\.0/,
+    );
+  });
+
   test("closed candidate scope rejects hidden or later release-input drift", async () => {
     const driftedManifest = (
       closedCandidateFiles("0.4.0")["packages/render/Cargo.toml"] as string
