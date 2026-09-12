@@ -1,13 +1,8 @@
 # Slider
 
-Status: approved target contract — g18.022 pending implementation
+Status: approved contract — implemented by g18.022 (block-first family)
 Updated: 2026-09-11
 
-The prose below is the approved post-g18.022 contract. Until that task merges,
-the checked-in implementation still exposes the temporary pre-migration
-`variant="standard" | "embedded"` plus `appearance="track" | "block"`
-surface recorded in the public-props table. g18.022 replaces it atomically;
-there is no mixed or compatibility state.
 
 ## 1. Purpose
 
@@ -62,7 +57,7 @@ upright: value at the physical top and optional label centered.
 | Root | yes | slider host with relative positioning | sizing, disabled opacity |
 | Track | yes, embedded variant | full value range background bar | background, radius |
 | Fill | yes | completed value span driven by CSS custom property; selected capsule in block | accent / selected fill, radius |
-| Control | yes, embedded variant | native or adapter-owned value control overlaid on the track | thumb styling, focus ring, appearance reset |
+| Control | yes, embedded variant | adapter-owned value control overlaid on the track | thumb styling, focus ring, appearance reset |
 | Capsule | yes, block variant | labelled rounded-square range surface | selected/remainder fill |
 | Hit | yes, block variant | measurable 44×44 logical-pixel effective target around a small thumb | handle fill/border, focus |
 | Inline layers | yes, block variant | clipped copies of one stable text layout above fill paint and below the thumb; pointer-inert | selected/remainder text |
@@ -77,8 +72,7 @@ upright: value at the physical top and optional label centered.
 | `min` | `number` | `0` | no | lower bound |
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
-| `variant` | `"standard" \| "embedded"` | `"standard"` | no | temporary implementation domain; g18.022 replaces it with block/embedded and block default |
-| `appearance` | `"track" \| "block"` | `"track"` | no | temporary pre-g18.022 switch; removed by g18.022 without an alias |
+| `variant` | `"block" \| "embedded"` | `"block"` | no | presentation variant. `block` is the ordinary rounded-square capsule; `embedded` is the dense track-and-thumb alternative for composites. The removed `standard`/`track` vocabulary has no alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
 | `visibleLabel` | `string \| null` | `null` | no | visible label for the block variant. Empty text omits the item. Never derived from `ariaLabel` |
 | `formatVisibleValue` | `((value: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the visible value from the normalized, bounds-guarded, step-snapped number. Default visible text is `String(value)`. Native specs carry the resolved string, not the closure |

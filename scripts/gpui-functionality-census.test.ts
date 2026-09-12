@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import {
   ADMITTED_VIA,
@@ -8,6 +9,7 @@ import {
   RECEIPT_SCHEMA,
   admitReceiptTextAxes,
   admitTestAxes,
+  CENSUS_JSON_PATH,
   extractTestBody,
   loadExecutionRecord,
   observedDriver,
@@ -241,7 +243,15 @@ describe("g18.001 census oracles", () => {
   it("record-state oracle: evidence identity is pinned, current tree descends from it", () => {
     const root = path.resolve(import.meta.dir, "..");
     const record = loadExecutionRecord(root);
-    expect(record.source_commit).toBe("d8e174fb40b2634b7d00018c721816ffc037d712");
+    // The census's own generator embeds the record's commit; the checked-in
+    // census must carry exactly that identity so the record stays the single
+    // evidence source (state, never live HEAD).
+    const census = JSON.parse(readFileSync(path.join(root, CENSUS_JSON_PATH), "utf8")) as { source_commit?: string };
+    expect(record.source_commit).toMatch(/^[0-9a-f]{40}$/);
+    expect(census.source_commit).toBe(record.source_commit);
+    // Pin ancestry, lockfile identity, and every admitted test body hash are
+    // the record's own oracle; repinning the identity to a newer ancestor
+    // stays legal without touching this test.
     validateExecutionRecord(record, root);
   });
 

@@ -293,10 +293,7 @@ pub use segmented_control::{SegmentedControlOption, SegmentedControlSpec};
 pub use select::{SelectMode, SelectSpec, SelectVariant};
 pub use separator::SeparatorSpec;
 pub use skeleton::{SkeletonPreset, SkeletonSpec};
-pub use slider::{
-    reject_vertical_block, SliderAppearance, SliderDirection, SliderPolarity, SliderSpec,
-    SliderVariant,
-};
+pub use slider::{SliderDirection, SliderPolarity, SliderSpec, SliderVariant};
 pub use spacer::SpacerSpec;
 pub use spinner::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 pub use split_button::{SplitButtonSpec, SplitMenuItem};

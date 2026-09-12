@@ -9172,15 +9172,9 @@
       },
       {
         "name": "variant",
-        "type": "\"standard\" | \"embedded\"",
-        "default": "\"standard\"",
-        "description": "Uses native range inputs or the dense control-machine pointer surface."
-      },
-      {
-        "name": "appearance",
-        "type": "\"track\" | \"block\"",
-        "default": "\"track\"",
-        "description": "Visual treatment. Orthogonal to variant. Block is horizontal only."
+        "type": "\"block\" | \"embedded\"",
+        "default": "\"block\"",
+        "description": "Block is the rounded-square capsule with fixed endpoint anchors; embedded is the dense track-and-thumb alternative for composites."
       },
       {
         "name": "direction",
@@ -9199,12 +9193,6 @@
         "type": "((value: number, thumb: \"lower\" | \"upper\") => string) | undefined",
         "default": "undefined",
         "description": "Web-only per-thumb formatter for block visible values. Native specs carry resolved strings."
-      },
-      {
-        "name": "formatVisibleRange",
-        "type": "((lower: number, upper: number) => string) | undefined",
-        "default": "undefined",
-        "description": "Web-only formatter for the selected-window range text. Native specs carry the resolved string."
       },
       {
         "name": "polarity",
@@ -10403,15 +10391,9 @@
       },
       {
         "name": "variant",
-        "type": "\"standard\" | \"embedded\"",
-        "default": "\"standard\"",
-        "description": "Uses the native input or dense control-machine pointer surface."
-      },
-      {
-        "name": "appearance",
-        "type": "\"track\" | \"block\"",
-        "default": "\"track\"",
-        "description": "Visual treatment. Orthogonal to variant. Block is horizontal only."
+        "type": "\"block\" | \"embedded\"",
+        "default": "\"block\"",
+        "description": "Block is the rounded-square capsule with fixed text; embedded is the dense track-and-thumb alternative for composites."
       },
       {
         "name": "direction",

@@ -47,19 +47,26 @@
       <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
     </SpecimenGroup>
 
-    <SpecimenGroup label="Block appearance">
-      <RangeSlider appearance="block" value={priceRange} min={0} max={100} visibleLabel="Price" ariaLabel="Price range" onValueChange={(value) => (priceRange = value)} />
-      <RangeSlider appearance="block" direction="rtl" value={ageRange} min={18} max={65} step={5} visibleLabel="Age" ariaLabel="Age range" onValueChange={(value) => (ageRange = value)} />
+    <!-- g18.022: fixed whole-capsule anchors — lower value at the logical
+         start, label centered, upper value at the logical end. Text never
+         follows a thumb. -->
+    <SpecimenGroup label="Block — fixed endpoint anchors">
+      <RangeSlider value={priceRange} min={0} max={100} visibleLabel="Price" ariaLabel="Price range" onValueChange={(value) => (priceRange = value)} />
+      <RangeSlider direction="rtl" value={ageRange} min={18} max={65} step={5} visibleLabel="Age" ariaLabel="Age range" onValueChange={(value) => (ageRange = value)} />
+      <div class="poodle-range-slider-specimen__narrow">
+        <RangeSlider value={[20, 80]} min={0} max={100} visibleLabel="Narrow fit" ariaLabel="Narrow fit range" />
+      </div>
     </SpecimenGroup>
   </div>
 
-  <SpecimenGroup label="Vertical — the same control on the other axis">
+  <SpecimenGroup label="Vertical block — upper value top, label centered, lower bottom">
     <div class="poodle-range-slider-specimen__vertical">
       <RangeSlider
         orientation="vertical"
         value={verticalRange}
         min={0}
         max={100}
+        visibleLabel="Level"
         ariaLabel="Vertical range"
         onValueChange={(value) => (verticalRange = value)}
       />
@@ -98,6 +105,10 @@
 
   .poodle-range-slider-specimen__axis {
     width: min(100%, 20rem);
+  }
+
+  .poodle-range-slider-specimen__narrow {
+    width: 9rem;
   }
 
   .poodle-range-slider-specimen__vertical {

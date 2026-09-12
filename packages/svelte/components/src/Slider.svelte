@@ -1,11 +1,10 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/slider.css";
   import {
-    assertHorizontalBlockAppearance,
     createSliderControlContext, layoutSliderBlock, measureInlineAdvance,
     normalizeSliderValue, physicalToValueNorm, resolveSliderVisibleValue, safeSliderMax,
     sliderControlTransition, sliderTransition, sliderVisualState,
-    type AudioValueLaw, type SliderAppearance, type SliderContext, type SliderControlContext,
+    type AudioValueLaw, type SliderContext, type SliderControlContext,
     type SliderDirection, type SliderPolarity, type SliderVariant,
   } from "@inflatable-cookie/poodle-core";
   import { onDestroy } from "svelte";
@@ -24,7 +23,6 @@
     max?: number;
     step?: number;
     variant?: SliderVariant;
-    appearance?: SliderAppearance;
     direction?: SliderDirection;
     polarity?: SliderPolarity;
     centerValue?: number | null;
@@ -47,8 +45,7 @@
     min = 0,
     max = 100,
     step = 1,
-    variant = "standard",
-    appearance = "track",
+    variant = "block",
     direction = "ltr",
     polarity = "unipolar",
     centerValue = null,
@@ -79,15 +76,11 @@
   const displayValue = $derived(normalizeSliderValue(machineContext, value));
   const sliderStyle = $derived(joinStyles([
     `--poodle-slider-percent: ${visualState.valueNorm * 100}%`,
-    `--poodle-slider-fill-start: ${variant === "standard" ? 0 : visualState.fillStartNorm * 100}%`,
-    `--poodle-slider-fill-span: ${(variant === "standard" ? visualState.valueNorm : visualState.fillSpanNorm) * 100}%`,
+    `--poodle-slider-fill-start: ${visualState.fillStartNorm * 100}%`,
+    `--poodle-slider-fill-span: ${visualState.fillSpanNorm * 100}%`,
     `--poodle-slider-center: ${visualState.centerNorm * 100}%`,
   ]));
-  const block = $derived.by(() => {
-    assertHorizontalBlockAppearance(appearance, orientation);
-    return appearance === "block";
-  });
-  const usesControlPointer = $derived(block || variant === "embedded");
+  const block = $derived(variant === "block");
   const visibleValueText = $derived(resolveSliderVisibleValue(displayValue, formatVisibleValue));
   const visibleLabelText = $derived(visibleLabel && visibleLabel !== "" ? visibleLabel : null);
   const blockLayout = $derived.by(() => {
@@ -135,7 +128,7 @@
   }
 
   function pointerDown(event: PointerEvent): void {
-    if (!usesControlPointer || event.button !== 0 || disabled) return;
+    if (event.button !== 0 || disabled) return;
     const target = block ? (event.currentTarget as HTMLElement) : root;
     if (!target) return;
     event.preventDefault();
@@ -159,7 +152,7 @@
     event.stopPropagation();
     terminate(event.pointerId);
   }
-  function embeddedKey(event: KeyboardEvent): void {
+  function controlKey(event: KeyboardEvent): void {
     if (disabled) return;
     const keyDirection = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const raw = event.key === "Home" ? min : event.key === "End" ? safeMax : keyDirection ? value + keyDirection * step : null;
@@ -175,11 +168,14 @@
 
   $effect(() => {
     if (!block || !capsule) return;
+    const axis = orientation;
     const observer = new ResizeObserver(() => {
-      capsuleSpan = capsule?.getBoundingClientRect().width ?? 0;
+      const rect = capsule?.getBoundingClientRect();
+      capsuleSpan = !rect ? 0 : axis === "vertical" ? rect.height : rect.width;
     });
     observer.observe(capsule);
-    capsuleSpan = capsule.getBoundingClientRect().width;
+    const rect = capsule.getBoundingClientRect();
+    capsuleSpan = axis === "vertical" ? rect.height : rect.width;
     return () => observer.disconnect();
   });
 
@@ -190,31 +186,48 @@
   onDestroy(() => terminate());
 </script>
 
-<!-- The embedded branch supplies slider semantics; the standard branch delegates them to the native input. -->
+<!-- Block is the standalone capsule; embedded is the dense track-and-thumb composite. -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-appearance={block ? "block" : undefined} data-direction={block || direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={block || direction === "rtl" ? direction : undefined}
-  role={usesControlPointer ? "slider" : undefined} tabindex={usesControlPointer && !disabled ? 0 : undefined}
-  aria-label={usesControlPointer ? ariaLabel ?? undefined : undefined} aria-valuemin={usesControlPointer ? min : undefined} aria-valuemax={usesControlPointer ? safeMax : undefined} aria-valuenow={usesControlPointer ? visualState.value : undefined} aria-valuetext={usesControlPointer ? valueText ?? undefined : undefined} aria-orientation={usesControlPointer ? orientation : undefined} aria-disabled={usesControlPointer ? disabled : undefined}
-  onpointerdown={usesControlPointer ? pointerDown : undefined} onpointermove={usesControlPointer ? pointerMove : undefined} onpointerup={usesControlPointer ? pointerEnd : undefined} onpointercancel={usesControlPointer ? pointerEnd : undefined} onlostpointercapture={usesControlPointer ? pointerEnd : undefined} onkeydown={usesControlPointer ? embeddedKey : undefined}>
+<div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-direction={direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={direction === "rtl" ? direction : undefined}
+  role="slider" tabindex={disabled ? undefined : 0}
+  aria-label={ariaLabel ?? undefined} aria-valuemin={min} aria-valuemax={safeMax} aria-valuenow={visualState.value} aria-valuetext={valueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled}
+  onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd} onkeydown={controlKey}>
   {#if block}
     <span bind:this={capsule} class="poodle-slider__capsule" aria-hidden="true">
       <span class="poodle-slider__track">
         <span class="poodle-slider__fill"></span>
         <span class="poodle-slider__remainder"></span>
         {#if blockLayout.labelInline || blockLayout.valueInline}
-          <!-- One stable row painted twice; the clip moves, the glyphs never do. -->
-          <span class="poodle-slider__inline poodle-slider__inline--selected">
-            <span class="poodle-slider__inline-row">
-              <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-              <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+          <!-- One stable text layout painted twice; the clip moves, the glyphs never do. -->
+          {#if orientation === "vertical"}
+            <span class="poodle-slider__inline poodle-slider__inline--selected">
+              <span class="poodle-slider__inline-row poodle-slider__inline-row--vertical">
+                <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                <span class="poodle-slider__inline-spacer"></span>
+              </span>
             </span>
-          </span>
-          <span class="poodle-slider__inline poodle-slider__inline--remainder">
-            <span class="poodle-slider__inline-row">
-              <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-              <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+            <span class="poodle-slider__inline poodle-slider__inline--remainder">
+              <span class="poodle-slider__inline-row poodle-slider__inline-row--vertical">
+                <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                <span class="poodle-slider__inline-spacer"></span>
+              </span>
             </span>
-          </span>
+          {:else}
+            <span class="poodle-slider__inline poodle-slider__inline--selected">
+              <span class="poodle-slider__inline-row">
+                <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+              </span>
+            </span>
+            <span class="poodle-slider__inline poodle-slider__inline--remainder">
+              <span class="poodle-slider__inline-row">
+                <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+              </span>
+            </span>
+          {/if}
         {/if}
         <span class="poodle-slider__center"></span>
       </span>
@@ -222,22 +235,9 @@
       <span class="poodle-slider__hit" data-part="hit" onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-slider__thumb"></span></span>
     </span>
   {:else}
-  <span class="poodle-slider__track" aria-hidden="true">
-    <span class="poodle-slider__fill"></span>
-    <span class="poodle-slider__center"></span>
-  </span>
-  {#if variant === "standard"}<input
-    class="poodle-slider__control"
-    type="range"
-    min={min}
-    max={safeMax}
-    {step}
-    value={displayValue}
-    disabled={disabled}
-    aria-label={ariaLabel ?? undefined}
-    aria-valuetext={valueText ?? undefined}
-    oninput={(event) => send("INPUT", event)}
-    onchange={(event) => send("COMMIT", event)}
-  />{/if}
+    <span class="poodle-slider__track" aria-hidden="true">
+      <span class="poodle-slider__fill"></span>
+      <span class="poodle-slider__center"></span>
+    </span>
   {/if}
 </div>

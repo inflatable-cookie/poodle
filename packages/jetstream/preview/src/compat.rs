@@ -882,8 +882,12 @@ pub fn js_radio_group(
 }
 
 pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -> El {
+    // Consumer-side translation (see js_slider): the Jetstream composite
+    // keeps the dense track presentation for its demo scenes.
+    let mut spec = spec.clone();
+    spec.variant = poodle_specs::SliderVariant::Embedded;
     El(pr::range_slider(
-        spec,
+        &spec,
         &pr::RenderContext::new(theme),
         pr::RangeSliderHandlers::default(),
     ))
@@ -986,7 +990,17 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::slider(spec, &pr::RenderContext::new(theme), &pr::SliderHandlers::default()))
+    // Consumer-side translation (architecture 001): the Jetstream composite
+    // keeps the dense track presentation for its demo scenes. The block
+    // capsule needs a parent-owned measure surface this preview does not
+    // host, so the embedded variant is the compatible translation here.
+    let mut spec = spec.clone();
+    spec.variant = poodle_specs::SliderVariant::Embedded;
+    El(pr::slider(
+        &spec,
+        &pr::RenderContext::new(theme),
+        &pr::SliderHandlers::default(),
+    ))
 }
 
 pub fn js_spacer(spec: &SpacerSpec, theme: &JetstreamThemeProvider) -> El {

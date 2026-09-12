@@ -8195,7 +8195,7 @@ impl IntoElement for Slider {
             on_change: self.on_change,
             on_value_commit: None,
         };
-        if self.spec.appearance == poodle_specs::SliderAppearance::Block {
+        if self.spec.variant == poodle_specs::SliderVariant::Block {
             return crate::block_slider_host::slider_element(
                 self.spec,
                 self.theme,
@@ -8266,7 +8266,7 @@ impl IntoElement for RangeSlider {
             on_change: self.on_change,
             on_value_commit: None,
         };
-        if self.spec.appearance == poodle_specs::SliderAppearance::Block {
+        if self.spec.variant == poodle_specs::SliderVariant::Block {
             return crate::block_slider_host::range_slider_element(
                 self.spec,
                 self.theme,

@@ -626,15 +626,15 @@ async function provePackedHistoryEntryTypes(
   };
 }
 
-const PACKED_SLIDER_APPEARANCE_DIAGNOSTIC = 'Type \'"pill"\' is not assignable';
+const PACKED_SLIDER_VARIANT_DIAGNOSTIC = 'Type \'"standard"\' is not assignable';
 
-async function provePackedSliderAppearanceTypes(
+async function provePackedSliderVariantTypes(
   consumerRoot: string,
 ): Promise<Record<string, unknown>> {
   const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
   if (!existsSync(compiler)) {
     throw new Error(
-      "the packed consumer did not install a TypeScript compiler; the SliderAppearance type proof cannot run",
+      "the packed consumer did not install a TypeScript compiler; the SliderVariant type proof cannot run",
     );
   }
 
@@ -656,28 +656,16 @@ async function provePackedSliderAppearanceTypes(
   );
   if (!existsSync(installedReactTypes) || !existsSync(installedReactIndex)) {
     throw new Error(
-      "the packed React tarball omitted dist/types.d.ts or dist/index.d.ts; the SliderAppearance React type proof cannot run",
-    );
-  }
-  const typesSource = readFileSync(installedReactTypes, "utf8");
-  if (!typesSource.includes('export type SliderAppearance = "track" | "block"')) {
-    throw new Error(
-      "installed React dist/types.d.ts does not export SliderAppearance as track | block",
-    );
-  }
-  const indexSource = readFileSync(installedReactIndex, "utf8");
-  if (!indexSource.includes('export * from "./types"')) {
-    throw new Error(
-      "installed React dist/index.d.ts no longer re-exports ./types; SliderAppearance would drop off the public root",
+      "the packed React tarball omitted dist/types.d.ts or dist/index.d.ts; the SliderVariant React type proof cannot run",
     );
   }
 
   const publicPositives = [
-    { file: "slider-appearance-positive.ts", config: "tsconfig.slider-positive.json" },
+    { file: "slider-variant-positive.ts", config: "tsconfig.slider-positive.json" },
   ] as const;
   const mappedReactPositives = [
     {
-      file: "slider-appearance-react-positive.ts",
+      file: "slider-variant-react-positive.ts",
       config: "tsconfig.slider-react-positive.json",
     },
   ] as const;
@@ -685,7 +673,7 @@ async function provePackedSliderAppearanceTypes(
     const compile = await runTypeCompile(consumerRoot, compiler, item.config);
     if (compile.exitCode !== 0 || compile.output.length > 0) {
       throw new Error(
-        `packed SliderAppearance positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
+        `packed SliderVariant positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
       );
     }
   }
@@ -693,19 +681,19 @@ async function provePackedSliderAppearanceTypes(
   const publicNegatives = [
     {
       importPath: "@inflatable-cookie/poodle-svelte",
-      file: "slider-appearance-root-negative.ts",
+      file: "slider-variant-root-negative.ts",
       config: "tsconfig.slider-root-negative.json",
     },
     {
       importPath: "@inflatable-cookie/poodle-svelte/types",
-      file: "slider-appearance-types-negative.ts",
+      file: "slider-variant-types-negative.ts",
       config: "tsconfig.slider-types-negative.json",
     },
   ] as const;
   const mappedReactNegatives = [
     {
       importPath: "@inflatable-cookie/poodle-react",
-      file: "slider-appearance-react-negative.ts",
+      file: "slider-variant-react-negative.ts",
       config: "tsconfig.slider-react-negative.json",
     },
   ] as const;
@@ -714,11 +702,11 @@ async function provePackedSliderAppearanceTypes(
     assertUnsuppressed(consumerRoot, negative.file);
     const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
     if (compile.exitCode === 0) {
-      throw new Error(`packed ${negative.importPath} still accepts appearance "pill"`);
+      throw new Error(`packed ${negative.importPath} still accepts the removed "standard" variant`);
     }
-    if (!compile.output.includes(PACKED_SLIDER_APPEARANCE_DIAGNOSTIC)) {
+    if (!compile.output.includes(PACKED_SLIDER_VARIANT_DIAGNOSTIC)) {
       throw new Error(
-        `packed ${negative.importPath} rejected "pill" with the wrong diagnostic:\n${compile.output}`,
+        `packed ${negative.importPath} rejected "standard" with the wrong diagnostic:\n${compile.output}`,
       );
     }
     if (!compile.output.includes(negative.file)) {
@@ -1585,7 +1573,7 @@ await run(["node", "node_modules/vitest/vitest.mjs", "run"], consumerRoot, {
 });
 
 const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
-const packedSliderAppearanceProof = await provePackedSliderAppearanceTypes(consumerRoot);
+const packedSliderVariantProof = await provePackedSliderVariantTypes(consumerRoot);
 const packedTreeReorderProof = await provePackedTreeReorderTypes(consumerRoot);
 
 const sortedPackedPackages = [...packedPackages].sort((left, right) =>
@@ -2027,7 +2015,7 @@ const falsificationReceipts = [
     failed: true,
     receipt: JSON.stringify([
       ...(packedHistoryEntryProof.expectedFailures ?? []),
-      ...(packedSliderAppearanceProof.expectedFailures ?? []),
+      ...(packedSliderVariantProof.expectedFailures ?? []),
       ...(packedTreeReorderProof.expectedFailures ?? []),
     ]),
   },
@@ -2186,7 +2174,7 @@ const evidence = {
   cssParserProof,
   declarationSurfaceProof,
   packedHistoryEntryProof,
-  packedSliderAppearanceProof,
+  packedSliderVariantProof,
   packedTreeReorderProof,
   installedRuntimeProof: {
     svelteRootAndDirectButtonSelect: true,

@@ -19,8 +19,8 @@ export function SliderSpecimen() {
       <SpecimenLayout
         sizes={(size) => (
           <span style={variantStyle}>
-            <span style={labelStyle}>{size.toUpperCase()} · standard</span>
-            <Slider value={sizeValues[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Standard slider at ${size}`} onValueChange={(value) => setSizeValues((current) => ({ ...current, [size]: value }))} />
+            <span style={labelStyle}>{size.toUpperCase()} · block</span>
+            <Slider value={sizeValues[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Block slider at ${size}`} onValueChange={(value) => setSizeValues((current) => ({ ...current, [size]: value }))} />
             <span style={labelStyle}>{size.toUpperCase()} · embedded</span>
             <Slider variant="embedded" polarity="unipolar" value={sizeValues[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Embedded slider at ${size}`} onValueChange={(value) => setSizeValues((current) => ({ ...current, [size]: value }))} />
           </span>
@@ -68,9 +68,21 @@ export function SliderSpecimen() {
           <Slider variant="embedded" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation" onValueChange={setBipolar} />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Block appearance">
-          <Slider appearance="block" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Volume" onValueChange={(value) => setVolume(value)} />
-          <Slider appearance="block" direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => setOpacity(value)} />
+        {/* g18.022: block is the default variant; vertical and bipolar block are native. */}
+        <SpecimenGroup label="Block — the default capsule">
+          <Slider value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Volume" onValueChange={(value) => setVolume(value)} />
+          <Slider direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => setOpacity(value)} />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Vertical block — value top, label centered, upright text">
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "2rem", height: "12rem" }}>
+            <Slider orientation="vertical" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Vertical volume" onValueChange={(value) => setVolume(value)} />
+            <Slider orientation="vertical" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Vertical bipolar block" onValueChange={setBipolar} />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Bipolar block — fill grows from the center">
+          <Slider polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} visibleLabel="Drive" ariaLabel="Bipolar block" onValueChange={setBipolar} />
         </SpecimenGroup>
       </SpecimenLayout>
     </div>

@@ -14,6 +14,7 @@ export function Harness() {
   const [collision, setCollision] = useState(12);
   const [rtl, setRtl] = useState(20);
   const [range, setRange] = useState<[number, number]>([20, 80]);
+  const [vertical, setVertical] = useState(50);
   const [dispatches, setDispatches] = useState(0);
   const [trace, setTrace] = useState("idle");
 
@@ -26,7 +27,6 @@ export function Harness() {
     <section data-framework="react">
       <div data-case="slider-low" style={{ width: 240, padding: 24 }}>
         <Slider
-          appearance="block"
           min={0}
           max={100}
           step={1}
@@ -43,7 +43,6 @@ export function Harness() {
       </div>
       <div data-case="slider-mid" style={{ width: 240, padding: 24 }}>
         <Slider
-          appearance="block"
           min={0}
           max={100}
           step={1}
@@ -60,7 +59,6 @@ export function Harness() {
       </div>
       <div data-case="slider-high" style={{ width: 240, padding: 24 }}>
         <Slider
-          appearance="block"
           min={0}
           max={100}
           step={1}
@@ -77,7 +75,6 @@ export function Harness() {
       </div>
       <div data-case="slider-collision" style={{ width: 64, padding: 24 }}>
         <Slider
-          appearance="block"
           min={0}
           max={100}
           step={1}
@@ -91,9 +88,26 @@ export function Harness() {
         />
         <p data-testid="trace" data-hits={dispatches}>{trace}</p>
       </div>
+      {/* g18.022 vertical block: value paints at the capsule's physical top
+          and the optional label at its center — anchored to the whole
+          capsule, not wherever the row happens to lay out. */}
+      <div data-case="slider-vertical" style={{ width: 200, height: 220, padding: 24 }}>
+        <Slider
+          orientation="vertical"
+          min={0}
+          max={100}
+          step={1}
+          value={vertical}
+          visibleLabel="Gain"
+          ariaLabel="Vertical gain"
+          onValueChange={(next) => {
+            setVertical(next);
+            bump(`change:${next}`);
+          }}
+        />
+      </div>
       <div data-case="slider-rtl" style={{ width: 240, padding: 24 }}>
         <Slider
-          appearance="block"
           direction="rtl"
           min={0}
           max={100}
@@ -105,7 +119,6 @@ export function Harness() {
       </div>
       <div data-case="range-block" style={{ width: 240, padding: 24 }}>
         <RangeSlider
-          appearance="block"
           min={0}
           max={100}
           step={1}

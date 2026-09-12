@@ -4,5 +4,5 @@
     "jsx": "react-jsx",
     "types": []
   },
-  "files": ["ambient.d.ts", "slider-appearance-react-positive.ts"]
+  "files": ["ambient.d.ts", "slider-variant-react-positive.ts"]
 }

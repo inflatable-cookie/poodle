@@ -13,21 +13,19 @@ use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
-    ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodePosition, NodeRole, ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
 };
-use poodle_specs::{
-    reject_vertical_block, ControlSize, RangeSliderSpec, SliderAppearance, SliderVariant,
-};
+use poodle_specs::{ControlSize, Orientation, RangeSliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::slider_block::{
-    block_grab, block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
-    stamp_disabled_roles, stamp_forced_color, visible_thumb,
+    block_grab_with_axis, block_hit, block_surface, block_surface_vertical, capsule_height_rem,
+    font_size_rem, fraction_anchor, fraction_anchor_vertical, stamp_disabled_roles,
+    stamp_forced_color, visible_thumb,
 };
-
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
 #[derive(Default)]
 pub struct RangeSliderHandlers {
@@ -62,8 +60,7 @@ pub fn range_slider(
     ctx: &RenderContext<'_>,
     handlers: RangeSliderHandlers,
 ) -> Node {
-    reject_vertical_block(spec.appearance, spec.orientation, "RangeSlider");
-    if spec.appearance == SliderAppearance::Block {
+    if spec.variant == SliderVariant::Block {
         return range_slider_block(spec, ctx, handlers);
     }
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
@@ -185,9 +182,7 @@ pub fn range_slider(
         thumb.a11y.role = Some(NodeRole::Slider);
         thumb.a11y.label = Some(label);
         thumb.a11y.value = Some(value);
-        if spec.variant == SliderVariant::Embedded {
-            thumb.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
-        }
+        thumb.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
         if spec.is_disabled {
             thumb.interaction.disabled = true;
         } else {
@@ -433,24 +428,6 @@ pub fn range_slider(
         }
     }
 
-    let thumb_layer = |fraction: f32, thumb: Node| -> Node {
-        let mut anchor = segment(fraction, None);
-        anchor.position = NodePosition::Relative;
-        let anchor = anchor.child(thumb);
-
-        let mut layer = Node::container();
-        layer.position = NodePosition::Absolute {
-            top: Some(0.0),
-            left: Some(0.0),
-            right: Some(0.0),
-            bottom: None,
-        };
-        layer.style.fill_width = true;
-        layer.style.descriptor.layout.direction = LayoutDirection::Row;
-        layer.style.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        layer.child(anchor)
-    };
-
     // Full-width 6px pill; percentage segments anchor both thumbs without
     // requiring backend-specific layout bounds.
     let mut track = Node::container();
@@ -473,12 +450,7 @@ pub fn range_slider(
         .child(seg_negative)
         .child(seg_positive)
         .child(seg_hi);
-    let embedded_thumbs = if spec.variant == SliderVariant::Standard {
-        track = track
-            .child(thumb_layer(lo, thumb_lo))
-            .child(thumb_layer(hi, thumb_hi));
-        None
-    } else {
+    let embedded_thumbs = {
         let mut marker = Node::container();
         marker.style.descriptor.layout.width = LayoutSizing::Fixed(border_w);
         marker.style.descriptor.layout.height = LayoutSizing::Fixed(track_h * 3.0);
@@ -546,14 +518,7 @@ pub fn range_slider(
         }
         .to_owned(),
     );
-    el.roles.insert(
-        "variant".to_owned(),
-        match spec.variant {
-            SliderVariant::Standard => "standard",
-            SliderVariant::Embedded => "embedded",
-        }
-        .to_owned(),
-    );
+    el.roles.insert("variant".to_owned(), "embedded".to_owned());
     el.roles.insert(
         "polarity".to_owned(),
         match spec.polarity {
@@ -582,17 +547,17 @@ fn range_slider_block(
 ) -> Node {
     use poodle_headless::slider::{
         layout_range_slider_block, physical_to_value_norm, range_slider_control_transition,
-        range_slider_transition, range_slider_visual_state, resolved_range_text,
-        resolved_visible_text, RangeSliderContext, RangeSliderControlContext,
-        RangeSliderControlEvent, RangeSliderEffect, RangeSliderEvent, RangeThumb,
-        SLIDER_BLOCK_HIT_PX,
+        range_slider_transition, range_slider_visual_state, resolved_visible_text,
+        RangeSliderContext, RangeSliderControlContext, RangeSliderControlEvent,
+        RangeSliderEffect, RangeSliderEvent, RangeThumb, SLIDER_BLOCK_HIT_PX,
     };
-    use poodle_node::{NodeKey, NodeModifiers};
+    use poodle_node::{LayoutOverflow, NodeKey, NodeModifiers};
 
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
-    let rtl = spec.direction.is_rtl();
-    let capsule_h = rem_to_px(capsule_height_rem(effective_size));
+    let vertical = spec.orientation == Orientation::Vertical;
+    let rtl = spec.direction.is_rtl() && !vertical;
+    let capsule_cross = rem_to_px(capsule_height_rem(effective_size));
     let font_px = rem_to_px(font_size_rem(effective_size));
     let hit_px = SLIDER_BLOCK_HIT_PX;
     // g18.017: the block family capsule uses the rounded-square control
@@ -621,8 +586,12 @@ fn range_slider_block(
     });
     let lo = visual.lower_norm as f32;
     let hi = visual.upper_norm.max(visual.lower_norm) as f32;
-    let physical_lo = if rtl { 1.0 - lo } else { lo };
-    let physical_hi = if rtl { 1.0 - hi } else { hi };
+    // Physical positions along the paint axis. Horizontal RTL mirrors so the
+    // lower value stays at the logical start; vertical never mirrors.
+    let physical_lo = if rtl { 1.0 - hi } else { lo };
+    let physical_hi = if rtl { 1.0 - lo } else { hi };
+    let physical_lo = physical_lo.min(physical_hi);
+    let physical_hi = physical_hi.max(physical_lo);
 
     let label = spec
         .visible_label
@@ -631,22 +600,12 @@ fn range_slider_block(
         .map(ToOwned::to_owned);
     let lower_text = resolved_visible_text(visual.value.0, spec.visible_lower_text.as_deref());
     let upper_text = resolved_visible_text(visual.value.1, spec.visible_upper_text.as_deref());
-    let range_text = resolved_range_text(
-        visual.value.0,
-        visual.value.1,
-        spec.visible_range_text.as_deref(),
-        lower_text.as_deref(),
-        upper_text.as_deref(),
-    );
     let (capsule_span, measure) = ctx.require_block_layout("RangeSlider");
     let layout = layout_range_slider_block(
         capsule_span,
-        lo,
-        hi,
         label.as_deref(),
         lower_text.as_deref(),
         upper_text.as_deref(),
-        range_text.as_deref(),
         |text| measure(text, font_px),
     );
 
@@ -666,7 +625,7 @@ fn range_slider_block(
         hit.a11y.role = Some(NodeRole::Slider);
         hit.a11y.label = Some(name);
         hit.a11y.value = Some(value);
-        hit.a11y.orientation = Some("horizontal".to_owned());
+        hit.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
         if spec.is_disabled {
             hit.interaction.disabled = true;
             stamp_disabled_roles(&mut hit);
@@ -871,70 +830,169 @@ fn range_slider_block(
         }));
     }
 
-    let mut selected = Node::container();
-    selected.style.width_pct = Some((hi - lo).max(0.0));
-    selected.style.fill_height = true;
-    selected.style.descriptor.background = Some(if visual.negative_fill_span_norm > 0.0 {
-        negative
+    // ── Fixed whole-capsule anchors (g18.022) ──
+    //
+    // One stable text layout (lower at the logical start, label centered,
+    // upper at the logical end) painted through window/remainder clip
+    // containers. Glyph coordinates never depend on the selected window;
+    // crossing a fill boundary changes only the painted foreground. Vertical
+    // keeps upright text: upper value at the physical top, label centered,
+    // lower value at the physical bottom.
+    let paint_text = layout.label_inline || layout.lower_inline || layout.upper_inline;
+    let row_span = if vertical { capsule_cross } else { capsule_span };
+    let row_height = if vertical { capsule_span } else { capsule_cross };
+    let make_row = |role_color: poodle_node::ColorValue, role_fill: &str, role_text: &str| {
+        let mut row = Node::container();
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(row_span);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(row_height);
+        row.style.descriptor.layout.direction = if vertical {
+            LayoutDirection::Column
+        } else {
+            LayoutDirection::Row
+        };
+        row.style.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
+        row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        let inset = rem_to_px(0.5);
+        row.style.descriptor.layout.spacing.padding.left = inset;
+        row.style.descriptor.layout.spacing.padding.right = inset;
+        let slot = |content: Option<&str>, id: &str| {
+            let mut node = Node::text(content.unwrap_or_default().to_owned());
+            node.id = Some(id.to_owned());
+            node.style.descriptor.text_color = Some(role_color);
+            node.style.text_size = Some(font_px);
+            node.style.no_wrap = true;
+            node.style.flex_none = true;
+            node
+        };
+        // Physical order along the paint axis. Horizontal LTR: lower, label,
+        // upper. Horizontal RTL mirrors so lower stays at the logical start.
+        // Vertical stays upright: upper at the physical top, label centered,
+        // lower at the physical bottom.
+        row = if vertical {
+            row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
+                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
+                .child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
+        } else if rtl {
+            row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
+                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
+                .child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
+        } else {
+            row.child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
+                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
+                .child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
+        };
+        stamp_forced_color(&mut row, role_fill, role_text);
+        row
+    };
+
+    // Clip containers: each holds the full-capsule row offset so the glyph
+    // coordinates stay identical across copies.
+    let clip_pair = |row: Node, clip_origin: f32, clip_span: f32| -> Node {
+        let mut clip = Node::container();
+        clip.style.descriptor.layout.width = LayoutSizing::Fixed(if vertical { capsule_cross } else { clip_span });
+        clip.style.descriptor.layout.height = LayoutSizing::Fixed(if vertical { clip_span } else { capsule_cross });
+        clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        clip.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        let mut offset_row = row;
+        let offset = -clip_origin;
+        offset_row.position = NodePosition::Absolute {
+            top: if vertical { Some(offset) } else { Some(0.0) },
+            left: if vertical { Some(0.0) } else { Some(offset) },
+            right: None,
+            bottom: None,
+        };
+        clip.child(offset_row)
+    };
+
+    let selected_clip = if paint_text {
+        let window_span = (physical_hi - physical_lo).max(0.0) * capsule_span;
+        let row = make_row(selected_text_color, "selection", "selection-text");
+        let mut clip = clip_pair(row, physical_lo * capsule_span, window_span);
+        clip.id = Some("block-range-slider-clip-selected".to_owned());
+        if vertical {
+            // The window is the bottom region; the clip hugs the capsule's
+            // bottom edge.
+            clip.position = NodePosition::Absolute {
+                top: None,
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            };
+        } else {
+            clip.position = NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(physical_lo * capsule_span),
+                right: None,
+                bottom: Some(0.0),
+            };
+        }
+        Some(clip)
     } else {
-        accent
-    });
-    stamp_forced_color(&mut selected, "selection", "selection-text");
-    if layout.inline {
-        if let Some(text) = &layout.selected_text {
-            let mut label_node = Node::text(text.clone());
-            label_node.style.descriptor.text_color = Some(selected_text_color);
-            label_node.style.text_size = Some(font_px);
-            label_node.style.no_wrap = true;
-            selected = selected.child(label_node);
-        }
-    }
-
-    let mut leading = Node::container();
-    leading.style.width_pct = Some(if rtl { (1.0 - hi).max(0.0) } else { lo });
-    leading.style.fill_height = true;
-    leading.style.descriptor.background = Some(remainder_fill);
-    stamp_forced_color(&mut leading, "canvas", "canvas-text");
-    if layout.inline {
-        let text = if rtl {
-            upper_text.as_deref()
+        None
+    };
+    let remainder_start_clip = if paint_text {
+        let start_span = physical_lo * capsule_span;
+        let row = make_row(remainder_text_color, "canvas", "canvas-text");
+        let mut clip = clip_pair(row, 0.0, start_span);
+        clip.id = Some("block-range-slider-clip-remainder-start".to_owned());
+        clip.position = if vertical {
+            // Vertical remainder-start is the bottom region, below the window.
+            NodePosition::Absolute {
+                top: None,
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            }
         } else {
-            lower_text.as_deref()
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: None,
+                bottom: Some(0.0),
+            }
         };
-        if let Some(text) = text {
-            let mut node = Node::text(text);
-            node.style.descriptor.text_color = Some(remainder_text_color);
-            node.style.text_size = Some(font_px);
-            node.style.no_wrap = true;
-            leading = leading.child(node);
-        }
-    }
-
-    let mut trailing = Node::container();
-    trailing.style.flex_fill = true;
-    trailing.style.fill_height = true;
-    trailing.style.descriptor.background = Some(remainder_fill);
-    stamp_forced_color(&mut trailing, "canvas", "canvas-text");
-    if layout.inline {
-        let text = if rtl {
-            lower_text.as_deref()
+        Some(clip)
+    } else {
+        None
+    };
+    let remainder_end_clip = if paint_text {
+        let end_span = (capsule_span - physical_hi * capsule_span).max(0.0);
+        let row = make_row(remainder_text_color, "canvas", "canvas-text");
+        let mut clip = clip_pair(row, physical_hi * capsule_span, end_span);
+        clip.id = Some("block-range-slider-clip-remainder-end".to_owned());
+        if vertical {
+            // Vertical remainder-end is the top region, above the window.
+            clip.position = NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: None,
+            };
         } else {
-            upper_text.as_deref()
-        };
-        if let Some(text) = text {
-            let mut node = Node::text(text);
-            node.style.descriptor.text_color = Some(remainder_text_color);
-            node.style.text_size = Some(font_px);
-            node.style.no_wrap = true;
-            trailing = trailing.child(node);
+            clip.position = NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(physical_hi * capsule_span),
+                right: None,
+                bottom: Some(0.0),
+            };
         }
-    }
+        Some(clip)
+    } else {
+        None
+    };
 
     let mut capsule = Node::container();
-    capsule.style.fill_width = true;
-    capsule.style.descriptor.layout.height = LayoutSizing::Fixed(capsule_h);
-    capsule.style.min_height = Some(capsule_h);
-    capsule.style.descriptor.layout.direction = LayoutDirection::Row;
+    if vertical {
+        capsule.style.fill_height = true;
+        capsule.style.descriptor.layout.width = LayoutSizing::Fixed(capsule_cross);
+        capsule.style.min_width = Some(capsule_cross);
+        capsule.style.descriptor.layout.direction = LayoutDirection::Column;
+    } else {
+        capsule.style.fill_width = true;
+        capsule.style.descriptor.layout.height = LayoutSizing::Fixed(capsule_cross);
+        capsule.style.min_height = Some(capsule_cross);
+        capsule.style.descriptor.layout.direction = LayoutDirection::Row;
+    }
     capsule.style.descriptor.background = Some(remainder_fill);
     let corners = &mut capsule.style.descriptor.corner_radii;
     corners.top_left = capsule_radius;
@@ -943,28 +1001,93 @@ fn range_slider_block(
     corners.bottom_left = capsule_radius;
     capsule.position = NodePosition::Relative;
     stamp_forced_color(&mut capsule, "canvas", "canvas-text");
-    capsule = capsule.child(leading).child(selected).child(trailing);
-    let inset = ((hit_px - capsule_h) * 0.5).max(0.0);
-    capsule.position = NodePosition::Absolute {
-        top: Some(inset),
-        left: Some(0.0),
-        right: Some(0.0),
-        bottom: None,
+
+    let window_fill = if visual.negative_fill_span_norm > 0.0 {
+        negative
+    } else {
+        accent
     };
-    let mut surface = block_surface(hit_px);
-    surface = surface
-        .child(capsule)
-        .child(fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5))
-        .child(fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5));
+    let selected = || {
+        let mut node = Node::container();
+        node.style.width_pct = Some((hi - lo).max(0.0));
+        node.style.fill_height = true;
+        node.style.descriptor.background = Some(window_fill);
+        stamp_forced_color(&mut node, "selection", "selection-text");
+        node
+    };
+    let remainder = || {
+        let mut node = Node::container();
+        node.style.flex_fill = true;
+        node.style.fill_height = true;
+        node.style.descriptor.background = Some(remainder_fill);
+        stamp_forced_color(&mut node, "canvas", "canvas-text");
+        node
+    };
+    // Paint order: window fill, remainder fill, text clips.
+    if vertical || rtl {
+        capsule = capsule.child(remainder()).child(selected());
+    } else {
+        capsule = capsule.child(selected()).child(remainder());
+    }
+    if let Some(clip) = remainder_start_clip {
+        capsule = capsule.child(clip);
+    }
+    if let Some(clip) = selected_clip {
+        capsule = capsule.child(clip);
+    }
+    if let Some(clip) = remainder_end_clip {
+        capsule = capsule.child(clip);
+    }
+
+    let inset = ((hit_px - capsule_cross) * 0.5).max(0.0);
+    let mut surface = if vertical {
+        let mut capsule = capsule;
+        capsule.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(inset),
+            right: Some(inset),
+            bottom: Some(0.0),
+        };
+        // Vertical anchors: upper value at the physical top, lower value at
+        // the physical bottom, both hung centred on the cross axis.
+        let lower_anchor = fraction_anchor_vertical(lo, hit_px, thumb_lo, hit_px * 0.5);
+        let upper_anchor = fraction_anchor_vertical(hi, hit_px, thumb_hi, hit_px * 0.5);
+        let mut s = block_surface_vertical(hit_px);
+        s = s.child(capsule).child(lower_anchor).child(upper_anchor);
+        s
+    } else {
+        let mut capsule = capsule;
+        capsule.position = NodePosition::Absolute {
+            top: Some(inset),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: None,
+        };
+        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5);
+        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5);
+        let mut s = block_surface(hit_px);
+        s = s.child(capsule).child(lower_anchor).child(upper_anchor);
+        s
+    };
     if let Some(handler) = scrub_handler {
-        surface = surface.child(block_grab(handler));
+        let axis = if vertical { ScrubAxis::Vertical } else { ScrubAxis::Horizontal };
+        surface = surface.child(block_grab_with_axis(handler, axis));
     }
 
     let mut el = Node::container();
-    el.style.fill_width = true;
-    el.style.descriptor.layout.direction = LayoutDirection::Column;
+    if vertical {
+        el.style.fill_height = true;
+        el.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
+        el.style.min_width = Some(hit_px);
+        el.style.min_height = Some(rem_to_px(10.0));
+        el.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    } else {
+        el.style.fill_width = true;
+        el.style.descriptor.layout.direction = LayoutDirection::Column;
+    }
     el.a11y.role = Some(NodeRole::Group);
     el.roles.insert("appearance".to_owned(), "block".to_owned());
+    el.roles.insert("orientation".to_owned(), orientation_name(spec.orientation).to_owned());
     el.roles.insert(
         "direction".to_owned(),
         if rtl { "rtl" } else { "ltr" }.to_owned(),
@@ -990,16 +1113,6 @@ fn range_slider_block(
         .to_owned(),
     );
     el = el.child(surface);
-    if let Some(fallback) = layout.fallback {
-        let mut line = Node::text(fallback);
-        line.style.descriptor.text_color = Some(remainder_text_color);
-        line.style.text_size = Some(font_px);
-        line.style.no_wrap = true;
-        line.roles.insert("part".to_owned(), "fallback".to_owned());
-        line.id = Some("block-range-slider-fallback".to_owned());
-        stamp_forced_color(&mut line, "canvas", "canvas-text");
-        el = el.child(line);
-    }
     if spec.is_disabled {
         el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
@@ -1008,9 +1121,17 @@ fn range_slider_block(
     el
 }
 
+fn orientation_name(orientation: Orientation) -> &'static str {
+    match orientation {
+        Orientation::Horizontal => "horizontal",
+        Orientation::Vertical => "vertical",
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_node::NodeKind;
     use poodle_specs::{Orientation, RangeSliderSpec};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
@@ -1027,7 +1148,7 @@ mod tests {
         let sink = std::sync::Arc::clone(&seen);
         let theme = theme();
         let root = RenderContext::new(&theme);
-        let ctx = if spec.appearance == poodle_specs::SliderAppearance::Block {
+        let ctx = if spec.variant == poodle_specs::SliderVariant::Block {
             use poodle_headless::slider::measure_block_advance;
             root.with_block_layout(160.0, Arc::new(measure_block_advance))
         } else {
@@ -1079,10 +1200,12 @@ mod tests {
     }
 
     #[test]
-    fn a_vertical_spec_still_scrubs_the_horizontal_geometry() {
+    fn an_embedded_vertical_spec_still_scrubs_the_horizontal_geometry() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let spec = spec().with_orientation(Orientation::Vertical);
+        let spec = spec()
+            .with_orientation(Orientation::Vertical)
+            .with_variant(SliderVariant::Embedded);
         let node = range_slider(
             &spec,
             &ctx,
@@ -1097,7 +1220,7 @@ mod tests {
         assert_eq!(carrier.interaction.scrub_axis, ScrubAxis::Horizontal);
         assert!(
             carrier.style.fill_width,
-            "vertical RangeSlider layout is deferred; the grab stays a horizontal overlay"
+            "vertical embedded layout stays a horizontal overlay"
         );
     }
 
@@ -1163,7 +1286,9 @@ mod tests {
     fn each_thumb_exposes_the_slider_role() {
         let named = spec().with_aria_label("Price range");
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
+        use poodle_headless::slider::measure_block_advance;
+        let root = RenderContext::new(&theme);
+        let ctx = root.with_block_layout(160.0, Arc::new(measure_block_advance));
         let node = range_slider(&named, &ctx, RangeSliderHandlers::default());
         let lower = node
             .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
@@ -1211,7 +1336,9 @@ mod tests {
     #[test]
     fn unnamed_controls_still_name_their_thumbs() {
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
+        use poodle_headless::slider::measure_block_advance;
+        let root = RenderContext::new(&theme);
+        let ctx = root.with_block_layout(160.0, Arc::new(measure_block_advance));
         let node = range_slider(&spec(), &ctx, RangeSliderHandlers::default());
         let lower = node
             .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
@@ -1231,7 +1358,7 @@ mod tests {
         let node = range_slider(
             &RangeSliderSpec::new(50.0, 50.0)
                 .with_bounds(0.0, 100.0)
-                .with_appearance(poodle_specs::SliderAppearance::Block)
+
                 .with_size(poodle_specs::ControlSize::Xs),
             &ctx,
             RangeSliderHandlers {
@@ -1266,28 +1393,39 @@ mod tests {
         let theme = theme();
         let spec = RangeSliderSpec::new(20.0, 80.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(poodle_specs::SliderAppearance::Block)
             .with_visible_label("AB")
-            .with_visible_lower_text("")
-            .with_visible_upper_text("")
-            .with_visible_range_text("");
+            .with_visible_lower_text("20")
+            .with_visible_upper_text("80");
         let measure: crate::context::BlockTextMeasure =
             Arc::new(|text: &str, _font| text.chars().count() as f32 * 30.0);
         let root = RenderContext::new(&theme);
-        let wide = root.with_block_layout(200.0, Arc::clone(&measure));
+        // Wide capsule: all three fixed anchors coexist.
+        let wide = root.with_block_layout(300.0, Arc::clone(&measure));
         let wide_node = range_slider(&spec, &wide, RangeSliderHandlers::default());
         assert!(wide_node
             .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
             .is_none());
+        let label_paints = wide_node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "AB"))
+            .is_some();
+        assert!(label_paints, "the optional label paints when it coexists");
+
+        // Narrow capsule: the optional label is the only item suppressed;
+        // the required endpoints keep painting and no fallback line exists.
         let narrow = root.with_block_layout(100.0, measure);
         let narrow_node = range_slider(&spec, &narrow, RangeSliderHandlers::default());
-        let fallback = narrow_node
+        assert!(narrow_node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "AB"))
+            .is_none());
+        assert!(narrow_node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "20"))
+            .is_some());
+        assert!(narrow_node
+            .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "80"))
+            .is_some());
+        assert!(narrow_node
             .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
-            .expect("narrow miss paints fallback");
-        assert!(
-            fallback.style.no_wrap,
-            "range fallback must stay one line so the host can reserve surface+line"
-        );
+            .is_none());
     }
 
     #[test]
@@ -1303,7 +1441,7 @@ mod tests {
         let node = range_slider(
             &RangeSliderSpec::new(50.0, 50.0)
                 .with_bounds(0.0, 100.0)
-                .with_appearance(poodle_specs::SliderAppearance::Block),
+                ,
             &ctx,
             RangeSliderHandlers {
                 on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),
@@ -1322,13 +1460,41 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "appearance=\"block\" rejects orientation=\"vertical\"")]
-    fn vertical_block_range_is_rejected_before_paint() {
+    fn vertical_range_block_keeps_upright_text_and_a_vertical_scrub() {
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
-        let spec = spec()
-            .with_appearance(poodle_specs::SliderAppearance::Block)
-            .with_orientation(Orientation::Vertical);
-        let _ = range_slider(&spec, &ctx, RangeSliderHandlers::default());
+        use poodle_headless::slider::measure_block_advance;
+        let root = RenderContext::new(&theme);
+        let ctx = root.with_block_layout(240.0, Arc::new(measure_block_advance));
+        let spec = spec().with_orientation(Orientation::Vertical);
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = range_slider(
+            &spec,
+            &ctx,
+            RangeSliderHandlers {
+                on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),
+                ..RangeSliderHandlers::default()
+            },
+        );
+        assert_eq!(
+            node.find(&|n| n.interaction.on_scrub.is_some())
+                .expect("grab area")
+                .interaction
+                .scrub_axis,
+            ScrubAxis::Vertical
+        );
+        // Upright text: the upper value paints at the physical top, the lower
+        // at the physical bottom. Both endpoint strings stay inside the
+        // capsule; no fallback exists.
+        let texts = node.texts();
+        assert!(texts.iter().any(|t| *t == "20"));
+        assert!(texts.iter().any(|t| *t == "80"));
+        assert!(node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_none());
+        let lower = node
+            .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
+            .expect("lower thumb");
+        assert_eq!(lower.a11y.orientation.as_deref(), Some("vertical"));
     }
 }

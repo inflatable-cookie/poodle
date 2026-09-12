@@ -5,18 +5,15 @@ pub use poodle_headless::slider::SliderPolarity;
 
 use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
 
+/// g18.022: `block` is the ordinary standalone capsule and the public
+/// default; `embedded` keeps the dense track-and-thumb treatment for
+/// composite use. There are no aliases for the removed track/standard
+/// vocabulary.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum SliderVariant {
     #[default]
-    Standard,
-    Embedded,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
-pub enum SliderAppearance {
-    #[default]
-    Track,
     Block,
+    Embedded,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -32,12 +29,6 @@ impl SliderDirection {
     }
 }
 
-pub fn reject_vertical_block(appearance: SliderAppearance, orientation: Orientation, component: &str) {
-    if appearance == SliderAppearance::Block && orientation == Orientation::Vertical {
-        panic!("{component} appearance=\"block\" rejects orientation=\"vertical\"");
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct SliderSpec {
     pub value: f64,
@@ -45,7 +36,6 @@ pub struct SliderSpec {
     pub max: f64,
     pub step: f64,
     pub variant: SliderVariant,
-    pub appearance: SliderAppearance,
     pub direction: SliderDirection,
     pub polarity: SliderPolarity,
     pub center_value: Option<f64>,
@@ -68,8 +58,7 @@ impl Default for SliderSpec {
             min: 0.0,
             max: 100.0,
             step: 1.0,
-            variant: SliderVariant::Standard,
-            appearance: SliderAppearance::Track,
+            variant: SliderVariant::Block,
             direction: SliderDirection::Ltr,
             polarity: SliderPolarity::Unipolar,
             center_value: None,
@@ -156,8 +145,8 @@ impl SliderSpec {
         self
     }
 
-    pub fn with_appearance(mut self, appearance: SliderAppearance) -> Self {
-        self.appearance = appearance;
+    pub fn with_variant(mut self, variant: SliderVariant) -> Self {
+        self.variant = variant;
         self
     }
 

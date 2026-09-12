@@ -1,13 +1,8 @@
 # Range Slider
 
-Status: approved target contract — g18.022 pending implementation
+Status: approved contract — implemented by g18.022 (block-first family)
 Updated: 2026-09-11
 
-The prose below is the approved post-g18.022 contract. Until that task merges,
-the checked-in implementation still exposes the temporary pre-migration
-`variant="standard" | "embedded"` plus `appearance="track" | "block"`
-surface recorded in the public-props table. g18.022 replaces it atomically;
-there is no mixed or compatibility state.
 
 ## 1. Purpose
 
@@ -55,10 +50,10 @@ physical top, optional label centered, and lower value at the physical bottom.
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | range slider host with relative positioning | sizing, disabled opacity |
-| Track | yes | full available range background bar | background, radius |
-| Fill | yes | selected range window between lower and upper values | accent color, positioning |
-| Lower Control | yes | native range input for lower bound thumb | thumb styling, focus ring |
-| Upper Control | yes | native range input for upper bound thumb | thumb styling, focus ring |
+| Track | yes, embedded variant | full available range background bar | background, radius |
+| Fill | yes, embedded variant | selected range window between lower and upper values | accent color, positioning |
+| Lower Control | yes, embedded variant | adapter-owned lower bound thumb | thumb styling, focus ring |
+| Upper Control | yes, embedded variant | adapter-owned upper bound thumb | thumb styling, focus ring |
 
 ## 3. Props And Inputs
 
@@ -70,12 +65,10 @@ physical top, optional label centered, and lower value at the physical bottom.
 | `min` | `number` | `0` | no | lower bound |
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
-| `variant` | `"standard" \| "embedded"` | `"standard"` | no | temporary implementation domain; g18.022 replaces it with block/embedded and block default |
-| `appearance` | `"track" \| "block"` | `"track"` | no | temporary pre-g18.022 switch; removed by g18.022 without an alias |
+| `variant` | `"block" \| "embedded"` | `"block"` | no | presentation variant. `block` is the ordinary rounded-square capsule; `embedded` is the dense track-and-thumb alternative for composites. The removed `standard`/`track` vocabulary has no alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
 | `visibleLabel` | `string \| null` | `null` | no | centered visible label for the block variant. Empty text omits it. Never derived from `ariaLabel` |
 | `formatVisibleValue` | `((value: number, thumb: "lower" \| "upper") => string) \| undefined` | `undefined` | no | **Web targets only** — formats a per-thumb visible value from the normalized, bounds-guarded, step-snapped number. Default is `String(value)`. Native specs carry resolved strings |
-| `formatVisibleRange` | `((lower: number, upper: number) => string) \| undefined` | `undefined` | no | temporary pre-g18.022 combined fallback formatter; removed when fixed endpoint anchors replace the fallback |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | ordinary range or range with an explicit bipolar center reference |
 | `centerValue` | `number \| null` | `null` | no | bipolar reference; defaults to zero when zero is inside the range, otherwise the midpoint |
 | `law` | `AudioValueLaw` | `linear` | no | value mapping used by adapter-owned block and embedded controls |

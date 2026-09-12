@@ -4,56 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import Slider from "../src/Slider.svelte";
 
-describe("Slider (svelte)", () => {
-  it("snaps live input to step and commits the same value on release", async () => {
-    const onValueChange = vi.fn();
-    const onValueCommit = vi.fn();
-    const { container } = render(Slider, {
-      props: { value: 50, step: 10, ariaLabel: "Volume", onValueChange, onValueCommit },
-    });
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-
-    await fireEvent.input(input, { target: { value: "63" } });
-    expect(onValueChange).toHaveBeenCalledWith(60);
-
-    await fireEvent.change(input, { target: { value: "63" } });
-    expect(onValueCommit).toHaveBeenCalledWith(60);
-  });
-
-  it("clamps out-of-range input into the min/max window", async () => {
-    const onValueChange = vi.fn();
-    const { container } = render(Slider, {
-      props: { value: 50, min: 0, max: 100, ariaLabel: "Volume", onValueChange },
-    });
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-
-    await fireEvent.input(input, { target: { value: "-5" } });
-    expect(onValueChange).toHaveBeenLastCalledWith(0);
-
-    await fireEvent.input(input, { target: { value: "150" } });
-    expect(onValueChange).toHaveBeenLastCalledWith(100);
-  });
-
-  it("drives the fill percentage custom property from the value", () => {
-    const { container } = render(Slider, { props: { value: 65, ariaLabel: "Volume" } });
-    const root = container.querySelector(".poodle-slider")!;
-    expect(root.getAttribute("style")).toContain("--poodle-slider-percent: 65%");
-  });
-
-  it("applies the bounds guard when max is at or below min", () => {
-    const { container } = render(Slider, { props: { value: 5, min: 10, max: 10, ariaLabel: "Volume" } });
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-    expect(input.getAttribute("max")).toBe("11");
-  });
-
-  it("disables the native control", () => {
-    const { container } = render(Slider, { props: { value: 40, disabled: true, ariaLabel: "Volume" } });
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-    expect(input.disabled).toBe(true);
-    expect(container.querySelector(".poodle-slider")!.getAttribute("data-disabled")).toBe("true");
-  });
-});
-
 function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.getBoundingClientRect = () =>
     ({
@@ -70,6 +20,42 @@ function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.setPointerCapture ??= () => {};
   root.releasePointerCapture ??= () => {};
 }
+
+const css = readFileSync(
+  new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+  "utf8",
+);
+
+describe("Slider (svelte)", () => {
+  it("drives the fill percentage custom property from the value", () => {
+    const { container } = render(Slider, { props: { value: 65, ariaLabel: "Volume" } });
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("style")).toContain("--poodle-slider-percent: 65%");
+  });
+
+  it("disables the control and drops the tab stop", () => {
+    const { container } = render(Slider, { props: { value: 40, disabled: true, ariaLabel: "Volume" } });
+    expect(container.querySelector(".poodle-slider")!.getAttribute("data-disabled")).toBe("true");
+    expect(container.querySelector(".poodle-slider")!.getAttribute("tabindex")).toBeNull();
+  });
+
+  it("omitting variant renders the block capsule as the default", () => {
+    const { container } = render(Slider, { props: { value: 50, ariaLabel: "Volume" } });
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-variant")).toBe("block");
+    expect(container.querySelector(".poodle-slider__capsule")).not.toBeNull();
+    expect(container.querySelector(".poodle-slider__control")).toBeNull();
+  });
+
+  it("renders embedded as the dense track alternative", () => {
+    const { container } = render(Slider, {
+      props: { variant: "embedded", value: 50, ariaLabel: "Volume" },
+    });
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-variant")).toBe("embedded");
+    expect(container.querySelector(".poodle-slider__capsule")).toBeNull();
+  });
+});
 
 describe("Slider (svelte) embedded semantics", () => {
   it("normalizes a horizontal pointer along the track and commits once", async () => {
@@ -204,18 +190,10 @@ describe("Slider (svelte) embedded semantics", () => {
   });
 });
 
-describe("Slider (svelte) block appearance", () => {
-  it("omitting appearance keeps the track anatomy", () => {
-    const { container } = render(Slider, { props: { value: 50, ariaLabel: "Volume" } });
-    const root = container.querySelector(".poodle-slider")!;
-    expect(root.getAttribute("data-appearance")).toBeNull();
-    expect(container.querySelector(".poodle-slider__control")).not.toBeNull();
-    expect(container.querySelector(".poodle-slider__capsule")).toBeNull();
-  });
-
+describe("Slider (svelte) block variant", () => {
   it("does not paint ariaLabel as visible text", () => {
     const { container } = render(Slider, {
-      props: { appearance: "block", value: 50, ariaLabel: "Gain" },
+      props: { value: 50, ariaLabel: "Gain" },
     });
     expect(container.textContent).not.toContain("Gain");
     expect(container.querySelector(".poodle-slider")!.getAttribute("aria-label")).toBe("Gain");
@@ -223,7 +201,7 @@ describe("Slider (svelte) block appearance", () => {
 
   it("does not use visibleLabel as the accessible name", () => {
     const { container } = render(Slider, {
-      props: { appearance: "block", value: 50, visibleLabel: "Blur" },
+      props: { value: 50, visibleLabel: "Blur" },
     });
     const root = container.querySelector(".poodle-slider")!;
     expect(root.getAttribute("aria-label")).toBeNull();
@@ -232,22 +210,12 @@ describe("Slider (svelte) block appearance", () => {
     );
   });
 
-  it("rejects vertical block before paint", () => {
-    expect(() =>
-      render(Slider, { props: { appearance: "block", orientation: "vertical", value: 40 } }),
-    ).toThrow('Slider appearance="block" rejects orientation="vertical"');
-  });
-
   it("keeps a 44px hit target and forced-color roles in CSS", () => {
-    const { container } = render(Slider, { props: { appearance: "block", value: 50, size: "xs" } });
+    const { container } = render(Slider, { props: { value: 50, size: "xs" } });
     const root = container.querySelector(".poodle-slider")!;
-    expect(root.getAttribute("data-appearance")).toBe("block");
+    expect(root.getAttribute("data-variant")).toBe("block");
     const hit = container.querySelector(".poodle-slider__hit") as HTMLElement;
     expect(hit).not.toBeNull();
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
-    );
     expect(css).toContain("--poodle-slider-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
     expect(css).toContain("min-height: max(var(--poodle-slider-block-min-height), var(--poodle-slider-block-hit))");
@@ -258,7 +226,6 @@ describe("Slider (svelte) block appearance", () => {
     const onValueCommit = vi.fn();
     const { container } = render(Slider, {
       props: {
-        appearance: "block",
         value: 0,
         min: 0,
         max: 100,
@@ -278,7 +245,7 @@ describe("Slider (svelte) block appearance", () => {
 
   it("paints one stable row through two clipped layers and never a fallback", () => {
     const { container } = render(Slider, {
-      props: { appearance: "block", value: 50, visibleLabel: "Blur", ariaLabel: "Gain" },
+      props: { value: 50, visibleLabel: "Blur", ariaLabel: "Gain" },
     });
     const selected = container.querySelector<HTMLElement>(".poodle-slider__inline--selected")!;
     const remainder = container.querySelector<HTMLElement>(".poodle-slider__inline--remainder")!;
@@ -292,7 +259,6 @@ describe("Slider (svelte) block appearance", () => {
     // The fills are paint-only; text lives in the clipped layers.
     expect(container.querySelector(".poodle-slider__fill")!.textContent).toBe("");
     expect(container.querySelector(".poodle-slider__remainder")!.textContent).toBe("");
-    // A single Slider never renders the external fallback line.
     expect(container.querySelector(".poodle-slider__fallback")).toBeNull();
   });
 
@@ -301,7 +267,7 @@ describe("Slider (svelte) block appearance", () => {
     // journey: the label slot stays in place (empty) while the exact numeric
     // value keeps painting inside the capsule.
     const { container } = render(Slider, {
-      props: { appearance: "block", value: 67, visibleLabel: "Blur", ariaLabel: "Gain" },
+      props: { value: 67, visibleLabel: "Blur", ariaLabel: "Gain" },
     });
     const label = container.querySelector(".poodle-slider__inline--selected .poodle-slider__inline-label")!;
     expect(label.textContent).toBe("");
@@ -311,41 +277,32 @@ describe("Slider (svelte) block appearance", () => {
   });
 
   it("keeps the block capsule rounded-square and the thumb circular in CSS", () => {
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-min-height);\n    border-radius: var(--poodle-radius-control);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-min-height);\n    border-radius: var(--poodle-radius-control);",
-    );
-    expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
     );
   });
 
   it("clips the selected layer at the fill boundary and mirrors the clip in RTL", () => {
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--selected {\n    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--selected {\n    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"horizontal\"][data-direction=\"rtl\"] .poodle-slider__inline--selected {\n    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"][data-direction=\"rtl\"] .poodle-slider__inline--selected {\n    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));",
-    );
-    expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"][data-direction=\"rtl\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"horizontal\"][data-direction=\"rtl\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);",
     );
   });
 
   it("renders the same layers in RTL and keeps the layers pointer-inert", () => {
     const { container } = render(Slider, {
       props: {
-        appearance: "block",
         direction: "rtl",
         value: 20,
         visibleLabel: "Opacity",
@@ -356,24 +313,76 @@ describe("Slider (svelte) block appearance", () => {
     expect(root.getAttribute("data-direction")).toBe("rtl");
     expect(container.querySelector(".poodle-slider__inline--selected")).not.toBeNull();
     expect(container.querySelector(".poodle-slider__inline--remainder")).not.toBeNull();
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
-    );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline {\n    position: absolute;\n    inset-block: 0;\n    inset-inline: 0;\n    display: flex;\n    align-items: center;\n    padding-inline: 0.5rem;\n    overflow: hidden;\n    white-space: nowrap;\n    pointer-events: none;",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline {\n    position: absolute;\n    inset-block: 0;\n    inset-inline: 0;\n    display: flex;\n    align-items: center;\n    padding-inline: 0.5rem;\n    overflow: hidden;\n    white-space: nowrap;\n    pointer-events: none;",
     );
   });
 
   it("maps selected fill to Highlight and remainder to Canvas", () => {
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
-    );
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--selected {\n      color: HighlightText;");
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--remainder {\n      color: CanvasText;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--selected {\n      color: HighlightText;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n      color: CanvasText;");
     expect(css).not.toMatch(/\.poodle-slider__fill \{\s*background: Canvas/);
+  });
+
+  it("keeps vertical block upright: value top, label centered, clip along the block axis", () => {
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    position: relative;\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    height: 100%;\n  }",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-slider-percent, 0%)) 0 0 0);",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 0 var(--poodle-slider-percent, 0%) 0);",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));",
+    );
+    // Vertical never mirrors with direction: the RTL clip rules stay
+    // horizontal-only.
+    expect(css).not.toContain(
+      "[data-orientation=\"vertical\"][data-direction=\"rtl\"]",
+    );
+  });
+
+  it("renders the vertical row with the value slot above the label", () => {
+    const { container } = render(Slider, {
+      props: { orientation: "vertical", value: 40, visibleLabel: "Blur", ariaLabel: "Blur" },
+    });
+    const row = container.querySelector(".poodle-slider__inline-row--vertical")!;
+    const children = Array.from(row.children);
+    expect(children[0].className).toContain("poodle-slider__inline-value");
+    expect(children[1].className).toContain("poodle-slider__inline-label");
+    expect(container.querySelector(".poodle-slider")!.getAttribute("data-orientation")).toBe(
+      "vertical",
+    );
+  });
+
+  it("keeps the row glyph slots value-independent across the whole range", async () => {
+    const journeys: Array<{ label: string; value: string }> = [];
+    for (const value of [0, 50, 100]) {
+      const { container, unmount } = render(Slider, {
+        props: { value, visibleLabel: "Blur", ariaLabel: "Blur" },
+      });
+      const label = container.querySelector(
+        ".poodle-slider__inline--selected .poodle-slider__inline-label",
+      )!;
+      const valueSlot = container.querySelector(
+        ".poodle-slider__inline--selected .poodle-slider__inline-value",
+      )!;
+      journeys.push({ label: label.textContent!, value: valueSlot.textContent! });
+      unmount();
+    }
+    expect(journeys).toHaveLength(3);
+    // happy-dom lays out at zero width, so the optional label is suppressed
+    // at every value — but the exact value keeps its slot unchanged, and no
+    // value ever moves or hides it.
+    expect(journeys[0]).toEqual({ label: "", value: "0" });
+    expect(journeys[1]).toEqual({ label: "", value: "50" });
+    expect(journeys[2]).toEqual({ label: "", value: "100" });
   });
 });

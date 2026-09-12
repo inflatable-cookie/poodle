@@ -45,14 +45,27 @@
     <Slider variant="embedded" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation" onValueChange={(value) => (bipolar = value)} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Block appearance">
-    <Slider appearance="block" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Volume" onValueChange={(value) => (volume = value)} />
-    <Slider appearance="block" direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => (opacity = value)} />
+  <!-- g18.022: block is the default variant; vertical and bipolar block are
+       native, and the value never leaves the capsule at any value. -->
+  <SpecimenGroup label="Block — the default capsule">
+    <Slider value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Volume" onValueChange={(value) => (volume = value)} />
+    <Slider direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => (opacity = value)} />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Vertical block — value top, label centered, upright text">
+    <div class="poodle-slider-specimen__vertical">
+      <Slider orientation="vertical" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Vertical volume" onValueChange={(value) => (volume = value)} />
+      <Slider orientation="vertical" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Vertical bipolar block" onValueChange={(value) => (bipolar = value)} />
+    </div>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Bipolar block — fill grows from the center">
+    <Slider polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} visibleLabel="Drive" ariaLabel="Bipolar block" onValueChange={(value) => (bipolar = value)} />
   </SpecimenGroup>
 
   {#snippet sizes(size)}
     <div class="poodle-slider-specimen__variant-pair">
-      <span>{size.toUpperCase()} · standard</span>
+      <span>{size.toUpperCase()} · block</span>
       <Slider value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Standard slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
       <span>{size.toUpperCase()} · embedded</span>
       <Slider variant="embedded" polarity="unipolar" value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Embedded slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
@@ -72,6 +85,13 @@
 <style>
   .poodle-slider-specimen {
     max-width: 20rem;
+  }
+
+  .poodle-slider-specimen__vertical {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    height: 12rem;
   }
 
   .poodle-slider-specimen__variant-pair,

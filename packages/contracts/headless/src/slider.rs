@@ -573,14 +573,6 @@ pub fn default_visible_value_text(value: f64) -> String {
     format!("{value}")
 }
 
-pub fn default_visible_range_text(lower: f64, upper: f64) -> String {
-    format!(
-        "{} – {}",
-        default_visible_value_text(lower),
-        default_visible_value_text(upper)
-    )
-}
-
 pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
     let clamped = physical_norm.clamp(0.0, 1.0);
     if rtl {
@@ -590,54 +582,11 @@ pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
     }
 }
 
-pub fn slider_fallback_text(label: Option<&str>, value_text: Option<&str>) -> Option<String> {
-    let mut parts = Vec::new();
-    if let Some(label) = omit_empty_visible_text(label) {
-        parts.push(label);
-    }
-    if let Some(value) = omit_empty_visible_text(value_text) {
-        parts.push(value);
-    }
-    if parts.is_empty() {
-        None
-    } else {
-        Some(parts.join(" "))
-    }
-}
-
-pub fn range_slider_fallback_text(label: Option<&str>, range_text: Option<&str>) -> Option<String> {
-    slider_fallback_text(label, range_text)
-}
-
 pub fn resolved_visible_text(value: f64, explicit: Option<&str>) -> Option<String> {
     match explicit {
         Some("") => None,
         Some(text) => Some(text.to_owned()),
         None => omit_empty_visible_text(Some(&default_visible_value_text(value))),
-    }
-}
-
-pub fn resolved_range_text(
-    lower: f64,
-    upper: f64,
-    explicit: Option<&str>,
-    lower_text: Option<&str>,
-    upper_text: Option<&str>,
-) -> Option<String> {
-    match explicit {
-        Some("") => None,
-        Some(text) => Some(text.to_owned()),
-        None => omit_empty_visible_text(Some(&format!(
-            "{} – {}",
-            lower_text
-                .filter(|text| !text.is_empty())
-                .map(ToOwned::to_owned)
-                .unwrap_or_else(|| default_visible_value_text(lower)),
-            upper_text
-                .filter(|text| !text.is_empty())
-                .map(ToOwned::to_owned)
-                .unwrap_or_else(|| default_visible_value_text(upper)),
-        ))),
     }
 }
 
@@ -674,43 +623,35 @@ pub fn layout_slider_block(
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+/// Fixed whole-capsule anchors for RangeSlider block text (g18.022): lower
+/// value at the logical start, optional label centered, upper value at the
+/// logical end, at every value pair. Endpoints are required; when the three
+/// items cannot coexist the optional label is suppressed. There is no
+/// external fallback in this variant.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RangeSliderBlockLayout {
-    pub inline: bool,
-    pub fallback: Option<String>,
-    pub selected_text: Option<String>,
+    pub label_inline: bool,
+    pub lower_inline: bool,
+    pub upper_inline: bool,
 }
 
 pub fn layout_range_slider_block(
     capsule_span: f32,
-    lower_norm: f32,
-    upper_norm: f32,
     label: Option<&str>,
     lower_text: Option<&str>,
     upper_text: Option<&str>,
-    range_text: Option<&str>,
     measure: impl Fn(&str) -> f32,
 ) -> RangeSliderBlockLayout {
-    let selected_span = (upper_norm - lower_norm).max(0.0) * capsule_span;
-    let lower_span = lower_norm.max(0.0) * capsule_span;
-    let upper_span = (1.0 - upper_norm).max(0.0) * capsule_span;
-    let selected_text = omit_empty_visible_text(label).or_else(|| omit_empty_visible_text(range_text));
-    let inline = block_inline_fits(
-        &[
-            (selected_text.as_deref(), selected_span),
-            (lower_text, lower_span),
-            (upper_text, upper_span),
-        ],
-        measure,
-    );
+    let lower_advance = lower_text.map_or(0.0, |text| measure(text).ceil());
+    let upper_advance = upper_text.map_or(0.0, |text| measure(text).ceil());
+    let label_advance = label.map_or(0.0, |text| measure(text).ceil());
+    // One content inset between each of the three fixed anchors.
+    let coexist = block_region_available(capsule_span, SLIDER_BLOCK_CONTENT_INSET_PX)
+        >= lower_advance + upper_advance + label_advance + 2.0 * SLIDER_BLOCK_CONTENT_INSET_PX;
     RangeSliderBlockLayout {
-        inline,
-        selected_text,
-        fallback: if inline {
-            None
-        } else {
-            range_slider_fallback_text(label, range_text)
-        },
+        label_inline: label.is_some() && coexist,
+        lower_inline: lower_text.is_some(),
+        upper_inline: upper_text.is_some(),
     }
 }
 
