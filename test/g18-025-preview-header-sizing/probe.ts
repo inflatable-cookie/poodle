@@ -7,13 +7,15 @@
  * Law under test, on both live preview applications (Svelte, React):
  * - every painted header control resolves the fixed `md` stop through the
  *   size context — the specimen `controlSize` axis never reaches the header;
- * - ThemeSelect, the block Slider, and the search TextInput paint the 36px
- *   md ladder; the two ToggleGroups paint their documented item contract
- *   (the 36px ladder minus the 0.25rem item inset in
- *   docs/contracts/components/toggle-group.md), identically in both
- *   frameworks;
- * - controls on the same row share top edges; full-height controls share
- *   bottom edges;
+ * - all five painted controls (ThemeSelect, both ToggleGroups, block Slider,
+ *   search TextInput) measure the shared 36px md ladder and share top and
+ *   bottom edges per row — the card oracle, completed by the Chatterbox
+ *   ruling (card revision b14aeb04b): the authorized paired-header treatment
+ *   neutralizes ToggleGroup's reusable 0.25rem item inset inside these two
+ *   headers only;
+ * - the neutralization does not leak: a ToggleGroup outside the header still
+ *   paints its documented item contract (ladder − 0.25rem), identically in
+ *   both frameworks;
  * - selecting specimen xs–xl moves the catalogue/pills, never the header;
  * - density changes never inflate the md chrome;
  * - Size, Density, Theme, Contrast, Search, wrapping, and keyboard journeys
@@ -90,72 +92,36 @@ async function measureHeader(page: Page): Promise<HeaderMeasure> {
   });
 }
 
-// ── Oracle provenance (round-2 review, PR #257 comment 5646051126) ─────────
+// ── Oracle (reconciled after the Chatterbox ruling, card revision
+// b14aeb04b) ───────────────────────────────────────────
 //
-// The card's stated oracle is "measured 36px visual boxes for all five
-// controls in both previews". Four controls prove that outright. The two
-// ToggleGroups consume the same md ladder (data-size="md",
-// --poodle-toggle-group-height = 2.25rem) but paint their documented item
-// contract — min-height = calc(height - 0.25rem) — so their painted box is
-// the ladder minus a 4px inset (docs/contracts/components/toggle-group.md,
-// "Item .toggle-group__item"). That divergence needs a canonical ruling
-// (accept the inset / component-level card / preview-local exception) and is
-// escalated on PR #257; it must not be silently encoded as "expected" here.
-//
-// The probe therefore pins the toggle boxes to the *measured* ladder box
-// (the full-height controls in the same header, same moment) minus the
-// documented contract inset. Any side that moves — component changes the
-// item inset, or a ruling amends the card/component — surfaces as a probe
-// failure and forces the card oracle and the probe oracle to be reconciled
-// before g18.025 can close.
+// The round-2 probe deliberately kept the card oracle (36px for all five)
+// and the component contract (ToggleGroup items at ladder − 0.25rem) in
+// tension so any movement would force reconciliation. The ruling has now
+// landed: ToggleGroup keeps its reusable inset globally, and the two
+// generated preview headers neutralize it locally. The probe therefore
+// asserts the unified card oracle — all five painted controls at the 36px
+// md ladder with shared row edges — and adds a leak guard proving a
+// ToggleGroup outside the header still paints the documented item contract.
 const MD_LADDER_PX = 36;
 const TOGGLE_ITEM_CONTRACT_INSET_PX = 4;
-const FULL_LADDER_CONTROLS = new Set(["theme", "contrast", "search"]);
-const TOGGLE_GROUP_CONTROLS = new Set(["density", "size"]);
-
-/** The measured md ladder: the painted box of the full-height controls. */
-function measuredLadderPx(measure: HeaderMeasure): number {
-  const boxes = measure.controls
-    .filter((control) => FULL_LADDER_CONTROLS.has(control.name))
-    .map((control) => control.box.height);
-  if (boxes.length === 0) return MD_LADDER_PX;
-  return Math.max(...boxes);
-}
+// The shared control-size ladder in px, by ToggleGroup data-size.
+const SIZE_LADDER_PX: Record<string, number> = { xs: 24, sm: 28, md: 36, lg: 44, xl: 52 };
 
 /** Assert the md-chrome geometry for one measured header. */
 function assertChromeGeometry(prefix: string, measure: HeaderMeasure): void {
   const names = measure.controls.map((control) => control.name).sort().join(",");
   check(`${prefix} all five painted controls measured`, measure.controls.length === 5, names);
-  const ladder = measuredLadderPx(measure);
-  check(
-    `${prefix} full-height controls measure the ${MD_LADDER_PX}px md ladder (card oracle)`,
-    near(ladder, MD_LADDER_PX),
-    `${ladder}px`,
-  );
   for (const { name, box, size } of measure.controls) {
     check(`${prefix} ${name} resolves the md stop`, size === "md", `data-size=${size}`);
-    if (FULL_LADDER_CONTROLS.has(name)) {
-      check(
-        `${prefix} ${name} paints the ${MD_LADDER_PX}px md ladder (card oracle)`,
-        near(box.height, MD_LADDER_PX),
-        `${box.height}px`,
-      );
-    } else {
-      // TOGGLE_GROUP_CONTROLS: the painted box is pinned to the measured
-      // ladder minus the documented contract inset — not to a constant — so
-      // a ruling that moves either side fails this check and forces the
-      // card oracle and the probe oracle back into agreement.
-      const expected = ladder - TOGGLE_ITEM_CONTRACT_INSET_PX;
-      check(
-        `${prefix} ${name} paints the documented item contract (measured ladder ${ladder}px − ${TOGGLE_ITEM_CONTRACT_INSET_PX}px inset = ${expected}px; card-oracle divergence escalated on PR #257)`,
-        near(box.height, expected),
-        `${box.height}px`,
-      );
-    }
+    check(
+      `${prefix} ${name} paints the ${MD_LADDER_PX}px md ladder (card oracle, Chatterbox ruling b14aeb04b)`,
+      near(box.height, MD_LADDER_PX),
+      `${box.height}px`,
+    );
   }
   // Bucket controls into visual rows by their group's top edge, then align
-  // within each row: shared tops; bottoms shared by the full-height controls
-  // with the toggle items inset by exactly the documented 4px contract.
+  // within each row: shared tops and shared bottoms beneath equal labels.
   const rows: Array<{ rowTop: number; controls: HeaderMeasure["controls"] }> = [];
   for (const control of measure.controls) {
     const row = rows.find((candidate) => near(candidate.rowTop, control.rowTop, 2));
@@ -169,24 +135,12 @@ function assertChromeGeometry(prefix: string, measure: HeaderMeasure): void {
       Math.max(...tops) - Math.min(...tops) <= 2,
       `tops ${tops.map((top) => top.toFixed(1)).join("/")}`,
     );
-    const full = row.controls.filter((control) => FULL_LADDER_CONTROLS.has(control.name));
-    const inset = row.controls.filter((control) => TOGGLE_GROUP_CONTROLS.has(control.name));
-    if (full.length > 0) {
-      const bottoms = full.map((control) => control.box.bottom);
-      check(
-        `${prefix} row ${index} full-height controls share bottom edges`,
-        Math.max(...bottoms) - Math.min(...bottoms) <= 2,
-        `bottoms ${bottoms.map((bottom) => bottom.toFixed(1)).join("/")}`,
-      );
-      for (const control of inset) {
-        const delta = bottoms[0]! - control.box.bottom;
-        check(
-          `${prefix} row ${index} ${control.name} item sits at the documented ${TOGGLE_ITEM_CONTRACT_INSET_PX}px contract inset below the ladder bottom (escalated on PR #257)`,
-          near(delta, TOGGLE_ITEM_CONTRACT_INSET_PX),
-          `inset ${delta.toFixed(1)}px`,
-        );
-      }
-    }
+    const bottoms = row.controls.map((control) => control.box.bottom);
+    check(
+      `${prefix} row ${index} controls share bottom edges`,
+      Math.max(...bottoms) - Math.min(...bottoms) <= 2,
+      `bottoms ${bottoms.map((bottom) => bottom.toFixed(1)).join("/")}`,
+    );
   }
 }
 
@@ -322,6 +276,47 @@ async function probe(
   return { headerHeight };
 }
 
+/**
+ * Leak guard: outside the header, ToggleGroup must still paint its
+ * documented item contract (ladder − 0.25rem). Drives the toggle-group
+ * specimen route so the ruling's scoped exception is proven not to reach
+ * catalogue specimens.
+ */
+async function probeLeakGuard(page: Page, engine: string, framework: string, base: string): Promise<void> {
+  const route = framework === "svelte" ? "#/components/toggle-group" : "#components/toggle-group";
+  await page.goto(`${base}/${route}`, { waitUntil: "domcontentloaded", timeout: 120_000 });
+  await page.locator(".poodle-toggle-group__item").first().waitFor({ timeout: 60_000 });
+  const samples = await page.evaluate(() => {
+    const items = [...document.querySelectorAll<HTMLElement>(".poodle-toggle-group__item")]
+      .filter((item) => !item.closest(".poodle-display-controls"));
+    return items.slice(0, 6).map((item) => {
+      const group = item.closest<HTMLElement>(".poodle-toggle-group")!;
+      return {
+        size: group.getAttribute("data-size") ?? "unknown",
+        height: item.getBoundingClientRect().height,
+      };
+    });
+  });
+  check(
+    `${engine} ${framework} leak guard found catalogue toggle items outside the header`,
+    samples.length > 0,
+    `${samples.length} items`,
+  );
+  for (const [index, sample] of samples.entries()) {
+    const ladder = SIZE_LADDER_PX[sample.size];
+    if (ladder === undefined) {
+      check(`${engine} ${framework} leak guard item ${index} has a known size stop`, false, sample.size);
+      continue;
+    }
+    const expected = ladder - TOGGLE_ITEM_CONTRACT_INSET_PX;
+    check(
+      `${engine} ${framework} leak guard item ${index} (${sample.size}) still paints the documented item contract (${expected}px)`,
+      near(sample.height, expected),
+      `${sample.height}px`,
+    );
+  }
+}
+
 let servers: Awaited<ReturnType<typeof startPreviews>> | undefined;
 
 try {
@@ -342,6 +337,9 @@ try {
     // Full journeys per framework, sharing one stability baseline per engine.
     const svelteRun = await probe(page, name, "svelte", servers.urls.svelte, undefined);
     await probe(page, name, "react", servers.urls.react, svelteRun);
+    // The ruling's exception must not leak into catalogue specimens.
+    await probeLeakGuard(page, name, "svelte", servers.urls.svelte);
+    await probeLeakGuard(page, name, "react", servers.urls.react);
     await browser.close();
   }
 } finally {

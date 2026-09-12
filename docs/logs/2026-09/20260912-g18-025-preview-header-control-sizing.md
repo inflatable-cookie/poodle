@@ -1,6 +1,6 @@
 # g18.025 — Preview header control sizing
 
-Status: in review — round 1 verdict `changes_required` (planning-change); blocked on the canonical ruling the review requests. Round-2 probe-oracle fix pushed; PR #257 stays open at the new head
+Status: in review — round 3: Chatterbox ruling landed (card revision `b14aeb04b`, preview-local ToggleGroup alignment authorized), ruling implemented, probe reconciled to the unified card oracle; PR #257 open at the new head
 Date: 2026-09-12
 Branch: `ns-92be02b9-f520-4b85-9baa-794a7464605c`
 Card: `docs/roadmaps/g18/025-preview-header-control-sizing.md`
@@ -46,6 +46,36 @@ blocking findings:
   forbid each until ruled. **The task is blocked on that canonical ruling.**
 - Re-validated at this head: probe 367 ok / 0 FAIL on headless Chromium and
   367 ok / 0 FAIL on headless WebKit; `git diff --check` clean.
+
+### Round 3 — ruling landed, implemented at this head
+
+The operator landed the canonical ruling on main as card revision
+`b14aeb04b` ("authorize preview header alignment"): option 3. ToggleGroup
+keeps its reusable 0.25rem item inset globally; within the two generated
+preview headers only, the inset is neutralized so Density and Size paint the
+same 36px `md` ladder as the other header controls — an explicit exception to
+the no-preview-height rule that must not change ToggleGroup's public contract
+or leak into catalogue specimens.
+
+Implementation at this head:
+
+- `packages/svelte/preview/src/components/DisplayControls.svelte` (scoped
+  style, `:global` child selector) and
+  `packages/react/preview/src/gallery/gallery.css`: one declaration each —
+  `.poodle-display-controls … .poodle-toggle-group__item { min-height:
+  var(--poodle-toggle-group-height); }` — restoring the item to the ladder
+  the component itself resolved. No hard-coded heights, no component change,
+  scoped under the header root so catalogue specimens are untouched.
+- The probe was reconciled to the unified card oracle (as its round-2 design
+  required once a side moved): all five painted controls assert 36px and
+  shared row tops/bottoms, and a new leak guard drives the toggle-group
+  specimen route in both apps proving catalogue ToggleGroups still paint the
+  documented item contract (ladder − 0.25rem at their resolved stop).
+- Re-validated: probe 321 ok / 0 FAIL per engine on headless Chromium and
+  WebKit (all five controls 36px, shared edges, leak guard green); focused
+  paired tests 8/8; `svelte-check` preview 0 errors; react preview `tsc`
+  error board byte-identical to base; `svelte:build` / `react:build` exit 0;
+  `docs:lint` green; `git diff --check` clean.
 
 ## Outcome
 
