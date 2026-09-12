@@ -67,19 +67,26 @@ export function RangeSliderSpecimen() {
           <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Block appearance">
-          <RangeSlider appearance="block" value={priceRange} min={0} max={100} visibleLabel="Price" ariaLabel="Price range" onValueChange={setPriceRange} />
-          <RangeSlider appearance="block" direction="rtl" value={ageRange} min={18} max={65} step={5} visibleLabel="Age" ariaLabel="Age range" onValueChange={setAgeRange} />
+        {/* g18.022: fixed whole-capsule anchors — lower value at the logical
+            start, label centered, upper value at the logical end. Text never
+            follows a thumb. */}
+        <SpecimenGroup label="Block — fixed endpoint anchors">
+          <RangeSlider value={priceRange} min={0} max={100} visibleLabel="Price" ariaLabel="Price range" onValueChange={setPriceRange} />
+          <RangeSlider direction="rtl" value={ageRange} min={18} max={65} step={5} visibleLabel="Age" ariaLabel="Age range" onValueChange={setAgeRange} />
+          <div style={{ width: "9rem" }}>
+            <RangeSlider value={[20, 80]} min={0} max={100} visibleLabel="Narrow fit" ariaLabel="Narrow fit range" />
+          </div>
         </SpecimenGroup>
       </div>
 
-      <SpecimenGroup label="Vertical — the same control on the other axis">
+      <SpecimenGroup label="Vertical block — upper value top, label centered, lower bottom">
         <div style={{ display: "flex", alignItems: "flex-start", gap: "2rem", height: "12rem" }}>
           <RangeSlider
             orientation="vertical"
             value={verticalRange}
             min={0}
             max={100}
+            visibleLabel="Level"
             ariaLabel="Vertical range"
             onValueChange={setVerticalRange}
           />

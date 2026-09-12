@@ -93,7 +93,26 @@ pub fn block_surface(hit_px: f32) -> Node {
     surface
 }
 
+/// Vertical companion of [`block_surface`]: the capsule fills the block
+/// axis and the cross axis is the fixed hit size (g18.022).
+pub fn block_surface_vertical(hit_px: f32) -> Node {
+    let mut surface = Node::container();
+    surface.roles.insert("part".to_owned(), "block-surface".to_owned());
+    surface.style.fill_height = true;
+    surface.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
+    surface.style.min_width = Some(hit_px);
+    surface.position = NodePosition::Relative;
+    surface
+}
+
 pub fn block_grab(handler: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>) -> Node {
+    block_grab_with_axis(handler, ScrubAxis::Horizontal)
+}
+
+pub fn block_grab_with_axis(
+    handler: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>,
+    axis: ScrubAxis,
+) -> Node {
     let mut grab = Node::container();
     grab.style.fill_width = true;
     grab.style.fill_height = true;
@@ -105,7 +124,7 @@ pub fn block_grab(handler: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>) -> Node {
     };
     grab.style.descriptor.cursor = CursorHint::Pointer;
     grab.interaction.on_scrub = Some(handler);
-    grab.interaction.scrub_axis = ScrubAxis::Horizontal;
+    grab.interaction.scrub_axis = axis;
     grab
 }
 
@@ -130,6 +149,33 @@ pub fn fraction_anchor(fraction: f32, height: f32, child: Node, child_half: f32)
     };
     layer.style.fill_width = true;
     layer.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+    layer.child(spacer.child(child))
+}
+
+/// Vertical companion of [`fraction_anchor`]: the fraction seeds a spacer
+/// along the block axis and the child hangs centred on its cross axis
+/// (g18.022). `height` is the anchor row height along the block axis.
+pub fn fraction_anchor_vertical(fraction: f32, width: f32, child: Node, child_half: f32) -> Node {
+    let mut spacer = Node::container();
+    spacer.style.height_pct = Some(fraction.clamp(0.0, 1.0));
+    spacer.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+    spacer.position = NodePosition::Relative;
+    let mut child = child;
+    child.position = NodePosition::Absolute {
+        top: None,
+        left: Some(-(child_half - width * 0.5)),
+        right: None,
+        bottom: Some(-child_half),
+    };
+    let mut layer = Node::container();
+    layer.position = NodePosition::Absolute {
+        top: Some(0.0),
+        left: Some(0.0),
+        right: None,
+        bottom: Some(0.0),
+    };
+    layer.style.fill_height = true;
+    layer.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     layer.child(spacer.child(child))
 }
 

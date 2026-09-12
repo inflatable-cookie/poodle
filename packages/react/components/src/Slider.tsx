@@ -1,10 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import {
-  assertHorizontalBlockAppearance,
   createSliderControlContext, layoutSliderBlock, measureInlineAdvance,
   normalizeSliderValue, physicalToValueNorm, resolveSliderVisibleValue, safeSliderMax,
   sliderControlTransition, sliderTransition, sliderVisualState,
-  type AudioValueLaw, type SliderAppearance, type SliderContext, type SliderControlContext,
+  type AudioValueLaw, type SliderContext, type SliderControlContext,
   type SliderDirection, type SliderPolarity, type SliderVariant,
 } from "@inflatable-cookie/poodle-core";
 
@@ -24,7 +23,6 @@ export interface SliderProps {
   max?: number;
   step?: number;
   variant?: SliderVariant;
-  appearance?: SliderAppearance;
   direction?: SliderDirection;
   polarity?: SliderPolarity;
   centerValue?: number | null;
@@ -48,8 +46,7 @@ export function Slider({
   min = 0,
   max = 100,
   step = 1,
-  variant = "standard",
-  appearance = "track",
+  variant = "block",
   direction = "ltr",
   polarity = "unipolar",
   centerValue = null,
@@ -63,7 +60,6 @@ export function Slider({
   onValueChange,
   onValueCommit,
 }: SliderProps) {
-  assertHorizontalBlockAppearance(appearance, orientation);
   const uiPresentation = useUiPresentation();
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [controlMachine, setControlMachine] = useState(createSliderControlContext);
@@ -91,12 +87,11 @@ export function Slider({
   const visualState = sliderVisualState(controlContext);
   const safeMax = safeSliderMax(min, max);
   const displayValue = normalizeSliderValue(machineContext, currentValue);
-  const block = appearance === "block";
-  const usesControlPointer = block || variant === "embedded";
+  const block = variant === "block";
   const sliderStyle = {
     "--poodle-slider-percent": `${visualState.valueNorm * 100}%`,
-    "--poodle-slider-fill-start": `${variant === "standard" ? 0 : visualState.fillStartNorm * 100}%`,
-    "--poodle-slider-fill-span": `${(variant === "standard" ? visualState.valueNorm : visualState.fillSpanNorm) * 100}%`,
+    "--poodle-slider-fill-start": `${visualState.fillStartNorm * 100}%`,
+    "--poodle-slider-fill-span": `${visualState.fillSpanNorm * 100}%`,
     "--poodle-slider-center": `${visualState.centerNorm * 100}%`,
   } as CSSProperties;
   const visibleValueText = resolveSliderVisibleValue(displayValue, formatVisibleValue);
@@ -111,19 +106,6 @@ export function Slider({
     })
     : { labelInline: false, valueInline: false };
 
-  function send(type: "INPUT" | "COMMIT", event: FormEvent<HTMLInputElement>): void {
-    const raw = Number(event.currentTarget.value);
-    const result = sliderTransition(machineContext, { type, raw });
-    for (const effect of result.effects) {
-      if (!isControlled) setUncontrolledValue(effect.value);
-      if (effect.type === "emitValueChange") {
-        onValueChange?.(effect.value);
-      } else if (effect.type === "emitValueCommit") {
-        onValueCommit?.(effect.value);
-      }
-    }
-  }
-
   function runControl(event: Parameters<typeof sliderControlTransition>[1]): void {
     const result = sliderControlTransition(controlRef.current, event);
     controlRef.current = result.context;
@@ -135,16 +117,16 @@ export function Slider({
       else onValueCommitRef.current?.(effect.value);
     }
   }
-  function pointNorm(event: PointerEvent<HTMLDivElement>): number {
+  function pointNorm(event: ReactPointerEvent<HTMLElement>): number {
     const rect = root.current!.getBoundingClientRect();
     const physical = orientation === "horizontal"
       ? (event.clientX - rect.left) / Math.max(rect.width, 1)
       : 1 - (event.clientY - rect.top) / Math.max(rect.height, 1);
     return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
   }
-  function pointerDown(event: PointerEvent<HTMLDivElement>): void {
-    if (!usesControlPointer || event.button !== 0 || disabled) return;
-    const target = block ? (event.currentTarget as HTMLDivElement) : root.current;
+  function pointerDown(event: ReactPointerEvent<HTMLElement>): void {
+    if (event.button !== 0 || disabled) return;
+    const target = block ? event.currentTarget : root.current;
     if (!target) return;
     event.preventDefault();
     event.stopPropagation();
@@ -152,7 +134,7 @@ export function Slider({
     target.setPointerCapture(event.pointerId);
     runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
   }
-  function pointerMove(event: PointerEvent<HTMLDivElement>): void {
+  function pointerMove(event: ReactPointerEvent<HTMLElement>): void {
     if (activePointer.current === event.pointerId) {
       event.stopPropagation();
       runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) });
@@ -172,7 +154,7 @@ export function Slider({
       else onValueCommitRef.current?.(effect.value);
     }
   }
-  function pointerEnd(event: PointerEvent<HTMLDivElement>): void {
+  function pointerEnd(event: ReactPointerEvent<HTMLElement>): void {
     event.stopPropagation();
     terminate(event.pointerId);
   }
@@ -183,7 +165,7 @@ export function Slider({
     onPointerCancel: pointerEnd,
     onLostPointerCapture: pointerEnd,
   };
-  function embeddedKey(event: KeyboardEvent<HTMLDivElement>): void {
+  function controlKey(event: ReactKeyboardEvent<HTMLElement>): void {
     if (disabled) return;
     const keyDirection = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const raw = event.key === "Home" ? min : event.key === "End" ? safeMax : keyDirection ? currentValue + keyDirection * step : null;
@@ -200,11 +182,15 @@ export function Slider({
   useLayoutEffect(() => {
     if (!block || !capsule.current) return;
     const node = capsule.current;
-    const observer = new ResizeObserver(() => setCapsuleSpan(node.getBoundingClientRect().width));
+    const observer = new ResizeObserver(() => {
+      const rect = node.getBoundingClientRect();
+      setCapsuleSpan(orientation === "vertical" ? rect.height : rect.width);
+    });
     observer.observe(node);
-    setCapsuleSpan(node.getBoundingClientRect().width);
+    const rect = node.getBoundingClientRect();
+    setCapsuleSpan(orientation === "vertical" ? rect.height : rect.width);
     return () => observer.disconnect();
-  }, [block]);
+  }, [block, orientation]);
 
   useEffect(() => {
     if (disabled) terminate();
@@ -222,23 +208,22 @@ export function Slider({
       data-size={resolvedSize}
       data-density={resolvedDensity}
       data-variant={variant}
-      data-appearance={block ? "block" : undefined}
-      data-direction={block || direction === "rtl" ? direction : undefined}
+      data-direction={direction === "rtl" ? direction : undefined}
       data-polarity={visualState.polarity}
       data-fill-tone={visualState.fillTone}
       data-state={visualState.pointerActive ? "active" : "idle"}
-      dir={block || direction === "rtl" ? direction : undefined}
-      role={usesControlPointer ? "slider" : undefined}
-      tabIndex={usesControlPointer && !disabled ? 0 : undefined}
-      aria-label={usesControlPointer ? ariaLabel ?? undefined : undefined}
-      aria-valuemin={usesControlPointer ? min : undefined}
-      aria-valuemax={usesControlPointer ? safeMax : undefined}
-      aria-valuenow={usesControlPointer ? visualState.value : undefined}
-      aria-valuetext={usesControlPointer ? valueText ?? undefined : undefined}
-      aria-orientation={usesControlPointer ? orientation : undefined}
-      aria-disabled={usesControlPointer ? disabled : undefined}
-      {...(usesControlPointer ? pointerHandlers : {})}
-      onKeyDown={usesControlPointer ? embeddedKey : undefined}
+      dir={direction === "rtl" ? direction : undefined}
+      role="slider"
+      tabIndex={disabled ? undefined : 0}
+      aria-label={ariaLabel ?? undefined}
+      aria-valuemin={min}
+      aria-valuemax={safeMax}
+      aria-valuenow={visualState.value}
+      aria-valuetext={valueText ?? undefined}
+      aria-orientation={orientation}
+      aria-disabled={disabled}
+      {...pointerHandlers}
+      onKeyDown={controlKey}
     >
       {block ? (
         <>
@@ -248,24 +233,45 @@ export function Slider({
               <span className="poodle-slider__remainder" />
               {blockLayout.labelInline || blockLayout.valueInline ? (
                 <>
-                  {/* One stable row painted twice; the clip moves, the glyphs never do. */}
-                  <span className="poodle-slider__inline poodle-slider__inline--selected">
-                    <span className="poodle-slider__inline-row">
-                      <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                      <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
-                    </span>
-                  </span>
-                  <span className="poodle-slider__inline poodle-slider__inline--remainder">
-                    <span className="poodle-slider__inline-row">
-                      <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                      <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
-                    </span>
-                  </span>
+                  {/* One stable text layout painted twice; the clip moves, the glyphs never do. */}
+                  {orientation === "vertical" ? (
+                    <>
+                      <span className="poodle-slider__inline poodle-slider__inline--selected">
+                        <span className="poodle-slider__inline-row poodle-slider__inline-row--vertical">
+                          <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                          <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                          <span className="poodle-slider__inline-spacer" />
+                        </span>
+                      </span>
+                      <span className="poodle-slider__inline poodle-slider__inline--remainder">
+                        <span className="poodle-slider__inline-row poodle-slider__inline-row--vertical">
+                          <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                          <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                          <span className="poodle-slider__inline-spacer" />
+                        </span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="poodle-slider__inline poodle-slider__inline--selected">
+                        <span className="poodle-slider__inline-row">
+                          <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                          <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                        </span>
+                      </span>
+                      <span className="poodle-slider__inline poodle-slider__inline--remainder">
+                        <span className="poodle-slider__inline-row">
+                          <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                          <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
+                        </span>
+                      </span>
+                    </>
+                  )}
                 </>
               ) : null}
               <span className="poodle-slider__center" />
             </span>
-            <span className="poodle-slider__hit" data-part="hit" {...(block ? pointerHandlers : {})}><span className="poodle-slider__thumb" /></span>
+            <span className="poodle-slider__hit" data-part="hit" {...pointerHandlers}><span className="poodle-slider__thumb" /></span>
           </span>
         </>
       ) : (
@@ -274,19 +280,6 @@ export function Slider({
             <span className="poodle-slider__fill" />
             <span className="poodle-slider__center" />
           </span>
-          {variant === "standard" && <input
-            className="poodle-slider__control"
-            type="range"
-            min={min}
-            max={safeMax}
-            step={step}
-            value={displayValue}
-            disabled={disabled}
-            aria-label={ariaLabel ?? undefined}
-            aria-valuetext={valueText ?? undefined}
-            onInput={(event) => send("INPUT", event)}
-            onChange={(event) => send("COMMIT", event)}
-          />}
         </>
       )}
     </div>

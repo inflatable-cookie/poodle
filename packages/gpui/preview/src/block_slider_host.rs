@@ -10,7 +10,7 @@ use gpui::AnyElement;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_node_backend::{measured_node_element, ShapedAdvance};
-use poodle_headless::slider::{resolved_range_text, resolved_visible_text};
+use poodle_headless::slider::resolved_visible_text;
 use poodle_node::{Node, NodeRole};
 use poodle_render::{
     presentation, range_slider, slider, slider_block, BlockTextMeasure, RangeSliderHandlers,
@@ -47,14 +47,7 @@ fn range_visible_texts(spec: &RangeSliderSpec) -> Vec<String> {
     }
     let lower = resolved_visible_text(spec.low, spec.visible_lower_text.as_deref());
     let upper = resolved_visible_text(spec.high, spec.visible_upper_text.as_deref());
-    let range = resolved_range_text(
-        spec.low,
-        spec.high,
-        spec.visible_range_text.as_deref(),
-        lower.as_deref(),
-        upper.as_deref(),
-    );
-    for text in [lower, upper, range].into_iter().flatten() {
+    for text in [lower, upper].into_iter().flatten() {
         if !text.is_empty() {
             texts.push(text);
         }

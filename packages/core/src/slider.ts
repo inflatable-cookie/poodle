@@ -21,9 +21,8 @@ import {
   type AudioValueLaw,
 } from "./audio/laws";
 
-export type SliderVariant = "standard" | "embedded";
+export type SliderVariant = "block" | "embedded";
 export type SliderPolarity = "unipolar" | "bipolar";
-export type SliderAppearance = "track" | "block";
 export type SliderDirection = "ltr" | "rtl";
 
 /** Logical-pixel effective target for every block thumb. */
@@ -357,16 +356,6 @@ export function rangeSliderControlTransition(
   }
 }
 
-export function assertHorizontalBlockAppearance(
-  appearance: SliderAppearance,
-  orientation: "horizontal" | "vertical",
-  component: "Slider" | "RangeSlider" = "Slider",
-): void {
-  if (appearance === "block" && orientation === "vertical") {
-    throw new Error(`${component} appearance="block" rejects orientation="vertical"`);
-  }
-}
-
 export function omitEmptyVisibleText(text: string | null | undefined): string | null {
   if (text == null || text === "") return null;
   return text;
@@ -376,9 +365,6 @@ export function defaultVisibleValueText(value: number): string {
   return String(value);
 }
 
-export function defaultVisibleRangeText(lower: number, upper: number): string {
-  return `${defaultVisibleValueText(lower)} – ${defaultVisibleValueText(upper)}`;
-}
 
 export function resolveSliderVisibleValue(
   value: number,
@@ -395,18 +381,6 @@ export function resolveRangeVisibleValue(
   return omitEmptyVisibleText(
     formatVisibleValue ? formatVisibleValue(value, thumb) : defaultVisibleValueText(value),
   );
-}
-
-export function resolveRangeVisibleRange(
-  lower: number,
-  upper: number,
-  formatVisibleRange?: ((lower: number, upper: number) => string) | null,
-  formatVisibleValue?: ((value: number, thumb: "lower" | "upper") => string) | null,
-): string | null {
-  if (formatVisibleRange) return omitEmptyVisibleText(formatVisibleRange(lower, upper));
-  const lowerText = resolveRangeVisibleValue(lower, "lower", formatVisibleValue) ?? defaultVisibleValueText(lower);
-  const upperText = resolveRangeVisibleValue(upper, "upper", formatVisibleValue) ?? defaultVisibleValueText(upper);
-  return omitEmptyVisibleText(`${lowerText} – ${upperText}`);
 }
 
 export function blockRegionAvailable(unoccludedSpan: number, contentInset = SLIDER_BLOCK_CONTENT_INSET_PX): number {
@@ -473,32 +447,45 @@ export function layoutSliderBlock(input: {
   return { labelInline, valueInline };
 }
 
+export interface RangeSliderBlockTextLayout {
+  /** The optional visible label paints at the capsule center. */
+  labelInline: boolean;
+  /** The required lower endpoint value paints at the logical-start anchor. */
+  lowerInline: boolean;
+  /** The required upper endpoint value paints at the logical-end anchor. */
+  upperInline: boolean;
+}
+
+/**
+ * Fixed whole-capsule anchors for RangeSlider block text (g18.022).
+ *
+ * Geometry never depends on the selected window: the lower value is pinned
+ * to the logical start, the upper value to the logical end, and the optional
+ * label to the center, at every value pair. The endpoint values are required
+ * and always paint when present; when the three items cannot coexist inside
+ * the capsule the optional label is suppressed. There is no external
+ * fallback in this variant. `capsuleSpan` is measured along the text axis
+ * (horizontal width or vertical height).
+ */
 export function layoutRangeSliderBlock(input: {
   capsuleSpan: number;
-  lowerNorm: number;
-  upperNorm: number;
   label: string | null;
   lowerText: string | null;
   upperText: string | null;
-  rangeText: string | null;
   measure: (text: string) => number;
-}): { inline: boolean; fallback: string | null; selectedText: string | null } {
-  const selectedSpan = Math.max(input.upperNorm - input.lowerNorm, 0) * input.capsuleSpan;
-  const lowerSpan = Math.max(input.lowerNorm, 0) * input.capsuleSpan;
-  const upperSpan = Math.max(1 - input.upperNorm, 0) * input.capsuleSpan;
-  const selectedText = input.label ?? input.rangeText;
-  const inline = blockInlineFits(
-    [
-      { text: selectedText, unoccludedSpan: selectedSpan },
-      { text: input.lowerText, unoccludedSpan: lowerSpan },
-      { text: input.upperText, unoccludedSpan: upperSpan },
-    ],
-    input.measure,
-  );
+}): RangeSliderBlockTextLayout {
+  const lowerText = input.lowerText != null;
+  const upperText = input.upperText != null;
+  const lowerAdvance = input.lowerText ? Math.ceil(input.measure(input.lowerText)) : 0;
+  const upperAdvance = input.upperText ? Math.ceil(input.measure(input.upperText)) : 0;
+  const labelAdvance = input.label ? Math.ceil(input.measure(input.label)) : 0;
+  // One content inset between each of the three fixed anchors.
+  const coexist = blockRegionAvailable(input.capsuleSpan)
+    >= lowerAdvance + upperAdvance + labelAdvance + 2 * SLIDER_BLOCK_CONTENT_INSET_PX;
   return {
-    inline,
-    selectedText,
-    fallback: inline ? null : rangeSliderFallbackText(input.label, input.rangeText),
+    labelInline: input.label != null && coexist,
+    lowerInline: lowerText,
+    upperInline: upperText,
   };
 }
 

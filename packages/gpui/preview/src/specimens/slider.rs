@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, SliderAppearance, SliderDirection, SliderPolarity, SliderSpec};
+use poodle_specs::{EyebrowSpec, SliderDirection, SliderPolarity, SliderSpec};
 use std::sync::Arc;
 
 fn slider_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64) + Send + Sync> {
@@ -226,7 +226,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Slider::from_spec(
                         SliderSpec::new(volume)
                             .with_bounds(0.0, 100.0)
-                            .with_appearance(SliderAppearance::Block)
+                            .with_variant(poodle_specs::SliderVariant::Block)
                             .with_visible_label("Volume"),
                         theme,
                     )
@@ -238,7 +238,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Slider::from_spec(
                         SliderSpec::new(opacity)
                             .with_bounds(0.0, 100.0)
-                            .with_appearance(SliderAppearance::Block)
+                            .with_variant(poodle_specs::SliderVariant::Block)
                             .with_direction(SliderDirection::Rtl)
                             .with_visible_label("Opacity"),
                         theme,

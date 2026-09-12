@@ -47,7 +47,7 @@ use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, ControlDensity,
     ControlSize, FaderSpec, HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation,
     PopoverSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec, SelectSpec, SkeletonSpec,
-    SliderAppearance, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
+    SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
     TabPin, TabVariant,
     TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
@@ -1369,7 +1369,7 @@ fn one_enter_activates_a_focused_control_exactly_once() {
 #[test]
 fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
     run_headless(|cx| {
-        let mut spec = RangeSliderSpec::default();
+        let mut spec = RangeSliderSpec::default().with_variant(poodle_specs::SliderVariant::Embedded);
         spec.low = 20.0;
         spec.high = 80.0;
 
@@ -5770,7 +5770,9 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
             let commit_events = Arc::clone(&trace);
             let commit_state = Arc::clone(&live);
             let commit_mount = Arc::clone(&mounted);
-            let mut spec = SliderSpec::new(value).with_bounds(0.0, 100.0);
+            let mut spec = SliderSpec::new(value)
+                .with_bounds(0.0, 100.0)
+                .with_variant(poodle_specs::SliderVariant::Embedded);
             spec.step = 1.0;
             spec.aria_label = Some("Volume".into());
             spec.value_text = Some(format!("{value:.0}%"));
@@ -5833,13 +5835,13 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         assert_eq!(control.a11y.value_text.as_deref(), Some("95%"));
         assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
         assert!(control.interaction.focusable);
-        let ring = control.style.focus_ring.expect("standard thumb ring");
-        assert!((ring.width - poodle_render::presentation::rem_to_px(0.1875)).abs() < 1e-6);
-        assert!((ring.offset - 0.0).abs() < 1e-6);
-        assert!((ring.color.3 - 0.32).abs() < 1e-6);
+        let ring = control.style.focus_ring.expect("embedded root ring");
+        assert!((ring.width - poodle_render::presentation::rem_to_px(0.125)).abs() < 1e-6);
+        assert!((ring.offset - poodle_render::presentation::rem_to_px(0.0625)).abs() < 1e-6);
+        assert!((ring.color.3 - 1.0).abs() < 1e-6);
         assert!(
-            rebuilt.style.focus_ring.is_none(),
-            "standard focus belongs on the thumb"
+            rebuilt.style.focus_ring.is_some(),
+            "embedded focus is the root outline"
         );
         drop(rebuilt);
 
@@ -5878,7 +5880,8 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
     run_headless(|cx| {
         let mut spec = SliderSpec::new(0.0)
             .with_bounds(0.0, 100.0)
-            .with_orientation(Orientation::Vertical);
+            .with_orientation(Orientation::Vertical)
+            .with_variant(poodle_specs::SliderVariant::Embedded);
         spec.step = 1.0;
         spec.aria_label = Some("Level".into());
         spec.value_text = Some("min".into());
@@ -5905,7 +5908,9 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
     });
 
     run_headless(|cx| {
-        let mut spec = SliderSpec::new(40.0).with_bounds(0.0, 100.0);
+        let mut spec = SliderSpec::new(40.0)
+            .with_bounds(0.0, 100.0)
+            .with_variant(poodle_specs::SliderVariant::Embedded);
         spec.is_disabled = true;
         spec.aria_label = Some("Muted".into());
         let live = Arc::new(Mutex::new(40.0f64));
@@ -5954,7 +5959,7 @@ fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
         let commit_count = Arc::clone(&commits);
         let spec = SliderSpec::new(0.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_direction(SliderDirection::Rtl)
             .with_size(ControlSize::Xs)
             .with_visible_label("Volume");
@@ -5999,7 +6004,7 @@ fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
         let sink = Arc::clone(&live);
         let spec = RangeSliderSpec::new(50.0, 50.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_size(ControlSize::Xs)
             .with_aria_label("Range");
         let theme = theme();
@@ -6101,7 +6106,7 @@ fn bounds_contain(outer: gpui::Bounds<Pixels>, inner: gpui::Bounds<Pixels>) -> b
 fn block_slider_fit_uses_parent_width_and_shaped_advance() {
     let label = SliderSpec::new(50.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_visible_label("ABCDEFGH")
         .with_visible_value_text("50");
     run_headless(|cx| {
@@ -6168,7 +6173,7 @@ fn block_slider_fit_uses_parent_width_and_shaped_advance() {
     let width = available + 16.0;
     let sample = SliderSpec::new(50.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_visible_label("iii")
         .with_visible_value_text("");
     let mut missed = false;
@@ -6204,7 +6209,7 @@ fn block_capsule_is_rounded_square_while_the_thumb_stays_circular() {
 
     let spec = SliderSpec::new(25.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_visible_label("Blur")
         .with_visible_value_text("25");
     let node = poodle_render::slider(&spec, &ctx, &SliderHandlers::default());
@@ -6229,7 +6234,7 @@ fn block_capsule_is_rounded_square_while_the_thumb_stays_circular() {
 
     let range_spec = RangeSliderSpec::new(20.0, 80.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_visible_label("Price");
     let range_node = poodle_render::range_slider(&range_spec, &ctx, poodle_render::RangeSliderHandlers::default());
     let range_capsule = &range_node
@@ -6259,7 +6264,7 @@ fn block_slider_text_layers_stay_fixed_while_the_boundary_moves() {
     for value in [10.0f64, 50.0, 90.0] {
         let spec = SliderSpec::new(value)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_visible_label("Blur")
             .with_visible_value_text("67");
         run_headless(|cx| {
@@ -6307,7 +6312,7 @@ fn block_slider_text_layers_stay_fixed_while_the_boundary_moves() {
 fn block_slider_rtl_mirrors_the_clip_geometry_and_keeps_logical_anchors() {
     let spec = SliderSpec::new(30.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_direction(SliderDirection::Rtl)
         .with_visible_label("Blur")
         .with_visible_value_text("67");
@@ -6351,20 +6356,20 @@ fn block_slider_rtl_mirrors_the_clip_geometry_and_keeps_logical_anchors() {
     });
 }
 
-/// g16.046 repair, amended by g18.017: the single Slider production host
-/// always reserves exactly the surface height (no fallback line exists),
-/// while the block RangeSlider still grows for its narrow fallback line and
-/// the following sibling never sits under it.
+/// g16.046 repair, superseded by g18.022: the RangeSlider block never paints
+/// a fallback line. Narrow fit suppresses only the optional label; the
+/// required endpoints keep painting and the host always reserves exactly the
+/// surface height, with the following sibling never sitting under text.
 #[test]
-fn block_slider_production_host_height_matches_surface_and_range_keeps_fallback() {
+fn block_slider_production_host_height_matches_surface_and_range_suppresses_label_only() {
     let slider = SliderSpec::new(50.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_visible_label("ABCDEFGH")
         .with_visible_value_text("50");
     let range = RangeSliderSpec::new(20.0, 80.0)
         .with_bounds(0.0, 100.0)
-        .with_appearance(SliderAppearance::Block)
+
         .with_visible_label("ABCDEFGH");
     let slider_surface = block_slider_host::block_slider_surface_height(&slider);
     let range_surface = block_slider_host::block_range_slider_surface_height(&range);
@@ -6462,22 +6467,31 @@ fn block_slider_production_host_height_matches_surface_and_range_keeps_fallback(
         );
         let host =
             poodle_gpui_node_backend::bounds_for("block-range-slider-host").expect("range host");
-        let fallback = poodle_gpui_node_backend::bounds_for("block-range-slider-fallback")
-            .expect("range fallback");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-range-slider-fallback").is_none(),
+            "the RangeSlider block never paints a fallback line"
+        );
+        let lower = poodle_gpui_node_backend::bounds_for("block-range-slider-value-lower")
+            .expect("lower endpoint keeps painting");
+        assert!(f32::from(lower.size.width) > 0.0, "endpoints are required");
+        let upper = poodle_gpui_node_backend::bounds_for("block-range-slider-value-upper")
+            .expect("upper endpoint keeps painting");
+        assert!(f32::from(upper.size.width) > 0.0);
+        let label = poodle_gpui_node_backend::bounds_for("block-range-slider-label");
+        assert!(
+            label.is_none() || f32::from(label.unwrap().size.width) < 0.5,
+            "narrow fit suppresses only the optional label"
+        );
         let next = poodle_gpui_node_backend::bounds_for("block-range-slider-next")
             .expect("range sibling");
-        assert!(
-            bounds_contain(host, fallback),
-            "range fallback {fallback:?} must sit inside production host {host:?}"
-        );
-        assert!(
-            next.origin.y >= fallback.bottom() - px(0.5),
-            "range sibling {next:?} must sit below fallback {fallback:?}"
-        );
         range_narrow_h = f32::from(host.size.height);
         assert!(
-            range_narrow_h > range_surface + 4.0,
-            "narrow range host {range_narrow_h} must reserve more than surface {range_surface}"
+            (range_narrow_h - range_surface).abs() <= 1.0,
+            "narrow range host {range_narrow_h} must reserve only the surface {range_surface}"
+        );
+        assert!(
+            next.origin.y >= host.bottom() - px(0.5),
+            "range sibling {next:?} must sit below the surface host {host:?}"
         );
     });
     run_headless(|cx| {
@@ -6514,8 +6528,8 @@ fn block_slider_production_host_height_matches_surface_and_range_keeps_fallback(
             "wide range sibling {next:?} must sit below the surface host {host:?}"
         );
         assert!(
-            range_wide_h + 4.0 < range_narrow_h,
-            "wide range {range_wide_h} must not retain narrow fallback height {range_narrow_h}"
+            (range_wide_h - range_narrow_h).abs() <= 1.0,
+            "wide range {range_wide_h} must match narrow height now that the fallback is gone {range_narrow_h}"
         );
     });
 }

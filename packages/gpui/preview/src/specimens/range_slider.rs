@@ -7,7 +7,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    EyebrowSpec, Orientation, RangeSliderSpec, SliderAppearance, SliderDirection, SliderPolarity,
+    EyebrowSpec, Orientation, RangeSliderSpec, SliderDirection, SliderPolarity,
 };
 use std::sync::Arc;
 
@@ -324,7 +324,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     RangeSlider::from_spec(
                         RangeSliderSpec::new(default_lo, default_hi)
                             .with_bounds(0.0, 100.0)
-                            .with_appearance(SliderAppearance::Block)
+                            .with_variant(poodle_specs::SliderVariant::Block)
                             .with_visible_label("Price")
                             .with_aria_label("Price range"),
                         theme,
@@ -339,7 +339,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         RangeSliderSpec::new(step_lo, step_hi)
                             .with_bounds(18.0, 65.0)
                             .with_step(5.0)
-                            .with_appearance(SliderAppearance::Block)
+                            .with_variant(poodle_specs::SliderVariant::Block)
                             .with_direction(SliderDirection::Rtl)
                             .with_visible_label("Age")
                             .with_aria_label("Age range"),

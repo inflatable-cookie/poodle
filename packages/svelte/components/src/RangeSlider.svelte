@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/range-slider.css";
   import {
-    assertHorizontalBlockAppearance,
     createRangeSliderControlContext,
     layoutRangeSliderBlock,
     measureInlineAdvance,
@@ -10,11 +9,10 @@
     rangeSliderControlTransition,
     rangeSliderVisualState,
     rangeSliderTransition,
-    resolveRangeVisibleRange,
     resolveRangeVisibleValue,
     safeSliderMax,
     type AudioValueLaw, type RangeSliderContext, type RangeSliderControlContext,
-    type SliderAppearance, type SliderDirection, type SliderPolarity, type SliderVariant,
+    type SliderDirection, type SliderPolarity, type SliderVariant,
   } from "@inflatable-cookie/poodle-core";
   import { onDestroy } from "svelte";
 
@@ -32,7 +30,6 @@
     max?: number;
     step?: number;
     variant?: SliderVariant;
-    appearance?: SliderAppearance;
     direction?: SliderDirection;
     polarity?: SliderPolarity;
     centerValue?: number | null;
@@ -44,7 +41,6 @@
     upperValueText?: string | null;
     visibleLabel?: string | null;
     formatVisibleValue?: ((value: number, thumb: "lower" | "upper") => string) | undefined;
-    formatVisibleRange?: ((lower: number, upper: number) => string) | undefined;
     onValueChange?: ((value: [number, number]) => void) | undefined;
     onValueCommit?: ((value: [number, number]) => void) | undefined;
   }
@@ -57,8 +53,7 @@
     min = 0,
     max = 100,
     step = 1,
-    variant = "standard",
-    appearance = "track",
+    variant = "block",
     direction = "ltr",
     polarity = "unipolar",
     centerValue = null,
@@ -70,7 +65,6 @@
     upperValueText = null,
     visibleLabel = null,
     formatVisibleValue = undefined,
-    formatVisibleRange = undefined,
     onValueChange = undefined,
     onValueCommit = undefined,
   }: Props = $props();
@@ -102,26 +96,18 @@
     `--poodle-range-positive-start: ${visualState.positiveFillStartNorm * 100}%`,
     `--poodle-range-positive-span: ${visualState.positiveFillSpanNorm * 100}%`,
   ]));
-  const block = $derived.by(() => {
-    assertHorizontalBlockAppearance(appearance, orientation, "RangeSlider");
-    return appearance === "block";
-  });
-  const usesControlPointer = $derived(block || variant === "embedded");
+  const block = $derived(variant === "block");
   const visibleLabelText = $derived(visibleLabel && visibleLabel !== "" ? visibleLabel : null);
   const lowerVisible = $derived(resolveRangeVisibleValue(displayLower, "lower", formatVisibleValue));
   const upperVisible = $derived(resolveRangeVisibleValue(displayUpper, "upper", formatVisibleValue));
-  const rangeVisible = $derived(resolveRangeVisibleRange(displayLower, displayUpper, formatVisibleRange, formatVisibleValue));
   const blockLayout = $derived.by(() => {
-    if (!block) return { inline: false, fallback: null, selectedText: null };
+    if (!block) return { labelInline: false, lowerInline: false, upperInline: false };
     const font = capsule ? getComputedStyle(capsule).font : "14px sans-serif";
     return layoutRangeSliderBlock({
       capsuleSpan,
-      lowerNorm: visualState.lowerNorm,
-      upperNorm: visualState.upperNorm,
       label: visibleLabelText,
       lowerText: lowerVisible,
       upperText: upperVisible,
-      rangeText: rangeVisible,
       measure: (text) => measureInlineAdvance(text, font),
     });
   });
@@ -157,7 +143,7 @@
     return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
   }
   function pointerDown(event: PointerEvent): void {
-    if (!usesControlPointer || event.button !== 0 || disabled) return;
+    if (event.button !== 0 || disabled) return;
     const target = block ? (event.currentTarget as HTMLElement) : root;
     if (!target) return;
     event.preventDefault();
@@ -181,7 +167,7 @@
     event.stopPropagation();
     terminate(event.pointerId);
   }
-  function embeddedKey(event: KeyboardEvent, thumb: "lower" | "upper"): void {
+  function controlKey(event: KeyboardEvent, thumb: "lower" | "upper"): void {
     const keyDirection = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const current = thumb === "lower" ? displayLower : displayUpper;
     const raw = event.key === "Home" ? min : event.key === "End" ? safeMax : keyDirection ? current + keyDirection * step : null;
@@ -197,71 +183,90 @@
 
   $effect(() => {
     if (!block || !capsule) return;
+    const axis = orientation;
     const observer = new ResizeObserver(() => {
-      capsuleSpan = capsule?.getBoundingClientRect().width ?? 0;
+      const rect = capsule?.getBoundingClientRect();
+      capsuleSpan = !rect ? 0 : axis === "vertical" ? rect.height : rect.width;
     });
     observer.observe(capsule);
-    capsuleSpan = capsule.getBoundingClientRect().width;
+    const rect = capsule.getBoundingClientRect();
+    capsuleSpan = axis === "vertical" ? rect.height : rect.width;
     return () => observer.disconnect();
   });
   $effect(() => { if (disabled) terminate(); });
   onDestroy(() => terminate());
 </script>
 
-<div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-appearance={block ? "block" : undefined} data-direction={block || direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={block || direction === "rtl" ? direction : undefined}
-  onpointerdown={usesControlPointer ? pointerDown : undefined} onpointermove={usesControlPointer ? pointerMove : undefined} onpointerup={usesControlPointer ? pointerEnd : undefined} onpointercancel={usesControlPointer ? pointerEnd : undefined} onlostpointercapture={usesControlPointer ? pointerEnd : undefined}>
+<div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-direction={direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={direction === "rtl" ? direction : undefined}
+  onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}>
   {#if block}
-    <span class="poodle-range-slider__block-surface">
     <span bind:this={capsule} class="poodle-range-slider__capsule" aria-hidden="true">
       <span class="poodle-range-slider__track">
         <span class="poodle-range-slider__fill poodle-range-slider__fill--negative"></span>
         <span class="poodle-range-slider__fill poodle-range-slider__fill--positive"></span>
         <span class="poodle-range-slider__center"></span>
       </span>
-      {#if blockLayout.inline && lowerVisible}<span class="poodle-range-slider__inline poodle-range-slider__inline--lower">{lowerVisible}</span>{/if}
-      {#if blockLayout.inline && blockLayout.selectedText}<span class="poodle-range-slider__inline poodle-range-slider__inline--selected">{blockLayout.selectedText}</span>{/if}
-      {#if blockLayout.inline && upperVisible}<span class="poodle-range-slider__inline poodle-range-slider__inline--upper">{upperVisible}</span>{/if}
+      {#if orientation === "vertical"}
+        {#if blockLayout.lowerInline || blockLayout.upperInline || blockLayout.labelInline}
+          <!-- One stable upright column painted through window/remainder clips; glyphs never move. -->
+          <span class="poodle-range-slider__inline poodle-range-slider__inline--selected">
+            <span class="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
+              <span class="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
+            </span>
+          </span>
+          <span class="poodle-range-slider__inline poodle-range-slider__inline--remainder-top">
+            <span class="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
+              <span class="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
+            </span>
+          </span>
+          <span class="poodle-range-slider__inline poodle-range-slider__inline--remainder-bottom">
+            <span class="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
+              <span class="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
+            </span>
+          </span>
+        {/if}
+      {:else}
+        {#if blockLayout.lowerInline || blockLayout.upperInline || blockLayout.labelInline}
+          <span class="poodle-range-slider__inline poodle-range-slider__inline--selected">
+            <span class="poodle-range-slider__inline-row">
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
+              <span class="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
+            </span>
+          </span>
+          <span class="poodle-range-slider__inline poodle-range-slider__inline--remainder-start">
+            <span class="poodle-range-slider__inline-row">
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
+              <span class="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
+            </span>
+          </span>
+          <span class="poodle-range-slider__inline poodle-range-slider__inline--remainder-end">
+            <span class="poodle-range-slider__inline-row">
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
+              <span class="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+              <span class="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
+            </span>
+          </span>
+        {/if}
+      {/if}
     </span>
-    <div class="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "lower")} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-range-slider__thumb"></span></div>
-    <div class="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "upper")} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-range-slider__thumb"></span></div>
-    </span>
-    {#if blockLayout.fallback}<span class="poodle-range-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span>{/if}
+    <div class="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => controlKey(event, "lower")} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-range-slider__thumb"></span></div>
+    <div class="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => controlKey(event, "upper")} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-range-slider__thumb"></span></div>
   {:else}
-  <span class="poodle-range-slider__track" aria-hidden="true">
-    <span class="poodle-range-slider__fill poodle-range-slider__fill--negative"></span>
-    <span class="poodle-range-slider__fill poodle-range-slider__fill--positive"></span>
-    <span class="poodle-range-slider__center"></span>
-  </span>
+    <span class="poodle-range-slider__track" aria-hidden="true">
+      <span class="poodle-range-slider__fill poodle-range-slider__fill--negative"></span>
+      <span class="poodle-range-slider__fill poodle-range-slider__fill--positive"></span>
+      <span class="poodle-range-slider__center"></span>
+    </span>
 
-  {#if variant === "standard"}<input
-    class="poodle-range-slider__control poodle-range-slider__control--lower"
-    type="range"
-    min={min}
-    max={safeMax}
-    {step}
-    value={displayLower}
-    disabled={disabled}
-    aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
-    aria-valuetext={lowerValueText ?? undefined}
-    oninput={(event) => send("INPUT", "lower", event)}
-    onchange={(event) => send("COMMIT", "lower", event)}
-  />
-
-  <input
-    class="poodle-range-slider__control poodle-range-slider__control--upper"
-    type="range"
-    min={min}
-    max={safeMax}
-    {step}
-    value={displayUpper}
-    disabled={disabled}
-    aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
-    aria-valuetext={upperValueText ?? undefined}
-    oninput={(event) => send("INPUT", "upper", event)}
-    onchange={(event) => send("COMMIT", "upper", event)}
-  />{:else}
-    <div class="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--lower" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "lower")}></div>
-    <div class="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--upper" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "upper")}></div>
-  {/if}
+    <div class="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--lower" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => controlKey(event, "lower")}></div>
+    <div class="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--upper" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => controlKey(event, "upper")}></div>
   {/if}
 </div>

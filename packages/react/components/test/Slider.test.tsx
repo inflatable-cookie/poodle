@@ -4,55 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { Slider } from "../src/Slider";
 
-describe("Slider (react)", () => {
-  it("snaps live input to step and commits the same value on release", () => {
-    const onValueChange = vi.fn();
-    const onValueCommit = vi.fn();
-    const { container } = render(
-      <Slider value={50} step={10} ariaLabel="Volume" onValueChange={onValueChange} onValueCommit={onValueCommit} />,
-    );
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-
-    fireEvent.input(input, { target: { value: "63" } });
-    expect(onValueChange).toHaveBeenCalledWith(60);
-
-    fireEvent.change(input, { target: { value: "63" } });
-    expect(onValueCommit).toHaveBeenCalledWith(60);
-  });
-
-  it("clamps out-of-range input into the min/max window", () => {
-    const onValueChange = vi.fn();
-    const { container } = render(
-      <Slider value={50} min={0} max={100} ariaLabel="Volume" onValueChange={onValueChange} />,
-    );
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-
-    fireEvent.input(input, { target: { value: "-5" } });
-    expect(onValueChange).toHaveBeenLastCalledWith(0);
-
-    fireEvent.input(input, { target: { value: "150" } });
-    expect(onValueChange).toHaveBeenLastCalledWith(100);
-  });
-
-  it("drives the fill percentage custom property from the value", () => {
-    const { container } = render(<Slider value={65} ariaLabel="Volume" />);
-    const root = container.querySelector(".poodle-slider")!;
-    expect(root.getAttribute("style")).toContain("--poodle-slider-percent: 65%");
-  });
-
-  it("applies the bounds guard when max is at or below min", () => {
-    const { container } = render(<Slider value={5} min={10} max={10} ariaLabel="Volume" />);
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-    expect(input.getAttribute("max")).toBe("11");
-  });
-
-  it("disables the native control", () => {
-    const { container } = render(<Slider value={40} disabled ariaLabel="Volume" />);
-    const input = container.querySelector<HTMLInputElement>(".poodle-slider__control")!;
-    expect(input.disabled).toBe(true);
-    expect(container.querySelector(".poodle-slider")!.getAttribute("data-disabled")).toBe("true");
-  });
-});
+const css = readFileSync(
+  new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+  "utf8",
+);
 
 function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.getBoundingClientRect = () =>
@@ -70,6 +25,59 @@ function mockTrack(root: HTMLElement, width: number, height: number): void {
   root.setPointerCapture ??= () => {};
   root.releasePointerCapture ??= () => {};
 }
+
+describe("Slider (react)", () => {
+  it("drives the fill percentage custom property from the value", () => {
+    const { container } = render(<Slider value={65} ariaLabel="Volume" />);
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("style")).toContain("--poodle-slider-percent: 65%");
+  });
+
+  it("exposes slider ARIA fields and a tab stop", () => {
+    const { container } = render(
+      <Slider value={40} min={0} max={100} orientation="vertical" ariaLabel="Gain" valueText="quiet" />,
+    );
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("role")).toBe("slider");
+    expect(root.getAttribute("aria-label")).toBe("Gain");
+    expect(root.getAttribute("aria-valuemin")).toBe("0");
+    expect(root.getAttribute("aria-valuemax")).toBe("100");
+    expect(root.getAttribute("aria-valuenow")).toBe("40");
+    expect(root.getAttribute("aria-valuetext")).toBe("quiet");
+    expect(root.getAttribute("aria-orientation")).toBe("vertical");
+    expect(root.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("drops the tab stop while disabled and ignores pointer and keyboard", () => {
+    const onValueChange = vi.fn();
+    const onValueCommit = vi.fn();
+    const { container } = render(
+      <Slider value={40} disabled ariaLabel="Gain" onValueChange={onValueChange} onValueCommit={onValueCommit} />,
+    );
+    const root = container.querySelector<HTMLElement>(".poodle-slider")!;
+    mockTrack(root, 100, 32);
+    fireEvent.pointerDown(root, { button: 0, clientX: 80, clientY: 16, pointerId: 1 });
+    fireEvent.keyDown(root, { key: "ArrowRight" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(onValueCommit).not.toHaveBeenCalled();
+    expect(root.getAttribute("tabindex")).toBeNull();
+  });
+
+  it("omitting variant renders the block capsule as the default", () => {
+    const { container } = render(<Slider value={50} ariaLabel="Volume" />);
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-variant")).toBe("block");
+    expect(container.querySelector(".poodle-slider__capsule")).not.toBeNull();
+    expect(container.querySelector(".poodle-slider__control")).toBeNull();
+  });
+
+  it("renders embedded as the dense track alternative", () => {
+    const { container } = render(<Slider variant="embedded" value={50} ariaLabel="Volume" />);
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-variant")).toBe("embedded");
+    expect(container.querySelector(".poodle-slider__capsule")).toBeNull();
+  });
+});
 
 describe("Slider (react) embedded semantics", () => {
   it("normalizes a horizontal pointer along the track and commits once", () => {
@@ -158,29 +166,6 @@ describe("Slider (react) embedded semantics", () => {
     expect(onValueCommit).toHaveBeenCalledTimes(6);
   });
 
-  it("exposes slider ARIA fields on the embedded control", () => {
-    const { container } = render(
-      <Slider
-        variant="embedded"
-        value={40}
-        min={0}
-        max={100}
-        orientation="vertical"
-        ariaLabel="Gain"
-        valueText="quiet"
-      />,
-    );
-    const root = container.querySelector(".poodle-slider")!;
-    expect(root.getAttribute("role")).toBe("slider");
-    expect(root.getAttribute("aria-label")).toBe("Gain");
-    expect(root.getAttribute("aria-valuemin")).toBe("0");
-    expect(root.getAttribute("aria-valuemax")).toBe("100");
-    expect(root.getAttribute("aria-valuenow")).toBe("40");
-    expect(root.getAttribute("aria-valuetext")).toBe("quiet");
-    expect(root.getAttribute("aria-orientation")).toBe("vertical");
-    expect(root.getAttribute("tabindex")).toBe("0");
-  });
-
   it("ignores pointer and keyboard while disabled", () => {
     const onValueChange = vi.fn();
     const onValueCommit = vi.fn();
@@ -204,23 +189,15 @@ describe("Slider (react) embedded semantics", () => {
   });
 });
 
-describe("Slider (react) block appearance", () => {
-  it("omitting appearance keeps the track anatomy", () => {
-    const { container } = render(<Slider value={50} ariaLabel="Volume" />);
-    const root = container.querySelector(".poodle-slider")!;
-    expect(root.getAttribute("data-appearance")).toBeNull();
-    expect(container.querySelector(".poodle-slider__control")).not.toBeNull();
-    expect(container.querySelector(".poodle-slider__capsule")).toBeNull();
-  });
-
+describe("Slider (react) block variant", () => {
   it("does not paint ariaLabel as visible text", () => {
-    const { container } = render(<Slider appearance="block" value={50} ariaLabel="Gain" />);
+    const { container } = render(<Slider value={50} ariaLabel="Gain" />);
     expect(container.textContent).not.toContain("Gain");
     expect(container.querySelector(".poodle-slider")!.getAttribute("aria-label")).toBe("Gain");
   });
 
   it("does not use visibleLabel as the accessible name", () => {
-    const { container } = render(<Slider appearance="block" value={50} visibleLabel="Blur" />);
+    const { container } = render(<Slider value={50} visibleLabel="Blur" />);
     const root = container.querySelector(".poodle-slider")!;
     expect(root.getAttribute("aria-label")).toBeNull();
     expect(container.querySelector(".poodle-slider__capsule")!.getAttribute("aria-hidden")).toBe(
@@ -228,21 +205,11 @@ describe("Slider (react) block appearance", () => {
     );
   });
 
-  it("rejects vertical block before paint", () => {
-    expect(() =>
-      render(<Slider appearance="block" orientation="vertical" value={40} />),
-    ).toThrow('Slider appearance="block" rejects orientation="vertical"');
-  });
-
   it("keeps a 44px auto hit target at xs", () => {
-    const { container } = render(<Slider appearance="block" value={50} size="xs" ariaLabel="Gain" />);
+    const { container } = render(<Slider value={50} size="xs" ariaLabel="Gain" />);
     const root = container.querySelector<HTMLElement>(".poodle-slider")!;
-    expect(root.getAttribute("data-appearance")).toBe("block");
+    expect(root.getAttribute("data-variant")).toBe("block");
     expect(container.querySelector(".poodle-slider__hit")).not.toBeNull();
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
-    );
     expect(css).toContain("--poodle-slider-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
     expect(css).toContain("min-height: max(var(--poodle-slider-block-min-height), var(--poodle-slider-block-hit))");
@@ -251,7 +218,7 @@ describe("Slider (react) block appearance", () => {
   it("dispatches from the hit outside the capsule footprint", () => {
     const onValueChange = vi.fn();
     const { container } = render(
-      <Slider appearance="block" defaultValue={50} min={0} max={100} step={10} ariaLabel="Gain" onValueChange={onValueChange} />,
+      <Slider defaultValue={50} min={0} max={100} step={10} ariaLabel="Gain" onValueChange={onValueChange} />,
     );
     const root = container.querySelector<HTMLElement>(".poodle-slider")!;
     const hit = container.querySelector<HTMLElement>(".poodle-slider__hit")!;
@@ -267,7 +234,6 @@ describe("Slider (react) block appearance", () => {
     const onValueCommit = vi.fn();
     const { container } = render(
       <Slider
-        appearance="block"
         defaultValue={0}
         min={0}
         max={100}
@@ -288,7 +254,7 @@ describe("Slider (react) block appearance", () => {
   });
 
   it("paints one stable row through two clipped layers and never a fallback", () => {
-    const { container } = render(<Slider appearance="block" value={50} visibleLabel="Blur" ariaLabel="Gain" />);
+    const { container } = render(<Slider value={50} visibleLabel="Blur" ariaLabel="Gain" />);
     const selected = container.querySelector<HTMLElement>(".poodle-slider__inline--selected")!;
     const remainder = container.querySelector<HTMLElement>(".poodle-slider__inline--remainder")!;
     expect(selected).not.toBeNull();
@@ -303,7 +269,7 @@ describe("Slider (react) block appearance", () => {
   });
 
   it("suppresses the optional label before the exact value at zero-width spans", () => {
-    const { container } = render(<Slider appearance="block" value={67} visibleLabel="Blur" ariaLabel="Gain" />);
+    const { container } = render(<Slider value={67} visibleLabel="Blur" ariaLabel="Gain" />);
     const label = container.querySelector(".poodle-slider__inline--selected .poodle-slider__inline-label")!;
     expect(label.textContent).toBe("");
     const value = container.querySelector(".poodle-slider__inline--selected .poodle-slider__inline-value")!;
@@ -312,40 +278,32 @@ describe("Slider (react) block appearance", () => {
   });
 
   it("keeps the block capsule rounded-square and the thumb circular in CSS", () => {
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-min-height);\n    border-radius: var(--poodle-radius-control);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-min-height);\n    border-radius: var(--poodle-radius-control);",
-    );
-    expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
     );
   });
 
   it("clips the selected layer at the fill boundary and mirrors the clip in RTL", () => {
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--selected {\n    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--selected {\n    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"horizontal\"][data-direction=\"rtl\"] .poodle-slider__inline--selected {\n    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));",
     );
     expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"][data-direction=\"rtl\"] .poodle-slider__inline--selected {\n    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));",
-    );
-    expect(css).toContain(
-      ".poodle-slider[data-appearance=\"block\"][data-direction=\"rtl\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"horizontal\"][data-direction=\"rtl\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);",
     );
   });
 
   it("renders the same layers in RTL", () => {
     const { container } = render(
-      <Slider appearance="block" direction="rtl" value={20} visibleLabel="Opacity" ariaLabel="Opacity" />,
+      <Slider direction="rtl" value={20} visibleLabel="Opacity" ariaLabel="Opacity" />,
     );
     const root = container.querySelector(".poodle-slider")!;
     expect(root.getAttribute("data-direction")).toBe("rtl");
@@ -354,14 +312,62 @@ describe("Slider (react) block appearance", () => {
   });
 
   it("maps selected fill to Highlight and remainder to Canvas", () => {
-    const css = readFileSync(
-      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
-      "utf8",
-    );
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--selected {\n      color: HighlightText;");
-    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__inline--remainder {\n      color: CanvasText;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--selected {\n      color: HighlightText;");
+    expect(css).toContain(".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n      color: CanvasText;");
     expect(css).not.toMatch(/\.poodle-slider__fill \{\s*background: Canvas/);
+  });
+
+  it("keeps vertical block upright: value top, label centered, clip along the block axis", () => {
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n  }",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-slider-percent, 0%)) 0 0 0);",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 0 var(--poodle-slider-percent, 0%) 0);",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));",
+    );
+    // Vertical never mirrors with direction.
+    expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
+  });
+
+  it("renders the vertical row with the value slot above the label", () => {
+    const { container } = render(
+      <Slider orientation="vertical" value={40} visibleLabel="Blur" ariaLabel="Blur" />,
+    );
+    const row = container.querySelector(".poodle-slider__inline-row--vertical")!;
+    const children = Array.from(row.children);
+    expect(children[0].className).toContain("poodle-slider__inline-value");
+    expect(children[1].className).toContain("poodle-slider__inline-label");
+    expect(container.querySelector(".poodle-slider")!.getAttribute("data-orientation")).toBe(
+      "vertical",
+    );
+  });
+
+  it("keeps the row glyph slots value-independent across the whole range", () => {
+    const journeys: Array<{ label: string; value: string }> = [];
+    for (const value of [0, 50, 100]) {
+      const { container, unmount } = render(
+        <Slider value={value} visibleLabel="Blur" ariaLabel="Blur" />,
+      );
+      const label = container.querySelector(
+        ".poodle-slider__inline--selected .poodle-slider__inline-label",
+      )!;
+      const valueSlot = container.querySelector(
+        ".poodle-slider__inline--selected .poodle-slider__inline-value",
+      )!;
+      journeys.push({ label: label.textContent!, value: valueSlot.textContent! });
+      unmount();
+    }
+    // happy-dom lays out at zero width, so the optional label is suppressed
+    // at every value — but the exact value keeps its slot unchanged.
+    expect(journeys[0]).toEqual({ label: "", value: "0" });
+    expect(journeys[1]).toEqual({ label: "", value: "50" });
+    expect(journeys[2]).toEqual({ label: "", value: "100" });
   });
 });

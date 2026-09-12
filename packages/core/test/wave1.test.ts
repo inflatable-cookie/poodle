@@ -15,14 +15,12 @@ import {
   sliderVisualState,
   sliderTransition,
   snapToStep,
-  assertHorizontalBlockAppearance,
   blockInlineFits,
   blockItemFits,
   blockRegionAvailable,
   physicalToValueNorm,
-  resolveRangeVisibleRange,
   resolveSliderVisibleValue,
-  rangeSliderFallbackText,
+  layoutRangeSliderBlock,
   layoutSliderBlock,
   type RangeSliderContext,
   type SliderContext,
@@ -249,17 +247,6 @@ describe("block appearance helpers", () => {
   test("visible channels default to String(value) and omit empty text", () => {
     expect(resolveSliderVisibleValue(67)).toBe("67");
     expect(resolveSliderVisibleValue(67, () => "")).toBeNull();
-    expect(resolveRangeVisibleRange(20, 80)).toBe("20 – 80");
-    expect(rangeSliderFallbackText("Price", "20 – 80")).toBe("Price 20 – 80");
-    expect(rangeSliderFallbackText(null, "")).toBeNull();
-  });
-
-  test("vertical block is rejected before paint", () => {
-    expect(() => assertHorizontalBlockAppearance("block", "vertical")).toThrow(
-      'Slider appearance="block" rejects orientation="vertical"',
-    );
-    expect(() => assertHorizontalBlockAppearance("block", "horizontal")).not.toThrow();
-    expect(() => assertHorizontalBlockAppearance("track", "vertical")).not.toThrow();
   });
 
   test("rtl remaps physical position without changing numeric meaning", () => {
@@ -331,5 +318,30 @@ describe("block appearance helpers", () => {
       measure: (text) => text.length * 10,
     });
     expect(soloValue).toEqual({ labelInline: false, valueInline: true });
+  });
+
+  test("layoutRangeSliderBlock anchors endpoints and value-independently coexists the label", () => {
+    const law = (text: string) => text.length * 10;
+    const layout = (capsuleSpan: number) =>
+      layoutRangeSliderBlock({
+        capsuleSpan,
+        label: "Price",
+        lowerText: "20",
+        upperText: "80",
+        measure: law,
+      });
+    // Endpoints are required and never suppressed.
+    expect(layout(300)).toEqual({ labelInline: true, lowerInline: true, upperInline: true });
+    // Narrow capsule: only the optional label is suppressed.
+    expect(layout(80)).toEqual({ labelInline: false, lowerInline: true, upperInline: true });
+    // The law is whole-capsule: value pairs cannot change the decision.
+    const solo = layoutRangeSliderBlock({
+      capsuleSpan: 160,
+      label: null,
+      lowerText: "0",
+      upperText: "100",
+      measure: law,
+    });
+    expect(solo).toEqual({ labelInline: false, lowerInline: true, upperInline: true });
   });
 });

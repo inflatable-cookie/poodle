@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.base.json",
-  "files": ["ambient.d.ts", "slider-appearance-root-negative.ts"]
+  "files": ["ambient.d.ts", "slider-variant-root-negative.ts"]
 }

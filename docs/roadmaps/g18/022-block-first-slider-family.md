@@ -200,3 +200,48 @@ Planning inspection on 2026-09-11 found:
 After g18.022 merges and g18.011 finishes with operator acceptance, resume the
 same retained g18.006 release-candidate task. Recompute the full `0.4.0` source
 identity and classify this breaking pre-v1 migration in its release evidence.
+
+## Execution log (worker, 2026-09-11)
+
+Breaking pre-v1 migration executed from queue branch
+`ns-28f7942c-6586-497a-8d18-045602f654df` against main `d29415bc5bff`.
+
+- Public API: both controls expose only `variant="block" | "embedded"`, default
+  block. Removed `appearance`, `SliderAppearance`, `variant="standard"`,
+  RangeSlider's combined visible-range formatter, `layoutRangeSliderBlock`'s
+  fallback output, and `assertHorizontalBlockAppearance`/`reject_vertical_block`
+  with no aliases (TypeScript core, Svelte, React, poodle-specs).
+- Fixed RangeSlider anchors: one stable whole-capsule text layout (lower at the
+  logical start, label centered, upper at the logical end) painted through
+  window/remainder clip layers in CSS and through overflow-hidden clip
+  containers in `poodle-render`; the external fallback is gone. Fit law is
+  value-independent and suppresses only the optional label.
+- Vertical block: native upright geometry in both orientations in Svelte,
+  React/CSS (clip-path along the block axis, hit anchored by `--poodle-*`
+  percent from the bottom), and `poodle-render` (column capsules, vertical
+  scrub axis, upright text rows). No rotation, no mirroring with direction on
+  the vertical axis.
+- Embedded retained as the only track presentation; the standard/native-input
+  branch and its CSS were deleted.
+- Bipolar block law stays shared: `sliderVisualState`/`rangeSliderVisualState`
+  already carry per-tone segments; renderers consume, none re-derive.
+- Native: headless layout law mirrored in `poodle-headless::slider`
+  (`layout_range_slider_block` fixed anchors, no fallback functions); GPUI
+  preview regressions updated and green; Jetstream preview compat translates
+  to the embedded variant at its own boundary (consumer-side translation,
+  architecture 001).
+- Proof: core 1376 tests; svelte-components 1543; react-components 1519;
+  svelte-preview 92; react-preview 34; parity 555; a11y 183; headless-dom 148;
+  nucleus-a11y 31; ssr 16; poodle-render lib 645 (2 pre-existing unrelated
+  failures named below); GPUI preview regressions 238; gpui board 134; block
+  slider hit and inline probes green on Chromium and WebKit (48/72 assertions
+  per engine); packed `SliderVariant` type proofs green; value-domain,
+  capability, callback, prop, spec, role, and focus-ring drift plus docs lint
+  and snippet checks green; `git diff --check` clean.
+- Pre-existing on main, untouched: `poodle-render` context a11y wrapper test
+  and segmented-control icon-only label test (unrelated controls).
+
+Known deltas for review: the packed install falsification receipts still name
+the committed (pre-migration) fixture names because falsification plants run
+against committed state; the migrated `slider-variant-*` fixtures are in this
+commit.

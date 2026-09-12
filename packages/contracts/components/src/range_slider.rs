@@ -2,7 +2,7 @@ use poodle_headless::audio::AudioValueLaw;
 use poodle_tokens::semantic;
 
 use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
-use crate::{SliderAppearance, SliderDirection, SliderPolarity, SliderVariant};
+use crate::{SliderDirection, SliderPolarity, SliderVariant};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RangeSliderSpec {
@@ -12,7 +12,6 @@ pub struct RangeSliderSpec {
     pub max: f64,
     pub step: f64,
     pub variant: SliderVariant,
-    pub appearance: SliderAppearance,
     pub direction: SliderDirection,
     pub polarity: SliderPolarity,
     pub center_value: Option<f64>,
@@ -32,7 +31,6 @@ pub struct RangeSliderSpec {
     pub visible_label: Option<String>,
     pub visible_lower_text: Option<String>,
     pub visible_upper_text: Option<String>,
-    pub visible_range_text: Option<String>,
 }
 
 impl Default for RangeSliderSpec {
@@ -43,8 +41,7 @@ impl Default for RangeSliderSpec {
             min: 0.0,
             max: 100.0,
             step: 1.0,
-            variant: SliderVariant::Standard,
-            appearance: SliderAppearance::Track,
+            variant: SliderVariant::Block,
             direction: SliderDirection::Ltr,
             polarity: SliderPolarity::Unipolar,
             center_value: None,
@@ -60,7 +57,6 @@ impl Default for RangeSliderSpec {
             visible_label: None,
             visible_lower_text: None,
             visible_upper_text: None,
-            visible_range_text: None,
         }
     }
 }
@@ -172,8 +168,8 @@ impl RangeSliderSpec {
         self
     }
 
-    pub fn with_appearance(mut self, appearance: SliderAppearance) -> Self {
-        self.appearance = appearance;
+    pub fn with_variant(mut self, variant: SliderVariant) -> Self {
+        self.variant = variant;
         self
     }
 
@@ -194,11 +190,6 @@ impl RangeSliderSpec {
 
     pub fn with_visible_upper_text(mut self, text: impl Into<String>) -> Self {
         self.visible_upper_text = Some(text.into());
-        self
-    }
-
-    pub fn with_visible_range_text(mut self, text: impl Into<String>) -> Self {
-        self.visible_range_text = Some(text.into());
         self
     }
 }

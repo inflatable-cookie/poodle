@@ -20,15 +20,13 @@ use poodle_node::{
     LayoutSizing, MainAxisAlignment, Node, NodeKey, NodeModifiers, NodePosition, NodeRole,
     ScrubAxis, ScrubPhase, ShadowValue,
 };
-use poodle_specs::{
-    reject_vertical_block, ControlSize, Orientation, SliderAppearance, SliderSpec, SliderVariant,
-};
+use poodle_specs::{ControlSize, Orientation, SliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::slider_block::{
-    block_grab, block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
+    block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
     stamp_disabled_roles, stamp_forced_color, visible_thumb,
 };
 
@@ -163,7 +161,6 @@ pub struct SliderHandlers {
 }
 
 pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandlers) -> Node {
-    reject_vertical_block(spec.appearance, spec.orientation, "Slider");
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
@@ -315,7 +312,7 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
             None
         };
 
-    if spec.appearance == SliderAppearance::Block {
+    if spec.variant == SliderVariant::Block {
         return paint_slider_block(
             spec,
             ctx,
@@ -385,19 +382,6 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
         s.descriptor.background = Some(fill_color);
     }
     pill(&mut fill, pill_radius);
-    let fill = if spec.variant == SliderVariant::Embedded {
-        fill
-    } else {
-        bind_slider_control(
-            &mut thumb,
-            spec,
-            visual.value,
-            safe_max,
-            key_handler.clone(),
-            standard_focus_ring(ctx, spec),
-        );
-        fill.child(thumb)
-    };
 
     let mut track = Node::container();
     {
@@ -422,28 +406,23 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
     } else {
         fill_origin
     };
-    let trailing_pct = if vertical { fill_origin } else { 0.0 };
-    if spec.variant == SliderVariant::Embedded || vertical {
-        if leading_pct > 0.0 {
-            let mut leading = Node::container();
-            if vertical {
-                leading.style.height_pct = Some(leading_pct);
-                leading.style.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
-            } else {
-                leading.style.width_pct = Some(leading_pct);
-                leading.style.descriptor.layout.height = LayoutSizing::Fixed(track_thickness);
-            }
-            track = track.child(leading);
+    if leading_pct > 0.0 {
+        let mut leading = Node::container();
+        if vertical {
+            leading.style.height_pct = Some(leading_pct);
+            leading.style.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
+        } else {
+            leading.style.width_pct = Some(leading_pct);
+            leading.style.descriptor.layout.height = LayoutSizing::Fixed(track_thickness);
         }
-        track = track.child(fill);
-        if trailing_pct > 0.0 {
-            let mut trailing = Node::container();
-            trailing.style.height_pct = Some(trailing_pct);
-            trailing.style.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
-            track = track.child(trailing);
-        }
-    } else {
-        track = track.child(fill);
+        track = track.child(leading);
+    }
+    track = track.child(fill);
+    if vertical {
+        let mut trailing = Node::container();
+        trailing.style.height_pct = Some(fill_origin);
+        trailing.style.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
+        track = track.child(trailing);
     }
 
     let mut grab = Node::container();
@@ -518,24 +497,27 @@ fn paint_slider_block(
     fraction: f32,
     accent: ColorValue,
     negative: ColorValue,
-    surface: ColorValue,
+    surface_color: ColorValue,
     border_default: ColorValue,
     elevated: ColorValue,
     scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>>,
     key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
     interactive: bool,
 ) -> Node {
-    let rtl = spec.direction.is_rtl();
-    let capsule_h = rem_to_px(capsule_height_rem(effective_size));
+    use crate::slider_block::{block_grab_with_axis, block_surface_vertical, fraction_anchor_vertical};
+
+    let vertical = spec.orientation == Orientation::Vertical;
+    // Horizontal geometry mirrors in RTL; vertical never mirrors.
+    let rtl = spec.direction.is_rtl() && !vertical;
+    let capsule_cross = rem_to_px(capsule_height_rem(effective_size));
     let font_px = rem_to_px(font_size_rem(effective_size));
     let hit_px = SLIDER_BLOCK_HIT_PX;
-    let physical = if rtl { 1.0 - fraction } else { fraction };
     let selected_color = if visual.fill_tone == poodle_headless::slider::SliderFillTone::Negative {
         negative
     } else {
         accent
     };
-    let remainder_fill = with_alpha(surface, surface.3 * 0.88);
+    let remainder_fill = with_alpha(surface_color, surface_color.3 * 0.88);
     let selected_text_color = ctx.theme().resolve_color("color.text.inverse");
     let remainder_text_color = ctx.theme().resolve_color("color.text.primary");
     // g18.017: the block family uses the rounded-square control radius, not
@@ -551,118 +533,162 @@ fn paint_slider_block(
         |text| measure(text, font_px),
     );
 
-    let mut selected = Node::container();
-    selected.style.width_pct = Some(fraction.clamp(0.0, 1.0));
-    selected.style.fill_height = true;
-    selected.style.descriptor.background = Some(selected_color);
-    stamp_forced_color(&mut selected, "selection", "selection-text");
+    let paint_text = layout.label_inline || layout.value_inline;
 
-    let mut remainder = Node::container();
-    remainder.style.flex_fill = true;
-    remainder.style.fill_height = true;
-    remainder.style.descriptor.background = Some(remainder_fill);
-    stamp_forced_color(&mut remainder, "canvas", "canvas-text");
-
-    // g18.017 fixed inline presentation: one stable row painted twice. Each
-    // layer is a per-region clip container holding a full-capsule-width row,
-    // so glyph coordinates never depend on the current value; crossing the
-    // boundary changes only the painted foreground. The shared node substrate
-    // expresses this with LayoutOverflow::Hidden — the preferred split-colour
-    // path, not the larger-side fallback.
-    let text_layers = if layout.label_inline || layout.value_inline {
+    // g18.017/g18.022 fixed inline presentation: one stable text layout
+    // painted twice. Each layer is a per-region clip container holding a
+    // full-capsule layout, so glyph coordinates never depend on the current
+    // value; crossing the boundary changes only the painted foreground.
+    // Vertical keeps the text upright: value at the physical top, optional
+    // label centered (g18.022).
+    let text_layers: Option<(Node, Node)> = if paint_text {
         let selected_span = fraction.clamp(0.0, 1.0) * capsule_span;
         let remainder_span = (capsule_span - selected_span).max(0.0);
-        let selected_row_left = if rtl { selected_span - capsule_span } else { 0.0 };
-        let remainder_row_left = if rtl { 0.0 } else { -selected_span };
+        let make_row = |role_color: ColorValue,
+                        role_fill: &str,
+                        role_text: &str,
+                        role_id: &str| {
+            let mut row = block_text_row(
+                label.clone().filter(|_| layout.label_inline),
+                value_text.clone().filter(|_| layout.value_inline),
+                role_color,
+                font_px,
+                if vertical { capsule_cross } else { capsule_span },
+                if vertical { capsule_span } else { capsule_cross },
+                rtl,
+                vertical,
+                &format!("block-slider-label-{role_id}"),
+                &format!("block-slider-value-{role_id}"),
+            );
+            stamp_forced_color(&mut row, role_fill, role_text);
+            row
+        };
 
-        let mut selected_clip = Node::container();
-        selected_clip.id = Some("block-slider-clip-selected".to_owned());
-        selected_clip.position = if rtl {
-            NodePosition::Absolute {
+        let selected_row = make_row(selected_text_color, "selection", "selection-text", "selected");
+        let remainder_row = make_row(remainder_text_color, "canvas", "canvas-text", "remainder");
+        let selected_row = if vertical {
+            selected_row
+        } else {
+            let mut selected_row = selected_row;
+            let selected_row_left = if rtl { selected_span - capsule_span } else { 0.0 };
+            selected_row.position = NodePosition::Absolute {
                 top: Some(0.0),
-                left: None,
+                left: Some(selected_row_left),
+                right: None,
+                bottom: None,
+            };
+            selected_row
+        };
+        let remainder_row = if vertical {
+            remainder_row
+        } else {
+            let mut remainder_row = remainder_row;
+            let remainder_row_left = if rtl { 0.0 } else { -selected_span };
+            remainder_row.position = NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(remainder_row_left),
+                right: None,
+                bottom: None,
+            };
+            remainder_row
+        };
+
+        let (selected_clip, remainder_clip) = if vertical {
+            // The selected fill grows from the physical bottom; the selected
+            // clip is the bottom region and the remainder clip the top. The
+            // row pins to the clip edge nearest the capsule's matching edge.
+            let mut selected_clip = Node::container();
+            selected_clip.id = Some("block-slider-clip-selected".to_owned());
+            selected_clip.position = NodePosition::Absolute {
+                top: None,
+                left: Some(0.0),
                 right: Some(0.0),
                 bottom: Some(0.0),
-            }
-        } else {
-            NodePosition::Absolute {
-                top: Some(0.0),
+            };
+            selected_clip.style.descriptor.layout.height = LayoutSizing::Fixed(selected_span);
+            selected_clip.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+            let mut pinned_row = selected_row;
+            pinned_row.position = NodePosition::Absolute {
+                top: Some(selected_span - capsule_span),
                 left: Some(0.0),
                 right: None,
-                bottom: Some(0.0),
-            }
-        };
-        selected_clip.style.descriptor.layout.width = LayoutSizing::Fixed(selected_span);
-        selected_clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
-        let mut selected_row = block_text_row(
-            label.clone().filter(|_| layout.label_inline),
-            value_text.clone().filter(|_| layout.value_inline),
-            selected_text_color,
-            font_px,
-            capsule_span,
-            capsule_h,
-            rtl,
-            "block-slider-label-selected",
-            "block-slider-value-selected",
-        );
-        stamp_forced_color(&mut selected_row, "selection", "selection-text");
-        selected_row.position = NodePosition::Absolute {
-            top: Some(0.0),
-            left: Some(selected_row_left),
-            right: None,
-            bottom: None,
-        };
-        selected_clip = selected_clip.child(selected_row);
+                bottom: None,
+            };
+            selected_clip = selected_clip.child(pinned_row);
 
-        let mut remainder_clip = Node::container();
-        remainder_clip.id = Some("block-slider-clip-remainder".to_owned());
-        remainder_clip.position = if rtl {
-            NodePosition::Absolute {
+            let mut remainder_clip = Node::container();
+            remainder_clip.id = Some("block-slider-clip-remainder".to_owned());
+            remainder_clip.position = NodePosition::Absolute {
                 top: Some(0.0),
                 left: Some(0.0),
-                right: None,
-                bottom: Some(0.0),
-            }
+                right: Some(0.0),
+                bottom: Some(remainder_span),
+            };
+            remainder_clip.style.descriptor.layout.height = LayoutSizing::Fixed(remainder_span);
+            remainder_clip.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+            remainder_clip = remainder_clip.child(remainder_row);
+            (selected_clip, remainder_clip)
         } else {
-            NodePosition::Absolute {
-                top: Some(0.0),
-                left: Some(selected_span),
-                right: None,
-                bottom: Some(0.0),
-            }
-        };
-        remainder_clip.style.descriptor.layout.width = LayoutSizing::Fixed(remainder_span);
-        remainder_clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
-        let mut remainder_row = block_text_row(
-            label.clone().filter(|_| layout.label_inline),
-            value_text.clone().filter(|_| layout.value_inline),
-            remainder_text_color,
-            font_px,
-            capsule_span,
-            capsule_h,
-            rtl,
-            "block-slider-label-remainder",
-            "block-slider-value-remainder",
-        );
-        stamp_forced_color(&mut remainder_row, "canvas", "canvas-text");
-        remainder_row.position = NodePosition::Absolute {
-            top: Some(0.0),
-            left: Some(remainder_row_left),
-            right: None,
-            bottom: None,
-        };
-        remainder_clip = remainder_clip.child(remainder_row);
+            let mut selected_clip = Node::container();
+            selected_clip.id = Some("block-slider-clip-selected".to_owned());
+            selected_clip.position = if rtl {
+                NodePosition::Absolute {
+                    top: Some(0.0),
+                    left: None,
+                    right: Some(0.0),
+                    bottom: Some(0.0),
+                }
+            } else {
+                NodePosition::Absolute {
+                    top: Some(0.0),
+                    left: Some(0.0),
+                    right: None,
+                    bottom: Some(0.0),
+                }
+            };
+            selected_clip.style.descriptor.layout.width = LayoutSizing::Fixed(selected_span);
+            selected_clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+            selected_clip = selected_clip.child(selected_row);
 
+            let mut remainder_clip = Node::container();
+            remainder_clip.id = Some("block-slider-clip-remainder".to_owned());
+            remainder_clip.position = if rtl {
+                NodePosition::Absolute {
+                    top: Some(0.0),
+                    left: Some(0.0),
+                    right: None,
+                    bottom: Some(0.0),
+                }
+            } else {
+                NodePosition::Absolute {
+                    top: Some(0.0),
+                    left: Some(selected_span),
+                    right: None,
+                    bottom: Some(0.0),
+                }
+            };
+            remainder_clip.style.descriptor.layout.width = LayoutSizing::Fixed(remainder_span);
+            remainder_clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+            remainder_clip = remainder_clip.child(remainder_row);
+            (selected_clip, remainder_clip)
+        };
         Some((selected_clip, remainder_clip))
     } else {
         None
     };
 
     let mut capsule = Node::container();
-    capsule.style.fill_width = true;
-    capsule.style.descriptor.layout.height = LayoutSizing::Fixed(capsule_h);
-    capsule.style.min_height = Some(capsule_h);
-    capsule.style.descriptor.layout.direction = LayoutDirection::Row;
+    if vertical {
+        capsule.style.fill_height = true;
+        capsule.style.descriptor.layout.width = LayoutSizing::Fixed(capsule_cross);
+        capsule.style.min_width = Some(capsule_cross);
+        capsule.style.descriptor.layout.direction = LayoutDirection::Column;
+    } else {
+        capsule.style.fill_width = true;
+        capsule.style.descriptor.layout.height = LayoutSizing::Fixed(capsule_cross);
+        capsule.style.min_height = Some(capsule_cross);
+        capsule.style.descriptor.layout.direction = LayoutDirection::Row;
+    }
     capsule.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     capsule.style.descriptor.background = Some(remainder_fill);
     let corners = &mut capsule.style.descriptor.corner_radii;
@@ -672,17 +698,38 @@ fn paint_slider_block(
     corners.bottom_left = control_radius;
     capsule.position = NodePosition::Relative;
     stamp_forced_color(&mut capsule, "canvas", "canvas-text");
-    capsule = if rtl {
-        capsule.child(remainder).child(selected)
-    } else {
-        capsule.child(selected).child(remainder)
+
+    // Paint order: selected paint, remainder paint, then the text layers.
+    // The span order flips for RTL and for vertical (selected grows from the
+    // physical bottom) so the window stays at the mirrored physical edge.
+    let selected = || {
+        let mut node = Node::container();
+        node.style.width_pct = Some(fraction.clamp(0.0, 1.0));
+        node.style.fill_height = true;
+        node.style.descriptor.background = Some(selected_color);
+        stamp_forced_color(&mut node, "selection", "selection-text");
+        node
     };
+    let remainder = || {
+        let mut node = Node::container();
+        node.style.flex_fill = true;
+        node.style.fill_height = true;
+        node.style.descriptor.background = Some(remainder_fill);
+        stamp_forced_color(&mut node, "canvas", "canvas-text");
+        node
+    };
+    if vertical || rtl {
+        capsule = capsule.child(remainder()).child(selected());
+    } else {
+        capsule = capsule.child(selected()).child(remainder());
+    }
     if let Some((selected_clip, remainder_clip)) = text_layers {
         capsule = capsule.child(selected_clip).child(remainder_clip);
     }
 
     let thumb = visible_thumb(effective_size, elevated, border_default);
     let mut hit = block_hit(hit_px, thumb, "value");
+    hit.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
     bind_slider_control(
         &mut hit,
         spec,
@@ -699,26 +746,53 @@ fn paint_slider_block(
         stamp_disabled_roles(&mut hit);
     }
 
-    let inset = ((hit_px - capsule_h) * 0.5).max(0.0);
-    capsule.position = NodePosition::Absolute {
-        top: Some(inset),
-        left: Some(0.0),
-        right: Some(0.0),
-        bottom: None,
+    let inset = ((hit_px - capsule_cross) * 0.5).max(0.0);
+    let physical = if rtl { 1.0 - fraction } else { fraction };
+    let mut surface = if vertical {
+        // The capsule fills the block axis; the cross axis is centred inside
+        // the hit-sized surface.
+        let mut capsule = capsule;
+        capsule.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(inset),
+            right: Some(inset),
+            bottom: Some(0.0),
+        };
+        let anchor_layer = fraction_anchor_vertical(physical, hit_px, hit, hit_px * 0.5);
+        let mut s = block_surface_vertical(hit_px);
+        s = s.child(capsule);
+        s.child(anchor_layer)
+    } else {
+        let mut capsule = capsule;
+        capsule.position = NodePosition::Absolute {
+            top: Some(inset),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: None,
+        };
+        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5);
+        let mut s = block_surface(hit_px);
+        s = s.child(capsule);
+        s.child(anchor_layer)
     };
-    let mut surface = block_surface(hit_px);
-    surface = surface
-        .child(capsule)
-        .child(fraction_anchor(physical, hit_px, hit, hit_px * 0.5));
     if let Some(handler) = scrub_handler {
-        surface = surface.child(block_grab(handler));
+        surface = surface.child(block_grab_with_axis(handler, scrub_axis(spec.orientation)));
     }
 
     let mut root = Node::container();
-    root.style.fill_width = true;
-    root.style.descriptor.layout.direction = LayoutDirection::Column;
+    if vertical {
+        root.style.fill_height = true;
+        root.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
+        root.style.min_width = Some(hit_px);
+        root.style.min_height = Some(rem_to_px(10.0));
+        root.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    } else {
+        root.style.fill_width = true;
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+    }
     root.roles
         .insert("appearance".to_owned(), "block".to_owned());
+    root.roles.insert("orientation".to_owned(), orientation_name(spec.orientation).to_owned());
     root.roles.insert(
         "direction".to_owned(),
         if rtl { "rtl" } else { "ltr" }.to_owned(),
@@ -753,10 +827,13 @@ fn block_text_slot(content: Option<String>, color: ColorValue, size: f32, id: &s
     node
 }
 
-/// The full-capsule-width row shared by both clipped text layers: optional
-/// label pinned to the logical inline start, exact value pinned to the
-/// logical inline end, at every value. Padding matches the fit law's content
-/// inset convention (0.5rem web / 8px native).
+/// The full-capsule text layout shared by both clipped text layers.
+///
+/// Horizontal (g18.017): optional label pinned to the logical inline start,
+/// exact value pinned to the logical inline end, at every value. Vertical
+/// (g18.022): the text stays upright with the exact value at the physical
+/// top and the optional label centered. Padding matches the fit law's
+/// content inset convention (0.5rem web / 8px native).
 #[allow(clippy::too_many_arguments)]
 fn block_text_row(
     label: Option<String>,
@@ -766,13 +843,18 @@ fn block_text_row(
     row_span: f32,
     row_height: f32,
     rtl: bool,
+    vertical: bool,
     label_id: &str,
     value_id: &str,
 ) -> Node {
     let mut row = Node::container();
     row.style.descriptor.layout.width = LayoutSizing::Fixed(row_span);
     row.style.descriptor.layout.height = LayoutSizing::Fixed(row_height);
-    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.direction = if vertical {
+        LayoutDirection::Column
+    } else {
+        LayoutDirection::Row
+    };
     row.style.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
     row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     let inset = rem_to_px(0.5);
@@ -780,7 +862,13 @@ fn block_text_row(
     row.style.descriptor.layout.spacing.padding.right = inset;
     let label_slot = block_text_slot(label, color, size, label_id);
     let value_slot = block_text_slot(value, color, size, value_id);
-    row = if rtl {
+    row = if vertical {
+        // Value at the physical top, label centered, and an empty bottom
+        // slot completing the three-anchor law. Text stays upright; nothing
+        // rotates.
+        let bottom_slot = block_text_slot(None, color, size, "block-slider-spacer");
+        row.child(value_slot).child(label_slot).child(bottom_slot)
+    } else if rtl {
         row.child(value_slot).child(label_slot)
     } else {
         row.child(label_slot).child(value_slot)
@@ -812,7 +900,7 @@ mod tests {
         let commit = Arc::clone(&seen);
         let theme = theme();
         let root = RenderContext::new(&theme);
-        let ctx = if spec.appearance == SliderAppearance::Block {
+        let ctx = if spec.variant == SliderVariant::Block {
             use poodle_headless::slider::measure_block_advance;
             root.with_block_layout(160.0, Arc::new(measure_block_advance))
         } else {
@@ -849,7 +937,9 @@ mod tests {
     fn commit_only_hosts_still_install_the_scrub() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+        let spec = SliderSpec::new(0.5)
+            .with_bounds(0.0, 1.0)
+            .with_variant(SliderVariant::Embedded);
         let node = slider(
             &spec,
             &ctx,
@@ -865,7 +955,9 @@ mod tests {
     fn no_change_handler_means_no_scrub() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+        let spec = SliderSpec::new(0.5)
+            .with_bounds(0.0, 1.0)
+            .with_variant(SliderVariant::Embedded);
         let node = slider(&spec, &ctx, &SliderHandlers::default());
         assert!(find_scrub(&node).is_none());
         assert!(slider_control(&node).interaction.on_key.is_none());
@@ -1017,7 +1109,7 @@ mod tests {
     fn block_hit_is_forty_four_and_forced_colors_keep_roles() {
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_visible_label("Blur")
             .with_visible_value_text("50");
         let (node, _) = armed(spec);
@@ -1057,7 +1149,7 @@ mod tests {
     fn collision_suppresses_the_label_and_keeps_the_exact_value() {
         let spec = SliderSpec::new(10.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_visible_label("Compressor makeup gain")
             .with_visible_value_text("10");
         let (node, _) = armed(spec);
@@ -1080,7 +1172,7 @@ mod tests {
     fn block_text_layers_split_at_the_fill_boundary() {
         let spec = SliderSpec::new(25.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_visible_label("Blur")
             .with_visible_value_text("25");
         let (node, _) = armed(spec);
@@ -1104,11 +1196,14 @@ mod tests {
             LayoutOverflow::Hidden
         ));
         // One stable full-capsule row per layer: same span, same glyph
-        // metrics, different foreground role.
-        let selected_slot = node
+        // metrics, different foreground role. Both rows stamp the same slot
+        // ids, so the roles are asserted per layer row instead.
+        let selected_row = &selected_clip.children[0];
+        let remainder_row = &remainder_clip.children[0];
+        let selected_slot = selected_row
             .find(&|n| n.id.as_deref() == Some("block-slider-value-selected"))
             .expect("selected value slot");
-        let remainder_slot = node
+        let remainder_slot = remainder_row
             .find(&|n| n.id.as_deref() == Some("block-slider-value-remainder"))
             .expect("remainder value slot");
         assert_eq!(selected_slot.style.text_size, remainder_slot.style.text_size);
@@ -1128,7 +1223,7 @@ mod tests {
     fn block_rtl_remaps_scrub_without_changing_keys() {
         let spec = SliderSpec::new(0.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_direction(poodle_specs::SliderDirection::Rtl);
         let (node, seen) = armed(spec);
         let scrub = Arc::clone(
@@ -1153,7 +1248,7 @@ mod tests {
     fn a_second_scrub_release_is_inert() {
         let spec = SliderSpec::new(0.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block);
+            ;
         let (node, seen) = armed(spec);
         let scrub = Arc::clone(
             find_scrub(&node)
@@ -1178,7 +1273,7 @@ mod tests {
         let theme = theme();
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_visible_label("AB")
             .with_visible_value_text("50");
         let measure: crate::context::BlockTextMeasure =
@@ -1216,7 +1311,7 @@ mod tests {
         let theme = theme();
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block);
+            ;
         let _node = slider(
             &spec,
             &RenderContext::new(&theme),
@@ -1224,21 +1319,43 @@ mod tests {
         );
     }
 
-    #[should_panic(expected = "appearance=\"block\" rejects orientation=\"vertical\"")]
     #[test]
-    fn vertical_block_is_rejected_before_paint() {
+    fn vertical_block_keeps_upright_text_and_a_vertical_scrub() {
         let spec = SliderSpec::new(40.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
-            .with_orientation(Orientation::Vertical);
-        let _ = armed(spec);
+            .with_orientation(Orientation::Vertical)
+            .with_visible_label("Blur")
+            .with_visible_value_text("40");
+        let (node, seen) = armed(spec);
+        let carrier = find_scrub(&node).unwrap();
+        assert_eq!(carrier.interaction.scrub_axis, ScrubAxis::Vertical);
+        // Pressing near the top drives the value toward the maximum.
+        let scrub = Arc::clone(
+            find_scrub(&node)
+                .unwrap()
+                .interaction
+                .on_scrub
+                .as_ref()
+                .unwrap(),
+        );
+        scrub(0.2, ScrubPhase::Press);
+        let pressed = seen.lock().unwrap().last().unwrap().1;
+        assert!((pressed - 20.0).abs() < 1e-6);
+        // Upright text: both strings paint inside the capsule.
+        let texts = node.texts();
+        assert!(texts.iter().any(|t| *t == "Blur"));
+        assert!(texts.iter().any(|t| *t == "40"));
+        assert!(node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_none());
+        assert_eq!(slider_control(&node).a11y.orientation.as_deref(), Some("vertical"));
     }
 
     #[test]
     fn aria_label_never_becomes_visible_block_text() {
         let mut spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block);
+            ;
         spec.aria_label = Some("Gain".into());
         let (node, _) = armed(spec);
         let texts = node.texts().join(" ");
@@ -1250,7 +1367,7 @@ mod tests {
     fn visible_label_never_becomes_block_accessible_name() {
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-            .with_appearance(SliderAppearance::Block)
+
             .with_visible_label("Blur");
         let (node, _) = armed(spec);
         assert_eq!(slider_control(&node).a11y.label, None);
