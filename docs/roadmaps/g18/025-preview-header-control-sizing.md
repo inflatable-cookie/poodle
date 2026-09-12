@@ -1,6 +1,6 @@
 # 025 — Preview header control sizing
 
-Status: ready for Queue dispatch — operator approved 2026-09-12
+Status: Queue revision — preview-local ToggleGroup alignment authorized 2026-09-12
 Owner: Poodle web previews
 Created: 2026-09-12
 Governing refs: `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
@@ -29,9 +29,16 @@ acceptance uses the corrected shell.
 - Header chrome is fixed at Poodle `md`; it does not inherit the specimen
   `controlSize` selection.
 - Use one coherent size context or existing public size inputs. Do not add
-  preview-only CSS heights that bypass component sizing contracts.
+  preview-only CSS heights that bypass component sizing contracts, except for
+  the narrow paired-header treatment below.
 - ThemeSelect, both ToggleGroups, Slider, and TextInput expose equal 36px visual
   control height and align on their top/bottom edges beneath equal labels.
+- **Chatterbox ruling, 2026-09-12:** preserve ToggleGroup's reusable 0.25rem
+  item inset globally. Within the two generated preview headers only, neutralize
+  that inset so Density and Size paint at the same 36px `md` height as the other
+  header controls. This paired local treatment is an explicit exception to the
+  no-preview-height rule; it must not change ToggleGroup's public contract or
+  leak into catalogue specimens.
 - Keep current values, generated-shell ownership, wrapping, responsive search
   growth, keyboard behavior, and accessibility unchanged.
 - Mirror the result in Svelte and React. Do not change reusable component APIs.
@@ -61,14 +68,14 @@ acceptance uses the corrected shell.
 - **Worker:** routine paired-web UI worker
 - **Excluded:** component API changes; generated shell vocabulary changes;
   broader header redesign; release mutations
-- **Escalation:** Chatterbox if any participating control cannot consume the
-  shared `md` size without a reusable-component API change
+- **Escalation:** resolved 2026-09-12. ToggleGroup keeps its reusable inset;
+  g18.025 may apply the narrow paired-header exception above.
 
 ## Work
 
 1. Plant paired header geometry checks at every specimen Size selection.
-2. Bind the complete header control surface to fixed `md` presentation without
-   hard-coded CSS heights.
+2. Bind the complete header control surface to fixed `md` presentation. Apply
+   the authorized paired-header ToggleGroup inset neutralization locally.
 3. Prove all five visual controls measure 36px and align in both previews.
 4. Prove Size, Density, Theme, Contrast, Search, wrapping, and keyboard behavior
    remain functional.
@@ -97,6 +104,13 @@ Inspection on 2026-09-12 found both DisplayControls implementations render the
 same ThemeSelect, ToggleGroup, Slider, and TextInput surfaces without binding
 one fixed header size. The operator screenshot shows Theme/Search/Contrast and
 Density/Size resolving to different visible heights.
+
+PR #257 proved the fixed `md` scope but exposed a pre-existing contract gap:
+ToggleGroup deliberately paints each item 0.25rem shorter than its resolved
+size. Accepting that inset would leave the reported mismatch intact; changing
+the reusable component would broaden a preview-shell repair across every
+consumer. Chatterbox therefore authorized the smallest paired preview-local
+alignment treatment.
 
 ## Next task
 
