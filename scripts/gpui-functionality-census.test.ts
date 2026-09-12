@@ -1,22 +1,28 @@
 import { describe, expect, it } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import {
   ADMITTED_VIA,
   AXIS_TEST_SIGNALS,
   CENSUS_AXES,
+  GPUI_PREVIEW_CARGO_MANIFEST,
   PLATFORM_LANGUAGE,
+  RECEIPT_DIR,
   RECEIPT_SCHEMA,
   admitReceiptTextAxes,
   admitTestAxes,
   CENSUS_JSON_PATH,
+  expectedTestReceiptContent,
   extractTestBody,
   loadExecutionRecord,
+  loadPreviewPackageVersion,
   observedDriver,
   observedRenderer,
+  parsePreviewPackageVersion,
   validateCapabilityManifest,
   validateCensusDoc,
   validateExecutionRecord,
+  validateReceiptPackageVersion,
   type CensusAxis,
   type CensusDoc,
   type ManifestEntry,
@@ -286,5 +292,65 @@ describe("g18.001 census oracles", () => {
     const admission = admitTestAxes(body);
     expect(admission.production).toBe(true);
     expect(admission.axes).not.toContain("accessibility");
+  });
+});
+
+describe("g18.031 census release provenance", () => {
+  const root = path.resolve(import.meta.dir, "..");
+
+  it("live-manifest law: preview Cargo.toml is the receipt version authority", () => {
+    const live = loadPreviewPackageVersion(root);
+    const manifest = readFileSync(path.join(root, GPUI_PREVIEW_CARGO_MANIFEST), "utf8");
+    expect(parsePreviewPackageVersion(manifest)).toBe(live);
+    const receiptDir = path.join(root, RECEIPT_DIR);
+    const files = readdirSync(receiptDir);
+    expect(files.length).toBeGreaterThan(0);
+    for (const file of files) {
+      const receipt = JSON.parse(readFileSync(path.join(receiptDir, file), "utf8")) as {
+        package_version?: string;
+      };
+      expect(receipt.package_version, file).toBe(live);
+    }
+  });
+
+  it("planted-manifest law: a preview bump flows into emitted receipt content", () => {
+    const planted = '[package]\nname = "poodle-gpui-preview"\nversion = "0.4.0"\n';
+    const version = parsePreviewPackageVersion(planted);
+    expect(version).toBe("0.4.0");
+    const content = expectedTestReceiptContent({
+      component: "Button",
+      test: "a_mounted_button_carries_its_controls_target",
+      command: "effigy regressions:native",
+      axes: ["semantic"],
+      signals: { semantic: ["assert"], events: [], pointer: [], keyboard_focus: [], accessibility: [], visual: [] },
+      driver: "HeadlessDriver::new",
+      renderer: "poodle_render::button",
+      packageVersion: version,
+      sourceCommit: "d8e174fb40b2634b7d00018c721816ffc037d712",
+      lockfileSha256: "0".repeat(64),
+      runId: "planted-run",
+      bodySha256: "0".repeat(64),
+    });
+    const receipt = JSON.parse(content) as { schema?: string; package_version?: string };
+    expect(receipt.schema).toBe(RECEIPT_SCHEMA);
+    expect(receipt.package_version).toBe("0.4.0");
+  });
+
+  it("fail-closed law: missing, duplicate, and malformed versions are rejected", () => {
+    expect(() => parsePreviewPackageVersion('[package]\nname = "poodle-gpui-preview"\n')).toThrow(/one version/i);
+    expect(() =>
+      parsePreviewPackageVersion('[package]\nversion = "0.3.0"\nversion = "0.4.0"\n'),
+    ).toThrow(/one version/i);
+    expect(() => parsePreviewPackageVersion("[package]\nversion = 0.4\n")).toThrow(/quoted semver/i);
+    expect(() => parsePreviewPackageVersion('[package]\nversion = "release"\n')).toThrow(/quoted semver/i);
+    expect(() =>
+      parsePreviewPackageVersion('[package]\nversion = "0.3.0"\n\n[package]\nversion = "0.4.0"\n'),
+    ).toThrow(/one \[package\]/i);
+  });
+
+  it("stale-receipt law: a receipt version that disagrees with the live manifest is rejected", () => {
+    expect(validateReceiptPackageVersion("0.3.0", "0.3.0", "Button")).toBe("0.3.0");
+    expect(() => validateReceiptPackageVersion("0.2.0", "0.3.0", "Button")).toThrow(/preview manifest/i);
+    expect(() => validateReceiptPackageVersion(undefined, "0.3.0", "Button")).toThrow(/preview manifest/i);
   });
 });

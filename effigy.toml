@@ -9,6 +9,16 @@ include = [
   "demos/effigy.demos.toml",
 ]
 
+[release]
+# Release authority is the public lockstep core package, not the private root
+# workspace manifest. Without this, Effigy auto-detects `poodle@0.1.0` in the
+# root tooling manifest and reports a false mismatch against the 0.3.0
+# changelog. The root manifest stays private workspace tooling.
+version-file = "packages/core/package.json"
+changelog = "CHANGELOG.md"
+tag-format = "v{version}"
+pre-1-0 = true
+
 [release.gates.headless]
 command = "effigy qa"
 description = "Run Poodle's complete self-contained headless release board"

@@ -10,6 +10,14 @@ const HEADLESS_TEST_FILE = "packages/gpui/preview/tests/headless_regressions.rs"
 const GPUI_LOCKFILE = "packages/gpui/preview/Cargo.lock";
 const NATIVE_SELECTOR = "effigy regressions:native";
 
+/** The live release identity for GPUI receipts. The preview crate manifest is
+ * the package authority; receipts must never embed a literal that outlives a
+ * version bump. */
+export const GPUI_PREVIEW_CARGO_MANIFEST = "packages/gpui/preview/Cargo.toml";
+export const PREVIEW_PACKAGE = "poodle-gpui-preview";
+
+const SEMVER_RE = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+
 export const CENSUS_DIR = "docs/evidence/gpui";
 export const MANIFEST_PATH = `${CENSUS_DIR}/capability-manifest.json`;
 export const RECEIPT_DIR = `${CENSUS_DIR}/mounted-receipts`;
@@ -137,6 +145,47 @@ export function sha256Hex(text: string): string {
 
 function read(root: string, relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
+}
+
+/** Parse the preview crate's `[package].version` narrowly and fail closed.
+ * Missing, duplicate, and malformed declarations refuse to produce evidence,
+ * so a manifest edit can never silently fall back to a stale literal. */
+export function parsePreviewPackageVersion(source: string): string {
+  const packageHeaders = [...source.matchAll(/^\[package\][ \t]*$/gm)];
+  if (packageHeaders.length !== 1) {
+    throw new Error(`GPUI preview manifest must declare exactly one [package] table; found ${packageHeaders.length}.`);
+  }
+  const header = packageHeaders[0];
+  const after = source.slice((header.index ?? 0) + header[0].length);
+  const nextTable = after.search(/^\[/m);
+  const block = nextTable === -1 ? after : after.slice(0, nextTable);
+  const declarations = [...block.matchAll(/^[ \t]*version[ \t]*=[ \t]*([^\r\n]*)$/gm)];
+  if (declarations.length !== 1) {
+    throw new Error(`GPUI preview [package] must declare exactly one version key; found ${declarations.length}.`);
+  }
+  const raw = declarations[0][1].trim();
+  const quoted = /^"([^"]*)"$/.exec(raw);
+  if (quoted === null || !SEMVER_RE.test(quoted[1])) {
+    throw new Error(`GPUI preview package version must be one quoted semver string; found ${raw === "" ? "nothing" : raw}.`);
+  }
+  return quoted[1];
+}
+
+/** The live preview package version from the checked-in manifest. */
+export function loadPreviewPackageVersion(root = ROOT): string {
+  return parsePreviewPackageVersion(read(root, GPUI_PREVIEW_CARGO_MANIFEST));
+}
+
+/** A mounted receipt's recorded package version must equal the live manifest.
+ * Returns the live version so callers can keep using it after validating. */
+export function validateReceiptPackageVersion(recorded: unknown, live: string, component: string): string {
+  if (recorded !== live) {
+    const found = typeof recorded === "string" && recorded.length > 0 ? recorded : "none";
+    throw new Error(
+      `Mounted receipt for ${component} records package version ${found} but the preview manifest is ${live}; regenerate.`,
+    );
+  }
+  return live;
 }
 
 /** The pinned execution commit must exist locally and the working tree must
@@ -541,6 +590,64 @@ export function receiptFileName(component: string, test: string): string {
   return `${RECEIPT_DIR}/${component}--${slug}.json`;
 }
 
+export type ExpectedTestReceiptInput = {
+  component: string;
+  test: string;
+  command: string;
+  axes: CensusAxis[];
+  signals: Record<CensusAxis, string[]>;
+  driver: string;
+  renderer: string;
+  packageVersion: string;
+  sourceCommit: string;
+  lockfileSha256: string;
+  runId: string;
+  bodySha256: string;
+};
+
+/** Build one checked-in mounted receipt. The release identity is injected, so
+ * the caller must supply the live preview manifest version instead of a
+ * literal that silently survives a version bump. */
+export function expectedTestReceiptContent(input: ExpectedTestReceiptInput): string {
+  return `${JSON.stringify(
+    {
+      schema: RECEIPT_SCHEMA,
+      component: input.component,
+      test: input.test,
+      selector: NATIVE_SELECTOR,
+      scenario_id: null,
+      scenario_note:
+        "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+      contract_claims: input.axes,
+      signals: Object.fromEntries(input.axes.map((axis) => [axis, input.signals[axis]])),
+      production_path_observation: {
+        observed: true,
+        mount: "HeadlessDriver",
+        driver: input.driver,
+        render_path: "poodle_render -> poodle_gpui_node_backend::to_gpui",
+        renderer: input.renderer,
+        input_dispatch: "gpui-test-platform-dispatch",
+      },
+      package: PREVIEW_PACKAGE,
+      package_version: input.packageVersion,
+      source_commit: input.sourceCommit,
+      lockfile: GPUI_LOCKFILE,
+      lockfile_sha256: input.lockfileSha256,
+      distribution: "workspace",
+      execution: {
+        command: input.command,
+        run_id: input.runId,
+        outcome: "passed",
+        body_sha256: input.bodySha256,
+      },
+      observed: input.axes.map((axis) => OBSERVED_SENTENCES[axis]),
+      outcome: "passed",
+    },
+    null,
+    2,
+  )}\n`;
+}
+
 export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{ file: string; content: string }> } {
   const roster = deriveLiveRoster(root);
   const manifest = deriveCapabilityManifest(root);
@@ -551,6 +658,8 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
   const nucleusByName = new Map(nucleusRows.map((row) => [row.entry.name, row]));
   const record = loadExecutionRecord(root);
   validateExecutionRecord(record, root);
+  // Release identity comes from the live preview manifest, never a literal.
+  const packageVersion = loadPreviewPackageVersion(root);
   // Evidence identity is record state, never live HEAD: a commit cannot
   // contain its own hash, so embedding the current checkout would make every
   // checked-in artifact disagree with the generator on every later commit.
@@ -637,43 +746,20 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
       for (const axis of axes) admit(axis, "expected-test", `${HEADLESS_TEST_FILE}#${test}`);
       receipts.push({
         file,
-        content: `${JSON.stringify(
-          {
-            schema: RECEIPT_SCHEMA,
-            component: component.name,
-            test,
-            selector: NATIVE_SELECTOR,
-            scenario_id: null,
-            scenario_note:
-              "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
-            contract_claims: axes,
-            signals: Object.fromEntries(axes.map((axis) => [axis, admission.signals[axis]])),
-            production_path_observation: {
-              observed: true,
-              mount: "HeadlessDriver",
-              driver: observedDriver(body, headlessSource, test),
-              render_path: "poodle_render -> poodle_gpui_node_backend::to_gpui",
-              renderer: observedRenderer(body, headlessSource, test),
-              input_dispatch: "gpui-test-platform-dispatch",
-            },
-            package: "poodle-gpui-preview",
-            package_version: "0.3.0",
-            source_commit: record.source_commit,
-            lockfile: GPUI_LOCKFILE,
-            lockfile_sha256: record.lockfile_sha256,
-            distribution: "workspace",
-            execution: {
-              command: record.command,
-              run_id: record.run_id,
-              outcome: "passed",
-              body_sha256: record.results[test].body_sha256,
-            },
-            observed: axes.map((axis) => OBSERVED_SENTENCES[axis]),
-            outcome: "passed",
-          },
-          null,
-          2,
-        )}\n`,
+        content: expectedTestReceiptContent({
+          component: component.name,
+          test,
+          command: record.command,
+          axes,
+          signals: admission.signals,
+          driver: observedDriver(body, headlessSource, test),
+          renderer: observedRenderer(body, headlessSource, test),
+          packageVersion,
+          sourceCommit: record.source_commit,
+          lockfileSha256: record.lockfile_sha256,
+          runId: record.run_id,
+          bodySha256: record.results[test].body_sha256,
+        }),
       });
       void admittedAxes;
     }
@@ -914,6 +1000,7 @@ function validateReceiptFile(content: string, root: string): void {
     test?: string;
     selector?: string;
     contract_claims?: string[];
+    package_version?: unknown;
     source_commit?: string;
     lockfile_sha256?: string;
     execution?: { outcome?: string; body_sha256?: string };
@@ -930,6 +1017,7 @@ function validateReceiptFile(content: string, root: string): void {
   for (const axis of receipt.contract_claims) {
     if (!(CENSUS_AXES as readonly string[]).includes(axis)) throw new Error(`Mounted receipt claims unknown axis ${axis}.`);
   }
+  validateReceiptPackageVersion(receipt.package_version, loadPreviewPackageVersion(root), receipt.component);
   if (!/^[0-9a-f]{40}$/.test(receipt.source_commit ?? "")) throw new Error("Mounted receipt needs a 40-hex source commit.");
   const lockText = read(root, GPUI_LOCKFILE);
   if (sha256Hex(lockText) !== receipt.lockfile_sha256) {
@@ -1005,8 +1093,10 @@ export function checkCensusArtifacts(root = ROOT): void {
   }
   for (const receipt of receipts) {
     const actual = read(root, receipt.file);
-    if (actual !== receipt.content) throw new Error(`Checked-in ${receipt.file} disagrees with the generator; regenerate.`);
+    // Validate the checked-in receipt first so a stale package version fails
+    // with its own provenance message, not only a generic byte mismatch.
     validateReceiptFile(actual, root);
+    if (actual !== receipt.content) throw new Error(`Checked-in ${receipt.file} disagrees with the generator; regenerate.`);
   }
   validateManifestRefs(doc.manifest, root);
   validateCrossRuntimeReport(root);
