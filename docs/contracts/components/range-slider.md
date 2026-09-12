@@ -1,6 +1,6 @@
 # Range Slider
 
-Status: approved contract — g18.024 repair queued
+Status: approved contract — g18.026 shared-family implementation queued
 Updated: 2026-09-12
 
 
@@ -20,6 +20,16 @@ Updated: 2026-09-12
   thumbs, single-value selection (see Slider), PageUp/PageDown convergence,
   invalid/read-only/indeterminate states, a generic tooltip or public
   fit-metric API
+
+### Slider-family implementation boundary
+
+`RangeSlider` extends the Slider family through composition, not public
+inheritance. It keeps its tuple value, active-thumb selection, non-crossing
+bounds, group semantics and two independently named slider focus stops. Its
+private renderer composes the same size/axis, capsule/track, fill, center,
+handle, text-clipping, pointer-coordinate and effective-target foundation as
+`Slider`, rendering the shared handle primitive twice. Only genuine two-thumb
+modifiers may remain RangeSlider-specific.
 
 ## 2. Anatomy
 

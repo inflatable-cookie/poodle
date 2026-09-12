@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: paused — retained dispatched Queue task/workspace; final implementation lane after g18.012 and operator acceptance
+Status: paused — retained Queue task/workspace; resume only after g18.026 and g18.027
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -11,7 +11,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../../packages/release-operations.json`
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
-`g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`
+`g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
+`g18.026`, `g18.027`
 
 ## Outcome
 
@@ -59,6 +60,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
   formatting surface. Do not add compatibility aliases in the candidate.
 - Include the accepted g18.023 dual syntax palettes. Do not release the
   temporary accent/status mapping from g18.021 as the final CodeEditor theme.
+- Consume the accepted g18.027 public-surface freeze report from the exact
+  post-g18.026 main head. Candidate preparation must recheck its ancestry and
+  delta identity before changing any release-bearing input.
 - Repair the current Keep-a-Changelog parser incompatibility before treating
   Effigy's release status/plan as healthy. Preserve historical meaning; do not
   bypass the parser or release gates.
@@ -69,11 +73,10 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** operator-paused in retained dispatched Queue task/workspace; resume
-  only after g18.011 completes with operator acceptance, g18.022 and g18.023
-  merge, and every other blocking repair closes; then rebase and recompute
-  final-source identity. Use the
-  Queue's in-place dependency mutation to preserve this retained task and
-  worker while encoding the remaining serial work; do not replace either.
+  only after g18.026 and g18.027 merge, then rebase and recompute final-source
+  identity. The task's dependency list froze on first dispatch, so preserve the
+  same task, worker and workspace in the visible blocked state; do not replace
+  them or pretend a later dependency mutation is available.
 - **Completion:** one reviewed release-candidate PR merged to main; exact
   candidate local gates and branch dry run green; final version set, package
   trees, packed archives and release notes recorded for g18.009
@@ -94,8 +97,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Work
 
-1. After g18.003 and g18.004 close, inventory the full public-intent delta from
-   `v0.3.0` to current main. Record final core/Svelte tree hashes and verify the
+1. After g18.027 closes, consume its full public-intent delta from `v0.3.0` to
+   current main. Record final core/Svelte tree hashes and verify the
    g18.002 editor-bearing hashes occur in their lineage.
 2. Repair `CHANGELOG.md` into the supported Keep a Changelog category grammar
    without losing historical release meaning. Prove `effigy release status
@@ -168,8 +171,9 @@ repair. The retained worker must recompute them after rebasing onto its merge.
 
 ## Next task
 
-Complete retained g18.011 and parallel g18.022/g18.023, then resolve any
-blocking finding. Resume this retained task only after operator sweep
-acceptance and merged g18.022/g18.023, then rebuild the candidate from the
-accepted source. After that candidate merges and closes, g18.009 dispatches
-from its dependency. Desktop then resumes retained g02.058 and PR #215.
+Complete g18.026, then g18.027. Resume this retained task only after the
+Slider-family parity repair and exact final public-surface freeze report merge.
+The Queue cannot add dependencies to this already-dispatched task, so its
+blocked state is the explicit serial gate; preserve its worker and workspace.
+After the candidate merges and closes, g18.009 dispatches from its existing
+dependency. Desktop then resumes retained g02.058 and PR #215.

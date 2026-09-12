@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.023/g18.024 merged; g18.025 ready before release)
+Updated: 2026-09-12 (g18.026 ready; g18.027 serial before retained release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -84,7 +84,7 @@ acceptance sweep — merged as `211ec0cb707eba62eadc5b33d1bb54d3605c5239` (PR #2
 `ready_to_merge`) at `09f298dce257c1414a6d07ddb74c6442e9cbacb0` with green
 rust/web checks at the reviewed head. Zero unresolved release-blocking
 findings; one retained non-blocking follow-up (F12, preview-harness owner).
-Operator acceptance is still required before g18.006 resumes.
+The sweep gate is closed; newer Slider-family work now gates g18.006.
 
 [`g18.022`](g18/022-block-first-slider-family.md) — block-first Slider family — merged as `02ab7f7ec9122d85364beca77d05d681fa4d0124` (PR #254) on
 2026-09-12 after exact-head independent review (PR comment `5644429883`,
@@ -112,7 +112,9 @@ focus-ring contract note (see the g18.024 closeout log).
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after operator acceptance of merged g18.011 and g18.025 closes.
+only after g18.026 and g18.027 merge. Its dependencies are frozen because it
+already dispatched; the visible blocked state is the serial gate and the task,
+worker and workspace must remain intact.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
@@ -124,8 +126,8 @@ dispatches only after the repaired candidate closes.
 merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). Queue task
 `aad6b776-1c3e-438c-bc9c-4e8ba8750462` is closed with the four-surface sweep
 complete, zero unresolved release-blocking findings, and one retained
-non-blocking follow-up (F12, preview-harness owner). Operator acceptance of
-the sweep capsule is the gate for resuming retained g18.006.
+non-blocking follow-up (F12, preview-harness owner). Newer g18.026/g18.027 work
+is the remaining release gate.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is merged (PR #250).
 It replaced the closed grammar catalogue with consumer-selected lazy CodeMirror
@@ -186,14 +188,26 @@ shared control-size axis, layout-neutral 44×44 targets, step-aware visible
 values, and complete native-axis vertical geometry with centred thumbs and
 xl-anchored hits.
 
-[`g18.025`](g18/025-preview-header-control-sizing.md) is operator-approved for
-Queue dispatch. It fixes every header control at shared `md` size in both web
-previews and prevents the specimen Size axis from resizing its own controls. It
-must close before retained g18.006 resumes.
+[`g18.025`](g18/025-preview-header-control-sizing.md) is complete (PR #257,
+merge `90c40defe86e4841ad248c72200f7333f37c342d`). Direct correction
+`a6bed8420` made every header control follow the selected size consistently and
+restored `sm` as the initial selection.
+
+[`g18.026`](g18/026-slider-foundation-and-range-parity.md) is the approved next
+task. It keeps Slider and RangeSlider separate publicly, consolidates their
+private rendering foundation, and ports the accepted Slider behavior to
+RangeSlider. It is ready for Queue submission after explicit execution
+authorization.
+
+[`g18.027`](g18/027-v040-public-surface-freeze-audit.md) follows g18.026. It
+classifies the exact `v0.3.0`→post-g18.026 public delta and freezes `0.4.0`
+before retained g18.006 resumes.
 
 ## Held planning horizons
 
-GPUI repair tranches, GPUI/shared-Rust CodeEditor and RichTextEditor work,
+The post-`0.4.0` compatible consumer/specimen sweep and `0.4.1` bug-fix release
+remain the next release horizon; scope is compiled from live findings after
+Desktop is unblocked. GPUI repair tranches, GPUI/shared-Rust CodeEditor and RichTextEditor work,
 visual expansion, keyboard-origin focus, V2, M2, A2, the Nucleus switch packet,
 web-pair extraction, the contributor-guidance pilot, Jetstream, and triage
 holds are not yet queue tasks. Their gates remain in `g18/README.md` and

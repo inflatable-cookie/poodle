@@ -23,5 +23,3 @@ Current open notes:
   only single-consumer Tabs asks remain after `0.3.0` adoption.
 - `20260905-111233-gpui-unofficial-adoption-gates.md` — published
   `gpui-apple` build failure and live AccessKit-tree proof still block A2.
-- `20260912-152335-range-slider-foundation-and-release-cutoff.md` — decide the
-  shared Slider-family renderer seam and final `0.4.0` breaking-change cutoff.

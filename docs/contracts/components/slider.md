@@ -1,6 +1,6 @@
 # Slider
 
-Status: approved contract — g18.024 merged; web collision docking adopted
+Status: approved contract — g18.026 shared-family implementation queued
 Updated: 2026-09-12
 
 
@@ -21,6 +21,17 @@ Updated: 2026-09-12
   semantics, tick marks, PageUp/PageDown convergence,
   invalid/read-only/indeterminate states, a generic tooltip or public
   fit-metric API
+
+### Slider-family implementation boundary
+
+`Slider` and `RangeSlider` remain separate public components. They do not
+inherit from one another and must not collapse into a scalar-or-pair union API.
+Their private renderers share one family foundation for size and axis geometry,
+capsule/track, fill segments, center markers, handles, text clipping, pointer
+coordinates and layout-neutral effective targets. Slider keeps its one-value,
+one-focus-stop machine; RangeSlider keeps its ordered pair and two focus stops.
+A presentation repair to the shared foundation is therefore a family change,
+not a component-local copy.
 
 ## 2. Anatomy
 

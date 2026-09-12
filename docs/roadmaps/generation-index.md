@@ -9,8 +9,8 @@ Updated: 2026-09-12
   - Completed tasks: `g18.001` contract-bound GPUI functionality census; `g18.002` CodeMirror web CodeEditor (PR #236); `g18.003` TipTap/ProseMirror rich-text editor (PR #237); `g18.004` Tabs card inactive surfaces (PR #239); `g18.005` v0.4.0 release preflight (PR #238); `g18.007` ordinary changelog maintenance scope (PR #240); `g18.008` web editor preview specimens (PR #241); `g18.010` CodeEditor editing focus treatment (PR #242); `g18.013` RichTextEditor toolbar controls (PR #245); `g18.015` preview distribution build preflight (PR #243); `g18.016` CodeEditor live line-number reconfiguration (PR #244); `g18.017` block Slider fixed inline presentation (PR #246); `g18.019` MarkdownRenderer shared safe/trusted rendering (PR #247); `g18.014` rich-text image-policy specimen proof (PR #249); `g18.012` CodeEditor extensible language registry (PR #250); `g18.018` RichTextEditor controlled-echo selection preservation (PR #248); `g18.020` RichTextEditor heading mode select (PR #251); `g18.021` CodeEditor token-bound syntax presentation (PR #252); `g18.011` four-surface web editor UX acceptance sweep (PR #253)
   - Merged task: `g18.011` four-surface web editor UX acceptance sweep (PR
     #253); paired Chromium/WebKit evidence with zero unresolved
-    release-blocking findings and one retained follow-up (F12); operator
-    acceptance gates retained g18.006.
+    release-blocking findings and one retained follow-up (F12); the newer
+    Slider-family parity and release-freeze work now gates retained g18.006.
   - Merged task: `g18.022` block-first Slider family (PR #254); block is now
     the default Slider/RangeSlider variant with fixed anchors and vertical
     parity after exact-head review.
@@ -21,8 +21,14 @@ Updated: 2026-09-12
     #256); the block family is on the shared size axis with layout-neutral
     targets, step-aware display, and complete vertical geometry after
     exact-head review.
-  - Ready task: operator-approved `g18.025` Preview header control sizing fixes
-    all five paired-preview controls at stable `md` chrome before release.
+  - Completed task: `g18.025` Preview header control sizing (PR #257 plus
+    direct correction `a6bed8420`); all controls follow one selected size with
+    `sm` as the initial value.
+  - Ready task: operator-approved `g18.026` consolidates the private
+    Slider-family renderer and brings RangeSlider to accepted Slider parity
+    without merging their public APIs.
+  - Dependency-ready task: `g18.027` freezes and classifies the exact
+    `v0.3.0`→post-g18.026 public surface before candidate preparation.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
     repair is an in-place g18.011 dependency.
@@ -62,10 +68,14 @@ Updated: 2026-09-12
     the outer ring is now a local keyboard-entry affordance dismissed on
     committed edits, with the document modality left truthful.
   - Paused candidate: retained g18.006 task/workspace resumes only after
-    accepted g18.011 and completed g18.025.
+    merged g18.026 and g18.027; its already-dispatched Queue dependency list is
+    frozen, so the blocked state preserves the serial gate.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
-  - Next checkpoint: merge g18.025, accept the repaired previews, then resume
-    g18.006.
+    hold; it publishes only the accepted candidate and returns the Desktop
+    unblock capsule.
+  - Next checkpoint: execute g18.026, then g18.027, then resume g18.006.
+    Publish `0.4.0` through g18.009, unblock Desktop, and route compatible
+    sweep findings to `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |
