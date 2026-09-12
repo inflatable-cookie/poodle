@@ -11,6 +11,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-12 — `.poodle-code-editor__viewport .cm-activeLine`/
+  `.cm-activeLineGutter` use `var(--poodle-color-surface-hover)`, which no
+  schema or generated artifact defines, so the active line silently renders
+  on the plain panel. Found while building g18.023's overlay-legibility
+  proof; fixing it means picking or adding a real surface-state token and is
+  editor-state work, not syntax-palette work. Impact: active-line affordance
+  is invisible in every theme. Plausible fix: define
+  `color.surface.hover` (or map to an existing state token) in the semantic
+  schema and regenerate. Affected surface:
+  `packages/core/src/styles/code-editor.css`, `packages/tokens/schema/`.
+
 - 2026-09-05 — later A1 tranche merges dropped already-landed `nucleus_a11y.rs`
   probes. Confirmed lost: NP-2 menu/segmented, NP-4 radio-group (divergence
   stores but no live test), and NP-4 callout/editable-label/text-input (a

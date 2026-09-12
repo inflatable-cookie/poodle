@@ -1,14 +1,17 @@
 /**
  * Headless Chromium + WebKit proof of the g18.012 CodeEditor language
- * registry and the g18.021 token-bound syntax presentation. jsdom covers the
- * semantic suite; this probe proves the parts only a real browser can: real
- * dynamic ESM grammar loading, controlled switching without remount,
- * focus/undo survival across switches, fail-closed rejected-load behavior in
- * a live page, real mount-time unknown-id refusal through each framework's
- * boundary mechanism, and — for g18.021 — visible token-bound syntax with
- * distinct computed Poodle colours for TypeScript and JSON, live theme
- * response, danger treatment for parser errors, and zero spans in plain
- * mode.
+ * registry, the g18.021 token-bound presentation plumbing, and the g18.023
+ * dual syntax palettes. jsdom covers the semantic suite; this probe proves
+ * the parts only a real browser can: real dynamic ESM grammar loading,
+ * controlled switching without remount, focus/undo survival across switches,
+ * fail-closed rejected-load behavior in a live page, real mount-time
+ * unknown-id refusal through each framework's boundary mechanism, and — for
+ * g18.023 — representative TypeScript and JSON resolving to dedicated
+ * `color.syntax.*` roles (never UI status/accent tokens), multi-hue
+ * perceptual variety, ordinary identifiers on primary text, invalid syntax
+ * with a non-colour cue, AA contrast for every role against every named
+ * theme's actual editor panel, overlays that never repaint token text, and
+ * live theme switches that restyle the same mounted editor.
  *
  *   bun test/code-editor-language-registry/probe.ts --browser=chromium
  *   bun test/code-editor-language-registry/probe.ts --browser=webkit
@@ -37,16 +40,77 @@ const viteBin = fileURLToPath(
 const port = 4199;
 const url = `http://127.0.0.1:${port}/`;
 
+/**
+ * g18.023: the representative TypeScript sample. It must expose at least five
+ * distinct chromatic syntax roles through the real grammar while leaving
+ * ordinary identifier uses (`entry` at its use site, `string`, `boolean`) on
+ * primary text. Keep byte-identical with the harness samples.
+ */
 const DOC = `// ledger
+type Ledger = { owner: string; balance: number };
 const answer = 42;
 const label = "hello";
+export function audit(entry: Ledger): boolean {
+  return entry.balance > 0;
+}
 `;
-const JSON_DOC = `{\n  "answer": 42,\n  "label": "hello",\n  "live": true\n}\n`;
-const INVALID_DOC = `// ledger
-const answer = 42;
-### oops ###
-const broken = ;
-`;
+const INVALID_DOC = `${DOC}### oops ###\nconst broken = ;\n`;
+
+/**
+ * The designed dark primitives behind the semantic roles (g18.023). Eclipse
+ * inherits the dark base unchanged, so its computed roles must be exactly
+ * these; iceberg selects the light ramp, so its keyword must be exactly the
+ * light primitive.
+ */
+const DARK_RAMP = {
+  comment: "#9db2c6",
+  keyword: "#c9b7fd",
+  string: "#97d9a2",
+  literal: "#f4c37a",
+  type: "#7fd6dc",
+  callable: "#8fb8ff",
+  property: "#f0a7c6",
+  operator: "#aebccf",
+  punctuation: "#98adbe",
+  invalid: "#ff8f86",
+} as const;
+const LIGHT_KEYWORD = "#6c2fd2";
+
+const SYNTAX_ROLES = [
+  "comment",
+  "keyword",
+  "string",
+  "literal",
+  "type",
+  "callable",
+  "property",
+  "operator",
+  "punctuation",
+  "invalid",
+] as const;
+type SyntaxRole = (typeof SYNTAX_ROLES)[number];
+
+/** Chromatic roles: the perceptual-variety floor is measured across these. */
+const CHROMATIC_ROLES: SyntaxRole[] = ["keyword", "string", "literal", "type", "callable", "property"];
+
+/** Light themes select the light primitive ramp; the rest inherit dark. */
+const LIGHT_THEMES = new Set(["iceberg", "clay", "meadow"]);
+
+/** Every named Poodle theme; the sweep proves AA contrast for each panel. */
+const ALL_THEMES = [
+  "iceberg",
+  "eclipse",
+  "graphite",
+  "midnight",
+  "nord",
+  "rose",
+  "forest",
+  "solarized",
+  "hornet",
+  "cobalt",
+  "clay",
+  "meadow",
+] as const;
 
 let failures = 0;
 
@@ -103,39 +167,48 @@ async function settle(page: Page): Promise<void> {
 type Counters = { typescript: number; json: number; broken: number };
 
 /**
- * g18.021: computed reference colours for the semantic tokens the private
- * highlight style consumes. Captured live so theme switches are compared
- * against the variables the mounted editor actually resolves.
+ * g18.023: computed reference colours for the semantic syntax roles the
+ * private highlight style consumes. Captured live so theme switches are
+ * compared against the variables the mounted editor actually resolves.
  */
-const TOKEN_VARIABLES = [
-  "text-secondary",
-  "accent-base",
-  "status-success",
-  "status-info",
-  "status-warning",
-  "status-danger",
-] as const;
-type TokenColors = Record<(typeof TOKEN_VARIABLES)[number], string>;
-
-async function tokenColors(page: Page): Promise<TokenColors> {
-  return page.evaluate((names) => {
+async function roleColors(page: Page): Promise<Record<SyntaxRole, string>> {
+  return page.evaluate((roles) => {
     const probe = document.createElement("span");
     probe.setAttribute(
       "style",
       "position:absolute;visibility:hidden;pointer-events:none",
     );
     document.body.appendChild(probe);
-    const out: Partial<Record<(typeof names)[number], string>> = {};
-    for (const name of names) {
-      probe.style.color = `var(--poodle-color-${name})`;
-      out[name] = getComputedStyle(probe).color;
+    const out: Partial<Record<SyntaxRole, string>> = {};
+    for (const role of roles) {
+      probe.style.color = `var(--poodle-color-syntax-${role})`;
+      out[role as SyntaxRole] = getComputedStyle(probe).color;
     }
     probe.remove();
-    return out as TokenColors;
-  }, [...TOKEN_VARIABLES]);
+    return out as Record<SyntaxRole, string>;
+  }, [...SYNTAX_ROLES]);
 }
 
-type StyledSpan = { text: string; color: string; invalid: boolean };
+function hexToRgbString(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+}
+
+/** Alpha of a computed rgba()/color(srgb ... / a) value; 1 when opaque. */
+function overlayAlpha(background: string): number {
+  const comma = background.match(/,\s*([\d.]+)\s*\)$/);
+  if (comma) return parseFloat(comma[1]);
+  const slash = background.match(/\/\s*([\d.]+)\s*\)$/);
+  if (slash) return parseFloat(slash[1]);
+  return 1;
+}
+
+type StyledSpan = {
+  text: string;
+  color: string;
+  invalid: boolean;
+  line: number;
+};
 
 /** Every span inside the editor content that carries non-default colour. */
 async function styledSpans(page: Page, framework: string): Promise<StyledSpan[]> {
@@ -144,13 +217,150 @@ async function styledSpans(page: Page, framework: string): Promise<StyledSpan[]>
     const content = frame?.querySelector(".cm-content");
     if (!(content instanceof HTMLElement)) throw new Error(`missing ${fw} editor content`);
     const base = getComputedStyle(content).color;
+    const lines = [...content.querySelectorAll(":scope > .cm-line")];
     return [...content.querySelectorAll("span")].flatMap((span) => {
       const color = getComputedStyle(span).color;
       const invalid = span.classList.contains("poodle-code-editor__syntax-invalid");
       if (color === base && !invalid) return [];
-      return [{ text: span.textContent ?? "", color, invalid }];
+      const line = lines.findIndex((line) => line.contains(span));
+      return [{ text: span.textContent ?? "", color, invalid, line }];
     });
   }, framework);
+}
+
+/**
+ * The styled spans of one rendered editor line, by its exact text. Used to
+ * prove the use-site of an ordinary identifier carries no syntax span.
+ */
+async function styledSpansOnLine(
+  page: Page,
+  framework: string,
+  lineText: string,
+): Promise<string[]> {
+  return page.evaluate(
+    ([fw, needle]) => {
+      const content = document.querySelector(
+        `[data-framework="${fw}"] [data-part='main-editor'] .cm-content`,
+      );
+      if (!(content instanceof HTMLElement)) throw new Error(`missing ${fw} editor content`);
+      const base = getComputedStyle(content).color;
+      const line = [...content.querySelectorAll(":scope > .cm-line")].find(
+        (candidate) => (candidate.textContent ?? "") === needle,
+      );
+      if (!(line instanceof HTMLElement)) throw new Error(`missing line ${JSON.stringify(needle)}`);
+      return [...line.querySelectorAll("span")]
+        .filter((span) => getComputedStyle(span).color !== base)
+        .map((span) => span.textContent ?? "");
+    },
+    [framework, lineText] as const,
+  );
+}
+
+/** The resolved background colour of the mounted editor panel. */
+async function panelColor(page: Page, framework: string): Promise<string> {
+  return page.evaluate((fw) => {
+    const editor = document.querySelector(
+      `[data-framework="${fw}"] [data-part='main-editor'] .poodle-code-editor`,
+    );
+    if (!(editor instanceof HTMLElement)) throw new Error(`missing ${fw} editor panel`);
+    return getComputedStyle(editor).backgroundColor;
+  }, framework);
+}
+
+/**
+ * In-page colour parsing + WCAG contrast. Handles rgb()/rgba(), hex, oklch()
+ * (the contrast-axis rendering), and color(srgb ...). Throws on anything else
+ * so an engine serialization change fails loudly instead of silently passing.
+ */
+const CONTRAST_HELPERS = `
+  function parseComponent(value, scale) {
+    if (value.endsWith('%')) return (parseFloat(value) / 100) * scale;
+    return parseFloat(value);
+  }
+  function parseColor(raw) {
+    const value = raw.trim();
+    let m = value.match(/^rgba?\\(([\\d.%,\\s\\/]+)\\)$/i);
+    if (m) {
+      const parts = m[1].split(/[\\s,\\/]+/).filter(Boolean);
+      if (parts.length >= 3) {
+        const rgba = parts.map((p, i) => i < 3 ? Math.round(parseComponent(p, 255)) : parseFloat(p));
+        return { r: rgba[0], g: rgba[1], b: rgba[2], a: rgba.length > 3 ? rgba[3] : 1 };
+      }
+    }
+    m = value.match(/^#([0-9a-f]{6})$/i);
+    if (m) {
+      const n = parseInt(m[1], 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
+    }
+    m = value.match(/^oklch\\(([\\d.%]+)\\s+([\\d.%]+)\\s+([\\d.]+(?:deg|rad)?)(?:\\s*\\/\\s*([\\d.%]+))?\\)$/i);
+    if (m) {
+      const L = m[1].endsWith('%') ? parseFloat(m[1]) / 100 : parseFloat(m[1]);
+      const C = parseFloat(m[2]);
+      const H = parseFloat(m[3]) * (m[3].includes('deg') ? 1 : m[3].includes('rad') ? 180 / Math.PI : 1);
+      const h = H * Math.PI / 180;
+      const l_ = L + 0.3963377774 * C * Math.cos(h) + 0.2158037573 * C * Math.sin(h);
+      const m_ = L - 0.1055613458 * C * Math.cos(h) - 0.0638541728 * C * Math.sin(h);
+      const s_ = L - 0.0894841775 * C * Math.cos(h) - 1.2914855480 * C * Math.sin(h);
+      const l = l_ * l_ * l_, m2 = m_ * m_ * m_, s = s_ * s_ * s_;
+      let r =  4.0767416621 * l - 3.3077115913 * m2 + 0.2309699292 * s;
+      let g = -1.2684380046 * l + 2.6097574011 * m2 - 0.3413193965 * s;
+      let b = -0.0041960863 * l - 0.7034186147 * m2 + 1.7076147010 * s;
+      const enc = (v) => v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+      return {
+        r: Math.round(Math.min(255, Math.max(0, enc(r) * 255))),
+        g: Math.round(Math.min(255, Math.max(0, enc(g) * 255))),
+        b: Math.round(Math.min(255, Math.max(0, enc(b) * 255))),
+        a: m[4] === undefined ? 1 : m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4]),
+      };
+    }
+    m = value.match(/^color\\(srgb\\s+([\\d.%]+)\\s+([\\d.%]+)\\s+([\\d.%]+)(?:\\s*\\/\\s*([\\d.%]+))?\\)$/i);
+    if (m) {
+      const enc = (v) => v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+      const part = (p) => p.endsWith('%') ? parseFloat(p) / 100 : parseFloat(p);
+      return {
+        r: Math.round(Math.min(255, Math.max(0, enc(part(m[1])) * 255))),
+        g: Math.round(Math.min(255, Math.max(0, enc(part(m[2])) * 255))),
+        b: Math.round(Math.min(255, Math.max(0, enc(part(m[3])) * 255))),
+        a: m[4] === undefined ? 1 : m[4].endsWith('%') ? parseFloat(m[4]) / 100 : parseFloat(m[4]),
+      };
+    }
+    throw new Error('unparseable computed color: ' + value);
+  }
+  function luminance({ r, g, b }) {
+    const lin = (c) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  }
+  function wcagContrast(fgRaw, bgRaw) {
+    const fg = parseColor(fgRaw);
+    const bg = parseColor(bgRaw);
+    if (bg.a < 1) throw new Error('opaque background expected: ' + bgRaw);
+    const la = luminance(fg), lb = luminance(bg);
+    const hi = Math.max(la, lb), lo = Math.min(la, lb);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+`;
+
+/** Per-role WCAG contrast of the syntax roles against the editor panel. */
+async function roleContrasts(
+  page: Page,
+  framework: string,
+): Promise<{ contrasts: Record<SyntaxRole, number>; panel: string }> {
+  const [roles, panel] = await Promise.all([
+    roleColors(page),
+    panelColor(page, framework),
+  ]);
+  const contrasts = await page.evaluate(
+    ({ roles, panel, helpers }) => {
+      const wcag = new Function(`${helpers}; return wcagContrast;`)();
+      const out: Partial<Record<SyntaxRole, number>> = {};
+      for (const [role, color] of Object.entries(roles)) {
+        out[role as SyntaxRole] = wcag(color, panel);
+      }
+      return out;
+    },
+    { roles, panel, helpers: CONTRAST_HELPERS },
+  );
+  return { contrasts: contrasts as Record<SyntaxRole, number>, panel };
 }
 
 async function clickPart(page: Page, framework: string, part: string): Promise<void> {
@@ -212,13 +422,21 @@ async function markEditor(page: Page, framework: string): Promise<void> {
   }, framework);
 }
 
+/** Focus the editor and park the caret at the exact end of the document. */
 async function typeText(page: Page, framework: string, text: string): Promise<void> {
   await page.locator(`[data-framework="${framework}"] [data-part='main-editor'] .cm-content`).click();
-  // The trailing newline leaves the caret on the empty last line; move it to
-  // the end of line 1 deterministically.
-  await page.keyboard.press("ArrowUp");
-  await page.keyboard.press("End");
+  await page.keyboard.press("ControlOrMeta+End");
   await page.keyboard.type(text);
+  await settle(page);
+}
+
+/** Double-click a word to make a real text selection on the mounted editor. */
+async function selectWord(page: Page, framework: string, word: string): Promise<void> {
+  await page
+    .locator(`[data-framework="${framework}"] [data-part='main-editor'] .cm-content`)
+    .getByText(word, { exact: true })
+    .first()
+    .dblclick();
   await settle(page);
 }
 
@@ -257,30 +475,70 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `doc=${JSON.stringify(initial.doc)} counters=${JSON.stringify(initialCounters)}`,
   );
 
-  // 0b. g18.021: token-bound syntax presentation is visible for the real
-  //     TypeScript grammar. Representative spans carry the exact Poodle
-  //     semantic colours resolved from the live theme variables.
-  const eclipseRefs = await tokenColors(page);
+  // 0b. g18.023: representative TypeScript resolves to the dedicated syntax
+  //     roles. Every span colour must equal the live --poodle-color-syntax-*
+  //     variable for its role — never an accent or UI status token.
+  const eclipseRefs = await roleColors(page);
   const tsSpans = await styledSpans(page, framework);
-  const tsExpectations: Array<[string, keyof TokenColors]> = [
-    ["ledger", "text-secondary"],
-    ["const", "accent-base"],
-    ["answer", "status-warning"],
-    ["42", "status-info"],
-    ['"hello"', "status-success"],
+  const tsExpectations: Array<[string, SyntaxRole, RegExp]> = [
+    ["ledger comment", "comment", /^\/\/ ledger$/],
+    ["type keyword", "keyword", /^type$/],
+    ["const keyword", "keyword", /^const$/],
+    ["Ledger type", "type", /^Ledger$/],
+    ["audit callable", "callable", /^audit$/],
+    ["answer callable", "callable", /^answer$/],
+    ["42 literal", "literal", /^42$/],
+    ["hello string", "string", /^"hello"$/],
+    ["balance property", "property", /^balance$/],
+    ["compare operator", "operator", /^>$/],
+    ["brace punctuation", "punctuation", /^[{(;,)]+$/],
   ];
-  for (const [needle, token] of tsExpectations) {
-    const span = tsSpans.find((candidate) => candidate.text.includes(needle));
+  for (const [label, role, pattern] of tsExpectations) {
+    const span = tsSpans.find((candidate) => pattern.test(candidate.text.trim()));
     check(
-      `${browserName} ${framework} typescript "${needle}" span uses --poodle-color-${token}`,
-      Boolean(span) && span?.color === eclipseRefs[token],
-      span ? `color=${span.color} expected=${eclipseRefs[token]}` : "no styled span",
+      `${browserName} ${framework} typescript ${label} span uses --poodle-color-syntax-${role}`,
+      Boolean(span) && span?.color === eclipseRefs[role],
+      span ? `color=${span.color} expected=${eclipseRefs[role]}` : "no styled span",
     );
   }
   check(
     `${browserName} ${framework} full typescript renders syntax spans`,
     tsSpans.length >= tsExpectations.length,
     JSON.stringify(tsSpans),
+  );
+
+  // The designed dark base is inherited unchanged: eclipse's roles are the
+  // dark primitives, resolved through generated CSS.
+  for (const role of SYNTAX_ROLES) {
+    check(
+      `${browserName} ${framework} eclipse ${role} role equals the dark primitive`,
+      eclipseRefs[role] === hexToRgbString(DARK_RAMP[role]),
+      `color=${eclipseRefs[role]} expected=${hexToRgbString(DARK_RAMP[role])}`,
+    );
+  }
+
+  // Perceptual variety: at least five distinct chromatic roles where the
+  // grammar exposes them — no accent/white field.
+  const distinctChromaticTs = new Set(
+    CHROMATIC_ROLES.map((role) =>
+      tsSpans.some((span) => span.color === eclipseRefs[role]) ? eclipseRefs[role] : null,
+    ).filter(Boolean),
+  );
+  check(
+    `${browserName} ${framework} typescript renders at least five distinct chromatic roles`,
+    distinctChromaticTs.size >= 5,
+    `distinct=${distinctChromaticTs.size} of ${CHROMATIC_ROLES.join(",")}`,
+  );
+
+  // Ordinary identifiers stay primary text: on the use-site line the only
+  // styled spans are `return`, `balance`, and `>` — `entry` carries none.
+  const useSiteSpans = await styledSpansOnLine(page, framework, "  return entry.balance > 0;");
+  check(
+    `${browserName} ${framework} ordinary identifier use stays unstyled primary text`,
+    useSiteSpans.includes("entry") === false &&
+      useSiteSpans.some((text) => text.trim() === "balance") &&
+      useSiteSpans.some((text) => text.trim() === "return"),
+    JSON.stringify(useSiteSpans),
   );
 
   // 1. Controlled switch to the second consumer language: one additional lazy
@@ -295,16 +553,6 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `counters=${JSON.stringify(jsonCounters)} marked=${jsonState.marked}`,
   );
 
-  // 1b. g18.021: switching language keeps the document — the JSON sample
-  //     token proof and the parser-error proof use the dedicated samples
-  //     below.
-  const switchSpans = await styledSpans(page, framework);
-  check(
-    `${browserName} ${framework} the json reconfiguration carries the private presentation`,
-    switchSpans.length > 0,
-    JSON.stringify(switchSpans.slice(0, 5)),
-  );
-
   // 2. Switching back reuses the memoized load: no new loader invocation.
   await selectLanguage(page, framework, "typescript");
   await settle(page);
@@ -316,34 +564,43 @@ async function runFramework(page: Page, framework: string, browserName: string):
     `counters=${JSON.stringify(backCounters)}`,
   );
 
-  // 2b. g18.021: a real JSON sample tokenizes with its own semantic palette.
-  //     Property names stay ordinary primary text; strings read as success and
-  //     numbers/booleans as info.
+  // 2b. g18.023: a real JSON sample tokenizes with its own roles. Property
+  //     keys read as property, strings as string, numbers/booleans as
+  //     literal, and braces/separators as punctuation.
   await clickPart(page, framework, "sample-json");
   await settle(page);
   const jsonSampleSpans = await styledSpans(page, framework);
-  const jsonColors = new Set(jsonSampleSpans.map((span) => span.color));
-  const jsonNumber = jsonSampleSpans.find((span) => span.text.includes("42"));
-  const jsonString = jsonSampleSpans.find((span) => span.text.includes('"hello"'));
-  check(
-    `${browserName} ${framework} json number span uses --poodle-color-status-info`,
-    Boolean(jsonNumber) && jsonNumber?.color === eclipseRefs["status-info"],
-    jsonNumber ? `color=${jsonNumber.color} expected=${eclipseRefs["status-info"]}` : "no styled span",
+  const jsonExpectations: Array<[string, SyntaxRole, RegExp]> = [
+    ["answer key", "property", /^"answer"$/],
+    ["label key", "property", /^"label"$/],
+    ["hello string", "string", /^"hello"$/],
+    ["42 literal", "literal", /^42$/],
+    ["true literal", "literal", /^true$/],
+    ["brace punctuation", "punctuation", /^[{}:,]+$/],
+  ];
+  for (const [label, role, pattern] of jsonExpectations) {
+    const span = jsonSampleSpans.find((candidate) => pattern.test(candidate.text.trim()));
+    check(
+      `${browserName} ${framework} json ${label} span uses --poodle-color-syntax-${role}`,
+      Boolean(span) && span?.color === eclipseRefs[role],
+      span ? `color=${span.color} expected=${eclipseRefs[role]}` : "no styled span",
+    );
+  }
+  const distinctChromaticJson = new Set(
+    CHROMATIC_ROLES.map((role) =>
+      jsonSampleSpans.some((span) => span.color === eclipseRefs[role]) ? eclipseRefs[role] : null,
+    ).filter(Boolean),
   );
   check(
-    `${browserName} ${framework} json string span uses --poodle-color-status-success`,
-    Boolean(jsonString) && jsonString?.color === eclipseRefs["status-success"],
-    jsonString ? `color=${jsonString.color} expected=${eclipseRefs["status-success"]}` : "no styled span",
+    `${browserName} ${framework} json renders its chromatic roles distinctly`,
+    distinctChromaticJson.size >= 3,
+    `distinct=${distinctChromaticJson.size}`,
   );
+  const combinedChromatic = new Set([...distinctChromaticTs, ...distinctChromaticJson]);
   check(
-    `${browserName} ${framework} json renders at least two distinct token colours`,
-    jsonColors.size >= 2,
-    JSON.stringify([...jsonColors]),
-  );
-  check(
-    `${browserName} ${framework} json property names stay ordinary text`,
-    !jsonSampleSpans.some((span) => span.text.includes("answer") && !span.invalid),
-    JSON.stringify(jsonSampleSpans.filter((span) => span.text.includes("answer"))),
+    `${browserName} ${framework} ts+json together expose at least five distinct chromatic roles`,
+    combinedChromatic.size >= 5,
+    `distinct=${combinedChromatic.size}`,
   );
   await clickPart(page, framework, "sample-typescript");
   await settle(page);
@@ -370,8 +627,8 @@ async function runFramework(page: Page, framework: string, browserName: string):
   await typeText(page, framework, "\nconst live = true;");
   const typed = await readEditor(page, framework);
   check(
-    `${browserName} ${framework} typing lands in the plain-text editor`,
-    typed.doc === `${DOC}const live = true;\n`,
+    `${browserName} ${framework} typing lands at the end of the plain-text editor`,
+    typed.doc === `${DOC}\nconst live = true;`,
     `doc=${JSON.stringify(typed.doc)}`,
   );
   await selectLanguage(page, framework, "typescript");
@@ -381,7 +638,7 @@ async function runFramework(page: Page, framework: string, browserName: string):
   const afterSwitch = await readEditor(page, framework);
   check(
     `${browserName} ${framework} typed text survives two language switches`,
-    afterSwitch.doc === `${DOC}const live = true;\n` && afterSwitch.marked,
+    afterSwitch.doc === `${DOC}\nconst live = true;` && afterSwitch.marked,
     `doc=${JSON.stringify(afterSwitch.doc)}`,
   );
   const undoReached = await undoUntil(page, framework, DOC);
@@ -483,82 +740,281 @@ async function runFramework(page: Page, framework: string, browserName: string):
   await settle(page);
   const restoredModeState = await readEditor(page, framework);
   const restoredModeSpans = await styledSpans(page, framework);
-  const restoredKeyword = restoredModeSpans.find((span) => span.text.includes("const"));
+  const restoredKeyword = restoredModeSpans.find((span) => span.text.trim() === "const");
   check(
     `${browserName} ${framework} returning to full mode reinstates token presentation without remounting`,
     restoredModeState.doc === DOC && restoredModeState.marked &&
-      Boolean(restoredKeyword) && restoredKeyword?.color === eclipseRefs["accent-base"],
-    `color=${restoredKeyword?.color} expected=${eclipseRefs["accent-base"]} marked=${restoredModeState.marked}`,
+      Boolean(restoredKeyword) && restoredKeyword?.color === eclipseRefs["keyword"],
+    `color=${restoredKeyword?.color} expected=${eclipseRefs["keyword"]} marked=${restoredModeState.marked}`,
   );
 
-  // 9. g18.021: the malformed TypeScript sample plants parser error nodes.
+  // 9. g18.023: malformed TypeScript plants parser error nodes; they take the
+  //    invalid role AND a non-colour wavy-underline cue, then lose both when
+  //    the document is repaired. Host diagnostics stay host-owned.
   await clickPart(page, framework, "sample-invalid");
   await settle(page);
   const invalidState = await readEditor(page, framework);
-  const invalidRefs = await tokenColors(page);
+  const invalidRefs = await roleColors(page);
   const invalidSpans = await styledSpans(page, framework);
   const invalidMarks = invalidSpans.filter((span) => span.invalid);
   check(
-    `${browserName} ${framework} parser error nodes receive the danger treatment`,
+    `${browserName} ${framework} parser error nodes receive the invalid syntax role`,
     invalidState.marked && invalidMarks.length > 0 &&
-      invalidMarks.every((span) => span.color === invalidRefs["status-danger"]),
+      invalidMarks.every((span) => span.color === invalidRefs["invalid"]),
     JSON.stringify(invalidMarks.slice(0, 5)),
+  );
+  const invalidCue = await page.evaluate(
+    ([fw, helpers]) => {
+      const wcag = new Function(`${helpers}; return wcagContrast;`)();
+      const mark = document.querySelector(
+        `[data-framework="${fw}"] [data-part='main-editor'] .poodle-code-editor__syntax-invalid`,
+      );
+      const panel = document.querySelector(
+        `[data-framework="${fw}"] [data-part='main-editor'] .poodle-code-editor`,
+      );
+      if (!(mark instanceof HTMLElement) || !(panel instanceof HTMLElement)) {
+        return { present: false, decoration: null, style: null, contrast: 0 };
+      }
+      const style = getComputedStyle(mark);
+      return {
+        present: true,
+        decoration: style.textDecorationLine,
+        style: style.textDecorationStyle,
+        contrast: wcag(style.color, getComputedStyle(panel).backgroundColor),
+      };
+    },
+    [framework, CONTRAST_HELPERS] as const,
+  );
+  check(
+    `${browserName} ${framework} invalid syntax keeps a non-colour wavy cue`,
+    invalidCue.present && (invalidCue.decoration ?? "").includes("underline") && invalidCue.style === "wavy",
+    JSON.stringify(invalidCue),
+  );
+  check(
+    `${browserName} ${framework} the invalid role itself meets AA on the panel`,
+    invalidCue.contrast >= 4.5,
+    `contrast=${invalidCue.contrast.toFixed(2)}`,
   );
   await clickPart(page, framework, "sample-typescript");
   await settle(page);
   const cleanedSpans = await styledSpans(page, framework);
   check(
-    `${browserName} ${framework} repairing the document removes the danger marks`,
+    `${browserName} ${framework} repairing the document removes the invalid marks`,
     cleanedSpans.every((span) => !span.invalid),
     JSON.stringify(cleanedSpans.filter((span) => span.invalid)),
   );
 
-  // 10. g18.021: a live theme switch restyles the same mounted editor through
-  //     the CSS-variable rules, with no remount.
+  // 10. g18.023: overlays never erase legibility. A text selection and an
+  //     active search match tint the background without repainting token
+  //     text; every span keeps its exact role colour under both overlays.
+  await selectWord(page, framework, "balance");
+  const selectionSpans = await styledSpans(page, framework);
+  // The editor keeps the browser's native selection (no drawSelection
+  // override), so the overlay is proven from the resolved ::selection style
+  // where the engine exposes it, falling back to the shipped component rule.
+  const selectionOverlay = await page.evaluate((fw) => {
+    const content = document.querySelector(
+      `[data-framework="${fw}"] [data-part='main-editor'] .cm-content`,
+    );
+    const computedSelection = content ? getComputedStyle(content, "::selection").backgroundColor : null;
+    let poodleRule: string | null = null;
+    for (const sheet of document.styleSheets) {
+      let rules: CSSRuleList;
+      try {
+        rules = sheet.cssRules;
+      } catch {
+        continue;
+      }
+      for (const rule of rules) {
+        if (
+          rule instanceof CSSStyleRule &&
+          rule.selectorText?.includes(".cm-selectionBackground") &&
+          rule.style.background.includes("transparent")
+        ) {
+          poodleRule = rule.style.background;
+        }
+      }
+    }
+    return { poodleRule, computedSelection };
+  }, framework);
+  const selectedProperty = selectionSpans.find((span) => span.text.trim() === "balance");
+  check(
+    `${browserName} ${framework} the selection overlay keeps token text at its role colour`,
+    Boolean(selectedProperty) && selectedProperty?.color === eclipseRefs["property"] &&
+      selectionSpans.some((span) => span.text.trim() === "const" && span.color === eclipseRefs["keyword"]),
+    JSON.stringify(selectionSpans.filter((span) => ["balance", "const"].includes(span.text.trim()))),
+  );
+  const selectionTranslucent =
+    (selectionOverlay.computedSelection !== null &&
+      selectionOverlay.computedSelection !== "rgba(0, 0, 0, 0)" &&
+      overlayAlpha(selectionOverlay.computedSelection) <= 0.5) ||
+    (selectionOverlay.poodleRule !== null &&
+      /color-mix.*28%.*transparent/s.test(selectionOverlay.poodleRule));
+  check(
+    `${browserName} ${framework} the selection overlay is translucent over the panel`,
+    selectionTranslucent,
+    `computed=${selectionOverlay.computedSelection} rule=${selectionOverlay.poodleRule}`,
+  );
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("ControlOrMeta+f");
+  await page.keyboard.type("balance");
+  await page.keyboard.press("Enter");
+  await settle(page);
+  const searchOverlay = await page.evaluate((fw) => {
+    const content = document.querySelector(
+      `[data-framework="${fw}"] [data-part='main-editor'] .cm-content`,
+    );
+    const match = content?.querySelector(".cm-searchMatch");
+    return match ? getComputedStyle(match).backgroundColor : null;
+  }, framework);
+  const searchSpans = await styledSpans(page, framework);
+  const searchedProperty = searchSpans.find((span) => span.text.trim() === "balance");
+  check(
+    `${browserName} ${framework} the search-match overlay keeps token text at its role colour`,
+    searchOverlay !== null && Boolean(searchedProperty) && searchedProperty?.color === eclipseRefs["property"],
+    `background=${searchOverlay} spans=${JSON.stringify(searchSpans.filter((span) => span.text.trim() === "balance"))}`,
+  );
+  check(
+    `${browserName} ${framework} the search-match overlay is translucent over the panel`,
+    searchOverlay !== null && overlayAlpha(searchOverlay) <= 0.5,
+    `background=${searchOverlay} alpha=${searchOverlay === null ? "-" : overlayAlpha(searchOverlay)}`,
+  );
+  await page.keyboard.press("Escape");
+  await settle(page);
+
+  // 11. g18.023: every named theme's actual panel keeps every syntax role at
+  //     AA contrast, and switching themes restyles the same mounted editor
+  //     live — no remount, no grammar reload, no document, selection, or
+  //     history change.
   await page.evaluate((fw) => {
     const editor = document.querySelector(
       `[data-framework="${fw}"] [data-part='main-editor'] .cm-editor`,
     );
-    if (!(editor instanceof Element)) throw new Error(`missing ${fw} editor`);
+    if (!(editor instanceof HTMLElement)) throw new Error(`missing ${fw} editor`);
     (editor as unknown as { __probeMounted?: boolean }).__probeMounted = true;
   }, framework);
+  await selectWord(page, framework, "Ledger");
+  const selectionText = await page.evaluate(() => document.getSelection()?.toString() ?? "");
+  let previousKeyword: string | null = null;
+  let previousWasLight: boolean | null = null;
+  for (const theme of ALL_THEMES) {
+    await setTheme(page, theme);
+    await settle(page);
+    const { contrasts, panel } = await roleContrasts(page, framework);
+    const worst = SYNTAX_ROLES.reduce(
+      (min, role) => (contrasts[role] < contrasts[min] ? role : min),
+      "comment" as SyntaxRole,
+    );
+    check(
+      `${browserName} ${framework} ${theme}: every syntax role meets AA on the actual panel`,
+      SYNTAX_ROLES.every((role) => contrasts[role] >= 4.5),
+      `panel=${panel} worst=${worst} at ${contrasts[worst]?.toFixed(2)}`,
+    );
+    const refs = await roleColors(page);
+    const spans = await styledSpans(page, framework);
+    const keyword = spans.find((span) => span.text.trim() === "const");
+    const identity = await page.evaluate((fw) => {
+      const editor = document.querySelector(
+        `[data-framework="${fw}"] [data-part='main-editor'] .cm-editor`,
+      );
+      return (
+        editor !== null &&
+        (editor as unknown as { __probeMounted?: boolean }).__probeMounted === true &&
+        editor.hasAttribute("data-probe-id")
+      );
+    }, framework);
+    const docStill = await readEditor(page, framework);
+    const isLight = LIGHT_THEMES.has(theme);
+    check(
+      `${browserName} ${framework} ${theme}: theme switch restyles the same mounted editor`,
+      identity && docStill.doc === DOC && docStill.marked &&
+        Boolean(keyword) && keyword?.color === refs["keyword"],
+      `keyword=${keyword?.color} identity=${identity} doc=${docStill.doc === DOC}`,
+    );
+    if (previousKeyword !== null) {
+      if (isLight !== previousWasLight) {
+        check(
+          `${browserName} ${framework} ${theme}: the palette base actually changed with the theme class`,
+          keyword?.color !== previousKeyword,
+          `now=${keyword?.color} was=${previousKeyword}`,
+        );
+      } else {
+        check(
+          `${browserName} ${framework} ${theme}: roles stay stable within the same base palette`,
+          keyword?.color === previousKeyword,
+          `now=${keyword?.color} was=${previousKeyword}`,
+        );
+      }
+    }
+    previousKeyword = keyword?.color ?? null;
+    previousWasLight = isLight;
+    check(
+      `${browserName} ${framework} ${theme}: selection survives the theme switch`,
+      (await page.evaluate(() => document.getSelection()?.toString() ?? "")) === selectionText,
+      `selection=${JSON.stringify(selectionText)}`,
+    );
+  }
+
+  // The light themes select the light primitives through their role-level
+  // overrides: iceberg's keyword must be exactly the light primitive.
   await setTheme(page, "iceberg");
   await settle(page);
-  const icebergRefs = await tokenColors(page);
-  const icebergSpans = await styledSpans(page, framework);
-  const icebergKeyword = icebergSpans.find((span) => span.text.includes("const"));
-  const icebergComment = icebergSpans.find((span) => span.text.includes("ledger"));
-  const identityKept = await page.evaluate((fw) => {
-    const editor = document.querySelector(
-      `[data-framework="${fw}"] [data-part='main-editor'] .cm-editor`,
-    );
-    return (
-      editor !== null &&
-      (editor as unknown as { __probeMounted?: boolean }).__probeMounted === true &&
-      editor.hasAttribute("data-probe-id")
-    );
-  }, framework);
+  const icebergRefs = await roleColors(page);
   check(
-    `${browserName} ${framework} iceberg theme restyles keyword tokens without remounting`,
-    identityKept && Boolean(icebergKeyword) &&
-      icebergKeyword?.color === icebergRefs["accent-base"] &&
-      icebergKeyword?.color !== eclipseRefs["accent-base"],
-    `color=${icebergKeyword?.color} expected=${icebergRefs["accent-base"]} was=${eclipseRefs["accent-base"]} identity=${identityKept}`,
+    `${browserName} ${framework} iceberg keyword role equals the light primitive`,
+    icebergRefs["keyword"] === hexToRgbString(LIGHT_KEYWORD),
+    `color=${icebergRefs["keyword"]} expected=${hexToRgbString(LIGHT_KEYWORD)}`,
   );
   check(
-    `${browserName} ${framework} iceberg theme restyles comment tokens without remounting`,
-    Boolean(icebergComment) && icebergComment?.color === icebergRefs["text-secondary"] &&
-      icebergComment?.color !== eclipseRefs["text-secondary"],
-    `color=${icebergComment?.color} expected=${icebergRefs["text-secondary"]}`,
+    `${browserName} ${framework} iceberg and eclipse palettes are genuinely different bases`,
+    SYNTAX_ROLES.every((role) => icebergRefs[role] !== eclipseRefs[role]),
+    JSON.stringify(SYNTAX_ROLES.filter((role) => icebergRefs[role] === eclipseRefs[role])),
   );
   await setTheme(page, "eclipse");
   await settle(page);
   const eclipseAgain = await styledSpans(page, framework);
-  const eclipseKeyword = eclipseAgain.find((span) => span.text.includes("const"));
+  const eclipseKeyword = eclipseAgain.find((span) => span.text.trim() === "const");
   check(
     `${browserName} ${framework} returning to eclipse restores the original token colours`,
-    Boolean(eclipseKeyword) && eclipseKeyword?.color === eclipseRefs["accent-base"],
-    `color=${eclipseKeyword?.color} expected=${eclipseRefs["accent-base"]}`,
+    Boolean(eclipseKeyword) && eclipseKeyword?.color === eclipseRefs["keyword"],
+    `color=${eclipseKeyword?.color} expected=${eclipseRefs["keyword"]}`,
+  );
+
+  // 12. g18.023: forced colours keep the editor legible — text stays painted
+  //     and mounted, and the presentation recovers after the mode ends.
+  await page.emulateMedia({ forcedColors: "active" });
+  await settle(page);
+  const forced = await page.evaluate((fw) => {
+    const content = document.querySelector(
+      `[data-framework="${fw}"] [data-part='main-editor'] .cm-content`,
+    );
+    const editor = document.querySelector(
+      `[data-framework="${fw}"] [data-part='main-editor'] .cm-editor`,
+    );
+    if (!(content instanceof HTMLElement) || !(editor instanceof HTMLElement)) {
+      return { present: false, mounted: false, color: "", visible: false };
+    }
+    const style = getComputedStyle(content);
+    return {
+      present: true,
+      mounted: (editor as unknown as { __probeMounted?: boolean }).__probeMounted === true,
+      color: style.color,
+      visible: style.visibility === "visible" && style.display !== "none",
+    };
+  }, framework);
+  check(
+    `${browserName} ${framework} forced colours keep the mounted editor legible`,
+    forced.present && forced.mounted && forced.visible && forced.color !== "rgba(0, 0, 0, 0)",
+    JSON.stringify(forced),
+  );
+  await page.emulateMedia({ forcedColors: "none" });
+  await settle(page);
+  const afterForced = await styledSpans(page, framework);
+  const afterForcedKeyword = afterForced.find((span) => span.text.trim() === "const");
+  check(
+    `${browserName} ${framework} presentation recovers after forced colours end`,
+    Boolean(afterForcedKeyword) && afterForcedKeyword?.color === eclipseRefs["keyword"],
+    `color=${afterForcedKeyword?.color} expected=${eclipseRefs["keyword"]}`,
   );
 }
 

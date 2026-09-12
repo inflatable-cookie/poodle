@@ -101,6 +101,112 @@
         "$value": "#e06a5f",
         "$description": "Danger status color."
       }
+    },
+    "syntax": {
+      "dark": {
+        "comment": {
+          "$type": "color",
+          "$value": "#9db2c6",
+          "$description": "Dark-surface syntax comment: recessive blue-grey for comments and metadata."
+        },
+        "keyword": {
+          "$type": "color",
+          "$value": "#c9b7fd",
+          "$description": "Dark-surface syntax keyword: soft violet for the keyword family."
+        },
+        "string": {
+          "$type": "color",
+          "$value": "#97d9a2",
+          "$description": "Dark-surface syntax string: calm green for strings, regex, and escapes."
+        },
+        "literal": {
+          "$type": "color",
+          "$value": "#f4c37a",
+          "$description": "Dark-surface syntax literal: warm amber for numbers, booleans, and atomic constants."
+        },
+        "type": {
+          "$type": "color",
+          "$value": "#7fd6dc",
+          "$description": "Dark-surface syntax type: cyan for types, classes, and namespaces."
+        },
+        "callable": {
+          "$type": "color",
+          "$value": "#8fb8ff",
+          "$description": "Dark-surface syntax callable: periwinkle blue for definitions and callables."
+        },
+        "property": {
+          "$type": "color",
+          "$value": "#f0a7c6",
+          "$description": "Dark-surface syntax property: muted rose for properties, attributes, and members."
+        },
+        "operator": {
+          "$type": "color",
+          "$value": "#aebccf",
+          "$description": "Dark-surface syntax operator: calm blue-grey for operators."
+        },
+        "punctuation": {
+          "$type": "color",
+          "$value": "#98adbe",
+          "$description": "Dark-surface syntax punctuation: recessive blue-grey for punctuation and brackets."
+        },
+        "invalid": {
+          "$type": "color",
+          "$value": "#ff8f86",
+          "$description": "Dark-surface syntax invalid: clear red for malformed syntax."
+        }
+      },
+      "light": {
+        "comment": {
+          "$type": "color",
+          "$value": "#5b6b7b",
+          "$description": "Light-surface syntax comment: recessive blue-grey for comments and metadata."
+        },
+        "keyword": {
+          "$type": "color",
+          "$value": "#6c2fd2",
+          "$description": "Light-surface syntax keyword: deep violet for the keyword family."
+        },
+        "string": {
+          "$type": "color",
+          "$value": "#237a38",
+          "$description": "Light-surface syntax string: deep green for strings, regex, and escapes."
+        },
+        "literal": {
+          "$type": "color",
+          "$value": "#95580a",
+          "$description": "Light-surface syntax literal: amber brown for numbers, booleans, and atomic constants."
+        },
+        "type": {
+          "$type": "color",
+          "$value": "#0c7089",
+          "$description": "Light-surface syntax type: deep teal for types, classes, and namespaces."
+        },
+        "callable": {
+          "$type": "color",
+          "$value": "#2559cf",
+          "$description": "Light-surface syntax callable: strong blue for definitions and callables."
+        },
+        "property": {
+          "$type": "color",
+          "$value": "#ad2678",
+          "$description": "Light-surface syntax property: plum for properties, attributes, and members."
+        },
+        "operator": {
+          "$type": "color",
+          "$value": "#54616f",
+          "$description": "Light-surface syntax operator: calm slate for operators."
+        },
+        "punctuation": {
+          "$type": "color",
+          "$value": "#5e6e7e",
+          "$description": "Light-surface syntax punctuation: recessive grey for punctuation and brackets."
+        },
+        "invalid": {
+          "$type": "color",
+          "$value": "#c22f38",
+          "$description": "Light-surface syntax invalid: clear dark red for malformed syntax."
+        }
+      }
     }
   }
 }

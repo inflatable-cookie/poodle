@@ -4,12 +4,18 @@ import { createCodeEditorLanguageRegistry } from "../../packages/react/component
 
 const VALUE = "const answer = 42;\n";
 
-// g18.021: the TypeScript sample exercises comment, keyword, definition,
-// number, and string token groups; the JSON sample exercises strings,
-// numbers, and booleans with ordinary (unstyled) property names.
+// g18.023: the TypeScript sample exercises the comment, keyword, type,
+// callable, literal, string, property, operator, and punctuation roles while
+// leaving ordinary identifier uses (`entry`, `string`, `boolean`) on primary
+// text. The JSON sample exercises property keys, strings, literals, and
+// punctuation.
 const TYPESCRIPT_VALUE = `// ledger
+type Ledger = { owner: string; balance: number };
 const answer = 42;
 const label = "hello";
+export function audit(entry: Ledger): boolean {
+  return entry.balance > 0;
+}
 `;
 const JSON_VALUE = `{\n  "answer": 42,\n  "label": "hello",\n  "live": true\n}\n`;
 // g18.021: the malformed sample plants parser error nodes so the probe can

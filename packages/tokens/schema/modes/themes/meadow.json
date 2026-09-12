@@ -73,6 +73,48 @@
         "$type": "color",
         "$value": "#5b655d"
       }
+    },
+    "syntax": {
+      "comment": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.comment}"
+      },
+      "keyword": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.keyword}"
+      },
+      "string": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.string}"
+      },
+      "literal": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.literal}"
+      },
+      "type": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.type}"
+      },
+      "callable": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.callable}"
+      },
+      "property": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.property}"
+      },
+      "operator": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.operator}"
+      },
+      "punctuation": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.punctuation}"
+      },
+      "invalid": {
+        "$type": "color",
+        "$value": "{primitives.color.syntax.light.invalid}"
+      }
     }
   }
 }
