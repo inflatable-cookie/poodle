@@ -708,6 +708,16 @@ function closedCandidateChangelog(version: string): string {
 
 function closedCandidateFiles(version: string): Record<string, string> {
   const files: Record<string, string> = {
+    "package.json": `${JSON.stringify(
+      {
+        name: "poodle",
+        version,
+        private: true,
+        scripts: { test: "vitest run" },
+      },
+      null,
+      2,
+    )}\n`,
     "packages/core/package.json": `${JSON.stringify(
       { name: "@inflatable-cookie/poodle-core", version, type: "module" },
       null,
@@ -866,6 +876,80 @@ describe("closed 0.4.0 candidate scope admission", () => {
         G18_006_CANDIDATE_SCOPE_MODE,
       ),
     ).rejects.toThrow(/candidate scope rejected unauthorized Cargo manifest change/);
+  });
+
+  test("closed candidate scope requires the exact root version-only transition", async () => {
+    const { root, base, head } = await plantClosedCandidate();
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toContain("package.json");
+
+    const unchanged = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["package.json"] = (files["package.json"] as string).replace(
+          '"version": "0.4.0"',
+          '"version": "0.3.0"',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        unchanged.root,
+        unchanged.base,
+        unchanged.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(
+      /requires the complete 0\.4\.0 release-input set; missing: .*package\.json/,
+    );
+
+    const wrongVersion = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["package.json"] = (files["package.json"] as string).replace(
+          '"version": "0.4.0"',
+          '"version": "0.4.1"',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        wrongVersion.root,
+        wrongVersion.base,
+        wrongVersion.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope requires package\.json version 0\.4\.0/);
+
+    const scriptsDrift = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        const manifest = JSON.parse(files["package.json"] as string);
+        manifest.scripts.test = "echo planted";
+        files["package.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        scriptsDrift.root,
+        scriptsDrift.base,
+        scriptsDrift.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope rejected unauthorized package\.json changes: scripts\.test/);
+
+    const unprivate = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        const manifest = JSON.parse(files["package.json"] as string);
+        manifest.private = false;
+        files["package.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        unprivate.root,
+        unprivate.base,
+        unprivate.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope rejected/);
   });
 
   test("closed candidate scope rejects arbitrary source and transport surfaces", async () => {

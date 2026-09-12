@@ -51,10 +51,26 @@ export const LOCKSTEP_JS_MANIFEST_PATHS = [
   "packages/react/components/package.json",
 ] as const;
 
+/**
+ * g18.006 additionally locks the root repository manifest. It stays private
+ * and unpublished, but its repository version moves with the lockstep release,
+ * so the closed candidate admits exactly its version-only transition.
+ */
+export const G18_006_JS_MANIFEST_PATHS = [
+  ...LOCKSTEP_JS_MANIFEST_PATHS,
+  "package.json",
+] as const;
+
 export const CANDIDATE_VERSION_PATHS = [
   ...LOCKSTEP_CARGO_MANIFEST_PATHS,
   ...LOCKSTEP_CARGO_LOCK_PATHS,
   ...LOCKSTEP_JS_MANIFEST_PATHS,
+] as const;
+
+/** The g18.006 version-file surface: the lockstep set plus the root manifest. */
+export const G18_006_VERSION_PATHS = [
+  ...CANDIDATE_VERSION_PATHS,
+  "package.json",
 ] as const;
 
 export const CANDIDATE_GENERATED_STAMP_PATHS = [
@@ -131,6 +147,7 @@ export const G18_006_RELEASE_INPUT_PATHS = [
   "bun.lock",
   "docs/release-notes/README.md",
   "docs/release-notes/0.4.0.md",
+  "package.json",
   ...LOCKSTEP_CARGO_MANIFEST_PATHS,
   ...LOCKSTEP_CARGO_LOCK_PATHS,
   ...LOCKSTEP_JS_MANIFEST_PATHS,
@@ -204,8 +221,8 @@ const G18_006_CANDIDATE_POLICY: CandidatePolicy = {
   sourceVersion: "0.3.0",
   targetVersion: "0.4.0",
   cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
-  jsManifestPaths: LOCKSTEP_JS_MANIFEST_PATHS,
-  versionPaths: CANDIDATE_VERSION_PATHS,
+  jsManifestPaths: G18_006_JS_MANIFEST_PATHS,
+  versionPaths: G18_006_VERSION_PATHS,
   writablePaths: G18_006_WRITABLE_PATHS,
   writablePathPatterns: [G18_006_EXECUTION_RECORD_PATTERN],
   evidencePaths: G18_006_EVIDENCE_PATHS,
@@ -883,6 +900,7 @@ export function requireExactCommit(value: string, label: string): string {
 }
 
 const CANDIDATE_MANIFEST_LEAF_ALLOWLIST: Record<string, readonly string[]> = {
+  "package.json": ["version"],
   "packages/core/package.json": ["version"],
   "packages/svelte/components/package.json": [
     "version",
@@ -962,8 +980,13 @@ async function assertCandidateManifestHonesty(
     if (after.version !== policy.targetVersion) {
       throw new Error(`candidate scope requires ${path} version ${policy.targetVersion}`);
     }
-    if (path === "packages/react/components/package.json" && after.private !== true) {
-      throw new Error("candidate scope rejected React admission: package must remain private");
+    if (
+      (path === "package.json" || path === "packages/react/components/package.json") &&
+      after.private !== true
+    ) {
+      throw new Error(
+        `candidate scope rejected ${path} admission: package must remain private`,
+      );
     }
     const beforeInternal = internalJsDependencies(before);
     const afterInternal = internalJsDependencies(after);
