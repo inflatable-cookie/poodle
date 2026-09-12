@@ -1,6 +1,6 @@
 # g18.025 — Preview header control sizing
 
-Status: in review — round 3: Chatterbox ruling landed (card revision `b14aeb04b`, preview-local ToggleGroup alignment authorized), ruling implemented, probe reconciled to the unified card oracle; PR #257 open at the new head
+Status: in review — round 4: approved at `e99c6e80e`; queue branch synced onto origin/main (`81bf2014f`) to pick up the slider-lane fixes the web gate asserts, all checks re-run green; PR #257 open at the new head
 Date: 2026-09-12
 Branch: `ns-92be02b9-f520-4b85-9baa-794a7464605c`
 Card: `docs/roadmaps/g18/025-preview-header-control-sizing.md`
@@ -76,6 +76,30 @@ Implementation at this head:
   paired tests 8/8; `svelte-check` preview 0 errors; react preview `tsc`
   error board byte-identical to base; `svelte:build` / `react:build` exit 0;
   `docs:lint` green; `git diff --check` clean.
+
+### Round 4 — queue-branch sync and re-validation
+
+Round-3 review approved the head but flagged a merge-gate caveat: the web
+check was red, inherited from a red origin/main whose slider block-variant
+extracted-styles tests (svelte + react, 3 tests) assert fixes landed after
+this branch's base. The queue directed a sync of the queue branch onto latest
+origin/main. Merged `origin/main` (`81bf2014f`, 11 commits: the g18.025 card
+ruling plus the slider block label/marker/bounds series and evidence repins)
+into this branch with zero conflicts; the preview-header inset-neutralizing
+exception is unchanged.
+
+Re-validated at the merge head:
+
+- The inherited red is resolved: Slider block-variant extracted-styles suites
+  green — `svelte-components` Slider.test.ts 25/25, `react-components`
+  Slider.test.tsx 26/26.
+- Full preview vitest projects — 29 files / 134 tests green.
+- `effigy test:g18-025-preview-header-sizing-chromium` — 321 ok / 0 FAIL;
+  `-webkit` — 321 ok / 0 FAIL.
+- `svelte-check` preview — 0 errors (warnings unchanged); react preview
+  `tsc` — error board unchanged from base except two pre-existing
+  SliderSpecimen errors at main-shifted line numbers (no new errors).
+- `svelte:build` / `react:build` exit 0; `git diff --check` clean.
 
 ## Outcome
 
