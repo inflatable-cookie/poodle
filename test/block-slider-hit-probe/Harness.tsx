@@ -2,11 +2,16 @@ import { useState } from "react";
 
 import { RangeSlider } from "../../packages/react/components/src/RangeSlider";
 import { Slider } from "../../packages/react/components/src/Slider";
+import { Button } from "../../packages/react/components/src/Button";
+import { TextInput } from "../../packages/react/components/src/TextInput";
+
+const sizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
 export function Harness() {
   const [sliderXs, setSliderXs] = useState(50);
   const [sliderCompact, setSliderCompact] = useState(50);
   const [rangeXs, setRangeXs] = useState<[number, number]>([20, 80]);
+  const [sizeValues, setSizeValues] = useState<Record<string, number>>({ xs: 40, sm: 40, md: 40, lg: 40, xl: 40 });
   const [sliderHits, setSliderHits] = useState(0);
   const [compactHits, setCompactHits] = useState(0);
   const [rangeHits, setRangeHits] = useState(0);
@@ -65,6 +70,23 @@ export function Harness() {
         />
         <p data-testid="trace" data-hits={rangeHits}>{rangeTrace}</p>
       </div>
+      {sizes.map((size) => (
+        // Mixed row: the Slider must align edge for edge with same-size
+        // reference controls (Button, TextInput) on the shared ladder.
+        <div key={size} data-case={`slider-${size}-row`} className="g18-row">
+          <Button size={size} ariaLabel={`Reference button at ${size}`}>Go</Button>
+          <Slider
+            size={size}
+            min={0}
+            max={100}
+            step={1}
+            ariaLabel={`Standard slider at ${size}`}
+            value={sizeValues[size]}
+            onValueChange={(next) => setSizeValues((values) => ({ ...values, [size]: next }))}
+          />
+          <TextInput size={size} ariaLabel={`Reference input at ${size}`} value="88" />
+        </div>
+      ))}
     </section>
   );
 }

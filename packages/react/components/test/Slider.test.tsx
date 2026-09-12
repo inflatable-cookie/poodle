@@ -212,7 +212,29 @@ describe("Slider (react) block variant", () => {
     expect(container.querySelector(".poodle-slider__hit")).not.toBeNull();
     expect(css).toContain("--poodle-slider-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
-    expect(css).toContain("min-height: max(var(--poodle-slider-block-min-height), var(--poodle-slider-block-hit))");
+    // g18.024: the accessibility envelope is measurable but never spacing.
+    expect(css).toContain("min-height: var(--poodle-slider-block-height)");
+    expect(css).not.toContain("max(var(--poodle-slider-block");
+    expect(css).not.toContain("--poodle-slider-block-min-height");
+  });
+
+  it("consumes the shared control-size axis with no private ladder", () => {
+    // The shared ladder is 24/28/36/44/52px for xs–xl; the block capsule
+    // matches Button/Input/Select edge for edge at every size.
+    for (const [size, rem] of [
+      ["xs", "1.5rem"],
+      ["sm", "1.75rem"],
+      ["md", "2.25rem"],
+      ["lg", "2.75rem"],
+      ["xl", "3.25rem"],
+    ] as const) {
+      expect(css).toContain(
+        `.poodle-slider[data-variant="block"][data-size="${size}"] { --poodle-slider-block-height: ${rem};`,
+      );
+    }
+    // Density never inflates the block capsule.
+    expect(css).toContain('.poodle-slider[data-variant="embedded"][data-density="compact"]');
+    expect(css).not.toContain('.poodle-slider[data-density="compact"]');
   });
 
   it("dispatches from the hit outside the capsule footprint", () => {
@@ -279,7 +301,7 @@ describe("Slider (react) block variant", () => {
 
   it("keeps the block capsule rounded-square and the thumb circular in CSS", () => {
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-min-height);\n    border-radius: var(--poodle-radius-control);",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-height);\n    border-radius: var(--poodle-radius-control);",
     );
     expect(css).toContain(
       ".poodle-slider[data-variant=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
@@ -321,7 +343,7 @@ describe("Slider (react) block variant", () => {
 
   it("keeps vertical block upright: value top, label centered, clip along the block axis", () => {
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    position: relative;\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    height: 100%;\n  }",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    position: relative;\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    height: 100%;\n    box-sizing: border-box;\n    /* g18.024: a fixed, value-independent block inset keeps the anchored\n       text fully inside the rail at every shared size. */\n    padding-block: 0.25rem;\n  }",
     );
     expect(css).toContain(
       ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
@@ -335,8 +357,23 @@ describe("Slider (react) block variant", () => {
     expect(css).toContain(
       ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));",
     );
+    // g18.024: the vertical rail is the shared capsule size, not the hit
+    // envelope.
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] {\n    width: var(--poodle-slider-block-height);\n    min-width: var(--poodle-slider-block-height);",
+    );
     // Vertical never mirrors with direction.
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
+  });
+
+  it("renders fractional default values as short step-aware decimals", () => {
+    // step 0.01 implies two decimals; the snapped 0.85 must never leak a
+    // binary tail. The custom formatter remains the authoritative override.
+    const { container } = render(
+      <Slider value={0.8500000000000001} min={0} max={1} step={0.01} ariaLabel="Drive" />,
+    );
+    const value = container.querySelector(".poodle-slider__inline--selected .poodle-slider__inline-value")!;
+    expect(value.textContent).toBe("0.85");
   });
 
   it("renders the vertical row with the value slot above the label", () => {

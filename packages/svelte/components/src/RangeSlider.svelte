@@ -98,8 +98,8 @@
   ]));
   const block = $derived(variant === "block");
   const visibleLabelText = $derived(visibleLabel && visibleLabel !== "" ? visibleLabel : null);
-  const lowerVisible = $derived(resolveRangeVisibleValue(displayLower, "lower", formatVisibleValue));
-  const upperVisible = $derived(resolveRangeVisibleValue(displayUpper, "upper", formatVisibleValue));
+  const lowerVisible = $derived(resolveRangeVisibleValue(displayLower, min, step, "lower", formatVisibleValue));
+  const upperVisible = $derived(resolveRangeVisibleValue(displayUpper, min, step, "upper", formatVisibleValue));
   const blockLayout = $derived.by(() => {
     if (!block) return { labelInline: false, lowerInline: false, upperInline: false };
     const font = capsule ? getComputedStyle(capsule).font : "14px sans-serif";

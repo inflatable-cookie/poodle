@@ -504,7 +504,9 @@ fn paint_slider_block(
     key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
     interactive: bool,
 ) -> Node {
-    use crate::slider_block::{block_grab_with_axis, block_surface_vertical, fraction_anchor_vertical};
+    use crate::slider_block::{
+        block_grab_with_axis, block_hit_inset, block_surface_vertical, fraction_anchor_vertical,
+    };
 
     let vertical = spec.orientation == Orientation::Vertical;
     // Horizontal geometry mirrors in RTL; vertical never mirrors.
@@ -524,7 +526,7 @@ fn paint_slider_block(
     // the pill. The visible thumb stays circular.
     let control_radius = ctx.theme().resolve_radius("radius.control");
     let label = omit_empty_owned(spec.visible_label.as_deref());
-    let value_text = resolved_visible_text(visual.value, spec.visible_value_text.as_deref());
+    let value_text = resolved_visible_text(visual.value, spec.min, spec.step, spec.visible_value_text.as_deref());
     let (capsule_span, measure) = ctx.require_block_layout("Slider");
     let layout = layout_slider_block(
         capsule_span,
@@ -746,44 +748,44 @@ fn paint_slider_block(
         stamp_disabled_roles(&mut hit);
     }
 
-    let inset = ((hit_px - capsule_cross) * 0.5).max(0.0);
+    let inset = block_hit_inset(hit_px, capsule_cross);
     let physical = if rtl { 1.0 - fraction } else { fraction };
     let mut surface = if vertical {
-        // The capsule fills the block axis; the cross axis is centred inside
-        // the hit-sized surface.
+        // The capsule fills the capsule-sized surface; the 44px hit and its
+        // anchor layer overflow centred (g18.024).
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
             top: Some(0.0),
-            left: Some(inset),
-            right: Some(inset),
+            left: Some(0.0),
+            right: Some(0.0),
             bottom: Some(0.0),
         };
-        let anchor_layer = fraction_anchor_vertical(physical, hit_px, hit, hit_px * 0.5);
-        let mut s = block_surface_vertical(hit_px);
+        let anchor_layer = fraction_anchor_vertical(physical, hit_px, hit, hit_px * 0.5, -inset);
+        let mut s = block_surface_vertical(capsule_cross);
         s = s.child(capsule);
         s.child(anchor_layer)
     } else {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
-            top: Some(inset),
+            top: Some(0.0),
             left: Some(0.0),
             right: Some(0.0),
             bottom: None,
         };
-        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5);
-        let mut s = block_surface(hit_px);
+        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5, -inset);
+        let mut s = block_surface(capsule_cross);
         s = s.child(capsule);
         s.child(anchor_layer)
     };
     if let Some(handler) = scrub_handler {
-        surface = surface.child(block_grab_with_axis(handler, scrub_axis(spec.orientation)));
+        surface = surface.child(block_grab_with_axis(handler, scrub_axis(spec.orientation), inset));
     }
 
     let mut root = Node::container();
     if vertical {
         root.style.fill_height = true;
-        root.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
-        root.style.min_width = Some(hit_px);
+        root.style.descriptor.layout.width = LayoutSizing::Fixed(capsule_cross);
+        root.style.min_width = Some(capsule_cross);
         root.style.min_height = Some(rem_to_px(10.0));
         root.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     } else {
@@ -860,6 +862,13 @@ fn block_text_row(
     let inset = rem_to_px(0.5);
     row.style.descriptor.layout.spacing.padding.left = inset;
     row.style.descriptor.layout.spacing.padding.right = inset;
+    if vertical {
+        // g18.024: a fixed, value-independent block inset keeps the anchored
+        // text fully inside the rail at every shared size.
+        let block_inset = rem_to_px(0.25);
+        row.style.descriptor.layout.spacing.padding.top = block_inset;
+        row.style.descriptor.layout.spacing.padding.bottom = block_inset;
+    }
     let label_slot = block_text_slot(label, color, size, label_id);
     let value_slot = block_text_slot(value, color, size, value_id);
     row = if vertical {

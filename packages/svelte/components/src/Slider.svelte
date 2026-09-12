@@ -81,7 +81,7 @@
     `--poodle-slider-center: ${visualState.centerNorm * 100}%`,
   ]));
   const block = $derived(variant === "block");
-  const visibleValueText = $derived(resolveSliderVisibleValue(displayValue, formatVisibleValue));
+  const visibleValueText = $derived(resolveSliderVisibleValue(displayValue, min, step, formatVisibleValue));
   const visibleLabelText = $derived(visibleLabel && visibleLabel !== "" ? visibleLabel : null);
   const blockLayout = $derived.by(() => {
     if (!block) return { labelInline: false, valueInline: false };

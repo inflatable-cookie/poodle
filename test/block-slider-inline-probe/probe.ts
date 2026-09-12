@@ -1,8 +1,10 @@
 /**
  * Headless Chromium + WebKit proof for g18.017 block Slider fixed inline
- * presentation: rounded-square family corners, stable glyph coordinates under
+ * presentation (rounded-square family corners, stable glyph coordinates under
  * a moving fill boundary, split-colour crossover, whole-track collision
- * priority, and RTL mirroring — over paired Svelte and React fixtures.
+ * priority, RTL mirroring) extended with the g18.024 repair proof: short
+ * step-aware default decimals and complete upright vertical rails for both
+ * families — over paired Svelte and React fixtures.
  *
  *   bun test/block-slider-inline-probe/probe.ts --browser=chromium
  *   bun test/block-slider-inline-probe/probe.ts --browser=webkit
@@ -258,6 +260,8 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
 
   // g18.022 vertical block: the value paints at the capsule's physical top
   // and the optional label at its center, anchored to the whole capsule.
+  // g18.024: the anchored text also stays fully inside the rail with a
+  // fixed, value-independent inset.
   const vertical = await measure(page, `${base} [data-case="slider-vertical"]`);
   const verticalTopInset = vertical.selectedValue.top - vertical.capsule.top;
   check(
@@ -280,13 +284,95 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
     `capsule ${vertical.capsule.height}px value ${vertical.selectedValue.top} label ${vertical.selectedLabel.top}..${vertical.selectedLabel.bottom}`,
   );
   check(
-    `${prefix} vertical text stays inside the capsule`,
+    `${prefix} vertical text stays inside the capsule with a visible inset`,
     vertical.selectedValue.top >= vertical.capsule.top &&
+      vertical.selectedValue.top - vertical.capsule.top >= 2 &&
       vertical.selectedLabel.bottom <= vertical.capsule.bottom,
+    `value top inset ${verticalTopInset.toFixed(1)}`,
   );
   check(
     `${prefix} vertical paints no fallback`,
     (await page.locator(`${base} [data-case="slider-vertical"] .poodle-slider__fallback`).count()) === 0,
+  );
+
+  // g18.024: fractional steps render short decimals — the default serializer
+  // rounds snapped binary debris to the precision implied by min and step.
+  const fraction = await measure(page, `${base} [data-case="slider-fraction"]`);
+  check(
+    `${prefix} a snapped 0.85 renders without a binary tail`,
+    fraction.selectedValueText === "0.85",
+    fraction.selectedValueText,
+  );
+  const rangeFractionSel = `${base} [data-case="range-fraction"]`;
+  const rangeFractionTexts = await page.evaluate(
+    (sel) =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          `${sel} .poodle-range-slider__inline--selected .poodle-range-slider__inline-value`,
+        ),
+      ).map((slot) => slot.textContent),
+    rangeFractionSel,
+  );
+  check(
+    `${prefix} both range endpoints render short decimals`,
+    rangeFractionTexts.join("/") === "0.3/0.85",
+    rangeFractionTexts.join("/"),
+  );
+
+  // g18.024 vertical range repair: upper value at the physical top, label
+  // centered on the exact middle, lower value at the physical bottom; every
+  // glyph inside the capsule, anchors value-independent.
+  const rangeVerticalSel = `${base} [data-case="range-vertical"]`;
+  const rv = await page.evaluate(
+    (sel) => {
+      const capsule = document.querySelector<HTMLElement>(`${sel} .poodle-range-slider__capsule`)!;
+      const row = document.querySelector<HTMLElement>(
+        `${sel} .poodle-range-slider__inline--selected .poodle-range-slider__inline-row--vertical`,
+      )!;
+      const rect = (el: Element) => {
+        const box = el.getBoundingClientRect();
+        return { top: box.top, bottom: box.bottom, left: box.left, right: box.right, height: box.height };
+      };
+      const upper = row.querySelector<HTMLElement>(".poodle-range-slider__inline-value--upper")!;
+      const lower = row.querySelector<HTMLElement>(".poodle-range-slider__inline-value--lower")!;
+      const label = row.querySelector<HTMLElement>(".poodle-range-slider__inline-label")!;
+      return {
+        capsule: rect(capsule),
+        upper: { box: rect(upper), text: upper.textContent ?? "" },
+        lower: { box: rect(lower), text: lower.textContent ?? "" },
+        label: { box: rect(label), text: label.textContent ?? "" },
+      };
+    },
+    rangeVerticalSel,
+  );
+  const rvCapsuleCenter = (rv.capsule.top + rv.capsule.bottom) / 2;
+  const rvLabelCenter = (rv.label.box.top + rv.label.box.bottom) / 2;
+  check(
+    `${prefix} vertical range upper value paints at the top`,
+    rv.upper.text === "80" && rv.upper.box.top - rv.capsule.top >= 2 && rv.upper.box.top - rv.capsule.top < 14,
+    `top inset ${(rv.upper.box.top - rv.capsule.top).toFixed(1)} text ${rv.upper.text}`,
+  );
+  check(
+    `${prefix} vertical range lower value paints at the bottom`,
+    rv.lower.text === "20" && rv.capsule.bottom - rv.lower.box.bottom >= 2 && rv.capsule.bottom - rv.lower.box.bottom < 14,
+    `bottom inset ${(rv.capsule.bottom - rv.lower.box.bottom).toFixed(1)} text ${rv.lower.text}`,
+  );
+  check(
+    `${prefix} vertical range label centers on the exact middle`,
+    rv.label.text === "Price" && Math.abs(rvLabelCenter - rvCapsuleCenter) <= 4,
+    `label ${rvLabelCenter.toFixed(1)} vs ${rvCapsuleCenter.toFixed(1)}`,
+  );
+  check(
+    `${prefix} vertical range keeps every glyph inside the capsule`,
+    rv.upper.box.top >= rv.capsule.top &&
+      rv.lower.box.bottom <= rv.capsule.bottom &&
+      rv.label.box.bottom <= rv.capsule.bottom,
+    `capsule ${rv.capsule.top}..${rv.capsule.bottom}`,
+  );
+  check(
+    `${prefix} vertical range rail is the shared 36px capsule width`,
+    Math.abs(rv.capsule.right - rv.capsule.left - 36) <= 0.75,
+    `${rv.capsule.right - rv.capsule.left}`,
   );
 
   // RangeSlider: radius-only family change; inline placement untouched.

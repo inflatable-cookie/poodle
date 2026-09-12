@@ -15,6 +15,9 @@
   let rtl = $state(20);
   let range = $state<[number, number]>([20, 80]);
   let vertical = $state(50);
+  let fraction = $state(0.85);
+  let rangeFraction = $state<[number, number]>([0.3, 0.85]);
+  let rangeVertical = $state<[number, number]>([20, 80]);
   let dispatches = $state(0);
   let trace = $state("idle");
 </script>
@@ -132,5 +135,33 @@
       }}
     />
     <p data-testid="trace" data-hits={dispatches}>{trace}</p>
+  </div>
+  <!-- g18.024: fractional steps render short decimals; a snapped 0.85 never
+       leaks a binary tail. -->
+  <div data-case="slider-fraction" style="width: 240px; padding: 24px;">
+    <Slider min={0} max={1} step={0.01} value={fraction} visibleLabel="Drive" ariaLabel="Drive" />
+  </div>
+  <div data-case="range-fraction" style="width: 240px; padding: 24px;">
+    <RangeSlider
+      min={0}
+      max={1}
+      step={0.01}
+      value={rangeFraction}
+      visibleLabel="Band"
+      ariaLabel="Band"
+    />
+  </div>
+  <!-- g18.024 vertical range repair: upper top, label centered on the exact
+       middle, lower bottom; nothing clips, shifts, or collapses. -->
+  <div data-case="range-vertical" style="width: 200px; height: 240px; padding: 24px;">
+    <RangeSlider
+      orientation="vertical"
+      min={0}
+      max={100}
+      step={1}
+      value={rangeVertical}
+      visibleLabel="Price"
+      ariaLabel="Vertical range"
+    />
   </div>
 </section>

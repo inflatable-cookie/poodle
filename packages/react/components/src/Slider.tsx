@@ -94,7 +94,7 @@ export function Slider({
     "--poodle-slider-fill-span": `${visualState.fillSpanNorm * 100}%`,
     "--poodle-slider-center": `${visualState.centerNorm * 100}%`,
   } as CSSProperties;
-  const visibleValueText = resolveSliderVisibleValue(displayValue, formatVisibleValue);
+  const visibleValueText = resolveSliderVisibleValue(displayValue, min, step, formatVisibleValue);
   const visibleLabelText = visibleLabel && visibleLabel !== "" ? visibleLabel : null;
   const font = capsule.current ? getComputedStyle(capsule.current).font : "14px sans-serif";
   const blockLayout = block

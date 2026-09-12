@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Slider } from "@inflatable-cookie/poodle-svelte";
+  import { RangeSlider, Slider } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
@@ -9,6 +9,7 @@
   let bipolar = $state(-0.45);
   let sizeValues = $state<Record<string, number>>({ xs: 0.4, sm: 0.4, md: 0.4, lg: 0.4, xl: 0.4 });
   let densityValues = $state<Record<string, number>>({ compact: -0.4, default: -0.4, comfortable: -0.4 });
+  const ladderSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="poodle-slider-specimen">
@@ -52,10 +53,25 @@
     <Slider direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => (opacity = value)} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Vertical block — value top, label centered, upright text">
+  <!-- g18.024: the shared control ladder — each family aligns edge for edge
+       with same-size reference controls, and vertical values stay short
+       step-aware decimals. -->
+  <SpecimenGroup label="Shared control ladder — same-size rows">
+    {#each ladderSizes as size (size)}
+      <div class="poodle-slider-specimen__ladder-row">
+        <span class="poodle-slider-specimen__size-tag">{size}</span>
+        <Slider value={sizeValues[size]} min={0} max={1} step={0.01} {size} visibleLabel="Gain" ariaLabel={"Block slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
+        <RangeSlider value={[0.2, 0.8]} min={0} max={1} step={0.01} {size} ariaLabel={"Block range at " + size} />
+      </div>
+    {/each}
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Vertical block — upright values, short decimals">
     <div class="poodle-slider-specimen__vertical">
       <Slider orientation="vertical" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Vertical volume" onValueChange={(value) => (volume = value)} />
       <Slider orientation="vertical" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Vertical bipolar block" onValueChange={(value) => (bipolar = value)} />
+      <Slider orientation="vertical" value={0.85} min={0} max={1} step={0.01} visibleLabel="Drive" ariaLabel="Vertical fractional block" />
+      <RangeSlider orientation="vertical" value={[0.3, 0.85]} min={0} max={1} step={0.01} visibleLabel="Band" ariaLabel="Vertical fractional range" />
     </div>
   </SpecimenGroup>
 
@@ -92,6 +108,24 @@
     align-items: flex-start;
     gap: 2rem;
     height: 12rem;
+  }
+
+  .poodle-slider-specimen__ladder-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .poodle-slider-specimen__ladder-row > :global(.poodle-slider),
+  .poodle-slider-specimen__ladder-row > :global(.poodle-range-slider) {
+    flex: 1;
+  }
+
+  .poodle-slider-specimen__size-tag {
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-label-size);
+    min-width: 1.5rem;
   }
 
   .poodle-slider-specimen__variant-pair,

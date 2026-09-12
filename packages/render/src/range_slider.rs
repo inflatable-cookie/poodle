@@ -22,9 +22,9 @@ use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::slider_block::{
-    block_grab_with_axis, block_hit, block_surface, block_surface_vertical, capsule_height_rem,
-    font_size_rem, fraction_anchor, fraction_anchor_vertical, stamp_disabled_roles,
-    stamp_forced_color, visible_thumb,
+    block_grab_with_axis, block_hit, block_hit_inset, block_surface, block_surface_vertical,
+    capsule_height_rem, font_size_rem, fraction_anchor, fraction_anchor_vertical,
+    stamp_disabled_roles, stamp_forced_color, visible_thumb,
 };
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
 #[derive(Default)]
@@ -598,8 +598,8 @@ fn range_slider_block(
         .as_deref()
         .filter(|text| !text.is_empty())
         .map(ToOwned::to_owned);
-    let lower_text = resolved_visible_text(visual.value.0, spec.visible_lower_text.as_deref());
-    let upper_text = resolved_visible_text(visual.value.1, spec.visible_upper_text.as_deref());
+    let lower_text = resolved_visible_text(visual.value.0, spec.min, spec.step, spec.visible_lower_text.as_deref());
+    let upper_text = resolved_visible_text(visual.value.1, spec.min, spec.step, spec.visible_upper_text.as_deref());
     let (capsule_span, measure) = ctx.require_block_layout("RangeSlider");
     let layout = layout_range_slider_block(
         capsule_span,
@@ -855,6 +855,13 @@ fn range_slider_block(
         let inset = rem_to_px(0.5);
         row.style.descriptor.layout.spacing.padding.left = inset;
         row.style.descriptor.layout.spacing.padding.right = inset;
+        // g18.024: a fixed, value-independent block inset keeps the anchored
+        // text fully inside the rail at every shared size.
+        if vertical {
+            let block_inset = rem_to_px(0.25);
+            row.style.descriptor.layout.spacing.padding.top = block_inset;
+            row.style.descriptor.layout.spacing.padding.bottom = block_inset;
+        }
         let slot = |content: Option<&str>, id: &str| {
             let mut node = Node::text(content.unwrap_or_default().to_owned());
             node.id = Some(id.to_owned());
@@ -866,11 +873,24 @@ fn range_slider_block(
         };
         // Physical order along the paint axis. Horizontal LTR: lower, label,
         // upper. Horizontal RTL mirrors so lower stays at the logical start.
-        // Vertical stays upright: upper at the physical top, label centered,
-        // lower at the physical bottom.
+        // Vertical stays upright: upper at the physical top, label centered
+        // on the exact rail middle as an absolute overlay (g18.024, matching
+        // the web row), lower at the physical bottom.
         row = if vertical {
+            let mut label_wrap = Node::container();
+            label_wrap.style.descriptor.layout.direction = LayoutDirection::Column;
+            label_wrap.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            label_wrap.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            label_wrap.position = NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            };
+            let label_wrap =
+                label_wrap.child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"));
             row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
-                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
+                .child(label_wrap)
                 .child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
         } else if rtl {
             row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
@@ -1039,46 +1059,47 @@ fn range_slider_block(
         capsule = capsule.child(clip);
     }
 
-    let inset = ((hit_px - capsule_cross) * 0.5).max(0.0);
+    let inset = block_hit_inset(hit_px, capsule_cross);
     let mut surface = if vertical {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
             top: Some(0.0),
-            left: Some(inset),
-            right: Some(inset),
+            left: Some(0.0),
+            right: Some(0.0),
             bottom: Some(0.0),
         };
         // Vertical anchors: upper value at the physical top, lower value at
-        // the physical bottom, both hung centred on the cross axis.
-        let lower_anchor = fraction_anchor_vertical(lo, hit_px, thumb_lo, hit_px * 0.5);
-        let upper_anchor = fraction_anchor_vertical(hi, hit_px, thumb_hi, hit_px * 0.5);
-        let mut s = block_surface_vertical(hit_px);
+        // the physical bottom, both hung centred on the cross axis. The hit
+        // layers overflow centred on the capsule-sized surface (g18.024).
+        let lower_anchor = fraction_anchor_vertical(lo, hit_px, thumb_lo, hit_px * 0.5, -inset);
+        let upper_anchor = fraction_anchor_vertical(hi, hit_px, thumb_hi, hit_px * 0.5, -inset);
+        let mut s = block_surface_vertical(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s
     } else {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
-            top: Some(inset),
+            top: Some(0.0),
             left: Some(0.0),
             right: Some(0.0),
             bottom: None,
         };
-        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5);
-        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5);
-        let mut s = block_surface(hit_px);
+        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5, -inset);
+        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5, -inset);
+        let mut s = block_surface(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s
     };
     if let Some(handler) = scrub_handler {
         let axis = if vertical { ScrubAxis::Vertical } else { ScrubAxis::Horizontal };
-        surface = surface.child(block_grab_with_axis(handler, axis));
+        surface = surface.child(block_grab_with_axis(handler, axis, inset));
     }
 
     let mut el = Node::container();
     if vertical {
         el.style.fill_height = true;
-        el.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
-        el.style.min_width = Some(hit_px);
+        el.style.descriptor.layout.width = LayoutSizing::Fixed(capsule_cross);
+        el.style.min_width = Some(capsule_cross);
         el.style.min_height = Some(rem_to_px(10.0));
         el.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     } else {

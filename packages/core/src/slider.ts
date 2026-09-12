@@ -361,25 +361,69 @@ export function omitEmptyVisibleText(text: string | null | undefined): string | 
   return text;
 }
 
-export function defaultVisibleValueText(value: number): string {
-  return String(value);
+/** Decimal places implied by a finite number's shortest representation. */
+function impliedDecimalPlaces(value: number): number {
+  const text = String(value);
+  const expIndex = text.indexOf("e");
+  if (expIndex === -1) {
+    const dotIndex = text.indexOf(".");
+    return dotIndex === -1 ? 0 : text.length - dotIndex - 1;
+  }
+  const mantissa = text.slice(0, expIndex);
+  const mantissaPlaces = mantissa.includes(".") ? mantissa.length - mantissa.indexOf(".") - 1 : 0;
+  return Math.max(0, mantissaPlaces - Number(text.slice(expIndex + 1)));
+}
+
+/**
+ * Decimal precision implied by `min` and a finite positive `step` (g18.024).
+ * The snapped value `min + n * step` is exact to at most that many decimal
+ * places, so binary tails beyond it are arithmetic noise, never data.
+ */
+export function sliderDisplayPrecision(min: number, step: number): number {
+  const stepPlaces = Number.isFinite(step) && step > 0 ? impliedDecimalPlaces(step) : 0;
+  return Math.min(100, Math.max(impliedDecimalPlaces(min), stepPlaces));
+}
+
+/**
+ * g18.024 default visible value: a short step-aware decimal. The value must
+ * already be step-snapped; with a finite positive `step` it is rounded to
+ * the precision implied by `min` and `step`, insignificant zeroes are
+ * trimmed, and negative zero normalizes to `"0"`. Binary tails never
+ * survive. Without a finite positive step no snapping happened, so the
+ * value keeps its shortest exact form.
+ */
+export function defaultVisibleValueText(value: number, min: number, step: number): string {
+  if (!Number.isFinite(value)) return String(value);
+  if (!Number.isFinite(step) || step <= 0) return String(value);
+  const rounded = Number(value.toFixed(sliderDisplayPrecision(min, step)));
+  // Number→String prints the shortest exact decimal (and `-0` as `"0"`),
+  // which performs the trimming and negative-zero normalization for free.
+  return String(rounded);
 }
 
 
 export function resolveSliderVisibleValue(
   value: number,
+  min: number,
+  step: number,
   formatVisibleValue?: ((value: number) => string) | null,
 ): string | null {
-  return omitEmptyVisibleText((formatVisibleValue ?? defaultVisibleValueText)(value));
+  return omitEmptyVisibleText(
+    formatVisibleValue ? formatVisibleValue(value) : defaultVisibleValueText(value, min, step),
+  );
 }
 
 export function resolveRangeVisibleValue(
   value: number,
+  min: number,
+  step: number,
   thumb: "lower" | "upper",
   formatVisibleValue?: ((value: number, thumb: "lower" | "upper") => string) | null,
 ): string | null {
   return omitEmptyVisibleText(
-    formatVisibleValue ? formatVisibleValue(value, thumb) : defaultVisibleValueText(value),
+    formatVisibleValue
+      ? formatVisibleValue(value, thumb)
+      : defaultVisibleValueText(value, min, step),
   );
 }
 
