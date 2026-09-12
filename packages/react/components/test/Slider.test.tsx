@@ -319,12 +319,6 @@ describe("Slider (react) block variant", () => {
     );
   });
 
-  it("marks the minimum so the block marker can step beyond the rail", () => {
-    const { container } = render(<Slider value={0} min={0} max={100} ariaLabel="Gain" />);
-    expect(container.querySelector(".poodle-slider")!.getAttribute("data-at-min")).toBe("true");
-    expect(css).toContain('[data-at-min="true"] .poodle-slider__thumb');
-  });
-
   it("clips selected text to the center-anchored fill and mirrors it in RTL", () => {
     expect(css).toContain(
       "clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));",

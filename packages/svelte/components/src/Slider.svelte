@@ -189,7 +189,6 @@
 <!-- Block is the standalone capsule; embedded is the dense track-and-thumb composite. -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-direction={direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={direction === "rtl" ? direction : undefined}
-  data-at-min={block && visualState.valueNorm === 0 ? "true" : undefined}
   role="slider" tabindex={disabled ? undefined : 0}
   aria-label={ariaLabel ?? undefined} aria-valuemin={min} aria-valuemax={safeMax} aria-valuenow={visualState.value} aria-valuetext={valueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd} onkeydown={controlKey}>

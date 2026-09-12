@@ -212,7 +212,6 @@ export function Slider({
       data-polarity={visualState.polarity}
       data-fill-tone={visualState.fillTone}
       data-state={visualState.pointerActive ? "active" : "idle"}
-      data-at-min={block && visualState.valueNorm === 0 ? "true" : undefined}
       dir={direction === "rtl" ? direction : undefined}
       role="slider"
       tabIndex={disabled ? undefined : 0}
