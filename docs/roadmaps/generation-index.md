@@ -11,11 +11,11 @@ Updated: 2026-09-12
     #253); paired Chromium/WebKit evidence with zero unresolved
     release-blocking findings and one retained follow-up (F12); operator
     acceptance gates retained g18.006.
-  - Active task: `g18.022` block-first Slider family is Queue task
-    `28f7942c-6586-497a-8d18-045602f654df`; it runs beside editor work and must
-    merge before g18.006 resumes.
+  - Merged task: `g18.022` block-first Slider family (PR #254); block is now
+    the default Slider/RangeSlider variant with fixed anchors and vertical
+    parity after exact-head review.
   - Ready task: `g18.023` CodeEditor dual syntax palettes awaits operator
-    dispatch approval; it may run beside g18.011/g18.022 and must merge before
+    dispatch approval; it runs after merged g18.011/g18.022 and must merge before
     g18.006 resumes.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
@@ -58,8 +58,8 @@ Updated: 2026-09-12
   - Paused candidate: retained g18.006 task/workspace resumes only after
     accepted g18.011, merged g18.022/g18.023, and all other blocking repairs.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
-  - Next checkpoint: get operator acceptance of merged g18.011 while g18.022
-    runs and g18.023 dispatches; merge required repairs, then resume g18.006.
+  - Next checkpoint: get operator acceptance of merged g18.011 and merged
+    g18.022 while g18.023 dispatches; merge required repairs, then resume g18.006.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

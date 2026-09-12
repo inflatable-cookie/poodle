@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.011 merged, awaiting operator acceptance; g18.022 active; g18.023 awaits approval; all precede release)
+Updated: 2026-09-12 (g18.011 merged, awaiting operator acceptance; g18.022 merged; g18.023 awaits approval; all precede release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -86,6 +86,11 @@ rust/web checks at the reviewed head. Zero unresolved release-blocking
 findings; one retained non-blocking follow-up (F12, preview-harness owner).
 Operator acceptance is still required before g18.006 resumes.
 
+[`g18.022`](g18/022-block-first-slider-family.md) — block-first Slider family — merged as `02ab7f7ec9122d85364beca77d05d681fa4d0124` (PR #254) on
+2026-09-12 after exact-head independent review (PR comment `5644429883`,
+`ready_to_merge`) at `7ed0daf093789177b8dbd67268f95c0a7151bed2` with green
+rust/web checks at the reviewed head.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -145,12 +150,13 @@ It added internal token-bound CodeMirror syntax presentation without bundling
 grammars or widening the public extension API. The syntax-presentation leg of
 g18.011 is unblocked.
 
-[`g18.022`](g18/022-block-first-slider-family.md) is dispatched as Queue task
-`28f7942c-6586-497a-8d18-045602f654df` beside the editor-only g18.011 task. It makes block the
-default and embedded the sole alternate for both Slider controls, removes the
-old presentation vocabulary, gives RangeSlider fixed endpoint/center text,
-adds vertical block parity, and proves block Slider bipolar geometry. It must
-merge before retained g18.006 resumes.
+[`g18.022`](g18/022-block-first-slider-family.md) is merged (PR #254,
+merge `02ab7f7ec9122d85364beca77d05d681fa4d0124`). Queue task
+`28f7942c-6586-497a-8d18-045602f654df` is closed with block the default and
+embedded the sole alternate for both Slider controls, the old presentation
+vocabulary removed, RangeSlider fixed endpoint/center text, vertical block
+parity, and proven block Slider bipolar geometry. The breaking pre-v1
+migration is classified in g18.006 release evidence on resume.
 
 [`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) awaits operator
 dispatch approval. It replaces g18.021’s accent/status mapping with dedicated

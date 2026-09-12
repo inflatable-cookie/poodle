@@ -1,6 +1,6 @@
 # 022 — block-first Slider family
 
-Status: ready to dispatch — operator approved 2026-09-11
+Status: complete — merged as `02ab7f7ec9122d85364beca77d05d681fa4d0124` (PR #254) on 2026-09-12
 Owner: Poodle cross-runtime components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/slider.md`,
@@ -107,10 +107,9 @@ release-candidate work resumes.
 
 ## Dispatch manifest
 
-- **State:** operator-approved for dispatch; safe to run in parallel with
-  retained g18.011; serial before retained g18.006
+- **State:** complete; merged g18.022 ran beside editor work; serial before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
-  independent review; never merge
+  independent review; merged by the plugin, never by the worker
 - **Owned mutable paths:** Slider/RangeSlider Svelte and React components,
   styles, shared TypeScript core, contracts/specs/headless/render Rust,
   GPUI adapter/preview, focused tests, paired specimen pages and generated
@@ -197,7 +196,7 @@ Planning inspection on 2026-09-11 found:
 
 ## Next task
 
-After g18.022 merges and g18.011 finishes with operator acceptance, resume the
+g18.022 is merged. After g18.011 finishes with operator acceptance, resume the
 same retained g18.006 release-candidate task. Recompute the full `0.4.0` source
 identity and classify this breaking pre-v1 migration in its release evidence.
 

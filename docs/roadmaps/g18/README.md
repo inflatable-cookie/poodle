@@ -66,7 +66,7 @@ needed to compile honest repair tranches.
 | [`g18.019`](019-markdown-renderer.md) — MarkdownRenderer shared safe/trusted rendering | complete | PR #247 (merge `cc26dd3c09e12addab7c0b6c5a243f83f33cff94`); standalone paired renderer, shared editor-preview path, safe default and explicit trusted opt-in |
 | [`g18.020`](020-rich-text-heading-mode-select.md) — RichTextEditor heading mode select | complete | PR #251 (merge `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9`); consumer-configurable Normal/H1–H6 selector plus real H4–H6 schema/editor/renderer support |
 | [`g18.021`](021-code-editor-token-bound-syntax-presentation.md) — CodeEditor token-bound syntax presentation | complete | PR #252 (merge `e69512038a4f032ecfad398562bbab28d40e9ffc`); private Poodle-token CodeMirror highlight style in both web engines |
-| [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | queued | Queue task `28f7942c-6586-497a-8d18-045602f654df`; runs beside editor work; serial before g18.006 |
+| [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | complete | PR #254 (merge `02ab7f7ec9122d85364beca77d05d681fa4d0124`); block-default two-variant Slider/RangeSlider API, fixed RangeSlider anchors, vertical block parity, repinned evidence |
 | [`g18.023`](023-code-editor-dual-syntax-palettes.md) — CodeEditor dual syntax palettes | awaiting operator dispatch approval | designed dark/light syntax ramps plus sparse Poodle-theme overrides; may run beside g18.011/g18.022; serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
@@ -120,9 +120,9 @@ to plain text. Merged g18.021 repaired it with one private Poodle-token
 highlight style in both engines (PR #252). Merged g18.011 swept all four
 surfaces under both engines with zero unresolved release-blocking findings
 (PR #253); operator acceptance of the capsule is the remaining gate.
-Dispatched g18.022
-then makes block the default Slider-family variant, removes the old
-standard/track surface, fixes RangeSlider text placement, and adds vertical
+Merged g18.022
+made block the default Slider-family variant, removed the old
+standard/track surface, fixed RangeSlider text placement, and added vertical
 block parity. g18.006 is the retained final candidate lane and stays paused
 until operator acceptance of merged g18.011, merged g18.022, g18.023, and any
 repairs close. g18.009 waits on g18.006; no candidate
