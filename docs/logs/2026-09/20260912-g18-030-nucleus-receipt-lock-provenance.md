@@ -1,7 +1,7 @@
 # g18.030 — Nucleus receipt lock provenance
 
-Status: repinned — implementation and complete current cohort evidence are
-committed; the PR opens for exact-head Queue review, CI observation and merge
+Status: complete — merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` (PR #262)
+on 2026-09-12 after exact-head independent review
 Date: 2026-09-12
 Branch: `ns-54e5251f-3cfe-4e0a-95de-f25b814304e5`
 Card: `docs/roadmaps/g18/030-nucleus-receipt-lock-provenance.md`
@@ -73,9 +73,36 @@ observations and captures are byte-identical.
   `effigy docs:lint` green; `git diff --check` clean.
 - Exact-head GitHub `web`/`rust` checks, review and merge are Queue-owned.
 
+## Merge and review
+
+- PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` on 2026-09-12
+  with parents `a057041942364989b3bbd31428df5c30b029f341` (main) and
+  `362013c7bbc64496588749bf052324a2be9f22ea` (reviewed head). The merge
+  matches the reviewed head exactly; no base refresh was needed.
+- Accepted independent review is [PR comment
+  5648889053](https://github.com/inflatable-cookie/poodle/pull/262#issuecomment-5648889053),
+  bound to the exact head with `ready_to_merge`; it found no blocking findings.
+- Exact-head GitHub `rust` and `web` checks were green at the merge gate. The
+  only review observation was non-blocking PR-description shorthand: the
+  committed cohort is 29 M1 plus 29 A1 receipts, not 58 combined files.
+
+## Closeout (integration checkout, 2026-09-12)
+
+- Verified `/Users/tom/Dev/projects/poodle` clean on `main` at
+  `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85`, matching `origin/main` and the
+  provider merge before this closeout batch.
+- Closeout reran no implementation or broad validation suites. The validation
+  above is the worker/reviewer evidence plus plugin-owned exact-head merge
+  verification. No task-specific failure is deferred.
+- Retained g18.006 now resumes on current main for the immutable `0.4.0`
+  candidate and its final version-bound Nucleus repin. g18.009 remains
+  dependency-queued behind that candidate for the hosted branch dry run, tag
+  and publication. No release, tag, workflow or Desktop mutation occurred in
+  g18.030.
+
 ## Boundaries held
 
 No Cargo manifest or lockfile, version, changelog, release note, workflow,
 public-surface policy, candidate, tag, registry, Desktop or retained g18.006
-mutation. The diff is one emitter source file plus generated evidence and this
-log.
+mutation. The merged PR diff was one emitter source file plus generated
+evidence and this log.

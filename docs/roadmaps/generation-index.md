@@ -73,17 +73,18 @@ Updated: 2026-09-12
   - Completed precursor: g18.029 added closed `0.4.0` candidate-scope
     admission in PR #261 while preserving strict and historical g16.054
     behavior.
-  - Ready precursor: operator-approved g18.030 derives Nucleus receipt
-    lock/version provenance from the actual preview lockfile and repins the
-    current cohort once.
-  - Blocked candidate: retained g18.006 is clean at current main with no
-    candidate mutation; it resumes in the same task/workspace after g18.030
-    merges.
+  - Completed precursor: g18.030 derives Nucleus receipt lock/version
+    provenance from the actual preview lockfile and repins the current cohort
+    once; PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` after
+    accepted exact-head review and green checks.
+  - Ready candidate: retained g18.006 is clean at current main with no
+    candidate mutation; it resumes in the same task/workspace now that g18.030
+    has merged.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; it publishes only the accepted candidate and returns the Desktop
     unblock capsule.
-  - Next checkpoint: execute g18.030, then resume retained g18.006. Publish
-    `0.4.0` through g18.009, unblock Desktop, and route compatible
+  - Next checkpoint: resume retained g18.006 on the merged g18.030 main.
+    Publish `0.4.0` through g18.009, unblock Desktop, and route compatible
     sweep findings to `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations
 

@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: blocked — retained Queue task/workspace; resume after g18.030 removes hard-coded receipt provenance
+Status: ready — retained Queue task/workspace; g18.030 merged, resume on current main
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -13,7 +13,7 @@ Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
 `g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
 `g18.026`, `g18.027`, `g18.028`, `g18.029`; current continuation gate:
-`g18.030`
+`g18.030` (merged as PR #262)
 
 ## Outcome
 
@@ -89,10 +89,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** blocked in retained dispatched Queue task/workspace at clean main
-  after g18.029 closed. Its release probe exposed hard-coded receipt
-  provenance that cannot belong to a release-only candidate. Resume only after
-  separate g18.030 merges. The
+- **State:** ready in retained dispatched Queue task/workspace at clean main
+  after g18.030 merged. Its release probe exposed hard-coded receipt
+  provenance that is now derived from the lockfile. The
   task's dependency list froze on first dispatch, so preserve the same task,
   worker and workspace; do not replace them or pretend a later dependency
   mutation is available.
@@ -222,17 +221,16 @@ post-merge g18.009.
 
 Post-g18.029 continuation proved one remaining structural conflict. The
 mandatory future `packages/gpui/preview/Cargo.lock` bump changes its SHA and
-Poodle package versions, while `nucleus_receipts.rs` hard-codes the current
-values and sits outside the closed candidate surface. g18.030 derives that
-provenance from the lockfile and repins current evidence before this task
-resumes; no candidate mutation exists.
+Poodle package versions, while `nucleus_receipts.rs` hard-coded the current
+values and sat outside the closed candidate surface. Merged g18.030 now derives
+that provenance from the lockfile and repinned current evidence; no candidate
+mutation exists.
 
 ## Next task
 
-Complete g18.030's derived Nucleus receipt provenance. Resume this retained
-task only after that PR merges. The Queue cannot add dependencies to
-this already-dispatched task, so its blocked state is the explicit serial gate;
-preserve its worker and workspace. After the candidate merges and closes,
+Resume this retained task on current main now that g18.030's derived Nucleus
+receipt provenance PR has merged. The Queue cannot add dependencies to this
+already-dispatched task, so preserve its worker and workspace. After the candidate merges and closes,
 g18.009 dispatches from its existing dependency, performs the hosted branch
 dry run, and completes release. Desktop then resumes retained g02.058 and PR
 #215.

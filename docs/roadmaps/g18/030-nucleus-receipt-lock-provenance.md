@@ -1,6 +1,6 @@
 # 030 — Nucleus receipt lock provenance
 
-Status: ready
+Status: complete — PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` on 2026-09-12 after exact-head independent review
 Owner: Poodle native evidence infrastructure
 Created: 2026-09-12
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -52,8 +52,8 @@ source, then repin the current source-bound evidence once for this precursor.
 
 ## Dispatch manifest
 
-- **State:** ready; independent release-infrastructure precursor; serial before
-  retained g18.006 resumes
+- **State:** complete; independent release-infrastructure precursor merged
+  before retained g18.006 resumes
 - **Completion:** one independently reviewed PR merged with derived provenance,
   planted version/hash laws, complete current evidence repin and exact-head
   `web`/`rust` checks green
@@ -121,9 +121,37 @@ is correctly outside the merged release-only candidate allowlist. A complete
 28-path candidate plant is admitted; adding the required emitter edit is the
 sole rejected path. The retained task has no PR or unique commit.
 
+## Merge and review
+
+PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` on 2026-09-12
+with parents `a057041942364989b3bbd31428df5c30b029f341` (main carrying this
+handoff) and `362013c7bbc64496588749bf052324a2be9f22ea` (reviewed head). The
+merge matches the reviewed head exactly; no base refresh was needed.
+
+The accepted independent review is [PR comment
+5648889053](https://github.com/inflatable-cookie/poodle/pull/262#issuecomment-5648889053),
+bound to the exact reviewed head with `ready_to_merge`. It found no blocking
+findings. Exact-head GitHub `rust` and `web` checks were green at the merge
+gate. The review noted only a non-blocking PR-description count shorthand;
+the committed evidence is complete.
+
+## Closeout
+
+- The integration checkout was verified clean on `main` at the merged commit,
+  matching both `origin/main` and the provider's merged PR identity before this
+  closeout batch.
+- Closeout reran no implementation or broad validation suites. It consumes the
+  worker/reviewer evidence recorded above and the plugin's exact-head merge
+  gate. No task-specific validation failure is deferred.
+- Broader release work remains deliberately deferred: retained g18.006 now
+  resumes the `0.4.0` candidate on current main, and g18.009 owns the hosted
+  branch dry run, tag and publication sequence. No release, tag, workflow or
+  Desktop mutation occurred here.
+
 ## Next task
 
-After this precursor merges and closes, resume Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086` in its retained workspace. Fast-forward
-it to accepted main, prepare the immutable `0.4.0` candidate, perform the one
-final version-bound Nucleus repin, and continue through ordinary review.
+Resume Queue task `17ac3fee-de90-4b32-9672-1134770bb086` in its retained
+workspace on current main. Fast-forward it to the accepted merge, prepare the
+immutable `0.4.0` candidate, perform the one final version-bound Nucleus repin,
+and continue through ordinary review. g18.009 remains dependency-queued behind
+that candidate and owns the hosted branch dry run, tag and publication.

@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: complete — PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85`
 owner: Poodle Northstar orchestrator
 created: 2026-09-12
 updated: 2026-09-12
@@ -35,13 +35,13 @@ recurring release conflict without widening candidate ownership.
 
 ## Current State
 
-Dispatch from pushed main containing this handoff. Retained Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086`, workspace
-`wks_85bb63e05d4b3f90`, and branch
-`ns-17ac3fee-de90-4b32-9672-1134770bb086` are preserved clean at
-`274757dc2b8f4f9800ee87211a8cc9daee16ff67`, with no PR or candidate commit.
-Its worker and recovery coordinator proved the exact emitter conflict and
-finished valid blocked callbacks.
+The worker branch opened PR #262 at reviewed head
+`362013c7bbc64496588749bf052324a2be9f22ea`. Queue merged it as
+`80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` with no base refresh after accepted
+exact-head review and green `rust`/`web` checks. Retained Queue task
+`17ac3fee-de90-4b32-9672-1134770bb086`, workspace `wks_85bb63e05d4b3f90`, and
+branch `ns-17ac3fee-de90-4b32-9672-1134770bb086` remain preserved for the
+next candidate lane.
 
 ## Boundaries
 
@@ -76,3 +76,13 @@ polling. Report `ready_for_review` immediately with the exact head, derived
 current and planted `0.4.0` proof, receipt counts, one-source identity and PR
 number. Queue owns exact-head CI, review and merge. No release mutation or
 g18.006 continuation occurs in this worker.
+
+## Post-merge closeout
+
+Accepted review is [PR comment
+5648889053](https://github.com/inflatable-cookie/poodle/pull/262#issuecomment-5648889053),
+bound to the reviewed head with `ready_to_merge`; it found no blocking findings.
+The worker/reviewer validation and exact-head merge evidence are recorded in
+the execution log. Closeout reran no suites. No task-specific failure is
+deferred; retained g18.006 resumes the `0.4.0` candidate on current main, and
+g18.009 owns the later hosted release sequence.
