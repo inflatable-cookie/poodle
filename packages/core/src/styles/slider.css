@@ -284,10 +284,10 @@
     transform: translateX(calc(-50% - var(--poodle-slider-block-marker-inset)));
   }
   .poodle-slider[data-variant="block"][data-at-min="true"] .poodle-slider__thumb {
-    transform: translateX(calc(-50% - var(--poodle-slider-block-marker-inset)));
+    transform: translateX(calc(50% + var(--poodle-slider-block-marker-inset)));
   }
   .poodle-slider[data-variant="block"][data-at-min="true"][data-direction="rtl"] .poodle-slider__thumb {
-    transform: translateX(calc(50% + var(--poodle-slider-block-marker-inset)));
+    transform: translateX(calc(-50% - var(--poodle-slider-block-marker-inset)));
   }
   /* g18.022 vertical block: the capsule fills the block axis, text stays
      upright with the value at the physical top and the optional label
@@ -331,7 +331,7 @@
     transform: translateY(calc(-50% - var(--poodle-slider-block-marker-inset)));
   }
   .poodle-slider[data-variant="block"][data-orientation="vertical"][data-at-min="true"] .poodle-slider__thumb {
-    transform: translateY(calc(50% + var(--poodle-slider-block-marker-inset)));
+    transform: translateY(calc(-50% - var(--poodle-slider-block-marker-inset)));
   }
   .poodle-slider[data-variant="block"]:focus-visible {
     outline: none;
