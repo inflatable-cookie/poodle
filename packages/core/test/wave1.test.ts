@@ -7,6 +7,7 @@ import {
   createRangeSliderControlContext,
   createSliderControlContext,
   normalizeRangeValue,
+  normalizeSliderValue,
   rangeSliderControlTransition,
   rangeSliderVisualState,
   rangeSliderTransition,
@@ -123,6 +124,15 @@ describe("slider", () => {
     expect(snapToStep(7, 0, 0)).toBe(7);
   });
 
+  test("keeps both bounds reachable when step does not divide the range", () => {
+    const uneven: SliderContext = { value: 0, min: 0, max: 1, step: 0.3, disabled: false };
+    expect(normalizeSliderValue(uneven, 0)).toBe(0);
+    expect(normalizeSliderValue(uneven, 1)).toBe(1);
+    expect(normalizeSliderValue(uneven, 2)).toBe(1);
+    expect(normalizeSliderValue(uneven, 0.89)).toBeCloseTo(0.9);
+    expect(sliderTransition(uneven, { type: "INPUT", raw: 1 }).context.value).toBe(1);
+  });
+
   test("negative half ties snap toward positive infinity from min", () => {
     // Portable tie law shared with poodle-headless: Math.round half-up,
     // anchored at (raw - min) / step — never raw / step and never f64::round.
@@ -200,6 +210,12 @@ describe("rangeSlider", () => {
     expect(result.effects).toEqual([{ type: "emitValueCommit", value: [20, 60] }]);
   });
 
+  test("keeps range bounds reachable when step does not divide the range", () => {
+    const uneven: RangeSliderContext = { value: [0.3, 0.6], min: 0, max: 1, step: 0.3, disabled: false };
+    expect(rangeSliderTransition(uneven, { type: "INPUT", thumb: "lower", raw: 0 }).context.value).toEqual([0, 0.6]);
+    expect(rangeSliderTransition(uneven, { type: "INPUT", thumb: "upper", raw: 1 }).context.value).toEqual([0.3, 1]);
+  });
+
   test("embedded pointer keeps the selected thumb and exposes the bipolar center", () => {
     let control = createRangeSliderControlContext({ value: [-0.5, 0.5], min: -1, max: 1, step: 0, polarity: "bipolar" });
     expect(rangeSliderVisualState(control)).toMatchObject({
@@ -251,10 +267,10 @@ describe("block appearance helpers", () => {
     expect(resolveSliderVisibleValue(67, 0, 1, () => "")).toBeNull();
   });
 
-  // g18.024: one shared default serializer. The snapped value rounds to the
-  // precision implied by min and a finite positive step, trailing zeroes
-  // trim, negative zero normalizes, and binary tails never survive.
-  test("the default display serializer emits short step-aware decimals", () => {
+  // One shared default serializer. The snapped value rounds and zero-fills to
+  // the precision implied by min and a finite positive step, negative zero
+  // normalizes, and binary tails never survive.
+  test("the default display serializer emits fixed-width step-aware decimals", () => {
     // Fractional step arithmetic without a binary tail.
     expect(defaultVisibleValueText(0.8500000000000001, 0, 0.05)).toBe("0.85");
     expect(defaultVisibleValueText(0.1 + 0.2, 0, 0.1)).toBe("0.3");
@@ -263,11 +279,11 @@ describe("block appearance helpers", () => {
     // Integer steps and integer minima never show decimal noise.
     expect(defaultVisibleValueText(44.99999999999999, 0, 1)).toBe("45");
     expect(defaultVisibleValueText(80, 0, 5)).toBe("80");
-    // Trailing zeroes trim.
-    expect(defaultVisibleValueText(Number((0.5).toFixed(2)), 0, 0.25)).toBe("0.5");
+    // Decimal precision is zero-filled so the label width stays stable.
+    expect(defaultVisibleValueText(Number((0.5).toFixed(2)), 0, 0.25)).toBe("0.50");
     expect(defaultVisibleValueText(1.2, 0.2, 0.2)).toBe("1.2");
     // Negative zero normalizes.
-    expect(defaultVisibleValueText(-1.1e-16, -1, 0.1)).toBe("0");
+    expect(defaultVisibleValueText(-1.1e-16, -1, 0.1)).toBe("0.0");
     // Custom units stay consumer-owned; the serializer only rounds digits.
     expect(defaultVisibleValueText(-0.45, -1, 0.01)).toBe("-0.45");
     // Without a finite positive step the value keeps its shortest form.

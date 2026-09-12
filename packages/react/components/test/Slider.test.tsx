@@ -71,6 +71,17 @@ describe("Slider (react)", () => {
     expect(container.querySelector(".poodle-slider__control")).toBeNull();
   });
 
+  it("anchors bipolar block fill at the center", () => {
+    const { container } = render(
+      <Slider value={-0.5} min={-1} max={1} step={0.01} polarity="bipolar" ariaLabel="Drive" />,
+    );
+    const style = container.querySelector(".poodle-slider")!.getAttribute("style");
+    expect(style).toContain("--poodle-slider-fill-start: 25%");
+    expect(style).toContain("--poodle-slider-fill-span: 25%");
+    expect(css).toContain("inset-inline-start: var(--poodle-slider-fill-start)");
+    expect(css).toContain("width: var(--poodle-slider-fill-span)");
+  });
+
   it("renders embedded as the dense track alternative", () => {
     const { container } = render(<Slider variant="embedded" value={50} ariaLabel="Volume" />);
     const root = container.querySelector(".poodle-slider")!;
@@ -299,27 +310,24 @@ describe("Slider (react) block variant", () => {
     expect(container.querySelector(".poodle-slider__fallback")).toBeNull();
   });
 
-  it("keeps the block capsule rounded-square and the thumb circular in CSS", () => {
+  it("keeps the block capsule rounded-square and uses an inset marker line", () => {
     expect(css).toContain(
       ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-height);\n    border-radius: var(--poodle-radius-control);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
+      "width: var(--poodle-slider-block-marker-thickness);\n    height: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));",
     );
   });
 
-  it("clips the selected layer at the fill boundary and mirrors the clip in RTL", () => {
+  it("clips selected text to the center-anchored fill and mirrors it in RTL", () => {
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--selected {\n    color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));\n    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);",
+      "clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));\n    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline--remainder {\n    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"horizontal\"][data-direction=\"rtl\"] .poodle-slider__inline--selected {\n    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));",
-    );
-    expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"horizontal\"][data-direction=\"rtl\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);",
+      "clip-path: inset(0 var(--poodle-slider-fill-start) 0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)));",
     );
   });
 
@@ -349,13 +357,10 @@ describe("Slider (react) block variant", () => {
       ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-slider-percent, 0%)) 0 0 0);",
+      "clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--remainder {\n    clip-path: inset(0 0 var(--poodle-slider-percent, 0%) 0);",
-    );
-    expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));",
+      ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__hit {\n    inset-inline-start: auto;\n    left: 50%;\n    top: auto;\n    bottom: calc(var(--poodle-slider-block-marker-position) - (var(--poodle-slider-block-hit) / 2));",
     );
     // g18.024: the vertical rail is the shared capsule size, not the hit
     // envelope.
@@ -366,7 +371,7 @@ describe("Slider (react) block variant", () => {
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
   });
 
-  it("renders fractional default values as short step-aware decimals", () => {
+  it("renders fractional default values as fixed-width step-aware decimals", () => {
     // step 0.01 implies two decimals; the snapped 0.85 must never leak a
     // binary tail. The custom formatter remains the authoritative override.
     const { container } = render(
@@ -389,7 +394,7 @@ describe("Slider (react) block variant", () => {
     );
   });
 
-  it("keeps the row glyph slots value-independent across the whole range", () => {
+  it("keeps the row glyph content intact across the whole range", () => {
     const journeys: Array<{ label: string; value: string }> = [];
     for (const value of [0, 50, 100]) {
       const { container, unmount } = render(

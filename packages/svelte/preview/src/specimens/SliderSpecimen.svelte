@@ -41,8 +41,12 @@
     <Slider value={40} min={0} max={100} ariaLabel="Disabled slider" disabled />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Embedded controls">
+  <SpecimenGroup label="Embedded unipolar">
     <Slider variant="embedded" polarity="unipolar" value={unipolar} min={0} max={1} step={0.01} ariaLabel="Unipolar modulation" onValueChange={(value) => (unipolar = value)} />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Bipolar — block and embedded fill from center">
+    <Slider polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} visibleLabel="Drive" ariaLabel="Bipolar block" onValueChange={(value) => (bipolar = value)} />
     <Slider variant="embedded" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation" onValueChange={(value) => (bipolar = value)} />
   </SpecimenGroup>
 
@@ -73,10 +77,6 @@
       <Slider orientation="vertical" value={0.85} min={0} max={1} step={0.01} visibleLabel="Drive" ariaLabel="Vertical fractional block" />
       <RangeSlider orientation="vertical" value={[0.3, 0.85]} min={0} max={1} step={0.01} visibleLabel="Band" ariaLabel="Vertical fractional range" />
     </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Bipolar block — fill grows from the center">
-    <Slider polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} visibleLabel="Drive" ariaLabel="Bipolar block" onValueChange={(value) => (bipolar = value)} />
   </SpecimenGroup>
 
   {#snippet sizes(size)}

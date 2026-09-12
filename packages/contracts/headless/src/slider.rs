@@ -52,11 +52,22 @@ pub enum SliderEffect {
 }
 
 pub fn normalize_slider_value(context: SliderContext, raw: f64) -> f64 {
-    clamp_value(
-        snap_to_step(raw, context.min, context.step),
-        context.min,
-        safe_slider_max(context.min, context.max),
-    )
+    normalize_value_to_bounds(raw, context.min, context.max, context.step)
+}
+
+fn normalize_value_to_bounds(raw: f64, min: f64, max: f64, step: f64) -> f64 {
+    let max = safe_slider_max(min, max);
+
+    // Bounds are authoritative stops even when the configured step does not
+    // divide the range evenly. Only values strictly inside the range snap.
+    if raw <= min {
+        return min;
+    }
+    if raw >= max {
+        return max;
+    }
+
+    clamp_value(snap_to_step(raw, min, step), min, max)
 }
 
 pub fn slider_transition(
@@ -129,7 +140,7 @@ pub fn range_slider_transition(
         RangeSliderEvent::Input { thumb, raw } | RangeSliderEvent::Commit { thumb, raw } => {
             let max = safe_slider_max(context.min, context.max);
             let (lower, upper) = normalize_range_value(context);
-            let snapped = snap_to_step(raw, context.min, context.step);
+            let snapped = normalize_value_to_bounds(raw, context.min, context.max, context.step);
             // A thumb cannot cross its sibling.
             let value = match thumb {
                 RangeThumb::Lower => (clamp_value(snapped, context.min, upper), upper),
@@ -450,11 +461,7 @@ pub fn range_slider_visual_state(context: RangeSliderControlContext) -> RangeSli
 fn range_control_value_at(context: RangeSliderControlContext, value_norm: f64) -> f64 {
     let max = safe_slider_max(context.min, context.max);
     let value = denormalize_value(value_norm, context.min, max, context.law);
-    clamp_value(
-        snap_to_step(value, context.min, context.step),
-        context.min,
-        max,
-    )
+    normalize_value_to_bounds(value, context.min, context.max, context.step)
 }
 
 pub fn range_slider_control_transition(
@@ -598,10 +605,10 @@ pub fn slider_display_precision(min: f64, step: f64) -> usize {
     (implied_decimal_places(min).max(step_places)).min(100)
 }
 
-/// g18.024 default visible value: a short step-aware decimal. The value must
-/// already be step-snapped; it is rounded to the precision implied by `min`
-/// and a finite positive `step`, insignificant zeroes are trimmed, and
-/// negative zero normalizes to `"0"`. Binary tails never survive.
+/// Default visible value: a fixed-width step-aware decimal. The value must
+/// already be step-snapped; it is rounded and zero-filled to the precision
+/// implied by `min` and a finite positive `step`. Negative zero normalizes at
+/// that same precision and binary tails never survive.
 pub fn default_visible_value_text(value: f64, min: f64, step: f64) -> String {
     if !value.is_finite() {
         return format!("{value}");
@@ -616,13 +623,10 @@ pub fn default_visible_value_text(value: f64, min: f64, step: f64) -> String {
     }
     let precision = slider_display_precision(min, step);
     let rounded = format!("{value:.precision$}");
-    let rounded: f64 = rounded.parse().unwrap_or(value);
-    // Re-parsing prints the shortest exact decimal, which trims insignificant
-    // zeroes for free; negative zero normalizes to `"0"` explicitly.
-    if rounded == 0.0 {
-        return "0".to_owned();
+    if rounded.parse::<f64>().unwrap_or(value) == 0.0 {
+        return format!("{:.precision$}", 0.0);
     }
-    format!("{rounded}")
+    rounded
 }
 
 pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
@@ -634,7 +638,12 @@ pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
     }
 }
 
-pub fn resolved_visible_text(value: f64, min: f64, step: f64, explicit: Option<&str>) -> Option<String> {
+pub fn resolved_visible_text(
+    value: f64,
+    min: f64,
+    step: f64,
+    explicit: Option<&str>,
+) -> Option<String> {
     match explicit {
         Some("") => None,
         Some(text) => Some(text.to_owned()),
@@ -724,26 +733,81 @@ mod control_tests {
         assert_eq!(snap_to_step(-1.5, -1.0, 1.0), -1.0);
     }
 
-    // g18.024: one shared default display serializer. The snapped value
-    // rounds to the precision implied by min and a finite positive step,
-    // trailing zeroes trim, negative zero normalizes, and binary tails never
-    // survive. Consumer-provided explicit text still wins in
+    #[test]
+    fn uneven_steps_keep_slider_and_range_bounds_reachable() {
+        let slider = SliderContext {
+            value: 0.0,
+            min: 0.0,
+            max: 1.0,
+            step: 0.3,
+            disabled: false,
+        };
+        assert_eq!(normalize_slider_value(slider, 0.0), 0.0);
+        assert_eq!(normalize_slider_value(slider, 1.0), 1.0);
+        assert_eq!(normalize_slider_value(slider, 2.0), 1.0);
+        assert!((normalize_slider_value(slider, 0.89) - 0.9).abs() < f64::EPSILON);
+
+        let range = RangeSliderContext {
+            value: (0.3, 0.6),
+            min: 0.0,
+            max: 1.0,
+            step: 0.3,
+            disabled: false,
+        };
+        let (lower, _) = range_slider_transition(
+            range,
+            RangeSliderEvent::Input {
+                thumb: RangeThumb::Lower,
+                raw: 0.0,
+            },
+        );
+        assert_eq!(lower.value, (0.0, 0.6));
+        let (upper, _) = range_slider_transition(
+            range,
+            RangeSliderEvent::Input {
+                thumb: RangeThumb::Upper,
+                raw: 1.0,
+            },
+        );
+        assert_eq!(upper.value, (0.3, 1.0));
+    }
+
+    // One shared default display serializer. The snapped value rounds and
+    // zero-fills to the precision implied by min and a finite positive step;
+    // negative zero normalizes and binary tails never survive.
+    // Consumer-provided explicit text still wins in
     // `resolved_visible_text`.
     #[test]
-    fn the_default_display_serializer_emits_short_step_aware_decimals() {
-        assert_eq!(default_visible_value_text(0.8500000000000001, 0.0, 0.05), "0.85");
+    fn the_default_display_serializer_emits_fixed_width_step_aware_decimals() {
+        assert_eq!(
+            default_visible_value_text(0.8500000000000001, 0.0, 0.05),
+            "0.85"
+        );
         assert_eq!(default_visible_value_text(0.1 + 0.2, 0.0, 0.1), "0.3");
-        assert_eq!(default_visible_value_text(0.35000000000000003, 0.05, 0.1), "0.35");
-        assert_eq!(default_visible_value_text(44.99999999999999, 0.0, 1.0), "45");
+        assert_eq!(
+            default_visible_value_text(0.35000000000000003, 0.05, 0.1),
+            "0.35"
+        );
+        assert_eq!(
+            default_visible_value_text(44.99999999999999, 0.0, 1.0),
+            "45"
+        );
         assert_eq!(default_visible_value_text(80.0, 0.0, 5.0), "80");
+        assert_eq!(default_visible_value_text(0.5, 0.0, 0.25), "0.50");
         assert_eq!(default_visible_value_text(1.2, 0.2, 0.2), "1.2");
-        assert_eq!(default_visible_value_text(-1.1102230246251565e-16, -1.0, 0.1), "0");
+        assert_eq!(
+            default_visible_value_text(-1.1102230246251565e-16, -1.0, 0.1),
+            "0.0"
+        );
         assert_eq!(default_visible_value_text(-0.45, -1.0, 0.01), "-0.45");
         assert_eq!(
             default_visible_value_text(0.30000000000000004, 0.0, 0.0),
             "0.30000000000000004"
         );
-        assert_eq!(resolved_visible_text(0.85, 0.0, 0.05, None), Some("0.85".to_owned()));
+        assert_eq!(
+            resolved_visible_text(0.85, 0.0, 0.05, None),
+            Some("0.85".to_owned())
+        );
         assert_eq!(resolved_visible_text(0.85, 0.0, 0.05, Some("")), None);
         assert_eq!(
             resolved_visible_text(0.85, 0.0, 0.05, Some("85%")),
@@ -896,9 +960,10 @@ mod control_tests {
         assert!(block_item_fits(40.0, 39.2));
         assert!(!block_item_fits(40.0, 41.0));
         assert_eq!(block_region_available(56.0, 8.0), 40.0);
-        assert!(block_inline_fits(&[(Some("Blur"), 56.0), (Some("67"), 56.0)], |text| {
-            text.len() as f32 * 10.0
-        }));
+        assert!(block_inline_fits(
+            &[(Some("Blur"), 56.0), (Some("67"), 56.0)],
+            |text| { text.len() as f32 * 10.0 }
+        ));
         assert!(!block_inline_fits(
             &[(Some("Blur"), 56.0), (Some("too-long-value"), 56.0)],
             |text| text.len() as f32 * 10.0
@@ -941,15 +1006,14 @@ mod control_tests {
     fn collision_suppresses_label_and_keeps_exact_value() {
         // 100px capsule: 84px available. "Compressor" (100) + "12" (20) miss;
         // the value keeps painting, the label never renders a fallback line.
-        let tight = layout_slider_block(100.0, Some("Compressor makeup gain"), Some("12"), |text| {
-            text.len() as f32 * 10.0
-        });
+        let tight =
+            layout_slider_block(100.0, Some("Compressor makeup gain"), Some("12"), |text| {
+                text.len() as f32 * 10.0
+            });
         assert!(!tight.label_inline);
         assert!(tight.value_inline);
         // No value at all: the label stands alone at the logical start.
-        let solo = layout_slider_block(100.0, Some("Blur"), None, |text| {
-            text.len() as f32 * 10.0
-        });
+        let solo = layout_slider_block(100.0, Some("Blur"), None, |text| text.len() as f32 * 10.0);
         assert!(solo.label_inline);
         assert!(!solo.value_inline);
         let gone = layout_slider_block(100.0, Some("Compressor makeup gain"), None, |text| {
