@@ -182,6 +182,16 @@
 # Longhorn. Includes a negative control. Headless; no window, no permission.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 "check:release-automation" = "bun scripts/check-release-automation.ts"
+# g18.027 public-surface freeze gate. Read-only cross-ref classifier plus its
+# planted-negative coverage. Deliberately outside `qa`/`ci`: it needs the
+# immutable `v0.3.0` tag and the frozen head in local history, and it is a
+# release-ops gate rather than repository health. The accepted result is
+# `docs/evidence/releases/g18-027-v040-public-surface-delta.md`; g18.006
+# re-runs it against the candidate and requires no new breaking row.
+"audit:public-surface" = [
+  { run = "bun test scripts/audit-public-surface-delta.test.ts" },
+  { run = "bun scripts/audit-public-surface-delta.ts --base v0.3.0 --head HEAD --summary" },
+]
 "core:build" = "bun scripts/web-distribution/core-build.ts"
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
