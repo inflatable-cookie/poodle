@@ -1,10 +1,10 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "source_commit": "d8e174fb40b2634b7d00018c721816ffc037d712",
+  "run_id": "2026-09-11-g18-022-expected",
+  "source_commit": "c2ff85142b9ddaf88516ea7b1fe7b3d14081b49a",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
-  "run_id": "2026-09-09-g18-001-expected",
   "results": {
     "a_mounted_button_carries_its_controls_target": {
       "outcome": "passed",
@@ -32,11 +32,11 @@
     },
     "a_scrub_reports_change_while_dragging_and_commits_once_at_release": {
       "outcome": "passed",
-      "body_sha256": "7b14bf38d54e1beee1689eb90cf5ed5ab505febdf1ef988d64896bd8d769268a"
+      "body_sha256": "0d57bbea27bb9f437495d7e1c893b46ed3707d37c388cb20010a59531a016432"
     },
     "slider_axis_keyboard_and_disabled_rebuild_the_host_spec": {
       "outcome": "passed",
-      "body_sha256": "8ded53e28c86a179c1bc4adb3d43f3f08b1e0eb696eac42b1b852d704edbe6d4"
+      "body_sha256": "fa056cba5537150eba405a9a3b1c2ce50b7906a30f529ee3ab7b329c73cc75b7"
     },
     "fader_mounted_parity_through_production_dispatch": {
       "outcome": "passed",
