@@ -57,7 +57,7 @@ Block variant (`variant="block"`, the default; horizontal form shown):
   │     ├── [Inline remainder layer .slider__inline--remainder]  <span>
   │     │     └── [Row .slider__inline-row]  (same stable row, clipped to the remainder;
   │     │       remainder text role)
-  │     └── [Hit .slider__hit]  (44×44 effective target; small visible thumb)
+  │     └── [Hit .slider__hit]  (44×44 effective target; bounded inset marker line)
 ```
 
 Vertical block uses the same paint stack on the block axis. Its text remains
@@ -70,7 +70,7 @@ upright: value at the physical top and optional label centered.
 | Fill | yes | completed value span driven by CSS custom property; selected capsule in block | accent / selected fill, radius |
 | Control | yes, embedded variant | adapter-owned value control overlaid on the track | thumb styling, focus ring, appearance reset |
 | Capsule | yes, block variant | labelled rounded-square range surface | selected/remainder fill |
-| Hit | yes, block variant | measurable 44×44 logical-pixel effective target around a small thumb | handle fill/border, focus |
+| Hit | yes, block variant | measurable 44×44 logical-pixel effective target around a bounded inset marker line | handle fill/border, focus |
 | Inline layers | yes, block variant | clipped copies of one text layout above fill and thumb paint; pointer-inert | selected/remainder text |
 
 ## 3. Props And Inputs
@@ -516,17 +516,19 @@ track at every size.
 
 Block capsule cross-size follows the shared control-height size ladder. The
 capsule corner radius resolves the rounded-square control radius
-(`--poodle-radius-control` / `radius.control`), not the pill; the visible
-thumb stays circular. The effective hit target is 44×44 logical pixels at
-every size and density and is not a public metric.
+(`--poodle-radius-control` / `radius.control`), not the pill. The visible
+block handle is a bounded inset marker line: on the block axis it is
+`0.25rem` thick, spans the capsule cross-size minus `0.5rem`, and is clamped
+inside the capsule at every value. The effective hit target is 44×44 logical
+pixels at every size and density and is not a public metric.
 
-| Size | capsule height | visible thumb |
+| Size | capsule height | marker length |
 |------|--------------------|---------------|
-| `xs` | `1.5rem` | `0.375rem` |
-| `sm` | `1.75rem` | `0.4375rem` |
-| `md` | `2.25rem` | `0.5rem` |
-| `lg` | `2.75rem` | `0.5625rem` |
-| `xl` | `3.25rem` | `0.625rem` |
+| `xs` | `1.5rem` | `1rem` |
+| `sm` | `1.75rem` | `1.25rem` |
+| `md` | `2.25rem` | `1.75rem` |
+| `lg` | `2.75rem` | `2.25rem` |
+| `xl` | `3.25rem` | `2.75rem` |
 
 Content inset used by the fit law is an internal `0.5rem` on each inline edge
 of an assigned region. Do not expose it.
@@ -547,7 +549,15 @@ of an assigned region. Do not expose it.
 | `height` | shared control height (`2.25rem` at `md`) |
 | `dir` | from `direction` |
 
-Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling back to a surface mix. Selected fill uses `--poodle-recipe-slider-block-selected-fill` falling back to accent. The two inline text layers use the selected/remainder text hooks, crossed at the fill boundary by clipping. The visible thumb uses the handle fill/border hooks. The capsule corner radius is `--poodle-radius-control`.
+Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling back to a surface mix. Selected fill uses `--poodle-recipe-slider-block-selected-fill` falling back to accent. The two inline text layers use the selected/remainder text hooks, crossed at the fill boundary by clipping. The visible handle uses the handle fill/border hooks. The capsule corner radius is `--poodle-radius-control`.
+
+The block handle is a clamped inset line. Its centre resolves
+`clamp(offset, value - offset, 100% - offset)` for the default fill tone and
+`clamp(offset, value + offset, 100% - offset)` for a negative bipolar tone,
+where `offset` is the `0.25rem` marker inset plus half the `0.25rem` marker
+thickness. The clamp keeps the line inside the capsule at both extrema; the
+44×44 hit target follows the same clamped centre and never participates in
+layout.
 
 ## 9. Svelte Notes
 
@@ -595,6 +605,10 @@ Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling 
   two absolutely positioned per-region clip containers
   (`LayoutOverflow::Hidden`) over one full-capsule text layout each, built from
   the block-layout axis span the host supplies. No fallback is permitted
+- the block handle is one shared composition (`slider_block::visible_thumb`)
+  used by Slider and RangeSlider alike. The current GPUI realization is the
+  shared circular thumb; aligning it to the web bounded inset marker line is a
+  documented pre-v1 divergence tracked in the Known Deltas table
 - GPUI block metadata and hit bounds are not mounted assistive-technology proof
 
 ## 10a. Jetstream Notes
@@ -644,6 +658,7 @@ does not require Jetstream execution or evidence while that deferral stands.
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | Page Up/Down increment amount | native range inputs keep browser-owned paging behavior | allowed | strict parity covers arrows, Home, and End |
 | horizontal block numeric collision docking | web prevents marker occlusion; GPUI still uses the fixed end anchor | provisional operator-approved UX | mirror docking in GPUI before visual-parity closure |
+| block handle realization | web paints the bounded inset marker line; GPUI paints the shared circular thumb for both families | documented pre-v1 divergence | align GPUI to the inset marker line before visual-parity closure |
 
 ## 13. Specimen Definitions
 

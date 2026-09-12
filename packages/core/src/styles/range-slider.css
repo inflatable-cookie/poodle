@@ -170,3 +170,10 @@
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit:focus-visible {
     z-index: 4;
   }
+
+  /* The per-thumb hits are the focusable elements. The ring itself is painted
+     on the shared handle in the family foundation; this sheet keeps each
+     focused hit's UA outline suppressed. */
+  .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit:focus-visible {
+    outline: none;
+  }

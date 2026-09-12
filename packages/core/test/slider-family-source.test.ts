@@ -103,4 +103,18 @@ describe("slider-family style foundation", () => {
     expect(range).not.toContain("ButtonFace");
     expect(slider).not.toContain("ButtonFace");
   });
+
+  test("focus suppresses the UA outline on each family's own focusable", () => {
+    // Slider focuses the block root; RangeSlider focuses each thumb hit.
+    expect(slider).toContain(
+      '.poodle-slider[data-variant="block"]:focus-visible {\n    outline: none;',
+    );
+    expect(range).toContain(
+      '.poodle-range-slider[data-variant="block"] .poodle-range-slider__hit:focus-visible {\n    outline: none;',
+    );
+    // The ring is painted on the one shared handle in the foundation.
+    expect(family).toContain(
+      "0 0 0 0.1875rem var(--poodle-recipe-slider-block-focus-ring, var(--poodle-color-accent-focusRing));",
+    );
+  });
 });

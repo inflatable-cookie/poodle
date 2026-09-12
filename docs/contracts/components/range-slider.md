@@ -224,7 +224,10 @@ never suppress or move an endpoint and never render an external fallback.
 
 The block capsule corner radius resolves the rounded-square control radius
 (`--poodle-radius-control` / `radius.control`), matching the Slider block
-family. Thumbs stay circular.
+family. Both block handles are the shared Slider-family bounded inset marker
+line: `0.25rem` thick on the block axis, spanning the capsule cross-size minus
+`0.5rem`, each clamped inside the capsule so a pair at the extrema or at
+equality never overhangs the capsule or crosses its sibling.
 
 Each thumb owns a measurable 44×44 logical-pixel effective target at every
 size and density. The targets must not enlarge the root's layout box, create
@@ -568,6 +571,11 @@ overflow without participating in layout.
 - pointer overlap handling (determining which thumb to grab when thumbs are at
   the same position) is implementation-specific but must produce a usable result
 - native specs carry resolved visible strings, never formatter closures
+- the block window is one shared composition (`slider_block`) with Slider: the
+  same bounded handle, 44×44 hit and centred anchor primitives. The current GPUI
+  handle realization is the shared circular thumb; aligning it to the web
+  bounded inset marker line is a documented pre-v1 divergence tracked in the
+  Known Deltas table
 - GPUI per-thumb metadata and hit bounds are not mounted assistive-technology
   proof
 
@@ -626,6 +634,7 @@ overflow without participating in layout.
 | vertical via CSS rotation vs native | Svelte uses rotate(-90deg); GPUI implements natively | allowed | same visual and interaction result required |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | embedded `aria-orientation` absent on native targets | `poodle-node` carries no orientation channel in its accessibility vocabulary, so neither native adapter can project it today | temporary | add an orientation field to the node a11y vocabulary; lands with native vertical orientation (which is itself unimplemented on both Rust targets) |
+| block handle realization | web paints one bounded inset marker line per thumb; GPUI paints the shared circular thumb for both thumbs | documented pre-v1 divergence | align GPUI to the inset marker line before visual-parity closure |
 
 ## 13. Specimen Definitions
 

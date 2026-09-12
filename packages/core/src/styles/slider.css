@@ -68,3 +68,10 @@
       calc(100% - var(--poodle-slider-family-marker-offset))
     );
   }
+
+  /* The block root is the single focusable element. The ring itself is
+     painted on the shared handle in the family foundation; this sheet keeps
+     the focused root's UA outline suppressed. */
+  .poodle-slider[data-variant="block"]:focus-visible {
+    outline: none;
+  }

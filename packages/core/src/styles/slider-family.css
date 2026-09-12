@@ -319,9 +319,14 @@
     height: var(--poodle-slider-family-marker-thickness);
   }
 
+  /* Focus: the ring is painted on the shared thumb whether the focusable
+     element is the block root (Slider) or the per-thumb hit (RangeSlider).
+     The UA outline is suppressed on whichever element owns focus. */
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"]:focus-visible,
   :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__hit, .poodle-range-slider__hit):focus-visible {
     outline: none;
   }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"]:focus-visible :is(.poodle-slider__thumb, .poodle-range-slider__thumb),
   :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__hit, .poodle-range-slider__hit):focus-visible :is(.poodle-slider__thumb, .poodle-range-slider__thumb) {
     box-shadow:
       0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default)),
