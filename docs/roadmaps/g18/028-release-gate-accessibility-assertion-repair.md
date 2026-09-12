@@ -1,6 +1,6 @@
 # 028 — Release-gate accessibility assertion repair
 
-Status: changes requested — PR #260 must repin the invalidated Nucleus cohort
+Status: complete — PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd` on 2026-09-12 after exact-head independent re-review
 Owner: Poodle Rust render contracts
 Created: 2026-09-12
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -112,12 +112,20 @@ Planning diagnosis from retained g18.006 at clean main
 `cargo test -p poodle-render --lib`. The same assertions predate intentional
 label projection from NP-4 commit `51b820a5d` and g16.119 commit `cceb6646a`.
 
-PR #260 changes only the two assertions at
-`390095f6f3653846af0d95d16d35a91c944389a0`. Worker evidence records 2 focused
-tests and all 647 `poodle-render` library tests green. Release status advances
-to the parity-ledger/GPUI-census refusal because the 29 receipts bind source
-commit `d0554d844598725782fb5c6cc16190fdae9b83ca`. PR #260 may not merge with
-that red web check; the complete cohort is now part of this repair.
+PR #260 merged `018b9214cb2eb88cb9651d9ec8a17808e53410cd` on 2026-09-12 with
+parents `3b1e91e82fe25dc3838a5dbc2612c5d488902da1` (stage-aware validation
+policy) and `3eb8e6c98c9f95a4e2289660df66e571381a42cd` (reviewed repin head):
+the merge matches the reviewed head exactly, no refresh was needed.
+The reviewed head carries the two assertion repairs from
+`390095f6f3653846af0d95d16d35a91c944389a0` (`Some("Save")`, `Some("Grid")`)
+plus the complete Nucleus cohort repin to the single source identity
+`390095f6f` (58 M1/A1 + 65 mounted receipts, manifest, GPUI execution record,
+census pair; zero `d0554d84` refs remain). Worker evidence records 2 focused
+tests, all 647 `poodle-render` library tests, `test:nucleus-parity-receipts`
+17/17, ledger 176 rows, census match, docs lint and `git diff --check` green.
+Independent re-review (issue comment `5647932569`, `ready_to_merge`) verified
+the repin round at the exact head with no observation drift. Exact-head GitHub
+`web` and `rust` checks were green at merge.
 
 ## Next task
 
