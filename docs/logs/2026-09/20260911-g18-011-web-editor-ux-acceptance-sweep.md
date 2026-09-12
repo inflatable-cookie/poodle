@@ -1,11 +1,6 @@
 # g18.011 — Web editor UX acceptance sweep
 
-Status: complete — sweep executed across all four surfaces with the repaired
-syntax presentation, re-run per engine after independent review corrected the
-instrument (WebKit launch, gate exit, vacuous passes, coverage disclosure);
-one evidence/test PR updated at a clean pushed head; no unresolved
-release-blocking finding. Operator acceptance is still required before g18.006
-resumes.
+Status: complete — merged as `211ec0cb707eba62eadc5b33d1bb54d3605c5239` (PR #253) on 2026-09-12 after exact-head independent review (PR comment `5641275365`, `ready_to_merge`) at `09f298dce257c1414a6d07ddb74c6442e9cbacb0` with green rust/web checks
 Date: 2026-09-11
 Branch: `ns-aad6b776-1c3e-438c-bc9c-4e8ba8750462`
 Card: `docs/roadmaps/g18/011-web-editor-ux-acceptance-sweep.md`
@@ -15,6 +10,7 @@ Governing refs: `docs/contracts/components/code-editor.md`,
 `docs/contracts/components/markdown-editor.md`
 Base: `origin/main` at `4781446d4` (g18.021 closeout, PR #252; first pass ran
 at `a639b1b78`)
+Operator acceptance of the capsule is still required before g18.006 resumes.
 
 ## Outcome
 
@@ -248,12 +244,12 @@ headless engines cannot exercise):
 - `effigy test:components` — component boards green (SSR/clipboard/IME
   coverage cited in the disclosure above re-verified on this head).
 - `effigy test:a11y` — pass. `effigy docs:check` — pass.
-- `git diff --check` — clean.
+- `git diff --check` — clean. Merge gate: PR #253 merged as `211ec0cb707eba62eadc5b33d1bb54d3605c5239` on 2026-09-12 with green rust/web checks at the reviewed head.
 
 ## Continuation
 
-The sweep is complete with no unresolved release-blocking finding. The
-evidence/test PR now awaits independent review. After merge, the operator
+The sweep is merged with no unresolved release-blocking finding (PR #253,
+merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). The operator now
 accepts or rejects the sweep capsule; acceptance is the gate for resuming
 retained g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`, with g18.009
 still dependency-queued behind it. F12 belongs to the preview harness owner,

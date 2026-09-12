@@ -39,8 +39,11 @@ preserve caret, selection, history and focus in both web wrappers (PR #248).
 Merged g18.020 replaced fixed H1–H3 controls with one consumer-configurable
 Normal/H1–H6 selector backed by real H4–H6 document support (PR #251).
 Merged g18.021 repaired the g18.011 F1 blocker with one private Poodle-token
-highlight style in both CodeEditor engines (PR #252). g18.011 performs the
-four-surface acceptance sweep while dispatched g18.022 completes the
+highlight style in both CodeEditor engines (PR #252). Merged g18.011 swept
+all four editor surfaces across both web previews under paired Chromium and
+WebKit engines (PR #253): zero unresolved release-blocking findings, one
+retained non-blocking follow-up (F12, preview-harness owner); operator
+acceptance is the remaining gate. Dispatched g18.022 completes the
 block-first Slider family. Operator-planned g18.023 replaces the rejected
 accent/status syntax mapping with designed dark/light palettes. The retained
 g18.006 `0.4.0` candidate and serial g18.009

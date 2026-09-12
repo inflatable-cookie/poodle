@@ -55,7 +55,7 @@ needed to compile honest repair tranches.
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
 | [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); product work continues through g18.012 before release resumes |
-| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | blocked on F1; existing Queue task retained | paired sweep stopped on missing CodeEditor syntax presentation; F1 repaired by merged g18.021, retry the retained sweep next |
+| [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | complete | PR #253 (merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`); four-surface paired Chromium/WebKit sweep, zero blocking findings, F12 follow-up retained; operator acceptance gates g18.006 |
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | complete | PR #250 (merge `f011df5e0a97856bfe022569d77faf69a9f75553`); consumer-selected lazy CodeMirror language providers; last planned product change before the sweep |
 | [`g18.013`](013-rich-text-editor-toolbar-controls.md) — RichTextEditor toolbar controls | complete | PR #245 (merge `1e11f59d01dc79f47196ee5f5b18e9e10cce5a70`) |
 | [`g18.014`](014-rich-text-image-policy-specimen-proof.md) — rich-text image-policy specimen proof | complete | PR #249 (merge `72c7a9e5e6ce288780c7a2e3e44715949a035221`); self-contained offline seeded/insertion fixtures with visible host proof in both previews |
@@ -117,13 +117,15 @@ schema/editor/renderer semantics through H6. The first g18.011 pass then found
 a real release blocker: both CodeEditor engines load consumer-selected grammars
 but install no CodeMirror highlight style, leaving full mode visually identical
 to plain text. Merged g18.021 repaired it with one private Poodle-token
-highlight style in both engines (PR #252). The existing g18.011 task/thread
-stays retained; retry the sweep from the merged head. Operator-planned g18.022
+highlight style in both engines (PR #252). Merged g18.011 swept all four
+surfaces under both engines with zero unresolved release-blocking findings
+(PR #253); operator acceptance of the capsule is the remaining gate.
+Dispatched g18.022
 then makes block the default Slider-family variant, removes the old
 standard/track surface, fixes RangeSlider text placement, and adds vertical
-block parity. It can run beside the editor-only sweep. g18.006 is the retained
-final candidate lane and stays paused until g18.011, g18.022, g18.023, and any
-repairs close with operator acceptance. g18.009 waits on g18.006; no candidate
+block parity. g18.006 is the retained final candidate lane and stays paused
+until operator acceptance of merged g18.011, merged g18.022, g18.023, and any
+repairs close. g18.009 waits on g18.006; no candidate
 is tagged or published while accepted product source is moving.
 
 ## Held and recurring work

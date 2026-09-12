@@ -1,6 +1,6 @@
 # 011 — Web editor UX acceptance sweep
 
-Status: blocked on F1 — g18.021 syntax-presentation repair awaiting operator-approved dispatch
+Status: complete — merged as `211ec0cb707eba62eadc5b33d1bb54d3605c5239` (PR #253) on 2026-09-12
 Owner: Poodle web quality
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -8,7 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/rich-text-editor.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../../packages/svelte/preview/`, `../../../packages/react/preview/`
-Depends on: g18.012–g18.020 complete and merged; g18.021 repair pending
+Depends on: g18.012–g18.021 complete and merged
 
 ## Outcome
 
@@ -79,10 +79,9 @@ unbounded findings in place.
 
 ## Dispatch manifest
 
-- **State:** dependency-queued as task
-  `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind parallel g18.012 and active
-  g18.014/g18.018→g18.020. The coordinator mutates those dependencies in place;
-  this task remains serial before retained g18.006.
+- **State:** complete; merged g18.011 (PR #253) is the sweep decision record;
+  operator acceptance gates retained g18.006; this task stays serial before
+  any g18.006 continuation
 - **Completion:** one open non-draft evidence/test PR at a clean pushed head
   with exact-head independent review, or a blocked callback naming reproducible
   release-blocking findings; never merge product fixes from this sweep
@@ -181,17 +180,20 @@ extensible registry.
 
 The first sweep pass at `a639b1b78` stopped correctly on release-blocking F1.
 Real TypeScript and JSON loaders produced zero syntax spans and one default
-text colour in Svelte and React under Chromium and WebKit. Both CodeEditor
-engines load the grammar extension but install no CodeMirror highlight style.
-Chatterbox promoted bounded repair g18.021; this task and its accepted blocked
-callback remain canonical and will resume after that repair merges. Follow-up
-F12 records that React preview accepts `#components/code-editor` but not the
+text colour in Svelte and React; the first-pass F1 evidence was Chromium-only
+at engine level (the `--browser=webkit` instrument only renamed the output
+directory). Both CodeEditor engines load the grammar extension but install no
+CodeMirror highlight style. Chatterbox promoted bounded repair g18.021; this
+task and its accepted blocked callback remain canonical and resumed after that
+repair merged. Follow-up F12 records that React preview accepts `#components/code-editor` but not the
 canonical `#/components/code-editor` spelling; it did not block the sweep.
 
 ## Next task
 
-Dispatch and merge g18.021, add it to this existing Queue task in place, then
-resume the interrupted sweep. Promote and merge every other blocking repair,
-then seek the operator's explicit sweep acceptance before resuming retained
-g18.006 task `17ac3fee-de90-4b32-9672-1134770bb086`. Keep g18.009
-dependency-queued meanwhile.
+g18.011 is merged (PR #253, merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`)
+after exact-head independent review (PR comment `5641275365`,
+`ready_to_merge`) with zero unresolved release-blocking findings and one
+retained non-blocking follow-up (F12, preview-harness owner). Seek the
+operator's explicit sweep acceptance before resuming retained g18.006 task
+`17ac3fee-de90-4b32-9672-1134770bb086`. Keep g18.009 dependency-queued
+meanwhile.

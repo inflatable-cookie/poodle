@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-11 (g18.011 and g18.022 active; g18.023 awaits approval; all precede release)
+Updated: 2026-09-12 (g18.011 merged, awaiting operator acceptance; g18.022 active; g18.023 awaits approval; all precede release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -78,14 +78,21 @@ token-bound syntax presentation — merged as `e69512038a4f032ecfad398562bbab28d
 2026-09-11 after exact-head independent review and green rust/web checks at the
 reviewed head.
 
+[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) — web editor UX
+acceptance sweep — merged as `211ec0cb707eba62eadc5b33d1bb54d3605c5239` (PR #253) on
+2026-09-12 after exact-head independent review (PR comment `5641275365`,
+`ready_to_merge`) at `09f298dce257c1414a6d07ddb74c6442e9cbacb0` with green
+rust/web checks at the reviewed head. Zero unresolved release-blocking
+findings; one retained non-blocking follow-up (F12, preview-harness owner).
+Operator acceptance is still required before g18.006 resumes.
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after g18.010 and g18.013–g18.020, the dependency-queued g18.011 sweep,
-g18.012, g18.021, g18.022, g18.023, and all other blocking repairs close and the
-operator accepts the sweep.
+only after operator acceptance of merged g18.011, merged g18.022, g18.023,
+and all other blocking repairs close.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
@@ -93,20 +100,12 @@ dispatches only after the repaired candidate closes.
 
 ## Active and dependency-queued product tasks
 
-[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is dependency-queued as
-task `aad6b776-1c3e-438c-bc9c-4e8ba8750462` behind merged g18.018, merged
-g18.020 and merged g18.021 (g18.012 merged as `f011df5e0a97856bfe022569d77faf69a9f75553`, PR #250).
-The version-57 dependency mutation made it wait exactly on g18.012 task
-`697c0380-bcc4-4433-9bce-a6c77fa0452a` and g18.020 task
-`276cd890-5904-4c79-a08f-253c704e4185`. It sweeps all four editor surfaces in
-both web previews and is serial before any g18.006 continuation.
-
-Its first pass stopped with an accepted blocked callback after proving that
-both CodeEditor engines load TypeScript/JSON grammars but install no visible
-syntax presentation. Preserve task `aad6b776-1c3e-438c-bc9c-4e8ba8750462`
-and its thread. [`g18.021`](g18/021-code-editor-token-bound-syntax-presentation.md)
-is merged (PR #252) with F1 repaired; it is an in-place dependency of g18.011.
-Retry that same sweep task from the merged head.
+[`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is merged (PR #253,
+merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). Queue task
+`aad6b776-1c3e-438c-bc9c-4e8ba8750462` is closed with the four-surface sweep
+complete, zero unresolved release-blocking findings, and one retained
+non-blocking follow-up (F12, preview-harness owner). Operator acceptance of
+the sweep capsule is the gate for resuming retained g18.006.
 
 [`g18.012`](g18/012-code-editor-extensible-language-registry.md) is merged (PR #250).
 It replaced the closed grammar catalogue with consumer-selected lazy CodeMirror
