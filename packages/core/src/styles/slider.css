@@ -130,8 +130,8 @@
        margin, padding, minimum size, or row height. */
     --poodle-slider-block-height: var(--poodle-size-control-height);
     --poodle-slider-block-hit: 44px;
-    --poodle-slider-block-marker-inset: 0.125rem;
-    --poodle-slider-block-marker-thickness: 0.125rem;
+    --poodle-slider-block-marker-inset: 0.25rem;
+    --poodle-slider-block-marker-thickness: 0.25rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
