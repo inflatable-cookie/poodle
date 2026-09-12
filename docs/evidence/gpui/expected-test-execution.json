@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-09-12-g18-024-native-vertical-expected",
-  "source_commit": "067db2cfe253eecd5b5e13173372200150c53de4",
+  "run_id": "2026-09-12-g18-024-thumb-centring-expected",
+  "source_commit": "ed48044bd7115dc3ada54053fb763c2d2b008c11",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "c86c2d11c36c9fcf9326bae438ee6acc3bcedacbaf01ac017a298c1bd3c2a34c",
   "results": {
