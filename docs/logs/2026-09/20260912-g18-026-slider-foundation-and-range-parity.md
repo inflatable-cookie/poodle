@@ -1,6 +1,6 @@
 # g18.026 — Slider foundation and RangeSlider parity
 
-Status: implementation complete — PR open for exact-head independent review
+Status: complete — merged as `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4` (PR #258) on 2026-09-12 after exact-head independent review (PR comment `5646875624`, `ready_to_merge`) at `313993daf010b7e0ac7605e94cf8f66d3390447d` with green rust/web checks
 Date: 2026-09-12
 Branch: `ns-6de406c0-1396-4a02-9e18-3c18e71ada27`
 Card: `docs/roadmaps/g18/026-slider-foundation-and-range-parity.md`
@@ -103,11 +103,33 @@ inheritance, alias or compatibility wrapper.
 
 ## Review and merge
 
-Not yet reviewed. One non-draft PR from the queue branch against `main`;
-queue-owned review and merge/closeout follow.
+Independent exact-head review at
+`313993daf010b7e0ac7605e94cf8f66d3390447d` (PR comment `5646875624`):
+**ready to merge**. The reviewer confirmed the 23 changed files sit inside the
+dispatch manifest's owned mutable paths, the public API is unchanged (separate
+`Slider`/`RangeSlider` components; the 12 new `sliderFamily*` exports follow
+the established core-internal-helper pattern), and RangeSlider endpoints never
+dock. Reviewer-measured at the head, all headless: `test:core` 1395 pass,
+`test:components` 4154 pass / 417 files, `check:svelte-components` 0 errors,
+`core:build` + `test:core-build` 66 pass, `test:block-slider-inline` paired
+Chromium/WebKit × Svelte/React 240 checks pass, `test:block-slider-hit` pass,
+`test:a11y` 183 pass, `docs:check` exit 0, `git diff --check` clean.
+
+Two non-blocking notes, each deferred rather than repaired here:
+
+- `check:react-components` (not a CI gate) reports exactly the 12 pre-existing
+  backlog errors already documented in `tasks/effigy.tasks.toml`; none is in a
+  file this PR touches.
+- The local `probe:gpui-specimens` run was skipped (cold cargo build exceeded
+  the review time box); the PR changes no Rust code, the GH `rust` lane passes
+  on this head, and the native claims were verified by direct source
+  inspection.
+
+Merge gate: PR #258 merged as `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`
+with green rust/web checks.
 
 ## Continuation
 
-After merge and operator acceptance, run g18.027 against the resulting main
-head. Retained g18.006 stays blocked until that audit closes with every public
-break classified.
+g18.026 is merged. Run g18.027 against the resulting main head. Retained
+g18.006 stays blocked until that audit closes with every public break
+classified. Further planning direction needs the operator.

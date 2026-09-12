@@ -1,6 +1,6 @@
 # 026 — Slider foundation and RangeSlider parity
 
-Status: ready — operator-approved pre-`0.4.0` repair
+Status: complete — merged as `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4` (PR #258) on 2026-09-12
 Owner: Poodle cross-runtime components
 Created: 2026-09-12
 Governing refs: `../../contracts/components/slider.md`,
@@ -71,9 +71,8 @@ every accepted post-g18.024 Slider behavior to RangeSlider before `0.4.0`.
 
 ## Dispatch manifest
 
-- **State:** ready for Queue submission after explicit execution authorization
-- **Completion:** one clean pushed PR with exact-head independent review and
-  queue-owned merge/closeout
+- **State:** complete; merged g18.026 Slider-family foundation and RangeSlider parity; serial before g18.027
+- **Completion:** one clean pushed PR with exact-head independent review; merged by the plugin, never by the worker
 - **Owned mutable paths:** Slider/RangeSlider contracts; shared TypeScript
   Slider core; private web foundation; Svelte/React Slider and RangeSlider
   shells and styles; shared Rust/GPUI Slider-family render paths where proof
