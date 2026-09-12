@@ -73,6 +73,11 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - Preserve the repository's two-step `release.yml` protocol. This candidate
   task owns the exact-candidate branch dry run only; g18.009 owns the later tag,
   tag dry run and publication sequence.
+- Use narrow selectors while assembling the candidate. Run
+  `effigy release status --check-gates` once, only after versions, locks,
+  changelog, release notes, package evidence and the final Nucleus repin are
+  complete on a stable candidate head. Do not restart the full board to
+  diagnose a known component failure; return to its focused selector.
 
 ## Dispatch manifest
 
@@ -103,9 +108,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Work
 
-1. After g18.027 closes, consume its full public-intent delta from `v0.3.0` to
-   current main. Record final core/Svelte tree hashes and verify the
-   g18.002 editor-bearing hashes occur in their lineage.
+1. After g18.028 closes, consume the full public-intent delta from `v0.3.0` to
+   current main. Record final core/Svelte tree hashes and verify the g18.002
+   editor-bearing hashes occur in their lineage.
 2. Repair `CHANGELOG.md` into the supported Keep a Changelog category grammar
    without losing historical release meaning. Prove `effigy release status
    --check-gates` and release plans parse rather than bypassing them.
@@ -119,10 +124,13 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 5. Prove source-free packed core/Svelte archives, private packed React, root
    isolation, SSR/browser imports, declarations, licenses, exact dependencies,
    and a fresh source-free consumer installed from the packed Svelte archive.
-6. Open one non-draft candidate PR. Independent review must bind the exact head,
+6. Once the candidate is stable, run one local
+   `effigy release status --check-gates` and the exact-candidate branch dry run.
+   Do not follow either with a redundant local `qa`, `ci:web` or `docs:check`.
+7. Open one non-draft candidate PR. Independent review must bind the exact head,
    version set, final package trees, package contents, release notes, and
    Desktop unblock oracle. The worker never merges, tags, or publishes.
-7. Return the exact candidate identity for queue review and merge. Closeout
+8. Return the exact candidate identity for queue review and merge. Closeout
    passes the merged identity to g18.009. Do not tag, publish or mutate npm.
 
 ## Acceptance and review oracle

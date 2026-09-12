@@ -35,19 +35,22 @@ gate or regress accessible labels to satisfy obsolete expectations.
 
 ## Current State
 
-Clean pushed Poodle main is `bb8999b68ae2be3366d93413abdd781e2adec1ea`.
-`cargo test -p poodle-render --lib` deterministically fails only the named
-provider and SegmentedControl tests. g18.006 remains intact on its retained
-Queue task, worker and workspace with no candidate mutation. Tom chose a
-separate repair lane rather than widening that release task.
+PR #260 carries the approved two-assertion repair at
+`390095f6f3653846af0d95d16d35a91c944389a0`; both focused tests and all 647
+`poodle-render` library tests pass. Its web check is red only because the
+source-bound Nucleus cohort still names the predecessor render source. The
+same retained worker/PR now owns the complete coherent repin. g18.006 remains
+intact and blocked until this PR closes.
 
 ## Boundaries
 
-Follow g18.028 exactly. Own only the two named test files and focused evidence.
-Assert `Some("Save")` for the provided button and `Some("Grid")` for the visible
-segment fallback. Preserve the tests' negative wrapper/layout assertions. Do
-not change renderer behavior, public contracts, candidate inputs, versions,
-locks, changelog, release notes, workflows, Desktop, or g18.006 state.
+Follow g18.028 exactly. Preserve the two approved assertion edits and own only
+the generated Nucleus receipt, manifest, parity-ledger and GPUI-census cohort
+needed to bind them. Assert `Some("Save")` for the provided button and
+`Some("Grid")` for the visible segment fallback. Preserve the tests' negative
+wrapper/layout assertions. Do not change renderer behavior, public contracts,
+candidate inputs, versions, locks, changelog, release notes, workflows,
+Desktop, or g18.006 state.
 
 ## Important Context
 
@@ -59,14 +62,19 @@ with current contracts, stop rather than inventing another semantic rule.
 
 ## Suggested Next Move
 
-Reproduce both failures, inspect the current contracts and blamed accepted
-commits, then make the smallest assertion-only patch and run the full release
-gate before opening the PR.
+Keep the approved assertion patch, regenerate the complete Nucleus cohort, and
+run only the focused Rust and generated-evidence selectors listed by g18.028.
+Push the stable head and let the required PR `web`/`rust` lanes supply broad
+exact-head proof.
 
 ## Completion Protocol
 
-Open one non-draft PR from the Queue branch. Prove the exact head with both
-focused tests, `cargo test -p poodle-render --lib`,
-`effigy release status --check-gates`, docs QA and `git diff --check`; report
-`ready_for_review`. Never merge, resume g18.006, prepare a candidate, tag,
-publish, edit workflows, or mutate Desktop.
+Update the existing non-draft PR from the Queue branch. Prove the exact head
+with both focused tests, `cargo test -p poodle-render --lib`,
+`effigy test:nucleus-parity-receipts`,
+`effigy check:parity-evidence-ledger`, `effigy check:gpui-census`,
+`effigy docs:lint`, `git diff --check`, and the required GitHub `web`/`rust`
+checks. Do not run local `effigy qa`, `effigy ci:web`, `effigy docs:check`, or
+`effigy release status --check-gates`; g18.006 owns one full release run after
+the final candidate is stable. Report `ready_for_review`. Never merge, resume
+g18.006, prepare a candidate, tag, publish, edit workflows, or mutate Desktop.

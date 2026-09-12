@@ -233,6 +233,23 @@ published from it.
 
 ## Validation
 
-Use Effigy as the command surface. Run the narrow checks relevant to a batch,
-then the broader repository or docs gate before handoff. Generated evidence
-must describe the current implementation and must not be edited by hand.
+Use Effigy as the command surface. Match proof cost to the delivery stage:
+
+1. **Worker loop:** run the narrow selectors that exercise the changed paths,
+   plus any generator/checker pair needed by changed evidence. Do not use
+   `effigy qa`, `effigy ci:web`, `effigy docs:check`, or a release gate as a
+   discovery loop.
+2. **Exact-head PR proof:** push the stable head and use the repository's
+   required CI lanes for broad web/Rust coverage. Do not repeat an equivalent
+   broad local board merely to restate green CI unless the task changes that
+   board or its reproducibility.
+3. **Release proof:** only the release-candidate or publication task runs the
+   full local release gate. Run it once after the candidate is complete and
+   stable, then run the prescribed candidate/tag dry run. A precursor repair
+   proves its own surface and required PR lanes; it does not certify the later
+   release candidate.
+
+`docs:lint` is the default local check for execution notes and generated
+evidence. Use `docs:check` when the task changes public documentation,
+documentation generation, or the docs gate itself. Generated evidence must
+describe the current implementation and must not be edited by hand.
