@@ -1,6 +1,6 @@
 # g18.024 — Slider-family layout and vertical repair
 
-Status: in review — one non-draft PR from the queue-owned branch
+Status: in review — round 2 at the native-vertical head
 Date: 2026-09-12
 Branch: `ns-0d7f161b-615a-4570-be16-0bc1cab8c2ef`
 Card: `docs/roadmaps/g18/024-slider-family-layout-and-vertical-repair.md`
@@ -9,6 +9,30 @@ Governing refs: `docs/contracts/components/slider.md`,
 `docs/contracts/components/range-slider.md`,
 `docs/architecture/012-feedback-motion-and-state-change.md`
 Base: `origin/main` at `4255c62ee16b0f35447189509142fc5b7e6e50ae`
+
+## Review rounds
+
+- Round 1 at `ec9e97821…` (PR comment `5645560034`): **changes required** —
+  the web half verified green (hit probe 248/0, inline probe 192/0 across
+  Chromium + WebKit; ladder, density, hit-out-of-layout, and the step-aware
+  serializer correct), but the native vertical half was not repaired and two
+  native regressions were measured on a temporary mounted GPUI probe:
+  `fraction_anchor_vertical` applied the centring offset to `top` (handle off
+  the rail axis and shifted 10px up), and `block_grab_with_axis` kept fill
+  sizing alongside the negative cross insets, so filled sizing won and the
+  scrub overlay stayed capsule-sized, leaving the 44×44 overflow band dead at
+  xs/sm/md. Two pre-existing in-scope defects were also measured: native
+  vertical block fills grew sideways (width percentage, value-independent on
+  the block axis), and vertical anchor direction was inverted against the
+  bottom-referenced scrub axis (range lower thumb above upper). The review
+  also flagged the missing mounted vertical coverage and noted the exported
+  core helper signature change as non-blocking.
+- Round 2 at `00d90ba64…`: all four findings fixed in
+  `packages/render` (`slider_block.rs`, `slider.rs`, `range_slider.rs`) with
+  three new mounted regressions in `headless_regressions.rs` (vertical single
+  Slider geometry, vertical RangeSlider geometry, horizontal xs band
+  coverage/dispatch); `effigy regressions:native` re-run at this head
+  (241/0) and the Nucleus/GPUI census evidence repinned per precedent.
 
 ## Outcome
 
@@ -77,8 +101,14 @@ as a complete, aligned control at every size and orientation:
 - `effigy regressions:native` — `headless_regressions` 238/0 plus the other
   three gpui-preview test targets (catalogue 7, icon geometry 6, visual
   fixture inventory 15) and `poodle-gpui-node-backend` 52/0.
+- Native: `effigy regressions:native` — `headless_regressions` 241/0 at the
+  native-vertical head (238 pre-existing plus the three new vertical/horizontal
+  block geometry regressions), and the other
+  three gpui-preview test targets (catalogue 7, icon geometry 6, visual
+  fixture inventory 15) and `poodle-gpui-node-backend` 52/0.
 - Block-slider hit probe 124/0 and inline probe 96/0 per engine on headless
-  Chromium and WebKit.
+  Chromium and WebKit at the round-1 head; the web half is unchanged in round
+  2 and was independently verified at 248/0 and 192/0 across both engines.
 - Full vitest board — 415 files / 4134 tests green (svelte-components,
   react-components, previews, parity, a11y, headless-dom).
 - `svelte-check` components — 0 errors; preview back at its pre-existing
@@ -89,9 +119,12 @@ as a complete, aligned control at every size and orientation:
 - Visual smoke board: slider pairs match; the only failure (`pill` at
   0.665%) reproduces identically on the base commit and is environmental.
 - Census/evidence hygiene: source changes move the receipts' SOURCE_PATHS, so
-  the Nucleus/GPUI census evidence is repinned to this head following the
-  g18.022 precedent (receipts differ only in `source_commit`; `effigy
-  regressions:native` re-run at this head; no observation or capture change).
+  the Nucleus/GPUI census evidence was repinned — first to the round-1 source
+  head, then to the native-vertical head (`00d90ba64`) following the g18.022
+  precedent (receipts differ only in `source_commit`/run id;
+  `effigy regressions:native` re-run at each head; no observation or capture
+  change; admitted capabilities identical: 73 admitted rows, 65 mounted
+  receipts).
 - `git diff --check` — clean.
 
 ## Explicitly not done
@@ -103,6 +136,13 @@ as a complete, aligned control at every size and orientation:
   TextInput-owned border. Fixing TextInput's box model is outside this task.
 - The `pill` visual-smoke delta is pre-existing/environmental (reproduces on
   the base commit) and stays out of scope.
+- The exported core helper signature change
+  (`resolveSliderVisibleValue`/`resolveRangeVisibleValue`/
+  `defaultVisibleValueText` and the Rust `resolved_visible_text` now carry
+  `min`/`step`) is deliberate: the precision law needs them, the web
+  `formatVisibleValue` prop and native explicit-string channels are
+  unchanged, and pre-v1 rules forbid compatibility shims. The reviewer
+  classified it non-blocking.
 
 ## Continuation
 
