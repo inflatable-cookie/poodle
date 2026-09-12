@@ -194,6 +194,7 @@
      positions never depend on the current value. */
   .poodle-slider[data-variant="block"] .poodle-slider__inline {
     position: absolute;
+    z-index: 3;
     inset-block: 0;
     inset-inline: 0;
     display: flex;
@@ -214,7 +215,7 @@
     flex: none;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline--selected {
-    z-index: 1;
+    z-index: 4;
     color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));
     clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));
   }
