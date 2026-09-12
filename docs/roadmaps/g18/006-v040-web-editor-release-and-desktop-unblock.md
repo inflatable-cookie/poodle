@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: blocked — retained Queue task/workspace; resume after g18.029 admits the v0.4.0 candidate scope
+Status: blocked — retained Queue task/workspace; resume after g18.030 removes hard-coded receipt provenance
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -12,7 +12,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
 `g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
-`g18.026`, `g18.027`, `g18.028`; current continuation gate: `g18.029`
+`g18.026`, `g18.027`, `g18.028`, `g18.029`; current continuation gate:
+`g18.030`
 
 ## Outcome
 
@@ -61,6 +62,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 - g18.029 lands a closed `0.4.0` candidate-scope admission before this task
   changes any release input. Consume that policy from current main; do not
   recreate it or widen the installed-package guard here.
+- g18.030 removes the Nucleus emitter's hard-coded preview-lock hash and
+  release versions before candidate preparation. Consume its derived
+  provenance from main; the final `0.4.0` repin must require no emitter edit.
 - Include the g18.022 pre-v1 Slider-family migration. Release notes must name
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
@@ -86,8 +90,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 ## Dispatch manifest
 
 - **State:** blocked in retained dispatched Queue task/workspace at clean main
-  after g18.028 closed. Its release probe exposed the missing `0.4.0`
-  candidate-scope admission. Resume only after separate g18.029 merges. The
+  after g18.029 closed. Its release probe exposed hard-coded receipt
+  provenance that cannot belong to a release-only candidate. Resume only after
+  separate g18.030 merges. The
   task's dependency list froze on first dispatch, so preserve the same task,
   worker and workspace; do not replace them or pretend a later dependency
   mutation is available.
@@ -215,10 +220,17 @@ before build/pack, while the only explicit candidate policy is the historical
 widening this live task. The same ruling moves the hosted branch dry run to
 post-merge g18.009.
 
+Post-g18.029 continuation proved one remaining structural conflict. The
+mandatory future `packages/gpui/preview/Cargo.lock` bump changes its SHA and
+Poodle package versions, while `nucleus_receipts.rs` hard-codes the current
+values and sits outside the closed candidate surface. g18.030 derives that
+provenance from the lockfile and repins current evidence before this task
+resumes; no candidate mutation exists.
+
 ## Next task
 
-Complete g18.029's closed `0.4.0` candidate-scope admission. Resume this
-retained task only after that PR merges. The Queue cannot add dependencies to
+Complete g18.030's derived Nucleus receipt provenance. Resume this retained
+task only after that PR merges. The Queue cannot add dependencies to
 this already-dispatched task, so its blocked state is the explicit serial gate;
 preserve its worker and workspace. After the candidate merges and closes,
 g18.009 dispatches from its existing dependency, performs the hosted branch

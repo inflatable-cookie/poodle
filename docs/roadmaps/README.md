@@ -48,10 +48,11 @@ alignment, layout-neutral targets, numeric display, and vertical geometry
 (PR #256).
 Merged g18.023 replaced the rejected accent/status syntax mapping with
 designed dark/light palettes (PR #255). Operator-approved g18.025 fixes all
-preview header controls at one selected size with `sm` as the default. The
-retained g18.006 `0.4.0` candidate is now serial behind the reviewed g18.029
-candidate-scope admission; g18.009 owns post-merge branch certification and
-publication. Desktop unblocks only after the accepted release reaches npm.
+preview header controls at one selected size with `sm` as the default. Merged
+g18.029 admits the closed `0.4.0` candidate surface. Ready g18.030 removes the
+receipt emitter's hard-coded lock provenance before retained g18.006 resumes;
+g18.009 owns post-merge branch certification and publication. Desktop unblocks
+only after the accepted release reaches npm.
 
 ## Rules
 

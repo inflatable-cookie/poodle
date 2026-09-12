@@ -70,16 +70,19 @@ Updated: 2026-09-12
   - Completed repair: g18.028 repaired the two stale `poodle-render`
     accessibility assertions and repinned the complete Nucleus cohort in PR
     #260.
-  - Ready precursor: operator-approved g18.029 adds closed `0.4.0`
-    candidate-scope admission for ordinary PR CI while preserving strict and
-    historical g16.054 behavior.
+  - Completed precursor: g18.029 added closed `0.4.0` candidate-scope
+    admission in PR #261 while preserving strict and historical g16.054
+    behavior.
+  - Ready precursor: operator-approved g18.030 derives Nucleus receipt
+    lock/version provenance from the actual preview lockfile and repins the
+    current cohort once.
   - Blocked candidate: retained g18.006 is clean at current main with no
-    candidate mutation; it resumes in the same task/workspace after g18.029
+    candidate mutation; it resumes in the same task/workspace after g18.030
     merges.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
     hold; it publishes only the accepted candidate and returns the Desktop
     unblock capsule.
-  - Next checkpoint: execute g18.029, then resume retained g18.006. Publish
+  - Next checkpoint: execute g18.030, then resume retained g18.006. Publish
     `0.4.0` through g18.009, unblock Desktop, and route compatible
     sweep findings to `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations

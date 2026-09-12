@@ -50,7 +50,7 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | blocked | retained Queue task/workspace; resume after g18.029 admits the candidate scope |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | blocked | retained Queue task/workspace; resume after g18.030 removes hard-coded receipt provenance |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
@@ -74,6 +74,7 @@ needed to compile honest repair tranches.
 | [`g18.027`](027-v040-public-surface-freeze-audit.md) — `v0.4.0` public-surface freeze audit | complete | PR #259 (merge `8a1f7dc4cb7fa23077c06bc2ad5040db20760182`); frozen `v0.3.0`→post-g18.026 classification with migration text for every breaking row; serial before retained g18.006 |
 | [`g18.028`](028-release-gate-accessibility-assertion-repair.md) — release-gate accessibility assertion repair | complete | PR #260 (merge `018b9214cb2eb88cb9651d9ec8a17808e53410cd`); two stale `poodle-render` expectations repaired plus complete Nucleus cohort repin; serial before retained g18.006 resumes |
 | [`g18.029`](029-v040-candidate-scope-admission.md) — v0.4.0 candidate-scope admission | complete | PR #261 (merge `01bb0dd84236f69bf55d5556c56b46513191a586`); closed 0.4.0 candidate admission with exact lockstep JS/Cargo requirements; serial before retained g18.006 resumes |
+| [`g18.030`](030-nucleus-receipt-lock-provenance.md) — Nucleus receipt lock provenance | ready | derive preview-lock hash and selected package resolution at emission; complete current evidence repin; serial before retained g18.006 resumes |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -145,7 +146,10 @@ operator-approved g18.028 repaired those tests and merged PR #260. The resumed
 lane then proved a separate plan-level gap: ordinary installed-package
 certification has no closed `0.4.0` candidate admission and the hosted branch
 dry run cannot pass until the candidate is on main. Operator-approved g18.029
-lands the admission first; g18.009 owns the post-merge branch dry run.
+landed the admission. Its resumed probe found the receipt emitter still
+hard-codes the old preview-lock hash and package versions. Operator-approved
+g18.030 derives them from the lock and repins current evidence before g18.006
+resumes; g18.009 owns the post-merge branch dry run.
 g18.009 waits on g18.006; no candidate is tagged or
 published while accepted product source is moving. After `0.4.0` unblocks
 Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
