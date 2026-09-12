@@ -25,13 +25,16 @@ import {
   type WebPackageRoster,
 } from "./roster";
 import {
-  CANDIDATE_SCOPE_MODE,
-  CANDIDATE_WRITABLE_PATHS,
+  G16_054_CANDIDATE_SCOPE_MODE,
+  G18_006_CANDIDATE_SCOPE_MODE,
   CERTIFICATION_FORBIDDEN_SURFACES,
   CERTIFICATION_SCOPE_MODE_ENV,
   CERTIFICATION_WRITABLE_PATHS,
+  LOCKSTEP_CARGO_LOCK_PATHS,
+  LOCKSTEP_CARGO_MANIFEST_PATHS,
   assertCertificationScope,
   assertInstalledScope,
+  candidateWritablePaths,
   emitsCertificationReceipt,
   formatInstalledRunOutput,
   readInstalledScopeMode,
@@ -1827,7 +1830,7 @@ async function candidateCargoScopeFalsificationPlant(
       plantRoot,
       plantBaseCommit,
       plantProofCommit,
-      CANDIDATE_SCOPE_MODE,
+      G16_054_CANDIDATE_SCOPE_MODE,
     );
     throw new Error(
       `candidate Cargo guard accepted planted content: ${acceptedScope.changedPaths.join(", ")}`,
@@ -1958,11 +1961,276 @@ async function candidateEvidenceHeadFalsificationPlant(): Promise<void> {
       plantRoot,
       plantBaseCommit,
       evidenceCommit,
-      CANDIDATE_SCOPE_MODE,
+      G16_054_CANDIDATE_SCOPE_MODE,
     );
     throw new Error(
       `candidate scope accepted the evidence head ${evidenceCommit} (past candidate ${candidateCommit}) as the certified candidate source`,
     );
+  } finally {
+    rmSync(plantRoot, { recursive: true, force: true });
+  }
+}
+
+const CLOSED_CANDIDATE_EVIDENCE_PATH =
+  "docs/evidence/nucleus/nucleus-parity-manifest.json";
+const CLOSED_CANDIDATE_STAMP_PATH = "packages/codegen/generated/json/index.json";
+
+function closedCandidateChangelog(version: string): string {
+  return [
+    "# Changelog",
+    "",
+    "Notable changes to Poodle are recorded here.",
+    "",
+    "## [Unreleased]",
+    "",
+    `## [${version}] - 2026-09-12`,
+    "",
+    "### Added",
+    "",
+    "- Planted candidate entry.",
+    "",
+    "[Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main",
+    `[${version}]: docs/release-notes/${version}.md`,
+    "",
+  ].join("\n");
+}
+
+function closedCandidateFiles(version: string): Record<string, string> {
+  const files: Record<string, string> = {
+    "packages/core/package.json": `${JSON.stringify(
+      { name: "@inflatable-cookie/poodle-core", version, type: "module" },
+      null,
+      2,
+    )}\n`,
+    "packages/svelte/components/package.json": `${JSON.stringify(
+      {
+        name: "@inflatable-cookie/poodle-svelte",
+        version,
+        dependencies: { "@inflatable-cookie/poodle-core": version },
+      },
+      null,
+      2,
+    )}\n`,
+    "packages/react/components/package.json": `${JSON.stringify(
+      {
+        name: "@inflatable-cookie/poodle-react",
+        version,
+        private: true,
+        dependencies: { "@inflatable-cookie/poodle-core": version },
+      },
+      null,
+      2,
+    )}\n`,
+    "bun.lock": `lock ${version}\n`,
+    "CHANGELOG.md": closedCandidateChangelog(version),
+    "docs/release-notes/README.md": `# Release notes\n\n- [${version}]\n`,
+    [CLOSED_CANDIDATE_STAMP_PATH]: `{"generated":{"generator":"poodle-codegen ${version}"}}\n`,
+    [CLOSED_CANDIDATE_EVIDENCE_PATH]: `${JSON.stringify(
+      { schema: "poodle.g16.062-nucleus-parity-manifest.v1", resolution: { source_commit: "0".repeat(40) } },
+      null,
+      2,
+    )}\n`,
+  };
+  for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
+    files[path] = [
+      "[package]",
+      'name = "planted"',
+      `version = "${version}"`,
+      'edition = "2021"',
+      "publish = false",
+      "",
+    ].join("\n");
+  }
+  for (const path of LOCKSTEP_CARGO_LOCK_PATHS) {
+    files[path] = `# planted ${version}\nversion = 4\n`;
+  }
+  return files;
+}
+
+type ClosedCandidatePlantKind =
+  | "partial-version-bump"
+  | "later-input-drift"
+  | "evidence-misbound"
+  | "react-admission";
+
+/**
+ * Build a synthetic `0.3.0` → `0.4.0` candidate range with a frozen
+ * release-input commit plus one evidence-only commit, then apply one plant.
+ * The production guards in `scope.ts` are the only validators exercised.
+ */
+async function closedCandidateScopePlant(
+  kind: ClosedCandidatePlantKind,
+  mode: InstalledScopeMode,
+): Promise<void> {
+  const plantRoot = mkdtempSync(join(runRoot, `closed-candidate-${kind}-`));
+  try {
+    await run(["git", "init", "--quiet", plantRoot], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "config", "user.email", "poodle-certification@example.invalid"],
+      repoRoot,
+    );
+    await run(
+      ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
+      repoRoot,
+    );
+    await writePlantFiles(plantRoot, closedCandidateFiles("0.3.0"));
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate base"], repoRoot);
+    const plantBaseCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "closed candidate falsification base commit",
+    );
+    const candidateFiles = closedCandidateFiles("0.4.0");
+    candidateFiles["docs/release-notes/0.4.0.md"] = "# Poodle 0.4.0\n";
+    if (kind === "partial-version-bump") {
+      delete candidateFiles["packages/gpui/preview/Cargo.toml"];
+      delete candidateFiles["packages/render/Cargo.toml"];
+    }
+    if (kind === "react-admission") {
+      candidateFiles["packages/react/components/package.json"] = `${JSON.stringify(
+        {
+          name: "@inflatable-cookie/poodle-react",
+          version: "0.4.0",
+          private: false,
+          dependencies: { "@inflatable-cookie/poodle-core": "0.4.0" },
+        },
+        null,
+        2,
+      )}\n`;
+    }
+    await writePlantFiles(plantRoot, candidateFiles);
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "frozen 0.4.0 release inputs"],
+      repoRoot,
+    );
+    const frozenCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "closed candidate frozen commit",
+    );
+    const recorded = kind === "evidence-misbound" ? plantBaseCommit : frozenCommit;
+    await writePlantFiles(plantRoot, {
+      [CLOSED_CANDIDATE_EVIDENCE_PATH]: `${JSON.stringify(
+        {
+          schema: "poodle.g16.062-nucleus-parity-manifest.v1",
+          resolution: { source_commit: recorded },
+        },
+        null,
+        2,
+      )}\n`,
+    });
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate evidence"],
+      repoRoot,
+    );
+    if (kind === "later-input-drift") {
+      const drifted = closedCandidateFiles("0.4.0");
+      drifted["packages/render/Cargo.toml"] = (drifted["packages/render/Cargo.toml"] as string).replace(
+        'version = "0.4.0"',
+        'version = "0.4.1"',
+      );
+      await writePlantFiles(plantRoot, { "packages/render/Cargo.toml": drifted["packages/render/Cargo.toml"] as string });
+      await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+      await run(
+        ["git", "-C", plantRoot, "commit", "--quiet", "-m", "later release-input drift"],
+        repoRoot,
+      );
+    }
+    const plantHeadCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "closed candidate falsification head commit",
+    );
+    const acceptedScope = await assertInstalledScope(
+      plantRoot,
+      plantBaseCommit,
+      plantHeadCommit,
+      mode,
+    );
+    throw new Error(
+      `closed candidate scope accepted the ${kind} plant: ${acceptedScope.changedPaths.join(", ")}`,
+    );
+  } finally {
+    rmSync(plantRoot, { recursive: true, force: true });
+  }
+}
+
+async function writePlantFiles(
+  plantRoot: string,
+  files: Record<string, string>,
+): Promise<void> {
+  for (const [path, contents] of Object.entries(files)) {
+    const absolute = join(plantRoot, ...path.split("/"));
+    mkdirSync(join(absolute, ".."), { recursive: true });
+    await Bun.write(absolute, contents);
+  }
+}
+
+/** Positive production-path admission of the complete closed candidate. */
+async function closedCandidateOrdinaryAdmissionReceipt(): Promise<Record<string, unknown>> {
+  const plantRoot = mkdtempSync(join(runRoot, "closed-candidate-admitted-"));
+  try {
+    await run(["git", "init", "--quiet", plantRoot], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "config", "user.email", "poodle-certification@example.invalid"],
+      repoRoot,
+    );
+    await run(
+      ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
+      repoRoot,
+    );
+    await writePlantFiles(plantRoot, closedCandidateFiles("0.3.0"));
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate base"], repoRoot);
+    const plantBaseCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "closed candidate admission base commit",
+    );
+    const candidateFiles = closedCandidateFiles("0.4.0");
+    candidateFiles["docs/release-notes/0.4.0.md"] = "# Poodle 0.4.0\n";
+    await writePlantFiles(plantRoot, candidateFiles);
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "frozen 0.4.0 release inputs"],
+      repoRoot,
+    );
+    const frozenCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "closed candidate admission frozen commit",
+    );
+    await writePlantFiles(plantRoot, {
+      [CLOSED_CANDIDATE_EVIDENCE_PATH]: `${JSON.stringify(
+        {
+          schema: "poodle.g16.062-nucleus-parity-manifest.v1",
+          resolution: { source_commit: frozenCommit },
+        },
+        null,
+        2,
+      )}\n`,
+    });
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "candidate evidence"],
+      repoRoot,
+    );
+    const plantHeadCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "closed candidate admission head commit",
+    );
+    const proof = await assertInstalledScope(
+      plantRoot,
+      plantBaseCommit,
+      plantHeadCommit,
+      "ordinary",
+    );
+    if (emitsCertificationReceipt(proof.mode)) {
+      throw new Error("ordinary closed-candidate admission emitted a certification receipt");
+    }
+    return {
+      oracle: "ordinary scope admits the complete closed 0.4.0 candidate",
+      failed: false,
+      receipt: `mode ${proof.mode}; ${proof.changedPaths.length} closed candidate paths; no certification receipt`,
+    };
   } finally {
     rmSync(plantRoot, { recursive: true, force: true });
   }
@@ -2089,15 +2357,15 @@ const falsificationReceipts = [
   ),
   await expectedFailure(
     "candidate scope rejects an unauthorized source path",
-    () => scopeFalsificationPlant(CANDIDATE_SCOPE_MODE, "packages/core/src/unauthorized.ts"),
+    () => scopeFalsificationPlant(G16_054_CANDIDATE_SCOPE_MODE, "packages/core/src/unauthorized.ts"),
   ),
   await expectedFailure(
     "candidate scope rejects a workflow transport mutation",
-    () => scopeFalsificationPlant(CANDIDATE_SCOPE_MODE, ".github/workflows/release.yml"),
+    () => scopeFalsificationPlant(G16_054_CANDIDATE_SCOPE_MODE, ".github/workflows/release.yml"),
   ),
   await expectedFailure(
     "candidate scope rejects a publish transport mutation",
-    () => scopeFalsificationPlant(CANDIDATE_SCOPE_MODE, "scripts/publish/release.ts"),
+    () => scopeFalsificationPlant(G16_054_CANDIDATE_SCOPE_MODE, "scripts/publish/release.ts"),
   ),
   await expectedFailure(
     "candidate scope rejects Cargo publish content in an allowed manifest",
@@ -2115,6 +2383,35 @@ const falsificationReceipts = [
     "candidate scope rejects the evidence head as the candidate source",
     candidateEvidenceHeadFalsificationPlant,
   ),
+  await closedCandidateOrdinaryAdmissionReceipt(),
+  await expectedFailure(
+    "ordinary scope rejects a partial 0.4.0 candidate version bump",
+    () => closedCandidateScopePlant("partial-version-bump", "ordinary"),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects a workflow transport mutation",
+    () => scopeFalsificationPlant(G18_006_CANDIDATE_SCOPE_MODE, ".github/workflows/release.yml"),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects a publish transport mutation",
+    () => scopeFalsificationPlant(G18_006_CANDIDATE_SCOPE_MODE, "scripts/publish/release.ts"),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects a registry transport mutation",
+    () => scopeFalsificationPlant(G18_006_CANDIDATE_SCOPE_MODE, ".npmrc"),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects React admission",
+    () => closedCandidateScopePlant("react-admission", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects later release-input drift",
+    () => closedCandidateScopePlant("later-input-drift", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
+  await expectedFailure(
+    "closed 0.4.0 candidate scope rejects misbound evidence",
+    () => closedCandidateScopePlant("evidence-misbound", G18_006_CANDIDATE_SCOPE_MODE),
+  ),
 ];
 
 const evidence = {
@@ -2128,9 +2425,7 @@ const evidence = {
         certificationScope: {
           ...scopeProof,
           writablePathAllowlist:
-            scopeProof.mode === CANDIDATE_SCOPE_MODE
-              ? CANDIDATE_WRITABLE_PATHS
-              : CERTIFICATION_WRITABLE_PATHS,
+            candidateWritablePaths(scopeProof.mode) ?? CERTIFICATION_WRITABLE_PATHS,
           forbiddenSurfaces: CERTIFICATION_FORBIDDEN_SURFACES.map(
             (surface) => surface.label,
           ).concat("version"),

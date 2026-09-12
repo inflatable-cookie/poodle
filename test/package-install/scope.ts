@@ -11,10 +11,16 @@ export const CERTIFICATION_WRITABLE_PATHS = [
   "docs/logs/2026-09/20260902-g16-059-installed-web-distribution-certification.md",
 ] as const;
 
-export const CANDIDATE_SCOPE_MODE = "g16.054-candidate" as const;
+export const G16_054_CANDIDATE_SCOPE_MODE = "g16.054-candidate" as const;
+export const G18_006_CANDIDATE_SCOPE_MODE = "g18.006-candidate" as const;
+export const CANDIDATE_SCOPE_MODES = [
+  G16_054_CANDIDATE_SCOPE_MODE,
+  G18_006_CANDIDATE_SCOPE_MODE,
+] as const;
+export type CandidateScopeMode = (typeof CANDIDATE_SCOPE_MODES)[number];
 export const CERTIFICATION_SCOPE_MODE_ENV = "POODLE_WEB_PACK_INSTALL_SCOPE_MODE";
 
-export const CANDIDATE_VERSION_PATHS = [
+export const LOCKSTEP_CARGO_MANIFEST_PATHS = [
   "packages/codegen/Cargo.toml",
   "packages/contracts/adapter/Cargo.toml",
   "packages/contracts/components/Cargo.toml",
@@ -32,11 +38,23 @@ export const CANDIDATE_VERSION_PATHS = [
   "packages/jetstream/adapter/Cargo.toml",
   "packages/jetstream/preview/Cargo.toml",
   "packages/render/Cargo.toml",
+] as const;
+
+export const LOCKSTEP_CARGO_LOCK_PATHS = [
   "packages/gpui/node-backend/Cargo.lock",
   "packages/gpui/preview/Cargo.lock",
+] as const;
+
+export const LOCKSTEP_JS_MANIFEST_PATHS = [
   "packages/core/package.json",
   "packages/svelte/components/package.json",
   "packages/react/components/package.json",
+] as const;
+
+export const CANDIDATE_VERSION_PATHS = [
+  ...LOCKSTEP_CARGO_MANIFEST_PATHS,
+  ...LOCKSTEP_CARGO_LOCK_PATHS,
+  ...LOCKSTEP_JS_MANIFEST_PATHS,
 ] as const;
 
 export const CANDIDATE_GENERATED_STAMP_PATHS = [
@@ -103,6 +121,106 @@ export const CANDIDATE_WRITABLE_PATHS = [
   ...CANDIDATE_GENERATED_STAMP_PATHS,
 ] as const;
 
+/**
+ * g18.006 release inputs. These are the lockstep version manifests, the
+ * intra-repository requirements they carry, the tracked locks, the changelog
+ * and the staged `0.4.0` release notes. Nothing else is a candidate input.
+ */
+export const G18_006_RELEASE_INPUT_PATHS = [
+  "CHANGELOG.md",
+  "bun.lock",
+  "docs/release-notes/README.md",
+  "docs/release-notes/0.4.0.md",
+  ...LOCKSTEP_CARGO_MANIFEST_PATHS,
+  ...LOCKSTEP_CARGO_LOCK_PATHS,
+  ...LOCKSTEP_JS_MANIFEST_PATHS,
+] as const;
+
+/**
+ * Generated and evidence surfaces that may follow the frozen release-input
+ * commit: the codegen version stamps, the complete Nucleus cohort, the GPUI
+ * census cohort and its mounted receipts. The fixed g18.006 execution record
+ * is matched by pattern in the policy below.
+ */
+export const G18_006_EVIDENCE_PATHS = [
+  ...CANDIDATE_GENERATED_STAMP_PATHS,
+  "docs/evidence/nucleus/nucleus-parity-manifest.json",
+  "docs/evidence/nucleus/nucleus-parity-receipts/**",
+  "docs/evidence/nucleus/parity-evidence-ledger.md",
+  "docs/evidence/gpui/**",
+] as const;
+
+/** The single fixed g18.006 execution record family. */
+export const G18_006_EXECUTION_RECORD_PATTERN =
+  /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g18-006-[a-z0-9-]+\.md$/;
+
+export const G18_006_WRITABLE_PATHS = [
+  ...G18_006_RELEASE_INPUT_PATHS,
+  ...G18_006_EVIDENCE_PATHS,
+] as const;
+
+/**
+ * One closed admission policy per candidate release. Policy data stays
+ * together: the source/target versions, the exact release inputs, the
+ * generated/evidence families, the content rules and whether the candidate
+ * may carry an evidence-only suffix after its frozen release-input commit.
+ */
+export type CandidatePolicy = {
+  mode: CandidateScopeMode;
+  sourceVersion: string;
+  targetVersion: string;
+  cargoManifestPaths: readonly string[];
+  jsManifestPaths: readonly string[];
+  versionPaths: readonly string[];
+  writablePaths: readonly string[];
+  writablePathPatterns: readonly RegExp[];
+  evidencePaths: readonly string[];
+  releaseInputPaths: readonly string[];
+  releaseNotePath: string;
+  /** g16.054 certifies a single candidate-tree child of the branch base. */
+  requiresDirectSource: boolean;
+  /** g18.006 certifies one frozen release-input commit plus evidence. */
+  requiresFrozenReleaseInputs: boolean;
+};
+
+const G16_054_CANDIDATE_POLICY: CandidatePolicy = {
+  mode: G16_054_CANDIDATE_SCOPE_MODE,
+  sourceVersion: "0.2.3",
+  targetVersion: "0.3.0",
+  cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
+  jsManifestPaths: LOCKSTEP_JS_MANIFEST_PATHS,
+  versionPaths: CANDIDATE_VERSION_PATHS,
+  writablePaths: CANDIDATE_WRITABLE_PATHS,
+  writablePathPatterns: [],
+  evidencePaths: CANDIDATE_GENERATED_STAMP_PATHS,
+  releaseInputPaths: [],
+  releaseNotePath: "docs/release-notes/0.3.0.md",
+  requiresDirectSource: true,
+  requiresFrozenReleaseInputs: false,
+};
+
+const G18_006_CANDIDATE_POLICY: CandidatePolicy = {
+  mode: G18_006_CANDIDATE_SCOPE_MODE,
+  sourceVersion: "0.3.0",
+  targetVersion: "0.4.0",
+  cargoManifestPaths: LOCKSTEP_CARGO_MANIFEST_PATHS,
+  jsManifestPaths: LOCKSTEP_JS_MANIFEST_PATHS,
+  versionPaths: CANDIDATE_VERSION_PATHS,
+  writablePaths: G18_006_WRITABLE_PATHS,
+  writablePathPatterns: [G18_006_EXECUTION_RECORD_PATTERN],
+  evidencePaths: G18_006_EVIDENCE_PATHS,
+  releaseInputPaths: G18_006_RELEASE_INPUT_PATHS,
+  releaseNotePath: "docs/release-notes/0.4.0.md",
+  requiresDirectSource: false,
+  requiresFrozenReleaseInputs: true,
+};
+
+export function candidatePolicy(mode: CandidateScopeMode): CandidatePolicy {
+  return mode === G16_054_CANDIDATE_SCOPE_MODE
+    ? G16_054_CANDIDATE_POLICY
+    : G18_006_CANDIDATE_POLICY;
+}
+
 const PRIVATE_DECLARATION_TOOLS_MANIFEST =
   "scripts/web-distribution/declaration-tools/package.json";
 
@@ -142,7 +260,7 @@ export const CERTIFICATION_FORBIDDEN_SURFACES = [
   },
 ] as const;
 
-export type CertificationScopeMode = "strict" | typeof CANDIDATE_SCOPE_MODE;
+export type CertificationScopeMode = "strict" | CandidateScopeMode;
 export type InstalledScopeMode = "ordinary" | CertificationScopeMode;
 
 export type InstalledScopeProof = {
@@ -156,6 +274,10 @@ export type CertificationScopeProof = InstalledScopeProof & {
   mode: CertificationScopeMode;
 };
 
+function isCandidateScopeMode(mode: string): mode is CandidateScopeMode {
+  return (CANDIDATE_SCOPE_MODES as readonly string[]).includes(mode);
+}
+
 function isCertificationScopeMode(mode: InstalledScopeMode): mode is CertificationScopeMode {
   return mode !== "ordinary";
 }
@@ -164,12 +286,20 @@ export function emitsCertificationReceipt(mode: InstalledScopeMode): boolean {
   return isCertificationScopeMode(mode);
 }
 
+/** The policy allowlist for a certification mode, or null for ordinary. */
+export function candidateWritablePaths(mode: InstalledScopeMode): readonly string[] | null {
+  if (!isCertificationScopeMode(mode)) return null;
+  return mode === "strict" ? CERTIFICATION_WRITABLE_PATHS : candidatePolicy(mode).writablePaths;
+}
+
 export function readInstalledScopeMode(value: string | undefined): InstalledScopeMode {
   if (!value || value === "ordinary") return "ordinary";
   if (value === "strict") return "strict";
-  if (value === CANDIDATE_SCOPE_MODE) return CANDIDATE_SCOPE_MODE;
+  if (isCandidateScopeMode(value)) return value;
   throw new Error(
-    `${CERTIFICATION_SCOPE_MODE_ENV} must be ordinary, strict, or ${CANDIDATE_SCOPE_MODE}: ${value}`,
+    `${CERTIFICATION_SCOPE_MODE_ENV} must be ordinary, strict, or ${CANDIDATE_SCOPE_MODES.join(
+      ", ",
+    )}: ${value}`,
   );
 }
 
@@ -233,6 +363,7 @@ function isJsManifestPath(path: string): boolean {
 
 const CHANGELOG_PATH = "CHANGELOG.md";
 const EXECUTION_LOG_PATH = /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g\d{2}-\d{3}-[a-z0-9-]+\.md$/;
+const RELEASE_NOTE_PATH = /^docs\/release-notes\/[^/]+\.md$/;
 
 type ChangelogInventory = {
   preamble: string;
@@ -410,10 +541,12 @@ export function isWritableCertificationPath(
   path: string,
   mode: CertificationScopeMode = "strict",
 ): boolean {
-  const writablePaths = mode === CANDIDATE_SCOPE_MODE
-    ? CANDIDATE_WRITABLE_PATHS
-    : CERTIFICATION_WRITABLE_PATHS;
-  return writablePaths.some((pattern) => matchesScopePattern(path, pattern));
+  const writablePaths = mode === "strict"
+    ? CERTIFICATION_WRITABLE_PATHS
+    : candidatePolicy(mode).writablePaths;
+  if (writablePaths.some((pattern) => matchesScopePattern(path, pattern))) return true;
+  if (mode === "strict") return false;
+  return candidatePolicy(mode).writablePathPatterns.some((pattern) => pattern.test(path));
 }
 
 function isCandidatePath(path: string, paths: readonly string[]): boolean {
@@ -427,14 +560,14 @@ export function forbiddenCertificationSurfaceLabels(
   const labels = CERTIFICATION_FORBIDDEN_SURFACES.filter((surface) =>
     surface.patterns.some((pattern) => matchesScopePattern(path, pattern)),
   ).map((surface) => surface.label);
-  const candidateReleaseHonestyPath =
-    mode === CANDIDATE_SCOPE_MODE && path === "CHANGELOG.md";
+  const candidateMode = isCandidateScopeMode(mode);
+  const candidateReleaseHonestyPath = candidateMode && path === "CHANGELOG.md";
   const filteredLabels = candidateReleaseHonestyPath
     ? labels.filter((label) => label !== "release")
     : labels;
   const isPackageManifest = isJsManifestPath(path);
   const candidateVersionPath =
-    mode === CANDIDATE_SCOPE_MODE && isCandidatePath(path, CANDIDATE_VERSION_PATHS);
+    candidateMode && isCandidatePath(path, candidatePolicy(mode).versionPaths);
   if (
     isPackageManifest &&
     path !== PRIVATE_DECLARATION_TOOLS_MANIFEST &&
@@ -749,25 +882,31 @@ export function requireExactCommit(value: string, label: string): string {
   return value;
 }
 
+const CANDIDATE_MANIFEST_LEAF_ALLOWLIST: Record<string, readonly string[]> = {
+  "packages/core/package.json": ["version"],
+  "packages/svelte/components/package.json": [
+    "version",
+    "dependencies.@inflatable-cookie/poodle-core",
+  ],
+  "packages/react/components/package.json": [
+    "version",
+    "dependencies.@inflatable-cookie/poodle-core",
+  ],
+};
+
 async function assertCandidateManifestHonesty(
   checkoutRoot: string,
   requiredBaseCommit: string,
   sourceCommit: string,
   changedPaths: string[],
+  policy: CandidatePolicy,
 ): Promise<void> {
-  const allowedManifestChanges: Record<string, readonly string[]> = {
-    "packages/core/package.json": ["version"],
-    "packages/svelte/components/package.json": [
-      "version",
-      "dependencies.@inflatable-cookie/poodle-core",
-    ],
-    "packages/react/components/package.json": [
-      "version",
-      "dependencies.@inflatable-cookie/poodle-core",
-    ],
-  };
-  for (const [path, allowedChanges] of Object.entries(allowedManifestChanges)) {
+  for (const path of policy.jsManifestPaths) {
     if (!changedPaths.includes(path)) continue;
+    const allowedChanges = CANDIDATE_MANIFEST_LEAF_ALLOWLIST[path];
+    if (!allowedChanges) {
+      throw new Error(`candidate scope has no manifest honesty rule for ${path}`);
+    }
     const before = JSON.parse(
       await runCapture(["git", "show", `${requiredBaseCommit}:${path}`], checkoutRoot),
     ) as Record<string, unknown>;
@@ -781,8 +920,13 @@ async function assertCandidateManifestHonesty(
         `candidate scope rejected unauthorized ${path} changes: ${unauthorizedChanges.join(", ")}`,
       );
     }
-    if (after.version !== "0.3.0") {
-      throw new Error(`candidate scope requires ${path} version 0.3.0`);
+    if (before.version !== policy.sourceVersion) {
+      throw new Error(
+        `candidate scope requires ${path} to begin at version ${policy.sourceVersion}`,
+      );
+    }
+    if (after.version !== policy.targetVersion) {
+      throw new Error(`candidate scope requires ${path} version ${policy.targetVersion}`);
     }
     if (path === "packages/react/components/package.json" && after.private !== true) {
       throw new Error("candidate scope rejected React admission: package must remain private");
@@ -834,7 +978,7 @@ type CandidateCargoRequirement = { name: string; path: string };
 
 function parseCandidateCargoRequirement(
   line: string,
-  version: "0.2.3" | "0.3.0",
+  version: string,
 ): CandidateCargoRequirement | null {
   const match = new RegExp(
     `^(poodle-[A-Za-z0-9_-]+)\\s*=\\s*\\{\\s*version\\s*=\\s*"${version.replaceAll(".", "\\.")}",\\s*path\\s*=\\s*"([^"]+)"\\s*\\}$`,
@@ -848,10 +992,9 @@ async function assertCandidateCargoManifestHonesty(
   requiredBaseCommit: string,
   sourceCommit: string,
   changedPaths: string[],
+  policy: CandidatePolicy,
 ): Promise<void> {
-  const cargoPaths = CANDIDATE_VERSION_PATHS.filter((path) =>
-    path.endsWith("/Cargo.toml"),
-  );
+  const cargoPaths = policy.cargoManifestPaths;
   for (const path of cargoPaths) {
     if (!changedPaths.includes(path)) continue;
     const diff = await runCapture(
@@ -896,10 +1039,10 @@ async function assertCandidateCargoManifestHonesty(
       const section = cargoSectionForLine(sourceText, added[index].lineNumber);
       const packageVersionChange =
         section === "package" &&
-        oldLine === 'version = "0.2.3"' &&
-        newLine === 'version = "0.3.0"';
-      const oldRequirement = parseCandidateCargoRequirement(oldLine, "0.2.3");
-      const newRequirement = parseCandidateCargoRequirement(newLine, "0.3.0");
+        oldLine === `version = "${policy.sourceVersion}"` &&
+        newLine === `version = "${policy.targetVersion}"`;
+      const oldRequirement = parseCandidateCargoRequirement(oldLine, policy.sourceVersion);
+      const newRequirement = parseCandidateCargoRequirement(newLine, policy.targetVersion);
       const dependencyVersionChange =
         (section === "dependencies" || section === "dev-dependencies") &&
         oldRequirement !== null &&
@@ -971,6 +1114,228 @@ async function changedPathsForCommitRange(
   return sortedUnique(changedPaths.split("\0").filter(Boolean));
 }
 
+async function commitChangedPaths(checkoutRoot: string, commit: string): Promise<string[]> {
+  const output = await runCapture(
+    [
+      "git",
+      "diff-tree",
+      "-r",
+      "--name-only",
+      "--no-commit-id",
+      "--first-parent",
+      "-m",
+      "--no-renames",
+      "-z",
+      commit,
+    ],
+    checkoutRoot,
+  );
+  return sortedUnique(output.split("\0").filter(Boolean));
+}
+
+function recordedSourceCommits(text: string): string[] {
+  return [...text.matchAll(/"source_commit"\s*:\s*"([0-9a-f]{40})"/g)].map(
+    (match) => match[1],
+  );
+}
+
+function isClosedCandidateEvidencePath(path: string, policy: CandidatePolicy): boolean {
+  return policy.evidencePaths.some((pattern) => matchesScopePattern(path, pattern));
+}
+
+async function assertCandidateReleaseHonesty(
+  checkoutRoot: string,
+  sourceCommit: string,
+  policy: CandidatePolicy,
+): Promise<void> {
+  const changelog = await gitShowFile(checkoutRoot, sourceCommit, CHANGELOG_PATH);
+  if (changelog === null) {
+    throw new Error(`closed candidate scope requires ${CHANGELOG_PATH}`);
+  }
+  let inventory: ChangelogInventory;
+  try {
+    inventory = changelogInventory(changelog);
+  } catch (error) {
+    throw new Error(
+      `closed candidate scope rejected unparsable ${CHANGELOG_PATH}: ${String(error)}`,
+    );
+  }
+  const release = inventory.releases.find(
+    ({ version }) => version === policy.targetVersion,
+  );
+  if (!release) {
+    throw new Error(
+      `closed candidate scope requires a ${policy.targetVersion} changelog release`,
+    );
+  }
+  const link = inventory.links.find(({ label }) => label === policy.targetVersion);
+  if (!link || link.target !== policy.releaseNotePath) {
+    throw new Error(
+      `closed candidate scope requires the ${policy.targetVersion} changelog link to ${policy.releaseNotePath}`,
+    );
+  }
+  const notes = await gitShowFile(checkoutRoot, sourceCommit, policy.releaseNotePath);
+  if (notes === null || notes.trim() === "") {
+    throw new Error(
+      `closed candidate scope requires staged release notes at ${policy.releaseNotePath}`,
+    );
+  }
+}
+
+/**
+ * Validate the frozen candidate identity: exactly one commit changes the
+ * complete release-input set, every later change is generated evidence or the
+ * fixed execution record, and the changed evidence binds its `source_commit`
+ * to that frozen release-input commit. Because the release-input commit is
+ * unique, the final inputs are byte-identical to it by construction.
+ */
+async function assertFrozenCandidateRange(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+  policy: CandidatePolicy,
+): Promise<void> {
+  const missingInputs = policy.releaseInputPaths.filter(
+    (path) => !changedPaths.includes(path),
+  );
+  if (missingInputs.length > 0) {
+    throw new Error(
+      `closed candidate scope requires the complete ${policy.targetVersion} release-input set; missing: ${missingInputs.join(", ")}`,
+    );
+  }
+  const commits = (
+    await runCapture(
+      ["git", "rev-list", "--first-parent", "--reverse", `${requiredBaseCommit}..${sourceCommit}`],
+      checkoutRoot,
+    )
+  )
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const frozenCommits: string[] = [];
+  const rangePaths = new Set<string>();
+  for (const commit of commits) {
+    const paths = await commitChangedPaths(checkoutRoot, commit);
+    for (const path of paths) rangePaths.add(path);
+    if (paths.some((path) => policy.releaseInputPaths.includes(path))) {
+      frozenCommits.push(commit);
+    }
+  }
+  if (frozenCommits.length !== 1) {
+    throw new Error(
+      `closed candidate scope requires exactly one frozen ${policy.targetVersion} release-input commit; found ${frozenCommits.length}: ${frozenCommits.join(", ")}`,
+    );
+  }
+  const frozenCommit = frozenCommits[0];
+  let bound = false;
+  for (const path of sortedUnique(
+    [...rangePaths].filter((candidate) => isClosedCandidateEvidencePath(candidate, policy)),
+  )) {
+    const text = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (text === null) {
+      throw new Error(
+        `closed candidate scope rejected removed candidate evidence: ${path}`,
+      );
+    }
+    for (const recorded of recordedSourceCommits(text)) {
+      if (recorded !== frozenCommit) {
+        throw new Error(
+          `closed candidate scope rejected evidence ${path} bound to ${recorded} instead of the frozen release-input commit ${frozenCommit}`,
+        );
+      }
+      bound = true;
+    }
+  }
+  if (!bound) {
+    throw new Error(
+      `closed candidate scope requires generated evidence whose source_commit names the frozen release-input commit ${frozenCommit}`,
+    );
+  }
+}
+
+/**
+ * The single closed candidate validator. It is used both by the explicit
+ * `g18.006-candidate` certification mode and by ordinary CI recognition, so a
+ * PR lane and a local certification run cannot disagree about admission.
+ */
+async function assertClosedCandidateRange(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+  policy: CandidatePolicy,
+): Promise<void> {
+  const outsideAllowlist = changedPaths.filter(
+    (path) => !isWritableCertificationPath(path, policy.mode),
+  );
+  if (outsideAllowlist.length > 0) {
+    throw new Error(
+      `certification scope rejected paths outside writable allowlist: ${outsideAllowlist.join(", ")}`,
+    );
+  }
+  const forbidden = changedPaths.flatMap((path) =>
+    forbiddenCertificationSurfaceLabels(path, policy.mode).map((surface) => ({
+      path,
+      surface,
+    })),
+  );
+  if (forbidden.length > 0) {
+    throw new Error(
+      `certification scope rejected forbidden ${forbidden
+        .map(({ surface, path }) => `${surface} surface: ${path}`)
+        .join(", ")}`,
+    );
+  }
+  await assertFrozenCandidateRange(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+    policy,
+  );
+  await assertCandidateManifestHonesty(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+    policy,
+  );
+  await assertCandidateCargoManifestHonesty(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+    policy,
+  );
+  await assertCandidateReleaseHonesty(checkoutRoot, sourceCommit, policy);
+}
+
+/**
+ * Ordinary CI carries no candidate environment variable. It may admit a
+ * release-bearing range only when the complete base-to-head diff satisfies the
+ * closed g18.006 policy; any failure stays an ordinary rejection.
+ */
+async function ordinaryAdmitsClosedCandidate(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  try {
+    await assertClosedCandidateRange(
+      checkoutRoot,
+      requiredBaseCommit,
+      sourceCommit,
+      changedPaths,
+      candidatePolicy(G18_006_CANDIDATE_SCOPE_MODE),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function assertInstalledScope(
   checkoutRoot: string,
   requiredBaseCommit: string,
@@ -987,7 +1352,8 @@ export async function assertInstalledScope(
   if (isCertificationScopeMode(mode) && changedPaths.length === 0) {
     throw new Error("certification scope found no changed paths");
   }
-  if (mode === CANDIDATE_SCOPE_MODE) {
+  const policy = isCandidateScopeMode(mode) ? candidatePolicy(mode) : null;
+  if (policy?.requiresDirectSource) {
     await assertDirectCandidateSource(checkoutRoot, requiredBaseCommit, sourceCommit);
   }
   let forbidden = changedPaths.flatMap((path) =>
@@ -1022,6 +1388,26 @@ export async function assertInstalledScope(
         changedPaths,
       )),
     );
+    // Ordinary CI has no candidate environment variable. A release-bearing
+    // range (a forbidden version/release surface or any staged release note)
+    // is admitted only when the complete diff satisfies the closed g18.006
+    // candidate policy; anything else stays an ordinary rejection.
+    const releaseNoteChanges = changedPaths.filter((path) => RELEASE_NOTE_PATH.test(path));
+    if (
+      (forbidden.length > 0 || releaseNoteChanges.length > 0) &&
+      (await ordinaryAdmitsClosedCandidate(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      ))
+    ) {
+      forbidden = [];
+    } else if (forbidden.length === 0 && releaseNoteChanges.length > 0) {
+      throw new Error(
+        `certification scope rejected a partial release-note change without the closed ${G18_006_CANDIDATE_SCOPE_MODE} candidate: ${releaseNoteChanges.join(", ")}`,
+      );
+    }
   }
   if (forbidden.length > 0) {
     throw new Error(
@@ -1030,7 +1416,15 @@ export async function assertInstalledScope(
         .join(", ")}`,
     );
   }
-  if (isCertificationScopeMode(mode)) {
+  if (policy?.requiresFrozenReleaseInputs) {
+    await assertClosedCandidateRange(
+      checkoutRoot,
+      requiredBaseCommit,
+      sourceCommit,
+      changedPaths,
+      policy,
+    );
+  } else if (isCertificationScopeMode(mode)) {
     const outsideAllowlist = changedPaths.filter(
       (path) => !isWritableCertificationPath(path, mode),
     );
@@ -1039,20 +1433,22 @@ export async function assertInstalledScope(
         `certification scope rejected paths outside writable allowlist: ${outsideAllowlist.join(", ")}`,
       );
     }
-  }
-  if (mode === CANDIDATE_SCOPE_MODE) {
-    await assertCandidateManifestHonesty(
-      checkoutRoot,
-      requiredBaseCommit,
-      sourceCommit,
-      changedPaths,
-    );
-    await assertCandidateCargoManifestHonesty(
-      checkoutRoot,
-      requiredBaseCommit,
-      sourceCommit,
-      changedPaths,
-    );
+    if (policy) {
+      await assertCandidateManifestHonesty(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+        policy,
+      );
+      await assertCandidateCargoManifestHonesty(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+        policy,
+      );
+    }
   }
   return { mode, requiredBaseCommit, sourceCommit, changedPaths };
 }

@@ -4,7 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
-  CANDIDATE_SCOPE_MODE,
+  G16_054_CANDIDATE_SCOPE_MODE,
+  G18_006_CANDIDATE_SCOPE_MODE,
+  LOCKSTEP_CARGO_LOCK_PATHS,
+  LOCKSTEP_CARGO_MANIFEST_PATHS,
   assertCertificationScope,
   assertInstalledScope,
   emitsCertificationReceipt,
@@ -172,18 +175,24 @@ describe("installed-package scope routing", () => {
     expect(readInstalledScopeMode(undefined)).toBe("ordinary");
     expect(readInstalledScopeMode("ordinary")).toBe("ordinary");
     expect(readInstalledScopeMode("strict")).toBe("strict");
-    expect(readInstalledScopeMode(CANDIDATE_SCOPE_MODE)).toBe(CANDIDATE_SCOPE_MODE);
+    expect(readInstalledScopeMode(G16_054_CANDIDATE_SCOPE_MODE)).toBe(
+      G16_054_CANDIDATE_SCOPE_MODE,
+    );
+    expect(readInstalledScopeMode(G18_006_CANDIDATE_SCOPE_MODE)).toBe(
+      G18_006_CANDIDATE_SCOPE_MODE,
+    );
     expect(emitsCertificationReceipt("ordinary")).toBe(false);
     expect(emitsCertificationReceipt("strict")).toBe(true);
-    expect(emitsCertificationReceipt(CANDIDATE_SCOPE_MODE)).toBe(true);
+    expect(emitsCertificationReceipt(G16_054_CANDIDATE_SCOPE_MODE)).toBe(true);
+    expect(emitsCertificationReceipt(G18_006_CANDIDATE_SCOPE_MODE)).toBe(true);
   });
 
   test("unknown mode rejects instead of becoming ordinary", () => {
     expect(() => readInstalledScopeMode("typo")).toThrow(
-      /must be ordinary, strict, or g16\.054-candidate: typo/,
+      /must be ordinary, strict, or g16\.054-candidate, g18\.006-candidate: typo/,
     );
     expect(() => readInstalledScopeMode("strict ")).toThrow(
-      /must be ordinary, strict, or g16\.054-candidate/,
+      /must be ordinary, strict, or g16\.054-candidate, g18\.006-candidate/,
     );
   });
 
@@ -613,7 +622,7 @@ describe("installed-package scope routing", () => {
     await writeFiles(root, { "packages/core/src/unauthorized.ts": "export {}\n" });
     const head = await commitAll(root, "candidate unauthorized");
     await expect(
-      assertCertificationScope(root, base, head, CANDIDATE_SCOPE_MODE),
+      assertCertificationScope(root, base, head, G16_054_CANDIDATE_SCOPE_MODE),
     ).rejects.toThrow(
       "certification scope rejected paths outside writable allowlist: packages/core/src/unauthorized.ts",
     );
@@ -638,7 +647,7 @@ describe("installed-package scope routing", () => {
       await writeFiles(root, { [CANDIDATE_CARGO_PLANT_MANIFEST]: `${planted}\n` });
       const head = await commitAll(root, `cargo ${kind} plant`);
       await expect(
-        assertCertificationScope(root, base, head, CANDIDATE_SCOPE_MODE),
+        assertCertificationScope(root, base, head, G16_054_CANDIDATE_SCOPE_MODE),
       ).rejects.toThrow(/candidate scope rejected/);
     }
   });
@@ -657,7 +666,7 @@ describe("installed-package scope routing", () => {
     });
     const evidence = await commitAll(root, "candidate evidence");
     await expect(
-      assertCertificationScope(root, base, evidence, CANDIDATE_SCOPE_MODE),
+      assertCertificationScope(root, base, evidence, G16_054_CANDIDATE_SCOPE_MODE),
     ).rejects.toThrow(
       /candidate scope requires the certified source to be the direct one-commit child/,
     );
@@ -671,5 +680,296 @@ describe("installed-package scope routing", () => {
     });
     expect(observed.length).toBeGreaterThan(0);
     expect(plantRoots.includes(observed)).toBe(false);
+  });
+});
+
+const CLOSED_CANDIDATE_EVIDENCE = "docs/evidence/nucleus/nucleus-parity-manifest.json";
+const CLOSED_CANDIDATE_STAMP = "packages/codegen/generated/json/index.json";
+
+function closedCandidateChangelog(version: string): string {
+  return [
+    "# Changelog",
+    "",
+    "Notable changes to Poodle are recorded here.",
+    "",
+    "## [Unreleased]",
+    "",
+    `## [${version}] - 2026-09-12`,
+    "",
+    "### Added",
+    "",
+    "- Planted candidate entry.",
+    "",
+    "[Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main",
+    `[${version}]: docs/release-notes/${version}.md`,
+    "",
+  ].join("\n");
+}
+
+function closedCandidateFiles(version: string): Record<string, string> {
+  const files: Record<string, string> = {
+    "packages/core/package.json": `${JSON.stringify(
+      { name: "@inflatable-cookie/poodle-core", version, type: "module" },
+      null,
+      2,
+    )}\n`,
+    "packages/svelte/components/package.json": `${JSON.stringify(
+      {
+        name: "@inflatable-cookie/poodle-svelte",
+        version,
+        dependencies: { "@inflatable-cookie/poodle-core": version },
+      },
+      null,
+      2,
+    )}\n`,
+    "packages/react/components/package.json": `${JSON.stringify(
+      {
+        name: "@inflatable-cookie/poodle-react",
+        version,
+        private: true,
+        dependencies: { "@inflatable-cookie/poodle-core": version },
+      },
+      null,
+      2,
+    )}\n`,
+    "bun.lock": `lock ${version}\n`,
+    "CHANGELOG.md": closedCandidateChangelog(version),
+    "docs/release-notes/README.md": `# Release notes\n\n- [${version}]\n`,
+    [CLOSED_CANDIDATE_STAMP]: `{"generated":{"generator":"poodle-codegen ${version}"}}\n`,
+    [CLOSED_CANDIDATE_EVIDENCE]: `${JSON.stringify(
+      {
+        schema: "poodle.g16.062-nucleus-parity-manifest.v1",
+        resolution: { source_commit: "0".repeat(40) },
+      },
+      null,
+      2,
+    )}\n`,
+  };
+  for (const path of LOCKSTEP_CARGO_MANIFEST_PATHS) {
+    const dependency =
+      path === "packages/contracts/tokens/Cargo.toml"
+        ? ['poodle-ir = { version = "' + version + '", path = "../../contracts/ir" }', ""]
+        : [];
+    files[path] = [
+      "[package]",
+      'name = "planted"',
+      `version = "${version}"`,
+      'edition = "2021"',
+      "publish = false",
+      "",
+      ...(dependency.length > 0 ? ["[dependencies]", ...dependency] : []),
+    ].join("\n");
+  }
+  for (const path of LOCKSTEP_CARGO_LOCK_PATHS) {
+    files[path] = `# planted ${version}\nversion = 4\n`;
+  }
+  return files;
+}
+
+type ClosedCandidatePlant = {
+  mutateCandidate?: (files: Record<string, string>) => void;
+  evidenceSourceCommit?: (frozen: string, base: string) => string;
+  afterEvidence?: Record<string, string>;
+};
+
+async function plantClosedCandidate(plant: ClosedCandidatePlant = {}): Promise<{
+  root: string;
+  base: string;
+  frozen: string;
+  head: string;
+}> {
+  const root = await initPlant();
+  await writeFiles(root, closedCandidateFiles("0.3.0"));
+  const base = await commitAll(root, "closed candidate base");
+  const candidateFiles = closedCandidateFiles("0.4.0");
+  candidateFiles["docs/release-notes/0.4.0.md"] = "# Poodle 0.4.0\n";
+  plant.mutateCandidate?.(candidateFiles);
+  await writeFiles(root, candidateFiles);
+  const frozen = await commitAll(root, "closed candidate frozen release inputs");
+  const recorded = plant.evidenceSourceCommit
+    ? plant.evidenceSourceCommit(frozen, base)
+    : frozen;
+  await writeFiles(root, {
+    [CLOSED_CANDIDATE_EVIDENCE]: `${JSON.stringify(
+      {
+        schema: "poodle.g16.062-nucleus-parity-manifest.v1",
+        resolution: { source_commit: recorded },
+      },
+      null,
+      2,
+    )}\n`,
+  });
+  const evidenceHead = await commitAll(root, "closed candidate evidence");
+  if (!plant.afterEvidence) return { root, base, frozen, head: evidenceHead };
+  await writeFiles(root, plant.afterEvidence);
+  const head = await commitAll(root, "closed candidate extra");
+  return { root, base, frozen, head };
+}
+
+describe("closed 0.4.0 candidate scope admission", () => {
+  test("ordinary CI admits the complete closed candidate without a receipt", async () => {
+    const { root, base, head } = await plantClosedCandidate();
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
+    expect(proof.changedPaths).toContain("packages/render/Cargo.toml");
+    expect(proof.changedPaths).toContain("docs/release-notes/0.4.0.md");
+    expect(proof.changedPaths).toContain(CLOSED_CANDIDATE_EVIDENCE);
+  });
+
+  test("explicit g18.006 mode certifies the same closed candidate", async () => {
+    const { root, base, head } = await plantClosedCandidate();
+    const proof = await assertCertificationScope(
+      root,
+      base,
+      head,
+      G18_006_CANDIDATE_SCOPE_MODE,
+    );
+    expect(proof.mode).toBe(G18_006_CANDIDATE_SCOPE_MODE);
+    expect(emitsCertificationReceipt(proof.mode)).toBe(true);
+  });
+
+  test("partial and wrong-version candidates fail before build or pack", async () => {
+    const partial = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        delete files["packages/gpui/preview/Cargo.toml"];
+        delete files["packages/render/Cargo.toml"];
+      },
+    });
+    await expect(
+      assertInstalledScope(partial.root, partial.base, partial.head, "ordinary"),
+    ).rejects.toThrow(/certification scope rejected forbidden/);
+    await expect(
+      assertCertificationScope(
+        partial.root,
+        partial.base,
+        partial.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/requires the complete 0\.4\.0 release-input set; missing/);
+
+    const wrongVersion = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["packages/render/Cargo.toml"] = (
+          files["packages/render/Cargo.toml"] as string
+        ).replace('version = "0.4.0"', 'version = "0.3.1"');
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        wrongVersion.root,
+        wrongVersion.base,
+        wrongVersion.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope rejected unauthorized Cargo manifest change/);
+  });
+
+  test("closed candidate scope rejects arbitrary source and transport surfaces", async () => {
+    const plants = {
+      "packages/core/src/unauthorized.ts": "export {};\n",
+      "test/package-install/scope.ts": "export {};\n",
+      ".github/workflows/release.yml": "name: planted\n",
+      ".npmrc": "registry=https://registry.example.invalid\n",
+      "scripts/publish/release.ts": "export {};\n",
+    };
+    for (const [path, contents] of Object.entries(plants)) {
+      const { root, base, head } = await plantClosedCandidate({
+        afterEvidence: { [path]: contents },
+      });
+      await expect(
+        assertCertificationScope(root, base, head, G18_006_CANDIDATE_SCOPE_MODE),
+      ).rejects.toThrow(/certification scope rejected/);
+    }
+  });
+
+  test("closed candidate scope rejects React admission and Cargo retargeting", async () => {
+    const react = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        const manifest = JSON.parse(files["packages/react/components/package.json"] as string);
+        manifest.private = false;
+        files["packages/react/components/package.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
+      },
+    });
+    await expect(
+      assertCertificationScope(react.root, react.base, react.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/candidate scope rejected/);
+
+    const retargeted = await plantClosedCandidate({
+      mutateCandidate: (files) => {
+        files["packages/contracts/tokens/Cargo.toml"] = (
+          files["packages/contracts/tokens/Cargo.toml"] as string
+        ).replace('path = "../../contracts/ir"', 'path = "../../contracts/evil"');
+      },
+    });
+    await expect(
+      assertCertificationScope(
+        retargeted.root,
+        retargeted.base,
+        retargeted.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/candidate scope rejected unauthorized Cargo manifest change/);
+  });
+
+  test("closed candidate scope rejects hidden or later release-input drift", async () => {
+    const driftedManifest = (
+      closedCandidateFiles("0.4.0")["packages/render/Cargo.toml"] as string
+    ).replace('version = "0.4.0"', 'version = "0.4.1"');
+    const drift = await plantClosedCandidate({
+      afterEvidence: { "packages/render/Cargo.toml": driftedManifest },
+    });
+    await expect(
+      assertCertificationScope(drift.root, drift.base, drift.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      /requires exactly one frozen 0\.4\.0 release-input commit; found 2/,
+    );
+  });
+
+  test("closed candidate scope rejects evidence bound to another commit", async () => {
+    const misbound = await plantClosedCandidate({
+      evidenceSourceCommit: (_frozen, base) => base,
+    });
+    await expect(
+      assertCertificationScope(
+        misbound.root,
+        misbound.base,
+        misbound.head,
+        G18_006_CANDIDATE_SCOPE_MODE,
+      ),
+    ).rejects.toThrow(/bound to .* instead of the frozen release-input commit/);
+  });
+
+  test("ordinary CI refuses a lone version bump instead of promoting it", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "packages/core/package.json": '{\n  "version": "0.3.0"\n}\n' });
+    const base = await commitAll(root, "lone bump base");
+    await writeFiles(root, { "packages/core/package.json": '{\n  "version": "0.4.0"\n}\n' });
+    const head = await commitAll(root, "lone bump head");
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      "certification scope rejected forbidden version surface: packages/core/package.json",
+    );
+  });
+
+  test("ordinary CI refuses a lone release-note change instead of promoting it", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "lone release note base");
+    await writeFiles(root, { "docs/release-notes/0.4.0.md": "# Poodle 0.4.0\n" });
+    const head = await commitAll(root, "lone release note head");
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /rejected a partial release-note change without the closed g18\.006-candidate candidate/,
+    );
+  });
+
+  test("g16.054 still requires its own 0.2.3 source identity", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "packages/core/package.json": '{\n  "version": "0.3.0"\n}\n' });
+    const base = await commitAll(root, "g16 candidate base");
+    await writeFiles(root, { "packages/core/package.json": '{\n  "version": "0.4.0"\n}\n' });
+    const head = await commitAll(root, "g16 candidate head");
+    await expect(
+      assertCertificationScope(root, base, head, G16_054_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/candidate scope requires packages\/core\/package\.json/);
   });
 });

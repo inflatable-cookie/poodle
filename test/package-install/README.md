@@ -30,11 +30,32 @@ and normalized entry payloads must be identical. Ambiguous shapes, semantic
 mutations, missing or extra logs, and mixed ranges remain forbidden release
 surfaces. Ordinary runs emit no certification receipt or receipt hash.
 
+Ordinary CI carries no candidate environment variable. When a range still
+contains release-bearing changes after the content-aware checks above — a
+forbidden version or release surface, or any staged release note — ordinary
+scope admits it only when the complete base-to-head diff satisfies the closed
+`0.3.0` → `0.4.0` g18.006 policy described below. Partial, wrong-version,
+retargeted, transport, lone release-note, unrelated and unbound-evidence
+ranges stay ordinary rejections, and a closed admission never emits a
+certification receipt.
+
 Exact certification requires `POODLE_WEB_PACK_INSTALL_SCOPE_MODE=strict` and
 keeps the g16.059 writable allowlist, non-empty range, receipt bytes, and
-receipt hash. Candidate certification remains
-`POODLE_WEB_PACK_INSTALL_SCOPE_MODE=g16.054-candidate`. Unknown modes reject.
-Changed filenames never promote a run into certification.
+receipt hash. The historical
+`POODLE_WEB_PACK_INSTALL_SCOPE_MODE=g16.054-candidate` policy is preserved
+unchanged: it keeps its `0.2.3` → `0.3.0` proof, its direct one-commit
+candidate tree, its writable set and its content rules. The closed
+`POODLE_WEB_PACK_INSTALL_SCOPE_MODE=g18.006-candidate` policy admits only the
+exact `0.3.0` → `0.4.0` release: the complete lockstep JS and Cargo
+manifests, intra-repository requirements, tracked locks, changelog, `0.4.0`
+release notes, generated version stamps, the complete Nucleus
+receipt/ledger/GPUI-census cohort and the fixed g18.006 execution record. It
+requires exactly one frozen release-input commit, permits only an
+evidence/log-only suffix, keeps the final release inputs byte-identical to
+that frozen commit, binds changed evidence `source_commit` values to it, and
+rejects component source, workflows, publish/registry transport, React
+admission, Cargo retargeting and arbitrary documentation. Unknown modes
+reject. Changed filenames never promote a run into certification.
 
 The certification receipt has schema `poodle-installed-web-distribution`. Its
 `sourceCommit`, package archive/build-receipt hashes, `artifactSetId`, and
