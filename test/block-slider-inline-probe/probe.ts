@@ -155,7 +155,7 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
   const prefix = `${engine} ${framework}`;
   const base = `[data-framework="${framework}"]`;
 
-  // Family corners: rounded-square capsule, circular thumb. The journey
+  // Family corners: rounded-square capsule, inset marker line. The journey
   // values match the harness cases (10 / 50 / 90).
   for (const [caseName, value] of [["slider-low", 10], ["slider-mid", 50], ["slider-high", 90]] as const) {
     const caseSel = `${base} [data-case="${caseName}"]`;
@@ -166,8 +166,11 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
       metrics.capsuleRadius,
     );
     check(
-      `${prefix} ${caseName} visible thumb stays circular`,
-      metrics.thumbRadius === "999px" && Math.abs(metrics.thumb.width - metrics.thumb.height) <= 0.5,
+      `${prefix} ${caseName} thumb is an inset marker line`,
+      metrics.thumb.width <= 4 &&
+        Math.abs(metrics.thumb.height - (metrics.capsule.height - 4)) <= 0.75 &&
+        metrics.thumb.top - metrics.capsule.top >= 1.5 &&
+        metrics.capsule.bottom - metrics.thumb.bottom >= 1.5,
       `${metrics.thumbRadius} ${metrics.thumb.width}x${metrics.thumb.height}`,
     );
     check(

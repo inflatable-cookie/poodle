@@ -309,13 +309,19 @@ describe("Slider (svelte) block variant", () => {
     expect(container.querySelector(".poodle-slider__fallback")).toBeNull();
   });
 
-  it("keeps the block capsule rounded-square and the thumb circular in CSS", () => {
+  it("keeps the block capsule rounded-square and uses an inset marker line", () => {
     expect(css).toContain(
       ".poodle-slider[data-variant=\"block\"] .poodle-slider__capsule {\n    position: relative;\n    display: block;\n    width: 100%;\n    min-height: var(--poodle-slider-block-height);\n    border-radius: var(--poodle-radius-control);",
     );
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__thumb {\n    width: var(--poodle-slider-block-thumb);\n    height: var(--poodle-slider-block-thumb);\n    border-radius: 999px;",
+      "width: var(--poodle-slider-block-marker-thickness);\n    height: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));",
     );
+  });
+
+  it("marks the minimum so the block marker can step beyond the rail", () => {
+    const { container } = render(Slider, { props: { value: 0, min: 0, max: 100, ariaLabel: "Gain" } });
+    expect(container.querySelector(".poodle-slider")!.getAttribute("data-at-min")).toBe("true");
+    expect(css).toContain('[data-at-min="true"] .poodle-slider__thumb');
   });
 
   it("clips selected text to the center-anchored fill and mirrors it in RTL", () => {

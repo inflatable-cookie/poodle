@@ -129,8 +129,9 @@
        ≥44×44 hit target stays measurable and interactive but never adds
        margin, padding, minimum size, or row height. */
     --poodle-slider-block-height: var(--poodle-size-control-height);
-    --poodle-slider-block-thumb: 0.5rem;
     --poodle-slider-block-hit: 44px;
+    --poodle-slider-block-marker-inset: 0.125rem;
+    --poodle-slider-block-marker-thickness: 0.125rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -139,11 +140,11 @@
     overflow: visible;
     touch-action: pan-y;
   }
-  .poodle-slider[data-variant="block"][data-size="xs"] { --poodle-slider-block-height: 1.5rem; --poodle-slider-block-thumb: 0.375rem; }
-  .poodle-slider[data-variant="block"][data-size="sm"] { --poodle-slider-block-height: 1.75rem; --poodle-slider-block-thumb: 0.4375rem; }
-  .poodle-slider[data-variant="block"][data-size="md"] { --poodle-slider-block-height: 2.25rem; --poodle-slider-block-thumb: 0.5rem; }
-  .poodle-slider[data-variant="block"][data-size="lg"] { --poodle-slider-block-height: 2.75rem; --poodle-slider-block-thumb: 0.5625rem; }
-  .poodle-slider[data-variant="block"][data-size="xl"] { --poodle-slider-block-height: 3.25rem; --poodle-slider-block-thumb: 0.625rem; }
+  .poodle-slider[data-variant="block"][data-size="xs"] { --poodle-slider-block-height: 1.5rem; }
+  .poodle-slider[data-variant="block"][data-size="sm"] { --poodle-slider-block-height: 1.75rem; }
+  .poodle-slider[data-variant="block"][data-size="md"] { --poodle-slider-block-height: 2.25rem; }
+  .poodle-slider[data-variant="block"][data-size="lg"] { --poodle-slider-block-height: 2.75rem; }
+  .poodle-slider[data-variant="block"][data-size="xl"] { --poodle-slider-block-height: 3.25rem; }
   .poodle-slider[data-variant="block"] .poodle-slider__capsule {
     position: relative;
     display: block;
@@ -266,12 +267,19 @@
     touch-action: none;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__thumb {
-    width: var(--poodle-slider-block-thumb);
-    height: var(--poodle-slider-block-thumb);
-    border-radius: 999px;
+    box-sizing: border-box;
+    width: var(--poodle-slider-block-marker-thickness);
+    height: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));
+    border-radius: calc(var(--poodle-slider-block-marker-thickness) / 2);
     background: var(--poodle-recipe-slider-block-handle-fill, var(--poodle-color-background-elevated));
-    border: 0.0625rem solid var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default));
+    box-shadow: 0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default));
     pointer-events: none;
+  }
+  .poodle-slider[data-variant="block"][data-at-min="true"] .poodle-slider__thumb {
+    transform: translateX(calc(-50% - var(--poodle-slider-block-marker-inset)));
+  }
+  .poodle-slider[data-variant="block"][data-at-min="true"][data-direction="rtl"] .poodle-slider__thumb {
+    transform: translateX(calc(50% + var(--poodle-slider-block-marker-inset)));
   }
   /* g18.022 vertical block: the capsule fills the block axis, text stays
      upright with the value at the physical top and the optional label
@@ -306,11 +314,20 @@
     bottom: calc(var(--poodle-slider-percent) - (var(--poodle-slider-block-hit) / 2));
     transform: translateX(-50%);
   }
+  .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__thumb {
+    width: calc(var(--poodle-slider-block-height) - var(--poodle-slider-block-marker-inset) - var(--poodle-slider-block-marker-inset));
+    height: var(--poodle-slider-block-marker-thickness);
+  }
+  .poodle-slider[data-variant="block"][data-orientation="vertical"][data-at-min="true"] .poodle-slider__thumb {
+    transform: translateY(calc(50% + var(--poodle-slider-block-marker-inset)));
+  }
   .poodle-slider[data-variant="block"]:focus-visible {
     outline: none;
   }
   .poodle-slider[data-variant="block"]:focus-visible .poodle-slider__thumb {
-    box-shadow: 0 0 0 0.1875rem var(--poodle-recipe-slider-block-focus-ring, var(--poodle-color-accent-focusRing));
+    box-shadow:
+      0 0 0 0.0625rem var(--poodle-recipe-slider-block-handle-border, var(--poodle-color-border-default)),
+      0 0 0 0.1875rem var(--poodle-recipe-slider-block-focus-ring, var(--poodle-color-accent-focusRing));
   }
 
   @media (forced-colors: active) {
@@ -329,8 +346,7 @@
       color: CanvasText;
     }
     .poodle-slider[data-variant="block"] .poodle-slider__thumb {
-      background: ButtonFace;
-      border-color: ButtonText;
+      background: ButtonText;
     }
     .poodle-slider[data-variant="block"]:focus-visible .poodle-slider__thumb {
       box-shadow: 0 0 0 0.1875rem Highlight;
