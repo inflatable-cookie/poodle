@@ -5,12 +5,13 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: awaiting-operator-approval
+status: ready-to-launch
 owner: Poodle Northstar orchestrator
 created: 2026-09-11
 updated: 2026-09-11
 base_required: pushed-main
 queue_dispatch: northstar-queue
+queue_approval: "Tom explicitly approved dispatch on 2026-09-12."
 queue:
   dependsOn: []
   capability: complex
@@ -34,11 +35,10 @@ not acceptable for `0.4.0`.
 
 ## Current State
 
-Integration main contains merged g18.021 and approved g18.022 planning. The
-g18.011 evidence PR is in its own Queue revision for browser/assertion gaps; do
-not edit it. g18.022 owns Slider-family paths and can run independently.
-Retained g18.006 and g18.009 remain closed. This task has no queue prerequisite
-and may run alongside those two active lanes.
+Integration main contains merged g18.021, merged g18.011, and merged g18.022.
+Operator-approved g18.024 owns the post-merge Slider-family repair and may run
+independently. Retained g18.006 and g18.009 remain closed. This task has no
+Queue prerequisite and may run alongside g18.024.
 
 ## Boundaries
 
@@ -47,7 +47,7 @@ roles, light-theme references and sparse named-theme overrides; regenerate all
 token artifacts; map the paired private CodeMirror engines to those roles; and
 replace token-identity tests with real palette, contrast, and live-theme proof.
 Keep languages consumer-owned, CodeMirror private, plain modes unhighlighted,
-and diagnostics intact. Do not touch g18.011, Slider work, public CodeEditor
+and diagnostics intact. Do not touch g18.024 Slider work, public CodeEditor
 props, release state, versions, changelog, workflows, Desktop, or native editor
 surfaces.
 
@@ -84,5 +84,5 @@ Open one non-draft PR from the queue-owned branch. Prove its exact head with
 token generation/audits, paired component and Chromium/WebKit computed-style
 checks, all-theme contrast, live-theme/no-remount behavior, plain-mode cost,
 package/preview builds, installed-package audit, docs QA, and
-`git diff --check`; then report `ready_for_review`. Never merge, edit or restart
-g18.011/g18.022, resume g18.006/g18.009, release, publish, or mutate Desktop.
+`git diff --check`; then report `ready_for_review`. Never merge, edit g18.024,
+resume g18.006/g18.009, release, publish, or mutate Desktop.

@@ -1,7 +1,7 @@
 # Slider
 
-Status: approved contract — implemented by g18.022 (block-first family)
-Updated: 2026-09-11
+Status: approved contract — g18.024 repair queued
+Updated: 2026-09-12
 
 
 ## 1. Purpose
@@ -75,7 +75,7 @@ upright: value at the physical top and optional label centered.
 | `variant` | `"block" \| "embedded"` | `"block"` | no | presentation variant. `block` is the ordinary rounded-square capsule; `embedded` is the dense track-and-thumb alternative for composites. The removed `standard`/`track` vocabulary has no alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
 | `visibleLabel` | `string \| null` | `null` | no | visible label for the block variant. Empty text omits the item. Never derived from `ariaLabel` |
-| `formatVisibleValue` | `((value: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the visible value from the normalized, bounds-guarded, step-snapped number. Default visible text is `String(value)`. Native specs carry the resolved string, not the closure |
+| `formatVisibleValue` | `((value: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the visible value from the normalized, bounds-guarded, step-snapped number. The custom formatter takes precedence. The default emits the shortest ordinary decimal at the precision implied by `min` and a finite positive `step`, trims insignificant trailing zeroes, normalizes negative zero, and never exposes binary floating-point debris. Native specs carry the resolved string, not the closure |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | fill from minimum or from the resolved center |
 | `centerValue` | `number \| null` | `null` | no | bipolar fill anchor; defaults to zero when zero is inside the range, otherwise the midpoint |
 | `law` | `AudioValueLaw` | `linear` | no | value mapping used by adapter-owned block and embedded controls |
@@ -173,8 +173,11 @@ Visible content is a separate channel from accessibility copy:
 - Block `visibleLabel` is not the accessible name. The control still needs
   `ariaLabel` or an external label.
 - Formatter input is the normalized, bounds-guarded, step-snapped value.
-- Default visible value text is `String(value)`. Empty label or formatter
-  output omits that assigned item.
+- Default visible value text is the shortest ordinary decimal at the precision
+  implied by `min` and a finite positive `step`. It trims insignificant
+  trailing zeroes, normalizes negative zero to `0`, and never exposes binary
+  floating-point debris. A custom `formatVisibleValue` remains authoritative.
+  Empty label or formatter output omits that assigned item.
 
 Inline text is fixed and value-independent. Horizontally, the visible label
 stays at logical inline start and the visible value at logical inline end.
@@ -201,8 +204,10 @@ not a public fit threshold.
 Block value feedback is static under architecture 012. Add no motion role.
 
 Every Slider control owns a measurable 44×44 logical-pixel effective target at
-every size and density. The visible thumb may be smaller. Proof is the hit
-rectangle, not only the painted thumb.
+every size and density. The visible thumb may be smaller. The effective target
+must not enlarge the root's layout box, create block-axis padding, or prevent a
+block Slider from aligning with a same-size control. Proof covers both the hit
+rectangle and the root/capsule layout geometry.
 
 Forced-color roles for the block variant (the text layers carry the
 selected/remainder text roles across the clip boundary):
@@ -493,27 +498,28 @@ track at every size.
 
 ### Block variant metrics
 
-Block capsule cross-size follows a size ladder that can hold inline label
-text. The capsule corner radius resolves the rounded-square control radius
+Block capsule cross-size follows the shared control-height size ladder. The
+capsule corner radius resolves the rounded-square control radius
 (`--poodle-radius-control` / `radius.control`), not the pill; the visible
 thumb stays circular. The effective hit target is 44×44 logical pixels at
 every size and density and is not a public metric.
 
-| Size | capsule min-height | visible thumb |
+| Size | capsule height | visible thumb |
 |------|--------------------|---------------|
-| `xs` | `1.75rem` | `0.375rem` |
-| `sm` | `1.875rem` | `0.4375rem` |
-| `md` | `2rem` | `0.5rem` |
-| `lg` | `2.25rem` | `0.5625rem` |
-| `xl` | `2.5rem` | `0.625rem` |
+| `xs` | `1.5rem` | `0.375rem` |
+| `sm` | `1.75rem` | `0.4375rem` |
+| `md` | `2.25rem` | `0.5rem` |
+| `lg` | `2.75rem` | `0.5625rem` |
+| `xl` | `3.25rem` | `0.625rem` |
 
 Content inset used by the fit law is an internal `0.5rem` on each inline edge
 of an assigned region. Do not expose it.
 
 ### Density And Vertical Padding
 
-- Density must not alter the slider's vertical padding, `min-height`, or thumb position — those are size-axis properties. Density on a single-thumb slider has no compositional vertical effect; it carries no contract-mandated padding change.
-- Known Svelte deviation: the Svelte target writes `padding: 0.25rem 0` (compact) and `padding: 0.75rem 0` (comfortable) on the root, i.e. density-driven vertical padding. This violates size/density orthogonality and is a Svelte bug, not the contract rule. Rust targets must follow this contract (no density vertical padding), not replicate the Svelte deviation.
+- Density must not alter the slider's block-axis padding, measured cross-size,
+  or thumb position. Those are size-axis properties. The effective hit target
+  may overflow without participating in layout.
 
 ### Root block `[data-variant="block"]`
 
@@ -522,7 +528,7 @@ of an assigned region. Do not expose it.
 | `display` | `flex` |
 | `flex-direction` | `column` |
 | `width` | `100%` |
-| `min-height` | capsule size table (`2rem` at `md`) |
+| `height` | shared control height (`2.25rem` at `md`) |
 | `dir` | from `direction` |
 
 Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling back to a surface mix. Selected fill uses `--poodle-recipe-slider-block-selected-fill` falling back to accent. The two inline text layers use the selected/remainder text hooks, crossed at the fill boundary by clipping. The visible thumb uses the handle fill/border hooks. The capsule corner radius is `--poodle-radius-control`.

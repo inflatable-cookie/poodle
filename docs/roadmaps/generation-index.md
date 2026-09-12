@@ -14,9 +14,9 @@ Updated: 2026-09-12
   - Merged task: `g18.022` block-first Slider family (PR #254); block is now
     the default Slider/RangeSlider variant with fixed anchors and vertical
     parity after exact-head review.
-  - Ready task: `g18.023` CodeEditor dual syntax palettes awaits operator
-    dispatch approval; it runs after merged g18.011/g18.022 and must merge before
-    g18.006 resumes.
+  - Ready tasks: operator-approved `g18.023` CodeEditor dual syntax palettes
+    and `g18.024` Slider-family layout and vertical repair may dispatch in
+    parallel; both must merge before g18.006 resumes.
   - Merged repair: `g18.021` token-bound CodeEditor syntax presentation (PR
     #252); both engines now present Poodle-token syntax in full mode and the
     repair is an in-place g18.011 dependency.
@@ -56,10 +56,10 @@ Updated: 2026-09-12
     the outer ring is now a local keyboard-entry affordance dismissed on
     committed edits, with the document modality left truthful.
   - Paused candidate: retained g18.006 task/workspace resumes only after
-    accepted g18.011, merged g18.022/g18.023, and all other blocking repairs.
+    accepted g18.011 and merged g18.023/g18.024.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
-  - Next checkpoint: get operator acceptance of merged g18.011 and merged
-    g18.022 while g18.023 dispatches; merge required repairs, then resume g18.006.
+  - Next checkpoint: dispatch g18.023 and g18.024 in parallel; merge both,
+    accept the repaired specimens, then resume g18.006.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

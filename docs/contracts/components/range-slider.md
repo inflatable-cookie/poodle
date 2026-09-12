@@ -1,7 +1,7 @@
 # Range Slider
 
-Status: approved contract — implemented by g18.022 (block-first family)
-Updated: 2026-09-11
+Status: approved contract — g18.024 repair queued
+Updated: 2026-09-12
 
 
 ## 1. Purpose
@@ -68,7 +68,7 @@ physical top, optional label centered, and lower value at the physical bottom.
 | `variant` | `"block" \| "embedded"` | `"block"` | no | presentation variant. `block` is the ordinary rounded-square capsule; `embedded` is the dense track-and-thumb alternative for composites. The removed `standard`/`track` vocabulary has no alias |
 | `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
 | `visibleLabel` | `string \| null` | `null` | no | centered visible label for the block variant. Empty text omits it. Never derived from `ariaLabel` |
-| `formatVisibleValue` | `((value: number, thumb: "lower" \| "upper") => string) \| undefined` | `undefined` | no | **Web targets only** — formats a per-thumb visible value from the normalized, bounds-guarded, step-snapped number. Default is `String(value)`. Native specs carry resolved strings |
+| `formatVisibleValue` | `((value: number, thumb: "lower" \| "upper") => string) \| undefined` | `undefined` | no | **Web targets only** — formats a per-thumb visible value from the normalized, bounds-guarded, step-snapped number. The custom formatter takes precedence. The default emits the shortest ordinary decimal at the precision implied by `min` and a finite positive `step`, trims insignificant trailing zeroes, normalizes negative zero, and never exposes binary floating-point debris. Native specs carry resolved strings |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | ordinary range or range with an explicit bipolar center reference |
 | `centerValue` | `number \| null` | `null` | no | bipolar reference; defaults to zero when zero is inside the range, otherwise the midpoint |
 | `law` | `AudioValueLaw` | `linear` | no | value mapping used by adapter-owned block and embedded controls |
@@ -186,7 +186,9 @@ and never writes those fields. `visibleLabel` is not a thumb accessible name;
 thumbs keep the §6 names (`"{ariaLabel} minimum/maximum"` or the defaults).
 Formatter inputs are normalized, bounds-guarded,
 step-snapped values. Empty label or formatter text omits that item. Default
-endpoint text is `String(value)`. Native specs carry resolved `visible_label`,
+endpoint text uses the Slider step-aware shortest-decimal law, including
+trailing-zero trimming and negative-zero normalization; a custom formatter
+takes precedence. Native specs carry resolved `visible_label`,
 `visible_lower_text`, and `visible_upper_text`. The former combined visible
 range formatter/string is removed because block always presents the two
 endpoint values at their scale anchors.
@@ -213,8 +215,10 @@ The block capsule corner radius resolves the rounded-square control radius
 family. Thumbs stay circular.
 
 Each thumb owns a measurable 44×44 logical-pixel effective target at every
-size and density. Proof is the per-thumb hit rectangle, not only the painted
-handle or the root box.
+size and density. The targets must not enlarge the root's layout box, create
+block-axis padding, or prevent a block RangeSlider from aligning with a
+same-size control. Proof covers each hit rectangle and the root/capsule layout
+geometry, not only the painted handle.
 
 Forced-color roles match Slider's block table. Block value feedback is static
 under architecture 012.
@@ -288,10 +292,11 @@ under architecture 012.
 
 ### Sizing
 
-- horizontal: width is 100% of parent; cross-size follows the size table
+- horizontal: width is 100% of parent; block cross-size follows the shared
+  1.5/1.75/2.25/2.75/3.25rem control-height ladder
 - vertical embedded: cross-size follows the size table; min-height 10rem;
   height is 100%
-- vertical block: width follows the block capsule cross-size ladder;
+- vertical block: width follows the shared control-height ladder;
   min-height 10rem; height is parent-owned
 - track thickness follows the shared Slider size ladder: 0.1875rem (`xs`),
   0.25rem (`sm`), 0.375rem (`md`), 0.5rem (`lg`), and 0.625rem (`xl`)
@@ -505,19 +510,9 @@ track at every size.
 
 ### Density adjustments
 
-| Density | Padding |
-|---------|---------|
-| `compact` | `0.25rem 0` |
-| `default` | _(none)_ |
-| `comfortable` | `0.75rem 0` |
-
-Density adds vertical (`padding-block`) padding to the root. This is an
-explicit, justified exception to the repo Size/Density rule ("density must
-never affect vertical padding"): the slider is a thin control whose hit area is
-a touch target, so density grows the surrounding vertical hit area without
-changing the track thickness, thumb size, or the visual `min-height` of the
-control itself. The padding sits outside the absolutely-positioned track/fill,
-so the control geometry is unchanged — only the grabbable margin grows.
+Density must not alter block-axis padding, measured cross-size, or thumb
+position. Those are size-axis properties. Each effective hit target may
+overflow without participating in layout.
 
 ## 9. Svelte Notes
 

@@ -1,6 +1,6 @@
 # 023 — CodeEditor dual syntax palettes
 
-Status: awaiting operator dispatch approval
+Status: ready for Queue dispatch — operator approved 2026-09-12
 Owner: Poodle tokens and web components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/code-editor.md`,
@@ -20,8 +20,8 @@ character.
 
 Keep the CodeMirror engine private and the language registry open. Consumers
 choose language loaders; Poodle chooses a readable default syntax presentation
-through ordinary generated CSS variables. This task may run beside g18.022 and
-the g18.011 evidence revision. It must merge before g18.006 resumes.
+through ordinary generated CSS variables. This task may run beside g18.024.
+It must merge before g18.006 resumes.
 
 ## Ready-State Rubric
 
@@ -36,8 +36,7 @@ the g18.011 evidence revision. It must merge before g18.006 resumes.
 - [x] Language grammars remain consumer-selected and must not carry colours.
 - [x] No public CodeMirror extension, `HighlightStyle`, or theme object is
   needed.
-- [x] The work is path-independent from Slider-family g18.022 and the separate
-  g18.011 sweep harness revision.
+- [x] The work is path-independent from Slider-family repair g18.024.
 
 ## Decisions
 
@@ -94,8 +93,8 @@ the g18.011 evidence revision. It must merge before g18.006 resumes.
 
 ## Dispatch manifest
 
-- **State:** ready for operator approval; parallel-safe with g18.022 and the
-  g18.011 evidence-only revision; serial before retained g18.006
+- **State:** operator-approved and ready; parallel-safe with g18.024; serial
+  before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
   independent review; never merge
 - **Owned mutable paths:** token primitive/semantic/theme schemas and generated
@@ -104,8 +103,8 @@ the g18.011 evidence revision. It must merge before g18.006 resumes.
   component/token tests; paired CodeEditor specimens only if needed to expose
   representative roles; one g18.023 execution log
 - **Reserved closeout surfaces:** g18 README/index/dispatch/task state;
-  g18.011 task/thread/workspace and its PR/test directory; g18.022 paths;
-  g18.006/g18.009 state; public CodeEditor props; grammar dependencies;
+  g18.024 Slider-family paths; g18.006/g18.009 state; public CodeEditor props;
+  grammar dependencies;
   versions, changelog, workflows, release/tag/publication, Desktop, native
   editor work
 - **Worker:** high-reasoning web/tokens worker comfortable with colour systems,
@@ -167,7 +166,7 @@ the g18.011 evidence revision. It must merge before g18.006 resumes.
 - Stop if a syntax role cannot meet AA contrast on its actual panel without a
   named theme override; return the role/theme matrix rather than weakening the
   threshold.
-- Stop before editing the active g18.011 sweep PR, Slider work, release state,
+- Stop before editing g18.024 Slider work, release state,
   versions, changelog, workflows, Desktop, or native editor surfaces.
 
 ## Evidence
@@ -188,6 +187,6 @@ Planning inspection on 2026-09-11 found:
 
 ## Next task
 
-After g18.023 and g18.022 merge and g18.011 closes with operator acceptance,
-resume the same retained g18.006 release-candidate task. Recompute final package
-trees and include the syntax palette in the `0.4.0` source identity.
+After g18.023 and g18.024 merge and the repaired specimens are accepted, resume
+the same retained g18.006 release-candidate task. Recompute final package trees
+and include both repairs in the `0.4.0` source identity.

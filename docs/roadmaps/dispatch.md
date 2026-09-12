@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.011 merged, awaiting operator acceptance; g18.022 merged; g18.023 awaits approval; all precede release)
+Updated: 2026-09-12 (g18.023 and g18.024 operator-approved in parallel; both precede release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -96,8 +96,8 @@ rust/web checks at the reviewed head.
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is operator-paused with its worker/workspace and any progress
 preserved. Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086`
-only after operator acceptance of merged g18.011, merged g18.022, g18.023,
-and all other blocking repairs close.
+only after operator acceptance of merged g18.011 and both g18.023/g18.024
+close.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
@@ -158,10 +158,16 @@ vocabulary removed, RangeSlider fixed endpoint/center text, vertical block
 parity, and proven block Slider bipolar geometry. The breaking pre-v1
 migration is classified in g18.006 release evidence on resume.
 
-[`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) awaits operator
-dispatch approval. It replaces g18.021’s accent/status mapping with dedicated
-dark/light syntax ramps and sparse theme overrides. It may run beside g18.011
-and g18.022, but must merge before retained g18.006 resumes.
+[`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) is operator-approved
+for Queue dispatch. It replaces g18.021’s accent/status mapping with dedicated
+dark/light syntax ramps and sparse theme overrides. It may run beside g18.024
+but must merge before retained g18.006 resumes.
+
+[`g18.024`](g18/024-slider-family-layout-and-vertical-repair.md) is
+operator-approved for Queue dispatch. It repairs the merged block family’s
+shared-size alignment, layout-neutral 44×44 targets, step-aware visible values,
+and vertical block geometry. It may run beside g18.023 but must merge before
+retained g18.006 resumes.
 
 ## Held planning horizons
 

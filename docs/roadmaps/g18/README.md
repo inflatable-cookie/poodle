@@ -50,7 +50,7 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after accepted g18.011, merged g18.022/g18.023, and any blocking repairs |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | paused | retained Queue task/workspace; resume after accepted g18.011 and merged g18.023/g18.024 |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
@@ -67,7 +67,8 @@ needed to compile honest repair tranches.
 | [`g18.020`](020-rich-text-heading-mode-select.md) — RichTextEditor heading mode select | complete | PR #251 (merge `d8ad00b848acf62cc51357fc0caa6dbd559ff7c9`); consumer-configurable Normal/H1–H6 selector plus real H4–H6 schema/editor/renderer support |
 | [`g18.021`](021-code-editor-token-bound-syntax-presentation.md) — CodeEditor token-bound syntax presentation | complete | PR #252 (merge `e69512038a4f032ecfad398562bbab28d40e9ffc`); private Poodle-token CodeMirror highlight style in both web engines |
 | [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | complete | PR #254 (merge `02ab7f7ec9122d85364beca77d05d681fa4d0124`); block-default two-variant Slider/RangeSlider API, fixed RangeSlider anchors, vertical block parity, repinned evidence |
-| [`g18.023`](023-code-editor-dual-syntax-palettes.md) — CodeEditor dual syntax palettes | awaiting operator dispatch approval | designed dark/light syntax ramps plus sparse Poodle-theme overrides; may run beside g18.011/g18.022; serial before g18.006 |
+| [`g18.023`](023-code-editor-dual-syntax-palettes.md) — CodeEditor dual syntax palettes | ready for Queue dispatch | operator approved; designed dark/light syntax ramps plus sparse Poodle-theme overrides; parallel with g18.024; serial before g18.006 |
+| [`g18.024`](024-slider-family-layout-and-vertical-repair.md) — Slider-family layout and vertical repair | ready for Queue dispatch | operator approved; shared size alignment, layout-neutral hit targets, step-aware visible values, and complete vertical block geometry; parallel with g18.023; serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -120,12 +121,12 @@ to plain text. Merged g18.021 repaired it with one private Poodle-token
 highlight style in both engines (PR #252). Merged g18.011 swept all four
 surfaces under both engines with zero unresolved release-blocking findings
 (PR #253); operator acceptance of the capsule is the remaining gate.
-Merged g18.022
-made block the default Slider-family variant, removed the old
+Merged g18.022 made block the default Slider-family variant, removed the old
 standard/track surface, fixed RangeSlider text placement, and added vertical
-block parity. g18.006 is the retained final candidate lane and stays paused
-until operator acceptance of merged g18.011, merged g18.022, g18.023, and any
-repairs close. g18.009 waits on g18.006; no candidate
+block parity. Post-merge inspection exposed size/alignment, numeric display,
+and vertical geometry defects now owned by g18.024. g18.006 is the retained
+final candidate lane and stays paused until operator acceptance of merged
+g18.011 and both g18.023/g18.024 close. g18.009 waits on g18.006; no candidate
 is tagged or published while accepted product source is moving.
 
 ## Held and recurring work
