@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.023 and g18.024 operator-approved in parallel; both precede release)
+Updated: 2026-09-12 (g18.023 merged; g18.024 operator-approved; both precede release)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -91,6 +91,14 @@ Operator acceptance is still required before g18.006 resumes.
 `ready_to_merge`) at `7ed0daf093789177b8dbd67268f95c0a7151bed2` with green
 rust/web checks at the reviewed head.
 
+[`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) — CodeEditor dual
+syntax palettes — merged as `155dbc7d82fe04479a986c1f5f5698770e366c17` (PR #255) on
+2026-09-12 after exact-head independent review (PR comment `5645265360`,
+`ready_to_merge`) at `2f60d7f2f5ae2170f69c2ce006f71423a008cfc6` with green
+rust/web checks at the reviewed head. Three non-blocking findings retained:
+unthemed-base contrast, active-line overlay proof, and single-role override
+coverage (see the g18.023 closeout log).
+
 ## Active and paused queue tasks
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
@@ -158,10 +166,11 @@ vocabulary removed, RangeSlider fixed endpoint/center text, vertical block
 parity, and proven block Slider bipolar geometry. The breaking pre-v1
 migration is classified in g18.006 release evidence on resume.
 
-[`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) is operator-approved
-for Queue dispatch. It replaces g18.021’s accent/status mapping with dedicated
-dark/light syntax ramps and sparse theme overrides. It may run beside g18.024
-but must merge before retained g18.006 resumes.
+[`g18.023`](g18/023-code-editor-dual-syntax-palettes.md) is merged (PR #255,
+merge `155dbc7d82fe04479a986c1f5f5698770e366c17`). Queue task
+`ebf1cc36-5a9a-46dc-9649-e42f0883673e` is closed with the accent/status
+mapping replaced by designed dark/light syntax ramps, sparse theme overrides,
+and real palette, contrast, and live-theme proof.
 
 [`g18.024`](g18/024-slider-family-layout-and-vertical-repair.md) is
 operator-approved for Queue dispatch. It repairs the merged block family’s

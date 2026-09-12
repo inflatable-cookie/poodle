@@ -1,6 +1,6 @@
 # g18.023 — CodeEditor dual syntax palettes
 
-Status: ready for review
+Status: complete — merged as `155dbc7d82fe04479a986c1f5f5698770e366c17` (PR #255) on 2026-09-12 after exact-head independent review (PR comment `5645265360`, `ready_to_merge`) at `2f60d7f2f5ae2170f69c2ce006f71423a008cfc6` with green rust/web checks
 Date: 2026-09-12
 Branch: `ns-ebf1cc36-5a9a-46dc-9649-e42f0883673e`
 Card: `docs/roadmaps/g18/023-code-editor-dual-syntax-palettes.md`
@@ -187,8 +187,37 @@ both frameworks.
   undefined in the token system today; active lines therefore render on the
   plain panel. Out of scope here — recorded in `PAPERCUTS.md` instead.
 
+## Review and merge
+
+Independent review at `2f60d7f2f5ae2170f69c2ce006f71423a008cfc6` (PR comment
+`5645265360`): **ready to merge**. The reviewer did not read the worker
+transcript and re-ran `audit:tokens`, the Chromium/WebKit
+language-registry suites for both frameworks, `docs:check`,
+`test:core-build`, focused CodeEditor suites, the tokens contracts, and
+`git diff --check` at the exact head — all clean. The probe's role assertions
+are anchored to the designed hex primitives, so the suite fails if the engine
+regresses to accent/status tokens.
+
+Three non-blocking findings, each deferred rather than repaired here:
+
+1. The unthemed base (`tokens/styles.css` with no `data-theme`) pairs a light
+   panel with the dark syntax default and reads at ~1.5–2.1:1 in real
+   Chromium. Same weakness as g18.021 and explicitly specified by g18.023, so
+   not a regression. Suggested follow-up: align the semantic default with the
+   base palette, or state that a theme attribute is required.
+2. Active-line and diagnostic-overlay legibility are not asserted in the new
+   probe (selection and search are proven). The active-line rule references
+   the undefined `--poodle-color-surface-hover`, so the active line paints
+   nothing today. Recorded in `PAPERCUTS.md` as pre-existing friction.
+3. No theme demonstrates a sparse single-role override (iceberg, clay, and
+   meadow each reference all ten light roles). The capability rests on
+   ordinary token-override semantics stated in the contract.
+
+Merge gate: PR #255 merged as `155dbc7d82fe04479a986c1f5f5698770e366c17`
+with green rust/web checks.
+
 ## Continuation
 
-g18.023 is ready for exact-head independent review. After it and g18.024
-merge and the repaired specimens are accepted, the retained g18.006 release
-task resumes with both repairs in the `0.4.0` source identity.
+g18.023 is merged. After g18.024 merges and the repaired specimens are
+accepted, the retained g18.006 release task resumes with both repairs in the
+`0.4.0` source identity. Further planning direction needs the operator.

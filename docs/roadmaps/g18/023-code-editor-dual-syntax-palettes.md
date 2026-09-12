@@ -1,6 +1,6 @@
 # 023 — CodeEditor dual syntax palettes
 
-Status: ready for Queue dispatch — operator approved 2026-09-12
+Status: complete — merged as `155dbc7d82fe04479a986c1f5f5698770e366c17` (PR #255) on 2026-09-12
 Owner: Poodle tokens and web components
 Created: 2026-09-11
 Governing refs: `../../contracts/components/code-editor.md`,
@@ -93,10 +93,10 @@ It must merge before g18.006 resumes.
 
 ## Dispatch manifest
 
-- **State:** operator-approved and ready; parallel-safe with g18.024; serial
+- **State:** complete; merged g18.023 ran beside g18.024 Slider work; serial
   before retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
-  independent review; never merge
+  independent review; merged by the plugin, never by the worker
 - **Owned mutable paths:** token primitive/semantic/theme schemas and generated
   CSS/TypeScript/Rust artifacts; paired CodeEditor engine twins; CodeEditor
   styles and contract; existing language-registry browser probe and focused
@@ -187,6 +187,6 @@ Planning inspection on 2026-09-11 found:
 
 ## Next task
 
-After g18.023 and g18.024 merge and the repaired specimens are accepted, resume
-the same retained g18.006 release-candidate task. Recompute final package trees
-and include both repairs in the `0.4.0` source identity.
+g18.023 is merged. After g18.024 merges and the repaired specimens are
+accepted, resume the same retained g18.006 release-candidate task. Recompute
+final package trees and include both repairs in the `0.4.0` source identity.
