@@ -77,9 +77,9 @@ Updated: 2026-09-12
     provenance from the actual preview lockfile and repins the current cohort
     once; PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85` after
     accepted exact-head review and green checks.
-  - Ready precursor: g18.031 selects the public core manifest as Effigy's
-    release version and derives GPUI census receipt versions from the preview
-    crate manifest.
+  - Changes-requested precursor: g18.031 aligns truthful root release metadata,
+    admits its exact lockstep transition and derives GPUI census receipt
+    versions from the preview crate manifest.
   - Blocked candidate: retained g18.006 is clean at current main with no
     candidate mutation; it resumes in the same task/workspace after g18.031.
   - Final release: g18.009 is dependency-queued behind g18.006 with no manual
