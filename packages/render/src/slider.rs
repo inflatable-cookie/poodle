@@ -504,7 +504,9 @@ fn paint_slider_block(
     key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
     interactive: bool,
 ) -> Node {
-    use crate::slider_block::{block_grab_with_axis, block_surface_vertical, fraction_anchor_vertical};
+    use crate::slider_block::{
+        block_grab_with_axis, block_hit_inset, block_surface_vertical, fraction_anchor_vertical,
+    };
 
     let vertical = spec.orientation == Orientation::Vertical;
     // Horizontal geometry mirrors in RTL; vertical never mirrors.
@@ -524,7 +526,7 @@ fn paint_slider_block(
     // the pill. The visible thumb stays circular.
     let control_radius = ctx.theme().resolve_radius("radius.control");
     let label = omit_empty_owned(spec.visible_label.as_deref());
-    let value_text = resolved_visible_text(visual.value, spec.visible_value_text.as_deref());
+    let value_text = resolved_visible_text(visual.value, spec.min, spec.step, spec.visible_value_text.as_deref());
     let (capsule_span, measure) = ctx.require_block_layout("Slider");
     let layout = layout_slider_block(
         capsule_span,
@@ -702,10 +704,19 @@ fn paint_slider_block(
     // Paint order: selected paint, remainder paint, then the text layers.
     // The span order flips for RTL and for vertical (selected grows from the
     // physical bottom) so the window stays at the mirrored physical edge.
+    // Vertical fills grow along the block axis (height) with the cross axis
+    // filled; horizontal fills grow along the inline axis (g18.024 review
+    // fix — a width percentage on the vertical capsule grew sideways).
     let selected = || {
         let mut node = Node::container();
-        node.style.width_pct = Some(fraction.clamp(0.0, 1.0));
-        node.style.fill_height = true;
+        node.id = Some("block-slider-fill".to_owned());
+        if vertical {
+            node.style.height_pct = Some(fraction.clamp(0.0, 1.0));
+            node.style.fill_width = true;
+        } else {
+            node.style.width_pct = Some(fraction.clamp(0.0, 1.0));
+            node.style.fill_height = true;
+        }
         node.style.descriptor.background = Some(selected_color);
         stamp_forced_color(&mut node, "selection", "selection-text");
         node
@@ -713,7 +724,11 @@ fn paint_slider_block(
     let remainder = || {
         let mut node = Node::container();
         node.style.flex_fill = true;
-        node.style.fill_height = true;
+        if vertical {
+            node.style.fill_width = true;
+        } else {
+            node.style.fill_height = true;
+        }
         node.style.descriptor.background = Some(remainder_fill);
         stamp_forced_color(&mut node, "canvas", "canvas-text");
         node
@@ -728,8 +743,16 @@ fn paint_slider_block(
     }
 
     let thumb = visible_thumb(effective_size, elevated, border_default);
+    let mut thumb = thumb;
+    thumb.id = Some("block-slider-thumb".to_owned());
     let mut hit = block_hit(hit_px, thumb, "value");
     hit.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
+    // Focus intent (g18.024 round-2 review note): the ring lives on the hit —
+    // the focusable 44×44 element — because the node vocabulary resolves ring
+    // painting through the ringed node's own focus handle, and the thumb is
+    // not focusable. Web paints the ring on the thumb as a styled descendant
+    // of its focused control; both stay visible and unclipped, which is what
+    // the contract requires.
     bind_slider_control(
         &mut hit,
         spec,
@@ -746,44 +769,56 @@ fn paint_slider_block(
         stamp_disabled_roles(&mut hit);
     }
 
-    let inset = ((hit_px - capsule_cross) * 0.5).max(0.0);
+    // The grab cross inset is the clamped hit overflow (zero once the shared
+    // ladder reaches 44px, where the surface itself covers the target). The
+    // anchor layer uses the signed centre offset so the hit also centres when
+    // the capsule is LARGER than the target (lg/xl) — g18.024 review fix.
+    let inset = block_hit_inset(hit_px, capsule_cross);
+    let anchor_offset = (capsule_cross - hit_px) * 0.5;
     let physical = if rtl { 1.0 - fraction } else { fraction };
     let mut surface = if vertical {
-        // The capsule fills the block axis; the cross axis is centred inside
-        // the hit-sized surface.
+        // The capsule fills the capsule-sized surface; the 44px hit and its
+        // anchor layer overflow centred (g18.024). The vertical scrub axis
+        // is bottom-referenced (fraction 0 at the bottom, 1 at the top), so
+        // the anchor spacer seeds `1 - physical` from the physical top to
+        // hang the handle at `physical` above the bottom, matching the fill
+        // and the pointer mapping (g18.024 review fix).
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
             top: Some(0.0),
-            left: Some(inset),
-            right: Some(inset),
+            left: Some(0.0),
+            right: Some(0.0),
             bottom: Some(0.0),
         };
-        let anchor_layer = fraction_anchor_vertical(physical, hit_px, hit, hit_px * 0.5);
-        let mut s = block_surface_vertical(hit_px);
+        let anchor_layer =
+            fraction_anchor_vertical(1.0 - physical, hit_px, hit, hit_px * 0.5, anchor_offset);
+        let mut s = block_surface_vertical(capsule_cross);
         s = s.child(capsule);
         s.child(anchor_layer)
     } else {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
-            top: Some(inset),
+            top: Some(0.0),
             left: Some(0.0),
             right: Some(0.0),
             bottom: None,
         };
-        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5);
-        let mut s = block_surface(hit_px);
+        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5, anchor_offset);
+        let mut s = block_surface(capsule_cross);
         s = s.child(capsule);
         s.child(anchor_layer)
     };
     if let Some(handler) = scrub_handler {
-        surface = surface.child(block_grab_with_axis(handler, scrub_axis(spec.orientation)));
+        let mut grab = block_grab_with_axis(handler, scrub_axis(spec.orientation), inset);
+        grab.id = Some("block-slider-grab".to_owned());
+        surface = surface.child(grab);
     }
 
     let mut root = Node::container();
     if vertical {
         root.style.fill_height = true;
-        root.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
-        root.style.min_width = Some(hit_px);
+        root.style.descriptor.layout.width = LayoutSizing::Fixed(capsule_cross);
+        root.style.min_width = Some(capsule_cross);
         root.style.min_height = Some(rem_to_px(10.0));
         root.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     } else {
@@ -860,6 +895,13 @@ fn block_text_row(
     let inset = rem_to_px(0.5);
     row.style.descriptor.layout.spacing.padding.left = inset;
     row.style.descriptor.layout.spacing.padding.right = inset;
+    if vertical {
+        // g18.024: a fixed, value-independent block inset keeps the anchored
+        // text fully inside the rail at every shared size.
+        let block_inset = rem_to_px(0.25);
+        row.style.descriptor.layout.spacing.padding.top = block_inset;
+        row.style.descriptor.layout.spacing.padding.bottom = block_inset;
+    }
     let label_slot = block_text_slot(label, color, size, label_id);
     let value_slot = block_text_slot(value, color, size, value_id);
     row = if vertical {
@@ -938,10 +980,19 @@ mod tests {
         let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
         let (node, _) = armed(spec);
         let scrub = find_scrub(&node).expect("a node carries the scrub handler");
-        assert!(
-            scrub.style.fill_width,
-            "the scrub belongs to the full-width track"
-        );
+        // g18.024: the scrub spans the full-width track via opposing inline
+        // anchors and overflows the cross axis over the hit band.
+        match scrub.position {
+            NodePosition::Absolute {
+                left: Some(left),
+                right: Some(right),
+                ..
+            } => {
+                assert_eq!(left, 0.0);
+                assert_eq!(right, 0.0);
+            }
+            other => panic!("the scrub belongs to the full-width track: {other:?}"),
+        }
         assert_eq!(scrub.interaction.scrub_axis, ScrubAxis::Horizontal);
     }
 
@@ -983,7 +1034,23 @@ mod tests {
         let (node, _) = armed(spec);
         let scrub = find_scrub(&node).expect("scrub");
         assert_eq!(scrub.interaction.scrub_axis, ScrubAxis::Vertical);
-        assert!(scrub.style.fill_height);
+        // g18.024: the block scrub spans the hit band via opposing anchors —
+        // the block axis hugs the surface and the cross axis overflows by the
+        // hit inset. No fill sizing: a fill percentage wins over the insets
+        // and would shrink the overlay back to the capsule.
+        match scrub.position {
+            NodePosition::Absolute {
+                top: Some(top),
+                bottom: Some(bottom),
+                left: Some(left),
+                right: Some(right),
+            } => {
+                assert_eq!(top, 0.0);
+                assert_eq!(bottom, 0.0);
+                assert!(left <= 0.0 && right <= 0.0 && left == right);
+            }
+            other => panic!("the vertical scrub must be an inset-sized overlay: {other:?}"),
+        }
         let fill = node
             .find(&|n| n.style.height_pct == Some(0.4))
             .expect("vertical fill");

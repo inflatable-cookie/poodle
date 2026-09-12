@@ -199,7 +199,10 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     expect(hits).toHaveLength(2);
     expect(css).toContain("--poodle-range-slider-block-hit: 44px");
     expect(css).toContain("pointer-events: auto");
-    expect(css).toContain("min-height: max(var(--poodle-range-slider-block-min-height), var(--poodle-range-slider-block-hit))");
+    // g18.024: the hit envelope is measurable but never spacing.
+    expect(css).toContain("min-height: var(--poodle-range-slider-block-height)");
+    expect(css).not.toContain("max(var(--poodle-range-slider-block");
+    expect(css).not.toContain("--poodle-range-slider-block-min-height");
     mockTrack(root, 100, 32);
     await fireEvent.pointerDown(root, { button: 0, clientX: 50, clientY: 16, pointerId: 1 });
     await fireEvent.pointerMove(root, { clientX: 20, clientY: 16, pointerId: 1 });
@@ -229,6 +232,15 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     expect(css).toContain(
       ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-range-slider__hit--lower {\n    inset-inline-start: auto;\n    bottom: calc(var(--poodle-range-start) - (var(--poodle-range-slider-block-hit) / 2));",
     );
+    // g18.024 vertical repair: the label centers on the exact rail middle
+    // as an absolute overlay, so the three upright rows never clip, shift,
+    // or collapse each other, and the rail is the shared capsule size.
+    expect(css).toContain(
+      ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__inline-row--vertical .poodle-range-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
+    );
+    expect(css).toContain(
+      ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] {\n    width: var(--poodle-range-slider-block-height);\n    min-width: var(--poodle-range-slider-block-height);",
+    );
     // Vertical never mirrors with direction.
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
   });
@@ -246,5 +258,23 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
       expect(slots).toEqual([String(value![0]), "", String(value![1])]);
       unmount();
     }
+  });
+
+  it("renders fractional endpoint values as short step-aware decimals", () => {
+    // step 0.01 implies two decimals; neither endpoint may leak a binary
+    // tail. The custom formatter remains the authoritative override.
+    const { container } = render(RangeSlider, {
+      props: {
+        value: [0.8500000000000001, 0.30000000000000004] as [number, number],
+        min: 0,
+        max: 1,
+        step: 0.01,
+        ariaLabel: "Band",
+      },
+    });
+    const values = Array.from(
+      container.querySelectorAll(".poodle-range-slider__inline--selected .poodle-range-slider__inline-value"),
+    ).map((slot) => slot.textContent);
+    expect(values).toEqual(["0.3", "0.85"]);
   });
 });

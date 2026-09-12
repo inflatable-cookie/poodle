@@ -569,8 +569,60 @@ pub fn omit_empty_visible_text(text: Option<&str>) -> Option<String> {
     }
 }
 
-pub fn default_visible_value_text(value: f64) -> String {
-    format!("{value}")
+/// Decimal places implied by a finite number's shortest representation.
+fn implied_decimal_places(value: f64) -> usize {
+    let text = format!("{value}");
+    match text.split_once(['e', 'E']) {
+        None => text
+            .split_once('.')
+            .map_or(0, |(_, fraction)| fraction.len()),
+        Some((mantissa, exponent)) => {
+            let mantissa_places = mantissa
+                .split_once('.')
+                .map_or(0, |(_, fraction)| fraction.len());
+            let exponent: i32 = exponent.parse().unwrap_or(0);
+            (mantissa_places as i32 - exponent).max(0) as usize
+        }
+    }
+}
+
+/// Decimal precision implied by `min` and a finite positive `step` (g18.024).
+/// The snapped value `min + n * step` is exact to at most that many decimal
+/// places, so binary tails beyond it are arithmetic noise, never data.
+pub fn slider_display_precision(min: f64, step: f64) -> usize {
+    let step_places = if step.is_finite() && step > 0.0 {
+        implied_decimal_places(step)
+    } else {
+        0
+    };
+    (implied_decimal_places(min).max(step_places)).min(100)
+}
+
+/// g18.024 default visible value: a short step-aware decimal. The value must
+/// already be step-snapped; it is rounded to the precision implied by `min`
+/// and a finite positive `step`, insignificant zeroes are trimmed, and
+/// negative zero normalizes to `"0"`. Binary tails never survive.
+pub fn default_visible_value_text(value: f64, min: f64, step: f64) -> String {
+    if !value.is_finite() {
+        return format!("{value}");
+    }
+    if !step.is_finite() || step <= 0.0 {
+        // No finite positive step: no snapping happened, so the value keeps
+        // its shortest exact form; Rust prints `-0.0` as `-0`, so normalize.
+        if value == 0.0 {
+            return "0".to_owned();
+        }
+        return format!("{value}");
+    }
+    let precision = slider_display_precision(min, step);
+    let rounded = format!("{value:.precision$}");
+    let rounded: f64 = rounded.parse().unwrap_or(value);
+    // Re-parsing prints the shortest exact decimal, which trims insignificant
+    // zeroes for free; negative zero normalizes to `"0"` explicitly.
+    if rounded == 0.0 {
+        return "0".to_owned();
+    }
+    format!("{rounded}")
 }
 
 pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
@@ -582,11 +634,11 @@ pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
     }
 }
 
-pub fn resolved_visible_text(value: f64, explicit: Option<&str>) -> Option<String> {
+pub fn resolved_visible_text(value: f64, min: f64, step: f64, explicit: Option<&str>) -> Option<String> {
     match explicit {
         Some("") => None,
         Some(text) => Some(text.to_owned()),
-        None => omit_empty_visible_text(Some(&default_visible_value_text(value))),
+        None => omit_empty_visible_text(Some(&default_visible_value_text(value, min, step))),
     }
 }
 
@@ -670,6 +722,33 @@ mod control_tests {
         assert_eq!(snap_to_step(15.0, 10.0, 10.0), 20.0);
         assert_eq!(snap_to_step(0.5, 0.0, 1.0), 1.0);
         assert_eq!(snap_to_step(-1.5, -1.0, 1.0), -1.0);
+    }
+
+    // g18.024: one shared default display serializer. The snapped value
+    // rounds to the precision implied by min and a finite positive step,
+    // trailing zeroes trim, negative zero normalizes, and binary tails never
+    // survive. Consumer-provided explicit text still wins in
+    // `resolved_visible_text`.
+    #[test]
+    fn the_default_display_serializer_emits_short_step_aware_decimals() {
+        assert_eq!(default_visible_value_text(0.8500000000000001, 0.0, 0.05), "0.85");
+        assert_eq!(default_visible_value_text(0.1 + 0.2, 0.0, 0.1), "0.3");
+        assert_eq!(default_visible_value_text(0.35000000000000003, 0.05, 0.1), "0.35");
+        assert_eq!(default_visible_value_text(44.99999999999999, 0.0, 1.0), "45");
+        assert_eq!(default_visible_value_text(80.0, 0.0, 5.0), "80");
+        assert_eq!(default_visible_value_text(1.2, 0.2, 0.2), "1.2");
+        assert_eq!(default_visible_value_text(-1.1102230246251565e-16, -1.0, 0.1), "0");
+        assert_eq!(default_visible_value_text(-0.45, -1.0, 0.01), "-0.45");
+        assert_eq!(
+            default_visible_value_text(0.30000000000000004, 0.0, 0.0),
+            "0.30000000000000004"
+        );
+        assert_eq!(resolved_visible_text(0.85, 0.0, 0.05, None), Some("0.85".to_owned()));
+        assert_eq!(resolved_visible_text(0.85, 0.0, 0.05, Some("")), None);
+        assert_eq!(
+            resolved_visible_text(0.85, 0.0, 0.05, Some("85%")),
+            Some("85%".to_owned())
+        );
     }
 
     #[test]

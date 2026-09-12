@@ -5,18 +5,24 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CursorHint, LayoutSizing, Node, NodePosition, ScrubAxis, ScrubPhase};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutSizing, MainAxisAlignment, Node, NodePosition, ScrubAxis,
+    ScrubPhase,
+};
 use poodle_specs::ControlSize;
 
 use crate::presentation::rem_to_px;
 
+/// g18.024: the block capsule consumes the shared control-height axis
+/// (24/28/36/44/52px) — the same ladder as Button, Input, and Select. There
+/// is no Slider-only height ladder.
 pub fn capsule_height_rem(size: ControlSize) -> f32 {
     match size {
-        ControlSize::Xs => 1.75,
-        ControlSize::Sm => 1.875,
-        ControlSize::Md => 2.0,
-        ControlSize::Lg => 2.25,
-        ControlSize::Xl => 2.5,
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.75,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.75,
+        ControlSize::Xl => 3.25,
     }
 }
 
@@ -78,49 +84,76 @@ pub fn block_hit(hit_px: f32, thumb: Node, thumb_name: &str) -> Node {
         s.descriptor.layout.height = LayoutSizing::Fixed(hit_px);
         s.min_width = Some(hit_px);
         s.min_height = Some(hit_px);
+        // g18.024 review fix: the visible thumb is centred inside the 44×44
+        // target (web paints it through grid place-items:center); an
+        // unaligned in-flow child painted at the hit's top-left corner,
+        // floating outside the rail.
+        s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.cursor = CursorHint::Pointer;
     }
     hit.child(thumb)
 }
 
-pub fn block_surface(hit_px: f32) -> Node {
+/// g18.024: the block surface is the visible capsule's layout box. Its
+/// measured cross-axis size equals the shared-ladder capsule size; the
+/// ≥44×44 hit rectangles live in absolute overflow layers and never add
+/// margin, padding, minimum size, or row height.
+pub fn block_surface(cross_px: f32) -> Node {
     let mut surface = Node::container();
     surface.roles.insert("part".to_owned(), "block-surface".to_owned());
     surface.style.fill_width = true;
-    surface.style.descriptor.layout.height = LayoutSizing::Fixed(hit_px);
-    surface.style.min_height = Some(hit_px);
+    surface.style.descriptor.layout.height = LayoutSizing::Fixed(cross_px);
+    surface.style.min_height = Some(cross_px);
     surface.position = NodePosition::Relative;
     surface
 }
 
 /// Vertical companion of [`block_surface`]: the capsule fills the block
-/// axis and the cross axis is the fixed hit size (g18.022).
-pub fn block_surface_vertical(hit_px: f32) -> Node {
+/// axis and the cross axis is the fixed shared-ladder capsule size
+/// (g18.024).
+pub fn block_surface_vertical(cross_px: f32) -> Node {
     let mut surface = Node::container();
     surface.roles.insert("part".to_owned(), "block-surface".to_owned());
     surface.style.fill_height = true;
-    surface.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
-    surface.style.min_width = Some(hit_px);
+    surface.style.descriptor.layout.width = LayoutSizing::Fixed(cross_px);
+    surface.style.min_width = Some(cross_px);
     surface.position = NodePosition::Relative;
     surface
 }
 
-pub fn block_grab(handler: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>) -> Node {
-    block_grab_with_axis(handler, ScrubAxis::Horizontal)
+/// Half the overflow of a 44×44 hit layer around a capsule-sized surface.
+/// Zero once the shared ladder reaches 44px (`lg`).
+pub fn block_hit_inset(hit_px: f32, cross_px: f32) -> f32 {
+    ((hit_px - cross_px) * 0.5).max(0.0)
 }
 
 pub fn block_grab_with_axis(
     handler: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>,
     axis: ScrubAxis,
+    cross_inset: f32,
 ) -> Node {
     let mut grab = Node::container();
-    grab.style.fill_width = true;
-    grab.style.fill_height = true;
-    grab.position = NodePosition::Absolute {
-        top: Some(0.0),
-        left: Some(0.0),
-        right: Some(0.0),
-        bottom: Some(0.0),
+    // g18.024: the scrub surface covers the 44×44 effective target even
+    // where it overflows the capsule-sized surface, so the hit envelope
+    // stays interactive without participating in layout. The cross axis is
+    // vertical for a horizontal scrub and horizontal for a vertical scrub.
+    // The box derives from opposing inset anchors (no fill sizing — a fill
+    // percentage would win over the insets and shrink the overlay back to
+    // the capsule, leaving the overflow band dead).
+    grab.position = match axis {
+        ScrubAxis::Vertical => NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(-cross_inset),
+            right: Some(-cross_inset),
+            bottom: Some(0.0),
+        },
+        ScrubAxis::Horizontal => NodePosition::Absolute {
+            top: Some(-cross_inset),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: Some(-cross_inset),
+        },
     };
     grab.style.descriptor.cursor = CursorHint::Pointer;
     grab.interaction.on_scrub = Some(handler);
@@ -128,7 +161,13 @@ pub fn block_grab_with_axis(
     grab
 }
 
-pub fn fraction_anchor(fraction: f32, height: f32, child: Node, child_half: f32) -> Node {
+pub fn fraction_anchor(
+    fraction: f32,
+    height: f32,
+    child: Node,
+    child_half: f32,
+    layer_offset: f32,
+) -> Node {
     let mut spacer = Node::container();
     spacer.style.width_pct = Some(fraction.clamp(0.0, 1.0));
     spacer.style.descriptor.layout.height = LayoutSizing::Fixed(height);
@@ -142,7 +181,9 @@ pub fn fraction_anchor(fraction: f32, height: f32, child: Node, child_half: f32)
     };
     let mut layer = Node::container();
     layer.position = NodePosition::Absolute {
-        top: Some(0.0),
+        // g18.024: layer_offset centres the overflowing hit layer on the
+        // capsule-sized surface.
+        top: Some(layer_offset),
         left: Some(0.0),
         right: Some(0.0),
         bottom: None,
@@ -154,8 +195,17 @@ pub fn fraction_anchor(fraction: f32, height: f32, child: Node, child_half: f32)
 
 /// Vertical companion of [`fraction_anchor`]: the fraction seeds a spacer
 /// along the block axis and the child hangs centred on its cross axis
-/// (g18.022). `height` is the anchor row height along the block axis.
-pub fn fraction_anchor_vertical(fraction: f32, width: f32, child: Node, child_half: f32) -> Node {
+/// (g18.022). `width` is the anchor row width along the cross axis;
+/// `layer_offset` centres the overflowing hit layer on the capsule-sized
+/// surface along the cross axis — a negative `left`, not a `top` shift
+/// (g18.024 review fix).
+pub fn fraction_anchor_vertical(
+    fraction: f32,
+    width: f32,
+    child: Node,
+    child_half: f32,
+    layer_offset: f32,
+) -> Node {
     let mut spacer = Node::container();
     spacer.style.height_pct = Some(fraction.clamp(0.0, 1.0));
     spacer.style.descriptor.layout.width = LayoutSizing::Fixed(width);
@@ -170,7 +220,7 @@ pub fn fraction_anchor_vertical(fraction: f32, width: f32, child: Node, child_ha
     let mut layer = Node::container();
     layer.position = NodePosition::Absolute {
         top: Some(0.0),
-        left: Some(0.0),
+        left: Some(layer_offset),
         right: None,
         bottom: Some(0.0),
     };

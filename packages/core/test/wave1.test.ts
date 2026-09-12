@@ -19,6 +19,8 @@ import {
   blockItemFits,
   blockRegionAvailable,
   physicalToValueNorm,
+  defaultVisibleValueText,
+  resolveRangeVisibleValue,
   resolveSliderVisibleValue,
   layoutRangeSliderBlock,
   layoutSliderBlock,
@@ -244,9 +246,38 @@ describe("block appearance helpers", () => {
     expect(blockInlineFits([{ text: null, unoccludedSpan: 8 }], measure)).toBe(true);
   });
 
-  test("visible channels default to String(value) and omit empty text", () => {
-    expect(resolveSliderVisibleValue(67)).toBe("67");
-    expect(resolveSliderVisibleValue(67, () => "")).toBeNull();
+  test("visible channels default to the step-aware decimal and omit empty text", () => {
+    expect(resolveSliderVisibleValue(67, 0, 1)).toBe("67");
+    expect(resolveSliderVisibleValue(67, 0, 1, () => "")).toBeNull();
+  });
+
+  // g18.024: one shared default serializer. The snapped value rounds to the
+  // precision implied by min and a finite positive step, trailing zeroes
+  // trim, negative zero normalizes, and binary tails never survive.
+  test("the default display serializer emits short step-aware decimals", () => {
+    // Fractional step arithmetic without a binary tail.
+    expect(defaultVisibleValueText(0.8500000000000001, 0, 0.05)).toBe("0.85");
+    expect(defaultVisibleValueText(0.1 + 0.2, 0, 0.1)).toBe("0.3");
+    // Precision takes the coarser of min and step into account.
+    expect(defaultVisibleValueText(0.35000000000000003, 0.05, 0.1)).toBe("0.35");
+    // Integer steps and integer minima never show decimal noise.
+    expect(defaultVisibleValueText(44.99999999999999, 0, 1)).toBe("45");
+    expect(defaultVisibleValueText(80, 0, 5)).toBe("80");
+    // Trailing zeroes trim.
+    expect(defaultVisibleValueText(Number((0.5).toFixed(2)), 0, 0.25)).toBe("0.5");
+    expect(defaultVisibleValueText(1.2, 0.2, 0.2)).toBe("1.2");
+    // Negative zero normalizes.
+    expect(defaultVisibleValueText(-1.1e-16, -1, 0.1)).toBe("0");
+    // Custom units stay consumer-owned; the serializer only rounds digits.
+    expect(defaultVisibleValueText(-0.45, -1, 0.01)).toBe("-0.45");
+    // Without a finite positive step the value keeps its shortest form.
+    expect(defaultVisibleValueText(0.30000000000000004, 0, 0)).toBe(String(0.30000000000000004));
+  });
+
+  test("both range endpoints resolve through the same serializer", () => {
+    expect(resolveRangeVisibleValue(0.8500000000000001, 0, 0.05, "lower")).toBe("0.85");
+    expect(resolveRangeVisibleValue(0.30000000000000004, 0, 0.1, "upper")).toBe("0.3");
+    expect(resolveRangeVisibleValue(20, 0, 10, "lower", (value) => `${value}%`)).toBe("20%");
   });
 
   test("rtl remaps physical position without changing numeric meaning", () => {

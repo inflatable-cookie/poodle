@@ -128,8 +128,8 @@ export function RangeSlider({
   }
   const block = variant === "block";
   const visibleLabelText = visibleLabel && visibleLabel !== "" ? visibleLabel : null;
-  const lowerVisible = resolveRangeVisibleValue(displayLower, "lower", formatVisibleValue);
-  const upperVisible = resolveRangeVisibleValue(displayUpper, "upper", formatVisibleValue);
+  const lowerVisible = resolveRangeVisibleValue(displayLower, min, step, "lower", formatVisibleValue);
+  const upperVisible = resolveRangeVisibleValue(displayUpper, min, step, "upper", formatVisibleValue);
   const font = capsule.current ? getComputedStyle(capsule.current).font : "14px sans-serif";
   const blockLayout = block
     ? layoutRangeSliderBlock({

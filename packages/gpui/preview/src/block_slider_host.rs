@@ -30,7 +30,7 @@ fn slider_visible_texts(spec: &SliderSpec) -> Vec<String> {
     {
         texts.push(label.to_owned());
     }
-    if let Some(value) = resolved_visible_text(spec.value, spec.visible_value_text.as_deref()) {
+    if let Some(value) = resolved_visible_text(spec.value, spec.min, spec.step, spec.visible_value_text.as_deref()) {
         texts.push(value);
     }
     texts
@@ -45,8 +45,8 @@ fn range_visible_texts(spec: &RangeSliderSpec) -> Vec<String> {
     {
         texts.push(label.to_owned());
     }
-    let lower = resolved_visible_text(spec.low, spec.visible_lower_text.as_deref());
-    let upper = resolved_visible_text(spec.high, spec.visible_upper_text.as_deref());
+    let lower = resolved_visible_text(spec.low, spec.min, spec.step, spec.visible_lower_text.as_deref());
+    let upper = resolved_visible_text(spec.high, spec.min, spec.step, spec.visible_upper_text.as_deref());
     for text in [lower, upper].into_iter().flatten() {
         if !text.is_empty() {
             texts.push(text);
@@ -59,20 +59,21 @@ fn font_size_px(size: Option<ControlSize>) -> f32 {
     presentation::rem_to_px(slider_block::font_size_rem(size.unwrap_or(ControlSize::Md)))
 }
 
+/// g18.024: hosts reserve exactly the visible capsule height from the
+/// shared control-size ladder. The 44×44 hit envelope overflows in absolute
+/// layers and never adds host layout.
 #[allow(dead_code)]
 pub fn block_slider_surface_height(spec: &SliderSpec) -> f32 {
-    let capsule = presentation::rem_to_px(slider_block::capsule_height_rem(
+    presentation::rem_to_px(slider_block::capsule_height_rem(
         spec.size.unwrap_or(ControlSize::Md),
-    ));
-    poodle_headless::slider::SLIDER_BLOCK_HIT_PX.max(capsule)
+    ))
 }
 
 #[allow(dead_code)]
 pub fn block_range_slider_surface_height(spec: &RangeSliderSpec) -> f32 {
-    let capsule = presentation::rem_to_px(slider_block::capsule_height_rem(
+    presentation::rem_to_px(slider_block::capsule_height_rem(
         spec.size.unwrap_or(ControlSize::Md),
-    ));
-    poodle_headless::slider::SLIDER_BLOCK_HIT_PX.max(capsule)
+    ))
 }
 
 fn as_block_measure(advance: ShapedAdvance) -> BlockTextMeasure {

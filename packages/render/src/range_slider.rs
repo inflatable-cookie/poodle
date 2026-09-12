@@ -22,9 +22,9 @@ use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::slider_block::{
-    block_grab_with_axis, block_hit, block_surface, block_surface_vertical, capsule_height_rem,
-    font_size_rem, fraction_anchor, fraction_anchor_vertical, stamp_disabled_roles,
-    stamp_forced_color, visible_thumb,
+    block_grab_with_axis, block_hit, block_hit_inset, block_surface, block_surface_vertical,
+    capsule_height_rem, font_size_rem, fraction_anchor, fraction_anchor_vertical,
+    stamp_disabled_roles, stamp_forced_color, visible_thumb,
 };
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
 #[derive(Default)]
@@ -598,8 +598,8 @@ fn range_slider_block(
         .as_deref()
         .filter(|text| !text.is_empty())
         .map(ToOwned::to_owned);
-    let lower_text = resolved_visible_text(visual.value.0, spec.visible_lower_text.as_deref());
-    let upper_text = resolved_visible_text(visual.value.1, spec.visible_upper_text.as_deref());
+    let lower_text = resolved_visible_text(visual.value.0, spec.min, spec.step, spec.visible_lower_text.as_deref());
+    let upper_text = resolved_visible_text(visual.value.1, spec.min, spec.step, spec.visible_upper_text.as_deref());
     let (capsule_span, measure) = ctx.require_block_layout("RangeSlider");
     let layout = layout_range_slider_block(
         capsule_span,
@@ -620,6 +620,8 @@ fn range_slider_block(
 
     let make_hit = |id: &str, thumb_name: &str, name: String, value: f64| -> Node {
         let thumb = visible_thumb(effective_size, elevated, border_default);
+        let mut thumb = thumb;
+        thumb.id = Some(format!("block-range-slider-{thumb_name}-thumb"));
         let mut hit = block_hit(hit_px, thumb, thumb_name);
         hit.id = Some(id.to_owned());
         hit.a11y.role = Some(NodeRole::Slider);
@@ -631,6 +633,11 @@ fn range_slider_block(
             stamp_disabled_roles(&mut hit);
         } else {
             hit.interaction.focusable = true;
+            // Focus intent (g18.024 round-2 review note): the focus treatment
+            // lives on the hit — the focusable 44×44 element — because the
+            // node vocabulary resolves focus painting through the focusable
+            // node itself; web styles the thumb as a descendant of its
+            // focused control. Both stay visible and unclipped.
             hit.style.focus = Some(StylePatch {
                 background: None,
                 border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
@@ -855,6 +862,13 @@ fn range_slider_block(
         let inset = rem_to_px(0.5);
         row.style.descriptor.layout.spacing.padding.left = inset;
         row.style.descriptor.layout.spacing.padding.right = inset;
+        // g18.024: a fixed, value-independent block inset keeps the anchored
+        // text fully inside the rail at every shared size.
+        if vertical {
+            let block_inset = rem_to_px(0.25);
+            row.style.descriptor.layout.spacing.padding.top = block_inset;
+            row.style.descriptor.layout.spacing.padding.bottom = block_inset;
+        }
         let slot = |content: Option<&str>, id: &str| {
             let mut node = Node::text(content.unwrap_or_default().to_owned());
             node.id = Some(id.to_owned());
@@ -866,11 +880,24 @@ fn range_slider_block(
         };
         // Physical order along the paint axis. Horizontal LTR: lower, label,
         // upper. Horizontal RTL mirrors so lower stays at the logical start.
-        // Vertical stays upright: upper at the physical top, label centered,
-        // lower at the physical bottom.
+        // Vertical stays upright: upper at the physical top, label centered
+        // on the exact rail middle as an absolute overlay (g18.024, matching
+        // the web row), lower at the physical bottom.
         row = if vertical {
+            let mut label_wrap = Node::container();
+            label_wrap.style.descriptor.layout.direction = LayoutDirection::Column;
+            label_wrap.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            label_wrap.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            label_wrap.position = NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            };
+            let label_wrap =
+                label_wrap.child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"));
             row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
-                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
+                .child(label_wrap)
                 .child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
         } else if rtl {
             row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
@@ -886,7 +913,12 @@ fn range_slider_block(
     };
 
     // Clip containers: each holds the full-capsule row offset so the glyph
-    // coordinates stay identical across copies.
+    // coordinates stay identical across copies. `clip_origin`/`clip_span`
+    // are measured from the logical start (left for horizontal, bottom for
+    // vertical). Horizontal pins the row to the capsule's left edge; vertical
+    // pins it to the capsule's top edge: the row offset cancels the clip's
+    // top-edge distance from the capsule top (g18.024 review fix — reusing
+    // the horizontal `-origin` shift misaligned every vertical layer).
     let clip_pair = |row: Node, clip_origin: f32, clip_span: f32| -> Node {
         let mut clip = Node::container();
         clip.style.descriptor.layout.width = LayoutSizing::Fixed(if vertical { capsule_cross } else { clip_span });
@@ -894,7 +926,11 @@ fn range_slider_block(
         clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
         clip.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         let mut offset_row = row;
-        let offset = -clip_origin;
+        let offset = if vertical {
+            clip_origin + clip_span - capsule_span
+        } else {
+            -clip_origin
+        };
         offset_row.position = NodePosition::Absolute {
             top: if vertical { Some(offset) } else { Some(0.0) },
             left: if vertical { Some(0.0) } else { Some(offset) },
@@ -910,13 +946,14 @@ fn range_slider_block(
         let mut clip = clip_pair(row, physical_lo * capsule_span, window_span);
         clip.id = Some("block-range-slider-clip-selected".to_owned());
         if vertical {
-            // The window is the bottom region; the clip hugs the capsule's
-            // bottom edge.
+            // The window is the region [lo, hi] above the logical bottom,
+            // mirroring the horizontal `left` offset: the clip hangs
+            // `lo` above the capsule's bottom edge (g18.024 review fix).
             clip.position = NodePosition::Absolute {
                 top: None,
                 left: Some(0.0),
                 right: Some(0.0),
-                bottom: Some(0.0),
+                bottom: Some(physical_lo * capsule_span),
             };
         } else {
             clip.position = NodePosition::Absolute {
@@ -1007,10 +1044,19 @@ fn range_slider_block(
     } else {
         accent
     };
+    // Vertical fills grow along the block axis (height) with the cross axis
+    // filled; horizontal fills grow along the inline axis (g18.024 review
+    // fix — a width percentage on the vertical capsule grew sideways).
     let selected = || {
         let mut node = Node::container();
-        node.style.width_pct = Some((hi - lo).max(0.0));
-        node.style.fill_height = true;
+        node.id = Some("block-range-slider-fill".to_owned());
+        if vertical {
+            node.style.height_pct = Some((hi - lo).max(0.0));
+            node.style.fill_width = true;
+        } else {
+            node.style.width_pct = Some((hi - lo).max(0.0));
+            node.style.fill_height = true;
+        }
         node.style.descriptor.background = Some(window_fill);
         stamp_forced_color(&mut node, "selection", "selection-text");
         node
@@ -1018,16 +1064,41 @@ fn range_slider_block(
     let remainder = || {
         let mut node = Node::container();
         node.style.flex_fill = true;
-        node.style.fill_height = true;
+        if vertical {
+            node.style.fill_width = true;
+        } else {
+            node.style.fill_height = true;
+        }
         node.style.descriptor.background = Some(remainder_fill);
         stamp_forced_color(&mut node, "canvas", "canvas-text");
         node
     };
+    // g18.024: the window paints at [lo, hi] along the paint axis, matching
+    // the web inset (`inset-inline-start: lo` / `bottom: lo`). A leading or
+    // trailing spacer holds the `lo` offset: before the fill for LTR
+    // horizontal, after it (from the physical top) for RTL and vertical.
+    let window_offset_spacer = || {
+        let mut node = Node::container();
+        if vertical {
+            node.style.height_pct = Some(lo.clamp(0.0, 1.0));
+            node.style.fill_width = true;
+        } else {
+            node.style.width_pct = Some(lo.clamp(0.0, 1.0));
+            node.style.fill_height = true;
+        }
+        node
+    };
     // Paint order: window fill, remainder fill, text clips.
     if vertical || rtl {
-        capsule = capsule.child(remainder()).child(selected());
+        capsule = capsule
+            .child(remainder())
+            .child(selected())
+            .child(window_offset_spacer());
     } else {
-        capsule = capsule.child(selected()).child(remainder());
+        capsule = capsule
+            .child(window_offset_spacer())
+            .child(selected())
+            .child(remainder());
     }
     if let Some(clip) = remainder_start_clip {
         capsule = capsule.child(clip);
@@ -1039,46 +1110,57 @@ fn range_slider_block(
         capsule = capsule.child(clip);
     }
 
-    let inset = ((hit_px - capsule_cross) * 0.5).max(0.0);
+    // Signed centre offset for the anchor layers (see the Slider renderer):
+    // negative below lg where the hit overflows the capsule, positive at
+    // lg/xl where the capsule is the larger of the two (g18.024 review fix).
+    let inset = block_hit_inset(hit_px, capsule_cross);
+    let anchor_offset = (capsule_cross - hit_px) * 0.5;
     let mut surface = if vertical {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
             top: Some(0.0),
-            left: Some(inset),
-            right: Some(inset),
+            left: Some(0.0),
+            right: Some(0.0),
             bottom: Some(0.0),
         };
         // Vertical anchors: upper value at the physical top, lower value at
-        // the physical bottom, both hung centred on the cross axis.
-        let lower_anchor = fraction_anchor_vertical(lo, hit_px, thumb_lo, hit_px * 0.5);
-        let upper_anchor = fraction_anchor_vertical(hi, hit_px, thumb_hi, hit_px * 0.5);
-        let mut s = block_surface_vertical(hit_px);
+        // the physical bottom, both hung centred on the cross axis. The hit
+        // layers overflow centred on the capsule-sized surface (g18.024);
+        // the spacers seed `1 - value` from the physical top because the
+        // vertical scrub axis is bottom-referenced (g18.024 review fix).
+        let lower_anchor =
+            fraction_anchor_vertical(1.0 - lo, hit_px, thumb_lo, hit_px * 0.5, anchor_offset);
+        let upper_anchor =
+            fraction_anchor_vertical(1.0 - hi, hit_px, thumb_hi, hit_px * 0.5, anchor_offset);
+        let mut s = block_surface_vertical(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s
     } else {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
-            top: Some(inset),
+            top: Some(0.0),
             left: Some(0.0),
             right: Some(0.0),
             bottom: None,
         };
-        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5);
-        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5);
-        let mut s = block_surface(hit_px);
+        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5, anchor_offset);
+        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5, anchor_offset);
+        let mut s = block_surface(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s
     };
     if let Some(handler) = scrub_handler {
         let axis = if vertical { ScrubAxis::Vertical } else { ScrubAxis::Horizontal };
-        surface = surface.child(block_grab_with_axis(handler, axis));
+        let mut grab = block_grab_with_axis(handler, axis, inset);
+        grab.id = Some("block-range-slider-grab".to_owned());
+        surface = surface.child(grab);
     }
 
     let mut el = Node::container();
     if vertical {
         el.style.fill_height = true;
-        el.style.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
-        el.style.min_width = Some(hit_px);
+        el.style.descriptor.layout.width = LayoutSizing::Fixed(capsule_cross);
+        el.style.min_width = Some(capsule_cross);
         el.style.min_height = Some(rem_to_px(10.0));
         el.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     } else {
@@ -1185,11 +1267,22 @@ mod tests {
         let carrier = node
             .find(&|n| n.interaction.on_scrub.is_some())
             .expect("grab area");
-        assert!(carrier.style.fill_width, "the scrub must span the track");
-        assert!(
-            matches!(carrier.position, NodePosition::Absolute { .. }),
-            "the grab area is an overlay, not a layout participant"
-        );
+        // g18.024: the grab spans the track via opposing inline anchors and
+        // overflows the cross axis by the hit inset — no fill sizing, which
+        // would win over the insets and leave the overflow band dead.
+        match carrier.position {
+            NodePosition::Absolute {
+                left: Some(left),
+                right: Some(right),
+                top: Some(top),
+                bottom: Some(bottom),
+            } => {
+                assert_eq!(left, 0.0);
+                assert_eq!(right, 0.0);
+                assert!(top <= 0.0 && bottom <= 0.0 && top == bottom);
+            }
+            other => panic!("the grab area is an inset-sized overlay: {other:?}"),
+        }
         // Exactly one node scrubs: two would fight over the same gesture.
         fn count_scrubs(node: &Node) -> usize {
             usize::from(node.interaction.on_scrub.is_some())
