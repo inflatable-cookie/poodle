@@ -1,6 +1,6 @@
 # 027 — `v0.4.0` public-surface freeze audit
 
-Status: dependency-ready behind g18.026
+Status: complete — merged as `8a1f7dc4cb7fa23077c06bc2ad5040db20760182` (PR #259) on 2026-09-12
 Owner: Poodle release operations
 Created: 2026-09-12
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
@@ -28,7 +28,7 @@ This is an audit and freeze gate, not a feature or release task.
   from behavioral and breaking changes in release evidence.
 - [x] g18.006 already stops on an unclassified public break but must not be the
   first place one is discovered.
-- [ ] g18.026 is merged and its exact main head is known.
+- [x] g18.026 is merged and its exact main head is known (merge `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`, main `31d529a6f0dd4dc632b11010cf1e16a29e6eb80b`).
 
 ## Decisions
 
@@ -55,9 +55,8 @@ This is an audit and freeze gate, not a feature or release task.
 
 ## Dispatch manifest
 
-- **State:** dependency-ready; submit only after g18.026 has a Queue identity
-- **Completion:** one clean pushed audit PR with exact-head independent review,
-  merged report/log and no product or release mutation
+- **State:** complete; merged classified `v0.3.0`→post-g18.026 audit; serial before retained g18.006
+- **Completion:** one clean pushed audit PR with exact-head independent review; merged by the plugin, never by the worker
 - **Owned mutable paths:** one `0.4.0` public-delta evidence report under
   `docs/evidence/releases/`; required evidence index update; focused audit
   scripts/tests only if no existing reproducible route can express the check;

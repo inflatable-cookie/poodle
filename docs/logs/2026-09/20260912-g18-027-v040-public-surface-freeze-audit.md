@@ -1,6 +1,6 @@
 # g18.027 — `v0.4.0` public-surface freeze audit
 
-Status: complete — audit PR open for exact-head independent review
+Status: complete — merged as `8a1f7dc4cb7fa23077c06bc2ad5040db20760182` (PR #259) on 2026-09-12 after exact-head independent review
 Date: 2026-09-12
 Branch: `ns-b9e45c4b-f9cd-48ff-b0fa-8bfe910b8d2e`
 Card: `docs/roadmaps/g18/027-v040-public-surface-freeze-audit.md`
@@ -11,6 +11,20 @@ Governing refs: `docs/specs/022-packaging-versioning-and-release-channel-rules.m
 `packages/release-manifest.json`
 Base: pushed `main` at `31d529a6f0dd4dc632b11010cf1e16a29e6eb80b`
 (post-g18.026, PR #258 merge `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`)
+
+## Merge and review
+
+- PR #259 merged `8a1f7dc4cb7fa23077c06bc2ad5040db20760182` on 2026-09-12 with
+  parents `31d529a6f0dd4dc632b11010cf1e16a29e6eb80b` (post-g18.026 main) and
+  `e4ff3f89b7e572cff84c7618d29ff4ab758467cf` (reviewed audit head): the merge
+  matches the reviewed head exactly, no refresh was needed.
+- Independent review (issue comment `5647015250`, `ready_to_merge`) re-derived
+  every identity, count and claim from the diff at the exact head: 65 breaking
+  rows enumerated with migration text, 433 additive and 12 internal-only rows
+  verified, reproducible auditor output confirmed, no unclassified break.
+- Merge-time checks were green (`rust`, `web`); the branch diff stayed inside
+  the owned audit paths with no version, lock, changelog, release-note,
+  workflow, Desktop, candidate or tag mutation.
 
 ## Outcome
 
@@ -72,6 +86,17 @@ names) would be a pre-v1 compatibility shim.
 - `effigy check:release-automation`, `effigy docs:lint`, `git diff --check`.
 - No version, lock, changelog, release-note, workflow, Desktop, candidate or
   tag mutation; `git status` shows only this audit's files.
+
+## Closeout (integration checkout, 2026-09-12)
+
+- Verified local `main` clean at `8a1f7dc4cb7fa23077c06bc2ad5040db20760182`,
+  matching `origin/main`; merge parents confirm the reviewed head merged
+  without refresh.
+- `git diff --check` clean; `effigy docs:lint` green on the closeout tree.
+- Deferred, not repaired here: the decision capsule stands — the Slider and
+  RangeSlider contract recipe-hook lists still overstate the implementation
+  (18 documented `--poodle-recipe-*` hooks no longer read) and are corrected
+  in the post-release docs sweep, never as a pre-v1 shim.
 
 ## Next task
 

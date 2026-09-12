@@ -71,7 +71,7 @@ needed to compile honest repair tranches.
 | [`g18.024`](024-slider-family-layout-and-vertical-repair.md) — Slider-family layout and vertical repair | complete | PR #256 (merge `c73db47d0de36dd0ce99ba697424dedb7c7b82da`); shared size alignment, layout-neutral hit targets, step-aware visible values, centred thumbs and xl-anchored vertical geometry; ran beside g18.023; serial before g18.006 |
 | [`g18.025`](025-preview-header-control-sizing.md) — Preview header control sizing | complete | PR #257 (merge `90c40defe86e4841ad248c72200f7333f37c342d`) plus direct correction `a6bed8420`; all controls share the selected size, default `sm` |
 | [`g18.026`](026-slider-foundation-and-range-parity.md) — Slider foundation and RangeSlider parity | complete | PR #258 (merge `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`); separate public controls over one private family renderer with accepted Slider fixes ported to RangeSlider; serial before g18.027 |
-| [`g18.027`](027-v040-public-surface-freeze-audit.md) — `v0.4.0` public-surface freeze audit | dependency-ready | exact `v0.3.0`→post-g18.026 classification; serial before retained g18.006 |
+| [`g18.027`](027-v040-public-surface-freeze-audit.md) — `v0.4.0` public-surface freeze audit | complete | PR #259 (merge `8a1f7dc4cb7fa23077c06bc2ad5040db20760182`); frozen `v0.3.0`→post-g18.026 classification with migration text for every breaking row; serial before retained g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -135,10 +135,10 @@ Merged g18.025 established paired-preview header alignment; direct correction
 `a6bed8420` made every control follow the selected size and restored `sm` as the
 Merged g18.026 consolidated Slider-family private rendering and ported the
 accepted Slider fixes to RangeSlider without merging their public APIs (PR
-#258, merged `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`). g18.027 then freezes
-and classifies the exact
-`v0.3.0`→main public delta. g18.006 remains the retained final candidate lane,
-blocked until both close. g18.009 waits on g18.006; no candidate is tagged or
+#258, merged `bfc0783b2020f6be7158e7f1a3cd74c4ed314be4`). Merged g18.027 froze
+and classified the exact `v0.3.0`→main public delta (PR #259, merged
+`8a1f7dc4cb7fa23077c06bc2ad5040db20760182`). g18.006 remains the retained final candidate lane,
+now unblocked on the frozen report. g18.009 waits on g18.006; no candidate is tagged or
 published while accepted product source is moving. After `0.4.0` unblocks
 Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
 later breaking change waits for `0.5.0`.
