@@ -5,7 +5,10 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CursorHint, LayoutSizing, Node, NodePosition, ScrubAxis, ScrubPhase};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutSizing, MainAxisAlignment, Node, NodePosition, ScrubAxis,
+    ScrubPhase,
+};
 use poodle_specs::ControlSize;
 
 use crate::presentation::rem_to_px;
@@ -81,6 +84,12 @@ pub fn block_hit(hit_px: f32, thumb: Node, thumb_name: &str) -> Node {
         s.descriptor.layout.height = LayoutSizing::Fixed(hit_px);
         s.min_width = Some(hit_px);
         s.min_height = Some(hit_px);
+        // g18.024 review fix: the visible thumb is centred inside the 44×44
+        // target (web paints it through grid place-items:center); an
+        // unaligned in-flow child painted at the hit's top-left corner,
+        // floating outside the rail.
+        s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.cursor = CursorHint::Pointer;
     }
     hit.child(thumb)

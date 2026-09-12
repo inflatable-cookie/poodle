@@ -743,8 +743,16 @@ fn paint_slider_block(
     }
 
     let thumb = visible_thumb(effective_size, elevated, border_default);
+    let mut thumb = thumb;
+    thumb.id = Some("block-slider-thumb".to_owned());
     let mut hit = block_hit(hit_px, thumb, "value");
     hit.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
+    // Focus intent (g18.024 round-2 review note): the ring lives on the hit —
+    // the focusable 44×44 element — because the node vocabulary resolves ring
+    // painting through the ringed node's own focus handle, and the thumb is
+    // not focusable. Web paints the ring on the thumb as a styled descendant
+    // of its focused control; both stay visible and unclipped, which is what
+    // the contract requires.
     bind_slider_control(
         &mut hit,
         spec,
@@ -761,7 +769,12 @@ fn paint_slider_block(
         stamp_disabled_roles(&mut hit);
     }
 
+    // The grab cross inset is the clamped hit overflow (zero once the shared
+    // ladder reaches 44px, where the surface itself covers the target). The
+    // anchor layer uses the signed centre offset so the hit also centres when
+    // the capsule is LARGER than the target (lg/xl) — g18.024 review fix.
     let inset = block_hit_inset(hit_px, capsule_cross);
+    let anchor_offset = (capsule_cross - hit_px) * 0.5;
     let physical = if rtl { 1.0 - fraction } else { fraction };
     let mut surface = if vertical {
         // The capsule fills the capsule-sized surface; the 44px hit and its
@@ -778,7 +791,7 @@ fn paint_slider_block(
             bottom: Some(0.0),
         };
         let anchor_layer =
-            fraction_anchor_vertical(1.0 - physical, hit_px, hit, hit_px * 0.5, -inset);
+            fraction_anchor_vertical(1.0 - physical, hit_px, hit, hit_px * 0.5, anchor_offset);
         let mut s = block_surface_vertical(capsule_cross);
         s = s.child(capsule);
         s.child(anchor_layer)
@@ -790,7 +803,7 @@ fn paint_slider_block(
             right: Some(0.0),
             bottom: None,
         };
-        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5, -inset);
+        let anchor_layer = fraction_anchor(physical, hit_px, hit, hit_px * 0.5, anchor_offset);
         let mut s = block_surface(capsule_cross);
         s = s.child(capsule);
         s.child(anchor_layer)

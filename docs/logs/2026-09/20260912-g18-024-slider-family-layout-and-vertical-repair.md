@@ -27,6 +27,21 @@ Base: `origin/main` at `4255c62ee16b0f35447189509142fc5b7e6e50ae`
   bottom-referenced scrub axis (range lower thumb above upper). The review
   also flagged the missing mounted vertical coverage and noted the exported
   core helper signature change as non-blocking.
+- Round 2 at `00d90ba64…`: all four round-1 findings verified fixed by
+  independent mounted probes, but two blocking native defects remained:
+  the visible thumb painted at the hit's top-left (an unaligned in-flow
+  child — the card's "handles float outside the rail" counterexample), and
+  at xl the clamped hit inset left the 44×44 target flush with the surface
+  start edge (4px off the rail centre). Fixed in round 3.
+- Round 3 at this head: `block_hit` centres the visible thumb (matching
+  web's grid place-items:center) and stamps thumb ids; the anchor layers
+  use a signed `(cross - hit)/2` offset so the hit centres at every size
+  (negative below `lg`, positive at `lg`/`xl`); mounted regressions assert
+  the thumb node and the xl centring on both orientations. Focus intent
+  confirmed and documented: the ring lives on the focusable 44×44 hit
+  because the node vocabulary resolves ring painting through the ringed
+  node's own focus handle; web styles the thumb as a descendant of its
+  focused control — both stay visible and unclipped.
 - Round 2 at `00d90ba64…`: all four findings fixed in
   `packages/render` (`slider_block.rs`, `slider.rs`, `range_slider.rs`) with
   three new mounted regressions in `headless_regressions.rs` (vertical single
@@ -101,9 +116,8 @@ as a complete, aligned control at every size and orientation:
 - `effigy regressions:native` — `headless_regressions` 238/0 plus the other
   three gpui-preview test targets (catalogue 7, icon geometry 6, visual
   fixture inventory 15) and `poodle-gpui-node-backend` 52/0.
-- Native: `effigy regressions:native` — `headless_regressions` 241/0 at the
-  native-vertical head (238 pre-existing plus the three new vertical/horizontal
-  block geometry regressions), and the other
+- Native: `effigy regressions:native` — `headless_regressions` 242/0 at the
+  round-3 head (241 plus the xl anchor-centring regression), and the other
   three gpui-preview test targets (catalogue 7, icon geometry 6, visual
   fixture inventory 15) and `poodle-gpui-node-backend` 52/0.
 - Block-slider hit probe 124/0 and inline probe 96/0 per engine on headless

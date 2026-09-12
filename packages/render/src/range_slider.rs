@@ -620,6 +620,8 @@ fn range_slider_block(
 
     let make_hit = |id: &str, thumb_name: &str, name: String, value: f64| -> Node {
         let thumb = visible_thumb(effective_size, elevated, border_default);
+        let mut thumb = thumb;
+        thumb.id = Some(format!("block-range-slider-{thumb_name}-thumb"));
         let mut hit = block_hit(hit_px, thumb, thumb_name);
         hit.id = Some(id.to_owned());
         hit.a11y.role = Some(NodeRole::Slider);
@@ -631,6 +633,11 @@ fn range_slider_block(
             stamp_disabled_roles(&mut hit);
         } else {
             hit.interaction.focusable = true;
+            // Focus intent (g18.024 round-2 review note): the focus treatment
+            // lives on the hit — the focusable 44×44 element — because the
+            // node vocabulary resolves focus painting through the focusable
+            // node itself; web styles the thumb as a descendant of its
+            // focused control. Both stay visible and unclipped.
             hit.style.focus = Some(StylePatch {
                 background: None,
                 border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
@@ -1103,7 +1110,11 @@ fn range_slider_block(
         capsule = capsule.child(clip);
     }
 
+    // Signed centre offset for the anchor layers (see the Slider renderer):
+    // negative below lg where the hit overflows the capsule, positive at
+    // lg/xl where the capsule is the larger of the two (g18.024 review fix).
     let inset = block_hit_inset(hit_px, capsule_cross);
+    let anchor_offset = (capsule_cross - hit_px) * 0.5;
     let mut surface = if vertical {
         let mut capsule = capsule;
         capsule.position = NodePosition::Absolute {
@@ -1117,8 +1128,10 @@ fn range_slider_block(
         // layers overflow centred on the capsule-sized surface (g18.024);
         // the spacers seed `1 - value` from the physical top because the
         // vertical scrub axis is bottom-referenced (g18.024 review fix).
-        let lower_anchor = fraction_anchor_vertical(1.0 - lo, hit_px, thumb_lo, hit_px * 0.5, -inset);
-        let upper_anchor = fraction_anchor_vertical(1.0 - hi, hit_px, thumb_hi, hit_px * 0.5, -inset);
+        let lower_anchor =
+            fraction_anchor_vertical(1.0 - lo, hit_px, thumb_lo, hit_px * 0.5, anchor_offset);
+        let upper_anchor =
+            fraction_anchor_vertical(1.0 - hi, hit_px, thumb_hi, hit_px * 0.5, anchor_offset);
         let mut s = block_surface_vertical(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s
@@ -1130,8 +1143,8 @@ fn range_slider_block(
             right: Some(0.0),
             bottom: None,
         };
-        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5, -inset);
-        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5, -inset);
+        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5, anchor_offset);
+        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5, anchor_offset);
         let mut s = block_surface(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s

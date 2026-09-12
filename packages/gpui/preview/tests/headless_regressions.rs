@@ -6594,6 +6594,23 @@ fn vertical_block_slider_geometry_on_the_mounted_host() {
             "hit centre y {hit_centre_y} must track the value ({expected_y})"
         );
 
+        // Visible thumb: centred inside the 44×44 target (g18.024 round-2
+        // review fix: an unaligned in-flow child painted at the hit's
+        // top-left corner, outside the rail). The bounds recorder canvas
+        // fills the padding box, so the recorded size is the 6px border-box
+        // minus its 1px border; centres stay exact.
+        let thumb = poodle_gpui_node_backend::bounds_for("block-slider-thumb").expect("thumb");
+        assert_eq!(f32::from(thumb.size.width), 4.0);
+        assert_eq!(f32::from(thumb.size.height), 4.0);
+        let thumb_centre_x = f32::from(thumb.origin.x) + f32::from(thumb.size.width) / 2.0;
+        let thumb_centre_y = f32::from(thumb.origin.y) + f32::from(thumb.size.height) / 2.0;
+
+        assert!(
+            (thumb_centre_x - hit_centre_x).abs() <= 0.75
+                && (thumb_centre_y - hit_centre_y).abs() <= 0.75,
+            "thumb centre must equal the hit centre"
+        );
+
         // Fill: grows along the block axis (60px of 240 at 25%), fills the
         // cross axis, and sits at the physical bottom of the rail.
         let fill = poodle_gpui_node_backend::bounds_for("block-slider-fill").expect("fill");
@@ -6682,6 +6699,23 @@ fn vertical_range_block_geometry_on_the_mounted_host() {
             "upper value must sit above lower value on a vertical rail"
         );
 
+        // Visible thumbs stay centred inside their 44×44 targets (round-2
+        // review fix).
+        for (name, hit, thumb_id) in [
+            ("lower", lower, "block-range-slider-lower-thumb"),
+            ("upper", upper, "block-range-slider-upper-thumb"),
+        ] {
+            let thumb = poodle_gpui_node_backend::bounds_for(thumb_id)
+                .unwrap_or_else(|| panic!("{name} thumb"));
+            let thumb_centre_x = f32::from(thumb.origin.x) + f32::from(thumb.size.width) / 2.0;
+            let thumb_centre_y = f32::from(thumb.origin.y) + f32::from(thumb.size.height) / 2.0;
+            assert!(
+                (thumb_centre_x - (f32::from(hit.origin.x) + 22.0)).abs() <= 0.75
+                    && (thumb_centre_y - (f32::from(hit.origin.y) + 22.0)).abs() <= 0.75,
+                "{name} thumb must centre in its hit"
+            );
+        }
+
         // Window fill: [lo, hi] above the logical bottom (144px of 240),
         // filling the 24px cross axis (g18.024 review fix: it grew sideways
         // from the rail's top edge). The bottom edge floats `lo` above the
@@ -6743,6 +6777,73 @@ fn horizontal_block_scrub_overlay_covers_the_hit_band_at_xs() {
         driver.pointer_press(point(px(x), px(y)));
         driver.pointer_release(point(px(x), px(y)));
         assert_eq!(*live.lock().expect("value lock"), 30.0);
+    });
+}
+
+/// g18.024 round-2 review fix: at xl the 52px capsule is LARGER than the
+/// 44px target, and the anchor layer must centre with a signed offset — a
+/// clamped-to-zero inset left the hit flush with the surface start edge
+/// (4px off the rail centre on both orientations).
+#[test]
+fn block_anchor_layers_centre_the_hit_at_xl() {
+    run_headless(|cx| {
+        // Horizontal xl: the 52px capsule centres in the 60px mount box and
+        // the hit must centre inside it, not hug its start edge.
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_size(ControlSize::Xl);
+        let mut spec = spec;
+        spec.aria_label = Some("Wide".into());
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        let node = poodle_render::slider(&spec, &ctx, &SliderHandlers::default());
+        let mut node = node;
+        stamp_slider_id(&mut node, "xl-slider-hit");
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 60.0);
+        driver.wait_for_focus_handle("xl-slider-hit");
+        let mount = driver.mount_box_bounds();
+        let rail_centre_y = f32::from(mount.origin.y) + 30.0;
+        let hit = poodle_gpui_node_backend::bounds_for("xl-slider-hit").expect("hit");
+        let hit_centre_y = f32::from(hit.origin.y) + 22.0;
+        assert!(
+            (hit_centre_y - rail_centre_y).abs() <= 0.75,
+            "xl horizontal hit centre y {hit_centre_y} must sit on the rail centre {rail_centre_y}"
+        );
+        let thumb = poodle_gpui_node_backend::bounds_for("block-slider-thumb").expect("thumb");
+        let thumb_centre_y = f32::from(thumb.origin.y) + f32::from(thumb.size.height) / 2.0;
+        assert!((thumb_centre_y - rail_centre_y).abs() <= 0.75);
+    });
+
+    run_headless(|cx| {
+        // Vertical xl: the same centring on the cross axis.
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_orientation(Orientation::Vertical)
+            .with_size(ControlSize::Xl);
+        let mut spec = spec;
+        spec.aria_label = Some("Tall".into());
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        let node = poodle_render::slider(&spec, &ctx, &SliderHandlers::default());
+        let mut node = node;
+        stamp_slider_id(&mut node, "xl-vertical-hit");
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 240.0);
+        driver.wait_for_focus_handle("xl-vertical-hit");
+        let mount = driver.mount_box_bounds();
+        let rail_centre_x = f32::from(mount.origin.x) + 80.0;
+        let hit = poodle_gpui_node_backend::bounds_for("xl-vertical-hit").expect("hit");
+        let hit_centre_x = f32::from(hit.origin.x) + 22.0;
+        assert!(
+            (hit_centre_x - rail_centre_x).abs() <= 0.75,
+            "xl vertical hit centre x {hit_centre_x} must sit on the rail centre {rail_centre_x}"
+        );
+        let thumb = poodle_gpui_node_backend::bounds_for("block-slider-thumb").expect("thumb");
+        let thumb_centre_x = f32::from(thumb.origin.x) + f32::from(thumb.size.width) / 2.0;
+        assert!((thumb_centre_x - rail_centre_x).abs() <= 0.75);
     });
 }
 
