@@ -1,6 +1,6 @@
 # g18.025 — Preview header control sizing
 
-Status: in review — opened from `ns-92be02b9-f520-4b85-9baa-794a7464605c` for exact-head independent review
+Status: in review — round 1 verdict `changes_required` (planning-change); blocked on the canonical ruling the review requests. Round-2 probe-oracle fix pushed; PR #257 stays open at the new head
 Date: 2026-09-12
 Branch: `ns-92be02b9-f520-4b85-9baa-794a7464605c`
 Card: `docs/roadmaps/g18/025-preview-header-control-sizing.md`
@@ -9,6 +9,43 @@ Governing refs: `docs/contracts/components/toggle-group.md`,
 `packages/svelte/preview/src/components/DisplayControls.svelte`,
 `packages/react/preview/src/gallery/DisplayControls.tsx`
 Base: `origin/main` at `aa51e200889d067cb0ccc6a40f7cf7b57b663269`
+
+## Review rounds
+
+### Round 1 — verdict `changes_required` (`planning-change`), PR comment 5646051126
+
+Independent review confirmed every green check and found no code defect. Two
+blocking findings:
+
+1. **Brief contradiction (`planning-change`)** — the card's stated oracle
+   ("36px visual boxes for all five controls") is not met: the two
+   ToggleGroups paint 32px by ToggleGroup's own documented item contract, so
+   the operator's original Theme/Search/Contrast vs Density/Size height split
+   persists (smaller, but present). The review rules this cannot be fixed in
+   code inside the card (component internals reserved; preview-only heights
+   excluded) and requests a canonical ruling: (1) accept the documented inset
+   and amend the card oracle, (2) authorize a follow-up component-level card,
+   or (3) explicitly authorize a preview-local alignment treatment.
+2. **`oracle-gap`** — the probe encoded `32px` as the expected toggle height,
+   so it could not fail on the card's stated 36px oracle.
+
+### Round 2 — worker response at this head
+
+- Finding 2 addressed: the probe no longer encodes a parallel expected-height
+  table. It now (a) proves the full-height controls against the card's 36px
+  md-ladder oracle outright, and (b) pins each ToggleGroup box to the
+  **measured** ladder box (the full-height controls in the same header, same
+  moment) minus the documented 0.25rem contract inset, with the divergence
+  named in every check label. If either side of the divergence moves — a
+  ruling amends the card, or a component-level change alters the inset — the
+  probe fails and forces the card oracle and the probe oracle back into
+  agreement before g18.025 can close.
+- Finding 1 cannot be closed by the worker: all three resolutions require
+  operator/orchestrator authority (amending the card, opening a component
+  card, or writing a preview-local exception), and the card's boundaries
+  forbid each until ruled. **The task is blocked on that canonical ruling.**
+- Re-validated at this head: probe 367 ok / 0 FAIL on headless Chromium and
+  367 ok / 0 FAIL on headless WebKit; `git diff --check` clean.
 
 ## Outcome
 

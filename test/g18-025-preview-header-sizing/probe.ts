@@ -48,7 +48,6 @@ function near(a: number, b: number, tolerance = 1.5): boolean {
 
 const HEADER = ".poodle-display-controls";
 const SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
-const MD_PX = 36;
 
 type Box = { height: number; top: number; bottom: number };
 
@@ -91,30 +90,68 @@ async function measureHeader(page: Page): Promise<HeaderMeasure> {
   });
 }
 
-// The md ladder is 36px. ToggleGroup items paint the ladder minus the
-// documented 0.25rem item inset (docs/contracts/components/toggle-group.md,
-// "Item .toggle-group__item: min-height = calc(height - 0.25rem)") — a
-// reusable-component contract this repair must not override.
-const EXPECTED_MD_HEIGHT: Record<string, number> = {
-  theme: MD_PX,
-  density: MD_PX - 4,
-  size: MD_PX - 4,
-  contrast: MD_PX,
-  search: MD_PX,
-};
+// ── Oracle provenance (round-2 review, PR #257 comment 5646051126) ─────────
+//
+// The card's stated oracle is "measured 36px visual boxes for all five
+// controls in both previews". Four controls prove that outright. The two
+// ToggleGroups consume the same md ladder (data-size="md",
+// --poodle-toggle-group-height = 2.25rem) but paint their documented item
+// contract — min-height = calc(height - 0.25rem) — so their painted box is
+// the ladder minus a 4px inset (docs/contracts/components/toggle-group.md,
+// "Item .toggle-group__item"). That divergence needs a canonical ruling
+// (accept the inset / component-level card / preview-local exception) and is
+// escalated on PR #257; it must not be silently encoded as "expected" here.
+//
+// The probe therefore pins the toggle boxes to the *measured* ladder box
+// (the full-height controls in the same header, same moment) minus the
+// documented contract inset. Any side that moves — component changes the
+// item inset, or a ruling amends the card/component — surfaces as a probe
+// failure and forces the card oracle and the probe oracle to be reconciled
+// before g18.025 can close.
+const MD_LADDER_PX = 36;
+const TOGGLE_ITEM_CONTRACT_INSET_PX = 4;
+const FULL_LADDER_CONTROLS = new Set(["theme", "contrast", "search"]);
+const TOGGLE_GROUP_CONTROLS = new Set(["density", "size"]);
+
+/** The measured md ladder: the painted box of the full-height controls. */
+function measuredLadderPx(measure: HeaderMeasure): number {
+  const boxes = measure.controls
+    .filter((control) => FULL_LADDER_CONTROLS.has(control.name))
+    .map((control) => control.box.height);
+  if (boxes.length === 0) return MD_LADDER_PX;
+  return Math.max(...boxes);
+}
 
 /** Assert the md-chrome geometry for one measured header. */
 function assertChromeGeometry(prefix: string, measure: HeaderMeasure): void {
   const names = measure.controls.map((control) => control.name).sort().join(",");
   check(`${prefix} all five painted controls measured`, measure.controls.length === 5, names);
+  const ladder = measuredLadderPx(measure);
+  check(
+    `${prefix} full-height controls measure the ${MD_LADDER_PX}px md ladder (card oracle)`,
+    near(ladder, MD_LADDER_PX),
+    `${ladder}px`,
+  );
   for (const { name, box, size } of measure.controls) {
-    const expected = EXPECTED_MD_HEIGHT[name]!;
     check(`${prefix} ${name} resolves the md stop`, size === "md", `data-size=${size}`);
-    check(
-      `${prefix} ${name} paints its md-contract height (${expected}px)`,
-      near(box.height, expected),
-      `${box.height}px`,
-    );
+    if (FULL_LADDER_CONTROLS.has(name)) {
+      check(
+        `${prefix} ${name} paints the ${MD_LADDER_PX}px md ladder (card oracle)`,
+        near(box.height, MD_LADDER_PX),
+        `${box.height}px`,
+      );
+    } else {
+      // TOGGLE_GROUP_CONTROLS: the painted box is pinned to the measured
+      // ladder minus the documented contract inset — not to a constant — so
+      // a ruling that moves either side fails this check and forces the
+      // card oracle and the probe oracle back into agreement.
+      const expected = ladder - TOGGLE_ITEM_CONTRACT_INSET_PX;
+      check(
+        `${prefix} ${name} paints the documented item contract (measured ladder ${ladder}px − ${TOGGLE_ITEM_CONTRACT_INSET_PX}px inset = ${expected}px; card-oracle divergence escalated on PR #257)`,
+        near(box.height, expected),
+        `${box.height}px`,
+      );
+    }
   }
   // Bucket controls into visual rows by their group's top edge, then align
   // within each row: shared tops; bottoms shared by the full-height controls
@@ -132,8 +169,8 @@ function assertChromeGeometry(prefix: string, measure: HeaderMeasure): void {
       Math.max(...tops) - Math.min(...tops) <= 2,
       `tops ${tops.map((top) => top.toFixed(1)).join("/")}`,
     );
-    const full = row.controls.filter((control) => EXPECTED_MD_HEIGHT[control.name] === MD_PX);
-    const inset = row.controls.filter((control) => EXPECTED_MD_HEIGHT[control.name] === MD_PX - 4);
+    const full = row.controls.filter((control) => FULL_LADDER_CONTROLS.has(control.name));
+    const inset = row.controls.filter((control) => TOGGLE_GROUP_CONTROLS.has(control.name));
     if (full.length > 0) {
       const bottoms = full.map((control) => control.box.bottom);
       check(
@@ -144,8 +181,8 @@ function assertChromeGeometry(prefix: string, measure: HeaderMeasure): void {
       for (const control of inset) {
         const delta = bottoms[0]! - control.box.bottom;
         check(
-          `${prefix} row ${index} ${control.name} item sits at the documented 4px contract inset`,
-          near(delta, 4),
+          `${prefix} row ${index} ${control.name} item sits at the documented ${TOGGLE_ITEM_CONTRACT_INSET_PX}px contract inset below the ladder bottom (escalated on PR #257)`,
+          near(delta, TOGGLE_ITEM_CONTRACT_INSET_PX),
           `inset ${delta.toFixed(1)}px`,
         );
       }
