@@ -171,22 +171,20 @@
   .poodle-slider[data-variant="block"] .poodle-slider__fill {
     position: absolute;
     inset-block: 0;
-    inset-inline-start: 0;
-    width: var(--poodle-slider-percent);
     left: auto;
+    inset-inline-start: var(--poodle-slider-fill-start);
+    width: var(--poodle-slider-fill-span);
     background: var(--poodle-recipe-slider-block-selected-fill, var(--poodle-color-accent-base));
     overflow: hidden;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__remainder {
     position: absolute;
-    inset-block: 0;
-    inset-inline-start: var(--poodle-slider-percent);
-    inset-inline-end: 0;
+    inset: 0;
     overflow: hidden;
   }
-  /* g18.017 fixed inline presentation: one stable text row painted twice and
-     clipped at the selected-fill boundary. Positions never depend on the
-     current value; only the painted foreground crosses over. */
+  /* One stable text row is painted twice. The selected copy is clipped to
+     the fill segment, including a bipolar center-to-value segment; glyph
+     positions never depend on the current value. */
   .poodle-slider[data-variant="block"] .poodle-slider__inline {
     position: absolute;
     inset-block: 0;
@@ -208,18 +206,15 @@
     flex: none;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline--selected {
+    z-index: 1;
     color: var(--poodle-recipe-slider-block-selected-text, var(--poodle-color-text-inverse));
-    clip-path: inset(0 calc(100% - var(--poodle-slider-percent, 0%)) 0 0);
+    clip-path: inset(0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start));
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline--remainder {
     color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
-    clip-path: inset(0 0 0 var(--poodle-slider-percent, 0%));
   }
   .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"] .poodle-slider__inline--selected {
-    clip-path: inset(0 0 0 calc(100% - var(--poodle-slider-percent, 0%)));
-  }
-  .poodle-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"] .poodle-slider__inline--remainder {
-    clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);
+    clip-path: inset(0 var(--poodle-slider-fill-start) 0 calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)));
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline-row--vertical {
     position: relative;
@@ -297,22 +292,12 @@
   .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__fill {
     inset-block: auto;
     inset-inline: 0;
-    bottom: 0;
+    bottom: var(--poodle-slider-fill-start);
     width: 100%;
-    height: var(--poodle-slider-percent);
-  }
-  .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__remainder {
-    inset-block: auto;
-    inset-inline: 0;
-    top: 0;
-    width: 100%;
-    height: calc(100% - var(--poodle-slider-percent));
+    height: var(--poodle-slider-fill-span);
   }
   .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__inline--selected {
-    clip-path: inset(calc(100% - var(--poodle-slider-percent, 0%)) 0 0 0);
-  }
-  .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__inline--remainder {
-    clip-path: inset(0 0 var(--poodle-slider-percent, 0%) 0);
+    clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);
   }
   .poodle-slider[data-variant="block"][data-orientation="vertical"] .poodle-slider__hit {
     inset-inline-start: auto;
