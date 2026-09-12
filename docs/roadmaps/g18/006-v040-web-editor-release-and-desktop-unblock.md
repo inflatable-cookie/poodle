@@ -132,7 +132,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
    `effigy release status --check-gates`. Do not follow it with a redundant
    local `qa`, `ci:web` or `docs:check`. Push the exact head and require the
    ordinary PR `web`/`rust` checks through the merged g18.029 admission.
-7. Open one non-draft candidate PR. Independent review must bind the exact head,
+7. Open one non-draft candidate PR and report `ready_for_review` immediately;
+   do not wait or poll for GitHub checks. Queue coordination owns asynchronous
+   `web`/`rust` observation and exact-head verification. Independent review must bind the exact head,
    version set, final package trees, package contents, release notes, and
    Desktop unblock oracle. The worker never merges, tags, or publishes.
 8. Return the exact candidate identity for queue review and merge. Closeout
@@ -151,6 +153,18 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 | Publication stays separate | candidate task creates a tag or changes npm | tag absence and no release workflow dispatch; g18.009 owns release mutation |
 | Changelog is valid | release proceeds by skipping the parser | Effigy status/plan parses and local release gates remain green |
 | Nucleus evidence binds the candidate once | receipts remain at the predecessor commit or mix repair/version identities | all 29 receipts, ledger and census resolve to the final candidate source commit and the complete release gate is green |
+
+### Validation budget
+
+- During assembly, run only selectors focused on the release input currently
+  changing and the required generator/checker pair for regenerated evidence.
+- Run `effigy release status --check-gates` once on the frozen candidate. It
+  subsumes `qa`, `ci:web`, `ci:rust`, packed-install and documentation checks;
+  do not run those separately afterward.
+- A review repair reruns its affected leaf selector. Rerun the release gate
+  only when the candidate or generated evidence identity changes.
+- GitHub checks are Queue-owned asynchronous evidence. No worker sleep loop,
+  `gh pr checks --watch`, or repeated status polling is allowed.
 | Public set stays bounded | candidate config admits React or crates | manifest, pack and workflow package-set inspection show core/Svelte only |
 | Desktop remains consumer-owned | Poodle worker edits PR #215 or its checkout | Poodle diff has no Desktop path; handoff contains evidence and resume instruction only |
 

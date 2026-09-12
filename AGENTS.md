@@ -23,6 +23,19 @@ Scope: whole `poodle/` repository.
 
 - Use `effigy tasks` to find selectors and run the narrow checks relevant to the batch.
 - Use `effigy qa` for the broad headless repository board.
+- Every worker handoff must name a bounded local validation budget: the focused
+  selectors allowed during implementation and the one final broad selector, if
+  any. Do not stack overlapping boards (`docs:check`, `ci:web`, `qa`, release
+  gates) or rerun a green broad selector after narrower checks.
+- Workers do not wait or poll for GitHub checks. After the clean pushed PR and
+  required local proof exist, report `ready_for_review` and stop. Queue
+  coordination owns asynchronous CI observation and exact-head verification.
+- A review repair reruns the affected leaf proof and only the final gate that
+  the change actually invalidated. Reviewers reuse exact-head CI evidence and
+  do not rerun an equivalent broad local board.
+- Release candidates run the complete local release gate once on the frozen
+  candidate. A changed candidate invalidates that receipt; documentation-only
+  follow-up does not justify unrelated broad boards.
 - Run `git diff --check` before handoff.
 - Do not edit `.github/workflows/` or run release mutations without explicit operator approval.
 

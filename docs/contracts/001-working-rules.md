@@ -1,7 +1,7 @@
 # 001 Working Rules
 
 Status: active
-Updated: 2026-09-04
+Updated: 2026-09-12
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -238,16 +238,29 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
 1. **Worker loop:** run the narrow selectors that exercise the changed paths,
    plus any generator/checker pair needed by changed evidence. Do not use
    `effigy qa`, `effigy ci:web`, `effigy docs:check`, or a release gate as a
-   discovery loop.
+   discovery loop. Every handoff names the allowed focused selectors and a
+   maximum final broad selector count. If that budget proves insufficient,
+   stop and explain the missing proof instead of improvising overlapping
+   boards.
 2. **Exact-head PR proof:** push the stable head and use the repository's
    required CI lanes for broad web/Rust coverage. Do not repeat an equivalent
    broad local board merely to restate green CI unless the task changes that
-   board or its reproducibility.
+   board or its reproducibility. The worker reports `ready_for_review` as soon
+   as the clean PR head and local task proof exist, then stops. Queue
+   coordination observes CI asynchronously; workers never run sleep/poll loops
+   for GitHub checks.
 3. **Release proof:** only the release-candidate or publication task runs the
    full local release gate. Run it once after the candidate is complete and
    stable, then run the prescribed candidate/tag dry run. A precursor repair
    proves its own surface and required PR lanes; it does not certify the later
    release candidate.
+
+A broad selector subsumes the narrower selectors in its task graph. Do not run
+`docs:check`, `ci:web`, `qa`, and release gates serially to restate the same
+proof. After review feedback, rerun the affected leaf selector and only a final
+gate whose inputs changed. Reviewers consume exact-head CI and recorded worker
+receipts; they add focused adversarial proof for a finding rather than another
+complete local board.
 
 `docs:lint` is the default local check for execution notes and generated
 evidence. Use `docs:check` when the task changes public documentation,
