@@ -256,7 +256,7 @@ bundle by run id, validator version, and directory hash and retains every
 reported finding as open evidence; findings adjudicate nothing.
 
 Manifest: `docs/evidence/nucleus/nucleus-parity-manifest.json`; receipt schema: `poodle.g16-nucleus-parity-receipt.v1`.
-Poodle resolution: `poodle-gpui-preview@0.3.0`;
+Poodle resolution: `poodle-gpui-preview@0.4.0`;
 source commit and Cargo.lock resolution are pinned in the manifest. A run that
 uses a published package must produce a separate resolution; this workspace
 receipt does not claim publication.
