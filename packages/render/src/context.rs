@@ -586,7 +586,7 @@ mod tests {
             assert!(provided.interaction.focusable);
             // The a11y projection carries no grouping a wrapper would add:
             // the provided node's accessible name is the button's own.
-            assert_eq!(provided.a11y.label, None);
+            assert_eq!(provided.a11y.label.as_deref(), Some("Save"));
             // Geometry comes from the scope (lg = 2.75rem = 44px)...
             assert_eq!(fixed_height(&provided), 44.0);
             // ...and no provider shell sits between: the child's own subtree
