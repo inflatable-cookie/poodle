@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-09-10
+Updated: 2026-09-12
 
 Northstar roadmaps use one generation-plus-task model:
 
@@ -48,10 +48,10 @@ alignment, layout-neutral targets, numeric display, and vertical geometry
 (PR #256).
 Merged g18.023 replaced the rejected accent/status syntax mapping with
 designed dark/light palettes (PR #255). Operator-approved g18.025 fixes all
-preview header controls at one stable `md` chrome size. The retained
-g18.006 `0.4.0` candidate and serial g18.009
-certification/publication lanes remain at the end and unblock Desktop only
-after accepted product source stops moving.
+preview header controls at one selected size with `sm` as the default. The
+retained g18.006 `0.4.0` candidate is now serial behind the reviewed g18.029
+candidate-scope admission; g18.009 owns post-merge branch certification and
+publication. Desktop unblocks only after the accepted release reaches npm.
 
 ## Rules
 

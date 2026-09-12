@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.028 repairs the retained candidate's Rust gate)
+Updated: 2026-09-12 (g18.029 admits the retained v0.4.0 candidate scope)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -111,19 +111,24 @@ focus-ring contract note (see the g18.024 closeout log).
 
 [`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
 preparation is blocked with its worker/workspace and progress preserved. It
-reached the release gate after g18.026 and g18.027, then stopped on two stale
-`poodle-render` accessibility assertions. Resume the same Queue task
-`17ac3fee-de90-4b32-9672-1134770bb086` only after g18.028 merges; the task,
-worker and workspace remain intact.
+is clean at current main after g18.028, with no candidate mutation or PR. Its
+release probe proved that ordinary installed-package certification cannot
+admit the `0.4.0` release diff. Resume the same Queue task
+`17ac3fee-de90-4b32-9672-1134770bb086` only after g18.029 merges; the task,
+worker, workspace and evidence remain intact.
 
-[`g18.028`](g18/028-release-gate-accessibility-assertion-repair.md) is ready as
-the operator-selected separate repair. It changes only the two stale Rust test
-expectations, proves the full library and release gates, and merges before
-retained g18.006 resumes.
+[`g18.028`](g18/028-release-gate-accessibility-assertion-repair.md) is complete
+after PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd`.
+
+[`g18.029`](g18/029-v040-candidate-scope-admission.md) is the
+operator-selected ready precursor. It adds one closed `0.4.0` policy that
+ordinary PR CI can recognize without workflow changes, preserves historical
+strict/candidate modes, and merges before retained g18.006 resumes.
 
 [`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
 certification is dependency-queued behind g18.006 with no manual hold. It
-dispatches only after the repaired candidate closes.
+dispatches only after the repaired candidate closes and owns the hosted branch
+dry run against that unchanged merged identity.
 
 ## Active and dependency-queued product tasks
 

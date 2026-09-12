@@ -24,12 +24,15 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 - [x] Release scope, version and public package set are frozen by g18.006.
 - [x] Tom explicitly authorized candidate and release execution on 2026-09-11.
 - [ ] g18.006 is complete and its accepted candidate is clean pushed main.
-- [ ] Candidate commit, package trees, archives and branch dry run are exact.
+- [ ] Candidate commit, package trees and archives are exact; branch dry run is
+  the first hosted step after dependency close.
 
 ## Decisions
 
 - Tag the exact accepted g18.006 candidate commit. Do not rebuild or amend it.
-- Run local release gates and the mandatory branch dry run before tagging.
+- Consume g18.006's exact stable local-gate proof without repeating it. Run the
+  mandatory hosted branch dry run against the unchanged merged candidate
+  before tagging.
 - Create one immutable lightweight `v0.4.0` tag only after every pre-tag gate is
   green. Never retag a failed or published release.
 - Run the tag dry run before publication. Stop on every red or mismatched run.
@@ -45,7 +48,7 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 - **State:** dependency-queued behind g18.006 with no manual hold; g18.006 stays
   paused until all product work, the four-surface sweep, g18.012, all blocking
   repairs, and operator acceptance are complete
-- **Completion:** exact candidate local gates and branch dry run green;
+- **Completion:** exact candidate local gate evidence consumed and branch dry run green;
   `v0.4.0` at that commit; tag dry run and publish green; npm core/Svelte 0.4.0
   metadata and tarballs verified; fresh ordinary install proves `./editor`;
   evidence PR independently reviewed and merged; Desktop capsule returned
@@ -62,8 +65,9 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 
 1. Resolve the exact accepted g18.006 candidate on clean pushed main. Recompute
    version, tree, archive and release-note identities without changing them.
-2. Run local release gates and the release workflow branch dry run against that
-   exact commit. Require the reported head to match.
+2. Verify g18.006's stable local-gate and exact-head PR evidence, then run the
+   release workflow branch dry run against that exact merged commit. Require
+   the reported head to match; do not repeat the equivalent local board.
 3. Create and push `v0.4.0` only after the branch dry run passes.
 4. Run the tag dry run, then publication. Stop on any failure; never retag.
 5. Query npm until exact core/Svelte 0.4.0 metadata and tarballs are available.

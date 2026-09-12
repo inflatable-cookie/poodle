@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: blocked — retained Queue task/workspace; resume after g18.028 repairs the Rust release gate
+Status: blocked — retained Queue task/workspace; resume after g18.029 admits the v0.4.0 candidate scope
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -12,7 +12,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Depends on: `g18.003`, `g18.004`, `g18.005`, `g18.008`, `g18.010`, `g18.011`,
 `g18.012`, `g18.013`, `g18.014`, `g18.015`, `g18.016`, `g18.017`, `g18.018`,
 `g18.019`, `g18.020`, `g18.021`, `g18.022`, `g18.023`, `g18.024`, `g18.025`,
-`g18.026`, `g18.027`; current continuation gate: `g18.028`
+`g18.026`, `g18.027`, `g18.028`; current continuation gate: `g18.029`
 
 ## Outcome
 
@@ -58,6 +58,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
   remains green. Repin the complete cohort again in this task after the `0.4.0`
   Cargo manifest changes, then require the whole parity-ledger, GPUI-census and
   release gate to pass against the final candidate identity.
+- g18.029 lands a closed `0.4.0` candidate-scope admission before this task
+  changes any release input. Consume that policy from current main; do not
+  recreate it or widen the installed-package guard here.
 - Include the g18.022 pre-v1 Slider-family migration. Release notes must name
   the new default `variant="block"`, retained `variant="embedded"`, and removed
   `appearance`, `standard`, `track`, and combined RangeSlider visible-range
@@ -71,7 +74,8 @@ Do not publish before all dependencies close. Do not mutate Desktop.
   Effigy's release status/plan as healthy. Preserve historical meaning; do not
   bypass the parser or release gates.
 - Preserve the repository's two-step `release.yml` protocol. This candidate
-  task owns the exact-candidate branch dry run only; g18.009 owns the later tag,
+  task owns the stable local gate and ordinary exact-head PR checks. g18.009
+  owns the hosted branch dry run after this candidate merges, then the tag,
   tag dry run and publication sequence.
 - Use narrow selectors while assembling the candidate. Run
   `effigy release status --check-gates` once, only after versions, locks,
@@ -81,9 +85,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 
 ## Dispatch manifest
 
-- **State:** blocked in retained dispatched Queue task/workspace after rebasing
-  onto accepted g18.026/g18.027 main. Its release gate found two stale Rust
-  accessibility assertions. Resume only after separate g18.028 merges. The
+- **State:** blocked in retained dispatched Queue task/workspace at clean main
+  after g18.028 closed. Its release probe exposed the missing `0.4.0`
+  candidate-scope admission. Resume only after separate g18.029 merges. The
   task's dependency list froze on first dispatch, so preserve the same task,
   worker and workspace; do not replace them or pretend a later dependency
   mutation is available.
@@ -125,8 +129,9 @@ Do not publish before all dependencies close. Do not mutate Desktop.
    isolation, SSR/browser imports, declarations, licenses, exact dependencies,
    and a fresh source-free consumer installed from the packed Svelte archive.
 6. Once the candidate is stable, run one local
-   `effigy release status --check-gates` and the exact-candidate branch dry run.
-   Do not follow either with a redundant local `qa`, `ci:web` or `docs:check`.
+   `effigy release status --check-gates`. Do not follow it with a redundant
+   local `qa`, `ci:web` or `docs:check`. Push the exact head and require the
+   ordinary PR `web`/`rust` checks through the merged g18.029 admission.
 7. Open one non-draft candidate PR. Independent review must bind the exact head,
    version set, final package trees, package contents, release notes, and
    Desktop unblock oracle. The worker never merges, tags, or publishes.
@@ -142,7 +147,7 @@ Do not publish before all dependencies close. Do not mutate Desktop.
 | Editor is in the candidate | source link passes but packed `./editor` is absent | source-free packed install imports Svelte `./editor` in browser/SSR/type modes |
 | Rich text is isolated | root or `./editor` pulls TipTap/ProseMirror | packed graph/archive isolation checks on final tarballs |
 | Desktop proof is honest | report repeats obsolete g18.002 whole-tree hashes as final | lineage records old hashes; final candidate/tag/package trees and integrity are reported separately |
-| Candidate is exact | CI success belongs to another head | branch dry-run `headSha` equals clean pushed candidate commit |
+| Candidate is exact | CI success belongs to another head | required PR checks bind the clean pushed candidate head; g18.009 later binds its hosted branch dry run to the unchanged merged candidate |
 | Publication stays separate | candidate task creates a tag or changes npm | tag absence and no release workflow dispatch; g18.009 owns release mutation |
 | Changelog is valid | release proceeds by skipping the parser | Effigy status/plan parses and local release gates remain green |
 | Nucleus evidence binds the candidate once | receipts remain at the predecessor commit or mix repair/version identities | all 29 receipts, ledger and census resolve to the final candidate source commit and the complete release gate is green |
@@ -187,11 +192,21 @@ Pre-correction promotion recheck on 2026-09-11:
 These identities are no longer final after the operator-required g18.010 UX
 repair. The retained worker must recompute them after rebasing onto its merge.
 
+Gate-admission diagnosis on 2026-09-12 verified the retained Queue branch and
+workspace clean at `ee5bdefce276558abb37c76486bc244680d812b4`, with g18.028
+merged and no unique candidate commit. A committed-range probe showed ordinary
+`test:web-pack-install` rejects `CHANGELOG.md` and a `0.4.0` package version
+before build/pack, while the only explicit candidate policy is the historical
+`g16.054-candidate` fixed to `0.3.0`. Tom selected separate g18.029 rather than
+widening this live task. The same ruling moves the hosted branch dry run to
+post-merge g18.009.
+
 ## Next task
 
-Complete g18.028's test-only Rust accessibility assertion repair. Resume this
-retained task only after that PR merges and the full library/release gate is
-green. The Queue cannot add dependencies to this already-dispatched task, so
-its blocked state is the explicit serial gate; preserve its worker and workspace.
-After the candidate merges and closes, g18.009 dispatches from its existing
-dependency. Desktop then resumes retained g02.058 and PR #215.
+Complete g18.029's closed `0.4.0` candidate-scope admission. Resume this
+retained task only after that PR merges. The Queue cannot add dependencies to
+this already-dispatched task, so its blocked state is the explicit serial gate;
+preserve its worker and workspace. After the candidate merges and closes,
+g18.009 dispatches from its existing dependency, performs the hosted branch
+dry run, and completes release. Desktop then resumes retained g02.058 and PR
+#215.
