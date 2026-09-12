@@ -10,6 +10,11 @@ owner: Poodle Northstar orchestrator
 created: 2026-09-12
 updated: 2026-09-12
 base_required: pushed-main
+queue_dispatch: northstar-queue
+queue_approval: "Tom explicitly said ‘Dispatch’ on 2026-09-12 after approving the g18.026 → g18.027 → retained g18.006 runway."
+queue:
+  capability: complex
+  skipPRReview: false
 tags: [coordination, handoff, worker, g18, g18.026, slider, range-slider, foundation]
 ---
 
