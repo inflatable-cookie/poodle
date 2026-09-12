@@ -407,10 +407,6 @@ export function blockInlineFits(
   });
 }
 
-export function rangeSliderFallbackText(label: string | null, rangeText: string | null): string | null {
-  return omitEmptyVisibleText([label, rangeText].filter((part): part is string => part != null && part !== "").join(" "));
-}
-
 export function physicalToValueNorm(physicalNorm: number, direction: SliderDirection): number {
   const clamped = Math.min(Math.max(physicalNorm, 0), 1);
   return direction === "rtl" ? 1 - clamped : clamped;

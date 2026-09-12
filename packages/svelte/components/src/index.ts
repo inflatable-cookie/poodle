@@ -158,7 +158,6 @@ export type {
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
   PopoverTriggerState,
-  SliderVariant,
   SliderPolarity,
 } from "@inflatable-cookie/poodle-core";
 
@@ -274,6 +273,7 @@ export type {
   OverlayPlacement,
   OverflowMode,
   PillAppearance,
+  SliderVariant,
   SliderDirection,
   PillFont,
   PillSize,

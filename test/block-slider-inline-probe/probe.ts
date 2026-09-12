@@ -256,6 +256,39 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
     rtl.selectedLabelColor !== rtl.remainderLabelColor,
   );
 
+  // g18.022 vertical block: the value paints at the capsule's physical top
+  // and the optional label at its center, anchored to the whole capsule.
+  const vertical = await measure(page, `${base} [data-case="slider-vertical"]`);
+  const verticalTopInset = vertical.selectedValue.top - vertical.capsule.top;
+  check(
+    `${prefix} vertical value paints at the capsule top`,
+    vertical.selectedValueText === "50" && verticalTopInset < 14,
+    `value top inset ${verticalTopInset.toFixed(1)}`,
+  );
+  const verticalLabelCenter = (vertical.selectedLabel.top + vertical.selectedLabel.bottom) / 2;
+  const verticalCapsuleCenter = (vertical.capsule.top + vertical.capsule.bottom) / 2;
+  check(
+    `${prefix} vertical label stays centered`,
+    Math.abs(verticalLabelCenter - verticalCapsuleCenter) <= 4,
+    `label center ${verticalLabelCenter.toFixed(1)} vs capsule center ${verticalCapsuleCenter.toFixed(1)}`,
+  );
+  check(
+    `${prefix} vertical row fills the capsule`,
+    vertical.selectedValue.top < vertical.selectedLabel.top &&
+      vertical.selectedLabel.bottom <= vertical.capsule.bottom &&
+      vertical.capsule.height > 100,
+    `capsule ${vertical.capsule.height}px value ${vertical.selectedValue.top} label ${vertical.selectedLabel.top}..${vertical.selectedLabel.bottom}`,
+  );
+  check(
+    `${prefix} vertical text stays inside the capsule`,
+    vertical.selectedValue.top >= vertical.capsule.top &&
+      vertical.selectedLabel.bottom <= vertical.capsule.bottom,
+  );
+  check(
+    `${prefix} vertical paints no fallback`,
+    (await page.locator(`${base} [data-case="slider-vertical"] .poodle-slider__fallback`).count()) === 0,
+  );
+
   // RangeSlider: radius-only family change; inline placement untouched.
   const rangeSel = `${base} [data-case="range-block"]`;
   const rangeCapsule = page.locator(`${rangeSel} .poodle-range-slider__capsule`);

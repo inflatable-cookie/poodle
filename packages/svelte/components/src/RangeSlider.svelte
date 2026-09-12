@@ -112,21 +112,6 @@
     });
   });
 
-  function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: Event): void {
-    const raw = Number((event.currentTarget as HTMLInputElement).value);
-    const result = rangeSliderTransition(machineContext, { type, thumb, raw });
-
-    for (const effect of result.effects) {
-      value = effect.value;
-
-      if (effect.type === "emitValueChange") {
-        onValueChange?.(effect.value);
-      } else if (effect.type === "emitValueCommit") {
-        onValueCommit?.(effect.value);
-      }
-    }
-  }
-
   function runControl(event: Parameters<typeof rangeSliderControlTransition>[1]): void {
     const result = rangeSliderControlTransition(controlContext, event);
     controlMachine = result.context;

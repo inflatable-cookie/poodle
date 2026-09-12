@@ -215,12 +215,30 @@
     clip-path: inset(0 var(--poodle-slider-percent, 0%) 0 0);
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline-row--vertical {
+    position: relative;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
+    height: 100%;
+  }
+  /* The optional label centers on the exact capsule middle: it is anchored
+     to the whole capsule (absolute, translateY(-50%)), so the value slot at
+     the top never shifts the center at any height. The transform is
+     constant, so the glyphs stay spatially fixed like every other part of
+     the stable text layout. */
+  .poodle-slider[data-variant="block"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline-spacer {
-    flex: none;
+    flex: 1 1 0;
   }
   .poodle-slider[data-variant="block"] .poodle-slider__inline-label,
   .poodle-slider[data-variant="block"] .poodle-slider__inline-value {

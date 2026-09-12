@@ -321,7 +321,10 @@ describe("Slider (react) block variant", () => {
 
   it("keeps vertical block upright: value top, label centered, clip along the block axis", () => {
     expect(css).toContain(
-      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n  }",
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical {\n    position: relative;\n    flex-direction: column;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    height: 100%;\n  }",
+    );
+    expect(css).toContain(
+      ".poodle-slider[data-variant=\"block\"] .poodle-slider__inline-row--vertical .poodle-slider__inline-label {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
     );
     expect(css).toContain(
       ".poodle-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-slider-percent, 0%)) 0 0 0);",

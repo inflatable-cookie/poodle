@@ -16,7 +16,6 @@
 <section data-framework="svelte">
   <div data-case="slider-xs" style="width: 240px; padding: 24px;">
     <Slider
-      appearance="block"
       size="xs"
       min={0}
       max={100}
@@ -33,7 +32,6 @@
   </div>
   <div data-case="slider-xs-compact" style="width: 240px; padding: 24px;">
     <Slider
-      appearance="block"
       size="xs"
       density="compact"
       min={0}
@@ -51,7 +49,6 @@
   </div>
   <div data-case="range-xs" style="width: 240px; padding: 24px;">
     <RangeSlider
-      appearance="block"
       size="xs"
       min={0}
       max={100}

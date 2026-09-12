@@ -863,11 +863,23 @@ fn block_text_row(
     let label_slot = block_text_slot(label, color, size, label_id);
     let value_slot = block_text_slot(value, color, size, value_id);
     row = if vertical {
-        // Value at the physical top, label centered, and an empty bottom
-        // slot completing the three-anchor law. Text stays upright; nothing
-        // rotates.
-        let bottom_slot = block_text_slot(None, color, size, "block-slider-spacer");
-        row.child(value_slot).child(label_slot).child(bottom_slot)
+        // Value at the physical top. The optional label is anchored to the
+        // whole capsule and centered on its exact middle (absolute wrapper
+        // spanning the row, content centered), so the value slot at the top
+        // never shifts the center at any height. Text stays upright;
+        // nothing rotates.
+        let mut label_wrap = Node::container();
+        label_wrap.style.descriptor.layout.direction = LayoutDirection::Column;
+        label_wrap.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        label_wrap.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        label_wrap.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: Some(0.0),
+        };
+        label_wrap = label_wrap.child(label_slot);
+        row.child(value_slot).child(label_wrap)
     } else if rtl {
         row.child(value_slot).child(label_slot)
     } else {

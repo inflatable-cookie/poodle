@@ -18,7 +18,6 @@ export function Harness() {
     <section data-framework="react">
       <div data-case="slider-xs" style={{ width: 240, padding: 24 }}>
         <Slider
-          appearance="block"
           size="xs"
           min={0}
           max={100}
@@ -35,7 +34,6 @@ export function Harness() {
       </div>
       <div data-case="slider-xs-compact" style={{ width: 240, padding: 24 }}>
         <Slider
-          appearance="block"
           size="xs"
           density="compact"
           min={0}
@@ -53,7 +51,6 @@ export function Harness() {
       </div>
       <div data-case="range-xs" style={{ width: 240, padding: 24 }}>
         <RangeSlider
-          appearance="block"
           size="xs"
           min={0}
           max={100}

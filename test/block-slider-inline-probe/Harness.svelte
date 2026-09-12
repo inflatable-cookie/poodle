@@ -14,6 +14,7 @@
   let collision = $state(12);
   let rtl = $state(20);
   let range = $state<[number, number]>([20, 80]);
+  let vertical = $state(50);
   let dispatches = $state(0);
   let trace = $state("idle");
 </script>
@@ -21,7 +22,6 @@
 <section data-framework="svelte">
   <div data-case="slider-low" style="width: 240px; padding: 24px;">
     <Slider
-      appearance="block"
       min={0}
       max={100}
       step={1}
@@ -39,7 +39,6 @@
   </div>
   <div data-case="slider-mid" style="width: 240px; padding: 24px;">
     <Slider
-      appearance="block"
       min={0}
       max={100}
       step={1}
@@ -57,7 +56,6 @@
   </div>
   <div data-case="slider-high" style="width: 240px; padding: 24px;">
     <Slider
-      appearance="block"
       min={0}
       max={100}
       step={1}
@@ -75,7 +73,6 @@
   </div>
   <div data-case="slider-collision" style="width: 64px; padding: 24px;">
     <Slider
-      appearance="block"
       min={0}
       max={100}
       step={1}
@@ -90,9 +87,27 @@
     />
     <p data-testid="trace" data-hits={dispatches}>{trace}</p>
   </div>
+  <!-- g18.022 vertical block: the value paints at the capsule's physical top
+       and the optional label at its center — anchored to the whole capsule,
+       not wherever the row happens to lay out. -->
+  <div data-case="slider-vertical" style="width: 200px; height: 220px; padding: 24px;">
+    <Slider
+      orientation="vertical"
+      min={0}
+      max={100}
+      step={1}
+      value={vertical}
+      visibleLabel="Gain"
+      ariaLabel="Vertical gain"
+      onValueChange={(next) => {
+        vertical = next;
+        dispatches += 1;
+        trace = `change:${next}`;
+      }}
+    />
+  </div>
   <div data-case="slider-rtl" style="width: 240px; padding: 24px;">
     <Slider
-      appearance="block"
       direction="rtl"
       min={0}
       max={100}
@@ -104,7 +119,6 @@
   </div>
   <div data-case="range-block" style="width: 240px; padding: 24px;">
     <RangeSlider
-      appearance="block"
       min={0}
       max={100}
       step={1}

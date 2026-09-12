@@ -245,3 +245,31 @@ Known deltas for review: the packed install falsification receipts still name
 the committed (pre-migration) fixture names because falsification plants run
 against committed state; the migrated `slider-variant-*` fixtures are in this
 commit.
+
+## Review-fix log (worker, 2026-09-11)
+
+- `SliderVariant` is now exported from both public Svelte paths' `types.ts`
+  (and React's `types.ts`), so the packed `slider-variant-positive.ts` proof
+  compiles on the `/types` subpath; the React packed positive compiles from
+  the rebuilt `dist/types.d.ts`.
+- Vertical block Slider text is anchored to the whole capsule: the
+  `--inline-row--vertical` row fills the capsule (`width/height: 100%`) and
+  the optional label centers on the exact capsule middle via a constant
+  `translateY(-50%)` anchor; the native `block_text_row` mirrors it with an
+  absolute wrapper spanning the row, so the top value slot cannot shift the
+  center at any height. Proven by a new `slider-vertical` case in the
+  block-slider-inline probe on Chromium and WebKit (value at capsule top,
+  label center == capsule center, no fallback, upright text).
+- `packages/svelte/preview/artifacts/component-docs.json` regenerated; no
+  `appearance`, `formatVisibleRange`, or `"standard"` variant remains for
+  either control.
+- The block-slider probe harnesses no longer pass the removed
+  `appearance="block"`; block is the default they render.
+- Dead code removed: `rangeSliderFallbackText` (core) and the unused
+  RangeSlider `send()` (Svelte).
+- Re-run proof: core 1376, svelte 1543 + react 1526 component tests, previews
+  and parity/a11y/dom/SSR boards green, docs lint and drift green, packed
+  install inner run green (12 files / 25 tests), GPUI regressions 238,
+  poodle-render 645 pass with the same 2 documented pre-existing unrelated
+  failures, both probes green on Chromium and WebKit (82/48 assertions per
+  engine), `git diff --check` clean.

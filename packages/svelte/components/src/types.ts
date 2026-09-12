@@ -74,6 +74,7 @@ export type StatusTone =
 export type ToneFill = "tint" | "solid";
 export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";
 export type PillAppearance = "tint" | "solid" | "subtle" | "badge";
+export type SliderVariant = "block" | "embedded";
 export type SliderDirection = "ltr" | "rtl";
 export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type PillFont = "normal" | "mono";
