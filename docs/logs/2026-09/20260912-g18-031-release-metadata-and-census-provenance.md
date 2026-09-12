@@ -1,7 +1,7 @@
 # g18.031 — Release metadata and GPUI census provenance
 
-Status: changes requested — operator corrected root version policy on PR #263;
-revised implementation awaiting fresh exact-head review
+Status: ready for review — fresh exact-head review requested under queue
+ownership (PR #264)
 Date: 2026-09-12
 Branch: `ns-e58c6d92-5f97-4263-8bc6-7756f749727a`
 Card: `docs/roadmaps/g18/031-release-metadata-and-census-provenance.md`
@@ -29,6 +29,11 @@ with root repository metadata corrected rather than exempted.
 - The closed g18.006 candidate policy now requires root `package.json` as a
   version-only `0.3.0` -> `0.4.0` release input and rejects any other root
   manifest change.
+- Ordinary CI admits exactly the one-time g18.031 precursor root alignment
+  (`0.1.0` -> `0.3.0`, version leaf only, `private` preserved). The earlier
+  revision left the deterministic `ci-web` gate failing because ordinary mode
+  labelled the operator-ordered root bump a forbidden version surface while
+  the closed-candidate escape hatch requires a full `0.4.0` candidate diff.
 - `scripts/gpui-functionality-census.ts` no longer embeds `package_version:
   "0.3.0"`. The generator derives it from
   `packages/gpui/preview/Cargo.toml` through fail-closed parsing and validates
@@ -85,6 +90,21 @@ Focused plants in `test/package-install/scope.test.ts`:
 | root `scripts.test` drift with the version bump | `candidate scope rejected unauthorized package.json changes: scripts.test` |
 | root `private: false` | `candidate scope rejected` |
 
+### Ordinary precursor alignment (ci-web repair)
+
+`ordinaryAdmitsPrecursorRootAlignment` admits exactly the one-time
+`0.1.0` -> `0.3.0` root version-only transition in ordinary mode and removes
+only that `package.json`/`version` forbidden label; every other forbidden
+surface beside it still fails, and the `0.3.0` -> `0.4.0` transition remains
+the closed g18.006 candidate rule.
+
+| Plant | Result |
+| --- | --- |
+| root `0.1.0` -> `0.3.0`, version leaf only, `private: true` | admitted |
+| wrong target (`0.4.0`), `scripts` drift, dependency drift, `private: false` | `forbidden version surface: package.json` |
+| precursor alignment plus a `.npmrc` registry change | `certification scope rejected forbidden` |
+| lone `0.3.0` -> `0.4.0` root bump without the closed candidate | `forbidden version surface: package.json` |
+
 ## Census provenance proof
 
 - `parsePreviewPackageVersion` reads exactly one `[package]` table and one
@@ -109,8 +129,12 @@ Budget: focused candidate-scope suite, `test:gpui-census`,
 `git diff --check`. No mounted tests, full `qa`, release gates or windowed
 conformance selectors were run.
 
-- `bun test test/package-install/scope.test.ts` — 44 pass / 0 fail, including
-  the new exact root version-only transition plants.
+- `bun test test/package-install/scope.test.ts` — 48 pass / 0 fail, including
+  the exact root version-only transition plants and the ordinary precursor
+  alignment plants.
+- Read-only ordinary-mode scope probe over the real base-to-head range
+  (`assertInstalledScope(repo, main, HEAD, "ordinary")`) — admitted after the
+  repair; it rejected before.
 - `effigy test:gpui-census` — 21 pass / 0 fail (17 existing oracles plus 4
   provenance laws).
 - `effigy check:gpui-census` — checked-in artifacts match the generator and

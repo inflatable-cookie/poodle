@@ -888,6 +888,42 @@ async function ordinaryCargoForbiddenSurfaces(
   return forbidden;
 }
 
+const PRECURSOR_ROOT_ALIGNMENT_SOURCE = "0.1.0";
+const PRECURSOR_ROOT_ALIGNMENT_TARGET = "0.3.0";
+
+/**
+ * One-time operator-ordered g18.031 precursor: the private root repository
+ * manifest moves 0.1.0 -> 0.3.0 so its version is truthful beside the accepted
+ * release. Ordinary CI admits exactly that alignment - private preserved,
+ * every other leaf unchanged - and nothing broader. The later 0.3.0 -> 0.4.0
+ * transition stays the closed g18.006 candidate rule.
+ */
+async function ordinaryAdmitsPrecursorRootAlignment(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  if (!changedPaths.includes("package.json")) return false;
+  const beforeText = await gitShowFile(checkoutRoot, requiredBaseCommit, "package.json");
+  const afterText = await gitShowFile(checkoutRoot, sourceCommit, "package.json");
+  if (beforeText === null || afterText === null) return false;
+  let before: unknown;
+  let after: unknown;
+  try {
+    before = JSON.parse(beforeText);
+    after = JSON.parse(afterText);
+  } catch {
+    return false;
+  }
+  if (!isJsonRecord(before) || !isJsonRecord(after)) return false;
+  if (before.version !== PRECURSOR_ROOT_ALIGNMENT_SOURCE) return false;
+  if (after.version !== PRECURSOR_ROOT_ALIGNMENT_TARGET) return false;
+  if (before.private !== true || after.private !== true) return false;
+  const changes = changedJsonLeafPaths(before, after);
+  return changes.length === 1 && changes[0] === "version";
+}
+
 function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
@@ -1567,6 +1603,23 @@ export async function assertInstalledScope(
         changedPaths,
       )),
     );
+    // The one-time g18.031 precursor aligns the private root manifest from
+    // 0.1.0 to the accepted 0.3.0. That exact version-only alignment is
+    // admitted; any broader root manifest change, or any other forbidden
+    // surface beside it, still fails closed. The 0.3.0 -> 0.4.0 transition
+    // remains the closed g18.006 candidate rule.
+    if (
+      await ordinaryAdmitsPrecursorRootAlignment(
+        checkoutRoot,
+        requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      )
+    ) {
+      forbidden = forbidden.filter(
+        ({ path, surface }) => !(path === "package.json" && surface === "version"),
+      );
+    }
     // Ordinary CI has no candidate environment variable. A release-bearing
     // range (a forbidden version/release surface or any staged release note)
     // is admitted only when the complete diff satisfies the closed g18.006

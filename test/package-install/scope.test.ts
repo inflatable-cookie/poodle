@@ -1132,3 +1132,88 @@ describe("closed 0.4.0 candidate scope admission", () => {
     ).rejects.toThrow(/candidate scope requires packages\/core\/package\.json/);
   });
 });
+
+describe("g18.031 precursor root version alignment", () => {
+  const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+    name: "poodle",
+    version: "0.1.0",
+    private: true,
+    scripts: { test: "vitest run" },
+    dependencies: { "left-pad": "1.0.0" },
+    ...overrides,
+  });
+
+  async function plantRootRange(
+    mutateHead: (manifest: Record<string, unknown>) => void,
+    extraHeadFiles: Record<string, string> = {},
+  ): Promise<{ root: string; base: string; head: string }> {
+    const root = await initPlant();
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest(), null, 2)}\n`,
+    });
+    const base = await commitAll(root, "precursor root base");
+    const target = rootManifest({ version: "0.3.0" });
+    mutateHead(target);
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(target, null, 2)}\n`,
+      ...extraHeadFiles,
+    });
+    const head = await commitAll(root, "precursor root head");
+    return { root, base, head };
+  }
+
+  test("ordinary CI admits the exact 0.1.0 -> 0.3.0 version-only alignment", async () => {
+    const { root, base, head } = await plantRootRange(() => {});
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toContain("package.json");
+  });
+
+  test("ordinary CI rejects anything broader than the precursor alignment", async () => {
+    const plants: Record<string, (manifest: Record<string, unknown>) => void> = {
+      "wrong target": (manifest) => {
+        manifest.version = "0.4.0";
+      },
+      "scripts drift": (manifest) => {
+        (manifest.scripts as Record<string, unknown>).test = "echo planted";
+      },
+      "dependency drift": (manifest) => {
+        (manifest.dependencies as Record<string, unknown>)["left-pad"] = "2.0.0";
+      },
+      "private flip": (manifest) => {
+        manifest.private = false;
+      },
+    };
+    for (const [kind, mutate] of Object.entries(plants)) {
+      const { root, base, head } = await plantRootRange(mutate);
+      await expect(
+        assertInstalledScope(root, base, head, "ordinary"),
+        kind,
+      ).rejects.toThrow(/forbidden version surface: package\.json/);
+    }
+  });
+
+  test("ordinary CI keeps other forbidden surfaces beside the precursor alignment", async () => {
+    const { root, base, head } = await plantRootRange(() => {}, {
+      ".npmrc": "registry=https://registry.example.invalid\n",
+    });
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /certification scope rejected forbidden/,
+    );
+  });
+
+  test("ordinary CI still refuses a 0.3.0 -> 0.4.0 root bump without the closed candidate", async () => {
+    const root = await initPlant();
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest({ version: "0.3.0" }), null, 2)}\n`,
+    });
+    const base = await commitAll(root, "post-precursor base");
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest({ version: "0.4.0" }), null, 2)}\n`,
+    });
+    const head = await commitAll(root, "post-precursor head");
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /forbidden version surface: package\.json/,
+    );
+  });
+});
