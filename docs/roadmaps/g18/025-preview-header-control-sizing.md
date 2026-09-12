@@ -1,6 +1,6 @@
 # 025 — Preview header control sizing
 
-Status: Queue revision — preview-local ToggleGroup alignment authorized 2026-09-12
+Status: complete — merged as `90c40defe86e4841ad248c72200f7333f37c342d` (PR #257) on 2026-09-12
 Owner: Poodle web previews
 Created: 2026-09-12
 Governing refs: `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
@@ -56,9 +56,10 @@ acceptance uses the corrected shell.
 
 ## Dispatch manifest
 
-- **State:** ready; serial before retained g18.006
+- **State:** complete; merged g18.025 fixed-`md` header repair; serial before
+  retained g18.006
 - **Completion:** one open non-draft PR at a clean pushed head with exact-head
-  independent review; never merge
+  independent review; merged by the plugin, never by the worker
 - **Owned mutable paths:** paired DisplayControls implementations; React
   gallery CSS and Svelte local DisplayControls styles; focused paired preview
   tests; one g18.025 execution log

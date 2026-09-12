@@ -1,6 +1,6 @@
 # g18.025 — Preview header control sizing
 
-Status: in review — round 4: approved at `e99c6e80e`; queue branch synced onto origin/main (`81bf2014f`) to pick up the slider-lane fixes the web gate asserts, all checks re-run green; PR #257 open at the new head
+Status: complete — merged as `90c40defe86e4841ad248c72200f7333f37c342d` (PR #257) on 2026-09-12 after exact-head independent review (PR comment `5646310971`, `ready_to_merge`) at `c2b2f8f161bee3ae8c68400f9e155812101d6e08` with green rust/web checks
 Date: 2026-09-12
 Branch: `ns-92be02b9-f520-4b85-9baa-794a7464605c`
 Card: `docs/roadmaps/g18/025-preview-header-control-sizing.md`
@@ -111,7 +111,7 @@ TextInput) resolve `md` at every specimen Size stop and the header no longer
 resizes when the operator selects `xs`–`xl`. Density keeps following the
 Density axis; values, generated-shell ownership, wrapping, responsive search
 growth, keyboard behavior, and accessibility are unchanged. No reusable
-component API or internal changed, and no preview-only CSS heights were added.
+component API or internal changed; the only preview CSS height is the card-authorized paired ToggleGroup inset neutralization (Chatterbox ruling `b14aeb04b`), scoped to the two preview headers.
 
 ## Execution
 
@@ -191,3 +191,38 @@ in a follow-up card.
   following the specimen scale — it is outside the card's owned paths.
 - Closeout surfaces (g18 README/index/dispatch/task state) left to the
   orchestrator; retained g18.006/g18.009 untouched.
+
+## Review and merge
+
+Independent round-4 review at `c2b2f8f161bee3ae8c68400f9e155812101d6e08` (PR
+comment `5646310971`): **ready to merge**. The reviewer confirmed the
+queue-branch sync onto `origin/main` (`81bf2014f`, zero conflicts) left the
+approved g18.025 surface byte-identical to the round-3 head, resolved the
+inherited web-gate red (Slider block-variant extracted-styles suites green:
+svelte-components 25/25, react-components 26/26), and re-measured the merged
+head independently: header probe 321 ok / 0 FAIL on Chromium and WebKit (all
+five controls 36px with shared row tops `81.5` and bottoms `117.5`, header
+height `83.5`; catalogue `sm` toggle items still 24px, no specimen leak),
+focused paired preview tests 8/8, full preview projects 29 files / 134 tests,
+`svelte-check` preview 0 errors, react preview `tsc` clean in the g18.025
+surface, `svelte:build` / `react:build` exit 0, `docs:check` exit 0,
+`git diff --check` clean.
+
+Two non-blocking notes, each deferred rather than repaired here:
+
+- The round-4 review flagged this log's react-`tsc` wording ("two pre-existing
+  SliderSpecimen errors") as undercounting the five `SliderSpecimen.tsx`
+  diagnostics; the overall error-board count is unchanged from prior heads and
+  none is in the g18.025 surface. Log-accuracy nit only.
+- The probe's leak-guard `SIZE_LADDER_PX` table duplicates the shared ladder
+  as a test constant; acceptable, revisit if the ladder ever moves.
+
+Merge gate: PR #257 merged as `90c40defe86e4841ad248c72200f7333f37c342d`
+with green rust/web checks.
+
+## Continuation
+
+g18.025 is merged. After the corrected preview experience is accepted, the
+retained g18.006 release-candidate task resumes with the repair in the `0.4.0`
+source identity; g18.009 stays serial behind it. Further planning direction
+needs the operator.

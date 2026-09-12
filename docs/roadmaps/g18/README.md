@@ -69,7 +69,7 @@ needed to compile honest repair tranches.
 | [`g18.022`](022-block-first-slider-family.md) — block-first Slider family | complete | PR #254 (merge `02ab7f7ec9122d85364beca77d05d681fa4d0124`); block-default two-variant Slider/RangeSlider API, fixed RangeSlider anchors, vertical block parity, repinned evidence |
 | [`g18.023`](023-code-editor-dual-syntax-palettes.md) — CodeEditor dual syntax palettes | complete | PR #255 (merge `155dbc7d82fe04479a986c1f5f5698770e366c17`); designed dark/light syntax ramps plus sparse Poodle-theme overrides; ran beside g18.024; serial before g18.006 |
 | [`g18.024`](024-slider-family-layout-and-vertical-repair.md) — Slider-family layout and vertical repair | complete | PR #256 (merge `c73db47d0de36dd0ce99ba697424dedb7c7b82da`); shared size alignment, layout-neutral hit targets, step-aware visible values, centred thumbs and xl-anchored vertical geometry; ran beside g18.023; serial before g18.006 |
-| [`g18.025`](025-preview-header-control-sizing.md) — Preview header control sizing | ready for Queue dispatch | fixed `md` Theme/Density/Size/Contrast/Search chrome in both previews; serial before g18.006 |
+| [`g18.025`](025-preview-header-control-sizing.md) — Preview header control sizing | complete | PR #257 (merge `90c40defe86e4841ad248c72200f7333f37c342d`); fixed `md` Theme/Density/Size/Contrast/Search chrome with the authorized paired ToggleGroup inset treatment in both previews; serial before g18.006 |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -128,10 +128,12 @@ block parity. Merged g18.023 replaced the rejected accent/status syntax mapping
 with designed dark/light palettes (PR #255, merged `155dbc7d82fe04479a986c1f5f5698770e366c17`).
 Merged g18.024 repaired the Slider family's size/alignment, numeric display,
 and vertical geometry defects (PR #256, merged `c73db47d0de36dd0ce99ba697424dedb7c7b82da`).
-g18.025 now owns the remaining paired-preview header sizing mismatch. g18.006
-is the retained final candidate lane and stays paused until operator acceptance
-of merged g18.011 and g18.025 closes. g18.009 waits on g18.006; no candidate
-is tagged or published while accepted product source is moving.
+Merged g18.025 fixed the paired-preview header sizing mismatch with fixed `md`
+chrome plus the authorized paired ToggleGroup inset treatment (PR #257, merged
+`90c40defe86e4841ad248c72200f7333f37c342d`). g18.006 is the retained final
+candidate lane and stays paused until operator acceptance of merged g18.011
+closes. g18.009 waits on g18.006; no candidate is tagged or published while
+accepted product source is moving.
 
 ## Held and recurring work
 
