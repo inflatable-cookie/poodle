@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-13 (g18.033 GPUI FormDialog convergence ready)
+Updated: 2026-09-13 (g18.033 GPUI FormDialog convergence merged)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -122,12 +122,19 @@ rust/web checks at the reviewed head. Root release metadata is truthful, its
 exact lockstep transition is admitted and census receipt versions derive from
 the preview crate manifest; no blocking findings remain.
 
+[`g18.033`](g18/033-gpui-form-dialog-render-convergence.md) — GPUI FormDialog
+render convergence — merged as `71788758102854d665d2be35b93a9ec4aa5ee3d9` (PR
+#268) on 2026-09-13 after exact-head independent review (PR comment
+`5653871766`, `ready_to_merge`) at `b4a2534229df018f743d9df4e964ad59279cd117`
+with narrow green checks at the reviewed head. The probe window-lifecycle
+repair restores 175/175 routes with a fail-closed regression; three baseline
+reds were cleared under operator rulings and one complete `qa:board` is
+wholly green in 453s. No blocking findings remain.
+
 ## Active and paused queue tasks
 
-[`g18.033`](g18/033-gpui-form-dialog-render-convergence.md) is the sole ready
-task. It repairs the `form-dialog` first-draw non-termination left visible by
-g18.032, restores all 175 GPUI specimen routes, and requires one wholly green
-bounded full board. A timeout-only or partial-board result cannot close it.
+No active queue task. The post-`0.4.0` consumer/specimen sweep is the next
+execution frontier; scope is compiled from live findings.
 
 ## Active and dependency-queued product tasks
 
@@ -211,8 +218,8 @@ merged evidence is retained in the generation roadmap.
 exact-head independent review (PR comment `5653154132`, `ready_to_merge`) at
 `7bb9f348d4b65d40f89733fe1ae081930c118293`. The final board passed 54/68
 units before safely stopping at the pre-existing `probe:gpui-specimens` hang.
-That containment is not acceptance: g18.033 owns the causal repair and must
-finish the complete board before the consumer/specimen sweep.
+That containment is not acceptance: g18.033 has since merged and finished the
+complete board before the consumer/specimen sweep.
 
 ## Held planning horizons
 

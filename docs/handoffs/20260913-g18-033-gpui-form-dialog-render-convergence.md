@@ -5,10 +5,13 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: merged
 owner: Poodle Northstar orchestrator
 created: 2026-09-13
 updated: 2026-09-13
+merged_pr: 268
+merged_commit: 71788758102854d665d2be35b93a9ec4aa5ee3d9
+review_comment: 5653871766
 base_required: pushed-main
 queue_dispatch: northstar-queue
 queue_approval: "Tom explicitly rejected the g18.032 closeout on 2026-09-13 because the GPUI hang remains and required the underlying problem to be fixed before moving on."

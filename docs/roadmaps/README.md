@@ -60,13 +60,13 @@ through an operator-authorized npm/web wrapper repair: `v0.4.0` is tagged at
 and a fresh registry consumer proves the Svelte `./editor` entry. Desktop
 unblocks from that published release.
 
-Merged g18.032 on 2026-09-13 (PR #267) repairs the process exposed by `0.4.0`:
-generic web-candidate admission, separate npm and native trains, one-build
-archives, two bounded hosted runs, and an observable deduplicated full
-headless board. Its final board safely stopped at the pre-existing
-`probe:gpui-specimens` renderer hang, but containment is not completion.
-Operator-prioritized g18.033 now owns the causal `form-dialog` repair and a
-wholly green bounded board before the post-`0.4.0` consumer/specimen sweep.
+Merged g18.033 on 2026-09-13 (PR #268) repairs the `form-dialog` first-draw
+non-termination: the probe now closes each route window after its assertions,
+restoring all 175 specimen routes with a fail-closed regression, and one
+complete `qa:board` is wholly green in 453s. Three baseline reds the board
+reached were cleared under operator rulings (`deny.toml` bzip2 drift, the
+tracked-symlink audit repair, the Vitest advisory patch). The post-`0.4.0`
+consumer/specimen sweep is the next execution frontier.
 
 ## Rules
 

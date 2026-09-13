@@ -1,6 +1,6 @@
 # 033 — GPUI FormDialog render convergence
 
-Status: ready
+Status: complete
 Owner: Poodle GPUI renderer and specimen infrastructure
 Created: 2026-09-13
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -148,6 +148,29 @@ the same process at roughly 100% CPU for 2h37m. A focused shard mounts through
 places the stack under `Window::draw`, flex layout and
 `poodle-gpui-node-backend` state patches. The probe's own settle and two-minute
 body limit are downstream of the stuck draw and cannot contain it.
+
+## Closeout
+
+Merged as `71788758102854d665d2be35b93a9ec4aa5ee3d9` (PR #268) on 2026-09-13
+after exact-head independent review (PR comment `5653871766`,
+`ready_to_merge`) at `b4a2534229df018f743d9df4e964ad59279cd117` with narrow
+green checks at the reviewed head; the queue owned asynchronous CI
+observation per protocol.
+
+Truthful validation: the one final `qa:board` ran 453s (7m33s) and exited 0 —
+every owned unit green under the unchanged fifteen-minute cap, including the
+Nucleus ledger (176 rows), `probe:gpui-specimens` 9/9 with 175/175 routes,
+`audit:licenses` and `audit:security`. The causal repair closes each route
+window after its assertions; the `app.windows().len() == 0` regression fails
+closed on the pre-fix implementation instead of hanging. Three baseline reds
+the board reached after the GPUI leaf passed were cleared under operator
+rulings canonicalized on `main`: `deny.toml` bzip2 drift (`f7c6d44f3`),
+tracked-symlink `EISDIR` audit repair (`adf6420ba`), and the Vitest
+GHSA-82fw-gwwq-j7x9 patch to 4.1.11 (`1a974fc44`).
+
+Deferred: the review's two non-blocking observations (stale PR-body board
+status, missing trailing newline in `specimen_probe.rs`) are follow-up
+material. The next pointer below is preserved.
 
 ## Next task
 

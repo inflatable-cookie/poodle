@@ -156,3 +156,17 @@ Nucleus ledger (176 rows), `probe:gpui-specimens` 9/9 with 175/175 routes,
 `audit:licenses` and `audit:security`. The named timeout outcome g18.032 had to
 report is gone: `probe:gpui-specimens` completes inside the board in 5.2s with
 all 9 tests and all 175 routes green.
+
+## Merge and closeout
+
+Merged as `71788758102854d665d2be35b93a9ec4aa5ee3d9` (PR #268) on 2026-09-13
+after exact-head independent review (PR comment `5653871766`,
+`ready_to_merge`) at `b4a2534229df018f743d9df4e964ad59279cd117`.
+
+Truthful validation: the one final `qa:board` ran 453s (7m33s) and exited 0
+with every owned unit green under the unchanged fifteen-minute cap. The
+review's two non-blocking observations (stale PR-body board status, missing
+trailing newline in `specimen_probe.rs`) are follow-up material.
+
+Deferred: the post-`0.4.0` consumer/specimen sweep resumes next; compatible
+fixes feed `0.4.1` through the g18.032 release path.
