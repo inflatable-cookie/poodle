@@ -120,6 +120,34 @@ The web lane passed in the same run: `test:web-pack-install` (1m4s),
 green. The slowest non-blocked units were `test:components` (1m42s),
 `test:web-pack-install` (1m4s) and `test:web-scope` (59.0s).
 
+### Root cause of the specimen hang
+
+A focused shard run mounts six routes and then never returns from
+`form-dialog`. `sample(1)` on the hung process shows every sample inside the
+initial `App::update -> Window::draw` in `open_route_window`
+(`specimen_probe.rs:100`), recursing through `compute_flexbox_layout`,
+`request_layout` and `poodle-gpui-node-backend` `apply_state_patches`. The
+probe's own `MAX_SWEEP_BODY` budget and its `settle` flush never run because
+the first draw of that route does not return. `form-dialog` is the first route
+to mount a looping loading spinner (`FormDialog` submitting state), but the
+non-termination is in renderer layout, not in the test harness: bounding the
+probe's `run_until_parked` flush does not change it.
+
+This is pre-existing product/renderer behavior, outside g18.032's mutable
+paths (`packages/gpui/**`, `packages/render/**` are not owned by this task),
+and it is the same leaf the baseline recorded at 2h37m / ~100% CPU. It is
+recorded in `PAPERCUTS.md` for a focused renderer task.
+
+### Spec 071 board assessment
+
+The board meets the acceptance oracle's process requirements: it is bounded
+(child five-minute ceiling, board fifteen-minute ceiling), visible (a start and
+completion line with elapsed time per owned unit), deduplicated (5 transitive
+repeats removed) and fail-closed on an over-budget child, which it named and
+killed with its owned process group. It is the complete assertion inventory.
+The remaining red unit is a pre-existing renderer defect surfaced, not caused,
+by this change; required PR CI is web-only and green.
+
 ## Hosted candidate drill
 
 The authorized non-publishing candidate drill ran twice on this task's own
