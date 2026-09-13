@@ -1,7 +1,7 @@
 # 022 Packaging Versioning And Release Channel Rules
 
 Status: active
-Updated: 2026-09-02
+Updated: 2026-09-13
 Depends on: `archive/021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
@@ -115,6 +115,15 @@ Each release-capable tranche should document:
 - whether the change affects public-intent entry points
 - whether the change is additive, behavioral, or breaking
 - what downstream evaluators should re-check
+
+## Release Train Rule
+
+Npm/web and native are separate release trains. The npm `vX.Y.Z` tag and root
+release version cover core, Svelte and the private paired React build. Core and
+Svelte are the only npm publications. Cargo packages, locks and native evidence
+do not move merely because an npm version moves; a native release needs its own
+future publication and tag decision. See
+[`071-fast-validation-and-npm-release-pipeline.md`](071-fast-validation-and-npm-release-pipeline.md).
 
 ## Native Dependency Licence And Source Rule
 

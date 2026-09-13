@@ -33,9 +33,13 @@ Scope: whole `poodle/` repository.
 - A review repair reruns the affected leaf proof and only the final gate that
   the change actually invalidated. Reviewers reuse exact-head CI evidence and
   do not rerun an equivalent broad local board.
-- Release candidates run the complete local release gate once on the frozen
-  candidate. A changed candidate invalidates that receipt; documentation-only
-  follow-up does not justify unrelated broad boards.
+- Npm release candidates run the bounded npm artifact gate once on the frozen
+  candidate. They do not run aggregate/native QA. A changed candidate
+  invalidates that receipt; documentation-only follow-up does not justify
+  unrelated broad boards.
+- Aggregate validation must show live child progress and respect the repository
+  runtime caps. Stop and report a named over-budget child; never leave a silent
+  selector running or retry it speculatively.
 - Run `git diff --check` before handoff.
 - Do not edit `.github/workflows/` or run release mutations without explicit operator approval.
 

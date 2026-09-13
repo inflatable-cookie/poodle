@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-09-12
+Updated: 2026-09-13
 
 Northstar roadmaps use one generation-plus-task model:
 
@@ -59,6 +59,11 @@ through an operator-authorized npm/web wrapper repair: `v0.4.0` is tagged at
 `4a39055f3`, core and Svelte `0.4.0` are published with attested provenance,
 and a fresh registry consumer proves the Svelte `./editor` entry. Desktop
 unblocks from that published release.
+
+Operator-prioritized g18.032 is the only next execution frontier. It repairs
+the process exposed by `0.4.0`: generic web-candidate admission, separate npm
+and native trains, one-build archives, two bounded hosted runs, and an
+observable deduplicated full headless board. Other Poodle work waits for it.
 
 ## Rules
 

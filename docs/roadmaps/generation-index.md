@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-12
+Updated: 2026-09-13
 
 ## Active generation
 
@@ -95,6 +95,9 @@ Updated: 2026-09-12
   - Next checkpoint: Desktop resumes retained g02.058 and PR #215 to unlink,
     repin `0.4.0`, and finish Phase B. Route compatible sweep findings to
     `0.4.1`; later breaking changes wait for `0.5.0`.
+  - Ready infrastructure task: operator-prioritized g18.032 replaces the
+    version-specific/native-coupled release path and opaque duplicate full
+    board before any further Poodle product task.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

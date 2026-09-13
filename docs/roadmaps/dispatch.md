@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-12 (g18.031 repairs release and census version authority)
+Updated: 2026-09-13 (g18.032 fast validation and npm release promoted)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -225,15 +225,15 @@ merge `90c40defe86e4841ad248c72200f7333f37c342d`). Direct correction
 `a6bed8420` made every header control follow the selected size consistently and
 restored `sm` as the initial selection.
 
-[`g18.026`](g18/026-slider-foundation-and-range-parity.md) is the approved next
-task. It keeps Slider and RangeSlider separate publicly, consolidates their
-private rendering foundation, and ports the accepted Slider behavior to
-RangeSlider. It is ready for Queue submission after explicit execution
-authorization.
+[`g18.026`](g18/026-slider-foundation-and-range-parity.md) and
+[`g18.027`](g18/027-v040-public-surface-freeze-audit.md) are complete; their
+merged evidence is retained in the generation roadmap.
 
-[`g18.027`](g18/027-v040-public-surface-freeze-audit.md) follows g18.026. It
-classifies the exact `v0.3.0`→post-g18.026 public delta and freezes `0.4.0`
-before retained g18.006 resumes.
+[`g18.032`](g18/032-fast-validation-and-npm-release.md) is the
+operator-prioritized next task. It replaces release-specific/native-coupled
+candidate machinery, makes npm a two-run one-build path, and makes the complete
+headless board observable, deduplicated and time-bounded. All other Poodle
+execution waits for this task to merge.
 
 ## Held planning horizons
 

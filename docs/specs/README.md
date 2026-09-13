@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-09-05
+Updated: 2026-09-13
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,
@@ -57,6 +57,9 @@ Current cross-cutting references:
 - `070-compiled-web-distribution-contract.md` — exact compiled `dist`
   inventories, Svelte client/server and React export maps, receipt schemas,
   source-free archive law, and the root-to-`./markdown` break
+- `071-fast-validation-and-npm-release-pipeline.md` — separate npm/native
+  trains, generic candidate admission, observable bounded full-suite execution,
+  one-build archives and two hosted release runs
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.

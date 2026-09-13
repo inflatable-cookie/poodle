@@ -224,12 +224,15 @@ This exception preserves upstream document authority and a configurable seam:
 ## Release Certification
 
 A release run that fails is a process failure, not a discovery (operator
-rule, 2026-09-04). Before any release tag exists, the exact candidate commit
-must have a green local `effigy release gates` and a green `release.yml`
-dry run dispatched against the candidate ref. Only then is the tag created,
-re-proven with a tag dry run, and published. A red run at any step stops
-the lane and returns to planning; the tag is retracted only when nothing was
-published from it.
+rule, 2026-09-04). Npm and native are separate release trains. Before an npm
+tag exists, the exact merged web candidate must have green required PR CI and
+one green `release.yml` candidate run that uploads the certified core/Svelte
+archives. The matching tag is then published from those exact archives in one
+second run; there is no tag dry run or publish-time rebuild. The npm workflow
+has a ten-minute hard ceiling and never runs aggregate, Rust, native, GPUI or
+Jetstream gates. A red or over-budget run stops the lane and returns to
+planning; the tag is retracted only when nothing was published from it. See
+spec 071.
 
 ## Validation
 
@@ -249,11 +252,11 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    as the clean PR head and local task proof exist, then stops. Queue
    coordination observes CI asynchronously; workers never run sleep/poll loops
    for GitHub checks.
-3. **Release proof:** only the release-candidate or publication task runs the
-   full local release gate. Run it once after the candidate is complete and
-   stable, then run the prescribed candidate/tag dry run. A precursor repair
-   proves its own surface and required PR lanes; it does not certify the later
-   release candidate.
+3. **Release proof:** the npm candidate task runs the bounded npm artifact gate
+   once after the candidate is complete and stable. Required PR CI owns source
+   behavior; candidate mode owns archive certification; publish mode verifies
+   and ships those same bytes. Do not stack a local aggregate board, candidate
+   run, tag dry run and rebuilt publish proof.
 
 A broad selector subsumes the narrower selectors in its task graph. Do not run
 `docs:check`, `ci:web`, `qa`, and release gates serially to restate the same
@@ -261,6 +264,14 @@ proof. After review feedback, rerun the affected leaf selector and only a final
 gate whose inputs changed. Reviewers consume exact-head CI and recorded worker
 receipts; they add focused adversarial proof for a finding rather than another
 complete local board.
+
+Aggregate selectors must emit live child progress and elapsed time. A full
+headless board hard-stops after fifteen minutes and an individual silent child
+after five unless its contract declares a smaller bound. An over-budget run is
+a measured blocker: stop its owned process tree and report it rather than
+waiting or retrying. Release and validation infrastructure work may run one
+capped baseline board and one final board; all intermediate checks stay on
+focused leaves.
 
 `docs:lint` is the default local check for execution notes and generated
 evidence. Use `docs:check` when the task changes public documentation,

@@ -2,7 +2,7 @@
 
 Status: active
 Opened: 2026-09-09
-Updated: 2026-09-12
+Updated: 2026-09-13
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
@@ -76,6 +76,7 @@ needed to compile honest repair tranches.
 | [`g18.029`](029-v040-candidate-scope-admission.md) — v0.4.0 candidate-scope admission | complete | PR #261 (merge `01bb0dd84236f69bf55d5556c56b46513191a586`); closed 0.4.0 candidate admission with exact lockstep JS/Cargo requirements; serial before retained g18.006 resumes |
 | [`g18.030`](030-nucleus-receipt-lock-provenance.md) — Nucleus receipt lock provenance | complete | PR #262 merged as `80609ff3528bc32fc44cd6f1a8dc5dd1ddb68b85`; derived lock provenance and complete current evidence repin accepted before g18.006 resumes |
 | [`g18.031`](031-release-metadata-and-census-provenance.md) — release metadata and GPUI census provenance | complete | PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`; truthful root release metadata, exact lockstep transition and derived census receipt versions accepted before g18.006 resumes |
+| [`g18.032`](032-fast-validation-and-npm-release.md) — fast validation and npm release | ready | operator-prioritized next; replace version-specific/native-coupled release machinery and the opaque duplicate full board before other Poodle work |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
