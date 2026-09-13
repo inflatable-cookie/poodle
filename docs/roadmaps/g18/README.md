@@ -53,7 +53,7 @@ needed to compile honest repair tranches.
 | [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | complete | PR #265 (merge `567fe01c33e7e80514cff6f7d14c516a9a9a788b`); independent exact-head review, green `rust`/`web` checks; g18.009 owns certification and publication |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
-| [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
+| [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | complete | wrapper `4a39055f3` tagged `v0.4.0`; branch/tag/publish runs green; core+Svelte `0.4.0` on npm with attested provenance; fresh registry `./editor` type/SSR/browser proof; Desktop capsule returned |
 | [`g18.010`](010-code-editor-editing-focus-treatment.md) — CodeEditor editing focus treatment | complete | PR #242 (merge `a71b48573c7253dfd45f35e482b9bbc7432ea0ca`); product work continues through g18.012 before release resumes |
 | [`g18.011`](011-web-editor-ux-acceptance-sweep.md) — web editor UX acceptance sweep | complete | PR #253 (merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`); four-surface paired Chromium/WebKit sweep, zero blocking findings, F12 follow-up retained |
 | [`g18.012`](012-code-editor-extensible-language-registry.md) — CodeEditor extensible language registry | complete | PR #250 (merge `f011df5e0a97856bfe022569d77faf69a9f75553`); consumer-selected lazy CodeMirror language providers; last planned product change before the sweep |
@@ -159,9 +159,14 @@ generator embedded `0.3.0` in 65 receipts. Merged g18.031 (PR #264,
 kept it in the exact lockstep candidate surface and derived census versions
 from the preview crate; g18.006 now resumes.
 PR #265 merged 2026-09-13 as `567fe01c33e7e80514cff6f7d14c516a9a9a788b`
-(candidate `9d18a21b`, exact-head review `ready_to_merge`). g18.009 proceeds
-from the unchanged merged candidate; nothing is tagged or published here. After
-`0.4.0` unblocks Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
+(candidate `9d18a21b`, exact-head review `ready_to_merge`). g18.009 released it
+on 2026-09-13: the operator-authorized npm/web wrapper repair at `4a39055f3`
+removed the obsolete aggregate gate from the release workflow, then branch dry
+run `34743528777`, tag `v0.4.0`, tag dry run `34743709181` and publish
+`34743884234` all passed at that commit with package trees byte-identical to
+`a797ce413`. npm serves core and Svelte `0.4.0` as `latest`, and a fresh
+source-free consumer resolves the Svelte `./editor` entry in type, SSR and
+browser modes. After `0.4.0` unblocks Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
 later breaking change waits for `0.5.0`.
 
 ## Held and recurring work

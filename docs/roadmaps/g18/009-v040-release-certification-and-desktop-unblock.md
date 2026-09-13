@@ -1,6 +1,6 @@
 # 009 — v0.4.0 release certification and Desktop unblock
 
-Status: dependency-queued behind g18.006 — final release lane
+Status: complete — `v0.4.0` published 2026-09-13; Desktop capsule returned
 Owner: Poodle release operations
 Created: 2026-09-11
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -23,13 +23,18 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 
 - [x] Release scope, version and public package set are frozen by g18.006.
 - [x] Tom explicitly authorized candidate and release execution on 2026-09-11.
-- [ ] g18.006 is complete and its accepted candidate is clean pushed main.
-- [ ] Candidate commit, package trees and archives are exact; branch dry run is
+- [x] g18.006 is complete and its accepted candidate is clean pushed main.
+- [x] Candidate commit, package trees and archives are exact; branch dry run is
   the first hosted step after dependency close.
+- [x] Operator ruling 2026-09-13 replaced the aggregate GPUI/native gate with
+  the accepted g18.006 npm/web certificate through a bounded workflow wrapper
+  repair before the hosted dry run.
 
 ## Decisions
 
-- Tag the exact accepted g18.006 candidate commit. Do not rebuild or amend it.
+- Tag the release commit: the accepted g18.006 candidate content carried by
+the operator-authorized npm/web wrapper commit. Do not rebuild or amend the
+candidate package trees.
 - Consume g18.006's exact stable local-gate proof without repeating it. Run the
   mandatory hosted branch dry run against the unchanged merged candidate
   before tagging.
@@ -102,3 +107,27 @@ release capsule that lets Desktop resume retained g02.058 and PR #215.
 
 Desktop resumes its retained g02.058 task and PR #215. Poodle returns to
 Chatterbox for GPUI tranche compilation; no release successor auto-starts.
+
+## Closeout evidence (2026-09-13)
+
+Executed and recorded in
+[`docs/logs/2026-09/20260913-g18-009-v040-release-certification.md`](../../logs/2026-09/20260913-g18-009-v040-release-certification.md).
+
+- The accepted g18.006 candidate `9d18a21b` (merge `567fe01c`) was certified by
+  a bounded workflow-only wrapper repair at `4a39055f3`: the aggregate
+  `effigy release gates` step was replaced by `effigy svelte:package`,
+  `effigy check:release-automation` and `effigy test:web-pack-install`, and the
+  release-automation guard now forbids the wrapper regaining the aggregate,
+  native, or GPUI selectors. Package trees stayed byte-identical to `a797ce413`.
+- Ordered evidence: branch dry run `34743528777`, tag `v0.4.0` at `4a39055f3`,
+  tag dry run `34743709181`, publish `34743884234` — all green at the same commit.
+- npm now serves `@inflatable-cookie/poodle-core@0.4.0` and
+  `@inflatable-cookie/poodle-svelte@0.4.0` as `latest` with attested provenance;
+  registry tarballs are byte-identical to the publish artifact; React, the
+  internal tooling packages, and every crate remain unpublished.
+- A fresh source-free consumer installed the exact registry versions and proved
+  the Svelte `./editor` entry in declared-type, SSR, and browser modes with the
+  `svelte 5.56.8` floor. This is the entry `0.3.0` lacked.
+- The first branch dry run (`34728955353`) was cancelled after six hours in the
+  obsolete aggregate gate and was never retried; the operator ruling supersedes
+  that step for this release.

@@ -82,15 +82,19 @@ Updated: 2026-09-12
     versions from the preview crate manifest; PR #264 merged as
     `aa659504b2a6222eb34c7423fcfd877a32138ba8` after accepted exact-head
     review and green checks.
-  - Ready candidate: retained g18.006 is clean at current main with no
-    candidate mutation; it resumes in the same task/workspace now that g18.031
-    merged.
-  - Final release: g18.009 is dependency-queued behind g18.006 with no manual
-    hold; it publishes only the accepted candidate and returns the Desktop
-    unblock capsule.
-  - Next checkpoint: resume retained g18.006 on current main.
-    Publish `0.4.0` through g18.009, unblock Desktop, and route compatible
-    sweep findings to `0.4.1`; later breaking changes wait for `0.5.0`.
+  - Ready candidate: retained g18.006 completed as PR #265
+    (`567fe01c33e7e80514cff6f7d14c516a9a9a788b`); the accepted candidate head
+    was `9d18a21b` with its frozen release inputs at `a797ce413`.
+  - Released: g18.009 published `0.4.0` on 2026-09-13. The
+    operator-authorized npm/web wrapper repair at `4a39055f3` replaced the
+    obsolete aggregate release gate, then branch dry run `34743528777`, tag
+    `v0.4.0`, tag dry run `34743709181` and publish `34743884234` all passed at
+    that commit. npm serves core and Svelte `0.4.0` as `latest`, and a fresh
+    source-free consumer resolves the Svelte `./editor` entry in declared-type,
+    SSR, and browser modes.
+  - Next checkpoint: Desktop resumes retained g02.058 and PR #215 to unlink,
+    repin `0.4.0`, and finish Phase B. Route compatible sweep findings to
+    `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

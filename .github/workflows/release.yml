@@ -9,9 +9,12 @@ name: Release
 # compromised dependency to exfiltrate and nothing to rotate. Provenance
 # attestation comes with it rather than being a separate step.
 #
-# The release authority is the single Effigy gate configured in `effigy.toml`.
-# `effigy release gates` runs the same complete headless `effigy qa` board as a
-# local release check; this workflow does not maintain a second selector list.
+# The release authority is the npm/web package proof below. This workflow
+# publishes compiled web packages only; it deliberately does not carry the
+# aggregate `effigy release gates` board, whose headless native/GPUI lane is
+# unrelated to this release and must not gate it (operator ruling, g18.009,
+# 2026-09-13). The exact pre-pack selector set is asserted by
+# `effigy check:release-automation`, which this workflow runs before packing.
 # Do not reach for `bunx effigy` -- an unrelated package of that name exists on
 # npm, and fetching it inside a workflow holding publish rights is the exact
 # hazard trusted publishing exists to remove.
@@ -55,9 +58,10 @@ concurrency:
 jobs:
   release:
     name: Validate and publish to npm
-    # The configured `effigy qa` release board includes the headless native
-    # lane, which needs macOS for GPUI/Metal. Native visual and paired Jetstream
-    # sweeps remain outside the board.
+    # Retained macOS runner and Rust provisioning. The bounded g18.009 wrapper
+    # repair replaced only the executed gate: the npm/web proof below needs no
+    # native lane, and the runner plus `cargo-deny` setup are left unchanged so
+    # the repair stays minimal and its checker law stays auditable.
     runs-on: macos-latest
     permissions:
       contents: read
@@ -118,10 +122,22 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # The configured gate runs the complete headless board: web, Rust, native,
-      # packed-install, licence, security, and release-automation checks.
-      - name: Release gates
-        run: effigy release gates
+      # Hosted npm/web release proof. Core and Svelte are the only published
+      # packages, so the accepted installed-package certificate is the gate:
+      # `effigy test:web-pack-install` clones this exact commit, builds and
+      # packs each package twice, and installs the archives into a source-free
+      # consumer. `effigy svelte:package` produces the compiled core and Svelte
+      # trees the pack step below ships. The release-automation guard keeps
+      # this wrapper narrow: an aggregate or native selector added back here
+      # fails the run before anything is packed or published.
+      - name: Build the published web packages
+        run: effigy svelte:package
+
+      - name: Release automation guard
+        run: effigy check:release-automation
+
+      - name: Hosted npm/web package proof
+        run: effigy test:web-pack-install
 
       # Within this repository, every Rust crate and every TypeScript package
       # carries one version, so a tag names all of them at once. Lockstep stops
