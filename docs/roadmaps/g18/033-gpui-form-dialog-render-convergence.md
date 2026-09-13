@@ -40,6 +40,9 @@ its existing fifteen-minute ceiling.
   Preserve ordinary FormDialog behavior and prove the actual minimal cause.
 - Diagnose with one prebuilt test binary and short exact-route child-process
   runs. Broad boards are completion proof, not a debugging loop.
+- The first final board exposed the unrelated, pre-existing `deny.toml`
+  `bzip2-1.0.6` allowance after the repaired GPUI leaf passed. Remove that
+  obsolete allowance in this task rather than accepting another red board.
 
 ## Dispatch manifest
 
@@ -52,7 +55,8 @@ its existing fifteen-minute ceiling.
   test-only support under `packages/gpui/preview/`,
   `packages/render/src/form_dialog.rs`, `packages/render/src/button.rs`,
   `packages/render/src/spinner.rs`, focused renderer tests, and causal
-  implementation/tests under `packages/gpui/node-backend/src/`
+  implementation/tests under `packages/gpui/node-backend/src/`; `deny.toml`
+  only for removal of the obsolete `bzip2-1.0.6` allowance and its comment
 - **Reserved closeout surfaces:** this task and handoff, g18 README,
   roadmap root/index/dispatch, spec 071, `PAPERCUTS.md`, and one execution log
 - **Worker:** complex Rust/GPUI renderer worker able to diagnose layout and
@@ -83,6 +87,11 @@ its existing fifteen-minute ceiling.
    all nine tests and all 175 routes green inside the existing child bound.
 6. Run one final `qa:board`. Every required unit must pass inside the existing
    fifteen-minute board cap. A bounded failure is a failure, not completion.
+7. If that board reaches the baseline `audit:licenses` failure after every
+   preceding unit passes, remove only the stale unresolved `bzip2-1.0.6`
+   allowance from `deny.toml`, rerun the affected license leaf, then run one
+   replacement final board. This replacement is authorized because the
+   candidate changed after the first board; it is not a speculative retry.
 
 ## Acceptance and review oracle
 
@@ -94,6 +103,7 @@ its existing fifteen-minute ceiling.
 | Catalogue proof is whole | one shard passes while another route is omitted or ignored | `probe:gpui-specimens`: 9/9 tests and 175/175 canonical routes |
 | Board is genuinely healthy | timeout handling reports the hung leaf but the task calls that success | one `qa:board` run: every owned unit green under 15 minutes, with no waived or skipped required leaf |
 | Loading behavior survives | all looping motion is disabled to make tests terminate | existing loading first-frame/committed-frame law plus focused renderer/backend evidence |
+| Baseline license drift is cleared | the GPUI repair passes but the board remains red on an unresolved retired allowance | focused `audit:licenses` plus the replacement full board are green after removing only the stale `bzip2-1.0.6` entry |
 
 ## Stop conditions
 
