@@ -11,11 +11,12 @@ import {
   statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, basename } from "node:path";
 
 import { packedMemberMissing } from "./archive-membership";
 import { resolvePackArchivePath } from "./pack-archives";
 import { buildCore } from "../../scripts/web-distribution/core-build";
+import { readNpmPublicationAuthority } from "../../scripts/npm-publication";
 import { buildReact } from "../../scripts/web-distribution/react-build";
 import { buildSvelte } from "../../scripts/web-distribution/svelte-build";
 import {
@@ -48,6 +49,13 @@ const repoRoot = resolve(import.meta.dir, "../..");
 // `--traceResolution` prints the realpath, so the temp root must match.
 const artifactRoot = realpathSync(mkdtempSync(join(tmpdir(), "poodle-web-pack-install-")));
 const innerRun = globalThis.process.env.POODLE_WEB_PACK_INSTALL_INNER === "1";
+// g18.032 / spec 071: archive certificate mode. Builds and packs one archive
+// set, installs those exact bytes into a source-free consumer and writes the
+// candidate identity manifest the hosted publish run consumes by run ID. It
+// never rebuilds for publish.
+const archiveCertificate =
+  globalThis.process.env.POODLE_WEB_PACK_INSTALL_ARCHIVE_CERTIFICATE === "1";
+const archiveOutputDir = globalThis.process.env.POODLE_WEB_PACK_INSTALL_ARCHIVE_OUT;
 
 type PackageManifest = {
   name: string;
@@ -208,6 +216,14 @@ async function runFromCleanCheckout(): Promise<void> {
         POODLE_WEB_PACK_INSTALL_INNER: "1",
         POODLE_WEB_PACK_INSTALL_BASE_COMMIT: requiredBaseCommit,
         [CERTIFICATION_SCOPE_MODE_ENV]: scopeMode,
+        ...(archiveCertificate
+          ? {
+              POODLE_WEB_PACK_INSTALL_ARCHIVE_CERTIFICATE: "1",
+              ...(archiveOutputDir
+                ? { POODLE_WEB_PACK_INSTALL_ARCHIVE_OUT: resolve(archiveOutputDir) }
+                : {}),
+            }
+          : {}),
       },
     );
     process.stdout.write(output);
@@ -1076,16 +1092,28 @@ const requiredBaseCommit = requireExactCommit(
   globalThis.process.env.POODLE_WEB_PACK_INSTALL_BASE_COMMIT ?? "",
   "required base commit",
 );
-const scopeMode = readInstalledScopeMode(
-  globalThis.process.env[CERTIFICATION_SCOPE_MODE_ENV],
-);
-const scopeProof = await assertInstalledScope(
-  repoRoot,
-  requiredBaseCommit,
-  exactSourceCommit,
-  scopeMode,
-);
-const certificationRun = emitsCertificationReceipt(scopeMode);
+const scopeMode = archiveCertificate
+  ? ("ordinary" as const)
+  : readInstalledScopeMode(
+      globalThis.process.env[CERTIFICATION_SCOPE_MODE_ENV],
+    );
+// Admission is a separate selector. The archive certificate only proves the
+// packed bytes, so it never runs the changed-range scope law here.
+const scopeProof = archiveCertificate
+  ? {
+      mode: "ordinary" as const,
+      requiredBaseCommit,
+      sourceCommit: exactSourceCommit,
+      changedPaths: [] as string[],
+    }
+  : await assertInstalledScope(
+      repoRoot,
+      requiredBaseCommit,
+      exactSourceCommit,
+      scopeMode,
+    );
+const certificationRun =
+  emitsCertificationReceipt(scopeMode) || archiveCertificate;
 const roster = readWebPackageRoster(repoRoot);
 const rosterRegression = assertReactExtraExportRegression(repoRoot, roster);
 
@@ -1100,28 +1128,34 @@ const firstDistInventories = Object.fromEntries(
 );
 const firstPackedPackages = await packPackages(firstPackRoot);
 
-await buildCore(repoRoot);
-await buildSvelte(repoRoot);
-await buildReact(repoRoot);
-const secondDistInventories = Object.fromEntries(
-  packages.map((packageEntry) => [
-    packageEntry.name,
-    fileInventory(join(repoRoot, packageEntry.directory, "dist")),
-  ]),
-);
-const secondPackedPackages = await packPackages(secondPackRoot);
+// Archive certificate mode builds and packs exactly once; the ordinary proof
+// still repeats the build and pack to prove byte determinism.
+let secondDistInventories = firstDistInventories;
+let secondPackedPackages = firstPackedPackages;
+if (!archiveCertificate) {
+  await buildCore(repoRoot);
+  await buildSvelte(repoRoot);
+  await buildReact(repoRoot);
+  secondDistInventories = Object.fromEntries(
+    packages.map((packageEntry) => [
+      packageEntry.name,
+      fileInventory(join(repoRoot, packageEntry.directory, "dist")),
+    ]),
+  );
+  secondPackedPackages = await packPackages(secondPackRoot);
 
-if (JSON.stringify(firstDistInventories) !== JSON.stringify(secondDistInventories)) {
-  throw new Error("repeated clean package builds produced different dist inventories or hashes");
-}
-for (let index = 0; index < firstPackedPackages.length; index += 1) {
-  const first = firstPackedPackages[index];
-  const second = secondPackedPackages[index];
-  if (sha256File(first.archivePath) !== sha256File(second.archivePath)) {
-    throw new Error(`${first.name} repeated pack produced different archive bytes`);
+  if (JSON.stringify(firstDistInventories) !== JSON.stringify(secondDistInventories)) {
+    throw new Error("repeated clean package builds produced different dist inventories or hashes");
+  }
+  for (let index = 0; index < firstPackedPackages.length; index += 1) {
+    const first = firstPackedPackages[index];
+    const second = secondPackedPackages[index];
+    if (sha256File(first.archivePath) !== sha256File(second.archivePath)) {
+      throw new Error(`${first.name} repeated pack produced different archive bytes`);
+    }
   }
 }
-const packedPackages = secondPackedPackages;
+const packedPackages = archiveCertificate ? firstPackedPackages : secondPackedPackages;
 
 function assertCssAndParserGraphs(): Record<string, unknown> {
   // A shared module (the Markdown content path) may be emitted as a stable
@@ -2334,6 +2368,47 @@ if (receiptText) {
   await Bun.write(join(runRoot, "installed-receipt.json"), receiptText);
 }
 
+// Archive certificate: upload exactly the packed bytes with their identity.
+// Publish mode consumes these by run ID and never rebuilds.
+if (archiveCertificate) {
+  if (!archiveOutputDir) {
+    throw new Error(
+      "archive certificate requires POODLE_WEB_PACK_INSTALL_ARCHIVE_OUT",
+    );
+  }
+  const outputDir = resolve(archiveOutputDir);
+  mkdirSync(outputDir, { recursive: true });
+  const authority = readNpmPublicationAuthority(repoRoot);
+  const published = authority.packages.map(({ name, path }) => {
+    const packed = packedPackages.find((candidate) => candidate.name === name);
+    if (!packed) throw new Error(`archive certificate did not pack ${name}`);
+    const tarball = basename(packed.archivePath);
+    cpSync(packed.archivePath, join(outputDir, tarball));
+    return {
+      name,
+      path,
+      tarball,
+      version: packed.manifest.version,
+      sha256: sha256File(packed.archivePath),
+    };
+  });
+  const coreManifest = packageManifests.get("@inflatable-cookie/poodle-core");
+  if (!coreManifest) throw new Error("archive certificate requires the core manifest");
+  const candidateManifest = {
+    schema: "poodle.npm-candidate.v1",
+    sourceCommit: exactSourceCommit,
+    version: coreManifest.version,
+    packages: published,
+  };
+  await Bun.write(
+    join(outputDir, authority.candidateManifestName),
+    `${JSON.stringify(candidateManifest, null, 2)}\n`,
+  );
+  console.log(
+    `archive certificate: ${published.length} archives for ${candidateManifest.version} at ${exactSourceCommit}`,
+  );
+}
+
 const falsificationReceipts = [
   installedSourcePlant,
   {
@@ -2507,7 +2582,7 @@ const evidence = {
   schema: "poodle.web-preview-pack-install.v2",
   sourceCommit: exactSourceCommit,
   mode: scopeMode,
-  ...(certificationRun
+  ...(certificationRun && emitsCertificationReceipt(scopeMode)
     ? {
         receiptSha256,
         receipt,
@@ -2533,8 +2608,8 @@ const evidence = {
     privateMimeKnowledge: false,
   },
   repeatability: {
-    buildPasses: 2,
-    packPasses: 2,
+    buildPasses: archiveCertificate ? 1 : 2,
+    packPasses: archiveCertificate ? 1 : 2,
     distInventoriesEqual: true,
     archiveBytesEqual: true,
     firstDistInventorySha256: createHash("sha256").update(JSON.stringify(firstDistInventories)).digest("hex"),

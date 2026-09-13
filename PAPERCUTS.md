@@ -11,6 +11,32 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-13 — `probe:gpui-specimens` hangs on the `form-dialog` route. A
+  focused shard run mounts six routes (through `drawer`) and then never
+  returns from `form-dialog`; `sample(1)` on the hung process shows all
+  samples inside the initial `App::update -> Window::draw` in
+  `open_route_window` (`specimen_probe.rs:100`), recursing through
+  `compute_flexbox_layout` / `request_layout` / `apply_state_patches` in
+  `poodle-gpui-node-backend`. This is a renderer/layout non-termination, not a
+  probe budget: the `0.4.0` baseline recorded the legacy `qa` board sitting in
+  the same leaf for 2h37m at ~100% CPU. The probe's own
+  `MAX_SWEEP_BODY`/`settle` bounds never run because the very first draw of
+  that route does not return. Impact: the complete headless board cannot
+  finish. Fix is product/renderer work (the `FormDialog` submitting specimen
+  is the first route to mount a looping loading spinner); g18.032 instead
+  bounds, names and kills it. Surface: `packages/gpui/preview/src/specimen_probe.rs`,
+  `packages/render/src/form_dialog.rs`, `packages/gpui/node-backend/src/lib.rs`.
+
+- 2026-09-13 — `effigy --json <selector>` executes the selector and buffers
+  its whole result; it is not a plan or dry-run flag. An agent used it for a
+  graph-inventory question about `qa` and the buffered run reproduced the
+  unbounded `probe:gpui-specimens` hang (2h37m, terminated by the operator).
+  Impact: graph inspection can accidentally start the full board. Plausible
+  fix: a real plan/dry-run surface on Effigy task selection, or a named
+  non-executing graph command. Surface: Effigy task CLI. Mitigated here by
+  `scripts/validation/run-board.ts --plan`, which expands and deduplicates
+  the manifest without executing anything.
+
 - 2026-09-12 — `.poodle-code-editor__viewport .cm-activeLine`/
   `.cm-activeLineGutter` use `var(--poodle-color-surface-hover)`, which no
   schema or generated artifact defines, so the active line silently renders

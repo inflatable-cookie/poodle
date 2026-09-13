@@ -403,7 +403,7 @@ export function formatInstalledRunOutput(args: {
   );
 }
 
-function matchesScopePattern(path: string, pattern: string): boolean {
+export function matchesScopePattern(path: string, pattern: string): boolean {
   if (pattern.endsWith("/**")) {
     return path.startsWith(pattern.slice(0, -2));
   }
@@ -436,7 +436,7 @@ const CHANGELOG_PATH = "CHANGELOG.md";
 const EXECUTION_LOG_PATH = /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g\d{2}-\d{3}-[a-z0-9-]+\.md$/;
 const RELEASE_NOTE_PATH = /^docs\/release-notes\/[^/]+\.md$/;
 
-type ChangelogInventory = {
+export type ChangelogInventory = {
   preamble: string;
   releases: { version: string; date: string; entries: string[] }[];
   links: { label: string; target: string }[];
@@ -457,7 +457,7 @@ function normalizedChangelogEntry(lines: string[]): string {
  * used by changelog cleanup are syntax; versions, dates, links, and entry text
  * are not. Unsupported shapes throw so ordinary scope fails closed.
  */
-function changelogInventory(text: string): ChangelogInventory {
+export function changelogInventory(text: string): ChangelogInventory {
   const lines = text.replaceAll("\r\n", "\n").split("\n");
   if (lines[0] !== "# Changelog") throw new Error("missing changelog title");
 
@@ -834,11 +834,11 @@ function ordinaryJsForbiddenLabels(
   return [...new Set(labels)];
 }
 
-function isJsonRecord(value: unknown): value is Record<string, unknown> {
+export function isJsonRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function changedJsonLeafPaths(
+export function changedJsonLeafPaths(
   before: unknown,
   after: unknown,
   prefix = "",
@@ -852,7 +852,7 @@ function changedJsonLeafPaths(
   return JSON.stringify(before) === JSON.stringify(after) ? [] : [prefix];
 }
 
-async function runCapture(
+export async function runCapture(
   command: string[],
   cwd: string,
 ): Promise<string> {
@@ -874,7 +874,7 @@ async function runCapture(
   return stdout;
 }
 
-async function runResult(
+export async function runResult(
   command: string[],
   cwd: string,
 ): Promise<{ exitCode: number }> {
@@ -887,7 +887,7 @@ async function runResult(
   return { exitCode };
 }
 
-async function gitShowFile(
+export async function gitShowFile(
   checkoutRoot: string,
   commit: string,
   path: string,
@@ -1093,8 +1093,101 @@ async function ordinaryAdmitsReleaseWrapperRepair(
   );
 }
 
-function sortedUnique(values: Iterable<string>): string[] {
+export function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
+}
+
+/**
+ * g18.032: a bounded release-automation program. Spec 071 replaces the narrow
+ * `0.4.0` wrapper repair with a structural law: a range that touches only the
+ * release-automation surfaces is admitted while the workflow keeps the one
+ * npm certificate entry, a Linux runner, the ten-minute ceiling and the
+ * run-ID identity protocol, and the checker keeps the spec 071 invariants.
+ * Any aggregate, native, Rust or GPUI selector fails it closed.
+ */
+const RELEASE_AUTOMATION_PATHS = [
+  ".github/workflows/release.yml",
+  "effigy.toml",
+  "quality/validation-bounds.json",
+  "packages/release-manifest.json",
+  "scripts/check-release-automation.ts",
+  "scripts/npm-publication.ts",
+  "scripts/verify-npm-candidate.ts",
+  "scripts/verify-npm-candidate.test.ts",
+  "scripts/validation/run-board.ts",
+  "scripts/validation/run-board.test.ts",
+  "tasks/effigy.tasks.toml",
+  "test/package-install/README.md",
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+  "test/package-install/web-admission.ts",
+  "test/package-install/web-candidate.ts",
+  "test/package-install/web-candidate.test.ts",
+  "test/package-install/web-preview.ts",
+  "PAPERCUTS.md",
+] as const;
+const RELEASE_AUTOMATION_WORKFLOW_REQUIRED = [
+  "effigy release:web-certificate",
+  "inflatable-cookie/setup-effigy@",
+  'version: "0.11.0"',
+  "runs-on: ubuntu-latest",
+  "timeout-minutes: 10",
+  "id-token: write",
+  "gh run download",
+  "scripts/verify-npm-candidate.ts",
+  "--access public",
+] as const;
+const RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN = [
+  "effigy qa",
+  "effigy ci",
+  "gpui",
+  "jetstream",
+  "cargo",
+  "macos-",
+  "rust-toolchain",
+] as const;
+const RELEASE_AUTOMATION_CHECKER_MARKERS = [
+  "collectReleaseWorkflowFailures",
+  "collectGenericCandidateFailures",
+  "readNpmPublicationAuthority",
+  "effigy release:web-certificate",
+] as const;
+
+async function ordinaryAdmitsReleaseAutomationProgram(
+  checkoutRoot: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  if (!changedPaths.includes(".github/workflows/release.yml")) return false;
+  const admitted = (path: string): boolean =>
+    (RELEASE_AUTOMATION_PATHS as readonly string[]).includes(path) ||
+    (path.startsWith("docs/") && !RELEASE_NOTE_PATH.test(path));
+  if (!changedPaths.every(admitted)) return false;
+  const workflow = await gitShowFile(
+    checkoutRoot,
+    sourceCommit,
+    ".github/workflows/release.yml",
+  );
+  if (workflow === null) return false;
+  if (!RELEASE_AUTOMATION_WORKFLOW_REQUIRED.every((marker) => workflow.includes(marker))) {
+    return false;
+  }
+  const active = workflow
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("#"))
+    .join("\n");
+  if (RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN.some((marker) => active.includes(marker))) {
+    return false;
+  }
+  const checker = await gitShowFile(
+    checkoutRoot,
+    sourceCommit,
+    "scripts/check-release-automation.ts",
+  );
+  return (
+    checker !== null &&
+    RELEASE_AUTOMATION_CHECKER_MARKERS.every((marker) => checker.includes(marker))
+  );
 }
 
 export function requireExactCommit(value: string, label: string): string {
@@ -1186,7 +1279,7 @@ const INTERNAL_JS_DEPENDENCY_PREFIX = "@inflatable-cookie/poodle-";
  * and the head with an exact `sourceVersion` -> `targetVersion` transition, so
  * a stale or arbitrary specifier cannot ride a lockstep version bump.
  */
-function internalJsDependencies(manifest: Record<string, unknown>): Map<string, string> {
+export function internalJsDependencies(manifest: Record<string, unknown>): Map<string, string> {
   const dependencies = new Map<string, string>();
   for (const section of INTERNAL_JS_DEPENDENCY_SECTIONS) {
     const entries = manifest[section];
@@ -1272,7 +1365,7 @@ async function assertCandidateManifestHonesty(
   }
 }
 
-function cargoSectionForLine(text: string, lineNumber: number): string {
+export function cargoSectionForLine(text: string, lineNumber: number): string {
   let section = "";
   for (const [index, line] of text.split(/\r?\n/).entries()) {
     const match = /^\s*\[([^\]]+)\]\s*$/.exec(line);
@@ -1284,7 +1377,7 @@ function cargoSectionForLine(text: string, lineNumber: number): string {
 
 type CargoDiffLine = { line: string; lineNumber: number };
 
-function parseCargoDiffLines(diff: string): {
+export function parseCargoDiffLines(diff: string): {
   added: CargoDiffLine[];
   removed: string[];
 } {
@@ -1362,7 +1455,7 @@ function parseInlineCargoRequirement(line: string): Omit<InlineCargoRequirement,
  * name-only key would let a correct later `[dev-dependencies]` entry shadow a
  * stale runtime `[dependencies]` entry.
  */
-function cargoIntraRepoRequirements(text: string): Map<string, InlineCargoRequirement> {
+export function cargoIntraRepoRequirements(text: string): Map<string, InlineCargoRequirement> {
   const requirements = new Map<string, InlineCargoRequirement>();
   let section = "";
   for (const raw of text.split(/\r?\n/)) {
@@ -1522,7 +1615,7 @@ async function assertDirectCandidateSource(
   }
 }
 
-async function changedPathsForCommitRange(
+export async function changedPathsForCommitRange(
   checkoutRoot: string,
   requiredBaseCommit: string,
   sourceCommit: string,
@@ -1552,7 +1645,7 @@ async function changedPathsForCommitRange(
   return sortedUnique(changedPaths.split("\0").filter(Boolean));
 }
 
-async function commitChangedPaths(checkoutRoot: string, commit: string): Promise<string[]> {
+export async function commitChangedPaths(checkoutRoot: string, commit: string): Promise<string[]> {
   const output = await runCapture(
     [
       "git",
@@ -1571,7 +1664,7 @@ async function commitChangedPaths(checkoutRoot: string, commit: string): Promise
   return sortedUnique(output.split("\0").filter(Boolean));
 }
 
-function recordedSourceCommits(text: string): string[] {
+export function recordedSourceCommits(text: string): string[] {
   return [...text.matchAll(/"source_commit"\s*:\s*"([0-9a-f]{40})"/g)].map(
     (match) => match[1],
   );
@@ -1701,7 +1794,7 @@ async function assertFrozenCandidateRange(
  * `before` must survive intact and in order inside `after`: no closed-admission
  * law may be rewritten or deleted by the candidate that it admits.
  */
-function lineSubsequenceHolds(before: string, after: string): boolean {
+export function lineSubsequenceHolds(before: string, after: string): boolean {
   const head = after.split("\n");
   let index = 0;
   for (const line of before.split("\n")) {
@@ -1977,6 +2070,15 @@ export async function assertInstalledScope(
       (await ordinaryAdmitsClosedCandidate(
         checkoutRoot,
         requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      ))
+    ) {
+      forbidden = [];
+    } else if (
+      forbidden.length > 0 &&
+      (await ordinaryAdmitsReleaseAutomationProgram(
+        checkoutRoot,
         sourceCommit,
         changedPaths,
       ))
