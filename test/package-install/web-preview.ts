@@ -39,6 +39,7 @@ import {
   formatInstalledRunOutput,
   readInstalledScopeMode,
   requireExactCommit,
+  resolveCertificationHead,
   type InstalledScopeMode,
 } from "./scope";
 
@@ -163,7 +164,12 @@ async function runFromCleanCheckout(): Promise<void> {
   const scopeMode = readInstalledScopeMode(
     globalThis.process.env[CERTIFICATION_SCOPE_MODE_ENV],
   );
-  const proofCommit = (await runCapture(["git", "rev-parse", "HEAD"], repoRoot)).trim();
+  const checkedOutCommit = (await runCapture(["git", "rev-parse", "HEAD"], repoRoot)).trim();
+  // g18.006 review repair: a `pull_request` checkout is GitHub's synthetic
+  // merge commit, so trusting `HEAD` named a commit the branch never had and
+  // rejected every correct candidate. Certify the real candidate head the merge
+  // wraps, resolving deterministically and failing closed for any other merge.
+  const proofCommit = await resolveCertificationHead(repoRoot, checkedOutCommit);
   // The real branch base is the merge-base with origin/main for both modes.
   // Candidate mode additionally requires the certified source to be the direct
   // one-commit child of that base (assertDirectCandidateSource), so evidence

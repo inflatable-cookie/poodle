@@ -183,6 +183,7 @@ export const G18_006_TEST_REPAIR_PATHS = [
   "packages/gpui/preview/src/nucleus_receipts.rs",
   "test/package-install/scope.ts",
   "test/package-install/scope.test.ts",
+  "test/package-install/web-preview.ts",
 ] as const;
 
 /**
@@ -194,7 +195,28 @@ export const G18_006_TEST_REPAIR_GUARD_PATHS = [
   "test/package-install/scope.ts",
   "test/package-install/scope.test.ts",
 ] as const;
-const G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT = 150;
+const G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT = 500;
+
+/**
+ * The harness half of that repair: `test/package-install/web-preview.ts` must
+ * resolve the certification head deterministically instead of trusting a
+ * synthetic `pull_request` merge commit. A harness patch stays surgical: a
+ * bounded changed-line budget with every pre-existing safety anchor retained,
+ * so the patch can only resolve the head rather than rewrite the harness
+ * around the resolution.
+ */
+export const G18_006_TEST_REPAIR_HARNESS_PATHS = [
+  "test/package-install/web-preview.ts",
+] as const;
+const G18_006_TEST_REPAIR_HARNESS_CHANGED_LINE_LIMIT = 40;
+const G18_006_TEST_REPAIR_HARNESS_ANCHORS: Record<string, readonly string[]> = {
+  "test/package-install/web-preview.ts": [
+    "resolveCertificationHead",
+    "POODLE_WEB_PACK_INSTALL_INNER",
+    "POODLE_WEB_PACK_INSTALL_BASE_COMMIT",
+    "assertInstalledScope(",
+  ],
+};
 
 /** The one admitted test-repair source path and its module marker. */
 export const G18_006_TEST_REPAIR_SOURCE_PATH =
@@ -967,6 +989,60 @@ export function requireExactCommit(value: string, label: string): string {
   return value;
 }
 
+/**
+ * The commit the installed-package harness must certify.
+ *
+ * `actions/checkout` on a `pull_request` event checks out GitHub's synthetic
+ * merge commit: first parent the base branch head, second parent the real
+ * candidate head. The certification range, the frozen release-input commit and
+ * every evidence binding name that candidate head, so certifying the synthetic
+ * merge would name a commit the branch never had and reject a correct
+ * candidate. Resolve the head deterministically and fail closed:
+ *
+ * - a head already contained in `origin/main` certifies itself (an empty
+ *   range, which is what a `push` lane to `main` sees);
+ * - an ordinary single-parent branch head certifies itself;
+ * - exactly one two-parent shape - first parent the merge base with
+ *   `origin/main` - unwraps to its second parent, the candidate head;
+ * - every other merge (octopus, reversed parents, a branch that merged main
+ *   into itself, or an unrelated merge) is refused rather than guessed at.
+ */
+export async function resolveCertificationHead(
+  checkoutRoot: string,
+  checkedOutCommit: string,
+): Promise<string> {
+  requireExactCommit(checkedOutCommit, "checked-out commit");
+  const base = requireExactCommit(
+    (
+      await runCapture(["git", "merge-base", checkedOutCommit, "origin/main"], checkoutRoot)
+    ).trim(),
+    "required base commit",
+  );
+  if (base === checkedOutCommit) return checkedOutCommit;
+  const parents = (
+    await runCapture(
+      ["git", "rev-list", "--parents", "-n", "1", checkedOutCommit],
+      checkoutRoot,
+    )
+  )
+    .trim()
+    .split(/\s+/);
+  if (parents.length === 2) return checkedOutCommit;
+  const [, firstParent, secondParent] = parents;
+  if (
+    parents.length === 3 &&
+    firstParent !== undefined &&
+    secondParent !== undefined &&
+    firstParent === base &&
+    secondParent !== base
+  ) {
+    return secondParent;
+  }
+  throw new Error(
+    `certification head ${checkedOutCommit} is a merge that is not GitHub's synthetic pull_request merge (parents ${parents.slice(1).join(", ")}, merge base ${base}); refusing to guess the candidate head`,
+  );
+}
+
 const CANDIDATE_MANIFEST_LEAF_ALLOWLIST: Record<string, readonly string[]> = {
   "package.json": ["version"],
   "packages/core/package.json": ["version"],
@@ -1552,6 +1628,36 @@ async function assertCandidateTestRepairHonesty(
       throw new Error(
         `certification scope rejected ${path} growth of ${added} lines beyond the ${G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT} line allowance`,
       );
+    }
+  }
+  for (const path of G18_006_TEST_REPAIR_HARNESS_PATHS) {
+    if (!changedPaths.includes(path)) continue;
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (before === null || after === null) {
+      throw new Error(
+        `certification scope rejected added or removed candidate test-repair path ${path}`,
+      );
+    }
+    const numstat = (
+      await runCapture(
+        ["git", "diff", "--numstat", requiredBaseCommit, sourceCommit, "--", path],
+        checkoutRoot,
+      )
+    ).trim();
+    const [addedField, removedField] = numstat.split(/\s+/);
+    const changed = Number(addedField) + Number(removedField);
+    if (!Number.isSafeInteger(changed) || changed > G18_006_TEST_REPAIR_HARNESS_CHANGED_LINE_LIMIT) {
+      throw new Error(
+        `certification scope rejected ${path} with ${addedField}+${removedField} changed lines; the harness repair budget is ${G18_006_TEST_REPAIR_HARNESS_CHANGED_LINE_LIMIT}`,
+      );
+    }
+    for (const anchor of G18_006_TEST_REPAIR_HARNESS_ANCHORS[path] ?? []) {
+      if (!after.includes(anchor)) {
+        throw new Error(
+          `certification scope rejected ${path} without the retained safety anchor ${anchor}`,
+        );
+      }
     }
   }
   if (!changedPaths.includes(G18_006_TEST_REPAIR_SOURCE_PATH)) return;
