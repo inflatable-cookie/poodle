@@ -245,6 +245,53 @@ function collectReleaseProtocolFailures(source: string): string[] {
   return found;
 }
 
+/**
+ * g18.009: the release workflow is the npm/web package wrapper and nothing
+ * else. It must run the installed-package proof that certifies the packed web
+ * packages, and it must never regain the aggregate `effigy release gates` /
+ * `effigy qa` board or a native/GPUI selector. This is the law that keeps the
+ * hosted branch dry run and the published release web-only.
+ */
+const RELEASE_WRAPPER_REQUIRED_RUNS = [
+  "run: effigy svelte:package",
+  "run: effigy check:release-automation",
+  "run: effigy test:web-pack-install",
+];
+const RELEASE_WRAPPER_FORBIDDEN_SELECTORS = [
+  "effigy release ",
+  "effigy qa",
+  "effigy ci",
+  "effigy check:gpui",
+  "effigy gpui:test",
+  "effigy regressions:native",
+  "effigy probe:gpui-specimens",
+  "effigy test:contracts",
+  "effigy test:core",
+  "effigy test:components",
+  "effigy audit:security",
+  "effigy audit:licenses",
+];
+
+function collectReleaseWrapperFailures(source: string): string[] {
+  const found: string[] = [];
+  const active = withoutComments(source);
+  for (const command of RELEASE_WRAPPER_REQUIRED_RUNS) {
+    if (!active.includes(command)) {
+      found.push(
+        `.github/workflows/release.yml must run ${command.slice("run: ".length)} as its pre-pack proof`,
+      );
+    }
+  }
+  for (const selector of RELEASE_WRAPPER_FORBIDDEN_SELECTORS) {
+    if (active.includes(selector)) {
+      found.push(
+        `.github/workflows/release.yml must not invoke ${selector}; this release is npm/web only`,
+      );
+    }
+  }
+  return found;
+}
+
 const actionRefPattern = /^\s*(?:-\s+)?uses:\s*([^\s#]+)(?:\s+#\s*(.*))?$/gm;
 
 for (const file of retainedWorkflows) {
@@ -328,7 +375,13 @@ for (const [source, relativePath] of automaticWorkflows) {
 requireRun(web, "effigy ci:web", ".github/workflows/ci-web.yml");
 requireRun(rust, "effigy ci:rust", ".github/workflows/ci-rust.yml");
 requireRun(native, "effigy ci:native", ".github/workflows/ci-native.yml");
-requireRun(release, "effigy release gates", ".github/workflows/release.yml");
+for (const selector of [
+  "effigy svelte:package",
+  "effigy check:release-automation",
+  "effigy test:web-pack-install",
+]) {
+  requireRun(release, selector, ".github/workflows/release.yml");
+}
 
 const rustSetup = "uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c";
 for (const [source, file] of [
@@ -395,10 +448,11 @@ assert(!releaseActive.includes("run: effigy ci"), "release must not maintain the
 assert(
   releaseActive.includes("cargo install cargo-deny --version 0.19.4 --locked") &&
     releaseActive.indexOf("cargo install cargo-deny --version 0.19.4 --locked") <
-      releaseActive.indexOf("run: effigy release gates"),
-  "release must install the reviewed cargo-deny CLI before its gate",
+      releaseActive.indexOf("run: effigy test:web-pack-install"),
+  "release must install the reviewed cargo-deny CLI before its npm/web proof",
 );
 for (const failure of collectReleaseProtocolFailures(release)) failures.push(failure);
+for (const failure of collectReleaseWrapperFailures(release)) failures.push(failure);
 
 const publishStart = releaseActive.indexOf("- name: Publish");
 const publishBlock = publishStart === -1 ? "" : releaseActive.slice(publishStart);
@@ -512,6 +566,51 @@ assert(
   }`,
 );
 
+const aggregateGate = release.replace(
+  "run: effigy test:web-pack-install",
+  "run: effigy release gates",
+);
+const aggregateGateFailures = collectReleaseWrapperFailures(aggregateGate);
+const aggregateGateFailed = aggregateGateFailures.some((failure) =>
+  failure.includes("must not invoke effigy release"),
+);
+assert(
+  aggregateGateFailed,
+  `restoring the aggregate release gate must fail the checker; got: ${
+    aggregateGateFailures.join("; ") || "no failures"
+  }`,
+);
+
+const nativeGate = release.replace(
+  "run: effigy test:web-pack-install",
+  "run: effigy ci:native",
+);
+const nativeGateFailures = collectReleaseWrapperFailures(nativeGate);
+const nativeGateFailed = nativeGateFailures.some((failure) =>
+  failure.includes("must not invoke effigy ci"),
+);
+assert(
+  nativeGateFailed,
+  `restoring a native gate must fail the checker; got: ${
+    nativeGateFailures.join("; ") || "no failures"
+  }`,
+);
+
+const omittedWebProof = release.replace(
+  "run: effigy test:web-pack-install",
+  "run: effigy docs:lint",
+);
+const omittedWebProofFailures = collectReleaseWrapperFailures(omittedWebProof);
+const omittedWebProofFailed = omittedWebProofFailures.some((failure) =>
+  failure.includes("must run effigy test:web-pack-install"),
+);
+assert(
+  omittedWebProofFailed,
+  `dropping the installed-package proof must fail the checker; got: ${
+    omittedWebProofFailures.join("; ") || "no failures"
+  }`,
+);
+
 console.log(
   omittedFetchFailed
     ? "plant omit origin/main fetch: failed as required"
@@ -537,6 +636,21 @@ console.log(
     ? "plant publish without tag guard: failed as required"
     : "plant publish without tag guard: did not fail",
 );
+console.log(
+  aggregateGateFailed
+    ? "plant aggregate release gate: failed as required"
+    : "plant aggregate release gate: did not fail",
+);
+console.log(
+  nativeGateFailed
+    ? "plant native gate: failed as required"
+    : "plant native gate: did not fail",
+);
+console.log(
+  omittedWebProofFailed
+    ? "plant omitted installed-package proof: failed as required"
+    : "plant omitted installed-package proof: did not fail",
+);
 
 if (failures.length > 0) {
   console.error("release automation static check: FAIL");
@@ -545,6 +659,6 @@ if (failures.length > 0) {
 } else {
   console.log("release automation static check: pass");
   console.log(
-    `checked ${retainedWorkflows.length} retained workflows, Effigy gate, alias, publish set, compiled pack assertions, release protocol, and planted failures`,
+    `checked ${retainedWorkflows.length} retained workflows, Effigy gate, alias, publish set, compiled pack assertions, release protocol, npm/web release wrapper, and planted failures`,
   );
 }

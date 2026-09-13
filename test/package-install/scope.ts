@@ -978,6 +978,121 @@ async function ordinaryAdmitsPrecursorRootAlignment(
   return changes.length === 1 && changes[0] === "version";
 }
 
+/**
+ * g18.009: the hosted release wrapper is workflow-only.
+ *
+ * The release workflow is a thin launcher, so a range that repairs it carries
+ * the `workflow` certification label even though it cannot change a package
+ * version, archive byte, or published surface. Admit exactly that bounded
+ * shape - the release workflow, its release-automation guard, and
+ * documentation - and only while the workflow keeps the narrow npm/web
+ * proof. Any aggregate, native, or GPUI selector stays rejected, so the
+ * ordinary branch dry run and tag dry run can certify the wrapper commit
+ * without weakening the guard that the release workflow exists to enforce.
+ */
+const RELEASE_WRAPPER_PATHS = [
+  ".github/workflows/release.yml",
+  "scripts/check-release-automation.ts",
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+] as const;
+/** The classifier that owns this admission; a range must leave it intact. */
+const RELEASE_WRAPPER_GUARD_PATH = "test/package-install/scope.ts";
+const RELEASE_WRAPPER_GUARD_MARKERS = [
+  "RELEASE_WRAPPER_REQUIRED_RUNS",
+  "RELEASE_WRAPPER_FORBIDDEN_SELECTORS",
+  '\"effigy test:web-pack-install\"',
+  '\"effigy release \"',
+] as const;
+const RELEASE_WRAPPER_CHECKER_PATH = "scripts/check-release-automation.ts";
+const RELEASE_WRAPPER_CHECKER_MARKERS = [
+  "collectReleaseWrapperFailures",
+  '\"effigy test:web-pack-install\"',
+] as const;
+const RELEASE_WRAPPER_REQUIRED_RUNS = [
+  "effigy svelte:package",
+  "effigy check:release-automation",
+  "effigy test:web-pack-install",
+] as const;
+const RELEASE_WRAPPER_FORBIDDEN_SELECTORS = [
+  "effigy release ",
+  "effigy qa",
+  "effigy ci",
+  "effigy check:gpui",
+  "effigy gpui:test",
+  "effigy regressions:native",
+  "effigy probe:gpui-specimens",
+  "effigy test:contracts",
+  "effigy test:core",
+  "effigy test:components",
+  "effigy audit:security",
+  "effigy audit:licenses",
+] as const;
+
+/** Every `run:` command a workflow declares, including block bodies. */
+function workflowRunCommands(source: string): string[] {
+  const commands: string[] = [];
+  const lines = source.split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line.trimStart().startsWith("#")) continue;
+    const declared = /^(\s*)(?:-\s*)?run:\s*(.*)$/.exec(line);
+    if (!declared) continue;
+    const indent = declared[1].length;
+    const value = declared[2].trim();
+    if (value === "" || value.startsWith("|") || value.startsWith(">")) {
+      for (let body = index + 1; body < lines.length; body += 1) {
+        const candidate = lines[body];
+        if (candidate.trim() === "") continue;
+        const bodyIndent = candidate.length - candidate.trimStart().length;
+        if (bodyIndent <= indent) break;
+        if (candidate.trimStart().startsWith("#")) continue;
+        commands.push(candidate.trim());
+      }
+      continue;
+    }
+    commands.push(value.replace(/^['"]/, "").replace(/['"]$/, ""));
+  }
+  return commands;
+}
+
+async function ordinaryAdmitsReleaseWrapperRepair(
+  checkoutRoot: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  const workflowPath = RELEASE_WRAPPER_PATHS[0];
+  if (!changedPaths.includes(workflowPath)) return false;
+  const admitted = (path: string): boolean =>
+    (RELEASE_WRAPPER_PATHS as readonly string[]).includes(path) ||
+    (path.startsWith("docs/") && !RELEASE_NOTE_PATH.test(path));
+  if (!changedPaths.every(admitted)) return false;
+  const workflow = await gitShowFile(checkoutRoot, sourceCommit, workflowPath);
+  if (workflow === null) return false;
+  const commands = workflowRunCommands(workflow);
+  if (!RELEASE_WRAPPER_REQUIRED_RUNS.every((command) => commands.includes(command))) {
+    return false;
+  }
+  const invoked = commands.join("\n");
+  if (
+    RELEASE_WRAPPER_FORBIDDEN_SELECTORS.some((selector) => invoked.includes(selector))
+  ) {
+    return false;
+  }
+  const guard = await gitShowFile(checkoutRoot, sourceCommit, RELEASE_WRAPPER_GUARD_PATH);
+  if (
+    guard === null ||
+    !RELEASE_WRAPPER_GUARD_MARKERS.every((marker) => guard.includes(marker))
+  ) {
+    return false;
+  }
+  const checker = await gitShowFile(checkoutRoot, sourceCommit, RELEASE_WRAPPER_CHECKER_PATH);
+  return (
+    checker !== null &&
+    RELEASE_WRAPPER_CHECKER_MARKERS.every((marker) => checker.includes(marker))
+  );
+}
+
 function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
@@ -1862,6 +1977,15 @@ export async function assertInstalledScope(
       (await ordinaryAdmitsClosedCandidate(
         checkoutRoot,
         requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      ))
+    ) {
+      forbidden = [];
+    } else if (
+      forbidden.length > 0 &&
+      (await ordinaryAdmitsReleaseWrapperRepair(
+        checkoutRoot,
         sourceCommit,
         changedPaths,
       ))

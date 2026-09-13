@@ -1514,3 +1514,111 @@ describe("g18.031 precursor root version alignment", () => {
     );
   });
 });
+
+describe("g18.009 npm/web release wrapper repair", () => {
+  const guardModule =
+    '// RELEASE_WRAPPER_REQUIRED_RUNS + RELEASE_WRAPPER_FORBIDDEN_SELECTORS\n' +
+    '// "effigy test:web-pack-install" and "effigy release "\n';
+  const checkerModule =
+    '// collectReleaseWrapperFailures asserts "effigy test:web-pack-install"\n';
+
+  const narrowWorkflow = (overrides: Record<string, string> = {}): string =>
+    [
+      "name: Release",
+      "",
+      "on:",
+      "  workflow_dispatch:",
+      "",
+      "jobs:",
+      "  release:",
+      "    runs-on: macos-latest",
+      "    steps:",
+      "      - run: bun install --frozen-lockfile",
+      "      - name: Build the published web packages",
+      "        run: effigy svelte:package",
+      "      - name: Release automation guard",
+      "        run: effigy check:release-automation",
+      "      - name: Hosted npm/web package proof",
+      "        run: effigy test:web-pack-install",
+    ]
+      .map((line) => overrides[line] ?? line)
+      .join("\n")
+      .concat("\n");
+
+  async function plantWrapperRange(
+    releaseWorkflow: string,
+    extraHeadFiles: Record<string, string> = {},
+  ): Promise<{ root: string; base: string; head: string }> {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "wrapper base");
+    await writeFiles(root, {
+      ".github/workflows/release.yml": releaseWorkflow,
+      "scripts/check-release-automation.ts": checkerModule,
+      "test/package-install/scope.ts": guardModule,
+      "test/package-install/scope.test.ts": "// guard coverage\n",
+      "docs/logs/2026-09/20260913-g18-009-test.md": "# release evidence\n",
+      ...extraHeadFiles,
+    });
+    const head = await commitAll(root, "wrapper head");
+    return { root, base, head };
+  }
+
+  test("ordinary CI admits the bounded release wrapper repair", async () => {
+    const { root, base, head } = await plantWrapperRange(narrowWorkflow());
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toContain(".github/workflows/release.yml");
+    expect(proof.changedPaths).toContain("test/package-install/scope.ts");
+  });
+
+  test("ordinary CI rejects a release wrapper that regains aggregate or native gating", async () => {
+    const plants = [
+      "        run: effigy release gates",
+      "        run: effigy qa",
+      "        run: effigy ci:native",
+      "        run: effigy regressions:native",
+    ];
+    for (const plant of plants) {
+      const { root, base, head } = await plantWrapperRange(
+        narrowWorkflow({ "        run: effigy test:web-pack-install": plant }),
+      );
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        /forbidden workflow surface: \.github\/workflows\/release\.yml/,
+      );
+    }
+  });
+
+  test("ordinary CI rejects a release wrapper that drops the installed-package proof", async () => {
+    const { root, base, head } = await plantWrapperRange(
+      narrowWorkflow({ "        run: effigy test:web-pack-install": "        run: effigy docs:lint" }),
+    );
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /forbidden workflow surface: \.github\/workflows\/release\.yml/,
+    );
+  });
+
+  test("ordinary CI rejects a wrapper range that strips the classifier guard", async () => {
+    const { root, base, head } = await plantWrapperRange(narrowWorkflow(), {
+      "test/package-install/scope.ts": "// guard stripped\n",
+    });
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /forbidden workflow surface: \.github\/workflows\/release\.yml/,
+    );
+  });
+
+  test("ordinary CI keeps product and release-note paths outside the wrapper repair", async () => {
+    const products = {
+      "packages/core/src/unauthorized.ts": "export {};\n",
+      "docs/release-notes/0.4.0.md": "# 0.4.0\n",
+    };
+    for (const [path, contents] of Object.entries(products)) {
+      const { root, base, head } = await plantWrapperRange(narrowWorkflow(), {
+        [path]: contents,
+      });
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        /certification scope rejected/,
+      );
+    }
+  });
+});
