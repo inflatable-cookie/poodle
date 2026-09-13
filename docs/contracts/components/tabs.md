@@ -579,8 +579,8 @@ measured from the selected item rather than painted as a selected-item border.
 
 | Orientation | Geometry |
 | --- | --- |
-| horizontal | selected item's inline offset and width; 0.125rem block size on the list's bottom edge |
-| vertical | selected item's block offset and height; 0.125rem inline size on the list's right edge |
+| horizontal | selected item's scroll-content inline offset and width; 0.125rem block size on the list's bottom edge |
+| vertical | selected item's scroll-content block offset and height; 0.125rem inline size on the list's right edge |
 
 The indicator uses `var(--poodle-recipe-tabs-active-underline-border,
 var(--poodle-color-accent-base))`. It never owns selection, focus, hit testing,
@@ -591,6 +591,9 @@ selection change against stable geometry retargets from the current rendered
 geometry to the latest selected tab. Orientation change, container resize,
 font reflow, and overflow-mode change cancel motion, remeasure, and snap. In
 `reduced` and `frozen`, every update snaps and schedules no indicator clock.
+The measured endpoint is expressed in the list's scroll-content coordinates,
+so manual scrolling, a host reveal before measurement, and ResizeObserver
+remeasurement do not displace the indicator by the current scroll offset.
 
 ### Recipe hooks — the active axis
 

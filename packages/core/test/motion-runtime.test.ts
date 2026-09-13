@@ -10,6 +10,7 @@ import {
   motionKey,
   playClippedHeight,
   playWebAnimation,
+  tabIndicatorBox,
   nextToastVisuals,
 } from "../src/index.ts";
 
@@ -192,6 +193,67 @@ describe("web motion runtime", () => {
     cancelWebMotion(motionKey(intent.owner, intent.role, intent.channel));
     expect(liveWebMotionCount()).toBe(1);
     holds.at(-1)?.finish();
+  });
+});
+
+function measuredElement(
+  rect: Pick<DOMRect, "left" | "top" | "width" | "height">,
+  scroll: { left?: number; top?: number } = {},
+): HTMLElement {
+  return {
+    scrollLeft: scroll.left ?? 0,
+    scrollTop: scroll.top ?? 0,
+    getBoundingClientRect: () => rect as DOMRect,
+  } as unknown as HTMLElement;
+}
+
+describe("tabs indicator content-space geometry", () => {
+  test("selection while manually scrolled keeps the horizontal underline on the selected tab", () => {
+    const list = measuredElement(
+      { left: 40, top: 12, width: 240, height: 36 },
+      { left: 120 },
+    );
+    const selected = measuredElement({ left: 180, top: 12, width: 72, height: 36 });
+
+    expect(tabIndicatorBox(list, selected, "horizontal")).toEqual({
+      left: 260,
+      top: 34,
+      width: 72,
+      height: 2,
+    });
+  });
+
+  test("programmatic reveal before measurement uses the revealed content offset", () => {
+    const list = measuredElement(
+      { left: 20, top: 8, width: 200, height: 32 },
+      { left: 180 },
+    );
+    const revealed = measuredElement({ left: 170, top: 8, width: 90, height: 32 });
+
+    expect(tabIndicatorBox(list, revealed, "horizontal")?.left).toBe(330);
+  });
+
+  test("remeasurement while vertically scrolled remains in list content coordinates", () => {
+    const list = measuredElement(
+      { left: 10, top: 30, width: 110, height: 220 },
+      { top: 96 },
+    );
+    const selected = measuredElement({ left: 10, top: 134, width: 110, height: 40 });
+    expect(tabIndicatorBox(list, selected, "vertical")).toEqual({
+      left: 108,
+      top: 200,
+      width: 2,
+      height: 40,
+    });
+
+    list.scrollTop = 128;
+    const reflowed = measuredElement({ left: 10, top: 102, width: 110, height: 48 });
+    expect(tabIndicatorBox(list, reflowed, "vertical")).toEqual({
+      left: 108,
+      top: 200,
+      width: 2,
+      height: 48,
+    });
   });
 });
 

@@ -326,13 +326,13 @@ export function tabIndicatorBox(
   if (orientation === "vertical") {
     return {
       left: tabBox.left - listBox.left + tabBox.width - 2,
-      top: tabBox.top - listBox.top,
+      top: tabBox.top - listBox.top + list.scrollTop,
       width: 2,
       height: tabBox.height,
     };
   }
   return {
-    left: tabBox.left - listBox.left,
+    left: tabBox.left - listBox.left + list.scrollLeft,
     top: tabBox.top - listBox.top + tabBox.height - 2,
     width: tabBox.width,
     height: 2,
