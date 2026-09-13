@@ -96,6 +96,9 @@ mutation.
   silently for more than five minutes.
 - A board still active at its hard ceiling is a failed process. Stop and
   escalate; never wait hours for an unexplained selector.
+- A clean timeout is containment, not acceptance. Every required leaf must
+  pass before validation optimization is complete; an over-budget leaf stays
+  an open repair obligation with its coverage intact.
 - Workers run a baseline board at most once and a final board at most once for
   an optimization task. They use focused leaves between those points.
 

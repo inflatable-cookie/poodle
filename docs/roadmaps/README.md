@@ -63,9 +63,10 @@ unblocks from that published release.
 Merged g18.032 on 2026-09-13 (PR #267) repairs the process exposed by `0.4.0`:
 generic web-candidate admission, separate npm and native trains, one-build
 archives, two bounded hosted runs, and an observable deduplicated full
-headless board. The final board stopped at the pre-existing
-`probe:gpui-specimens` renderer hang per the stop condition; that defect and
-the post-`0.4.0` consumer/specimen sweep are the next execution frontier.
+headless board. Its final board safely stopped at the pre-existing
+`probe:gpui-specimens` renderer hang, but containment is not completion.
+Operator-prioritized g18.033 now owns the causal `form-dialog` repair and a
+wholly green bounded board before the post-`0.4.0` consumer/specimen sweep.
 
 ## Rules
 

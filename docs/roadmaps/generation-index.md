@@ -92,12 +92,10 @@ Updated: 2026-09-13
     that commit. npm serves core and Svelte `0.4.0` as `latest`, and a fresh
     source-free consumer resolves the Svelte `./editor` entry in declared-type,
     SSR, and browser modes.
-  - Next checkpoint: Desktop resumes retained g02.058 and PR #215 to unlink,
-    repin `0.4.0`, and finish Phase B. Route compatible sweep findings to
-    `0.4.1`; later breaking changes wait for `0.5.0`.
-  - Ready infrastructure task: operator-prioritized g18.032 replaces the
-    version-specific/native-coupled release path and opaque duplicate full
-    board before any further Poodle product task.
+  - Next checkpoint: operator-prioritized g18.033 repairs the GPUI
+    `form-dialog` first-draw hang and proves the complete bounded board green.
+    Then Desktop continues on published `0.4.0` and compatible sweep findings
+    feed `0.4.1`; later breaking changes wait for `0.5.0`.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

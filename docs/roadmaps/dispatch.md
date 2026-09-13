@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-13 (g18.032 fast validation and npm release merged)
+Updated: 2026-09-13 (g18.033 GPUI FormDialog convergence ready)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -124,33 +124,10 @@ the preview crate manifest; no blocking findings remain.
 
 ## Active and paused queue tasks
 
-[`g18.006`](g18/006-v040-web-editor-release-and-desktop-unblock.md) candidate
-preparation is ready with its worker/workspace and progress preserved. It is
-clean at current main after g18.031 merged, with no candidate mutation or PR.
-Resume the same Queue task `17ac3fee-de90-4b32-9672-1134770bb086` on its
-accepted merged main; the task, worker, workspace and evidence remain intact.
-
-[`g18.028`](g18/028-release-gate-accessibility-assertion-repair.md) is complete
-after PR #260 merged as `018b9214cb2eb88cb9651d9ec8a17808e53410cd`.
-
-[`g18.029`](g18/029-v040-candidate-scope-admission.md) is complete after PR
-#261 merged as `01bb0dd84236f69bf55d5556c56b46513191a586`.
-
-[`g18.030`](g18/030-nucleus-receipt-lock-provenance.md) is complete. It derives
-receipt SHA/version provenance from the actual preview lockfile and performed
-one complete current evidence repin before retained g18.006 resumes.
-
-[`g18.031`](g18/031-release-metadata-and-census-provenance.md) is complete
-after PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`. It
-delivered truthful root release metadata, exact root lockstep candidate
-admission, manifest-derived census receipt version and one deterministic
-current census regeneration. It did not prepare the candidate or run the full
-release board.
-
-[`g18.009`](g18/009-v040-release-certification-and-desktop-unblock.md) release
-certification is dependency-queued behind g18.006 with no manual hold. It
-dispatches only after the repaired candidate closes and owns the hosted branch
-dry run against that unchanged merged identity.
+[`g18.033`](g18/033-gpui-form-dialog-render-convergence.md) is the sole ready
+task. It repairs the `form-dialog` first-draw non-termination left visible by
+g18.032, restores all 175 GPUI specimen routes, and requires one wholly green
+bounded full board. A timeout-only or partial-board result cannot close it.
 
 ## Active and dependency-queued product tasks
 
@@ -233,8 +210,9 @@ merged evidence is retained in the generation roadmap.
 #267 merged as `1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92` on 2026-09-13 after
 exact-head independent review (PR comment `5653154132`, `ready_to_merge`) at
 `7bb9f348d4b65d40f89733fe1ae081930c118293`. The final board passed 54/68
-units before stopping at the pre-existing `probe:gpui-specimens` hang per the
-stop condition; the defect is recorded for the consumer/specimen sweep.
+units before safely stopping at the pre-existing `probe:gpui-specimens` hang.
+That containment is not acceptance: g18.033 owns the causal repair and must
+finish the complete board before the consumer/specimen sweep.
 
 ## Held planning horizons
 
