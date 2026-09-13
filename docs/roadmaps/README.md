@@ -1,6 +1,5 @@
 # Roadmaps
 
-Status: reference
 Updated: 2026-09-13
 
 Northstar roadmaps use one generation-plus-task model:

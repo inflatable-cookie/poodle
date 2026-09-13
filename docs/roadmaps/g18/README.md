@@ -1,6 +1,5 @@
 # g18 — GPUI functional completion
 
-Status: active
 Opened: 2026-09-09
 Updated: 2026-09-13
 Governing refs: `../../../README.md`, `../../README.md`,
