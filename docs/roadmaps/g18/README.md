@@ -199,3 +199,11 @@ counts and source presence cannot satisfy this rule.
   declared Queue dependencies and may run without changing product priority.
   Existing next-task text continues to describe product sequencing; this entry
   authorizes no sibling product work.
+<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:9c0459fa98c820e7c9aa21a964bc7e34837ca8fc28f7c838e9dc0aa72f0b9c2b -->
+| Generation | Disposition | Runway state |
+| --- | --- | --- |
+| g18 | open | planning_required |
+| Task | Status | Stage | Revision | Record digest |
+| --- | --- | --- | --- | --- |
+| g18.034 | complete | none | 8 | sha256:bd6863d116045dec331e616c30985260c441d1ea02735bcfb4bdbdb275f1c106 |
+<!-- northstar:lifecycle:end -->
