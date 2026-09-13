@@ -131,6 +131,21 @@ function baseFiles(): Record<string, string> {
     "bun.lock": bunLock("0.4.0"),
     "CHANGELOG.md": changelog(null),
     "docs/release-notes/README.md": "# Release notes\n",
+    "packages/render/Cargo.toml": [
+      "[package]",
+      'name = "poodle-render"',
+      'version = "0.4.0"',
+      "publish = false",
+      "",
+    ].join("\n"),
+    "packages/render/Cargo.lock": [
+      "version = 4",
+      "",
+      "[[package]]",
+      'name = "poodle-render"',
+      'version = "0.4.0"',
+      "",
+    ].join("\n"),
   };
 }
 
@@ -185,6 +200,8 @@ describe("web candidate admission", () => {
     expect(proof.sourceVersion).toBe("0.4.0");
     expect(proof.targetVersion).toBe("0.4.1");
     expect(proof.releaseNotePath).toBe("docs/release-notes/0.4.1.md");
+    expect(proof.changedPaths).not.toContain("packages/render/Cargo.toml");
+    expect(proof.changedPaths).not.toContain("packages/render/Cargo.lock");
   });
 
   test("admit a synthetic 0.5.0 candidate", async () => {
@@ -258,7 +275,13 @@ describe("web candidate admission", () => {
   test("reject a native Cargo change that rides the bump", async () => {
     const { root, base, head } = await plantCandidate("0.5.0", {
       evidenceExtra: {
-        "packages/render/Cargo.toml": ['[package]', 'name = "poodle-render"', 'version = "0.5.0"', ""].join("\n"),
+        "packages/render/Cargo.toml": [
+          "[package]",
+          'name = "poodle-render"',
+          'version = "0.5.0"',
+          "publish = false",
+          "",
+        ].join("\n"),
       },
     });
     await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(

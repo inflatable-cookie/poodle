@@ -15,12 +15,7 @@
 // A violation names the specific rule. Historical `g16.054`/`g18.006` modes in
 // `scope.ts` are retained as evidence and are not consulted here.
 
-import { readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
-
 import {
-  cargoIntraRepoRequirements,
-  cargoSectionForLine,
   changedJsonLeafPaths,
   changedPathsForCommitRange,
   changelogInventory,
@@ -28,7 +23,6 @@ import {
   gitShowFile,
   internalJsDependencies,
   isJsonRecord,
-  parseCargoDiffLines,
   recordedSourceCommits,
   requireExactCommit,
   runCapture,
@@ -113,50 +107,16 @@ async function readManifestVersion(
   return manifest.version;
 }
 
-/** Discover every tracked Cargo manifest and lock below `packages/`. */
-function discoverCargoPaths(checkoutRoot: string): {
-  manifests: string[];
-  locks: string[];
-} {
-  const manifests: string[] = [];
-  const locks: string[] = [];
-  const walk = (relative: string): void => {
-    for (const entry of readdirSync(join(checkoutRoot, relative), { withFileTypes: true })) {
-      if (entry.name === "target" || entry.name === "node_modules" || entry.name.startsWith(".")) {
-        continue;
-      }
-      const child = relative === "" ? entry.name : `${relative}/${entry.name}`;
-      if (entry.isDirectory()) {
-        walk(child);
-        continue;
-      }
-      if (entry.name === "Cargo.toml") manifests.push(child);
-      if (entry.name === "Cargo.lock") locks.push(child);
-    }
-  };
-  if (statSync(join(checkoutRoot, "packages")).isDirectory()) walk("packages");
-  return { manifests: sortedUnique(manifests), locks: sortedUnique(locks) };
-}
-
-/** The version-carrying surface shared by every lockstep participant. */
-export function webCandidateVersionPaths(checkoutRoot: string): string[] {
-  const { manifests, locks } = discoverCargoPaths(checkoutRoot);
-  return sortedUnique([...manifests, ...locks, ...WEB_CANDIDATE_JS_MANIFEST_PATHS]);
-}
-
 /** The complete release-input set derives from the target version, nothing else. */
 export function webCandidateReleaseInputPaths(
-  checkoutRoot: string,
+  _checkoutRoot: string,
   targetVersion: string,
 ): string[] {
-  const { manifests, locks } = discoverCargoPaths(checkoutRoot);
   return sortedUnique([
     CHANGELOG_PATH,
     BUN_LOCK_PATH,
     RELEASE_NOTES_INDEX_PATH,
     `docs/release-notes/${targetVersion}.md`,
-    ...manifests,
-    ...locks,
     ...WEB_CANDIDATE_JS_MANIFEST_PATHS,
   ]);
 }
@@ -282,92 +242,6 @@ async function assertJsLockstep(
       if (beforeSpecifier !== sourceVersion || afterSpecifier !== targetVersion) {
         throw new Error(
           `web candidate requires internal JS dependency ${dependency} in ${path} to move ${sourceVersion} -> ${targetVersion}, found ${beforeSpecifier} -> ${afterSpecifier}`,
-        );
-      }
-    }
-  }
-}
-
-/** Cargo manifests and locks carry the same lockstep transition, nothing else. */
-async function assertCargoLockstep(
-  checkoutRoot: string,
-  requiredBaseCommit: string,
-  sourceCommit: string,
-  changedPaths: string[],
-  { sourceVersion, targetVersion }: WebCandidateVersions,
-): Promise<void> {
-  const { manifests, locks } = discoverCargoPaths(checkoutRoot);
-  for (const path of [...manifests, ...locks]) {
-    if (!changedPaths.includes(path)) continue;
-    const diff = await runCapture(
-      ["git", "diff", "--no-ext-diff", "--unified=0", requiredBaseCommit, sourceCommit, "--", path],
-      checkoutRoot,
-    );
-    const { added, removed } = parseCargoDiffLines(diff);
-    const transport = [...removed, ...added.map(({ line }) => line)].filter(
-      (line) =>
-        /^\s*(?:publish|registry|source)\s*=/.test(line) ||
-        /^\s*\[(?:patch|replace)(?:\.|\])/.test(line),
-    );
-    if (transport.length > 0) {
-      throw new Error(
-        `web candidate rejected Cargo publication/registry/source content in ${path}: ${transport.join(", ")}`,
-      );
-    }
-    if (removed.length !== added.length) {
-      throw new Error(
-        `web candidate rejected unpaired Cargo lockstep content in ${path}; only version and exact intra-repository Poodle requirement versions may change`,
-      );
-    }
-    const sourceText = (await gitShowFile(checkoutRoot, sourceCommit, path))!;
-    for (let index = 0; index < removed.length; index += 1) {
-      const oldLine = removed[index];
-      const newLine = added[index].line;
-      const section = cargoSectionForLine(sourceText, added[index].lineNumber);
-      const packageVersion =
-        section === "package" &&
-        oldLine === `version = "${sourceVersion}"` &&
-        newLine === `version = "${targetVersion}"`;
-      const requirement = new RegExp(
-        `^(poodle-[A-Za-z0-9_-]+)\\s*=\\s*\\{\\s*version\\s*=\\s*"${sourceVersion.replaceAll(".", "\\.")}",\\s*path\\s*=\\s*"([^"]+)"\\s*\\}$`,
-      ).exec(oldLine);
-      const requirementAfter = requirement
-        ? new RegExp(
-            `^${requirement[1]}\\s*=\\s*\\{\\s*version\\s*=\\s*"${targetVersion.replaceAll(".", "\\.")}",\\s*path\\s*=\\s*"${requirement[2]}"\\s*\\}$`,
-          ).test(newLine)
-        : false;
-      const dependencyVersion =
-        (section === "dependencies" || section === "dev-dependencies") && requirementAfter;
-      if (!packageVersion && !dependencyVersion) {
-        throw new Error(
-          `web candidate rejected unauthorized Cargo change in ${path}: ${oldLine} -> ${newLine}`,
-        );
-      }
-    }
-    const beforeText = (await gitShowFile(checkoutRoot, requiredBaseCommit, path))!;
-    const beforeRequirements = cargoIntraRepoRequirements(beforeText);
-    const afterRequirements = cargoIntraRepoRequirements(sourceText);
-    for (const key of sortedUnique([...beforeRequirements.keys(), ...afterRequirements.keys()])) {
-      const beforeRequirement = beforeRequirements.get(key);
-      const afterRequirement = afterRequirements.get(key);
-      if (!beforeRequirement || !afterRequirement) {
-        throw new Error(`web candidate rejected added or removed intra-repository Cargo requirement in ${path}`);
-      }
-      if (beforeRequirement.path !== afterRequirement.path) {
-        throw new Error(`web candidate rejected retargeted intra-repository Cargo requirement in ${path}`);
-      }
-      if (afterRequirement.version === null) {
-        if (beforeRequirement.version !== null) {
-          throw new Error(`web candidate rejected version removal from an intra-repository Cargo requirement in ${path}`);
-        }
-        continue;
-      }
-      if (
-        beforeRequirement.version !== sourceVersion ||
-        afterRequirement.version !== targetVersion
-      ) {
-        throw new Error(
-          `web candidate requires intra-repository Cargo requirement in ${path} to move ${sourceVersion} -> ${targetVersion}`,
         );
       }
     }
@@ -532,7 +406,6 @@ export async function assertWebCandidateScope(
     );
   }
   await assertJsLockstep(checkoutRoot, requiredBaseCommit, sourceCommit, changedPaths, versions);
-  await assertCargoLockstep(checkoutRoot, requiredBaseCommit, sourceCommit, changedPaths, versions);
   await assertBunLock(checkoutRoot, requiredBaseCommit, sourceCommit, versions);
   await assertReleaseNotes(checkoutRoot, sourceCommit, versions);
   const frozenReleaseInputCommit = await assertFrozenReleaseInputRange(
