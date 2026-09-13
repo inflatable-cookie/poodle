@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import RangeSlider from "../src/RangeSlider.svelte";
 
 function mockTrack(root: HTMLElement, width: number, height: number): void {
-  root.getBoundingClientRect = () =>
+  const measured = root.querySelector<HTMLElement>(".poodle-range-slider__capsule") ?? root;
+  measured.getBoundingClientRect = () =>
     ({
       x: 0,
       y: 0,
@@ -188,7 +189,7 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     );
   });
 
-  it("keeps two 44px hits and chooses lower on a tie", async () => {
+  it("keeps two 44px hits and chooses lower left of a collision", async () => {
     const onValueChange = vi.fn();
     const { container } = render(RangeSlider, {
       props: {
@@ -210,7 +211,7 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
     expect(css).not.toContain("max(var(--poodle-slider-family-block");
     expect(css).not.toContain("--poodle-slider-family-block-min-height");
     mockTrack(root, 100, 32);
-    await fireEvent.pointerDown(root, { button: 0, clientX: 50, clientY: 16, pointerId: 1 });
+    await fireEvent.pointerDown(root, { button: 0, clientX: 49, clientY: 16, pointerId: 1 });
     await fireEvent.pointerMove(root, { clientX: 20, clientY: 16, pointerId: 1 });
     expect(onValueChange).toHaveBeenLastCalledWith([20, 50]);
     const upper = container.querySelector(".poodle-range-slider__hit--upper") as HTMLElement;
@@ -229,18 +230,19 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
         ".poodle-range-slider__inline--selected .poodle-range-slider__inline-row--vertical",
       )!.children,
     ).map((child) => child.textContent);
-    // Upright: upper value at the physical top, label centered, lower at the
-    // physical bottom.
-    expect(slots).toEqual(["80", "", "20"]);
+    // Values sit outside the rail so the rotated label remains clear.
+    expect(slots).toEqual([""]);
+    expect(container.querySelector(".poodle-range-slider__external-value--upper")!.textContent).toBe("80");
+    expect(container.querySelector(".poodle-range-slider__external-value--lower")!.textContent).toBe("20");
     expect(css).toContain(
       ".poodle-range-slider[data-variant=\"block\"][data-orientation=\"vertical\"] .poodle-range-slider__inline--selected {\n    clip-path: inset(calc(100% - var(--poodle-range-end)) 0 var(--poodle-range-start) 0);",
     );
     // Both handles use the shared family marker offset.
     expect(css).toContain(
-      "--poodle-range-slider-block-marker-start: clamp(",
+      "--poodle-range-slider-block-marker-start: max(",
     );
     expect(css).toContain(
-      "--poodle-range-slider-block-marker-end: clamp(",
+      "--poodle-range-slider-block-marker-end: min(",
     );
     expect(css).toContain(
       ".poodle-range-slider[data-variant=\"block\"] .poodle-range-slider__hit--lower {\n    --poodle-slider-family-marker: var(--poodle-range-slider-block-marker-start);",
@@ -255,7 +257,7 @@ describe("RangeSlider (svelte) fixed block anchors", () => {
       ":is(.poodle-slider__inline-row--vertical, .poodle-range-slider__inline-row--vertical) :is(.poodle-slider__inline-label, .poodle-range-slider__inline-label) {\n    position: absolute;\n    left: 0;\n    right: 0;\n    top: 50%;\n    transform: translateY(-50%);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }",
     );
     expect(css).toContain(
-      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] {\n    width: var(--poodle-slider-family-block-height);\n    min-width: var(--poodle-slider-family-block-height);',
+      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__rail, .poodle-range-slider__rail) {\n    grid-row: 2;\n    justify-self: center;\n    width: var(--poodle-slider-family-block-height);\n    min-width: var(--poodle-slider-family-block-height);',
     );
     // Vertical never mirrors with direction.
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
@@ -311,10 +313,9 @@ describe("RangeSlider (svelte) shared family foundation", () => {
       ":is(.poodle-slider__thumb, .poodle-range-slider__thumb) {\n    box-sizing: border-box;\n    width: var(--poodle-slider-family-marker-thickness);\n    height: calc(var(--poodle-slider-family-block-height) - var(--poodle-slider-family-marker-inset) - var(--poodle-slider-family-marker-inset));\n    border-radius: calc(var(--poodle-slider-family-marker-thickness) / 2);",
     );
     // Each handle is clamped inside the capsule toward the window interior.
-    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-start: clamp(");
-    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-end: clamp(");
-    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-start: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-start),");
-    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-end: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-end),");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-window-midpoint: calc(");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-start: max(\n      var(--poodle-slider-family-marker-offset),\n      min(");
+    expect(rangeOnlyCss).toContain("--poodle-range-slider-block-marker-end: min(\n      calc(100% - var(--poodle-slider-family-marker-offset)),\n      max(");
     // The range sheet never re-implements a private handle or size ladder.
     expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-thumb");
     expect(rangeOnlyCss).not.toContain("--poodle-range-slider-block-marker-thickness");

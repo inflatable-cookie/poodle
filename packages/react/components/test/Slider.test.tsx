@@ -16,7 +16,8 @@ const css = [
 ].join("\n");
 
 function mockTrack(root: HTMLElement, width: number, height: number): void {
-  root.getBoundingClientRect = () =>
+  const measured = root.querySelector<HTMLElement>(".poodle-slider__capsule") ?? root;
+  measured.getBoundingClientRect = () =>
     ({
       x: 0,
       y: 0,
@@ -385,7 +386,7 @@ describe("Slider (react) block variant", () => {
     // g18.024: the vertical rail is the shared capsule size, not the hit
     // envelope.
     expect(css).toContain(
-      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] {\n    width: var(--poodle-slider-family-block-height);\n    min-width: var(--poodle-slider-family-block-height);',
+      ':is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__rail, .poodle-range-slider__rail) {\n    grid-row: 2;\n    justify-self: center;\n    width: var(--poodle-slider-family-block-height);\n    min-width: var(--poodle-slider-family-block-height);',
     );
     // Vertical never mirrors with direction.
     expect(css).not.toContain("[data-orientation=\"vertical\"][data-direction=\"rtl\"]");
@@ -401,14 +402,15 @@ describe("Slider (react) block variant", () => {
     expect(value.textContent).toBe("0.85");
   });
 
-  it("renders the vertical row with the value slot above the label", () => {
+  it("renders the vertical value above the rail and keeps the label inside", () => {
     const { container } = render(
       <Slider orientation="vertical" value={40} visibleLabel="Blur" ariaLabel="Blur" />,
     );
     const row = container.querySelector(".poodle-slider__inline-row--vertical")!;
     const children = Array.from(row.children);
-    expect(children[0].className).toContain("poodle-slider__inline-value");
-    expect(children[1].className).toContain("poodle-slider__inline-label");
+    expect(children).toHaveLength(1);
+    expect(children[0].className).toContain("poodle-slider__inline-label");
+    expect(container.querySelector(".poodle-slider__external-value--upper")!.textContent).toBe("40");
     expect(container.querySelector(".poodle-slider")!.getAttribute("data-orientation")).toBe(
       "vertical",
     );

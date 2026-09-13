@@ -20,8 +20,13 @@ function mockRect(element: HTMLElement, rect: Partial<DOMRect> = {}): HTMLElemen
 }
 
 function mockRangeGesture(container: HTMLElement, thumb: HTMLElement): HTMLElement {
-  mockRect(container.querySelector(".poodle-range-slider") as HTMLElement);
+  mockRect(container.querySelector(".poodle-range-slider__capsule") as HTMLElement);
   return mockRect(thumb);
+}
+
+function mockSliderGesture(container: HTMLElement, slider: HTMLElement): HTMLElement {
+  mockRect(container.querySelector(".poodle-slider__capsule") as HTMLElement);
+  return mockRect(slider);
 }
 
 function BoundSlider({ initial, ...props }: { initial: number } & Record<string, unknown>) {
@@ -29,7 +34,7 @@ function BoundSlider({ initial, ...props }: { initial: number } & Record<string,
   return (
     <Slider
       {...props}
-      appearance="block"
+      variant="block"
       value={value}
       onValueChange={(next: number) => {
         setValue(next);
@@ -44,7 +49,7 @@ function BoundRangeSlider({ initial, ...props }: { initial: [number, number] } &
   return (
     <RangeSlider
       {...props}
-      appearance="block"
+      variant="block"
       value={value}
       onValueChange={(next: [number, number]) => {
         setValue(next);
@@ -61,7 +66,7 @@ describe("block slider terminal ownership (react)", () => {
     const view = render(
       <BoundSlider initial={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={first} />,
     );
-    const slider = mockRect(view.getByRole("slider", { name: "Gain" }));
+    const slider = mockSliderGesture(view.container, view.getByRole("slider", { name: "Gain" }));
     fireEvent.pointerDown(slider, { button: 0, pointerId: 1, clientX: 100, clientY: 22 });
     fireEvent.pointerMove(slider, { pointerId: 1, clientX: 140, clientY: 22 });
     view.rerender(
@@ -77,13 +82,13 @@ describe("block slider terminal ownership (react)", () => {
     const first = vi.fn();
     const second = vi.fn();
     const view = render(
-      <Slider appearance="block" value={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={first} />,
+      <Slider variant="block" value={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={first} />,
     );
-    const slider = mockRect(view.getByRole("slider", { name: "Gain" }));
+    const slider = mockSliderGesture(view.container, view.getByRole("slider", { name: "Gain" }));
     fireEvent.pointerDown(slider, { button: 0, pointerId: 1, clientX: 100, clientY: 22 });
     fireEvent.pointerMove(slider, { pointerId: 1, clientX: 140, clientY: 22 });
     view.rerender(
-      <Slider appearance="block" defaultValue={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={second} />,
+      <Slider variant="block" defaultValue={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={second} />,
     );
     view.unmount();
     expect(first).not.toHaveBeenCalled();
@@ -94,7 +99,7 @@ describe("block slider terminal ownership (react)", () => {
   it("Slider closes an open gesture once on teardown and ignores stale pointer ids", () => {
     const onValueCommit = vi.fn();
     const view = render(<BoundSlider initial={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={onValueCommit} />);
-    const slider = mockRect(view.getByRole("slider", { name: "Gain" }));
+    const slider = mockSliderGesture(view.container, view.getByRole("slider", { name: "Gain" }));
     fireEvent.pointerDown(slider, { button: 0, pointerId: 1, clientX: 100, clientY: 22 });
     fireEvent.pointerMove(slider, { pointerId: 9, clientX: 160, clientY: 22 });
     fireEvent.pointerCancel(slider, { pointerId: 1 });
@@ -107,7 +112,7 @@ describe("block slider terminal ownership (react)", () => {
   it("Slider disabled during drag terminates with the live callback", () => {
     const onValueCommit = vi.fn();
     const view = render(<BoundSlider initial={50} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={onValueCommit} />);
-    const slider = mockRect(view.getByRole("slider", { name: "Gain" }));
+    const slider = mockSliderGesture(view.container, view.getByRole("slider", { name: "Gain" }));
     fireEvent.pointerDown(slider, { button: 0, pointerId: 1, clientX: 100, clientY: 22 });
     view.rerender(
       <BoundSlider initial={50} min={0} max={100} step={10} ariaLabel="Gain" disabled onValueCommit={onValueCommit} />,
@@ -137,13 +142,13 @@ describe("block slider terminal ownership (react)", () => {
     const first = vi.fn();
     const second = vi.fn();
     const view = render(
-      <RangeSlider appearance="block" value={[20, 80]} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={first} />,
+      <RangeSlider variant="block" value={[20, 80]} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={first} />,
     );
     const lower = mockRangeGesture(view.container, view.getByRole("slider", { name: "Gain minimum" }));
     fireEvent.pointerDown(lower, { button: 0, pointerId: 1, clientX: 40, clientY: 22 });
     fireEvent.pointerMove(lower, { pointerId: 1, clientX: 80, clientY: 22 });
     view.rerender(
-      <RangeSlider appearance="block" defaultValue={[20, 80]} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={second} />,
+      <RangeSlider variant="block" defaultValue={[20, 80]} min={0} max={100} step={10} ariaLabel="Gain" onValueCommit={second} />,
     );
     view.unmount();
     expect(first).not.toHaveBeenCalled();
