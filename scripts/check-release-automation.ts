@@ -1,9 +1,19 @@
-// Keep the retained manual workflows as thin, immutable Effigy launchers.
-// This is deliberately static: it catches workflow drift without dispatching
-// GitHub Actions or reaching a registry.
+// g18.032 / spec 071: the release-automation guard proves structure, not
+// incidental workflow steps.
+//
+// It requires: one Effigy npm certificate entry in candidate mode; no
+// aggregate/Rust/native/GPUI/Jetstream selector or setup; a Linux runner and a
+// hard ten-minute timeout; candidate artifact and publish-time identity checks;
+// publication of archives rather than package directories; tag plus explicit
+// publish-mode mutation guards; and core/Svelte only in the publication set,
+// derived from `packages/release-manifest.json`.
+//
+// It is deliberately static: no dispatch, no registry, no workflow execution.
 
 import fs from "node:fs";
 import path from "node:path";
+
+import { readNpmPublicationAuthority } from "./npm-publication";
 
 const root = process.cwd();
 const retainedWorkflows = [
@@ -31,17 +41,19 @@ function withoutComments(source: string): string {
     .join("\n");
 }
 
-function requireRun(source: string, command: string, file: string): void {
-  const runs = withoutComments(source)
+function runCommands(source: string): string[] {
+  return withoutComments(source)
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.startsWith("run:"))
     .map((line) => line.slice("run:".length).trim());
-  assert(runs.includes(command), `${file} must run ${command}`);
+}
+
+function requireRun(source: string, command: string, file: string): void {
+  assert(runCommands(source).includes(command), `${file} must run ${command}`);
 }
 
 function triggerKeys(source: string): string[] {
-  // Event names declared directly under `on:`, in file order; [] when absent.
   const active = withoutComments(source);
   const on = /^on:\s*$/m.exec(active);
   if (!on) return [];
@@ -55,7 +67,6 @@ function triggerKeys(source: string): string[] {
 }
 
 function eventBranchTargets(source: string, event: string): string[] {
-  // Branch names an `on:` event is restricted to; [] when unrestricted.
   const active = withoutComments(source);
   const on = /^on:\s*$/m.exec(active);
   if (!on) return [];
@@ -79,214 +90,145 @@ function eventBranchTargets(source: string, event: string): string[] {
   return targets;
 }
 
-const PACK_STEP_NAME = "- name: Pack and verify contents";
-const PUBLISH_STEP_NAME = "- name: Publish";
-const TAG_REQUIRE_STEP_NAME = "- name: Require a versioned release tag";
-const VERSIONS_TAG_STEP_NAME = "- name: Versions agree with the tag";
-const VERSIONS_LOCKSTEP_STEP_NAME = "- name: Versions agree with each other";
-const ORIGIN_MAIN_FETCH = "git fetch --no-tags origin main:refs/remotes/origin/main";
-const TAG_REQUIRE_IF = "if: ${{ !startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}";
-const VERSIONS_TAG_IF = "if: ${{ startsWith(github.ref, 'refs/tags/v') }}";
-const VERSIONS_LOCKSTEP_IF = "if: ${{ !startsWith(github.ref, 'refs/tags/v') }}";
-const PUBLISH_IF = "if: ${{ startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}";
-const RECEIPT_PATTERN = "^package/dist/\\.poodle-build\\.json$";
-const ICON_JS_PATTERN = "^package/dist/icons/icons/.*\\.js$";
-const ICON_DTS_PATTERN = "^package/dist/icons/icons/.*\\.d\\.ts$";
-const ICON_ALIAS_PATTERN = "^package/dist/icons/aliases\\.generated\\.d\\.ts$";
-const TOKEN_CSS_PATTERN = "^package/dist/tokens/generated/css/.*\\.css$";
-const STALE_SOURCE_PATTERN = "^package/src/icons/icons/.*\\.ts$";
+export type NpmPublication = ReturnType<typeof readNpmPublicationAuthority>;
 
-function namedStepBlock(source: string, stepNameMarker: string): string {
-  const start = source.indexOf(stepNameMarker);
-  if (start === -1) return "";
-  const lines = source.slice(start).split("\n");
-  const block = [lines[0]];
-  for (const line of lines.slice(1)) {
-    if (/^      - /.test(line)) break;
-    block.push(line);
-  }
-  return block.join("\n");
-}
-
-function packVerifyBlock(source: string): string {
-  const start = source.indexOf(PACK_STEP_NAME);
-  const publish = source.indexOf(PUBLISH_STEP_NAME);
-  if (start === -1 || publish === -1 || publish <= start) return "";
-  return source.slice(start, publish);
-}
-
-function requireLine(
-  pack: string,
-  description: string,
-  pattern: string,
-  minimum: number,
-): boolean {
-  const suffix = new RegExp(`\\s${minimum}\\s*$`);
-  return pack.split("\n").some(
-    (line) =>
-      line.includes(`require "$tarball" "${description}"`) &&
-      line.includes(pattern) &&
-      suffix.test(line),
-  );
-}
-
-function collectPackAssertionFailures(source: string): string[] {
-  const found: string[] = [];
-  const pack = packVerifyBlock(source);
-  if (!pack) {
-    found.push("release.yml must keep a Pack and verify contents block before Publish");
-    return found;
-  }
-
-  if (!pack.includes("packages/core") || !pack.includes("packages/svelte/components")) {
-    found.push("release pack verifier must still pack core and Svelte");
-  }
-  if (pack.includes("packages/react/components")) {
-    found.push("release pack verifier must not pack React");
-  }
-
-  if (!requireLine(pack, "licence", "^package/LICENSE$", 1)) {
-    found.push("release pack verifier must require package/LICENSE");
-  }
-  if (!requireLine(pack, "readme", "^package/README.md$", 1)) {
-    found.push("release pack verifier must require package/README.md");
-  }
-  if (!requireLine(pack, "manifest", "^package/package.json$", 1)) {
-    found.push("release pack verifier must require package/package.json");
-  }
-  if (!requireLine(pack, "receipt", RECEIPT_PATTERN, 1)) {
-    found.push(
-      "release pack verifier must require package/dist/.poodle-build.json for every packed package",
-    );
-  }
-
-  const receiptAt = pack.indexOf(RECEIPT_PATTERN);
-  const coreCaseAt = pack.indexOf("*poodle-core*");
-  if (receiptAt === -1 || coreCaseAt === -1 || receiptAt > coreCaseAt) {
-    found.push("release pack verifier must require the compiled receipt before the core-only case");
-  }
-
-  if (!requireLine(pack, "icon modules", ICON_JS_PATTERN, 50)) {
-    found.push("release pack verifier must require at least 50 package/dist/icons/icons/*.js modules");
-  }
-  if (!requireLine(pack, "icon declarations", ICON_DTS_PATTERN, 50)) {
-    found.push(
-      "release pack verifier must require at least 50 package/dist/icons/icons/*.d.ts declarations",
-    );
-  }
-  if (!requireLine(pack, "icon aliases", ICON_ALIAS_PATTERN, 1)) {
-    found.push("release pack verifier must require package/dist/icons/aliases.generated.d.ts");
-  }
-  if (!requireLine(pack, "token css", TOKEN_CSS_PATTERN, 20)) {
-    found.push(
-      "release pack verifier must require at least 20 package/dist/tokens/generated/css/*.css files",
-    );
-  }
-
-  for (const [pattern, label] of [
-    [ICON_JS_PATTERN, "icon modules"],
-    [ICON_DTS_PATTERN, "icon declarations"],
-    [ICON_ALIAS_PATTERN, "icon aliases"],
-    [TOKEN_CSS_PATTERN, "token css"],
-  ] as const) {
-    const at = pack.indexOf(pattern);
-    if (coreCaseAt === -1 || at === -1 || at < coreCaseAt) {
-      found.push(`release pack verifier must keep ${label} inside the core archive case`);
-    }
-  }
-
-  if (pack.includes("package/src/")) {
-    found.push("release pack verifier must not require stale package/src members");
-  }
-
-  return found;
-}
-
-function collectReleaseProtocolFailures(source: string): string[] {
-  const found: string[] = [];
-  const active = withoutComments(source);
-
-  if (!active.includes("fetch-depth: 0")) {
-    found.push("release checkout must unshallow with fetch-depth: 0");
-  }
-  if (!active.includes(ORIGIN_MAIN_FETCH)) {
-    found.push("release must fetch origin/main for the pack-install scope classifier");
-  }
-
-  const tagRequire = namedStepBlock(source, TAG_REQUIRE_STEP_NAME);
-  if (!tagRequire.includes(TAG_REQUIRE_IF)) {
-    found.push("Require a versioned release tag must fail only when dry-run is false");
-  }
-  if (!tagRequire.includes("Release workflow must be dispatched against refs/tags/v*")) {
-    found.push("release must fail closed on a non-tag publish attempt");
-  }
-
-  const versionsTag = namedStepBlock(source, VERSIONS_TAG_STEP_NAME);
-  if (!versionsTag.includes(VERSIONS_TAG_IF)) {
-    found.push("Versions agree with the tag must run only on tag refs");
-  }
-  if (!versionsTag.includes('tag="${GITHUB_REF_NAME#v}"')) {
-    found.push("Versions agree with the tag must compare manifests to the tag");
-  }
-
-  const versionsLockstep = namedStepBlock(source, VERSIONS_LOCKSTEP_STEP_NAME);
-  if (!versionsLockstep.includes(VERSIONS_LOCKSTEP_IF)) {
-    found.push("Versions agree with each other must run only on non-tag refs");
-  }
-  if (!versionsLockstep.includes('expected="$version"')) {
-    found.push("Versions agree with each other must compare manifests to each other");
-  }
-
-  const publish = namedStepBlock(source, PUBLISH_STEP_NAME);
-  if (!publish.includes(PUBLISH_IF)) {
-    found.push("Publish must require a versioned release tag and an explicit non-dry-run input");
-  }
-
-  return found;
-}
+const RELEASE_CERTIFICATE_SELECTOR = "effigy release:web-certificate";
+const RELEASE_VERIFY = "scripts/verify-npm-candidate.ts";
+const RELEASE_ARTIFACT_NAME = "poodle-npm-candidate";
+const RELEASE_FORBIDDEN = [
+  { label: "aggregate qa", pattern: /\beffigy\s+qa\b/ },
+  { label: "aggregate ci", pattern: /\beffigy\s+ci(?::|\s|$)/ },
+  { label: "docs or validation board", pattern: /\beffigy\s+(?:docs|test:|check:|audit:)/ },
+  { label: "Rust toolchain setup", pattern: /rust-toolchain|cargo\s|Cargo\.toml/ },
+  { label: "native/GPUI selector", pattern: /\bgpui\b|\bjetstream\b|check:gpui|ci:native/ },
+  { label: "macOS runner", pattern: /macos-/ },
+];
 
 /**
- * g18.009: the release workflow is the npm/web package wrapper and nothing
- * else. It must run the installed-package proof that certifies the packed web
- * packages, and it must never regain the aggregate `effigy release gates` /
- * `effigy qa` board or a native/GPUI selector. This is the law that keeps the
- * hosted branch dry run and the published release web-only.
+ * The npm lane is a short packaging operation over an already reviewed web
+ * candidate. This collector is the law that keeps it that way.
  */
-const RELEASE_WRAPPER_REQUIRED_RUNS = [
-  "run: effigy svelte:package",
-  "run: effigy check:release-automation",
-  "run: effigy test:web-pack-install",
-];
-const RELEASE_WRAPPER_FORBIDDEN_SELECTORS = [
-  "effigy release ",
-  "effigy qa",
-  "effigy ci",
-  "effigy check:gpui",
-  "effigy gpui:test",
-  "effigy regressions:native",
-  "effigy probe:gpui-specimens",
-  "effigy test:contracts",
-  "effigy test:core",
-  "effigy test:components",
-  "effigy audit:security",
-  "effigy audit:licenses",
-];
-
-function collectReleaseWrapperFailures(source: string): string[] {
+export function collectReleaseWorkflowFailures(
+  source: string,
+  publication: NpmPublication,
+): string[] {
   const found: string[] = [];
   const active = withoutComments(source);
-  for (const command of RELEASE_WRAPPER_REQUIRED_RUNS) {
-    if (!active.includes(command)) {
-      found.push(
-        `.github/workflows/release.yml must run ${command.slice("run: ".length)} as its pre-pack proof`,
-      );
+  const commands = runCommands(source).join("\n");
+
+  const effigyInvocations = [...active.matchAll(/\beffigy\s+([A-Za-z0-9:_-]+)/g)].map(
+    (match) => match[0],
+  );
+  const uniqueEffigy = [...new Set(effigyInvocations)];
+  if (uniqueEffigy.length !== 1 || uniqueEffigy[0] !== RELEASE_CERTIFICATE_SELECTOR) {
+    found.push(
+      `release.yml must invoke exactly one Effigy certificate entry (${RELEASE_CERTIFICATE_SELECTOR}); found ${uniqueEffigy.join(", ") || "none"}`,
+    );
+  }
+  for (const { label, pattern } of RELEASE_FORBIDDEN) {
+    if (pattern.test(active)) found.push(`release.yml must not carry ${label}`);
+  }
+  if (!/runs-on:\s*ubuntu-latest/.test(active)) {
+    found.push("release.yml must run on ubuntu-latest");
+  }
+  if (!/timeout-minutes:\s*10\b/.test(active)) {
+    found.push("release.yml must declare a ten-minute hard job timeout");
+  }
+  if (!active.includes("id-token: write")) {
+    found.push("release.yml must retain job-local OIDC permission for trusted publishing");
+  }
+  if (!active.includes("actions: read")) {
+    found.push("release.yml must retain actions:read to download the candidate run artifact");
+  }
+  if (!active.includes("--access public")) {
+    found.push("release.yml must publish with the public-package guard");
+  }
+  if (/dry-run/.test(active)) {
+    found.push("release.yml must not retain a tag dry-run phase");
+  }
+
+  const modes = [...active.matchAll(/^\s{6}([a-z-]+):$/gm)].map((match) => match[1]);
+  if (!active.includes("options: [candidate, publish]") || !active.includes("default: candidate")) {
+    found.push("release.yml must declare exactly the candidate and publish modes");
+  }
+  if (modes.includes("dry-run")) {
+    found.push("release.yml must not declare a dry-run mode");
+  }
+
+  if (!commands.includes("effigy release:web-certificate")) {
+    found.push("release.yml must run the one Effigy npm certificate entry in candidate mode");
+  }
+  if (!active.includes(RELEASE_VERIFY)) {
+    found.push("release.yml must verify the candidate identity before publish");
+  }
+  if (!/gh run download "\$\{\{\s*inputs\.candidate-run-id\s*\}\}"/.test(active)) {
+    found.push("publish mode must download the named candidate run artifact");
+  }
+  if (!active.includes(`--name ${RELEASE_ARTIFACT_NAME}`)) {
+    found.push("publish mode must download the certified candidate artifact by name");
+  }
+  if (!active.includes("--source-commit")) {
+    found.push("publish mode must bind the candidate source commit to the tag commit");
+  }
+  if (!active.includes("--tag-version")) {
+    found.push("publish mode must bind the candidate version to the tag");
+  }
+  if (!/npm publish "\$tarball"/.test(active) && !/npm publish "\$\{?tarball\}?"/.test(active)) {
+    found.push("publish mode must publish archives (npm publish <tarball>)");
+  }
+  if (/cd\s+packages\//.test(active) && /npm publish/.test(active)) {
+    found.push("publish mode must publish archives rather than package directories");
+  }
+  if (!/upload-artifact/.test(active) || !/release-artifacts\/\*\*/.test(active)) {
+    found.push("candidate mode must upload the archive set and its identity manifest");
+  }
+  if (!/inputs\.mode\s*==\s*'publish'/.test(active)) {
+    found.push("publish steps must be guarded on the explicit publish mode");
+  }
+  if (!/inputs\.mode\s*==\s*'candidate'/.test(active)) {
+    found.push("candidate steps must be guarded on the explicit candidate mode");
+  }
+  if (!/refs\/tags\/v/.test(active)) {
+    found.push("publish mode must require a versioned release tag");
+  }
+  if (!active.includes("candidate-run-id")) {
+    found.push("publish mode must require the candidate run ID input");
+  }
+
+  const manifestNames = publication.packages.map((entry) => entry.name).sort();
+  const expectedNames = [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte",
+  ].sort();
+  if (JSON.stringify(manifestNames) !== JSON.stringify(expectedNames)) {
+    found.push(
+      `release manifest npm publication set must be exactly core and Svelte; found ${manifestNames.join(", ") || "none"}`,
+    );
+  }
+  // Package paths derive from the manifest; the workflow must not repeat them.
+  if (/packages\/(?:core|svelte|react)/.test(active)) {
+    found.push("release.yml must derive package paths from the release manifest, not repeat them");
+  }
+  if (active.includes("@inflatable-cookie/poodle-react")) {
+    found.push("release.yml must not publish the private React package");
+  }
+  for (const entry of publication.packages) {
+    if (!fs.existsSync(path.join(root, entry.path, "package.json"))) {
+      found.push(`release manifest package path ${entry.path} has no package.json`);
     }
   }
-  for (const selector of RELEASE_WRAPPER_FORBIDDEN_SELECTORS) {
-    if (active.includes(selector)) {
-      found.push(
-        `.github/workflows/release.yml must not invoke ${selector}; this release is npm/web only`,
-      );
+  return found;
+}
+
+/** Active release authority must not freeze one generation or one version. */
+export function collectGenericCandidateFailures(
+  surfaces: Record<string, string>,
+): string[] {
+  const found: string[] = [];
+  const frozen = /g1[0-9]\.0[0-9]{2}-candidate|(?:^|[^\d.])0\.(?:2\.3|3\.0|4\.0)(?:[^\d]|$)/;
+  for (const [name, source] of Object.entries(surfaces)) {
+    if (frozen.test(withoutComments(source))) {
+      found.push(`${name} must not freeze a generation or version in active release policy`);
     }
   }
   return found;
@@ -328,10 +270,6 @@ const native = read(".github/workflows/ci-native.yml");
 const visual = read(".github/workflows/ci-visual.yml");
 const release = read(".github/workflows/release.yml");
 
-// Trigger shape is per workflow: the two ubuntu-only Linux boards run
-// automatically on pull requests targeting main and pushes to main; the
-// native, visual, and release lanes stay dispatch-only (operator decision
-// 2026-09-02, g16.096).
 const manualOnlyWorkflows = [
   [native, ".github/workflows/ci-native.yml"],
   [visual, ".github/workflows/ci-visual.yml"],
@@ -340,10 +278,7 @@ const manualOnlyWorkflows = [
 
 for (const [source, relativePath] of manualOnlyWorkflows) {
   const active = withoutComments(source);
-  assert(
-    /^\s*workflow_dispatch:/m.test(active),
-    `${relativePath} must remain manually dispatched`,
-  );
+  assert(/^\s*workflow_dispatch:/m.test(active), `${relativePath} must remain manually dispatched`);
   assert(
     !/^\s*(?:push|pull_request|schedule):/m.test(active),
     `${relativePath} must not add an automatic trigger`,
@@ -375,23 +310,20 @@ for (const [source, relativePath] of automaticWorkflows) {
 requireRun(web, "effigy ci:web", ".github/workflows/ci-web.yml");
 requireRun(rust, "effigy ci:rust", ".github/workflows/ci-rust.yml");
 requireRun(native, "effigy ci:native", ".github/workflows/ci-native.yml");
-for (const selector of [
-  "effigy svelte:package",
-  "effigy check:release-automation",
-  "effigy test:web-pack-install",
-]) {
-  requireRun(release, selector, ".github/workflows/release.yml");
-}
 
 const rustSetup = "uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c";
 for (const [source, file] of [
   [rust, ".github/workflows/ci-rust.yml"],
   [native, ".github/workflows/ci-native.yml"],
-  [release, ".github/workflows/release.yml"],
 ] as const) {
   assert(source.includes(rustSetup), `${file} must use the reviewed Rust action`);
   assert(source.includes('toolchain: "1.95"'), `${file} must select Rust 1.95 explicitly`);
 }
+assert(
+  !release.includes(rustSetup) && !release.includes('toolchain: "1.95"'),
+  "release.yml must not install a Rust toolchain",
+);
+
 assert(
   native.includes("uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6") &&
     native.includes('bun-version: "1.3.14"'),
@@ -407,9 +339,12 @@ for (const selector of ["effigy test:visual-smoke", "effigy ci:visual", "effigy 
   assert(visualActive.includes(selector), `ci-visual.yml must map an input to ${selector}`);
 }
 assert(visualActive.includes('case "$TIER"'), "ci-visual.yml must select from the tier input");
-assert(visualActive.includes("*)") && visualActive.includes("exit 1"), "ci-visual.yml must reject unknown tiers");
+assert(
+  visualActive.includes("*)") && visualActive.includes("exit 1"),
+  "ci-visual.yml must reject unknown tiers",
+);
 
-for (const source of [web, rust, native, visual, release]) {
+for (const source of [web, rust, native, visual]) {
   assert(!source.includes("ci:conformance"), "retained workflows must not use ci:conformance");
   assert(
     !source.includes("packages/gpui/components/Cargo.toml"),
@@ -417,239 +352,181 @@ for (const source of [web, rust, native, visual, release]) {
   );
 }
 
+const publication = readNpmPublicationAuthority(root);
+
 const manifest = read("effigy.toml");
 assert(
   manifest.includes('minimum_effigy_version = "0.11.0"'),
   "effigy.toml must require Effigy 0.11.0",
 );
 assert(manifest.includes("[release.gates.headless]"), "headless release gate must be configured");
-assert(manifest.includes('command = "effigy qa"'), "headless release gate must run effigy qa");
 assert(
-  manifest.includes('description = "Run Poodle\'s complete self-contained headless release board"'),
-  "headless release gate must describe the complete board",
+  manifest.includes(`command = "${RELEASE_CERTIFICATE_SELECTOR}"`),
+  `headless release gate must run ${RELEASE_CERTIFICATE_SELECTOR}`,
+);
+assert(
+  !/command = "effigy qa"/.test(manifest),
+  "aggregate qa must not be release authority",
 );
 
 const taskManifest = read("tasks/effigy.tasks.toml");
 assert(!taskManifest.includes("ci:conformance"), "the stale ci:conformance alias must be removed");
-assert(fs.existsSync(path.join(root, ".github/workflows/ci-conformance.yml")) === false, "stale conformance workflow must be deleted");
-
-const releaseActive = withoutComments(release);
-assert(releaseActive.includes("default: true"), "release dry-run must default to true");
-assert(releaseActive.includes("id-token: write"), "release publishing must retain job-local OIDC permission");
-assert(releaseActive.includes('node-version: "22.22.2"'), "release Node version must be exact");
-assert(releaseActive.includes("npm@12.0.2"), "release npm CLI version must be exact");
 assert(
-  releaseActive.includes('npm install --prefix "$npm_cli" --no-save npm@12.0.2') &&
-    releaseActive.includes('echo "$npm_cli/node_modules/.bin" >> "$GITHUB_PATH"'),
-  "release must install the reviewed npm CLI into an isolated runner prefix",
+  fs.existsSync(path.join(root, ".github/workflows/ci-conformance.yml")) === false,
+  "stale conformance workflow must be deleted",
 );
-assert(!releaseActive.includes("npm install --global npm@"), "release must not replace its running npm CLI in place");
-assert(!releaseActive.includes("run: effigy ci"), "release must not maintain the old partial CI gate");
+
+// The npm certificate is one selector that separates admission from archive
+// certification, and `qa` stays the aggregate board through the bounded runner.
 assert(
-  releaseActive.includes("cargo install cargo-deny --version 0.19.4 --locked") &&
-    releaseActive.indexOf("cargo install cargo-deny --version 0.19.4 --locked") <
-      releaseActive.indexOf("run: effigy test:web-pack-install"),
-  "release must install the reviewed cargo-deny CLI before its npm/web proof",
-);
-for (const failure of collectReleaseProtocolFailures(release)) failures.push(failure);
-for (const failure of collectReleaseWrapperFailures(release)) failures.push(failure);
-
-const publishStart = releaseActive.indexOf("- name: Publish");
-const publishBlock = publishStart === -1 ? "" : releaseActive.slice(publishStart);
-assert(
-  publishBlock.includes("if: ${{ startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}"),
-  "Publish must require a versioned release tag and an explicit non-dry-run input",
-);
-assert(publishBlock.includes("packages/core"), "release must publish core");
-assert(publishBlock.includes("packages/svelte/components"), "release must publish Svelte");
-assert(!publishBlock.includes("packages/react/components"), "release must not publish React");
-
-for (const failure of collectPackAssertionFailures(release)) failures.push(failure);
-
-const omittedReceipt = release.replaceAll(RECEIPT_PATTERN, "");
-const omittedFailures = collectPackAssertionFailures(omittedReceipt);
-const omitReceiptFailed = omittedFailures.some(
-  (failure) =>
-    failure.includes("package/dist/.poodle-build.json") || failure.includes("compiled receipt"),
+  taskManifest.includes('"release:web-admission"') &&
+    taskManifest.includes('"release:web-archive"') &&
+    taskManifest.includes('"release:web-certificate"'),
+  "the npm certificate selectors must exist and stay separate from archive certification",
 );
 assert(
-  omitReceiptFailed,
-  `omitting the compiled receipt assertion must fail the checker; got: ${
-    omittedFailures.join("; ") || "no failures"
-  }`,
-);
-
-const restoredSource = release.replace(
-  PACK_STEP_NAME,
-  `${PACK_STEP_NAME}\n          require "$tarball" "stale source" "${STALE_SOURCE_PATTERN}" 50`,
-);
-const restoredFailures = collectPackAssertionFailures(restoredSource);
-const restoreSourceFailed = restoredFailures.some((failure) => failure.includes("package/src"));
-assert(
-  restoreSourceFailed,
-  `restoring a stale package/src assertion must fail the checker; got: ${
-    restoredFailures.join("; ") || "no failures"
-  }`,
-);
-
-console.log(
-  omitReceiptFailed
-    ? "plant omit compiled receipt: failed as required"
-    : "plant omit compiled receipt: did not fail",
-);
-console.log(
-  restoreSourceFailed
-    ? "plant restore package/src: failed as required"
-    : "plant restore package/src: did not fail",
-);
-
-const omittedFetch = release.replace(ORIGIN_MAIN_FETCH, "git fetch --no-tags origin HEAD");
-const omittedFetchFailures = collectReleaseProtocolFailures(omittedFetch);
-const omittedFetchFailed = omittedFetchFailures.some((failure) =>
-  failure.includes("origin/main"),
+  taskManifest.includes('qa = "bun scripts/validation/run-board.ts qa:board"'),
+  "qa must execute the bounded, observable validation runner",
 );
 assert(
-  omittedFetchFailed,
-  `omitting the origin/main fetch must fail the checker; got: ${
-    omittedFetchFailures.join("; ") || "no failures"
-  }`,
+  taskManifest.includes('"qa:board" = ['),
+  "the complete aggregate inventory must stay declared as qa:board",
 );
 
-const tagRequireAlways = release.replace(
-  TAG_REQUIRE_IF,
-  "if: ${{ !startsWith(github.ref, 'refs/tags/v') }}",
-);
-const tagRequireAlwaysFailures = collectReleaseProtocolFailures(tagRequireAlways);
-const tagRequireAlwaysFailed = tagRequireAlwaysFailures.some((failure) =>
-  failure.includes("fail only when dry-run is false"),
+const bounds = JSON.parse(read("quality/validation-bounds.json")) as {
+  boardTimeoutMs: number;
+  childTimeoutMs: number;
+  tasks: Record<string, number>;
+};
+assert(
+  bounds.boardTimeoutMs <= 15 * 60 * 1000,
+  "the full board must hard-stop at fifteen minutes",
 );
 assert(
-  tagRequireAlwaysFailed,
-  `dropping the dry-run exception from the tag-require step must fail the checker; got: ${
-    tagRequireAlwaysFailures.join("; ") || "no failures"
-  }`,
-);
-
-const versionsTagUnconditional = release.replace(`        ${VERSIONS_TAG_IF}\n`, "");
-const versionsTagUnconditionalFailures = collectReleaseProtocolFailures(versionsTagUnconditional);
-const versionsTagUnconditionalFailed = versionsTagUnconditionalFailures.some((failure) =>
-  failure.includes("must run only on tag refs"),
+  bounds.childTimeoutMs <= 5 * 60 * 1000,
+  "no child may run silently for more than five minutes",
 );
 assert(
-  versionsTagUnconditionalFailed,
-  `running Versions agree with the tag on every ref must fail the checker; got: ${
-    versionsTagUnconditionalFailures.join("; ") || "no failures"
-  }`,
+  typeof bounds.tasks["probe:gpui-specimens"] === "number" &&
+    bounds.tasks["probe:gpui-specimens"] <= 3 * 60 * 1000,
+  "the named specimen probe must carry an explicit smaller bound",
 );
 
-const publishTagOnly = release.replace(PUBLISH_IF, "if: ${{ startsWith(github.ref, 'refs/tags/v') }}");
-const publishTagOnlyFailures = collectReleaseProtocolFailures(publishTagOnly);
-const publishTagOnlyFailed = publishTagOnlyFailures.some((failure) =>
-  failure.includes("versioned release tag and an explicit non-dry-run input"),
+for (const failure of collectReleaseWorkflowFailures(release, publication)) {
+  failures.push(failure);
+}
+for (const failure of collectGenericCandidateFailures({
+  ".github/workflows/release.yml": release,
+  "effigy.toml": manifest,
+})) {
+  failures.push(failure);
+}
+
+// ---------------------------------------------------------------------------
+// Planted negatives: each mutation of the retained surfaces must fail the law.
+// ---------------------------------------------------------------------------
+
+type Plant = { name: string; source: string; expect: RegExp };
+
+const releasePlants: Plant[] = [
+  {
+    name: "restore the aggregate qa board",
+    source: release.replace(
+      "run: effigy release:web-certificate",
+      "run: effigy qa",
+    ),
+    expect: /exactly one Effigy certificate entry|must not carry aggregate qa/,
+  },
+  {
+    name: "install the Rust toolchain",
+    source: release.replace(
+      "      - uses: oven-sh/setup-bun@",
+      "      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # Rust 1.95\n      - uses: oven-sh/setup-bun@",
+    ),
+    expect: /must not carry Rust toolchain setup/,
+  },
+  {
+    name: "move back to a macOS runner",
+    source: release.replace("runs-on: ubuntu-latest", "runs-on: macos-latest"),
+    expect: /must run on ubuntu-latest|must not carry macOS runner/,
+  },
+  {
+    name: "drop the hard timeout",
+    source: release.replace("    timeout-minutes: 10\n", ""),
+    expect: /ten-minute hard job timeout/,
+  },
+  {
+    name: "publish a package directory instead of archives",
+    source: release.replace(
+      '          for tarball in "${tarballs[@]}"; do\n            npm publish "$tarball" --access public\n          done',
+      '          for dir in packages/core packages/svelte/components; do\n            (cd "$dir" && npm publish --access public)\n          done',
+    ),
+    expect: /publish archives|package directories/,
+  },
+  {
+    name: "add a second Effigy entry",
+    source: release.replace(
+      "run: effigy release:web-certificate",
+      "run: effigy release:web-certificate\n      - run: effigy docs:lint",
+    ),
+    expect: /exactly one Effigy certificate entry/,
+  },
+  {
+    name: "reintroduce a tag dry run",
+    source: release.replace(
+      "      candidate-run-id:",
+      "      dry-run:\n        description: pack without publishing\n        type: boolean\n        default: true\n      candidate-run-id:",
+    ),
+    expect: /dry-run/,
+  },
+  {
+    name: "drop publish source-commit binding",
+    source: release.replace(/ --source-commit "\$\(git rev-parse HEAD\)"/, ""),
+    expect: /bind the candidate source commit/,
+  },
+  {
+    name: "drop the candidate artifact upload",
+    source: release.replace("          path: release-artifacts/**\n", ""),
+    expect: /upload the archive set|archive set and its identity manifest/,
+  },
+];
+
+for (const plant of releasePlants) {
+  const planted = collectReleaseWorkflowFailures(plant.source, publication);
+  const caught = planted.some((failure) => plant.expect.test(failure));
+  assert(caught, `plant "${plant.name}" must fail the checker; got: ${planted.join("; ") || "no failures"}`);
+  console.log(caught ? `plant ${plant.name}: failed as required` : `plant ${plant.name}: did not fail`);
+}
+
+const reactPublication = {
+  ...publication,
+  packages: [
+    ...publication.packages,
+    { name: "@inflatable-cookie/poodle-react", path: "packages/react/components" },
+  ],
+};
+const reactFailure = collectReleaseWorkflowFailures(release, reactPublication).some((failure) =>
+  failure.includes("exactly core and Svelte"),
 );
 assert(
-  publishTagOnlyFailed,
-  `dropping the dry-run guard from Publish must fail the checker; got: ${
-    publishTagOnlyFailures.join("; ") || "no failures"
-  }`,
-);
-
-const publishDryRunOnly = release.replace(PUBLISH_IF, "if: ${{ !inputs.dry-run }}");
-const publishDryRunOnlyFailures = collectReleaseProtocolFailures(publishDryRunOnly);
-const publishDryRunOnlyFailed = publishDryRunOnlyFailures.some((failure) =>
-  failure.includes("versioned release tag and an explicit non-dry-run input"),
-);
-assert(
-  publishDryRunOnlyFailed,
-  `dropping the tag-ref guard from Publish must fail the checker; got: ${
-    publishDryRunOnlyFailures.join("; ") || "no failures"
-  }`,
-);
-
-const aggregateGate = release.replace(
-  "run: effigy test:web-pack-install",
-  "run: effigy release gates",
-);
-const aggregateGateFailures = collectReleaseWrapperFailures(aggregateGate);
-const aggregateGateFailed = aggregateGateFailures.some((failure) =>
-  failure.includes("must not invoke effigy release"),
-);
-assert(
-  aggregateGateFailed,
-  `restoring the aggregate release gate must fail the checker; got: ${
-    aggregateGateFailures.join("; ") || "no failures"
-  }`,
-);
-
-const nativeGate = release.replace(
-  "run: effigy test:web-pack-install",
-  "run: effigy ci:native",
-);
-const nativeGateFailures = collectReleaseWrapperFailures(nativeGate);
-const nativeGateFailed = nativeGateFailures.some((failure) =>
-  failure.includes("must not invoke effigy ci"),
-);
-assert(
-  nativeGateFailed,
-  `restoring a native gate must fail the checker; got: ${
-    nativeGateFailures.join("; ") || "no failures"
-  }`,
-);
-
-const omittedWebProof = release.replace(
-  "run: effigy test:web-pack-install",
-  "run: effigy docs:lint",
-);
-const omittedWebProofFailures = collectReleaseWrapperFailures(omittedWebProof);
-const omittedWebProofFailed = omittedWebProofFailures.some((failure) =>
-  failure.includes("must run effigy test:web-pack-install"),
-);
-assert(
-  omittedWebProofFailed,
-  `dropping the installed-package proof must fail the checker; got: ${
-    omittedWebProofFailures.join("; ") || "no failures"
-  }`,
-);
-
-console.log(
-  omittedFetchFailed
-    ? "plant omit origin/main fetch: failed as required"
-    : "plant omit origin/main fetch: did not fail",
+  reactFailure,
+  "adding React to the release authority must fail the checker",
 );
 console.log(
-  tagRequireAlwaysFailed
-    ? "plant tag-require without dry-run exception: failed as required"
-    : "plant tag-require without dry-run exception: did not fail",
+  reactFailure
+    ? "plant React publication authority: failed as required"
+    : "plant React publication authority: did not fail",
 );
+
+const frozenFailure = collectGenericCandidateFailures({
+  "release.yml": `${release}\n# g18.006 frozen candidate\n`,
+  "tasks": 'x = "0.4.0"',
+}).length;
+assert(frozenFailure >= 1, "a frozen generation or version in active release policy must fail");
 console.log(
-  versionsTagUnconditionalFailed
-    ? "plant versions-agree-with-tag on every ref: failed as required"
-    : "plant versions-agree-with-tag on every ref: did not fail",
-);
-console.log(
-  publishTagOnlyFailed
-    ? "plant publish without dry-run guard: failed as required"
-    : "plant publish without dry-run guard: did not fail",
-);
-console.log(
-  publishDryRunOnlyFailed
-    ? "plant publish without tag guard: failed as required"
-    : "plant publish without tag guard: did not fail",
-);
-console.log(
-  aggregateGateFailed
-    ? "plant aggregate release gate: failed as required"
-    : "plant aggregate release gate: did not fail",
-);
-console.log(
-  nativeGateFailed
-    ? "plant native gate: failed as required"
-    : "plant native gate: did not fail",
-);
-console.log(
-  omittedWebProofFailed
-    ? "plant omitted installed-package proof: failed as required"
-    : "plant omitted installed-package proof: did not fail",
+  frozenFailure >= 1
+    ? "plant frozen release policy: failed as required"
+    : "plant frozen release policy: did not fail",
 );
 
 if (failures.length > 0) {
@@ -659,6 +536,6 @@ if (failures.length > 0) {
 } else {
   console.log("release automation static check: pass");
   console.log(
-    `checked ${retainedWorkflows.length} retained workflows, Effigy gate, alias, publish set, compiled pack assertions, release protocol, npm/web release wrapper, and planted failures`,
+    `checked ${retainedWorkflows.length} retained workflows, the npm certificate authority, generic candidate admission, validation bounds, archive/identity protocol, publication set and planted failures`,
   );
 }

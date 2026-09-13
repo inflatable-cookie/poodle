@@ -181,6 +181,23 @@
 # this stops compiling — which is exactly what published v0.2.1 did to
 # Longhorn. Includes a negative control. Headless; no window, no permission.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
+# g18.032 / spec 071: changed-range admission and archive certification are
+# separate selectors. The npm certificate runs both and is the only web-release
+# authority; aggregate `qa` stays independent.
+"test:web-candidate" = "bun test test/package-install/web-candidate.test.ts scripts/verify-npm-candidate.test.ts"
+"release:web-admission" = "bun test/package-install/web-admission.ts"
+# Certificate mode builds and packs exactly once and writes the candidate
+# identity manifest into POODLE_WEB_PACK_INSTALL_ARCHIVE_OUT.
+"release:web-archive" = {
+  run = "bun test/package-install/web-preview.ts",
+  env = { POODLE_WEB_PACK_INSTALL_ARCHIVE_CERTIFICATE = "1" },
+}
+"release:web-certificate" = [
+  { task = "release:web-admission" },
+  { task = "release:web-archive" },
+]
+# g18.032 validation runner. Bounded, observable, deduplicating board executor.
+"test:validation-runner" = "bun test scripts/validation/run-board.test.ts"
 "check:release-automation" = "bun scripts/check-release-automation.ts"
 # g18.027 public-surface freeze gate. Read-only cross-ref classifier plus its
 # planted-negative coverage. Deliberately outside `qa`/`ci`: it needs the
@@ -643,6 +660,11 @@
 
 "ci:web" = [
   { task = "gate:snapshot" },
+  # g18.032: release-authority and candidate-admission laws run in required PR
+  # CI, so a broken classifier or workflow drift fails the exact head.
+  { task = "check:release-automation" },
+  { task = "test:web-candidate" },
+  { task = "test:validation-runner" },
   { task = "core:build" },
   { task = "audit:icons" },
   { task = "audit:tokens" },
@@ -794,7 +816,17 @@ health = [
 # and paired Jetstream sweeps stay separate (`test:native-visual`,
 # `qa:jetstream`). Was previously misnamed `health`, which made every
 # `effigy doctor` run the whole suite.
-qa = [
+# Full self-contained local release board (headless / CPU-only). Visual GPUI
+# and paired Jetstream sweeps stay separate (`test:native-visual`,
+# `qa:jetstream`). Was previously misnamed `health`, which made every
+# `effigy doctor` run the whole suite.
+#
+# g18.032 / spec 071: `qa:board` is the complete assertion inventory. `qa`
+# executes it through the bounded, observable validation runner, which emits a
+# start/completion/elapsed line per owned unit, deduplicates transitive repeats
+# and hard-stops at fifteen minutes.
+qa = "bun scripts/validation/run-board.ts qa:board"
+"qa:board" = [
   { task = "check:release-automation" },
   { task = "ci" },
   { task = "ci:native" },

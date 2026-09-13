@@ -1,4 +1,18 @@
 {
+  "npmPublication": {
+    "description": "The npm/web release train. Core and Svelte are the only publications; React is private and paired. Package paths and the candidate identity manifest name are derived from this authority, never repeated in a workflow.",
+    "candidateManifestName": "poodle-npm-candidate.json",
+    "packages": [
+      {
+        "name": "@inflatable-cookie/poodle-core",
+        "path": "packages/core"
+      },
+      {
+        "name": "@inflatable-cookie/poodle-svelte",
+        "path": "packages/svelte/components"
+      }
+    ]
+  },
   "versionPolicy": {
     "baseline": "0.x until a later generation explicitly introduces a stable channel",
     "publicIntentChannel": "preview",
