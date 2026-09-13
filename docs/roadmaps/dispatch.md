@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-13 (g18.032 fast validation and npm release promoted)
+Updated: 2026-09-13 (g18.032 fast validation and npm release merged)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -229,11 +229,12 @@ restored `sm` as the initial selection.
 [`g18.027`](g18/027-v040-public-surface-freeze-audit.md) are complete; their
 merged evidence is retained in the generation roadmap.
 
-[`g18.032`](g18/032-fast-validation-and-npm-release.md) is the
-operator-prioritized next task. It replaces release-specific/native-coupled
-candidate machinery, makes npm a two-run one-build path, and makes the complete
-headless board observable, deduplicated and time-bounded. All other Poodle
-execution waits for this task to merge.
+[`g18.032`](g18/032-fast-validation-and-npm-release.md) is complete after PR
+#267 merged as `1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92` on 2026-09-13 after
+exact-head independent review (PR comment `5653154132`, `ready_to_merge`) at
+`7bb9f348d4b65d40f89733fe1ae081930c118293`. The final board passed 54/68
+units before stopping at the pre-existing `probe:gpui-specimens` hang per the
+stop condition; the defect is recorded for the consumer/specimen sweep.
 
 ## Held planning horizons
 

@@ -1,6 +1,6 @@
 # 032 — Fast validation and npm release
 
-Status: ready
+Status: complete
 Owner: Poodle validation and web release infrastructure
 Created: 2026-09-13
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -158,6 +158,29 @@ installation consumed 1m52s and npm/web proof took 49s. Tag dry run
 Current GitHub `ci:web` takes roughly eight minutes. Candidate preparation also
 needed g18.029–031 because policy encoded one version, coupled npm to Cargo
 lockstep and embedded native receipt identity.
+
+## Closeout
+
+Mered as `1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92` (PR #267) on 2026-09-13
+after exact-head independent review (PR comment `5653154132`,
+`ready_to_merge`) at `7bb9f348d4b65d40f89733fe1ae081930c118293` with green
+`rust` checks at the reviewed head; the queue owned asynchronous CI
+observation per protocol.
+
+Truthful validation: the one final `qa:board` passed 54 of 68 owned units in
+10m34s, then stopped at `probe:gpui-specimens` at its five-minute bound —
+the spec 071 stop condition. The web lane passed fully. A sampled stack
+root-caused the leaf as renderer/layout non-termination in the initial
+`Window::draw` of the `form-dialog` route, the same baseline 2h37m leaf, and
+outside this task's mutable paths. Two non-publishing candidate drills ran:
+`34754769895` caught a missing Effigy setup (repaired and lawed) and
+`34754894881` failed closed on `0.4.0 -> 0.4.0` before any build.
+
+Deferred: the `form-dialog` probe hang is recorded in `PAPERCUTS.md` for a
+renderer task and feeds the post-`0.4.0` consumer/specimen sweep; the
+review's three non-blocking findings (log prose vs bounds authority, runner
+dedupe key env, dispatch-input shell indirection) are follow-up material.
+The next pointer below is preserved.
 
 ## Next task
 

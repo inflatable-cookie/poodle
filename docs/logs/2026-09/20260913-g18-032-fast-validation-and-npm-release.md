@@ -204,3 +204,19 @@ task introduced and then fixed:
    workflow keeps the one npm certificate entry, Linux runner, ten-minute
    ceiling and run-ID identity protocol, and the checker keeps the spec 071
    invariants.
+
+## Merge and closeout
+
+Merged as `1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92` (PR #267) on 2026-09-13
+after exact-head independent review (PR comment `5653154132`,
+`ready_to_merge`) at `7bb9f348d4b65d40f89733fe1ae081930c118293`.
+
+Truthful validation: the one final `qa:board` passed 54 of 68 owned units in
+10m34s, then stopped at `probe:gpui-specimens` at its five-minute bound per
+the spec 071 stop condition; the web lane passed fully. The leaf is the
+pre-existing `form-dialog` renderer non-termination recorded in `PAPERCUTS.md`.
+Both candidate drills were non-publishing with no tag or registry mutation.
+
+Deferred: the probe hang feeds the post-`0.4.0` consumer/specimen sweep, plus
+the review's three non-blocking findings (log bounds prose, runner dedupe key
+env, dispatch-input shell indirection).

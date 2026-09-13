@@ -5,10 +5,13 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: merged
 owner: Poodle Northstar orchestrator
 created: 2026-09-13
 updated: 2026-09-13
+merged_pr: 267
+merged_commit: 1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92
+review_comment: 5653154132
 base_required: pushed-main
 queue_dispatch: northstar-queue
 queue_approval: "Tom explicitly directed Poodle Chatterbox on 2026-09-13 to fix the release process before any other work, then clarified that the complete suite including GPUI must also be trimmed, observable and fast."

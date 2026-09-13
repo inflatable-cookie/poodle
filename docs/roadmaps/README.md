@@ -60,10 +60,12 @@ through an operator-authorized npm/web wrapper repair: `v0.4.0` is tagged at
 and a fresh registry consumer proves the Svelte `./editor` entry. Desktop
 unblocks from that published release.
 
-Operator-prioritized g18.032 is the only next execution frontier. It repairs
-the process exposed by `0.4.0`: generic web-candidate admission, separate npm
-and native trains, one-build archives, two bounded hosted runs, and an
-observable deduplicated full headless board. Other Poodle work waits for it.
+Merged g18.032 on 2026-09-13 (PR #267) repairs the process exposed by `0.4.0`:
+generic web-candidate admission, separate npm and native trains, one-build
+archives, two bounded hosted runs, and an observable deduplicated full
+headless board. The final board stopped at the pre-existing
+`probe:gpui-specimens` renderer hang per the stop condition; that defect and
+the post-`0.4.0` consumer/specimen sweep are the next execution frontier.
 
 ## Rules
 
