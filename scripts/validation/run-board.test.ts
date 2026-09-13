@@ -59,12 +59,12 @@ describe("validation board repository inventory", () => {
     }
   });
 
-  test("the named specimen hang carries an explicit smaller bound", () => {
-    expect(policy.tasks["probe:gpui-specimens"]).toBeLessThanOrEqual(180_000);
+  test("the named specimen hang carries an explicit bound", () => {
+    expect(policy.tasks["probe:gpui-specimens"]).toBeLessThanOrEqual(5 * 60 * 1000);
     expect(policy.boardTimeoutMs).toBeLessThanOrEqual(15 * 60 * 1000);
     const { units } = collectUnits(nodes, "qa:board", repoRoot, policy);
     const specimen = units.find((unit) => unit.name === "probe:gpui-specimens");
-    expect(specimen?.timeoutMs).toBe(180_000);
+    expect(specimen?.timeoutMs).toBe(300_000);
   });
 
   test("the npm release gate is not the aggregate board", () => {

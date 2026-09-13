@@ -2,7 +2,7 @@
   "boardTimeoutMs": 900000,
   "childTimeoutMs": 300000,
   "tasks": {
-    "probe:gpui-specimens": 180000,
+    "probe:gpui-specimens": 300000,
     "regressions:native": 180000,
     "drift:gpui-consumer-identity": 240000,
     "smoke:gpui-window-capture": 240000

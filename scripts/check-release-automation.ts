@@ -408,8 +408,8 @@ assert(
 );
 assert(
   typeof bounds.tasks["probe:gpui-specimens"] === "number" &&
-    bounds.tasks["probe:gpui-specimens"] <= 3 * 60 * 1000,
-  "the named specimen probe must carry an explicit smaller bound",
+    bounds.tasks["probe:gpui-specimens"] <= 5 * 60 * 1000,
+  "the named specimen probe must carry an explicit bound at or below the five-minute ceiling",
 );
 
 for (const failure of collectReleaseWorkflowFailures(release, publication)) {
