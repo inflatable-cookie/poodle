@@ -212,7 +212,12 @@
 "core:build" = "bun scripts/web-distribution/core-build.ts"
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
-"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/scope.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts"
+# g18.032: the installed-package scope suite plants dozens of git ranges and
+# exceeds Bun's default per-test timeout when it shares a parallel test-file
+# run with the core-build files. It is the same assertion inventory as its own
+# board unit, so the contention cannot turn a correct range into a failure.
+"test:web-scope" = "bun test test/package-install/scope.test.ts"
 # Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
 # its parallel test-file workers; the helper still validates the exact nested
 # realpath on every build.
@@ -672,6 +677,7 @@
   { task = "drift:drag-inventory" },
   { task = "test:core" },
   { task = "test:core-build" },
+  { task = "test:web-scope" },
   # g16.098: detached worktree without shell dist. Bites if react-preview
   # loses its workspace alias or ci:web tests components before package builds.
   { run = "bun test scripts/web-distribution/cold-checkout-react-preview.test.ts" },
