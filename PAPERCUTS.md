@@ -11,6 +11,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-13 — `effigy --json <selector>` executes the selector and buffers
+  its whole result; it is not a plan or dry-run flag. An agent used it for a
+  graph-inventory question about `qa` and the buffered run reproduced the
+  unbounded `probe:gpui-specimens` hang (2h37m, terminated by the operator).
+  Impact: graph inspection can accidentally start the full board. Plausible
+  fix: a real plan/dry-run surface on Effigy task selection, or a named
+  non-executing graph command. Surface: Effigy task CLI. Mitigated here by
+  `scripts/validation/run-board.ts --plan`, which expands and deduplicates
+  the manifest without executing anything.
+
 - 2026-09-12 — `.poodle-code-editor__viewport .cm-activeLine`/
   `.cm-activeLineGutter` use `var(--poodle-color-surface-hover)`, which no
   schema or generated artifact defines, so the active line silently renders
