@@ -120,6 +120,31 @@ The web lane passed in the same run: `test:web-pack-install` (1m4s),
 green. The slowest non-blocked units were `test:components` (1m42s),
 `test:web-pack-install` (1m4s) and `test:web-scope` (59.0s).
 
+## Hosted candidate drill
+
+The one authorized non-publishing candidate drill ran on the exact pushed head
+`96b959428704fd478eb5a66b24d6b72f1826adc1`:
+
+- run `34754769895`, `workflow_dispatch`, mode `candidate`;
+- job `npm web release (candidate)`, started 11:34:08Z, completed
+  11:34:32Z (**24s**), conclusion `failure`;
+- steps 1–10 passed: checkout, `origin/main` fetch, explicit-mode guard, Bun,
+  Node, the reviewed npm CLI, and `bun install`;
+- step 11 `npm web certificate` failed with **exit 127** because the rewritten
+  workflow had dropped the reviewed `inflatable-cookie/setup-effigy` action,
+  so `effigy` was not on `PATH`. Later steps were skipped, so no archive set
+  or hashes were produced.
+
+The dropped action is repaired and now lawed: `release.yml` must install the
+pinned Effigy action (with the pinned version) before the certificate, and the
+checker has a planted negative for removing it. The pinned `0.11.0` Effigy is
+sufficient for every selector this lane uses; the bounded runner is repo-local.
+
+A re-drill is required to observe the certificate step itself. On this
+infrastructure head the generic admission is expected to reject the range
+because the root version does not move (`0.4.0` -> `0.4.0`); a certifying drill
+belongs to the next version candidate, not to this PR.
+
 ### Board-order correction
 
 The first two attempts failed earlier, both on validation-graph defects this

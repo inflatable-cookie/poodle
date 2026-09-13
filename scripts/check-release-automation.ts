@@ -137,6 +137,19 @@ export function collectReleaseWorkflowFailures(
   if (!active.includes("id-token: write")) {
     found.push("release.yml must retain job-local OIDC permission for trusted publishing");
   }
+  const effigySetup = "uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8";
+  if (!active.includes(effigySetup)) {
+    found.push("release.yml must install the reviewed Effigy action before its certificate");
+  }
+  if (!active.includes('version: "0.11.0"')) {
+    found.push("release.yml must pin the reviewed Effigy version");
+  }
+  if (
+    active.includes(effigySetup) &&
+    !(active.indexOf(effigySetup) < active.indexOf("effigy release:web-certificate"))
+  ) {
+    found.push("release.yml must install Effigy before it runs the certificate");
+  }
   if (!active.includes("actions: read")) {
     found.push("release.yml must retain actions:read to download the candidate run artifact");
   }
@@ -488,6 +501,14 @@ const releasePlants: Plant[] = [
     name: "drop the candidate artifact upload",
     source: release.replace("          path: release-artifacts/**\n", ""),
     expect: /upload the archive set|archive set and its identity manifest/,
+  },
+  {
+    name: "drop the Effigy setup action",
+    source: release.replace(
+      "      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0\n        with:\n          version: \"0.11.0\"\n\n",
+      "",
+    ),
+    expect: /install the reviewed Effigy action/,
   },
 ];
 

@@ -1128,6 +1128,8 @@ const RELEASE_AUTOMATION_PATHS = [
 ] as const;
 const RELEASE_AUTOMATION_WORKFLOW_REQUIRED = [
   "effigy release:web-certificate",
+  "inflatable-cookie/setup-effigy@",
+  'version: "0.11.0"',
   "runs-on: ubuntu-latest",
   "timeout-minutes: 10",
   "id-token: write",
