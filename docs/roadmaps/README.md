@@ -86,11 +86,12 @@ consumer/specimen sweep is the next execution frontier.
 
 Start with `generation-index.md`, then the active generation README, then the
 ready task. Historical work should not be needed to execute current work.
-<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:9c0459fa98c820e7c9aa21a964bc7e34837ca8fc28f7c838e9dc0aa72f0b9c2b -->
+<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:5ed1aff2f1d5261fb998a6b56b6d3e7fc0720548417dbb96577030eb87791162 -->
 | Generation | Disposition | Runway state |
 | --- | --- | --- |
 | g18 | open | planning_required |
 | Task | Status | Stage | Revision | Record digest |
 | --- | --- | --- | --- | --- |
 | g18.034 | complete | none | 8 | sha256:bd6863d116045dec331e616c30985260c441d1ea02735bcfb4bdbdb275f1c106 |
+| g18.035 | complete | none | 8 | sha256:daefcba434d2d1941bb670de98b3faf47d988cb82732c6f2f6a848e4f38614e3 |
 <!-- northstar:lifecycle:end -->
