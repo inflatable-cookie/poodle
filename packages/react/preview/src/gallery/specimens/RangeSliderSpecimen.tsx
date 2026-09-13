@@ -34,12 +34,11 @@ export function RangeSliderSpecimen() {
             value={priceRange}
             min={0}
             max={100}
+            visibleLabel="Price"
+            formatVisibleValue={(value) => `$${value}`}
             ariaLabel="Price range"
             onValueChange={setPriceRange}
           />
-          <p>
-            ${priceRange[0]} – ${priceRange[1]}
-          </p>
         </SpecimenGroup>
 
         <SpecimenGroup label="Stepped — the thumbs land on whole increments">
@@ -48,12 +47,11 @@ export function RangeSliderSpecimen() {
             min={18}
             max={65}
             step={5}
+            visibleLabel="Age"
+            formatVisibleValue={(value) => `${value} yrs`}
             ariaLabel="Age range"
             onValueChange={setAgeRange}
           />
-          <p>
-            Ages {ageRange[0]} – {ageRange[1]}
-          </p>
         </SpecimenGroup>
 
         {/* The embedded variant is the dense control used inside audio and

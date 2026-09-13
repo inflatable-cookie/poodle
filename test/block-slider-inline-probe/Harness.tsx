@@ -187,6 +187,17 @@ export function Harness() {
           ariaLabel="Equality range"
         />
       </div>
+      <div data-case="range-narrow-label" style={{ width: 144, padding: 24 }}>
+        <RangeSlider
+          min={0}
+          max={100}
+          step={1}
+          value={[20, 81]}
+          visibleLabel="Narrow fit"
+          formatVisibleValue={(value) => `$${value}`}
+          ariaLabel="Narrow label collision"
+        />
+      </div>
     </section>
   );
 }

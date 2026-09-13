@@ -126,12 +126,32 @@
   /* Vertical block: the capsule fills the block axis and the cross axis is
      the shared ladder size; the pointer scrubs the opposite axis. */
   :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] {
-    width: var(--poodle-slider-family-block-height);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: max-content;
+    row-gap: 0.375rem;
+    width: max-content;
     min-width: var(--poodle-slider-family-block-height);
     min-height: 10rem;
     height: 100%;
     justify-content: center;
     touch-action: pan-x;
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__rail, .poodle-range-slider__rail) {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: var(--poodle-slider-family-block-height);
+  }
+
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__rail, .poodle-range-slider__rail) {
+    grid-row: 2;
+    justify-self: center;
+    width: var(--poodle-slider-family-block-height);
+    min-width: var(--poodle-slider-family-block-height);
+    min-height: 0;
+    height: 100%;
   }
 
   /* ── Block root and capsule ── */
@@ -168,7 +188,13 @@
     min-height: var(--poodle-slider-family-block-height);
     border-radius: var(--poodle-radius-control);
     overflow: visible;
-    background: var(--poodle-recipe-slider-block-remainder-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+    background: var(
+      --poodle-recipe-slider-block-remainder-fill,
+      var(
+        --poodle-recipe-range-slider-block-remainder-fill,
+        var(--poodle-color-background-elevated)
+      )
+    );
     color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
     font-variant-numeric: tabular-nums;
     font-size: 0.875rem;
@@ -187,10 +213,12 @@
   :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__track, .poodle-range-slider__track) {
     position: absolute;
     inset: 0;
+    width: auto;
     height: auto;
     transform: none;
     overflow: hidden;
     border-radius: inherit;
+    background: transparent;
   }
 
   :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__remainder, .poodle-range-slider__remainder) {
@@ -258,6 +286,27 @@
     align-items: center;
     justify-content: center;
   }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-orientation="vertical"] :is(.poodle-slider__inline-label, .poodle-range-slider__inline-label) {
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    transform-origin: center;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__external-value, .poodle-range-slider__external-value) {
+    justify-self: center;
+    color: var(--poodle-recipe-slider-block-remainder-text, var(--poodle-color-text-primary));
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__external-value--upper, .poodle-range-slider__external-value--upper) { grid-row: 1; }
+  .poodle-range-slider[data-variant="block"] .poodle-range-slider__external-value--lower { grid-row: 3; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="xs"] :is(.poodle-slider__external-value, .poodle-range-slider__external-value) { font-size: 0.75rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="sm"] :is(.poodle-slider__external-value, .poodle-range-slider__external-value) { font-size: 0.8125rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="lg"] :is(.poodle-slider__external-value, .poodle-range-slider__external-value) { font-size: 1rem; }
+  :is(.poodle-slider, .poodle-range-slider)[data-variant="block"][data-size="xl"] :is(.poodle-slider__external-value, .poodle-range-slider__external-value) { font-size: 1.125rem; }
   :is(.poodle-slider, .poodle-range-slider)[data-variant="block"] :is(.poodle-slider__inline-spacer, .poodle-range-slider__inline-spacer) {
     flex: 1 1 0;
   }

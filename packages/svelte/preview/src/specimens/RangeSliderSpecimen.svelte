@@ -18,10 +18,11 @@
         value={priceRange}
         min={0}
         max={100}
+        visibleLabel="Price"
+        formatVisibleValue={(value) => `$${value}`}
         ariaLabel="Price range"
         onValueChange={(value) => (priceRange = value)}
       />
-      <p>${priceRange[0]} – ${priceRange[1]}</p>
     </SpecimenGroup>
 
     <SpecimenGroup label="Stepped — the thumbs land on whole increments">
@@ -30,10 +31,11 @@
         min={18}
         max={65}
         step={5}
+        visibleLabel="Age"
+        formatVisibleValue={(value) => `${value} yrs`}
         ariaLabel="Age range"
         onValueChange={(value) => (ageRange = value)}
       />
-      <p>Ages {ageRange[0]} – {ageRange[1]}</p>
     </SpecimenGroup>
 
     <!-- The embedded variant is the dense control used inside audio and

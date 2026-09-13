@@ -7,6 +7,10 @@ import {
   SLIDER_FAMILY_BLOCK_MARKER_THICKNESS_PX,
   SLIDER_FAMILY_TEXT_DOCK_GAP_PX,
   SLIDER_FAMILY_TEXT_END_INSET_PX,
+  SLIDER_FAMILY_INLINE_TEXT_GAP_PX,
+  rangeSliderBlockDockingFits,
+  rangeSliderBlockLabelFits,
+  sliderBlockDockingFits,
   sliderFamilyBlockMarkerPercent,
   sliderFamilyCapsuleSpan,
   sliderFamilyValueDockedToMarker,
@@ -23,6 +27,7 @@ describe("slider-family foundation", () => {
     expect(SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX).toBe(6);
     expect(SLIDER_FAMILY_TEXT_DOCK_GAP_PX).toBe(4);
     expect(SLIDER_FAMILY_TEXT_END_INSET_PX).toBe(12);
+    expect(SLIDER_FAMILY_INLINE_TEXT_GAP_PX).toBe(8);
   });
 
   test("capsule span measures the value axis, not the cross axis", () => {
@@ -52,6 +57,81 @@ describe("slider-family foundation", () => {
     expect(sliderFamilyValueDockedToMarker({ valueNorm: 0.5, span: 200, advance: 30 })).toBe(false);
     // Zero-width hosts never dock.
     expect(sliderFamilyValueDockedToMarker({ valueNorm: 1, span: 0, advance: 30 })).toBe(false);
+  });
+
+  test("a docked range value hides the centre label only on real overlap", () => {
+    const base = {
+      span: 300,
+      labelAdvance: 40,
+      lowerAdvance: 20,
+      upperAdvance: 24,
+      upperNorm: 0.8,
+      lowerDocked: true,
+      upperDocked: false,
+    };
+    expect(rangeSliderBlockLabelFits({ ...base, lowerNorm: 0 })).toBe(true);
+    expect(rangeSliderBlockLabelFits({ ...base, lowerNorm: 0.4, lowerAdvance: 60 })).toBe(false);
+    // The compact 144px specimen resolves docking percentages against the
+    // 120px padded row, so its centred label yields before the upper value
+    // paints across it.
+    expect(rangeSliderBlockLabelFits({
+      span: 144,
+      labelAdvance: 64,
+      lowerAdvance: 20,
+      upperAdvance: 20,
+      lowerNorm: 0.2,
+      upperNorm: 0.8,
+      lowerDocked: true,
+      upperDocked: true,
+    })).toBe(false);
+  });
+
+  test("range values attach only when the complete pair fits", () => {
+    const input = {
+      span: 144,
+      lowerAdvance: 32,
+      upperAdvance: 32,
+      lowerNorm: 0.2,
+      upperNorm: 0.8,
+      lowerDocked: true,
+      upperDocked: true,
+    };
+    expect(rangeSliderBlockDockingFits(input)).toBe(false);
+    expect(rangeSliderBlockDockingFits({ ...input, span: 320 })).toBe(true);
+  });
+
+  test("a Slider value stays pinned when attachment would overlap its label", () => {
+    expect(sliderBlockDockingFits({
+      span: 144,
+      labelAdvance: 34,
+      valueAdvance: 32,
+      valueNorm: 0.66,
+      markerInterior: -1,
+    })).toBe(false);
+    expect(sliderBlockDockingFits({
+      span: 320,
+      labelAdvance: 34,
+      valueAdvance: 32,
+      valueNorm: 0.9,
+      markerInterior: -1,
+    })).toBe(true);
+  });
+
+  test("a numeric-only Slider stays pinned when marker attachment would clip", () => {
+    expect(sliderBlockDockingFits({
+      span: 72,
+      labelAdvance: 0,
+      valueAdvance: 34,
+      valueNorm: 0.42,
+      markerInterior: -1,
+    })).toBe(false);
+    expect(sliderBlockDockingFits({
+      span: 144,
+      labelAdvance: 0,
+      valueAdvance: 34,
+      valueNorm: 0.75,
+      markerInterior: -1,
+    })).toBe(true);
   });
 
   test("the marker is clamped inside the capsule at both extrema", () => {

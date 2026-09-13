@@ -264,7 +264,7 @@ export interface RangeSliderControlContext extends RangeSliderContext {
 }
 
 export type RangeSliderControlEvent =
-  | { type: "POINTER_BEGIN"; valueNorm: number }
+  | { type: "POINTER_BEGIN"; valueNorm: number; thumb?: "lower" | "upper" }
   | { type: "POINTER_MOVE"; valueNorm: number }
   | { type: "POINTER_END" }
   | { type: "SET_VALUE"; value: [number, number] };
@@ -348,7 +348,10 @@ export function rangeSliderControlTransition(
     case "POINTER_BEGIN": {
       if (context.disabled) return { context, effects: [] };
       const visual = rangeSliderVisualState(context);
-      const thumb = Math.abs(event.valueNorm - visual.lowerNorm) <= Math.abs(visual.upperNorm - event.valueNorm) ? "lower" : "upper";
+      const coincident = Math.abs(visual.upperNorm - visual.lowerNorm) <= Number.EPSILON;
+      const thumb = event.thumb ?? (coincident
+        ? (event.valueNorm < visual.lowerNorm ? "lower" : "upper")
+        : (Math.abs(event.valueNorm - visual.lowerNorm) <= Math.abs(visual.upperNorm - event.valueNorm) ? "lower" : "upper"));
       const raw = rangeControlValueAt(context, event.valueNorm);
       const result = rangeSliderTransition(context, { type: "INPUT", thumb, raw });
       return { context: { ...context, value: result.context.value, pointerActive: true, activeThumb: thumb }, effects: result.effects };
@@ -510,9 +513,11 @@ export interface RangeSliderBlockTextLayout {
  *
  * Geometry never depends on the selected window: the lower value is pinned
  * to the logical start, the upper value to the logical end, and the optional
- * label to the center, at every value pair. The endpoint values are required
- * and always paint when present; when the three items cannot coexist inside
- * the capsule the optional label is suppressed. There is no external
+ * label to the exact center, at every value pair. Each endpoint must fit its
+ * own half without entering the centered label's box; unequal numeric widths
+ * therefore never move the label. The endpoint values are required and always
+ * paint when present; when either side cannot coexist with the centered label
+ * the optional label is suppressed. There is no external
  * fallback in this variant. `capsuleSpan` is measured along the text axis
  * (horizontal width or vertical height).
  */
@@ -528,9 +533,8 @@ export function layoutRangeSliderBlock(input: {
   const lowerAdvance = input.lowerText ? Math.ceil(input.measure(input.lowerText)) : 0;
   const upperAdvance = input.upperText ? Math.ceil(input.measure(input.upperText)) : 0;
   const labelAdvance = input.label ? Math.ceil(input.measure(input.label)) : 0;
-  // One content inset between each of the three fixed anchors.
-  const coexist = blockRegionAvailable(input.capsuleSpan)
-    >= lowerAdvance + upperAdvance + labelAdvance + 2 * SLIDER_BLOCK_CONTENT_INSET_PX;
+  const endpointLane = (input.capsuleSpan - labelAdvance) / 2 - SLIDER_BLOCK_CONTENT_INSET_PX;
+  const coexist = endpointLane >= lowerAdvance && endpointLane >= upperAdvance;
   return {
     labelInline: input.label != null && coexist,
     lowerInline: lowerText,

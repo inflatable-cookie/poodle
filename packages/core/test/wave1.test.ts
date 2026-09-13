@@ -309,9 +309,20 @@ describe("block appearance helpers", () => {
     expect(second.effects).toEqual([]);
   });
 
-  test("equal-value range pointer tie chooses lower and holds it", () => {
+  test("equal-value range track clicks open the requisite side", () => {
     let control = createRangeSliderControlContext({ value: [50, 50], min: 0, max: 100, step: 1 });
-    let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.5 });
+    let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.2 });
+    expect(result.context.activeThumb).toBe("lower");
+    expect(result.context.value).toEqual([20, 50]);
+    control = createRangeSliderControlContext({ value: [50, 50], min: 0, max: 100, step: 1 });
+    result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.8 });
+    expect(result.context.activeThumb).toBe("upper");
+    expect(result.context.value).toEqual([50, 80]);
+  });
+
+  test("an explicit equal-value thumb grab holds that thumb", () => {
+    let control = createRangeSliderControlContext({ value: [50, 50], min: 0, max: 100, step: 1 });
+    let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.5, thumb: "lower" });
     expect(result.context.activeThumb).toBe("lower");
     control = result.context;
     result = rangeSliderControlTransition(control, { type: "POINTER_MOVE", valueNorm: 0.2 });

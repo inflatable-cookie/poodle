@@ -51,6 +51,18 @@
     clip-path: inset(calc(100% - var(--poodle-slider-fill-start) - var(--poodle-slider-fill-span)) 0 var(--poodle-slider-fill-start) 0);
   }
 
+  /* Horizontal text roles own fixed absolute anchors. Attaching the value
+     overrides only its end anchor; flex never moves the label as a side
+     effect. */
+  .poodle-slider[data-variant="block"][data-orientation="horizontal"] .poodle-slider__inline-label {
+    position: absolute;
+    inset-inline-start: 0;
+  }
+  .poodle-slider[data-variant="block"][data-orientation="horizontal"] .poodle-slider__inline-value {
+    position: absolute;
+    inset-inline-end: 0;
+  }
+
   /* Bounded inset marker: the handle is clamped inside the capsule at every
      value and sits toward the fill interior, matching the family handle. */
   .poodle-slider[data-variant="block"] {

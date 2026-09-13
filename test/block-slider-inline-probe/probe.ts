@@ -485,9 +485,10 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
     );
   }
   check(
-    `${prefix} range handles sit at their own values`,
-    Math.abs(rangeMetrics.lowerCenter - rangeStart) <= 1.5 && Math.abs(rangeMetrics.upperCenter - rangeEnd) <= 1.5,
-    `${rangeMetrics.lowerCenter},${rangeMetrics.upperCenter}`,
+    `${prefix} range handles stay inset toward the selected window`,
+    rangeMetrics.lowerCenter > rangeStart + 3 && rangeMetrics.lowerCenter < rangeStart + 8 &&
+      rangeMetrics.upperCenter < rangeEnd - 3 && rangeMetrics.upperCenter > rangeEnd - 8,
+    `${rangeMetrics.lowerCenter},${rangeMetrics.upperCenter} window ${rangeStart}..${rangeEnd}`,
   );
   check(
     `${prefix} range text paints above the shared handle`,
@@ -497,7 +498,7 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
 
   const extrema = await measureRange(page, `${base} [data-case="range-extrema"]`);
   check(
-    `${prefix} extrema handles are clamped inside the capsule`,
+    `${prefix} extrema handles keep the same window inset`,
     Math.abs(extrema.lowerCenter - (extrema.capsule.left + 6)) <= 1.5 &&
       Math.abs(extrema.upperCenter - (extrema.capsule.right - 6)) <= 1.5,
     `${extrema.lowerCenter} ${extrema.upperCenter} capsule ${extrema.capsule.left}..${extrema.capsule.right}`,
@@ -518,11 +519,38 @@ async function probeFramework(page: Page, engine: string, framework: string): Pr
   const equality = await measureRange(page, `${base} [data-case="range-equality"]`);
   const equalityCenter = equality.capsule.left + equality.capsule.width / 2;
   check(
-    `${prefix} equality handles meet at the value without crossing`,
-    equality.lowerCenter <= equality.upperCenter + 0.5 &&
-      Math.abs(equality.lowerCenter - equalityCenter) <= 1.5 &&
-      Math.abs(equality.upperCenter - equalityCenter) <= 1.5,
+    `${prefix} equality handles part around the shared value without crossing`,
+    equality.lowerCenter < equalityCenter &&
+      equality.upperCenter > equalityCenter &&
+      equality.upperCenter - equality.lowerCenter >= equality.lowerThumb.width - 0.5,
     `${equality.lowerCenter} ${equality.upperCenter} center ${equalityCenter}`,
+  );
+
+  const narrowLabel = await page.evaluate((sel) => {
+    const root = document.querySelector<HTMLElement>(`${sel} .poodle-range-slider`)!;
+    const capsule = root.querySelector<HTMLElement>(".poodle-range-slider__capsule")!;
+    const row = document.querySelector<HTMLElement>(`${sel} .poodle-range-slider__inline--selected .poodle-range-slider__inline-row`)!;
+    const label = row.querySelector<HTMLElement>(".poodle-range-slider__inline-label")!;
+    const lower = row.querySelector<HTMLElement>(".poodle-range-slider__inline-value--lower")!;
+    const upper = row.querySelector<HTMLElement>(".poodle-range-slider__inline-value--upper")!;
+    const box = (node: HTMLElement) => {
+      const rect = node.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, text: node.textContent ?? "" };
+    };
+    return {
+      label: box(label), lower: box(lower), upper: box(upper),
+      lowerDocked: root.dataset.lowerValueDocked ?? "",
+      upperDocked: root.dataset.upperValueDocked ?? "",
+      font: getComputedStyle(capsule).font,
+    };
+  }, `${base} [data-case="range-narrow-label"]`);
+  check(
+    `${prefix} narrow centred label hides before either docked value overlaps it`,
+    narrowLabel.label.text === "" || (
+      narrowLabel.lower.right + 4 <= narrowLabel.label.left &&
+      narrowLabel.upper.left - 4 >= narrowLabel.label.right
+    ),
+    JSON.stringify(narrowLabel),
   );
 
   const rangeVert = await measureRange(page, `${base} [data-case="range-vertical"]`);

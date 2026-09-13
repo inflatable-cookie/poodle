@@ -19,10 +19,11 @@
       value={volume}
       min={0}
       max={100}
+      visibleLabel="Volume"
+      formatVisibleValue={(value) => `${value}%`}
       ariaLabel="Volume"
       onValueChange={(value) => (volume = value)}
     />
-    <p>Volume: <strong>{volume}%</strong></p>
   </SpecimenGroup>
 
   <SpecimenGroup label="With step">
@@ -31,10 +32,11 @@
       min={0}
       max={100}
       step={10}
+      visibleLabel="Opacity"
+      formatVisibleValue={(value) => `${value}%`}
       ariaLabel="Opacity"
       onValueChange={(value) => (opacity = value)}
     />
-    <p>Opacity: <strong>{opacity}%</strong></p>
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
@@ -57,20 +59,7 @@
     <Slider direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => (opacity = value)} />
   </SpecimenGroup>
 
-  <!-- g18.024: the shared control ladder — each family aligns edge for edge
-       with same-size reference controls, and vertical values stay short
-       step-aware decimals. -->
-  <SpecimenGroup label="Shared control ladder — same-size rows">
-    {#each ladderSizes as size (size)}
-      <div class="poodle-slider-specimen__ladder-row">
-        <span class="poodle-slider-specimen__size-tag">{size}</span>
-        <Slider value={sizeValues[size]} min={0} max={1} step={0.01} {size} visibleLabel="Gain" ariaLabel={"Block slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
-        <RangeSlider value={[0.2, 0.8]} min={0} max={1} step={0.01} {size} ariaLabel={"Block range at " + size} />
-      </div>
-    {/each}
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Vertical block — upright values, short decimals">
+  <SpecimenGroup label="Vertical block — rotated label, external upright values">
     <div class="poodle-slider-specimen__vertical">
       <Slider orientation="vertical" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Vertical volume" onValueChange={(value) => (volume = value)} />
       <Slider orientation="vertical" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Vertical bipolar block" onValueChange={(value) => (bipolar = value)} />
@@ -80,12 +69,27 @@
   </SpecimenGroup>
 
   {#snippet sizes(size)}
-    <div class="poodle-slider-specimen__variant-pair">
+    <div class="poodle-slider-specimen__horizontal-size">
       <span>{size.toUpperCase()} · block</span>
-      <Slider value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Standard slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
+      <Slider value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Block slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
       <span>{size.toUpperCase()} · embedded</span>
       <Slider variant="embedded" polarity="unipolar" value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Embedded slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
     </div>
+    {#if size === "xl"}
+      <div class="poodle-slider-specimen__vertical-suite">
+        <span>Vertical block</span>
+        <div class="poodle-slider-specimen__vertical-row">
+          {#each ladderSizes as verticalSize (verticalSize)}
+            <div class="poodle-slider-specimen__vertical-item">
+              <span>{verticalSize.toUpperCase()}</span>
+              <div class="poodle-slider-specimen__vertical-size">
+                <Slider orientation="vertical" value={sizeValues[verticalSize]} min={0} max={1} step={0.01} size={verticalSize} visibleLabel="Gain" ariaLabel={"Vertical block slider at " + verticalSize} onValueChange={(value) => (sizeValues[verticalSize] = value)} />
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
   {/snippet}
 
   {#snippet densities(density)}
@@ -110,25 +114,7 @@
     height: 12rem;
   }
 
-  .poodle-slider-specimen__ladder-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .poodle-slider-specimen__ladder-row > :global(.poodle-slider),
-  .poodle-slider-specimen__ladder-row > :global(.poodle-range-slider) {
-    flex: 1;
-  }
-
-  .poodle-slider-specimen__size-tag {
-    color: var(--poodle-color-text-secondary);
-    font-size: var(--poodle-typography-label-size);
-    min-width: 1.5rem;
-  }
-
-  .poodle-slider-specimen__variant-pair,
+  .poodle-slider-specimen__horizontal-size,
   .poodle-slider-specimen__density {
     display: flex;
     width: 100%;
@@ -136,7 +122,38 @@
     gap: 0.375rem;
   }
 
-  .poodle-slider-specimen__variant-pair > span,
+  .poodle-slider-specimen__vertical-size {
+    display: flex;
+    align-items: stretch;
+    height: 12rem;
+  }
+
+  .poodle-slider-specimen__vertical-suite {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .poodle-slider-specimen__vertical-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .poodle-slider-specimen__vertical-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .poodle-slider-specimen__horizontal-size > span,
+  .poodle-slider-specimen__vertical-suite > span,
+  .poodle-slider-specimen__vertical-item > span,
   .poodle-slider-specimen__density > span {
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-label-size);

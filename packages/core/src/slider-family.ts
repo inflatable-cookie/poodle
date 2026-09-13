@@ -30,6 +30,8 @@ export const SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX =
 export const SLIDER_FAMILY_TEXT_DOCK_GAP_PX = 4;
 /** Reserved inline end inset that the docked value must clear. */
 export const SLIDER_FAMILY_TEXT_END_INSET_PX = 12;
+/** Minimum breathing room between independently positioned inline text. */
+export const SLIDER_FAMILY_INLINE_TEXT_GAP_PX = 8;
 
 export interface SliderFamilyRect {
   left: number;
@@ -44,6 +46,16 @@ export function sliderFamilyCapsuleSpan(
   orientation: SliderFamilyOrientation,
 ): number {
   return orientation === "vertical" ? rect.height : rect.width;
+}
+
+/** Canvas-usable font shorthand from a rendered Slider-family element. */
+export function sliderFamilyResolvedFont(element: Element): string {
+  const style = getComputedStyle(element);
+  if (style.font) return style.font;
+  // Chromium can expose an empty computed shorthand even though every longhand
+  // is resolved. Canvas then silently falls back to 10px sans-serif and
+  // under-measures values, so construct the usable subset explicitly.
+  return `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
 }
 
 /** Physical pointer position -> logical value coordinate in `[0, 1]`. */
@@ -77,6 +89,103 @@ export function sliderFamilyValueDockedToMarker(input: {
   const { valueNorm, span, advance } = input;
   if (span <= 0) return false;
   return (1 - valueNorm) * span < advance + SLIDER_FAMILY_TEXT_END_INSET_PX + SLIDER_FAMILY_TEXT_DOCK_GAP_PX;
+}
+
+/** Whether a proposed Slider value attachment clears its fixed start label. */
+export function sliderBlockDockingFits(input: {
+  span: number;
+  labelAdvance: number;
+  valueAdvance: number;
+  valueNorm: number;
+  markerInterior: 1 | -1;
+}): boolean {
+  const { span, labelAdvance, valueAdvance, valueNorm, markerInterior } = input;
+  if (span <= 0) return false;
+  const contentSpan = Math.max(span - 2 * SLIDER_FAMILY_TEXT_END_INSET_PX, 0);
+  const marker = Math.min(
+    Math.max(
+      valueNorm * contentSpan + markerInterior * SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX,
+      SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX,
+    ),
+    contentSpan - SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX,
+  );
+  const labelRight = SLIDER_FAMILY_TEXT_END_INSET_PX + labelAdvance;
+  const valueLeft = SLIDER_FAMILY_TEXT_END_INSET_PX + marker
+    - SLIDER_FAMILY_TEXT_DOCK_GAP_PX - valueAdvance;
+  // A numeric-only Slider still needs enough space on the marker's interior
+  // side. Otherwise attachment clips the value through the capsule's start
+  // edge; leave it on the stable end anchor instead.
+  if (valueLeft < SLIDER_FAMILY_TEXT_END_INSET_PX) return false;
+  if (labelAdvance <= 0) return true;
+  return labelRight + SLIDER_FAMILY_INLINE_TEXT_GAP_PX <= valueLeft;
+}
+
+/** Whether the exact-centre RangeSlider label clears both endpoint values. */
+interface RangeSliderBlockValueGeometryInput {
+  span: number;
+  lowerAdvance: number;
+  upperAdvance: number;
+  lowerNorm: number;
+  upperNorm: number;
+  lowerDocked: boolean;
+  upperDocked: boolean;
+}
+
+function rangeSliderBlockValueEdges(input: RangeSliderBlockValueGeometryInput): {
+  lowerRight: number;
+  upperLeft: number;
+} {
+  const {
+    span, lowerAdvance, upperAdvance,
+    lowerNorm, upperNorm, lowerDocked, upperDocked,
+  } = input;
+
+  // Docked value offsets resolve against the inline row's content box. The
+  // row sits inside the family's 12px-per-side text padding, so using the
+  // outer capsule span predicts each value too far toward its edge and hides
+  // the centre label late.
+  const contentSpan = Math.max(span - 2 * SLIDER_FAMILY_TEXT_END_INSET_PX, 0);
+  const contentStart = SLIDER_FAMILY_TEXT_END_INSET_PX;
+  const start = contentStart + lowerNorm * contentSpan;
+  const end = contentStart + upperNorm * contentSpan;
+  const midpoint = (start + end) / 2;
+  const halfMarker = SLIDER_FAMILY_BLOCK_MARKER_THICKNESS_PX / 2;
+  const lowerMarker = Math.max(
+    contentStart + SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX,
+    Math.min(start + SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX, midpoint - halfMarker),
+  );
+  const upperMarker = Math.min(
+    contentStart + contentSpan - SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX,
+    Math.max(end - SLIDER_FAMILY_BLOCK_MARKER_OFFSET_PX, midpoint + halfMarker),
+  );
+  const lowerRight = lowerDocked
+    ? lowerMarker + halfMarker + SLIDER_FAMILY_TEXT_DOCK_GAP_PX + lowerAdvance
+    : SLIDER_FAMILY_TEXT_END_INSET_PX + lowerAdvance;
+  const upperLeft = upperDocked
+    ? upperMarker - halfMarker - SLIDER_FAMILY_TEXT_DOCK_GAP_PX - upperAdvance
+    : span - SLIDER_FAMILY_TEXT_END_INSET_PX - upperAdvance;
+  return { lowerRight, upperLeft };
+}
+
+/** Whether the proposed attached RangeSlider values fit without overlap. */
+export function rangeSliderBlockDockingFits(input: RangeSliderBlockValueGeometryInput): boolean {
+  if (input.span <= 0) return false;
+  const { lowerRight, upperLeft } = rangeSliderBlockValueEdges(input);
+  return lowerRight + SLIDER_FAMILY_INLINE_TEXT_GAP_PX <= upperLeft;
+}
+
+/** Whether the exact-centre RangeSlider label clears both endpoint values. */
+export function rangeSliderBlockLabelFits(input: RangeSliderBlockValueGeometryInput & {
+  labelAdvance: number;
+}): boolean {
+  const { span, labelAdvance } = input;
+  if (span <= 0 || labelAdvance <= 0) return false;
+  const { lowerRight, upperLeft } = rangeSliderBlockValueEdges(input);
+  const labelLeft = (span - labelAdvance) / 2;
+  const labelRight = labelLeft + labelAdvance;
+
+  return lowerRight + SLIDER_FAMILY_TEXT_DOCK_GAP_PX <= labelLeft
+    && upperLeft - SLIDER_FAMILY_TEXT_DOCK_GAP_PX >= labelRight;
 }
 
 /**

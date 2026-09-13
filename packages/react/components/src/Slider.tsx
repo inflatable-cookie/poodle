@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import {
   createSliderControlContext, layoutSliderBlock, measureInlineAdvance,
   normalizeSliderValue, resolveSliderVisibleValue, safeSliderMax,
-  sliderControlTransition, sliderFamilyCapsuleSpan, sliderFamilyValueDockedToMarker,
+  sliderBlockDockingFits, sliderControlTransition, sliderFamilyCapsuleSpan, sliderFamilyResolvedFont, sliderFamilyValueDockedToMarker,
   sliderFamilyValueNorm, sliderTransition, sliderVisualState,
   type AudioValueLaw, type SliderContext, type SliderControlContext,
   type SliderDirection, type SliderPolarity, type SliderVariant,
@@ -97,7 +97,7 @@ export function Slider({
   } as CSSProperties;
   const visibleValueText = resolveSliderVisibleValue(displayValue, min, step, formatVisibleValue);
   const visibleLabelText = visibleLabel && visibleLabel !== "" ? visibleLabel : null;
-  const font = capsule.current ? getComputedStyle(capsule.current).font : "14px sans-serif";
+  const font = capsule.current ? sliderFamilyResolvedFont(capsule.current) : "14px sans-serif";
   const blockLayout = block
     ? layoutSliderBlock({
       capsuleSpan,
@@ -106,7 +106,7 @@ export function Slider({
       measure: (text) => measureInlineAdvance(text, font),
     })
     : { labelInline: false, valueInline: false };
-  const valueDockedToMarker = block
+  const valueDockCandidate = block
     && orientation === "horizontal"
     && capsuleSpan > 0
     && visibleValueText != null
@@ -115,6 +115,13 @@ export function Slider({
       span: capsuleSpan,
       advance: measureInlineAdvance(visibleValueText, font),
     });
+  const valueDockedToMarker = valueDockCandidate && sliderBlockDockingFits({
+    span: capsuleSpan,
+    labelAdvance: visibleLabelText ? measureInlineAdvance(visibleLabelText, font) : 0,
+    valueAdvance: measureInlineAdvance(visibleValueText, font),
+    valueNorm: visualState.valueNorm,
+    markerInterior: visualState.fillTone === "negative" ? 1 : -1,
+  });
 
   function runControl(event: Parameters<typeof sliderControlTransition>[1]): void {
     const result = sliderControlTransition(controlRef.current, event);
@@ -128,8 +135,11 @@ export function Slider({
     }
   }
   function pointNorm(event: ReactPointerEvent<HTMLElement>): number {
+    const rect = block && capsule.current
+      ? capsule.current.getBoundingClientRect()
+      : root.current!.getBoundingClientRect();
     return sliderFamilyValueNorm({
-      rect: root.current!.getBoundingClientRect(),
+      rect,
       orientation,
       direction,
       clientX: event.clientX,
@@ -240,6 +250,10 @@ export function Slider({
     >
       {block ? (
         <>
+          {orientation === "vertical" && blockLayout.valueInline ? (
+            <span className="poodle-slider__external-value poodle-slider__external-value--upper" aria-hidden="true">{visibleValueText}</span>
+          ) : null}
+          <div className="poodle-slider__rail">
           <span ref={capsule} className="poodle-slider__capsule" aria-hidden="true">
             <span className="poodle-slider__track">
               <span className="poodle-slider__fill" />
@@ -251,16 +265,12 @@ export function Slider({
                     <>
                       <span className="poodle-slider__inline poodle-slider__inline--selected">
                         <span className="poodle-slider__inline-row poodle-slider__inline-row--vertical">
-                          <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
                           <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                          <span className="poodle-slider__inline-spacer" />
                         </span>
                       </span>
                       <span className="poodle-slider__inline poodle-slider__inline--remainder">
                         <span className="poodle-slider__inline-row poodle-slider__inline-row--vertical">
-                          <span className="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
                           <span className="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                          <span className="poodle-slider__inline-spacer" />
                         </span>
                       </span>
                     </>
@@ -286,6 +296,7 @@ export function Slider({
             </span>
             <span className="poodle-slider__hit" data-part="hit" {...pointerHandlers}><span className="poodle-slider__thumb" /></span>
           </span>
+          </div>
         </>
       ) : (
         <>

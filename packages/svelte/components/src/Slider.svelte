@@ -3,7 +3,7 @@
   import {
     createSliderControlContext, layoutSliderBlock, measureInlineAdvance,
     normalizeSliderValue, resolveSliderVisibleValue, safeSliderMax,
-    sliderControlTransition, sliderFamilyCapsuleSpan, sliderFamilyValueDockedToMarker,
+    sliderBlockDockingFits, sliderControlTransition, sliderFamilyCapsuleSpan, sliderFamilyResolvedFont, sliderFamilyValueDockedToMarker,
     sliderFamilyValueNorm, sliderTransition, sliderVisualState,
     type AudioValueLaw, type SliderContext, type SliderControlContext,
     type SliderDirection, type SliderPolarity, type SliderVariant,
@@ -86,7 +86,7 @@
   const visibleLabelText = $derived(visibleLabel && visibleLabel !== "" ? visibleLabel : null);
   const blockLayout = $derived.by(() => {
     if (!block) return { labelInline: false, valueInline: false };
-    const font = capsule ? getComputedStyle(capsule).font : "14px sans-serif";
+    const font = capsule ? sliderFamilyResolvedFont(capsule) : "14px sans-serif";
     return layoutSliderBlock({
       capsuleSpan,
       label: visibleLabelText,
@@ -94,12 +94,23 @@
       measure: (text) => measureInlineAdvance(text, font),
     });
   });
-  const valueDockedToMarker = $derived.by(() => {
+  const valueDockCandidate = $derived.by(() => {
     if (!block || orientation !== "horizontal" || !capsule || capsuleSpan <= 0 || visibleValueText == null) return false;
-    const font = getComputedStyle(capsule).font;
+    const font = sliderFamilyResolvedFont(capsule);
     const valueAdvance = measureInlineAdvance(visibleValueText, font);
     // 12px end inset + 4px breathing room between the glyph and marker.
     return sliderFamilyValueDockedToMarker({ valueNorm: visualState.valueNorm, span: capsuleSpan, advance: valueAdvance });
+  });
+  const valueDockedToMarker = $derived.by(() => {
+    if (!valueDockCandidate || !capsule || capsuleSpan <= 0 || visibleValueText == null) return false;
+    const font = sliderFamilyResolvedFont(capsule);
+    return sliderBlockDockingFits({
+      span: capsuleSpan,
+      labelAdvance: visibleLabelText ? measureInlineAdvance(visibleLabelText, font) : 0,
+      valueAdvance: measureInlineAdvance(visibleValueText, font),
+      valueNorm: visualState.valueNorm,
+      markerInterior: visualState.fillTone === "negative" ? 1 : -1,
+    });
   });
 
   function send(type: "INPUT" | "COMMIT", event: Event): void {
@@ -128,8 +139,9 @@
   }
 
   function pointNorm(event: PointerEvent): number {
+    const rect = block && capsule ? capsule.getBoundingClientRect() : root.getBoundingClientRect();
     return sliderFamilyValueNorm({
-      rect: root.getBoundingClientRect(),
+      rect,
       orientation,
       direction,
       clientX: event.clientX,
@@ -202,6 +214,10 @@
   aria-label={ariaLabel ?? undefined} aria-valuemin={min} aria-valuemax={safeMax} aria-valuenow={visualState.value} aria-valuetext={valueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd} onkeydown={controlKey}>
   {#if block}
+    {#if orientation === "vertical" && blockLayout.valueInline}
+      <span class="poodle-slider__external-value poodle-slider__external-value--upper" aria-hidden="true">{visibleValueText}</span>
+    {/if}
+    <div class="poodle-slider__rail">
     <span bind:this={capsule} class="poodle-slider__capsule" aria-hidden="true">
       <span class="poodle-slider__track">
         <span class="poodle-slider__fill"></span>
@@ -211,16 +227,12 @@
           {#if orientation === "vertical"}
             <span class="poodle-slider__inline poodle-slider__inline--selected">
               <span class="poodle-slider__inline-row poodle-slider__inline-row--vertical">
-                <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
                 <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                <span class="poodle-slider__inline-spacer"></span>
               </span>
             </span>
             <span class="poodle-slider__inline poodle-slider__inline--remainder">
               <span class="poodle-slider__inline-row poodle-slider__inline-row--vertical">
-                <span class="poodle-slider__inline-value">{blockLayout.valueInline ? visibleValueText : ""}</span>
                 <span class="poodle-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                <span class="poodle-slider__inline-spacer"></span>
               </span>
             </span>
           {:else}
@@ -243,6 +255,7 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span class="poodle-slider__hit" data-part="hit" onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-slider__thumb"></span></span>
     </span>
+    </div>
   {:else}
     <span class="poodle-slider__track" aria-hidden="true">
       <span class="poodle-slider__fill"></span>

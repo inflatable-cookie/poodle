@@ -124,6 +124,10 @@
     gap: 1rem;
   }
 
+  .poodle-specimen-layout__variants:not([data-direction="row"]) > .poodle-specimen-layout__variant {
+    width: 100%;
+  }
+
   .poodle-specimen-layout__variants[data-direction="row"] {
     flex-direction: row;
     flex-wrap: wrap;

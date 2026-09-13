@@ -4,12 +4,16 @@ import {
   layoutRangeSliderBlock,
   measureInlineAdvance,
   normalizeRangeValue,
+  rangeSliderBlockDockingFits,
+  rangeSliderBlockLabelFits,
   rangeSliderControlTransition,
   rangeSliderTransition,
   rangeSliderVisualState,
   resolveRangeVisibleValue,
   safeSliderMax,
   sliderFamilyCapsuleSpan,
+  sliderFamilyResolvedFont,
+  sliderFamilyValueDockedToMarker,
   sliderFamilyValueNorm,
   type AudioValueLaw, type RangeSliderContext, type RangeSliderControlContext,
   type SliderDirection, type SliderPolarity, type SliderVariant,
@@ -121,8 +125,11 @@ export function RangeSlider({
     }
   }
   function pointNorm(event: ReactPointerEvent<HTMLElement>): number {
+    const rect = block && capsule.current
+      ? capsule.current.getBoundingClientRect()
+      : root.current!.getBoundingClientRect();
     return sliderFamilyValueNorm({
-      rect: root.current!.getBoundingClientRect(),
+      rect,
       orientation,
       direction,
       clientX: event.clientX,
@@ -133,7 +140,7 @@ export function RangeSlider({
   const visibleLabelText = visibleLabel && visibleLabel !== "" ? visibleLabel : null;
   const lowerVisible = resolveRangeVisibleValue(displayLower, min, step, "lower", formatVisibleValue);
   const upperVisible = resolveRangeVisibleValue(displayUpper, min, step, "upper", formatVisibleValue);
-  const font = capsule.current ? getComputedStyle(capsule.current).font : "14px sans-serif";
+  const font = capsule.current ? sliderFamilyResolvedFont(capsule.current) : "14px sans-serif";
   const blockLayout = block
     ? layoutRangeSliderBlock({
       capsuleSpan,
@@ -143,6 +150,50 @@ export function RangeSlider({
       measure: (text) => measureInlineAdvance(text, font),
     })
     : { labelInline: false, lowerInline: false, upperInline: false };
+  const lowerValueDockCandidate = block
+    && orientation === "horizontal"
+    && capsuleSpan > 0
+    && lowerVisible != null
+    && sliderFamilyValueDockedToMarker({
+      valueNorm: 1 - visualState.lowerNorm,
+      span: capsuleSpan,
+      advance: measureInlineAdvance(lowerVisible, font),
+    });
+  const upperValueDockCandidate = block
+    && orientation === "horizontal"
+    && capsuleSpan > 0
+    && upperVisible != null
+    && sliderFamilyValueDockedToMarker({
+      valueNorm: visualState.upperNorm,
+      span: capsuleSpan,
+      advance: measureInlineAdvance(upperVisible, font),
+    });
+  const valueDockingFits = block
+    && orientation === "horizontal"
+    && rangeSliderBlockDockingFits({
+      span: capsuleSpan,
+      lowerAdvance: measureInlineAdvance(lowerVisible ?? "", font),
+      upperAdvance: measureInlineAdvance(upperVisible ?? "", font),
+      lowerNorm: visualState.lowerNorm,
+      upperNorm: visualState.upperNorm,
+      lowerDocked: lowerValueDockCandidate,
+      upperDocked: upperValueDockCandidate,
+    });
+  const lowerValueDockedToMarker = lowerValueDockCandidate && valueDockingFits;
+  const upperValueDockedToMarker = upperValueDockCandidate && valueDockingFits;
+  const showBlockLabel = blockLayout.labelInline && (
+    orientation !== "horizontal"
+    || rangeSliderBlockLabelFits({
+      span: capsuleSpan,
+      labelAdvance: measureInlineAdvance(visibleLabelText ?? "", font),
+      lowerAdvance: measureInlineAdvance(lowerVisible ?? "", font),
+      upperAdvance: measureInlineAdvance(upperVisible ?? "", font),
+      lowerNorm: visualState.lowerNorm,
+      upperNorm: visualState.upperNorm,
+      lowerDocked: lowerValueDockedToMarker,
+      upperDocked: upperValueDockedToMarker,
+    })
+  );
   function pointerDown(event: ReactPointerEvent<HTMLElement>): void {
     if (event.button !== 0 || disabled) return;
     const target = block ? event.currentTarget : root.current;
@@ -151,7 +202,12 @@ export function RangeSlider({
     event.stopPropagation();
     activePointer.current = event.pointerId;
     target.setPointerCapture(event.pointerId);
-    runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
+    const requestedThumb = event.currentTarget.dataset.thumb;
+    runControl({
+      type: "POINTER_BEGIN",
+      valueNorm: pointNorm(event),
+      thumb: requestedThumb === "lower" || requestedThumb === "upper" ? requestedThumb : undefined,
+    });
   }
   function pointerMove(event: ReactPointerEvent<HTMLElement>): void {
     if (activePointer.current === event.pointerId) {
@@ -230,11 +286,17 @@ export function RangeSlider({
       data-polarity={visualState.polarity}
       data-fill-split={visualState.fillSplitAtCenter}
       data-state={visualState.pointerActive ? "active" : "idle"}
+      data-lower-value-docked={lowerValueDockedToMarker ? "marker" : undefined}
+      data-upper-value-docked={upperValueDockedToMarker ? "marker" : undefined}
       dir={direction === "rtl" ? direction : undefined}
       {...pointerHandlers}
     >
       {block ? (
         <>
+          {orientation === "vertical" && blockLayout.upperInline ? (
+            <span className="poodle-range-slider__external-value poodle-range-slider__external-value--upper" aria-hidden="true">{upperVisible}</span>
+          ) : null}
+          <div className="poodle-range-slider__rail">
           <span ref={capsule} className="poodle-range-slider__capsule" aria-hidden="true">
             <span className="poodle-range-slider__track">
               <span className="poodle-range-slider__fill poodle-range-slider__fill--negative" />
@@ -246,26 +308,20 @@ export function RangeSlider({
                 {/* One stable text layout painted through window/remainder clips; glyphs never move. */}
                 {orientation === "vertical" ? (
                   <>
-                    <span className="poodle-range-slider__inline poodle-range-slider__inline--selected">
-                      <span className="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
-                        <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
-                        <span className="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                        <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
-                      </span>
+                      <span className="poodle-range-slider__inline poodle-range-slider__inline--selected">
+                        <span className="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
+                          <span className="poodle-range-slider__inline-label">{showBlockLabel ? visibleLabelText : ""}</span>
+                        </span>
                     </span>
-                    <span className="poodle-range-slider__inline poodle-range-slider__inline--remainder-top">
-                      <span className="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
-                        <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
-                        <span className="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                        <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
-                      </span>
+                      <span className="poodle-range-slider__inline poodle-range-slider__inline--remainder-top">
+                        <span className="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
+                          <span className="poodle-range-slider__inline-label">{showBlockLabel ? visibleLabelText : ""}</span>
+                        </span>
                     </span>
-                    <span className="poodle-range-slider__inline poodle-range-slider__inline--remainder-bottom">
-                      <span className="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
-                        <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
-                        <span className="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
-                        <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
-                      </span>
+                      <span className="poodle-range-slider__inline poodle-range-slider__inline--remainder-bottom">
+                        <span className="poodle-range-slider__inline-row poodle-range-slider__inline-row--vertical">
+                          <span className="poodle-range-slider__inline-label">{showBlockLabel ? visibleLabelText : ""}</span>
+                        </span>
                     </span>
                   </>
                 ) : (
@@ -273,21 +329,21 @@ export function RangeSlider({
                     <span className="poodle-range-slider__inline poodle-range-slider__inline--selected">
                       <span className="poodle-range-slider__inline-row">
                         <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
-                        <span className="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                        <span className="poodle-range-slider__inline-label">{showBlockLabel ? visibleLabelText : ""}</span>
                         <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
                       </span>
                     </span>
                     <span className="poodle-range-slider__inline poodle-range-slider__inline--remainder-start">
                       <span className="poodle-range-slider__inline-row">
                         <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
-                        <span className="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                        <span className="poodle-range-slider__inline-label">{showBlockLabel ? visibleLabelText : ""}</span>
                         <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
                       </span>
                     </span>
                     <span className="poodle-range-slider__inline poodle-range-slider__inline--remainder-end">
                       <span className="poodle-range-slider__inline-row">
                         <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--lower">{blockLayout.lowerInline ? lowerVisible : ""}</span>
-                        <span className="poodle-range-slider__inline-label">{blockLayout.labelInline ? visibleLabelText : ""}</span>
+                        <span className="poodle-range-slider__inline-label">{showBlockLabel ? visibleLabelText : ""}</span>
                         <span className="poodle-range-slider__inline-value poodle-range-slider__inline-value--upper">{blockLayout.upperInline ? upperVisible : ""}</span>
                       </span>
                     </span>
@@ -298,6 +354,10 @@ export function RangeSlider({
           </span>
           <div className="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => controlKey(event, "lower")} {...pointerHandlers}><span className="poodle-range-slider__thumb" /></div>
           <div className="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => controlKey(event, "upper")} {...pointerHandlers}><span className="poodle-range-slider__thumb" /></div>
+          </div>
+          {orientation === "vertical" && blockLayout.lowerInline ? (
+            <span className="poodle-range-slider__external-value poodle-range-slider__external-value--lower" aria-hidden="true">{lowerVisible}</span>
+          ) : null}
         </>
       ) : (
         <>

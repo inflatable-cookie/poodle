@@ -71,6 +71,17 @@ describe("slider-family style foundation", () => {
     expect(range).not.toContain("--poodle-range-slider-block-hit");
   });
 
+  test("vertical block capsules keep the shared width and rotate their label", () => {
+    expect(family).toContain(
+      "width: var(--poodle-slider-family-block-height);",
+    );
+    expect(family).toContain("transform: translate(-50%, -50%) rotate(-90deg);");
+    expect(family).toContain("grid-template-rows: auto minmax(0, 1fr) auto;");
+    expect(family).toMatch(
+      /\[data-variant="block"\] :is\(\.poodle-slider__track, \.poodle-range-slider__track\) \{[\s\S]*?width: auto;[\s\S]*?height: auto;/,
+    );
+  });
+
   test("each family supplies only its marker position through the shared variable", () => {
     expect(slider).toContain("--poodle-slider-family-marker: var(--poodle-slider-block-marker-position);");
     expect(range).toContain(
@@ -79,12 +90,19 @@ describe("slider-family style foundation", () => {
     expect(range).toContain(
       "--poodle-slider-family-marker: var(--poodle-range-slider-block-marker-end);",
     );
-    // The range handles are clamped inside the capsule by the shared bound.
+    // The range handles stay inside the selected window, with a distinct
+    // midpoint collision law rather than Slider's edge-only clamp.
     expect(range).toContain(
-      "--poodle-range-slider-block-marker-start: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-start),",
+      "calc(var(--poodle-range-start) + var(--poodle-slider-family-marker-offset))",
     );
     expect(range).toContain(
-      "--poodle-range-slider-block-marker-end: clamp(\n      var(--poodle-slider-family-marker-offset),\n      var(--poodle-range-end),",
+      "calc(var(--poodle-range-end) - var(--poodle-slider-family-marker-offset))",
+    );
+    expect(range).toContain(
+      "calc(var(--poodle-range-slider-block-window-midpoint) - (var(--poodle-slider-family-marker-thickness) / 2))",
+    );
+    expect(range).toContain(
+      "calc(var(--poodle-range-slider-block-window-midpoint) + (var(--poodle-slider-family-marker-thickness) / 2))",
     );
   });
 

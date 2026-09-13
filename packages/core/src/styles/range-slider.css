@@ -141,23 +141,70 @@
     clip-path: inset(0 0 var(--poodle-range-start) 0);
   }
 
-  /* ── Block bounded inset handles ──
-     Both markers use the shared family marker offset (inset + half
-     thickness) as the clamp bound, exactly like Slider. The genuine two-thumb
-     difference is the anchor: each handle sits at its own value and is only
-     pushed inside by the bound, so a pair that meets or overlaps can never
-     cross its sibling the way a symmetric interior inset would. */
+  /* Every horizontal text role owns an absolute anchor. Flex must never
+     redistribute the surviving values when the label hides or one endpoint
+     docks to its handle. */
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"] .poodle-range-slider__inline-value--lower {
+    position: absolute;
+    inset-inline-start: 0;
+  }
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"] .poodle-range-slider__inline-value--upper {
+    position: absolute;
+    inset-inline-end: 0;
+  }
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"] .poodle-range-slider__inline-label {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Values stay on their stable endpoint anchors until a handle enters that
+     text box, then dock just inside the selected window. Every clipped paint
+     layer shares the placement, so only foreground colour crosses the fill. */
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"][data-lower-value-docked="marker"] .poodle-range-slider__inline-value--lower {
+    position: absolute;
+    inset-inline-start: var(--poodle-range-slider-block-marker-start);
+    inset-inline-end: auto;
+    transform: translateX(calc((var(--poodle-slider-family-marker-thickness) / 2) + 0.25rem));
+  }
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"][data-upper-value-docked="marker"] .poodle-range-slider__inline-value--upper {
+    position: absolute;
+    inset-inline-start: var(--poodle-range-slider-block-marker-end);
+    inset-inline-end: auto;
+    transform: translateX(calc(-100% - (var(--poodle-slider-family-marker-thickness) / 2) - 0.25rem));
+  }
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"][data-lower-value-docked="marker"] .poodle-range-slider__inline-value--lower {
+    transform: translateX(calc(-1 * ((var(--poodle-slider-family-marker-thickness) / 2) + 0.25rem)));
+  }
+  .poodle-range-slider[data-variant="block"][data-orientation="horizontal"][data-direction="rtl"][data-upper-value-docked="marker"] .poodle-range-slider__inline-value--upper {
+    transform: translateX(calc(100% + (var(--poodle-slider-family-marker-thickness) / 2) + 0.25rem));
+  }
+
+  /* ── Block window-inset handles ──
+     A range handle belongs to the selected window, not to the outside
+     remainder: the lower handle stays just inside the window start and the
+     upper handle stays just inside its end at every value, including the
+     capsule extrema. When the selected window becomes too narrow for both
+     handles, they part continuously around its midpoint instead of crossing
+     or jumping to an edge-only clamp. */
 
   .poodle-range-slider[data-variant="block"] {
-    --poodle-range-slider-block-marker-start: clamp(
-      var(--poodle-slider-family-marker-offset),
-      var(--poodle-range-start),
-      calc(100% - var(--poodle-slider-family-marker-offset))
+    --poodle-range-slider-block-window-midpoint: calc(
+      (var(--poodle-range-start) + var(--poodle-range-end)) / 2
     );
-    --poodle-range-slider-block-marker-end: clamp(
+    --poodle-range-slider-block-marker-start: max(
       var(--poodle-slider-family-marker-offset),
-      var(--poodle-range-end),
-      calc(100% - var(--poodle-slider-family-marker-offset))
+      min(
+        calc(var(--poodle-range-start) + var(--poodle-slider-family-marker-offset)),
+        calc(var(--poodle-range-slider-block-window-midpoint) - (var(--poodle-slider-family-marker-thickness) / 2))
+      )
+    );
+    --poodle-range-slider-block-marker-end: min(
+      calc(100% - var(--poodle-slider-family-marker-offset)),
+      max(
+        calc(var(--poodle-range-end) - var(--poodle-slider-family-marker-offset)),
+        calc(var(--poodle-range-slider-block-window-midpoint) + (var(--poodle-slider-family-marker-thickness) / 2))
+      )
     );
   }
   .poodle-range-slider[data-variant="block"] .poodle-range-slider__hit--lower {
