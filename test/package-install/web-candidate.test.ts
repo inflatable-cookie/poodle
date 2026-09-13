@@ -11,9 +11,11 @@ import { join } from "node:path";
 import { requireExactCommit, withDisposableGitPlant } from "./scope";
 import {
   assertWebCandidateScope,
+  assertWebPreviewScope,
   deriveWebCandidateVersions,
   isWebCandidateEvidencePath,
   WEB_CANDIDATE_EVIDENCE_PATTERNS,
+  WEB_CANDIDATE_MODE,
 } from "./web-candidate";
 
 const plantRoots: string[] = [];
@@ -194,6 +196,13 @@ describe("web candidate versions", () => {
 });
 
 describe("web candidate admission", () => {
+  test("ordinary installed-package CI routes a planted 0.4.1 candidate through generic admission", async () => {
+    const { root, base, head } = await plantCandidate("0.4.1");
+    const proof = await assertWebPreviewScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe(WEB_CANDIDATE_MODE);
+    expect(proof.changedPaths).toContain("docs/release-notes/0.4.1.md");
+  });
+
   test("admit a synthetic 0.4.1 candidate", async () => {
     const { root, base, head } = await plantCandidate("0.4.1");
     const proof = await assertWebCandidateScope(root, base, head);

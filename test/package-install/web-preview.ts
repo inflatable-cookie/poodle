@@ -43,6 +43,7 @@ import {
   resolveCertificationHead,
   type InstalledScopeMode,
 } from "./scope";
+import { assertWebPreviewScope } from "./web-candidate";
 
 const repoRoot = resolve(import.meta.dir, "../..");
 // macOS tmpdir is `/var/folders/...` → `/private/var/folders/...`. tsc
@@ -1106,7 +1107,7 @@ const scopeProof = archiveCertificate
       sourceCommit: exactSourceCommit,
       changedPaths: [] as string[],
     }
-  : await assertInstalledScope(
+  : await assertWebPreviewScope(
       repoRoot,
       requiredBaseCommit,
       exactSourceCommit,

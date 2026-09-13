@@ -16,6 +16,7 @@
 // `scope.ts` are retained as evidence and are not consulted here.
 
 import {
+  assertInstalledScope,
   changedJsonLeafPaths,
   changedPathsForCommitRange,
   changelogInventory,
@@ -27,6 +28,8 @@ import {
   requireExactCommit,
   runCapture,
   sortedUnique,
+  type InstalledScopeMode,
+  type InstalledScopeProof,
 } from "./scope";
 
 export const WEB_CANDIDATE_MODE = "web-candidate" as const;
@@ -424,4 +427,33 @@ export async function assertWebCandidateScope(
     releaseInputPaths,
     evidencePaths: changedPaths.filter(isWebCandidateEvidencePath),
   };
+}
+
+/**
+ * The installed-package CI proof normally uses ordinary scope. When that
+ * range carries a root version increase, route it through the generic web
+ * candidate law instead of the retained one-release g18.006 policy.
+ */
+export async function assertWebPreviewScope(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  mode: InstalledScopeMode,
+): Promise<InstalledScopeProof | WebCandidateProof> {
+  try {
+    return await assertInstalledScope(
+      checkoutRoot,
+      requiredBaseCommit,
+      sourceCommit,
+      mode,
+    );
+  } catch (ordinaryError) {
+    if (mode !== "ordinary") throw ordinaryError;
+    try {
+      await deriveWebCandidateVersions(checkoutRoot, requiredBaseCommit, sourceCommit);
+    } catch {
+      throw ordinaryError;
+    }
+    return assertWebCandidateScope(checkoutRoot, requiredBaseCommit, sourceCommit);
+  }
 }
