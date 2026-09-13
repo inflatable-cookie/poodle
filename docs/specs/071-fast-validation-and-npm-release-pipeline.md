@@ -82,6 +82,13 @@ One retained `.github/workflows/release.yml` supports two explicit modes:
    publish those exact tarballs with npm trusted publishing and verify registry
    availability.
 
+If the tagged workflow wrapper itself blocks before publication, a reviewed
+wrapper-only repair may dispatch publish from the default branch with an
+explicit existing `release-tag`. Checkout and identity verification still
+resolve that immutable tag, and the same successful candidate run supplies the
+archives. This recovery route cannot rebuild, move the tag, or substitute a
+different source commit.
+
 There is no tag dry run and no rebuild during publish. A publish invocation
 without a successful candidate run ID or exact identity fails before npm
 mutation.

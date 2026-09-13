@@ -186,8 +186,8 @@ export function collectReleaseWorkflowFailures(
   if (!active.includes("--tag-version")) {
     found.push("publish mode must bind the candidate version to the tag");
   }
-  if (!/npm publish "\$tarball"/.test(active) && !/npm publish "\$\{?tarball\}?"/.test(active)) {
-    found.push("publish mode must publish archives (npm publish <tarball>)");
+  if (!/npm publish "\.\/\$tarball"/.test(active)) {
+    found.push("publish mode must publish archives through an explicit local path (npm publish ./<tarball>)");
   }
   if (/cd\s+packages\//.test(active) && /npm publish/.test(active)) {
     found.push("publish mode must publish archives rather than package directories");
@@ -206,6 +206,12 @@ export function collectReleaseWorkflowFailures(
   }
   if (!active.includes("candidate-run-id")) {
     found.push("publish mode must require the candidate run ID input");
+  }
+  if (
+    !active.includes("release-tag") ||
+    !/ref:\s*\$\{\{[^\n]*inputs\.release-tag[^\n]*\|\|\s*github\.ref\s*\}\}/.test(active)
+  ) {
+    found.push("publish mode must retain the explicit certified-tag recovery checkout");
   }
 
   const manifestNames = publication.packages.map((entry) => entry.name).sort();
@@ -471,10 +477,23 @@ const releasePlants: Plant[] = [
   {
     name: "publish a package directory instead of archives",
     source: release.replace(
-      '          for tarball in "${tarballs[@]}"; do\n            npm publish "$tarball" --access public\n          done',
+      '          for tarball in "${tarballs[@]}"; do\n            npm publish "./$tarball" --access public\n          done',
       '          for dir in packages/core packages/svelte/components; do\n            (cd "$dir" && npm publish --access public)\n          done',
     ),
     expect: /publish archives|package directories/,
+  },
+  {
+    name: "drop the explicit local archive path",
+    source: release.replace('npm publish "./$tarball"', 'npm publish "$tarball"'),
+    expect: /explicit local path/,
+  },
+  {
+    name: "drop the certified-tag recovery checkout",
+    source: release.replace(
+      "          ref: ${{ inputs.mode == 'publish' && inputs.release-tag || github.ref }}\n",
+      "",
+    ),
+    expect: /certified-tag recovery checkout/,
   },
   {
     name: "add a second Effigy entry",

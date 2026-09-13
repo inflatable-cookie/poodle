@@ -37,6 +37,10 @@ on:
         description: Candidate run ID whose archive set is published (publish mode)
         type: string
         required: false
+      release-tag:
+        description: Existing certified tag to publish when dispatching the repaired workflow from main
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -61,6 +65,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Normal publish runs dispatch on the tag. `release-tag` is the
+          # fail-closed recovery route when the tagged workflow itself needs a
+          # wrapper-only correction: the current workflow still checks out and
+          # verifies the immutable certified tag before any npm mutation.
+          ref: ${{ inputs.mode == 'publish' && inputs.release-tag || github.ref }}
           # Full history: changed-range admission needs the release-input range
           # and the base manifest, not a shallow tip.
           fetch-depth: 0
@@ -83,10 +92,17 @@ jobs:
       # Publication is an act against a versioned tag, never a branch tip. A
       # candidate run uploads archives only and never reaches npm.
       - name: Require a versioned release tag when publishing
-        if: ${{ inputs.mode == 'publish' && !startsWith(github.ref, 'refs/tags/v') }}
+        if: ${{ inputs.mode == 'publish' && inputs.release-tag == '' && !startsWith(github.ref, 'refs/tags/v') }}
         run: |
           set -euo pipefail
           echo "publish mode requires refs/tags/v* (got ${GITHUB_REF})." >&2
+          exit 1
+
+      - name: Require a versioned recovery tag when publishing
+        if: ${{ inputs.mode == 'publish' && inputs.release-tag != '' && !startsWith(inputs.release-tag, 'v') }}
+        run: |
+          set -euo pipefail
+          echo "publish mode release-tag must name v* (got ${{ inputs.release-tag }})." >&2
           exit 1
 
       - name: Require a candidate run ID when publishing
@@ -159,13 +175,15 @@ jobs:
 
       - name: Verify tag, commit, version, packages and hashes
         if: ${{ inputs.mode == 'publish' }}
+        env:
+          RELEASE_TAG: ${{ inputs.release-tag != '' && inputs.release-tag || github.ref_name }}
         run: |
           set -euo pipefail
           bun scripts/verify-npm-candidate.ts \
             --root . \
             --manifest release-artifacts/poodle-npm-candidate.json \
             --dir release-artifacts \
-            --tag-version "${GITHUB_REF_NAME#v}" \
+            --tag-version "${RELEASE_TAG#v}" \
             --source-commit "$(git rev-parse HEAD)"
 
       # Publish the archives, never a package directory. Public access is the
@@ -181,7 +199,7 @@ jobs:
             exit 1
           fi
           for tarball in "${tarballs[@]}"; do
-            npm publish "$tarball" --access public
+            npm publish "./$tarball" --access public
           done
 
       - name: Verify registry availability
