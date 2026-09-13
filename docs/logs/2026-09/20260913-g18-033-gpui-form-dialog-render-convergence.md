@@ -93,6 +93,7 @@ Focused selectors only during implementation, then one final broad board.
 | Replacement final board | `effigy qa:board` | 614s (10m14s); `audit:licenses` now green; stopped on `audit:security` (`EISDIR` on the tracked symlink) |
 | Symlink repair focused test | `bun test scripts/audit-repository-security.test.ts` | 19/19 pass, including both planted symlink fixtures; both fail on the pre-fix script |
 | Security leaf after the symlink repair | `effigy audit:security` | repository-script step now clean (5126 files); stopped at the `bun audit` step (see below) |
+| Symlink-repaired replacement board | `effigy qa:board` | 431s (7m11s); all units before `audit:security` green (ledger, `probe:gpui-specimens` 9/9, `audit:licenses` clean, repository-security script clean 5126 files); stopped at `bun audit` |
 
 Final-board detail: the first `effigy qa:board` attempt (before the repin
 commit) aborted at `check:parity-evidence-ledger` because the receipt binding
@@ -147,10 +148,11 @@ diff contains no dependency or lockfile edit. Clearing it needs a vitest bump
 
 Per the completion protocol this is reported as a blocker with the exact
 evidence rather than silently widening scope or accepting a red board. The
-authorized replacement board still runs on the symlink-repaired candidate so
-that any earlier-unit regression would surface; `audit:security` is the final
-top-level board leaf, so a `bun audit` failure there is the only untoward
-outcome the board can add.
+authorized replacement board ran on the symlink-repaired candidate for 431s
+(7m11s): the Nucleus ledger, `probe:gpui-specimens` (9/9), `audit:licenses`
+and the repository-security script (5126 files) are green, and `audit:security`
+stops at `bun audit` with the two moderate Vitest advisories above. That is
+the only failure the board reports.
 
 The named timeout outcome g18.032 had to report is gone: `probe:gpui-specimens`
 now completes inside the board in 2.8s with all 9 tests and all 175 routes
