@@ -217,7 +217,7 @@
 # exceeds Bun's default per-test timeout when it shares a parallel test-file
 # run with the core-build files. It is the same assertion inventory as its own
 # board unit, so the contention cannot turn a correct range into a failure.
-"test:web-scope" = "bun test test/package-install/scope.test.ts"
+"test:web-scope" = "bun test --timeout 30000 test/package-install/scope.test.ts"
 # Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
 # its parallel test-file workers; the helper still validates the exact nested
 # realpath on every build.
