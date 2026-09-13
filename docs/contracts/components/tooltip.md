@@ -134,12 +134,14 @@ Tooltip uses `closeDelayMs = 0` (immediate close on leave/blur/Escape).
 
 | Key | Behavior |
 |-----|----------|
-| focus navigation | reveals the tooltip when the trigger receives focus |
+| keyboard focus navigation | reveals the tooltip when the trigger receives focus |
 | `Escape` | dismisses the visible tooltip |
 
 ### Focus And Announcement
 
 - focus entry: tooltip itself is not focusable
+- pointer-triggered programmatic focus, including Dialog and Popover autofocus,
+  does not reveal the tooltip
 - focus exit: tooltip dismisses when the trigger loses the relevant focus or
   hover state
 - live-region behavior: none; tooltip content should be exposed through the

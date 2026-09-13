@@ -341,7 +341,8 @@ async function runRichTextEditor(
   // insert image at retained selection
   await page.locator("[data-part='image-policy-editor'] .ProseMirror p").last().click();
   await page.locator("[data-part='image-policy-editor'] [data-command='insert-image'] button").click();
-  await settle(page, 1200); // host picker delay is 300ms
+  await page.locator("[data-part='image-picker-insert'] button").click();
+  await settle(page, 600);
   const inserted = await page.evaluate(() => ({
     images: document.querySelectorAll("[data-part='image-policy-editor'] img").length,
     alts: [...document.querySelectorAll("[data-part='image-policy-editor'] img")].map((i) => i.getAttribute("alt")),

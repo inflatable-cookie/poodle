@@ -128,8 +128,6 @@ export const RICH_TEXT_PICKED_IMAGE_ALT = "Revenue chart (host pick)";
  * `requestImage` waits this long (a real picker is never instantaneous), which
  * also gives the retained-selection proof a pending window to observe.
  */
-export const RICH_TEXT_IMAGE_REQUEST_DELAY_MS = 300;
-
 /** `type: "image"` nodes anywhere in a ProseMirror document JSON tree. */
 export function countRichTextImages(document: ProseMirrorDocumentJSON): number {
   let count = 0;

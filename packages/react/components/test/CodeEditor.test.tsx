@@ -36,6 +36,13 @@ function visibleText(container: HTMLElement): string {
 }
 
 describe("CodeEditor (react)", () => {
+  it("publishes explicit size and density axes on the editor root", () => {
+    const { container } = render(<CodeEditor value="" size="xl" density="comfortable" />);
+    const root = container.querySelector(".poodle-code-editor");
+    expect(root?.getAttribute("data-size")).toBe("xl");
+    expect(root?.getAttribute("data-density")).toBe("comfortable");
+  });
+
   it("mounts the exact value with astral characters and trailing whitespace intact", async () => {
     const value = "const snowman = \"\u2603\";  \n\tindented \u{1F600}";
     const { container } = render(<CodeEditor value={value} />);

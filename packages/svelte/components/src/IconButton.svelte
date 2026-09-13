@@ -4,7 +4,13 @@
 
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/icon-button.css";
-  import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@inflatable-cookie/poodle-core";
+  import {
+    getInputModality,
+    hoverTransition,
+    installInputModality,
+    type HoverEvent as HoverMachineEvent,
+    type HoverState,
+  } from "@inflatable-cookie/poodle-core";
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -75,6 +81,8 @@
     children,
   }: Props = $props();
 
+  installInputModality();
+
   const uiPresentation = getUiPresentation();
   const motionReady = useMotionReady();
 
@@ -141,7 +149,7 @@
   }
 
   function handleFocus(event: FocusEvent): void {
-    scheduleOpen();
+    if (getInputModality() === "keyboard") scheduleOpen();
     onFocus?.(event);
   }
 

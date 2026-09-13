@@ -272,6 +272,8 @@ Tooltip sub-machine (active when vertical or `showTooltips`): `hidden` →
 `pending { index }` (pointer enter or keyboard focus, 300ms timer) →
 `visible { index }`; pointer leave, blur, or Escape from any state → `hidden`,
 cancelling the timer. Disabled items never enter `pending` or `visible`. If
+focus was assigned programmatically after a pointer-triggered Dialog or Popover
+opens, it does not enter `pending`. If
 the pending or visible target becomes disabled or is removed, cancel the
 timer and return to `hidden`. Adapters latch the tab value, not a raw index,
 so a later row cannot inherit a stale tooltip after removal or reorder.

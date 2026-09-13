@@ -56,6 +56,8 @@ an unrelated painted copy is not conforming.
 | `tabSize` | `number` | `2` | no | Positive integer used for indentation width and tab display. |
 | `tabBehavior` | `"focus" \| "indent"` | `"focus"` | no | `focus` lets Tab leave. `indent` inserts indentation; Escape then Tab leaves. |
 | `performanceMode` | `"full" \| "plain"` | `"full"` | no | Explicit host choice. `plain` disables syntax tokenization but preserves editing, line numbers, search, diagnostics, and exact events. |
+| `size` | `ControlSize \| null` | `null` | no | Explicit code typography scale. When omitted, resolves from the presentation size axis. |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic presentation role used when `size` is omitted. |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit spacing-density override. |
 | `onChange` | `((change: CodeEditorChange) => void) \| null` | `null` | no | One exact callback for each committed user edit transaction. |
 

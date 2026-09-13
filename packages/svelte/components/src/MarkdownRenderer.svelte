@@ -6,8 +6,8 @@
     type MarkdownHtmlPolicy,
     type MarkdownHtmlRenderer,
   } from "./markdown-content";
-  import { getUiPresentation } from "./presentation";
-  import type { ControlDensity } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   /**
    * Standalone, read-only Markdown document rendering over the same private
@@ -20,6 +20,8 @@
     renderHtml?: MarkdownHtmlRenderer;
     htmlPolicy?: MarkdownHtmlPolicy;
     ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
   }
 
@@ -28,16 +30,20 @@
     renderHtml = null,
     htmlPolicy = "safe",
     ariaLabel = null,
+    size = null,
+    sizeRole = "control",
     density = null,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
-  const resolvedDensity = $derived(density ?? uiPresentation.density);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const html = $derived(renderMarkdownHtml(value, renderHtml, htmlPolicy));
 </script>
 
 <div
   class="poodle-md-renderer"
+  data-size={resolvedSize}
   data-density={resolvedDensity}
   role={ariaLabel ? "region" : undefined}
   aria-label={ariaLabel ?? undefined}

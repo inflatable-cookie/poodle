@@ -30,7 +30,13 @@ import type {
   RichTextToolbarItem,
   RichTextToolbarHeadingSelectItem,
 } from "@inflatable-cookie/poodle-core";
-import type { ControlDensity, SelectOptionRenderState, SelectTriggerRenderState } from "./types";
+import type {
+  ControlDensity,
+  ControlSize,
+  SelectOptionRenderState,
+  SelectTriggerRenderState,
+  SemanticControlSizeRole,
+} from "./types";
 
 import "@inflatable-cookie/poodle-core/styles/rich-text.css";
 
@@ -49,7 +55,7 @@ import type {
   RichTextImageInput,
   RichTextToolbarSnapshot,
 } from "./rich-text-engine";
-import { useUiPresentation } from "./presentation";
+import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 
 export interface RichTextEditorProps {
   value: ProseMirrorDocumentJSON;
@@ -60,6 +66,8 @@ export interface RichTextEditorProps {
   placeholder?: string;
   ariaLabel?: string;
   requestImage?: (() => Promise<RichTextImageInput | null>) | null;
+  size?: ControlSize | null;
+  sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   onChange?: ((document: ProseMirrorDocumentJSON) => void) | null;
 }
@@ -115,12 +123,16 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       placeholder = "",
       ariaLabel = "Rich text editor",
       requestImage = null,
+      size = null,
+      sizeRole = "control",
       density = null,
       onChange = null,
     }: RichTextEditorProps,
     ref,
   ) {
     const uiPresentation = useUiPresentation();
+    const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
+    const resolvedChromeSize = resolveSemanticControlSize(resolvedSize, "chrome");
     const resolvedDensity = density ?? uiPresentation.density;
     const hostRef = useRef<HTMLDivElement | null>(null);
     const engineRef = useRef<RichTextEngine | null>(null);
@@ -334,6 +346,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     return (
       <div
         className="poodle-rich-text-editor"
+        data-size={resolvedSize}
         data-density={resolvedDensity}
         data-disabled={disabled || undefined}
         data-readonly={readOnly || undefined}
@@ -366,7 +379,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
                         <Select
                           value={headingValue}
                           options={headingOptions}
-                          sizeRole="chrome"
+                          size={resolvedChromeSize}
                           density={resolvedDensity}
                           variant="ghost"
                           disabled={disabled || readOnly}
@@ -388,7 +401,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
                       <IconButton
                         variant="ghost"
                         tone={presentation.destructive ? "danger" : "default"}
-                        sizeRole="chrome"
+                        size={resolvedChromeSize}
                         density={resolvedDensity}
                         icon={presentation.icon}
                         ariaLabel={presentation.label}
@@ -414,14 +427,14 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               onChange={(event) => setLinkValue(event.target.value)}
               onKeyDown={handleLinkInputKeydown}
             />
-            <Button variant="secondary" sizeRole="chrome" density={resolvedDensity} onClick={submitLink}>
+            <Button variant="secondary" size={resolvedChromeSize} density={resolvedDensity} onClick={submitLink}>
               Apply
             </Button>
             {snapshot?.states.link.active ? (
               <Button
                 variant="ghost"
                 tone="danger"
-                sizeRole="chrome"
+                size={resolvedChromeSize}
                 density={resolvedDensity}
                 onClick={removeLink}
               >

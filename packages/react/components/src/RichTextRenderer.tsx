@@ -13,11 +13,15 @@ import {
   createRichTextSchema,
   renderRichTextDocument,
 } from "./rich-text-engine";
+import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
+import type { ControlSize, SemanticControlSizeRole } from "./types";
 
 export interface RichTextRendererProps {
   value: ProseMirrorDocumentJSON;
   features?: readonly RichTextFeature[];
   ariaLabel?: string | null;
+  size?: ControlSize | null;
+  sizeRole?: SemanticControlSizeRole;
 }
 
 /**
@@ -30,7 +34,11 @@ export function RichTextRenderer({
   value,
   features = RICH_TEXT_STANDARD_FEATURES,
   ariaLabel = null,
+  size = null,
+  sizeRole = "control",
 }: RichTextRendererProps) {
+  const uiPresentation = useUiPresentation();
+  const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   // Fail closed before any output, including server render. Validation is
   // pure: it never creates an editor and never touches browser globals.
   assertAdmittedFeatures(features);
@@ -50,6 +58,7 @@ export function RichTextRenderer({
   return (
     <div
       className="poodle-rich-text-renderer"
+      data-size={resolvedSize}
       role={ariaLabel ? "region" : undefined}
       aria-label={ariaLabel ?? undefined}
     >

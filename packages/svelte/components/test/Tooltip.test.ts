@@ -5,6 +5,7 @@ import TooltipHarness from "./TooltipHarness.svelte";
 
 afterEach(() => {
   vi.useRealTimers();
+  document.documentElement.removeAttribute("data-poodle-input-modality");
 });
 
 describe("Tooltip (svelte)", () => {
@@ -62,6 +63,19 @@ describe("Tooltip (svelte)", () => {
 
     await vi.advanceTimersByTimeAsync(300);
     expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it("does not open when pointer-triggered overlay focus lands on the trigger", async () => {
+    vi.useFakeTimers();
+    const onOpenChange = vi.fn();
+    const { container } = render(TooltipHarness, { props: { onOpenChange } });
+    const trigger = triggerOf(container);
+
+    await fireEvent.pointerDown(trigger);
+    await fireEvent.focusIn(trigger);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(bubbleOf()).toBeNull();
   });
 
   it("asks to reopen through hover after the host closed a controlled tooltip", async () => {

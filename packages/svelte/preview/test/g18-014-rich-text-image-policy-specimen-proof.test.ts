@@ -54,6 +54,13 @@ async function mountImagesOn(container: HTMLElement): Promise<void> {
   });
 }
 
+async function confirmImagePicker(): Promise<void> {
+  await waitFor(() => {
+    expect(document.querySelector("[data-part='image-picker']")).not.toBeNull();
+  });
+  await fireEvent.click(document.querySelector("[data-part='image-picker-insert'] button")!);
+}
+
 describe("g18.014 rich text image policy specimen proof (svelte)", () => {
   it("ships self-contained raster fixtures instead of a non-resolving URL", () => {
     for (const src of [RICH_TEXT_IMAGE_SRC, RICH_TEXT_PICKED_IMAGE_SRC]) {
@@ -117,6 +124,7 @@ describe("g18.014 rich text image policy specimen proof (svelte)", () => {
     await fireEvent.click(
       policy(container).querySelectorAll<HTMLButtonElement>("[data-command='insert-image'] button")[0]!,
     );
+    await confirmImagePicker();
     await waitFor(() => {
       expect(metric(container, "changes")).toBe("1");
     });
@@ -151,6 +159,7 @@ describe("g18.014 rich text image policy specimen proof (svelte)", () => {
     await fireEvent.click(
       policy(container).querySelectorAll<HTMLButtonElement>("[data-command='insert-image'] button")[0]!,
     );
+    await confirmImagePicker();
     await waitFor(() => {
       expect(metric(container, "images")).toBe("2");
     });

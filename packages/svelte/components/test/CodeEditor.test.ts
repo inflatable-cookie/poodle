@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { EditorState } from "@codemirror/state";
 
 import CodeEditor from "../src/CodeEditor.svelte";
+import CodeEditorPresentationHarness from "./CodeEditorPresentationHarness.svelte";
 import {
   assertAdmittedLanguage,
   createCodeEditorEngine,
@@ -35,6 +36,24 @@ function visibleText(container: HTMLElement): string {
   return lines.length > 0 ? lines.join("\n") : (contentOf(container).textContent ?? "");
 }
 describe("CodeEditor (svelte)", () => {
+  it("publishes explicit size and density axes on the editor root", () => {
+    const { container } = render(CodeEditor, {
+      props: { value: "", size: "xl", density: "comfortable" },
+    });
+    const root = container.querySelector(".poodle-code-editor");
+    expect(root?.getAttribute("data-size")).toBe("xl");
+    expect(root?.getAttribute("data-density")).toBe("comfortable");
+  });
+
+  it("reacts to the presentation provider size scale", async () => {
+    const view = render(CodeEditorPresentationHarness, { props: { sizeScale: "xs" } });
+    const root = view.container.querySelector(".poodle-code-editor");
+    expect(root?.getAttribute("data-size")).toBe("xs");
+
+    await view.rerender({ sizeScale: "xl" });
+    expect(root?.getAttribute("data-size")).toBe("xl");
+  });
+
   it("mounts the exact value with astral characters and trailing whitespace intact", async () => {
     const value = "const snowman = \"\u2603\";  \n\tindented \u{1F600}";
     const { container } = render(CodeEditor, { props: { value } });

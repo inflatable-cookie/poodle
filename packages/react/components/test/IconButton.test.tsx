@@ -5,6 +5,7 @@ import { IconButton } from "../src/IconButton";
 
 afterEach(() => {
   vi.useRealTimers();
+  document.documentElement.removeAttribute("data-poodle-input-modality");
 });
 
 describe("IconButton (react)", () => {
@@ -82,6 +83,17 @@ describe("IconButton (react)", () => {
     expect(button.getAttribute("aria-describedby")).toBe(tooltip?.getAttribute("id"));
 
     fireEvent.keyDown(button, { key: "Escape" });
+    expect(document.querySelector(".poodle-icon-button__tooltip")).toBeNull();
+  });
+
+  it("does not show its tooltip for pointer-triggered programmatic focus", () => {
+    vi.useFakeTimers();
+    const { container } = render(<IconButton icon="refresh-cw" ariaLabel="Check for updates" />);
+    const button = container.querySelector(".poodle-icon-button") as HTMLButtonElement;
+
+    fireEvent.pointerDown(button);
+    fireEvent.focus(button);
+    act(() => vi.advanceTimersByTime(300));
     expect(document.querySelector(".poodle-icon-button__tooltip")).toBeNull();
   });
 

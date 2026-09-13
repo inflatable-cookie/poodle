@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { MarkdownEditor } from "../src/MarkdownEditor";
 import { MarkdownRenderer } from "../src/MarkdownRenderer";
+import { UiPresentationProvider } from "../src/UiPresentationProvider";
 import { renderMarkdownHtml } from "../src/markdown-content";
 
 const markdownEditorCss = readFileSync(
@@ -21,6 +22,18 @@ function injectStyles(): void {
 const TRUSTED_FIXTURE = `<div class="trusted-fixture" data-note="kept"><script>window.__trusted = true;</script><p onclick="window.__clicked = true">Trusted body</p></div>`;
 
 describe("MarkdownRenderer (react)", () => {
+  it("inherits and reacts to the presentation size", () => {
+    const view = render(
+      <UiPresentationProvider sizeScale="xs"><MarkdownRenderer value="text" /></UiPresentationProvider>,
+    );
+    const root = view.container.querySelector(".poodle-md-renderer");
+    expect(root?.getAttribute("data-size")).toBe("xs");
+    view.rerender(
+      <UiPresentationProvider sizeScale="xl"><MarkdownRenderer value="text" /></UiPresentationProvider>,
+    );
+    expect(root?.getAttribute("data-size")).toBe("xl");
+  });
+
   it("renders read-only document content with no editor mechanics", () => {
     const { container } = render(
       <MarkdownRenderer value={"# Title\n\nBody with **bold** and [link](https://example.com)."} />,

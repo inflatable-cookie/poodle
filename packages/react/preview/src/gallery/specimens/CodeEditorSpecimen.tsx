@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ControlDensity } from "@inflatable-cookie/poodle-react";
+import type { ControlDensity, ControlSize } from "@inflatable-cookie/poodle-react";
 import { CodeEditor, type CodeEditorLanguageId } from "@inflatable-cookie/poodle-react/editor";
 import { createCodeEditorLanguageRegistry } from "@inflatable-cookie/poodle-react/editor/codemirror";
 import { SpecimenGroup } from "../SpecimenGroup";
@@ -21,7 +21,7 @@ const languageRegistry = createCodeEditorLanguageRegistry({
   json: async () => (await import("@codemirror/lang-json")).json(),
 });
 
-const axisSource = "export const ready = true;\n";
+const axisSource = "export const ready = true;\nexport const count = 3;\nconsole.log(ready, count);\n";
 
 export function CodeEditorSpecimen() {
   const [value, setValue] = useState(CODE_TYPESCRIPT_SOURCE);
@@ -30,9 +30,22 @@ export function CodeEditorSpecimen() {
 
   return (
     <SpecimenLayout
+      sizes={(size) => (
+        <SpecimenGroup label={size}>
+          <div className="code-editor-frame code-editor-frame--axis">
+            <CodeEditor
+              value={axisSource}
+              language="typescript"
+              languageRegistry={languageRegistry}
+              size={size as ControlSize}
+              ariaLabel="Size sample"
+            />
+          </div>
+        </SpecimenGroup>
+      )}
       densities={(density) => (
         <SpecimenGroup label={density}>
-          <div className="code-editor-frame">
+          <div className="code-editor-frame code-editor-frame--axis">
             <CodeEditor
               value={axisSource}
               language="typescript"
@@ -133,6 +146,7 @@ export function CodeEditorSpecimen() {
       </SpecimenGroup>
       <style>{`
         .code-editor-frame { height: 16rem; }
+        .code-editor-frame--axis { height: 10rem; }
         .code-editor-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
         .code-editor-readout { margin: 0.75rem 0 0; padding: 0.5rem; border-radius: 0.25rem; background: var(--poodle-color-background-surface); font-size: 0.75rem; white-space: pre-wrap; max-height: 8rem; overflow: auto; }
       `}</style>

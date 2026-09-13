@@ -14,6 +14,8 @@ import {
 import {
   createDragDropController,
   firstEnabledIndex,
+  getInputModality,
+  installInputModality,
   isTabsReorderAllowed,
   isValidTabsPinnedOrder,
   nextTabsControlledFocusDestination,
@@ -192,6 +194,7 @@ export function Tabs({
   children,
   actions,
 }: TabsProps) {
+  installInputModality();
   const tabsId = useId();
   const foreignInsert = useTabsForeignInsert();
   const uiPresentation = useUiPresentation();
@@ -937,7 +940,7 @@ export function Tabs({
                 onClose={() => send({ type: "CLOSE", value: item.value })}
                 onFocus={() => {
                   setFocusIndex(index);
-                  if (hasTooltips) scheduleTooltip(index);
+                  if (hasTooltips && getInputModality() === "keyboard") scheduleTooltip(index);
                 }}
                 onBlur={() => hasTooltips && dismissTooltip()}
                 onEnter={() => scheduleTooltip(index)}

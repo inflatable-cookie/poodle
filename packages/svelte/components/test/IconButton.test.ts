@@ -5,6 +5,7 @@ import IconButton from "../src/IconButton.svelte";
 
 afterEach(() => {
   vi.useRealTimers();
+  document.documentElement.removeAttribute("data-poodle-input-modality");
 });
 
 describe("IconButton (svelte)", () => {
@@ -85,6 +86,17 @@ describe("IconButton (svelte)", () => {
     expect(button.getAttribute("aria-describedby")).toBe(tooltip?.getAttribute("id"));
 
     await fireEvent.keyDown(button, { key: "Escape" });
+    expect(document.querySelector(".poodle-icon-button__tooltip")).toBeNull();
+  });
+
+  it("does not show its tooltip for pointer-triggered programmatic focus", async () => {
+    vi.useFakeTimers();
+    const { container } = render(IconButton, { props: { icon: "refresh-cw", ariaLabel: "Check for updates" } });
+    const button = container.querySelector(".poodle-icon-button") as HTMLButtonElement;
+
+    await fireEvent.pointerDown(button);
+    await fireEvent.focus(button);
+    await vi.advanceTimersByTimeAsync(300);
     expect(document.querySelector(".poodle-icon-button__tooltip")).toBeNull();
   });
 

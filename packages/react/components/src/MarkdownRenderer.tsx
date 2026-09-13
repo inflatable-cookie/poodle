@@ -5,8 +5,8 @@ import {
   type MarkdownHtmlPolicy,
   type MarkdownHtmlRenderer,
 } from "./markdown-content";
-import { useUiPresentation } from "./presentation";
-import type { ControlDensity } from "./types";
+import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
+import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
 export interface MarkdownRendererProps {
   value: string;
@@ -16,6 +16,10 @@ export interface MarkdownRendererProps {
   htmlPolicy?: MarkdownHtmlPolicy;
   /** When supplied, exposes the renderer as a labelled region; null keeps ordinary document semantics. */
   ariaLabel?: string | null;
+  /** Explicit typography-size override for rendered prose. */
+  size?: ControlSize | null;
+  /** Semantic role used to resolve the inherited presentation size. */
+  sizeRole?: SemanticControlSizeRole;
   /** Explicit spacing-density override for rendered prose. */
   density?: ControlDensity | null;
 }
@@ -31,15 +35,19 @@ export function MarkdownRenderer({
   renderHtml = null,
   htmlPolicy = "safe",
   ariaLabel = null,
+  size = null,
+  sizeRole = "control",
   density = null,
 }: MarkdownRendererProps) {
   const uiPresentation = useUiPresentation();
+  const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const html = renderMarkdownHtml(value, renderHtml, htmlPolicy);
 
   return (
     <div
       className="poodle-md-renderer"
+      data-size={resolvedSize}
       data-density={resolvedDensity}
       role={ariaLabel ? "region" : undefined}
       aria-label={ariaLabel ?? undefined}

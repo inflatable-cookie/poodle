@@ -5,6 +5,7 @@ import { Tooltip } from "../src/Tooltip";
 
 afterEach(() => {
   vi.useRealTimers();
+  document.documentElement.removeAttribute("data-poodle-input-modality");
 });
 
 describe("Tooltip (react)", () => {
@@ -69,6 +70,21 @@ describe("Tooltip (react)", () => {
       vi.advanceTimersByTime(300);
     });
     expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it("does not open when pointer-triggered overlay focus lands on the trigger", () => {
+    vi.useFakeTimers();
+    const onOpenChange = vi.fn();
+    const { container } = render(
+      <Tooltip content="Save" onOpenChange={onOpenChange}><button>Hover me</button></Tooltip>,
+    );
+    const trigger = container.querySelector(".poodle-tooltip button") as HTMLElement;
+
+    fireEvent.pointerDown(trigger);
+    fireEvent.focus(trigger);
+    act(() => vi.advanceTimersByTime(300));
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(bubbleOf()).toBeNull();
   });
 
   it("reports open changes driven by hover on an uncontrolled tooltip", () => {

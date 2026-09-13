@@ -5,7 +5,9 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/tooltip.css";
   import {
+    getInputModality,
     hoverTransition,
+    installInputModality,
     type HoverEvent as HoverMachineEvent,
     type HoverState,
   } from "@inflatable-cookie/poodle-core";
@@ -33,6 +35,8 @@
     onOpenChange = undefined,
     children,
   }: Props = $props();
+
+  installInputModality();
 
   const tooltipId = `poodle-tooltip-${++nextTooltipId}`;
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -201,6 +205,9 @@
   }
 
   function handleFocusIn(event: FocusEvent): void {
+    if (getInputModality() !== "keyboard") {
+      return;
+    }
     const anchor = resolveAnchor(event.target);
     if (!anchor) {
       return;

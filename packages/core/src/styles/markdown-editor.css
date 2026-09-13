@@ -2,6 +2,7 @@
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
   .poodle-md-editor {
+    --poodle-md-prose-font-size: 0.875rem;
     --poodle-md-editor-toolbar-y: 0.375rem;
     --poodle-md-editor-toolbar-x: 0.5rem;
     --poodle-md-editor-tool-gap: 0.125rem;
@@ -23,24 +24,29 @@
   }
 
   .poodle-md-editor[data-size="xs"] {
+    --poodle-md-prose-font-size: 0.75rem;
     --poodle-md-editor-tool-size: 1.5rem;
     --poodle-md-editor-mode-x: 0.375rem;
   }
 
   .poodle-md-editor[data-size="sm"] {
+    --poodle-md-prose-font-size: 0.8125rem;
     --poodle-md-editor-tool-size: 1.75rem;
   }
 
   .poodle-md-editor[data-size="md"] {
+    --poodle-md-prose-font-size: 0.875rem;
     --poodle-md-editor-tool-size: 2rem;
   }
 
   .poodle-md-editor[data-size="lg"] {
+    --poodle-md-prose-font-size: 1rem;
     --poodle-md-editor-tool-size: 2.25rem;
     --poodle-md-editor-mode-x: 0.625rem;
   }
 
   .poodle-md-editor[data-size="xl"] {
+    --poodle-md-prose-font-size: 1.125rem;
     --poodle-md-editor-tool-size: 2.5rem;
     --poodle-md-editor-mode-x: 0.75rem;
   }
@@ -158,7 +164,7 @@
     background: var(--poodle-recipe-markdown-editor-textarea-fill, transparent);
     color: var(--poodle-recipe-markdown-editor-textarea-text, var(--poodle-color-text-primary));
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.8125rem;
+    font-size: calc(var(--poodle-md-prose-font-size) * 0.9286);
     line-height: 1.6;
     resize: vertical;
     outline: none;
@@ -174,25 +180,25 @@
      output cannot drift in presentation. */
   .poodle-md-prose {
     font-family: var(--poodle-typography-body-family);
-    font-size: 0.875rem;
+    font-size: var(--poodle-md-prose-font-size);
     line-height: 1.6;
     color: var(--poodle-recipe-markdown-editor-preview-text, var(--poodle-color-text-primary));
   }
 
   .poodle-md-prose h1 {
-    font-size: 1.25rem;
+    font-size: 1.4286em;
     font-weight: 700;
     margin: 0 0 0.5rem;
   }
 
   .poodle-md-prose h2 {
-    font-size: 1.0625rem;
+    font-size: 1.2143em;
     font-weight: 600;
     margin: 0 0 0.375rem;
   }
 
   .poodle-md-prose h3 {
-    font-size: 0.9375rem;
+    font-size: 1.0714em;
     font-weight: 600;
     margin: 0 0 0.25rem;
   }
@@ -210,7 +216,7 @@
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-markdown-editor-preview-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent));
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.8125rem;
+    font-size: 0.9286em;
   }
 
   .poodle-md-prose blockquote {
@@ -261,11 +267,18 @@
      toolbar, border, or split-pane layout. Density mirrors the editor pane
      padding values so editor preview and renderer stay aligned. */
   .poodle-md-renderer {
+    --poodle-md-prose-font-size: 0.875rem;
     --poodle-md-renderer-pad-x: 0.75rem;
     --poodle-md-renderer-pad-y: 0.75rem;
     min-width: 0;
     padding: var(--poodle-md-renderer-pad-y) var(--poodle-md-renderer-pad-x);
   }
+
+  .poodle-md-renderer[data-size="xs"] { --poodle-md-prose-font-size: 0.75rem; }
+  .poodle-md-renderer[data-size="sm"] { --poodle-md-prose-font-size: 0.8125rem; }
+  .poodle-md-renderer[data-size="md"] { --poodle-md-prose-font-size: 0.875rem; }
+  .poodle-md-renderer[data-size="lg"] { --poodle-md-prose-font-size: 1rem; }
+  .poodle-md-renderer[data-size="xl"] { --poodle-md-prose-font-size: 1.125rem; }
 
   .poodle-md-renderer[data-density="compact"] {
     --poodle-md-renderer-pad-x: 0.625rem;

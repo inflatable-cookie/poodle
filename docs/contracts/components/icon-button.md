@@ -165,8 +165,9 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 - `aria-label` is announced on focus
 - tooltip text is exposed via `aria-describedby` and announced as a
   description after the label
-- tooltip appears on hover (300ms delay) and focus (300ms delay); dismissed
-  on activation, mouseleave, blur, or Escape key
+- tooltip appears on hover (300ms delay) and keyboard focus (300ms delay);
+  pointer-triggered programmatic focus does not reveal it; dismissed on
+  activation, mouseleave, blur, or Escape key
 - `aria-pressed` state change is announced for toggle buttons
 - live-region behavior: none by default
 - GPUI-native accessibility mapping notes: icon-only buttons must expose

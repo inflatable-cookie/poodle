@@ -55,6 +55,9 @@ editor used as the renderer is non-conforming.
 | `placeholder` | `string` | `""` | no | Shown only for one empty editable paragraph. |
 | `ariaLabel` | `string` | `"Rich text editor"` | no | Accessible name for the editing surface. |
 | `requestImage` | `(() => Promise<RichTextImageInput \| null>) \| null` | `null` | no | Host-owned asset choice for `insert-image`; valid only with `images`. Poodle inserts the returned node at the retained selection. |
+| `size` | `ControlSize \| null` | `null` | no | Explicit typography and toolbar-size override. Inherits the presentation size when absent. |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve the inherited presentation size. |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit toolbar-spacing override. |
 | `onChange` | `((document: ProseMirrorDocumentJSON) => void) \| null` | `null` | no | Fires once for each committed user transaction that changes the document. |
 
 ### Renderer Props
@@ -64,6 +67,8 @@ editor used as the renderer is non-conforming.
 | `value` | `ProseMirrorDocumentJSON` | - | yes | Same controlled document representation as the editor. |
 | `features` | `readonly RichTextFeature[]` | `richTextStandardFeatures` | no | Must admit every node and mark in `value`. |
 | `ariaLabel` | `string \| null` | `null` | no | Optional accessible name when the rendered document is a labelled region. |
+| `size` | `ControlSize \| null` | `null` | no | Explicit rendered-document typography override. Inherits the presentation size when absent. |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve the inherited presentation size. |
 
 ### Public Types
 

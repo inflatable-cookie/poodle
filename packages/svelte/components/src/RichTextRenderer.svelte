@@ -7,6 +7,9 @@
   } from "@inflatable-cookie/poodle-core";
   import { onDestroy, onMount } from "svelte";
 
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
   import {
     assertAdmittedFeatures,
     assertValidRichTextDocument,
@@ -24,9 +27,20 @@
     value: ProseMirrorDocumentJSON;
     features?: readonly RichTextFeature[];
     ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
   }
 
-  let { value, features = RICH_TEXT_STANDARD_FEATURES, ariaLabel = null }: Props = $props();
+  let {
+    value,
+    features = RICH_TEXT_STANDARD_FEATURES,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+  }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
 
   let contentElement: HTMLDivElement | null = $state(null);
 
@@ -63,6 +77,7 @@
 
 <div
   class="poodle-rich-text-renderer"
+  data-size={resolvedSize}
   role={ariaLabel ? "region" : undefined}
   aria-label={ariaLabel ?? undefined}
 >

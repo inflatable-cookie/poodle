@@ -90,6 +90,8 @@ mounts a textarea, toolbar, editor state, or contenteditable surface.
 | `renderHtml` | `((markdown: string) => string) \| null` | `null` | no | Same parser customization seam as the editor preview; output remains governed by `htmlPolicy` |
 | `htmlPolicy` | `"safe" \| "trusted"` | `"safe"` | no | Same policy as the editor preview |
 | `ariaLabel` | `string \| null` | `null` | no | When supplied, exposes the renderer as a labelled region; null leaves ordinary document semantics |
+| `size` | `ControlSize \| null` | `null` | no | Explicit rendered-prose typography override; inherits the presentation size when absent |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit spacing-density override for rendered prose |
 
 ### Shared HTML Policy

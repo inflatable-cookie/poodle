@@ -24,6 +24,7 @@ function withoutValue(value: string) {
 
 afterEach(() => {
   vi.useRealTimers();
+  document.documentElement.removeAttribute("data-poodle-input-modality");
 });
 
 function tabOf(container: HTMLElement, value: string): HTMLElement {
@@ -153,6 +154,18 @@ describe("Tabs tooltips (svelte)", () => {
     await vi.advanceTimersByTimeAsync(1);
     expect(tooltip()?.getAttribute("role")).toBe("tooltip");
     expect(tooltip()?.textContent?.trim()).toBe("Search");
+  });
+
+  it("does not show a tab tooltip for pointer-triggered programmatic focus", async () => {
+    vi.useFakeTimers();
+    const { container } = render(Tabs, {
+      props: { items, defaultValue: "explorer", showTooltips: true },
+    });
+    const search = tabOf(container, "search");
+    await fireEvent.pointerDown(search);
+    await fireEvent.focus(search);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(tooltip()).toBeNull();
   });
 
   it("schedules vertical keyboard focus without showTooltips", async () => {

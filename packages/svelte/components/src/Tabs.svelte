@@ -8,6 +8,8 @@
 
   import {
     createDragDropController,
+    getInputModality,
+    installInputModality,
     isTabsReorderAllowed,
     isValidTabsPinnedOrder,
     nextTabsControlledFocusDestination,
@@ -171,6 +173,8 @@
     children,
     actions,
   }: Props = $props();
+
+  installInputModality();
 
   const tabsId = ++nextTabsId;
   const foreignInsert = getTabsForeignInsert();
@@ -950,7 +954,7 @@
           onClose={() => send({ type: "CLOSE", value: item.value })}
           onFocus={() => {
             focusIndex = index;
-            if (hasTooltips) scheduleTooltip(index);
+            if (hasTooltips && getInputModality() === "keyboard") scheduleTooltip(index);
           }}
           onBlur={() => hasTooltips && dismissTooltip()}
           onEnter={() => scheduleTooltip(index)}

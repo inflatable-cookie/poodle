@@ -12,7 +12,7 @@
     CodeEditorPerformanceMode,
     CodeEditorTabBehavior,
   } from "@inflatable-cookie/poodle-core";
-  import type { ControlDensity } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
   import { onDestroy, onMount } from "svelte";
 
   import {
@@ -20,7 +20,7 @@
     createCodeEditorEngine,
   } from "./code-editor-engine";
   import type { CodeEditorActiveDiagnostic, CodeEditorEngine } from "./code-editor-engine";
-  import { getUiPresentation } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   /**
    * Web-admitted controlled code and plain-text editing surface over
@@ -42,6 +42,8 @@
     tabSize?: number;
     tabBehavior?: CodeEditorTabBehavior;
     performanceMode?: CodeEditorPerformanceMode;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     onChange?: ((change: CodeEditorChange) => void) | null;
   }
@@ -61,11 +63,14 @@
     tabSize = 2,
     tabBehavior = "focus",
     performanceMode = "full",
+    size = null,
+    sizeRole = "control",
     density = null,
     onChange = null,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   // `language` is validated against `languageRegistry` when the engine mounts
   // and on every language update; asserting here would capture only the
@@ -152,6 +157,7 @@
 
 <div
   class="poodle-code-editor"
+  data-size={resolvedSize}
   data-density={resolvedDensity}
   data-disabled={disabled || undefined}
   data-readonly={readOnly || undefined}

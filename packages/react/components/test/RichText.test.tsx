@@ -6,6 +6,7 @@ import { TextSelection } from "@tiptap/pm/state";
 
 import { RichTextEditor } from "../src/RichTextEditor";
 import { RichTextRenderer } from "../src/RichTextRenderer";
+import { UiPresentationProvider } from "../src/UiPresentationProvider";
 import {
   assertAdmittedFeatures,
   assertAdmittedToolbar,
@@ -595,6 +596,27 @@ describe("RichTextEditor controlled reconfiguration (react)", () => {
 });
 
 describe("RichTextRenderer (react)", () => {
+  it("inherits presentation size across editor and renderer", () => {
+    const view = render(
+      <UiPresentationProvider sizeScale="xs">
+        <RichTextEditor value={PLAIN} />
+        <RichTextRenderer value={PLAIN} />
+      </UiPresentationProvider>,
+    );
+    const sizes = () => [
+      view.container.querySelector(".poodle-rich-text-editor")?.getAttribute("data-size"),
+      view.container.querySelector(".poodle-rich-text-renderer")?.getAttribute("data-size"),
+    ];
+    expect(sizes()).toEqual(["xs", "xs"]);
+    view.rerender(
+      <UiPresentationProvider sizeScale="xl">
+        <RichTextEditor value={PLAIN} />
+        <RichTextRenderer value={PLAIN} />
+      </UiPresentationProvider>,
+    );
+    expect(sizes()).toEqual(["xl", "xl"]);
+  });
+
   it("renders the same semantic structure without contenteditable state", () => {
     const { container } = render(createElement(RichTextRenderer, { value: RICH }));
     expect(container.querySelector("[contenteditable]")).toBeNull();

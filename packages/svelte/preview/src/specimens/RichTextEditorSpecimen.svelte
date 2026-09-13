@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Button, Dialog, TextInput } from "@inflatable-cookie/poodle-svelte";
   import {
     RICH_TEXT_STANDARD_FEATURES,
     RichTextEditor,
@@ -13,7 +14,8 @@
     RICH_TEXT_HEADING_DOCUMENT,
     RICH_TEXT_IMAGE_DOCUMENT,
     RICH_TEXT_IMAGE_FEATURES,
-    RICH_TEXT_IMAGE_REQUEST_DELAY_MS,
+    RICH_TEXT_IMAGE_ALT,
+    RICH_TEXT_IMAGE_SRC,
     RICH_TEXT_PICKED_IMAGE_ALT,
     RICH_TEXT_PICKED_IMAGE_SRC,
     RICH_TEXT_SPARSE_HEADING_TOOLBAR,
@@ -26,6 +28,12 @@
   let imageDocument = $state<ProseMirrorDocumentJSON>(RICH_TEXT_IMAGE_DOCUMENT);
   let imageRequests = $state(0);
   let imageChanges = $state(0);
+  let imagePickerOpen = $state(false);
+  let selectedImage = $state<"seeded" | "picked">("picked");
+  let customImageSource = $state("");
+  let imageAlt = $state(RICH_TEXT_PICKED_IMAGE_ALT);
+  let imageTitle = $state("");
+  let settleImageRequest: ((image: RichTextImageInput | null) => void) | null = null;
   const imageCount = $derived(countRichTextImages(imageDocument));
 
   const imageFeatures: readonly RichTextFeature[] = RICH_TEXT_IMAGE_FEATURES;
@@ -33,15 +41,36 @@
   /** Consumers choose commands, not their icons or grouping. */
   const subsetToolbar: readonly RichTextCommand[] = ["bold", "italic", "link"];
 
-  /**
-   * Host-owned asset choice, standing in for a consumer media picker. The
-   * fixture is a self-contained raster data URL: no network, no DNS, no
-   * mutable remote content.
-   */
   async function requestImage(): Promise<RichTextImageInput | null> {
     imageRequests += 1;
-    await new Promise((resolve) => setTimeout(resolve, RICH_TEXT_IMAGE_REQUEST_DELAY_MS));
-    return { src: RICH_TEXT_PICKED_IMAGE_SRC, alt: RICH_TEXT_PICKED_IMAGE_ALT };
+    imagePickerOpen = true;
+    return new Promise((resolve) => {
+      settleImageRequest = resolve;
+    });
+  }
+
+  function chooseImage(choice: "seeded" | "picked"): void {
+    selectedImage = choice;
+    customImageSource = "";
+    imageAlt = choice === "picked" ? RICH_TEXT_PICKED_IMAGE_ALT : RICH_TEXT_IMAGE_ALT;
+  }
+
+  function cancelImageRequest(): void {
+    settleImageRequest?.(null);
+    settleImageRequest = null;
+    imagePickerOpen = false;
+  }
+
+  function insertImage(): void {
+    const presetSource = selectedImage === "picked" ? RICH_TEXT_PICKED_IMAGE_SRC : RICH_TEXT_IMAGE_SRC;
+    const title = imageTitle.trim();
+    settleImageRequest?.({
+      src: customImageSource.trim() || presetSource,
+      alt: imageAlt,
+      ...(title ? { title } : {}),
+    });
+    settleImageRequest = null;
+    imagePickerOpen = false;
   }
 
   function onImageDocumentChange(next: ProseMirrorDocumentJSON): void {
@@ -50,6 +79,7 @@
   }
 
   function toggleImages(): void {
+    if (imagePickerOpen) cancelImageRequest();
     imagesOn = !imagesOn;
   }
 </script>
@@ -116,7 +146,7 @@
 
     <SpecimenGroup
       label="Image policy"
-      description="Images are an explicit project choice. Embeds are not a v1 feature. The seeded document loads offline; Insert image asks the host for an asset and inserts exactly one image at the retained selection. The host document below is retained while images are off."
+      description="Images are an explicit project choice. Insert image opens this host-owned asset picker, which can choose a fixture or accept a custom source and accessible description. Poodle inserts the result at the retained selection."
     >
       <button
         type="button"
@@ -127,6 +157,69 @@
       >
         {imagesOn ? "Images on" : "Images off"}
       </button>
+      <Dialog
+        open={imagePickerOpen}
+        title="Choose image"
+        description="Select an asset or paste a source, then describe the image for readers."
+        width="lg"
+        showCloseButton
+        onOpenChange={(open) => {
+          if (!open && imagePickerOpen) cancelImageRequest();
+        }}
+      >
+        <div class="image-picker" data-part="image-picker">
+          <div class="image-picker__assets" role="group" aria-label="Example assets">
+            <button
+              type="button"
+              class="image-picker__asset"
+              aria-pressed={selectedImage === "picked" && !customImageSource}
+              onclick={() => chooseImage("picked")}
+            >
+              <img src={RICH_TEXT_PICKED_IMAGE_SRC} alt="" />
+              <span>Revenue bars</span>
+            </button>
+            <button
+              type="button"
+              class="image-picker__asset"
+              aria-pressed={selectedImage === "seeded" && !customImageSource}
+              onclick={() => chooseImage("seeded")}
+            >
+              <img src={RICH_TEXT_IMAGE_SRC} alt="" />
+              <span>Revenue line</span>
+            </button>
+          </div>
+          <div class="image-picker__fields">
+            <label for="rich-text-image-source">Custom image source</label>
+            <TextInput
+              id="rich-text-image-source"
+              value={customImageSource}
+              placeholder="https://example.com/image.png"
+              inputMode="url"
+              onValueChange={(value) => (customImageSource = value)}
+            />
+            <label for="rich-text-image-alt">Alt text</label>
+            <TextInput
+              id="rich-text-image-alt"
+              value={imageAlt}
+              placeholder="Describe the image, or leave empty if decorative"
+              onValueChange={(value) => (imageAlt = value)}
+            />
+            <label for="rich-text-image-title">Title <span>(optional)</span></label>
+            <TextInput
+              id="rich-text-image-title"
+              value={imageTitle}
+              placeholder="Shown as supplementary information"
+              onValueChange={(value) => (imageTitle = value)}
+            />
+          </div>
+        </div>
+        {#snippet actions()}
+          <div class="image-picker__actions">
+            <Button variant="ghost" onClick={cancelImageRequest}>Cancel</Button>
+            <span data-part="image-picker-insert"><Button variant="primary" onClick={insertImage}>Insert image</Button></span>
+          </div>
+        {/snippet}
+      </Dialog>
       <div class="editor-frame" data-part="image-policy-editor">
         {#if imagesOn}
           <RichTextEditor
@@ -202,6 +295,36 @@
   }
   .images-toggle[aria-pressed="true"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+  }
+  .image-picker {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 1.2fr);
+    gap: 1rem 1.25rem;
+  }
+  .image-picker__assets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+  .image-picker__asset {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding: 0.5rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-panel);
+    color: var(--poodle-color-text-primary);
+    font: inherit;
+    cursor: pointer;
+  }
+  .image-picker__asset[aria-pressed="true"] { border-color: var(--poodle-color-accent-base); }
+  .image-picker__asset img { width: 100%; aspect-ratio: 2 / 1; object-fit: cover; border-radius: calc(var(--poodle-radius-control) * 0.6); image-rendering: pixelated; }
+  .image-picker__asset span { font-size: 0.75rem; }
+  .image-picker__fields { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.5rem 0.75rem; align-items: center; }
+  .image-picker__fields label { color: var(--poodle-color-text-secondary); font-size: 0.75rem; }
+  .image-picker__fields label span { color: var(--poodle-color-text-tertiary); }
+  .image-picker__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+  @media (max-width: 42rem) {
+    .image-picker { grid-template-columns: 1fr; }
+    .image-picker__fields { grid-template-columns: 1fr; gap: 0.25rem; }
+    .image-picker__fields :global(.poodle-text-input) { margin-bottom: 0.5rem; }
   }
   .editor-frame {
     height: 20rem;

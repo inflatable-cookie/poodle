@@ -5,6 +5,7 @@ import { TextSelection } from "@tiptap/pm/state";
 
 import RichTextEditor from "../src/RichTextEditor.svelte";
 import RichTextRenderer from "../src/RichTextRenderer.svelte";
+import ContentSizePresentationHarness from "./ContentSizePresentationHarness.svelte";
 import {
   assertAdmittedFeatures,
   assertAdmittedToolbar,
@@ -776,6 +777,21 @@ describe("RichTextEditor controlled reconfiguration (svelte)", () => {
     } finally {
       errorSpy.mockRestore();
     }
+  });
+});
+
+describe("content presentation size (svelte)", () => {
+  it("reacts across the editor and both read-only renderers", async () => {
+    const view = render(ContentSizePresentationHarness, { props: { sizeScale: "xs" } });
+    const roots = () => [
+      view.container.querySelector(".poodle-rich-text-editor"),
+      view.container.querySelector(".poodle-rich-text-renderer"),
+      view.container.querySelector(".poodle-md-renderer"),
+    ];
+    expect(roots().map((root) => root?.getAttribute("data-size"))).toEqual(["xs", "xs", "xs"]);
+
+    await view.rerender({ sizeScale: "xl" });
+    expect(roots().map((root) => root?.getAttribute("data-size"))).toEqual(["xl", "xl", "xl"]);
   });
 });
 

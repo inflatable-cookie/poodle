@@ -169,6 +169,7 @@ async function runSpecimen(page: Page, base: string, framework: Framework): Prom
 
   // Move the caret to the first paragraph while the request is still pending.
   await paragraphs.first().click();
+  await page.locator("[data-part='image-picker-insert'] button").click();
   await page
     .waitForFunction(
       () => document.querySelectorAll("[data-part='image-policy-editor'] img").length === 2,

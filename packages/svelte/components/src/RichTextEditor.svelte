@@ -25,8 +25,10 @@
   } from "@inflatable-cookie/poodle-core";
   import type {
     ControlDensity,
+    ControlSize,
     SelectOptionRenderState,
     SelectTriggerRenderState,
+    SemanticControlSizeRole,
   } from "./types";
   import { onDestroy, onMount } from "svelte";
 
@@ -45,7 +47,7 @@
     RichTextImageInput,
     RichTextToolbarSnapshot,
   } from "./rich-text-engine";
-  import { getUiPresentation } from "./presentation";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   /**
    * Web-admitted controlled rich-text editing surface over TipTap 3 and
@@ -62,6 +64,8 @@
     placeholder?: string;
     ariaLabel?: string;
     requestImage?: (() => Promise<RichTextImageInput | null>) | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     onChange?: ((document: ProseMirrorDocumentJSON) => void) | null;
   }
@@ -75,11 +79,15 @@
     placeholder = "",
     ariaLabel = "Rich text editor",
     requestImage = null,
+    size = null,
+    sizeRole = "control",
     density = null,
     onChange = null,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedChromeSize = $derived(resolveSemanticControlSize(resolvedSize, "chrome"));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   /** Imperative escape hatch: focus the editing surface. Documented as a method, not a prop. */
@@ -190,7 +198,7 @@
     return {
       variant: "ghost" as const,
       tone: presentation.destructive ? ("danger" as const) : ("default" as const),
-      sizeRole: "chrome" as const,
+      size: resolvedChromeSize,
       density: resolvedDensity,
       icon: presentation.icon,
       ariaLabel: presentation.label,
@@ -310,6 +318,7 @@
 
 <div
   class="poodle-rich-text-editor"
+  data-size={resolvedSize}
   data-density={resolvedDensity}
   data-disabled={disabled || undefined}
   data-readonly={readOnly || undefined}
@@ -340,7 +349,7 @@
                 <Select
                   value={headingValue}
                   options={headingOptions}
-                  sizeRole="chrome"
+                  size={resolvedChromeSize}
                   density={resolvedDensity}
                   variant="ghost"
                   disabled={disabled || readOnly}
@@ -397,14 +406,14 @@
         bind:value={linkValue}
         onkeydown={handleLinkInputKeydown}
       />
-      <Button variant="secondary" sizeRole="chrome" density={resolvedDensity} onclick={submitLink}>
+      <Button variant="secondary" size={resolvedChromeSize} density={resolvedDensity} onclick={submitLink}>
         Apply
       </Button>
       {#if snapshot?.states.link.active}
         <Button
           variant="ghost"
           tone="danger"
-          sizeRole="chrome"
+          size={resolvedChromeSize}
           density={resolvedDensity}
           onclick={removeLink}
         >

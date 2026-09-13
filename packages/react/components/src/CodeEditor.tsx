@@ -11,7 +11,7 @@ import type {
   CodeEditorPerformanceMode,
   CodeEditorTabBehavior,
 } from "@inflatable-cookie/poodle-core";
-import type { ControlDensity } from "./types";
+import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
 import "@inflatable-cookie/poodle-core/styles/code-editor.css";
 
@@ -20,7 +20,7 @@ import {
   createCodeEditorEngine,
 } from "./code-editor-engine";
 import type { CodeEditorActiveDiagnostic, CodeEditorEngine } from "./code-editor-engine";
-import { useUiPresentation } from "./presentation";
+import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 
 export interface CodeEditorProps {
   value: string;
@@ -37,6 +37,8 @@ export interface CodeEditorProps {
   tabSize?: number;
   tabBehavior?: CodeEditorTabBehavior;
   performanceMode?: CodeEditorPerformanceMode;
+  size?: ControlSize | null;
+  sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   onChange?: ((change: CodeEditorChange) => void) | null;
 }
@@ -66,6 +68,8 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
     tabSize = 2,
     tabBehavior = "focus",
     performanceMode = "full",
+    size = null,
+    sizeRole = "control",
     density = null,
     onChange = null,
   }: CodeEditorProps,
@@ -74,6 +78,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   assertAdmittedLanguage(language, languageRegistry);
 
   const uiPresentation = useUiPresentation();
+  const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const hostRef = useRef<HTMLDivElement | null>(null);
   const engineRef = useRef<CodeEditorEngine | null>(null);
@@ -178,6 +183,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
   return (
     <div
       className="poodle-code-editor"
+      data-size={resolvedSize}
       data-density={resolvedDensity}
       data-disabled={disabled || undefined}
       data-readonly={readOnly || undefined}

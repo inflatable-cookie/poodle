@@ -24,7 +24,7 @@
   let value = $state(CODE_TYPESCRIPT_SOURCE);
   let language = $state<CodeEditorLanguageId>("typescript");
   let lineNumbers = $state(true);
-  const axisSource = "export const ready = true;\n";
+  const axisSource = "export const ready = true;\nexport const count = 3;\nconsole.log(ready, count);\n";
 </script>
 
 <SpecimenLayout>
@@ -116,9 +116,23 @@
     </SpecimenGroup>
   {/snippet}
 
+  {#snippet sizes(size)}
+    <SpecimenGroup label={size}>
+      <div class="editor-frame editor-frame--axis">
+        <CodeEditor
+          value={axisSource}
+          language="typescript"
+          {languageRegistry}
+          {size}
+          ariaLabel="Size sample"
+        />
+      </div>
+    </SpecimenGroup>
+  {/snippet}
+
   {#snippet densities(density)}
     <SpecimenGroup label={density}>
-      <div class="editor-frame">
+      <div class="editor-frame editor-frame--axis">
         <CodeEditor
           value={axisSource}
           language="typescript"
@@ -134,6 +148,9 @@
 <style>
   .editor-frame {
     height: 16rem;
+  }
+  .editor-frame--axis {
+    height: 10rem;
   }
   .controls {
     display: flex;

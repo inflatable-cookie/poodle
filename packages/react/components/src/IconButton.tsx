@@ -10,7 +10,13 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@inflatable-cookie/poodle-core";
+import {
+  getInputModality,
+  hoverTransition,
+  installInputModality,
+  type HoverEvent as HoverMachineEvent,
+  type HoverState,
+} from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/icon-button.css";
 
@@ -78,6 +84,7 @@ export function IconButton({
   onPressedChange = null,
   children,
 }: IconButtonProps) {
+  installInputModality();
   const uiPresentation = useUiPresentation();
   const motionReady = useMotionReady();
   const tooltipId = useId();
@@ -165,7 +172,7 @@ export function IconButton({
         aria-controls={controls ?? undefined}
         onClick={handleClick}
         onFocus={(event) => {
-          sendHover({ type: "ENTER" });
+          if (getInputModality() === "keyboard") sendHover({ type: "ENTER" });
           onFocus?.(event);
         }}
         onBlur={(event) => {

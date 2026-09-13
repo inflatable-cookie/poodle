@@ -10,7 +10,13 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { hoverTransition, type HoverEvent as HoverMachineEvent, type HoverState } from "@inflatable-cookie/poodle-core";
+import {
+  getInputModality,
+  hoverTransition,
+  installInputModality,
+  type HoverEvent as HoverMachineEvent,
+  type HoverState,
+} from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/tooltip.css";
 
@@ -36,6 +42,7 @@ export function Tooltip({
   onOpenChange,
   children,
 }: TooltipProps) {
+  installInputModality();
   const tooltipId = useId();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement>(placement);
@@ -167,7 +174,9 @@ export function Tooltip({
       // pointerenter always saw the root. Anchor to the direct child.
       onPointerEnter={() => anchorAndOpen(rootRef.current)}
       onPointerLeave={(event: PointerEvent) => dismissUnlessWithin(event.relatedTarget)}
-      onFocus={(event: FocusEvent) => anchorAndOpen(event.target)}
+      onFocus={(event: FocusEvent) => {
+        if (getInputModality() === "keyboard") anchorAndOpen(event.target);
+      }}
       onBlur={(event: FocusEvent) => dismissUnlessWithin(event.relatedTarget)}
       onKeyDown={(event) => {
         if (event.key === "Escape") send({ type: "DISMISS" });
