@@ -14,6 +14,7 @@ import {
   formatInstalledRunOutput,
   readInstalledScopeMode,
   requireExactCommit,
+  resolveCertificationHead,
   withDisposableGitPlant,
 } from "./scope";
 
@@ -1130,6 +1131,302 @@ describe("closed 0.4.0 candidate scope admission", () => {
     await expect(
       assertCertificationScope(root, base, head, G16_054_CANDIDATE_SCOPE_MODE),
     ).rejects.toThrow(/candidate scope requires packages\/core\/package\.json/);
+  });
+});
+
+const TEST_REPAIR_PATH = "packages/gpui/preview/src/nucleus_receipts.rs";
+
+function receiptEmitterSource(
+  planted: string,
+  production = 'const LOCKFILE: &str = "packages/gpui/preview/Cargo.lock";',
+): string {
+  return [
+    'const RECEIPT_SCHEMA: &str = "poodle.g16-nucleus-parity-receipt.v1";',
+    production,
+    "",
+    "fn lock_provenance(bytes: &[u8]) -> Result<(), String> {",
+    "    let _ = bytes;",
+    "    Ok(())",
+    "}",
+    "",
+    "#[cfg(test)]",
+    "mod receipt_lock_tests {",
+    "    use super::*;",
+    "",
+    `    const PLANTED_RELEASE_VERSION: &str = "${planted}";`,
+    "",
+    "    #[test]",
+    "    fn receipt_lock_planted_version_never_collides() {",
+    '        assert_ne!(PLANTED_RELEASE_VERSION, env!("CARGO_PKG_VERSION"));',
+    "    }",
+    "}",
+    "",
+  ].join("\n");
+}
+
+describe("g18.006 in-lane receipt test repair admission", () => {
+  const baseEmitter = receiptEmitterSource("0.3.0");
+  const repairedEmitter = receiptEmitterSource("9.9.9");
+
+  test("admits the cfg(test)-only emitter repair in ordinary and explicit modes", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+      },
+    });
+    const ordinary = await assertInstalledScope(plant.root, plant.base, plant.head, "ordinary");
+    expect(ordinary.mode).toBe("ordinary");
+    expect(ordinary.changedPaths).toContain(TEST_REPAIR_PATH);
+    const explicit = await assertCertificationScope(
+      plant.root,
+      plant.base,
+      plant.head,
+      G18_006_CANDIDATE_SCOPE_MODE,
+    );
+    expect(explicit.mode).toBe(G18_006_CANDIDATE_SCOPE_MODE);
+  });
+
+  test("rejects a production-line change to the admitted emitter", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = receiptEmitterSource(
+          "9.9.9",
+          'const LOCKFILE: &str = "planted/Cargo.lock";',
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/only the #\[cfg\(test\)\] module may move/);
+  });
+
+  test("rejects a repair that drops the receipt-lock module", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter.replace("mod receipt_lock_tests", "mod planted_tests");
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/without the mod receipt_lock_tests module/);
+  });
+
+  test("rejects broader preview source beside the repair", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+        files["packages/gpui/preview/src/headless_driver.rs"] = "// planted\n";
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      /paths outside writable allowlist: packages\/gpui\/preview\/src\/headless_driver\.rs/,
+    );
+  });
+
+  test("rejects a rewritten guard law beside the repair", async () => {
+    const guard = ["export function lawA() {}", "export function lawB() {}", ""].join("\n");
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+        files["test/package-install/scope.ts"] = guard;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+      },
+      afterEvidence: {
+        "test/package-install/scope.ts": guard.replace(
+          "export function lawB() {}",
+          "export function lawB() { return true; }",
+        ),
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/the closed admission may only grow/);
+  });
+
+  test("rejects unbounded growth of the guard beside the repair", async () => {
+    const guard = "export function lawA() {}\n";
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[TEST_REPAIR_PATH] = baseEmitter;
+        files["test/package-install/scope.ts"] = guard;
+      },
+      mutateCandidate: (files) => {
+        files[TEST_REPAIR_PATH] = repairedEmitter;
+      },
+      afterEvidence: {
+        "test/package-install/scope.ts": `${guard}${"// planted growth\n".repeat(560)}`,
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/beyond the 500 line allowance/);
+  });
+});
+
+describe("g18.006 synthetic-merge certification head resolution", () => {
+  type MergePlant = {
+    root: string;
+    base: string;
+    feature: string;
+    other: string;
+    tree: string;
+  };
+
+  async function plantBranchPlant(): Promise<MergePlant> {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "merge plant base");
+    await runGit(root, ["update-ref", "refs/remotes/origin/main", base]);
+    await runGit(root, ["checkout", "--quiet", "-b", "feature"]);
+    await writeFiles(root, { "feature.txt": "feature\n" });
+    const feature = await commitAll(root, "feature head");
+    await runGit(root, ["checkout", "--quiet", "-b", "other", base]);
+    await writeFiles(root, { "other.txt": "other\n" });
+    const other = await commitAll(root, "other head");
+    const tree = (await runGit(root, ["rev-parse", `${feature}^{tree}`])).trim();
+    return { root, base, feature, other, tree };
+  }
+
+  test("certifies an ordinary single-parent branch head unchanged", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "single parent base");
+    await runGit(root, ["update-ref", "refs/remotes/origin/main", base]);
+    await writeFiles(root, { "feature.txt": "feature\n" });
+    const head = await commitAll(root, "single parent head");
+    expect(await resolveCertificationHead(root, head)).toBe(head);
+  });
+
+  test("certifies a head already contained in origin/main unchanged", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const head = await commitAll(root, "already on main");
+    await runGit(root, ["update-ref", "refs/remotes/origin/main", head]);
+    expect(await resolveCertificationHead(root, head)).toBe(head);
+  });
+
+  test("unwraps GitHub's synthetic pull_request merge to the candidate head", async () => {
+    const { root, base, feature, tree } = await plantBranchPlant();
+    const synthetic = (
+      await runGit(root, [
+        "commit-tree",
+        tree,
+        "-p",
+        base,
+        "-p",
+        feature,
+        "-m",
+        "GitHub synthetic merge",
+      ])
+    ).trim();
+    await runGit(root, ["checkout", "--quiet", "--detach", synthetic]);
+    expect(await resolveCertificationHead(root, synthetic)).toBe(feature);
+  });
+
+  test("refuses a merge it cannot certify instead of guessing the head", async () => {
+    const { root, base, feature, other, tree } = await plantBranchPlant();
+    const reversed = (
+      await runGit(root, [
+        "commit-tree",
+        tree,
+        "-p",
+        feature,
+        "-p",
+        base,
+        "-m",
+        "branch merged main into itself",
+      ])
+    ).trim();
+    await expect(resolveCertificationHead(root, reversed)).rejects.toThrow(
+      /refusing to guess the candidate head/,
+    );
+    const octopus = (
+      await runGit(root, [
+        "commit-tree",
+        tree,
+        "-p",
+        base,
+        "-p",
+        feature,
+        "-p",
+        other,
+        "-m",
+        "octopus merge",
+      ])
+    ).trim();
+    await expect(resolveCertificationHead(root, octopus)).rejects.toThrow(
+      /refusing to guess the candidate head/,
+    );
+  });
+
+  const HARNESS_PATH = "test/package-install/web-preview.ts";
+  const harnessBase = [
+    "POODLE_WEB_PACK_INSTALL_INNER",
+    "POODLE_WEB_PACK_INSTALL_BASE_COMMIT",
+    "assertInstalledScope(",
+    "resolveCertificationHead",
+    "",
+  ].join("\n");
+
+  test("admits a surgical harness patch that keeps its safety anchors", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[HARNESS_PATH] = harnessBase;
+      },
+      mutateCandidate: (files) => {
+        files[HARNESS_PATH] = `${harnessBase}// certify the resolved head\n`;
+      },
+    });
+    const proof = await assertInstalledScope(plant.root, plant.base, plant.head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toContain(HARNESS_PATH);
+  });
+
+  test("rejects a harness patch that drops a safety anchor", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[HARNESS_PATH] = harnessBase;
+      },
+      mutateCandidate: (files) => {
+        files[HARNESS_PATH] = harnessBase.replace(
+          "POODLE_WEB_PACK_INSTALL_INNER",
+          "INNER_RUN_FLAG",
+        );
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/without the retained safety anchor POODLE_WEB_PACK_INSTALL_INNER/);
+  });
+
+  test("rejects a harness rewrite beyond the repair budget", async () => {
+    const plant = await plantClosedCandidate({
+      mutateBase: (files) => {
+        files[HARNESS_PATH] = harnessBase;
+      },
+      mutateCandidate: (files) => {
+        files[HARNESS_PATH] = `${harnessBase}${"// planted churn\n".repeat(60)}`;
+      },
+    });
+    await expect(
+      assertCertificationScope(plant.root, plant.base, plant.head, G18_006_CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(/the harness repair budget is 40/);
   });
 });
 

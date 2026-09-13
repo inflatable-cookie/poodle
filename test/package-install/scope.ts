@@ -171,9 +171,63 @@ export const G18_006_EVIDENCE_PATHS = [
 export const G18_006_EXECUTION_RECORD_PATTERN =
   /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g18-006-[a-z0-9-]+\.md$/;
 
+/**
+ * g18.006 in-lane test-infrastructure repair. The `cfg(test)` receipt-lock laws
+ * planted the release version itself, so they collided with the `0.4.0` lock
+ * and failed the native lane they exist to protect. This admits the emitter's
+ * `#[cfg(test)]` module (its production source must stay byte-identical) plus
+ * the guard implementation and its focused laws that make the admission
+ * fail-closed. Broader preview source stays rejected.
+ */
+export const G18_006_TEST_REPAIR_PATHS = [
+  "packages/gpui/preview/src/nucleus_receipts.rs",
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+  "test/package-install/web-preview.ts",
+] as const;
+
+/**
+ * The mechanism halves of that repair: the guard and its focused laws. They may
+ * only grow, never rewrite or delete an existing law, and only inside a bounded
+ * allowance, so the existing arbitrary-source plant keeps biting.
+ */
+export const G18_006_TEST_REPAIR_GUARD_PATHS = [
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+] as const;
+const G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT = 500;
+
+/**
+ * The harness half of that repair: `test/package-install/web-preview.ts` must
+ * resolve the certification head deterministically instead of trusting a
+ * synthetic `pull_request` merge commit. A harness patch stays surgical: a
+ * bounded changed-line budget with every pre-existing safety anchor retained,
+ * so the patch can only resolve the head rather than rewrite the harness
+ * around the resolution.
+ */
+export const G18_006_TEST_REPAIR_HARNESS_PATHS = [
+  "test/package-install/web-preview.ts",
+] as const;
+const G18_006_TEST_REPAIR_HARNESS_CHANGED_LINE_LIMIT = 40;
+const G18_006_TEST_REPAIR_HARNESS_ANCHORS: Record<string, readonly string[]> = {
+  "test/package-install/web-preview.ts": [
+    "resolveCertificationHead",
+    "POODLE_WEB_PACK_INSTALL_INNER",
+    "POODLE_WEB_PACK_INSTALL_BASE_COMMIT",
+    "assertInstalledScope(",
+  ],
+};
+
+/** The one admitted test-repair source path and its module marker. */
+export const G18_006_TEST_REPAIR_SOURCE_PATH =
+  "packages/gpui/preview/src/nucleus_receipts.rs";
+export const G18_006_TEST_MODULE_MARKER = "#[cfg(test)]";
+const G18_006_TEST_MODULE_NAME = "mod receipt_lock_tests";
+
 export const G18_006_WRITABLE_PATHS = [
   ...G18_006_RELEASE_INPUT_PATHS,
   ...G18_006_EVIDENCE_PATHS,
+  ...G18_006_TEST_REPAIR_PATHS,
 ] as const;
 
 /**
@@ -935,6 +989,60 @@ export function requireExactCommit(value: string, label: string): string {
   return value;
 }
 
+/**
+ * The commit the installed-package harness must certify.
+ *
+ * `actions/checkout` on a `pull_request` event checks out GitHub's synthetic
+ * merge commit: first parent the base branch head, second parent the real
+ * candidate head. The certification range, the frozen release-input commit and
+ * every evidence binding name that candidate head, so certifying the synthetic
+ * merge would name a commit the branch never had and reject a correct
+ * candidate. Resolve the head deterministically and fail closed:
+ *
+ * - a head already contained in `origin/main` certifies itself (an empty
+ *   range, which is what a `push` lane to `main` sees);
+ * - an ordinary single-parent branch head certifies itself;
+ * - exactly one two-parent shape - first parent the merge base with
+ *   `origin/main` - unwraps to its second parent, the candidate head;
+ * - every other merge (octopus, reversed parents, a branch that merged main
+ *   into itself, or an unrelated merge) is refused rather than guessed at.
+ */
+export async function resolveCertificationHead(
+  checkoutRoot: string,
+  checkedOutCommit: string,
+): Promise<string> {
+  requireExactCommit(checkedOutCommit, "checked-out commit");
+  const base = requireExactCommit(
+    (
+      await runCapture(["git", "merge-base", checkedOutCommit, "origin/main"], checkoutRoot)
+    ).trim(),
+    "required base commit",
+  );
+  if (base === checkedOutCommit) return checkedOutCommit;
+  const parents = (
+    await runCapture(
+      ["git", "rev-list", "--parents", "-n", "1", checkedOutCommit],
+      checkoutRoot,
+    )
+  )
+    .trim()
+    .split(/\s+/);
+  if (parents.length === 2) return checkedOutCommit;
+  const [, firstParent, secondParent] = parents;
+  if (
+    parents.length === 3 &&
+    firstParent !== undefined &&
+    secondParent !== undefined &&
+    firstParent === base &&
+    secondParent !== base
+  ) {
+    return secondParent;
+  }
+  throw new Error(
+    `certification head ${checkedOutCommit} is a merge that is not GitHub's synthetic pull_request merge (parents ${parents.slice(1).join(", ")}, merge base ${base}); refusing to guess the candidate head`,
+  );
+}
+
 const CANDIDATE_MANIFEST_LEAF_ALLOWLIST: Record<string, readonly string[]> = {
   "package.json": ["version"],
   "packages/core/package.json": ["version"],
@@ -1474,6 +1582,124 @@ async function assertFrozenCandidateRange(
  * `g18.006-candidate` certification mode and by ordinary CI recognition, so a
  * PR lane and a local certification run cannot disagree about admission.
  */
+/**
+ * `before` must survive intact and in order inside `after`: no closed-admission
+ * law may be rewritten or deleted by the candidate that it admits.
+ */
+function lineSubsequenceHolds(before: string, after: string): boolean {
+  const head = after.split("\n");
+  let index = 0;
+  for (const line of before.split("\n")) {
+    while (index < head.length && head[index] !== line) index += 1;
+    if (index === head.length) return false;
+    index += 1;
+  }
+  return true;
+}
+
+/**
+ * The in-lane test repair is content-bound. The emitter's production source
+ * (everything before the `#[cfg(test)]` marker) must be byte-identical, the
+ * head must still declare the receipt-lock module, and the module itself must
+ * change. The guard and its laws may only grow, inside a bounded allowance.
+ * A production-line edit, a deleted module, a rewritten guard law or any other
+ * preview source path stays rejected.
+ */
+async function assertCandidateTestRepairHonesty(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<void> {
+  for (const path of G18_006_TEST_REPAIR_GUARD_PATHS) {
+    if (!changedPaths.includes(path)) continue;
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (before === null || after === null) {
+      throw new Error(`certification scope rejected added or removed candidate test-repair path ${path}`);
+    }
+    if (!lineSubsequenceHolds(before, after)) {
+      throw new Error(
+        `certification scope rejected rewritten or deleted guard content in ${path}; the closed admission may only grow`,
+      );
+    }
+    const added = after.split("\n").length - before.split("\n").length;
+    if (added > G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT) {
+      throw new Error(
+        `certification scope rejected ${path} growth of ${added} lines beyond the ${G18_006_TEST_REPAIR_GUARD_ADDED_LINE_LIMIT} line allowance`,
+      );
+    }
+  }
+  for (const path of G18_006_TEST_REPAIR_HARNESS_PATHS) {
+    if (!changedPaths.includes(path)) continue;
+    const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
+    const after = await gitShowFile(checkoutRoot, sourceCommit, path);
+    if (before === null || after === null) {
+      throw new Error(
+        `certification scope rejected added or removed candidate test-repair path ${path}`,
+      );
+    }
+    const numstat = (
+      await runCapture(
+        ["git", "diff", "--numstat", requiredBaseCommit, sourceCommit, "--", path],
+        checkoutRoot,
+      )
+    ).trim();
+    const [addedField, removedField] = numstat.split(/\s+/);
+    const changed = Number(addedField) + Number(removedField);
+    if (!Number.isSafeInteger(changed) || changed > G18_006_TEST_REPAIR_HARNESS_CHANGED_LINE_LIMIT) {
+      throw new Error(
+        `certification scope rejected ${path} with ${addedField}+${removedField} changed lines; the harness repair budget is ${G18_006_TEST_REPAIR_HARNESS_CHANGED_LINE_LIMIT}`,
+      );
+    }
+    for (const anchor of G18_006_TEST_REPAIR_HARNESS_ANCHORS[path] ?? []) {
+      if (!after.includes(anchor)) {
+        throw new Error(
+          `certification scope rejected ${path} without the retained safety anchor ${anchor}`,
+        );
+      }
+    }
+  }
+  if (!changedPaths.includes(G18_006_TEST_REPAIR_SOURCE_PATH)) return;
+  const before = await gitShowFile(
+    checkoutRoot,
+    requiredBaseCommit,
+    G18_006_TEST_REPAIR_SOURCE_PATH,
+  );
+  const after = await gitShowFile(
+    checkoutRoot,
+    sourceCommit,
+    G18_006_TEST_REPAIR_SOURCE_PATH,
+  );
+  if (before === null || after === null) {
+    throw new Error(
+      `certification scope rejected added or removed candidate test-repair path ${G18_006_TEST_REPAIR_SOURCE_PATH}`,
+    );
+  }
+  const beforeMarker = before.indexOf(G18_006_TEST_MODULE_MARKER);
+  const afterMarker = after.indexOf(G18_006_TEST_MODULE_MARKER);
+  if (beforeMarker < 0 || afterMarker < 0) {
+    throw new Error(
+      `certification scope rejected ${G18_006_TEST_REPAIR_SOURCE_PATH} without a ${G18_006_TEST_MODULE_MARKER} module`,
+    );
+  }
+  if (before.slice(0, beforeMarker) !== after.slice(0, afterMarker)) {
+    throw new Error(
+      `certification scope rejected production source changes in ${G18_006_TEST_REPAIR_SOURCE_PATH}; only the ${G18_006_TEST_MODULE_MARKER} module may move`,
+    );
+  }
+  if (!after.includes(G18_006_TEST_MODULE_NAME)) {
+    throw new Error(
+      `certification scope rejected ${G18_006_TEST_REPAIR_SOURCE_PATH} without the ${G18_006_TEST_MODULE_NAME} module`,
+    );
+  }
+  if (before.slice(beforeMarker) === after.slice(afterMarker)) {
+    throw new Error(
+      `certification scope rejected ${G18_006_TEST_REPAIR_SOURCE_PATH} without a ${G18_006_TEST_MODULE_MARKER} change`,
+    );
+  }
+}
+
 async function assertClosedCandidateRange(
   checkoutRoot: string,
   requiredBaseCommit: string,
@@ -1524,6 +1750,12 @@ async function assertClosedCandidateRange(
     policy,
   );
   await assertCandidateReleaseHonesty(checkoutRoot, sourceCommit, policy);
+  await assertCandidateTestRepairHonesty(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+    changedPaths,
+  );
 }
 
 /**

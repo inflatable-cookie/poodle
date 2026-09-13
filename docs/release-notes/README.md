@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.4.0](0.4.0.md) — 2026-09-12 — Slider/RangeSlider presentation
+  replacement, safe-by-default markdown preview, and the `./editor` and
+  `./rich-text` web editor entries; candidate, not yet published
 - [0.3.0](0.3.0.md) — 2026-09-02 — immutable candidate with HistoryCenter
   v3 and the root markdown migration; not published
 - [0.2.3](0.2.3.md) — 2026-08-30 — prepared but unpublished triggerless

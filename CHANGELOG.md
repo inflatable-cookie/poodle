@@ -7,6 +7,127 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-12
+
+### Breaking
+
+- **Slider and RangeSlider presentation API.** Both controls now expose one
+  `variant` prop. `variant="block"` is the default capsule and
+  `variant="embedded"` is the dense track-and-thumb alternative. The pre-0.4
+  `appearance` prop, `variant="standard"`, the external fallback-text helpers
+  (`sliderFallbackText`, `rangeSliderFallbackText`), the combined
+  `formatVisibleRange` string, `defaultVisibleRangeText`, and
+  `resolveRangeVisibleRange` are removed with no aliases. Vertical block
+  presentation is supported in every runtime, so `assertHorizontalBlockAppearance`
+  and the Rust `reject_vertical_block` guard are gone. `SliderAppearance` is
+  replaced by `SliderVariant`, and `SliderPolarity` is now exported too. Block
+  always paints the lower and upper endpoint values at their scale anchors; use
+  `formatVisibleValue` per thumb for custom text. Update consumer CSS from
+  `[data-appearance="block"]` to `[data-variant="block"]`.
+- **Slider-family recipe hooks.** Eighteen documented recipe hooks are no longer
+  read because Slider and RangeSlider share one family foundation. Removed
+  Slider hooks: `--poodle-recipe-slider-block-fallback-text` (no successor),
+  `-control-thumb-fill` (use `-control-fill`), `-control-shadow` (none),
+  `-focus-control-shadow` (use `-focus-ring`). Removed RangeSlider hooks:
+  `--poodle-recipe-range-slider-track-fill`, `-track-border`, `-center-fill`,
+  `-control-fill`, `-block-remainder-fill`, `-block-remainder-text`,
+  `-block-handle-fill`, `-block-handle-border`, `-block-focus-ring` (all use
+  the matching `--poodle-recipe-slider-*` family name),
+  `-control-thumb-fill` and `-control-thumb-shadow` (none),
+  `-focus-control-thumb-shadow` (use `--poodle-recipe-slider-focus-ring`),
+  `-control-track-fill` and `-block-fallback-text` (none). The retained
+  RangeSlider-specific hooks are `-block-selected-fill`, `-block-selected-text`,
+  `-fill-fill`, `-fill-negative`, and `-focus-ring`. The new hook
+  `--poodle-recipe-tabs-card-item-fill` was added.
+- **Markdown preview is safe by default.** `MarkdownEditor` sanitizes the
+  complete HTML result of the built-in `marked` path and of a custom
+  `renderHtml` closure unless `htmlPolicy="trusted"` is set. Supplying
+  `renderHtml` no longer implies trust. `MarkdownRenderer` renders through the
+  same safe path. `MarkdownEditor.renderHtml` is now typed as the named
+  `MarkdownHtmlRenderer` (same signature, no migration).
+- **Rust source/tag consumers.** `poodle-specs` removes `SliderAppearance`,
+  `SliderSpec.appearance`/`with_appearance`, `RangeSliderSpec.appearance`,
+  `.visible_range_text`, `with_visible_range_text` and `reject_vertical_block`;
+  `RangeSliderSpec::with_appearance` becomes `with_variant`. `poodle-headless`
+  removes `slider_fallback_text`, `range_slider_fallback_text`,
+  `default_visible_range_text` and `resolved_range_text`, changes
+  `default_visible_value_text` and `resolved_visible_text` to take `min`/`step`,
+  and replaces the `fallback` layout fields with `label_inline`/`value_inline`.
+  `poodle-node` gains `Banner`, `Heading` and `SearchBox` `NodeRole` variants and
+  `NodeA11y.initial_focus`, so exhaustive matches and struct literals must be
+  updated. `poodle-render::slider_block::block_grab` is removed in favour of
+  `block_grab_with_axis`, `block_surface` takes `cross_px`, and
+  `fraction_anchor` takes a trailing `layer_offset`. `TabDefinition.pinned` and
+  `TabsItem.pinned` are additive fields that break exhaustive struct literals;
+  use the builder or `pinned: None`.
+
+### Added
+
+- **Web editor entries.** `@inflatable-cookie/poodle-svelte` and
+  `@inflatable-cookie/poodle-react` gain `./editor`,
+  `./editor/codemirror` and `./rich-text`. `CodeEditor` is
+  CodeMirror-backed with a consumer-selected language registry;
+  `RichTextEditor` and `RichTextRenderer` are TipTap/ProseMirror-backed with a
+  configurable H1-H6 heading select; `MarkdownRenderer` joins the existing
+  `./markdown` entry as a web-only companion. The new CodeMirror, `@lezer/highlight`
+  and TipTap dependencies are ordinary `dependencies`, so consumers install them
+  even when they never import the new entries.
+- **Core root exports (91 new names).** CodeEditor types/constants and helpers,
+  rich-text constants, labels, toolbar projection/validation and node/byte
+  guards, `sanitizeMarkdownHtml`, `decodeHtmlEntities`, `MarkdownHtmlPolicy`,
+  `sliderFamily*` helpers and `SLIDER_FAMILY_*` constants, `SliderVariant`,
+  `SliderPolarity`, `TabsPin`, `isValidTabsPinnedOrder`, `isTabsReorderAllowed`,
+  `getInputModality`, `installInputModality`, `INPUT_MODALITY_ATTR`,
+  `installCodeEditorFocusEntry`, and six new icon registry identifiers
+  (`between-horizontal-start`, `between-vertical-start`, `list-ordered`,
+  `square-code`, `strikethrough`, `table`).
+- **Tokens and styles.** Ten `--poodle-color-syntax-*` custom properties in
+  `poodle-tokens.css` and every theme artifact, the
+  `--poodle-recipe-tabs-card-item-fill` recipe hook, new
+  `--poodle-md-renderer-*`, `--poodle-rich-text-*` and `--poodle-slider-family-*`
+  variables, and the `code-editor.css`, `rich-text.css` and `slider-family.css`
+  stylesheet modules behind the existing `./styles/*` entry.
+
+### Changed
+
+- **Tabs card items are surface-filled.** Every card item carries
+  `background-surface`; inactive cards are filled without a border, and
+  `activeFill="none"` keeps the variant's idle surface. Tabs reordering now
+  partitions `pinned` items: pinned items are never reorder sources or targets,
+  an unpinned item cannot cross a pinned partition, and `items` must already be
+  partition-ordered.
+- **Slider/RangeSlider semantics.** Exact or out-of-range bound input resolves
+  directly to `min`/`safeMax`, default visible values round and zero-fill to the
+  precision implied by `min` and a finite positive `step`, and negative zero is
+  normalized. One fixed whole-track block layout serves both selected and
+  remainder layers; the optional label yields under narrow fit while the value
+  never moves or disappears.
+- **Select navigation.** A non-searchable, non-freeform Select no longer filters
+  its option list by the committed label, so keyboard navigation reaches every
+  option.
+- **Focus chrome modality.** Select, TokenInput, NumberInput, DurationInput,
+  FilterBuilder, OrderBy, MenuSurface and AgentChatInput install the
+  input-modality observer, so `:focus-within` chrome is gated by
+  `:root[data-poodle-input-modality="keyboard"]`.
+- **Release status.** This `0.4.0` candidate is prepared in the repository and
+  is not yet tagged or published; `0.4.0` adds all public-intent work accumulated
+  after the published `v0.3.0` release, including the final Slider-family
+  consolidation and dual CodeEditor syntax palettes.
+- Core, Svelte, the private React validation package, the Rust source/tag
+  distribution set, and the private root repository manifest are versioned at
+  `0.4.0`. Core and Svelte are the only eventual npm publication set; React
+  stays private and Rust stays source/tag distribution. Internal preview/tooling
+  packages are not consumer dependencies.
+- **Downstream checks.** Remove `appearance`, `variant="standard"`, the removed
+  fallback-text helpers and `formatVisibleRange`; rename consumer selectors from
+  `data-appearance` to `data-variant`; migrate removed RangeSlider recipe hooks
+  to their family successors; opt into `htmlPolicy="trusted"` where raw
+  markdown HTML is intentional; and update Rust matches/struct literals for
+  `SliderVariant`, `TabPin`, `TabsItem.pinned`, `NodeRole` and
+  `NodeA11y.initial_focus`. See the
+  [full 0.4.0 release notes](docs/release-notes/0.4.0.md) for the complete
+  breaking table and migration text.
+
 ## [0.3.0] - 2026-09-05
 
 ### Breaking
@@ -309,6 +430,7 @@ so minor releases may contain documented breaking changes.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.0]: docs/release-notes/0.4.0.md
 [0.3.0]: docs/release-notes/0.3.0.md
 [0.2.3]: docs/release-notes/0.2.3.md
 [0.2.2]: docs/release-notes/0.2.2.md

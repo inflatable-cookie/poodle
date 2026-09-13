@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "73c99bed7062fd3e22ffedbd045f8d2ac79a9b93",
+  "source_commit": "a797ce413d378795a8698d6782b003560878315a",
   "denominator": {
     "public": 176,
     "portable": 175,
