@@ -7,6 +7,44 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-13
+
+### Added
+
+- **Editor presentation controls.** `CodeEditor` now accepts `size` and
+  `sizeRole`; `RichTextEditor` accepts `size`, `sizeRole`, and `density`; and
+  `RichTextRenderer` and `MarkdownRenderer` accept `size` and `sizeRole`.
+  Explicit values override the shared `UiPresentation` axes in both Svelte and
+  React.
+
+### Fixed
+
+- **Slider and RangeSlider geometry.** Block presentation keeps thumbs inset,
+  resolves two-thumb collisions without endpoint drift, selects the requisite
+  thumb on track clicks, keeps labels spatially stable, docks values only when
+  measured space is safe, and restores usable vertical layout. Bipolar sliders
+  fill from the centre.
+- **Editor specimens and sizing.** CodeEditor typography and chrome now respond
+  consistently to size and density. Rich-text and markdown typography follows
+  the shared size presentation. The rich-text image example now uses a modal
+  picker with presets and custom URL, alt, and title fields.
+- **Tooltip input modality.** Tooltip, IconButton, and Tabs still reveal
+  descriptions on hover and genuine keyboard focus, but no longer open from
+  pointer-triggered programmatic focus when a Dialog or Popover autofocuses a
+  child.
+- **Tabs underline scrolling.** The measured underline now uses tablist
+  scroll-content coordinates, so manual scrolling, programmatic tab reveal,
+  and resize remeasurement keep it aligned with the selected tab.
+- **npm candidate isolation and CI routing.** The generic web-candidate
+  admission keeps Cargo manifests and locks outside the npm release-input set
+  and is selected by installed-package CI for versioned web candidates.
+
+### Changed
+
+- **Release status.** Core and Svelte are the `0.4.1` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Cargo packages and native evidence do not move in this patch.
+
 ## [0.4.0] - 2026-09-12
 
 ### Breaking
@@ -430,6 +468,7 @@ so minor releases may contain documented breaking changes.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.1]: docs/release-notes/0.4.1.md
 [0.4.0]: docs/release-notes/0.4.0.md
 [0.3.0]: docs/release-notes/0.3.0.md
 [0.2.3]: docs/release-notes/0.2.3.md

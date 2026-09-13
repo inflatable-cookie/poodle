@@ -20,9 +20,12 @@ exists yet.
 
 ## Versions
 
+- [0.4.1](0.4.1.md) — 2026-09-13 — accepted web UX corrections for the
+  Slider family, editor presentation sizing, rich-text image picking, and
+  tooltip input modality; core and Svelte patch candidate
 - [0.4.0](0.4.0.md) — 2026-09-12 — Slider/RangeSlider presentation
   replacement, safe-by-default markdown preview, and the `./editor` and
-  `./rich-text` web editor entries; candidate, not yet published
+  `./rich-text` web editor entries; core and Svelte published 2026-09-13
 - [0.3.0](0.3.0.md) — 2026-09-02 — immutable candidate with HistoryCenter
   v3 and the root markdown migration; not published
 - [0.2.3](0.2.3.md) — 2026-08-30 — prepared but unpublished triggerless
