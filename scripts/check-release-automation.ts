@@ -207,6 +207,9 @@ export function collectReleaseWorkflowFailures(
   if (!active.includes("candidate-run-id")) {
     found.push("publish mode must require the candidate run ID input");
   }
+  if (!active.includes("for attempt in {1..12}") || !active.includes("sleep 5")) {
+    found.push("registry verification must retain its bounded processing-delay retry");
+  }
   if (
     !active.includes("release-tag") ||
     !/ref:\s*\$\{\{[^\n]*inputs\.release-tag[^\n]*\|\|\s*github\.ref\s*\}\}/.test(active)
@@ -494,6 +497,11 @@ const releasePlants: Plant[] = [
       "",
     ),
     expect: /certified-tag recovery checkout/,
+  },
+  {
+    name: "drop the bounded registry processing retry",
+    source: release.replace("            for attempt in {1..12}; do\n", ""),
+    expect: /bounded processing-delay retry/,
   },
   {
     name: "add a second Effigy entry",

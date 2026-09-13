@@ -89,6 +89,10 @@ resolve that immutable tag, and the same successful candidate run supplies the
 archives. This recovery route cannot rebuild, move the tag, or substitute a
 different source commit.
 
+Registry availability is checked with a bounded read-only retry because npm
+may acknowledge a provenance-backed publish before the version becomes
+queryable. The retry never encloses or repeats `npm publish`.
+
 There is no tag dry run and no rebuild during publish. A publish invocation
 without a successful candidate run ID or exact identity fails before npm
 mutation.

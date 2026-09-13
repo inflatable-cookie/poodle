@@ -212,9 +212,15 @@ jobs:
             for (const entry of manifest.packages) console.log(`${entry.name}@${entry.version}`);
           ' | while IFS= read -r spec; do
             expected="${spec##*@}"
-            published="$(npm view "$spec" version)"
-            if [ "$published" != "$expected" ]; then
-              echo "$spec resolved $published from the registry" >&2
-              exit 1
-            fi
+            published=""
+            for attempt in {1..12}; do
+              if published="$(npm view "$spec" version 2>/dev/null)" && [ "$published" = "$expected" ]; then
+                break
+              fi
+              if [ "$attempt" -eq 12 ]; then
+                echo "$spec did not resolve version $expected from the registry (last result: ${published:-unavailable})" >&2
+                exit 1
+              fi
+              sleep 5
+            done
           done
