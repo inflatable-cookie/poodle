@@ -1097,6 +1097,97 @@ export function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
 
+/**
+ * g18.032: a bounded release-automation program. Spec 071 replaces the narrow
+ * `0.4.0` wrapper repair with a structural law: a range that touches only the
+ * release-automation surfaces is admitted while the workflow keeps the one
+ * npm certificate entry, a Linux runner, the ten-minute ceiling and the
+ * run-ID identity protocol, and the checker keeps the spec 071 invariants.
+ * Any aggregate, native, Rust or GPUI selector fails it closed.
+ */
+const RELEASE_AUTOMATION_PATHS = [
+  ".github/workflows/release.yml",
+  "effigy.toml",
+  "quality/validation-bounds.json",
+  "packages/release-manifest.json",
+  "scripts/check-release-automation.ts",
+  "scripts/npm-publication.ts",
+  "scripts/verify-npm-candidate.ts",
+  "scripts/verify-npm-candidate.test.ts",
+  "scripts/validation/run-board.ts",
+  "scripts/validation/run-board.test.ts",
+  "tasks/effigy.tasks.toml",
+  "test/package-install/README.md",
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+  "test/package-install/web-admission.ts",
+  "test/package-install/web-candidate.ts",
+  "test/package-install/web-candidate.test.ts",
+  "test/package-install/web-preview.ts",
+  "PAPERCUTS.md",
+] as const;
+const RELEASE_AUTOMATION_WORKFLOW_REQUIRED = [
+  "effigy release:web-certificate",
+  "runs-on: ubuntu-latest",
+  "timeout-minutes: 10",
+  "id-token: write",
+  "gh run download",
+  "scripts/verify-npm-candidate.ts",
+  "--access public",
+] as const;
+const RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN = [
+  "effigy qa",
+  "effigy ci",
+  "gpui",
+  "jetstream",
+  "cargo",
+  "macos-",
+  "rust-toolchain",
+] as const;
+const RELEASE_AUTOMATION_CHECKER_MARKERS = [
+  "collectReleaseWorkflowFailures",
+  "collectGenericCandidateFailures",
+  "readNpmPublicationAuthority",
+  "effigy release:web-certificate",
+] as const;
+
+async function ordinaryAdmitsReleaseAutomationProgram(
+  checkoutRoot: string,
+  sourceCommit: string,
+  changedPaths: string[],
+): Promise<boolean> {
+  if (!changedPaths.includes(".github/workflows/release.yml")) return false;
+  const admitted = (path: string): boolean =>
+    (RELEASE_AUTOMATION_PATHS as readonly string[]).includes(path) ||
+    (path.startsWith("docs/") && !RELEASE_NOTE_PATH.test(path));
+  if (!changedPaths.every(admitted)) return false;
+  const workflow = await gitShowFile(
+    checkoutRoot,
+    sourceCommit,
+    ".github/workflows/release.yml",
+  );
+  if (workflow === null) return false;
+  if (!RELEASE_AUTOMATION_WORKFLOW_REQUIRED.every((marker) => workflow.includes(marker))) {
+    return false;
+  }
+  const active = workflow
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("#"))
+    .join("\n");
+  if (RELEASE_AUTOMATION_WORKFLOW_FORBIDDEN.some((marker) => active.includes(marker))) {
+    return false;
+  }
+  const checker = await gitShowFile(
+    checkoutRoot,
+    sourceCommit,
+    "scripts/check-release-automation.ts",
+  );
+  return (
+    checker !== null &&
+    RELEASE_AUTOMATION_CHECKER_MARKERS.every((marker) => checker.includes(marker))
+  );
+}
+
 export function requireExactCommit(value: string, label: string): string {
   if (!/^[0-9a-f]{40}$/.test(value)) {
     throw new Error(`${label} is not an exact Git SHA: ${value}`);
@@ -1977,6 +2068,15 @@ export async function assertInstalledScope(
       (await ordinaryAdmitsClosedCandidate(
         checkoutRoot,
         requiredBaseCommit,
+        sourceCommit,
+        changedPaths,
+      ))
+    ) {
+      forbidden = [];
+    } else if (
+      forbidden.length > 0 &&
+      (await ordinaryAdmitsReleaseAutomationProgram(
+        checkoutRoot,
         sourceCommit,
         changedPaths,
       ))
