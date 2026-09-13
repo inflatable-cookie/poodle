@@ -1,4 +1,9 @@
-import { expect, test } from "bun:test";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterAll, expect, test } from "bun:test";
 import {
   approvedGitRevisions,
   registryOnlyCrates,
@@ -239,4 +244,92 @@ test("every other secret class still matches its production shape", () => {
   expect(
     secretPatternHits(glued("https://", "alice", ":", "secret", "@", "host")),
   ).toContain("credential URL");
+});
+
+// ── g18.033: tracked symlinks are audited as links, never followed ────
+//
+// The repository-security walker enumerates `git ls-files` and reads every
+// entry. `readFileSync` follows a symlink, so the intentional tracked link
+// `.claude/skills/impeccable` -> `.agents/skills/impeccable` aborted the walk
+// with `EISDIR`. These fixtures plant the same shape in a throwaway repo: the
+// link's own text must be audited, and a directory target must not be read.
+
+const securityScriptDir = path.dirname(fileURLToPath(import.meta.url));
+const securityRepoRoot = path.resolve(securityScriptDir, "..");
+const securityAuditScript = path.join(
+  securityRepoRoot,
+  "scripts",
+  "audit-repository-security.ts",
+);
+
+const securityFixtureRoots: string[] = [];
+
+function securityFixtureRepo(): string {
+  const root = mkdtempSync(path.join(tmpdir(), "poodle-security-link-"));
+  securityFixtureRoots.push(root);
+  mkdirSync(path.join(root, ".agents", "skills", "impeccable"), {
+    recursive: true,
+  });
+  writeFileSync(
+    path.join(root, ".agents", "skills", "impeccable", "SKILL.md"),
+    "# fixture skill\n",
+  );
+  mkdirSync(path.join(root, ".claude", "skills"), { recursive: true });
+  symlinkSync(
+    "../../.agents/skills/impeccable",
+    path.join(root, ".claude", "skills", "impeccable"),
+  );
+  execFileSync("git", ["init", "-q"], { cwd: root });
+  trackSecurityFixture(root);
+  return root;
+}
+
+function trackSecurityFixture(root: string): void {
+  execFileSync("git", ["add", "-A"], { cwd: root });
+}
+
+function runSecurityAudit(root: string): { status: number; output: string } {
+  try {
+    const output = execFileSync("bun", [securityAuditScript], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    return { status: 0, output };
+  } catch (error) {
+    const execError = error as {
+      status?: number;
+      stdout?: string | Buffer;
+      stderr?: string | Buffer;
+    };
+    return {
+      status: execError.status ?? 1,
+      output: `${execError.stdout?.toString() ?? ""}${execError.stderr?.toString() ?? ""}`,
+    };
+  }
+}
+
+afterAll(() => {
+  for (const root of securityFixtureRoots) {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a tracked symlink to a tracked directory is audited without following it", () => {
+  const root = securityFixtureRepo();
+  const { status, output } = runSecurityAudit(root);
+  expect(status).toBe(0);
+  expect(output).toContain("Security hygiene clean");
+});
+
+test("a tracked symlink's own link text is audited, not skipped", () => {
+  const root = securityFixtureRepo();
+  symlinkSync(
+    glued("ghp_", "c".repeat(30)),
+    path.join(root, ".claude", "skills", "release-notes"),
+  );
+  trackSecurityFixture(root);
+  const { status, output } = runSecurityAudit(root);
+  expect(status).toBe(1);
+  expect(output).toContain("symlink target contains a GitHub token");
 });

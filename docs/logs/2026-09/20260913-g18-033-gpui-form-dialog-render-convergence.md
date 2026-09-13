@@ -90,7 +90,9 @@ Focused selectors only during implementation, then one final broad board.
 | Ledger | `bun scripts/parity-evidence-ledger.ts` | 176 component rows validated, exit 0 |
 | Final board (first) | `effigy qa:board` | 556s (9m16s); all units before `audit:licenses` green, including `probe:gpui-specimens` 9/9; stopped on the pre-existing bzip2 allowance |
 | License leaf after the authorized removal | `effigy audit:licenses` | clean, 9 package manifests / 17 Cargo manifests / 4 notice surfaces, exit 0, 5s |
-| Replacement final board | `effigy qa:board` | 614s (10m14s); `audit:licenses` now green; stopped on `audit:security` (see below) |
+| Replacement final board | `effigy qa:board` | 614s (10m14s); `audit:licenses` now green; stopped on `audit:security` (`EISDIR` on the tracked symlink) |
+| Symlink repair focused test | `bun test scripts/audit-repository-security.test.ts` | 19/19 pass, including both planted symlink fixtures; both fail on the pre-fix script |
+| Security leaf after the symlink repair | `effigy audit:security` | repository-script step now clean (5126 files); stopped at the `bun audit` step (see below) |
 
 Final-board detail: the first `effigy qa:board` attempt (before the repin
 commit) aborted at `check:parity-evidence-ledger` because the receipt binding
@@ -108,24 +110,47 @@ no lockfile resolves`) is cleared by the authorized removal of the stale
 allowance. The focused leaf is green.
 
 The replacement board then exposed the next baseline defect, which is not
-caused by this change:
+caused by this change: `audit:security` failed with `EISDIR: illegal operation
+on a directory, read` at `scripts/audit-repository-security.ts:63`. The audit
+enumerates `git ls-files --cached --others --exclude-standard` and
+`readFileSync`s every entry; the tracked symlink `.claude/skills/impeccable`
+(mode `120000`, added by `54ea1ec47 chore(skills): install Impeccable` on
+2026-09-11) resolves to the tracked directory `.agents/skills/impeccable`, so
+the read followed it and threw.
 
-- `audit:security` fails with `EISDIR: illegal operation on a directory, read`
-  at `scripts/audit-repository-security.ts:63`.
-- The audit enumerates `git ls-files --cached --others --exclude-standard`,
-  then `readFileSync`s every entry. The tracked symlink
-  `.claude/skills/impeccable` (mode `120000`, added by `54ea1ec47
-  chore(skills): install Impeccable` on 2026-09-11) resolves to the tracked
-  directory `.agents/skills/impeccable`, so the read follows it and throws.
-- `git diff a27a781db HEAD -- scripts/audit-repository-security.ts
-  .claude/skills/impeccable` is empty: both are byte-identical to the
-  dispatch head. The last recorded clean `audit:security` runs predate the
-  symlink (2026-09-02/05); the board never reached this unit since, because
-  the GPUI probe hang stopped it earlier.
+Operator ruling on `main` at `adf6420ba` authorized a non-following, fail-closed
+repair in `scripts/audit-repository-security.ts` and its focused test. The walker
+now `lstat`s each tracked entry and, for a symlink, audits the link's own text
+and only reads a target that is a regular file; a directory (or gitlink) target
+is never read, and a dangling link still has its text audited. The intentional
+Impeccable link and its tracked target are unchanged. Two planted fixtures in
+`scripts/audit-repository-security.test.ts` prove the behaviour: a tracked
+symlink to a tracked directory must audit clean, and a tracked symlink whose
+link text carries a secret pattern must fail. Both fail against the pre-fix
+script with the exact `EISDIR` crash. The focused real audit is clean
+(5126 repository files).
 
-Fixing that leaf needs an audit-script or symlink change that the operator's
-ruling for this task did not authorize. Per the completion protocol it is
-reported as a blocker with this exact evidence rather than silently widened.
+The security leaf then exposed a further, separate baseline red that this task
+is not authorized to repair:
+
+- `effigy audit:security` now clears its repository-script step and stops at
+  `bun audit`.
+- `bun audit` reports two moderate vulnerabilities for GHSA-82fw-gwwq-j7x9:
+  `vitest` and `@vitest/mocker` are in the advisory range `>=2.1.0 <4.1.11`,
+  and this repository resolves both at `4.1.10` (`package.json` declares
+  `vitest: ^4.1.10`; `bun.lock` pins `vitest@4.1.10` and
+  `@vitest/mocker@4.1.10`).
+- The advisory is newer than the last recorded clean run of this leaf
+  (g16.053/g16.054, 2026-09-02/05) and is untouched by this change: the task
+diff contains no dependency or lockfile edit. Clearing it needs a vitest bump
+  to `>=4.1.11`, which the symlink ruling did not authorize.
+
+Per the completion protocol this is reported as a blocker with the exact
+evidence rather than silently widening scope or accepting a red board. The
+authorized replacement board still runs on the symlink-repaired candidate so
+that any earlier-unit regression would surface; `audit:security` is the final
+top-level board leaf, so a `bun audit` failure there is the only untoward
+outcome the board can add.
 
 The named timeout outcome g18.032 had to report is gone: `probe:gpui-specimens`
 now completes inside the board in 2.8s with all 9 tests and all 175 routes
