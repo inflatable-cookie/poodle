@@ -1,6 +1,6 @@
 # 006 — v0.4.0 web editor release candidate
 
-Status: ready — retained Queue task/workspace; g18.031 merged, resume on current main
+Status: complete — PR #265 merged as `567fe01c33e7e80514cff6f7d14c516a9a9a788b`; g18.009 owns certification and publication
 Owner: Poodle release operations
 Created: 2026-09-10
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -244,11 +244,15 @@ lockstep in this candidate's version-only `0.3.0` -> `0.4.0` surface, and
 derives census versions from the preview crate after exact-head review with
 green `rust`/`web` checks. No candidate mutation exists.
 
+Merged 2026-09-13 as PR #265 (`567fe01c33e7e80514cff6f7d14c516a9a9a788b`).
+Candidate head `9d18a21bdf344d4b659e5a56ab6b6b4b80d6891a` (freeze `a797ce413`,
+repin `d8cb83ccc`, certification-head repair `9d18a21bd`) passed independent
+exact-head review (round-2 `ready_to_merge`, comment `5649713789`) with green
+`rust`/`web` checks. No tag, publication, workflow or Desktop mutation.
+
 ## Next task
 
-Resume this retained task on current main now that g18.031 has merged. The
-Queue cannot add dependencies to this already-dispatched task, so preserve
-its worker and workspace. After the candidate merges and closes,
-g18.009 dispatches from its existing dependency, performs the hosted branch
-dry run, and completes release. Desktop then resumes retained g02.058 and PR
-#215.
+None in this lane: the candidate is merged. g18.009 dispatches from its
+existing dependency, performs the hosted branch dry run, and completes
+release (tag, tag dry run, publication). Desktop then resumes retained
+g02.058 and PR #215 after public registry proof.

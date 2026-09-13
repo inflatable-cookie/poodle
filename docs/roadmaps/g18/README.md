@@ -50,7 +50,7 @@ needed to compile honest repair tranches.
 | [`g18.003`](003-tiptap-prosemirror-rich-text-editor.md) — TipTap/ProseMirror rich-text editor | complete | PR #237 (merge `fb0b73732b5c0a2a9361fddd75962eccd2710b0f`) |
 | [`g18.004`](004-tabs-card-inactive-surfaces.md) — Tabs card inactive surfaces | complete | PR #239 (merge `ed6ed66050c5ba8bf62aaf27eee795ca5be052fa`) |
 | [`g18.005`](005-v040-release-preflight.md) — v0.4.0 release preflight | complete | PR #238 (merge `93e165fd072aea27f44ede5a794042948654b265`) |
-| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | ready | retained Queue task/workspace; g18.031 merged, resume on current main |
+| [`g18.006`](006-v040-web-editor-release-and-desktop-unblock.md) — v0.4.0 web editor release candidate | complete | PR #265 (merge `567fe01c33e7e80514cff6f7d14c516a9a9a788b`); independent exact-head review, green `rust`/`web` checks; g18.009 owns certification and publication |
 | [`g18.007`](007-ordinary-changelog-maintenance-scope.md) — ordinary changelog maintenance scope | complete | PR #240 (merge `ef2e46bb949a766e844e48f071119c9576c6f723`); g18.005 validated and merged after |
 | [`g18.008`](008-web-editor-preview-specimens.md) — web editor preview specimens | complete | PR #241 (merge `998b6ddc69f94e405b515f6bddd682a2e8916ea5`); Svelte/React catalogue admission via the web-only supplement, serial before g18.006 |
 | [`g18.009`](009-v040-release-certification-and-desktop-unblock.md) — v0.4.0 release certification and Desktop unblock | dependency-queued behind g18.006 | final tag/publication/Desktop-unblock lane; no manual hold |
@@ -158,9 +158,10 @@ generator embedded `0.3.0` in 65 receipts. Merged g18.031 (PR #264,
 `aa659504b2a6222eb34c7423fcfd877a32138ba8`) aligned root to current `0.3.0`,
 kept it in the exact lockstep candidate surface and derived census versions
 from the preview crate; g18.006 now resumes.
-g18.009 waits on g18.006; no candidate is tagged or
-published while accepted product source is moving. After `0.4.0` unblocks
-Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
+PR #265 merged 2026-09-13 as `567fe01c33e7e80514cff6f7d14c516a9a9a788b`
+(candidate `9d18a21b`, exact-head review `ready_to_merge`). g18.009 proceeds
+from the unchanged merged candidate; nothing is tagged or published here. After
+`0.4.0` unblocks Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
 later breaking change waits for `0.5.0`.
 
 ## Held and recurring work
