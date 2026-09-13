@@ -47,6 +47,10 @@ its existing fifteen-minute ceiling.
   `audit:security`: its repository walker follows a tracked symlink to a
   directory and crashes with `EISDIR`. Audit the symlink itself without
   following it; keep the intentional Impeccable link and its tracked target.
+- After the symlink repair, `audit:security` reaches `bun audit` and reports
+  GHSA-82fw-gwwq-j7x9 against Vitest and `@vitest/mocker` 4.1.10. Move the sole
+  root Vitest declaration and lock graph to a non-vulnerable 4.1.x patch at or
+  above 4.1.11; do not alter package release versions or published manifests.
 
 ## Dispatch manifest
 
@@ -62,7 +66,8 @@ its existing fifteen-minute ceiling.
   implementation/tests under `packages/gpui/node-backend/src/`; `deny.toml`
   only for removal of the obsolete `bzip2-1.0.6` allowance and its comment;
   `scripts/audit-repository-security.ts` and its focused test only for
-  non-following, fail-closed tracked-symlink handling
+  non-following, fail-closed tracked-symlink handling; root `package.json` and
+  `bun.lock` only for the Vitest 4.1.x security patch
 - **Reserved closeout surfaces:** this task and handoff, g18 README,
   roadmap root/index/dispatch, spec 071, `PAPERCUTS.md`, and one execution log
 - **Worker:** complex Rust/GPUI renderer worker able to diagnose layout and
@@ -104,6 +109,11 @@ its existing fifteen-minute ceiling.
    regression, run `audit:security`, then one final replacement board. Do not
    remove or rewrite the intentional symlink. The candidate changed again, so
    this replacement proof is authorized.
+9. If `bun audit` then reports GHSA-82fw-gwwq-j7x9 against the pinned Vitest
+   4.1.10 graph, raise the sole root Vitest range to at least 4.1.11 while
+   staying on 4.1.x and regenerate `bun.lock`. Run `bun audit`, then the whole
+   `audit:security` leaf so its four later Cargo checks are not left hidden.
+   Run one final replacement board after that leaf is wholly green.
 
 ## Acceptance and review oracle
 
@@ -117,6 +127,7 @@ its existing fifteen-minute ceiling.
 | Loading behavior survives | all looping motion is disabled to make tests terminate | existing loading first-frame/committed-frame law plus focused renderer/backend evidence |
 | Baseline license drift is cleared | the GPUI repair passes but the board remains red on an unresolved retired allowance | focused `audit:licenses` plus the replacement full board are green after removing only the stale `bzip2-1.0.6` entry |
 | Security audit handles tracked symlinks | `readFileSync` follows a tracked directory link and throws `EISDIR`, or the fix simply skips all symlink evidence | planted tracked symlink-to-directory proof shows the link text is audited without traversing it; `audit:security` and the final replacement board pass |
+| Test tooling has no known advisory | Vitest remains pinned inside GHSA-82fw-gwwq-j7x9's `<4.1.11` range, or unrelated dependencies move | manifest/lock diff changes only the Vitest 4.1.x graph; `bun audit`, complete `audit:security`, and the final board pass |
 
 ## Stop conditions
 
