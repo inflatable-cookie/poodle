@@ -122,12 +122,16 @@ green. The slowest non-blocked units were `test:components` (1m42s),
 
 ## Hosted candidate drill
 
-The one authorized non-publishing candidate drill ran on the exact pushed head
-`96b959428704fd478eb5a66b24d6b72f1826adc1`:
+The authorized non-publishing candidate drill ran twice on this task's own
+heads. Candidate mode cannot certify an infrastructure head (the root version
+does not move), so the useful observation is that the workflow plumbing,
+Effigy setup, selector routing and fail-closed admission all execute.
+
+**First drill** — head `96b959428704fd478eb5a66b24d6b72f1826adc1`:
 
 - run `34754769895`, `workflow_dispatch`, mode `candidate`;
-- job `npm web release (candidate)`, started 11:34:08Z, completed
-  11:34:32Z (**24s**), conclusion `failure`;
+- job `npm web release (candidate)`, 11:34:08Z -> 11:34:32Z (**24s**),
+  conclusion `failure`;
 - steps 1–10 passed: checkout, `origin/main` fetch, explicit-mode guard, Bun,
   Node, the reviewed npm CLI, and `bun install`;
 - step 11 `npm web certificate` failed with **exit 127** because the rewritten
@@ -135,15 +139,27 @@ The one authorized non-publishing candidate drill ran on the exact pushed head
   so `effigy` was not on `PATH`. Later steps were skipped, so no archive set
   or hashes were produced.
 
-The dropped action is repaired and now lawed: `release.yml` must install the
-pinned Effigy action (with the pinned version) before the certificate, and the
-checker has a planted negative for removing it. The pinned `0.11.0` Effigy is
-sufficient for every selector this lane uses; the bounded runner is repo-local.
+That is a real defect the drill caught. It is repaired and lawed: `release.yml`
+must install the pinned Effigy action (with the pinned version) before the
+certificate, the structural release-automation admission requires it, and the
+checker has a planted negative for removing it.
 
-A re-drill is required to observe the certificate step itself. On this
-infrastructure head the generic admission is expected to reject the range
-because the root version does not move (`0.4.0` -> `0.4.0`); a certifying drill
-belongs to the next version candidate, not to this PR.
+**Second drill** — corrected head `dbb85018427e0b57e73ad3090e0bc85242efec6b`:
+
+- run `34754894881`, `workflow_dispatch`, mode `candidate`;
+- job `npm web release (candidate)`, 11:36:52Z -> 11:37:14Z (**22s**),
+  conclusion `failure`;
+- step 11 `inflatable-cookie/setup-effigy` **succeeded**;
+- step 12 `npm web certificate` ran `effigy release:web-certificate`; the
+  admission selector executed and failed closed with
+  `web candidate requires the target version to exceed the base version:
+  0.4.0 -> 0.4.0` before any build or pack.
+
+No archive set or hashes exist for either run, because neither head is a
+version candidate. A certifying drill belongs to the next version candidate,
+where the admission will derive a real `0.4.0 -> 0.4.1` range. Both runs are
+non-publishing: the publish steps were skipped and no registry or tag mutation
+occurred.
 
 ### Board-order correction
 
