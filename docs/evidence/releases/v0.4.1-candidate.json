@@ -1,0 +1,22 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.1",
+  "source_commit": "8ce5cf73709ae134dd426dc633215f6550263bed",
+  "base_commit": "cd38a54f193f8bc24f4615c0c85c7bf7ff148ea9",
+  "payload_commits": [
+    "fed5e78e8",
+    "cbc52ce60"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "2026-09-13 web UX sweep accepted for patch preparation",
+  "focused_evidence": {
+    "slider_editor_tooltip_tests": "212 passed across the accepted UX batches",
+    "tabs_motion_runtime_tests": "11 passed, including three scroll-content geometry regressions",
+    "web_candidate_tests": "19 passed after correcting npm/native train isolation and CI routing",
+    "diff_check": "clean"
+  }
+}
