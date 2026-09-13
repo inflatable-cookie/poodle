@@ -88,24 +88,44 @@ Focused selectors only during implementation, then one final broad board.
 | Exact `form-dialog` shard | `poodle_preview-… …and_axis_pane_3` in a 30s child | 44/44 routes, test body 1.7s, exit 0 |
 | Complete specimen probe (175 routes) | `cargo test … --bin poodle-preview specimen_probe` | 9/9 tests, 175/175 routes (44+44+44+43), finished 2.27s |
 | Ledger | `bun scripts/parity-evidence-ledger.ts` | 176 component rows validated, exit 0 |
-| Final board | `effigy qa:board` | 556s (9m16s); all web + native units before `audit:licenses` green, including `probe:gpui-specimens` 9/9 |
+| Final board (first) | `effigy qa:board` | 556s (9m16s); all units before `audit:licenses` green, including `probe:gpui-specimens` 9/9; stopped on the pre-existing bzip2 allowance |
+| License leaf after the authorized removal | `effigy audit:licenses` | clean, 9 package manifests / 17 Cargo manifests / 4 notice surfaces, exit 0, 5s |
+| Replacement final board | `effigy qa:board` | 614s (10m14s); `audit:licenses` now green; stopped on `audit:security` (see below) |
 
 Final-board detail: the first `effigy qa:board` attempt (before the repin
 commit) aborted at `check:parity-evidence-ledger` because the receipt binding
 requires a committed runtime head; after the repin commit the single final
-board ran. Its only failure is the pre-existing, recorded `audit:licenses`
-red — see below. `git diff --check` is clean.
+board ran. The operator then confirmed the canonical ruling on `main` at
+`f7c6d44f3`, widening this task to remove the obsolete `bzip2-1.0.6`
+allowance and its comment from `deny.toml` (nothing else in the license
+policy changed), and authorized one replacement board because the candidate
+had changed. `git diff --check` is clean.
 
-## Pre-existing red, unchanged
+## Baseline drift cleared, next baseline red exposed
 
-`audit:licenses` fails with `deny.toml: still claims bzip2, which no lockfile
-resolves`. This is recorded in `PAPERCUTS.md` (2026-09-10) and was verified
-unchanged versus the dispatch head: `deny.toml`, every `Cargo.lock` and every
-package manifest are byte-identical to `a27a781db`, and the task diff touches
-only `packages/gpui/preview/src/specimen_probe.rs` and the 59 Nucleus
-provenance files. It is the same accepted pre-existing-red disposition g18.003
-used (its log records the identical failure as out of scope). The board did
-not reach `audit:security`, which was not listed as red in that precedent.
+The pre-existing `audit:licenses` red (`deny.toml: still claims bzip2, which
+no lockfile resolves`) is cleared by the authorized removal of the stale
+allowance. The focused leaf is green.
+
+The replacement board then exposed the next baseline defect, which is not
+caused by this change:
+
+- `audit:security` fails with `EISDIR: illegal operation on a directory, read`
+  at `scripts/audit-repository-security.ts:63`.
+- The audit enumerates `git ls-files --cached --others --exclude-standard`,
+  then `readFileSync`s every entry. The tracked symlink
+  `.claude/skills/impeccable` (mode `120000`, added by `54ea1ec47
+  chore(skills): install Impeccable` on 2026-09-11) resolves to the tracked
+  directory `.agents/skills/impeccable`, so the read follows it and throws.
+- `git diff a27a781db HEAD -- scripts/audit-repository-security.ts
+  .claude/skills/impeccable` is empty: both are byte-identical to the
+  dispatch head. The last recorded clean `audit:security` runs predate the
+  symlink (2026-09-02/05); the board never reached this unit since, because
+  the GPUI probe hang stopped it earlier.
+
+Fixing that leaf needs an audit-script or symlink change that the operator's
+ruling for this task did not authorize. Per the completion protocol it is
+reported as a blocker with this exact evidence rather than silently widened.
 
 The named timeout outcome g18.032 had to report is gone: `probe:gpui-specimens`
 now completes inside the board in 2.8s with all 9 tests and all 175 routes
