@@ -191,3 +191,11 @@ g18 completes only when every portable row has capability-level disposition:
 validated mounted proof, a repaired and proved implementation, or a current
 contract/platform hold with a named owner and recheck. Aggregate construction
 counts and source presence cannot satisfy this rule.
+
+## Queue lifecycle adoption
+
+- [g18.034 Effigy-hosted lifecycle hook](034-adopt-effigy-hosted-lifecycle-hook.md)
+  is an operator-approved, configuration-only maintenance lane. It follows its
+  declared Queue dependencies and may run without changing product priority.
+  Existing next-task text continues to describe product sequencing; this entry
+  authorizes no sibling product work.
