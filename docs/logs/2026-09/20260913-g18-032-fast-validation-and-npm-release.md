@@ -97,4 +97,41 @@ aggregate board is never release authority.
 
 ## Final board
 
-Recorded below after the one optimized complete headless board run.
+The one optimized complete headless board ran under its fifteen-minute cap and
+executed 68 owned units with 5 transitive repeats removed. **54 units passed
+and the board stopped at `probe:gpui-specimens`**, which exceeded its
+explicit five-minute ceiling and was killed with its owned process group:
+
+```
+▶ [55/68] probe:gpui-specimens (bound 5m0s)
+✘ probe:gpui-specimens killed after 5m0s (child bound)
+board failed: 55/68 units in 10m34s
+```
+
+This is the spec 071 stop condition: one leaf alone exceeds five minutes and
+fixing it needs product and native-probe behavior changes, which are outside
+g18.032's boundaries. A focused run showed the probe's own tests still
+"running for over 60 seconds" after compilation, so it is the pre-existing
+runaway the baseline recorded (2h37m at ~100% CPU), not a validation-graph
+defect.
+
+The web lane passed in the same run: `test:web-pack-install` (1m4s),
+`test:web-scope`, `gate:clean`, `ci:web` and every focused release law are
+green. The slowest non-blocked units were `test:components` (1m42s),
+`test:web-pack-install` (1m4s) and `test:web-scope` (59.0s).
+
+### Board-order correction
+
+The first two attempts failed earlier, both on validation-graph defects this
+task introduced and then fixed:
+
+1. `test:core-build` failed because the git-plant `scope.test.ts` suite shared
+   Bun's default five-second per-test timeout with parallel core-build files;
+   it is now its own unit with an explicit thirty-second timeout.
+2. `test:web-pack-install` failed because ordinary scope correctly rejected a
+   changed `.github/workflows/release.yml`. The narrow `0.4.0` wrapper-repair
+   admission is now backed by a structural release-automation admission: a
+   range touching only release-automation surfaces is admitted while the
+   workflow keeps the one npm certificate entry, Linux runner, ten-minute
+   ceiling and run-ID identity protocol, and the checker keeps the spec 071
+   invariants.
