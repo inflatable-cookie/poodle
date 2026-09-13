@@ -131,3 +131,4 @@ Executed and recorded in
 - The first branch dry run (`34728955353`) was cancelled after six hours in the
   obsolete aggregate gate and was never retried; the operator ruling supersedes
   that step for this release.
+- Evidence PR #266 merged 2026-09-13 as `4c0bb57410584da944f781eb8064805521fba054` (now `origin/main`) on independent exact-head review (comment `5651878364`, verdict `ready_to_merge`); `rust` + `web` checks green at merge. Recorded in [`docs/logs/2026-09/20260913-g18-009-v040-release-merged.md`](../../logs/2026-09/20260913-g18-009-v040-release-merged.md).
