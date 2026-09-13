@@ -90,6 +90,11 @@ fn probe_viewport() -> Size<Pixels> {
 /// clear `debug_bounds`, so a reused window would keep reporting an earlier
 /// route's tabs. A fresh root is also the route-state reset — no specimen's
 /// retained tab or toggle can leak into another route.
+///
+/// The caller must close the window with [`close_route_window`] once the
+/// route's assertions are done: a live window keeps its `PreviewRoot`
+/// rendering, and leaked route windows are what made a later mount's first
+/// draw non-terminating (g18.033).
 fn open_route_window(
     app: &TestAppContext,
     slug: &str,
@@ -134,6 +139,20 @@ fn settle(cx: &mut VisualTestContext) {
         let _ = window.draw(app);
     });
     cx.run_until_parked();
+}
+
+/// Close a route's window once its assertions are done.
+///
+/// gpui's effect loop redraws every live window until none is dirty, and each
+/// drawn `PreviewRoot` registers work for the next pass. Because the probe
+/// opens a window per route and never closed them, a shard accumulated live
+/// windows until a later mount's first draw looped forever (the g18.033
+/// non-termination: `sample` showed repeated `Window::draw` under
+/// `open_route_window`). Closing the route's window keeps at most one mounted
+/// at a time; the window's root and `debug_bounds` are per-window, so nothing
+/// the probe asserts is lost.
+fn close_route_window(cx: &mut VisualTestContext) {
+    cx.update(|window, _app| window.remove_window());
 }
 
 /// The route painted a real specimen card and did not reach the fallback.
@@ -186,6 +205,7 @@ fn ordinary_route_constructs_a_real_specimen_card() {
     let (_root, mut cx) = open_route_window(&app, "region");
     settle(&mut cx);
     assert_real_specimen(&mut cx, "region");
+    close_route_window(&mut cx);
 }
 
 /// Seam proof 2: an axis page discovers its advertised `Sizes` and
@@ -202,6 +222,7 @@ fn axis_route_opens_every_advertised_pane() {
         (1, 1),
         "button advertises one Sizes tab and one Densities tab"
     );
+    close_route_window(&mut cx);
 }
 
 /// g16.034 production-host proof: the real `PreviewRoot` builds loading nodes
@@ -234,6 +255,7 @@ fn production_loading_routes_commit_before_starting_full_mode_loops() {
             committed.contains(&"surface.animation.scheduled"),
             "{slug}: the production first-frame callback must enable the full-mode loop"
         );
+        close_route_window(&mut cx);
     }
 }
 
@@ -327,6 +349,18 @@ fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::Canoni
         let (sizes, densities) = exercise_axis_tabs(&mut cx, slug);
         sizes_tabs += sizes;
         densities_tabs += densities;
+        // Close before the next mount: a live route window keeps drawing, and
+        // leaked windows are the g18.033 non-termination.
+        close_route_window(&mut cx);
+        app.update(|app| {
+            assert_eq!(
+                app.windows().len(),
+                0,
+                "probe: the {slug} route window was not closed; a leaked window \
+                 keeps its PreviewRoot drawing and can make a later mount's \
+                 first draw non-terminating"
+            );
+        });
     }
 
     let elapsed = started.elapsed();
@@ -539,4 +573,5 @@ fn stepper_route_selection_and_rerun_run_through_the_preview_adapter() {
         Some("extract"),
         "and re-running left the current step where selection put it"
     );
+    close_route_window(&mut cx);
 }

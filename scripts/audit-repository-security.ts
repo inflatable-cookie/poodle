@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, readlinkSync, statSync, type Stats } from "node:fs";
 import { basename } from "node:path";
 import {
   secretPatternHits,
@@ -54,10 +54,43 @@ for (const lockPath of [
 for (const path of paths) {
   // `git ls-files --cached` includes paths deleted in an uncommitted change.
   // Audit the working tree that would be committed without crashing on them.
-  if (!existsSync(path)) continue;
+  // `lstatSync` describes the tracked entry itself, so a symlink is never
+  // followed just to learn that it exists.
+  let entry: Stats;
+  try {
+    entry = lstatSync(path);
+  } catch {
+    continue;
+  }
 
   if (sensitiveName.test(path) && !environmentExample.test(path)) {
     errors.push(`${path}: credential-like filename is tracked`);
+  }
+
+  // A tracked symlink's link text is tracked content, so audit the link itself
+  // instead of whatever it points at. `readFileSync` follows the link, and a
+  // link to a directory (`.claude/skills/impeccable` ->
+  // `.agents/skills/impeccable`) threw `EISDIR` and aborted the walk (g18.033).
+  // Skipping symlinks would drop evidence, so only the target read is skipped
+  // when the target is not a regular file.
+  if (entry.isSymbolicLink()) {
+    const linkText = readlinkSync(path);
+    for (const label of secretPatternHits(linkText)) {
+      errors.push(`${path}: symlink target contains a ${label} pattern`);
+    }
+    let target: Stats;
+    try {
+      target = statSync(path);
+    } catch {
+      // Dangling link: its text was audited above and there is no target to
+      // read, so keep walking rather than throwing.
+      continue;
+    }
+    if (!target.isFile()) continue;
+  } else if (!entry.isFile()) {
+    // A gitlink/submodule entry is a directory in the working tree; it has no
+    // auditable file bytes.
+    continue;
   }
 
   const bytes = readFileSync(path);
