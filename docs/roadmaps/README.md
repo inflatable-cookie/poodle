@@ -53,9 +53,12 @@ g18.029 admits the closed `0.4.0` candidate surface. Merged g18.030 removes
 the receipt emitter's hard-coded lock provenance and repins the complete
 current cohort. Merged g18.031 (PR #264) aligns root release metadata, keeps
 it in the exact lockstep candidate surface and derives GPUI census receipt
-versions before the retained g18.006 task resumes; g18.009 owns post-merge branch certification
-and publication. Desktop unblocks
-only after the accepted release reaches npm.
+versions before the retained g18.006 task resumes. Merged g18.006 (PR #265)
+prepared the accepted `0.4.0` candidate, and g18.009 released it on 2026-09-13
+through an operator-authorized npm/web wrapper repair: `v0.4.0` is tagged at
+`4a39055f3`, core and Svelte `0.4.0` are published with attested provenance,
+and a fresh registry consumer proves the Svelte `./editor` entry. Desktop
+unblocks from that published release.
 
 ## Rules
 
