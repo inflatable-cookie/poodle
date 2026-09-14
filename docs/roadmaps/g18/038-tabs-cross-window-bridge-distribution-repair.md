@@ -1,6 +1,6 @@
 # g18.038 — Tabs cross-window bridge distribution repair
 
-Status: ready; operator-approved for Queue dispatch
+Status: complete; merged in PR #274 and released in `0.4.2`
 Owner: Poodle Svelte Tabs and npm web artifact
 Created: 2026-09-14
 Governing refs: `../../contracts/components/tabs.md`,
@@ -139,10 +139,19 @@ as published.
   and diff hygiene pass.
 - npm serves `0.4.1` publicly and does not permit replacing that version's
   archive. A corrected publication therefore requires `0.4.2`.
+- PR #274 merged as `e5a575358be949567eb9bb00d10004b3fad759b2`
+  after exact-head review at `c4618cbecdd45529a3308f629fa346538673ccf8`.
+  The source suite passed 16/16 and the source-free packed fixture passed
+  26/26.
+- `v0.4.2` dereferences to
+  `d2438aef7d34df31b958d172c9c162e83063d83c`. Hosted candidate run
+  `34838863944` passed, and both public registry archives byte-match its
+  certified hashes. A fresh registry consumer passed DockRegion 4/4,
+  including bridge preparation.
 
 ## Next task
 
-After merge, return to Chatterbox for explicit approval of the normal bounded
-`0.4.2` candidate/tag/publish lane. Once fresh-registry proof passes, report the
-exact version and commit to Longhorn so its operator can revise and resume the
-retained `g02.039` task without recreating its worker or workspace.
+Longhorn's retained `g02.039` worker resumed in its original workspace and
+branch with a scoped instruction to adopt public `0.4.2`. Poodle has no active
+follow-up from this repair; select the next bounded g18 runway item in
+Chatterbox.

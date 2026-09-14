@@ -69,12 +69,12 @@ consumer/specimen sweep is the current execution frontier. Merged
 [`g18.036`](g18/036-slider-role-drag-boundary.md) keeps `role="slider"`
 gestures out of ancestor drag sources. Merged
 [`g18.037`](g18/037-menu-item-explicit-accessible-name.md) gives every shared
-web MenuSurface item an exact explicit accessible name. Ready
+web MenuSurface item an exact explicit accessible name. Merged
 [`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) restores
 the omitted Svelte Tabs cross-window bridge forward and proves the packed
-artifact. Queue execution and the required bounded `0.4.2` release are
-operator-approved; Longhorn's retained task and workspace remain preserved for
-the downstream retry.
+artifact. Public npm `0.4.2` is released from
+`d2438aef7d34df31b958d172c9c162e83063d83c`; fresh registry proof passed, and
+Longhorn's retained task resumed in place. No Poodle Queue task is active.
 
 ## Rules
 

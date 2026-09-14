@@ -98,12 +98,12 @@ Updated: 2026-09-14
   - Merged task: `g18.037` projects the required Menu item label as an exact
     explicit accessible name in both web MenuSurface adapters (PR #273, merge
     `00b09f1120928e16d3030b61ff18f6eb49f69e18`).
-  - Ready task: `g18.038` restores the omitted Svelte Tabs cross-window bridge
-    forward and adds source plus source-free packed-artifact proof. Queue
-    dispatch is operator-approved; no release or consumer mutation is included.
-  - Next checkpoint: after g18.038 merges, request explicit approval for the
-    bounded `0.4.2` candidate/tag/publish lane, then return exact registry
-    version and commit evidence to Longhorn's retained `g02.039` task.
+  - Released repair: `g18.038` merged in PR #274 as
+    `e5a575358be949567eb9bb00d10004b3fad759b2`; public npm `0.4.2` is tagged at
+    `d2438aef7d34df31b958d172c9c162e83063d83c`, byte-matched against the
+    certified archives, and proven by a fresh registry consumer. Longhorn's
+    retained `g02.039` worker resumed in place against `0.4.2`.
+  - Next checkpoint: choose the next bounded g18 runway item in Chatterbox.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |

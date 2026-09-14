@@ -1,5 +1,13 @@
 # Papercuts
 
+- 2026-09-14 — npm trusted publication succeeded for both `0.4.2` archives,
+  but the release workflow's 12 × 5-second registry-visibility loop expired
+  before the Svelte packument appeared seconds later. The immutable release is
+  healthy, yet the run is red and invites an unsafe publish retry. Candidate:
+  lengthen the read-only visibility budget within the ten-minute job cap or
+  accept delayed packument status without retrying publication. Surface:
+  `.github/workflows/release.yml` registry availability step.
+
 - 2026-09-05 — `effigy test:nucleus-a11y` cannot resolve generated
   `@inflatable-cookie/poodle-core/styles/accordion.css` in a fresh worker
   checkout; impact: A1 Svelte evidence cannot start; plausible fix: make the

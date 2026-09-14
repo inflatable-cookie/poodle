@@ -79,7 +79,7 @@ needed to compile honest repair tranches.
 | [`g18.033`](033-gpui-form-dialog-render-convergence.md) — GPUI FormDialog render convergence | complete | PR #268 (merge `71788758102854d665d2be35b93a9ec4aa5ee3d9`); probe window-lifecycle repair restores 175/175 routes with a fail-closed regression, three baseline reds cleared under operator rulings, one wholly green `qa:board` in 453s |
 | [`g18.036`](036-slider-role-drag-boundary.md) — slider-role drag boundary | complete | PR #272 (merge `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`); role-slider gestures stay out of ancestor drag sources |
 | [`g18.037`](037-menu-item-explicit-accessible-name.md) — Menu item explicit accessible names | complete | PR #273 (merge `00b09f1120928e16d3030b61ff18f6eb49f69e18`); paired web MenuSurface rows expose exact explicit names |
-| [`g18.038`](038-tabs-cross-window-bridge-distribution-repair.md) — Tabs cross-window bridge distribution repair | ready | operator-approved for Queue dispatch; restores the omitted Svelte prop forward and proves the packed archive before the approved bounded `0.4.2` release |
+| [`g18.038`](038-tabs-cross-window-bridge-distribution-repair.md) — Tabs cross-window bridge distribution repair | complete | PR #274 (merge `e5a575358be949567eb9bb00d10004b3fad759b2`); released as public npm `0.4.2` from tag commit `d2438aef7d34df31b958d172c9c162e83063d83c` |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -179,13 +179,13 @@ Loophole's retained workaround. Merged g18.037 (PR #273,
 `00b09f1120928e16d3030b61ff18f6eb49f69e18`) gives both web MenuSurface
 adapters exact explicit names from their required visible item labels.
 
-The next bounded consumer repair is g18.038. Public Svelte `0.4.1` accepts the
-Tabs cross-window source bridge but fails to forward it to TabsItem in source
-and the packed bundle. The ready task restores that existing contract and adds
-source plus source-free archive proof. It authorizes no release mutation or
-Longhorn edit. Because npm `0.4.1` is immutable, a separate operator-approved
-lane must publish the correction as `0.4.2`, then Longhorn can revise and
-resume its retained `g02.039` task.
+Merged g18.038 (PR #274,
+`e5a575358be949567eb9bb00d10004b3fad759b2`) restores the omitted Svelte Tabs
+cross-window bridge forward and proves both source and source-free packed
+behavior. Public npm `0.4.2` was released from tag commit
+`d2438aef7d34df31b958d172c9c162e83063d83c`; fresh registry proof passed and
+Longhorn's retained `g02.039` worker resumed in place against that version.
+The current Poodle runway has no active Queue task.
 
 ## Held and recurring work
 

@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-14 (g18.038 Tabs bridge repair ready)
+Updated: 2026-09-14 (g18.038 released as npm 0.4.2)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -143,21 +143,22 @@ accessible names — merged as
 exact-head independent review and green checks. Both web MenuSurface adapters
 now expose each required visible item label as its exact explicit name.
 
+[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) — Tabs
+cross-window bridge distribution repair — merged as
+`e5a575358be949567eb9bb00d10004b3fad759b2` (PR #274) on 2026-09-14 after
+exact-head independent review. Source proof passed 16/16 and the source-free
+packed fixture passed 26/26. Public npm `0.4.2` is tagged at
+`d2438aef7d34df31b958d172c9c162e83063d83c`; fresh registry proof passed.
+
 ## Active and paused queue tasks
 
-No Poodle Queue task was active when this projection was compiled.
-[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) is ready
-and operator-approved for Queue submission.
+No Poodle Queue task is active. Longhorn's retained `g02.039` worker resumed
+in its original workspace against public Poodle `0.4.2`.
 
 ## Active and dependency-queued product tasks
 
-[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) is ready
-after completed g18.037. Its owned scope is the omitted Svelte Tabs-to-TabsItem
-bridge forward, a focused source regression, a source-free installed-package
-regression, and the Tabs contract. Queue must not edit React/native/Longhorn,
-change bridge API or semantics, bump versions, touch workflows, or publish npm.
-The immutable public `0.4.1` artifact makes `0.4.2` the smallest corrected
-release, under a separate operator approval after this task merges.
+No product task is dependency-queued. The next bounded g18 item requires a
+Chatterbox runway decision.
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is merged (PR #253,
 merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). Queue task
