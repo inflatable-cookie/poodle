@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-14 (g18.037 Menu item names ready)
+Updated: 2026-09-14 (g18.038 Tabs bridge repair ready)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -137,20 +137,26 @@ merged as `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9` (PR #272) on
 shared DOM selector now keeps role-slider gestures out of ancestor sources;
 Loophole's retained workaround remains consumer-owned.
 
+[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) — Menu item explicit
+accessible names — merged as
+`00b09f1120928e16d3030b61ff18f6eb49f69e18` (PR #273) on 2026-09-14 after
+exact-head independent review and green checks. Both web MenuSurface adapters
+now expose each required visible item label as its exact explicit name.
+
 ## Active and paused queue tasks
 
-[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) is the sole ready
-Poodle task. It projects each MenuSurface item's required visible label as its
-exact explicit accessible name in both web runtimes. Consumer adoption and npm
-release remain separate.
+No Poodle Queue task is active. [`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md)
+is planning-ready but awaits execution approval before Queue submission.
 
 ## Active and dependency-queued product tasks
 
-[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) is ready after
-completed g18.036. Its owned scope is the paired web MenuSurface adapters,
-focused Menu/ContextMenu tests, and their two component contracts. Queue must
-not edit Longhorn or Figmatic, add a naming prop, sweep other menuitem
-renderers, change native behavior, or start an npm patch release.
+[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) is ready
+after completed g18.037. Its owned scope is the omitted Svelte Tabs-to-TabsItem
+bridge forward, a focused source regression, a source-free installed-package
+regression, and the Tabs contract. Queue must not edit React/native/Longhorn,
+change bridge API or semantics, bump versions, touch workflows, or publish npm.
+The immutable public `0.4.1` artifact makes `0.4.2` the smallest corrected
+release, under a separate operator approval after this task merges.
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is merged (PR #253,
 merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). Queue task

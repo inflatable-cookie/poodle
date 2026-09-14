@@ -78,7 +78,8 @@ needed to compile honest repair tranches.
 | [`g18.032`](032-fast-validation-and-npm-release.md) — fast validation and npm release | complete | PR #267 (merge `1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92`); generic web-candidate admission, one-build npm candidate/publish on ubuntu, bounded observable deduplicated board; final board stopped at the pre-existing `probe:gpui-specimens` hang per the stop condition; follow-up in PAPERCUTS and the consumer/specimen sweep |
 | [`g18.033`](033-gpui-form-dialog-render-convergence.md) — GPUI FormDialog render convergence | complete | PR #268 (merge `71788758102854d665d2be35b93a9ec4aa5ee3d9`); probe window-lifecycle repair restores 175/175 routes with a fail-closed regression, three baseline reds cleared under operator rulings, one wholly green `qa:board` in 453s |
 | [`g18.036`](036-slider-role-drag-boundary.md) — slider-role drag boundary | complete | PR #272 (merge `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`); role-slider gestures stay out of ancestor drag sources |
-| [`g18.037`](037-menu-item-explicit-accessible-name.md) — Menu item explicit accessible names | ready | follows completed g18.036; paired web MenuSurface refinement, no consumer or release mutation |
+| [`g18.037`](037-menu-item-explicit-accessible-name.md) — Menu item explicit accessible names | complete | PR #273 (merge `00b09f1120928e16d3030b61ff18f6eb49f69e18`); paired web MenuSurface rows expose exact explicit names |
+| [`g18.038`](038-tabs-cross-window-bridge-distribution-repair.md) — Tabs cross-window bridge distribution repair | ready | awaiting execution approval; restores the omitted Svelte prop forward and proves the packed archive before a separately approved `0.4.2` release |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -174,10 +175,17 @@ later breaking change waits for `0.5.0`.
 
 Merged g18.036 (PR #272, `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`)
 keeps `role="slider"` gestures out of ancestor drag sources without editing
-Loophole's retained workaround. The next bounded consumer-sweep finding is
-g18.037: both web MenuSurface adapters expose the required visible item label
-as an exact explicit accessible name. Longhorn and Figmatic adoption remain
-consumer-owned, and this task authorizes no release mutation.
+Loophole's retained workaround. Merged g18.037 (PR #273,
+`00b09f1120928e16d3030b61ff18f6eb49f69e18`) gives both web MenuSurface
+adapters exact explicit names from their required visible item labels.
+
+The next bounded consumer repair is g18.038. Public Svelte `0.4.1` accepts the
+Tabs cross-window source bridge but fails to forward it to TabsItem in source
+and the packed bundle. The ready task restores that existing contract and adds
+source plus source-free archive proof. It authorizes no release mutation or
+Longhorn edit. Because npm `0.4.1` is immutable, a separate operator-approved
+lane must publish the correction as `0.4.2`, then Longhorn can revise and
+resume its retained `g02.039` task.
 
 ## Held and recurring work
 

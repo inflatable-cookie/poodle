@@ -67,10 +67,13 @@ reached were cleared under operator rulings (`deny.toml` bzip2 drift, the
 tracked-symlink audit repair, the Vitest advisory patch). The post-`0.4.0`
 consumer/specimen sweep is the current execution frontier. Merged
 [`g18.036`](g18/036-slider-role-drag-boundary.md) keeps `role="slider"`
-gestures out of ancestor drag sources. Ready
+gestures out of ancestor drag sources. Merged
 [`g18.037`](g18/037-menu-item-explicit-accessible-name.md) gives every shared
-web MenuSurface item an exact explicit accessible name without editing
-consumers or starting a release.
+web MenuSurface item an exact explicit accessible name. Ready
+[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) restores
+the omitted Svelte Tabs cross-window bridge forward and proves the packed
+artifact. Execution, the required `0.4.2` release, and Longhorn's retained-task
+resume each remain separately operator-gated.
 
 ## Rules
 

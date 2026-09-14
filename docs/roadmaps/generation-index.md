@@ -95,12 +95,15 @@ Updated: 2026-09-14
   - Merged task: `g18.036` repairs the shared web drag controller's omitted
     `role="slider"` interactive boundary (PR #272, merge
     `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`).
-  - Ready task: `g18.037` projects the required Menu item label as an exact
-    explicit accessible name in both web MenuSurface adapters without editing
-    consumers or starting a release.
-  - Next checkpoint: return to Chatterbox after g18.037; if the sweep remains
-    quiet, compatible findings may feed one patch batch while breaking changes
-    wait for `0.5.0`.
+  - Merged task: `g18.037` projects the required Menu item label as an exact
+    explicit accessible name in both web MenuSurface adapters (PR #273, merge
+    `00b09f1120928e16d3030b61ff18f6eb49f69e18`).
+  - Ready task: `g18.038` restores the omitted Svelte Tabs cross-window bridge
+    forward and adds source plus source-free packed-artifact proof. Execution
+    awaits approval; no release or consumer mutation is included.
+  - Next checkpoint: after g18.038 merges, request explicit approval for the
+    bounded `0.4.2` candidate/tag/publish lane, then return exact registry
+    version and commit evidence to Longhorn's retained `g02.039` task.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |
