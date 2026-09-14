@@ -1,0 +1,27 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.2",
+  "source_commit": "0da9ce0615347c1a1e071435dcd9557690189570",
+  "base_commit": "55d8acc5081d2718df7444ffcf4c02a4eb0f54d4",
+  "payload_commits": [
+    "4be5785a0afa926848aaf952517b97be88af22a1",
+    "8fac1b0de1a2826e69c6e43d860c4eae2ec2efab",
+    "dd09ed7e0283c463e78415f9e161911e305f7d90",
+    "3761871a5e175e53373b46637b898b09a371d378",
+    "342151d9960506e24219dc4d9ac304e1af4e254d",
+    "c4618cbecdd45529a3308f629fa346538673ccf8"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "2026-09-14 blanket approval for the Poodle repair, bounded 0.4.2 release, and retained Longhorn continuation chain",
+  "focused_evidence": {
+    "slider_drag_boundary": "73 focused headless DOM tests and the 4167-test web board passed on PR #272",
+    "menu_accessible_names": "22 focused paired Menu/ContextMenu tests and the web board passed on PR #273",
+    "tabs_cross_window_bridge": "16 focused Svelte Tabs tests and 12 source-free consumer files / 26 tests passed at reviewed PR #274 head c4618cbecdd45529a3308f629fa346538673ccf8",
+    "packed_archive_falsification": "the container-scoped bridge oracle records zero prepare calls against the pre-fix archive and one correct prepare call against the reviewed repair archive",
+    "diff_check": "clean"
+  }
+}
