@@ -1,7 +1,7 @@
 {
   "schema": "poodle.web-candidate-evidence.v1",
   "version": "0.4.2",
-  "source_commit": "0da9ce0615347c1a1e071435dcd9557690189570",
+  "source_commit": "a28c99f448d3ffa4fbf18bcf9f7d350c063cc750",
   "base_commit": "55d8acc5081d2718df7444ffcf4c02a4eb0f54d4",
   "payload_commits": [
     "4be5785a0afa926848aaf952517b97be88af22a1",
