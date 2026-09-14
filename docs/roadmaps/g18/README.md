@@ -79,7 +79,7 @@ needed to compile honest repair tranches.
 | [`g18.033`](033-gpui-form-dialog-render-convergence.md) — GPUI FormDialog render convergence | complete | PR #268 (merge `71788758102854d665d2be35b93a9ec4aa5ee3d9`); probe window-lifecycle repair restores 175/175 routes with a fail-closed regression, three baseline reds cleared under operator rulings, one wholly green `qa:board` in 453s |
 | [`g18.036`](036-slider-role-drag-boundary.md) — slider-role drag boundary | complete | PR #272 (merge `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`); role-slider gestures stay out of ancestor drag sources |
 | [`g18.037`](037-menu-item-explicit-accessible-name.md) — Menu item explicit accessible names | complete | PR #273 (merge `00b09f1120928e16d3030b61ff18f6eb49f69e18`); paired web MenuSurface rows expose exact explicit names |
-| [`g18.038`](038-tabs-cross-window-bridge-distribution-repair.md) — Tabs cross-window bridge distribution repair | ready | awaiting execution approval; restores the omitted Svelte prop forward and proves the packed archive before a separately approved `0.4.2` release |
+| [`g18.038`](038-tabs-cross-window-bridge-distribution-repair.md) — Tabs cross-window bridge distribution repair | ready | operator-approved for Queue dispatch; restores the omitted Svelte prop forward and proves the packed archive before the approved bounded `0.4.2` release |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |

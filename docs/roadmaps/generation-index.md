@@ -99,8 +99,8 @@ Updated: 2026-09-14
     explicit accessible name in both web MenuSurface adapters (PR #273, merge
     `00b09f1120928e16d3030b61ff18f6eb49f69e18`).
   - Ready task: `g18.038` restores the omitted Svelte Tabs cross-window bridge
-    forward and adds source plus source-free packed-artifact proof. Execution
-    awaits approval; no release or consumer mutation is included.
+    forward and adds source plus source-free packed-artifact proof. Queue
+    dispatch is operator-approved; no release or consumer mutation is included.
   - Next checkpoint: after g18.038 merges, request explicit approval for the
     bounded `0.4.2` candidate/tag/publish lane, then return exact registry
     version and commit evidence to Longhorn's retained `g02.039` task.

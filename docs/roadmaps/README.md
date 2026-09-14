@@ -72,8 +72,9 @@ gestures out of ancestor drag sources. Merged
 web MenuSurface item an exact explicit accessible name. Ready
 [`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) restores
 the omitted Svelte Tabs cross-window bridge forward and proves the packed
-artifact. Execution, the required `0.4.2` release, and Longhorn's retained-task
-resume each remain separately operator-gated.
+artifact. Queue execution and the required bounded `0.4.2` release are
+operator-approved; Longhorn's retained task and workspace remain preserved for
+the downstream retry.
 
 ## Rules
 

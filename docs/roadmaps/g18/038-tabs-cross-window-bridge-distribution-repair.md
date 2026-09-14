@@ -1,6 +1,6 @@
 # g18.038 — Tabs cross-window bridge distribution repair
 
-Status: ready; awaiting execution approval
+Status: ready; operator-approved for Queue dispatch
 Owner: Poodle Svelte Tabs and npm web artifact
 Created: 2026-09-14
 Governing refs: `../../contracts/components/tabs.md`,
@@ -66,8 +66,8 @@ as published.
 
 ## Dispatch manifest
 
-- **State:** ready; awaiting explicit execution approval; no Queue task or PR
-  exists for this repair.
+- **State:** ready and operator-approved for Queue dispatch; no Queue task or
+  PR existed when the handoff was compiled.
 - **Completion:** source and packed-consumer regressions pass, the existing
   Tabs interaction suite stays green, one frozen source-free web artifact gate
   passes, and an independently reviewed PR merges through Queue closeout.

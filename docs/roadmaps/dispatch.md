@@ -145,8 +145,9 @@ now expose each required visible item label as its exact explicit name.
 
 ## Active and paused queue tasks
 
-No Poodle Queue task is active. [`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md)
-is planning-ready but awaits execution approval before Queue submission.
+No Poodle Queue task was active when this projection was compiled.
+[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) is ready
+and operator-approved for Queue submission.
 
 ## Active and dependency-queued product tasks
 
