@@ -218,8 +218,9 @@ The web pointer sensor uses Pointer Events. It must:
 - clean up capture, listeners, preview, source/target attributes, and scroll
   state exactly once;
 - skip interactive descendants (`button`, `input`, `textarea`, `select`,
-  `a[href]`, `[role='button']`, `contenteditable`) and `[data-poodle-no-drag]`
-  hosts so a whole-row source does not steal their pointerdown;
+  `a[href]`, `[role='button']`, `[role='slider']`, `contenteditable`) and
+  `[data-poodle-no-drag]` hosts so a whole-row source does not steal their
+  pointerdown;
 - suppress native text selection on the connected root as soon as a primary
   pointerdown resolves to an accepted, enabled registered source, keep that
   suppression through the pre-threshold candidate and the active pointer drag,
