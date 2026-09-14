@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/svelte";
+import { fireEvent, render, within } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import "@inflatable-cookie/poodle-core/styles/licence.css";
@@ -183,7 +183,7 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
       cancel: () => {},
     };
 
-    const { getAllByRole, getByRole } = render(DockRegion, {
+    const { container, getByRole } = render(DockRegion, {
       props: {
         items,
         value: "explorer",
@@ -192,7 +192,7 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
         crossWindowDragSource,
       },
     });
-    const [firstTab] = getAllByRole("tab");
+    const [firstTab] = within(container).getAllByRole("tab");
 
     expect(getByRole("region", { name: "Consumer panels" })).toBeTruthy();
 
@@ -221,7 +221,7 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
       cancel: vi.fn(),
     };
 
-    const { container, getAllByRole } = render(DockRegion, {
+    const { container } = render(DockRegion, {
       props: {
         items,
         value: "explorer",
@@ -230,7 +230,7 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
       },
     });
     layoutTabs(container);
-    const [firstTab] = getAllByRole("tab");
+    const [firstTab] = within(container).getAllByRole("tab");
 
     await fireEvent(firstTab, pointer("pointerdown", 50, 15));
     await fireEvent(document, pointer("pointermove", 90, 15));
