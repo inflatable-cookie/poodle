@@ -91,7 +91,7 @@ consumers or starting a release.
 
 Start with `generation-index.md`, then the active generation README, then the
 ready task. Historical work should not be needed to execute current work.
-<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:f73968278565e1345fa8bcfdfe1450965596bb692c5c253de1bfab565616aa0e -->
+<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:257388743fba41519c4ebf911542cceba033efc6a72f572af234e1a9a523a64d -->
 | Generation | Disposition | Runway state |
 | --- | --- | --- |
 | g18 | open | planning_required |
@@ -100,4 +100,5 @@ ready task. Historical work should not be needed to execute current work.
 | g18.034 | complete | none | 8 | sha256:bd6863d116045dec331e616c30985260c441d1ea02735bcfb4bdbdb275f1c106 |
 | g18.035 | complete | none | 8 | sha256:daefcba434d2d1941bb670de98b3faf47d988cb82732c6f2f6a848e4f38614e3 |
 | g18.036 | complete | none | 8 | sha256:b4f79112ff283c2cf7b3c32214cdeeaab547f0766609dde3d2a9a4f67a5649d3 |
+| g18.037 | complete | none | 8 | sha256:f85ff1b17dcdc8ddb826ba4dea3118c3617f8e14d694a18665602730471de89a |
 <!-- northstar:lifecycle:end -->
