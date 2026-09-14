@@ -89,7 +89,7 @@ The remaining sections preserve decision and delivery context:
 
 These records are useful to contributors, but they are not part of the operator
 learning path and may describe superseded implementation states.
-<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:5ed1aff2f1d5261fb998a6b56b6d3e7fc0720548417dbb96577030eb87791162 -->
+<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:f73968278565e1345fa8bcfdfe1450965596bb692c5c253de1bfab565616aa0e -->
 | Generation | Disposition | Runway state |
 | --- | --- | --- |
 | g18 | open | planning_required |
@@ -97,4 +97,5 @@ learning path and may describe superseded implementation states.
 | --- | --- | --- | --- | --- |
 | g18.034 | complete | none | 8 | sha256:bd6863d116045dec331e616c30985260c441d1ea02735bcfb4bdbdb275f1c106 |
 | g18.035 | complete | none | 8 | sha256:daefcba434d2d1941bb670de98b3faf47d988cb82732c6f2f6a848e4f38614e3 |
+| g18.036 | complete | none | 8 | sha256:b4f79112ff283c2cf7b3c32214cdeeaab547f0766609dde3d2a9a4f67a5649d3 |
 <!-- northstar:lifecycle:end -->
