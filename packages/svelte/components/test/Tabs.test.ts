@@ -2,6 +2,10 @@ import { fireEvent, render, screen } from "@testing-library/svelte";
 import { tick } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+  type CrossWindowDragSourceBridge,
+} from "@inflatable-cookie/poodle-core";
 import Tabs from "../src/Tabs.svelte";
 
 const items = [
@@ -374,5 +378,35 @@ describe("Tabs (svelte)", () => {
     for (const tab of itemsOf(container).map((item) => item.querySelector(".poodle-tabs__tab"))) {
       expect(tab?.getAttribute("draggable")).toBe("false");
     }
+  });
+
+  it("forwards the cross-window bridge to the selected tab after pointer pre-drag", async () => {
+    const prepare = vi.fn();
+    const crossWindowSourceBridge: CrossWindowDragSourceBridge = {
+      capabilities: { pointer: true, touch: false, keyboardTargetPicker: false },
+      prepare: vi.fn(async (request) => {
+        prepare(request.subject.id);
+        return { protocolVersion: CROSS_WINDOW_DRAG_PROTOCOL_VERSION, token: "tabs-mix" };
+      }),
+      start: vi.fn(() => () => {}),
+      cancel: vi.fn(),
+    };
+    const { container } = render(Tabs, {
+      props: {
+        items,
+        defaultValue: "mix",
+        reorderable: true,
+        crossWindowSourceBridge,
+      },
+    });
+    layout(container);
+    const [source] = tabs();
+
+    await fireEvent(source, pointer("pointerdown", 50, 15));
+    await fireEvent(document, pointer("pointermove", 90, 15));
+    await tick();
+
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(prepare).toHaveBeenCalledWith("mix");
   });
 });
