@@ -1,6 +1,6 @@
 # Roadmaps
 
-Updated: 2026-09-13
+Updated: 2026-09-14
 
 Northstar roadmaps use one generation-plus-task model:
 
@@ -65,7 +65,11 @@ restoring all 175 specimen routes with a fail-closed regression, and one
 complete `qa:board` is wholly green in 453s. Three baseline reds the board
 reached were cleared under operator rulings (`deny.toml` bzip2 drift, the
 tracked-symlink audit repair, the Vitest advisory patch). The post-`0.4.0`
-consumer/specimen sweep is the next execution frontier.
+consumer/specimen sweep is the current execution frontier. Its first bounded
+Poodle-owned finding is
+[`g18.036`](g18/036-slider-role-drag-boundary.md): keep `role="slider"`
+gestures out of ancestor drag sources without editing Loophole's retained
+consumer workaround or starting a release.
 
 ## Rules
 

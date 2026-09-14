@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-13 (g18.033 GPUI FormDialog convergence merged)
+Updated: 2026-09-14 (g18.036 slider-role drag boundary ready)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -133,10 +133,17 @@ wholly green in 453s. No blocking findings remain.
 
 ## Active and paused queue tasks
 
-No active queue task. The post-`0.4.0` consumer/specimen sweep is the next
-execution frontier; scope is compiled from live findings.
+[`g18.036`](g18/036-slider-role-drag-boundary.md) is the sole ready Poodle
+task. It repairs the shared `role="slider"` interactive boundary exposed by
+Loophole without editing or duplicating Loophole's retained workaround lane.
+No release mutation or automatic sibling is authorized.
 
 ## Active and dependency-queued product tasks
+
+[`g18.036`](g18/036-slider-role-drag-boundary.md) is ready and independent.
+Its owned scope is the shared DOM controller, focused headless regression, and
+spec 069. Queue must not edit Loophole, remove consumer workarounds, broaden
+the ARIA-role policy, or start an npm patch release.
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is merged (PR #253,
 merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). Queue task

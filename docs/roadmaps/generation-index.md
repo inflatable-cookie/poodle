@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-13
+Updated: 2026-09-14
 
 ## Active generation
 
@@ -92,10 +92,12 @@ Updated: 2026-09-13
     that commit. npm serves core and Svelte `0.4.0` as `latest`, and a fresh
     source-free consumer resolves the Svelte `./editor` entry in declared-type,
     SSR, and browser modes.
-  - Next checkpoint: operator-prioritized g18.033 repairs the GPUI
-    `form-dialog` first-draw hang and proves the complete bounded board green.
-    Then Desktop continues on published `0.4.0` and compatible sweep findings
-    feed `0.4.1`; later breaking changes wait for `0.5.0`.
+  - Ready task: `g18.036` repairs the shared web drag controller's omitted
+    `role="slider"` interactive boundary without editing Loophole's retained
+    workaround or starting a release.
+  - Next checkpoint: return to Chatterbox after g18.036; compatible sweep
+    findings may later feed one patch batch, while breaking changes wait for
+    `0.5.0`.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |
