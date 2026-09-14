@@ -220,6 +220,7 @@
           data-kind={hasSubmenu ? "submenu" : (item.kind ?? "action")}
           data-tone={item.tone ?? "default"}
           role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
+          aria-label={item.label}
           tabindex={actionableItems.findIndex((candidate) => candidate.value === item.value) === firstTabStopIndex ? 0 : -1}
           aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
           aria-haspopup={hasSubmenu ? "menu" : undefined}

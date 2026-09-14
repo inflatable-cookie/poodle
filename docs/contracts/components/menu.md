@@ -144,6 +144,11 @@ behavior (the Svelte implementation is the parity authority).
 - Overlay: `role="menu"`, `aria-label` when provided
 - Items: `role="menuitem"` for action kind, `role="menuitemcheckbox"` for
   checkbox kind, `role="menuitemradio"` for radio kind
+- Item names: every non-separator item exposes `aria-label` set to exactly its
+  required `item.label`, the same text users see; the explicit attribute keeps
+  the name stable for bounded serializers. Shortcut, check, and submenu
+  metadata stay `aria-hidden` and never contribute to the name. Separators
+  remain structural and unnamed.
 - Checked items: `aria-checked` attribute reflecting `checked` state
 - Disabled items: `aria-disabled="true"`
 - Shortcut labels: supplemental descriptive text within the item
@@ -374,6 +379,7 @@ behavior (the Svelte implementation is the parity authority).
 - [ ] trigger role="button" with aria-expanded matches
 - [ ] overlay role="menu" with aria-label matches
 - [ ] item roles (menuitem, menuitemcheckbox, menuitemradio) match
+- [ ] each non-separator item's `aria-label` equals its exact `item.label`; separators stay unnamed
 - [ ] aria-checked on checkbox/radio items matches
 - [ ] highlight movement, activation, and dismissal behavior match
 - [ ] focus restoration to trigger matches

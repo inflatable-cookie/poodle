@@ -6,8 +6,58 @@ import type { MenuItem } from "../src/types";
 
 const items: MenuItem[] = [
   { value: "rename", label: "Rename" },
+  { value: "delete", label: "Delete", tone: "danger" },
+  { value: "divider", label: "divider", kind: "separator" },
+  { value: "show-grid", label: "Show grid", kind: "checkbox", checked: true, shortcutLabel: "⌘G" },
+  { value: "small", label: "Small icons", kind: "radio" },
+  { value: "export", label: "Export…", disabled: true },
+  {
+    value: "open-in",
+    label: "Open In",
+    children: [{ value: "finder", label: "Finder" }],
+  },
+];
+
+/** Original g14.007 fixture; retained regressions below still assume it. */
+const identityItems: MenuItem[] = [
+  { value: "rename", label: "Rename" },
   { value: "delete", label: "Delete" },
 ];
+
+/** g18.037 — every non-separator row names itself with the exact required label. */
+describe("Menu (svelte) item accessible names", () => {
+  it("exposes each non-separator item's explicit aria-label and leaves separators unnamed", async () => {
+    const { container } = render(Menu, { props: { items } });
+    await fireEvent.click(container.querySelector(".poodle-menu__trigger") as HTMLElement);
+
+    const surface = document.querySelector(".poodle-menu-surface") as HTMLElement;
+    const rows = [...surface.querySelectorAll(":scope > div .poodle-menu-surface__item")];
+    expect(rows.map((row) => row.getAttribute("aria-label"))).toEqual([
+      "Rename",
+      "Delete",
+      "Show grid",
+      "Small icons",
+      "Export…",
+      "Open In",
+    ]);
+
+    const separator = surface.querySelector('[role="separator"]');
+    expect(separator).not.toBeNull();
+    expect(separator?.getAttribute("aria-label")).toBeNull();
+  });
+
+  it("names the submenu parent row exactly while keeping its popup semantics", async () => {
+    const { container } = render(Menu, { props: { items } });
+    await fireEvent.click(container.querySelector(".poodle-menu__trigger") as HTMLElement);
+
+    const parent = document.querySelector(
+      '.poodle-menu-surface__item[data-kind="submenu"]',
+    ) as HTMLElement;
+    expect(parent.getAttribute("aria-label")).toBe("Open In");
+    expect(parent.getAttribute("aria-haspopup")).toBe("menu");
+    expect(parent.getAttribute("aria-expanded")).toBe("false");
+  });
+});
 
 describe("Menu (svelte) dismissOnOutsideInteract", () => {
   const triggerOf = (container: HTMLElement) =>
@@ -41,7 +91,7 @@ describe("Menu (svelte) dismissOnOutsideInteract", () => {
 /** g14.007 retained regression — see the Select pair for the claim. */
 describe("Menu (svelte) item identity", () => {
   it("addresses every item by its value", async () => {
-    const { container } = render(Menu, { props: { items } });
+    const { container } = render(Menu, { props: { items: identityItems } });
     await fireEvent.click(container.querySelector(".poodle-menu__trigger") as HTMLElement);
 
     const values = [...document.querySelectorAll('[role="menuitem"]')].map((el) =>
@@ -51,7 +101,7 @@ describe("Menu (svelte) item identity", () => {
   });
 
   it("keeps one enabled menu item in the sequential tab order", async () => {
-    const { container } = render(Menu, { props: { items } });
+    const { container } = render(Menu, { props: { items: identityItems } });
     await fireEvent.click(container.querySelector(".poodle-menu__trigger") as HTMLElement);
 
     const menuItems = [...document.querySelectorAll('[role="menuitem"]')] as HTMLButtonElement[];

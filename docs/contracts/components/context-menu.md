@@ -138,6 +138,10 @@ pre-machine component re-fired the callback; recorded delta).
 - Overlay: `role="menu"`, `aria-label` when provided
 - Items: `role="menuitem"` for action kind, `role="menuitemcheckbox"` for
   checkbox kind, `role="menuitemradio"` for radio kind
+- Item names: every non-separator item exposes `aria-label` set to exactly its
+  required `item.label`, inherited from the shared menu-surface adapter;
+  shortcut and check metadata stay `aria-hidden`. Separators remain structural
+  and unnamed.
 - Checked items: `aria-checked` attribute reflecting `checked` state
 - Disabled items: `aria-disabled="true"`
 - Labeling rules: keyboard invocation must produce a meaningful focus and
@@ -332,6 +336,7 @@ leaf-only activation.
 - [ ] pointer and keyboard context invocation semantics match
 - [ ] overlay role="menu" with aria-label matches
 - [ ] item roles (menuitem, menuitemcheckbox, menuitemradio) match
+- [ ] each non-separator item's `aria-label` equals its exact `item.label`; separators stay unnamed
 - [ ] aria-checked on checkbox/radio items matches
 - [ ] item navigation, activation, and dismissal behavior match
 - [ ] outside click (mousedown outside overlay) closes the menu
