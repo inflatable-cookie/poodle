@@ -7,6 +7,30 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-09-14
+
+### Fixed
+
+- **Tabs cross-window transfer.** Svelte Tabs once again forwards its public
+  `crossWindowSourceBridge` to each tab item, so host preparation occurs during
+  pointer pre-drag instead of leaving transfer state idle. Source and
+  source-free packed-package regressions cover the bridge path.
+- **Slider drag containment.** Elements with `role="slider"` are included in
+  the shared interactive boundary, preventing fader and slider gestures from
+  starting an ancestor drag source.
+- **Menu accessible names.** Svelte and React MenuSurface rows expose their
+  required visible item labels as exact explicit accessible names across Menu
+  and ContextMenu.
+- **npm publication reliability.** Publish mode consumes the certified local
+  archives with explicit relative paths and waits for bounded npm registry
+  propagation after successful trusted publication.
+
+### Changed
+
+- **Release status.** Core and Svelte are the `0.4.2` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Cargo packages and native evidence do not move in this patch.
+
 ## [0.4.1] - 2026-09-13
 
 ### Added
@@ -468,6 +492,7 @@ so minor releases may contain documented breaking changes.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.2]: docs/release-notes/0.4.2.md
 [0.4.1]: docs/release-notes/0.4.1.md
 [0.4.0]: docs/release-notes/0.4.0.md
 [0.3.0]: docs/release-notes/0.3.0.md

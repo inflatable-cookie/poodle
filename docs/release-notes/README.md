@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.4.2](0.4.2.md) — 2026-09-14 — Svelte Tabs cross-window bridge repair,
+  slider drag containment, explicit Menu names, and reliable certified-archive
+  publication; core and Svelte patch candidate
 - [0.4.1](0.4.1.md) — 2026-09-13 — accepted web UX corrections for the
   Slider family, editor presentation sizing, rich-text image picking, and
   tooltip input modality; core and Svelte patch candidate
