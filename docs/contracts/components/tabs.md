@@ -83,6 +83,12 @@ Updated: 2026-09-10
 | `onClose` | `(value: string) => void` | `undefined` | no | callback fired when a tab close is requested |
 | `crossWindowSourceBridge` | `CrossWindowDragSourceBridge \| undefined` | `undefined` | no | semantic host preparation and terminal bridge for a tab that may leave this window; only an opaque receipt crosses the bounded transport |
 
+The Svelte `Tabs` parent forwards `crossWindowSourceBridge` unchanged to each
+eligible `TabsItem` source registration. The forwarding is part of the
+published contract: source coverage must cross the pointer pre-drag threshold,
+and the source-free packed-consumer fixture must observe the same one-time
+`prepare` call from the installed archive.
+
 `focusOnValueChange` is web-only and is deliberately absent from `TabsSpec`.
 Capture and transfer are DOM adapter effects; this bounded consumer unblock
 does not add a GPUI or Jetstream focus promise.

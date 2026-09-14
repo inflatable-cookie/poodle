@@ -937,6 +937,7 @@
           {hasPanel}
           {hasTooltips}
           {isVertical}
+          {crossWindowSourceBridge}
           {indexOfValue}
           {ownsValue}
           {isPinnedValue}

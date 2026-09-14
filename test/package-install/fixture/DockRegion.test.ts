@@ -4,6 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 import "@inflatable-cookie/poodle-core/styles/licence.css";
 import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 import {
+  CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+  decodeDockPanelSubject,
+} from "@inflatable-cookie/poodle-core";
+import {
   DockRegion,
   LicenceActivation,
   LicenceSeats,
@@ -47,6 +51,46 @@ const connectionOptions = [
     isDisabled: false,
   },
 ];
+
+function pointer(type: string, x: number, y: number): PointerEvent {
+  return new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    button: 0,
+    buttons: type === "pointerup" ? 0 : 1,
+    isPrimary: true,
+    clientX: x,
+    clientY: y,
+  });
+}
+
+function layoutTabs(container: HTMLElement): void {
+  const rect = {
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 30,
+    top: 0,
+    left: 0,
+    right: 100,
+    bottom: 30,
+    toJSON() {
+      return this;
+    },
+  } as DOMRect;
+  for (const item of container.querySelectorAll<HTMLElement>(".poodle-tabs__item")) {
+    item.getBoundingClientRect = () => rect;
+    const tab = item.querySelector<HTMLElement>(".poodle-tabs__tab");
+    if (tab) {
+      tab.getBoundingClientRect = () => rect;
+      tab.setPointerCapture = vi.fn();
+      tab.releasePointerCapture = vi.fn();
+      tab.hasPointerCapture = () => false;
+    }
+  }
+}
 
 describe("packed @inflatable-cookie/poodle-svelte", () => {
   it("resolves the licence stylesheet and mounts every licence export", () => {
@@ -163,5 +207,38 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
     firstTab.focus();
     await fireEvent.keyDown(firstTab, { key: "ArrowRight", altKey: true });
     expect(onReorder).toHaveBeenCalledWith(["inspector", "explorer"]);
+  });
+
+  it("forwards the cross-window bridge through the packed DockRegion Tabs", async () => {
+    const prepare = vi.fn();
+    const crossWindowDragSource: CrossWindowDragSourceBridge = {
+      capabilities: { pointer: true, touch: false, keyboardTargetPicker: false },
+      prepare: vi.fn(async (request) => {
+        prepare(request.subject.id);
+        return { protocolVersion: CROSS_WINDOW_DRAG_PROTOCOL_VERSION, token: "packed-explorer" };
+      }),
+      start: vi.fn(() => () => {}),
+      cancel: vi.fn(),
+    };
+
+    const { container, getAllByRole } = render(DockRegion, {
+      props: {
+        items,
+        value: "explorer",
+        ariaLabel: "Consumer panels",
+        crossWindowDragSource,
+      },
+    });
+    layoutTabs(container);
+    const [firstTab] = getAllByRole("tab");
+
+    await fireEvent(firstTab, pointer("pointerdown", 50, 15));
+    await fireEvent(document, pointer("pointermove", 90, 15));
+    await Promise.resolve();
+
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(decodeDockPanelSubject(prepare.mock.calls[0][0])).toMatchObject({
+      panelId: "explorer",
+    });
   });
 });
