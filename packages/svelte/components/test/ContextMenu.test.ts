@@ -6,7 +6,11 @@ import type { MenuItem } from "../src/types";
 
 const items: MenuItem[] = [
   { value: "rename", label: "Rename" },
-  { value: "delete", label: "Delete" },
+  { value: "delete", label: "Delete", tone: "danger" },
+  { value: "divider", label: "divider", kind: "separator" },
+  { value: "show-grid", label: "Show grid", kind: "checkbox", checked: true, shortcutLabel: "⌘G" },
+  { value: "small", label: "Small icons", kind: "radio" },
+  { value: "export", label: "Export…", disabled: true },
 ];
 
 describe("ContextMenu (svelte) dismissOnOutsideInteract", () => {
@@ -35,6 +39,37 @@ describe("ContextMenu (svelte) dismissOnOutsideInteract", () => {
 
     await fireEvent.mouseDown(document.body);
     expect(surfaceOf()).not.toBeNull();
+  });
+});
+
+describe("ContextMenu (svelte) item accessible names", () => {
+  const surfaceOf = () => document.querySelector(".poodle-menu-surface") as HTMLElement;
+
+  /** g18.037 — ContextMenu renders through the shared surface, so it inherits
+   * the exact-label rule for every non-separator row. */
+  it("names each non-separator item exactly and leaves separators unnamed", async () => {
+    const { container } = render(ContextMenu, {
+      props: {
+        items,
+        trigger: false,
+        open: true,
+        anchorPoint: { x: 12, y: 8 },
+      },
+    });
+
+    const surface = surfaceOf();
+    const rows = [...surface.querySelectorAll(":scope > div .poodle-menu-surface__item")];
+    expect(rows.map((row) => row.getAttribute("aria-label"))).toEqual([
+      "Rename",
+      "Delete",
+      "Show grid",
+      "Small icons",
+      "Export…",
+    ]);
+
+    const separator = surface.querySelector('[role="separator"]');
+    expect(separator).not.toBeNull();
+    expect(separator?.getAttribute("aria-label")).toBeNull();
   });
 });
 

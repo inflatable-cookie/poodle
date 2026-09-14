@@ -116,6 +116,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
             data-kind={item.kind ?? "action"}
             data-tone={item.tone ?? "default"}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
+            aria-label={item.label}
             tabIndex={actionableItems.findIndex((candidate) => candidate.value === item.value) === firstTabStopIndex ? 0 : -1}
             aria-checked={item.kind === "checkbox" || item.kind === "radio" ? item.checked === true : undefined}
             onClick={() => activateItem(item)}
