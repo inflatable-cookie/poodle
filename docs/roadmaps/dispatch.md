@@ -1,7 +1,7 @@
 # Queue Dispatch Projection
 
 Status: active
-Updated: 2026-09-14 (g18.036 slider-role drag boundary ready)
+Updated: 2026-09-14 (g18.037 Menu item names ready)
 Planning authority: [`g18/README.md`](g18/README.md)
 
 This file is the control-plane projection of the generation README's approved
@@ -131,19 +131,26 @@ repair restores 175/175 routes with a fail-closed regression; three baseline
 reds were cleared under operator rulings and one complete `qa:board` is
 wholly green in 453s. No blocking findings remain.
 
+[`g18.036`](g18/036-slider-role-drag-boundary.md) — slider-role drag boundary —
+merged as `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9` (PR #272) on
+2026-09-14 after exact-head independent review and green rust/web checks. The
+shared DOM selector now keeps role-slider gestures out of ancestor sources;
+Loophole's retained workaround remains consumer-owned.
+
 ## Active and paused queue tasks
 
-[`g18.036`](g18/036-slider-role-drag-boundary.md) is the sole ready Poodle
-task. It repairs the shared `role="slider"` interactive boundary exposed by
-Loophole without editing or duplicating Loophole's retained workaround lane.
-No release mutation or automatic sibling is authorized.
+[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) is the sole ready
+Poodle task. It projects each MenuSurface item's required visible label as its
+exact explicit accessible name in both web runtimes. Consumer adoption and npm
+release remain separate.
 
 ## Active and dependency-queued product tasks
 
-[`g18.036`](g18/036-slider-role-drag-boundary.md) is ready and independent.
-Its owned scope is the shared DOM controller, focused headless regression, and
-spec 069. Queue must not edit Loophole, remove consumer workarounds, broaden
-the ARIA-role policy, or start an npm patch release.
+[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) is ready after
+completed g18.036. Its owned scope is the paired web MenuSurface adapters,
+focused Menu/ContextMenu tests, and their two component contracts. Queue must
+not edit Longhorn or Figmatic, add a naming prop, sweep other menuitem
+renderers, change native behavior, or start an npm patch release.
 
 [`g18.011`](g18/011-web-editor-ux-acceptance-sweep.md) is merged (PR #253,
 merge `211ec0cb707eba62eadc5b33d1bb54d3605c5239`). Queue task

@@ -77,7 +77,8 @@ needed to compile honest repair tranches.
 | [`g18.031`](031-release-metadata-and-census-provenance.md) — release metadata and GPUI census provenance | complete | PR #264 merged as `aa659504b2a6222eb34c7423fcfd877a32138ba8`; truthful root release metadata, exact lockstep transition and derived census receipt versions accepted before g18.006 resumes |
 | [`g18.032`](032-fast-validation-and-npm-release.md) — fast validation and npm release | complete | PR #267 (merge `1b1ee3cdfc3eae912e254d8f6b736c8db11d3d92`); generic web-candidate admission, one-build npm candidate/publish on ubuntu, bounded observable deduplicated board; final board stopped at the pre-existing `probe:gpui-specimens` hang per the stop condition; follow-up in PAPERCUTS and the consumer/specimen sweep |
 | [`g18.033`](033-gpui-form-dialog-render-convergence.md) — GPUI FormDialog render convergence | complete | PR #268 (merge `71788758102854d665d2be35b93a9ec4aa5ee3d9`); probe window-lifecycle repair restores 175/175 routes with a fail-closed regression, three baseline reds cleared under operator rulings, one wholly green `qa:board` in 453s |
-| [`g18.036`](036-slider-role-drag-boundary.md) — slider-role drag boundary | ready | first compatible post-0.4.0 consumer-sweep finding; Poodle-only shared DOM repair, no Loophole workaround edit and no release mutation |
+| [`g18.036`](036-slider-role-drag-boundary.md) — slider-role drag boundary | complete | PR #272 (merge `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`); role-slider gestures stay out of ancestor drag sources |
+| [`g18.037`](037-menu-item-explicit-accessible-name.md) — Menu item explicit accessible names | ready | follows completed g18.036; paired web MenuSurface refinement, no consumer or release mutation |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
@@ -171,12 +172,12 @@ source-free consumer resolves the Svelte `./editor` entry in type, SSR and
 browser modes. After `0.4.0` unblocks Bovine Desktop, a bounded sweep feeds compatible repairs into `0.4.1`; any
 later breaking change waits for `0.5.0`.
 
-The next bounded consumer-sweep finding is g18.036: the shared web drag
-controller's interactive-descendant selector omits `role="slider"`, so an
-ancestor source can steal a Fader, Knob, or custom ARIA slider gesture.
-Loophole's existing explicit-handle and no-drag workaround remains
-consumer-owned; g18.036 repairs only Poodle's shared interaction boundary and
-does not remove that workaround or authorize a release.
+Merged g18.036 (PR #272, `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`)
+keeps `role="slider"` gestures out of ancestor drag sources without editing
+Loophole's retained workaround. The next bounded consumer-sweep finding is
+g18.037: both web MenuSurface adapters expose the required visible item label
+as an exact explicit accessible name. Longhorn and Figmatic adoption remain
+consumer-owned, and this task authorizes no release mutation.
 
 ## Held and recurring work
 

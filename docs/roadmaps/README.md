@@ -65,11 +65,12 @@ restoring all 175 specimen routes with a fail-closed regression, and one
 complete `qa:board` is wholly green in 453s. Three baseline reds the board
 reached were cleared under operator rulings (`deny.toml` bzip2 drift, the
 tracked-symlink audit repair, the Vitest advisory patch). The post-`0.4.0`
-consumer/specimen sweep is the current execution frontier. Its first bounded
-Poodle-owned finding is
-[`g18.036`](g18/036-slider-role-drag-boundary.md): keep `role="slider"`
-gestures out of ancestor drag sources without editing Loophole's retained
-consumer workaround or starting a release.
+consumer/specimen sweep is the current execution frontier. Merged
+[`g18.036`](g18/036-slider-role-drag-boundary.md) keeps `role="slider"`
+gestures out of ancestor drag sources. Ready
+[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) gives every shared
+web MenuSurface item an exact explicit accessible name without editing
+consumers or starting a release.
 
 ## Rules
 

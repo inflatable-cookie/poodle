@@ -92,12 +92,15 @@ Updated: 2026-09-14
     that commit. npm serves core and Svelte `0.4.0` as `latest`, and a fresh
     source-free consumer resolves the Svelte `./editor` entry in declared-type,
     SSR, and browser modes.
-  - Ready task: `g18.036` repairs the shared web drag controller's omitted
-    `role="slider"` interactive boundary without editing Loophole's retained
-    workaround or starting a release.
-  - Next checkpoint: return to Chatterbox after g18.036; compatible sweep
-    findings may later feed one patch batch, while breaking changes wait for
-    `0.5.0`.
+  - Merged task: `g18.036` repairs the shared web drag controller's omitted
+    `role="slider"` interactive boundary (PR #272, merge
+    `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`).
+  - Ready task: `g18.037` projects the required Menu item label as an exact
+    explicit accessible name in both web MenuSurface adapters without editing
+    consumers or starting a release.
+  - Next checkpoint: return to Chatterbox after g18.037; if the sweep remains
+    quiet, compatible findings may feed one patch batch while breaking changes
+    wait for `0.5.0`.
 ## Compacted generations
 
 | Generation | Durable result | Roll-up |
