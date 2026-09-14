@@ -416,6 +416,44 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("keeps role=slider host and descendant gestures local while source chrome still drags", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const slider = document.createElement("div");
+    slider.setAttribute("role", "slider");
+    const thumb = document.createElement("span");
+    thumb.textContent = "Thumb";
+    slider.append(thumb);
+    const chrome = document.createElement("span");
+    chrome.textContent = "Chrome";
+    row.append(slider, chrome);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    slider.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    slider.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().session).toBeNull();
+    expect((row as HTMLElement).setPointerCapture).not.toHaveBeenCalled();
+
+    thumb.dispatchEvent(pointer("pointerdown", { clientX: 22, clientY: 22 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    thumb.dispatchEvent(pointer("pointermove", { clientX: 32, clientY: 92 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().session).toBeNull();
+    expect((row as HTMLElement).setPointerCapture).not.toHaveBeenCalled();
+
+    chrome.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    chrome.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect((row as HTMLElement).setPointerCapture).toHaveBeenCalledWith(1);
+    controller.destroy();
+  });
+
   it("does not start a pointer drag from a bare contenteditable descendant", () => {
     const row = layout(document.createElement("div"), SOURCE_BOX);
     const editor = document.createElement("div");

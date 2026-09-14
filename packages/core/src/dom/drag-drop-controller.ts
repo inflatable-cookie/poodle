@@ -565,7 +565,7 @@ function canPointerCapture(element: Element): boolean {
 
 const NO_DRAG_ATTR = "data-poodle-no-drag";
 const INTERACTIVE_SELECTOR =
-  `button, input, textarea, select, a[href], [role='button'], [contenteditable]:not([contenteditable='false']), [${NO_DRAG_ATTR}]`;
+  `button, input, textarea, select, a[href], [role='button'], [role='slider'], [contenteditable]:not([contenteditable='false']), [${NO_DRAG_ATTR}]`;
 
 function resolveHandle(element: Element, handle: Element | string | undefined): Element {
   if (handle === undefined) return element;
