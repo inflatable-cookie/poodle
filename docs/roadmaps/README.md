@@ -95,7 +95,7 @@ Longhorn's retained task resumed in place. No Poodle Queue task is active.
 
 Start with `generation-index.md`, then the active generation README, then the
 ready task. Historical work should not be needed to execute current work.
-<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:e7e800aca6a1a1c4b0e7df11fb0b1e540e2ed25be7157781482997663fa504a0 -->
+<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:7f9677505612a44fcc1eae63481c576ab876d6890127dc4841a8880764b91514 -->
 | Generation | Disposition | Runway state |
 | --- | --- | --- |
 | g18 | open | planning_required |
@@ -106,4 +106,5 @@ ready task. Historical work should not be needed to execute current work.
 | g18.036 | complete | none | 8 | sha256:b4f79112ff283c2cf7b3c32214cdeeaab547f0766609dde3d2a9a4f67a5649d3 |
 | g18.037 | complete | none | 8 | sha256:f85ff1b17dcdc8ddb826ba4dea3118c3617f8e14d694a18665602730471de89a |
 | g18.038 | complete | none | 8 | sha256:9979bf9354226ec68d1f962e9681be65a3c7bab0d1252135a827dd40ab31d08a |
+| g18.039 | complete | none | 8 | sha256:551d8a4f7d02019f4dad4934f4d30ef302264c8a9130041f35ac45c204827d06 |
 <!-- northstar:lifecycle:end -->
