@@ -80,6 +80,7 @@ needed to compile honest repair tranches.
 | [`g18.036`](036-slider-role-drag-boundary.md) — slider-role drag boundary | complete | PR #272 (merge `89eb7cfe226dbe840dc31dfe38fa246bc0648fb9`); role-slider gestures stay out of ancestor drag sources |
 | [`g18.037`](037-menu-item-explicit-accessible-name.md) — Menu item explicit accessible names | complete | PR #273 (merge `00b09f1120928e16d3030b61ff18f6eb49f69e18`); paired web MenuSurface rows expose exact explicit names |
 | [`g18.038`](038-tabs-cross-window-bridge-distribution-repair.md) — Tabs cross-window bridge distribution repair | complete | PR #274 (merge `e5a575358be949567eb9bb00d10004b3fad759b2`); released as public npm `0.4.2` from tag commit `d2438aef7d34df31b958d172c9c162e83063d83c` |
+| [`g18.039`](039-prospective-merge-protocol-migration.md) — prospective-merge protocol migration | ready maintenance | operator-authorized configuration-only v4 migration; independent of product sequencing |
 | First functional repair tranche | planning horizon | compile from accepted g18.001 missing-capability output |
 | Remaining mounted behaviour tranches | planning horizon | bounded by dependency and interaction substrate, not arbitrary component count |
 | GPUI visual expansion | planning horizon | functional tranche stable; operator-approved background-safe capture |
