@@ -65,16 +65,14 @@ restoring all 175 specimen routes with a fail-closed regression, and one
 complete `qa:board` is wholly green in 453s. Three baseline reds the board
 reached were cleared under operator rulings (`deny.toml` bzip2 drift, the
 tracked-symlink audit repair, the Vitest advisory patch). The post-`0.4.0`
-consumer/specimen sweep is the current execution frontier. Merged
-[`g18.036`](g18/036-slider-role-drag-boundary.md) keeps `role="slider"`
-gestures out of ancestor drag sources. Merged
-[`g18.037`](g18/037-menu-item-explicit-accessible-name.md) gives every shared
-web MenuSurface item an exact explicit accessible name. Merged
-[`g18.038`](g18/038-tabs-cross-window-bridge-distribution-repair.md) restores
-the omitted Svelte Tabs cross-window bridge forward and proves the packed
-artifact. Public npm `0.4.2` is released from
+consumer/specimen sweep is the current execution frontier. Merged repairs keep
+`role="slider"` gestures out of ancestor drag sources, give every shared web
+MenuSurface item an exact explicit accessible name, and restore the omitted
+Svelte Tabs cross-window bridge with packed-artifact proof. Public npm `0.4.2`
+is released from
 `d2438aef7d34df31b958d172c9c162e83063d83c`; fresh registry proof passed, and
-Longhorn's retained task resumed in place. No Poodle Queue task is active.
+Longhorn's retained task resumed in place. Select the next bounded g18 runway
+item in Chatterbox after this repair closes. No Poodle Queue task is active.
 
 ## Rules
 

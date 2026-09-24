@@ -1,6 +1,5 @@
 # g18.038 — Tabs cross-window bridge distribution repair
 
-Status: complete; merged in PR #274 and released in `0.4.2`
 Owner: Poodle Svelte Tabs and npm web artifact
 Created: 2026-09-14
 Governing refs: `../../contracts/components/tabs.md`,
