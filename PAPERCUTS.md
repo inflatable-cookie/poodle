@@ -1,5 +1,13 @@
 # Papercuts
 
+- 2026-09-24 — Chatterbox ownership transfer preflight succeeded through the
+  Queue helper, but the same helper rejected transfer because its source build
+  no longer matched the running Queue service. Impact: a valid successor exists
+  read-only while ownership cannot move through the default path. Plausible
+  fix: reload Queue with the installed build or make the helper select its
+  documented Paseo compatibility bridge on an exact build-mismatch refusal.
+  Surface: `northstar-transfer-origin.mjs` / Queue local client.
+
 - 2026-09-14 — npm trusted publication succeeded for both `0.4.2` archives,
   but the release workflow's 12 × 5-second registry-visibility loop expired
   before the Svelte packument appeared seconds later. The immutable release is
