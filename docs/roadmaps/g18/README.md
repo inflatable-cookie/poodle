@@ -217,7 +217,7 @@ counts and source presence cannot satisfy this rule.
   declared Queue dependencies and may run without changing product priority.
   Existing next-task text continues to describe product sequencing; this entry
   authorizes no sibling product work.
-<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:7f9677505612a44fcc1eae63481c576ab876d6890127dc4841a8880764b91514 -->
+<!-- northstar:lifecycle:begin schema=northstar.lifecycle.projection.v2 digest=sha256:42a285f9c13209058b319db2eaaca8e7c64bab8071482df9c4ab16cd814fcb8e -->
 | Generation | Disposition | Runway state |
 | --- | --- | --- |
 | g18 | open | planning_required |
@@ -229,4 +229,5 @@ counts and source presence cannot satisfy this rule.
 | g18.037 | complete | none | 8 | sha256:f85ff1b17dcdc8ddb826ba4dea3118c3617f8e14d694a18665602730471de89a |
 | g18.038 | complete | none | 8 | sha256:9979bf9354226ec68d1f962e9681be65a3c7bab0d1252135a827dd40ab31d08a |
 | g18.039 | complete | none | 8 | sha256:551d8a4f7d02019f4dad4934f4d30ef302264c8a9130041f35ac45c204827d06 |
+| g18.040 | complete | none | 8 | sha256:14ad8a28202d68ff74e8f5391a2d30c5e0fdf1108ca7f0115e4c8c61930bc085 |
 <!-- northstar:lifecycle:end -->
