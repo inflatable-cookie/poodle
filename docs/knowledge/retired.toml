@@ -5,6 +5,14 @@
 # paths and allow: an entry is an exact file, or a directory when it ends in
 # "/". `*` matches within one path segment. Keep terms multi-word and specific.
 
+# Published history that is never rewritten; check-links and retired-concepts
+# skip it. Current release rules live in docs/knowledge/contracts/release.md.
+frozen = [
+  "docs/release-notes/",
+  # Changelog test inputs whose links are deliberately fixture text.
+  "test/package-install/fixtures/",
+]
+
 [[retired]]
 id = "northstar-process-records"
 retired = "2026-09-26"
@@ -29,7 +37,6 @@ paths = [
 config_keys = ["northstar/queue:hook", "paseo.queue.control.v4"]
 allow = [
   "CHANGELOG.md",
-  "docs/release-notes/",
   ".agents/skills/",
   "docs/evidence/nucleus/v1-cohort-bundle/",
   "docs/evidence/visual/g15-047-button-comparison/",
