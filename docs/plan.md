@@ -16,8 +16,21 @@ task.
 ## Now
 
 1. **Choose the next product frontier** (lane `next-frontier`) — Q-001.
-   Nothing is queued until the operator picks. The recommendation is item 1
-   under Next.
+   Nothing product-facing is queued until the operator picks. The
+   recommendation is item 1 under Next.
+2. **Current-`main` web gates** (lane `web-gates`) — `check:react` is red on
+   current sources, so it can't join `ci:web`, and `visual:report` has an
+   untracked failing Svelte↔React pair set (53 when last measured in August),
+   so reports can't tell existing debt from a new regression. Clear the type
+   errors and put `check:react` on `ci:web`; re-measure the visual set and
+   commit it as a reasoned debt inventory the gate diffs against.
+   Queue papercuts: `195bd08e`, `d3b97931`.
+3. **Fresh-checkout validation** (lane `fresh-validate`) — Poodle has no one
+   command that validates a fresh disposable checkout. Queue's pre-merge
+   validation gate is live and needs exactly that: a command that installs
+   its own dependencies, passes on a fresh checkout and leaves the tree
+   unmodified. Once it passes, set it with Queue's `repository.set`.
+   Queue papercut: `43cd35e9`.
 
 ## Next
 
@@ -50,21 +63,23 @@ task.
      `docs/specs/`, removed roadmap and log records); then drop their `allow`
      entries in [retired.toml](knowledge/retired.toml);
    - `rustls` 0.23.45 in the preview lock (RUSTSEC-2026-0285);
-   - A1 probes lost in later merges and A1 receipts with no emitting selector;
    - whether `SOURCE_PATHS` should pin whole crates or only runtime source.
-   Queue papercuts: `6bfdf8af`, `d193a521`, `06296edd`.
-7. **Red and unrun checks** (lane `check-health`) — checks that exist but are
-   red or never run on `main`: two `poodle-render` unit tests, `check:react`
-   and the `packages/core` strict type-check, `drift:roles`, `rustfmt` on
-   `packages/render`, plus a single fresh-checkout validation command for
-   Queue. A red check that nobody runs hides real regressions.
-   Queue papercuts: `e1492121`, `195bd08e`, `71e576fc`, `869bca08`,
-   `bd8c69c8`, `43cd35e9`.
-8. **Small web defects** (lane `web-defects`) — CodeEditor's active line uses
-   an undefined `--poodle-color-surface-hover` token, React Button/TextInput
-   miss contract-listed web-native props, Svelte `TextInput` doesn't export
-   `focus()`, and React `SplitView` lacks the contract's `divider` prop.
-   Queue papercuts: `01d7a515`, `bdb2c96c`, `6095f116`, `5860bf71`.
+   Queue papercut: `06296edd`.
+7. **Remaining check debt** (lane `check-health`) — the `packages/core` strict
+   type-check reports pre-existing errors, and `packages/render` is not
+   `rustfmt`-clean, so neither can gate. A red check that nobody runs hides
+   real regressions.
+   Queue papercuts: `71e576fc`, `bd8c69c8`.
+8. **Web API gaps and small defects** (lane `web-defects`) — consumers work
+   around missing Poodle API with local CSS or wrappers, which break silently
+   when Poodle refactors. Known gaps: Svelte Text and Code have no wrap
+   control for long identifiers, IconButton forwards no data attributes, and
+   consumers still override `.poodle-tabs*` with `:global` CSS. Known defects:
+   CodeEditor's active line uses an undefined `--poodle-color-surface-hover`
+   token, React Button/TextInput miss contract-listed web-native props, and
+   React `SplitView` lacks the contract's `divider` prop.
+   Queue papercuts: `7d7d6e0b`, `bec2e434`, `80412a47`, `01d7a515`,
+   `bdb2c96c`, `5860bf71`.
 
 ## Not now
 
