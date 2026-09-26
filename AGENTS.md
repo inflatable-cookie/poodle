@@ -17,9 +17,8 @@ or a consumer-shaped adapter layer.
 - Unresolved leads: `docs/triage/`
 - Component contracts (public API reference): `docs/contracts/`
 - Generated evidence (receipts, ledgers, census): `docs/evidence/`
-- Small recurring friction: `PAPERCUTS.md`
 
-Tasks, briefs and status live in Queue, never in this repository.
+Tasks, briefs, status and papercuts live in Queue, never in this repository.
 
 ## Commands
 
@@ -56,8 +55,9 @@ Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing.
   operator-selected `AGENTS_WORKTREE_CONTAINER_DIR` from ignored
   `.agents.local.env`; never guess a temporary or repository-adjacent path. See
   [agent local paths](docs/knowledge/contracts/agent-local-paths.md).
-- Record small solvable friction in `PAPERCUTS.md`; do not turn it into
-  unplanned work.
+- File small solvable friction as a Queue papercut and carry on; do not turn
+  it into unplanned work. See
+  [working rules](docs/knowledge/contracts/working-rules.md#papercuts).
 - When a change alters what is true, update the owning knowledge file in the
   same PR.
 - An operator ruling given in conversation goes into its owning file before

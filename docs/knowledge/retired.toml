@@ -43,3 +43,19 @@ allow = [
   "packages/contracts/ir/src/shared.rs",
   "packages/gpui/preview/tests/headless/nucleus_a11y.rs",
 ]
+
+[[retired]]
+id = "papercuts-file"
+retired = "2026-09-26"
+replacement = "Papercuts are filed in Queue with papercut.add; the planner promotes or closes them."
+owner = "docs/knowledge/contracts/working-rules.md"
+paths = ["PAPERCUTS.md"]
+allow = [
+  "CHANGELOG.md",
+  ".agents/skills/",
+  # Historical g16.059 certification allowlist and its planted fixtures.
+  "test/package-install/scope.ts",
+  "test/package-install/scope.test.ts",
+  # Runtime source pinned by Nucleus receipts (lane `pinned-source-paths`).
+  "packages/gpui/preview/tests/headless/nucleus_a11y.rs",
+]

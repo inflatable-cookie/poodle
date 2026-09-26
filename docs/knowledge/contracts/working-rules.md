@@ -231,6 +231,17 @@ Jetstream gates. A red or over-budget run stops the lane and returns to
 planning; the tag is retracted only when nothing was published from it. See
 spec 071.
 
+## Papercuts
+
+Small, recurring friction worth fixing later is filed in Queue, not in this
+repository (operator ruling 2026-09-26). From the Queue plugin root
+(`~/Dev/projects/paseo-northstar-queue`), run
+`node bin/queue-cli.mjs papercut.add payload.json` with
+`repository: {origin: "inflatable-cookie/poodle", path}`, `title`, `happened`
+and `impact`, plus optional `area` and `fix`. Record it and continue the task.
+The planner promotes a papercut into the plan or a brief, or closes it as
+completed or deprecated.
+
 ## Validation
 
 Use Effigy as the command surface. Match proof cost to the delivery stage:
