@@ -234,7 +234,7 @@ When `typography="inherit"`:
 - `data-size` on root reflects the resolved size
 - `data-density` on root reflects the resolved density value (`compact`, `default`, or `comfortable`)
 - `typography="inherit"` uses the proportional-inherit rule from
-  `docs/contracts/001-working-rules.md`: the selected size preset is converted
+  `docs/knowledge/contracts/working-rules.md`: the selected size preset is converted
   from token `rem` values into equivalent `em` values for label, dot, and gap
 - Label content can come from prop or default slot
 

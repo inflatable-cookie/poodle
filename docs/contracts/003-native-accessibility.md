@@ -22,7 +22,7 @@ argument. This is no longer a claim about source code.
 The earlier version of this document said neither runtime had an API and
 recommended not scheduling the work at all. That was right about GPUI and wrong
 about Jetstream, where the blocker was a decision no one had taken rather than
-anything upstream. The [`g12` roll-up](../roadmaps/archive/g12.md) preserves the
+anything upstream. The `g12` roll-up preserves the
 original options study;
 this records what shipped.
 
@@ -65,7 +65,7 @@ unmodified at every Zed release tag (Apache-2.0; the previously GPL
 `ztracing`/`zlog` crates were relicensed Apache upstream on 2026-09-01 and are
 clean from republish 1.19.0-pre). The operator chose to evaluate that route
 instead of building a fork-free adapter. The feasibility spike succeeded at
-the API boundary; the [`g16` roll-up](../roadmaps/archive/g16.md) and current
+the API boundary; the `g16` roll-up and current
 [`gpui-unofficial` gates](../triage/20260905-111233-gpui-unofficial-adoption-gates.md)
 preserve the result. "No API to build against" is no longer true of upstream,
 only of the crates.io 0.2.2 pin. Adoption still waits on a buildable published

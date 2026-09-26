@@ -1,7 +1,7 @@
 //! The public GPUI drag-and-drop controller (g16.025).
 //!
-//! Architecture: `docs/architecture/011-drag-and-drop-substrate.md`.
-//! Spec: `docs/specs/069-dependable-drag-and-drop-substrate.md`.
+//! Architecture: `docs/knowledge/architecture/011-drag-and-drop-substrate.md`.
+//! Spec: `docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md`.
 //!
 //! One [`DragDropController`] owns one semantic drag session. It translates
 //! stock crates.io GPUI 0.2.2 input into the shared Rust kernel

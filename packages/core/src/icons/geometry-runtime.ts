@@ -1,9 +1,9 @@
 /**
  * Private icon-geometry plan/lifecycle over candidate fixtures.
  *
- * Architecture: docs/architecture/013-icon-geometry-substrate.md
- * Motion laws: docs/architecture/012-semantic-motion-policy.md
- * Card: docs/roadmaps/g16/050-icon-geometry-internal-runtime-substrate.md
+ * Architecture: docs/knowledge/architecture/013-icon-geometry-substrate.md
+ * Motion laws: docs/knowledge/architecture/012-semantic-motion-policy.md
+ * Card: task g16.050 (Git history)
  *
  * Not a public IconMorph. Candidate geometry is fixture input only.
  */

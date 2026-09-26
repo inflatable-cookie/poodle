@@ -2,20 +2,19 @@
  * Planted tests for the retired-token drift gate (g16.108 item 6,
  * operator-authorized 2026-09-05).
  *
- * The gate (scripts/check-recipe-only-surface.ts) treats docs/logs,
- * docs/parity, docs/roadmaps, and docs/archive as historical prefixes, and
- * fails on any retired recipe-token CSS-variable reference in every other
- * scanned file. The forbidden literals below are assembled at runtime so the
+ * The gate (scripts/check-recipe-only-surface.ts) treats superseded specs
+ * under docs/knowledge/specs/archive/ as historical, and fails on any retired
+ * recipe-token CSS-variable reference in every other scanned file. The forbidden literals below are assembled at runtime so the
  * gate never trips on its own test source. These tests run the gate
  * hermeticly: the script is copied into a throwaway mini-repo whose only
  * files are the planted fixtures, so the test never mutates the real working
  * tree and proves both directions:
  *
  * 1. an active-path reference under docs/guides/ still fails the gate, while
- *    the same wording under docs/archive/parity/ stays exempt — archived
+ *    the same wording under the specs archive stays exempt — archived
  *    content is never edited to satisfy a gate;
  * 2. a repo whose only retired-token references live under the historical
- *    prefixes is green.
+ *    prefix is green.
  */
 
 import { execFileSync } from "node:child_process";
@@ -74,7 +73,7 @@ test("an active-path reference under docs/guides/ still fails the gate", () => {
   fs.writeFileSync(path.join(guidesDir, "planted.md"), `# Planted\n\n- ${plantedLine}\n`);
   // Same wording under the archive must stay exempt: archived content is
   // evidence and is never edited to satisfy a gate.
-  const archiveDir = path.join(root, "docs", "archive", "parity");
+  const archiveDir = path.join(root, "docs", "knowledge", "specs", "archive");
   fs.mkdirSync(archiveDir, { recursive: true });
   fs.writeFileSync(path.join(archiveDir, "legacy-audit.md"), `# Legacy\n\n- ${plantedLine}\n`);
 
@@ -82,20 +81,14 @@ test("an active-path reference under docs/guides/ still fails the gate", () => {
 
   expect(result.status).not.toBe(0);
   expect(result.output).toContain("docs/guides/planted.md");
-  expect(result.output).not.toContain("docs/archive/parity/legacy-audit.md");
+  expect(result.output).not.toContain("docs/knowledge/specs/archive/legacy-audit.md");
 });
 
-test("archived parity content alone is green (no active-path reference)", () => {
+test("archived spec content alone is green (no active-path reference)", () => {
   const root = fixtureRepo();
-  const archiveDir = path.join(root, "docs", "archive", "parity");
+  const archiveDir = path.join(root, "docs", "knowledge", "specs", "archive");
   fs.mkdirSync(archiveDir, { recursive: true });
   fs.writeFileSync(path.join(archiveDir, "legacy-audit.md"), `# Legacy\n\n- ${plantedLine}\n`);
-  const parityDir = path.join(root, "docs", "parity");
-  fs.mkdirSync(parityDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(parityDir, "README.md"),
-    "# Pointer\n\nThe audits live under docs/archive/parity and mention the retired token layer.\n",
-  );
 
   const result = runGate(root);
 

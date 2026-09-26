@@ -1,7 +1,7 @@
 /**
  * The browser's own file drag, as a Poodle inbound host bridge.
  *
- * Spec: docs/specs/069-dependable-drag-and-drop-substrate.md — Inbound Files.
+ * Spec: docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md — Inbound Files.
  *
  * This is the whole of what Poodle knows about `File`, `DataTransfer`, and
  * HTML drag events on the inbound side. It turns a webview's file drag into

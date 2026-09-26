@@ -4,7 +4,7 @@ Status: open — spike `g16.110` merged (report PR #214 at `073faf61b`, spike
 branch `f5ad4491e` unmerged); gate 2 resolved 2026-09-05; gates 1 and 3 remain
 Captured: 2026-09-05
 Owner: Chatterbox (planning)
-Source: `../logs/2026-09/20260905-g16-110-gpui-unofficial-spike.md` (PR
+Source: the retired logs (Git history) (PR
 #214), plus direct verification of the published crates on 2026-09-05
 
 ## What the spike proved

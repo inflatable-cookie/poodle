@@ -38,9 +38,7 @@ out/
 .DS_Store
 
 # Logs
-# Runtime logs only. Anchored: an unanchored `logs/` also matches `docs/logs/`,
-# which is documentation and belongs in the repo — that collision is what the
-# per-month re-include rules here were working around.
+# Runtime logs only. Anchored so nested `logs/` directories are not ignored.
 /logs/
 *.log
 npm-debug.log*
@@ -107,8 +105,8 @@ packages/gpui/preview/baselines/
 packages/jetstream/preview/baselines/
 test/native-visual/out/
 test/native-visual/out-jetstream/
-# g15.047 Button comparison: same-run evidence goes to docs/logs via --out;
-# the default directory is disposable.
+# g15.047 Button comparison: retained evidence is copied into docs/evidence/
+# via --out; the default directory is disposable.
 test/visual/button-comparison/out/
 test/visual/inset-shadow-evidence/out/
 # Per-runtime conformance observation reports (spec 066) — written by the

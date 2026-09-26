@@ -1,7 +1,7 @@
 # Cross-framework visual gate
 
 Pixel-diffs the Svelte and React previews against each other at the same
-specimen slug and the same display axis. Roadmap: `docs/roadmaps/g12/009`.
+specimen slug and the same display axis. Roadmap: task g12.009 (Git history).
 
 Both previews serve the same `#components/<slug>` routes from the same
 stylesheet, so the two images should be identical. Any real difference is a
@@ -82,4 +82,4 @@ not an ancestor clips the surface. The probe wraps a specimen in a hostile
 ancestor (scrolling + transformed + low stacking context, with a higher-z
 sibling beside it), opens each anchored overlay, and asserts it portalled out,
 fits the viewport, is the topmost painted element at its own centre, and hides
-when its anchor scrolls out of the pane. Roadmap: `docs/roadmaps/g12/011`.
+when its anchor scrolls out of the pane. Roadmap: task g12.011 (Git history).

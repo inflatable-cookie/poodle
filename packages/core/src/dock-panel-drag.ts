@@ -2,7 +2,7 @@
  * The semantic subject a dragged dock panel carries.
  *
  * Contract: `docs/contracts/components/dock-region.md` §8.
- * Spec: `docs/specs/069-dependable-drag-and-drop-substrate.md`.
+ * Spec: `docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md`.
  *
  * A panel move is an ordinary drag session, so the panel's identity has to
  * travel in the one field the substrate carries: `DragSubject.id`. That field

@@ -1,5 +1,16 @@
 # Papercuts
 
+Small, recurring friction worth fixing later. One entry each: date, what
+happened, impact, a plausible fix. Remove an entry when it is fixed.
+
+- 2026-09-26 — Poodle has no single command that validates a fresh disposable
+  checkout: `effigy qa` assumes `bun install` already ran, and the required PR
+  CI lanes (`ci:web`, `ci:rust`) each install their own toolchain first.
+  Impact: when Queue gains plain pre-merge validation, the manifest has no
+  qualifying `validation` command to name. Plausible fix: a `validate`
+  selector that runs `bun install --frozen-lockfile` then `ci:web` and
+  `ci:rust`. Surface: `tasks/effigy.tasks.toml`, `.paseo/queue.json`.
+
 - 2026-09-24 — Chatterbox ownership transfer preflight succeeded through the
   Queue helper, but the same helper rejected transfer because its source build
   no longer matched the running Queue service. Impact: a valid successor exists
@@ -21,11 +32,6 @@
   checkout; impact: A1 Svelte evidence cannot start; plausible fix: make the
   package build/link bootstrap produce style exports before Vitest; affected
   surface: `test/nucleus-a11y` Vite resolution.
-
-Small, actionable friction found during agent work. Agents append entries when
-they hit a solvable hurdle; they do not stop the current task to fix one.
-
-## Open
 
 - 2026-09-13 — `effigy --json <selector>` executes the selector and buffers
   its whole result; it is not a plan or dry-run flag. An agent used it for a
@@ -151,11 +157,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   g16.096 works around it by fetching `main` after checkout, not by touching
   this script.
 
-- 2026-09-04 — RESOLVED 2026-09-04 by g16.098. The 2026-09-02 `react-preview`
-  workspace-alias papercut is closed: that vitest project now uses
-  `workspaceAliases`, and `ci:web` builds both shell packages before
-  `test:components`. A detached-worktree proof replants the missing alias.
-
 - 2026-09-04 — Second sighting of the 2026-09-02 `react-preview` dist-ordering
   defect, now load-bearing: g16.096 made `ci-web` run automatically on every
   PR and `main` push, and a CI tree is always cold, so `test:components`
@@ -202,12 +203,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   task accept trailing arguments or add a focused native-test selector. Hit
   while preparing g16.082.
 
-- 2026-09-03 — RESOLVED 2026-09-03 by g16.076. Two open Selects plus a focused
-  trigger used to close both layers: `on_cancel` Closed the focused instance
-  and `dismiss_innermost` popped the other. Overlay members skip cancel so
-  Escape owns one stack pop; non-searchable trigger blur no longer Close.
-  Hit while converting g16.076.
-
 - 2026-09-03 — `HeadlessDriver::pointer_activate_id` on a missing runtime id
   falls through to `pointer_activate_at(0.92)` and can toggle whatever control
   sits there. A vanished Select option after disable-while-open looked like a
@@ -230,61 +225,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   before a first `ci:web` on a cold worktree, or give `react-preview` the same
   src alias `react-components` already has. Hit while closing g16.065.
 
-- 2026-09-02 — RESOLVED 2026-09-02 by g16.061. Unset `effigy test:web-pack-install`
-  was still g16.059 strict certification. Empty `origin/main..HEAD` and ordinary
-  feature ranges failed before build/pack (`certification scope found no changed
-  paths` or the writable allowlist), so `ci:web` could not go green for feature
-  PRs. Default is now receipt-free ordinary smoke; `strict` and
-  `g16.054-candidate` stay explicit. Hit while reproducing g16.060 merge
-  validation.
-
-- 2026-09-02 — RESOLVED 2026-09-02. Lazy AgentMessage in root AgentPlan delayed
-  the parser and emptied SSR plan bodies. Operator moved all five markdown
-  components to `./markdown` and restored synchronous render. Hit while closing
-  g16.058.
-
-- 2026-09-02 — RESOLVED 2026-09-02. `effigy test:shell-build` ran compiler/shim
-  falsification under Bun's 5s default; `spawnSync.status` was `null` at
-  5008 ms. The oracle now has an explicit 30s compiler timeout and a 60s test
-  timeout. Hit while closing g16.058.
-
-- 2026-09-02 — RESOLVED 2026-09-02. Compiled shell archives cannot keep the
-  pre-058 pack-install consumer green unchanged. Svelte `5.38.6` cannot run
-  `5.56.8` client output (`$.delegated` is not a function). Vite 7.3.1 leaves
-  CSS imports in compiled React `node_modules` `.js` for Node
-  (`ERR_UNKNOWN_FILE_EXTENSION`). Existing Slider/Tree React type proofs
-  required packed `src/types.ts`. The existing consumer is pinned to `5.56.8`,
-  uses the disposable-smoke CSS stub, and those proofs read `dist/*.d.ts`. No
-  059 receipt or below-floor negative. Hit while closing g16.058.
-
-- 2026-09-02 — RESOLVED 2026-09-02. Node 22 `navigator` is a getter-only
-  global. Disposable browser mount uses `defineProperty`; Node
-  `--conditions=browser --import css-register.mjs` runs the mount. Hit while
-  closing g16.058.
-
-- 2026-09-02 — RESOLVED 2026-09-02. `@sveltejs/package` `emitDts` rejects
-  TypeScript 7.0.2 (`"typescript": "^5.0.0 || ^6.0.0"`). Distribution
-  declarations now stage through `scripts/web-distribution/declaration-tools`
-  pinned to TypeScript `6.0.3` and `@sveltejs/package` 2.5.7. Root repo
-  TypeScript stays `^7.0.2`. Hit while closing g16.058.
-
 - 2026-09-02 — Staged-dist path audit treats any `/…` quoted string as a
   workspace path. Svelte SSR HTML contains `"/</span>"`, which is not a path.
   Values with `<` or `>` are skipped. Hit while closing g16.058.
-
-- 2026-09-02 — RESOLVED 2026-09-02. After core exports moved to `dist/`,
-  `docs:lint` (and therefore `health`) failed on a fresh checkout until
-  `core:build` produced `packages/core/dist`. `health` and `test:components`
-  now run `core:build` first. The pack-install directory-membership check
-  now treats `src` and `dist` as trees (`package/<dir>/` or exact
-  `package/<dir>`) and still treats `LICENSE` as a file. g16.059's new
-  receipt/consumer/two-pack work stays out of this harness. Hit while
-  closing g16.057.
-
-- 2026-09-02 — RESOLVED 2026-09-05 by g16.107. `scripts/gate-tree-guard.ts` writes `poodle-gate-tree-guard.json`
-  into the shared OS temp dir. Parallel worktrees (`docs:check` / `ci:web`)
-  clobber each other's snapshot; `--compare` then fails with "no snapshot found".
-  Hit while closing g16.050 next to a sibling lane.
 
 - 2026-09-02 — Same-worktree parallel `effigy ci:web` and `effigy docs:check`
   both take `task:poodle/core:build`. The second fails immediately with
@@ -318,13 +261,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `setState` forever. Keep a module-level default and depend on a joined key.
   Hit while wiring g16.047 config reconcile.
 
-- 2026-09-01 — RESOLVED 2026-09-01. An earlier `ci:web` run OOMed the
-  specimen census at the ordinary V8 heap while closing g16.034. The shared
-  rAF/cancel cleanup and React smoke cleanup removed the leak: ordinary
-  `effigy test:components` and `effigy ci:web` now pass at default Vitest
-  parallelism and normal heap (372 files / 3472 tests). No heap override or
-  worker serialization is required.
-
 - 2026-09-01 — Adding one public portable catalogue component requires a
   coordinated denominator bump across `specimen_probe.rs` `EXPECTED_ROUTES`,
   `test/parity/specimen-axis-census.test.tsx`, `lint-docs.ts` GPUI/native
@@ -351,20 +287,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   here: `component-docs.ts` is outside this card's writable scope, and the
   snippet needs a v3 rewrite rather than a field edit. Found while running the
   v2 `branchCount` absence search for g16.033.
-
-- 2026-09-01 — RESOLVED 2026-09-02 by g16.053. `audit:security` failed on
-  `main` on an English word.
-  `docs/triage/20260901-080641-post-g16-research-queue.md:153` contains
-  "mask-plus-translated-highlight", and the OpenAI matcher
-  `/sk-(?:proj-)?[A-Za-z0-9_-]{20,}/` in
-  `scripts/audit-repository-security.ts:23` had no left boundary, so it matched
-  the `sk-plus-translated-hi…` inside `mask-`. `effigy qa` was therefore red on
-  `main` itself. The production matcher now requires a left word boundary
-  (`\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}/`) and focused tests exercise that
-  production path: real `sk-` / `sk-proj-` shapes at whitespace, quote, `=`,
-  and `:` still match; `mask-plus-translated-highlight` and
-  `task-backed-...` do not. Denominator stays `git ls-files` with no path
-  exclusion. Found while closing g16.028.
 
 - 2026-09-01 — `probe:gpui-specimens` fails on a wall-clock budget
   (`probe shard N exceeded the two-minute test-body budget`) rather than on
@@ -436,12 +358,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 - 2026-08-29 — `rustfmt` on a touched `packages/gpui/preview/tests/headless_regressions.rs` or specimen file rewrites the whole multi-thousand-line file. Format only the new function, or skip rustfmt on those paths. Hit while landing g16.032 Batch 1; recovered by restoring and re-applying the surgical edit.
 
-- 2026-08-29 — RESOLVED 2026-09-05 by g16.107. `scripts/gate-tree-guard.ts` keeps its snapshot at a fixed
-  `os.tmpdir()` path shared by every worktree, and `--compare` deletes it. Two
-  concurrent `effigy ci:web`/`qa` runs in different worktrees therefore fail
-  each other with "no snapshot found". Key the snapshot by repository root or
-  by a run id. Seen while closing g16.031; the same board passed on a rerun.
-
 - 2026-08-29 — The Svelte package build strips a function parameter's type
   annotation but leaves the optional marker, so `function f(id?: number)` in a
   `.svelte` script ships as invalid JavaScript and breaks every consumer import
@@ -461,40 +377,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `packages/render/src/*.rs` files in an otherwise clean worker tree. Revert
   the extra formatting or stop running crate-wide rustfmt from the CI board.
   Found while closing g16.029.
-
-- 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter never re-read props after
-  OPEN, so a host that handed back new pages while the popover stayed open
-  kept the OPEN-time copy. Already fixed: the Svelte/React adapters dispatch
-  `PAGES_CHANGED` on pages identity change (`HistoryCenter.svelte` /
-  `HistoryCenter.tsx` pages `$effect` / `useEffect`). Evidence:
-  `HistoryCenter.test.ts` "re-requests continuations when the host supplies
-  pages containing the open run". Filed from Loophole 2026-08-12.
-
-- 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter stale-level reconcile needed
-  an event that never came, so an open fork whose run now sat on the spine
-  spun on "Loading…". Already fixed: `PAGES_CHANGED` is inert itself and
-  drives `reconcileStaleLevels` once. Evidence: core tests "PAGES_CHANGED is
-  inert on its own" and "PAGES_CHANGED drives the stale-level reconcile
-  exactly once". Filed from Loophole 2026-08-12.
-
-- 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter's single-fork picker
-  disabled its actions menu with the Select, greying out Checkout. Already
-  fixed: menu enablement is independent of `row.disabled`; Checkout gates on
-  `picked.preferred`. Evidence: "single fork: the Select is disabled but
-  Checkout and Rename stay live on their own gates (R1)". Filed from Loophole
-  2026-08-12.
-
-- 2026-08-27 — RESOLVED 2026-08-27. Poodle-svelte `types.ts` still exported
-  the v2 `HistoryEntry` (`branchCount`). Replaced with a re-export of the
-  core `HistoryEntry` / `HistoryEntryPosition` shapes; React `types.ts`
-  matched. Evidence: HistoryCenter package-types tests assign
-  `continuationCount` on the public type.
-
-- 2026-08-27 — RESOLVED 2026-08-27. Poodle Select ignored `variant="ghost"`
-  in native mode: the native root had no `data-variant`, so ghost CSS never
-  applied. Native root now stamps `data-variant={variant}`. Evidence:
-  Select svelte/react tests "stamps data-variant on the native root". Filed
-  from Figmatic 2026-08-14.
 
 - 2026-08-27 — `effigy drift:roles` resolves the deferred Jetstream preview
   and fails in an otherwise valid Poodle worktree when the sibling Jetstream
@@ -568,13 +450,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   the JS package version before the next Underlay tag. Found while widening
   Poodle `g15.068`–`072` and `079`.
 
-- 2026-08-24 — RESOLVED 2026-09-05 by g16.107. Required Northstar orientation through `effigy doctor` now
-  fails on three broad repository scans (`generated-in-src`, `god-files`, and
-  `stale-suppressions`: 41 error findings total) even though none is connected
-  to the active consumer-adoption lane. Baseline or intentionally configure
-  these scans so doctor distinguishes new health drift from accepted source
-  shape. Affects every worker and orchestrator startup in Poodle.
-
 - 2026-08-24 — The exact-candidate Button visual diagnostic recovered three
   Svelte captures only after separate 60-second `waitForSelector` timeouts,
   despite all retained captures verifying and repeating byte-identically. Add
@@ -617,14 +492,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   generator version from the header (source path + schema version already
   identify the artifact). Found by g15.050.
 
-- 2026-08-23 — The headless GPUI root began calling the production
-  `reset_element_ids` boundary in every render, but the generated element and
-  gesture counters were process-global atomics while Rust ran independent
-  test apps in parallel. One app could rewind another app's in-progress tree
-  walk, making generated identity proofs intermittent. Fixed on g15.052 by
-  matching the counters to GPUI's UI-thread model and the thread-local
-  registries they key.
-
 - 2026-08-22 — zsh reserves the lowercase `path` variable for `PATH`; a shell
   inventory loop using `path` silently removed `git`, `rg`, and `sort` from the
   command search path. Use a neutral loop variable in repository probes.
@@ -654,13 +521,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   A build script or an in-crate generated module would remove it. Found on
   g15.044 while vendoring the Rust graph into a throwaway proof workspace.
 
-- 2026-08-21 — RESOLVED 2026-09-05 by g16.107. `effigy qa` reproducibly reaches `gate-tree-guard --compare`
-  with no snapshot even when run alone from a clean committed worktree; every
-  preceding component, package, type, and docs step passes. The earlier entry
-  treated this as a parallel-worktree race, but it also affects a single broad
-  board. Keep snapshot/compare state invocation-local or make the guard one
-  atomic step. Found while closing g15.041.
-
 - 2026-08-21 — The contract drift checkers (`contract-prop-drift.ts`,
   `contract-callback-drift.ts`, `contract-value-domain-drift.ts`) parsed only
   `interface Props`; a discriminated-union props shape
@@ -668,21 +528,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   prop-drift outright and was silently skipped by the other two. Fixed on
   g15.041 with a shared `unionPropsBody()` fallback — any future union-typed
   props get it for free, but a third props shape will need the same visit.
-
-- 2026-08-21 — No SSR-capable vitest project existed for Svelte: every
-  `.svelte` file compiled client-only, so `render` from `svelte/server`
-  throws. vite-plugin-svelte ignores `compilerOptions.generate`; the working
-  knob is omitting `resolve.conditions: ["browser"]` in the SSR project so the
-  plugin server-compiles through vitest's SSR transform. Fixed on g15.041 with
-  the `svelte-components-ssr` project (server-render evidence for
-  `defaultOpen`/SSR-dependent components now has a home).
-
-- 2026-08-20 — RESOLVED 2026-09-05 by g16.107. `effigy ci:rust` runs `test:contracts`, which lists seven
-  contract crates but not `packages/contracts/node`. `poodle-node` is the
-  vocabulary every component depends on, and its own unit tests run under no
-  selector — only `cargo test --manifest-path packages/contracts/node/...`
-  reaches them. Adding the crate to `test:contracts` is a one-line task edit,
-  which needs the task-file owner. Found on g15.040.
 
 - 2026-08-20 — `gh pr merge --merge --delete-branch` successfully merges a PR
   from its worker worktree, then exits non-zero because it tries to check out
@@ -820,12 +665,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   both-collapsed recoverability and `primaryHidden`/`secondaryHidden` deltas
   were fixed there; these remain).
 
-- 2026-08-16 — RESOLVED 2026-09-05 by g16.107. two `effigy docs:check` runs in separate worktrees can race on
-  `gate-tree-guard` state: one run reached `--compare` after the shared snapshot
-  had disappeared and failed with "no snapshot found", while the other passed.
-  Namespace guard snapshots by worktree and process, or make snapshot/compare
-  one atomic invocation. Found while reviewing g15.003 and g15.004 in parallel.
-
 - 2026-08-16 — cards that say only `git diff --check` can report green after
   all work is committed while committed trailing whitespace remains: the bare
   command checks the empty working-tree diff. Final worker gates should compare
@@ -876,24 +715,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   surface differently. Cards that name the standalone selector inherit a red
   unrelated baseline. Align the two prop-normalization paths or declare the
   slot props once in the contract-drift policy.
-
-- 2026-08-14 — g14.004 said only “conformance gates”, so a worktree agent ran
-  the foreground `ci:conformance-windowed` board for 15+ minutes and repeatedly
-  stole desktop focus. Selector naming and comments did not protect the
-  operator. Resolved at the task boundary with a local opt-in guard; planned
-  cards now name the headless selector explicitly. Full GPUI execution still
-  needs migration onto GPUI's in-memory test platform.
-  RESOLVED 2026-08-15 by g14.023: the windowed board, its opt-in guard, and the
-  AppKit driver are deleted; `conformance:complete` runs the full cohort on
-  GPUI's in-memory test platform in any worktree.
-
-- 2026-08-14 — repeated `conformance:test-gpui-windowed` runs in one desktop
-  session can write all three reports and exit the GPUI child while Effigy
-  keeps waiting; later runs can also miss RangeSlider scrub/focus AppKit events
-  after an earlier full-green run. The selector should time out/reap the child
-  and isolate or reset foreground input state between invocations.
-  RESOLVED 2026-08-15 by g14.023: the selector is deleted; the headless board
-  is deterministic in-memory execution with no platform input state.
 
 - 2026-08-14 — `effigy graph explore ... --json` can leave its process alive
   after emitting the complete envelope, holding `.effigy/graph/refresh.lock` and
@@ -1009,55 +830,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   needs to pixel-prove a bottom-row state in Jetstream either scrolls the
   snap scene or captures per-section.
 
-- 2026-08-13 — RESOLVED in g13-042. b041's review moved the `button-ts`
-  artifact from the preview packages to the component packages
-  (`packages/{svelte,react}/components/src/generated/button/`) but never
-  moved the two path constants in `packages/codegen/tests/button.rs`, so
-  `cargo test` for `poodle-codegen` was red on the branch (`No such file
-  or directory`) until 042 corrected them. A review that moves where
-  generated code lands must update the tests that byte-compare it.
-
-- 2026-08-12 — RESOLVED at review. `g13-b041` had `Button.svelte`/`Button.tsx`
-  import the generated definition across a package boundary
-  (`../../preview/src/generated/button`), so the packed `poodle-svelte` /
-  `poodle-react` tarballs (`files: src`) did not carry it and
-  `test:web-pack-install` failed to resolve the import in its consumer. Green
-  on `main`, red on the branch — a real regression, not a pre-existing gap.
-
-  **Cause was the card, not the worker.** `041`'s Writable Paths named
-  `packages/{svelte,react}/preview/src/**/generated/**` as the artifact
-  location, copied from `b035` where the consumer *was* the preview. A
-  component's artifact has to live in the package that ships it. Fixed at
-  review: the `button-ts` target now emits into
-  `packages/{svelte,react}/components/src/generated/button/`, the four imports
-  point there, and `test:web-pack-install` is green again.
-
-  **`test:web-pack-install` is not in `ci:web`.** Every gate the card listed
-  passed while the packaged build was broken. A card that moves where code is
-  emitted must run it; better, it belongs in `ci:web`.
-
-- 2026-08-12 — RESOLVED 2026-08-13: rule deleted; the drag-handle keeps the ring
-  b038 gave it. g13-038 found a dead focus rule: `.poodle-order-by__item:focus-visible`
-  (order-by.css) rings the item row, but the item div is never focusable — no
-  `tabindex`, and the only focusable inside is the drag-handle button. The ring
-  never renders; the drag-handle got its own ring this batch. The dead rule
-  should be deleted or retargeted to the handle.
-
-- 2026-08-12 — RESOLVED 2026-08-12: g13-038 closed the sweep. The 56-sheet
-  stacking is gated by `docs:focus-ring-drift` (absent-treatment + stacked-UA
-  checks with baselines); hidden inputs and machine-driven controls now set
-  `outline: none`, and the detail-item/field info triggers defer to the nested
-  Popover's own ring. Original report follows. g13-037 measured the other half
-  of the 2026-08-11 focus-ring entry: 56 component stylesheets draw their own
-  focus ring without suppressing the UA `outline: auto` on the same element,
-  so Chrome stacks a second 1px ring. Live in checkbox/radio/switch/tri-state/
-  segmented-control (the hidden native input draws `outline: auto` — invisible
-  on the clipped inputs, so harmless there) and visibly on the
-  `detail-item`/`field` info-trigger wrappers, whose own ring lands on the
-  icon while the UA ring draws on the focusable wrap. The follow-up card owns
-  the sweep; the fix pattern is `outline: none` on the focusable element + the
-  component's own ring on its visible surface.
-
 - 2026-08-12 — g13-036: the scene now owns the control labels in all four
   shells, but the web shells still hardcode accessibility labels: Svelte and
   React `DisplayControls` pass `ariaLabel="Neutral contrast"` (contrast),
@@ -1068,23 +840,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   only remaining second copy of label text — R3's "the scene owns the word"
   is not complete until the web aria labels read from the artifact too.
   Out of scope for 036 (web preview sources are not its writable paths).
-
-- 2026-08-12 — RESOLVED 2026-08-12: the include now covers `test/**` and the
-  36 errors are cleared (701 files, 0 errors, up from 449). Verified by
-  reintroducing the stale `rootContinuationCount` — the gate catches it now.
-  The previews are still unchecked and remain open. Original report follows.
-  `check:svelte` type-checks `packages/svelte/components/src`
-  only. Its tsconfig `include` is `src/**`, so the 36 files in `test/` are not
-  checked, and no task type-checks either preview at all. This is not
-  hypothetical: the `rootContinuationCount` → `precedingContinuationCount`
-  rename (`2a6d3af9`) left four live sites stale — both HistoryCentre specimens
-  and both component test suites — and every gate stayed green. Widening the
-  include to `test/**` surfaces 36 pre-existing errors across 11 files
-  (`SplitView.svelte.test.ts` 12, `AppHeader.svelte.test.ts` 8,
-  `contract-prop-drift.ts` 6 via its test, and others); adding `vite/client`
-  and `vitest/globals` types does not reduce them, so they are real. Clear that
-  backlog, then widen the include, then decide whether the previews get a gate
-  of their own.
 
 - 2026-08-12 — g13-032's picker pencil is an `IconButton`, which forwards no
   data attributes (explicit props only, no rest spread): the pencil's
@@ -1119,77 +874,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   Fix: one declaration line + the strict-null guards; a `tsc --noEmit` gate on
   core would have caught it at b028.
 
-- 2026-08-12 — RESOLVED 2026-08-12 by Longhorn `777de887`. The mechanism in
-  this report was wrong: `record_applied` always installs the new entry as its
-  parent's preferred continuation, so a run's terminal entry has **no**
-  children and its `continuationCount` is 0, not 1. Poodle's implementation
-  saturates at 0 and was never affected. The report did surface a real hole
-  the other way round — `ForkHistory::from_state` accepted a parent with
-  children and no preference, and two Longhorn fixtures were already in that
-  state, including an anchor whose 64 alternates were unreachable. Longhorn
-  added a two-half guard: one child needs no preference, two or more without
-  one is `MissingPreferredChild`. Original report follows.
-  R4's `forkCount = continuationCount - 1` makes a **single fork
-  off a run's last entry invisible**: the authority defines
-  `continuation_count` as all children ("this page's own next entry included…
-  a run's last entry is always zero", `ForkEntryRecord` doc), so a last entry
-  with one divergent child carries 1 → `forkCount 0` → no disclosure
-  affordance, no way to open the fork. Verified in the Longhorn prototype
-  (`projection/project.rs`: `continuation_count = child_ids(entry).len()`);
-  the v3 disclosure model therefore cannot reach such a fork at all, while the
-  authority's own doc line claims the case never occurs. Either the authority
-  forbids recording a fork at the preferred chain's leaf (making the doc line
-  a true invariant), or v3 needs a head-fork affordance. Affects g13.029
-  rendering and the Longhorn thread.
-
-- 2026-08-12 — RESOLVED 2026-08-12 (b027 Part 1, `1331b5e5`: the twelve specs
-  now carry `dismiss_on_outside_interact` — default `true`, matching the web —
-  and `OPEN_GAPS` is `{}` again; each renderer resolves the field). Original
-  report follows. A contract cannot document a prop the matching `*Spec` struct
-  deliberately lacks without `effigy docs:lint` failing: the contract ↔
-  poodle-specs drift gate (`packages/svelte/preview/scripts/contract-spec-drift.ts`)
-  requires every documented Public Prop to exist on the Spec. g13-026 needed
-  `dismissOnOutsideInteract` documented on twelve specs (`select`, `menu`,
-  `context-menu`, `menubar`, `navigation-menu`, `split-button`, `theme-select`,
-  `ref-select`, `model-picker`, `order-by`, `list-card`, `filter-builder`) that
-  deliberately model no dismissal (default matches every native platform, so a
-  field would be invented data) — carried via `OPEN_GAPS` entries instead,
-  which the card's writable paths exclude. Same decision-shaped hole as the
-  g13.009 `initialFocus` papercut: either the specs gain the fields or the gate
-  needs a sanctioned carve-out for "default-is-platform-standard" props. Decide
-  once, then burn down both gaps (delete the `OPEN_GAPS` entries).
-
-- 2026-08-12 — RESOLVED 2026-08-12 (b027 Part 2, `c04a9cdc`: the parser no
-  longer reads a comma inside a string literal as a prop boundary — regression
-  test on the exact `placeholder = "Select date, time, and zone"` line —
-  Snippet-typed props are separated from props, and the gate now enforces the
-  reverse direction, exiting non-zero on undocumented props). Original report
-  follows. `contract-prop-drift` only checks that documented props are
-  implemented, never that implemented props are documented, so an undocumented
-  public prop can never fail the gate. The reverse direction exists behind
-  `DRIFT_REPORT=1` but never exits non-zero and mixes snippets (`children`,
-  `footer`) in with real props. It also has a depth bug: it reports `and` and
-  `time` as props of `date-time-zone-picker`, both lifted from inside
-  `placeholder = "Select date, time, and zone"` and `defaultValue = { date:
-  null, time: null, timeZone: null }`, though the comment at
-  `contract-prop-drift.ts:51` says default values and object literals are
-  skipped. Fix the parser, separate snippets from props, then enforce.
-
-- 2026-08-11 — RESOLVED 2026-08-12 (`5854634c` regenerated the artifacts,
-  `761f81d8` added the `gate:snapshot`/`gate:clean` guard that now fails any
-  gate which rewrites a committed artifact). Original report follows.
-  `effigy docs:check` fails at HEAD once the parity reports
-  regenerate: `packages/svelte/preview/artifacts/parity-report.json` reports
-  201 exports / 164 components (`HistoryCenter`, from g13-b020/b021) while
-  the committed report and `packages/shared-demo-app-audit.json` say
-  200/163, so `docs:lint`'s audit-json consistency check fails. The report
-  generators have no `--check` mode (b015 failure mode 8), so the committed
-  report drifted silently and the first regeneration after any component
-  lands breaks the gate. Either regenerate+commit the report artifacts
-  together with component landings, or give the report generators a check
-  mode wired into `docs:check`. Affects every gate run after a component
-  lands.
-
 - 2026-08-11 — (the `isForkPoint` instance was fixed in b023 review; the
   structural point stands and is why it recurs.)
   `packages/core/src/index.ts` hard-lists every per-module
@@ -1204,20 +888,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   Either make `index.ts` writable on export-deleting cards, or switch these
   blocks to wildcard re-exports (`export * from "./history-center"`) so
   deletions stop breaking the package index.
-
-- 2026-08-11 — RESOLVED 2026-08-12 (`761f81d8`: added the tsconfig and the
-  `*.css` ambient declaration, wired `check:svelte-components` into
-  `check:svelte`; coverage went from 1 file to 449, and the two real errors it
-  exposed were fixed in AudioSwitch). Original report follows.
-  `packages/svelte/components` has no `tsconfig.json` and is never
-  type-checked. `effigy check:svelte` runs `svelte-check` against
-  `packages/svelte/install-smoke` — one file, 0 errors — so the 164 components
-  are unchecked. A `class` prop passed to `Icon`, which accepts no such prop,
-  shipped through every gate: it was reported from a consumer repo whose own
-  type-check caught it. The prop was silently dropped, so the checkpoint pin
-  also rendered unstyled. Pairs with the 2026-08-10 React entry (`react:build`
-  transpiles without `tsc`): neither web runtime has a type gate. Standing one
-  up will surface a backlog, so it wants its own card.
 
 - 2026-08-11 — `box-sizing: border-box` plus `width: 100%` plus a horizontal
   margin overflows by twice the margin: border-box covers padding and border but
@@ -1271,21 +941,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   it). The workaround for a one-off check is temporarily repointing those
   paths at the worktree; it should not need to exist. Consider canonicalizing
   the sibling path or documenting the required checkout layout.
-
-- 2026-08-11 — **Resolved 2026-08-12.** The docs preview's global
-  `button:focus-visible, input:focus-visible` outline
-  (`packages/svelte/preview/src/app.css`) outranked every component that draws
-  its own focus treatment: a bare element selector plus pseudo-class is (0,1,1)
-  and beats a component class at (0,1,0). 33 component stylesheets set
-  `outline: none` for exactly this reason, so all of them were being overridden
-  — TextInput visibly rendered its rounded focus border and the preview's
-  square outline at the same time. The first fix narrowed it with
-  `:not([class*="poodle-"])`, which made it match nothing: every focusable
-  element in the shell is a Poodle component or carries a `poodle-` class
-  (measured 0 matches across four pages). Dead, but still dangerous — a shell
-  copied into a host app takes the rule with it and it starts matching that
-  host's chrome. Now deleted. Chrome that needs a ring gives itself one, keyed
-  to its own class and radius.
 
 - 2026-08-11 — Removing an explicit `border` declaration from a `<button>`-based
   component style leaks the UA default `2px outset buttonborder`, and the two
@@ -1370,7 +1025,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   documented Public Prop to exist on the matching `*Spec` struct, so g13.009's
   `initialFocus` (a focus-behaviour semantic, not web plumbing) cannot ship
   without `DialogSpec`/`FormDialogSpec` gaining `initial_focus` — stopped the
-  card; see `docs/logs/2026-08/11-g13-009-dialog-initial-focus.md` §5. Either
+  card; see the g13.009 log (Git history) §5. Either
   the Specs need the field (native renderers own focus per dialog.md §10) or
   the gate needs a sanctioned web-only carve-out; a decision is required
   before the next prop of this kind lands.
@@ -1380,7 +1035,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   (`282ce489`) added a `--poodle-split-shadow` column to split-button.md §8
   "Tone: danger" that the stylesheet never implemented — primary danger
   resolves `none` against a mandated elevation shadow (stopped the card;
-  see `docs/logs/2026-08/11-g13-006-button-tone-parity.md` §5). Card gap
+  see the g13.006 log (Git history) §5). Card gap
   tables should be re-verified against amended contracts at dispatch time.
 
 - 2026-08-11 — `docs/guides/svelte-developer-guide.md` §Types still defines
@@ -1472,41 +1127,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 - 2026-08-06 — `effigy doctor` reports the repo's `isolation` manifest key as
   unsupported, so routine health checks cannot go green on the checked-in
   manifest. Align the manifest schema or update Effigy's accepted config keys.
-
-
-- 2026-08-12 — RESOLVED 2026-08-13 (g13-044): `hasMounted` is now `$state`,
-  so the persistence `$effect` re-runs on mount and on every preview-mode
-  change; the Svelte preview writes `?theme=…&density=…&controlSize=…` back
-  to the URL exactly like React's `useEffect` (browser-verified, incoming
-  params preserved). Original report follows.
-  Svelte preview's SHELL-08 URL persistence never fires: in
-  `packages/svelte/preview/src/App.svelte`, the `$effect` that writes
-  `theme`/`density`/`controlSize` back into the URL is gated on
-  `hasMounted`, a plain `let` in a runes-mode component — not reactive, so
-  the effect never observes the state it is supposed to re-serialize.
-  Measured live (g13-035): clicking density/size updates the top-bar pills
-  and `data-theme` but `location.href` keeps the pre-change query string,
-  with no console error; the React preview's equivalent `useEffect` does
-  persist (`?theme=forest&density=default&controlSize=lg` after clicks), so
-  the two web shells drift on SHELL-08. Either make `hasMounted` `$state`
-  (or drop the guard and run the write on mount) or route the effect through
-  `$effect` with an explicit reactive flag. Affects the shared-preview-shell
-  parity story once 036 lands.
-
-- 2026-08-12 — RESOLVED 2026-08-13 (g13-044): both `CatalogueLanding`
-  surfaces now derive their grid groups from the `components` prop, so the
-  grid card count equals the header count under any query
-  (browser-verified: 6/6 with query `date`). Original report follows.
-  Both catalogue-landing grids ignore their filtered component
-  list: `packages/svelte/preview/src/pages/CatalogueLanding.svelte` and the
-  React mirror render `componentsByTag()` (every component) and use the
-  `components` prop only for the count line. With a search query active, the
-  sidebar filters correctly and the header reads "2 components" while the
-  grid still renders ~164 cards (measured live in both previews, g13-035).
-  The search axis itself works — the data flows — but the landing grid
-  defeats the filter's visible result. Fix: derive `groups` from the
-  `components` prop (filter `componentsByTag()` items by the passed set)
-  in both files.
 
 - 2026-08-12 — Two findings from the SettingsShell specimen.
 
@@ -1698,14 +1318,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   any branch. Surface: `packages/render` unit tests. Found by g16.118, which
   did not repair them.
 
-- 2026-09-05 — Three A1 scenarios shipped with scenario ids that no manifest
-  row carries (`nucleus-toast-host`, `nucleus-command-palette`,
-  `nucleus-message-center` against `nucleus.attention.*`). Nothing caught it
-  because a diverged row emits no receipt, so the id was never resolved
-  against the manifest. A scenario-id-to-manifest check in
-  `effigy test:nucleus-a11y` would fail it the day the scenario lands.
-  Surface: `test/nucleus-a11y/scenarios/`. Fixed by g16.118.
-
 - 2026-09-05 — The native Dialog backdrop is absolutely positioned inside its
   own composition wrapper, not the window, so any sibling beside the open
   overlay (ConfirmAction's default trigger, which Svelte keeps mounted)
@@ -1740,24 +1352,28 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   can therefore split one run across root and package `target/` trees. Use an
   absolute output path for direct re-emission, or let the task honor an
   explicit caller override. Surface: Effigy task env and A1 receipt runner.
+
 - 2026-09-07 — `file:`-linked consumers serve `packages/core/dist` and
   `packages/svelte/components/dist`, so a Poodle pull that adds an export
   (g17.002 `installInputModality`) throws "doesn't provide an export named"
   in the app until `effigy core:build` and `effigy svelte:package` rerun.
   Nothing in the pull path rebuilds. Candidate: one `web:dist` selector plus
   a README line for linked consumers; not a card.
+
 - 2026-09-09 — `effigy qa` repeatedly stops in
   `scripts/web-distribution/cold-checkout-react-preview.test.ts`: the detached
   three-suite positive control exceeds its fixed 120-second child timeout on
   this machine, then spends several more minutes unwinding the child tree. A
   focused rerun reproduced the same 2 pass / 1 timeout result. The flattened
   task migration does not touch the tested React preview or build path.
+
 - 2026-09-10 — `bun scripts/audit-license-compliance.ts` fails on the clean
   g18.003 dispatch head (`deny.toml: still claims bzip2, which no lockfile
   resolves`). The retired-notice sweep scans `deny.toml`, which still carries
   a `[licenses] skipped`/comment reference to bzip2 from before g16.006.
   Candidate: scrub the bzip2 mention from `deny.toml`; unrelated to g18.003,
   which added no Cargo dependency.
+
 - 2026-09-10 — Verified on the clean g18.003 dispatch head, three checks are
   already red before any rich-text change: `drift:roles` (invokes
   `packages/svelte/preview/scripts/contract-role-drift.ts`, which does not

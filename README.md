@@ -107,7 +107,7 @@ docs/guides/                operator and integration guides
 ```
 
 The [documentation index](docs/README.md) separates operator guides from
-architecture, contracts, and project history.
+architecture, contracts, and generated evidence.
 
 ## Work on Poodle Locally
 
@@ -151,9 +151,9 @@ Use `effigy tasks` to see narrower validation and build tasks.
 ## Documentation
 
 - [Documentation index](docs/README.md) — operator paths and project reference
-- [System architecture](docs/architecture/001-poodle-system-shape.md) — package
+- [System architecture](docs/knowledge/architecture/001-poodle-system-shape.md) — package
   boundaries and renderer flow
-- [Token and package architecture](docs/architecture/002-token-system-and-package-layout.md)
+- [Token and package architecture](docs/knowledge/architecture/002-token-system-and-package-layout.md)
 - [Component contracts](docs/contracts/components/README.md) — normative
   component behavior
 - [Application recipes](docs/guides/README.md) — reusable composition patterns
@@ -162,8 +162,9 @@ Use `effigy tasks` to see narrower validation and build tasks.
   private reporting
 - [Security policy](SECURITY.md) — private vulnerability reporting
 
-Roadmaps, logs, specs, and research are kept in the repository for contributors
-and historical traceability. They are not required reading for adopting Poodle.
+Knowledge (vision, architecture, specs, working rules) lives under
+[`docs/knowledge/`](docs/knowledge/README.md) for contributors. It is not
+required reading for adopting Poodle.
 
 ## License
 

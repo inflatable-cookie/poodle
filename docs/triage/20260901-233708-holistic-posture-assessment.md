@@ -10,7 +10,7 @@ in the surfaces they were promoted to. Do not reconstruct them here.
 ## Promoted (removed from this note)
 
 - Parity goal, Nucleus as the switch target, execution-backed ledger:
-  `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g16/nucleus-gpui-parity-programme.md`, `g16.062`–`g16.093`.
+  the g16 `nucleus-gpui-parity-programme` record (Git history), `g16.062`–`g16.093`.
 - Release truth and scanner: `g16.053`, `g16.054`.
 - Compiled web distribution, `sideEffects`, `marked` as optional peer:
   `g16.056`–`g16.061`, architecture 014.
@@ -19,7 +19,7 @@ in the surfaces they were promoted to. Do not reconstruct them here.
 - React retain + drift gate: `g16.095` (ready).
 - Linux web + Rust PR/main board: `g16.096` (ready).
 - Underlay direct-import rule: `AGENTS.md`, product guardrails, vision §Underlay.
-- Consumer defect intake lane: `../roadmaps/README.md` rules.
+- Consumer defect intake lane: the retired roadmaps (Git history) rules.
 
 ## Still open
 

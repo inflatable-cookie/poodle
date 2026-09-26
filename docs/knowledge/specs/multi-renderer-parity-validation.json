@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "generation": "g10.021",
+  "updated": "2026-04-22",
+  "description": "Multi-renderer parity validation report — maps the unified Svelte component surface to the merged Rust spec crates and adapter readiness",
+  "contract_crates": {
+    "poodle-tokens": {
+      "path": "packages/contracts/tokens",
+      "modules": ["semantic", "primitives", "themes", "density", "metadata", "typed"],
+      "typed_module": true
+    },
+    "poodle-specs": {
+      "path": "packages/contracts/components",
+      "spec_count": 126,
+      "notes": "Merged contract crate. Replaced legacy poodle-primitives and poodle-composites in g10.004."
+    },
+    "poodle-workstation": {
+      "path": "packages/contracts/workstation",
+      "spec_count": 13
+    },
+    "poodle-layout": {
+      "path": "packages/contracts/layout",
+      "types": ["LayoutDirection", "LayoutSizing", "LayoutEdges", "LayoutSpacing", "MainAxisAlignment", "CrossAxisAlignment", "LayoutAlignment", "LayoutOverflow", "LayoutIntent"]
+    },
+    "poodle-events": {
+      "path": "packages/contracts/events",
+      "types": ["SemanticEvent", "EventValue", "DragPhase", "EventModifiers", "NavigateDirection", "ComponentEventProfile"]
+    },
+    "poodle-style": {
+      "path": "packages/contracts/style",
+      "types": ["StyleDescriptor", "FontFamily", "TypographyDescriptor", "BorderDescriptor", "CornerRadii", "CursorHint"]
+    },
+    "poodle-adapter": {
+      "path": "packages/contracts/adapter",
+      "traits": ["ThemeProvider", "EventSink", "RenderTarget", "RenderComponent", "AdapterManifest"]
+    }
+  },
+  "adapter_targets": {
+    "gpui": {
+      "generation": "g10",
+      "status": "implemented",
+      "crate_name": "poodle-gpui"
+    },
+    "jetstream": {
+      "generation": "g10",
+      "status": "implemented",
+      "crate_name": "poodle-jetstream",
+      "constraint_document": "task g06.013 (Git history)"
+    }
+  },
+  "spec_coverage": {
+    "total_svelte_components": 124,
+    "total_rust_specs": 139,
+    "coverage_notes": "The merged poodle-specs crate exports 126 component specs. The remaining 13 specs live in poodle-workstation for shell and workstation-only surfaces.",
+    "component_specs": 126,
+    "workstation_specs": 13
+  },
+  "validation_checks": {
+    "typed_token_coverage": {
+      "status": "pass",
+      "description": "All token categories have typed equivalents (ColorValue, SpaceValue, DurationValue, ShadowValue)",
+      "string_only_tokens": ["font-family", "easing", "z-index (emitted as f32)"]
+    },
+    "layout_intent_coverage": {
+      "status": "pass",
+      "description": "All layout properties map losslessly to both GPUI and Jetstream",
+      "known_deltas": ["overflow_x: Scroll maps to Hidden in Jetstream (vertical-only scroll)"]
+    },
+    "event_model_coverage": {
+      "status": "pass",
+      "description": "All semantic events map to both GPUI events and Jetstream UiEvent",
+      "known_deltas": ["Hovered not emitted by Jetstream (gamepad primary)", "Navigate added for Jetstream gamepad"]
+    },
+    "adapter_trait_readiness": {
+      "status": "pass",
+      "description": "All trait definitions published, ready for g07/g08 implementation",
+      "deferred": "Actual adapter implementations land in g07 (GPUI) and g08 (Jetstream)"
+    }
+  }
+}

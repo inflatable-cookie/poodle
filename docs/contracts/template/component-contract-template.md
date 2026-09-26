@@ -106,7 +106,7 @@ is the source of truth for the headless core (`@inflatable-cookie/poodle-core` T
 and the Rust mirror). Rules: transitions are pure; side effects appear only in
 the Effects table as named intents; every ARIA/data attribute the machine owns
 appears in the Part Attribute Output table as a function of machine state and
-context. See `docs/specs/062-headless-core-and-dual-layer-strategy.md`.
+context. See `docs/knowledge/specs/062-headless-core-and-dual-layer-strategy.md`.
 
 Behavior classification: `machine-backed | styled-only`
 

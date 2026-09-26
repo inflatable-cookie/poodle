@@ -3,8 +3,8 @@
 Status: complete — measured by `g15.001`
 Date: 2026-08-16
 Updated: 2026-09-02 — `g16.056` froze 176 as the compiled-distribution denominator and named the root markdown break
-Card: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
-Governing refs: `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g15/001-release-baseline-roster-inventory.md`, `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g14/022-generation-closeout.md`, `docs/contracts/001-working-rules.md`, `https://github.com/inflatable-cookie/poodle/blob/85741961d60ac557974f4a4f3e2244b61c8f0b74/docs/roadmaps/g14/conformance-estate.md`, `docs/specs/070-compiled-web-distribution-contract.md`
+Card: task g15.001 (Git history)
+Governing refs: task g15.001 (Git history), task g14.022 (Git history), `docs/knowledge/contracts/working-rules.md`, the g14 `conformance-estate` record (Git history), `docs/knowledge/specs/070-compiled-web-distribution-contract.md`
 
 ## Denominator
 

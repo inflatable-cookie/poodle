@@ -15,7 +15,7 @@
 //     different are baselined below, each with a reason.
 //
 // The convention statement is in
-// `docs/roadmaps/g11/002-headless-machine-spec-format-and-pilot-contracts.md`.
+// task g11.002 (Git history).
 // Closing a drift means deleting its baseline entry.
 
 import { readFileSync, existsSync, readdirSync } from "node:fs";

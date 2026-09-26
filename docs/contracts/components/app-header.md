@@ -83,7 +83,7 @@ Non-goals (deliberate, per g13-b014 rulings):
   (`BTN-15` is carried as a `NEG-02` escape hatch).
 - No `action` prop: Svelte actions have no React equivalent, so an action prop
   would be a Svelte-only API, which the Runtime Parity Authority rule forbids
-  (`docs/contracts/001-working-rules.md` §Runtime Parity Authority).
+  (`docs/knowledge/contracts/working-rules.md` §Runtime Parity Authority).
 - No additional named props (`id`, `class`, `style`, or any other): element
   access only.
 

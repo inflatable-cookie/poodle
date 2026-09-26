@@ -202,7 +202,7 @@ Values are computed using integer division (floor). Thresholds use seconds:
 
 - Renders a `<time>` element with class `time-ago`, wrapped in the `Tooltip` component
 - `typography="inherit"` uses the text-only-inherit rule from
-  `docs/contracts/001-working-rules.md`: font metrics inherit directly because
+  `docs/knowledge/contracts/working-rules.md`: font metrics inherit directly because
   the primitive has no shell geometry to scale
 - Live updates via `setInterval` with `interval` prop as delay, run inside a
   reactive `$effect`; the interval is cleared on the effect's teardown return

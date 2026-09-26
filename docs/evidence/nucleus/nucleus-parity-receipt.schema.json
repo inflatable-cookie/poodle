@@ -166,7 +166,7 @@
         "poodle_pin"
       ],
       "properties": {
-        "dir": { "const": "docs/logs/2026-09/08-140648-g01-006-cohort-batch-bundle" },
+        "dir": { "const": "docs/evidence/nucleus/v1-cohort-bundle" },
         "directory_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "summary_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "lab_merge_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },

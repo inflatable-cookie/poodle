@@ -1765,12 +1765,6 @@ Published from the certified tag.
         kind === "semantic-entry" ? "Planted semantic release entry." : "Existing release entry.",
       );
     await Bun.write(changelogPath, after);
-    const logPath = join(
-      plantRoot,
-      "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md",
-    );
-    mkdirSync(join(logPath, ".."), { recursive: true });
-    await Bun.write(logPath, "# Changelog maintenance\n");
     if (kind === "mixed-range") {
       const sourcePath = join(plantRoot, "packages/core/src/release-stowaway.ts");
       mkdirSync(join(sourcePath, ".."), { recursive: true });

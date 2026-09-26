@@ -407,7 +407,7 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 - Tone, appearance, size, font, and muted state are driven via `data-*`
   attributes for CSS selector targeting
 - `typography="inherit"` uses the proportional-inherit rule from
-  `docs/contracts/001-working-rules.md`: the selected size preset is converted
+  `docs/knowledge/contracts/working-rules.md`: the selected size preset is converted
   from token `rem` values into equivalent `em` values
 - Component custom properties (`--poodle-pill-tint-fill`,
   `--poodle-pill-fill`, `--poodle-pill-border`, `--poodle-pill-text`) are set

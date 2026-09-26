@@ -8,5 +8,5 @@ Jetstream, or another runtime. Backend-specific conversion belongs in the
 target adapter, not here.
 
 This crate is a pre-1.0 source preview and is not yet published to crates.io.
-See the [native architecture](../../../docs/architecture/001-poodle-system-shape.md)
+See the [native architecture](../../../docs/knowledge/architecture/001-poodle-system-shape.md)
 for the full render flow.

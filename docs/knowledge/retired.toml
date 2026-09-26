@@ -1,0 +1,45 @@
+# Concepts that no longer exist. The retired-concepts check fails on any listed
+# term, path or config key found outside `allow`
+# (`effigy skill run northstar-lean/retired-concepts`).
+#
+# paths and allow: an entry is an exact file, or a directory when it ends in
+# "/". `*` matches within one path segment. Keep terms multi-word and specific.
+
+[[retired]]
+id = "northstar-process-records"
+retired = "2026-09-26"
+replacement = "Knowledge in docs/knowledge/, intent in docs/plan.md; tasks, briefs, status and outcomes live in Queue."
+owner = "docs/knowledge/README.md"
+terms = [
+  "roadmap card",
+  "generation index",
+  "generation runway",
+  "active generation",
+  "Northstar task",
+  "northstar:lifecycle",
+  "chatterbox handoff",
+]
+paths = [
+  ".northstar/lifecycle/",
+  "docs/roadmaps/",
+  "docs/handoffs/",
+  "docs/logs/",
+  "docs/archive/",
+]
+config_keys = ["northstar/queue:hook", "paseo.queue.control.v4"]
+allow = [
+  "CHANGELOG.md",
+  "docs/release-notes/",
+  ".agents/skills/",
+  "docs/evidence/nucleus/v1-cohort-bundle/",
+  "docs/evidence/visual/g15-047-button-comparison/",
+  "docs/knowledge/specs/archive/",
+  # Historical closed-candidate release policies match exact past diffs.
+  "test/package-install/scope.ts",
+  # Runtime source pinned by Nucleus receipts; comments are fixed at the next
+  # evidence repin (docs/plan.md, lane `pinned-source-paths`).
+  "packages/render/src/lib.rs",
+  "packages/contracts/ir/src/lib.rs",
+  "packages/contracts/ir/src/shared.rs",
+  "packages/gpui/preview/tests/headless/nucleus_a11y.rs",
+]

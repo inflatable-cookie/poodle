@@ -40,6 +40,7 @@ const REACT_ENGINE_SOURCE = "packages/react/components/src/code-editor-engine.ts
 
 const RUN_TIMEOUT_MS = 120_000;
 const PREVIEW_TIMEOUT_MS = 360_000;
+const MODULE_FETCH_TIMEOUT_MS = 30_000;
 const CLEANUP_TIMEOUT_MS = 60_000;
 
 const childEnv = { ...process.env };
@@ -411,7 +412,9 @@ async function fetchFirstOk(urls: string[]): Promise<{ url: string; body: string
   const errors: string[] = [];
   for (const url of urls) {
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(5_000) });
+      // Vite transforms a module on first request; the large editor bundle
+      // can outlive a short budget on a loaded machine.
+      const response = await fetch(url, { signal: AbortSignal.timeout(MODULE_FETCH_TIMEOUT_MS) });
       if (!response.ok) {
         errors.push(`${url} -> ${response.status}`);
         continue;

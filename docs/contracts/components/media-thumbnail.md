@@ -224,7 +224,7 @@ When `stateTitle` is null, the component uses these defaults:
 | height | `100%` |
 
 When `state="loading"`, the state display prepends the shared
-[`Spinner`](../foundation/spinner.md) primitive with `variant="grid"`,
+[`Spinner`](spinner.md) primitive with `variant="grid"`,
 `tone="accent"`, and size `md` in default presentation or `sm` in compact
 presentation.
 

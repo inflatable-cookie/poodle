@@ -1,52 +1,76 @@
-# AGENTS
+# Poodle
 
-Scope: whole `poodle/` repository.
+Poodle is a generalized design system: tokens, primitives and reusable
+composites, delivered as Svelte and React web packages and a shared Rust
+renderer with GPUI and Jetstream backends, all bound to one set of
+renderer-neutral contracts. It serves applications that need one UI language
+across web and native. It must never become a home for one product's widgets
+or a consumer-shaped adapter layer.
 
-## Hard Rules
+## Where things live
 
-- Treat `docs/` as the authority for Poodle vision, architecture, roadmap, and execution status.
-- Keep Poodle focused on generalized tokens, primitives, and reusable composites; app-specific DAW widgets stay in their owning products.
-- Keep Svelte, React, shared Rust composition, and GPUI aligned to one documented contract. Parity means semantic inputs, states, behavior, and token usage first. Jetstream follows its current admission status in the working rules.
-- Underlay and its applications import Poodle's published packages directly; any translation lives in the consumer. Poodle carries no consumer-named directory or adapter (architecture 001, operator decision 2026-09-02).
-- Treat Bits Svelte as an implementation detail, not public contract authority.
-- Never run `*-windowed` conformance selectors locally without explicit operator approval; use the headless `effigy ci:conformance` path.
-- Before v1.0, do not add compatibility shims, aliases, or silent fallbacks. Stop and ask before a breaking migration.
+- Current state: `docs/README.md`
+- Knowledge (one owner per fact): `docs/knowledge/README.md`
+- Retired concepts, which must not come back: `docs/knowledge/retired.toml`
+- Open questions: `docs/knowledge/questions.md`
+- What's next: `docs/plan.md`
+- Unresolved leads: `docs/triage/`
+- Component contracts (public API reference): `docs/contracts/`
+- Generated evidence (receipts, ledgers, census): `docs/evidence/`
+- Small recurring friction: `PAPERCUTS.md`
 
-## Agent Workflow
+Tasks, briefs and status live in Queue, never in this repository.
 
-- Use Northstar for planning, runway maintenance, worker dispatch, PR review, and closeout. The orchestrator owns the `main` planning checkout; workers use dedicated non-`main` worktrees, push PRs, and never merge.
-- Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing and supported execution.
-- Prefer harness-managed worktrees. Manual creation requires the operator-selected `AGENTS_WORKTREE_CONTAINER_DIR` from ignored `.agents.local.env`; never guess a temporary or repository-adjacent path. See `docs/contracts/005-agent-local-paths.md`.
-- Record small solvable execution friction in root `PAPERCUTS.md`; do not turn it into unplanned work.
+## Commands
+
+Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing.
+
+- `effigy tasks` — list selectors; pick the narrow ones for the change
+- `effigy docs:lint` — contract, docs and generated-evidence checks
+- `effigy ci:web` / `effigy ci:rust` — the required PR CI lanes
+- `effigy qa` — the broad headless repository board
+
+## Product rules
+
+- Keep Poodle to generalized tokens, primitives and reusable composites.
+  App-specific DAW widgets stay in their owning products.
+- Svelte, React, shared Rust composition and GPUI follow one documented
+  contract. Parity means semantic inputs, states, behavior and token use first.
+  Svelte is the parity authority. Jetstream follows its admission status in
+  [working rules](docs/knowledge/contracts/working-rules.md).
+- Underlay and its applications import Poodle's published packages directly;
+  any translation lives in the consumer. Poodle carries no consumer-named
+  directory or adapter (architecture 001, operator decision 2026-09-02).
+- Bits Svelte is an implementation detail, not public contract authority.
+- Before v1.0, add no compatibility shims, aliases or silent fallbacks. Stop and
+  ask before a breaking migration.
+
+## Guardrails
+
+- Never run `*-windowed` conformance selectors locally without explicit
+  operator approval; use the headless `effigy ci:conformance` path.
+- Do not edit `.github/workflows/` or run release mutations without explicit
+  operator approval. Release follows
+  [release](docs/knowledge/contracts/release.md).
+- Prefer harness-managed worktrees. Manual creation requires the
+  operator-selected `AGENTS_WORKTREE_CONTAINER_DIR` from ignored
+  `.agents.local.env`; never guess a temporary or repository-adjacent path. See
+  [agent local paths](docs/knowledge/contracts/agent-local-paths.md).
+- Record small solvable friction in `PAPERCUTS.md`; do not turn it into
+  unplanned work.
+- When a change alters what is true, update the owning knowledge file in the
+  same PR.
+- An operator ruling given in conversation goes into its owning file before
+  the thread ends.
 
 ## Validate
 
-- Use `effigy tasks` to find selectors and run the narrow checks relevant to the batch.
-- Use `effigy qa` for the broad headless repository board.
-- Every worker handoff must name a bounded local validation budget: the focused
-  selectors allowed during implementation and the one final broad selector, if
-  any. Do not stack overlapping boards (`docs:check`, `ci:web`, `qa`, release
-  gates) or rerun a green broad selector after narrower checks.
-- Workers do not wait or poll for GitHub checks. After the clean pushed PR and
-  required local proof exist, report `ready_for_review` and stop. Queue
-  coordination owns asynchronous CI observation and exact-head verification.
-- A review repair reruns the affected leaf proof and only the final gate that
-  the change actually invalidated. Reviewers reuse exact-head CI evidence and
-  do not rerun an equivalent broad local board.
-- Npm release candidates run the bounded npm artifact gate once on the frozen
-  candidate. They do not run aggregate/native QA. A changed candidate
-  invalidates that receipt; documentation-only follow-up does not justify
-  unrelated broad boards.
-- Aggregate validation must show live child progress and respect the repository
-  runtime caps. Stop and report a named over-budget child; never leave a silent
-  selector running or retry it speculatively.
-- Run `git diff --check` before handoff.
-- Do not edit `.github/workflows/` or run release mutations without explicit operator approval.
+Every brief names a bounded validation budget: the focused selectors allowed
+during implementation and at most one final broad selector. Do not stack
+overlapping boards (`docs:check`, `ci:web`, `qa`, release gates) or rerun a
+green broad selector after narrower checks. Aggregate runs must show live child
+progress; stop and report a named over-budget child. Workers do not wait or
+poll for GitHub checks. The full rules are in
+[working rules](docs/knowledge/contracts/working-rules.md#validation).
 
-## Canonical References
-
-- `README.md`, `docs/README.md`, `docs/vision/001-poodle-vision.md`
-- `docs/architecture/001-poodle-system-shape.md`, `docs/architecture/product-guardrails.md`
-- `docs/contracts/001-working-rules.md`, `docs/contracts/005-agent-local-paths.md`
-- `docs/roadmaps/README.md`, `docs/specs/README.md`
-- `docs/policy/internal-writing-style.md`
+Run `git diff --check` and the brief's selectors before opening a PR.

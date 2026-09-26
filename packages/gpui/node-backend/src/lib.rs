@@ -7,7 +7,7 @@
 //! fluent element API. The transcription source is the Jetstream backend
 //! (`jetstream-poodle/src/lib.rs`), whose channel walk this mirrors channel by
 //! channel; where GPUI has no equivalent channel the gap is documented inline
-//! and in the crate's channel table (see `docs/roadmaps/g12/019-gpui-node-backend.md`).
+//! and in the crate's channel table (see task g12.019 (Git history)).
 //!
 //! What this backend owns (and the vocabulary correctly does not): text
 //! measurement and shaping (GPUI's text system), hit-testing and event

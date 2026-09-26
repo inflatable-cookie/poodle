@@ -1,6 +1,6 @@
 /**
  * g15.047 — the fixed comparison policy. These numbers are the card's
- * authority (`docs/roadmaps/g15/047-primitive-visual-comparison.md`), copied
+ * authority (task g15.047 (Git history)), copied
  * here verbatim; the worker may not widen them. If real antialiasing cannot
  * fit the pixel cap while geometry and roles are correct, the run stops for
  * an operator decision instead of editing this table.

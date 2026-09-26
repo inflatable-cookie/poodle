@@ -57,5 +57,5 @@ at the crate root; use that path.
 Add shared native composition, token-resolved appearance, and interaction intent here.
 Keep engine input, text, lifecycle, and drawing behavior in the backend.
 
-See the [native architecture](../../docs/architecture/001-poodle-system-shape.md)
+See the [native architecture](../../docs/knowledge/architecture/001-poodle-system-shape.md)
 and [component contracts](../../docs/contracts/components/README.md).

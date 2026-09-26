@@ -25,7 +25,15 @@ export const NUCLEUS_RUNTIME = "gpui-headless";
 export const NUCLEUS_COMMAND = "effigy regressions:native";
 
 const ROOT = path.resolve(import.meta.dir, "..");
-const SOURCE_PATHS = ["packages/gpui/preview", "packages/gpui/adapter", "packages/render", "packages/contracts"];
+// Markdown under these roots is documentation: no runtime source embeds it, so
+// a docs-only edit does not invalidate mounted evidence.
+const SOURCE_PATHS = [
+  "packages/gpui/preview",
+  "packages/gpui/adapter",
+  "packages/render",
+  "packages/contracts",
+  ":(exclude,glob)packages/**/*.md",
+];
 
 export type NucleusEntry = {
   id: string;
@@ -613,7 +621,7 @@ export function deriveNucleusReceiptRows(root = ROOT): NucleusReceiptRow[] {
 /// implementation input: it is copied byte-for-byte, re-validated by directory
 /// hash and validator version, and never edited. Reported findings are
 /// retained verbatim in every receipt; they adjudicate nothing.
-export const NUCLEUS_V1_BUNDLE_DIR = "docs/logs/2026-09/08-140648-g01-006-cohort-batch-bundle";
+export const NUCLEUS_V1_BUNDLE_DIR = "docs/evidence/nucleus/v1-cohort-bundle";
 export const NUCLEUS_V1_BUNDLE_SCHEMA = "poodle-lab.cohort-run.v1";
 export const NUCLEUS_V1_RUN_ID = "2026-09-08T14-06-48";
 export const NUCLEUS_V1_VALIDATOR_VERSION = "1.0.0";

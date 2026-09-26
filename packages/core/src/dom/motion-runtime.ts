@@ -1,7 +1,7 @@
 /**
  * Web motion runtime: WAAPI/rAF handles keyed by semantic owner.
  *
- * Architecture: docs/architecture/012-semantic-motion-policy.md
+ * Architecture: docs/knowledge/architecture/012-semantic-motion-policy.md
  * Laws: packages/core/src/motion-policy.ts
  */
 

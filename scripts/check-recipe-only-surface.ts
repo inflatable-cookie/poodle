@@ -3,14 +3,10 @@
 const ROOT = new URL("..", import.meta.url).pathname;
 const SELF = "scripts/check-recipe-only-surface.ts";
 const RETIRED_ARCHITECTURE =
-  "docs/architecture/005-treatment-system-and-recipe-variables.md";
+  "docs/knowledge/architecture/005-treatment-system-and-recipe-variables.md";
 const RETIRED_ARCHITECTURE_LINK = "005-treatment-system-and-recipe-variables.md";
-const HISTORICAL_PREFIXES = [
-  "docs/archive/",
-  "docs/logs/",
-  "docs/parity/",
-  "docs/roadmaps/",
-];
+// Superseded specs are retained as evidence and never edited to satisfy a gate.
+const HISTORICAL_PREFIXES = ["docs/knowledge/specs/archive/"];
 const SCANNED_EXTENSIONS = new Set([
   ".css",
   ".json",
@@ -61,7 +57,7 @@ for await (const path of glob.scan({ cwd: ROOT, onlyFiles: true })) {
   const lines = (await Bun.file(`${ROOT}/${path}`).text()).split("\n");
   for (const [index, line] of lines.entries()) {
     if (
-      path === "docs/architecture/007-appearance-recipe-contract.md" &&
+      path === "docs/knowledge/architecture/007-appearance-recipe-contract.md" &&
       line.includes(RETIRED_ARCHITECTURE_LINK)
     ) {
       continue;

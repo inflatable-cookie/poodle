@@ -117,7 +117,7 @@ state value.
 - Body and state regions: grid with `gap: --poodle-space-stack-lg`
 - State region: padded with doubled panel spacing, subtle background,
   `border-radius: --poodle-radius-surface`
-- Loading fallback prepends the shared [`Spinner`](../foundation/spinner.md)
+- Loading fallback prepends the shared [`Spinner`](spinner.md)
   primitive with `variant="grid"`, `size="md"`, and `tone="accent"`
 
 ## 10. Token Usage

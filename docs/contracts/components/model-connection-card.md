@@ -2,7 +2,7 @@
 
 Status: approved
 Updated: 2026-08-14
-Governing spec: `../../specs/067-model-connection-management.md`
+Governing spec: `../../knowledge/specs/067-model-connection-management.md`
 
 ## 1. Purpose
 

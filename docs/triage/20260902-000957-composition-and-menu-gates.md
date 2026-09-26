@@ -3,8 +3,8 @@
 Status: open — accepted directions lack serial prerequisites
 Captured: 2026-09-02
 Owner: Poodle Northstar orchestrator
-Sources: `../research/value-tracks/agent-citations-and-sources.md`,
-`../research/value-tracks/nested-menu-pointer-intent.md`
+Sources: `agent-citations-and-sources.md` (Git history),
+`nested-menu-pointer-intent.md` (Git history)
 
 ## Agent Citations
 

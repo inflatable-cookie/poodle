@@ -433,7 +433,6 @@ function isJsManifestPath(path: string): boolean {
 }
 
 const CHANGELOG_PATH = "CHANGELOG.md";
-const EXECUTION_LOG_PATH = /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g\d{2}-\d{3}-[a-z0-9-]+\.md$/;
 const RELEASE_NOTE_PATH = /^docs\/release-notes\/[^/]+\.md$/;
 
 export type ChangelogInventory = {
@@ -583,12 +582,7 @@ export function changelogInventory(text: string): ChangelogInventory {
 }
 
 function isChangelogMaintenanceRange(changedPaths: string[]): boolean {
-  if (!changedPaths.includes(CHANGELOG_PATH)) return false;
-  const logs = changedPaths.filter((path) => EXECUTION_LOG_PATH.test(path));
-  return (
-    logs.length === 1 &&
-    changedPaths.every((path) => path === CHANGELOG_PATH || EXECUTION_LOG_PATH.test(path))
-  );
+  return changedPaths.length === 1 && changedPaths[0] === CHANGELOG_PATH;
 }
 
 async function ordinaryChangelogMaintenancePermitted(

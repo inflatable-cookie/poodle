@@ -73,7 +73,8 @@ committed evidence):
 - `contact-sheet.html` — the operator review surface, canonical fixture order,
   native device scale
 
-Committed copies under `docs/logs/` are point-in-time review evidence. The
+The committed copy under `docs/evidence/visual/g15-047-button-comparison/` is
+point-in-time review evidence. The
 comparator never reads them; there is no update/refresh command and nothing
 here can mark Button — or any component — complete.
 

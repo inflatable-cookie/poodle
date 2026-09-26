@@ -1,8 +1,8 @@
 /**
  * Drag-and-drop semantic kernel — the renderer-neutral drag session.
  *
- * Architecture: docs/architecture/011-drag-and-drop-substrate.md.
- * Spec: docs/specs/069-dependable-drag-and-drop-substrate.md.
+ * Architecture: docs/knowledge/architecture/011-drag-and-drop-substrate.md.
+ * Spec: docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md.
  * Rust mirror: packages/contracts/headless/src/drag_drop.rs.
  * Shared vectors: packages/contracts/headless/vectors/machines.json (`dragDrop`).
  *

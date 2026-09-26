@@ -32,8 +32,8 @@ the local environment is unclear.
 - GPUI and Jetstream backends own runtime interpretation only.
 - Underlay-facing APIs remain Underlay-owned behind the bridge.
 
-Read the [product guardrails](docs/architecture/product-guardrails.md) and
-[system architecture](docs/architecture/001-poodle-system-shape.md) before
+Read the [product guardrails](docs/knowledge/architecture/product-guardrails.md) and
+[system architecture](docs/knowledge/architecture/001-poodle-system-shape.md) before
 changing a package boundary.
 
 ## Change a Component
