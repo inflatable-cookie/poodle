@@ -23,7 +23,9 @@ component complete.
    use; a small tranche proves the repair loop before larger substrates.
 2. **Remaining mounted-behaviour tranches** (lane `gpui-mounted-tranches`) —
    compiled from the census's missing-capability groups, bounded by substrate
-   (overlay, text input, drag, and so on).
+   (overlay, text input, drag, and so on). Known gaps include IconButton and
+   Collapsible triggers with no focus patch, and IconButton `expanded` and
+   `controls` never reaching `Node.a11y`.
 3. **GPUI keyboard-origin focus** (lane `gpui-keyboard-focus`) — native focus
    treatment must follow the keyboard-origin rule in
    [working rules](knowledge/contracts/working-rules.md#focus-visibility); the
@@ -35,13 +37,25 @@ component complete.
    `packages/g03-closeout.json`, the `g04.00x` GPUI baselines and similar JSON
    records still validated by `docs:lint`, and the archived specs they cite.
    Decide which still guard a live surface; delete the rest with their checks.
-6. **Fix doc paths in evidence-pinned runtime source** (lane
-   `pinned-source-paths`) — Rust comments under
-   `packages/{render,contracts,gpui/preview}` still cite pre-cut paths
-   (`docs/architecture/`, `docs/specs/`, removed roadmap and log records).
-   Nucleus receipts pin those files byte-for-byte, so fix them in the same PR
-   as the next evidence repin, then drop their `allow` entries in
-   [retired.toml](knowledge/retired.toml).
+6. **Next Nucleus evidence repin** (lane `pinned-source-paths`) — Nucleus
+   receipts pin `packages/{gpui/preview,gpui/adapter,render,contracts}` and
+   `packages/gpui/preview/Cargo.lock` byte-for-byte, so these changes land
+   together with one repin:
+   - Rust comments that still cite pre-cut paths (`docs/architecture/`,
+     `docs/specs/`, removed roadmap and log records); then drop their `allow`
+     entries in [retired.toml](knowledge/retired.toml);
+   - `rustls` 0.23.45 in the preview lock (RUSTSEC-2026-0285);
+   - A1 probes lost in later merges and A1 receipts with no emitting selector;
+   - whether `SOURCE_PATHS` should pin whole crates or only runtime source.
+7. **Red and unrun checks** (lane `check-health`) — checks that exist but are
+   red or never run on `main`: two `poodle-render` unit tests, `check:react`
+   and the `packages/core` strict type-check, `drift:roles`, `rustfmt` on
+   `packages/render`, plus a single fresh-checkout validation command for
+   Queue. A red check that nobody runs hides real regressions.
+8. **Small web defects** (lane `web-defects`) — CodeEditor's active line uses
+   an undefined `--poodle-color-surface-hover` token, React Button/TextInput
+   miss contract-listed web-native props, Svelte `TextInput` doesn't export
+   `focus()`, and React `SplitView` lacks the contract's `divider` prop.
 
 ## Not now
 
