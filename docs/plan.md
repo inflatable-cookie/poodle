@@ -19,7 +19,7 @@ task.
    Nothing product-facing is queued until the operator picks. The
    recommendation is item 1 under Next.
 2. **Dependency refresh and `0.4.3` before Longhorn `0.3.0`** (lane
-   `release-0.4.3`) — operator ruling 2026-09-26. Longhorn pins
+   `release-refresh`) — operator ruling 2026-09-26. Longhorn pins
    `@inflatable-cookie/poodle-svelte` exactly, and its `0.3.0` dependency sweep
    waits for this release. Refresh every JavaScript dependency to its newest
    compatible release in one change, then release core and Svelte `0.4.3`
