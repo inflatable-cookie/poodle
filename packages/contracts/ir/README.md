@@ -13,10 +13,10 @@ and depends on no framework, DOM, GPUI, Jetstream, or `poodle-node` types.
 
 Governing references:
 
-- `docs/specs/063-rust-authored-component-and-scene-ir.md` (IR-01–IR-12)
-- `docs/roadmaps/g13/pilot-expressiveness-corpus.md` (129 requirements;
-  `CROSS-*`, `BTN-*`, `RNG-*`, `TXT-*`, `SHELL-*`, `NEG-*`)
-- `docs/roadmaps/g13/batch-cards/011-poodle-ir-schema-core.md`
+- `docs/knowledge/specs/063-rust-authored-component-and-scene-ir.md` (IR-01–IR-12)
+- the g13 `pilot-expressiveness-corpus` record (129 requirements;
+  `CROSS-*`, `BTN-*`, `RNG-*`, `TXT-*`, `SHELL-*`, `NEG-*`; Git history)
+- g13 batch card 011 (Git history)
 
 This crate is a pre-1.0 source preview and is not yet published to crates.io.
 Its only in-repo dependency is `poodle-tokens`, used to resolve token

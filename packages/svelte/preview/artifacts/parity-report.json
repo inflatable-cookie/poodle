@@ -140,7 +140,7 @@
       "scope": "Button-only 18-case inventory across Svelte, React, and GPUI",
       "evidence": [
         "test/visual/fixtures/button-visual-inventory.json",
-        "docs/logs/2026-08/assets/g15-047/summary.json",
+        "docs/evidence/visual/g15-047-button-comparison/summary.json",
         "test/visual/button-comparison/README.md",
         "test/visual/button-comparison/compare.test.ts"
       ],

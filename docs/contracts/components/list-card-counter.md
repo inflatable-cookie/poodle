@@ -90,7 +90,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - `gap: 0.25rem`
 - `font-size: 0.6875rem`
 - `typography="inherit"` uses the proportional-inherit rule from
-  `docs/contracts/001-working-rules.md` so text, icon, and gap scale together
+  `docs/knowledge/contracts/working-rules.md` so text, icon, and gap scale together
 - `font-variant-numeric: tabular-nums` for consistent digit widths
 - Inline element, wraps with its parent container
 - Parent expectations: designed to be placed in the `footer` snippet of ListCard

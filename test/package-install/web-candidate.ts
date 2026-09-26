@@ -9,7 +9,7 @@
 //   3. internal web dependency requirements and `bun.lock` match the target;
 //   4. the changelog and one matching release note describe the target;
 //   5. exactly one commit changes the release-input set, and every later
-//      change is a generated/evidence execution record bound to that commit;
+//      change is generated evidence bound to that commit;
 //   6. every changed path is a release input or a declared evidence surface.
 //
 // A violation names the specific rule. Historical `g16.054`/`g18.006` modes in
@@ -57,7 +57,7 @@ const INTERNAL_JS_DEPENDENCY_PREFIX = "@inflatable-cookie/poodle-";
 /**
  * Generated/evidence surfaces that may follow the frozen release-input commit.
  * They are protocol families, not one version's file list: regenerated codegen
- * stamps, the committed evidence trees and a bounded execution record.
+ * stamps and the committed evidence trees.
  */
 export const WEB_CANDIDATE_EVIDENCE_PATTERNS = [
   /^packages\/codegen\/generated\//,
@@ -65,7 +65,6 @@ export const WEB_CANDIDATE_EVIDENCE_PATTERNS = [
   /^packages\/[^/]+\/src\/generated\//,
   /^packages\/[^/]+\/(?:preview|components)\/src\/generated\//,
   /^docs\/evidence\//,
-  /^docs\/logs\/\d{4}-\d{2}\/\d{8}-g\d{2}-\d{3}-[a-z0-9-]+\.md$/,
 ] as const;
 
 export type WebCandidateVersions = {

@@ -1,7 +1,7 @@
 /**
  * The bounded web codec for the cross-window receipt.
  *
- * Spec: docs/specs/069-dependable-drag-and-drop-substrate.md — Native
+ * Spec: docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md — Native
  * DataTransfer Adapter.
  *
  * `DataTransfer` is a wire, not a session store. This module writes exactly

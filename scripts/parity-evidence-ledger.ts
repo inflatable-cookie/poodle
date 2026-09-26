@@ -394,7 +394,7 @@ function expectedComponentRow(
   const gpuiRegistryPath = "packages/gpui/preview/src/specimens/mod.rs";
   const nativeProofPath = "packages/gpui/native-accessibility-proof.json";
   const visualInventoryPath = "test/visual/fixtures/button-visual-inventory.json";
-  const visualSummaryPath = "docs/logs/2026-08/assets/g15-047/summary.json";
+  const visualSummaryPath = "docs/evidence/visual/g15-047-button-comparison/summary.json";
   const visualRunPath = "test/visual/run.ts";
 
   if (!exists(root, contractPath)) throw new Error(`Missing contract for ${name}: ${contractPath}.`);

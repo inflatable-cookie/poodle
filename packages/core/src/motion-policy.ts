@@ -1,7 +1,7 @@
 /**
  * Shared host motion policy and framework-free lifecycle laws.
  *
- * Architecture: docs/architecture/012-semantic-motion-policy.md
+ * Architecture: docs/knowledge/architecture/012-semantic-motion-policy.md
  * Contract: docs/contracts/components/motion-policy-provider.md
  * Rust mirror: packages/contracts/headless/src/motion_policy.rs
  *

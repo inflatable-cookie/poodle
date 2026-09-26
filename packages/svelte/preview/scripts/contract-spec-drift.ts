@@ -149,7 +149,7 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // value on the host: GPUI/AppState owns stage/value/query/open and rerenders
   // after a callback requests a change, so an uncontrolled seed has nothing to
   // seed. Stated in each contract's Native Binding note and in
-  // `docs/roadmaps/g15/008-model-connection-family-native-completion.md`.
+  // task g15.008 (Git history).
   "model-connection-card": ["defaultOpen"],
   "model-connection-picker": ["defaultQuery", "defaultValue"],
   "model-connection-setup": ["defaultStage", "defaultValue"],
@@ -173,7 +173,7 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
 /**
  * Real gaps: props the contract documents, Svelte implements, and the Spec does
  * not carry — so neither native target can render them. Tracked as debt in
- * `docs/roadmaps/g12/013-native-spec-surface-parity.md`, burned down there.
+ * task g12.013 (Git history), burned down there.
  *
  * This is a baseline, not an allowlist. Closing a gap means deleting its entry;
  * adding one means a prop shipped to the web without reaching the shared spec

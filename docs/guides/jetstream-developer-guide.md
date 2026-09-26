@@ -144,8 +144,8 @@ submit, dismiss, or reorder intent; the host decides the resulting workflow.
 
 ## Related Documentation
 
-- [System architecture](../architecture/001-poodle-system-shape.md)
-- [Token architecture](../architecture/002-token-system-and-package-layout.md)
+- [System architecture](../knowledge/architecture/001-poodle-system-shape.md)
+- [Token architecture](../knowledge/architecture/002-token-system-and-package-layout.md)
 - [Component contracts](../contracts/components/README.md)
 - [Jetstream adapter reference](../../packages/jetstream/adapter/README.md)
 - [GPUI developer guide](gpui-developer-guide.md)

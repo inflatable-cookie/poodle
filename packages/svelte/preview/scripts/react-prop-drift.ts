@@ -1,6 +1,6 @@
 // Svelte <-> React public prop drift gate.
 //
-// CLAUDE.md and docs/contracts/001-working-rules.md mandate that Svelte is the
+// CLAUDE.md and docs/knowledge/contracts/working-rules.md mandate that Svelte is the
 // reference implementation and React must match. While contract-prop-drift.ts
 // compares Svelte against contract Public Props tables, this script compares
 // React's public prop surface against Svelte's public prop surface.

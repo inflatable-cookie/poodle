@@ -291,8 +291,8 @@ decides what saving, navigation, upload, or deletion means.
 
 ## Related Documentation
 
-- [System architecture](../architecture/001-poodle-system-shape.md)
-- [Token architecture](../architecture/002-token-system-and-package-layout.md)
+- [System architecture](../knowledge/architecture/001-poodle-system-shape.md)
+- [Token architecture](../knowledge/architecture/002-token-system-and-package-layout.md)
 - [Component contracts](../contracts/components/README.md)
 - [GPUI adapter reference](../../packages/gpui/adapter/README.md)
 - [Jetstream developer guide](jetstream-developer-guide.md)

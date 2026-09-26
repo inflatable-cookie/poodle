@@ -2,7 +2,7 @@
 
 Status: detailed contract
 Updated: 2026-09-01
-Governing architecture: `../../architecture/012-semantic-motion-policy.md`
+Governing architecture: `../../knowledge/architecture/012-semantic-motion-policy.md`
 
 ## 1. Purpose
 

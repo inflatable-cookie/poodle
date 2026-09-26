@@ -7,7 +7,7 @@
  * (internal sizing/spacing, not part of the recipe contract).
  *
  * Output: packages/svelte/preview/artifacts/recipe-inventory.json
- * See docs/architecture/007-appearance-recipe-contract.md.
+ * See docs/knowledge/architecture/007-appearance-recipe-contract.md.
  */
 
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";

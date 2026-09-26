@@ -1,8 +1,8 @@
 /**
  * Same-document drag-and-drop web controller.
  *
- * Architecture: docs/architecture/011-drag-and-drop-substrate.md.
- * Spec: docs/specs/069-dependable-drag-and-drop-substrate.md.
+ * Architecture: docs/knowledge/architecture/011-drag-and-drop-substrate.md.
+ * Spec: docs/knowledge/specs/069-dependable-drag-and-drop-substrate.md.
  *
  * Owns pointer/keyboard sensors, cached geometry, effect execution, and
  * presentation snapshots. Session phase, arbitration, and exactly-once

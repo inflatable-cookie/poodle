@@ -79,12 +79,12 @@ behavior.
 ## Evidence on Hand
 
 - Product promise and scope: `README.md` and
-  `docs/vision/001-poodle-vision.md`.
-- Package and renderer ownership: `docs/architecture/001-poodle-system-shape.md`.
+  `docs/knowledge/vision.md`.
+- Package and renderer ownership: `docs/knowledge/architecture/001-poodle-system-shape.md`.
 - Normative behavior: `docs/contracts/components/`.
 - Canonical token sources: `packages/tokens/schema/`.
 - Real Svelte, React, GPUI, and Jetstream preview surfaces under `packages/`.
-- Roadmaps, execution logs, tests, and parity receipts record implementation
+- Tests and parity receipts under `docs/evidence/` record implementation
   and validation history. They are evidence, not substitutes for current
   component contracts.
 - No testimonials, customer claims, adoption metrics, or performance benchmarks

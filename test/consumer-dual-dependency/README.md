@@ -52,4 +52,4 @@ headless native board.
 - Source policy: `scripts/repository-security-policy.ts` (`registryOnlyCrates`)
   rejects a Git-sourced `gpui`/`gpui_platform` in any active manifest or lock,
   and `deny.toml` admits no Git source at all.
-- Card: `docs/roadmaps/g16/005-gpui-cratesio-recovery.md`.
+- Card: task g16.005 (Git history).

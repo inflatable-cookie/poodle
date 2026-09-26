@@ -433,7 +433,7 @@ None.
 - spec struct: `SplitViewSpec` with orientation, ratio, collapse states,
   fixed sizes, min sizes, disabled, size, density
 - `on_ratio_change(ratio)` streams during a divider drag, clamped to
-  [0.05, 0.95]: the divider starts a gpui drag and the split root listens
+  `[0.05, 0.95]`: the divider starts a gpui drag and the split root listens
   for its moves, whose bounds give the axis extent a ratio needs. The drag
   state lives in gpui, not the component, so mid-drag re-renders (each
   ratio emission causes one) do not drop the gesture.

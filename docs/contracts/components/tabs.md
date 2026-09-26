@@ -604,7 +604,7 @@ remeasurement do not displace the indicator by the current scroll offset.
 ### Recipe hooks — the active axis
 
 The selection edge and fill resolve through recipe hooks, one per treatment,
-per the grammar in `docs/architecture/007-appearance-recipe-contract.md`
+per the grammar in `docs/knowledge/architecture/007-appearance-recipe-contract.md`
 (`--poodle-recipe-<component>[-<variant>]-<slot>[-<state>]`). Each falls back
 to the semantic token, so with no override active rendering is identical.
 

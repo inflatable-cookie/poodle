@@ -4,10 +4,10 @@ Status: frozen evidence — accepted delta from immutable `v0.3.0` to
 post-g18.026 main
 Date: 2026-09-12
 Owner: Poodle release operations
-Card: [`docs/roadmaps/g18/027-v040-public-surface-freeze-audit.md`](../../roadmaps/g18/027-v040-public-surface-freeze-audit.md)
-Governing refs: [`docs/specs/022-packaging-versioning-and-release-channel-rules.md`](../../specs/022-packaging-versioning-and-release-channel-rules.md),
-[`docs/specs/044-deprecation-change-control-and-release-channel-operations.md`](../../specs/044-deprecation-change-control-and-release-channel-operations.md),
-[`docs/specs/070-compiled-web-distribution-contract.md`](../../specs/070-compiled-web-distribution-contract.md),
+Card: task g18.027 (Git history)
+Governing refs: [`docs/knowledge/specs/022-packaging-versioning-and-release-channel-rules.md`](../../knowledge/specs/022-packaging-versioning-and-release-channel-rules.md),
+[`docs/knowledge/specs/044-deprecation-change-control-and-release-channel-operations.md`](../../knowledge/specs/044-deprecation-change-control-and-release-channel-operations.md),
+[`docs/knowledge/specs/070-compiled-web-distribution-contract.md`](../../knowledge/specs/070-compiled-web-distribution-contract.md),
 [`packages/release-manifest.json`](../../../packages/release-manifest.json)
 
 ## Purpose

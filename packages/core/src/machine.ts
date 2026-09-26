@@ -5,7 +5,7 @@
  * event, and returns the next state + context plus effect intents. Adapters
  * (Svelte, future React, GPUI/Jetstream via the Rust mirror) own reactivity
  * and execute effects. Callbacks are emitted as effects so transitions stay
- * side-effect free. See docs/specs/062-headless-core-and-dual-layer-strategy.md.
+ * side-effect free. See docs/knowledge/specs/062-headless-core-and-dual-layer-strategy.md.
  */
 
 export interface TransitionResult<S extends string, C, Eff> {

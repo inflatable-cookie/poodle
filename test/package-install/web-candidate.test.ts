@@ -336,12 +336,11 @@ describe("web candidate admission", () => {
 });
 
 describe("web candidate evidence families", () => {
-  test("generated, evidence and execution-record families are admitted", () => {
+  test("generated and evidence families are admitted", () => {
     expect(isWebCandidateEvidencePath("packages/core/src/generated/machines/hover.ts")).toBe(true);
     expect(isWebCandidateEvidencePath("packages/svelte/preview/src/generated/catalogue/catalogue.ts")).toBe(true);
     expect(isWebCandidateEvidencePath("docs/evidence/gpui/census.json")).toBe(true);
-    expect(isWebCandidateEvidencePath("docs/logs/2026-09/20260913-g19-001-release.md")).toBe(true);
     expect(isWebCandidateEvidencePath("packages/core/src/index.ts")).toBe(false);
-    expect(WEB_CANDIDATE_EVIDENCE_PATTERNS.length).toBeGreaterThanOrEqual(5);
+    expect(WEB_CANDIDATE_EVIDENCE_PATTERNS.length).toBeGreaterThanOrEqual(4);
   });
 });

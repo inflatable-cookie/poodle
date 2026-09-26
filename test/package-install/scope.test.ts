@@ -274,20 +274,13 @@ describe("installed-package scope routing", () => {
     }
   });
 
-  test("ordinary admits the bound changelog normalization with one execution log", async () => {
-    const executionLog = "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md";
-    const { root, base, head } = await plantOrdinaryChangelogRange(
-      ordinaryChangelogAfter,
-      { [executionLog]: "# Changelog maintenance\n" },
-    );
+  test("ordinary admits a changelog-only normalization", async () => {
+    const { root, base, head } = await plantOrdinaryChangelogRange(ordinaryChangelogAfter, {});
     const proof = await assertInstalledScope(root, base, head, "ordinary");
-    expect(proof.changedPaths).toEqual(["CHANGELOG.md", executionLog]);
+    expect(proof.changedPaths).toEqual(["CHANGELOG.md"]);
   });
 
   test("ordinary changelog maintenance rejects semantic inventory mutations", async () => {
-    const executionLog = {
-      "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md": "# Changelog maintenance\n",
-    };
     const plants = {
       version: ordinaryChangelogAfter.replace("## [0.3.0]", "## [0.3.1]"),
       date: ordinaryChangelogAfter.replace("2026-09-05", "2026-09-06"),
@@ -305,20 +298,18 @@ describe("installed-package scope routing", () => {
       ),
     };
     for (const [kind, changelog] of Object.entries(plants)) {
-      const { root, base, head } = await plantOrdinaryChangelogRange(changelog, executionLog);
+      const { root, base, head } = await plantOrdinaryChangelogRange(changelog, {});
       await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
         "certification scope rejected forbidden release surface: CHANGELOG.md",
       );
     }
   });
 
-  test("ordinary changelog maintenance rejects missing logs, mixed ranges, and ambiguity", async () => {
+  test("ordinary changelog maintenance rejects mixed ranges and ambiguity", async () => {
     const cases = [
-      { after: ordinaryChangelogAfter, extraFiles: {} },
       {
         after: ordinaryChangelogAfter,
         extraFiles: {
-          "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md": "# Log\n",
           "packages/core/src/release-stowaway.ts": "export {};\n",
         },
       },
@@ -327,9 +318,7 @@ describe("installed-package scope routing", () => {
           "### Added\n",
           "#### Unsupported nested release heading\n",
         ),
-        extraFiles: {
-          "docs/logs/2026-09/20260910-g99-999-changelog-maintenance.md": "# Log\n",
-        },
+        extraFiles: {},
       },
     ];
     for (const { after, extraFiles } of cases) {
@@ -1557,7 +1546,7 @@ describe("g18.009 npm/web release wrapper repair", () => {
       "scripts/check-release-automation.ts": checkerModule,
       "test/package-install/scope.ts": guardModule,
       "test/package-install/scope.test.ts": "// guard coverage\n",
-      "docs/logs/2026-09/20260913-g18-009-test.md": "# release evidence\n",
+      "docs/knowledge/contracts/release.md": "# Release\n",
       ...extraHeadFiles,
     });
     const head = await commitAll(root, "wrapper head");

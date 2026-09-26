@@ -269,7 +269,7 @@ function validateCurrentArchitectureReferences(errors: string[]): void {
     path.join(repoRoot, "AGENTS.md"),
     path.join(repoRoot, "CLAUDE.md"),
     path.join(repoRoot, "CONTRIBUTING.md"),
-    ...collectMarkdownFiles(path.join(repoRoot, "docs", "architecture")),
+    ...collectMarkdownFiles(path.join(repoRoot, "docs", "knowledge")),
     ...collectMarkdownFiles(path.join(repoRoot, "docs", "contracts")),
     ...collectMarkdownFiles(path.join(repoRoot, "docs", "guides")),
   ];
@@ -284,20 +284,6 @@ function validateCurrentArchitectureReferences(errors: string[]): void {
     );
   }
 }
-function validateRoadmapBacklogRetired(errors: string[]): void {
-  expect(
-    !fs.existsSync(path.join(repoRoot, "docs", "roadmaps", "backlog")),
-    "docs/roadmaps/backlog/ is retired; disposition unresolved or deferred candidates in docs/triage/ and remove the backlog directory.",
-    errors,
-  );
-  const roadmapReadme = fs.readFileSync(path.join(repoRoot, "docs", "roadmaps", "README.md"), "utf8");
-  expect(
-    !/backlog\//.test(roadmapReadme),
-    "docs/roadmaps/README.md still teaches a live roadmap backlog; roadmaps hold promoted tasks and triage holds candidates.",
-    errors,
-  );
-}
-
 
 function validateContractIndexes(errors: string[]): void {
   const componentContracts = collectMarkdownFiles(path.join(contractsDir, "components"))
@@ -3086,7 +3072,6 @@ function validateSharedDemoAppContract(errors: string[]): {
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateCurrentArchitectureReferences(errors);
-validateRoadmapBacklogRetired(errors);
 validateContractIndexes(errors);
 const operatorGuideCount = validateOperatorGuides(errors);
 // Unified package — README surface validation skipped (130+ exports)

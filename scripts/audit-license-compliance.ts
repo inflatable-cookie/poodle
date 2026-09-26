@@ -95,7 +95,7 @@ const noticeSweepPaths = paths.filter(
   (path) =>
     basename(path) === "THIRD_PARTY_NOTICES.md" ||
     path === "deny.toml" ||
-    path === "docs/specs/022-packaging-versioning-and-release-channel-rules.md",
+    path === "docs/knowledge/specs/022-packaging-versioning-and-release-channel-rules.md",
 );
 
 for (const retired of retiredNoticeCrates) {

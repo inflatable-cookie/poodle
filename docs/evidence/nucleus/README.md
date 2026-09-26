@@ -1,8 +1,6 @@
 # Nucleus Parity Evidence
 
 Status: active evidence
-Programme: completed [`g17`](../../roadmaps/archive/g17.md); broader GPUI
-continuation: [`g18`](../../roadmaps/g18/README.md)
 
 ## Boundary
 
@@ -30,8 +28,9 @@ work.
 
 The generated ledger also records the full 176-component active-cohort
 denominator. Nucleus receipts cover 29 GPUI rows; they do not imply functional
-completion for the other 146 portable components. The g18 roadmap owns that
-broader completion programme.
+completion for the other 146 portable components; see the
+[GPUI functionality census](../gpui/gpui-functionality-census.md) and
+[the plan](../../plan.md).
 
 ## Artifacts
 

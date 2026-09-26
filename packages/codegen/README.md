@@ -2,7 +2,7 @@
 
 Deterministic emitter turning a validated [`poodle-ir`](../contracts/ir/)
 model into committed TypeScript artifacts — the compiler boundary of
-[`docs/specs/063-rust-authored-component-and-scene-ir.md`](../../docs/specs/063-rust-authored-component-and-scene-ir.md)
+[`docs/knowledge/specs/063-rust-authored-component-and-scene-ir.md`](../../docs/knowledge/specs/063-rust-authored-component-and-scene-ir.md)
 (`IR-07` deterministic generation, `IR-11` pilot gate).
 
 Nothing depends on this crate. It is a tool (`publish = false`, channel

@@ -104,7 +104,7 @@ When `typography="inherit"`:
 | `gap` | `0.375em` |
 | label `font-size` | `0.6875em` |
 | value `font-size` | `1em` |
-| behavior | proportional-inherit rule from `docs/contracts/001-working-rules.md` |
+| behavior | proportional-inherit rule from `docs/knowledge/contracts/working-rules.md` |
 
 ## 8. Runtime Notes
 
