@@ -18,14 +18,22 @@ task.
 1. **Choose the next product frontier** (lane `next-frontier`) — Q-001.
    Nothing product-facing is queued until the operator picks. The
    recommendation is item 1 under Next.
-2. **Current-`main` web gates** (lane `web-gates`) — `check:react` is red on
+2. **Dependency refresh and `0.4.3` before Longhorn `0.3.0`** (lane
+   `release-0.4.3`) — operator ruling 2026-09-26. Longhorn pins
+   `@inflatable-cookie/poodle-svelte` exactly, and its `0.3.0` dependency sweep
+   waits for this release. Refresh every JavaScript dependency to its newest
+   compatible release in one change, then release core and Svelte `0.4.3`
+   ([release](knowledge/contracts/release.md)) once that refresh and the
+   Text/Code wrap work (`web-defects`) have merged. The Svelte peer stays
+   `>=5.56.8 <6`; raising the floor needs Longhorn told first.
+3. **Current-`main` web gates** (lane `web-gates`) — `check:react` is red on
    current sources, so it can't join `ci:web`, and `visual:report` has an
    untracked failing Svelte↔React pair set (53 when last measured in August),
    so reports can't tell existing debt from a new regression. Clear the type
    errors and put `check:react` on `ci:web`; re-measure the visual set and
    commit it as a reasoned debt inventory the gate diffs against.
    Queue papercuts: `195bd08e`, `d3b97931`.
-3. **Fresh-checkout validation** (lane `fresh-validate`) — Poodle has no one
+4. **Fresh-checkout validation** (lane `fresh-validate`) — Poodle has no one
    command that validates a fresh disposable checkout. Queue's pre-merge
    validation gate is live and needs exactly that: a command that installs
    its own dependencies, passes on a fresh checkout and leaves the tree
