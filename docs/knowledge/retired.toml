@@ -37,7 +37,7 @@ allow = [
   # Historical closed-candidate release policies match exact past diffs.
   "test/package-install/scope.ts",
   # Runtime source pinned by Nucleus receipts; comments are fixed at the next
-  # evidence repin (docs/plan.md).
+  # evidence repin (docs/plan.md, lane `pinned-source-paths`).
   "packages/render/src/lib.rs",
   "packages/contracts/ir/src/lib.rs",
   "packages/contracts/ir/src/shared.rs",

@@ -11,30 +11,32 @@ component complete.
 
 ## Now
 
-1. **Choose the next product frontier** — Q-001. Nothing is queued until the
-   operator picks. The recommendation is item 1 under Next.
+1. **Choose the next product frontier** (lane `next-frontier`) — Q-001.
+   Nothing is queued until the operator picks. The recommendation is item 1
+   under Next.
 
 ## Next
 
-1. **GPUI selection-navigation repair tranche** — Button, Checkbox, Radio,
-   ToggleGroup and Accordion. These are basic controls with census refusals
-   and heavy consumer use; a small tranche proves the repair loop before larger
-   substrates.
-2. **Remaining mounted-behaviour tranches** — compiled from the census's
-   missing-capability groups, bounded by substrate (overlay, text input, drag,
-   and so on).
-3. **GPUI keyboard-origin focus** — native focus treatment must follow the
-   keyboard-origin rule in
+1. **GPUI selection-navigation repair tranche** (lane
+   `gpui-selection-repair`) — Button, Checkbox, Radio, ToggleGroup and
+   Accordion. These are basic controls with census refusals and heavy consumer
+   use; a small tranche proves the repair loop before larger substrates.
+2. **Remaining mounted-behaviour tranches** (lane `gpui-mounted-tranches`) —
+   compiled from the census's missing-capability groups, bounded by substrate
+   (overlay, text input, drag, and so on).
+3. **GPUI keyboard-origin focus** (lane `gpui-keyboard-focus`) — native focus
+   treatment must follow the keyboard-origin rule in
    [working rules](knowledge/contracts/working-rules.md#focus-visibility); the
    census names the affected focus-bearing rows.
-4. **Sweep removed records for rulings** — the lean cut removed roadmaps, logs
-   and handoffs. Operator rulings buried there that no knowledge file states
-   should be promoted when found. Git history has them.
-5. **Retire historical generation baselines** — `packages/g03-closeout.json`,
-   the `g04.00x` GPUI baselines and similar JSON records still validated by
-   `docs:lint`, and the archived specs they cite. Decide which still guard a
-   live surface; delete the rest with their checks.
-6. **Fix doc paths in evidence-pinned runtime source** — Rust comments under
+4. **Sweep removed records for rulings** (lane `ruling-sweep`) — the lean cut
+   removed roadmaps, logs and handoffs. Operator rulings buried there that no
+   knowledge file states should be promoted when found. Git history has them.
+5. **Retire historical generation baselines** (lane `baseline-retirement`) —
+   `packages/g03-closeout.json`, the `g04.00x` GPUI baselines and similar JSON
+   records still validated by `docs:lint`, and the archived specs they cite.
+   Decide which still guard a live surface; delete the rest with their checks.
+6. **Fix doc paths in evidence-pinned runtime source** (lane
+   `pinned-source-paths`) — Rust comments under
    `packages/{render,contracts,gpui/preview}` still cite pre-cut paths
    (`docs/architecture/`, `docs/specs/`, removed roadmap and log records).
    Nucleus receipts pin those files byte-for-byte, so fix them in the same PR
