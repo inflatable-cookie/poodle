@@ -9,6 +9,10 @@ bounded tranches grouped by dependency and interaction substrate, never by
 arbitrary component count. A specimen route or test name never marks a
 component complete.
 
+Papercuts live in Queue (`papercut.list`). Plan items cite the ones they
+cover by ID prefix; when a lane is briefed, promote those papercuts to its
+task.
+
 ## Now
 
 1. **Choose the next product frontier** (lane `next-frontier`) — Q-001.
@@ -26,6 +30,7 @@ component complete.
    (overlay, text input, drag, and so on). Known gaps include IconButton and
    Collapsible triggers with no focus patch, and IconButton `expanded` and
    `controls` never reaching `Node.a11y`.
+   Queue papercuts: `0a394228`, `4c4cdb07`, `e9bfd23a`.
 3. **GPUI keyboard-origin focus** (lane `gpui-keyboard-focus`) — native focus
    treatment must follow the keyboard-origin rule in
    [working rules](knowledge/contracts/working-rules.md#focus-visibility); the
@@ -47,15 +52,19 @@ component complete.
    - `rustls` 0.23.45 in the preview lock (RUSTSEC-2026-0285);
    - A1 probes lost in later merges and A1 receipts with no emitting selector;
    - whether `SOURCE_PATHS` should pin whole crates or only runtime source.
+   Queue papercuts: `6bfdf8af`, `d193a521`, `06296edd`.
 7. **Red and unrun checks** (lane `check-health`) — checks that exist but are
    red or never run on `main`: two `poodle-render` unit tests, `check:react`
    and the `packages/core` strict type-check, `drift:roles`, `rustfmt` on
    `packages/render`, plus a single fresh-checkout validation command for
    Queue. A red check that nobody runs hides real regressions.
+   Queue papercuts: `e1492121`, `195bd08e`, `71e576fc`, `869bca08`,
+   `bd8c69c8`, `43cd35e9`.
 8. **Small web defects** (lane `web-defects`) — CodeEditor's active line uses
    an undefined `--poodle-color-surface-hover` token, React Button/TextInput
    miss contract-listed web-native props, Svelte `TextInput` doesn't export
    `focus()`, and React `SplitView` lacks the contract's `divider` prop.
+   Queue papercuts: `01d7a515`, `bdb2c96c`, `6095f116`, `5860bf71`.
 
 ## Not now
 
