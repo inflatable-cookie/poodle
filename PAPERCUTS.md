@@ -11,13 +11,6 @@ happened, impact, a plausible fix. Remove an entry when it is fixed.
   selector that runs `bun install --frozen-lockfile` then `ci:web` and
   `ci:rust`. Surface: `tasks/effigy.tasks.toml`, `.paseo/queue.json`.
 
-- 2026-09-26 — `test:preview-preflight` failed 2 of 3 local runs, then passed
-  alone: the cold Vite transform of `dist/editor.client.js` outlived the
-  5-second per-request fetch timeout in `fetchFirstOk`. Impact: `qa` goes red
-  without a code cause. Plausible fix: warm the module once or raise the
-  per-request timeout within the test's overall deadline. Surface:
-  `scripts/web-distribution/preview-distribution-preflight.test.ts`.
-
 - 2026-09-24 — Chatterbox ownership transfer preflight succeeded through the
   Queue helper, but the same helper rejected transfer because its source build
   no longer matched the running Queue service. Impact: a valid successor exists
