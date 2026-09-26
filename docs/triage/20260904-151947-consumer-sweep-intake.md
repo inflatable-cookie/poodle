@@ -5,7 +5,7 @@ Tabs fill seam (`g16.102`); `0.3.0` adoption is complete; remaining here:
 single-consumer Tabs asks only. Keyboard geometry is held elsewhere.
 Captured: 2026-09-04
 Owner: Chatterbox (planning)
-Source: read-only sweep of 15 sibling repositories' `PAPERCUTS.md` and
+Source: read-only sweep of 15 sibling repositories' papercut files and
 triage files (report kept outside the repo); claims below were spot-checked
 against consumer sources
 
@@ -42,7 +42,7 @@ and all fifteen consumers adopted it. They need no Poodle task.
    nucleus responsive icon-only, loophole drop-target border) stay here
    until a second consumer names them.
 2. **Tree treeitem accessible name and hierarchy** — figmatic
-   (`PAPERCUTS.md`, 2026-08-28): Longhorn's a11y snapshot shows treeitems
+   (figmatic papercut, 2026-08-28): Longhorn's a11y snapshot shows treeitems
    with no name and no children. Defect in Poodle Svelte `Tree`. It also
    blocks Nucleus A1 for Tree. Route: one bounded card (accessible name from
    the visible label; `aria-owns`/nesting so children are discoverable);
@@ -60,7 +60,7 @@ and all fifteen consumers adopted it. They need no Poodle task.
   consumer hits. All 15 consumers are Svelte.
 - `DockRegion showTabs`: used by Longhorn `longhorn-poodle-svelte`
   (`LayoutDockRegion.svelte:121`, `dock.test.ts:36`) and required by Loophole
-  (`PAPERCUTS.md:631`).
+  (Loophole papercut file, line 631).
 - Most-consumed components: Button 15 repos, Select 14, TextInput 14, Tabs
   13, EmptyState 12, Callout 11, Dialog 10, IconButton 10. Tabs is the
   fourth most-used component and the top override target; Select is the
