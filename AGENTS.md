@@ -27,6 +27,7 @@ Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing.
 - `effigy tasks` — list selectors; pick the narrow ones for the change
 - `effigy docs:lint` — contract, docs and generated-evidence checks
 - `effigy ci:web` / `effigy ci:rust` — the required PR CI lanes
+- `effigy ci:fresh` — fresh-checkout PR validation: frozen install, then `ci`
 - `effigy qa` — the broad headless repository board
 
 ## Product rules

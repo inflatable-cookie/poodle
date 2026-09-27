@@ -172,7 +172,10 @@
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows bootstrap their pinned runtimes and
-# Effigy before launching the named selectors; `effigy ci` is the local gate.
+# Effigy before launching the named selectors. `effigy ci` is the local gate
+# when dependencies are already installed. `effigy ci:fresh` is the
+# from-nothing command Queue runs as pre-merge validation: frozen-lockfile
+# install, then the same PR lanes, leaving only ignored outputs behind.
 # g16.005 downstream consumer proof. Compiles a throwaway crate that declares
 # crates.io `gpui = "0.2.2"` for itself AND depends on Poodle's GPUI node
 # backend, passing GPUI values across the boundary both ways. A forked or
@@ -709,6 +712,13 @@
 "ci" = [
   { task = "ci:web" },
   { task = "ci:rust" },
+]
+# Queue argv: ["effigy", "ci:fresh"]. Hydration is JS only; cargo test fetches
+# the contract crates. Do not compose bootstrap:deps (native crate fetch) or
+# native/windowed/release selectors.
+"ci:fresh" = [
+  { run = "bun install --frozen-lockfile" },
+  { task = "ci" },
 ]
 
 # Native compile-rot check (macOS: gpui pulls metal). The preview is the only
