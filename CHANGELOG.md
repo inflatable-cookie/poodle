@@ -7,6 +7,40 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-09-27
+
+`0.4.6` is an additive patch candidate with no breaking API change.
+
+### Added
+
+- **ListCard eyebrow slot.** Svelte and React `ListCard` accept an optional
+  `eyebrow` (text) or `eyebrowContent` (snippet/node), rendered above the title
+  in the card body. The eyebrow never changes the card's accessible name.
+  Web-admitted; the portable spec follows a later native evidence repin.
+- **Pill dismiss control.** Svelte and React `Pill` accept `dismissible`,
+  rendering a trailing native `<button class="poodle-pill__dismiss">` whose
+  accessible name comes from `dismissLabel` (default `"Dismiss"`) and whose
+  click fires `onDismiss`. Web-admitted; the portable spec follows a later
+  native evidence repin.
+- **SidebarNav per-item context menu.** Svelte and React `SidebarNavItem`
+  accept `contextMenuItems` and `contextMenuAriaLabel`, opening the shared
+  `ContextMenu` from a right-click or `ContextMenu`/`Shift+F10`.
+  `onContextAction(itemValue, actionValue)` reports the nav item and the chosen
+  menu row. Web-admitted; the portable spec follows a later native evidence
+  repin.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.6 <0.5`. Svelte, React, React DOM and Marked peer ranges stay
+  unchanged.
+- **Release tooling.** The internal publish-mode registry check revalidates
+  its reads with `npm view --prefer-online` over a longer read-only budget. It
+  changes no consumer behavior.
+- **Release status.** Core and Svelte are the `0.4.6` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Cargo packages and native evidence do not move in this patch.
+
 ## [0.4.5] - 2026-09-27
 
 `0.4.5` is an additive patch candidate with no breaking API change.
@@ -575,6 +609,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.6]: docs/release-notes/0.4.6.md
 [0.4.5]: docs/release-notes/0.4.5.md
 [0.4.4]: docs/release-notes/0.4.4.md
 [0.4.3]: docs/release-notes/0.4.3.md
