@@ -129,6 +129,37 @@ export function ListCardSpecimen() {
               badges={<Pill tone="info">Move</Pill>}
             />
             <ListCard
+              title="logo-primary.svg"
+              eyebrow="Brand kit"
+              subtitle="Updated 2 days ago"
+              meta="1.2 MB"
+              interactive
+              onClick={() => setLastClick("logo-primary.svg")}
+              leading={<Icon name="image" />}
+            />
+            <ListCard
+              title="msa-2026.pdf"
+              eyebrow="Contracts"
+              subtitle="Signed by legal"
+              meta="824 KB"
+              interactive
+              onClick={() => setLastClick("msa-2026.pdf")}
+              leading={<Icon name="file-text" />}
+            />
+            <ListCard
+              title="onboarding-deck.key"
+              subtitle="Shared with the whole team"
+              interactive
+              onClick={() => setLastClick("onboarding-deck.key")}
+              leading={<Icon icon="folder" />}
+              eyebrowContent={
+                <>
+                  <Icon name="layers" size="xs" ariaLabel="Archive" />
+                  <span>Archive · 2026</span>
+                </>
+              }
+            />
+            <ListCard
               title="Selected row"
               subtitle="Batch-selection ready"
               selectable
@@ -264,45 +295,6 @@ export function ListCardSpecimen() {
                 <>
                   <ListCardCounter icon="file-text" count={6} tooltip="6 documents" />
                   <ListCardCounter icon="image" count={42} tooltip="42 images" />
-                </>
-              }
-            />
-          </div>
-        </SpecimenGroup>
-
-        <SpecimenGroup
-          label="Eyebrow labels"
-          description="A small family name above the title, so mixed lists can label each card without composing an external Eyebrow."
-        >
-          <div className="poodle-specimen__stack" style={stack}>
-            <ListCard
-              title="logo-primary.svg"
-              eyebrow="Brand kit"
-              subtitle="Updated 2 days ago"
-              meta="1.2 MB"
-              interactive
-              onClick={() => setLastClick("logo-primary.svg")}
-              leading={<Icon name="image" />}
-            />
-            <ListCard
-              title="msa-2026.pdf"
-              eyebrow="Contracts"
-              subtitle="Signed by legal"
-              meta="824 KB"
-              interactive
-              onClick={() => setLastClick("msa-2026.pdf")}
-              leading={<Icon name="file-text" />}
-            />
-            <ListCard
-              title="onboarding-deck.key"
-              subtitle="Shared with the whole team"
-              interactive
-              onClick={() => setLastClick("onboarding-deck.key")}
-              leading={<Icon icon="folder" />}
-              eyebrowContent={
-                <>
-                  <Icon name="layers" size="xs" ariaLabel="Archive" />
-                  <span>Archive · 2026</span>
                 </>
               }
             />

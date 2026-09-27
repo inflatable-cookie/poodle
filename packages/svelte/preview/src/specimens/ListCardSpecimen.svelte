@@ -118,6 +118,44 @@
           {/snippet}
         </ListCard>
         <ListCard
+          title="logo-primary.svg"
+          eyebrow="Brand kit"
+          subtitle="Updated 2 days ago"
+          meta="1.2 MB"
+          interactive
+          onClick={() => (lastClick = "logo-primary.svg")}
+        >
+          {#snippet leading()}
+            <Icon name="image" />
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="msa-2026.pdf"
+          eyebrow="Contracts"
+          subtitle="Signed by legal"
+          meta="824 KB"
+          interactive
+          onClick={() => (lastClick = "msa-2026.pdf")}
+        >
+          {#snippet leading()}
+            <Icon name="file-text" />
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="onboarding-deck.key"
+          subtitle="Shared with the whole team"
+          interactive
+          onClick={() => (lastClick = "onboarding-deck.key")}
+        >
+          {#snippet leading()}
+            <Icon icon={folder} />
+          {/snippet}
+          {#snippet eyebrowContent()}
+            <Icon name="layers" size="xs" ariaLabel="Archive" />
+            <span>Archive · 2026</span>
+          {/snippet}
+        </ListCard>
+        <ListCard
           title="Selected row"
           subtitle="Batch-selection ready"
           selectable
@@ -294,52 +332,6 @@
         {#snippet footer()}
           <ListCardCounter icon="file-text" count={6} tooltip="6 documents" />
           <ListCardCounter icon="image" count={42} tooltip="42 images" />
-        {/snippet}
-      </ListCard>
-    </div>
-    </SpecimenGroup>
-
-    <SpecimenGroup
-      label="Eyebrow labels"
-      description="A small family name above the title, so mixed lists can label each card without composing an external Eyebrow."
-    >
-    <div class="poodle-specimen__stack">
-      <ListCard
-        title="logo-primary.svg"
-        eyebrow="Brand kit"
-        subtitle="Updated 2 days ago"
-        meta="1.2 MB"
-        interactive
-        onClick={() => (lastClick = "logo-primary.svg")}
-      >
-        {#snippet leading()}
-          <Icon name="image" />
-        {/snippet}
-      </ListCard>
-      <ListCard
-        title="msa-2026.pdf"
-        eyebrow="Contracts"
-        subtitle="Signed by legal"
-        meta="824 KB"
-        interactive
-        onClick={() => (lastClick = "msa-2026.pdf")}
-      >
-        {#snippet leading()}
-          <Icon name="file-text" />
-        {/snippet}
-      </ListCard>
-      <ListCard
-        title="onboarding-deck.key"
-        subtitle="Shared with the whole team"
-        interactive
-        onClick={() => (lastClick = "onboarding-deck.key")}
-      >
-        {#snippet leading()}
-          <Icon icon={folder} />
-        {/snippet}
-        {#snippet eyebrowContent()}
-          <Icon name="layers" size="xs" ariaLabel="Archive" />
-          <span>Archive · 2026</span>
         {/snippet}
       </ListCard>
     </div>
