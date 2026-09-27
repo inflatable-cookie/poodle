@@ -1,0 +1,30 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.6",
+  "source_commit": "db43b6d373102d5f20a73bbeab0ea6df5b134185",
+  "base_commit": "bdfd344f5adbc9c17c9a04c25832aadd12570c71",
+  "payload_commits": [
+    "7d21c44c89e9f17c1ad338bd644d991bf55cc176",
+    "e5e7b87cb864730de12d2ed3b465ec00cf063f4b",
+    "ced33bf10ddd275adb42da8b66c726dadae177a7",
+    "443246ce0867b19fc41bd8b29679b47ae6c0dcc9",
+    "32fbf8fc758d7834f2954ac811ebe51282ec05b1",
+    "014fee7bb4313a58510450b3f033f25ffb735413",
+    "289cfa7a3d0bdf253a043de0b2e673195500b971"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved briefing the Bovine Desktop gaps for the release after 0.4.5 on 2026-09-27, in the Poodle planning thread.",
+  "focused_evidence": {
+    "list_card_eyebrow": "PR #294 adds the web-admitted ListCard eyebrow prop and eyebrowContent slot; focused Svelte and React ListCard tests cover placement, snippet precedence, unset-is-unchanged and the unchanged accessible name.",
+    "pill_dismiss": "PR #295 adds the web-admitted Pill dismiss control; focused Svelte and React Pill tests cover the button tag and type, keyboard focusability, the default and overridden accessible name, and onDismiss firing.",
+    "sidebar_nav_context_menu": "PR #293 adds the web-admitted SidebarNav per-item context menu; focused Svelte and React SidebarNav tests cover pointer and keyboard open, the aria label, the onContextAction payload and unchanged unset items.",
+    "registry_visibility_check": "PR #297 is internal release tooling: publish mode revalidates with npm view --prefer-online over 36 read-only attempts. effigy check:release-automation passes and the tree is otherwise unchanged.",
+    "frozen_lockfile": "Bun 1.4.2 lockfile-only frozen validation passed with workspace packages at 0.4.6 and core ranges at >=0.4.6 <0.5.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
