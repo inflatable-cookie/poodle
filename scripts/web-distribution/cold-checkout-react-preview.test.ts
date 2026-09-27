@@ -26,6 +26,13 @@ const COLD_SUITES = [
 const REACT_PREVIEW_ALIAS =
   /resolve:\s*\{\s*alias:\s*workspaceAliases\s*\},\s*(?=test:\s*\{\s*name:\s*"react-preview")/;
 
+// Whole-line plain alias assignments: the root config's resolve.alias and the
+// projects that restate it without extra conditions.
+const WORKSPACE_ALIAS_LINE =
+  /^[^\S\n]*resolve:\s*\{\s*alias:\s*workspaceAliases\s*\},[^\S\n]*$/gm;
+const WORKSPACE_ALIAS_LINE_PRESENT =
+  /^[^\S\n]*resolve:\s*\{\s*alias:\s*workspaceAliases\s*\},[^\S\n]*$/m;
+
 const RESOLVE_FAILURE = 'Failed to resolve import "@inflatable-cookie/poodle-react"';
 
 const VITEST_TIMEOUT_MS = 120_000;
@@ -95,11 +102,17 @@ function removeColdCheckout(root: string): void {
   rmSync(dirname(root), { recursive: true, force: true });
 }
 
-function stripReactPreviewAlias(source: string): string {
+function stripWorkspaceAliases(source: string): string {
   if (!/name:\s*"react-preview"/.test(source)) {
     throw new Error("vitest.config.ts has no react-preview project");
   }
-  return source.replace(REACT_PREVIEW_ALIAS, "");
+  // vitest 5 merges the root config's resolve.alias into every project, so
+  // stripping only the react-preview project's own alias leaves the import
+  // resolving through the inherited root alias and the planted regression
+  // passes for the wrong reason. The negative control strips every plain
+  // workspaceAliases alias line (root and projects) so the checkout is
+  // genuinely alias-less.
+  return source.replace(WORKSPACE_ALIAS_LINE, "");
 }
 
 function ciWebSequence(toml: string): string[] {
@@ -174,8 +187,10 @@ describe("g16.098 cold-checkout react-preview", () => {
       }
       const configPath = join(coldRoot, "vitest.config.ts");
       const original = readFileSync(configPath, "utf8");
-      const planted = stripReactPreviewAlias(original);
+      const planted = stripWorkspaceAliases(original);
       expect(planted).not.toMatch(REACT_PREVIEW_ALIAS);
+      expect(planted).not.toMatch(WORKSPACE_ALIAS_LINE_PRESENT);
+      expect(planted).toMatch(/name:\s*"react-preview"/);
       writeFileSync(configPath, planted);
       try {
         const result = runColdSuites(coldRoot);
