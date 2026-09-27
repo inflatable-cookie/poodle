@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import {
   isTreeBranch,
   type DragDropCommitResult,
