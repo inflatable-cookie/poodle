@@ -12,6 +12,7 @@ import { requireExactCommit, withDisposableGitPlant } from "./scope";
 import {
   assertWebCandidateScope,
   assertWebPreviewScope,
+  deriveWebCandidateBase,
   deriveWebCandidateVersions,
   isWebCandidateEvidencePath,
   WEB_CANDIDATE_EVIDENCE_PATTERNS,
@@ -342,5 +343,34 @@ describe("web candidate evidence families", () => {
     expect(isWebCandidateEvidencePath("docs/evidence/gpui/census.json")).toBe(true);
     expect(isWebCandidateEvidencePath("packages/core/src/index.ts")).toBe(false);
     expect(WEB_CANDIDATE_EVIDENCE_PATTERNS.length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe("web candidate base", () => {
+  test("an unmerged candidate is admitted against its merge-base", async () => {
+    const { root, base, head } = await plantCandidate("0.4.1");
+    await runGit(root, ["branch", "-f", "integration", base]);
+    expect(await deriveWebCandidateBase(root, head, "integration")).toBe(base);
+  });
+
+  test("a merged candidate walks back over its own release and evidence commits", async () => {
+    const { root, base, head } = await plantCandidate("0.4.1");
+    await runGit(root, ["branch", "-f", "integration", head]);
+    const derived = await deriveWebCandidateBase(root, head, "integration");
+    expect(derived).toBe(base);
+    const proof = await assertWebCandidateScope(root, derived, head);
+    expect(proof.sourceVersion).toBe("0.4.0");
+    expect(proof.targetVersion).toBe("0.4.1");
+  });
+
+  test("a merged head that is not a candidate commit is refused", async () => {
+    const { root, head } = await plantCandidate("0.4.1");
+    await writeFiles(root, { "packages/core/src/feature.ts": "export {};\n" });
+    const later = await commitAll(root, "feature after release");
+    await runGit(root, ["branch", "-f", "integration", later]);
+    expect(head).not.toBe(later);
+    await expect(deriveWebCandidateBase(root, later, "integration")).rejects.toThrow(
+      /already on integration but is not a release-input or evidence commit/,
+    );
   });
 });

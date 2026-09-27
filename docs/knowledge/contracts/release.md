@@ -55,11 +55,17 @@ process failure, not a discovery: stop and return to planning.
    (`release:web-archive`). Do not stack `qa`, `ci:web` or a tag dry run on top.
 3. **Merge.** The candidate PR needs green required PR CI and review, then
    merges with operator approval.
-4. **Candidate run.** Dispatch `.github/workflows/release.yml` with
-   `mode=candidate` on the exact merged candidate commit. It re-runs the npm
-   certificate and uploads the two tarballs plus an identity manifest (source
-   commit, version, SHA-256 values). Hard ceiling: ten minutes.
-5. **Tag.** Create `vX.Y.Z` on that same commit.
+4. **Candidate run.** Push `release/X.Y.Z` pointing at the candidate PR's head
+   (the evidence commit), then dispatch `.github/workflows/release.yml` with
+   `mode=candidate` on that branch. It re-runs the npm certificate and uploads
+   the two tarballs plus an identity manifest (source commit, version, SHA-256
+   values). Hard ceiling: ten minutes. Admission derives its base itself: the
+   candidate's merge-base with `origin/main` before the merge, or, once the
+   candidate has merged, the commit just before its own release-input and
+   evidence commits (`deriveWebCandidateBase` in
+   `test/package-install/web-candidate.ts`). So the run works before or after
+   the merge; it never compares the release with itself.
+5. **Tag.** Create an annotated `vX.Y.Z` tag on that same candidate commit.
 6. **Publish run.** Dispatch `release.yml` with `mode=publish` on the tag and
    `candidate-run-id` set to the candidate run. It downloads that run's
    archives, verifies tag, commit, version, package names and hashes, then
