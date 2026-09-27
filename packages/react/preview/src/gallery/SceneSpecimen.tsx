@@ -6,6 +6,7 @@ import {
   Pill,
   Spinner,
 } from "@inflatable-cookie/poodle-react";
+import type { ControlDensity, ControlSize } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "./SpecimenGroup";
 import { SpecimenLayout } from "./SpecimenLayout";
 import { specimenScenes } from "../generated/specimens/specimen-scenes";
@@ -28,8 +29,9 @@ type FixtureScene = {
   name: string;
   description: string;
   tabs: readonly string[];
-  sizeAxis: readonly string[];
-  densityAxis: readonly string[];
+  // The generator emits the control size/density stops as the matrix axes.
+  sizeAxis: readonly ControlSize[];
+  densityAxis: readonly ControlDensity[];
   groups: readonly FixtureGroup[];
 };
 

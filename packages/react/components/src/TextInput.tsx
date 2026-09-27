@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -176,6 +177,15 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
   const [userEditedSlug, setUserEditedSlug] = useState(false);
 
   const controlRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  // The control renders as either element, and a RefObject typed for the union
+  // is not assignable to either single-element `ref`. A stable callback accepts
+  // both without loosening the ref's own type.
+  const setControlRef = useCallback(
+    (node: HTMLInputElement | HTMLTextAreaElement | null) => {
+      controlRef.current = node;
+    },
+    [],
+  );
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const validationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeValidationKey = useRef<string | null>(null);
@@ -496,7 +506,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
 
           {isMultiline ? (
             <textarea
-              ref={controlRef}
+              ref={setControlRef}
               id={id || undefined}
               name={name}
               className="poodle-text-input__control poodle-text-input__control--multiline"
@@ -529,7 +539,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
             />
           ) : (
             <input
-              ref={controlRef}
+              ref={setControlRef}
               id={id || undefined}
               name={name}
               list={list ?? undefined}

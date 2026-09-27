@@ -12,10 +12,10 @@ export interface SpecimenLayoutProps {
   showSizes?: boolean;
   showDensities?: boolean;
   children?: ReactNode;
-  sizes?: (size: string) => ReactNode;
-  densities?: (density: string) => ReactNode;
-  sizeValues?: readonly string[];
-  densityValues?: readonly string[];
+  sizes?: (size: ControlSize) => ReactNode;
+  densities?: (density: ControlDensity) => ReactNode;
+  sizeValues?: readonly ControlSize[];
+  densityValues?: readonly ControlDensity[];
 }
 
 export function SpecimenLayout({

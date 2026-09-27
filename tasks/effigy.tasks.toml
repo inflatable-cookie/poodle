@@ -447,7 +447,10 @@
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
 "test:meter-surface-perf" = "bun test/visual/meter-surface-perf.ts"
-# Same capture, never fails the process — writes diffs + summary to test/visual/out.
+# Sweep-tier report against the committed parity-debt inventory
+# (test/visual/debt.ts): recorded pairs report as known debt; any other
+# failing pair is a new regression and fails the process. Artifacts land in
+# test/visual/out.
 "visual:report" = "bun test/visual/run.ts --tier=sweep --report"
 "ci:visual" = [{ task = "test:visual" }]
 
@@ -541,10 +544,10 @@
 # consumer's own type-check found a Poodle error before Poodle did.
 "check:svelte-components" = "bunx svelte-check --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
 
-# React type gate (g16.107). Counterpart to `check:svelte`. Not on `ci:web`:
-# current sources have a 12-error component backlog plus a large preview
-# specimen `string`/`ControlSize` mismatch. Clearing those is component work,
-# outside this hygiene lane. Selector exists so the backlog is runnable.
+# React type gate (g16.107). Counterpart to `check:svelte`. Resolves
+# `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-react` types
+# from built dist, so run it after `core:build`/`react:package` (in ci:web
+# ordering does that; standalone, build the packages first).
 "check:react" = [
   { task = "check:react-components" },
   { task = "check:react-preview" },
@@ -699,6 +702,9 @@
   { task = "test:web-pack-install" },
   { task = "svelte:surface-audit" },
   { task = "check:svelte" },
+  # Both type gates need the dist built above (svelte also via install-smoke;
+  # react resolves poodle-core/poodle-react types from dist).
+  { task = "check:react" },
   { task = "docs:lint" },
   { task = "check:parity-evidence-ledger" },
   { task = "docs:react-specimen-drift" },

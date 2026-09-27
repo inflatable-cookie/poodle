@@ -209,6 +209,9 @@ export function LicenceActivation(props: LicenceActivationProps) {
       return;
     }
 
+    // route is derived from mode, so route === "accountToken" already implies
+    // the account union member; mode is what the props union narrows on.
+    if (props.mode !== "account") return;
     const submittedLabel = machineLabelDraft;
     setAccountBusy(true);
     setRouteMessage(null);

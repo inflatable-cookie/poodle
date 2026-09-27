@@ -90,7 +90,7 @@ export function ModelConnectionCard({
   const statusLabel = readiness === "ready" && accessSummary ? accessSummary : readinessLabel;
 
   function disclosureControl(): HTMLElement | null {
-    return summaryRef.current?.querySelector<HTMLElement>("[data-model-connection-disclosure] button");
+    return summaryRef.current?.querySelector<HTMLElement>("[data-model-connection-disclosure] button") ?? null;
   }
 
   function toggleOpen(): void {
