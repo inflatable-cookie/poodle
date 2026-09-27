@@ -284,8 +284,11 @@
     outline-offset: 0.0625rem;
   }
 
-  .poodle-pill__dismiss svg,
-  .poodle-pill__dismiss .poodle-icon {
+  /* `svg.poodle-icon` (specificity 0,2,1) beats the base `.poodle-icon` and
+     `.poodle-icon[data-size]` rules (both 0,2,0), so the dismiss glyph stays
+     0.75em across size, density, and typography="inherit" presets instead of
+     falling back to the icon's rem data-size cascade. */
+  .poodle-pill__dismiss svg.poodle-icon {
     width: 0.75em;
     height: 0.75em;
   }
