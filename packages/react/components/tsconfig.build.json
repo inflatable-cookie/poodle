@@ -17,7 +17,8 @@
     "declarationMap": false,
     "rootDir": "src",
     "outDir": "dist",
-    "types": []
+    "types": [],
+    "preserveSymlinks": true
   },
   "include": [
     "src/**/*.ts",
