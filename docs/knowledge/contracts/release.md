@@ -24,6 +24,14 @@ dependency PRs describe their user-visible changes in the PR description, and
 the release candidate PR writes them into the changelog. The one exception is
 a changelog-only maintenance PR that changes nothing else.
 
+`.github/workflows/` is a release surface too, but the Bun runtime isn't
+pinned there. Every workflow installs Bun with
+`bun-version-file: "package.json"`, so `packageManager` is the single pin, and
+upgrading Bun means changing `packageManager` (plus `bun.lock`). Ordinary PR
+scope admits a workflow change only when its sole changed lines are
+setup-bun's `bun-version`/`bun-version-file` inputs; any other workflow edit
+needs operator approval.
+
 Every release is operator-approved: releases and workflow dispatch are release
 mutations (see [AGENTS.md](../../../AGENTS.md)). A failed release run is a
 process failure, not a discovery: stop and return to planning.
