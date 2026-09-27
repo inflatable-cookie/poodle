@@ -168,6 +168,12 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // g16.060. Controlled-panel focus transfer is a DOM adapter effect.
   // Native has no panel-unmount capture in this bounded consumer unblock.
   tabs: ["focusOnValueChange"],
+  // Text/Code wrap (operator ruling 2026-09-27). Web-admitted now; the
+  // portable spec and GPUI channel wait for the next Nucleus evidence
+  // repin because receipts pin packages/contracts, render, and gpui
+  // byte-for-byte (plan lane `pinned-source-paths`).
+  text: ["wrap"],
+  code: ["wrap"],
 };
 
 /**

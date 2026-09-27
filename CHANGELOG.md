@@ -7,16 +7,6 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
-### Added
-
-- **Text and Code wrap control.** Both web runtimes accept `wrap="anywhere"`,
-  which applies `overflow-wrap: anywhere` so long identifiers can break.
-  The default `wrap="normal"` leaves current rendering unchanged. Native
-  maps `anywhere` through the shared `wrap_anywhere` channel; GPUI mid-token
-  wraps when a single word exceeds the line.
-- **IconButton data attributes.** Svelte and React IconButton forward host
-  `data-*` attributes to the root button.
-
 ## [0.4.2] - 2026-09-14
 
 ### Fixed

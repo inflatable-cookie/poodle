@@ -59,7 +59,10 @@ task.
      `docs/specs/`, removed roadmap and log records); then drop their `allow`
      entries in [retired.toml](knowledge/retired.toml);
    - `rustls` 0.23.45 in the preview lock (RUSTSEC-2026-0285);
-   - whether `SOURCE_PATHS` should pin whole crates or only runtime source.
+   - whether `SOURCE_PATHS` should pin whole crates or only runtime source;
+   - Text and Code `wrap="anywhere"` portable spec and GPUI mapping (web is
+     already admitted; commits `667ac0edd1` and `572ce7c580` hold the Rust
+     work).
    Queue papercut: `06296edd`.
 7. **Remaining check debt** (lane `check-health`) — the `packages/core` strict
    type-check reports pre-existing errors, and `packages/render` is not
