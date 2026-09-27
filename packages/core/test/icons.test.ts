@@ -20,7 +20,9 @@ describe("icon catalogue boundary", () => {
     // 114: g18.013's RichTextEditor toolbar — strikethrough, list-ordered,
     // square-code, table, and the between-horizontal/vertical-start pair that
     // distinguishes the add-row/add-column table actions.
-    expect(Object.keys(defaultLucideIconSet)).toHaveLength(114);
+    // 115: the lucide 1.48 `trash-2` -> `trash` upstream rename adds the
+    // canonical `trash` alongside the retained `trash-2` alias.
+    expect(Object.keys(defaultLucideIconSet)).toHaveLength(115);
     expect(defaultLucideIconSet.search).toBe(search);
     expect(defaultLucideIconSet.x).toBe(x);
     expect("biohazard" in defaultLucideIconSet).toBe(false);
@@ -46,6 +48,7 @@ describe("icon catalogue boundary", () => {
       "help-circle": "circle-question-mark",
       "pause-circle": "circle-pause",
       spinner: "loader-circle",
+      "trash-2": "trash",
       unlock: "lock-open",
       "x-circle": "circle-x",
     };
