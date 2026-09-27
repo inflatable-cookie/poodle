@@ -80,7 +80,12 @@ never moves.
 ## Verify
 
 - The publish run's bounded registry check sees both packages at the new
-  version. It retries reads only; it never repeats `npm publish`.
+  version. It retries reads only; it never repeats `npm publish`. npm can take
+  minutes to make a trusted publish visible ("Your package is being processed"),
+  and the check has timed out and turned the run red after a successful
+  publish (`0.4.2`, `0.4.4`). If "Publish the certified archives" succeeded,
+  confirm with `npm view <package>@<version> version` until both resolve.
+  Never rerun publish for a version npm has accepted.
 - A fresh, source-free consumer installs the published versions from the
   registry and resolves the public entry points (types, SSR and browser).
 - `npm view @inflatable-cookie/poodle-svelte dist-tags` shows the new `latest`.
