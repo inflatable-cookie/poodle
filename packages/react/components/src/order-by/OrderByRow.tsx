@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import type {
   DragDropCommitResult,
   DropIntent,
@@ -49,7 +51,7 @@ export function OrderByRow({
   onRemove,
   total,
   canReorder,
-}: OrderByRowProps) {
+}: OrderByRowProps): ReactElement {
   const { getSourceProps, dragging } = useDragSource({
     sourceId,
     subject: { kind: subjectKind, id: item.key },

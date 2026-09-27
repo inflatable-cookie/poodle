@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import type { DragDropCommitResult, DropIntent } from "@inflatable-cookie/poodle-core";
 
 import { useKeyboardDropTarget } from "../drag-drop";
@@ -75,7 +77,7 @@ export function TabsKeyboardTargets({
   ownsValue,
   isPinnedValue,
   onDrop,
-}: TabsKeyboardTargetsProps) {
+}: TabsKeyboardTargetsProps): ReactElement {
   return (
     <>
       {items.map((item, index) => (

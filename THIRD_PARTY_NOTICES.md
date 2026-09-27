@@ -5,7 +5,7 @@ their upstream licenses; Poodle's MIT license does not replace those terms.
 
 ## Lucide Icons
 
-Lucide 1.31.0 supplies both the scoped icon data in
+Lucide 1.48.0 supplies both the scoped icon data in
 `packages/core/src/icons/icons/` and the SVG assets in
 `packages/render/assets/icons/`. Both outputs are generated from one
 canonical Poodle manifest. [Lucide](https://github.com/lucide-icons/lucide) is

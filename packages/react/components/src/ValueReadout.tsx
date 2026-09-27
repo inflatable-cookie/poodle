@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import { formatAudioValue, valueReadoutVisualState, type AudioValueFormat, type AudioValueLaw } from "@inflatable-cookie/poodle-core";
 import "@inflatable-cookie/poodle-core/styles/value-readout.css";
 import { ValueVisual } from "./audio/ValueVisual";
@@ -13,7 +15,7 @@ export interface ValueReadoutProps extends AudioPresentationProps {
   ariaLabel?: string | null;
 }
 
-export function ValueReadout({ size, sizeRole, density, value = 0, min = 0, max = 1, law = { type: "linear" }, format = { type: "number", decimals: 2 }, disabled = false, ariaLabel = null }: ValueReadoutProps) {
+export function ValueReadout({ size, sizeRole, density, value = 0, min = 0, max = 1, law = { type: "linear" }, format = { type: "number", decimals: 2 }, disabled = false, ariaLabel = null }: ValueReadoutProps): ReactElement {
   const presentation = useAudioPresentation({ size, sizeRole, density });
   const visualState = valueReadoutVisualState(value, min, max, law, !disabled);
   return <output className="poodle-value-readout" data-size={presentation.size} data-density={presentation.density} aria-label={ariaLabel ?? undefined} data-disabled={disabled} data-scope="value-readout" data-part="root">

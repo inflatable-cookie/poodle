@@ -9,7 +9,7 @@ Participation is governed by the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Set Up the Repository
 
-Install [Effigy](https://github.com/inflatable-cookie/effigy), Bun 1.3.14, and
+Install [Effigy](https://github.com/inflatable-cookie/effigy), Bun 1.4.2, and
 Rust 1.95, then run:
 
 ```sh

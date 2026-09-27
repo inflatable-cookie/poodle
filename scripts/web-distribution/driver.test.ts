@@ -53,10 +53,12 @@ describe("web distribution driver", () => {
 
   test("lockfile tools are the locked versions, not cwd paths", () => {
     const tools = readLockedTools(findRepoRoot());
+    // svelte stays pinned at the published peer floor (5.56.8) so the shipped
+    // client dist keeps running there; vite 8.3.1 is the in-range refresh.
     expect(tools).toEqual({
       svelte: "5.56.8",
       typescript: "7.0.2",
-      vite: "8.2.1",
+      vite: "8.3.1",
     });
     expect(JSON.stringify(tools)).not.toContain("/Users/");
   });

@@ -94,7 +94,8 @@ describe("core compiled distribution", () => {
     // g18.013 adds six component-owned RichTextEditor toolbar icons:
     // strikethrough, list-ordered, square-code, table, and the
     // between-horizontal/vertical-start add-row/add-column pair.
-    expect(CORE_ICON_MODULES).toHaveLength(114);
+    // 115: the lucide 1.48 `trash-2` -> `trash` rename adds canonical `trash`.
+    expect(CORE_ICON_MODULES).toHaveLength(115);
     const manifest = JSON.parse(readFileSync(join(coreRoot, "package.json"), "utf8")) as {
       exports: unknown;
       files: string[];

@@ -309,6 +309,7 @@ export const CORE_ICON_MODULES = [
   "table",
   "tag",
   "terminal",
+  "trash",
   "trash-2",
   "trending-down",
   "trending-up",

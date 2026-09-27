@@ -356,7 +356,7 @@ mod tests {
         assert_eq!(ICON_GEOMETRY_REGISTRY_SCHEMA_VERSION, 1);
         assert_eq!(ICON_GEOMETRY_NORMALIZER_VERSION, "1.0.0");
         assert_eq!(ICON_GEOMETRY_SOURCE_PACKAGE, "lucide-static");
-        assert_eq!(ICON_GEOMETRY_SOURCE_VERSION, "1.31.0");
+        assert_eq!(ICON_GEOMETRY_SOURCE_VERSION, "1.48.0");
         assert_eq!(ICON_GEOMETRY_NOTICE_ID, "lucide-static-isc-feather-mit");
         assert!(ICON_GEOMETRY_REGISTRY.len() >= 8);
         assert!(ICON_GEOMETRY_REGISTRY

@@ -15,6 +15,7 @@ export const iconAliases: Readonly<Record<string, string>> = {
   "more-vertical": "ellipsis-vertical",
   "pause-circle": "circle-pause",
   "spinner": "loader-circle",
+  "trash-2": "trash",
   "unlock": "lock-open",
   "x-circle": "circle-x"
 };
