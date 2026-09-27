@@ -1,0 +1,26 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.5",
+  "source_commit": "9fb36a0c04d54421d5745d5848f523b5ea6fa246",
+  "base_commit": "b30a5e2bff5b4a85f449474e57a1e2f5c00f788e",
+  "payload_commits": [
+    "45f2929b77c910e3f9d85084fb6adb96a3b75c0a",
+    "f6c0c523f97bc4116c82efdaf0dd8a49dc7bc12c",
+    "7e0e2fa109c2188609a5ead20e955417db8d4fe2",
+    "3472e5c91ce22d9d1be7a6da335ba2792b920fc2"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved dispatch of the SidebarNav endLabel work and a 0.4.5 release on 2026-09-27, with the dependency-ranges change landing first, in the Poodle planning thread.",
+  "focused_evidence": {
+    "sidebar_nav_end_label": "PR #288 includes focused Svelte and React tests for rendering and description semantics; label remains the accessible name.",
+    "dependency_ranges": "PR #289 declares current-minor core requirements and caret ranges for CodeMirror, Lezer and TipTap; packaging assertions cover the caret range shape.",
+    "web_scope_timeout": "PR #290 raises the internal test:web-scope per-test cap to 120 seconds for loaded gate hosts.",
+    "frozen_lockfile": "Bun 1.4.2 lockfile-only frozen validation passed with workspace packages at 0.4.5 and core ranges at >=0.4.5 <0.5.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
