@@ -8,7 +8,7 @@ import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { requireExactCommit, withDisposableGitPlant } from "./scope";
+import { internalJsDependencyRange, requireExactCommit } from "./scope";
 import {
   assertWebCandidateScope,
   assertWebPreviewScope,
@@ -60,6 +60,7 @@ async function initPlant(): Promise<string> {
 }
 
 function jsManifests(version: string): Record<string, string> {
+  const coreRequirement = internalJsDependencyRange(version);
   return {
     "package.json": `${JSON.stringify({ name: "poodle", version, private: true }, null, 2)}\n`,
     "packages/core/package.json": `${JSON.stringify(
@@ -71,7 +72,7 @@ function jsManifests(version: string): Record<string, string> {
       {
         name: "@inflatable-cookie/poodle-svelte",
         version,
-        dependencies: { "@inflatable-cookie/poodle-core": version },
+        dependencies: { "@inflatable-cookie/poodle-core": coreRequirement },
       },
       null,
       2,
@@ -81,7 +82,7 @@ function jsManifests(version: string): Record<string, string> {
         name: "@inflatable-cookie/poodle-react",
         version,
         private: true,
-        dependencies: { "@inflatable-cookie/poodle-core": version },
+        dependencies: { "@inflatable-cookie/poodle-core": coreRequirement },
       },
       null,
       2,
@@ -105,6 +106,7 @@ function changelog(version: string | null): string {
 }
 
 function bunLock(version: string): string {
+  const coreRequirement = internalJsDependencyRange(version);
   return `${JSON.stringify(
     {
       lockfileVersion: 1,
@@ -114,12 +116,12 @@ function bunLock(version: string): string {
         "packages/svelte/components": {
           name: "@inflatable-cookie/poodle-svelte",
           version,
-          dependencies: { "@inflatable-cookie/poodle-core": version },
+          dependencies: { "@inflatable-cookie/poodle-core": coreRequirement },
         },
         "packages/react/components": {
           name: "@inflatable-cookie/poodle-react",
           version,
-          dependencies: { "@inflatable-cookie/poodle-core": version },
+          dependencies: { "@inflatable-cookie/poodle-core": coreRequirement },
         },
       },
     },
@@ -218,6 +220,52 @@ describe("web candidate admission", () => {
     const { root, base, head } = await plantCandidate("0.5.0");
     const proof = await assertWebCandidateScope(root, base, head);
     expect(proof.targetVersion).toBe("0.5.0");
+  });
+
+  test("admit a synthetic 0.4.5 candidate with current-minor core ranges", async () => {
+    const { root, base, head } = await plantCandidate("0.4.5");
+    const proof = await assertWebCandidateScope(root, base, head);
+    expect(proof.sourceVersion).toBe("0.4.0");
+    expect(proof.targetVersion).toBe("0.4.5");
+  });
+
+  test("reject an exact internal web dependency pin", async () => {
+    const { root, base, head } = await plantCandidate("0.4.5", {
+      frozenExtra: {
+        "packages/svelte/components/package.json": `${JSON.stringify(
+          {
+            name: "@inflatable-cookie/poodle-svelte",
+            version: "0.4.5",
+            dependencies: { "@inflatable-cookie/poodle-core": "0.4.5" },
+          },
+          null,
+          2,
+        )}\n`,
+      },
+    });
+    await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(
+      /internal JS dependency .* >=0\.4\.0 <0\.5 -> >=0\.4\.5 <0\.5, found >=0\.4\.0 <0\.5 -> 0\.4\.5/,
+    );
+  });
+
+  test("reject a wrong-floor internal web dependency range", async () => {
+    const { root, base, head } = await plantCandidate("0.4.5", {
+      frozenExtra: {
+        "packages/react/components/package.json": `${JSON.stringify(
+          {
+            name: "@inflatable-cookie/poodle-react",
+            version: "0.4.5",
+            private: true,
+            dependencies: { "@inflatable-cookie/poodle-core": ">=0.4.4 <0.5" },
+          },
+          null,
+          2,
+        )}\n`,
+      },
+    });
+    await expect(assertWebCandidateScope(root, base, head)).rejects.toThrow(
+      /internal JS dependency .* >=0\.4\.0 <0\.5 -> >=0\.4\.5 <0\.5, found >=0\.4\.0 <0\.5 -> >=0\.4\.4 <0\.5/,
+    );
   });
 
   test("reject a partial lockstep bump", async () => {

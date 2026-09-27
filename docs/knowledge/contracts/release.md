@@ -21,10 +21,10 @@ called out in the changelog and release note.
 Shared libraries are declared as ranges, never exact pins (operator ruling
 2026-09-27), both by consumers and between libraries, so a patch never forces
 a release elsewhere. Svelte and React require `@inflatable-cookie/poodle-core`
-within the current minor, for example `>=0.4.5 <0.5`, while the four web
+within the current minor, for example `>=0.4.4 <0.5`, while the four web
 versions still move in lockstep. Third-party runtime dependencies use ranges
-unless a stated reason keeps one exact. The manifests and release admission
-adopt this in `lane:dependency-ranges`.
+unless a stated reason keeps one exact. Release admission requires that
+range shape.
 
 `CHANGELOG.md` and `docs/release-notes/` are release surfaces. Ordinary PR CI
 (`test:web-pack-install` scope) rejects any change to them, so feature and
@@ -47,7 +47,7 @@ process failure, not a discovery: stop and return to planning.
 ## Steps (npm/web)
 
 1. **Candidate PR.** On a branch, bump root, core, Svelte and React to the same
-   target version, update internal web dependency requirements and `bun.lock`,
+   target version, retarget the current-minor core ranges and `bun.lock`,
    add the `CHANGELOG.md` entry and one `docs/release-notes/<version>.md`, and
    list it in `docs/release-notes/README.md`. Nothing else may change except
    generated stamps and evidence that release policy admits. In a second

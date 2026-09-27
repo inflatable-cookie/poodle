@@ -6,7 +6,8 @@
 //
 //   1. the target is a greater pre-1.0 semantic version of the base;
 //   2. root, core, Svelte and React move in exact lockstep;
-//   3. internal web dependency requirements and `bun.lock` match the target;
+//   3. internal web dependency requirements are the current-minor range
+//      (`>=<version> <0.<minor+1>`) and `bun.lock` resolves at the target;
 //   4. the changelog and one matching release note describe the target;
 //   5. exactly one commit changes the release-input set, and every later
 //      change is generated evidence bound to that commit;
@@ -23,6 +24,7 @@ import {
   commitChangedPaths,
   gitShowFile,
   internalJsDependencies,
+  internalJsDependencyRange,
   isJsonRecord,
   recordedSourceCommits,
   requireExactCommit,
@@ -241,9 +243,11 @@ async function assertJsLockstep(
           `web candidate rejected added or removed internal JS dependency ${dependency} in ${path}`,
         );
       }
-      if (beforeSpecifier !== sourceVersion || afterSpecifier !== targetVersion) {
+      const sourceRange = internalJsDependencyRange(sourceVersion);
+      const targetRange = internalJsDependencyRange(targetVersion);
+      if (beforeSpecifier !== sourceRange || afterSpecifier !== targetRange) {
         throw new Error(
-          `web candidate requires internal JS dependency ${dependency} in ${path} to move ${sourceVersion} -> ${targetVersion}, found ${beforeSpecifier} -> ${afterSpecifier}`,
+          `web candidate requires internal JS dependency ${dependency} in ${path} to move ${sourceRange} -> ${targetRange}, found ${beforeSpecifier} -> ${afterSpecifier}`,
         );
       }
     }
@@ -274,9 +278,24 @@ async function assertBunLock(
         `web candidate requires ${BUN_LOCK_PATH} to resolve ${name} at ${targetVersion}`,
       );
     }
-    if (after.includes(`"${name}": "${sourceVersion}"`)) {
+    const sourceRange = internalJsDependencyRange(sourceVersion);
+    const targetRange = internalJsDependencyRange(targetVersion);
+    if (
+      after.includes(`"${name}": "${sourceVersion}"`) ||
+      after.includes(`"${name}": "${sourceRange}"`)
+    ) {
       throw new Error(
         `web candidate rejected stale ${name} dependency specifier ${sourceVersion} in ${BUN_LOCK_PATH}`,
+      );
+    }
+    if (after.includes(`"${name}": "${targetVersion}"`)) {
+      throw new Error(
+        `web candidate rejected exact ${name} dependency specifier ${targetVersion} in ${BUN_LOCK_PATH}`,
+      );
+    }
+    if (name === "@inflatable-cookie/poodle-core" && !after.includes(`"${name}": "${targetRange}"`)) {
+      throw new Error(
+        `web candidate requires ${BUN_LOCK_PATH} to declare ${name} as ${targetRange}`,
       );
     }
   }

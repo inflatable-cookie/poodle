@@ -1309,6 +1309,22 @@ const INTERNAL_JS_DEPENDENCY_SECTIONS = [
 ] as const;
 
 const INTERNAL_JS_DEPENDENCY_PREFIX = "@inflatable-cookie/poodle-";
+const INTERNAL_JS_DEPENDENCY_VERSION = /^0\.(\d+)\.(\d+)$/;
+
+/**
+ * Current-minor range for an internal web dependency. The floor is the
+ * lockstep version; the ceiling is the next 0.x minor. Historical g18.006
+ * still requires exact equality; generic web-candidate admission uses this.
+ */
+export function internalJsDependencyRange(version: string): string {
+  const match = INTERNAL_JS_DEPENDENCY_VERSION.exec(version);
+  if (!match) {
+    throw new Error(
+      `internal JS dependency range requires a pre-1.0 semantic version, found ${version}`,
+    );
+  }
+  return `>=${version} <0.${Number(match[1]) + 1}`;
+}
 
 /**
  * Every internal Poodle dependency an installed JS manifest declares. The
