@@ -196,6 +196,10 @@ const NOT_APPLICABLE: Record<string, Record<string, string>> = {
   tabs: {
     tabpanel: "TabDefinition carries no content in this API, so no panel exists to label",
   },
+  "list-card": {
+    option: "web-admitted itemRole; portable spec waits for lane:pinned-source-paths",
+    listitem: "web-admitted itemRole; portable spec waits for lane:pinned-source-paths",
+  },
 };
 
 function notApplicable(slug: string, aria: string): string | undefined {

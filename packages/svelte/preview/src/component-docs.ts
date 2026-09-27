@@ -2275,6 +2275,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "interactive", type: "boolean", default: "false", description: "Whether the card is clickable." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the card is disabled." },
       { name: "selectable", type: "boolean", default: "false", description: "Whether the card toggles selected state when activated." },
+      { name: "itemRole", type: '"option" | "listitem" | null', default: "null", description: "Web-only list membership role. option/listitem skip keyboard activation; unset keeps the button/generic root." },
       { name: "selected", type: "boolean", default: "false", description: "Selected visual state for selectable cards." },
       { name: "showReorderHandle", type: "boolean", default: "false", description: "Whether to show the visual reorder affordance." },
       { name: "notLive", type: "boolean", default: "false", description: "Whether to show the card in a non-live state." },

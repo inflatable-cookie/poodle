@@ -3,7 +3,7 @@
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -17,8 +17,8 @@ Updated: 2026-07-10
 - In scope: interactive and disabled states, leading shape variants, leading fill
   variants (tint/solid), custom accent color theming, snippet-based leading,
   badges, footer, actions, and trailing composition, title truncation, meta display
-  with tabular-nums, compact layout, selected state, and reorder-affordance
-  presentation
+  with tabular-nums, compact layout, selected state, reorder-affordance
+  presentation, and web-admitted option/listitem root semantics
 - Out of scope: drag-and-drop workflow ownership, batch-submit reorder flows,
   expandable list cards
 
@@ -80,6 +80,7 @@ Updated: 2026-07-10
 | `interactive` | `boolean` | `false` | no | enables hover/focus/click behavior |
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `selectable` | `boolean` | `false` | no | toggles selected state through the root interaction contract |
+| `itemRole` | `"option" \| "listitem" \| null` | `null` | no | **Web targets only** — `option` renders `role="option"` and exposes `aria-selected`; `listitem` renders `role="listitem"`. Unset keeps the existing button/generic root. Neither mode adds keyboard activation; the list or listbox owner handles that. `href` does not become a link root in these modes. Native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
 | `selected` | `boolean` | `false` | no | selected visual state |
 | `active` | `boolean` | `false` | no | the card the user is currently on; quieter than `selected` and orthogonal to it |
 | `highlighted` | `boolean` | `false` | no | accent emphasis state; tints border, paints an accent-to-transparent gradient over the fill, and adds an inset accent ring (independent of selection) |
@@ -168,36 +169,47 @@ props.
 
 | Callback | When It Runs | Payload | Notes |
 |----------|--------------|---------|-------|
-| `onClick` | card activated (when interactive) | `MouseEvent` | suppressed while disabled |
-| `onSelectedChange` | selectable card toggled | `boolean` | receives the next selected state; suppressed while disabled |
+| `onClick` | card activated (when interactive) | `MouseEvent` | suppressed while disabled. Pointer click still fires in `option`/`listitem` mode. Enter/Space do not fire it in those modes |
+| `onSelectedChange` | selectable card toggled | `boolean` | receives the next selected state; suppressed while disabled. Pointer click still toggles in `option`/`listitem` mode. Enter/Space do not |
 | `onContextAction` | a context-menu item is activated | `string` | the item's `value`; separators and disabled items fire nothing, and the menu closes after it fires |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- When `href` is present: renders an anchor root
-- When interactive/selectable without `href`: `role="button"`, `tabindex="0"`, `aria-label` from prop or title
-- When not interactive: no role (generic container)
+- When `href` is present and `itemRole` is unset: renders an anchor root
+- When interactive/selectable without `href` and `itemRole` unset: `role="button"`, `tabindex="0"`, `aria-label` from prop or title
+- When not interactive and `itemRole` unset: no role (generic container)
+- When `itemRole="option"`: `role="option"`; `aria-selected` reflects `selected`; no `role="button"`; not a tab stop; `href` does not become a link root
+- When `itemRole="listitem"`: `role="listitem"`; no `role="button"`; no `aria-selected`; not a tab stop; `href` does not become a link root
 - When disabled: `aria-disabled="true"`
-- When selectable: `aria-pressed` reflects `selected`
+- When selectable and `itemRole` unset: `aria-pressed` reflects `selected`
+- When `itemRole="option"`: `aria-pressed` is not set — selection is `aria-selected` only
 - When `active`: `aria-current="true"` — the current item, which is a different
   claim from `aria-selected` and must not be conflated with it
+- `itemRole` is web-admitted. The portable Rust spec and GPUI mapping land with
+  the next Nucleus evidence repin (`lane:pinned-source-paths`).
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` | activates link roots |
-| `Enter` | activates card (when interactive) |
-| `Space` | activates card (when interactive) |
-| `Tab` | moves focus to/from card |
+| `Enter` | activates link roots (`itemRole` unset) |
+| `Enter` | activates card (when interactive and `itemRole` unset) |
+| `Space` | activates card (when interactive and `itemRole` unset) |
+| `Tab` | moves focus to/from card (`itemRole` unset) |
+
+Keyboard behaviour in a listbox or list belongs to the owner. `itemRole="option"`
+and `itemRole="listitem"` add no Enter/Space activation. Pointer `onClick` /
+`onSelectedChange` still run so the host can wire selection without wrapping
+the card in another interactive role.
 
 ### Focus And Announcement
 
-- focus entry: card root receives visible focus ring (when interactive)
+- focus entry: card root receives visible focus ring (when interactive and `itemRole` unset)
 - focus exit: focus ring clears immediately
 - non-interactive cards are not focusable
+- `option`/`listitem` cards are not tab stops; the owner may focus them programmatically
 
 ## 7. Layout
 
@@ -470,6 +482,8 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - `--list-card-sash` custom property set via inline style when `sashColor` is provided
 - Root gets `position: relative; overflow: hidden` via `list-card--has-sash` class when sash is present
 - Interactive mode adds click handling and keydown handling for Enter/Space
+  when `itemRole` is unset; `option`/`listitem` skip keyboard activation
+- `itemRole` is web-admitted; unset leaves the existing button/generic root
 - Title text always truncated with ellipsis
 - Leading snippet provides default container styling (circle or rounded-square)
 - Trailing snippet is unstyled pass-through
@@ -501,7 +515,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - [ ] title, subtitle, meta display correctly
 - [ ] interactive mode enables click and keyboard activation
 - [ ] disabled state suppresses interaction
-- [ ] ARIA role matches (button when interactive)
+- [ ] ARIA role matches (button when interactive; option/listitem when `itemRole` is set)
 - [ ] leadingShape variants render correctly
 - [ ] leadingFill tint/solid variants render correctly
 - [ ] accentColor custom theming applies to leading
@@ -531,6 +545,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | tabular-nums font variant | may require GPUI font feature flag | allowed | match where possible |
 | GPUI active bar is a child rectangle with rounded leading corners, not an inset shadow | GPUI's `BoxShadow` has no inset flag, so the bar cannot be clipped by the card's radius as it is on the web and Jetstream | allowed | revisit if gpui gains inset shadows |
 | ListCardCounter helper | Svelte-specific helper, GPUI may inline | allowed | match API if feasible |
+| `itemRole` is web-admitted | Nucleus receipts pin `packages/{contracts,render,gpui}` | operator 2026-09-27 | portable spec in `lane:pinned-source-paths` |
 
 ## 14. Specimen Definitions
 
@@ -605,6 +620,14 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Read-only item | `title="Read-only item"`, `subtitle="No click handler"`, not interactive | Non-interactive card with no hover/focus behavior |
+
+### Option And Listitem Modes
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Selected option | `itemRole="option"`, `selected`, `interactive`, inside a `role="listbox"` | Card with option semantics and selected treatment; no nested button role |
+| Idle option | `itemRole="option"`, `interactive`, inside a `role="listbox"` | Card with option semantics; `aria-selected` false |
+| Plain list item | `itemRole="listitem"`, inside a `role="list"` | Card with listitem semantics; no button role |
 
 ## 15. Approval And Adoption Notes
 

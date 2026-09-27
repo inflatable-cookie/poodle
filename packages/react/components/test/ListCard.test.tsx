@@ -1,5 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ListCard } from "../src/ListCard";
 
@@ -26,6 +26,102 @@ describe("ListCard (react)", () => {
 
     expect(div.dataset.size).toBe("lg");
     expect(anchor.dataset.size).toBe("lg");
+  });
+
+  it("keeps button semantics when itemRole is unset", () => {
+    const root = rootOf(render(<ListCard title="Card" interactive />).container);
+    expect(root.getAttribute("role")).toBe("button");
+    expect(root.tabIndex).toBe(0);
+    expect(root.getAttribute("aria-selected")).toBeNull();
+  });
+
+  it("renders option semantics and aria-selected without a nested button role", () => {
+    const selected = rootOf(
+      render(<ListCard title="Chosen" itemRole="option" selected interactive />).container,
+    );
+    expect(selected.tagName).toBe("DIV");
+    expect(selected.getAttribute("role")).toBe("option");
+    expect(selected.getAttribute("aria-selected")).toBe("true");
+    expect(selected.getAttribute("aria-pressed")).toBeNull();
+    expect(selected.tabIndex).toBe(-1);
+    expect(selected.querySelector('[role="button"]')).toBeNull();
+
+    const idle = rootOf(
+      render(<ListCard title="Idle" itemRole="option" interactive />).container,
+    );
+    expect(idle.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("renders listitem semantics without button or selected ARIA", () => {
+    const root = rootOf(
+      render(<ListCard title="Row" itemRole="listitem" selected interactive />).container,
+    );
+    expect(root.getAttribute("role")).toBe("listitem");
+    expect(root.getAttribute("aria-selected")).toBeNull();
+    expect(root.getAttribute("aria-pressed")).toBeNull();
+    expect(root.tabIndex).toBe(-1);
+  });
+
+  it("does not render a link root when itemRole is set", () => {
+    const root = rootOf(
+      render(<ListCard title="Linked option" href="#" itemRole="option" interactive />).container,
+    );
+    expect(root.tagName).toBe("DIV");
+    expect(root.getAttribute("role")).toBe("option");
+    expect(root.getAttribute("href")).toBeNull();
+  });
+
+  it("does not activate on Enter or Space in option mode", () => {
+    const onClick = vi.fn();
+    const onSelectedChange = vi.fn();
+    const root = rootOf(
+      render(
+        <ListCard
+          title="Option"
+          itemRole="option"
+          interactive
+          selectable
+          onClick={onClick}
+          onSelectedChange={onSelectedChange}
+        />,
+      ).container,
+    );
+
+    fireEvent.keyDown(root, { key: "Enter" });
+    fireEvent.keyDown(root, { key: " " });
+    expect(onClick).not.toHaveBeenCalled();
+    expect(onSelectedChange).not.toHaveBeenCalled();
+  });
+
+  it("still toggles from the pointer in option mode", () => {
+    const onClick = vi.fn();
+    const onSelectedChange = vi.fn();
+    const root = rootOf(
+      render(
+        <ListCard
+          title="Option"
+          itemRole="option"
+          interactive
+          selectable
+          onClick={onClick}
+          onSelectedChange={onSelectedChange}
+        />,
+      ).container,
+    );
+
+    fireEvent.click(root);
+    expect(onSelectedChange).toHaveBeenCalledWith(true);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("still activates from Enter when itemRole is unset", () => {
+    const onClick = vi.fn();
+    const root = rootOf(
+      render(<ListCard title="Card" interactive onClick={onClick} />).container,
+    );
+
+    fireEvent.keyDown(root, { key: "Enter" });
+    expect(onClick).toHaveBeenCalled();
   });
 });
 

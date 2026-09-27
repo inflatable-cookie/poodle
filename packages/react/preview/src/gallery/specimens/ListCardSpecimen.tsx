@@ -422,6 +422,37 @@ export function ListCardSpecimen() {
             <ListCard title="Read-only item" subtitle="No click handler" />
           </div>
         </SpecimenGroup>
+
+        <SpecimenGroup
+          label="Listbox and list item roles"
+          description="Option and listitem modes so a listbox of cards has no nested button role. Keyboard stays with the list owner."
+        >
+          <div className="poodle-specimen__stack" style={stack} role="listbox" aria-label="Library documents">
+            <ListCard
+              title="Selected option"
+              subtitle="aria-selected on the card itself"
+              itemRole="option"
+              selected
+              interactive
+              leading={<Icon name="file-text" />}
+            />
+            <ListCard
+              title="Idle option"
+              subtitle="Ready for the listbox owner"
+              itemRole="option"
+              interactive
+              leading={<Icon icon="folder" />}
+            />
+          </div>
+          <div className="poodle-specimen__stack" style={stack} role="list" aria-label="Static rows">
+            <ListCard
+              title="Plain list item"
+              subtitle="No button role"
+              itemRole="listitem"
+              leading={<Icon icon="layers" />}
+            />
+          </div>
+        </SpecimenGroup>
       </div>
     </SpecimenLayout>
   );

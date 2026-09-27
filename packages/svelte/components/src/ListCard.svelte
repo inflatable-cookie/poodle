@@ -25,6 +25,11 @@
     interactive?: boolean;
     disabled?: boolean;
     selectable?: boolean;
+    /**
+     * Web-admitted list membership role. Unset keeps the button/generic root.
+     * `option`/`listitem` skip keyboard activation; the list owner handles it.
+     */
+    itemRole?: "option" | "listitem" | null;
     selected?: boolean;
     /**
      * The card you are currently on — always on for one card in a list.
@@ -75,6 +80,7 @@
     interactive = false,
     disabled = false,
     selectable = false,
+    itemRole = null,
     selected = false,
     active = false,
     highlighted = false,
@@ -117,6 +123,9 @@
     isStacked && (Boolean(trailing) || showMeta || showActions)
   );
   const isInteractive = $derived(Boolean(href) || interactive || selectable);
+  const usesItemRole = $derived(itemRole === "option" || itemRole === "listitem");
+  const rootRole = $derived(itemRole ?? (isInteractive ? "button" : undefined));
+  const isLinkRoot = $derived(Boolean(href) && !disabled && !selectable && !usesItemRole);
   const showSelectionIndicator = $derived(selectable && selectionIndicator === "checkbox");
   const showSelectionOverlay = $derived(showSelectionIndicator && Boolean(leading));
   const actionableContextMenuItems = $derived(menuNavigableItems(contextMenuItems ?? []));
@@ -152,7 +161,7 @@
   }
 
   function handleKeydown(event: KeyboardEvent) {
-    if (disabled || href) return;
+    if (disabled || href || usesItemRole) return;
 
     if ((interactive || selectable) && (event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
@@ -263,7 +272,7 @@
   });
 </script>
 
-{#if href && !disabled && !selectable}
+{#if isLinkRoot}
   <a
     bind:this={rootElement}
     class="poodle-list-card"
@@ -488,10 +497,11 @@
     data-active={active}
     data-highlighted={highlighted}
     data-reorder={showReorderHandle}
-    role={isInteractive ? (selectable ? "button" : "button") : undefined}
-    aria-pressed={selectable ? selected : undefined}
+    role={rootRole}
+    aria-pressed={usesItemRole ? undefined : selectable ? selected : undefined}
+    aria-selected={itemRole === "option" ? (selected ? "true" : "false") : undefined}
     aria-current={active ? "true" : undefined}
-    tabindex={isInteractive && !disabled ? 0 : -1}
+    tabindex={usesItemRole ? -1 : isInteractive && !disabled ? 0 : -1}
     aria-label={ariaLabel ?? title}
     class:poodle-list-card--has-sash={!!sash}
     style={[

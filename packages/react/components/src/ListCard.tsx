@@ -33,6 +33,11 @@ export interface ListCardProps {
   interactive?: boolean;
   disabled?: boolean;
   selectable?: boolean;
+  /**
+   * Web-admitted list membership role. Unset keeps the button/generic root.
+   * `option`/`listitem` skip keyboard activation; the list owner handles it.
+   */
+  itemRole?: "option" | "listitem" | null;
   selected?: boolean;
   /**
    * The card you are currently on — always on for one card in a list.
@@ -110,6 +115,7 @@ export function ListCard({
   interactive = false,
   disabled = false,
   selectable = false,
+  itemRole = null,
   selected = false,
   active = false,
   highlighted = false,
@@ -148,6 +154,9 @@ export function ListCard({
   const showActions = !trailing && Boolean(actions);
   const showUtilityRail = isStacked && (Boolean(trailing) || showMeta || showActions);
   const isInteractive = Boolean(href) || interactive || selectable;
+  const usesItemRole = itemRole === "option" || itemRole === "listitem";
+  const rootRole = itemRole ?? (isInteractive ? "button" : undefined);
+  const isLinkRoot = Boolean(href) && !disabled && !selectable && !usesItemRole;
   const showSelectionIndicator = selectable && selectionIndicator === "checkbox";
   const showSelectionOverlay = showSelectionIndicator && Boolean(leading);
   const actionableContextMenuItems = menuNavigableItems(contextMenuItems ?? []);
@@ -213,7 +222,7 @@ export function ListCard({
   }
 
   function handleKeydown(event: ReactKeyboardEvent) {
-    if (disabled || href) return;
+    if (disabled || href || usesItemRole) return;
 
     if ((interactive || selectable) && (event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
@@ -508,7 +517,7 @@ export function ListCard({
       </AnchoredSurface>
     ) : null;
 
-  if (href && !disabled && !selectable) {
+  if (isLinkRoot) {
     return (
       <>
         <a
@@ -541,10 +550,11 @@ export function ListCard({
         className={rootClassName}
         data-size={resolvedSize}
         {...sharedDataProps}
-        role={isInteractive ? "button" : undefined}
-        aria-pressed={selectable ? selected : undefined}
+        role={rootRole}
+        aria-pressed={usesItemRole ? undefined : selectable ? selected : undefined}
+        aria-selected={itemRole === "option" ? (selected ? "true" : "false") : undefined}
         aria-current={active ? "true" : undefined}
-        tabIndex={isInteractive && !disabled ? 0 : -1}
+        tabIndex={usesItemRole ? -1 : isInteractive && !disabled ? 0 : -1}
         aria-label={ariaLabel ?? title}
         style={rootStyle}
         onClick={handleClick}
