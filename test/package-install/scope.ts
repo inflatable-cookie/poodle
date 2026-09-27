@@ -585,6 +585,49 @@ function isChangelogMaintenanceRange(changedPaths: string[]): boolean {
   return changedPaths.length === 1 && changedPaths[0] === CHANGELOG_PATH;
 }
 
+/**
+ * Toolchain pin: a workflow whose only changed lines are setup-bun's version
+ * inputs (`bun-version` or `bun-version-file`). The Bun runtime is pinned by
+ * package.json `packageManager`, and workflows read it through
+ * `bun-version-file`, so this is how CI follows the pin. Every other line,
+ * including the pinned `uses:` action, must stay byte-identical, and no line
+ * may be added or removed.
+ */
+const SETUP_BUN_VERSION_INPUT = /^\s*bun-version(?:-file)?:\s*\S.*$/;
+
+export function isSetupBunVersionOnlyChange(before: string, after: string): boolean {
+  const left = before.split("\n");
+  const right = after.split("\n");
+  if (left.length !== right.length) return false;
+  let changed = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index] === right[index]) continue;
+    if (!SETUP_BUN_VERSION_INPUT.test(left[index]) || !SETUP_BUN_VERSION_INPUT.test(right[index])) {
+      return false;
+    }
+    changed += 1;
+  }
+  return changed > 0;
+}
+
+async function withoutSetupBunVersionChanges(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+  forbidden: { path: string; surface: string }[],
+): Promise<{ path: string; surface: string }[]> {
+  const kept: { path: string; surface: string }[] = [];
+  for (const entry of forbidden) {
+    if (entry.surface === "workflow" && entry.path.startsWith(".github/workflows/")) {
+      const before = await gitShowFile(checkoutRoot, requiredBaseCommit, entry.path);
+      const after = await gitShowFile(checkoutRoot, sourceCommit, entry.path);
+      if (before !== null && after !== null && isSetupBunVersionOnlyChange(before, after)) continue;
+    }
+    kept.push(entry);
+  }
+  return kept;
+}
+
 async function ordinaryChangelogMaintenancePermitted(
   checkoutRoot: string,
   requiredBaseCommit: string,
@@ -2021,6 +2064,12 @@ export async function assertInstalledScope(
         ({ path, surface }) => path !== CHANGELOG_PATH || surface !== "release",
       );
     }
+    forbidden = await withoutSetupBunVersionChanges(
+      checkoutRoot,
+      requiredBaseCommit,
+      sourceCommit,
+      forbidden,
+    );
     forbidden.push(
       ...(await ordinaryCargoForbiddenSurfaces(
         checkoutRoot,

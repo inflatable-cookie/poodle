@@ -12,6 +12,7 @@ import {
   assertInstalledScope,
   emitsCertificationReceipt,
   formatInstalledRunOutput,
+  isSetupBunVersionOnlyChange,
   readInstalledScopeMode,
   requireExactCommit,
   resolveCertificationHead,
@@ -1609,5 +1610,55 @@ describe("g18.009 npm/web release wrapper repair", () => {
         /certification scope rejected/,
       );
     }
+  });
+});
+
+describe("setup-bun version-input admission", () => {
+  const workflow = (versionLine: string, extra = "") =>
+    [
+      "name: ci-web",
+      "jobs:",
+      "  web:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      "      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0",
+      "        with:",
+      `          ${versionLine}`,
+      `      - run: effigy ci:web${extra}`,
+      "",
+    ].join("\n");
+
+  test("only setup-bun version inputs may differ, line for line", () => {
+    const pinned = workflow('bun-version: "1.3.14"');
+    expect(isSetupBunVersionOnlyChange(pinned, workflow('bun-version-file: "package.json"'))).toBe(true);
+    expect(isSetupBunVersionOnlyChange(pinned, workflow('bun-version: "1.4.2"'))).toBe(true);
+    expect(isSetupBunVersionOnlyChange(pinned, pinned)).toBe(false);
+    expect(isSetupBunVersionOnlyChange(pinned, workflow('bun-version: "1.4.2"', " --fast"))).toBe(false);
+    expect(isSetupBunVersionOnlyChange(pinned, workflow('bun-version: "1.4.2"') + "extra: line\n")).toBe(false);
+    expect(
+      isSetupBunVersionOnlyChange(pinned, pinned.replace("setup-bun@0c5077e5", "setup-bun@deadbeef")),
+    ).toBe(false);
+  });
+
+  async function plantWorkflowRange(after: string, extra: Record<string, string> = {}) {
+    const root = await initPlant();
+    await writeFiles(root, { ".github/workflows/ci-web.yml": workflow('bun-version: "1.3.14"') });
+    const base = await commitAll(root, "workflow base");
+    await writeFiles(root, { ".github/workflows/ci-web.yml": after, ...extra });
+    const head = await commitAll(root, "workflow head");
+    return { root, base, head };
+  }
+
+  test("ordinary CI admits a workflow that only moves setup-bun to package.json", async () => {
+    const { root, base, head } = await plantWorkflowRange(workflow('bun-version-file: "package.json"'));
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toContain(".github/workflows/ci-web.yml");
+  });
+
+  test("any other workflow line change stays a forbidden workflow surface", async () => {
+    const { root, base, head } = await plantWorkflowRange(workflow('bun-version-file: "package.json"', " --fast"));
+    await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+      /forbidden workflow surface: \.github\/workflows\/ci-web\.yml/,
+    );
   });
 });

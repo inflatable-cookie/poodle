@@ -348,9 +348,20 @@ assert(
 
 assert(
   native.includes("uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6") &&
-    native.includes('bun-version: "1.3.14"'),
-  "ci-native.yml must install the reviewed Bun 1.3.14 runtime",
+    native.includes('bun-version-file: "package.json"'),
+  "ci-native.yml must install the Bun pinned by package.json packageManager",
 );
+for (const [file, source] of [
+  ["ci-web.yml", web],
+  ["ci-native.yml", native],
+  ["ci-visual.yml", visual],
+  ["release.yml", release],
+] as const) {
+  assert(
+    source.includes('bun-version-file: "package.json"') && !/^\s*bun-version:/m.test(source),
+    `${file} must read the Bun version from package.json packageManager`,
+  );
+}
 assert(
   native.indexOf("uses: oven-sh/setup-bun@") < native.indexOf("run: effigy ci:native"),
   "ci-native.yml must install Bun before the native selector",
