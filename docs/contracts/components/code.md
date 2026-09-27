@@ -372,9 +372,11 @@ face reads larger or smaller than the default sans family.
 - Inline mode: GPUI renders as a styled text run within a parent text element
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
-- `wrap="anywhere"` maps to `text_wrap` with `no_wrap` cleared. GPUI's
-  `whitespace_normal` wraps at word boundaries; mid-word breaking of long
-  identifiers is a backend gap, same class as clamp's N-line ellipsis.
+- `wrap="anywhere"` sets the shared `wrap_anywhere` channel (and
+  `text_wrap`, with `no_wrap` cleared). GPUI maps that to
+  `WhiteSpace::Normal`. GPUI's LineWrapper wraps at spaces first, then
+  mid-token when a single word exceeds the line — the overflow-wrap:anywhere
+  result for long identifiers.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
@@ -423,7 +425,6 @@ face reads larger or smaller than the default sans family.
 |-------|-------------|-----------------|-----------|
 | syntax highlighting not specified | tokenization is implementation-specific | allowed | may add token color contracts later |
 | clipboard API differs per platform | GPUI uses native clipboard vs navigator.clipboard | allowed | keep 2s feedback timing |
-| `wrap="anywhere"` is word wrap on native | GPUI has no overflow-wrap/anywhere channel | allowed | mid-word break stays a backend gap |
 
 ## 13. Specimen Definitions
 

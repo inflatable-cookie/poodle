@@ -4,7 +4,7 @@
 //! Ported from: `packages/jetstream/components/src/text.rs`.
 
 use poodle_node::{LayoutDirection, LayoutOverflow, Node};
-use poodle_specs::{TextSpec, TextWeight};
+use poodle_specs::{TextSpec, TextWeight, TextWrap};
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
@@ -26,8 +26,7 @@ pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
         s.text_weight = Some(weight);
         s.line_height = Some(spec.line_height());
         s.text_wrap = true;
-        // `wrap="anywhere"` does not change this backend: Text already word-
-        // wraps. GPUI has no overflow-wrap/anywhere channel.
+        s.wrap_anywhere = spec.wrap == TextWrap::Anywhere;
         // `clamp` degrades to wrapped text clipped at the box, as on both old
         // native tiers — the exact N-line cap + ellipsis stays a backend gap.
         if spec.clamp.is_some() {
@@ -50,7 +49,7 @@ pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::{TextLeading, TextSize, TextSpacing, TextTone, TextWeight};
+    use poodle_specs::{TextLeading, TextSize, TextSpacing, TextTone, TextWeight, TextWrap};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -131,5 +130,22 @@ mod tests {
             poodle_node::NodeKind::Text { content } => assert_eq!(content, "compact"),
             _ => panic!("Compact child must be a text node"),
         }
+    }
+
+    #[test]
+    fn wrap_anywhere_sets_the_shared_channel_and_leaves_normal_unset() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        let unset = text(&TextSpec::new("very-long-identifier"), &ctx);
+        assert!(unset.style.text_wrap);
+        assert!(!unset.style.wrap_anywhere);
+
+        let anywhere = text(
+            &TextSpec::new("very-long-identifier").with_wrap(TextWrap::Anywhere),
+            &ctx,
+        );
+        assert!(anywhere.style.text_wrap);
+        assert!(anywhere.style.wrap_anywhere);
     }
 }

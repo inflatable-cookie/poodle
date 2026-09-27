@@ -51,6 +51,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
             s.font_family = Some(FontFamily::Mono);
             if spec.wrap == CodeWrap::Anywhere {
                 s.text_wrap = true;
+                s.wrap_anywhere = true;
             } else {
                 s.no_wrap = true;
             }
@@ -207,6 +208,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
             source.style.font_family = Some(FontFamily::Mono);
             if spec.wrap == CodeWrap::Anywhere {
                 source.style.text_wrap = true;
+                source.style.wrap_anywhere = true;
             } else {
                 source.style.no_wrap = true;
             }
@@ -217,6 +219,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
         source.style.font_family = Some(FontFamily::Mono);
         if spec.wrap == CodeWrap::Anywhere {
             source.style.text_wrap = true;
+            source.style.wrap_anywhere = true;
         }
         scroll = scroll.child(source);
     }
@@ -245,7 +248,17 @@ mod tests {
             &ctx,
         );
         assert!(node.style.text_wrap);
+        assert!(node.style.wrap_anywhere);
         assert!(!node.style.no_wrap);
+
+        let unset = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_inline(true),
+            &ctx,
+        );
+        assert!(!unset.style.wrap_anywhere);
+        assert!(unset.style.no_wrap);
     }
 
     #[test]
@@ -260,5 +273,35 @@ mod tests {
             .expect("block code always renders a source surface");
 
         assert_eq!(scroll.style.line_height, Some(1.4));
+    }
+
+    #[test]
+    fn block_wrap_anywhere_sets_the_shared_channel_on_source() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let node = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        let source = node
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("block code without gutter has one source text child");
+        assert!(source.style.text_wrap);
+        assert!(source.style.wrap_anywhere);
+        assert!(!source.style.no_wrap);
+
+        let unset = code(&CodeSpec::new().with_content("very-long-identifier"), &ctx);
+        let unset_source = unset
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("unset block source");
+        assert!(!unset_source.style.wrap_anywhere);
+        assert!(!unset_source.style.text_wrap);
     }
 }

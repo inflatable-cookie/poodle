@@ -47,6 +47,9 @@ Updated: 2026-09-27
   overflow, and vertical box orientation.
 - `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
   `wrap="normal"` do not change overflow wrapping.
+- Native maps `wrap="anywhere"` to the shared `wrap_anywhere` node channel.
+  GPUI's LineWrapper wraps at spaces first, then mid-token when a single
+  word exceeds the line.
 
 ## 4. Accessibility
 
