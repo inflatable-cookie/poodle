@@ -20,7 +20,7 @@ bunx playwright install chromium
 effigy test:visual-smoke   # 15 components, 1 axis — fast sanity pass
 effigy test:visual         # axis tier: 15 components x 12 size/density/contrast axes
 effigy test:visual-sweep   # every specimen slug x 2 themes
-effigy visual:report       # sweep without failing the process
+effigy visual:report       # sweep, diffed against the committed debt inventory
 ```
 
 Or directly:
@@ -34,6 +34,11 @@ The run boots both vite previews itself (Svelte 4174, React 4180), reuses
 them if they are already listening, and restarts one that dies mid-run.
 Failures write `test/visual/out/<slug>-<axis>-{svelte,react,diff}.png` plus
 `summary.json` (gitignored).
+
+In `--report` mode every failing pair is classified against the committed
+parity-debt inventory (`debt.ts`): a recorded pair reports as known debt;
+any other failing pair is a new regression and fails the process. The strict
+tiers never read the inventory — a gate failure is always a failure.
 
 ## Triage
 
@@ -63,6 +68,7 @@ Order of suspicion, learned from wave 1:
 | `run.ts` | drives the matrix, diffs, writes the summary |
 | `probe.ts` | side-by-side measurement helper for triage |
 | `allowlist.ts` | accepted deltas — each needs a written reason |
+| `debt.ts` | sweep-tier known-failing pairs — the report diffs against it; each entry names its failure class and reason |
 | `fixtures/` | g15.046 Button visual fixture inventory — named cases for the g15.047 comparator, no captures |
 
 ## What the gate does not cover

@@ -5,6 +5,7 @@ import { PNG } from "pngjs";
 import { chromium, type Browser, type Page } from "playwright";
 
 import { ALLOWLIST, DEFAULT_MAX_DIFF_RATIO } from "./allowlist";
+import { DEBT, type VisualDebtEntry } from "./debt";
 import { captureSpecimen, pinPage } from "./capture";
 import { SKIPPED, VIEWPORT, tierPlan, type Axis, type Tier } from "./config";
 import { ensureUp, startPreviews } from "./server";
@@ -15,7 +16,10 @@ import { ensureUp, startPreviews } from "./server";
  *   bun test/visual/run.ts [--tier=smoke|axis|sweep] [--report] [--slug=<slug>]
  *
  * Diffs the Svelte and React previews at the same slug and axis. `--report`
- * writes artifacts without failing the process.
+ * diffs against the committed parity-debt inventory (`debt.ts`): a failing
+ * pair that the inventory records reports as known debt; any other failing
+ * pair is a new regression and fails the process. Without `--report`, every
+ * failure fails the process.
  */
 
 const OUT_DIR = "test/visual/out";
@@ -35,6 +39,13 @@ function arg(name: string, fallback?: string): string | undefined {
 
 function maxDiffRatio(slug: string): number {
   return ALLOWLIST[slug]?.maxDiffRatio ?? DEFAULT_MAX_DIFF_RATIO;
+}
+
+/** The inventory entry that records this failing pair, if any. */
+function debtFor(slug: string, axis: string, kind: Failure["kind"]): VisualDebtEntry | undefined {
+  return DEBT.find(
+    (entry) => entry.slug === slug && entry.kind === kind && entry.axes.includes(axis),
+  );
 }
 
 async function diffPair(
@@ -214,7 +225,28 @@ async function main(): Promise<void> {
     }
   }
 
-  if (failures.length > 0 && !reportOnly) process.exit(1);
+  const debtFailures = failures.filter((f) => debtFor(f.slug, f.axis, f.kind));
+  const regressions = failures.filter((f) => !debtFor(f.slug, f.axis, f.kind));
+
+  if (reportOnly) {
+    if (debtFailures.length > 0) {
+      console.log(`known visual debt (${debtFailures.length} pairs, see test/visual/debt.ts):`);
+      for (const f of debtFailures) {
+        console.log(`  = ${f.slug} [${f.axis}] ${f.kind} — ${debtFor(f.slug, f.axis, f.kind)?.reason}`);
+      }
+    }
+    if (regressions.length > 0) {
+      console.error(`new regressions (${regressions.length} pairs, not in the debt inventory):`);
+      for (const f of regressions) {
+        console.error(`  ✗ ${f.slug} [${f.axis}] ${f.kind} — ${f.detail}`);
+      }
+      process.exit(1);
+    }
+    if (debtFailures.length === 0) console.log("no failures");
+    return;
+  }
+
+  if (failures.length > 0) process.exit(1);
 }
 
 await main();
