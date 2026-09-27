@@ -179,6 +179,12 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // They are item fields, not Public Props, so this checker never reads them;
   // the entry records the status where the next repin will look for them.
   "sidebar-nav": ["endLabel", "contextMenuItems", "contextMenuAriaLabel"],
+  // ListCard.eyebrow (operator ruling 2026-09-27, planning-thread approval
+  // briefing the Bovine Desktop gaps). Web-admitted on the same terms as
+  // Text/Code `wrap`: Nucleus receipts pin packages/contracts, render, and
+  // gpui byte-for-byte, so ListCardSpec gains `eyebrow` at the next evidence
+  // repin (plan lane `pinned-source-paths`).
+  "list-card": ["eyebrow"],
   // Pill dismiss control (operator ruling 2026-09-27), web-admitted on the
   // same terms as `wrap`. Both are Public Props in the contract; the portable
   // spec and GPUI channel wait for the next Nucleus evidence repin

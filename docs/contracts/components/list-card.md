@@ -3,7 +3,7 @@
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -11,12 +11,13 @@ Updated: 2026-07-10
 - Layer: `foundation`
 - Summary: a compact card for displaying items in list views and square-ish
   tile contexts with
-  leading icon/thumbnail, title, badges, subtitle, footer counters, meta,
+  leading icon/thumbnail, eyebrow, title, badges, subtitle, footer counters, meta,
   explicit actions, selectable state, an exclusive trailing lane, and optional
   link-root navigation
 - In scope: interactive and disabled states, leading shape variants, leading fill
   variants (tint/solid), custom accent color theming, snippet-based leading,
-  badges, footer, actions, and trailing composition, title truncation, meta display
+  an optional eyebrow label above the title, badges, footer, actions, and
+  trailing composition, title truncation, meta display
   with tabular-nums, compact layout, selected state, and reorder-affordance
   presentation
 - Out of scope: drag-and-drop workflow ownership, batch-submit reorder flows,
@@ -31,6 +32,7 @@ Updated: 2026-07-10
   ├── [SelectionIndicator .list-card__selection-indicator]  <span> (optional, when selectionIndicator="checkbox"; overlays leading or renders inline)
   ├── [Leading .list-card__leading]  (optional, via leading snippet)
   ├── [Body .list-card__body]  <div>
+  │   ├── [Eyebrow .list-card__eyebrow]  <span> (optional)
   │   ├── [Header .list-card__header]  <div>
   │   │   ├── [Title .list-card__title]  <span> (text prop or titleContent snippet)
   │   │   └── [HeaderAccessories .list-card__header-accessories]  (optional)
@@ -50,7 +52,8 @@ Updated: 2026-07-10
 | Handle | no | compact reorder affordance; visual only | size, color, spacing |
 | SelectionIndicator | no | checkbox selection indicator shown when `selectionIndicator="checkbox"` and selectable; overlays the leading area when leading is present, otherwise inline | size |
 | Leading | no | avatar, icon, or thumbnail snippet | width, height, border-radius, background, color |
-| Body | yes | title/subtitle/footer column | flex, gap |
+| Body | yes | eyebrow/title/subtitle/footer column | flex, gap |
+| Eyebrow | no | small uppercase family/category label above the title (web targets only) | font, color, letter-spacing, overflow |
 | Header | yes | title + accessories row | flex, gap, alignment |
 | Title | yes | primary text, truncated | font, color, overflow |
 | HeaderAccessories | no | shrink-proof cluster holding badges and corner next to the title | flex, gap |
@@ -69,6 +72,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `title` | `string` | — | yes | primary display text |
+| `eyebrow` | `string \| null` | `null` | no | **Web targets only** — small uppercase label rendered above the title, for family/category naming on each card; renders nothing when unset. Native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
 | `subtitle` | `string \| null` | `null` | no | secondary display text |
 | `meta` | `string \| null` | `null` | no | right-aligned metadata text |
 | `href` | `string \| null` | `null` | no | when present and not disabled/selectable, renders a real link root |
@@ -104,6 +108,7 @@ Updated: 2026-07-10
 
 | Snippet | Purpose |
 |---------|---------|
+| `eyebrowContent` | custom rich eyebrow content when plain string eyebrow is not enough |
 | `titleContent` | custom rich title content when plain string title is not enough |
 | `subtitleContent` | custom rich subtitle content when plain subtitle text is not enough |
 | `metaContent` | custom rich metadata content when plain meta text is not enough |
@@ -183,6 +188,9 @@ props.
 - When selectable: `aria-pressed` reflects `selected`
 - When `active`: `aria-current="true"` — the current item, which is a different
   claim from `aria-selected` and must not be conflated with it
+- The eyebrow is presentational emphasis above the title; it does not change
+  the accessible name. Interactive and link roots keep `aria-label` from the
+  `ariaLabel` prop or `title` alone.
 
 ### Keyboard
 
@@ -206,6 +214,7 @@ props.
 - Root: flex row by default, stacked column when `layout="stacked"`
 - Leading: fixed square — 2rem (circle) or 2.75rem (rounded-square)
 - Body: flex 1, min-width 0 for truncation
+- Eyebrow: single line, truncates like the title
 - Header: flex row, title truncates, badges shrink-proof
 - Meta: flex-shrink 0
 
@@ -347,6 +356,24 @@ props.
 | `flex-direction` | `column` |
 | `gap` | `0.0625rem` |
 
+### Eyebrow
+
+Same values as the [Eyebrow](./eyebrow.md) primitive's root (default `sm` size),
+plus the title's single-line truncation:
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--poodle-recipe-eyebrow-text, var(--poodle-color-text-secondary))` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `0.6875rem` |
+| `font-weight` | `600` |
+| `letter-spacing` | `0.12em` |
+| `line-height` | `1.5` |
+| `text-transform` | `uppercase` |
+| `overflow` | `hidden` |
+| `text-overflow` | `ellipsis` |
+| `white-space` | `nowrap` |
+
 ### Header
 
 | Property | Value |
@@ -474,6 +501,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - Leading snippet provides default container styling (circle or rounded-square)
 - Trailing snippet is unstyled pass-through
 - Badges and corner snippets render inside the `header-accessories` cluster inline with the title
+- Eyebrow text or the `eyebrowContent` snippet renders above the title as the first body child; `eyebrow` is web-admitted and the portable spec gains the field at the next Nucleus evidence repin (`lane:pinned-source-paths`)
 - Footer snippet renders below subtitle for counter icons
 - Built-in context menu: when `contextMenuItems` is non-empty the card owns a context-menu overlay (right-click, or leading-trigger via `contextMenuTrigger="leading"`), with `ContextMenu`/`Shift+F10` keyboard support and `onContextAction(value)`; a standalone ContextMenu wrapper remains an alternative for fully external ownership
 - `data-highlighted` reflects the `highlighted` prop on root
@@ -531,6 +559,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | tabular-nums font variant | may require GPUI font feature flag | allowed | match where possible |
 | GPUI active bar is a child rectangle with rounded leading corners, not an inset shadow | GPUI's `BoxShadow` has no inset flag, so the bar cannot be clipped by the card's radius as it is on the web and Jetstream | allowed | revisit if gpui gains inset shadows |
 | ListCardCounter helper | Svelte-specific helper, GPUI may inline | allowed | match API if feasible |
+| `eyebrow` is web-admitted | Nucleus receipts pin `packages/{contracts,render,gpui}` | operator 2026-09-27 | portable spec in `lane:pinned-source-paths` |
 
 ## 14. Specimen Definitions
 
@@ -605,6 +634,14 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Read-only item | `title="Read-only item"`, `subtitle="No click handler"`, not interactive | Non-interactive card with no hover/focus behavior |
+
+### Eyebrow Labels
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| logo-primary.svg | `eyebrow="Brand kit"`, `title`, `subtitle`, `meta="1.2 MB"`, `interactive`, leading icon (image) | Small uppercase family label above the title |
+| msa-2026.pdf | `eyebrow="Contracts"`, `title`, `subtitle`, `meta="824 KB"`, `interactive`, leading icon (file-text) | Family label on a second card in the same list |
+| onboarding-deck.key | `eyebrowContent` snippet with inline icon and text, `title`, `subtitle`, `interactive`, leading icon (folder) | Rich eyebrow content rendered in the eyebrow lane |
 
 ## 15. Approval And Adoption Notes
 
