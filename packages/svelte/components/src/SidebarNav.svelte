@@ -1,3 +1,7 @@
+<script module lang="ts">
+  let nextSidebarNavId = 0;
+</script>
+
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/sidebar-nav.css";
   import type {
@@ -28,6 +32,8 @@
     onValueChange = undefined,
   }: Props = $props();
 
+  const sidebarNavId = ++nextSidebarNavId;
+
   const visibleGroups = $derived(groups.filter((group) => group.items.length > 0));
 
   function handleItemActivation(item: SidebarNavItem): void {
@@ -44,7 +50,16 @@
   data-size-role={sizeRole}
   aria-label={ariaLabel ?? undefined}
 >
-  {#each visibleGroups as group (group.id)}
+  {#snippet itemContent(item: SidebarNavItem, endLabelId: string)}
+    {#if item.endLabel}
+      <span class="poodle-sidebar-nav__label">{item.label}</span>
+      <span class="poodle-sidebar-nav__end-label" id={endLabelId} aria-hidden="true">{item.endLabel}</span>
+    {:else}
+      {item.label}
+    {/if}
+  {/snippet}
+
+  {#each visibleGroups as group, groupIndex (group.id)}
     <section
       class="poodle-sidebar-nav__group"
       data-separated={visibleGroups.length > 1}
@@ -55,17 +70,20 @@
       {/if}
 
       <ul class="poodle-sidebar-nav__list">
-        {#each group.items as item (item.value)}
+        {#each group.items as item, itemIndex (item.value)}
+          {@const endLabelId = `poodle-sidebar-nav-${sidebarNavId}-${groupIndex}-${itemIndex}-end-label`}
           <li>
             {#if item.href && !item.disabled}
               <a
                 class="poodle-sidebar-nav__item"
                 class:poodle-sidebar-nav__item--active={item.value === value}
                 href={item.href}
+                aria-describedby={item.endLabel ? endLabelId : undefined}
+                data-end-label={item.endLabel ? "true" : undefined}
                 aria-current={item.value === value ? "page" : undefined}
                 onclick={() => handleItemActivation(item)}
               >
-                {item.label}
+                {@render itemContent(item, endLabelId)}
               </a>
             {:else}
               <button
@@ -74,9 +92,11 @@
                 class:poodle-sidebar-nav__item--active={item.value === value}
                 aria-current={item.value === value ? "page" : undefined}
                 disabled={item.disabled}
+                aria-describedby={item.endLabel ? endLabelId : undefined}
+                data-end-label={item.endLabel ? "true" : undefined}
                 onclick={() => handleItemActivation(item)}
               >
-                {item.label}
+                {@render itemContent(item, endLabelId)}
               </button>
             {/if}
           </li>

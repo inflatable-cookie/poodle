@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/svelte";
+import { fireEvent, render, within } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import SidebarNav from "../src/SidebarNav.svelte";
@@ -89,5 +89,56 @@ describe("SidebarNav (svelte)", () => {
     expect((titles[0] as HTMLElement).getAttribute("title")).toBe("Foundation");
     const groupSections = [...container.querySelectorAll(".poodle-sidebar-nav__group")];
     expect(groupSections[0].getAttribute("data-separated")).toBe("true");
+  });
+
+  describe("endLabel", () => {
+    const counted: SidebarNavGroup[] = [
+      {
+        id: "library",
+        label: "Library",
+        items: [
+          { value: "videos", label: "Videos", href: "/videos", endLabel: "198" },
+          { value: "audio", label: "Audio", endLabel: "42" },
+          { value: "images", label: "Images", endLabel: "7", disabled: true },
+          { value: "notes", label: "Notes", endLabel: null },
+        ],
+      },
+    ];
+
+    it("keeps the accessible name as label and describes link and button items with endLabel", () => {
+      const { container } = render(SidebarNav, { props: { groups: counted } });
+      const view = within(container);
+      const link = view.getByRole("link", { name: "Videos", description: "198" });
+      expect(link.getAttribute("data-end-label")).toBe("true");
+      const button = view.getByRole("button", { name: "Audio", description: "42" });
+      const disabled = view.getByRole("button", { name: "Images", description: "7" });
+      expect((disabled as HTMLButtonElement).disabled).toBe(true);
+
+      for (const item of [link, button, disabled]) {
+        const endLabel = item.querySelector(".poodle-sidebar-nav__end-label") as HTMLElement;
+        expect(endLabel.getAttribute("aria-hidden")).toBe("true");
+        expect(item.getAttribute("aria-describedby")).toBe(endLabel.id);
+        expect(item.querySelector(".poodle-sidebar-nav__label")?.textContent).toBe(
+          item === link ? "Videos" : item === button ? "Audio" : "Images",
+        );
+      }
+      expect(link.querySelector(".poodle-sidebar-nav__end-label")?.textContent).toBe("198");
+    });
+
+    it("renders no end label or description when endLabel is unset or null", () => {
+      const { container } = render(SidebarNav, { props: { groups: counted } });
+      const notes = within(container).getByRole("button", { name: "Notes" });
+      expect(notes.hasAttribute("aria-describedby")).toBe(false);
+      expect(notes.hasAttribute("data-end-label")).toBe(false);
+      expect(notes.querySelector("span")).toBeNull();
+      expect(notes.textContent).toBe("Notes");
+    });
+
+    it("gives every end label a unique id", () => {
+      const { container } = render(SidebarNav, { props: { groups: counted } });
+      const ids = [...container.querySelectorAll(".poodle-sidebar-nav__end-label")].map((el) => el.id);
+      expect(ids.length).toBe(3);
+      expect(new Set(ids).size).toBe(3);
+    });
   });
 });

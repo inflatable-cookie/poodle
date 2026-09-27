@@ -174,6 +174,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // byte-for-byte (plan lane `pinned-source-paths`).
   text: ["wrap"],
   code: ["wrap"],
+  // SidebarNavItem.endLabel (operator ruling 2026-09-27), web-admitted on
+  // the same terms as `wrap`. It is an item field, not a Public Prop, so this
+  // checker never reads it; the entry records the status where the next
+  // repin will look for it.
+  "sidebar-nav": ["endLabel"],
 };
 
 /**
