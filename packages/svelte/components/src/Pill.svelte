@@ -2,6 +2,7 @@
   import "@inflatable-cookie/poodle-core/styles/pill.css";
   import type { Snippet } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import { getPillContext, type PillTypography } from "./pill-context";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
@@ -21,6 +22,9 @@
     dot = false,
     title = null,
     ariaLabel = null,
+    dismissible = false,
+    dismissLabel = "Dismiss",
+    onDismiss = undefined,
     children = undefined,
   }: {
     tone?: PillTone;
@@ -36,6 +40,9 @@
     dot?: boolean;
     title?: string | null;
     ariaLabel?: string | null;
+    dismissible?: boolean;
+    dismissLabel?: string;
+    onDismiss?: (() => void) | undefined;
     children?: Snippet;
   } = $props();
 
@@ -68,4 +75,14 @@
     <span class="poodle-pill__dot" aria-hidden="true"></span>
   {/if}
   {@render children?.()}
+  {#if dismissible}
+    <button
+      type="button"
+      class="poodle-pill__dismiss"
+      aria-label={dismissLabel}
+      onclick={() => onDismiss?.()}
+    >
+      <Icon name="x" />
+    </button>
+  {/if}
 </span>

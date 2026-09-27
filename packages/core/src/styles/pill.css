@@ -254,6 +254,45 @@
   .poodle-pill[data-tone="danger"] { --poodle-pill-dot-fill: var(--poodle-color-status-danger, #ef4444); }
   .poodle-pill[data-accent="custom"] { --poodle-pill-dot-fill: var(--poodle-pill-accent); }
 
+  /* Optional trailing dismiss control (dismissible prop). A real button sized
+     in em so it tracks the pill's font size across size, density, and
+     typography="inherit" presets; the x icon stays decorative. */
+  .poodle-pill__dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    line-height: 1;
+  }
+
+  .poodle-pill__dismiss:hover {
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-pill__dismiss:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  /* `svg.poodle-icon` (specificity 0,2,1) beats the base `.poodle-icon` and
+     `.poodle-icon[data-size]` rules (both 0,2,0), so the dismiss glyph stays
+     0.75em across size, density, and typography="inherit" presets instead of
+     falling back to the icon's rem data-size cascade. */
+  .poodle-pill__dismiss svg.poodle-icon {
+    width: 0.75em;
+    height: 0.75em;
+  }
+
   /* Solid appearance: tint-border colour promoted into one surface. The
      ordinary tone-tinted shell is the `tint` base recipe above; appearances
      are mutually exclusive, so solid never composes with subtle or badge. */

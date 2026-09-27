@@ -100,6 +100,7 @@ import PaginationSpecimen from "./PaginationSpecimen.svelte";
 import PaginationSummarySpecimen from "./PaginationSummarySpecimen.svelte";
 import PasswordRequirementsSpecimen from "./PasswordRequirementsSpecimen.svelte";
 import PickerShellSpecimen from "./PickerShellSpecimen.svelte";
+import PillSpecimen from "./PillSpecimen.svelte";
 
 import CodeEditorSpecimen from "./CodeEditorSpecimen.svelte";
 import CodeInputSpecimen from "./CodeInputSpecimen.svelte";
@@ -291,7 +292,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "pagination-summary": PaginationSummarySpecimen,
   "password-requirements": PasswordRequirementsSpecimen,
   "picker-shell": PickerShellSpecimen,
-  pill: SceneSpecimen,
+  pill: PillSpecimen,
   "code-input": CodeInputSpecimen,
   popover: PopoverSpecimen,
   progress: ProgressSpecimen,

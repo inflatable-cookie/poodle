@@ -1,7 +1,7 @@
 # Pill
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -9,8 +9,9 @@ Updated: 2026-07-10
 - Layer: `foundation`
 - Summary: a rounded inline label for compact categorization or metadata
 - In scope: tone, appearance (tint/solid/subtle/badge), semantic
-  sizing, optional monospace styling
-- Out of scope: removable chips, multi-select tag inputs
+  sizing, optional monospace styling, and an optional trailing removal control
+- Out of scope: multi-select tag inputs and free-form chip composition beyond
+  one removal control
 
 ## 2. Anatomy
 
@@ -18,7 +19,8 @@ Updated: 2026-07-10
 [Root .pill]
   ├── [Dot (optional, .poodle-pill__dot)]
   ├── [Icon (optional, inline svg / .poodle-icon)]
-  └── [Content (default slot)]
+  ├── [Content (default slot)]
+  └── [Dismiss (optional, .poodle-pill__dismiss)]  (button)
 ```
 
 | Part | Element | Required | Description |
@@ -27,6 +29,7 @@ Updated: 2026-07-10
 | Dot | `.poodle-pill__dot` | no | optional leading status dot (`dot` prop), `0.5em` square, `aria-hidden`, fill follows the semantic tone |
 | Icon | `<svg>` / `.poodle-icon` | no | optional inline icon, sized `1em` square and `flex-shrink: 0` |
 | Content | slot | yes | short label text |
+| Dismiss | `<button>` | no | optional trailing dismiss control (`dismissible` prop); a real button with `aria-label` from `dismissLabel`, containing the `x` icon |
 
 ## 3. Props And Inputs
 
@@ -47,6 +50,8 @@ Updated: 2026-07-10
 | `dot` | `boolean` | `false` | no | renders a leading `0.5em` status dot filled with the tone's status color (accent color when `accent` is set, `--poodle-color-text-secondary` for neutral) |
 | `title` | `string \| null` | `null` | no | optional native tooltip forwarded to the root element's `title` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
+| `dismissible` | `boolean` | `false` | no | **Web targets only** — renders a trailing dismiss button; native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
+| `dismissLabel` | `string` | `"Dismiss"` | no | **Web targets only** — accessible name for the dismiss button |
 
 ### Controlled And Uncontrolled
 
@@ -76,7 +81,9 @@ Updated: 2026-07-10
 
 ### Component States
 
-No internal state.
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| dismissible | `dismissible=true` | trailing dismiss button appears; rendering and semantics stay unchanged when unset |
 
 ### Behavior Machine
 
@@ -88,9 +95,12 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ## 5. Events
 
+The portable pill is a non-interactive display primitive and emits no events
+of its own. The web-admitted dismiss control adds one:
+
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| none | n/a | n/a | non-interactive display primitive |
+| `onDismiss` | dismiss button clicked | `() => void` | **Web targets only** — only fires when `dismissible` is true; the consumer removes or hides the pill |
 
 ## 6. Accessibility
 
@@ -99,21 +109,32 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Role: inline text by default (no ARIA role)
 - Required attributes: none
 - Optional attributes: `aria-label` when visible text is abbreviated or symbolic
-- Labeling rules: pills stay non-interactive unless a higher-order contract
-  wraps them
+- Labeling rules: the pill root stays non-interactive; the `dismissible`
+  dismiss control carries its own accessible name from `dismissLabel`, so the
+  pill label stays its own text
+- The dismiss control is a native `<button type="button">` labelled by
+  `dismissLabel` (for example `"Remove filter: Videos"`); the trailing `x`
+  icon is decorative and hidden from assistive technology
 
 ### Keyboard
 
+The pill root is not focusable and has no keyboard behavior of its own.
+
 | Key | Behavior |
 |-----|----------|
-| none | non-interactive by default |
+| none | the pill root is not focusable by default |
+| Tab | **Web targets only** — moves focus to the dismiss button when `dismissible` is true |
+| Enter / Space | **Web targets only** — activates the focused dismiss button and fires `onDismiss` |
 
 ### Focus And Announcement
 
-- focus entry: not focusable by default
+- focus entry: the pill root is not focusable; the web-admitted dismiss button
+  is keyboard focusable when present
+- focus-visible: the dismiss button draws the shared focus ring
 - live-region behavior: none
 - GPUI-native accessibility mapping notes: expose pill content as text-like
-  metadata, not as a control
+  metadata, not as a control; the web-admitted dismiss control is not part of
+  the portable native surface
 
 ## 7. Layout
 
@@ -381,6 +402,36 @@ Tone dot fills (`--poodle-pill-dot-fill` on the root):
 | `[data-tone="danger"]` | `var(--poodle-color-status-danger)` |
 | `[data-accent="custom"]` | `var(--poodle-pill-accent)` |
 
+### Dismiss `.poodle-pill__dismiss`
+
+The optional trailing dismiss control is a real `<button>` sized in `em`, so it
+tracks the pill's font size across size, density, and `typography="inherit"`
+presets. It inherits the pill's text color and the `x` icon is `0.75em` square.
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `flex-shrink` | `0` |
+| `width` / `height` | `1em` |
+| `margin` | `0` |
+| `padding` | `0` |
+| `border` | `0` |
+| `border-radius` | `999px` |
+| `background` | `transparent` |
+| `color` | `inherit` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+| `line-height` | `1` |
+
+### Dismiss — focus-visible
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
+| `outline-offset` | `0.0625rem` |
+
 ### Density
 
 Density adjusts pill spacing via the `--poodle-pill-*-adjust` custom properties.
@@ -414,6 +465,8 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
   on the root element and consumed by the same element's CSS, enabling tone
   overrides without class proliferation
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `dismissible` renders a trailing `<button class="poodle-pill__dismiss">`
+  with `aria-label={dismissLabel}` and an `onclick` that calls `onDismiss?.()`
 - **Pill context composition surface** (`pill-context.ts`): a parent may call
   `setPillContext({ size?, typography? })` to force the `size` and `typography`
   of descendant pills. When present, the context's `size`/`typography` win over
@@ -431,6 +484,9 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 - for `typography="inherit"`, non-CSS runtimes may approximate parent-owned
   `em` behavior with ratio-preserving metrics from a 1rem baseline until
   parent-relative inline layout exists
+- `dismissible` and `dismissLabel` are web-admitted. The portable Rust spec and
+  GPUI mapping land with the next Nucleus evidence repin
+  (`lane:pinned-source-paths`).
 
 ## 11. Parity Checklist
 
@@ -460,6 +516,7 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 |-------|-------------|-----------------|-----------|
 | `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
 | Jetstream mono font styling | current Jetstream `JsEl` text surface does not expose font-family or letter-spacing controls | allowed | implement text-family and tracking support in Jetstream, then apply `font="mono"` literally |
+| `dismissible` / `dismissLabel` are web-admitted | Nucleus receipts pin `packages/{contracts,render,gpui}` | operator 2026-09-27 | portable spec in `lane:pinned-source-paths` |
 
 ## 13. Specimen Definitions
 
@@ -514,12 +571,25 @@ Three muted pills in a horizontal row:
 | Muted success | success | true |
 | Muted danger | danger | true |
 
+### Dismissible
+
+Pills with a trailing dismiss button. The accessible name comes from
+`dismissLabel`; the pill label stays its own text.
+
+| Content | Props | Expected Visual |
+|---------|-------|-----------------|
+| Videos | `dismissible=true`, `dismissLabel="Remove filter: Videos"` | pill labelled Videos with a trailing `x` dismiss button whose accessible name is "Remove filter: Videos" |
+| Audio | `dismissible=true` | pill labelled Audio with a trailing `x` dismiss button using the default "Dismiss" name |
+
 ## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: metadata displays, labels, status tags, card headers
 - future follow-up: add dismissible-chip semantics separately if needed
+- implemented 2026-09-27: optional dismiss control (`dismissible`,
+  `dismissLabel`, `onDismiss`) is web-admitted in Svelte and React; the
+  portable spec follows with the next Nucleus evidence repin
 
 ## Rust Spec Note
 

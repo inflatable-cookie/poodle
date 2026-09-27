@@ -185,6 +185,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // gpui byte-for-byte, so ListCardSpec gains `eyebrow` at the next evidence
   // repin (plan lane `pinned-source-paths`).
   "list-card": ["eyebrow"],
+  // Pill dismiss control (operator ruling 2026-09-27), web-admitted on the
+  // same terms as `wrap`. Both are Public Props in the contract; the portable
+  // spec and GPUI channel wait for the next Nucleus evidence repin
+  // (`lane:pinned-source-paths`).
+  pill: ["dismissible", "dismissLabel"],
 };
 
 /**
