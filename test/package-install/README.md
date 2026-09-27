@@ -31,7 +31,8 @@ which applies the version-independent law in `web-candidate.ts`:
 - the target is a greater pre-1.0 semantic version of the base;
 - root, core, Svelte and the private paired React manifest move in exact
   lockstep;
-- internal web dependency requirements and `bun.lock` resolve at the target;
+- Svelte and React require `@inflatable-cookie/poodle-core` as
+  `>=<target> <0.<minor+1>`, and `bun.lock` resolves at the target;
 - the changelog and one matching `docs/release-notes/<target>.md` describe it;
 - exactly one commit changes the derived release-input set, and every later
   change is a generated/evidence/execution-record surface bound to it;

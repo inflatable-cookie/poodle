@@ -64,20 +64,22 @@ describe("RichText packaging", () => {
     expect(react).toContain("./RichTextRenderer");
   });
 
-  it("both manifests pin the exact TipTap set with no ranges", () => {
+  it("both manifests declare caret ranges for the TipTap set", () => {
     for (const manifestPath of [
       "packages/svelte/components/package.json",
       "packages/react/components/package.json",
     ]) {
       const manifest = JSON.parse(read(manifestPath)) as { dependencies?: Record<string, string> };
-      for (const name of TIPTAP_SPECIFIERS) {
+      const specifiers = TIPTAP_SPECIFIERS.map((name) => {
         const specifier = manifest.dependencies?.[name];
-        expect(specifier, `${manifestPath} ${name}`).toMatch(/^\d+\.\d+\.\d+$/);
-      }
+        expect(specifier, `${manifestPath} ${name}`).toMatch(/^\^\d+\.\d+\.\d+$/);
+        return specifier;
+      });
+      expect(new Set(specifiers).size, `${manifestPath} TipTap family`).toBe(1);
       const raw = read(manifestPath);
       expect(raw).toContain('"./rich-text"');
       // The engine set is separate from the editor set: no cross-contamination.
-      expect(manifest.dependencies?.["@codemirror/state"]).toMatch(/^\d+\.\d+\.\d+$/);
+      expect(manifest.dependencies?.["@codemirror/state"]).toMatch(/^\^\d+\.\d+\.\d+$/);
     }
   });
 

@@ -12,6 +12,7 @@ import {
   assertInstalledScope,
   emitsCertificationReceipt,
   formatInstalledRunOutput,
+  internalJsDependencyRange,
   isSetupBunVersionOnlyChange,
   readInstalledScopeMode,
   requireExactCommit,
@@ -70,6 +71,19 @@ async function initPlant(): Promise<string> {
   await runGit(root, ["config", "user.name", "Poodle Certification"]);
   return root;
 }
+
+describe("internal JS dependency range", () => {
+  test("current-minor floor tracks the lockstep version", () => {
+    expect(internalJsDependencyRange("0.4.4")).toBe(">=0.4.4 <0.5");
+    expect(internalJsDependencyRange("0.4.5")).toBe(">=0.4.5 <0.5");
+    expect(internalJsDependencyRange("0.5.0")).toBe(">=0.5.0 <0.6");
+  });
+
+  test("reject a non-pre-1.0 version", () => {
+    expect(() => internalJsDependencyRange("1.0.0")).toThrow(/pre-1\.0 semantic version/);
+    expect(() => internalJsDependencyRange("0.4")).toThrow(/pre-1\.0 semantic version/);
+  });
+});
 
 const CANDIDATE_CARGO_PLANT_MANIFEST = "packages/contracts/tokens/Cargo.toml";
 const candidateCargoPlantBase = [

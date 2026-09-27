@@ -1,7 +1,7 @@
 # 071 Fast Validation And npm Release Pipeline
 
 Status: active
-Updated: 2026-09-13
+Updated: 2026-09-27
 Depends on: `022-packaging-versioning-and-release-channel-rules.md`,
 `044-deprecation-change-control-and-release-channel-operations.md`,
 `070-compiled-web-distribution-contract.md`
@@ -40,7 +40,10 @@ admits a candidate only when:
 
 - the target is a valid greater pre-1.0 semantic version;
 - root, core, Svelte and React move in exact lockstep;
-- internal web dependency requirements and `bun.lock` match that target;
+- Svelte and React require `@inflatable-cookie/poodle-core` as the
+  current-minor range (`>=<target> <0.<minor+1>`), and `bun.lock` resolves
+  those packages at the target; an exact or wrong-floor requirement fails
+  closed;
 - the changelog and one matching release note describe the target;
 - every other change is a bounded release input or execution record declared
   by release policy.
