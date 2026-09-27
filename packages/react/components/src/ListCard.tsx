@@ -22,6 +22,11 @@ export interface ListCardProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   title: string;
+  /**
+   * Small uppercase label rendered above the title — a family or category
+   * name on each card. Web-admitted; see list-card.md §3.
+   */
+  eyebrow?: string | null;
   subtitle?: string | null;
   meta?: string | null;
   href?: string | null;
@@ -55,6 +60,7 @@ export interface ListCardProps {
   onClick?: ((event: ReactMouseEvent | MouseEvent) => void) | null;
   onSelectedChange?: ((selected: boolean) => void) | null;
   onContextAction?: ((value: string) => void) | null;
+  eyebrowContent?: ReactNode;
   titleContent?: ReactNode;
   subtitleContent?: ReactNode;
   metaContent?: ReactNode;
@@ -99,6 +105,7 @@ export function ListCard({
   sizeRole = "control",
   density = null,
   title,
+  eyebrow = null,
   subtitle = null,
   meta = null,
   href = null,
@@ -126,6 +133,7 @@ export function ListCard({
   onClick = null,
   onSelectedChange = null,
   onContextAction = null,
+  eyebrowContent,
   titleContent,
   subtitleContent,
   metaContent,
@@ -379,6 +387,9 @@ export function ListCard({
       {leadingContent}
 
       <div className="poodle-list-card__body">
+        {eyebrowContent || eyebrow ? (
+          <span className="poodle-list-card__eyebrow">{eyebrowContent ?? eyebrow}</span>
+        ) : null}
         <div className="poodle-list-card__header">
           <span className="poodle-list-card__title">{titleContent ?? title}</span>
           {badges || corner ? (

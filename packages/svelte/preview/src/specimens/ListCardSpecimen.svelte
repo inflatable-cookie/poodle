@@ -118,6 +118,44 @@
           {/snippet}
         </ListCard>
         <ListCard
+          title="logo-primary.svg"
+          eyebrow="Brand kit"
+          subtitle="Updated 2 days ago"
+          meta="1.2 MB"
+          interactive
+          onClick={() => (lastClick = "logo-primary.svg")}
+        >
+          {#snippet leading()}
+            <Icon name="image" />
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="msa-2026.pdf"
+          eyebrow="Contracts"
+          subtitle="Signed by legal"
+          meta="824 KB"
+          interactive
+          onClick={() => (lastClick = "msa-2026.pdf")}
+        >
+          {#snippet leading()}
+            <Icon name="file-text" />
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="onboarding-deck.key"
+          subtitle="Shared with the whole team"
+          interactive
+          onClick={() => (lastClick = "onboarding-deck.key")}
+        >
+          {#snippet leading()}
+            <Icon icon={folder} />
+          {/snippet}
+          {#snippet eyebrowContent()}
+            <Icon name="layers" size="xs" ariaLabel="Archive" />
+            <span>Archive · 2026</span>
+          {/snippet}
+        </ListCard>
+        <ListCard
           title="Selected row"
           subtitle="Batch-selection ready"
           selectable
