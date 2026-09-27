@@ -42,7 +42,13 @@ process failure, not a discovery: stop and return to planning.
    target version, update internal web dependency requirements and `bun.lock`,
    add the `CHANGELOG.md` entry and one `docs/release-notes/<version>.md`, and
    list it in `docs/release-notes/README.md`. Nothing else may change except
-   generated stamps and evidence that release policy admits.
+   generated stamps and evidence that release policy admits. In a second
+   commit, bind `docs/evidence/releases/v<version>-candidate.json`
+   (`poodle.web-candidate-evidence.v1`): the freeze commit as
+   `source_commit`, the base, the payload commits since the previous tag, the
+   publication set, `native_train_changed`, the operator acceptance and the
+   focused evidence. The `0.4.2` candidate (`a28c99f44`, `d2438aef7`) is the
+   reference.
 2. **Local proof.** Run `effigy release:web-certificate` once on the stable
    candidate. It admits the changed range (`release:web-admission`), then
    builds, packs and source-free-installs one archive set
