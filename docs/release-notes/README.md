@@ -20,9 +20,12 @@ exists yet.
 
 ## Versions
 
+- [0.4.4](0.4.4.md) — 2026-09-27 — additive patch candidate superseding
+  unpublished 0.4.3; Text/Code wrap, IconButton `data-*`, dependency refresh,
+  and Bun 1.4.2; core and Svelte patch candidate
 - [0.4.3](0.4.3.md) — 2026-09-27 — Text/Code wrap, IconButton `data-*`
-  forwarding, JavaScript dependency refresh, and Bun 1.4.2; core and Svelte
-  patch candidate
+  forwarding, JavaScript dependency refresh, and Bun 1.4.2; not published,
+  superseded by the 0.4.4 candidate
 - [0.4.2](0.4.2.md) — 2026-09-14 — Svelte Tabs cross-window bridge repair,
   slider drag containment, explicit Menu names, and reliable certified-archive
   publication; core and Svelte patch candidate
