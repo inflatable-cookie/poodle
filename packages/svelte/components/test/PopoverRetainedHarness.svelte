@@ -8,6 +8,7 @@
     defaultOpen?: boolean;
     disabled?: boolean;
     triggerIsInteractive?: boolean;
+    trapFocus?: boolean;
     onOpenChange?: (open: boolean) => void;
   }
 
@@ -16,13 +17,14 @@
     defaultOpen = false,
     disabled = false,
     triggerIsInteractive = false,
+    trapFocus = false,
     onOpenChange = undefined,
   }: Props = $props();
 </script>
 
 <div data-poodle-theme-root>
   {#if triggerIsInteractive}
-    <Popover {open} {defaultOpen} {disabled} triggerIsInteractive {onOpenChange}>
+    <Popover {open} {defaultOpen} {disabled} {trapFocus} triggerIsInteractive {onOpenChange}>
       {#snippet trigger(state: PopoverTriggerState)}
         <button
           type="button"
@@ -35,13 +37,19 @@
         </button>
       {/snippet}
       <button type="button" data-testid="surface-action">Surface action</button>
+      {#if trapFocus}
+        <button type="button" data-testid="surface-next">Next action</button>
+      {/if}
     </Popover>
   {:else}
-    <Popover {open} {defaultOpen} {disabled}>
+    <Popover {open} {defaultOpen} {disabled} {trapFocus}>
       {#snippet trigger()}
         Open
       {/snippet}
       <button type="button" data-testid="surface-action">Surface action</button>
+      {#if trapFocus}
+        <button type="button" data-testid="surface-next">Next action</button>
+      {/if}
     </Popover>
   {/if}
 </div>

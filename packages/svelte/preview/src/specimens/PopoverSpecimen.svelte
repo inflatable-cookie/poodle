@@ -40,6 +40,29 @@
       </div>
     </Popover>
   </SpecimenGroup>
+
+  <SpecimenGroup label="Focus trap (opt-in)">
+    <Popover trapFocus ariaLabel="Pinned tools" triggerIsInteractive>
+      {#snippet trigger(state: PopoverTriggerState)}
+        <Button
+          variant="secondary"
+          ariaExpanded={state.expanded}
+          controls={state.controls}
+          disabled={state.disabled}
+        >
+          Open tools
+        </Button>
+      {/snippet}
+      <div class="poodle-popover-content">
+        <strong>Pinned tools</strong>
+        <p>Tab stays inside this surface. Escape and outside click still dismiss.</p>
+        <div class="poodle-popover-actions">
+          <Button variant="secondary" size="sm">Rename</Button>
+          <Button variant="primary" size="sm">Apply</Button>
+        </div>
+      </div>
+    </Popover>
+  </SpecimenGroup>
 </div>
 
 <style>
@@ -63,5 +86,11 @@
     margin: 0;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-popover-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
   }
 </style>

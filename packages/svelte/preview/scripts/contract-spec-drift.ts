@@ -174,6 +174,12 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // byte-for-byte (plan lane `pinned-source-paths`).
   text: ["wrap"],
   code: ["wrap"],
+  // Popover trapFocus (operator ruling 2026-09-27). Web-admitted now; the
+  // portable spec and GPUI channel wait for the next Nucleus evidence
+  // repin because receipts pin packages/contracts, render, and gpui
+  // byte-for-byte (plan lane `pinned-source-paths`). Default stays
+  // non-modal: no backdrop, no aria-modal, no body scroll lock.
+  popover: ["trapFocus"],
   // SidebarNavItem.endLabel (operator ruling 2026-09-27), web-admitted on
   // the same terms as `wrap`. It is an item field, not a Public Prop, so this
   // checker never reads it; the entry records the status where the next

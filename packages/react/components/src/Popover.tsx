@@ -5,6 +5,7 @@ import {
   popoverParts,
   popoverTransition,
   registerDismissLayer,
+  trapFocusKeydown,
   type PopoverContext,
   type PopoverEvent,
   type PopoverTriggerState,
@@ -19,8 +20,8 @@ import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
 /**
  * The contracted Popover surface. `trigger` and the content take React nodes;
- * `triggerIsInteractive` and `onSurfaceGeometryChange` are documented web-only
- * extensions kept beside this adapter.
+ * `triggerIsInteractive`, `trapFocus`, and `onSurfaceGeometryChange` are
+ * documented web-only extensions kept beside this adapter.
  *
  * Contract: `docs/contracts/components/popover.md`. The Svelte pair is
  * `packages/svelte/components/src/Popover.svelte`; the Rust counterpart is
@@ -33,6 +34,7 @@ interface PopoverCommonProps {
   offset?: number;
   dismissOnOutsideInteract?: boolean;
   initialFocus?: PopoverInitialFocus;
+  trapFocus?: boolean;
   ariaLabel?: string | null;
   block?: boolean;
   disabled?: boolean;
@@ -65,6 +67,7 @@ export function Popover({
   offset = 8,
   dismissOnOutsideInteract = true,
   initialFocus = "first-focusable",
+  trapFocus = false,
   ariaLabel = null,
   block = false,
   triggerIsInteractive = false,
@@ -206,6 +209,11 @@ export function Popover({
           {...reactifyPart(parts.surface)}
           className="poodle-popover__surface"
           style={surfaceStyle}
+          onKeyDown={
+            trapFocus
+              ? (event) => trapFocusKeydown(surfaceRef.current, event.nativeEvent)
+              : undefined
+          }
         >
           {children}
         </AnchoredSurface>

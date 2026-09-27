@@ -6,6 +6,7 @@
     popoverParts,
     popoverTransition,
     registerDismissLayer,
+    trapFocusKeydown,
     type PopoverContext,
     type PopoverEvent,
     type PopoverTriggerState,
@@ -18,8 +19,9 @@
 
   /**
    * The contracted Popover surface. `trigger` and the content take framework
-   * snippets; `triggerIsInteractive` and `onSurfaceGeometryChange` are
-   * documented web-only extensions kept beside this adapter.
+   * snippets; `triggerIsInteractive`, `trapFocus`, and
+   * `onSurfaceGeometryChange` are documented web-only extensions kept beside
+   * this adapter.
    *
    * `triggerIsInteractive` discriminates the two compile-time trigger shapes
    * (contract §3): default mode takes a zero-argument `trigger` snippet and the
@@ -37,6 +39,7 @@
     offset?: number;
     dismissOnOutsideInteract?: boolean;
     initialFocus?: PopoverInitialFocus;
+    trapFocus?: boolean;
     ariaLabel?: string | null;
     block?: boolean;
     disabled?: boolean;
@@ -67,6 +70,7 @@
     offset = 8,
     dismissOnOutsideInteract = true,
     initialFocus = "first-focusable",
+    trapFocus = false,
     ariaLabel = null,
     block = false,
     triggerIsInteractive = false,
@@ -191,6 +195,10 @@
     }
   }
 
+  function onSurfaceKeydown(event: KeyboardEvent): void {
+    trapFocusKeydown(surfaceElement, event);
+  }
+
   $effect(() => {
     if (!isOpen) {
       return;
@@ -251,6 +259,7 @@
         surfaceMinWidth ? `--poodle-popover-surface-min-width: ${surfaceMinWidth}` : "",
         surfaceMaxWidth ? `--poodle-popover-surface-max-width: ${surfaceMaxWidth}` : "",
       ].filter(Boolean).join("; ")}
+      onkeydown={trapFocus ? onSurfaceKeydown : undefined}
     >
       {@render children?.()}
     </div>

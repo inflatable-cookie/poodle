@@ -223,3 +223,49 @@ describe("Popover — default trigger mode unchanged (g15.041)", () => {
     expect(screen.getByTestId("surface-action")).toBeTruthy();
   });
 });
+
+describe("Popover — opt-in focus trap", () => {
+  it("does not trap Tab when trapFocus is unset", async () => {
+    render(Harness, { props: { defaultOpen: true } });
+
+    const action = screen.getByTestId("surface-action");
+    action.focus();
+    const event = new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true });
+    action.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it("cycles Tab from last to first and Shift+Tab from first to last", async () => {
+    render(Harness, { props: { defaultOpen: true, trapFocus: true } });
+
+    const first = screen.getByTestId("surface-action");
+    const last = screen.getByTestId("surface-next");
+
+    last.focus();
+    await fireEvent.keyDown(last, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+
+    first.focus();
+    await fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
+  });
+
+  it("still restores trigger focus on Escape when the trap is on", async () => {
+    render(Harness, { props: { defaultOpen: true, trapFocus: true, triggerIsInteractive: true } });
+
+    screen.getByTestId("surface-action").focus();
+    await fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+    expect(document.activeElement).toBe(screen.getByTestId("inner-trigger"));
+  });
+
+  it("still dismisses on outside pointerdown when the trap is on", async () => {
+    render(Harness, { props: { defaultOpen: true, trapFocus: true, triggerIsInteractive: true } });
+
+    await fireEvent.mouseDown(document.body);
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+    expect(document.activeElement).toBe(screen.getByTestId("inner-trigger"));
+  });
+});

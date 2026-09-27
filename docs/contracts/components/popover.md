@@ -1,7 +1,7 @@
 # Popover
 
 Status: detailed contract
-Updated: 2026-08-21
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -10,7 +10,8 @@ Updated: 2026-08-21
 - Summary: an anchored non-modal overlay for contextual interactive or rich
   informational content
 - In scope: trigger/content relationship, anchored placement, outside dismissal,
-  optional initial focus, placement via CSS custom property
+  optional initial focus, optional Tab focus trap, placement via CSS custom
+  property
 - Out of scope: modal flows, menu-specific item semantics, long-lived pinned
   panels
 
@@ -42,6 +43,7 @@ Updated: 2026-08-21
 | `offset` | `number` | `8` | no | trigger gap in pixels, set as CSS custom property |
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal |
 | `initialFocus` | `"first-focusable" \| "content" \| "none"` | `"first-focusable"` | no | initial focus strategy |
+| `trapFocus` | `boolean` | `false` | no | **Web targets only** — when true, Tab/Shift+Tab cycle inside the open content. Default stays non-modal: no backdrop, no `aria-modal`, no body scroll lock. Outside dismissal and Escape still close and restore trigger focus. Native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
 | `ariaLabel` | `string \| null` | `null` | no | optional label when no internal heading exists |
 | `block` | `boolean` | `false` | no | makes the trigger and root expand to available width |
 | `disabled` | `boolean` | `false` | no | disables the trigger — blocks `setOpen`, sets `data-disabled`/`aria-disabled="true"`, `tabindex=-1`, and `cursor: not-allowed` |
@@ -245,23 +247,27 @@ wiring, presence (if open/close animation is added later).
 | Key | Behavior |
 |-----|----------|
 | `Enter` or `Space` | opens from an interactive trigger when appropriate |
-| `Escape` | closes the popover and restores focus to the trigger |
-| `Tab` | moves through focusable content without trapping the user |
+| `Escape` | closes the popover and restores focus to the trigger — with or without `trapFocus` |
+| `Tab` | without `trapFocus`, moves through focusable content without trapping; with `trapFocus`, cycles inside the open surface (last→first). Unset/`false` stays non-trapping |
+| `Shift+Tab` | reverse of Tab; trapped only when `trapFocus` is true |
 
 ### Focus And Announcement
 
 - focus entry: opening may move focus into the content according to
   `initialFocus`
-- focus exit: non-modal popovers do not trap focus; leaving the content may
-  dismiss according to implementation policy
-- focus restoration: explicit close returns focus to the trigger — in
-  interactive mode, to the actual interactive descendant the state payload was
-  applied to, never the inert wrapper
+- focus exit: the default is non-modal and does not trap; `trapFocus` opts
+  into cycling Tab within the open content. Leaving the content may dismiss
+  according to implementation policy when the trap is off. Modal flows
+  (backdrop, `aria-modal`, body scroll lock) stay with Dialog and Drawer
+- focus restoration: explicit close, Escape, and outside dismiss return focus
+  to the trigger — in interactive mode, to the actual interactive descendant
+  the state payload was applied to, never the inert wrapper — with or without
+  `trapFocus`
 - live-region behavior: none by default; content semantics should carry the
   meaning
 - GPUI-native accessibility mapping notes: GPUI must expose popover ownership,
   focus handoff, and restoration without confusing the popover with a modal
-  window
+  window. `trapFocus` is web-admitted until the next Nucleus evidence repin
 
 ## 7. Layout
 
@@ -358,8 +364,11 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 
 - may compose headless popover primitives, but the contract owns dismissal and
   focus-restoration semantics
-- if the content traps focus, the component should likely be `Dialog` or
-  `Drawer` instead
+- `trapFocus` is web-admitted (Svelte and React), default `false`. When true,
+  Tab cycles inside the open surface via the shared `trapFocusKeydown`
+  helper. Outside dismissal and Escape still close and restore trigger focus.
+  Modal flows stay with Dialog and Drawer. The portable Rust spec and GPUI
+  mapping land with the next Nucleus evidence repin (`lane:pinned-source-paths`)
 - `offset` is passed to the anchored-overlay primitive as a px gap; there is no
   `--poodle-popover-offset` custom property, because the surface no longer
   positions itself in CSS
@@ -377,6 +386,8 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 - GPUI implementation must intentionally model anchored overlay behavior,
   outside-dismiss rules, and non-modal focus flow through native window or view
   constructs
+- `trapFocus` is web-admitted. The portable Rust spec and GPUI mapping land
+  with the next Nucleus evidence repin (`lane:pinned-source-paths`)
 - surface sizing constraints must match: min-width 14rem, max-width
   min(24rem, 90vw) (both overridable via `surfaceMinWidth`/`surfaceMaxWidth`)
 - border uses a 74% opacity color-mix for `border-subtle`
@@ -412,6 +423,7 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 |-------|-------------|-----------------|-----------|
 | Jetstream raises no events | the component renders the panel; the trigger and the open state belong to the consumer, so there is nothing here to click | accepted (by design) | none |
 | `onSurfaceGeometryChange` is Svelte/React-only | it reports CSS viewport geometry for a web surface; native hosts own their renderer geometry | accepted | do not copy browser geometry callbacks into native specs |
+| `trapFocus` is web-admitted | Nucleus receipts pin `packages/{contracts,render,gpui}` | operator 2026-09-27 | portable spec in `lane:pinned-source-paths` |
 | exact placement fallback order may differ | overlay engine internals vary | allowed | keep trigger relation, dismissal, and focus rules strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 | width bounds are rem lengths in the portable surface | the contract's `surfaceMinWidth`/`surfaceMaxWidth` accept any CSS length on the web shell, but the portable surface cannot interpret arbitrary CSS values; the portable subset is a rem length (`Nrem`) — `PopoverSpec::surface_min_width`/`surface_max_width` parse exactly that and an unsupported value is an authoring error, never a silent default — and arbitrary CSS lengths remain a web-shell extension beside the adapters | accepted by g14.005 (contract contradiction reported in the batch log) | keep the portable rem subset validated; revisit only with a portable CSS-length parser |
@@ -429,6 +441,12 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Top popover | `<Popover placement="top" ariaLabel="Help tip">` with a secondary Button trigger ("Show help") and paragraph content | Button trigger; clicking opens an elevated surface anchored above the trigger with descriptive text; the gap matches `offset` |
+
+### Group: Focus trap (opt-in)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Focus trap | `<Popover trapFocus ariaLabel="Pinned tools">` with a secondary Button trigger ("Open tools") and two action buttons in the content | Button trigger; clicking opens a non-modal surface whose Tab cycle stays inside the two actions; Escape and outside click still dismiss |
 
 ## 14. Approval And Adoption Notes
 

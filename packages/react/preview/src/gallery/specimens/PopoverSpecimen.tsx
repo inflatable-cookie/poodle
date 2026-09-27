@@ -41,6 +41,34 @@ export function PopoverSpecimen() {
           </div>
         </Popover>
       </SpecimenGroup>
+
+      <SpecimenGroup label="Focus trap (opt-in)">
+        <Popover
+          trapFocus
+          ariaLabel="Pinned tools"
+          triggerIsInteractive
+          trigger={(state) => (
+            <Button variant="secondary" ariaExpanded={state.expanded} controls={state.controls} disabled={state.disabled}>
+              Open tools
+            </Button>
+          )}
+        >
+          <div style={{ padding: "0.75rem", maxWidth: "16rem" }}>
+            <strong style={{ display: "block", marginBottom: "0.25rem" }}>Pinned tools</strong>
+            <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--poodle-color-text-secondary)" }}>
+              Tab stays inside this surface. Escape and outside click still dismiss.
+            </p>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+              <Button variant="secondary" size="sm">
+                Rename
+              </Button>
+              <Button variant="primary" size="sm">
+                Apply
+              </Button>
+            </div>
+          </div>
+        </Popover>
+      </SpecimenGroup>
     </div>
   );
 }
