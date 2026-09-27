@@ -525,7 +525,7 @@ function TreeView({
     );
   }
 
-  function renderNode(node: TreeNode, depth: number, parent: string | null) {
+  function renderNode(node: TreeNode, depth: number, parent: string | null): ReactNode {
     const branch = isTreeBranch(node);
     const open = branch && isExpanded(node.value);
     const group =

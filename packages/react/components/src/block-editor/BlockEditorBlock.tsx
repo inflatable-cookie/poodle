@@ -5,7 +5,8 @@ import type {
   DropPosition,
 } from "@inflatable-cookie/poodle-core";
 
-import { useDragSource, useDropTarget } from "../drag-drop";
+import { composeRefs, useDragSource, useDropTarget } from "../drag-drop";
+import type { DragPropsWithRef } from "../drag-drop";
 import type { EditorBlock } from "../types";
 
 /**
@@ -83,21 +84,14 @@ export function BlockEditorBlock({
   // registered source is still keyboard-reachable and still nameable in an
   // announcement. The hooks still run — their order is fixed — but no element
   // reaches them, so no registration exists.
-  const sourceProps = canDrag ? getSourceProps() : {};
-  const targetProps = canDrag ? getTargetProps() : {};
+  const sourceProps: Partial<DragPropsWithRef> = canDrag ? getSourceProps() : {};
+  const targetProps: Partial<DragPropsWithRef> = canDrag ? getTargetProps() : {};
 
   return (
     <div
       {...targetProps}
       {...sourceProps}
-      ref={
-        canDrag
-          ? (node) => {
-              sourceProps.ref?.(node);
-              targetProps.ref?.(node);
-            }
-          : undefined
-      }
+      ref={canDrag ? composeRefs(sourceProps.ref, targetProps.ref) : undefined}
       className={[
         "poodle-block-editor__block",
         active ? "poodle-active" : "",

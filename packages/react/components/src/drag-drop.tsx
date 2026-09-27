@@ -78,15 +78,6 @@ interface DragDropContextValue {
 
 const DragDropContext = createContext<DragDropContextValue | null>(null);
 
-function composeRefs<T>(...refs: Array<Ref<T> | undefined>): (node: T | null) => void {
-  return (node) => {
-    for (const ref of refs) {
-      if (typeof ref === "function") ref(node);
-      else if (ref) (ref as { current: T | null }).current = node;
-    }
-  };
-}
-
 function composeHandler<E>(theirs?: (event: E) => void, ours?: (event: E) => void): (event: E) => void {
   return (event) => {
     theirs?.(event);
@@ -260,13 +251,36 @@ export function useDragDrop(): {
   };
 }
 
-export type SourcePropGetter = (
-  props?: HTMLAttributes<HTMLElement> & { ref?: Ref<HTMLElement> },
-) => HTMLAttributes<HTMLElement> & { ref: (node: HTMLElement | null) => void };
+/**
+ * Element props a caller may carry into a drag source or drop target. Data
+ * attributes are part of the contract: rows, tabs and blocks tag drag handles
+ * and reorder targets with `data-*` hooks that survive the prop round-trip.
+ */
+export type DragElementProps = HTMLAttributes<HTMLElement> & {
+  ref?: Ref<HTMLElement>;
+} & Record<`data-${string}`, string | number | boolean | undefined>;
 
-export type TargetPropGetter = (
-  props?: HTMLAttributes<HTMLElement> & { ref?: Ref<HTMLElement> },
-) => HTMLAttributes<HTMLElement> & { ref: (node: HTMLElement | null) => void };
+/** The getter's return: the caller's props plus the hook's own ref. */
+export type DragPropsWithRef = DragElementProps & {
+  ref: (node: HTMLElement | null) => void;
+};
+
+export type SourcePropGetter = (props?: DragElementProps) => DragPropsWithRef;
+
+export type TargetPropGetter = (props?: DragElementProps) => DragPropsWithRef;
+
+/**
+ * Attach several refs to one element. Exported for components that render
+ * their own host element from source and target props (BlockEditorBlock).
+ */
+export function composeRefs<T>(...refs: Array<Ref<T> | undefined>): (node: T | null) => void {
+  return (node) => {
+    for (const ref of refs) {
+      if (typeof ref === "function") ref(node);
+      else if (ref) (ref as { current: T | null }).current = node;
+    }
+  };
+}
 
 export function useDragSource(registration: DragSourceRegistration): {
   getSourceProps: SourcePropGetter;

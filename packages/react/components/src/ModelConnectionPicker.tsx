@@ -72,7 +72,7 @@ export function ModelConnectionPicker({
   footer,
 }: ModelConnectionPickerProps) {
   const instanceId = useId();
-  const rootRef = useRef<HTMLElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   const [uncontrolledValue, setUncontrolledValue] = useState<string | null>(defaultValue);
   const [uncontrolledQuery, setUncontrolledQuery] = useState(defaultQuery);

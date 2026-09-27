@@ -79,7 +79,7 @@ interface EditableListRowProps<T extends EditableListItemLike> {
   onDragStart: (session: DragSession) => void;
   onDragEnd: (outcome: DragTerminalOutcome) => void;
   onRemove: (id: string) => void;
-  onIdleKeydown: (event: KeyboardEvent<HTMLLIElement>, index: number) => void;
+  onIdleKeydown: (event: KeyboardEvent<HTMLElement>, index: number) => void;
 }
 
 function EditableListRow<T extends EditableListItemLike>({
@@ -354,7 +354,7 @@ export function EditableList<T extends EditableListItemLike>({
     activeSourceIdRef.current = null;
   }
 
-  function handleIdleKeydown(event: KeyboardEvent<HTMLLIElement>, index: number): void {
+  function handleIdleKeydown(event: KeyboardEvent<HTMLElement>, index: number): void {
     if (isUnavailable || activeSourceIdRef.current !== null) return;
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
     const next = event.key === "ArrowDown" ? index + 1 : index - 1;
