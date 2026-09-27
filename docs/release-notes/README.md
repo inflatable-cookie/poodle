@@ -20,6 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.4.5](0.4.5.md) — 2026-09-27 — additive patch candidate with SidebarNav
+  item end labels and ranged web dependencies; core and Svelte publication set
 - [0.4.4](0.4.4.md) — 2026-09-27 — additive patch candidate superseding
   unpublished 0.4.3; Text/Code wrap, IconButton `data-*`, dependency refresh,
   and Bun 1.4.2; core and Svelte patch candidate

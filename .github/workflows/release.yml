@@ -213,14 +213,18 @@ jobs:
           ' | while IFS= read -r spec; do
             expected="${spec##*@}"
             published=""
-            for attempt in {1..12}; do
-              if published="$(npm view "$spec" version 2>/dev/null)" && [ "$published" = "$expected" ]; then
+            # npm can take minutes to expose a trusted publish, and a first miss
+            # is cached locally (packument max-age), so every attempt
+            # revalidates with --prefer-online. Reads only: publication is never
+            # repeated. 36 x 10s fits inside the job's ten-minute ceiling.
+            for attempt in {1..36}; do
+              if published="$(npm view --prefer-online "$spec" version 2>/dev/null)" && [ "$published" = "$expected" ]; then
                 break
               fi
-              if [ "$attempt" -eq 12 ]; then
+              if [ "$attempt" -eq 36 ]; then
                 echo "$spec did not resolve version $expected from the registry (last result: ${published:-unavailable})" >&2
                 exit 1
               fi
-              sleep 5
+              sleep 10
             done
           done

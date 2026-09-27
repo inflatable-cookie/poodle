@@ -174,11 +174,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // byte-for-byte (plan lane `pinned-source-paths`).
   text: ["wrap"],
   code: ["wrap"],
-  // SidebarNavItem.endLabel (operator ruling 2026-09-27), web-admitted on
-  // the same terms as `wrap`. It is an item field, not a Public Prop, so this
-  // checker never reads it; the entry records the status where the next
-  // repin will look for it.
-  "sidebar-nav": ["endLabel"],
+  // SidebarNavItem.endLabel / contextMenuItems / contextMenuAriaLabel
+  // (operator ruling 2026-09-27), web-admitted on the same terms as `wrap`.
+  // They are item fields, not Public Props, so this checker never reads them;
+  // the entry records the status where the next repin will look for them.
+  "sidebar-nav": ["endLabel", "contextMenuItems", "contextMenuAriaLabel"],
   // Pill dismiss control (operator ruling 2026-09-27), web-admitted on the
   // same terms as `wrap`. Both are Public Props in the contract; the portable
   // spec and GPUI channel wait for the next Nucleus evidence repin

@@ -57,10 +57,34 @@ const libraryGroups: SidebarNavGroup[] = [
   },
 ];
 
+const savedViewMenu = [
+  { value: "rename", label: "Rename" },
+  { value: "sep", label: "", kind: "separator" as const },
+  { value: "delete", label: "Delete", tone: "danger" as const },
+];
+
+const savedViewGroups: SidebarNavGroup[] = [
+  {
+    id: "saved",
+    label: "Saved views",
+    items: [
+      {
+        value: "q4",
+        label: "Q4 close",
+        contextMenuItems: savedViewMenu,
+        contextMenuAriaLabel: "Q4 close actions",
+      },
+      { value: "cash", label: "Cash flow", contextMenuItems: savedViewMenu },
+      { value: "all", label: "All records" },
+    ],
+  },
+];
+
 export function SidebarNavSpecimen() {
   const [catalogueValue, setCatalogueValue] = useState("dock-region");
   const [harnessValue, setHarnessValue] = useState("pulse-runtime-foundation");
   const [libraryValue, setLibraryValue] = useState("videos");
+  const [savedViewValue, setSavedViewValue] = useState("q4");
 
   return (
     <SpecimenLayout
@@ -115,6 +139,17 @@ export function SidebarNavSpecimen() {
               groups={libraryGroups}
               value={libraryValue}
               onValueChange={(value) => setLibraryValue(value)}
+            />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Saved views (context menu)">
+          <div style={frameStyle}>
+            <SidebarNav
+              ariaLabel="Saved views"
+              groups={savedViewGroups}
+              value={savedViewValue}
+              onValueChange={(value) => setSavedViewValue(value)}
             />
           </div>
         </SpecimenGroup>
