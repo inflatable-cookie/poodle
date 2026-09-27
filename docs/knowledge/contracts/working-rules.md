@@ -263,10 +263,10 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`). It must
    pass in a disposable checkout with Queue's hook environment (`PATH`, `HOME`,
    `TMPDIR`, `LANG`, `LC_ALL`) and leave `git status --porcelain` empty.
-   Native, windowed and release gates stay out. It takes about ten minutes
-   on a fresh clone, which exceeds Queue's 600-second validation ceiling, so
-   the planner sets it with `repository.set` once that ceiling allows (plan
-   lane `fresh-validate`).
+   Native, windowed and release gates stay out. Queue runs it on every
+   prospective merge (`repository.set`, 20-minute timeout; it takes about ten
+   minutes on a fresh clone). If its runtime approaches the timeout, fix the
+   command or raise the setting; don't let merges time out.
 3. **Release proof:** the npm candidate task runs the bounded npm artifact gate
    once after the candidate is complete and stable. Required PR CI owns source
    behavior; candidate mode owns archive certification; publish mode verifies

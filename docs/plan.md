@@ -33,15 +33,6 @@ task.
    errors and put `check:react` on `ci:web`; re-measure the visual set and
    commit it as a reasoned debt inventory the gate diffs against.
    Queue papercuts: `195bd08e`, `d3b97931`.
-4. **Enable Queue pre-merge validation** (lane `fresh-validate`) —
-   `effigy ci:fresh` validates a fresh disposable checkout and leaves it
-   unmodified, but it took 604 seconds on a fresh clone, and Queue's
-   `repository.set` caps `timeoutMs` at 600 seconds. A timeout holds the task
-   for operator attention, so the command stays unset until Queue raises the
-   ceiling (Queue papercut `4be1f6d2` in `paseo-northstar-queue`) or the
-   command gets reliably faster. Then set `["effigy", "ci:fresh"]` with about
-   twice the measured runtime.
-
 ## Next
 
 1. **GPUI selection-navigation repair tranche** (lane
