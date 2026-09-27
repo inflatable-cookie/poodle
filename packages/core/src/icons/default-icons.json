@@ -1,5 +1,5 @@
 {
-  "lucideVersion": "1.31.0",
+  "lucideVersion": "1.48.0",
   "icons": [
     "arrow-down",
     "arrow-left",
@@ -88,7 +88,7 @@
     "table",
     "tag",
     "terminal",
-    "trash-2",
+    "trash",
     "trending-down",
     "trending-up",
     "triangle-alert",
@@ -115,6 +115,7 @@
     "more-vertical": "ellipsis-vertical",
     "pause-circle": "circle-pause",
     "spinner": "loader-circle",
+    "trash-2": "trash",
     "unlock": "lock-open",
     "x-circle": "circle-x"
   }

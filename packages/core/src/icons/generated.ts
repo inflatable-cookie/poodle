@@ -100,6 +100,7 @@ import { strikethrough } from "./icons/strikethrough";
 import { table } from "./icons/table";
 import { tag } from "./icons/tag";
 import { terminal } from "./icons/terminal";
+import { trash } from "./icons/trash";
 import { trash2 } from "./icons/trash-2";
 import { trendingDown } from "./icons/trending-down";
 import { trendingUp } from "./icons/trending-up";
@@ -217,6 +218,7 @@ export {
   table,
   tag,
   terminal,
+  trash,
   trash2,
   trendingDown,
   trendingUp,
@@ -335,6 +337,7 @@ export const defaultLucideIconSet: IconSet = {
   "table": table,
   "tag": tag,
   "terminal": terminal,
+  "trash": trash,
   "trash-2": trash2,
   "trending-down": trendingDown,
   "trending-up": trendingUp,

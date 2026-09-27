@@ -23,12 +23,12 @@
     "@codemirror/lang-json": "6.0.2",
     "@inflatable-cookie/poodle-core": "workspace:*",
     "@inflatable-cookie/poodle-svelte": "workspace:*",
-    "lucide-static": "1.31.0",
+    "lucide-static": "1.48.0",
     "svelte": "^5.56.8"
   },
   "devDependencies": {
     "@codemirror/language": "6.12.4",
-    "@codemirror/state": "6.7.4",
+    "@codemirror/state": "6.7.6",
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
     "@types/node": "^26.2.0",
     "typescript": "^7.0.2",

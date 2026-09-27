@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 The icon data shipped by this package is generated from
-[Lucide Icons 1.31.0](https://github.com/lucide-icons/lucide). It remains
+[Lucide Icons 1.48.0](https://github.com/lucide-icons/lucide). It remains
 subject to the following upstream terms.
 
 ## Lucide Icons

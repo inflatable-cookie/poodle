@@ -11,7 +11,7 @@ describe("icon geometry registry", () => {
     expect(ICON_GEOMETRY_REGISTRY.normalizerVersion).toBe("1.0.0");
     expect(ICON_GEOMETRY_REGISTRY.source).toEqual({
       package: "lucide-static",
-      version: "1.31.0",
+      version: "1.48.0",
       manifest: "packages/core/src/icons/default-icons.json",
     });
     expect(ICON_GEOMETRY_REGISTRY.notice).toEqual({

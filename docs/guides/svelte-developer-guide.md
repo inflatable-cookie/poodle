@@ -25,7 +25,7 @@ exact version and read the
 [release notes](../release-notes/README.md) before upgrading.
 
 ```sh
-bun add @inflatable-cookie/poodle-svelte@0.2.2 @inflatable-cookie/poodle-core@0.2.2 lucide-static@1.31.0
+bun add @inflatable-cookie/poodle-svelte@0.2.2 @inflatable-cookie/poodle-core@0.2.2 lucide-static@1.48.0
 ```
 
 ```json
@@ -33,7 +33,7 @@ bun add @inflatable-cookie/poodle-svelte@0.2.2 @inflatable-cookie/poodle-core@0.
   "dependencies": {
     "@inflatable-cookie/poodle-core": "0.2.2",
     "@inflatable-cookie/poodle-svelte": "0.2.2",
-    "lucide-static": "1.31.0"
+    "lucide-static": "1.48.0"
   }
 }
 ```
