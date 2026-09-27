@@ -21,18 +21,13 @@ task.
 2. **Dependency refresh and `0.4.3` before Longhorn `0.3.0`** (lane
    `release-refresh`) — operator ruling 2026-09-26. Longhorn pins
    `@inflatable-cookie/poodle-svelte` exactly, and its `0.3.0` dependency sweep
-   waits for this release. Refresh every JavaScript dependency to its newest
-   compatible release in one change, then release core and Svelte `0.4.3`
+   waits for this release. Refresh every JavaScript dependency, and Bun itself
+   (to 1.4.2, operator direction 2026-09-27), to its newest compatible release
+   in one change, then release core and Svelte `0.4.3`
    ([release](knowledge/contracts/release.md)) once that refresh and the
    Text/Code wrap work (`web-defects`) have merged. The Svelte peer stays
    `>=5.56.8 <6`; raising the floor needs Longhorn told first.
-3. **Current-`main` web gates** (lane `web-gates`) — `check:react` is red on
-   current sources, so it can't join `ci:web`, and `visual:report` has an
-   untracked failing Svelte↔React pair set (53 when last measured in August),
-   so reports can't tell existing debt from a new regression. Clear the type
-   errors and put `check:react` on `ci:web`; re-measure the visual set and
-   commit it as a reasoned debt inventory the gate diffs against.
-   Queue papercuts: `195bd08e`, `d3b97931`.
+
 ## Next
 
 1. **GPUI selection-navigation repair tranche** (lane
@@ -64,6 +59,9 @@ task.
      `docs/specs/`, removed roadmap and log records); then drop their `allow`
      entries in [retired.toml](knowledge/retired.toml);
    - `rustls` 0.23.45 in the preview lock (RUSTSEC-2026-0285);
+   - the portable Rust/GPUI Text/Code wrap spec, deferred from the web
+     admission (reusable commits `667ac0edd1` and `572ce7c580` on the
+     poodle#024 branch);
    - whether `SOURCE_PATHS` should pin whole crates or only runtime source.
    Queue papercut: `06296edd`.
 7. **Remaining check debt** (lane `check-health`) — the `packages/core` strict
