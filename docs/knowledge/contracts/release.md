@@ -18,6 +18,14 @@ Poodle has two release trains. The rules behind this procedure are in
 Versions stay `0.x`. Breaking changes may ship in a minor release and must be
 called out in the changelog and release note.
 
+Shared libraries are declared as ranges, never exact pins (operator ruling
+2026-09-27), both by consumers and between libraries, so a patch never forces
+a release elsewhere. Svelte and React require `@inflatable-cookie/poodle-core`
+within the current minor, for example `>=0.4.5 <0.5`, while the four web
+versions still move in lockstep. Third-party runtime dependencies use ranges
+unless a stated reason keeps one exact. The manifests and release admission
+adopt this in `lane:dependency-ranges`.
+
 `CHANGELOG.md` and `docs/release-notes/` are release surfaces. Ordinary PR CI
 (`test:web-pack-install` scope) rejects any change to them, so feature and
 dependency PRs describe their user-visible changes in the PR description, and
