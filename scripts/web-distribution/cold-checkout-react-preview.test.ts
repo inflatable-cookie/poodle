@@ -116,7 +116,12 @@ function ciWebSequence(toml: string): string[] {
 }
 
 function runColdSuites(cwd: string): { status: number | null; output: string } {
-  const result = run("bunx", ["vitest", "run", "--project", "react-preview", "--", ...COLD_SUITES], cwd);
+  // Call the checkout's vitest binary. `bunx vitest … -- <files>` lets bunx
+  // swallow the `--` and drop the file filters, so the whole react-preview
+  // include runs — including suites that import `lucide-static/icon-nodes.json`
+  // through the root `node_modules` symlink.
+  const vitest = join(cwd, "node_modules", ".bin", "vitest");
+  const result = run(vitest, ["run", "--project", "react-preview", ...COLD_SUITES], cwd);
   return {
     status: result.status,
     output: `${result.stdout}\n${result.stderr}`,
@@ -155,6 +160,7 @@ describe("g16.098 cold-checkout react-preview", () => {
       expect(readFileSync(join(coldRoot, "vitest.config.ts"), "utf8")).toMatch(REACT_PREVIEW_ALIAS);
       const result = runColdSuites(coldRoot);
       expect(result.output, result.output).not.toContain(RESOLVE_FAILURE);
+      expect(result.output, result.output).not.toContain("g18-019-markdown-renderer.test.tsx");
       expect(result.status, result.output).toBe(0);
     },
     VITEST_TIMEOUT_MS,
