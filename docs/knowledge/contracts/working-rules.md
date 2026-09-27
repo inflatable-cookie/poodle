@@ -1,7 +1,7 @@
 # Working Rules
 
 Status: active
-Updated: 2026-09-12
+Updated: 2026-09-27
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -259,7 +259,12 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    board or its reproducibility. The worker reports `ready_for_review` as soon
    as the clean PR head and local task proof exist, then stops. Queue
    coordination observes CI asynchronously; workers never run sleep/poll loops
-   for GitHub checks.
+   for GitHub checks. Queue's pre-merge command is `effigy ci:fresh`:
+   `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`). It must
+   pass in a disposable checkout with Queue's hook environment (`PATH`, `HOME`,
+   `TMPDIR`, `LANG`, `LC_ALL`) and leave `git status --porcelain` empty.
+   Native, windowed and release gates stay out. The planner sets it with
+   `repository.set` after merge.
 3. **Release proof:** the npm candidate task runs the bounded npm artifact gate
    once after the candidate is complete and stable. Required PR CI owns source
    behavior; candidate mode owns archive certification; publish mode verifies

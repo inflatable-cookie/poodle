@@ -72,6 +72,21 @@ describe("validation board repository inventory", () => {
     const labels = release.units.map((unit) => unit.label);
     expect(labels).toEqual(["release:web-admission", "release:web-archive"]);
   });
+
+  test("ci:fresh hydrates then runs the required PR lanes only", () => {
+    const fresh = collectUnits(nodes, "ci:fresh", repoRoot, policy);
+    const web = collectUnits(nodes, "ci:web", repoRoot, policy);
+    const rust = collectUnits(nodes, "ci:rust", repoRoot, policy);
+    const labels = fresh.units.map((unit) => unit.label);
+    expect(labels[0]).toBe("ci:fresh::bun install --frozen-lockfile");
+    expect(fresh.units[0]?.command).toBe("bun install --frozen-lockfile");
+    const rest = labels.slice(1);
+    expect(rest).toEqual([...web.units.map((unit) => unit.label), ...rust.units.map((unit) => unit.label)]);
+    expect(rest).toContain("test:core");
+    expect(labels.some((label) => /native|windowed|gpui|jetstream|release:|qa/.test(label))).toBe(
+      false,
+    );
+  });
 });
 
 describe("validation board graph", () => {
