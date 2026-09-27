@@ -30,7 +30,7 @@ The generated ledger also records the full 176-component active-cohort
 denominator. Nucleus receipts cover 29 GPUI rows; they do not imply functional
 completion for the other 146 portable components; see the
 [GPUI functionality census](../gpui/gpui-functionality-census.md) and
-[the plan](../../plan.md).
+`lane:gpui-mounted-tranches`.
 
 ## Artifacts
 

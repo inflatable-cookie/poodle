@@ -11,7 +11,7 @@ behavior, accessibility, and token usage remain aligned.
 
 This document defines the current ownership model. Component details live in
 [component contracts](../../contracts/components/README.md), while intent lives in
-[the plan](../../plan.md).
+the Queue plan.
 
 ## System at a Glance
 

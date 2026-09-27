@@ -16,7 +16,7 @@ frozen = [
 [[retired]]
 id = "northstar-process-records"
 retired = "2026-09-26"
-replacement = "Knowledge in docs/knowledge/, intent in docs/plan.md; tasks, briefs, status and outcomes live in Queue."
+replacement = "Knowledge in docs/knowledge/; the plan, leads, tasks, briefs, status and outcomes live in Queue."
 owner = "docs/knowledge/README.md"
 terms = [
   "roadmap card",
@@ -44,7 +44,7 @@ allow = [
   # Historical closed-candidate release policies match exact past diffs.
   "test/package-install/scope.ts",
   # Runtime source pinned by Nucleus receipts; comments are fixed at the next
-  # evidence repin (docs/plan.md, lane `pinned-source-paths`).
+  # evidence repin (`lane:pinned-source-paths`).
   "packages/render/src/lib.rs",
   "packages/contracts/ir/src/lib.rs",
   "packages/contracts/ir/src/shared.rs",
@@ -63,6 +63,14 @@ allow = [
   # Historical g16.059 certification allowlist and its planted fixtures.
   "test/package-install/scope.ts",
   "test/package-install/scope.test.ts",
-  # Runtime source pinned by Nucleus receipts (lane `pinned-source-paths`).
+  # Runtime source pinned by Nucleus receipts (`lane:pinned-source-paths`).
   "packages/gpui/preview/tests/headless/nucleus_a11y.rs",
 ]
+
+[[retired]]
+id = "repository-planning-files"
+retired = "2026-09-27"
+replacement = "The plan is Queue lanes, lane documents and plan order; leads are Queue records (lead.add)."
+owner = "docs/knowledge/README.md"
+paths = ["docs/plan.md", "docs/triage/"]
+allow = ["CHANGELOG.md"]

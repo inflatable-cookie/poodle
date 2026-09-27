@@ -42,7 +42,6 @@ details may differ when the contract permits it.
 - Specs: [knowledge/specs/](knowledge/specs/README.md)
 - Working rules and release: [knowledge/contracts/](knowledge/contracts/README.md)
 - Generated evidence: [evidence/](evidence/README.md)
-- Open leads: [triage/](triage/README.md)
 
 ## Run the docs locally
 
@@ -57,4 +56,4 @@ documentation changes with `effigy docs:check`.
 
 ## What's next
 
-See [plan.md](plan.md).
+The project's plan is in Queue: its lanes, their documents and their order.

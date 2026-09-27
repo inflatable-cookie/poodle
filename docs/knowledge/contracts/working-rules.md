@@ -10,9 +10,9 @@ Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 - Architecture defines stable ownership and runtime boundaries.
 - Specs define repository-wide normative rules.
 - Component contracts define public component semantics.
-- [`docs/plan.md`](../../plan.md) states what matters next. Queue holds tasks,
-  briefs, status and outcomes; Effigy tasks are command selectors. Neither is
-  knowledge authority.
+- The Queue plan (lanes, lane documents and their order) states what matters
+  next, and Queue holds leads, tasks, briefs, status and outcomes; Effigy tasks
+  are command selectors. Neither is knowledge authority.
 - Generated evidence under `docs/evidence/` records what was observed.
 
 Execution status does not belong in contracts. When two documents conflict,

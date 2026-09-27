@@ -66,7 +66,7 @@ unmodified at every Zed release tag (Apache-2.0; the previously GPL
 clean from republish 1.19.0-pre). The operator chose to evaluate that route
 instead of building a fork-free adapter. The feasibility spike succeeded at
 the API boundary; the `g16` roll-up and current
-[`gpui-unofficial` gates](../triage/20260905-111233-gpui-unofficial-adoption-gates.md)
+`gpui-unofficial` adoption gates (Queue lead)
 preserve the result. "No API to build against" is no longer true of upstream,
 only of the crates.io 0.2.2 pin. Adoption still waits on a buildable published
 `gpui-apple` crate and live platform-tree proof.
@@ -79,7 +79,7 @@ only of the crates.io 0.2.2 pin. Adoption still waits on a buildable published
   blocked because the published `gpui-apple` crate cannot build from crates.io,
   and the in-memory test platform exposes no live accessibility tree. Track
   those exact gates in
-  `../triage/20260905-111233-gpui-unofficial-adoption-gates.md`; do not build a
+  the `gpui-unofficial` adoption gates Queue lead; do not build a
   parallel macOS-only tree against 0.2.2.
 - **Continue component-level accessibility work below A2.** Poodle can still
   prove roles, labels, state, value, keyboard operation, and focus in its

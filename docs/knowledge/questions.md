@@ -7,7 +7,7 @@ briefs. An answered question keeps only its pointer to where the answer lives.
 
 Status: open (asked 2026-09-24)
 
-No Poodle work is queued. The candidates are in [the plan](../plan.md). The
+No Poodle work is queued. The candidates are the Queue plan's lanes (`lane:next-frontier`). The
 planner's recommendation is a small GPUI repair tranche on basic
 selection-navigation controls (Button, Checkbox, Radio, ToggleGroup,
 Accordion), compiled from the

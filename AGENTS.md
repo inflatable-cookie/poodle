@@ -13,12 +13,12 @@ or a consumer-shaped adapter layer.
 - Knowledge (one owner per fact): `docs/knowledge/README.md`
 - Retired concepts, which must not come back: `docs/knowledge/retired.toml`
 - Open questions: `docs/knowledge/questions.md`
-- What's next: `docs/plan.md`
-- Unresolved leads: `docs/triage/`
 - Component contracts (public API reference): `docs/contracts/`
 - Generated evidence (receipts, ledgers, census): `docs/evidence/`
 
-Tasks, briefs, status and papercuts live in Queue, never in this repository.
+The plan (lanes, their documents and their order), leads, papercuts, brief
+drafts, tasks and status live in Queue, never in this repository. Read what's
+next with `plan.get` (see the `northstar` skill).
 
 ## Commands
 

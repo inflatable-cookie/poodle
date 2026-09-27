@@ -14,7 +14,7 @@ migration, and downstream boundaries.
 - Use a spec when a rule applies across packages or component families.
 - Use [architecture](../architecture/README.md) for stable ownership and
   layering decisions.
-- Use [the plan](../../plan.md) for what comes next.
+- Use the Queue plan (`plan.get`) for what comes next.
 
 The numbered files in this directory are the complete active spec set. Earlier
 specs may describe the baseline that introduced a capability; later architecture

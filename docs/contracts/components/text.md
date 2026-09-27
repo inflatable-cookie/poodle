@@ -23,7 +23,7 @@ Updated: 2026-09-27
 | `leading` | `"normal" \| "relaxed"` | `"normal"` | line-height |
 | `spacing` | `"none" \| "compact"` | `"none"` | compact grid gap for child paragraphs |
 | `clamp` | `"none" \| 1 \| 2 \| 3` | `"none"` | optional line clamp |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; `normal` leaves overflow wrapping unchanged. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; `normal` leaves overflow wrapping unchanged. Native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
 | `children` | `Snippet` | none | text/content |
 
 ## 3. Visual Rules
@@ -48,7 +48,7 @@ Updated: 2026-09-27
 - `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
   `wrap="normal"` do not change overflow wrapping.
 - `wrap` is web-admitted. The portable Rust spec and GPUI mapping land with
-  the next Nucleus evidence repin (plan lane `pinned-source-paths`).
+  the next Nucleus evidence repin (`lane:pinned-source-paths`).
 
 ## 4. Accessibility
 

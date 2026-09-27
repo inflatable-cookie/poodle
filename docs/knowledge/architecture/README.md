@@ -5,7 +5,7 @@ Updated: 2026-09-02
 
 Architecture documents define Poodle's stable ownership and runtime boundaries.
 They explain the current system; what comes next belongs in
-[the plan](../../plan.md).
+the Queue plan.
 
 ## Start Here
 
