@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import { envelopeSegmentValueAt, type EnvelopeVisualPoint, type EnvelopeVisualState } from "@inflatable-cookie/poodle-core";
 
 function segmentPath(point: EnvelopeVisualPoint, next: EnvelopeVisualPoint): string {
@@ -11,7 +13,7 @@ function segmentPath(point: EnvelopeVisualPoint, next: EnvelopeVisualPoint): str
   }).join(" ");
 }
 
-export function EnvelopeVisual({ visualState }: { visualState: EnvelopeVisualState }) {
+export function EnvelopeVisual({ visualState }: { visualState: EnvelopeVisualState }): ReactElement {
   return <svg className="poodle-envelope-editor-visual" viewBox="0 0 100 100" preserveAspectRatio="none" data-focus={visualState.focus} data-enabled={visualState.enabled} aria-hidden="true">
     <path className="poodle-envelope-editor-visual__grid" d="M 25 0 V 100 M 50 0 V 100 M 75 0 V 100 M 0 25 H 100 M 0 50 H 100 M 0 75 H 100" />
     {visualState.points.slice(0, -1).map((point, index) => <path key={point.id} className="poodle-envelope-editor-visual__curve" d={segmentPath(point, visualState.points[index + 1]!)} />)}

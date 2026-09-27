@@ -57,7 +57,7 @@ export function TreeKeyboardTargets({
   editingValue: string | null;
   canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
   onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
-}) {
+}): ReactElement | null {
   if (!reorderable) return null;
   return (
     <>
