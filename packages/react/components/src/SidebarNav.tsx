@@ -1,6 +1,6 @@
 import "@inflatable-cookie/poodle-core/styles/sidebar-nav.css";
 
-import { useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem } from "./types";
 
@@ -29,6 +29,7 @@ export function SidebarNav({
   const isControlled = controlledValue !== undefined && controlledValue !== null;
   const value = isControlled ? controlledValue : uncontrolledValue;
 
+  const sidebarNavId = useId();
   const visibleGroups = groups.filter((group) => group.items.length > 0);
 
   function handleItemActivation(item: SidebarNavItem): void {
@@ -48,6 +49,18 @@ export function SidebarNav({
       .join(" ");
   }
 
+  function itemContent(item: SidebarNavItem, endLabelId: string): ReactNode {
+    if (!item.endLabel) return item.label;
+    return (
+      <>
+        <span className="poodle-sidebar-nav__label">{item.label}</span>
+        <span className="poodle-sidebar-nav__end-label" id={endLabelId} aria-hidden="true">
+          {item.endLabel}
+        </span>
+      </>
+    );
+  }
+
   return (
     <nav
       className="poodle-sidebar-nav"
@@ -56,7 +69,7 @@ export function SidebarNav({
       data-size-role={sizeRole}
       aria-label={ariaLabel ?? undefined}
     >
-      {visibleGroups.map((group) => (
+      {visibleGroups.map((group, groupIndex) => (
         <section
           key={group.id}
           className="poodle-sidebar-nav__group"
@@ -66,30 +79,37 @@ export function SidebarNav({
           {group.label ? <h2 className="poodle-sidebar-nav__group-title" title={group.label}>{group.label}</h2> : null}
 
           <ul className="poodle-sidebar-nav__list">
-            {group.items.map((item) => (
-              <li key={item.value}>
-                {item.href && !item.disabled ? (
-                  <a
-                    className={itemClassName(item)}
-                    href={item.href}
-                    aria-current={item.value === value ? "page" : undefined}
-                    onClick={() => handleItemActivation(item)}
-                  >
-                    {item.label}
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    className={itemClassName(item)}
-                    aria-current={item.value === value ? "page" : undefined}
-                    disabled={item.disabled}
-                    onClick={() => handleItemActivation(item)}
-                  >
-                    {item.label}
-                  </button>
-                )}
-              </li>
-            ))}
+            {group.items.map((item, itemIndex) => {
+              const endLabelId = `${sidebarNavId}-${groupIndex}-${itemIndex}-end-label`;
+              return (
+                <li key={item.value}>
+                  {item.href && !item.disabled ? (
+                    <a
+                      className={itemClassName(item)}
+                      href={item.href}
+                      aria-describedby={item.endLabel ? endLabelId : undefined}
+                      data-end-label={item.endLabel ? "true" : undefined}
+                      aria-current={item.value === value ? "page" : undefined}
+                      onClick={() => handleItemActivation(item)}
+                    >
+                      {itemContent(item, endLabelId)}
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className={itemClassName(item)}
+                      aria-current={item.value === value ? "page" : undefined}
+                      disabled={item.disabled}
+                      aria-describedby={item.endLabel ? endLabelId : undefined}
+                      data-end-label={item.endLabel ? "true" : undefined}
+                      onClick={() => handleItemActivation(item)}
+                    >
+                      {itemContent(item, endLabelId)}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ))}

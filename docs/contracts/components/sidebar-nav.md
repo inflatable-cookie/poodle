@@ -1,7 +1,7 @@
 # SidebarNav
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -12,7 +12,7 @@ Updated: 2026-07-10
 - In scope: active-item state with accent rail, optional section headings,
   grouped and ungrouped list posture, anchor or button items, compact sidebar
   presentation, size and density scaling, disabled items, group separators,
-  focus-visible ring
+  focus-visible ring, compact end-aligned item metadata (`endLabel`)
 - Out of scope: router ownership, page layout, breadcrumb trails, global shell
   toolbars, nested tree disclosure, drag-and-drop reordering
 
@@ -25,6 +25,8 @@ Updated: 2026-07-10
         └── [ItemList <ul> .poodle-sidebar-nav__list]
               └── [Item <li>]*
                     └── [ItemLink <a> .poodle-sidebar-nav__item] or [ItemButton <button> .poodle-sidebar-nav__item]
+                          ├── [Label <span> .poodle-sidebar-nav__label]          (when endLabel set)
+                          └── [EndLabel <span> .poodle-sidebar-nav__end-label]   (when endLabel set)
 ```
 
 ### Parts
@@ -38,6 +40,8 @@ Updated: 2026-07-10
 | Item | `<li>` | List item wrapper |
 | ItemLink | `<a>` | Class `poodle-sidebar-nav__item`, rendered when `item.href` is set and item is not disabled |
 | ItemButton | `<button>` | Class `poodle-sidebar-nav__item`, rendered when no href or when disabled |
+| Label | `<span>` | Class `poodle-sidebar-nav__label`, flexible item label. Rendered only when `endLabel` is set; otherwise the label is the item's direct text |
+| EndLabel | `<span>` | Class `poodle-sidebar-nav__end-label`, rendered only when `endLabel` is set. Compact muted metadata aligned after the flexible label. Carries a generated `id` and `aria-hidden="true"`; the item references it with `aria-describedby` |
 
 ## 3. Props And Inputs
 
@@ -69,6 +73,7 @@ Updated: 2026-07-10
 | `label` | `string` | yes | Visible item label |
 | `href` | `string \| null` | no | When present, renders an anchor |
 | `disabled` | `boolean` | no | Disabled items render inertly |
+| `endLabel` | `string \| null` | no | Default `null`. **Web targets only.** Compact end-aligned metadata such as a count ("198" in "Videos 198"). Exposed as the item's accessible description, never its name. Put counts here, not in `label`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
 
 ### Slots
 
@@ -91,6 +96,7 @@ controlled.
 | hover | Mouse over non-disabled item | Text color primary, elevated background |
 | disabled | Item `disabled: true` | Reduced opacity, `cursor: not-allowed`, no activation |
 | focus-visible | Keyboard focus on item | Focus ring via `--poodle-border-width-focus` and `--poodle-color-accent-focusRing` |
+| end label | Item `endLabel` set | Item lays out as a row; label flexes, end label sits end-aligned in muted tertiary text. Stays visible, in its muted colour, for active, hover and disabled items (disabled opacity applies to the whole item) |
 
 ### Behavior Machine
 
@@ -114,6 +120,13 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Group sections have `aria-label` from the group `label` prop when provided
 - Keyboard interaction follows native link/button behavior; the component does not implement roving focus or composite-menu semantics
 - Disabled items use the native `disabled` attribute on `<button>`
+- The item's accessible name is exactly `label`. When `endLabel` is set, the
+  end-label element carries `aria-hidden="true"` so name-from-content skips
+  it, and the item sets `aria-describedby` to that element's generated `id`, so
+  assistive tech announces the metadata as the item's description ("Videos,
+  link, 198"). A hidden element referenced by `aria-describedby` still
+  contributes its text to the description. Unset or `null` `endLabel` renders
+  no end-label element and no `aria-describedby`
 - Focus ring uses `outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` with `outline-offset: 0.125rem`
 
 ## 7. Layout
@@ -148,6 +161,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `data-density` | Root | `"compact"`, `"default"`, `"comfortable"` (or absent) |
 | `data-size-role` | Root | `"chrome"`, `"control"`, `"prominent"` |
 | `data-separated` | Group | `"true"` when multiple visible groups |
+| `data-end-label` | Item | `"true"` when the item has an `endLabel` (or absent) |
 
 ### CSS Custom Properties (Internal)
 
@@ -161,6 +175,8 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `--poodle-sidebar-nav-title-font-size` | `calc(var(--poodle-typography-label-size) * 0.75)` | Group title font size |
 | `--poodle-sidebar-nav-title-letter-spacing` | `0.18em` | Group title tracking |
 | `--poodle-sidebar-nav-title-gap` | `calc(var(--poodle-space-panel-y) * 0.375)` | Gap between title and list |
+| `--poodle-sidebar-nav-end-label-gap` | `calc(var(--poodle-sidebar-nav-item-padding-inline) * 0.5)` | Gap between label and end label; scales with density |
+| `--poodle-sidebar-nav-end-label-font-size` | `calc(var(--poodle-sidebar-nav-item-font-size) * 0.85)` | End-label font size; scales with size |
 
 ### `.poodle-sidebar-nav` (Root)
 
@@ -255,6 +271,35 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `cursor` | `pointer` |
 | `transition` | `color, background, box-shadow` via `--poodle-motion-duration-interaction` and `--poodle-motion-easing-standard` |
 
+### `.poodle-sidebar-nav__item[data-end-label="true"]`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `baseline` |
+| `gap` | `var(--poodle-sidebar-nav-end-label-gap)` |
+
+### `.poodle-sidebar-nav__label`
+
+| Property | Value |
+|----------|-------|
+| `flex` | `1 1 auto` |
+| `min-width` | `0` |
+
+### `.poodle-sidebar-nav__end-label`
+
+| Property | Value |
+|----------|-------|
+| `flex` | `0 0 auto` |
+| `margin-left` | `auto` |
+| `color` | `var(--poodle-color-text-tertiary)` |
+| `font-size` | `var(--poodle-sidebar-nav-end-label-font-size)` |
+| `font-variant-numeric` | `tabular-nums` |
+| `font-weight` | `500` |
+
+The end label keeps its muted colour and weight on hover and active items; the
+item's colour and weight changes apply to the label only.
+
 ### `.poodle-sidebar-nav__item:hover:not(:disabled)`
 
 | Property | Value |
@@ -301,12 +346,17 @@ None.
 - `data-separated` attribute on groups tracks whether multiple visible groups exist
 - Item activation calls `onValueChange` unless the item is disabled
 - Uses callback props instead of a dispatcher event surface
+- `endLabel` is web-admitted (Svelte and React). The portable Rust spec and
+  GPUI mapping land with the next Nucleus evidence repin (plan lane
+  `pinned-source-paths`), following the Text and Code `wrap` precedent
 
 ## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::sidebar_nav`
 - Active indicator is a left border (not a pseudo-element); GPUI should use a border or equivalent edge element
 - Size/density scaling must match the custom property override tables
+- `SidebarNavItem.endLabel` is not yet carried by the portable spec; it is
+  web-admitted until the next Nucleus evidence repin
 
 ## 10a. Jetstream Notes
 
@@ -358,3 +408,9 @@ None.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | With disabled | One group with items where one is `disabled: true` | Disabled item at reduced opacity, non-interactive |
+
+### End Labels (web)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Library counts | One titled group "Library" with items carrying `endLabel` counts (Videos 198, Audio 42, Images 1,204) plus one disabled item with a count, `value="videos"` | Counts sit end-aligned in muted tabular figures; the active item keeps its count muted |

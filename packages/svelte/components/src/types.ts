@@ -742,6 +742,8 @@ export type SidebarNavItem = {
   label: string;
   href?: string | null;
   disabled?: boolean;
+  /** Compact end-aligned metadata such as a count. Described, not named. */
+  endLabel?: string | null;
 };
 
 export type SidebarNavGroup = {

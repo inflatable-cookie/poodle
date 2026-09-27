@@ -6,6 +6,7 @@
 
   let catalogueValue = $state("dock-region");
   let harnessValue = $state("pulse-runtime-foundation");
+  let libraryValue = $state("videos");
 
   const catalogueGroups: SidebarNavGroup[] = [
     {
@@ -40,6 +41,19 @@
       items: [{ value: "shell-kernel", label: "Shell kernel" }],
     },
   ];
+
+  const libraryGroups: SidebarNavGroup[] = [
+    {
+      id: "library",
+      label: "Library",
+      items: [
+        { value: "videos", label: "Videos", endLabel: "198" },
+        { value: "audio", label: "Audio", endLabel: "42" },
+        { value: "images", label: "Images", endLabel: "1,204" },
+        { value: "archive", label: "Archive", endLabel: "0", disabled: true },
+      ],
+    },
+  ];
 </script>
 
 <SpecimenLayout>
@@ -62,6 +76,17 @@
           groups={harnessGroups}
           value={harnessValue}
           onValueChange={(value) => (harnessValue = value)}
+        />
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Library counts (endLabel)">
+      <div class="poodle-specimen__frame">
+        <SidebarNav
+          ariaLabel="Library navigation"
+          groups={libraryGroups}
+          value={libraryValue}
+          onValueChange={(value) => (libraryValue = value)}
         />
       </div>
     </SpecimenGroup>

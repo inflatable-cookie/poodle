@@ -44,9 +44,23 @@ const harnessGroups: SidebarNavGroup[] = [
   },
 ];
 
+const libraryGroups: SidebarNavGroup[] = [
+  {
+    id: "library",
+    label: "Library",
+    items: [
+      { value: "videos", label: "Videos", endLabel: "198" },
+      { value: "audio", label: "Audio", endLabel: "42" },
+      { value: "images", label: "Images", endLabel: "1,204" },
+      { value: "archive", label: "Archive", endLabel: "0", disabled: true },
+    ],
+  },
+];
+
 export function SidebarNavSpecimen() {
   const [catalogueValue, setCatalogueValue] = useState("dock-region");
   const [harnessValue, setHarnessValue] = useState("pulse-runtime-foundation");
+  const [libraryValue, setLibraryValue] = useState("videos");
 
   return (
     <SpecimenLayout
@@ -90,6 +104,17 @@ export function SidebarNavSpecimen() {
               groups={harnessGroups}
               value={harnessValue}
               onValueChange={(value) => setHarnessValue(value)}
+            />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Library counts (endLabel)">
+          <div style={frameStyle}>
+            <SidebarNav
+              ariaLabel="Library navigation"
+              groups={libraryGroups}
+              value={libraryValue}
+              onValueChange={(value) => setLibraryValue(value)}
             />
           </div>
         </SpecimenGroup>
