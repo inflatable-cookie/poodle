@@ -10060,6 +10060,12 @@
         "type": "((value: string) => void) | undefined",
         "default": "undefined",
         "description": "Called when a navigation item is activated."
+      },
+      {
+        "name": "onContextAction",
+        "type": "((itemValue: string, actionValue: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a per-item context-menu row is activated. First argument is the nav item value; second is the menu item value."
       }
     ],
     "slots": [],

@@ -7,6 +7,28 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-09-27
+
+`0.4.5` is an additive patch candidate with no breaking API change.
+
+### Added
+
+- **SidebarNav item end labels.** Svelte and React `SidebarNavItem` accept
+  `endLabel` for compact, muted, end-aligned metadata such as a count. The
+  item's accessible name remains `label`; the end label is its description.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.5 <0.5`. CodeMirror, Lezer and TipTap runtime dependencies use caret
+  ranges. Svelte, React, React DOM and Marked peer ranges stay unchanged.
+- **Release tooling.** Candidate admission derives its base after merge, and
+  the internal `test:web-scope` per-test cap is 120 seconds. Neither changes
+  consumer behavior.
+- **Release status.** Core and Svelte are the `0.4.5` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Cargo packages and native evidence do not move in this patch.
+
 ## [0.4.4] - 2026-09-27
 
 `0.4.4` is an additive patch candidate with no breaking API change. It
@@ -553,6 +575,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.5]: docs/release-notes/0.4.5.md
 [0.4.4]: docs/release-notes/0.4.4.md
 [0.4.3]: docs/release-notes/0.4.3.md
 [0.4.2]: docs/release-notes/0.4.2.md

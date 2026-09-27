@@ -207,8 +207,12 @@ export function collectReleaseWorkflowFailures(
   if (!active.includes("candidate-run-id")) {
     found.push("publish mode must require the candidate run ID input");
   }
-  if (!active.includes("for attempt in {1..12}") || !active.includes("sleep 5")) {
-    found.push("registry verification must retain its bounded processing-delay retry");
+  if (
+    !active.includes("for attempt in {1..36}") ||
+    !active.includes("sleep 10") ||
+    !active.includes("npm view --prefer-online")
+  ) {
+    found.push("registry verification must retain its bounded, cache-revalidating processing-delay retry");
   }
   if (
     !active.includes("release-tag") ||
@@ -511,8 +515,13 @@ const releasePlants: Plant[] = [
   },
   {
     name: "drop the bounded registry processing retry",
-    source: release.replace("            for attempt in {1..12}; do\n", ""),
-    expect: /bounded processing-delay retry/,
+    source: release.replace("            for attempt in {1..36}; do\n", ""),
+    expect: /cache-revalidating processing-delay retry/,
+  },
+  {
+    name: "read the registry through the local packument cache",
+    source: release.replace("npm view --prefer-online", "npm view"),
+    expect: /cache-revalidating processing-delay retry/,
   },
   {
     name: "add a second Effigy entry",
