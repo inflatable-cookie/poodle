@@ -71,14 +71,12 @@ task.
    Queue papercuts: `71e576fc`, `bd8c69c8`.
 8. **Web API gaps and small defects** (lane `web-defects`) — consumers work
    around missing Poodle API with local CSS or wrappers, which break silently
-   when Poodle refactors. Known gaps: Svelte Text and Code have no wrap
-   control for long identifiers, IconButton forwards no data attributes, and
-   consumers still override `.poodle-tabs*` with `:global` CSS. Known defects:
+   when Poodle refactors. Known gap: consumers still override
+   `.poodle-tabs*` with `:global` CSS. Known defects:
    CodeEditor's active line uses an undefined `--poodle-color-surface-hover`
    token, React Button/TextInput miss contract-listed web-native props, and
    React `SplitView` lacks the contract's `divider` prop.
-   Queue papercuts: `7d7d6e0b`, `bec2e434`, `80412a47`, `01d7a515`,
-   `bdb2c96c`, `5860bf71`.
+   Queue papercuts: `80412a47`, `01d7a515`, `bdb2c96c`, `5860bf71`.
 
 ## Not now
 
