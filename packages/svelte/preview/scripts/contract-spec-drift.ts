@@ -179,6 +179,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // checker never reads it; the entry records the status where the next
   // repin will look for it.
   "sidebar-nav": ["endLabel"],
+  // Pill dismiss control (operator ruling 2026-09-27), web-admitted on the
+  // same terms as `wrap`. Both are Public Props in the contract; the portable
+  // spec and GPUI channel wait for the next Nucleus evidence repin
+  // (`lane:pinned-source-paths`).
+  pill: ["dismissible", "dismissLabel"],
 };
 
 /**

@@ -1,5 +1,5 @@
-import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import { Pill } from "../src/Pill";
 
@@ -59,5 +59,42 @@ describe("Pill (react)", () => {
     expect(container.querySelector(".poodle-pill__dot")?.getAttribute("aria-hidden")).toBe(
       "true",
     );
+  });
+
+  it("renders no dismiss control unless dismissible", () => {
+    const { container } = render(<Pill>Videos</Pill>);
+    expect(container.querySelector(".poodle-pill__dismiss")).toBeNull();
+  });
+
+  it("renders a real dismiss button with a default accessible name and fires onDismiss", () => {
+    const onDismiss = vi.fn();
+    const { container } = render(
+      <Pill dismissible onDismiss={onDismiss}>
+        Audio
+      </Pill>,
+    );
+    const dismiss = container.querySelector(".poodle-pill__dismiss") as HTMLButtonElement;
+    expect(dismiss.tagName).toBe("BUTTON");
+    expect(dismiss.getAttribute("type")).toBe("button");
+    expect(dismiss.disabled).toBe(false);
+    expect(dismiss.tabIndex).toBeGreaterThanOrEqual(0);
+    expect(dismiss.getAttribute("aria-label")).toBe("Dismiss");
+
+    fireEvent.click(dismiss);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("takes the dismiss accessible name from dismissLabel", () => {
+    const onDismiss = vi.fn();
+    const { container } = render(
+      <Pill dismissible dismissLabel="Remove filter: Videos" onDismiss={onDismiss}>
+        Videos
+      </Pill>,
+    );
+    const dismiss = container.querySelector(".poodle-pill__dismiss") as HTMLButtonElement;
+    expect(dismiss.getAttribute("aria-label")).toBe("Remove filter: Videos");
+
+    fireEvent.click(dismiss);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });

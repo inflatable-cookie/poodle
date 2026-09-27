@@ -123,6 +123,7 @@ import { PaginationSpecimen } from "./specimens/PaginationSpecimen";
 import { PaginationSummarySpecimen } from "./specimens/PaginationSummarySpecimen";
 import { PasswordRequirementsSpecimen } from "./specimens/PasswordRequirementsSpecimen";
 import { PickerShellSpecimen } from "./specimens/PickerShellSpecimen";
+import { PillSpecimen } from "./specimens/PillSpecimen";
 
 import { PopoverSpecimen } from "./specimens/PopoverSpecimen";
 import { ProgressSpecimen } from "./specimens/ProgressSpecimen";
@@ -312,7 +313,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "pagination-summary": PaginationSummarySpecimen,
   "password-requirements": PasswordRequirementsSpecimen,
   "picker-shell": PickerShellSpecimen,
-  "pill": SceneSpecimen,
+  "pill": PillSpecimen,
   "popover": PopoverSpecimen,
   "progress": ProgressSpecimen,
   "radio": RadioSpecimen,

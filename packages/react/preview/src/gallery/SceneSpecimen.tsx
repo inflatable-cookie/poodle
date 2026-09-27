@@ -41,7 +41,7 @@ type FixtureScene = {
  * instances, typed prop bindings, matrix axes. `content` bindings project
  * to children; every other binding forwards as a prop.
  */
-export function SceneSpecimen({ slug }: { slug?: string }) {
+export function SceneSpecimen({ slug, children }: { slug?: string; children?: ReactNode }) {
   const scene = slug
     ? (specimenScenes[slug as keyof typeof specimenScenes] as unknown as FixtureScene | undefined)
     : undefined;
@@ -90,6 +90,7 @@ export function SceneSpecimen({ slug }: { slug?: string }) {
           </div>
         </SpecimenGroup>
       ))}
+      {children}
     </SpecimenLayout>
   );
 }

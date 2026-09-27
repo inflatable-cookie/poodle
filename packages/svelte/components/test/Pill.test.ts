@@ -1,5 +1,5 @@
-import { render } from "@testing-library/svelte";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render } from "@testing-library/svelte";
+import { describe, expect, it, vi } from "vitest";
 
 import Pill from "../src/Pill.svelte";
 import { asSnippet } from "./snippet";
@@ -59,5 +59,43 @@ describe("Pill (svelte)", () => {
     expect(root.dataset.muted).toBe("true");
     expect(root.dataset.adaptiveWidth).toBe("true");
     expect(container.querySelector(".poodle-pill__dot")).not.toBeNull();
+  });
+
+  it("renders no dismiss control unless dismissible", () => {
+    const { container } = render(Pill, { props: { children: asSnippet(() => "Videos") } });
+    expect(container.querySelector(".poodle-pill__dismiss")).toBeNull();
+  });
+
+  it("renders a real dismiss button with a default accessible name and fires onDismiss", async () => {
+    const onDismiss = vi.fn();
+    const { container } = render(Pill, {
+      props: { dismissible: true, onDismiss, children: asSnippet(() => "Audio") },
+    });
+    const dismiss = container.querySelector(".poodle-pill__dismiss") as HTMLButtonElement;
+    expect(dismiss.tagName).toBe("BUTTON");
+    expect(dismiss.getAttribute("type")).toBe("button");
+    expect(dismiss.disabled).toBe(false);
+    expect(dismiss.tabIndex).toBeGreaterThanOrEqual(0);
+    expect(dismiss.getAttribute("aria-label")).toBe("Dismiss");
+
+    await fireEvent.click(dismiss);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("takes the dismiss accessible name from dismissLabel", async () => {
+    const onDismiss = vi.fn();
+    const { container } = render(Pill, {
+      props: {
+        dismissible: true,
+        dismissLabel: "Remove filter: Videos",
+        onDismiss,
+        children: asSnippet(() => "Videos"),
+      },
+    });
+    const dismiss = container.querySelector(".poodle-pill__dismiss") as HTMLButtonElement;
+    expect(dismiss.getAttribute("aria-label")).toBe("Remove filter: Videos");
+
+    await fireEvent.click(dismiss);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });

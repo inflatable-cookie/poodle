@@ -6,11 +6,12 @@
     Pill,
     Spinner,
   } from "@inflatable-cookie/poodle-svelte";
+  import type { Snippet } from "svelte";
   import SpecimenGroup from "./SpecimenGroup.svelte";
   import SpecimenLayout from "./SpecimenLayout.svelte";
   import { specimenScenes } from "../generated/specimens/specimen-scenes";
 
-  let { slug }: { slug?: string } = $props();
+  let { slug, children }: { slug?: string; children?: Snippet } = $props();
 
   const scene = $derived(slug ? specimenScenes[slug as keyof typeof specimenScenes] : undefined);
 
@@ -86,6 +87,7 @@
         </div>
       </SpecimenGroup>
     {/each}
+    {@render children?.()}
   </SpecimenLayout>
 {/if}
 

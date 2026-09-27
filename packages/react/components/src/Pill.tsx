@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import "@inflatable-cookie/poodle-core/styles/pill.css";
 
+import { Icon } from "./Icon";
 import { usePillContext } from "./pill-context";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
@@ -28,6 +29,9 @@ export interface PillProps {
   dot?: boolean;
   title?: string | null;
   ariaLabel?: string | null;
+  dismissible?: boolean;
+  dismissLabel?: string;
+  onDismiss?: (() => void) | undefined;
   children?: ReactNode;
 }
 
@@ -45,6 +49,9 @@ export function Pill({
   dot = false,
   title = null,
   ariaLabel = null,
+  dismissible = false,
+  dismissLabel = "Dismiss",
+  onDismiss = undefined,
   children,
 }: PillProps) {
   const uiPresentation = useUiPresentation();
@@ -78,6 +85,16 @@ export function Pill({
     >
       {dot ? <span className="poodle-pill__dot" aria-hidden="true" /> : null}
       {children}
+      {dismissible ? (
+        <button
+          type="button"
+          className="poodle-pill__dismiss"
+          aria-label={dismissLabel}
+          onClick={() => onDismiss?.()}
+        >
+          <Icon name="x" />
+        </button>
+      ) : null}
     </span>
   );
 }
