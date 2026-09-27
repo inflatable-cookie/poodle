@@ -1,7 +1,8 @@
 import "@inflatable-cookie/poodle-core/styles/sidebar-nav.css";
 
-import { useId, useState, type ReactNode } from "react";
+import { useId, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 
+import { ContextMenu } from "./ContextMenu";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem } from "./types";
 
 export interface SidebarNavProps {
@@ -13,6 +14,7 @@ export interface SidebarNavProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   onValueChange?: ((value: string) => void) | undefined;
+  onContextAction?: ((itemValue: string, actionValue: string) => void) | undefined;
 }
 
 export function SidebarNav({
@@ -24,6 +26,7 @@ export function SidebarNav({
   sizeRole = "chrome",
   density = null,
   onValueChange = undefined,
+  onContextAction = undefined,
 }: SidebarNavProps) {
   const [uncontrolledValue, setUncontrolledValue] = useState<string | null>(defaultValue);
   const isControlled = controlledValue !== undefined && controlledValue !== null;
@@ -32,12 +35,59 @@ export function SidebarNav({
   const sidebarNavId = useId();
   const visibleGroups = groups.filter((group) => group.items.length > 0);
 
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [contextMenuAnchor, setContextMenuAnchor] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenuItemValue, setContextMenuItemValue] = useState<string | null>(null);
+
+  const contextMenuHost =
+    visibleGroups.flatMap((group) => group.items).find((item) => item.value === contextMenuItemValue) ?? null;
+  const contextMenuItems = contextMenuHost?.contextMenuItems ?? [];
+  const contextMenuAriaLabel =
+    contextMenuHost?.contextMenuAriaLabel ?? (contextMenuHost ? `${contextMenuHost.label} actions` : null);
+
   function handleItemActivation(item: SidebarNavItem): void {
     if (item.disabled) return;
     if (!isControlled) {
       setUncontrolledValue(item.value);
     }
     onValueChange?.(item.value);
+  }
+
+  function itemHasContextMenu(item: SidebarNavItem): boolean {
+    return !item.disabled && (item.contextMenuItems?.length ?? 0) > 0;
+  }
+
+  function openContextMenu(item: SidebarNavItem, x: number, y: number): void {
+    if (!itemHasContextMenu(item)) return;
+    setContextMenuItemValue(item.value);
+    setContextMenuAnchor({ x, y });
+    setContextMenuOpen(true);
+  }
+
+  function handleItemContextMenu(item: SidebarNavItem, event: ReactMouseEvent): void {
+    if (!itemHasContextMenu(item)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openContextMenu(item, event.clientX, event.clientY);
+  }
+
+  function handleItemKeydown(item: SidebarNavItem, event: ReactKeyboardEvent): void {
+    if (!itemHasContextMenu(item)) return;
+    if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLElement)) return;
+    const rect = target.getBoundingClientRect();
+    openContextMenu(item, rect.left + 16, rect.top + 16);
+  }
+
+  function handleContextAction(actionValue: string): void {
+    if (contextMenuItemValue == null) return;
+    onContextAction?.(contextMenuItemValue, actionValue);
   }
 
   function itemClassName(item: SidebarNavItem): string {
@@ -81,6 +131,7 @@ export function SidebarNav({
           <ul className="poodle-sidebar-nav__list">
             {group.items.map((item, itemIndex) => {
               const endLabelId = `${sidebarNavId}-${groupIndex}-${itemIndex}-end-label`;
+              const hasMenu = itemHasContextMenu(item);
               return (
                 <li key={item.value}>
                   {item.href && !item.disabled ? (
@@ -91,6 +142,8 @@ export function SidebarNav({
                       data-end-label={item.endLabel ? "true" : undefined}
                       aria-current={item.value === value ? "page" : undefined}
                       onClick={() => handleItemActivation(item)}
+                      onContextMenu={hasMenu ? (event) => handleItemContextMenu(item, event) : undefined}
+                      onKeyDown={hasMenu ? (event) => handleItemKeydown(item, event) : undefined}
                     >
                       {itemContent(item, endLabelId)}
                     </a>
@@ -103,6 +156,8 @@ export function SidebarNav({
                       aria-describedby={item.endLabel ? endLabelId : undefined}
                       data-end-label={item.endLabel ? "true" : undefined}
                       onClick={() => handleItemActivation(item)}
+                      onContextMenu={hasMenu ? (event) => handleItemContextMenu(item, event) : undefined}
+                      onKeyDown={hasMenu ? (event) => handleItemKeydown(item, event) : undefined}
                     >
                       {itemContent(item, endLabelId)}
                     </button>
@@ -113,6 +168,19 @@ export function SidebarNav({
           </ul>
         </section>
       ))}
+
+      <ContextMenu
+        trigger={false}
+        items={contextMenuItems}
+        open={contextMenuOpen}
+        anchorPoint={contextMenuAnchor}
+        ariaLabel={contextMenuAriaLabel}
+        size={size}
+        sizeRole={sizeRole}
+        density={density}
+        onOpenChange={setContextMenuOpen}
+        onAction={handleContextAction}
+      />
     </nav>
   );
 }
