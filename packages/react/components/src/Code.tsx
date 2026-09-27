@@ -19,6 +19,7 @@ export interface CodeProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  wrap?: "normal" | "anywhere";
 }
 
 function CopyGlyph({ copied }: { copied: boolean }) {
@@ -48,6 +49,7 @@ export function Code({
   sizeRole = "chrome",
   size = null,
   density = null,
+  wrap = "normal",
 }: CodeProps) {
   const uiPresentation = useUiPresentation();
   const [copied, setCopied] = useState(false);
@@ -87,6 +89,7 @@ export function Code({
         data-density={resolvedDensity}
         data-inline-variant={inlineVariant}
         data-typography={typography}
+        data-wrap={wrap}
       >
         <code
           className="poodle-code poodle-code--inline"
@@ -96,6 +99,7 @@ export function Code({
           data-density={resolvedDensity}
           data-inline-variant={inlineVariant}
           data-typography={typography}
+          data-wrap={wrap}
         >
           {source}
         </code>
@@ -120,6 +124,7 @@ export function Code({
       data-language={language}
       data-size={resolvedSize}
       data-density={resolvedDensity}
+      data-wrap={wrap}
       style={maxHeight ? { maxHeight } : undefined}
     >
       {language || showCopyButton ? (

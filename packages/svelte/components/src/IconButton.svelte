@@ -54,6 +54,7 @@
     onBlur?: ((event: FocusEvent) => void) | null;
     onPressedChange?: ((pressed: boolean) => void) | null;
     children?: Snippet<[]>;
+    [key: string]: unknown;
   }
 
   let {
@@ -79,7 +80,16 @@
     onBlur = null,
     onPressedChange = null,
     children,
+    ...restProps
   }: Props = $props();
+
+  function hostDataAttributes(rest: Record<string, unknown>): Record<string, unknown> {
+    const attrs: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(rest)) {
+      if (key.startsWith("data-")) attrs[key] = value;
+    }
+    return attrs;
+  }
 
   installInputModality();
 
@@ -182,6 +192,7 @@
   onmouseleave={dismiss}
 >
   <button
+    {...hostDataAttributes(restProps)}
     {type}
     bind:this={buttonElement}
     class="poodle-icon-button"

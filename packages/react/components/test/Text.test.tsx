@@ -39,6 +39,16 @@ describe("Text (react)", () => {
     expect(root.dataset.clamp).toBe("2");
   });
 
+  it("projects wrap=anywhere and leaves overflow wrapping unset at the default", () => {
+    const unset = render(<Text>id</Text>);
+    expect((unset.container.querySelector(".poodle-text") as HTMLElement).dataset.wrap).toBe("normal");
+
+    const wrapped = render(<Text wrap="anywhere">very-long-identifier</Text>);
+    expect((wrapped.container.querySelector(".poodle-text") as HTMLElement).dataset.wrap).toBe(
+      "anywhere",
+    );
+  });
+
   it("does not add ARIA roles", () => {
     const { container } = render(<Text>Body</Text>);
     expect(container.querySelector(".poodle-text")?.getAttribute("role")).toBeNull();

@@ -10,6 +10,7 @@
     leading?: "normal" | "relaxed";
     spacing?: "none" | "compact";
     clamp?: "none" | 1 | 2 | 3;
+    wrap?: "normal" | "anywhere";
     children?: Snippet;
   }
 
@@ -21,20 +22,21 @@
     leading = "normal",
     spacing = "none",
     clamp = "none",
+    wrap = "normal",
     children,
   }: Props = $props();
 </script>
 
 {#if as === "span"}
-  <span class="poodle-text" data-tone={tone} data-size={size} data-weight={weight} data-leading={leading} data-spacing={spacing} data-clamp={clamp}>
+  <span class="poodle-text" data-tone={tone} data-size={size} data-weight={weight} data-leading={leading} data-spacing={spacing} data-clamp={clamp} data-wrap={wrap}>
     {@render children?.()}
   </span>
 {:else if as === "div"}
-  <div class="poodle-text" data-tone={tone} data-size={size} data-weight={weight} data-leading={leading} data-spacing={spacing} data-clamp={clamp}>
+  <div class="poodle-text" data-tone={tone} data-size={size} data-weight={weight} data-leading={leading} data-spacing={spacing} data-clamp={clamp} data-wrap={wrap}>
     {@render children?.()}
   </div>
 {:else}
-  <p class="poodle-text" data-tone={tone} data-size={size} data-weight={weight} data-leading={leading} data-spacing={spacing} data-clamp={clamp}>
+  <p class="poodle-text" data-tone={tone} data-size={size} data-weight={weight} data-leading={leading} data-spacing={spacing} data-clamp={clamp} data-wrap={wrap}>
     {@render children?.()}
   </p>
 {/if}

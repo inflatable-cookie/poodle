@@ -1,10 +1,25 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { existsSync, realpathSync } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { configDefaults, defineConfig } from "vitest/config";
 
 const repoRoot = dirname(fileURLToPath(import.meta.url));
+// Detached worktrees symlink `node_modules` at the root. Vite then serves
+// JSON imports such as `lucide-static/icon-nodes.json` through `/@fs` at
+// the real store path, which is outside the checkout unless we allow it.
+function allowedNodeModulesRoots(): string[] {
+  const linked = join(repoRoot, "node_modules");
+  if (!existsSync(linked)) return [];
+  try {
+    const real = realpathSync(linked);
+    return real === linked ? [] : [real];
+  } catch {
+    return [];
+  }
+}
+const fsAllow = [repoRoot, ...allowedNodeModulesRoots()];
 // g16.111: the Svelte accessibility extractor reads names and roles through
 // dom-accessibility-api, which this repository already carries as a declared
 // dependency of @testing-library/dom. Resolve it through that graph rather
@@ -71,6 +86,7 @@ const workspaceAliases = {
 // tests cover the framework binding those machines to real DOM.
 export default defineConfig({
   resolve: { alias: workspaceAliases },
+  server: { fs: { allow: fsAllow } },
   test: {
     projects: [
       {
@@ -140,6 +156,7 @@ export default defineConfig({
           include: ["packages/react/preview/test/**/*.test.tsx"],
           setupFiles: ["./test/vitest.setup.ts"],
         },
+        server: { fs: { allow: fsAllow } },
       },
       {
         // Runtime accessibility sweep (axe-core) over the Svelte components.

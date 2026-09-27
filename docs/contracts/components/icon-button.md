@@ -1,7 +1,7 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-08-27
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -59,6 +59,10 @@ Updated: 2026-08-27
 | `expanded` | `boolean \| null` | `null` | no | optional `aria-expanded` state when the button triggers a disclosure or popover |
 | `controls` | `string \| null` | `null` | no | optional `aria-controls` reference for the controlled surface |
 | `type` | `HTMLButtonElement["type"]` | `"button"` | no | HTML button type attribute |
+
+Host `data-*` attributes are forwarded to the root `<button>` in the web
+runtimes. They are a web-only attribute pass-through and stay out of
+`IconButtonSpec`.
 
 ### ButtonVariant
 
@@ -438,6 +442,7 @@ activates the button or emits a pressed-state callback.
   blur, or Escape key
 - Tooltip placement controlled by `tooltipPlacement` prop (default `"top"`)
 - Events forwarded directly from native button element
+- Host `data-*` attributes are forwarded to the root `<button>` (web only)
 
 ## 10. GPUI Notes
 

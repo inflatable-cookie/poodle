@@ -36,6 +36,18 @@ describe("Text (svelte)", () => {
     expect(root.dataset.clamp).toBe("2");
   });
 
+  it("projects wrap=anywhere and leaves overflow wrapping unset at the default", () => {
+    const unset = render(Text, { props: { children: asSnippet(() => "id") } });
+    const unsetRoot = unset.container.querySelector(".poodle-text") as HTMLElement;
+    expect(unsetRoot.dataset.wrap).toBe("normal");
+
+    const wrapped = render(Text, {
+      props: { wrap: "anywhere", children: asSnippet(() => "very-long-identifier") },
+    });
+    const wrappedRoot = wrapped.container.querySelector(".poodle-text") as HTMLElement;
+    expect(wrappedRoot.dataset.wrap).toBe("anywhere");
+  });
+
   it("does not add ARIA roles", () => {
     const { container } = render(Text, { props: { children: asSnippet(() => "Body") } });
     expect(container.querySelector(".poodle-text")?.getAttribute("role")).toBeNull();

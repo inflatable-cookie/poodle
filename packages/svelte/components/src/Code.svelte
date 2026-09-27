@@ -18,6 +18,7 @@
     sizeRole = "chrome",
     size = null,
     density = null,
+    wrap = "normal",
   }: {
     source?: string;
     language?: string | null;
@@ -32,6 +33,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    wrap?: "normal" | "anywhere";
   } = $props();
 
   const uiPresentation = getUiPresentation();
@@ -76,6 +78,7 @@
     data-density={resolvedDensity}
     data-inline-variant={inlineVariant}
     data-typography={typography}
+    data-wrap={wrap}
   >
     <code
       class="poodle-code poodle-code--inline"
@@ -85,6 +88,7 @@
       data-density={resolvedDensity}
       data-inline-variant={inlineVariant}
       data-typography={typography}
+      data-wrap={wrap}
     >
       {source}
     </code>
@@ -115,6 +119,7 @@
     data-language={language}
     data-size={resolvedSize}
     data-density={resolvedDensity}
+    data-wrap={wrap}
     style={maxHeight ? `max-height: ${maxHeight}` : undefined}
   >
     {#if language || showCopyButton}
