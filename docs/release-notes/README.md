@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.4.6](0.4.6.md) — 2026-09-27 — additive patch candidate with ListCard
+  eyebrow, Pill dismiss, and SidebarNav per-item context menu; core and Svelte
+  publication set
 - [0.4.5](0.4.5.md) — 2026-09-27 — additive patch candidate with SidebarNav
   item end labels and ranged web dependencies; core and Svelte publication set
 - [0.4.4](0.4.4.md) — 2026-09-27 — additive patch candidate superseding
