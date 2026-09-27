@@ -135,4 +135,87 @@ describe("SidebarNav (react)", () => {
       expect(new Set(ids).size).toBe(3);
     });
   });
+
+  describe("context menu", () => {
+    const viewItems = [
+      { value: "rename", label: "Rename" },
+      { value: "sep", label: "", kind: "separator" as const },
+      { value: "delete", label: "Delete", tone: "danger" as const },
+    ];
+    const menuGroups: SidebarNavGroup[] = [
+      {
+        id: "saved",
+        label: "Saved views",
+        items: [
+          {
+            value: "q4",
+            label: "Q4 close",
+            href: "/views/q4",
+            contextMenuItems: viewItems,
+            contextMenuAriaLabel: "Q4 close actions",
+          },
+          { value: "cash", label: "Cash flow", contextMenuItems: viewItems },
+          { value: "all", label: "All records" },
+          {
+            value: "archive",
+            label: "Archive",
+            disabled: true,
+            contextMenuItems: viewItems,
+          },
+        ],
+      },
+    ];
+
+    const surfaceOf = () => document.querySelector(".poodle-menu-surface") as HTMLElement | null;
+
+    it("opens the shared ContextMenu from right-click on link and button items", () => {
+      const { container } = render(<SidebarNav groups={menuGroups} />);
+      const view = within(container);
+      const link = view.getByRole("link", { name: "Q4 close" });
+      fireEvent.contextMenu(link);
+      const surface = surfaceOf();
+      expect(surface).not.toBeNull();
+      expect(surface?.getAttribute("role")).toBe("menu");
+      expect(surface?.getAttribute("aria-label")).toBe("Q4 close actions");
+      expect(surface?.querySelector('[aria-label="Delete"]')).not.toBeNull();
+
+      fireEvent.mouseDown(document.body);
+      expect(surfaceOf()).toBeNull();
+
+      const button = view.getByRole("button", { name: "Cash flow" });
+      fireEvent.contextMenu(button);
+      expect(surfaceOf()?.getAttribute("aria-label")).toBe("Cash flow actions");
+    });
+
+    it("opens from Shift+F10 on the focused item", () => {
+      const { container } = render(<SidebarNav groups={menuGroups} />);
+      const button = within(container).getByRole("button", { name: "Cash flow" });
+      fireEvent.keyDown(button, { key: "F10", shiftKey: true });
+      const surface = surfaceOf();
+      expect(surface).not.toBeNull();
+      expect(surface?.getAttribute("aria-label")).toBe("Cash flow actions");
+    });
+
+    it("fires onContextAction with the nav item value then the menu value, and does not activate the item", () => {
+      const onContextAction = vi.fn();
+      const onValueChange = vi.fn();
+      const { container } = render(
+        <SidebarNav groups={menuGroups} onContextAction={onContextAction} onValueChange={onValueChange} />,
+      );
+      const button = within(container).getByRole("button", { name: "Cash flow" });
+      fireEvent.contextMenu(button);
+      const deleteRow = surfaceOf()?.querySelector('[aria-label="Delete"]') as HTMLElement;
+      fireEvent.click(deleteRow);
+      expect(onContextAction).toHaveBeenCalledWith("cash", "delete");
+      expect(onValueChange).not.toHaveBeenCalled();
+      expect(surfaceOf()).toBeNull();
+    });
+
+    it("does not intercept contextmenu when contextMenuItems is unset", () => {
+      const { container } = render(<SidebarNav groups={menuGroups} />);
+      const plain = within(container).getByRole("button", { name: "All records" });
+      fireEvent.contextMenu(plain);
+      expect(surfaceOf()).toBeNull();
+    });
+  });
 });

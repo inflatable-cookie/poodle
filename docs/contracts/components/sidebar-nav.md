@@ -12,9 +12,11 @@ Updated: 2026-09-27
 - In scope: active-item state with accent rail, optional section headings,
   grouped and ungrouped list posture, anchor or button items, compact sidebar
   presentation, size and density scaling, disabled items, group separators,
-  focus-visible ring, compact end-aligned item metadata (`endLabel`)
+  focus-visible ring, compact end-aligned item metadata (`endLabel`), per-item
+  context menu (`contextMenuItems`)
 - Out of scope: router ownership, page layout, breadcrumb trails, global shell
-  toolbars, nested tree disclosure, drag-and-drop reordering
+  toolbars, nested tree disclosure, drag-and-drop reordering, a new menu
+  surface (the overlay is the shared ContextMenu)
 
 ## 2. Anatomy
 
@@ -56,6 +58,7 @@ Updated: 2026-09-27
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Semantic size intent |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
 | `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | Fires when a non-disabled item is activated; payload is the item `value` |
+| `onContextAction` | `((itemValue: string, actionValue: string) => void) \| undefined` | `undefined` | no | **Web targets only.** Fires when a built-in per-item context-menu row is activated. First argument is the nav item's `value`; second is the menu item's `value`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
 
 ### Type: SidebarNavGroup
 
@@ -74,6 +77,8 @@ Updated: 2026-09-27
 | `href` | `string \| null` | no | When present, renders an anchor |
 | `disabled` | `boolean` | no | Disabled items render inertly |
 | `endLabel` | `string \| null` | no | Default `null`. **Web targets only.** Compact end-aligned metadata such as a count ("198" in "Videos 198"). Exposed as the item's accessible description, never its name. Put counts here, not in `label`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
+| `contextMenuItems` | `MenuItem[] \| null` | no | Default `null`. **Web targets only.** Same shape as ListCard's `contextMenuItems`. When non-empty, right-click or keyboard `ContextMenu`/`Shift+F10` on that item opens the shared ContextMenu. Unset, `null`, or empty leaves native item behaviour unchanged. Disabled items never open a menu. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
+| `contextMenuAriaLabel` | `string \| null` | no | Default `null`. **Web targets only.** Accessible name for that item's context-menu overlay. When unset, the overlay is labelled `{item.label} actions`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
 
 ### Slots
 
@@ -97,6 +102,7 @@ controlled.
 | disabled | Item `disabled: true` | Reduced opacity, `cursor: not-allowed`, no activation |
 | focus-visible | Keyboard focus on item | Focus ring via `--poodle-border-width-focus` and `--poodle-color-accent-focusRing` |
 | end label | Item `endLabel` set | Item lays out as a row; label flexes, end label sits end-aligned in muted tertiary text. Stays visible, in its muted colour, for active, hover and disabled items (disabled opacity applies to the whole item) |
+| context menu | Item `contextMenuItems` non-empty; right-click or keyboard `ContextMenu`/`Shift+F10` | Shared ContextMenu overlay opens at the pointer or keyboard origin for that item. Activation does not change the nav `value`. Unset items do not intercept contextmenu |
 
 ### Behavior Machine
 
@@ -104,13 +110,17 @@ Behavior classification: styled-only (no machine)
 
 Rendering and composition only, or interaction fully delegated to composed
 Poodle primitives / native elements; no component-owned behavioral state
-beyond plain props. Classified in the g11.004 long-tail sweep.
+beyond plain props. Classified in the g11.004 long-tail sweep. Per-item
+context menus delegate open, dismiss, keyboard navigation, and action to
+ContextMenu (`trigger={false}`); SidebarNav owns which item invoked the
+overlay and the anchor point.
 
 ## 5. Callbacks
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
 | `onValueChange` | User activates a non-disabled item | `string` | Called for both link and button items |
+| `onContextAction` | A context-menu item is activated | `itemValue: string, actionValue: string` | Nav item `value`, then menu item `value`. Separators and disabled menu rows fire nothing; the menu closes after it fires. Never fires for a disabled nav item |
 
 ## 6. Accessibility
 
@@ -119,6 +129,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Active items expose `aria-current="page"` on both anchor and button elements
 - Group sections have `aria-label` from the group `label` prop when provided
 - Keyboard interaction follows native link/button behavior; the component does not implement roving focus or composite-menu semantics
+- When `contextMenuItems` is non-empty on a non-disabled item, `ContextMenu` or
+  `Shift+F10` on that focused link or button opens the shared ContextMenu at the
+  item, with overlay `role="menu"` and `aria-label` from `contextMenuAriaLabel`
+  or `{item.label} actions`. Menu keyboard behaviour is ContextMenu's
 - Disabled items use the native `disabled` attribute on `<button>`
 - The item's accessible name is exactly `label`. When `endLabel` is set, the
   end-label element carries `aria-hidden="true"` so name-from-content skips
@@ -150,6 +164,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - use group labels for section context; do not fake hierarchy inside item text
 - if the UI needs dimmed ancestors and chevrons, use `PageHeader` or
   `ListCard`, not `SidebarNav`
+- context menu: pass `contextMenuItems` on the nav item (and optional
+  `contextMenuAriaLabel`) to use the built-in ContextMenu overlay. Do not wrap
+  the item in a detached ContextMenu for per-item actions such as Delete on a
+  saved view. Unset or empty `contextMenuItems` leaves link and button
+  semantics, including the browser's native context menu on anchors, unchanged
 
 ## 8. Token Usage
 
@@ -349,14 +368,19 @@ None.
 - `endLabel` is web-admitted (Svelte and React). The portable Rust spec and
   GPUI mapping land with the next Nucleus evidence repin (plan lane
   `pinned-source-paths`), following the Text and Code `wrap` precedent
+- `contextMenuItems` / `contextMenuAriaLabel` are web-admitted item fields
+  (Svelte and React) on the same terms. Invocation is on the item link or
+  button; the overlay is ContextMenu with `trigger={false}`.
+  `onContextAction(itemValue, actionValue)` fires for a committed menu row
 
 ## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::sidebar_nav`
 - Active indicator is a left border (not a pseudo-element); GPUI should use a border or equivalent edge element
 - Size/density scaling must match the custom property override tables
-- `SidebarNavItem.endLabel` is not yet carried by the portable spec; it is
-  web-admitted until the next Nucleus evidence repin
+- `SidebarNavItem.endLabel`, `contextMenuItems`, and `contextMenuAriaLabel`
+  are not yet carried by the portable spec; they are web-admitted until the
+  next Nucleus evidence repin
 
 ## 10a. Jetstream Notes
 
@@ -373,6 +397,9 @@ None.
 - [ ] disabled items suppress activation
 - [ ] group filtering removes empty groups
 - [ ] event name and payload match
+- [ ] per-item context menu opens from right-click and `ContextMenu`/`Shift+F10` when `contextMenuItems` is set
+- [ ] unset `contextMenuItems` leaves item semantics unchanged
+- [ ] `onContextAction` payload is `(itemValue, actionValue)`
 
 ### Tier 2: Visual Parity
 
@@ -414,3 +441,9 @@ None.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Library counts | One titled group "Library" with items carrying `endLabel` counts (Videos 198, Audio 42, Images 1,204) plus one disabled item with a count, `value="videos"` | Counts sit end-aligned in muted tabular figures; the active item keeps its count muted |
+
+### Item context menu (web)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Saved views | One titled group "Saved views" with items carrying `contextMenuItems` (Rename, separator, Delete) on two rows, plus one row without a menu, `value="q4"` | Right-click or the context-menu key on a saved view opens the shared ContextMenu; the row without items keeps native item behaviour |

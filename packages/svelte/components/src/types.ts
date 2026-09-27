@@ -744,6 +744,10 @@ export type SidebarNavItem = {
   disabled?: boolean;
   /** Compact end-aligned metadata such as a count. Described, not named. */
   endLabel?: string | null;
+  /** Built-in context menu items; when non-empty, right-click / keyboard opens ContextMenu. */
+  contextMenuItems?: MenuItem[] | null;
+  /** Accessible name for this item's context-menu overlay. */
+  contextMenuAriaLabel?: string | null;
 };
 
 export type SidebarNavGroup = {

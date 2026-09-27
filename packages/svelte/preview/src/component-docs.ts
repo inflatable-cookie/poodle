@@ -4055,6 +4055,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a navigation item is activated." },
+      { name: "onContextAction", type: "((itemValue: string, actionValue: string) => void) | undefined", default: "undefined", description: "Called when a per-item context-menu row is activated. First argument is the nav item value; second is the menu item value." },
     ],
     slots: [],
     events: [],

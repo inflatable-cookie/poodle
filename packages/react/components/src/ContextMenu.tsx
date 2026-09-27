@@ -81,7 +81,6 @@ export function ContextMenu({
 
   useEffect(() => {
     if (!isOpen) return;
-    if (!pendingFocus.current) return;
     pendingFocus.current = false;
     surfaceRef.current?.focusFirstItem();
   }, [isOpen]);

@@ -7,6 +7,7 @@
   let catalogueValue = $state("dock-region");
   let harnessValue = $state("pulse-runtime-foundation");
   let libraryValue = $state("videos");
+  let savedViewValue = $state("q4");
 
   const catalogueGroups: SidebarNavGroup[] = [
     {
@@ -54,6 +55,29 @@
       ],
     },
   ];
+
+  const savedViewMenu = [
+    { value: "rename", label: "Rename" },
+    { value: "sep", label: "", kind: "separator" as const },
+    { value: "delete", label: "Delete", tone: "danger" as const },
+  ];
+
+  const savedViewGroups: SidebarNavGroup[] = [
+    {
+      id: "saved",
+      label: "Saved views",
+      items: [
+        {
+          value: "q4",
+          label: "Q4 close",
+          contextMenuItems: savedViewMenu,
+          contextMenuAriaLabel: "Q4 close actions",
+        },
+        { value: "cash", label: "Cash flow", contextMenuItems: savedViewMenu },
+        { value: "all", label: "All records" },
+      ],
+    },
+  ];
 </script>
 
 <SpecimenLayout>
@@ -87,6 +111,17 @@
           groups={libraryGroups}
           value={libraryValue}
           onValueChange={(value) => (libraryValue = value)}
+        />
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Saved views (context menu)">
+      <div class="poodle-specimen__frame">
+        <SidebarNav
+          ariaLabel="Saved views"
+          groups={savedViewGroups}
+          value={savedViewValue}
+          onValueChange={(value) => (savedViewValue = value)}
         />
       </div>
     </SpecimenGroup>
