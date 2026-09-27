@@ -18,6 +18,12 @@ Poodle has two release trains. The rules behind this procedure are in
 Versions stay `0.x`. Breaking changes may ship in a minor release and must be
 called out in the changelog and release note.
 
+`CHANGELOG.md` and `docs/release-notes/` are release surfaces. Ordinary PR CI
+(`test:web-pack-install` scope) rejects any change to them, so feature and
+dependency PRs describe their user-visible changes in the PR description, and
+the release candidate PR writes them into the changelog. The one exception is
+a changelog-only maintenance PR that changes nothing else.
+
 Every release is operator-approved: releases and workflow dispatch are release
 mutations (see [AGENTS.md](../../../AGENTS.md)). A failed release run is a
 process failure, not a discovery: stop and return to planning.
