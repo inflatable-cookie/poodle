@@ -25,9 +25,9 @@ describe("CodeEditor packaging", () => {
     expect(react).toContain("./CodeEditor");
   });
 
-  it("both manifests pin the exact base CodeMirror set with no grammar packages", () => {
-    // g18.012: language support is consumer-owned. The shells pin the base
-    // engine substrate only; every `@codemirror/lang-*` and legacy-modes
+  it("both manifests declare caret ranges for the base CodeMirror set with no grammar packages", () => {
+    // g18.012: language support is consumer-owned. The shells declare the
+    // base engine substrate only; every `@codemirror/lang-*` and legacy-modes
     // package is refused so the closed catalogue cannot return.
     const expected = [
       "@codemirror/commands",
@@ -56,7 +56,7 @@ describe("CodeEditor packaging", () => {
       const manifest = JSON.parse(read(manifestPath)) as { dependencies?: Record<string, string> };
       for (const name of expected) {
         const specifier = manifest.dependencies?.[name];
-        expect(specifier, `${manifestPath} ${name}`).toMatch(/^\d+\.\d+\.\d+$/);
+        expect(specifier, `${manifestPath} ${name}`).toMatch(/^\^\d+\.\d+\.\d+$/);
       }
       for (const name of forbidden) {
         expect(manifest.dependencies?.[name], `${manifestPath} ${name}`).toBeUndefined();
