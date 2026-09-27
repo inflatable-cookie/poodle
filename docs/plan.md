@@ -59,9 +59,6 @@ task.
      `docs/specs/`, removed roadmap and log records); then drop their `allow`
      entries in [retired.toml](knowledge/retired.toml);
    - `rustls` 0.23.45 in the preview lock (RUSTSEC-2026-0285);
-   - the portable Rust/GPUI Text/Code wrap spec, deferred from the web
-     admission (reusable commits `667ac0edd1` and `572ce7c580` on the
-     poodle#024 branch);
    - whether `SOURCE_PATHS` should pin whole crates or only runtime source.
    Queue papercut: `06296edd`.
 7. **Remaining check debt** (lane `check-health`) — the `packages/core` strict
