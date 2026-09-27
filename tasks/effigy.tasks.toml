@@ -199,7 +199,7 @@
   { task = "release:web-archive" },
 ]
 # g18.032 validation runner. Bounded, observable, deduplicating board executor.
-"test:validation-runner" = "bun test scripts/validation/run-board.test.ts"
+"test:validation-runner" = "bun test scripts/validation/run-board.test.ts scripts/validation/fresh.test.ts"
 "check:release-automation" = "bun scripts/check-release-automation.ts"
 # g18.027 public-surface freeze gate. Read-only cross-ref classifier plus its
 # planted-negative coverage. Deliberately outside `qa`/`ci`: it needs the
@@ -719,13 +719,12 @@
   { task = "ci:web" },
   { task = "ci:rust" },
 ]
-# Queue argv: ["effigy", "ci:fresh"]. Hydration is JS only; cargo test fetches
-# the contract crates. Do not compose bootstrap:deps (native crate fetch) or
-# native/windowed/release selectors.
-"ci:fresh" = [
-  { run = "bun install --frozen-lockfile" },
-  { task = "ci" },
-]
+# Queue argv: ["effigy", "ci:fresh"]. scripts/validation/fresh.ts runs the
+# frozen install and `effigy ci` with the Bun pinned in package.json
+# `packageManager`, whatever Bun the host PATH provides. Hydration is JS only;
+# cargo test fetches the contract crates. Do not compose bootstrap:deps (native
+# crate fetch) or native/windowed/release selectors.
+"ci:fresh" = "bun scripts/validation/fresh.ts"
 
 # Native compile-rot check (macOS: gpui pulls metal). The preview is the only
 # GPUI crate that needs a live window; since g12.019 the components themselves

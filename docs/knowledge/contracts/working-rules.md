@@ -260,7 +260,10 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    as the clean PR head and local task proof exist, then stops. Queue
    coordination observes CI asynchronously; workers never run sleep/poll loops
    for GitHub checks. Queue's pre-merge command is `effigy ci:fresh`:
-   `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`). It must
+   `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`), both
+   run with the Bun pinned in `package.json` `packageManager`, fetched through
+   `bunx` when the host Bun differs, because Bun versions lay out
+   `node_modules` differently and that changes declaration emit. It must
    pass in a disposable checkout with Queue's hook environment (`PATH`, `HOME`,
    `TMPDIR`, `LANG`, `LC_ALL`) and leave `git status --porcelain` empty.
    Native, windowed and release gates stay out. Queue runs it on every
