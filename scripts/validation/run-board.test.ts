@@ -73,19 +73,15 @@ describe("validation board repository inventory", () => {
     expect(labels).toEqual(["release:web-admission", "release:web-archive"]);
   });
 
-  test("ci:fresh hydrates then runs the required PR lanes only", () => {
+  test("ci:fresh delegates to the pinned-Bun runner, which runs only the required PR lanes", () => {
     const fresh = collectUnits(nodes, "ci:fresh", repoRoot, policy);
-    const web = collectUnits(nodes, "ci:web", repoRoot, policy);
-    const rust = collectUnits(nodes, "ci:rust", repoRoot, policy);
-    const labels = fresh.units.map((unit) => unit.label);
-    expect(labels[0]).toBe("ci:fresh::bun install --frozen-lockfile");
-    expect(fresh.units[0]?.command).toBe("bun install --frozen-lockfile");
-    const rest = labels.slice(1);
-    expect(rest).toEqual([...web.units.map((unit) => unit.label), ...rust.units.map((unit) => unit.label)]);
-    expect(rest).toContain("test:core");
-    expect(labels.some((label) => /native|windowed|gpui|jetstream|release:|qa/.test(label))).toBe(
-      false,
-    );
+    expect(fresh.units.map((unit) => unit.command)).toEqual(["bun scripts/validation/fresh.ts"]);
+    const runner = readFileSync(join(repoRoot, "scripts/validation/fresh.ts"), "utf8");
+    expect(runner).toContain('run("bun", ["install", "--frozen-lockfile"], path)');
+    expect(runner).toContain('run("effigy", ["ci"], path)');
+    expect(runner).not.toMatch(/native|windowed|jetstream|release:|"qa"/);
+    const ci = collectUnits(nodes, "ci", repoRoot, policy).units.map((unit) => unit.label);
+    expect(ci).toContain("test:core");
   });
 });
 
