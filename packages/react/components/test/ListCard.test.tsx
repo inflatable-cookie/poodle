@@ -29,6 +29,63 @@ describe("ListCard (react)", () => {
   });
 });
 
+describe("ListCard (react) eyebrow", () => {
+  const rootOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-list-card") as HTMLElement;
+  const eyebrowOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-list-card__eyebrow") as HTMLElement | null;
+
+  it("renders the eyebrow above the title", () => {
+    const { container } = render(
+      <ListCard title="logo-primary.svg" eyebrow="Brand kit" />,
+    );
+
+    const eyebrow = eyebrowOf(container);
+    expect(eyebrow).not.toBeNull();
+    expect(eyebrow?.textContent).toBe("Brand kit");
+    // The eyebrow lane sits directly above the header row in the body.
+    expect(eyebrow?.nextElementSibling?.classList.contains("poodle-list-card__header")).toBe(
+      true,
+    );
+  });
+
+  it("renders nothing when unset", () => {
+    const { container } = render(<ListCard title="Card" />);
+
+    expect(eyebrowOf(container)).toBeNull();
+  });
+
+  it("prefers eyebrowContent over the plain eyebrow", () => {
+    const { container } = render(
+      <ListCard
+        title="msa-2026.pdf"
+        eyebrow="Ignored fallback"
+        eyebrowContent={<span className="harness-eyebrow">Contracts · rich</span>}
+      />,
+    );
+
+    const eyebrow = eyebrowOf(container);
+    expect(eyebrow?.querySelector(".harness-eyebrow")?.textContent).toBe("Contracts · rich");
+    expect(eyebrow?.textContent).not.toContain("Ignored fallback");
+  });
+
+  it("does not change the accessible name on either root", () => {
+    const div = rootOf(
+      render(
+        <ListCard title="logo-primary.svg" eyebrow="Brand kit" interactive />,
+      ).container,
+    );
+    const anchor = rootOf(
+      render(
+        <ListCard title="logo-primary.svg" eyebrow="Brand kit" href="#brand-kit" />,
+      ).container,
+    );
+
+    expect(div.getAttribute("aria-label")).toBe("logo-primary.svg");
+    expect(anchor.getAttribute("aria-label")).toBe("logo-primary.svg");
+  });
+});
+
 describe("ListCard (react) dismissOnOutsideInteract", () => {
   const rootOf = (container: HTMLElement) =>
     container.querySelector(".poodle-list-card") as HTMLElement;

@@ -179,6 +179,12 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // checker never reads it; the entry records the status where the next
   // repin will look for it.
   "sidebar-nav": ["endLabel"],
+  // ListCard.eyebrow (operator ruling 2026-09-27, planning-thread approval
+  // briefing the Bovine Desktop gaps). Web-admitted on the same terms as
+  // Text/Code `wrap`: Nucleus receipts pin packages/contracts, render, and
+  // gpui byte-for-byte, so ListCardSpec gains `eyebrow` at the next evidence
+  // repin (plan lane `pinned-source-paths`).
+  "list-card": ["eyebrow"],
 };
 
 /**

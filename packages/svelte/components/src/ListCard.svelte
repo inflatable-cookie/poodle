@@ -14,6 +14,11 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     title: string;
+    /**
+     * Small uppercase label rendered above the title — a family or category
+     * name on each card. Web-admitted; see list-card.md §3.
+     */
+    eyebrow?: string | null;
     subtitle?: string | null;
     meta?: string | null;
     href?: string | null;
@@ -47,6 +52,7 @@
     onClick?: ((event: MouseEvent) => void) | null;
     onSelectedChange?: ((selected: boolean) => void) | null;
     onContextAction?: ((value: string) => void) | null;
+    eyebrowContent?: Snippet<[]>;
     titleContent?: Snippet<[]>;
     subtitleContent?: Snippet<[]>;
     metaContent?: Snippet<[]>;
@@ -64,6 +70,7 @@
     sizeRole = "control",
     density = null,
     title,
+    eyebrow = null,
     subtitle = null,
     meta = null,
     href = null,
@@ -91,6 +98,7 @@
     onClick = null,
     onSelectedChange = null,
     onContextAction = null,
+    eyebrowContent,
     titleContent,
     subtitleContent,
     metaContent,
@@ -381,6 +389,15 @@
     {/if}
 
     <div class="poodle-list-card__body">
+      {#if eyebrowContent || eyebrow}
+        <span class="poodle-list-card__eyebrow">
+          {#if eyebrowContent}
+            {@render eyebrowContent()}
+          {:else}
+            {eyebrow}
+          {/if}
+        </span>
+      {/if}
       <div class="poodle-list-card__header">
         <span class="poodle-list-card__title">
           {#if titleContent}
@@ -592,6 +609,15 @@
     {/if}
 
     <div class="poodle-list-card__body">
+      {#if eyebrowContent || eyebrow}
+        <span class="poodle-list-card__eyebrow">
+          {#if eyebrowContent}
+            {@render eyebrowContent()}
+          {:else}
+            {eyebrow}
+          {/if}
+        </span>
+      {/if}
       <div class="poodle-list-card__header">
         <span class="poodle-list-card__title">
           {#if titleContent}

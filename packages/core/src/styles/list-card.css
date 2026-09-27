@@ -511,6 +511,21 @@
     gap: 0.0625rem;
   }
 
+  /* The card's eyebrow lane reuses the Eyebrow primitive's values (default sm
+     size) with the title's single-line truncation. list-card.md §8. */
+  .poodle-list-card__eyebrow {
+    color: var(--poodle-recipe-eyebrow-text, var(--poodle-color-text-secondary));
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .poodle-list-card__header {
     display: flex;
     align-items: baseline;
