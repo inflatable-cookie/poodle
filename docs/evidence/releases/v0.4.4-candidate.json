@@ -1,0 +1,30 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.4",
+  "source_commit": "284899870484466e9629a5a7590326707aefe065",
+  "base_commit": "f29101fec99525b0064d5aafde426f4d12907645",
+  "payload_commits": [
+    "7148f38475896e13469a99b7562f2340b644b310",
+    "a405fb452efa1abe3960114b858f7dc0a1b7a6e9",
+    "e37cab0c3d3447e08b364742d986ac1617f766ee",
+    "59a64af50d0f592e7b12d121f24fa8655d8cd67d",
+    "f0685ed8a1080af9cadb03504f269ca432f1672e",
+    "64182d08a0621b984aa50d3f5fac4b96021de875",
+    "6c14fa7cd31391b18e8c8406e03b0ebeec284864",
+    "24852d5726a5ab40b71b45092dac95ae615771a1"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved the dependency refresh and this release on 2026-09-26, and the re-cut as 0.4.4 on 2026-09-27, in the Poodle planning thread.",
+  "focused_evidence": {
+    "text_code_wrap": "focused Svelte and React Text and Code wrap tests passed on PR #280",
+    "icon_button_data_attributes": "focused Svelte and React IconButton data-* forwarding tests passed on PR #280",
+    "javascript_dependency_refresh": "417 files / 4180 component tests, 12 files / 26 pack-install tests, and 19 web-candidate tests passed on PR #282",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "post_merge_candidate_base": "PR #286 merged as 24852d5726a5ab40b71b45092dac95ae615771a1; admission derives the candidate base after merge without changing consumer behavior.",
+    "diff_check": "clean"
+  }
+}
