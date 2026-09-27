@@ -6,7 +6,7 @@
 import { resolve } from "node:path";
 
 import { requireExactCommit, resolveCertificationHead, runCapture } from "./scope";
-import { assertWebCandidateScope } from "./web-candidate";
+import { assertWebCandidateScope, deriveWebCandidateBase } from "./web-candidate";
 
 const repoRoot = resolve(import.meta.dir, "../..");
 
@@ -14,7 +14,7 @@ const checkedOutCommit = (await runCapture(["git", "rev-parse", "HEAD"], repoRoo
 const proofCommit = await resolveCertificationHead(repoRoot, checkedOutCommit);
 const requiredBaseCommit = requireExactCommit(
   globalThis.process.env.POODLE_WEB_PACK_INSTALL_BASE_COMMIT ??
-    (await runCapture(["git", "merge-base", proofCommit, "origin/main"], repoRoot)).trim(),
+    (await deriveWebCandidateBase(repoRoot, proofCommit)),
   "required base commit",
 );
 

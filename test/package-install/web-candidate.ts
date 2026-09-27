@@ -370,6 +370,50 @@ async function assertFrozenReleaseInputRange(
 }
 
 /**
+ * The base a candidate is admitted against.
+ *
+ * Before the candidate merges, that is its merge-base with the integration
+ * branch. Once it has merged, the merge-base is the candidate itself, so walk
+ * back along the first parent over the candidate's own commits (those that
+ * change only release inputs for the candidate's version or declared
+ * evidence) and use the first commit before them. Anything else would compare
+ * the release with itself (0.4.3: `0.4.3 -> 0.4.3`).
+ */
+export async function deriveWebCandidateBase(
+  checkoutRoot: string,
+  sourceCommit: string,
+  integrationRef = "origin/main",
+): Promise<string> {
+  requireExactCommit(sourceCommit, "certification source commit");
+  const mergeBase = (
+    await runCapture(["git", "merge-base", sourceCommit, integrationRef], checkoutRoot)
+  ).trim();
+  if (mergeBase !== sourceCommit) return requireExactCommit(mergeBase, "required base commit");
+  const targetVersion = await readManifestVersion(checkoutRoot, sourceCommit, "package.json");
+  const releaseInputPaths = webCandidateReleaseInputPaths(checkoutRoot, targetVersion);
+  let current = sourceCommit;
+  let walked = 0;
+  for (;;) {
+    const paths = await commitChangedPaths(checkoutRoot, current);
+    const candidateOwned =
+      paths.length > 0 &&
+      paths.every((path) => releaseInputPaths.includes(path) || isWebCandidateEvidencePath(path));
+    if (!candidateOwned) break;
+    const parent = (
+      await runCapture(["git", "rev-parse", `${current}^1`], checkoutRoot)
+    ).trim();
+    current = requireExactCommit(parent, "candidate parent commit");
+    walked += 1;
+  }
+  if (walked === 0) {
+    throw new Error(
+      `web candidate ${sourceCommit} is already on ${integrationRef} but is not a release-input or evidence commit`,
+    );
+  }
+  return current;
+}
+
+/**
  * The single generic web-candidate admission. It derives the version pair,
  * proves the lockstep release inputs, then admits only the bounded evidence
  * suffix. Any violation names the specific rule.
