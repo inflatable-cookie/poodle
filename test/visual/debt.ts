@@ -15,8 +15,10 @@
  *
  * Measured 2026-09-27 on the web-gates branch (current main plus type-only
  * React fixes; sweep tier, 344 comparisons): 34 failing pairs across 19
- * slugs — 16 size, 18 pixels, 0 capture. The August figure (53 pairs over
- * 308 comparisons) predates the current specimen set.
+ * slugs — 16 size, 18 pixels, 0 capture — plus two run-to-run flippers
+ * found by a second sweep (text-input, embed-preview), recorded on both
+ * axes with the evidence. The August figure (53 pairs over 308
+ * comparisons) predates the current specimen set.
  */
 
 export type VisualDebtFailureKind = "capture" | "size" | "pixels";
@@ -89,10 +91,10 @@ export const DEBT: VisualDebtEntry[] = [
   },
   {
     slug: "embed-preview",
-    axes: ["eclipse-compact-md"],
+    axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "14.6% — the remote Vimeo iframe paints a different decoded video frame per capture (diff reviewed; player chrome matches). Remote-media nondeterminism, the sweep-comparable cousin of the skipped media specimens; untriaged.",
+      "14.6-19.9% — the remote Vimeo iframe paints a different decoded video frame per capture (diff reviewed; player chrome matches). Which theme fails flips between runs; both are recorded. Remote-media nondeterminism, the sweep-comparable cousin of the skipped media specimens; untriaged.",
   },
   {
     slug: "envelope-editor",
@@ -145,10 +147,10 @@ export const DEBT: VisualDebtEntry[] = [
   },
   {
     slug: "text-input",
-    axes: ["iceberg-compact-md"],
+    axes: ["eclipse-compact-md", "iceberg-compact-md"],
     kind: "pixels",
     reason:
-      "0.07% on iceberg only — glyph rasterization under the iceberg theme; the eclipse axes match; untriaged.",
+      "0.07% — glyph rasterization at the default floor's edge; the failing axis flips between consecutive sweeps (iceberg then eclipse on 2026-09-27), so both are recorded; untriaged.",
   },
   {
     slug: "validation-summary",
