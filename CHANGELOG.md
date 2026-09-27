@@ -7,6 +7,34 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-09-27
+
+### Added
+
+- **Text and Code wrap.** Svelte and React `Text` and `Code` accept
+  `wrap="normal" | "anywhere"` (default `normal`). `anywhere` applies
+  `overflow-wrap: anywhere` so long identifiers can break; unset and
+  `normal` leave current wrapping unchanged. Web-admitted; the portable
+  spec and GPUI mapping wait for a later native evidence pin.
+- **IconButton data attributes.** Svelte and React IconButton forward host
+  `data-*` attributes to the root button.
+
+### Changed
+
+- **JavaScript dependencies.** Workspace JavaScript dependencies refresh to
+  their newest compatible releases. Notable runtime moves: `lucide-static`
+  1.48.0 (shipped default icon set; `trash` is an additive export, `trash-2`
+  remains an alias, no export removed), `@codemirror/*` and
+  `@lezer/highlight` patches, and root `react` / `react-dom` 19.3.0. Peer
+  ranges stay `svelte >=5.56.8 <6`, `react` / `react-dom >=18`, and
+  `marked ^18.0.9`. The Svelte build toolchain stays pinned at the published
+  5.56.8 peer floor.
+- **Bun 1.4.2.** `packageManager` is `bun@1.4.2`. Contributors and CI
+  install from that pin.
+- **Release status.** Core and Svelte are the `0.4.3` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Cargo packages and native evidence do not move in this patch.
+
 ## [0.4.2] - 2026-09-14
 
 ### Fixed
@@ -492,6 +520,7 @@ so minor releases may contain documented breaking changes.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.3]: docs/release-notes/0.4.3.md
 [0.4.2]: docs/release-notes/0.4.2.md
 [0.4.1]: docs/release-notes/0.4.1.md
 [0.4.0]: docs/release-notes/0.4.0.md
