@@ -60,6 +60,10 @@
     line-clamp: 3;
   }
 
+  .poodle-text[data-wrap="anywhere"] {
+    overflow-wrap: anywhere;
+  }
+
   .poodle-text[data-tone="secondary"],
   .poodle-text[data-tone="muted"] {
     color: var(--poodle-recipe-text-secondary-muted-text, var(--poodle-color-text-secondary));

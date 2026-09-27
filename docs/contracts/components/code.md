@@ -1,7 +1,7 @@
 # Code
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-27
 
 ## 1. Purpose
 
@@ -78,6 +78,7 @@ Updated: 2026-07-10
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; block source also uses `white-space: pre-wrap`. Unset and `normal` leave overflow wrapping and `white-space: pre` unchanged |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -93,6 +94,7 @@ Updated: 2026-07-10
 | inline | `inline=true` | compact inline code fragment |
 | inline plain | `inline=true`, `inlineVariant="plain"` | inline fragment with no padding, radius, or background |
 | inline typography | `inline=true`, `typography="inline"` | inline fragment at `1em × adjustmentRatio` with inherited line-height |
+| wrap anywhere | `wrap="anywhere"` | long identifiers break with `overflow-wrap: anywhere`; block source uses `white-space: pre-wrap` |
 | block | `inline=false` (default) | full block with optional toolbar |
 | copied | user clicks copy button | icon changes to check mark for 2 seconds |
 | line-highlighted | line index in `highlightLines` | accent background on that line |
@@ -309,7 +311,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | `line-height` | `1.4` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `tab-size` | `2` |
-| `white-space` | `pre` |
+| `white-space` | `pre` (`pre-wrap` when `wrap="anywhere"`) |
 
 ### Line `.code__line`
 
@@ -355,6 +357,7 @@ face reads larger or smaller than the default sans family.
 
 - `data-size` attribute on root reflects the resolved size
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-wrap` — `normal` or `anywhere`; `anywhere` applies `overflow-wrap: anywhere`
 - Inline mode renders a single `<code>` element with class `code code--inline`
 - Block mode renders a `<div>` wrapper with `<pre><code>` inside
 - Toolbar rendered conditionally when `language` or `showCopyButton` is truthy
@@ -369,6 +372,9 @@ face reads larger or smaller than the default sans family.
 - Inline mode: GPUI renders as a styled text run within a parent text element
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
+- `wrap="anywhere"` maps to `text_wrap` with `no_wrap` cleared. GPUI's
+  `whitespace_normal` wraps at word boundaries; mid-word breaking of long
+  identifiers is a backend gap, same class as clamp's N-line ellipsis.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
@@ -417,6 +423,7 @@ face reads larger or smaller than the default sans family.
 |-------|-------------|-----------------|-----------|
 | syntax highlighting not specified | tokenization is implementation-specific | allowed | may add token color contracts later |
 | clipboard API differs per platform | GPUI uses native clipboard vs navigator.clipboard | allowed | keep 2s feedback timing |
+| `wrap="anywhere"` is word wrap on native | GPUI has no overflow-wrap/anywhere channel | allowed | mid-word break stays a backend gap |
 
 ## 13. Specimen Definitions
 

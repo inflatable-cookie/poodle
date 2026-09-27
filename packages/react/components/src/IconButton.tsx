@@ -35,7 +35,11 @@ import type {
   SemanticControlSizeRole,
 } from "./types";
 
-export interface IconButtonProps {
+type DataAttributeProps = {
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
+
+export interface IconButtonProps extends DataAttributeProps {
   variant?: ButtonVariant;
   tone?: ButtonTone;
   size?: ControlSize | null;
@@ -83,7 +87,11 @@ export function IconButton({
   onBlur = null,
   onPressedChange = null,
   children,
+  ...rest
 }: IconButtonProps) {
+  const hostDataAttributes = Object.fromEntries(
+    Object.entries(rest).filter(([key]) => key.startsWith("data-")),
+  );
   installInputModality();
   const uiPresentation = useUiPresentation();
   const motionReady = useMotionReady();
@@ -153,6 +161,7 @@ export function IconButton({
       onMouseLeave={() => sendHover({ type: "DISMISS" })}
     >
       <button
+        {...hostDataAttributes}
         type={type}
         ref={setButtonElement}
         className="poodle-icon-button"

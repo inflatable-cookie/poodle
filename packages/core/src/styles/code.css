@@ -109,6 +109,15 @@
     background: var(--poodle-recipe-code-pre-fill, color-mix(in srgb, var(--poodle-color-background-canvas) 92%, black));
   }
 
+  .poodle-code[data-wrap="anywhere"] {
+    overflow-wrap: anywhere;
+  }
+
+  .poodle-code[data-wrap="anywhere"] .poodle-code__source {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
   .poodle-code__source {
     display: block;
     font-family: var(--poodle-typography-code-family);

@@ -26,6 +26,8 @@ pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
         s.text_weight = Some(weight);
         s.line_height = Some(spec.line_height());
         s.text_wrap = true;
+        // `wrap="anywhere"` does not change this backend: Text already word-
+        // wraps. GPUI has no overflow-wrap/anywhere channel.
         // `clamp` degrades to wrapped text clipped at the box, as on both old
         // native tiers — the exact N-line cap + ellipsis stays a backend gap.
         if spec.clamp.is_some() {

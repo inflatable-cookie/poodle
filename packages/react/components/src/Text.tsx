@@ -10,6 +10,7 @@ export interface TextProps {
   leading?: "normal" | "relaxed";
   spacing?: "none" | "compact";
   clamp?: "none" | 1 | 2 | 3;
+  wrap?: "normal" | "anywhere";
   children?: ReactNode;
 }
 
@@ -21,6 +22,7 @@ export function Text({
   leading = "normal",
   spacing = "none",
   clamp = "none",
+  wrap = "normal",
   children,
 }: TextProps) {
   return (
@@ -32,6 +34,7 @@ export function Text({
       data-leading={leading}
       data-spacing={spacing}
       data-clamp={clamp}
+      data-wrap={wrap}
     >
       {children}
     </As>

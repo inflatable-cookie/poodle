@@ -9,6 +9,13 @@ afterEach(() => {
 });
 
 describe("IconButton (svelte)", () => {
+  it("forwards a host data attribute to the root button", () => {
+    const { container } = render(IconButton, {
+      props: { icon: "x", ariaLabel: "Close", "data-action": "close" },
+    });
+    expect(container.querySelector(".poodle-icon-button")?.getAttribute("data-action")).toBe("close");
+  });
+
   it("always carries the required accessible name and hides the glyph from the tree", () => {
     const { container } = render(IconButton, { props: { icon: "x", ariaLabel: "Close" } });
     const button = container.querySelector<HTMLButtonElement>(".poodle-icon-button");

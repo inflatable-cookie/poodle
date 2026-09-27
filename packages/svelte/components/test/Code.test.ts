@@ -35,6 +35,23 @@ describe("Code (svelte)", () => {
     expect(container.querySelector(".poodle-code__pre")).toBeNull();
   });
 
+  it("projects wrap=anywhere on inline and block, and defaults to normal", () => {
+    const unset = render(Code, { props: { source: "id" } });
+    expect((unset.container.querySelector(".poodle-code") as HTMLElement).dataset.wrap).toBe("normal");
+
+    const block = render(Code, { props: { source: "very-long-identifier", wrap: "anywhere" } });
+    expect((block.container.querySelector(".poodle-code--block") as HTMLElement).dataset.wrap).toBe(
+      "anywhere",
+    );
+
+    const inline = render(Code, {
+      props: { source: "very-long-identifier", inline: true, wrap: "anywhere" },
+    });
+    expect((inline.container.querySelector("code.poodle-code--inline") as HTMLElement).dataset.wrap).toBe(
+      "anywhere",
+    );
+  });
+
   it("shows the language label in the block toolbar", () => {
     const { container } = render(Code, { props: { source: "x", language: "typescript" } });
     expect(container.querySelector(".poodle-code__language")?.textContent).toBe("typescript");
