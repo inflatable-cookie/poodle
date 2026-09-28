@@ -58,8 +58,8 @@ describe("ToastHost (react)", () => {
 
   it("auto-dismisses non-sticky toasts after the configured delay", async () => {
     const { store, hostStore } = makeStore([
-      { id: "t1", title: "Saved", tone: "success" },
-      { id: "t2", title: "Deploy failed", tone: "danger" },
+      { id: "t1", title: "Saved", message: "Done.", tone: "success" },
+      { id: "t2", title: "Deploy failed", message: "Boom.", tone: "danger" },
     ]);
     render(<ToastHost store={hostStore} autoDismissMs={20} />);
 
@@ -74,7 +74,7 @@ describe("ToastHost (react)", () => {
 
   it("keeps sticky toasts until explicitly dismissed", async () => {
     const { store, hostStore } = makeStore([
-      { id: "t1", title: "Sticky", tone: "warning", sticky: true },
+      { id: "t1", title: "Sticky", message: "Sticky.", tone: "warning", sticky: true },
     ]);
     render(<ToastHost store={hostStore} autoDismissMs={20} />);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -85,7 +85,9 @@ describe("ToastHost (react)", () => {
 
   it("dismisses through the store and reports onDismiss", async () => {
     const onDismiss = vi.fn();
-    const { hostStore } = makeStore([{ id: "t1", title: "Saved", tone: "success" }]);
+    const { hostStore } = makeStore([
+      { id: "t1", title: "Saved", message: "Done.", tone: "success" },
+    ]);
     const { container } = render(<ToastHost store={hostStore} onDismiss={onDismiss} />);
     await waitFor(() => {
       expect(container.querySelector(".poodle-toast")).not.toBeNull();
@@ -101,7 +103,7 @@ describe("ToastHost (react)", () => {
   it("forwards the action callback from the toast action button", async () => {
     const onAction = vi.fn();
     const { hostStore } = makeStore([
-      { id: "t1", title: "New version", actionLabel: "Update", tone: "info" },
+      { id: "t1", title: "New version", message: "v2.1", actionLabel: "Update", tone: "info" },
     ]);
     const { container } = render(<ToastHost store={hostStore} onAction={onAction} />);
     await waitFor(() => {

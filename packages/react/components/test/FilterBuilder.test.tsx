@@ -5,7 +5,7 @@ import { FilterBuilder } from "../src/FilterBuilder";
 import type { FilterFieldDefinition } from "../src/types";
 
 const fields: FilterFieldDefinition[] = [
-  { key: "status", label: "Status", kind: "select", options: [{ value: "open", label: "Open" }] },
+  { key: "status", label: "Status", kind: "enum", options: [{ value: "open", label: "Open" }] },
 ];
 
 describe("FilterBuilder (react) dismissOnOutsideInteract", () => {

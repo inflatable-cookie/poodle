@@ -83,8 +83,8 @@ describe("Field (react)", () => {
     const surface = document.querySelector<HTMLElement>(".poodle-popover__surface");
     expect(surface).not.toBeNull();
     expect(surface?.getAttribute("role")).toBe("dialog");
-    expect(surface.getAttribute("aria-label")).toBe("Field description");
-    expect(surface.querySelector(".poodle-field__info-content")?.textContent).toBe("How the title appears.");
+    expect(surface?.getAttribute("aria-label")).toBe("Field description");
+    expect(surface?.querySelector(".poodle-field__info-content")?.textContent).toBe("How the title appears.");
 
     const srDescription = container.querySelector<HTMLElement>(".poodle-field__sr-description");
     expect(srDescription?.getAttribute("id")).toBe("title-description");

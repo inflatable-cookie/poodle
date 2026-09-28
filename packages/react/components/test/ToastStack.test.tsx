@@ -17,7 +17,7 @@ describe("ToastStack (react)", () => {
     expect(stack.getAttribute("aria-label")).toBe("Alerts");
     expect(stack.getAttribute("aria-live")).toBe("polite");
 
-    const toasts = [...container.querySelectorAll(".poodle-toast")];
+    const toasts = [...container.querySelectorAll<HTMLElement>(".poodle-toast")];
     expect(toasts.length).toBe(2);
     expect(toasts[0].dataset.tone).toBe("success");
     expect(toasts[0].textContent).toContain("Changes saved");

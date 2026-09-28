@@ -553,10 +553,17 @@
 # consumer's own type-check found a Poodle error before Poodle did.
 "check:svelte-components" = "bunx svelte-check --workspace packages/svelte/components --tsconfig ./tsconfig.json --threshold error"
 
+# Core strict type gate. `packages/core/tsconfig.json` includes `src` and
+# `test`, so new modules and test fixtures are checked. Self-contained: core's
+# tsconfig resolves only relative imports and the `bun` types, so it needs no
+# built dist.
+"check:core" = "bun run --cwd packages/core check"
+
 # React type gate (g16.107). Counterpart to `check:svelte`. Resolves
 # `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-react` types
 # from built dist, so run it after `core:build`/`react:package` (in ci:web
-# ordering does that; standalone, build the packages first).
+# ordering does that; standalone, build the packages first). Both include
+# `test`, so component and preview test files are type-checked too.
 "check:react" = [
   { task = "check:react-components" },
   { task = "check:react-preview" },
@@ -724,9 +731,10 @@
   # every other gate accepted while the published tarball could not resolve it.
   { task = "test:web-pack-install" },
   { task = "svelte:surface-audit" },
+  { task = "check:core" },
   { task = "check:svelte" },
-  # Both type gates need the dist built above (svelte also via install-smoke;
-  # react resolves poodle-core/poodle-react types from dist).
+  # Both remaining type gates need the dist built above (svelte also via
+  # install-smoke; react resolves poodle-core/poodle-react types from dist).
   { task = "check:react" },
   { task = "docs:lint" },
   { task = "check:parity-evidence-ledger" },

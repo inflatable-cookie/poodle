@@ -84,6 +84,7 @@ describe("FormActions (react)", () => {
     expect(surface).not.toBeNull();
     expect(surface?.getAttribute("role")).toBe("menu");
 
+    if (!surface) throw new Error("expected the menu surface to be mounted");
     const items = [...surface.querySelectorAll<HTMLElement>(".poodle-menu-surface__item")];
     expect(items.map((el) => el.textContent)).toEqual(["Delete", "Reset"]);
 

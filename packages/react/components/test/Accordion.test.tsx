@@ -64,7 +64,7 @@ describe("Accordion (react)", () => {
       <Accordion items={[items[0], { ...items[1], disabled: true }]} defaultValue="one" />,
     );
     const triggers = getAllByRole("button");
-    expect(triggers[1].disabled).toBe(true);
+    expect((triggers[1] as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.click(triggers[1]);
     expect(triggers[1].getAttribute("aria-expanded")).toBe("false");
