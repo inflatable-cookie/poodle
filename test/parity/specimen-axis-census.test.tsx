@@ -60,6 +60,7 @@ const SCENE_SLUGS = ["avatar", "callout", "empty-state", "pill", "spinner"];
  *  scope; they get tolerant tests below instead of running under the suite's
  *  console.error guard. */
 const NOISY_SLUGS = ["toolbar", "error-boundary"];
+const CENSUS_ROUTES = ROUTES.filter((route) => !NOISY_SLUGS.includes(route));
 
 /** A component takes an axis prop when its own source declares it. Mirrors the
  *  audit's static pass (axis eligibility read from each component's props).
@@ -748,51 +749,63 @@ describe("web axis census (176 routes)", () => {
     }
   }, 60_000);
 
-  it("reports Sizes/Densities iff the component takes the prop, in both runtimes, across all routes", async () => {
-    // 173 routes × two runtimes: the sweep outlives the default 5s test timeout.
-    document.body.innerHTML = "";
+  // At load averages of 44–113, `icon` took 39.6s; its 60s budget leaves 20.4s
+  // headroom because its specimen renders the full icon grid.
+  it.each(CENSUS_ROUTES)("%s reports only eligible axis tabs in both runtimes", async (slug) => {
     const disagreements: string[] = [];
-    for (const slug of ROUTES.filter((route) => !NOISY_SLUGS.includes(route))) {
+
+    try {
+      document.body.innerHTML = "";
       const eligibility = ELIGIBILITY[slug.replace(/-/g, "")];
       expect(eligibility, `${slug}: component source not found`).toBeTruthy();
 
-      const svelteResult = await assertRoute("Svelte", slug);
-      cleanupSvelte();
+      let svelteResult: Awaited<ReturnType<typeof assertRoute>>;
+      try {
+        svelteResult = await assertRoute("Svelte", slug);
+      } finally {
+        cleanupSvelte();
+      }
 
-      const reactResult = await assertRoute("React", slug);
-      cleanupReact();
+      let reactResult: Awaited<ReturnType<typeof assertRoute>>;
+      try {
+        reactResult = await assertRoute("React", slug);
+      } finally {
+        cleanupReact();
+      }
 
       if (!svelteResult || !reactResult) {
         disagreements.push(`${slug}: route could not be exercised`);
-        continue;
-      }
+      } else {
+        const { tabs: svelteTabs, hasLayout: svelteLayout } = svelteResult;
+        const { tabs: reactTabs, hasLayout: reactLayout } = reactResult;
 
-      const { tabs: svelteTabs, hasLayout: svelteLayout } = svelteResult;
-      const { tabs: reactTabs, hasLayout: reactLayout } = reactResult;
+        if (svelteLayout !== reactLayout) {
+          disagreements.push(`${slug} layout drift: Svelte=${svelteLayout} React=${reactLayout}`);
+        }
+        if (JSON.stringify(reactTabs) !== JSON.stringify(svelteTabs)) {
+          disagreements.push(`${slug} runtime drift: ${JSON.stringify(svelteTabs)} vs ${JSON.stringify(reactTabs)}`);
+        }
 
-      if (svelteLayout !== reactLayout) {
-        disagreements.push(`${slug} layout drift: Svelte=${svelteLayout} React=${reactLayout}`);
+        // Expectations are eligibility-derived independently of the current page
+        // shape: a page that takes a size/density prop must expose the axis even
+        // if it does not use SpecimenLayout, or the census fails until it does.
+        const expected: string[] = [];
+        if (svelteLayout) expected.push("Examples");
+        if (eligibility.size) expected.push("Sizes");
+        if (eligibility.density) expected.push("Densities");
+        if (JSON.stringify(svelteTabs) !== JSON.stringify(expected)) {
+          disagreements.push(`${slug} (Svelte): ${JSON.stringify(svelteTabs)} ≠ ${JSON.stringify(expected)}`);
+        }
+        if (JSON.stringify(reactTabs) !== JSON.stringify(expected)) {
+          disagreements.push(`${slug} (React): ${JSON.stringify(reactTabs)} ≠ ${JSON.stringify(expected)}`);
+        }
       }
-      if (JSON.stringify(reactTabs) !== JSON.stringify(svelteTabs)) {
-        disagreements.push(`${slug} runtime drift: ${JSON.stringify(svelteTabs)} vs ${JSON.stringify(reactTabs)}`);
-      }
-
-      // Expectations are eligibility-derived independently of the current page
-      // shape: a page that takes a size/density prop must expose the axis even
-      // if it does not use SpecimenLayout, or the census fails until it does.
-      const expected: string[] = [];
-      if (svelteLayout) expected.push("Examples");
-      if (eligibility.size) expected.push("Sizes");
-      if (eligibility.density) expected.push("Densities");
-      if (JSON.stringify(svelteTabs) !== JSON.stringify(expected)) {
-        disagreements.push(`${slug} (Svelte): ${JSON.stringify(svelteTabs)} ≠ ${JSON.stringify(expected)}`);
-      }
-      if (JSON.stringify(reactTabs) !== JSON.stringify(expected)) {
-        disagreements.push(`${slug} (React): ${JSON.stringify(reactTabs)} ≠ ${JSON.stringify(expected)}`);
-      }
+    } finally {
+      document.body.innerHTML = "";
     }
+
     expect(disagreements, disagreements.join("\n")).toEqual([]);
-  }, 120_000);
+  }, 60_000);
 
   it("keeps toolbar and error-boundary on contract despite their designed noise", async () => {
     // ToolbarSpecimen renders icons missing from the fixture set and
