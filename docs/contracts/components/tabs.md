@@ -415,12 +415,14 @@ the spec.
   `focusin`/`focusout` state; no render-phase DOM read, ref mutation, or state
   update occurs. The destination is the owned tab registry. Svelte schedules
   the transfer from its `$effect.pre`; React applies the committed controlled
-  change from a commit-phase layout effect, then one cancellable timer. No
-  consumer selector, panel initial-focus callback, or body/panel fallback.
-  Repeated or superseded controlled changes — batched, or committed separately
-  before the first timer fires — retarget and focus only the latest eligible
-  destination once. Teardown, a policy change to `"preserve"`, a missing tab,
-  or a disabled tab makes the request inert.
+  change from a commit-phase layout effect, then one cancellable timer. A
+  superseding commit before that timer fires retargets the latched destination
+  in place; it does not replace the clock. No consumer selector, panel
+  initial-focus callback, or body/panel fallback. Repeated or superseded
+  controlled changes — batched, or committed separately before the first timer
+  fires — retarget and focus only the latest eligible destination once.
+  Teardown, a policy change to `"preserve"`, a missing tab, or a disabled tab
+  makes the request inert.
 
 ## 7. Layout
 

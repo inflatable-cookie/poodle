@@ -689,6 +689,9 @@
   { task = "test:web-scope" },
   # g16.098: detached worktree without shell dist. Bites if react-preview
   # loses its workspace alias or ci:web tests components before package builds.
+  # 2026-09-28 loaded host (141/143/130): checkout 2.9s, passing suites 15.5s,
+  # planted 6.3s. Vitest child 120s (~8x); bun:test wrappers 120s. Process
+  # group kill on timeout. See the constants in that file.
   { run = "bun test scripts/web-distribution/cold-checkout-react-preview.test.ts" },
   # g18.015: preview selectors that skip package preflight serve a stale
   # core export graph. Bind composition and the live rebuild-before-listen
