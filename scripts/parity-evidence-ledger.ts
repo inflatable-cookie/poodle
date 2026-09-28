@@ -182,6 +182,14 @@ function exists(root: string, relativePath: string): boolean {
   return fs.existsSync(path.join(root, relativePath));
 }
 
+function isFile(root: string, relativePath: string): boolean {
+  try {
+    return fs.statSync(path.join(root, relativePath)).isFile();
+  } catch {
+    return false;
+  }
+}
+
 function walkFiles(root: string, relativeDirectory: string): string[] {
   const directory = path.join(root, relativeDirectory);
   if (!fs.existsSync(directory)) return [];
@@ -277,7 +285,7 @@ function reactExportBarrel(root: string, name: string): string {
     : "packages/react/components/src/index.ts";
 }
 
-function resolveSourceFile(root: string, directory: string, sourcePath: string): string | undefined {
+export function resolveSourceFile(root: string, directory: string, sourcePath: string): string | undefined {
   const candidates = [
     sourcePath,
     `${sourcePath}.tsx`,
@@ -285,7 +293,7 @@ function resolveSourceFile(root: string, directory: string, sourcePath: string):
     `${sourcePath}.jsx`,
     `${sourcePath}.js`,
   ];
-  return candidates.find((candidate) => exists(root, `${directory}/${candidate}`));
+  return candidates.find((candidate) => isFile(root, `${directory}/${candidate}`));
 }
 
 function findFocusedTest(root: string, runtime: "svelte" | "react", name: string): string {

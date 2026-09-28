@@ -730,6 +730,15 @@
   { task = "check:react" },
   { task = "docs:lint" },
   { task = "check:parity-evidence-ledger" },
+  # Cheap docs:check leaves that need no Rust. Stale GPUI census used to land
+  # with every required gate green because check:gpui-census lived only on
+  # docs:check. Same for Svelte/React prop-domain drift. Runtimes recorded
+  # 2026-09-28 (this checkout): census 4.0s idle / 4.6s at load ~20;
+  # react-prop-drift 0.25s idle / 0.31s loaded; value-domain-drift 0.20s idle
+  # / 0.24s loaded.
+  { task = "check:gpui-census" },
+  { task = "docs:react-prop-drift" },
+  { task = "docs:value-domain-drift" },
   { task = "docs:react-specimen-drift" },
   { task = "docs:capability-drift" },
   { task = "react:docs" },

@@ -4,12 +4,18 @@ import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
 import { COMPONENT_PROPS, PARITY_EXCLUDE } from "../fixtures/component-props";
+import {
+  selectPublicSvelteEntries,
+  sveltePublicComponentSources,
+} from "../fixtures/svelte-public-components";
 
-// Svelte <-> React anatomy parity across EVERY component present in both
+// Svelte <-> React anatomy parity across public components present in both
 // packages. Each side renders with the SAME props and no children (symmetric by
 // construction), then the emitted poodle-* class sets are diffed.
 //
-// The module globs mean new components are gated automatically.
+// The globs load modules; Svelte membership comes from the package barrels
+// through the shared selection step, keyed by implementation file so an export
+// alias still covers its module.
 
 const svelteModules = import.meta.glob("../../packages/svelte/components/src/*.svelte", {
   eager: true,
@@ -33,7 +39,7 @@ function isReactComponent(comp: unknown): boolean {
 }
 
 const svelteByName = new Map<string, unknown>(
-  Object.entries(svelteModules).map(([f, m]) => [basename(f, ".svelte"), m.default]),
+  selectPublicSvelteEntries(svelteModules, sveltePublicComponentSources()),
 );
 const reactByName = new Map<string, unknown>(
   Object.entries(reactModules)
@@ -71,7 +77,15 @@ function anatomy(root: ParentNode): string[] {
 }
 
 describe("svelte <-> react anatomy parity", () => {
-  it("gates a substantial shared component surface", () => {
+  it("gates the public export surface, not every top-level .svelte file", () => {
+    const sveltePublicSources = sveltePublicComponentSources();
+    expect(sveltePublicSources.has("Button")).toBe(true);
+    expect(sveltePublicSources.has("MenuSurface")).toBe(false);
+    expect(svelteByName.has("Button")).toBe(true);
+    expect(svelteByName.has("MenuSurface")).toBe(false);
+    expect(shared).toContain("Button");
+    expect(shared).not.toContain("MenuSurface");
+    for (const name of svelteByName.keys()) expect(sveltePublicSources.has(name)).toBe(true);
     expect(shared.length).toBeGreaterThan(100);
   });
 

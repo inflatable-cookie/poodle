@@ -3,7 +3,7 @@
 // that partial, stale, source, workflow, registry and native changes fail
 // closed before any build.
 
-import { afterAll, describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test, setDefaultTimeout } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -20,13 +20,43 @@ import {
 } from "./web-candidate";
 
 const plantRoots: string[] = [];
+let gitTemplate: string | undefined;
+const plantTemplates = new Map<
+  string,
+  { root: string; base: string; frozen: string; head: string }
+>();
+
+// Git-plant cases used to hit bun's default 5s timeout under load (13 of 25
+// failed at Queue's gate; pre-optimization 21/21 passed in 31s at load 32).
+// Reusing one inited git dir cuts the repeated `git init` work, and every
+// duplicate is produced by `git clone --shared` — never a raw copy of a
+// `.git` directory, which races git's own transient lock files: a detached
+// post-commit maintenance left `.git/objects/maintenance.lock` mid-copy and
+// cpSync died with ENOENT in required CI (review of this leaf, 2026-09-28).
+// Measured 2026-09-28 with the clone reuse at ambient load 50–83: 21/21 in
+// 12–15s, slowest case 1.3s — clone is also faster per plant than the copy
+// was (cpSync measured 5.1s idle / 7.6s loaded). The 20s cap keeps ~15x
+// headroom over the loaded slowest case.
+setDefaultTimeout(20_000);
 
 afterAll(() => {
   for (const root of plantRoots) rmSync(root, { recursive: true, force: true });
 });
 
-async function runGit(root: string, args: string[]): Promise<string> {
-  const child = Bun.spawn(["git", "-C", root, ...args], { stdout: "pipe", stderr: "pipe" });
+const GIT_IDENTITY = {
+  GIT_AUTHOR_NAME: "Poodle Certification",
+  GIT_AUTHOR_EMAIL: "poodle-certification@example.invalid",
+  GIT_COMMITTER_NAME: "Poodle Certification",
+  GIT_COMMITTER_EMAIL: "poodle-certification@example.invalid",
+};
+
+async function runGit(cwd: string, args: string[]): Promise<string> {
+  const child = Bun.spawn(["git", ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+    env: { ...process.env, ...GIT_IDENTITY },
+  });
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(child.stdout).text(),
     new Response(child.stderr).text(),
@@ -50,13 +80,34 @@ async function commitAll(root: string, message: string): Promise<string> {
   return requireExactCommit((await runGit(root, ["rev-parse", "HEAD"])).trim(), "plant commit");
 }
 
-async function initPlant(): Promise<string> {
+/**
+ * Duplicate a git repository with git itself. Clones share objects through
+ * alternates instead of copying `.git`, so no reader can race a lock file the
+ * source repo's detached maintenance writes and deletes.
+ */
+async function cloneRepo(sourceRoot: string): Promise<string> {
   const root = mkdtempSync(join(tmpdir(), "poodle-web-candidate-test-"));
   plantRoots.push(root);
-  await runGit(root, ["init", "--quiet"]);
-  await runGit(root, ["config", "user.email", "poodle-certification@example.invalid"]);
-  await runGit(root, ["config", "user.name", "Poodle Certification"]);
+  await runGit(tmpdir(), ["clone", "--shared", "--quiet", sourceRoot, root]);
   return root;
+}
+
+async function initPlant(): Promise<string> {
+  if (gitTemplate === undefined) {
+    gitTemplate = mkdtempSync(join(tmpdir(), "poodle-web-candidate-git-"));
+    plantRoots.push(gitTemplate);
+    await runGit(gitTemplate, ["init", "--quiet"]);
+  }
+  return cloneRepo(gitTemplate);
+}
+
+async function clonePlant(source: {
+  root: string;
+  base: string;
+  frozen: string;
+  head: string;
+}): Promise<{ root: string; base: string; frozen: string; head: string }> {
+  return { root: await cloneRepo(source.root), base: source.base, frozen: source.frozen, head: source.head };
 }
 
 function jsManifests(version: string): Record<string, string> {
@@ -168,6 +219,12 @@ async function plantCandidate(
   target: string,
   options: { frozenExtra?: Record<string, string>; evidenceExtra?: Record<string, string> } = {},
 ): Promise<{ root: string; base: string; frozen: string; head: string }> {
+  const extras = options.frozenExtra !== undefined || options.evidenceExtra !== undefined;
+  if (!extras) {
+    const cached = plantTemplates.get(target);
+    if (cached) return clonePlant(cached);
+  }
+
   const root = await initPlant();
   await writeFiles(root, baseFiles());
   const base = await commitAll(root, "candidate base");
@@ -178,7 +235,9 @@ async function plantCandidate(
     ...(options.evidenceExtra ?? {}),
   });
   const head = await commitAll(root, "candidate evidence");
-  return { root, base, frozen, head };
+  const planted = { root, base, frozen, head };
+  if (!extras) plantTemplates.set(target, planted);
+  return extras ? planted : clonePlant(planted);
 }
 
 describe("web candidate versions", () => {

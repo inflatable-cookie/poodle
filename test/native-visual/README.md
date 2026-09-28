@@ -70,6 +70,10 @@ A bulk refresh is not proof that current rendering is correct. Reclassify stale
 baselines through the explicit refresh flow and inspect the preserved previous
 image plus the manifest.
 
+The headless Jetstream gate (`test/native-visual/jetstream.ts`) uses the same
+rule: compare is read-only, a missing baseline fails and names the slug, and
+only `--update` writes a first reference.
+
 ## Local-only
 
 The GPUI preview screenshots its own window — it finds itself by PID through a

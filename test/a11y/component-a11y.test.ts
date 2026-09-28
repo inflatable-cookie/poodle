@@ -4,11 +4,15 @@ import { createRawSnippet } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import { A11Y_BASELINE, A11Y_EXCLUDE, COMPONENT_PROPS } from "../fixtures/component-props";
+import {
+  selectPublicSvelteEntries,
+  sveltePublicComponentSources,
+} from "../fixtures/svelte-public-components";
 
-// Runtime accessibility sweep over EVERY Svelte component (the parity authority).
-// Contracts mandate roles, ARIA and keyboard behaviour, but the accessibility
-// report only records self-declared audit *status* — nothing executed the rules.
-// This runs axe-core against each rendered component.
+// Runtime accessibility sweep over the public Svelte export surface (the
+// parity authority). Contracts mandate roles, ARIA and keyboard behaviour, but
+// the accessibility report only records self-declared audit *status* — nothing
+// executed the rules. This runs axe-core against each rendered component.
 //
 // Page-level rules are disabled: a component renders as an isolated fragment, so
 // landmark/document rules ("must be in a region", "needs an <h1>", "needs a
@@ -43,13 +47,18 @@ const modules = import.meta.glob("../../packages/svelte/components/src/*.svelte"
   eager: true,
 }) as Record<string, { default: unknown }>;
 
-const entries = Object.entries(modules)
-  .map(([file, mod]) => [file.split("/").pop()!.replace(".svelte", ""), mod.default] as const)
+const entries = selectPublicSvelteEntries(modules, sveltePublicComponentSources())
   .filter(([name]) => !(name in A11Y_EXCLUDE))
   .sort(([a], [b]) => a.localeCompare(b));
 
 describe("component accessibility (axe)", () => {
-  it("sweeps the whole component surface", () => {
+  it("sweeps the public export surface, not every top-level .svelte file", () => {
+    const publicSources = sveltePublicComponentSources();
+    expect(publicSources.has("Button")).toBe(true);
+    expect(publicSources.has("MenuSurface")).toBe(false);
+    expect(entries.some(([name]) => name === "Button")).toBe(true);
+    expect(entries.some(([name]) => name === "MenuSurface")).toBe(false);
+    for (const [name] of entries) expect(publicSources.has(name)).toBe(true);
     expect(entries.length).toBeGreaterThan(120);
   });
 
