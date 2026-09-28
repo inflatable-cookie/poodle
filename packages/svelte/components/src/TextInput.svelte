@@ -574,9 +574,12 @@
         value={currentValue}
         {placeholder}
         {autocomplete}
+        {required}
         {spellcheck}
         autocapitalize={autocapitalize ?? undefined}
         {...autocorrectAttributes}
+        enterkeyhint={enterKeyHint ?? undefined}
+        inputmode={inputMode ?? undefined}
         rows={rows ?? 4}
         style={resize !== "vertical" ? `resize: ${resize};` : undefined}
         maxlength={maxLength ?? undefined}

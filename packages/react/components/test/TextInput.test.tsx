@@ -74,6 +74,22 @@ describe("TextInput (react)", () => {
     expect(input.getAttribute("list")).toBe("emails");
     expect(input.getAttribute("inputmode")).toBe("email");
   });
+
+  it("passes required, inputMode, and enterKeyHint through to the textarea in multiline mode", () => {
+    const { container } = render(
+      <TextInput
+        id="t1"
+        type="multiline"
+        required
+        enterKeyHint="send"
+        inputMode="text"
+      />,
+    );
+    const textarea = container.querySelector("textarea")!;
+    expect(textarea.hasAttribute("required")).toBe(true);
+    expect(textarea.getAttribute("enterkeyhint")).toBe("send");
+    expect(textarea.getAttribute("inputmode")).toBe("text");
+  });
 });
 
 /**
