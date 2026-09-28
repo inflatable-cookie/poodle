@@ -242,6 +242,30 @@ and `impact`, plus optional `area` and `fix`. Record it and continue the task.
 The planner promotes a papercut into the plan or a brief, or closes it as
 completed or deprecated.
 
+## Test-Environment Traps
+
+Known behaviour of the tools Poodle tests with. None has a Poodle fix, so
+work around them:
+
+- **Svelte:** a prop named `state` collides with the `$state` rune at runtime
+  (`store_invalid_shape`). Alias it in `$props()`, for example
+  `state: catalogueState = "ready"`.
+- **happy-dom:** `@media` rules are evaluated only when a stylesheet is
+  parsed, so resizing the window later updates `matchMedia` but not the
+  cascade. Set the width before the stylesheet loads, or assert responsive
+  layout in a browser.
+- **Testing Library:** `fireEvent.click` dispatches only `click`. Overlay
+  dismissal listens on document `mousedown`, so a pointer-commit regression
+  dispatches `mousedown` on the real target, then `click`.
+- **WebKit:** some ports are restricted (for example 4190: "Not allowed to use
+  restricted network port"). Browser probes pick a free port outside that
+  list, and run one Playwright engine per process.
+- **GPUI headless platform:** a view renders several times per
+  `window.draw`, so interactive nodes in mounted regressions declare explicit
+  ids, or press and release land on different elements. `Frame::clear` never
+  clears `debug_bounds` in gpui 0.2.2, so a probe that discovers elements
+  across routes uses a fresh window per route.
+
 ## Validation
 
 Use Effigy as the command surface. Match proof cost to the delivery stage:
