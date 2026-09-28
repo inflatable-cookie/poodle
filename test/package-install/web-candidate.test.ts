@@ -27,9 +27,12 @@ const plantTemplates = new Map<
 >();
 
 // Git-plant cases used to hit bun's default 5s timeout under load (13 of 25
-// failed at Queue's gate; 21/21 passed in 31s at load 32). Reusing one inited
-// git dir and copying completed plants cuts the repeated `git init` work.
-// Measured 2026-09-28 after the copy reuse; timeout is ~4x the slowest case.
+// failed at Queue's gate; pre-optimization 21/21 passed in 31s at load 32).
+// Reusing one inited git dir and copying completed plants cuts the repeated
+// `git init` work. Measured 2026-09-28 with that reuse: ambient load 22–26 →
+// 21/21 in 12.4s, slowest case 5.1s; deliberately loaded host (32 busy loops
+// over ambient ~25, load 73) → 21/21 in 58s, slowest 7.6s. The 20s cap is ~4x
+// the slowest case at the recorded failure load and ~2.6x at that extreme.
 setDefaultTimeout(20_000);
 
 afterAll(() => {
