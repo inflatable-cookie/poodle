@@ -97,6 +97,14 @@ const PAGES: Page[] = [
   },
 ];
 
+// Measured 2026-09-28 at load 39/29/24: agent-transcript caption identity
+// 357ms in a warm file run (other pages 28–95ms). Isolated one-test wall
+// 20.6s, 17s of that transform. 20 consecutive isolated runs passed at
+// load 24/27/24. Three `effigy test:components` runs passed at load
+// 12–30 (suite ~66s). Default 5s timed out at load 27–60 inside
+// test:components. Timeout 20s is 4× that 5s default / ~56× the warm 357ms.
+const AGENT_TRANSCRIPT_CAPTION_TIMEOUT_MS = 20_000;
+
 const GPUI_SPECIMENS = join(import.meta.dirname, "../../packages/gpui/preview/src/specimens");
 
 function collect(source: string, pattern: RegExp): string[] {
@@ -168,7 +176,7 @@ describe("g15.024 agent and tools specimens", () => {
 
       it("keeps Svelte and React captions identical", () => {
         expect(reactCaptions(page)).toEqual(svelteCaptions(page));
-      });
+      }, page.slug === "agent-transcript" ? AGENT_TRANSCRIPT_CAPTION_TIMEOUT_MS : 5_000);
 
       it("stays inside the outline's section budget", () => {
         const count = page.expected.length;

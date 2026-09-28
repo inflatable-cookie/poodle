@@ -214,7 +214,7 @@
 "core:build" = "bun scripts/web-distribution/core-build.ts"
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
-"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts scripts/docs-deps-preflight.test.ts"
 # g18.032: the installed-package scope suite plants dozens of git ranges and
 # exceeds Bun's default per-test timeout when it shares a parallel test-file
 # run with the core-build files. It is the same assertion inventory as its own
@@ -223,7 +223,7 @@
 # takes ~6s alone hit 30s at ~4x slowdown (poodle#028, 2026-09-27), so the
 # per-test cap is 120s. A genuine hang still fails well inside the 5-minute
 # child bound.
-"test:web-scope" = "bun test --timeout 120000 test/package-install/scope.test.ts"
+"test:web-scope" = "bun test --timeout 120000 test/package-install/scope.test.ts test/package-install/web-preview-harness.test.ts"
 # Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
 # its parallel test-file workers; the helper still validates the exact nested
 # realpath on every build.
@@ -234,7 +234,7 @@
 # g18.015: public `*:preview` rebuilds package dist before Vite. Isolated
 # stale/missing distributions, live HTTP module-graph proof, fail-closed
 # startup, and process/port cleanup. Does not touch live ignored output.
-"test:preview-preflight" = "bun test scripts/web-distribution/preview-distribution-preflight.test.ts"
+"test:preview-preflight" = "bun test scripts/web-distribution/preview-distribution-preflight.test.ts test/visual/server.test.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
@@ -807,7 +807,9 @@
 # (g16.108): every fenced ```svelte block in docs/guides/*.md is checked in
 # a throwaway project. Needs network/cache for its first bun install.
 "docs:snippet-check" = "bun packages/svelte/preview/scripts/docs-snippet-check.ts"
+"docs:deps-preflight" = "bun scripts/docs-deps-preflight.ts"
 "docs:check" = [
+  { task = "docs:deps-preflight" },
   { task = "gate:snapshot" },
   { task = "core:build" },
   # Export and docs audits inspect the compiled shell packages. Build their
