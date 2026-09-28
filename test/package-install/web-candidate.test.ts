@@ -3,8 +3,8 @@
 // that partial, stale, source, workflow, registry and native changes fail
 // closed before any build.
 
-import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { afterAll, describe, expect, test, setDefaultTimeout } from "bun:test";
+import { cpSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -20,6 +20,17 @@ import {
 } from "./web-candidate";
 
 const plantRoots: string[] = [];
+let gitTemplate: string | undefined;
+const plantTemplates = new Map<
+  string,
+  { root: string; base: string; frozen: string; head: string }
+>();
+
+// Git-plant cases used to hit bun's default 5s timeout under load (13 of 25
+// failed at Queue's gate; 21/21 passed in 31s at load 32). Reusing one inited
+// git dir and copying completed plants cuts the repeated `git init` work.
+// Measured 2026-09-28 after the copy reuse; timeout is ~4x the slowest case.
+setDefaultTimeout(20_000);
 
 afterAll(() => {
   for (const root of plantRoots) rmSync(root, { recursive: true, force: true });
@@ -51,12 +62,29 @@ async function commitAll(root: string, message: string): Promise<string> {
 }
 
 async function initPlant(): Promise<string> {
+  if (gitTemplate === undefined) {
+    gitTemplate = mkdtempSync(join(tmpdir(), "poodle-web-candidate-git-"));
+    plantRoots.push(gitTemplate);
+    await runGit(gitTemplate, ["init", "--quiet"]);
+    await runGit(gitTemplate, ["config", "user.email", "poodle-certification@example.invalid"]);
+    await runGit(gitTemplate, ["config", "user.name", "Poodle Certification"]);
+  }
   const root = mkdtempSync(join(tmpdir(), "poodle-web-candidate-test-"));
   plantRoots.push(root);
-  await runGit(root, ["init", "--quiet"]);
-  await runGit(root, ["config", "user.email", "poodle-certification@example.invalid"]);
-  await runGit(root, ["config", "user.name", "Poodle Certification"]);
+  cpSync(gitTemplate, root, { recursive: true });
   return root;
+}
+
+function clonePlant(source: {
+  root: string;
+  base: string;
+  frozen: string;
+  head: string;
+}): { root: string; base: string; frozen: string; head: string } {
+  const root = mkdtempSync(join(tmpdir(), "poodle-web-candidate-test-"));
+  plantRoots.push(root);
+  cpSync(source.root, root, { recursive: true });
+  return { root, base: source.base, frozen: source.frozen, head: source.head };
 }
 
 function jsManifests(version: string): Record<string, string> {
@@ -168,6 +196,12 @@ async function plantCandidate(
   target: string,
   options: { frozenExtra?: Record<string, string>; evidenceExtra?: Record<string, string> } = {},
 ): Promise<{ root: string; base: string; frozen: string; head: string }> {
+  const extras = options.frozenExtra !== undefined || options.evidenceExtra !== undefined;
+  if (!extras) {
+    const cached = plantTemplates.get(target);
+    if (cached) return clonePlant(cached);
+  }
+
   const root = await initPlant();
   await writeFiles(root, baseFiles());
   const base = await commitAll(root, "candidate base");
@@ -178,7 +212,9 @@ async function plantCandidate(
     ...(options.evidenceExtra ?? {}),
   });
   const head = await commitAll(root, "candidate evidence");
-  return { root, base, frozen, head };
+  const planted = { root, base, frozen, head };
+  if (!extras) plantTemplates.set(target, planted);
+  return extras ? planted : clonePlant(planted);
 }
 
 describe("web candidate versions", () => {

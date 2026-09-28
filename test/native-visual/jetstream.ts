@@ -1,8 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import pixelmatch from "pixelmatch";
-import { PNG } from "pngjs";
 
+import { applyBaseline } from "./baseline";
 import { repoRoot } from "./config";
 
 /**
@@ -29,7 +28,8 @@ import { repoRoot } from "./config";
  * rendered, then the texture is read back.
  *
  * So the tolerance is a true zero, not a measured noise floor, and there is no
- * retry loop. A difference means the render changed.
+ * retry loop. A difference means the render changed. A specimen with no
+ * baseline fails unless this run is `--update`.
  */
 
 const SNAP_OUT = "/tmp/poodle-specimens";
@@ -78,49 +78,36 @@ runSweep();
 const rendered = readdirSync(SNAP_OUT).filter((f) => f.endsWith(".png")).sort();
 console.log(`  ${rendered.length} specimens rendered`);
 
-let ok = 0;
-let fresh = 0;
+let written = 0;
 const failed: string[] = [];
 
 for (const file of rendered) {
   const shot = readFileSync(path.join(SNAP_OUT, file));
   const baseline = path.join(baselineDir, file);
+  const result = applyBaseline({ file, shot, baselinePath: baseline, update });
 
-  if (update || !existsSync(baseline)) {
-    writeFileSync(baseline, shot);
-    if (update) ok++;
-    else {
-      fresh++;
-      console.log(`  + ${file} — baseline written (was missing)`);
+  if (result.status === "written") {
+    written++;
+    if (result.first) console.log(`  + ${file} — baseline written (was missing)`);
+    continue;
+  }
+  if (result.status === "missing") {
+    failed.push(result.detail);
+    console.log(`  ✗ ${result.detail}`);
+    continue;
+  }
+  if (result.status === "failed") {
+    failed.push(result.detail);
+    if (result.diff) {
+      writeFileSync(path.join(outDir, file.replace(".png", "-diff.png")), result.diff);
     }
+    console.log(`  ✗ ${result.detail}`);
     continue;
   }
-
-  const a = PNG.sync.read(shot);
-  const b = PNG.sync.read(readFileSync(baseline));
-
-  if (a.width !== b.width || a.height !== b.height) {
-    failed.push(`${file} — size ${a.width}x${a.height} vs baseline ${b.width}x${b.height}`);
-    console.log(`  ✗ ${failed.at(-1)}`);
-    continue;
-  }
-
-  const diff = new PNG({ width: a.width, height: a.height });
-  const differing = pixelmatch(a.data, b.data, diff.data, a.width, a.height, { threshold: 0.1 });
-
-  // A true zero: the render is deterministic, so any difference is a change.
-  if (differing > 0) {
-    writeFileSync(path.join(outDir, file.replace(".png", "-diff.png")), PNG.sync.write(diff));
-    const ratio = ((differing / (a.width * a.height)) * 100).toFixed(4);
-    failed.push(`${file} — ${differing} px (${ratio}%)`);
-    console.log(`  ✗ ${failed.at(-1)}`);
-    continue;
-  }
-  ok++;
 }
 
 console.log(`\ncompared ${rendered.length} specimens, ${failed.length} failing`);
-if (fresh > 0) console.log(`${fresh} baseline(s) written for the first time — commit them.`);
+if (written > 0) console.log(`${written} baseline(s) written — commit them.`);
 if (failed.length > 0) {
   console.log(`diffs in ${OUT_DIR}/`);
   process.exit(1);

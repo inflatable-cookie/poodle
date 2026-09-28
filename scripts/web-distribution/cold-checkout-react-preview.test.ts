@@ -243,6 +243,15 @@ afterAll(() => {
 }, CLEANUP_MS);
 
 describe("g16.098 cold-checkout react-preview", () => {
+  test("ci:web includes the cheap docs:check leaves that need no Rust toolchain", () => {
+    const sequence = ciWebSequence(readFileSync(join(repoRoot, "tasks/effigy.tasks.toml"), "utf8"));
+    expect(sequence).toContain("check:gpui-census");
+    expect(sequence).toContain("docs:react-prop-drift");
+    expect(sequence).toContain("docs:value-domain-drift");
+    expect(sequence).not.toContain("docs:snippet-check");
+    expect(sequence).not.toContain("docs:build");
+  });
+
   test("ci:web builds shell packages before test:components and keeps pack-install after them", () => {
     const sequence = ciWebSequence(readFileSync(join(repoRoot, "tasks/effigy.tasks.toml"), "utf8"));
     const svelte = sequence.indexOf("svelte:package");

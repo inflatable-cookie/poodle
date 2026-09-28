@@ -4,16 +4,18 @@ import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
 import { COMPONENT_PROPS, PARITY_EXCLUDE } from "../fixtures/component-props";
+import { sveltePublicComponentNames } from "../fixtures/svelte-public-components";
 
-// Svelte <-> React anatomy parity across EVERY component present in both
+// Svelte <-> React anatomy parity across public components present in both
 // packages. Each side renders with the SAME props and no children (symmetric by
 // construction), then the emitted poodle-* class sets are diffed.
 //
-// The module globs mean new components are gated automatically.
+// The glob loads modules; Svelte membership comes from the package barrels.
 
 const svelteModules = import.meta.glob("../../packages/svelte/components/src/*.svelte", {
   eager: true,
 }) as Record<string, { default: unknown }>;
+const sveltePublicNames = sveltePublicComponentNames();
 
 const reactModules = import.meta.glob("../../packages/react/components/src/*.tsx", {
   eager: true,
@@ -33,7 +35,9 @@ function isReactComponent(comp: unknown): boolean {
 }
 
 const svelteByName = new Map<string, unknown>(
-  Object.entries(svelteModules).map(([f, m]) => [basename(f, ".svelte"), m.default]),
+  Object.entries(svelteModules)
+    .map(([f, m]) => [basename(f, ".svelte"), m.default] as const)
+    .filter(([name]) => sveltePublicNames.has(name)),
 );
 const reactByName = new Map<string, unknown>(
   Object.entries(reactModules)
@@ -71,7 +75,13 @@ function anatomy(root: ParentNode): string[] {
 }
 
 describe("svelte <-> react anatomy parity", () => {
-  it("gates a substantial shared component surface", () => {
+  it("gates the public export surface, not every top-level .svelte file", () => {
+    expect(sveltePublicNames.has("Button")).toBe(true);
+    expect(sveltePublicNames.has("MenuSurface")).toBe(false);
+    expect(svelteByName.has("Button")).toBe(true);
+    expect(svelteByName.has("MenuSurface")).toBe(false);
+    expect(shared).toContain("Button");
+    expect(shared).not.toContain("MenuSurface");
     expect(shared.length).toBeGreaterThan(100);
   });
 

@@ -1,10 +1,12 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, setDefaultTimeout } from "bun:test";
 import {
   deriveLiveRoster,
   generateLedgerMarkdown,
   ledgerComparableText,
+  resolveSourceFile,
   validateLedgerText,
 } from "./parity-evidence-ledger";
 
@@ -133,5 +135,22 @@ describe("g17.001 Nucleus V1 ledger cells", () => {
       expect(row).toContain("compared — validated");
       expect(row).toContain("findings retained as open evidence");
     }
+  });
+});
+
+describe("React source path resolution", () => {
+  it("resolves a file when a same-named directory exists", () => {
+    const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "poodle-ledger-source-"));
+    const src = path.join(fixture, "src");
+    fs.mkdirSync(path.join(src, "tree"), { recursive: true });
+    fs.writeFileSync(path.join(src, "tree", "helper.ts"), "export {};\n");
+    fs.writeFileSync(path.join(src, "Tree.tsx"), "export const Tree = () => null;\n");
+    expect(resolveSourceFile(fixture, "src", "Tree")).toBe("Tree.tsx");
+  });
+
+  it("refuses a directory even when it is the first existing path", () => {
+    const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "poodle-ledger-source-"));
+    fs.mkdirSync(path.join(fixture, "src", "Tree"), { recursive: true });
+    expect(resolveSourceFile(fixture, "src", "Tree")).toBeUndefined();
   });
 });
