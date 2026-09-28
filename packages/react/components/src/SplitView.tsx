@@ -138,7 +138,9 @@ export function SplitView({
         : "100%"
       : primarySize != null
         ? `${primarySize}px`
-        : `${currentRatio * 100}%`;
+        : secondarySize != null
+          ? `calc(100% - ${secondarySize}px)`
+          : `${currentRatio * 100}%`;
 
   // Refs mirror the latest collapse/ratio state for drag handlers, which
   // run outside the render cycle.
@@ -158,7 +160,9 @@ export function SplitView({
     ? secondaryCollapsedSize != null
       ? `0 0 ${secondaryCollapsedSize}px`
       : "0 0 0"
-    : "1 1 0";
+    : secondarySize != null
+      ? `0 0 ${secondarySize}px`
+      : "1 1 0";
   const minSizeProperty = orientation === "horizontal" ? "minWidth" : "minHeight";
   const primaryStyle: CSSProperties = {
     flex: primaryFlex,

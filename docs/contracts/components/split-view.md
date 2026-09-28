@@ -318,8 +318,8 @@ Pane `flex` and `overflow` are applied via inline style:
 | transform | `translate(-50%, -50%)` |
 
 The toggles are a direct child of the root, positioned along
-`--poodle-split-seam` — a CSS length the component computes from the ratio
-and collapse state — never against the divider box, which a collapsed or
+`--poodle-split-seam` — a CSS length the component computes from the ratio,
+fixed pane sizes, and collapse state — never against the divider box, which a collapsed or
 hidden sibling pane can leave degenerate. Fully collapsed panes anchor the
 pill to the viewport edge instead (flat side out; see Toggle visibility in
 §4).
