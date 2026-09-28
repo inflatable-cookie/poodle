@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/block-editor.css";
 import type { ReactNode } from "react";
 import type {
   DragDropCommitResult,

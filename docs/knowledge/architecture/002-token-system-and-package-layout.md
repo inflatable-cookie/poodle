@@ -181,6 +181,13 @@ values.
 - Change token meaning in the DTCG schema, then regenerate all targets.
 - Use semantic tokens in components; reserve primitives for token definitions.
 - Keep web component CSS in `poodle-core` so Svelte and React do not drift.
+- React shells that render a `poodle-*` class must import the core stylesheet
+  that defines it; `effigy drift:react-stylesheets` is the gate.
 - Keep runtime-specific conversion in adapters and backends.
 - Record aliases and deprecations when renaming public token paths.
 - Validate generated outputs before committing a schema change.
+  `effigy audit:tokens` (`--check`) compares every committed file under the
+  token artifact roots, including files the generator no longer emits.
+  Write mode unlinks those orphans under both roots; the core/Svelte mirror
+  copies only files the generator still emits, so an artifact-root orphan
+  cannot be re-homed into the mirror.

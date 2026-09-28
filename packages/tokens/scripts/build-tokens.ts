@@ -2,13 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// `--check` compares what would be written against what is committed instead
-// of overwriting it, mirroring `scripts/build-default-icons.ts --check`.
+// `--check` compares what would be written against what is committed, including
+// files the generator no longer emits, mirroring `scripts/build-default-icons.ts --check`.
 // The generated token artifacts are committed so a clean clone packs a
 // complete tarball with no build step; committing generated source is only
 // safe when something fails if the tree and the generator disagree.
 const checkOnly = process.argv.includes("--check");
 const drift: string[] = [];
+const expected = new Set<string>();
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
@@ -230,8 +231,15 @@ function jsString(value: string): string {
   return JSON.stringify(value);
 }
 
+const repoRoot = path.resolve(tokensDir, "../..");
+
+function rel(filePath: string): string {
+  return path.relative(repoRoot, filePath);
+}
+
 function writeFile(relativePath: string, contents: string): void {
   const filePath = path.join(artifactDir, relativePath);
+  expected.add(filePath);
   if (checkOnly) {
     compare(filePath, contents);
     return;
@@ -247,7 +255,7 @@ function compare(filePath: string, contents: string): void {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
-  if (existing !== contents) drift.push(path.relative(path.resolve(tokensDir, "../.."), filePath));
+  if (existing !== contents) drift.push(rel(filePath));
 }
 
 function copyDir(sourceDir: string, destinationDir: string): void {
@@ -259,12 +267,38 @@ function copyDir(sourceDir: string, destinationDir: string): void {
       copyDir(sourcePath, destinationPath);
       continue;
     }
+    // Only mirror files the generator still emits. Copying an artifact-root
+    // orphan would add its destination to `expected` and leave --check red
+    // after write mode unlinked just the source.
+    if (!expected.has(sourcePath)) continue;
+    expected.add(destinationPath);
     if (checkOnly) {
       compare(destinationPath, fs.readFileSync(sourcePath, "utf8"));
       continue;
     }
     fs.copyFileSync(sourcePath, destinationPath);
   }
+}
+
+function walkFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const files: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...walkFiles(full));
+    else if (entry.isFile()) files.push(full);
+  }
+  return files;
+}
+
+function staleFiles(): string[] {
+  const stale: string[] = [];
+  for (const root of [artifactDir, svelteTokensGeneratedDir]) {
+    for (const file of walkFiles(root)) {
+      if (!expected.has(file)) stale.push(file);
+    }
+  }
+  return stale;
 }
 
 function syncSvelteTokenArtifacts(): void {
@@ -978,11 +1012,15 @@ ${buildTypedRustConstants(semanticEntries, "")}
 `,
 );
 
+const stale = staleFiles();
 if (checkOnly) {
+  for (const file of stale) drift.push(rel(file));
   if (drift.length > 0) {
     throw new Error(
       `Generated token artifacts are stale:\n${[...new Set(drift)].sort().join("\n")}`,
     );
   }
-  console.log(`Verified ${new Set(drift).size === 0 ? "all" : ""} generated token artifacts.`);
+  console.log("Verified all generated token artifacts.");
+} else {
+  for (const file of stale) fs.unlinkSync(file);
 }

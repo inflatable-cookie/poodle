@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/tabs.css";
 import type {
   CrossWindowDragSourceBridge,
   DragDropCommitResult,

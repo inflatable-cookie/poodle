@@ -13,7 +13,7 @@ use std::process::Command;
 
 use poodle_codegen::{
     check_outputs, generate, load_and_validate, targets, write_outputs, CodegenError, DriftKind,
-    GeneratedFile,
+    GeneratedFile, GENERATOR_VERSION,
 };
 
 /// Repo-relative fixture path, exactly as the Effigy selector passes it —
@@ -219,6 +219,31 @@ fn generation_is_independent_of_environment() {
 // reports every drifted path, classifies whitespace-only, detects stale
 // orphans, leaves the worktree unchanged")
 // ---------------------------------------------------------------------------
+
+#[test]
+fn check_detects_stale_generator_version_stamp() {
+    let root = target_root("drift-stamp");
+    let files = write_fixture(&root);
+    let badge = root.join("badge.ts");
+    let contents = fs::read_to_string(&badge).expect("badge exists");
+    let stamped = contents.replace(
+        &format!("poodle-codegen {GENERATOR_VERSION}"),
+        "poodle-codegen 0.0.0-stale",
+    );
+    assert_ne!(contents, stamped, "the planted stamp change is real");
+    fs::write(&badge, stamped).expect("plant stale generator stamp");
+
+    let report = check_outputs(&root, &files).expect("check runs");
+    assert!(!report.is_clean(), "a stale generator stamp fails the gate");
+    assert!(
+        report
+            .drifted
+            .iter()
+            .any(|(path, kind)| path.ends_with("badge.ts") && *kind == DriftKind::Content),
+        "stale generator stamp classifies as content drift: {:?}",
+        report.drifted
+    );
+}
 
 #[test]
 fn check_detects_content_drift_and_reports_every_path() {

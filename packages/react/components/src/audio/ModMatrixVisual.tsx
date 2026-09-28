@@ -1,3 +1,5 @@
+import "@inflatable-cookie/poodle-core/styles/mod-matrix-grid.css";
+import "@inflatable-cookie/poodle-core/styles/slider.css";
 import type { CSSProperties } from "react";
 import type { ModMatrixVisualState } from "@inflatable-cookie/poodle-core";
 

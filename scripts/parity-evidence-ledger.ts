@@ -713,6 +713,19 @@ function expectedMapTable(): string {
   ].join("\n");
 }
 
+function evidenceUpdatedDate(nucleusRows: NucleusReceiptRow[]): string {
+  const days = nucleusRows
+    .map((row) => row.v1Receipt?.lab_bundle.run_id.slice(0, 10))
+    .filter((day): day is string => Boolean(day) && /^\d{4}-\d{2}-\d{2}$/.test(day));
+  days.sort();
+  return days.at(-1) ?? "1970-01-01";
+}
+
+/** Drop the evidence-derived Updated line so reproduction fails on cells, not the header date. */
+export function ledgerComparableText(markdown: string): string {
+  return markdown.replace(/^Updated: \d{4}-\d{2}-\d{2}\n/m, "");
+}
+
 export function generateLedgerMarkdown(root = ROOT): string {
   const nucleusRows = deriveNucleusReceiptRows(root);
   const rows = deriveRows(root, nucleusRows);
@@ -723,7 +736,7 @@ export function generateLedgerMarkdown(root = ROOT): string {
   return `# g16.001 — Active-Cohort Parity Evidence Ledger
 
 Status: current evidence snapshot
-Updated: 2026-09-02
+Updated: ${evidenceUpdatedDate(nucleusRows)}
 Source: live public Svelte exports, generated portable catalogue, runtime registries, focused tests, validated execution receipts, and retained g15 evidence
 
 ## Purpose
@@ -975,7 +988,14 @@ function main(): void {
     return;
   }
 
-  validateLedgerText(fs.readFileSync(ledgerPath, "utf8"), ROOT);
+  const committed = fs.readFileSync(ledgerPath, "utf8");
+  validateLedgerText(committed, ROOT);
+  const generated = generateLedgerMarkdown(ROOT);
+  if (ledgerComparableText(generated) !== ledgerComparableText(committed)) {
+    throw new Error(
+      `${LEDGER_PATH} differs from live evidence. Reproduction ignores the evidence-derived Updated header; a cell change must match generateLedgerMarkdown.`,
+    );
+  }
   console.log(`Validated ${deriveLiveRoster(ROOT).length} component evidence rows in ${LEDGER_PATH}.`);
 }
 

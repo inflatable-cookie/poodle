@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/gain-reduction-meter.css";
 import type { CSSProperties } from "react";
 import type { GainReductionMeterVisualState } from "@inflatable-cookie/poodle-core";
 

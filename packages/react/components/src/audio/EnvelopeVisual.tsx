@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/envelope-editor.css";
 import type { ReactElement } from "react";
 
 import { envelopeSegmentValueAt, type EnvelopeVisualPoint, type EnvelopeVisualState } from "@inflatable-cookie/poodle-core";

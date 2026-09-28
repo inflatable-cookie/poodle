@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/waveform-display.css";
 import type { CSSProperties } from "react";
 import type { WaveformVisualState } from "@inflatable-cookie/poodle-core";
 

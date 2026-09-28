@@ -1,3 +1,5 @@
+import "@inflatable-cookie/poodle-core/styles/model-connection.css";
+import "@inflatable-cookie/poodle-core/styles/icon-button.css";
 import type { KeyboardEvent, ReactNode } from "react";
 import type {
   DragDropCommitResult,

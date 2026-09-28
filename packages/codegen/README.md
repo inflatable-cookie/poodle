@@ -39,13 +39,18 @@ cargo run --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- \
   web-only props are marked in the doc comment.
 - **Check/write split** (ruling R3): `ir:build` writes, `ir:check` compares.
   Gates compose only `*:check` selectors; `ir:build` is never part of a gate.
+  `effigy ci:rust` runs `ir:check` and `catalogue:check` so a `GENERATOR_VERSION`
+  restamp fails the board Queue runs, not only the optional selectors.
 - The remaining targets (JSON schema, registry, conformance vectors, docs
   fragments) are a follow-up card; the machinery here is target-independent.
 
 ## Selectors
 
 - `effigy ir:build` — regenerate the committed artifacts (write mode).
-- `effigy ir:check` — read-only drift gate.
+- `effigy ir:check` — read-only drift gate; `ci:rust` runs it.
+- `effigy catalogue:check` — the catalogue sibling; also on `ci:rust`.
+- `effigy test:codegen-stamp` — planted `GENERATOR_VERSION` restamp. Not on
+  `ci:rust`; a second codegen compile would stack on that board.
 
 ## Tests
 

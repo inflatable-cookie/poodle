@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/xy-pad.css";
 import type { CSSProperties } from "react";
 import type { XYPadVisualState } from "@inflatable-cookie/poodle-core";
 

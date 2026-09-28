@@ -408,6 +408,12 @@ assert(
 
 const taskManifest = read("tasks/effigy.tasks.toml");
 assert(!taskManifest.includes("ci:conformance"), "the stale ci:conformance alias must be removed");
+const ciRustBoard = /"ci:rust"\s*=\s*\[([\s\S]*?)\]/.exec(taskManifest)?.[1] ?? "";
+assert(ciRustBoard.includes("ir:check"), "ci:rust must run ir:check so generator-stamp drift fails on the Queue board");
+assert(
+  ciRustBoard.includes("catalogue:check"),
+  "ci:rust must run catalogue:check so catalogue stamp drift fails on the Queue board",
+);
 assert(
   fs.existsSync(path.join(root, ".github/workflows/ci-conformance.yml")) === false,
   "stale conformance workflow must be deleted",
