@@ -62,3 +62,45 @@ describe("Select listbox Tab in a Popover (svelte)", () => {
     expect(prevented).toBe(true);
   });
 });
+
+describe("nested Popover portal Tab (svelte)", () => {
+  it("routes Tab from a nested portalled surface to its trigger", async () => {
+    const { container } = render(Harness);
+    const triggers = container.querySelectorAll(".poodle-popover__trigger");
+    const nestedTrigger = triggers[1] as HTMLElement;
+    const action = container.querySelector('[data-testid="nested-action"]') as HTMLElement;
+    expect(nestedTrigger).not.toBeUndefined();
+
+    // The nested surface is portalled out of the outer root, but it is a
+    // registered descendant of the outer scope, so the outer routing keeps
+    // the key instead of yielding it to document order. Awaited first: the
+    // mount-time initial-focus microtasks must flush before the key, or
+    // they fire after the redirect and steal focus back.
+    await fireEvent.focus(action);
+    const prevented = await fireEvent.keyDown(action, { key: "Tab" });
+    expect(prevented).toBe(false);
+    expect(document.activeElement).toBe(nestedTrigger);
+  });
+
+  it("routes shift+Tab from a nested portalled surface to its trigger", async () => {
+    const { container } = render(Harness);
+    const nestedTrigger = container.querySelectorAll(".poodle-popover__trigger")[1] as HTMLElement;
+    const action = container.querySelector('[data-testid="nested-action"]') as HTMLElement;
+
+    await fireEvent.focus(action);
+    const prevented = await fireEvent.keyDown(action, { key: "Tab", shiftKey: true });
+    expect(prevented).toBe(false);
+    expect(document.activeElement).toBe(nestedTrigger);
+  });
+
+  it("still passes Tab from the nested trigger through natively", async () => {
+    const { container } = render(Harness);
+    const nestedTrigger = container.querySelectorAll(".poodle-popover__trigger")[1] as HTMLElement;
+
+    // In-surface keys are never routed: the redirect cannot loop back on
+    // itself, so the follow-up key exits freely.
+    await fireEvent.focus(nestedTrigger);
+    const prevented = await fireEvent.keyDown(nestedTrigger, { key: "Tab" });
+    expect(prevented).toBe(true);
+  });
+});

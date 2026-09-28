@@ -31,5 +31,11 @@
     {/snippet}
     <button type="button" data-testid="surface-action">Surface action</button>
     <Select {options} native={false} ariaLabel="Pick" />
+    <Popover defaultOpen={true}>
+      {#snippet trigger()}
+        Nested
+      {/snippet}
+      <button type="button" data-testid="nested-action">Nested action</button>
+    </Popover>
   </Popover>
 </div>

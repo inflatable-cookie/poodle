@@ -162,24 +162,32 @@ export function Popover({
      * falling back into the surface). This is containment, not a trap — the
      * destination is always in-surface, where keys flow natively and no
      * content trap cycles, so exit stays one Tab away and nothing can loop.
-     * In-surface targets and other popovers' surfaces are never touched.
+     * In-surface targets are never touched; neither are other popovers'
+     * surfaces, unless nested inside our own scope as portalled descendants.
      */
     function handleDocumentKeydown(event: KeyboardEvent): void {
       if (event.key !== "Tab") return;
       const target = event.target;
       if (!(target instanceof Node)) return;
-      // Another popover's surface owns the Tabs inside it — nested or
-      // peer — even when that surface is itself one of our portalled
-      // descendants.
-      if (target instanceof Element) {
-        const owner = target.closest(".poodle-popover__surface");
-        if (owner !== null && owner !== surfaceRef.current) return;
-      }
       // In-scope targets keep native flow and content-owned traps.
       if (layerContains(target as Node, rootElement, surfaceRef.current)) return;
-      const home = portalledDescendantsOf(rootElement, surfaceRef.current).find((node) =>
-        node.contains(target),
-      );
+      const portalled = portalledDescendantsOf(rootElement, surfaceRef.current);
+      // A surface that is not ours owns its own keys — a peer, or a nested
+      // popover rendered elsewhere. But a nested popover surface that is
+      // itself one of our portalled descendants stays in our scope: it fell
+      // out of our subtree only through portalling, so Tabs inside it route
+      // home to its anchor exactly like any other portal below.
+      if (target instanceof Element) {
+        const owner = target.closest(".poodle-popover__surface");
+        if (
+          owner !== null &&
+          owner !== surfaceRef.current &&
+          !portalled.includes(owner as HTMLElement)
+        ) {
+          return;
+        }
+      }
+      const home = portalled.find((node) => node.contains(target));
       if (!home) return;
       const anchor = portalAnchorOf(home);
       const destination =

@@ -28,6 +28,11 @@ function renderHarness() {
           Surface action
         </button>
         <Select options={options} native={false} ariaLabel="Pick" />
+        <Popover defaultOpen trigger="Nested">
+          <button type="button" data-testid="nested-action">
+            Nested action
+          </button>
+        </Popover>
       </Popover>
     </div>,
   );
@@ -78,6 +83,46 @@ describe("Select listbox Tab in a Popover (react)", () => {
     // trigger passes through, proving nothing cycles.
     trigger.focus();
     const prevented = fireEvent.keyDown(trigger, { key: "Tab" });
+    expect(prevented).toBe(true);
+  });
+});
+
+describe("nested Popover portal Tab (react)", () => {
+  it("routes Tab from a nested portalled surface to its trigger", () => {
+    const { container } = renderHarness();
+    const triggers = container.querySelectorAll(".poodle-popover__trigger");
+    const nestedTrigger = triggers[1] as HTMLElement;
+    const action = container.querySelector('[data-testid="nested-action"]') as HTMLElement;
+    expect(nestedTrigger).not.toBeUndefined();
+
+    // The nested surface is portalled out of the outer root, but it is a
+    // registered descendant of the outer scope, so the outer routing keeps
+    // the key instead of yielding it to document order.
+    action.focus();
+    const prevented = fireEvent.keyDown(action, { key: "Tab" });
+    expect(prevented).toBe(false);
+    expect(document.activeElement).toBe(nestedTrigger);
+  });
+
+  it("routes shift+Tab from a nested portalled surface to its trigger", () => {
+    const { container } = renderHarness();
+    const nestedTrigger = container.querySelectorAll(".poodle-popover__trigger")[1] as HTMLElement;
+    const action = container.querySelector('[data-testid="nested-action"]') as HTMLElement;
+
+    action.focus();
+    const prevented = fireEvent.keyDown(action, { key: "Tab", shiftKey: true });
+    expect(prevented).toBe(false);
+    expect(document.activeElement).toBe(nestedTrigger);
+  });
+
+  it("still passes Tab from the nested trigger through natively", () => {
+    const { container } = renderHarness();
+    const nestedTrigger = container.querySelectorAll(".poodle-popover__trigger")[1] as HTMLElement;
+
+    // In-surface keys are never routed: the redirect cannot loop back on
+    // itself, so the follow-up key exits freely.
+    nestedTrigger.focus();
+    const prevented = fireEvent.keyDown(nestedTrigger, { key: "Tab" });
     expect(prevented).toBe(true);
   });
 });
