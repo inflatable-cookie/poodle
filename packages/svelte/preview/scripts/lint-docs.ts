@@ -11,7 +11,7 @@ import {
 import { accessibilityAuditTargets } from "../src/accessibility";
 import { containerQueryDriftErrors } from "./container-query-drift";
 import { contractCallbackDrift } from "./contract-callback-drift";
-import { contractPropDrift } from "./contract-prop-drift";
+import { contractDriftErrors, contractPropDrift } from "./contract-prop-drift";
 import { contractSpecDrift } from "./contract-spec-drift";
 import { focusRingDriftErrors } from "./focus-ring-drift";
 
@@ -3096,16 +3096,10 @@ const gpuiCrossRuntimeRouteCounts = validateGpuiCrossRuntimeParityReport(errors)
 const sharedDemoAppAuditCounts = validateSharedDemoAppAudit(errors);
 const sharedDemoAppContractCounts = validateSharedDemoAppContract(errors);
 
-// Contract <-> Svelte prop-surface drift: every documented Public Prop must be
-// implemented in the authoritative Svelte component.
+// Contract <-> Svelte prop-surface drift: share the standalone gate's complete
+// two-direction result, including missing contracts or props tables.
 const contractDriftResult = contractPropDrift();
-for (const f of contractDriftResult.findings) {
-  if (f.contractOnly.length > 0) {
-    errors.push(
-      `contract prop drift: ${f.slug}.md documents prop(s) not implemented in the ${f.slug} Svelte component: ${f.contractOnly.join(", ")}`,
-    );
-  }
-}
+errors.push(...contractDriftErrors(contractDriftResult));
 
 // Contract <-> Svelte callback drift: every callback a component emits must be
 // named in its contract. contract-prop-drift skips `on*` props by design, so

@@ -190,6 +190,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // spec and GPUI channel wait for the next Nucleus evidence repin
   // (`lane:pinned-source-paths`).
   pill: ["dismissible", "dismissLabel"],
+  // Keyboard.computerBaseNote (planner ruling 2026-09-28) is portable
+  // computer-key mapping semantics. Web-admitted pending native until the
+  // headless keyboard machine gains it with the next Nucleus evidence repin
+  // (`lane:pinned-source-paths`).
+  keyboard: ["computerBaseNote"],
 };
 
 /**
