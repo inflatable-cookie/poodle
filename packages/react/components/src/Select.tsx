@@ -327,6 +327,30 @@ export function Select({
     }
   }
 
+  /**
+   * Tab from inside the portalled listbox. A native Tab from an option
+   * would move focus in document order — outside whatever opened the
+   * Select — and leave the listbox dangling open, because the
+   * trigger/input `handleKeydown` above never sees the key. Close the
+   * dropdown (contract: Tab closes without changing value) and return
+   * focus to the combobox control that owns it. A single stop, not a
+   * trap: Tabs from the trigger flow natively, so a non-modal Popover
+   * never traps.
+   */
+  function handleListboxKeydown(event: KeyboardEvent): void {
+    if (event.key !== "Tab" || !stateRef.current.open) {
+      return;
+    }
+
+    event.preventDefault();
+    skipBlurCommit.current = true;
+    dispatch({ type: "CLOSE" });
+    (
+      inputRef.current ??
+      rootElement?.querySelector<HTMLElement>(".poodle-select__trigger")
+    )?.focus();
+  }
+
   function handleClear(event: MouseEvent): void {
     event.stopPropagation();
     dispatch({ type: "CLEAR" });
@@ -664,6 +688,7 @@ export function Select({
           role="listbox"
           aria-label={ariaLabel ?? undefined}
           style={menuMinWidth ? { minWidth: menuMinWidth } : undefined}
+          onKeyDown={handleListboxKeydown}
         >
           {isGrouped && !searchable
             ? normalizedGroups.map((group, gi) =>

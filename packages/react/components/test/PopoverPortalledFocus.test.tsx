@@ -10,11 +10,14 @@ const options = [
 ];
 
 /**
- * The Select listbox portals to the theme root, so Tab from an open
- * listbox never bubbles through the popover surface and no content-level
- * trap can see it. The Popover's document-level trap must hold those keys
- * inside the popover's own scope — trigger, surface, and portalled
- * descendants — for any portalled child, not just this pair.
+ * The Select listbox portals to the theme root, so a native Tab from an
+ * option would move focus in document order — outside the popover — and
+ * leave the listbox dangling open, because the Select trigger/input key
+ * handler never sees the key. The listbox therefore handles Tab itself:
+ * the dropdown closes (contract: Tab closes without changing value) and
+ * focus returns to the combobox trigger inside the popover. A single stop,
+ * not a trap — the popover contract forbids trapping, so Tabs from the
+ * trigger onward flow natively.
  */
 function renderHarness() {
   return render(
@@ -29,51 +32,31 @@ function renderHarness() {
   );
 }
 
-function popoverScope(container: HTMLElement): HTMLElement {
-  const scope = container.querySelector(".poodle-popover") as HTMLElement;
-  if (!scope) throw new Error("popover root did not mount");
-  return scope;
-}
-
-/**
- * The root, the portalled surface, and the portalled listbox together are
- * the popover's scope. The surface and the listbox both live at the theme
- * root, so neither is a descendant of the popover root — and after Tab the
- * Select closes, detaching the listbox while keeping its subtree addressable.
- */
-function inScope(container: HTMLElement, listbox: HTMLElement, node: Node | null): boolean {
-  if (node === null) return false;
-  const surface = document.querySelector(".poodle-popover__surface");
-  return (
-    popoverScope(container).contains(node) ||
-    (surface !== null && surface.contains(node)) ||
-    listbox.contains(node)
-  );
-}
-
-describe("Popover portalled focus trap (react)", () => {
-  it("keeps forward Tab from a portalled listbox inside the popover", () => {
+describe("Select listbox Tab in a Popover (react)", () => {
+  it("closes the listbox and returns focus to the trigger on Tab from an option", () => {
     const { container } = renderHarness();
-    fireEvent.click(container.querySelector(".poodle-select__trigger") as HTMLElement);
+    const trigger = container.querySelector(".poodle-select__trigger") as HTMLElement;
+    fireEvent.click(trigger);
 
     const listbox = document.querySelector('[role="listbox"]') as HTMLElement;
     expect(listbox).not.toBeNull();
-    // Portalled out of the popover root: the trap cannot rely on ancestry.
-    expect(popoverScope(container).contains(listbox)).toBe(false);
+    // Portalled out of the popover root: native Tab would leave the popover.
+    const popover = container.querySelector(".poodle-popover") as HTMLElement;
+    expect(popover.contains(listbox)).toBe(false);
 
     const option = listbox.querySelector('[role="option"]') as HTMLElement;
     option.focus();
-    expect(document.activeElement).toBe(option);
 
     const prevented = fireEvent.keyDown(option, { key: "Tab" });
     expect(prevented).toBe(false);
-    expect(document.activeElement).not.toBe(option);
-    expect(inScope(container, listbox, document.activeElement)).toBe(true);
+    expect(document.querySelector('[role="listbox"]')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
   });
 
-  it("keeps shift+Tab from a portalled listbox inside the popover", () => {
+  it("closes the listbox and returns focus to the trigger on shift+Tab from an option", () => {
     const { container } = renderHarness();
-    fireEvent.click(container.querySelector(".poodle-select__trigger") as HTMLElement);
+    const trigger = container.querySelector(".poodle-select__trigger") as HTMLElement;
+    fireEvent.click(trigger);
 
     const listbox = document.querySelector('[role="listbox"]') as HTMLElement;
     const option = listbox.querySelector('[role="option"]') as HTMLElement;
@@ -81,18 +64,19 @@ describe("Popover portalled focus trap (react)", () => {
 
     const prevented = fireEvent.keyDown(option, { key: "Tab", shiftKey: true });
     expect(prevented).toBe(false);
-    expect(document.activeElement).not.toBe(option);
-    expect(inScope(container, listbox, document.activeElement)).toBe(true);
+    expect(document.querySelector('[role="listbox"]')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
   });
 
-  it("leaves in-surface Tab to the content's own traps", () => {
+  it("does not trap: Tab from the trigger flows natively", () => {
     const { container } = renderHarness();
-    const action = container.querySelector('[data-testid="surface-action"]') as HTMLElement;
-    action.focus();
+    const trigger = container.querySelector(".poodle-select__trigger") as HTMLElement;
+    fireEvent.click(trigger);
+    trigger.focus();
 
-    // Not prevented: the popover only intercepts Tabs from its portalled
-    // descendants, never from inside its own root or surface.
-    const prevented = fireEvent.keyDown(action, { key: "Tab" });
+    // The trigger's own Tab handling closes without preventDefault, so the
+    // key keeps its native pass-through: the non-modal popover never traps.
+    const prevented = fireEvent.keyDown(trigger, { key: "Tab" });
     expect(prevented).toBe(true);
   });
 });
