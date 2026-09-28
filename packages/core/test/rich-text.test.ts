@@ -31,6 +31,7 @@ import {
   validateRichTextFeatures,
   validateRichTextToolbar,
   type ProseMirrorDocumentJSON,
+  type RichTextToolbarCommandItem,
 } from "../src/rich-text.ts";
 import { defaultLucideIconSet } from "../src/icons/generated.ts";
 
@@ -138,9 +139,11 @@ describe("rich-text heading registry", () => {
     ]);
     for (const level of RICH_TEXT_HEADING_LEVELS) {
       const command = richTextHeadingCommand(level);
-      expect(command).toBe(`heading-${level}`);
-      expect(isRichTextHeadingCommand(command as string)).toBe(true);
-      expect(richTextHeadingCommandLevel(command as never)).toBe(level);
+      expect(command).toBe(`heading-${level}` as typeof command);
+      expect(command).not.toBeNull();
+      if (command === null) continue;
+      expect(isRichTextHeadingCommand(command)).toBe(true);
+      expect(richTextHeadingCommandLevel(command)).toBe(level);
       expect(RICH_TEXT_COMMANDS).toContain(command);
     }
     // Out-of-range levels never resolve to a command and stay closed.
@@ -236,7 +239,7 @@ describe("rich-text toolbar projection", () => {
       "heading-5",
     ]);
     const commands = items
-      .filter((item): item is { kind: "command"; command: string } => item.kind === "command")
+      .filter((item): item is RichTextToolbarCommandItem => item.kind === "command")
       .map((item) => item.command);
     expect(commands).toEqual(["undo", "bold", "link", "bullet-list"]);
     const heading = items.find((item) => item.kind === "heading-select");

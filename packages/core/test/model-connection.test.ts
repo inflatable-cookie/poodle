@@ -87,14 +87,16 @@ describe("groupModelConnectionOptions", () => {
 
 describe("modelConnectionOptionSelectable", () => {
   test("only available non-disabled options are selectable", () => {
-    const byId = Object.fromEntries(options.map((option) => [option.id, option])) as Record<
-      string,
-      ModelConnectionOption
-    >;
-    expect(modelConnectionOptionSelectable(byId["openai-responses"])).toBe(true);
-    expect(modelConnectionOptionSelectable(byId["codex-app"])).toBe(false);
-    expect(modelConnectionOptionSelectable(byId["lmstudio-local"])).toBe(false);
-    expect(modelConnectionOptionSelectable(byId["vendor-legacy"])).toBe(false);
+    const byId = Object.fromEntries(options.map((option) => [option.id, option]));
+    const option = (id: string): ModelConnectionOption => {
+      const found = byId[id];
+      if (!found) throw new Error(`missing fixture option ${id}`);
+      return found;
+    };
+    expect(modelConnectionOptionSelectable(option("openai-responses"))).toBe(true);
+    expect(modelConnectionOptionSelectable(option("codex-app"))).toBe(false);
+    expect(modelConnectionOptionSelectable(option("lmstudio-local"))).toBe(false);
+    expect(modelConnectionOptionSelectable(option("vendor-legacy"))).toBe(false);
   });
 });
 

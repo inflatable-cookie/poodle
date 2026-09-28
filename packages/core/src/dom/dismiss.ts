@@ -192,8 +192,9 @@ export function registerDismissLayer(layer: DismissLayer): () => void {
   let parent: DismissLayer | null = null;
   if (host) {
     for (let index = stack.length - 1; index >= 0; index -= 1) {
-      if (stack[index].contains(host as Node)) {
-        parent = stack[index];
+      const candidate = stack[index];
+      if (candidate?.contains(host as Node)) {
+        parent = candidate;
         break;
       }
     }
@@ -214,7 +215,10 @@ export function registerDismissLayer(layer: DismissLayer): () => void {
     stack.splice(insertAt, 0, layer);
     for (let index = insertAt + 1; index < stack.length; index += 1) {
       const existing = stack[index];
-      if (existing.hostElement && layer.contains(existing.hostElement as Node)) {
+      if (
+        existing?.hostElement &&
+        layer.contains(existing.hostElement as Node)
+      ) {
         existing.parent = layer;
       }
     }

@@ -12,6 +12,7 @@ import {
   playWebAnimation,
   tabIndicatorBox,
   nextToastVisuals,
+  type MotionIntent,
 } from "../src/index.ts";
 
 afterEach(() => {
@@ -62,12 +63,12 @@ describe("web motion runtime", () => {
   test("replacing a key does not let the cancelled promise drop the new handle", async () => {
     const holds: Hold[] = [];
     const element = fakeElement((hold) => holds.push(hold));
-    const intent = {
+    const intent: MotionIntent = {
       owner: "owner",
       role: MOTION_ROLE.toastEnter,
       channel: "item",
       target: "enter",
-      properties: ["opacity"] as const,
+      properties: ["opacity"],
       durationMs: MOTION_DURATION_MS.standard,
       reducedOpacity: true,
     };
@@ -160,12 +161,12 @@ describe("web motion runtime", () => {
   test("cancelling a handle cannot erase a synchronous replacement", () => {
     const holds: Hold[] = [];
     const element = fakeElement((hold) => holds.push(hold));
-    const intent = {
+    const intent: MotionIntent = {
       owner: "owner",
       role: MOTION_ROLE.toastEnter,
       channel: "item",
       target: "enter",
-      properties: ["opacity"] as const,
+      properties: ["opacity"],
       durationMs: MOTION_DURATION_MS.standard,
       reducedOpacity: true,
     };

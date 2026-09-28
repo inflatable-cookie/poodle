@@ -8,6 +8,7 @@ import {
 } from "../src/dom/drag-drop-auto-scroll";
 
 function metrics(overrides: Partial<AutoScrollMetrics> = {}): AutoScrollMetrics {
+  const { rect, ...rest } = overrides;
   return {
     scrollTop: 80,
     scrollLeft: 0,
@@ -15,9 +16,8 @@ function metrics(overrides: Partial<AutoScrollMetrics> = {}): AutoScrollMetrics 
     scrollWidth: 200,
     clientHeight: 100,
     clientWidth: 200,
-    rect: { top: 0, right: 200, bottom: 100, left: 0 },
-    ...overrides,
-    rect: overrides.rect ?? { top: 0, right: 200, bottom: 100, left: 0 },
+    ...rest,
+    rect: rect ?? { top: 0, right: 200, bottom: 100, left: 0 },
   };
 }
 

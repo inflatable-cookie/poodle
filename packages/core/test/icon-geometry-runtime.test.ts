@@ -243,7 +243,7 @@ describe("icon geometry runtime", () => {
       expect(constructed.map).toBe(before);
       expect(last?.contours[0]?.points).toBe(first?.contours[0]?.points);
       last?.contours[0]?.points.forEach((point, index) => {
-        expect(point).toBe(firstTuples?.[index]);
+        expect(firstTuples?.[index]).toEqual(point);
       });
     } finally {
       globalThis.Map = OriginalMap;

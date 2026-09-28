@@ -344,10 +344,14 @@ describe("tree reorder authority helpers", () => {
 
   test("refuses an accepted policy that mutates hover target, position, or operation", () => {
     const subject = treeLatchReorderSubject(nodes, "README.md", ["README.md"])!;
-    const hovered = {
+    const hovered: {
+      targetId: string;
+      position: "before" | "after" | "inside";
+      operation: "move" | "copy";
+    } = {
       targetId: "docs",
-      position: "before" as const,
-      operation: "move" as const,
+      position: "before",
+      operation: "move",
     };
     const host = (intent: typeof hovered & { destination?: { targetId: string; position: "before" | "after" | "inside" } }): TreeReorderAuthority => ({
       projectMovingValues: () => subject.movingValues,

@@ -36,7 +36,10 @@ const BARE_TAB = /^\.poodle-tabs__tab$/;
 function parseAttrs(chunk: string): Record<string, string> {
   const attrs: Record<string, string> = {};
   for (const match of chunk.matchAll(ATTR)) {
-    const [name, raw] = match[1].split("=");
+    const captured = match[1];
+    if (!captured) continue;
+    const [name, raw] = captured.split("=");
+    if (!name) continue;
     attrs[name] = (raw ?? "true").replaceAll('"', "");
   }
   return attrs;
@@ -79,11 +82,15 @@ function parseRules(source: string): Rule[] {
   let order = 0;
   for (const block of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const declarations: Declarations = {};
-    for (const declaration of block[2].matchAll(/(background|border|border-color|border-radius)\s*:\s*([^;]+);/g)) {
-      declarations[declaration[1]] = declaration[2].trim().replace(/\s+/g, " ");
+    const body = block[2] ?? "";
+    for (const declaration of body.matchAll(/(background|border|border-color|border-radius)\s*:\s*([^;]+);/g)) {
+      const property = declaration[1];
+      const value = declaration[2];
+      if (!property || value === undefined) continue;
+      declarations[property] = value.trim().replace(/\s+/g, " ");
     }
     if (Object.keys(declarations).length === 0) continue;
-    for (const selector of block[1].split(",")) {
+    for (const selector of (block[1] ?? "").split(",")) {
       const parsed = parseSelector(selector);
       if (parsed) rules.push({ ...parsed, declarations, order: order++ });
     }
