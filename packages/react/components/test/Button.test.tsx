@@ -57,4 +57,17 @@ describe("Button (react)", () => {
     expect(button.style.color).toBe("red");
     expect(button.style.maxWidth).toBe("200px");
   });
+
+  it("passes through native rest attributes the contract does not name as props", () => {
+    const { getByRole } = render(
+      <Button name="action" value="go" role="menuitem" aria-checked="true">
+        Go
+      </Button>,
+    );
+    const button = getByRole("menuitem");
+    expect(button.getAttribute("name")).toBe("action");
+    expect(button.getAttribute("value")).toBe("go");
+    expect(button.getAttribute("role")).toBe("menuitem");
+    expect(button.getAttribute("aria-checked")).toBe("true");
+  });
 });
