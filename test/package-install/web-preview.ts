@@ -44,6 +44,8 @@ import {
   type InstalledScopeMode,
 } from "./scope";
 import { assertWebPreviewScope } from "./web-candidate";
+import { materializeCertificationCheckout } from "./clean-checkout";
+import { outputIncludes } from "./strip-ansi";
 
 const repoRoot = resolve(import.meta.dir, "../..");
 // macOS tmpdir is `/var/folders/...` → `/private/var/folders/...`. tsc
@@ -198,13 +200,13 @@ async function runFromCleanCheckout(): Promise<void> {
   try {
     // Clone through a bare repository so ignored artifacts in this attached
     // worktree cannot become part of the clean certification checkout.
-    await run(["git", "clone", "--quiet", "--bare", commonGitDir, bareRoot], repoRoot);
-    await run(
-      ["git", "-C", bareRoot, "fetch", "--quiet", commonGitDir, requiredBaseCommit, proofCommit],
-      repoRoot,
-    );
-    await run(["git", "clone", "--quiet", "--no-local", bareRoot, checkoutRoot], repoRoot);
-    await run(["git", "checkout", "--quiet", "--detach", proofCommit], checkoutRoot);
+    await materializeCertificationCheckout({
+      sourceGitDir: commonGitDir,
+      bareRoot,
+      checkoutRoot,
+      proofCommit,
+      requiredBaseCommit,
+    });
     const clonedCommit = (await runCapture(["git", "rev-parse", "HEAD"], checkoutRoot)).trim();
     if (clonedCommit !== proofCommit) {
       throw new Error(`clean certification checkout moved from ${proofCommit} to ${clonedCommit}`);
@@ -553,10 +555,13 @@ async function runTypeCompile(
   compiler: string,
   config: string,
 ): Promise<PackedTypeCompile> {
+  const env = { ...globalThis.process.env };
+  delete env.FORCE_COLOR;
   const process = Bun.spawn([compiler, "--project", join(PACKED_TYPE_PROOF_DIR, config)], {
     cwd: consumerRoot,
     stdout: "pipe",
     stderr: "pipe",
+    env,
   });
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(process.stdout).text(),
@@ -618,12 +623,12 @@ async function provePackedHistoryEntryTypes(
         `packed ${negative.importPath} still accepts the retired v2 branchCount field`,
       );
     }
-    if (!compile.output.includes(PACKED_TYPE_PROOF_DIAGNOSTIC)) {
+    if (!outputIncludes(compile.output, PACKED_TYPE_PROOF_DIAGNOSTIC)) {
       throw new Error(
         `packed ${negative.importPath} rejected branchCount with the wrong diagnostic:\n${compile.output}`,
       );
     }
-    if (!compile.output.includes(negative.file)) {
+    if (!outputIncludes(compile.output, negative.file)) {
       throw new Error(
         `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
       );
@@ -730,12 +735,12 @@ async function provePackedSliderVariantTypes(
     if (compile.exitCode === 0) {
       throw new Error(`packed ${negative.importPath} still accepts the removed "standard" variant`);
     }
-    if (!compile.output.includes(PACKED_SLIDER_VARIANT_DIAGNOSTIC)) {
+    if (!outputIncludes(compile.output, PACKED_SLIDER_VARIANT_DIAGNOSTIC)) {
       throw new Error(
         `packed ${negative.importPath} rejected "standard" with the wrong diagnostic:\n${compile.output}`,
       );
     }
-    if (!compile.output.includes(negative.file)) {
+    if (!outputIncludes(compile.output, negative.file)) {
       throw new Error(
         `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
       );
@@ -957,12 +962,12 @@ async function provePackedTreeReorderTypes(
         `packed ${negative.importPath} still accepts reorderAuthority together with onReorder`,
       );
     }
-    if (!compile.output.includes(PACKED_TREE_REORDER_DIAGNOSTIC)) {
+    if (!outputIncludes(compile.output, PACKED_TREE_REORDER_DIAGNOSTIC)) {
       throw new Error(
         `packed ${negative.importPath} rejected the exclusive union with the wrong diagnostic:\n${compile.output}`,
       );
     }
-    if (!compile.output.includes(negative.file)) {
+    if (!outputIncludes(compile.output, negative.file)) {
       throw new Error(
         `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
       );

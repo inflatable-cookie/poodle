@@ -1,7 +1,7 @@
 # Working Rules
 
 Status: active
-Updated: 2026-09-27
+Updated: 2026-09-28
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -257,6 +257,13 @@ work around them:
 - **Testing Library:** `fireEvent.click` dispatches only `click`. Overlay
   dismissal listens on document `mousedown`, so a pointer-commit regression
   dispatches `mousedown` on the real target, then `click`.
+- **TypeScript `tsc`:** with `FORCE_COLOR=1` (Paseo's agent default) it
+  colourises diagnostics, so a plain-string `includes()` of
+  `error TS2339: ...` fails. Strip ANSI at the comparison.
+- **Vite `--strictPort`:** if a configured preview port is taken by a process
+  that is not a healthy preview, the spawn exits and a waiter that only
+  probes HTTP will poll the squatter's 404s until timeout. Check the listen
+  table before spawn, name the occupant, and print the child output on death.
 - **WebKit:** some ports are restricted (for example 4190: "Not allowed to use
   restricted network port"). Browser probes pick a free port outside that
   list, and run one Playwright engine per process.
