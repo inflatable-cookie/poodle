@@ -2,8 +2,6 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode 
 import {
   getFocusableElements,
   layerContains,
-  portalAnchorOf,
-  portalledDescendantsOf,
   popoverParts,
   popoverTransition,
   registerDismissLayer,
@@ -147,63 +145,6 @@ export function Popover({
     if (isOpen) return;
     setResolvedPlacement(placement);
   }, [isOpen, placement]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    /**
-     * Tab from inside one of this popover's own portalled descendants — a
-     * Select listbox opened from content in this surface, or any anchored
-     * overlay a future child portals. The node lives at the theme root, so
-     * the key never bubbles through the surface and no content-level trap
-     * can see it; natively it would leave in document order while the child
-     * stays open. Route it home instead: prevent the pass-through and focus
-     * the control the portal opened from (the anchor's first focusable,
-     * falling back into the surface). This is containment, not a trap — the
-     * destination is always in-surface, where keys flow natively and no
-     * content trap cycles, so exit stays one Tab away and nothing can loop.
-     * In-surface targets are never touched; neither are other popovers'
-     * surfaces, unless nested inside our own scope as portalled descendants.
-     */
-    function handleDocumentKeydown(event: KeyboardEvent): void {
-      if (event.key !== "Tab") return;
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      // In-scope targets keep native flow and content-owned traps.
-      if (layerContains(target as Node, rootElement, surfaceRef.current)) return;
-      const portalled = portalledDescendantsOf(rootElement, surfaceRef.current);
-      // A surface that is not ours owns its own keys — a peer, or a nested
-      // popover rendered elsewhere. But a nested popover surface that is
-      // itself one of our portalled descendants stays in our scope: it fell
-      // out of our subtree only through portalling, so Tabs inside it route
-      // home to its anchor exactly like any other portal below.
-      if (target instanceof Element) {
-        const owner = target.closest(".poodle-popover__surface");
-        if (
-          owner !== null &&
-          owner !== surfaceRef.current &&
-          !portalled.includes(owner as HTMLElement)
-        ) {
-          return;
-        }
-      }
-      const home = portalled.find((node) => node.contains(target));
-      if (!home) return;
-      const anchor = portalAnchorOf(home);
-      const destination =
-        (anchor ? getFocusableElements(anchor as HTMLElement)[0] : undefined) ??
-        getFocusableElements(rootElement)[0] ??
-        getFocusableElements(surfaceRef.current)[0] ??
-        surfaceRef.current;
-      event.preventDefault();
-      destination?.focus();
-    }
-
-    document.addEventListener("keydown", handleDocumentKeydown);
-    return () => {
-      document.removeEventListener("keydown", handleDocumentKeydown);
-    };
-  }, [isOpen, rootElement]);
 
   useEffect(() => {
     if (!isOpen) return;

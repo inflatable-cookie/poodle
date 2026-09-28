@@ -228,12 +228,6 @@ export {
 } from "./dom/dismiss";
 export { createInstanceId } from "./dom/id";
 export {
-  portalAnchorOf,
-  portalledDescendantsOf,
-  registerPortalledSurface,
-  unregisterPortalledSurface,
-} from "./dom/portal";
-export {
   copyOverlayViewportRect,
   equalOverlaySurfaceGeometry,
   observeOverlaySurfaceGeometry,

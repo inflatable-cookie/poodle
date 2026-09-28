@@ -341,30 +341,6 @@
     }
   }
 
-  /**
-   * Tab from inside the portalled listbox. The trigger/input `handleKeydown`
-   * above never sees the key, so without this the dropdown would stay
-   * dangling open while focus leaves in document order. Close the dropdown
-   * (contract: Tab closes without changing value) and return focus to the
-   * combobox control that owns it — focus first, while still open, because
-   * the searchable input reopens on focus when closed. Then let the Tab
-   * pass through natively: a host Popover routes portal-originated Tabs
-   * back into its content, and standalone the key exits from the trigger
-   * exactly like a trigger Tab. No preventDefault here and no blur flag:
-   * any exit commit is governed by the ordinary blur rules, so nothing can
-   * go stale and suppress a later freeform commit.
-   */
-  function handleListboxKeydown(event: KeyboardEvent): void {
-    if (event.key !== "Tab" || !open) {
-      return;
-    }
-
-    const control =
-      inputElement ?? rootElement?.querySelector<HTMLElement>(".poodle-select__trigger");
-    control?.focus();
-    dispatch({ type: "CLOSE" });
-  }
-
   function handleClear(event: MouseEvent): void {
     event.stopPropagation();
     dispatch({ type: "CLEAR" });
@@ -570,10 +546,6 @@
 
     <!-- Dropdown listbox -->
     {#if open}
-      <!-- The listbox handles only bubbled Tab from its options (close and
-           return focus to the trigger); it never takes focus itself, so it
-           carries no tabindex of its own. -->
-      <!-- svelte-ignore a11y_interactive_supports_focus -->
       <div
         bind:this={listboxElement}
         use:anchored={{
@@ -597,7 +569,6 @@
         role="listbox"
         aria-label={ariaLabel ?? undefined}
         style={menuMinWidth ? `min-width: ${menuMinWidth}` : undefined}
-        onkeydown={handleListboxKeydown}
       >
         {#if isGrouped && !searchable}
           {#each normalizedGroups as group}
