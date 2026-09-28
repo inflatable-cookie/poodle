@@ -1,7 +1,7 @@
 # Keyboard
 
 Status: detailed contract
-Updated: 2026-08-11
+Updated: 2026-09-28
 
 ## 1. Purpose
 
@@ -28,6 +28,7 @@ Updated: 2026-08-11
 | `firstNote`, `lastNote` | `number` | `48`, `72` | inclusive MIDI range, clamped to `0..127` |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | vertical is high-to-low, top-to-bottom gutter |
 | `octaveShift` | `number` | `0` | computer-map shift in octaves |
+| `computerBaseNote` | `number` | `60` | base MIDI note for computer-key offsets |
 | `computerKeyMap` | `Record<string, number>` | chromatic A–K map | key to semitone offset |
 | `externalHeldNotes` | `number[]` | `[]` | host highlights; never emit note effects |
 | `disabled` | `boolean` | `false` | releases local notes and blocks input |
