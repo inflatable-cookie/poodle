@@ -88,6 +88,6 @@ export function selectPublicSvelteEntries<T>(
   publicSources: Set<string>,
 ): Array<[string, T]> {
   return Object.entries(modules)
-    .map(([file, mod]) => [file.split("/").pop()!.replace(/\.svelte$/, ""), mod] as const)
+    .map(([file, mod]) => [file.split("/").pop()!.replace(/\.svelte$/, ""), mod] as [string, T])
     .filter(([name]) => publicSources.has(name));
 }
