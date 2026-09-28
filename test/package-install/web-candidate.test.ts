@@ -4,7 +4,7 @@
 // closed before any build.
 
 import { afterAll, describe, expect, test, setDefaultTimeout } from "bun:test";
-import { cpSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -28,19 +28,35 @@ const plantTemplates = new Map<
 
 // Git-plant cases used to hit bun's default 5s timeout under load (13 of 25
 // failed at Queue's gate; pre-optimization 21/21 passed in 31s at load 32).
-// Reusing one inited git dir and copying completed plants cuts the repeated
-// `git init` work. Measured 2026-09-28 with that reuse: ambient load 22–26 →
-// 21/21 in 12.4s, slowest case 5.1s; deliberately loaded host (32 busy loops
-// over ambient ~25, load 73) → 21/21 in 58s, slowest 7.6s. The 20s cap is ~4x
-// the slowest case at the recorded failure load and ~2.6x at that extreme.
+// Reusing one inited git dir cuts the repeated `git init` work, and every
+// duplicate is produced by `git clone --shared` — never a raw copy of a
+// `.git` directory, which races git's own transient lock files: a detached
+// post-commit maintenance left `.git/objects/maintenance.lock` mid-copy and
+// cpSync died with ENOENT in required CI (review of this leaf, 2026-09-28).
+// Measured 2026-09-28 with the clone reuse at ambient load 50–83: 21/21 in
+// 12–15s, slowest case 1.3s — clone is also faster per plant than the copy
+// was (cpSync measured 5.1s idle / 7.6s loaded). The 20s cap keeps ~15x
+// headroom over the loaded slowest case.
 setDefaultTimeout(20_000);
 
 afterAll(() => {
   for (const root of plantRoots) rmSync(root, { recursive: true, force: true });
 });
 
-async function runGit(root: string, args: string[]): Promise<string> {
-  const child = Bun.spawn(["git", "-C", root, ...args], { stdout: "pipe", stderr: "pipe" });
+const GIT_IDENTITY = {
+  GIT_AUTHOR_NAME: "Poodle Certification",
+  GIT_AUTHOR_EMAIL: "poodle-certification@example.invalid",
+  GIT_COMMITTER_NAME: "Poodle Certification",
+  GIT_COMMITTER_EMAIL: "poodle-certification@example.invalid",
+};
+
+async function runGit(cwd: string, args: string[]): Promise<string> {
+  const child = Bun.spawn(["git", ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+    env: { ...process.env, ...GIT_IDENTITY },
+  });
   const [stdout, stderr, exitCode] = await Promise.all([
     new Response(child.stdout).text(),
     new Response(child.stderr).text(),
@@ -64,30 +80,34 @@ async function commitAll(root: string, message: string): Promise<string> {
   return requireExactCommit((await runGit(root, ["rev-parse", "HEAD"])).trim(), "plant commit");
 }
 
+/**
+ * Duplicate a git repository with git itself. Clones share objects through
+ * alternates instead of copying `.git`, so no reader can race a lock file the
+ * source repo's detached maintenance writes and deletes.
+ */
+async function cloneRepo(sourceRoot: string): Promise<string> {
+  const root = mkdtempSync(join(tmpdir(), "poodle-web-candidate-test-"));
+  plantRoots.push(root);
+  await runGit(tmpdir(), ["clone", "--shared", "--quiet", sourceRoot, root]);
+  return root;
+}
+
 async function initPlant(): Promise<string> {
   if (gitTemplate === undefined) {
     gitTemplate = mkdtempSync(join(tmpdir(), "poodle-web-candidate-git-"));
     plantRoots.push(gitTemplate);
     await runGit(gitTemplate, ["init", "--quiet"]);
-    await runGit(gitTemplate, ["config", "user.email", "poodle-certification@example.invalid"]);
-    await runGit(gitTemplate, ["config", "user.name", "Poodle Certification"]);
   }
-  const root = mkdtempSync(join(tmpdir(), "poodle-web-candidate-test-"));
-  plantRoots.push(root);
-  cpSync(gitTemplate, root, { recursive: true });
-  return root;
+  return cloneRepo(gitTemplate);
 }
 
-function clonePlant(source: {
+async function clonePlant(source: {
   root: string;
   base: string;
   frozen: string;
   head: string;
-}): { root: string; base: string; frozen: string; head: string } {
-  const root = mkdtempSync(join(tmpdir(), "poodle-web-candidate-test-"));
-  plantRoots.push(root);
-  cpSync(source.root, root, { recursive: true });
-  return { root, base: source.base, frozen: source.frozen, head: source.head };
+}): Promise<{ root: string; base: string; frozen: string; head: string }> {
+  return { root: await cloneRepo(source.root), base: source.base, frozen: source.frozen, head: source.head };
 }
 
 function jsManifests(version: string): Record<string, string> {

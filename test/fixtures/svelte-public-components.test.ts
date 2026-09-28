@@ -4,36 +4,59 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
-  parseSveltePublicComponentNames,
-  sveltePublicComponentNames,
+  parseSveltePublicComponentExports,
+  selectPublicSvelteEntries,
+  sveltePublicComponentSources,
 } from "./svelte-public-components";
 
-describe("svelte public component names", () => {
-  test("live barrels include public components and exclude internals", () => {
-    const names = sveltePublicComponentNames();
-    expect(names.has("Button")).toBe(true);
-    expect(names.has("MarkdownRenderer")).toBe(true);
-    expect(names.has("CodeEditor")).toBe(true);
-    expect(names.has("RichTextEditor")).toBe(true);
-    expect(names.has("DragDropProvider")).toBe(true);
-    expect(names.has("MenuSurface")).toBe(false);
+describe("svelte public component sources", () => {
+  test("live barrels cover public components and exclude internals", () => {
+    const sources = sveltePublicComponentSources();
+    expect(sources.has("Button")).toBe(true);
+    expect(sources.has("MarkdownRenderer")).toBe(true);
+    expect(sources.has("CodeEditor")).toBe(true);
+    expect(sources.has("RichTextEditor")).toBe(true);
+    expect(sources.has("DragDropProvider")).toBe(true);
+    expect(sources.has("MenuSurface")).toBe(false);
   });
 
   test("a planted top-level .svelte file is not public unless a barrel exports it", () => {
-    const planted = parseSveltePublicComponentNames(
+    const planted = parseSveltePublicComponentExports(
       'export { default as Button } from "./Button.svelte";\n',
     );
-    expect(planted).toEqual(["Button"]);
-    expect(planted).not.toContain("MenuSurface");
-    expect(planted).not.toContain("PlantedInternal");
+    expect(planted).toEqual(new Map([["Button", "Button"]]));
+    expect(planted.has("MenuSurface")).toBe(false);
+    expect(planted.has("PlantedInternal")).toBe(false);
   });
 
-  test("an alias re-export counts as a public component", () => {
-    expect(
-      parseSveltePublicComponentNames(
-        'import Planted from "./Planted.svelte";\nexport { Planted as PlantedPublic };\n',
-      ),
-    ).toEqual(["PlantedPublic"]);
+  test("an alias re-export keeps the implementation file public under its export name", () => {
+    const planted = parseSveltePublicComponentExports(
+      'import Planted from "./Planted.svelte";\nexport { Planted as PlantedPublic };\n',
+    );
+    expect(planted).toEqual(new Map([["PlantedPublic", "Planted"]]));
+  });
+
+  test("a source-module alias re-export maps the export to its file", () => {
+    const planted = parseSveltePublicComponentExports(
+      'export { Renamed as PlantedPublic } from "./Planted.svelte";\nexport { default } from "./Solo.svelte";\n',
+    );
+    expect(planted).toEqual(
+      new Map([
+        ["PlantedPublic", "Planted"],
+        ["Solo", "Solo"],
+      ]),
+    );
+  });
+
+  test("selection keeps a module backed by an alias export and drops internals", () => {
+    const planted = parseSveltePublicComponentExports(
+      'import Planted from "./Planted.svelte";\nexport { Planted as PlantedPublic };\n',
+    );
+    const selected = selectPublicSvelteEntries(
+      { "./src/Planted.svelte": "planted-module", "./src/MenuSurface.svelte": "internal-module" },
+      new Set(planted.values()),
+    );
+    expect(selected).toEqual([["Planted", "planted-module"]]);
   });
 
   test("a planted barrel directory is the authority, not a filename glob", () => {
@@ -47,8 +70,8 @@ describe("svelte public component names", () => {
       writeFileSync(join(root, "packages/svelte/components/src", barrel), "");
     }
     writeFileSync(join(root, "packages/svelte/components/src/PlantedInternal.svelte"), "<div></div>\n");
-    const names = sveltePublicComponentNames(root);
-    expect(names.has("Button")).toBe(true);
-    expect(names.has("PlantedInternal")).toBe(false);
+    const sources = sveltePublicComponentSources(root);
+    expect(sources.has("Button")).toBe(true);
+    expect(sources.has("PlantedInternal")).toBe(false);
   });
 });
