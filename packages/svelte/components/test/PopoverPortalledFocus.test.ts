@@ -5,18 +5,17 @@ import Harness from "./PopoverPortalledFocusHarness.svelte";
 
 /**
  * The Select listbox portals to the theme root, so a Tab from an option
- * never reaches the Select trigger/input key handler: without listbox
- * handling the dropdown would stay dangling open while focus leaves in
- * document order. The listbox therefore handles Tab itself, per the Select
- * contract (Tab closes the dropdown without changing value): it closes,
- * returns focus to the combobox trigger, and lets the Tab pass through
- * natively so it exits the control exactly like a Tab from the trigger.
- * No preventDefault anywhere on this path — the popover contract forbids
- * trapping Tab — and the exit blur consumes the skip-blur flag just like
- * the trigger path, so no later freeform commit is suppressed.
+ * never reaches the Select trigger/input key handler and never bubbles
+ * through the popover surface: natively it would leave in document order
+ * while the dropdown stays dangling open. The Select closes the dropdown
+ * on the key, and the Popover routes portal-originated Tabs home — to the
+ * control the portal opened from — for any portalled child, not just this
+ * pair. Containment, not a trap: the destination is always in-surface,
+ * where keys flow natively, so the follow-up Tab exits freely and nothing
+ * can cycle.
  */
 describe("Select listbox Tab in a Popover (svelte)", () => {
-  it("closes the listbox and returns focus to the trigger on Tab from an option", async () => {
+  it("routes Tab from a portalled option home and closes the listbox", async () => {
     const { container } = render(Harness);
     const trigger = container.querySelector(".poodle-select__trigger") as HTMLButtonElement;
     await fireEvent.click(trigger);
@@ -31,12 +30,12 @@ describe("Select listbox Tab in a Popover (svelte)", () => {
     (option as HTMLElement).focus();
 
     const prevented = await fireEvent.keyDown(option, { key: "Tab" });
-    expect(prevented).toBe(true);
+    expect(prevented).toBe(false);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(document.activeElement).toBe(trigger);
   });
 
-  it("closes the listbox and returns focus to the trigger on shift+Tab from an option", async () => {
+  it("routes shift+Tab from a portalled option home and closes the listbox", async () => {
     const { container } = render(Harness);
     const trigger = container.querySelector(".poodle-select__trigger") as HTMLButtonElement;
     await fireEvent.click(trigger);
@@ -46,19 +45,19 @@ describe("Select listbox Tab in a Popover (svelte)", () => {
     option.focus();
 
     const prevented = await fireEvent.keyDown(option, { key: "Tab", shiftKey: true });
-    expect(prevented).toBe(true);
+    expect(prevented).toBe(false);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(document.activeElement).toBe(trigger);
   });
 
-  it("does not trap: Tab from the trigger flows natively", async () => {
+  it("leaves in-surface Tab alone so the next key exits freely", async () => {
     const { container } = render(Harness);
     const trigger = container.querySelector(".poodle-select__trigger") as HTMLButtonElement;
     await fireEvent.click(trigger);
-    trigger.focus();
 
-    // The trigger's own Tab handling closes without preventDefault, so the
-    // key keeps its native pass-through: the non-modal popover never traps.
+    // The redirect lands in-surface, where keys flow natively: Tab from the
+    // trigger passes through, proving nothing cycles.
+    trigger.focus();
     const prevented = await fireEvent.keyDown(trigger, { key: "Tab" });
     expect(prevented).toBe(true);
   });

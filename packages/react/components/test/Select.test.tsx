@@ -305,33 +305,26 @@ describe("Select (react) semantic machine", () => {
   });
 });
 
-describe("Select (react) listbox Tab blur flag", () => {
+describe("Select (react) listbox Tab freeform commit", () => {
   const inputOf = (container: HTMLElement) =>
     container.querySelector(".poodle-select__input") as HTMLInputElement;
 
-  it("does not let a listbox Tab suppress a later freeform blur commit", () => {
+  it("leaves later freeform blur commits unsuppressed", () => {
     const onValueChange = vi.fn();
     const { container } = render(
       <Select options={options} searchable freeform native={false} onValueChange={onValueChange} />,
     );
 
-    // Type, open the listbox, and Tab out of an option: the dropdown closes
-    // and focus returns to the input. The Tab-exit blur consumes the
-    // skip-blur flag exactly like a trigger Tab does, so the next blur
-    // still commits.
+    // The listbox Tab path arms no blur flag — any exit commit is governed
+    // by the ordinary blur rules — so a later blur still commits.
     fireEvent.focus(inputOf(container));
     // "alp" still matches the alpha option, so the listbox has an option to
-    // Tab out of; the unmatched remainder is what the later blur commits.
+    // Tab out of.
     fireEvent.change(inputOf(container), { target: { value: "alp" } });
     const option = document.querySelector('[role="option"]') as HTMLElement;
     option.focus();
     fireEvent.keyDown(option, { key: "Tab" });
     expect(document.querySelector('[role="listbox"]')).toBeNull();
-
-    fireEvent.blur(container.querySelector(".poodle-select") as HTMLElement, {
-      relatedTarget: document.body,
-    });
-    expect(onValueChange).not.toHaveBeenCalled();
 
     // A freeform commit is inert while a query highlight exists ("alp"
     // highlights alpha), so type past the options before the proving blur.
@@ -340,5 +333,26 @@ describe("Select (react) listbox Tab blur flag", () => {
       relatedTarget: document.body,
     });
     expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["kiwi"]);
+  });
+});
+
+describe("Select (react) standalone listbox Tab", () => {
+  const triggerOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-select__trigger") as HTMLButtonElement;
+
+  it("closes the listbox and passes Tab through natively without a host", () => {
+    const { container } = render(<Select options={options} native={false} />);
+    fireEvent.click(triggerOf(container));
+    expect(document.querySelector('[role="listbox"]')).not.toBeNull();
+
+    // No Popover claims the key, so nothing intercepts it: the dropdown
+    // still closes and focus returns to the trigger, and the key keeps its
+    // native pass-through for the browser to carry out of the control.
+    const option = document.querySelector('[role="option"]') as HTMLElement;
+    option.focus();
+    const prevented = fireEvent.keyDown(option, { key: "Tab" });
+    expect(prevented).toBe(true);
+    expect(document.querySelector('[role="listbox"]')).toBeNull();
+    expect(document.activeElement).toBe(triggerOf(container));
   });
 });

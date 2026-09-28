@@ -346,31 +346,23 @@
    * above never sees the key, so without this the dropdown would stay
    * dangling open while focus leaves in document order. Close the dropdown
    * (contract: Tab closes without changing value) and return focus to the
-   * combobox control that owns it — then let the Tab pass through natively,
-   * so it exits the control exactly like a Tab from the trigger does. No
-   * preventDefault: a non-modal Popover must not trap Tab (contract), and
-   * the exit blur this produces consumes `skipBlurCommit` just like the
-   * trigger path, so the flag can never go stale and suppress a later
-   * freeform commit. The flag is armed only when focus actually landed back
-   * inside the root; otherwise no root focusout can follow to consume it.
+   * combobox control that owns it — focus first, while still open, because
+   * the searchable input reopens on focus when closed. Then let the Tab
+   * pass through natively: a host Popover routes portal-originated Tabs
+   * back into its content, and standalone the key exits from the trigger
+   * exactly like a trigger Tab. No preventDefault here and no blur flag:
+   * any exit commit is governed by the ordinary blur rules, so nothing can
+   * go stale and suppress a later freeform commit.
    */
   function handleListboxKeydown(event: KeyboardEvent): void {
     if (event.key !== "Tab" || !open) {
       return;
     }
 
-    // Focus first, while still open: the searchable input reopens on focus
-    // when closed, so closing first would immediately reopen. Then close
-    // and arm the flag only when focus actually landed back inside the
-    // root; otherwise no root focusout can follow to consume it.
     const control =
       inputElement ?? rootElement?.querySelector<HTMLElement>(".poodle-select__trigger");
     control?.focus();
     dispatch({ type: "CLOSE" });
-
-    if (control && rootElement?.contains(document.activeElement)) {
-      skipBlurCommit = true;
-    }
   }
 
   function handleClear(event: MouseEvent): void {
