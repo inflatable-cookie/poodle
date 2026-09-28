@@ -3,23 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import Accordion from "../src/Accordion.svelte";
 
-// happy-dom lacks the Web Animations API, which the panel's `transition:slide`
-// calls through `element.animate`. Same polyfill precedent as
-// DrawerDismissOutside.svelte.test.ts.
-if (!("animate" in Element.prototype)) {
-  (Element.prototype as unknown as { animate: () => unknown }).animate = () => {
-    const animation = {
-      onfinish: null as (() => void) | null,
-      cancel: () => {},
-      playState: "finished",
-      currentTime: 0,
-      effect: null,
-      finished: Promise.resolve(),
-    };
-    queueMicrotask(() => animation.onfinish?.());
-    return animation;
-  };
-}
+// Web Animations stub comes from the shared test/vitest.setup.ts.
 
 const items = [
   { value: "one", label: "One" },

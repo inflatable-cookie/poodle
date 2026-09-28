@@ -38,24 +38,7 @@ import catalogue from "../../packages/codegen/fixtures/preview-catalogue.json";
 import { SpecimenLayout } from "../../packages/react/preview/src/gallery/SpecimenLayout";
 import { specimenScenes } from "../../packages/react/preview/src/generated/specimens/specimen-scenes";
 
-// Drawer slides/fades out through the Web Animations API (`element.animate`),
-// which happy-dom does not implement. Mirrors the polyfill in the Drawer
-// component tests: the fake fires `onfinish` on the next microtask, after
-// Svelte has attached it, so the outro completes without throwing.
-if (!("animate" in Element.prototype)) {
-  (Element.prototype as unknown as { animate: () => unknown }).animate = () => {
-    const animation = {
-      onfinish: null as (() => void) | null,
-      cancel: () => {},
-      playState: "finished",
-      currentTime: 0,
-      effect: null,
-      finished: Promise.resolve(),
-    };
-    queueMicrotask(() => animation.onfinish?.());
-    return animation;
-  };
-}
+// Web Animations stub comes from the shared test/vitest.setup.ts.
 
 const COMPONENT_SRC = join(import.meta.dirname, "../../packages/svelte/components/src");
 const { components: catalogueComponents } = catalogue as {

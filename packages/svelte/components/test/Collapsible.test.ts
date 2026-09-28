@@ -4,23 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import Collapsible from "../src/Collapsible.svelte";
 import { asSnippet } from "./snippet";
 
-// happy-dom lacks the Web Animations API, which the content's
-// `transition:slide` calls through `element.animate`. Same polyfill precedent
-// as DrawerDismissOutside.svelte.test.ts.
-if (!("animate" in Element.prototype)) {
-  (Element.prototype as unknown as { animate: () => unknown }).animate = () => {
-    const animation = {
-      onfinish: null as (() => void) | null,
-      cancel: () => {},
-      playState: "finished",
-      currentTime: 0,
-      effect: null,
-      finished: Promise.resolve(),
-    };
-    queueMicrotask(() => animation.onfinish?.());
-    return animation;
-  };
-}
+// Web Animations stub comes from the shared test/vitest.setup.ts.
 
 describe("Collapsible (svelte)", () => {
   it("renders content open from defaultOpen and toggles via the trigger", async () => {

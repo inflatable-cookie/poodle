@@ -3,24 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import Drawer from "../src/Drawer.svelte";
 
-// jsdom lacks the Web Animations API, which Svelte 5 transitions call through
-// `element.animate`. Drawer slides/fades out on close, so a close would throw
-// before unmounting. The fake fires `onfinish` on the next microtask — after
-// Svelte has attached it — which drives the outro to completion.
-if (!("animate" in Element.prototype)) {
-  (Element.prototype as unknown as { animate: () => unknown }).animate = () => {
-    const animation = {
-      onfinish: null as (() => void) | null,
-      cancel: () => {},
-      playState: "finished",
-      currentTime: 0,
-      effect: null,
-      finished: Promise.resolve(),
-    };
-    queueMicrotask(() => animation.onfinish?.());
-    return animation;
-  };
-}
+// Web Animations stub comes from the shared test/vitest.setup.ts.
 
 /**
  * `dismissOnOutsideInteract` on a modal drawer. Drawer registers the dismiss
