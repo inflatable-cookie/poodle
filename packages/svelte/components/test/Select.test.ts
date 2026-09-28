@@ -308,3 +308,41 @@ describe("Select (svelte) semantic machine", () => {
     expect(listboxOf(container)).not.toBeNull();
   });
 });
+
+describe("Select (svelte) listbox Tab blur flag", () => {
+  const inputOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-select__input") as HTMLInputElement;
+
+  it("does not let a listbox Tab suppress a later freeform blur commit", async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(Select, {
+      props: { options, searchable: true, freeform: true, native: false, onValueChange },
+    });
+
+    // Type, open the listbox, and Tab out of an option: the dropdown closes
+    // and focus returns to the input. The Tab-exit blur consumes the
+    // skip-blur flag exactly like a trigger Tab does, so the next blur
+    // still commits.
+    await fireEvent.focus(inputOf(container));
+    // "alp" still matches the alpha option, so the listbox has an option to
+    // Tab out of; the unmatched remainder is what the later blur commits.
+    await fireEvent.input(inputOf(container), { target: { value: "alp" } });
+    const option = document.querySelector('[role="option"]') as HTMLElement;
+    option.focus();
+    await fireEvent.keyDown(option, { key: "Tab" });
+    expect(document.querySelector('[role="listbox"]')).toBeNull();
+
+    await fireEvent.focusOut(container.querySelector(".poodle-select") as HTMLElement, {
+      relatedTarget: document.body,
+    });
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    // A freeform commit is inert while a query highlight exists ("alp"
+    // highlights alpha), so type past the options before the proving blur.
+    await fireEvent.input(inputOf(container), { target: { value: "kiwi" } });
+    await fireEvent.focusOut(container.querySelector(".poodle-select") as HTMLElement, {
+      relatedTarget: document.body,
+    });
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["kiwi"]);
+  });
+});

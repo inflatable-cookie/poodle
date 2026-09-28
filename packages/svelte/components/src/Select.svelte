@@ -342,24 +342,35 @@
   }
 
   /**
-   * Tab from inside the portalled listbox. A native Tab from an option
-   * would move focus in document order — outside whatever opened the
-   * Select — and leave the listbox dangling open, because the
-   * trigger/input `handleKeydown` above never sees the key. Close the
-   * dropdown (contract: Tab closes without changing value) and return
-   * focus to the combobox control that owns it. A single stop, not a
-   * trap: Tabs from the trigger flow natively, so a non-modal Popover
-   * never traps.
+   * Tab from inside the portalled listbox. The trigger/input `handleKeydown`
+   * above never sees the key, so without this the dropdown would stay
+   * dangling open while focus leaves in document order. Close the dropdown
+   * (contract: Tab closes without changing value) and return focus to the
+   * combobox control that owns it — then let the Tab pass through natively,
+   * so it exits the control exactly like a Tab from the trigger does. No
+   * preventDefault: a non-modal Popover must not trap Tab (contract), and
+   * the exit blur this produces consumes `skipBlurCommit` just like the
+   * trigger path, so the flag can never go stale and suppress a later
+   * freeform commit. The flag is armed only when focus actually landed back
+   * inside the root; otherwise no root focusout can follow to consume it.
    */
   function handleListboxKeydown(event: KeyboardEvent): void {
     if (event.key !== "Tab" || !open) {
       return;
     }
 
-    event.preventDefault();
-    skipBlurCommit = true;
+    // Focus first, while still open: the searchable input reopens on focus
+    // when closed, so closing first would immediately reopen. Then close
+    // and arm the flag only when focus actually landed back inside the
+    // root; otherwise no root focusout can follow to consume it.
+    const control =
+      inputElement ?? rootElement?.querySelector<HTMLElement>(".poodle-select__trigger");
+    control?.focus();
     dispatch({ type: "CLOSE" });
-    (inputElement ?? rootElement?.querySelector<HTMLElement>(".poodle-select__trigger"))?.focus();
+
+    if (control && rootElement?.contains(document.activeElement)) {
+      skipBlurCommit = true;
+    }
   }
 
   function handleClear(event: MouseEvent): void {

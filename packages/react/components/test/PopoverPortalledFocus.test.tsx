@@ -10,14 +10,16 @@ const options = [
 ];
 
 /**
- * The Select listbox portals to the theme root, so a native Tab from an
- * option would move focus in document order — outside the popover — and
- * leave the listbox dangling open, because the Select trigger/input key
- * handler never sees the key. The listbox therefore handles Tab itself:
- * the dropdown closes (contract: Tab closes without changing value) and
- * focus returns to the combobox trigger inside the popover. A single stop,
- * not a trap — the popover contract forbids trapping, so Tabs from the
- * trigger onward flow natively.
+ * The Select listbox portals to the theme root, so a Tab from an option
+ * never reaches the Select trigger/input key handler: without listbox
+ * handling the dropdown would stay dangling open while focus leaves in
+ * document order. The listbox therefore handles Tab itself, per the Select
+ * contract (Tab closes the dropdown without changing value): it closes,
+ * returns focus to the combobox trigger, and lets the Tab pass through
+ * natively so it exits the control exactly like a Tab from the trigger.
+ * No preventDefault anywhere on this path — the popover contract forbids
+ * trapping Tab — and the exit blur consumes the skip-blur flag just like
+ * the trigger path, so no later freeform commit is suppressed.
  */
 function renderHarness() {
   return render(
@@ -48,7 +50,7 @@ describe("Select listbox Tab in a Popover (react)", () => {
     option.focus();
 
     const prevented = fireEvent.keyDown(option, { key: "Tab" });
-    expect(prevented).toBe(false);
+    expect(prevented).toBe(true);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(document.activeElement).toBe(trigger);
   });
@@ -63,7 +65,7 @@ describe("Select listbox Tab in a Popover (react)", () => {
     option.focus();
 
     const prevented = fireEvent.keyDown(option, { key: "Tab", shiftKey: true });
-    expect(prevented).toBe(false);
+    expect(prevented).toBe(true);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(document.activeElement).toBe(trigger);
   });
