@@ -470,42 +470,43 @@
 
     if (nextPending !== pendingFocusDestination) {
       pendingFocusDestination = nextPending;
-      pendingFocusGeneration += 1;
-      if (focusTransferTimer !== null) {
-        clearTimeout(focusTransferTimer);
-        focusTransferTimer = null;
-      }
-
-      const dest = nextPending;
-      const generation = pendingFocusGeneration;
-      if (dest === null) {
-        return;
-      }
-
-      focusTransferTimer = setTimeout(() => {
-        focusTransferTimer = null;
-        if (destroyed || generation !== pendingFocusGeneration) {
-          return;
+      if (nextPending === null) {
+        pendingFocusGeneration += 1;
+        if (focusTransferTimer !== null) {
+          clearTimeout(focusTransferTimer);
+          focusTransferTimer = null;
         }
-        if (
-          focusOnValueChange !== "selected-tab" ||
-          !isControlled ||
-          currentValue !== dest
-        ) {
+      } else if (focusTransferTimer === null) {
+        pendingFocusGeneration += 1;
+        const generation = pendingFocusGeneration;
+        focusTransferTimer = setTimeout(() => {
+          focusTransferTimer = null;
+          const dest = pendingFocusDestination;
+          if (destroyed || generation !== pendingFocusGeneration) {
+            return;
+          }
+          if (
+            focusOnValueChange !== "selected-tab" ||
+            !isControlled ||
+            dest === null ||
+            currentValue !== dest
+          ) {
+            pendingFocusDestination = null;
+            return;
+          }
+
+          const resolved = resolveTabsControlledFocusDestination({
+            pendingValue: dest,
+            items: renderedItems,
+            alive: !destroyed,
+          });
           pendingFocusDestination = null;
-          return;
-        }
-
-        const resolved = resolveTabsControlledFocusDestination({
-          pendingValue: dest,
-          items: renderedItems,
-          alive: !destroyed,
-        });
-        pendingFocusDestination = null;
-        if (resolved !== null) {
-          tabElements[resolved]?.focus();
-        }
-      }, 0);
+          if (resolved !== null) {
+            tabElements[resolved]?.focus();
+          }
+        }, 0);
+      }
+      // else: pending destination already updated; keep the latched timer.
     }
 
     if (previousValue !== nextValue) {

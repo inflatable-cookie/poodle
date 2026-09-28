@@ -462,8 +462,12 @@ export function Tabs({
     }
 
     pendingFocusDestinationRef.current = nextPending;
+    // Keep the latched clock. Replacing it moves the transfer onto a later
+    // timeout and races any waiter that flushed the original tick.
+    if (focusTransferTimerRef.current !== null) {
+      return;
+    }
     pendingFocusGenerationRef.current += 1;
-    clearFocusTransferTimer();
     const generation = pendingFocusGenerationRef.current;
     focusTransferTimerRef.current = window.setTimeout(() => {
       focusTransferTimerRef.current = null;
