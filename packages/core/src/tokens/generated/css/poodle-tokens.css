@@ -111,6 +111,7 @@
   --poodle-color-background-panel: oklch(from #f7fafd calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
   --poodle-color-background-elevated: oklch(from #fcfdff calc(var(--poodle-contrast-anchor-l) + (l - var(--poodle-contrast-anchor-l)) * var(--poodle-contrast, 0.5)) c h);
   --poodle-color-background-overlay: rgba(11, 15, 20, 0.64);
+  --poodle-color-surface-hover: rgba(148, 163, 184, 0.12);
   --poodle-color-text-primary: #131a22;
   --poodle-color-text-secondary: #314255;
   --poodle-color-text-tertiary: #75869b;

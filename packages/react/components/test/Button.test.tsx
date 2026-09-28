@@ -24,19 +24,27 @@ describe("Button (react)", () => {
     expect(getByRole("button").getAttribute("aria-controls")).toBeNull();
   });
 
-  it("renders formEncType and formMethod attributes", () => {
+  it("renders contract-listed form override attributes", () => {
     const { getByRole } = render(
       <Button
         type="submit"
+        form="checkout"
+        formAction="/submit"
         formEncType="multipart/form-data"
         formMethod="post"
+        formNoValidate
+        formTarget="_blank"
       >
         Submit
       </Button>,
     );
     const button = getByRole("button");
+    expect(button.getAttribute("form")).toBe("checkout");
+    expect(button.getAttribute("formaction")).toBe("/submit");
     expect(button.getAttribute("formenctype")).toBe("multipart/form-data");
     expect(button.getAttribute("formmethod")).toBe("post");
+    expect(button.hasAttribute("formnovalidate")).toBe(true);
+    expect(button.getAttribute("formtarget")).toBe("_blank");
   });
 
   it("renders inline style and combines with maxWidth", () => {

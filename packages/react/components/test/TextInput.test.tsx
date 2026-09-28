@@ -45,6 +45,35 @@ describe("TextInput (react)", () => {
     ref.current?.focus();
     expect(document.activeElement).toBe(input);
   });
+
+  it("passes contract-listed web-native attributes through to the input", () => {
+    const { container } = render(
+      <TextInput
+        id="t1"
+        name="email"
+        autoComplete="email"
+        required
+        pattern=".+@.+"
+        spellCheck={false}
+        autoCapitalize="off"
+        autoCorrect="off"
+        enterKeyHint="send"
+        list="emails"
+        inputMode="email"
+      />,
+    );
+    const input = container.querySelector("input")!;
+    expect(input.getAttribute("name")).toBe("email");
+    expect(input.getAttribute("autocomplete")).toBe("email");
+    expect(input.hasAttribute("required")).toBe(true);
+    expect(input.getAttribute("pattern")).toBe(".+@.+");
+    expect(input.getAttribute("spellcheck")).toBe("false");
+    expect(input.getAttribute("autocapitalize")).toBe("off");
+    expect(input.getAttribute("autocorrect")).toBe("off");
+    expect(input.getAttribute("enterkeyhint")).toBe("send");
+    expect(input.getAttribute("list")).toBe("emails");
+    expect(input.getAttribute("inputmode")).toBe("email");
+  });
 });
 
 /**

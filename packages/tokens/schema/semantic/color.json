@@ -27,6 +27,13 @@
         "$description": "Backdrop scrim."
       }
     },
+    "surface": {
+      "hover": {
+        "$type": "color",
+        "$value": "rgba(148, 163, 184, 0.12)",
+        "$description": "Subtle hover and active-line fill on a surface."
+      }
+    },
     "text": {
       "primary": {
         "$type": "color",
