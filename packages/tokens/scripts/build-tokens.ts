@@ -267,6 +267,10 @@ function copyDir(sourceDir: string, destinationDir: string): void {
       copyDir(sourcePath, destinationPath);
       continue;
     }
+    // Only mirror files the generator still emits. Copying an artifact-root
+    // orphan would add its destination to `expected` and leave --check red
+    // after write mode unlinked just the source.
+    if (!expected.has(sourcePath)) continue;
     expected.add(destinationPath);
     if (checkOnly) {
       compare(destinationPath, fs.readFileSync(sourcePath, "utf8"));

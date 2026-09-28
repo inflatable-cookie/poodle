@@ -1,9 +1,11 @@
 /**
- * Planted orphan coverage for `build-tokens.ts --check`.
+ * Planted orphan coverage for `build-tokens.ts --check` and write mode.
  *
  * `--check` used to compare only files the generator still emits, so a
- * committed artifact the emitter no longer writes stayed green. These tests
- * plant that file in the live artifact roots, then always unlink it.
+ * committed artifact the emitter no longer writes stayed green. Write mode
+ * used to copy an artifact-root orphan into the core/Svelte mirror before
+ * unlinking the source, so `--check` stayed red after regeneration. These
+ * tests plant that file in the live artifact roots, then always unlink it.
  */
 
 import { execFileSync } from "node:child_process";
@@ -26,9 +28,9 @@ afterEach(() => {
   }
 });
 
-function runCheck(): { status: number; output: string } {
+function runScript(args: string[] = []): { status: number; output: string } {
   try {
-    const output = execFileSync("bun", [script, "--check"], {
+    const output = execFileSync("bun", [script, ...args], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -40,6 +42,10 @@ function runCheck(): { status: number; output: string } {
       output: `${execError.stdout?.toString() ?? ""}${execError.stderr?.toString() ?? ""}`,
     };
   }
+}
+
+function runCheck(): { status: number; output: string } {
+  return runScript(["--check"]);
 }
 
 test("a stale committed artifact the generator no longer emits fails --check", () => {
@@ -54,6 +60,16 @@ test("a stale core token mirror the generator no longer emits fails --check", ()
   const result = runCheck();
   expect(result.status).not.toBe(0);
   expect(result.output).toContain("packages/core/src/tokens/generated/css/stale-orphan.css");
+});
+
+test("write mode removes an artifact-root orphan from both roots so --check passes", () => {
+  fs.writeFileSync(planted[0], "/* planted orphan */\n");
+  const write = runScript();
+  expect(write.status).toBe(0);
+  expect(fs.existsSync(planted[0])).toBe(false);
+  expect(fs.existsSync(planted[1])).toBe(false);
+  const result = runCheck();
+  expect(result.status).toBe(0);
 });
 
 test("the live token artifacts pass --check", () => {

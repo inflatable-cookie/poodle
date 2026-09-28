@@ -49,6 +49,8 @@ cargo run --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- \
 - `effigy ir:build` — regenerate the committed artifacts (write mode).
 - `effigy ir:check` — read-only drift gate; `ci:rust` runs it.
 - `effigy catalogue:check` — the catalogue sibling; also on `ci:rust`.
+- `effigy test:codegen-stamp` — planted `GENERATOR_VERSION` restamp. Not on
+  `ci:rust`; a second codegen compile would stack on that board.
 
 ## Tests
 

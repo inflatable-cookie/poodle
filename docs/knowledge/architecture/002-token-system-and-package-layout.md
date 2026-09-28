@@ -188,3 +188,6 @@ values.
 - Validate generated outputs before committing a schema change.
   `effigy audit:tokens` (`--check`) compares every committed file under the
   token artifact roots, including files the generator no longer emits.
+  Write mode unlinks those orphans under both roots; the core/Svelte mirror
+  copies only files the generator still emits, so an artifact-root orphan
+  cannot be re-homed into the mirror.

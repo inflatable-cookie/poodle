@@ -320,5 +320,8 @@ evidence. Use `docs:check` when the task changes public documentation,
 documentation generation, or the docs gate itself. Generated evidence must
 describe the current implementation and must not be edited by hand.
 `ir:check` and `catalogue:check` run on `ci:rust` (they need cargo; they stay
-off `ci:web`). The parity ledger's `Updated` date is derived from Nucleus V1
-lab-run evidence; reproduction compares the body, not that header line.
+off `ci:web`). `test:codegen-stamp` is a focused planted restamp and is not
+on that board: a second codegen compile would stack on `ci:rust`, and
+`ir:check` is the committed-tree gate. The parity ledger's `Updated` date is
+derived from Nucleus V1 lab-run evidence; reproduction compares the body, not
+that header line.
