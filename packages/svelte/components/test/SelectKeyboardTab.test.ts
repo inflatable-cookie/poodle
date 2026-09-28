@@ -4,6 +4,7 @@ import type {
   HistoryContinuation,
   HistoryPathPage,
 } from "@inflatable-cookie/poodle-core";
+import { getFocusableElements } from "@inflatable-cookie/poodle-core";
 
 import HistoryCenterHostHarness from "./HistoryCenterHostHarness.svelte";
 import SelectInDialogHarness from "./SelectInDialogHarness.svelte";
@@ -89,6 +90,36 @@ function openListbox(): HTMLElement {
 // The helpers query `document` globally; isolate like HistoryCenter.test.ts.
 afterEach(cleanup);
 
+/**
+ * A Tab keypress with real focus traversal. happy-dom performs no default
+ * focus movement, so after an uninterrupted key the helper advances focus
+ * to the next tabbable element in document order itself — the sequential
+ * navigation the browser would run, minus `tabindex="-1"` and hidden
+ * inputs, which native Tab skips. Returns whether any handler prevented
+ * the key, in which case focus is left exactly where the handler put it.
+ */
+function tabbables(): HTMLElement[] {
+  return getFocusableElements(document.body).filter(
+    (element) =>
+      element.getAttribute("tabindex") !== "-1" &&
+      !(element instanceof HTMLInputElement && element.type === "hidden"),
+  );
+}
+
+async function pressTab(target: HTMLElement): Promise<boolean> {
+  const prevented = (await fireEvent.keyDown(target, { key: "Tab" })) === false;
+  if (!prevented) {
+    const order = tabbables();
+    const next = order[order.indexOf(document.activeElement as HTMLElement) + 1] ?? null;
+    if (next) {
+      next.focus();
+    } else {
+      (document.activeElement as HTMLElement)?.blur();
+    }
+  }
+  return prevented;
+}
+
 describe("Select keyboard Tab in a trap (svelte)", () => {
   it("closes the HistoryCenter picker on Tab with the pick unchanged and focus in the section", async () => {
     render(HistoryCenterHostHarness, {
@@ -123,16 +154,18 @@ describe("Select keyboard Tab in a trap (svelte)", () => {
       document.querySelector('[role="listbox"] [data-highlighted="true"]'),
     ).not.toBeNull();
 
-    // Non-modal pass-through: the container's own trap governs the key, the
-    // dropdown closes without committing the highlight, and DOM focus never
-    // left the trigger inside the section.
-    const prevented = await fireEvent.keyDown(trigger, { key: "Tab" });
-    expect(prevented).toBe(true);
+    // The section trap passes a mid-list Tab through, so traversal runs: the
+    // dropdown closes without committing the highlight, and real document
+    // order carries focus to the picker's own actions menu — still inside
+    // the section, never out to the page.
+    const prevented = await pressTab(trigger);
+    expect(prevented).toBe(false);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(trigger.textContent).toBe(pickedBefore);
-    expect(document.activeElement).toBe(trigger);
+    const landed = document.activeElement as HTMLElement;
+    expect(landed.classList.contains("poodle-menu__trigger")).toBe(true);
     expect(
-      (document.querySelector(".poodle-history-center") as HTMLElement).contains(trigger),
+      (document.querySelector(".poodle-history-center") as HTMLElement).contains(landed),
     ).toBe(true);
   });
 
@@ -153,13 +186,16 @@ describe("Select keyboard Tab in a trap (svelte)", () => {
       document.querySelector('[role="listbox"] [data-highlighted="true"]'),
     ).not.toBeNull();
 
-    const prevented = await fireEvent.keyDown(trigger, { key: "Tab" });
-    expect(prevented).toBe(true);
+    // Real traversal carries focus to the trailing action — still inside
+    // the dialog surface — while the dropdown closes without committing.
+    const prevented = await pressTab(trigger);
+    expect(prevented).toBe(false);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(onValueChange).not.toHaveBeenCalled();
-    expect(document.activeElement).toBe(trigger);
+    const landed = document.activeElement as HTMLElement;
+    expect(landed.getAttribute("data-testid")).toBe("after-action");
     expect(
-      (document.querySelector(".poodle-dialog__surface") as HTMLElement).contains(trigger),
+      (document.querySelector(".poodle-dialog__surface") as HTMLElement).contains(landed),
     ).toBe(true);
   });
 });

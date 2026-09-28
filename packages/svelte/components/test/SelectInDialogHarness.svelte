@@ -24,5 +24,6 @@
 <div data-poodle-theme-root>
   <Dialog open title="Pick one">
     <Select {options} native={false} ariaLabel="Pick" {onValueChange} />
+    <button type="button" data-testid="after-action">After action</button>
   </Dialog>
 </div>

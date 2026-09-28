@@ -6,6 +6,7 @@ import type {
   HistoryPathPage,
 } from "@inflatable-cookie/poodle-core";
 
+import { getFocusableElements } from "@inflatable-cookie/poodle-core";
 import { Dialog } from "../src/Dialog";
 import { HistoryCenter } from "../src/HistoryCenter";
 import { Select } from "../src/Select";
@@ -104,6 +105,36 @@ function HistoryHost() {
   );
 }
 
+/**
+ * A Tab keypress with real focus traversal. happy-dom performs no default
+ * focus movement, so after an uninterrupted key the helper advances focus
+ * to the next tabbable element in document order itself — the sequential
+ * navigation the browser would run, minus `tabindex="-1"` and hidden
+ * inputs, which native Tab skips. Returns whether any handler prevented
+ * the key, in which case focus is left exactly where the handler put it.
+ */
+function tabbables(): HTMLElement[] {
+  return getFocusableElements(document.body).filter(
+    (element) =>
+      element.getAttribute("tabindex") !== "-1" &&
+      !(element instanceof HTMLInputElement && element.type === "hidden"),
+  );
+}
+
+function pressTab(target: HTMLElement): boolean {
+  const prevented = fireEvent.keyDown(target, { key: "Tab" }) === false;
+  if (!prevented) {
+    const order = tabbables();
+    const next = order[order.indexOf(document.activeElement as HTMLElement) + 1] ?? null;
+    if (next) {
+      next.focus();
+    } else {
+      (document.activeElement as HTMLElement)?.blur();
+    }
+  }
+  return prevented;
+}
+
 function rowByEntry(entryId: string): HTMLElement {
   const row = document.querySelector(
     `[data-row-kind="entry"][data-row-entry="${entryId}"]`,
@@ -142,13 +173,14 @@ describe("Select keyboard Tab in a trap (react)", () => {
     // Non-modal pass-through: the container's own trap governs the key, the
     // dropdown closes without committing the highlight, and DOM focus never
     // left the trigger inside the section.
-    const prevented = fireEvent.keyDown(trigger, { key: "Tab" });
-    expect(prevented).toBe(true);
+    const prevented = pressTab(trigger);
+    expect(prevented).toBe(false);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(trigger.textContent).toBe(pickedBefore);
-    expect(document.activeElement).toBe(trigger);
+    const landed = document.activeElement as HTMLElement;
+    expect(landed.classList.contains("poodle-menu__trigger")).toBe(true);
     expect(
-      (document.querySelector(".poodle-history-center") as HTMLElement).contains(trigger),
+      (document.querySelector(".poodle-history-center") as HTMLElement).contains(landed),
     ).toBe(true);
   });
 
@@ -158,6 +190,9 @@ describe("Select keyboard Tab in a trap (react)", () => {
       <div data-poodle-theme-root>
         <Dialog open title="Pick one">
           <Select options={options} native={false} ariaLabel="Pick" onValueChange={onValueChange} />
+          <button type="button" data-testid="after-action">
+            After action
+          </button>
         </Dialog>
       </div>,
     );
@@ -175,13 +210,14 @@ describe("Select keyboard Tab in a trap (react)", () => {
       document.querySelector('[role="listbox"] [data-highlighted="true"]'),
     ).not.toBeNull();
 
-    const prevented = fireEvent.keyDown(trigger, { key: "Tab" });
-    expect(prevented).toBe(true);
+    const prevented = pressTab(trigger);
+    expect(prevented).toBe(false);
     expect(document.querySelector('[role="listbox"]')).toBeNull();
     expect(onValueChange).not.toHaveBeenCalled();
-    expect(document.activeElement).toBe(trigger);
+    const landed = document.activeElement as HTMLElement;
+    expect(landed.getAttribute("data-testid")).toBe("after-action");
     expect(
-      (document.querySelector(".poodle-dialog__surface") as HTMLElement).contains(trigger),
+      (document.querySelector(".poodle-dialog__surface") as HTMLElement).contains(landed),
     ).toBe(true);
   });
 });
