@@ -2148,7 +2148,7 @@
       "component": "SidebarNav",
       "portable": true,
       "contract": "docs/contracts/components/sidebar-nav.md",
-      "substrate": "drag-resize-reorder",
+      "substrate": "overlay-dismissal",
       "required": [
         "semantic",
         "events",

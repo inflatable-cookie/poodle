@@ -5990,7 +5990,7 @@
       "component": "SidebarNav",
       "portable": true,
       "contract": "docs/contracts/components/sidebar-nav.md",
-      "substrate": "drag-resize-reorder",
+      "substrate": "overlay-dismissal",
       "required": [
         "semantic",
         "events",
@@ -7574,6 +7574,7 @@
         "RemediationBanner",
         "ResizeHandle",
         "SettingsShell",
+        "SidebarNav",
         "Slider",
         "SplitButton",
         "ThemeSelect",
@@ -7585,12 +7586,12 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 32,
-        "events": 36,
-        "pointer": 40,
-        "keyboard_focus": 34,
-        "accessibility": 39,
-        "visual": 42
+        "semantic": 33,
+        "events": 37,
+        "pointer": 41,
+        "keyboard_focus": 35,
+        "accessibility": 40,
+        "visual": 43
       },
       "contracts": [
         "docs/contracts/components/agent-plan-record.md",
@@ -7628,6 +7629,7 @@
         "docs/contracts/components/remediation-banner.md",
         "docs/contracts/components/resize-handle.md",
         "docs/contracts/components/settings-shell.md",
+        "docs/contracts/components/sidebar-nav.md",
         "docs/contracts/components/slider.md",
         "docs/contracts/components/split-button.md",
         "docs/contracts/components/theme-select.md",
@@ -7775,17 +7777,16 @@
         "MarkdownEditor",
         "ModelCatalogueEditor",
         "Separator",
-        "SidebarNav",
         "SplitView",
         "TokenInput"
       ],
       "missingTally": {
-        "semantic": 9,
-        "events": 8,
-        "pointer": 11,
-        "keyboard_focus": 10,
-        "accessibility": 11,
-        "visual": 14
+        "semantic": 8,
+        "events": 7,
+        "pointer": 10,
+        "keyboard_focus": 9,
+        "accessibility": 10,
+        "visual": 13
       },
       "contracts": [
         "docs/contracts/components/app-header.md",
@@ -7801,7 +7802,6 @@
         "docs/contracts/components/markdown-editor.md",
         "docs/contracts/components/model-catalogue-editor.md",
         "docs/contracts/components/separator.md",
-        "docs/contracts/components/sidebar-nav.md",
         "docs/contracts/components/split-view.md",
         "docs/contracts/components/token-input.md"
       ]
