@@ -1,7 +1,7 @@
 # NumberInput
 
 Status: active — g16.030 value/draft/mounted parity on worker PR; awaiting review/merge
-Updated: 2026-09-07
+Updated: 2026-09-28
 
 ## 1. Purpose
 
@@ -46,10 +46,19 @@ old source-specific step callbacks. No alias or compatibility path remains.
 | `validationContext` | `unknown` | `undefined` | host context forwarded to `validate` |
 | `validationState` | `ValidationState` | `"none"` | externally supplied validation presentation |
 | `showSteppers` | `boolean` | `false` | show increment/decrement buttons |
+| `id` | `string` | `""` | input id |
+| `name` | `string \| undefined` | `undefined` | native form name |
+| `placeholder` | `string \| null` | `null` | empty-field hint |
+| `disabled` | `boolean` | `false` | disables editing and stepping |
+| `readOnly` | `boolean` | `false` | prevents value edits while preserving focus and selection |
+| `required` | `boolean` | `false` | native required-field semantics |
+| `ariaLabel` | `string \| null` | `null` | accessible name when no visible label is associated |
+| `describedBy` | `string \| null` | `null` | ids of descriptive elements |
+| `size` | `ControlSize \| null` | `null` | explicit semantic size override |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | semantic role used to resolve inherited size |
+| `density` | `ControlDensity \| null` | `null` | explicit density override |
 
-Standard control props remain `id`, `name`, `placeholder`, `disabled`,
-`readOnly`, `required`, `ariaLabel`, `describedBy`, `size`, `sizeRole`, and
-`density`.
+These control props follow the shared text-input semantics.
 
 `value`, `defaultValue`, `min`, `max`, and `step` do not accept strings.
 Non-finite committed values or bounds, non-positive/non-finite steps,

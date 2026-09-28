@@ -78,6 +78,17 @@ describe("contractProps cell parsing", () => {
     expect([...props].sort()).toEqual(["primaryHidden", "secondaryHidden"]);
   });
 
+  it("finds the prop table by its columns when the heading wording changes", () => {
+    const md = `## Component Surface
+### Inputs Exposed to Consumers
+| Prop | Type | Default |
+| --- | --- | --- |
+| \`renamedHeadingProp\` | boolean | false |`;
+    const { props, found } = contractProps(md);
+    expect(found).toBe(true);
+    expect([...props]).toEqual(["renamedHeadingProp"]);
+  });
+
   it("separates target-specific props from documented ones", () => {
     const md = `### Public Props
 | Prop | Type | Default | Required | Notes |
