@@ -62,6 +62,18 @@ export function svelteBuildSpec(repoRoot: string): PackageBuildSpec {
   };
 }
 
+export function sveltePackagePlugins() {
+  return [
+    svelte({
+      compilerOptions: { css: "external" },
+      onwarn: (warning, handler) => {
+        if (warning.code.startsWith("a11y_")) return;
+        handler(warning);
+      },
+    }),
+  ];
+}
+
 export function assertSvelteManifest(repoRoot: string): void {
   const manifest = JSON.parse(
     readFileSync(join(repoRoot, SVELTE_PACKAGE_DIR, "package.json"), "utf8"),
@@ -129,15 +141,7 @@ export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<Bu
   const sortedClientNames = Object.keys(clientEntries).sort();
   const orderedClientEntries: Record<string, string> = {};
   for (const name of sortedClientNames) orderedClientEntries[name] = clientEntries[name];
-  const plugins = [
-    svelte({
-      compilerOptions: { css: "external" },
-      onwarn: (warning, handler) => {
-        if (warning.code.startsWith("a11y_")) return;
-        handler(warning);
-      },
-    }),
-  ];
+  const plugins = sveltePackagePlugins();
 
   const client = await buildViteLibrary({
     root: packageRoot,

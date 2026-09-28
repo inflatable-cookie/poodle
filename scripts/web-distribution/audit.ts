@@ -19,6 +19,51 @@ export type DistAuditOptions = {
   specifiers?: readonly string[];
 };
 
+export type JavascriptSyntaxError = {
+  line: number;
+  column: number;
+  message: string;
+};
+
+type BunParseIssue = {
+  message?: string;
+  position?: { line?: number; column?: number };
+};
+
+type BunTranspilerHost = {
+  Transpiler: new (options: { loader: "js" }) => { transformSync(source: string): string };
+};
+
+function bunHost(): BunTranspilerHost {
+  const host = (globalThis as { Bun?: BunTranspilerHost }).Bun;
+  if (!host) {
+    throw new Error("staged JavaScript parse requires Bun");
+  }
+  return host;
+}
+
+export function javascriptSyntaxError(source: string): JavascriptSyntaxError | null {
+  try {
+    new (bunHost().Transpiler)({ loader: "js" }).transformSync(source);
+    return null;
+  } catch (error) {
+    const issues = error instanceof AggregateError ? error.errors : [error];
+    for (const issue of issues) {
+      const typed = issue as BunParseIssue;
+      const line = typed.position?.line;
+      const column = typed.position?.column;
+      if (typeof line === "number" && typeof column === "number") {
+        return { line, column, message: typed.message ?? "Parse error" };
+      }
+    }
+    return {
+      line: 1,
+      column: 1,
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
 function walkFiles(root: string): string[] {
   const files: string[] = [];
   const visit = (directory: string) => {
@@ -295,6 +340,14 @@ export function auditStagedDist(options: DistAuditOptions): void {
       const pathHit = absolutePathInSource(bytes);
       if (pathHit) {
         throw new Error(`workspace path leaked into ${distPath}: ${pathHit}`);
+      }
+    }
+    if (distPath.endsWith(".js") || distPath.endsWith(".mjs")) {
+      const syntax = javascriptSyntaxError(bytes);
+      if (syntax) {
+        throw new Error(
+          `invalid JavaScript in ${distPath}:${syntax.line}:${syntax.column}: ${syntax.message}`,
+        );
       }
     }
   }

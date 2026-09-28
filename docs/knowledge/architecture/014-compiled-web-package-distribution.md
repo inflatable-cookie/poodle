@@ -75,6 +75,8 @@ is separate. `@sveltejs/package` output is staging input only: only declaration
 files are copied, never raw `.svelte` files. The distribution toolchain pins
 TypeScript `6.0.3`, the newest supported major for the locked `svelte2tsx`
 emitter; TypeScript 7 returns only after upstream declaration support exists.
+Staged `.js` must parse as JavaScript. A leftover TypeScript optional-parameter
+marker (`function f(id?)`) fails `svelte:package` with the file and line.
 
 The target shape is:
 
@@ -216,6 +218,7 @@ Stop if browser/SSR selects the wrong lane; a client artifact renders through
 diagnostic suppression, or a compatibility alias; `./types` loses runtime or
 declaration reachability; an export is missing or exposes an unreviewed file;
 CSS or parser isolation drifts; declarations/maps/source violate the boundary;
-the declared Svelte floor fails; builds or packs differ; receipt provenance is
-nondeterministic; the roster denominator disagrees; React becomes publishable;
-or any workflow, release, tag, registry, or sibling mutation appears.
+staged JavaScript does not parse; the declared Svelte floor fails; builds or
+packs differ; receipt provenance is nondeterministic; the roster denominator
+disagrees; React becomes publishable; or any workflow, release, tag, registry,
+or sibling mutation appears.

@@ -3,7 +3,8 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, cpSync, rmSync } f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { auditPackageDependencies, auditStagedDist } from "./audit";
+import { auditPackageDependencies, auditStagedDist, javascriptSyntaxError } from "./audit";
+import { sveltePackagePlugins } from "./svelte-build";
 import { CORE_FORBIDDEN_MODULES } from "./core-contract";
 import { readLockedTools } from "./lockfile";
 import { findRepoRoot } from "./core-build";
@@ -357,4 +358,58 @@ describe("web distribution driver", () => {
     expect(isExternalId("./Button.svelte", ["svelte"])).toBe(false);
     expect(isExternalId("/tmp/x.js", ["svelte"])).toBe(false);
   });
+
+  test("leftover TypeScript optional-parameter markers fail the staged JS parse", () => {
+    expect(javascriptSyntaxError("export function f(id) { return id?.length; }\n")).toBeNull();
+    const leftover = javascriptSyntaxError("export function f(id?) { return id; }\n");
+    expect(leftover).toEqual({
+      line: 1,
+      column: 21,
+      message: 'Expected ")" but found "?"',
+    });
+
+    const distDir = fixtureDist();
+    writeFileSync(
+      join(distDir, "index.js"),
+      "const ok = 1;\nexport function f(id?) {\n  return id;\n}\n",
+    );
+    expect(() =>
+      auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
+    ).toThrow(/invalid JavaScript in dist\/index\.js:2:21: Expected "\)" but found "\?"/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("a planted Svelte optional parameter packages as valid JavaScript", async () => {
+    const root = mkdtempSync(join(tmpdir(), "poodle-optional-param-"));
+    mkdirSync(join(root, "src"));
+    writeFileSync(
+      join(root, "src", "Plant.svelte"),
+      `<script lang="ts">
+  function f(id?: number) {
+    return id ?? 0;
+  }
+  const g = (x?: string) => x?.length ?? 0;
+  export { f, g };
+</script>
+`,
+    );
+    writeFileSync(join(root, "src", "index.ts"), `export { default } from "./Plant.svelte";\n`);
+    const distDir = join(root, "dist");
+    mkdirSync(distDir);
+    await buildViteLibrary({
+      root,
+      outDir: distDir,
+      entries: { index: join(root, "src", "index.ts") },
+      fileName: () => "index.js",
+      externals: ["svelte"],
+      plugins: sveltePackagePlugins(),
+    });
+    const packed = readFileSync(join(distDir, "index.js"), "utf8");
+    expect(packed).toMatch(/function f\(id\)/);
+    expect(packed).toMatch(/\(x\)\s*=>/);
+    expect(packed).not.toMatch(/\bid\?[,)]/);
+    expect(packed).not.toMatch(/\bx\?[,)]/);
+    expect(javascriptSyntaxError(packed)).toBeNull();
+    rmSync(root, { recursive: true, force: true });
+  }, 30_000);
 });
