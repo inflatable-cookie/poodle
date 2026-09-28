@@ -6,6 +6,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -35,10 +36,13 @@ const WORKSPACE_ALIAS_LINE_PRESENT =
 
 const RESOLVE_FAILURE = 'Failed to resolve import "@inflatable-cookie/poodle-react"';
 
-// Checkout is a detached worktree, workspace node_modules links, and a core
-// dist copy — not a recursive `find`+`cp -a` of every package store. Vitest
-// runs in its own process group so a timeout SIGKILLs workers instead of
-// spending minutes unwinding them.
+// Checkout is a detached worktree, copies of the small workspace node_modules
+// symlink farms, and a core dist copy — not a recursive `find`+`cp -a` of
+// every package store, and not a directory symlink into the parent. Relative
+// `@inflatable-cookie/*` links must resolve inside the checkout; a parent-dir
+// symlink lets them follow the parent's `packages/react/components/dist`
+// after `react:package`. Vitest runs in its own process group so a timeout
+// SIGKILLs workers instead of spending minutes unwinding them.
 // Measured 2026-09-28 at load 141/143/130: checkout 2.9s, passing suites
 // 15.5s, planted-alias rerun 6.3s, file 27s. The vitest child cap is 120s
 // (~8x the loaded passing run). Each bun:test wrapper is also 120s: checkout
@@ -55,6 +59,7 @@ const childEnv = { ...process.env };
 delete childEnv.FORCE_COLOR;
 
 let coldRoot: string | undefined;
+let restoreParentDist: (() => void) | undefined;
 
 function run(
   command: string,
@@ -125,7 +130,7 @@ function runProcessGroup(
   });
 }
 
-function linkWorkspaceNodeModules(fromRoot: string, toRoot: string): void {
+function copyWorkspaceNodeModules(fromRoot: string, toRoot: string): void {
   const manifest = JSON.parse(readFileSync(join(fromRoot, "package.json"), "utf8")) as {
     workspaces?: string[];
   };
@@ -134,8 +139,28 @@ function linkWorkspaceNodeModules(fromRoot: string, toRoot: string): void {
     if (!existsSync(source)) continue;
     const dest = join(toRoot, rel, "node_modules");
     mkdirSync(dirname(dest), { recursive: true });
-    symlinkSync(source, dest);
+    // `cp -a` keeps relative workspace links (e.g. poodle-react ->
+    // ../../../components) inside the checkout. Symlinking this directory
+    // would resolve those links against the parent, including its dist.
+    const copied = run("cp", ["-a", source, dest], fromRoot, CORE_DIST_COPY_MS);
+    if (copied.status !== 0) {
+      throw new Error(`cp ${rel}/node_modules failed: ${copied.stderr}`);
+    }
   }
+}
+
+function ensureParentReactDist(): () => void {
+  const distDir = join(repoRoot, "packages/react/components/dist");
+  const marker = join(distDir, "index.js");
+  if (existsSync(marker)) {
+    return () => undefined;
+  }
+  mkdirSync(distDir, { recursive: true });
+  writeFileSync(marker, "export default undefined;\n");
+  writeFileSync(join(distDir, "index.d.ts"), "export default undefined;\n");
+  return () => {
+    rmSync(distDir, { recursive: true, force: true });
+  };
 }
 
 function createColdCheckout(): string {
@@ -147,7 +172,7 @@ function createColdCheckout(): string {
   }
   copyFileSync(join(repoRoot, "vitest.config.ts"), join(root, "vitest.config.ts"));
   symlinkSync(join(repoRoot, "node_modules"), join(root, "node_modules"));
-  linkWorkspaceNodeModules(repoRoot, root);
+  copyWorkspaceNodeModules(repoRoot, root);
   const coreDist = join(repoRoot, "packages/core/dist");
   if (!existsSync(coreDist)) {
     throw new Error("packages/core/dist missing; run core:build before this proof");
@@ -213,6 +238,8 @@ afterAll(() => {
     removeColdCheckout(coldRoot);
     coldRoot = undefined;
   }
+  restoreParentDist?.();
+  restoreParentDist = undefined;
 }, CLEANUP_MS);
 
 describe("g16.098 cold-checkout react-preview", () => {
@@ -234,9 +261,18 @@ describe("g16.098 cold-checkout react-preview", () => {
   test(
     "the three react-preview suites pass in a detached worktree with no shell dist",
     async () => {
+      // Second consecutive `ci:web` leaves parent dist from `react:package`.
+      // The negative control must still fail resolve against that state.
+      restoreParentDist = ensureParentReactDist();
       coldRoot = createColdCheckout();
       expect(existsSync(join(coldRoot, "packages/react/components/dist"))).toBe(false);
       expect(existsSync(join(coldRoot, "packages/svelte/components/dist"))).toBe(false);
+      expect(
+        realpathSync(
+          join(coldRoot, "packages/react/preview/node_modules/@inflatable-cookie/poodle-react"),
+        ),
+      ).toBe(realpathSync(join(coldRoot, "packages/react/components")));
+      expect(existsSync(join(repoRoot, "packages/react/components/dist/index.js"))).toBe(true);
       expect(readFileSync(join(coldRoot, "vitest.config.ts"), "utf8")).toMatch(REACT_PREVIEW_ALIAS);
       const result = await runColdSuites(coldRoot);
       expect(result.output, result.output).not.toContain(RESOLVE_FAILURE);
@@ -250,6 +286,7 @@ describe("g16.098 cold-checkout react-preview", () => {
     "removing the react-preview alias fails the same three suites with Failed to resolve import",
     async () => {
       if (!coldRoot) {
+        restoreParentDist ??= ensureParentReactDist();
         coldRoot = createColdCheckout();
       }
       const configPath = join(coldRoot, "vitest.config.ts");
