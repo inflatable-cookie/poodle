@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/keyboard.css";
 import type { CSSProperties } from "react";
 import type { KeyboardVisualState } from "@inflatable-cookie/poodle-core";
 

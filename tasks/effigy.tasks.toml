@@ -14,7 +14,12 @@
 # Generated token artifacts are committed so a clean clone packs a complete
 # tarball with no build step. Committing generated source is only safe when
 # something fails if the tree and the generator disagree -- this is that.
-"audit:tokens" = "bun packages/tokens/scripts/build-tokens.ts --check"
+# `--check` also fails on committed files the generator no longer emits
+# (the Svelte/core mirror already deleted those on write; check used not to).
+"audit:tokens" = [
+  { run = "bun packages/tokens/scripts/build-tokens.ts --check" },
+  { run = "bun test packages/tokens/scripts/build-tokens.test.ts" },
+]
 
 # IR code generation (g13.003; the shell scene is g13.004 card 035). The
 # generated TypeScript under packages/codegen/generated/ is committed for
@@ -634,6 +639,14 @@
 # `draggable`, `DataTransfer`, or local drag index back into any of the seven
 # fails it, and so does a component that reaches no substrate module at all.
 "drift:drag-inventory" = "bun scripts/check-drag-inventory.ts"
+# React shells must import the core stylesheet that defines each poodle-*
+# class they render. Without that import the class is a no-op (the
+# UiPresentationProvider `display: contents` case). Planted missing-import
+# coverage lives beside the gate.
+"drift:react-stylesheets" = [
+  { run = "bun scripts/check-react-stylesheet-imports.ts" },
+  { run = "bun test scripts/check-react-stylesheet-imports.test.ts" },
+]
 # The Jetstream sibling, and stronger: GPUI can only check that a handler field
 # is read, because a real click there needs a live window. Jetstream dispatches
 # clicks with no window, so this demands a test that actually drives one. Also
@@ -684,6 +697,7 @@
   { task = "audit:tokens" },
   { task = "drift:recipes" },
   { task = "drift:drag-inventory" },
+  { task = "drift:react-stylesheets" },
   { task = "test:core" },
   { task = "test:core-build" },
   { task = "test:web-scope" },
@@ -723,7 +737,15 @@
   { task = "report:accessibility" },
   { task = "gate:clean" },
 ]
-"ci:rust" = [{ task = "test:contracts" }]
+# Planted GENERATOR_VERSION restamp; ir:check is the committed-tree gate on ci:rust.
+"test:codegen-stamp" = "cargo test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
+# ir:check / catalogue:check need cargo; they stay off ci:web. A GENERATOR_VERSION
+# restamp that is not regenerated used to pass every board Queue runs.
+"ci:rust" = [
+  { task = "test:contracts" },
+  { task = "ir:check" },
+  { task = "catalogue:check" },
+]
 "ci" = [
   { task = "ci:web" },
   { task = "ci:rust" },

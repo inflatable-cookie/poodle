@@ -1,3 +1,5 @@
+import "@inflatable-cookie/poodle-core/styles/value-readout.css";
+import "@inflatable-cookie/poodle-core/styles/drag-number-field.css";
 import type { ReactElement } from "react";
 
 import type { AudioControlVisualState } from "@inflatable-cookie/poodle-core";

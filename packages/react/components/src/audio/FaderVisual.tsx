@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/fader.css";
 import type { CSSProperties } from "react";
 import type { AudioControlVisualState } from "@inflatable-cookie/poodle-core";
 

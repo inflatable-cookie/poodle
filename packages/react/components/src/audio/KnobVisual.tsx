@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/knob.css";
 import type { CSSProperties } from "react";
 import type { AudioControlVisualState } from "@inflatable-cookie/poodle-core";
 

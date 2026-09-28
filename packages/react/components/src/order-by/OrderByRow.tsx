@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/order-by.css";
 import type { ReactElement } from "react";
 
 import type {

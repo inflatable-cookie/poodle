@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/tree.css";
 import { useLayoutEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
   treeAcceptedDropDepth,

@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/picker-shell.css";
 import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 
 import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";

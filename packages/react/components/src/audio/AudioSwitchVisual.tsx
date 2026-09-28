@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/audio-switch.css";
 import type { CSSProperties } from "react";
 import type { AudioSwitchVisualState } from "@inflatable-cookie/poodle-core";
 

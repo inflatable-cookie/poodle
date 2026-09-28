@@ -1,3 +1,4 @@
+import "@inflatable-cookie/poodle-core/styles/audio-meter.css";
 import type { CSSProperties } from "react";
 import type { AudioMeterVisualState } from "@inflatable-cookie/poodle-core";
 

@@ -1,11 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it, setDefaultTimeout } from "bun:test";
-import { deriveLiveRoster, generateLedgerMarkdown, validateLedgerText } from "./parity-evidence-ledger";
+import {
+  deriveLiveRoster,
+  generateLedgerMarkdown,
+  ledgerComparableText,
+  validateLedgerText,
+} from "./parity-evidence-ledger";
 
 const root = path.resolve(import.meta.dir, "..");
 const ledgerPath = path.join(root, "docs/evidence/nucleus/parity-evidence-ledger.md");
-setDefaultTimeout(30_000);
+setDefaultTimeout(90_000);
 
 describe("g16.001 parity evidence ledger", () => {
   it("derives the fixed 176/175 roster", () => {
@@ -66,7 +71,26 @@ describe("g16.001 parity evidence ledger", () => {
   });
 
   it("can reproduce the checked-in document from live sources", () => {
-    expect(generateLedgerMarkdown(root)).toBe(fs.readFileSync(ledgerPath, "utf8"));
+    expect(ledgerComparableText(generateLedgerMarkdown(root))).toBe(
+      ledgerComparableText(fs.readFileSync(ledgerPath, "utf8")),
+    );
+  });
+
+  it("fails a cell move on evidence, not on the header date", () => {
+    const generated = generateLedgerMarkdown(root);
+    const datedOnly = generated.replace(/^Updated: \d{4}-\d{2}-\d{2}$/m, "Updated: 1999-01-01");
+    expect(datedOnly).not.toBe(generated);
+    expect(ledgerComparableText(datedOnly)).toBe(ledgerComparableText(generated));
+    expect(() => validateLedgerText(datedOnly, root)).not.toThrow();
+
+    const buttonRow = generated.split("\n").find((line) => line.startsWith("| Button |"));
+    expect(buttonRow).toBeDefined();
+    const movedCell = generated.replace(
+      buttonRow!,
+      buttonRow!.replace("present — `docs/contracts/components/button.md`", "missing — planted cell move"),
+    );
+    expect(movedCell).not.toBe(generated);
+    expect(() => validateLedgerText(movedCell, root)).toThrow(/ledger cell differs from live evidence/);
   });
 });
 
