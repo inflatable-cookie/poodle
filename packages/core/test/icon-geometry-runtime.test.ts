@@ -243,7 +243,9 @@ describe("icon geometry runtime", () => {
       expect(constructed.map).toBe(before);
       expect(last?.contours[0]?.points).toBe(first?.contours[0]?.points);
       last?.contours[0]?.points.forEach((point, index) => {
-        expect(firstTuples?.[index]).toEqual(point);
+        // `toBe`, not `toEqual`: reuse means the same tuple object, and deep
+        // equality would pass even if every sample allocated a fresh tuple.
+        expect(firstTuples?.[index]).toBe(point);
       });
     } finally {
       globalThis.Map = OriginalMap;
