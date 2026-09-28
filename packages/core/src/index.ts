@@ -228,6 +228,11 @@ export {
 } from "./dom/dismiss";
 export { createInstanceId } from "./dom/id";
 export {
+  portalledDescendantsOf,
+  registerPortalledSurface,
+  unregisterPortalledSurface,
+} from "./dom/portal";
+export {
   copyOverlayViewportRect,
   equalOverlaySurfaceGeometry,
   observeOverlaySurfaceGeometry,

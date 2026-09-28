@@ -17,10 +17,12 @@ import {
   isAnchorClipped,
   observeAnchorMovement,
   observeOverlaySurfaceGeometry,
+  registerPortalledSurface,
   resolveClipRect,
   resolveOverlayPosition,
   resolveLayerZIndex,
   resolvePortalTarget,
+  unregisterPortalledSurface,
   type AnchorTarget,
   type OverlaySurfaceGeometryChangeHandler,
   type OverlaySurfaceGeometryObserver,
@@ -123,6 +125,17 @@ export const AnchoredSurface = forwardRef<HTMLElement, AnchoredSurfaceProps>(
         resolveLayerZIndex(anchorElement(anchor), Number.isFinite(own) ? own : 0),
       );
     }, [anchor, surface]);
+
+    // The surface left its trigger's subtree, so DOM containment no longer
+    // reflects logical containment. Record the anchor while mounted so focus
+    // traps (Popover) can resolve their portalled descendants.
+    useLayoutEffect(() => {
+      if (!anchor || !surface || !target) return;
+      registerPortalledSurface(surface, anchorElement(anchor));
+      return () => {
+        unregisterPortalledSurface(surface);
+      };
+    }, [anchor, surface, target]);
 
     useLayoutEffect(() => {
       if (!surface) return;

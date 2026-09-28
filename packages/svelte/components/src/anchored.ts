@@ -6,10 +6,12 @@ import {
   isPointAnchorClipped,
   observeAnchorMovement,
   observeOverlaySurfaceGeometry,
+  registerPortalledSurface,
   resolveClipRect,
   resolveOverlayPosition,
   resolveLayerZIndex,
   resolvePortalTarget,
+  unregisterPortalledSurface,
   type AnchorTarget,
   type OverlaySurfaceGeometryChangeHandler,
 } from "@inflatable-cookie/poodle-core";
@@ -173,6 +175,10 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
     node.style.zIndex = String(layered);
 
     target.appendChild(node);
+    // The node left its trigger's subtree, so DOM containment no longer
+    // reflects logical containment. Record the anchor while portalled so
+    // focus traps (Popover) can resolve their portalled descendants.
+    registerPortalledSurface(node, anchorElement(current.anchor));
 
     reposition();
     stopObserving = observeAnchorMovement(current.anchor, node, reposition);
@@ -198,6 +204,10 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
       if (anchorChanged) {
         stopObserving?.();
         stopObserving = observeAnchorMovement(current.anchor, node, reposition);
+
+        if (target) {
+          registerPortalledSurface(node, anchorElement(current.anchor));
+        }
       }
 
       reposition();
@@ -205,6 +215,7 @@ export function anchored(node: HTMLElement, options: AnchoredOptions) {
     destroy() {
       stopObserving?.();
       geometry.destroy();
+      unregisterPortalledSurface(node);
 
       if (target && node.parentNode === target) {
         target.removeChild(node);

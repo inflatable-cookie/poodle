@@ -25,8 +25,13 @@
 }
 
 .poodle-message-center {
-  width: clamp(22rem, 36vw, 28rem);
-  max-width: calc(100vw - 4rem);
+  /* The popover surface owns the width: MessageCenter passes it
+     surfaceMinWidth/surfaceMaxWidth, and the surface adds its own horizontal
+     padding on top. Setting a width here too made the content wider than the
+     surface that contains it, so the header and the row separators spilled
+     past the rounded edge. With no width here the surface sizes to its
+     content between those bounds, which is what the min/max were for. */
+  min-width: 0;
   font-family: var(--poodle-typography-body-family);
   color: var(--poodle-color-text-primary);
 }

@@ -3,6 +3,7 @@
   import {
     getFocusableElements,
     layerContains,
+    portalledDescendantsOf,
     popoverParts,
     popoverTransition,
     registerDismissLayer,
@@ -190,6 +191,86 @@
       }
     }
   }
+
+  /**
+   * Tab from inside a portalled descendant — a Select listbox opened from
+   * content in this surface — never bubbles through the surface, because
+   * the anchored action moved the node to the theme root. No content-level
+   * keydown trap (HistoryCenter's section trap) can see it, so the key
+   * escapes the popover. While open, watch Tab at the document: targets
+   * inside the root or the surface keep their own traps; targets inside
+   * this popover's own portalled descendants cycle over the combined
+   * focusable set instead of leaving. Generic over the child — any
+   * anchored overlay resolves through the portal registry.
+   */
+  function handleDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== "Tab" || !isOpen) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Node)) {
+      return;
+    }
+
+    // Another popover's surface owns the Tabs inside it — nested or peer —
+    // even when that surface is itself one of our portalled descendants.
+    if (target instanceof Element) {
+      const owner = target.closest(".poodle-popover__surface");
+
+      if (owner !== null && owner !== surfaceElement) {
+        return;
+      }
+    }
+
+    // In-surface targets keep their own traps.
+    if (layerContains(target, rootElement, surfaceElement)) {
+      return;
+    }
+
+    const portalled = portalledDescendantsOf(rootElement, surfaceElement);
+
+    if (!portalled.some((node) => node.contains(target))) {
+      return;
+    }
+
+    // The surface registers itself as portalled (its anchor is the root),
+    // so dedupe before sequencing — duplicates would double-step Tabs.
+    const scope = [...new Set([rootElement, surfaceElement, ...portalled])].filter(
+      (element): element is HTMLElement => element !== null,
+    );
+    const focusable = [...new Set(scope.flatMap((element) => getFocusableElements(element)))];
+
+    if (focusable.length === 0) {
+      event.preventDefault();
+      surfaceElement?.focus();
+      return;
+    }
+
+    const index = focusable.indexOf(document.activeElement as HTMLElement);
+    event.preventDefault();
+
+    if (event.shiftKey) {
+      (index <= 0 ? focusable[focusable.length - 1] : focusable[index - 1])?.focus();
+    } else if (index === -1 || index === focusable.length - 1) {
+      focusable[0]?.focus();
+    } else {
+      focusable[index + 1]?.focus();
+    }
+  }
+
+  $effect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    document.addEventListener("keydown", handleDocumentKeydown);
+
+    return () => {
+      document.removeEventListener("keydown", handleDocumentKeydown);
+    };
+  });
 
   $effect(() => {
     if (!isOpen) {

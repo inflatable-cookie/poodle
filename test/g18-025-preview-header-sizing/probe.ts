@@ -75,7 +75,7 @@ async function measureHeader(page: Page): Promise<HeaderMeasure> {
     const picks: Array<[string, string]> = [
       ["theme", ".poodle-theme-select__trigger"],
       ["density", '.poodle-toggle-group[aria-label="Density"] .poodle-toggle-group__item'],
-      ["size", '.poodle-toggle-group[aria-label="Control size"] .poodle-toggle-group__item'],
+      ["size", '.poodle-toggle-group[aria-label="Size"] .poodle-toggle-group__item'],
       ["contrast", ".poodle-slider"],
       ["search", ".poodle-text-input"],
     ];
@@ -148,7 +148,7 @@ function assertFrameworkParity(
 
 async function selectSize(page: Page, framework: string, size: string): Promise<void> {
   await page
-    .locator(`.poodle-toggle-group[aria-label="Control size"] [data-toggle-value="${size}"]`)
+    .locator(`.poodle-toggle-group[aria-label="Size"] [data-toggle-value="${size}"]`)
     .click();
   // The selection must reach app state: the top bar's size pill shows it.
   const pill = page.locator(".poodle-app-top-bar__pills .poodle-pill").nth(2);

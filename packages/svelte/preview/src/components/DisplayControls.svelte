@@ -123,7 +123,7 @@
         <ToggleGroup
           value={controlSize}
           options={controlSizeOptions}
-          ariaLabel="Control size"
+          ariaLabel={sizeControl.label}
           onValueChange={(value) => onControlSizeChange(value as string)}
         />
       </div>
@@ -137,7 +137,7 @@
           min={contrastControl.min}
           max={contrastControl.max}
           step={0.05}
-          ariaLabel="Neutral contrast"
+          ariaLabel={contrastControl.label}
           valueText={`${contrast.toFixed(2)}x`}
           onValueChange={(value) => onContrastChange(value)}
         />
@@ -151,7 +151,7 @@
           type="search"
           placeholder={searchControl.placeholder}
           value={search}
-          ariaLabel="Search components"
+          ariaLabel={searchControl.label}
           onValueChange={onSearchChange}
           onClear={() => onSearchChange("")}
         />

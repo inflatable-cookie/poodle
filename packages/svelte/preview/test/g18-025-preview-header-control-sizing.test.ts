@@ -11,7 +11,7 @@ import Harness from "./HeaderSizingHarness.svelte";
  */
 
 function sizeGroup(container: HTMLElement): HTMLElement {
-  const group = container.querySelector<HTMLElement>('.poodle-toggle-group[aria-label="Control size"]');
+  const group = container.querySelector<HTMLElement>('.poodle-toggle-group[aria-label="Size"]');
   if (!group) throw new Error("size ToggleGroup did not mount");
   return group;
 }
