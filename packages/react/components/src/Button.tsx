@@ -1,4 +1,11 @@
-import { useState, type CSSProperties, type FocusEvent, type MouseEvent, type ReactNode } from "react";
+import {
+  useState,
+  type ButtonHTMLAttributes,
+  type CSSProperties,
+  type FocusEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 
 import "@inflatable-cookie/poodle-core/styles/button.css";
 
@@ -24,7 +31,25 @@ import type {
  * `packages/svelte/components/src/Button.svelte`; the Rust counterpart is
  * `poodle_specs::ButtonSpec`.
  */
-export interface ButtonProps {
+type NativeButtonRest = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  | "type"
+  | "disabled"
+  | "style"
+  | "className"
+  | "onClick"
+  | "onFocus"
+  | "onBlur"
+  | "children"
+  | "form"
+  | "formAction"
+  | "formEncType"
+  | "formMethod"
+  | "formNoValidate"
+  | "formTarget"
+>;
+
+export interface ButtonProps extends NativeButtonRest {
   variant?: ButtonVariant;
   tone?: ButtonTone;
   size?: ControlSize | null;
@@ -102,6 +127,7 @@ export function Button({
   children,
   leading,
   trailing,
+  ...rest
 }: ButtonProps) {
   const uiPresentation = useUiPresentation();
   const [uncontrolledPressed, setUncontrolledPressed] = useState(defaultPressed === true);
@@ -135,6 +161,7 @@ export function Button({
 
   return (
     <button
+      {...rest}
       type={type}
       form={form ?? undefined}
       formAction={formAction ?? undefined}

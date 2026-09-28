@@ -36,6 +36,22 @@ describe("TextInput (svelte)", () => {
     (component as unknown as { focus: () => void }).focus();
     expect(document.activeElement).toBe(input);
   });
+
+  it("passes required, inputMode, and enterKeyHint through to the textarea in multiline mode", () => {
+    const { container } = render(TextInput, {
+      props: {
+        id: "t1",
+        type: "multiline",
+        required: true,
+        enterKeyHint: "send",
+        inputMode: "text",
+      },
+    });
+    const textarea = container.querySelector("textarea")!;
+    expect(textarea.hasAttribute("required")).toBe(true);
+    expect(textarea.getAttribute("enterkeyhint")).toBe("send");
+    expect(textarea.getAttribute("inputmode")).toBe("text");
+  });
 });
 
 /**

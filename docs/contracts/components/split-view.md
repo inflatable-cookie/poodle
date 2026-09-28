@@ -1,7 +1,7 @@
 # SplitView
 
 Status: detailed contract
-Updated: 2026-08-21
+Updated: 2026-09-28
 
 ## 1. Purpose
 
@@ -318,8 +318,8 @@ Pane `flex` and `overflow` are applied via inline style:
 | transform | `translate(-50%, -50%)` |
 
 The toggles are a direct child of the root, positioned along
-`--poodle-split-seam` — a CSS length the component computes from the ratio
-and collapse state — never against the divider box, which a collapsed or
+`--poodle-split-seam` — a CSS length the component computes from the ratio,
+fixed pane sizes, and collapse state — never against the divider box, which a collapsed or
 hidden sibling pane can leave degenerate. Fully collapsed panes anchor the
 pill to the viewport edge instead (flat side out; see Toggle visibility in
 §4).
@@ -343,9 +343,9 @@ wins and a disabled hover-reveal split shows its dimmed pill permanently.
 | `[data-toggle-visibility="hover"][data-primary-collapsed] .split-view__toggles`, `[data-toggle-visibility="hover"][data-secondary-collapsed] .split-view__toggles` | `--poodle-split-toggles-reveal: 1`; `pointer-events: auto` |
 | `@media (prefers-reduced-motion: reduce)` | `transition: none` |
 
-Two reveal selectors cover the two anatomies: the sibling combinator for the
-toggles as a root sibling of the divider (Svelte), the descendant form for
-the toggles nested inside it (React).
+Two reveal selectors cover both anatomies: the sibling combinator for the
+toggles as a root sibling of the divider, and the descendant form for a
+nested pill. Web runtimes use the root-sibling anatomy.
 
 #### Toggles Disabled
 
@@ -501,7 +501,7 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| The zero-footprint seam (default off) is shared by the web targets; React still lacks the `divider` opt-in and the root `--poodle-split-seam` anchoring, and the natives still paint the divider line | the seam behavior was proven in the Svelte host first; React matches the default-off anatomy but not the opt-in or the collapsed-pane seam tracking | pending review | port the `divider` opt-in and seam anchoring to React, and the default-off to the natives, when one is next touched |
+| The zero-footprint seam (default off) is shared by the web targets; the natives still paint the divider line | the seam behavior was proven in the Svelte host first and React now matches the opt-in, `--poodle-split-seam` anchoring, and collapsed-pane seam tracking | pending review | port the default-off seam to the natives when one is next touched |
 | The both-collapsed expand-toggle rule is web parity | the trap was proven against the Svelte host and the React mirror now matches; the natives hide both toggles when both panes are collapsed | pending review | port to the natives with the seam work |
 | The natives' hover-reveal zone is the toggle cluster's own bounds, not the divider's grab strip — the pointer must reach the pill rather than the seam around it | the shared render tier has no absolute positioning for the cluster, so it sits inline beside the handle rather than overlaying it; there is no "hovering a sibling reveals me" primitive in the node vocabulary | pending review | widen when the node vocabulary gains group-hover |
 | The natives have no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no accessibility/focus routing for the split, and Jetstream's focus does not feed the hover patch | pending review | revisit with native keyboard resize |

@@ -7,6 +7,7 @@ pub const COLOR_BACKGROUND_SURFACE: &str = "color.background.surface";
 pub const COLOR_BACKGROUND_PANEL: &str = "color.background.panel";
 pub const COLOR_BACKGROUND_ELEVATED: &str = "color.background.elevated";
 pub const COLOR_BACKGROUND_OVERLAY: &str = "color.background.overlay";
+pub const COLOR_SURFACE_HOVER: &str = "color.surface.hover";
 pub const COLOR_TEXT_PRIMARY: &str = "color.text.primary";
 pub const COLOR_TEXT_SECONDARY: &str = "color.text.secondary";
 pub const COLOR_TEXT_TERTIARY: &str = "color.text.tertiary";

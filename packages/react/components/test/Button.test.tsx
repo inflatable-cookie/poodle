@@ -24,19 +24,27 @@ describe("Button (react)", () => {
     expect(getByRole("button").getAttribute("aria-controls")).toBeNull();
   });
 
-  it("renders formEncType and formMethod attributes", () => {
+  it("renders contract-listed form override attributes", () => {
     const { getByRole } = render(
       <Button
         type="submit"
+        form="checkout"
+        formAction="/submit"
         formEncType="multipart/form-data"
         formMethod="post"
+        formNoValidate
+        formTarget="_blank"
       >
         Submit
       </Button>,
     );
     const button = getByRole("button");
+    expect(button.getAttribute("form")).toBe("checkout");
+    expect(button.getAttribute("formaction")).toBe("/submit");
     expect(button.getAttribute("formenctype")).toBe("multipart/form-data");
     expect(button.getAttribute("formmethod")).toBe("post");
+    expect(button.hasAttribute("formnovalidate")).toBe(true);
+    expect(button.getAttribute("formtarget")).toBe("_blank");
   });
 
   it("renders inline style and combines with maxWidth", () => {
@@ -48,5 +56,18 @@ describe("Button (react)", () => {
     const button = getByRole("button");
     expect(button.style.color).toBe("red");
     expect(button.style.maxWidth).toBe("200px");
+  });
+
+  it("passes through native rest attributes the contract does not name as props", () => {
+    const { getByRole } = render(
+      <Button name="action" value="go" role="menuitem" aria-checked="true">
+        Go
+      </Button>,
+    );
+    const button = getByRole("menuitem");
+    expect(button.getAttribute("name")).toBe("action");
+    expect(button.getAttribute("value")).toBe("go");
+    expect(button.getAttribute("role")).toBe("menuitem");
+    expect(button.getAttribute("aria-checked")).toBe("true");
   });
 });

@@ -1,7 +1,7 @@
 # CodeEditor
 
 Status: detailed contract
-Updated: 2026-09-10
+Updated: 2026-09-28
 
 ## 1. Purpose
 
@@ -233,7 +233,7 @@ described below is the implemented contract, not a pending target.
 | --- | --- |
 | root / viewport | surface background, default border, surface radius |
 | text / gutter | primary text, secondary text, code typography |
-| selection / active line | accent selection and subtle surface state |
+| selection / active line | accent selection and `color.surface.hover` |
 | focus | shared keyboard focus ring |
 | diagnostic error / warning / info | matching status colour plus non-colour mark |
 | search match | accent tint; active match receives stronger outline |

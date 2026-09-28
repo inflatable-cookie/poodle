@@ -122,6 +122,26 @@ export function SplitView({
   const isPrimaryRailed = isPrimaryCollapsed && primaryCollapsedSize != null;
   const isSecondaryRailed = isSecondaryCollapsed && secondaryCollapsedSize != null;
 
+  /**
+   * The seam's position along the split axis, as a CSS length against the
+   * split root. The toggle pill anchors to the root, never the divider box:
+   * a collapsed or hidden sibling can leave the divider degenerate, and the
+   * pill must stay centered on the seam regardless.
+   */
+  const seamPosition = isPrimaryGone
+    ? primaryCollapsedSize != null
+      ? `${primaryCollapsedSize}px`
+      : "0px"
+    : isSecondaryGone
+      ? secondaryCollapsedSize != null
+        ? `calc(100% - ${secondaryCollapsedSize}px)`
+        : "100%"
+      : primarySize != null
+        ? `${primarySize}px`
+        : secondarySize != null
+          ? `calc(100% - ${secondarySize}px)`
+          : `${currentRatio * 100}%`;
+
   // Refs mirror the latest collapse/ratio state for drag handlers, which
   // run outside the render cycle.
   const stateRef = useRef({ currentRatio, isPrimaryCollapsed, isSecondaryCollapsed });
@@ -140,7 +160,9 @@ export function SplitView({
     ? secondaryCollapsedSize != null
       ? `0 0 ${secondaryCollapsedSize}px`
       : "0 0 0"
-    : "1 1 0";
+    : secondarySize != null
+      ? `0 0 ${secondarySize}px`
+      : "1 1 0";
   const minSizeProperty = orientation === "horizontal" ? "minWidth" : "minHeight";
   const primaryStyle: CSSProperties = {
     flex: primaryFlex,
@@ -293,8 +315,10 @@ export function SplitView({
       data-secondary-collapsed={isSecondaryCollapsed || undefined}
       data-divider={divider ? "line" : undefined}
       data-toggle-visibility={toggleVisibility}
+      data-disabled={disabled || undefined}
       data-size={resolvedSize}
       data-density={resolvedDensity}
+      style={{ "--poodle-split-seam": seamPosition } as CSSProperties}
       aria-label={ariaLabel ?? "Split view"}
       ref={containerRef}
     >
@@ -316,34 +340,34 @@ export function SplitView({
           onResizeMove={handleResizeMove}
           onResizeStep={handleResizeStep}
         />
-
-        {hasToggles ? (
-          <div className="poodle-split-view__toggles">
-            {showCollapsePrimary && (!isSecondaryCollapsed || isPrimaryCollapsed) ? (
-              <CollapseToggle
-                direction={beforeDirection}
-                collapsed={isPrimaryCollapsed}
-                disabled={disabled}
-                ariaLabel={isPrimaryCollapsed ? "Expand primary" : "Collapse primary"}
-                onToggle={(next) => setPrimaryCollapsed(next)}
-              />
-            ) : null}
-            {showCollapseSecondary && (!isPrimaryCollapsed || isSecondaryCollapsed) ? (
-              <CollapseToggle
-                direction={afterDirection}
-                collapsed={isSecondaryCollapsed}
-                disabled={disabled}
-                ariaLabel={isSecondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
-                onToggle={(next) => setSecondaryCollapsed(next)}
-              />
-            ) : null}
-          </div>
-        ) : null}
       </div>
 
       <div className="poodle-split-view__pane poodle-split-view__pane--secondary" style={secondaryStyle}>
         {!isSecondaryGone || isSecondaryRailed ? secondary : null}
       </div>
+
+      {hasToggles ? (
+        <div className="poodle-split-view__toggles">
+          {showCollapsePrimary && (!isSecondaryCollapsed || isPrimaryCollapsed) ? (
+            <CollapseToggle
+              direction={beforeDirection}
+              collapsed={isPrimaryCollapsed}
+              disabled={disabled}
+              ariaLabel={isPrimaryCollapsed ? "Expand primary" : "Collapse primary"}
+              onToggle={(next) => setPrimaryCollapsed(next)}
+            />
+          ) : null}
+          {showCollapseSecondary && (!isPrimaryCollapsed || isSecondaryCollapsed) ? (
+            <CollapseToggle
+              direction={afterDirection}
+              collapsed={isSecondaryCollapsed}
+              disabled={disabled}
+              ariaLabel={isSecondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
+              onToggle={(next) => setSecondaryCollapsed(next)}
+            />
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

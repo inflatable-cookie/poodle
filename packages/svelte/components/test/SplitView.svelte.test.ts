@@ -108,3 +108,47 @@ describe("SplitView toggle visibility", () => {
     expect(getByRole("button", { name: "Collapse secondary" })).toBeTruthy();
   });
 });
+
+describe("SplitView seam anchoring", () => {
+  function renderSplit(props: Record<string, unknown> = {}) {
+    const { container } = render(SplitView, {
+      props: {
+        showCollapsePrimary: true,
+        showCollapseSecondary: true,
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
+        ...props,
+      },
+    });
+    return container.querySelector(".poodle-split-view") as HTMLElement;
+  }
+
+  it("anchors the toggle pill to the root along --poodle-split-seam", () => {
+    const root = renderSplit({ ratio: 0.35 });
+    expect(root.style.getPropertyValue("--poodle-split-seam")).toBe("35%");
+    expect(root.querySelector(":scope > .poodle-split-view__toggles")).toBeTruthy();
+  });
+
+  it("pins the seam to the primary edge when that pane is collapsed", () => {
+    expect(renderSplit({ primaryCollapsed: true }).style.getPropertyValue("--poodle-split-seam")).toBe("0px");
+  });
+
+  it("pins the seam to the secondary edge when that pane is collapsed", () => {
+    expect(renderSplit({ secondaryCollapsed: true }).style.getPropertyValue("--poodle-split-seam")).toBe("100%");
+  });
+
+  it("uses a fixed primary size as the seam length", () => {
+    expect(renderSplit({ primarySize: 240 }).style.getPropertyValue("--poodle-split-seam")).toBe("240px");
+  });
+
+  it("anchors the seam to a fixed secondary size instead of the unused ratio", () => {
+    const root = renderSplit({ ratio: 0.35, secondarySize: 240 });
+    expect(root.style.getPropertyValue("--poodle-split-seam")).toBe("calc(100% - 240px)");
+    const primary = root.querySelector(".poodle-split-view__pane--primary") as HTMLElement;
+    const secondary = root.querySelector(".poodle-split-view__pane--secondary") as HTMLElement;
+    expect(primary.style.flexGrow).toBe("1");
+    expect(primary.style.flexBasis).toBe("0px");
+    expect(secondary.style.flexGrow).toBe("0");
+    expect(secondary.style.flexBasis).toBe("240px");
+  });
+});

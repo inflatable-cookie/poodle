@@ -196,6 +196,9 @@ export const tokens = {
         "elevated": "#fcfdff",
         "overlay": "rgba(11, 15, 20, 0.64)"
       },
+      "surface": {
+        "hover": "rgba(148, 163, 184, 0.12)"
+      },
       "text": {
         "primary": "#131a22",
         "secondary": "#314255",
@@ -491,6 +494,7 @@ export const tokenPaths = [
   "color.background.panel",
   "color.background.elevated",
   "color.background.overlay",
+  "color.surface.hover",
   "color.text.primary",
   "color.text.secondary",
   "color.text.tertiary",
@@ -596,6 +600,7 @@ export const cssVars = {
   "color.background.panel": "--poodle-color-background-panel",
   "color.background.elevated": "--poodle-color-background-elevated",
   "color.background.overlay": "--poodle-color-background-overlay",
+  "color.surface.hover": "--poodle-color-surface-hover",
   "color.text.primary": "--poodle-color-text-primary",
   "color.text.secondary": "--poodle-color-text-secondary",
   "color.text.tertiary": "--poodle-color-text-tertiary",
