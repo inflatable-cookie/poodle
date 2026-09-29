@@ -1,14 +1,16 @@
-//! Viewport containing block for overlay nodes that fill the mount.
+//! Viewport containing block for overlay nodes collapsed by an in-flow sibling.
 //!
 //! GPUI 0.2.2 has no `position: fixed`. `style.overlay` already defers paint,
 //! but layout still uses the nearest positioned ancestor — every GPUI div is
 //! positioned, so an Absolute inset-0 Dialog backdrop collapses to its
-//! composition wrapper. ConfirmAction's still-mounted trigger sitting beside
-//! the open overlay is the reproducing sibling.
+//! composition wrapper when a still-mounted trigger sits beside it.
 //!
-//! Nodes that declare overlay *and* Absolute inset 0 are laid out against the
-//! window viewport and prepainted at the window origin. Anchored overlays
+//! Window fill is only for that sibling-collapse case. Independently converted
+//! overlay roots (CommandPalette reuses `dialog()` as its `to_gpui` root inside
+//! a relative host slot) keep the host as containing block. Anchored overlays
 //! (Popover, Menu) keep parent-relative Absolute coordinates.
+
+use std::cell::Cell;
 
 use gpui::{
     div, point, px, size, AnyElement, App, AvailableSpace, Bounds, Element, GlobalElementId,
@@ -16,6 +18,10 @@ use gpui::{
     Styled, Window,
 };
 use poodle_node::{Node, NodePosition};
+
+thread_local! {
+    static COLLAPSED_BY_IN_FLOW_SIBLING: Cell<bool> = const { Cell::new(false) };
+}
 
 pub(super) fn fills_viewport(node: &Node) -> bool {
     node.style.overlay
@@ -28,6 +34,30 @@ pub(super) fn fills_viewport(node: &Node) -> bool {
                 bottom: Some(0.0),
             }
         )
+}
+
+fn in_flow(node: &Node) -> bool {
+    !matches!(node.position, NodePosition::Absolute { .. })
+}
+
+pub(super) fn sibling_collapses_containing_block(parent: &Node, child_index: usize) -> bool {
+    parent
+        .children
+        .iter()
+        .enumerate()
+        .any(|(index, sibling)| index != child_index && in_flow(sibling))
+}
+
+pub(super) fn enter_child(collapsed: bool) -> bool {
+    COLLAPSED_BY_IN_FLOW_SIBLING.with(|flag| flag.replace(collapsed))
+}
+
+pub(super) fn restore_child(previous: bool) {
+    COLLAPSED_BY_IN_FLOW_SIBLING.with(|flag| flag.set(previous));
+}
+
+pub(super) fn needs_viewport_containing_block(node: &Node) -> bool {
+    fills_viewport(node) && COLLAPSED_BY_IN_FLOW_SIBLING.with(|flag| flag.get())
 }
 
 pub(super) fn viewport_containing_block(child: AnyElement, defer_paint: bool) -> ViewportOverlay {

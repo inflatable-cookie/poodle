@@ -554,6 +554,7 @@ fn a_to_gpui_prewalk_runs_once_per_tree_and_keeps_nested_drop_depth() {
 
 struct OverlayMount {
     node: Node,
+    nested_host: Option<(f32, f32, f32, f32)>,
 }
 
 impl gpui::Render for OverlayMount {
@@ -566,8 +567,41 @@ impl gpui::Render for OverlayMount {
         overlay_frame_begin_for(handle, cx);
         cx.defer(move |_| overlay_frame_end_for(handle));
         reset_element_ids();
-        attach_overlay_host(div().size_full().child(to_gpui(&self.node)), handle)
+        let tree = if let Some((left, top, width, height)) = self.nested_host {
+            // CommandPalette hosts `dialog()` as a to_gpui root inside a sized
+            // relative slot. Window-filling that root would spill the mount.
+            div().size_full().child(
+                div()
+                    .absolute()
+                    .left(px(left))
+                    .top(px(top))
+                    .w(px(width))
+                    .h(px(height))
+                    .child(to_gpui(&self.node)),
+            )
+        } else {
+            div().size_full().child(to_gpui(&self.node))
+        };
+        attach_overlay_host(tree, handle)
     }
+}
+
+fn dialog_like_backdrop(surface: Node) -> Node {
+    let mut backdrop = Node::container();
+    backdrop.id = Some("backdrop".into());
+    backdrop.runtime_id = Some("backdrop".into());
+    backdrop.style.overlay = true;
+    backdrop.position = NodePosition::Absolute {
+        top: Some(0.0),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: Some(0.0),
+    };
+    backdrop.style.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.5));
+    backdrop.style.descriptor.layout.direction = LayoutDirection::Row;
+    backdrop.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+    backdrop.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    backdrop.child(surface)
 }
 
 fn run_headless(body: impl FnOnce(&mut gpui::TestAppContext)) {
@@ -590,8 +624,8 @@ fn paint_mount(cx: &mut gpui::VisualTestContext, root: &gpui::Entity<OverlayMoun
 }
 
 /// Before: Absolute inset-0 used the sibling row as containing block, so the
-/// backdrop collapsed to the trigger height. After: overlay+inset-0 layouts
-/// against the window viewport.
+/// backdrop collapsed to the trigger height. After: an overlay+inset-0 that
+/// shares a parent with an in-flow sibling layouts against the window viewport.
 #[test]
 fn a_dialog_backdrop_covers_the_window_with_a_sibling_trigger_mounted() {
     run_headless(|cx| {
@@ -607,29 +641,16 @@ fn a_dialog_backdrop_covers_the_window_with_a_sibling_trigger_mounted() {
         surface.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
         surface.style.descriptor.layout.height = LayoutSizing::Fixed(80.0);
 
-        let mut backdrop = Node::container();
-        backdrop.id = Some("backdrop".into());
-        backdrop.runtime_id = Some("backdrop".into());
-        backdrop.style.overlay = true;
-        backdrop.position = NodePosition::Absolute {
-            top: Some(0.0),
-            left: Some(0.0),
-            right: Some(0.0),
-            bottom: Some(0.0),
-        };
-        backdrop.style.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.5));
-        backdrop.style.descriptor.layout.direction = LayoutDirection::Row;
-        backdrop.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-        backdrop.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        backdrop = backdrop.child(surface);
-
         let mut row = Node::container();
         row.style.descriptor.layout.direction = LayoutDirection::Row;
-        row = row.child(trigger).child(backdrop);
+        row = row.child(trigger).child(dialog_like_backdrop(surface));
 
         let (root, cx) = cx.add_window_view(|window, _cx| {
             window.refresh();
-            OverlayMount { node: row }
+            OverlayMount {
+                node: row,
+                nested_host: None,
+            }
         });
         paint_mount(cx, &root);
 
@@ -654,6 +675,40 @@ fn a_dialog_backdrop_covers_the_window_with_a_sibling_trigger_mounted() {
                 && f32::from(surface.origin.y) + f32::from(surface.size.height)
                     <= f32::from(backdrop.origin.y) + f32::from(backdrop.size.height),
             "surface {surface:?} must sit on the window-sized backdrop {backdrop:?}"
+        );
+    });
+}
+
+/// CommandPalette converts `dialog()` as a `to_gpui` root inside a sized host
+/// slot. Window-filling every overlay+inset-0 spilled those roots across the
+/// mount; a conversion root with no in-flow sibling stays in the host.
+#[test]
+fn a_dialog_root_overlay_stays_inside_its_host_slot() {
+    run_headless(|cx| {
+        let mut surface = Node::container();
+        surface.id = Some("surface".into());
+        surface.runtime_id = Some("surface".into());
+        surface.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        surface.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+
+        let (root, cx) = cx.add_window_view(|window, _cx| {
+            window.refresh();
+            OverlayMount {
+                node: dialog_like_backdrop(surface),
+                nested_host: Some((32.0, 48.0, 200.0, 120.0)),
+            }
+        });
+        paint_mount(cx, &root);
+
+        let viewport = cx.update(|window, _| window.viewport_size());
+        let backdrop = bounds_for("backdrop").expect("backdrop painted");
+        assert_eq!(f32::from(backdrop.origin.x), 32.0);
+        assert_eq!(f32::from(backdrop.origin.y), 48.0);
+        assert_eq!(f32::from(backdrop.size.width), 200.0);
+        assert_eq!(f32::from(backdrop.size.height), 120.0);
+        assert!(
+            f32::from(backdrop.size.width) < f32::from(viewport.width),
+            "a conversion-root overlay must not fill the window: backdrop={backdrop:?} viewport={viewport:?}"
         );
     });
 }

@@ -680,7 +680,7 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
     if node.style.overlay {
         DEFERRED_SCOPE.with(|scope| scope.set(was_deferred));
         record_probe_channel("overlay.intent.painted");
-        if overlay::fills_viewport(node) {
+        if overlay::needs_viewport_containing_block(node) {
             overlay::viewport_containing_block(element, !was_deferred).into_any_element()
         } else if was_deferred {
             element
@@ -1037,8 +1037,11 @@ fn apply_children<E: ParentElement>(mut el: E, node: &Node, id: &str) -> E {
     let inherited = FOCUS_SCOPE.with(|f| f.get());
     let scope = inherited || (tracks_focus(node) && is_focused(id));
     FOCUS_SCOPE.with(|f| f.set(scope));
-    for child in &node.children {
+    for (index, child) in node.children.iter().enumerate() {
+        let previous =
+            overlay::enter_child(overlay::sibling_collapses_containing_block(node, index));
         el = el.child(to_gpui_impl(child));
+        overlay::restore_child(previous);
     }
     FOCUS_SCOPE.with(|f| f.set(inherited));
     el
