@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "283e5d65ce1ab84bfd12133efc4538ce23d80de0",
+  "source_commit": "62d52ecd7a9b967225ba7df40450cd6e48db5437",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -6042,12 +6042,16 @@
       ],
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-labels-render-muted-metadata-and-describe-the-item.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-foo-and-foo-end-label-values-keep-distinct-ids.json",
         "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-item-context-menu-opens-by-pointer-and-keyboard-and-restores-focus.json"
       ],
       "refusals": [
         "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no events claim; events stays missing.",
         "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no pointer claim; pointer stays missing.",
-        "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no keyboard_focus claim; keyboard_focus stays missing."
+        "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no keyboard_focus claim; keyboard_focus stays missing.",
+        "Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no events claim; events stays missing.",
+        "Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no pointer claim; pointer stays missing.",
+        "Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no keyboard_focus claim; keyboard_focus stays missing."
       ]
     },
     {
@@ -7562,7 +7566,7 @@
       "visual": 143
     },
     "holdCount": 175,
-    "refusalCount": 226
+    "refusalCount": 229
   },
   "groups": [
     {
