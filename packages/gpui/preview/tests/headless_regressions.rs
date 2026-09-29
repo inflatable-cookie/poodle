@@ -999,11 +999,13 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
 
         let mut normal_text = poodle_render::text(&TextSpec::new(long), &ctx);
         normal_text.id = Some("admit-text-wrap-normal".into());
+        normal_text.style.max_width = Some(72.0);
         let mut anywhere_text = poodle_render::text(
             &TextSpec::new(long).with_wrap(TextWrap::Anywhere),
             &ctx,
         );
         anywhere_text.id = Some("admit-text-wrap-anywhere".into());
+        anywhere_text.style.max_width = Some(72.0);
         assert!(!normal_text.style.wrap_anywhere);
         assert!(anywhere_text.style.wrap_anywhere);
 
@@ -1024,6 +1026,43 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         assert!(!normal_code.style.wrap_anywhere);
         assert!(anywhere_code.style.wrap_anywhere);
         assert!(!anywhere_code.style.no_wrap);
+
+        let block_source = format!("fn main() {{\n    {long}\n}}");
+        let mut normal_block = poodle_render::code(
+            &CodeSpec::new()
+                .with_content(&block_source)
+                .with_copyable(false),
+            &ctx,
+        );
+        normal_block.id = Some("admit-block-code-wrap-normal".into());
+        {
+            let source = normal_block
+                .children
+                .last_mut()
+                .and_then(|scroll| scroll.children.first_mut())
+                .expect("normal block source");
+            source.id = Some("admit-block-code-wrap-normal-source".into());
+            source.style.max_width = Some(72.0);
+            assert!(source.style.no_wrap);
+        }
+        let mut anywhere_block = poodle_render::code(
+            &CodeSpec::new()
+                .with_content(&block_source)
+                .with_copyable(false)
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        anywhere_block.id = Some("admit-block-code-wrap-anywhere".into());
+        {
+            let source = anywhere_block
+                .children
+                .last_mut()
+                .and_then(|scroll| scroll.children.first_mut())
+                .expect("anywhere block source");
+            source.id = Some("admit-block-code-wrap-anywhere-source".into());
+            source.style.max_width = Some(72.0);
+            assert!(source.style.wrap_anywhere);
+        }
 
         let mut card = poodle_render::list_card(
             &ListCardSpec::new()
@@ -1096,6 +1135,8 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             .child(anywhere_text)
             .child(normal_code)
             .child(anywhere_code)
+            .child(normal_block)
+            .child(anywhere_block)
             .child(card)
             .child(pill);
 
@@ -1121,6 +1162,40 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             .expect("painted normal text");
         assert!(anywhere_text_paint.wrap_anywhere);
         assert!(!normal_text_paint.wrap_anywhere);
+        let normal_text_bounds = poodle_gpui_node_backend::bounds_for("admit-text-wrap-normal")
+            .expect("normal text bounds");
+        let anywhere_text_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-text-wrap-anywhere")
+                .expect("anywhere text bounds");
+        assert!(
+            anywhere_text_bounds.size.height > normal_text_bounds.size.height,
+            "wrap=anywhere must mid-token wrap a long identifier; wrap=normal must not. normal={:?} anywhere={:?}",
+            normal_text_bounds.size,
+            anywhere_text_bounds.size
+        );
+
+        let normal_block_paint =
+            poodle_gpui_node_backend::painted_node_for("admit-block-code-wrap-normal-source")
+                .expect("painted normal block source");
+        let anywhere_block_paint =
+            poodle_gpui_node_backend::painted_node_for("admit-block-code-wrap-anywhere-source")
+                .expect("painted anywhere block source");
+        assert!(normal_block_paint.no_wrap);
+        assert!(!normal_block_paint.wrap_anywhere);
+        assert!(anywhere_block_paint.wrap_anywhere);
+        assert!(!anywhere_block_paint.no_wrap);
+        let normal_block_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-block-code-wrap-normal-source")
+                .expect("normal block bounds");
+        let anywhere_block_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-block-code-wrap-anywhere-source")
+                .expect("anywhere block bounds");
+        assert!(
+            anywhere_block_bounds.size.height > normal_block_bounds.size.height,
+            "block wrap=normal must stay preformatted; anywhere must wrap. normal={:?} anywhere={:?}",
+            normal_block_bounds.size,
+            anywhere_block_bounds.size
+        );
 
         let card_paint = poodle_gpui_node_backend::painted_node_for("admit-list-card-eyebrow")
             .expect("painted list card");

@@ -1781,19 +1781,18 @@ pub const DEFAULT_COMPUTER_KEY_MAP: &[(&str, i16)] = &[
     ("k", 12),
 ];
 
-fn clamp_midi_note(note: i16) -> u8 {
-    note.clamp(0, 127) as u8
-}
-
 /// MIDI note for a computer key: `computerBaseNote + offset + octaveShift * 12`.
+/// Returns `None` when the key is unmapped or the computed note is outside
+/// 0..=127. Svelte's PRESS path rejects the raw sum the same way — it does
+/// not saturate into range.
 pub fn keyboard_computer_note(context: &KeyboardContext, key: &str) -> Option<u8> {
     let offset = DEFAULT_COMPUTER_KEY_MAP
         .iter()
         .find(|(name, _)| name.eq_ignore_ascii_case(key))
         .map(|(_, offset)| *offset)?;
-    Some(clamp_midi_note(
-        i16::from(context.computer_base_note) + offset + i16::from(context.octave_shift) * 12,
-    ))
+    let note =
+        i16::from(context.computer_base_note) + offset + i16::from(context.octave_shift) * 12;
+    u8::try_from(note).ok().filter(|note| *note <= 127)
 }
 
 pub fn keyboard_computer_key_down(
@@ -2478,6 +2477,23 @@ mod tests {
         );
         let (_, effects) = keyboard_computer_key_up(pressed, "a");
         assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+
+        let mut high = KeyboardContext {
+            first_note: 0,
+            last_note: 127,
+            computer_base_note: 127,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_computer_note(&high, "k"), None);
+        assert_eq!(
+            keyboard_computer_key_down(high.clone(), "k", 90, false).1,
+            vec![]
+        );
+
+        high.computer_base_note = 0;
+        high.octave_shift = -1;
+        assert_eq!(keyboard_computer_note(&high, "a"), None);
+        assert_eq!(keyboard_computer_key_down(high, "a", 90, false).1, vec![]);
     }
 
     #[test]

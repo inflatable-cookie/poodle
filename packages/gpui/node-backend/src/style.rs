@@ -365,12 +365,18 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
         el = el.line_height(relative(lh));
         record_probe_channel("content.typography.line-height");
     }
-    if style.wrap_anywhere || style.text_wrap {
+    if style.wrap_anywhere {
         // GPUI 0.2.2 WhiteSpace::Normal wraps at spaces first, then mid-token
         // when a single word exceeds the line (LineWrapper else-branch; their
-        // own test wraps `aaa aaaaaaaaaaaaaaaaaa`). That is the
-        // overflow-wrap:anywhere result for long identifiers.
+        // own test wraps `aaa aaaaaaaaaaaaaaaaaa`). That is overflow-wrap:
+        // anywhere. wrap=normal must not take this path or a long identifier
+        // breaks the same way as anywhere.
         el = el.whitespace_normal();
+    } else if style.text_wrap {
+        // GPUI has no overflow-wrap:normal: Normal always mid-token wraps an
+        // overlong word. Nowrap keeps that word on one line, matching Svelte
+        // wrap=normal for the unbroken-identifier case the contract admits.
+        el = el.whitespace_nowrap();
     }
     if let Some(family) = style.font_family {
         // Sans is the app's default (the preview sets Inter at the root), so

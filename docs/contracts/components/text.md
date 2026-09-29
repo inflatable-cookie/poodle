@@ -47,7 +47,9 @@ Updated: 2026-09-29
   overflow, and vertical box orientation.
 - `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
   `wrap="normal"` do not change overflow wrapping. Native maps `anywhere`
-  through the shared `wrap_anywhere` channel.
+  through the shared `wrap_anywhere` channel (GPUI `WhiteSpace::Normal`,
+  which mid-token wraps). `normal` does not take that path so a long
+  identifier stays on one line.
 
 ## 4. Accessibility
 

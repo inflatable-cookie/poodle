@@ -220,6 +220,10 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
         if spec.wrap == CodeWrap::Anywhere {
             source.style.text_wrap = true;
             source.style.wrap_anywhere = true;
+        } else {
+            // white-space: pre — long identifiers stay on one line; newlines
+            // in the source remain. GPUI default Normal would wrap them.
+            source.style.no_wrap = true;
         }
         scroll = scroll.child(source);
     }
@@ -234,6 +238,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_node::NodeKind;
 
     #[test]
     fn inline_wrap_anywhere_clears_no_wrap() {
@@ -303,5 +308,48 @@ mod tests {
             .expect("unset block source");
         assert!(!unset_source.style.wrap_anywhere);
         assert!(!unset_source.style.text_wrap);
+        assert!(unset_source.style.no_wrap);
+    }
+
+    #[test]
+    fn block_wrap_normal_keeps_multiline_source_preformatted() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let source_text = "fn main() {\n    supercalifragilisticexpialidociousidentifier\n}";
+        let node = code(
+            &CodeSpec::new()
+                .with_content(source_text)
+                .with_copyable(false),
+            &ctx,
+        );
+        let source = node
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("multiline block source");
+        assert!(source.style.no_wrap);
+        assert!(!source.style.wrap_anywhere);
+        assert!(!source.style.text_wrap);
+        match &source.kind {
+            NodeKind::Text { content } => assert_eq!(content, source_text),
+            _ => panic!("expected one preformatted text node"),
+        }
+
+        let anywhere = code(
+            &CodeSpec::new()
+                .with_content(source_text)
+                .with_copyable(false)
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        let anywhere_source = anywhere
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("anywhere block source");
+        assert!(anywhere_source.style.wrap_anywhere);
+        assert!(anywhere_source.style.text_wrap);
+        assert!(!anywhere_source.style.no_wrap);
     }
 }
