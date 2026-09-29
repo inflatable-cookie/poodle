@@ -45,6 +45,14 @@ pub struct SidebarNavHandlers {
     /// actionValue)`), and focus on close are host-owned, matching the Tree
     /// host pattern.
     pub on_context_menu: Option<Arc<dyn Fn(&str, SidebarNavContextMenuOrigin) + Send + Sync>>,
+    /// Stable per-instance scope for generated element ids. A host mounting
+    /// more than one sidebar in a window MUST give each a distinct scope —
+    /// unscoped ids are only unique under the one-unscoped-nav-per-window
+    /// rule — and the scope must be the same value on every frame (it keys
+    /// the backend's id-keyed registries). Scoped ids take the form
+    /// `sidebar-nav~{scope}~{value}` (+ `~end-label` / `~label`); unscoped
+    /// ids keep the historical `sidebar-nav-{value}` form.
+    pub instance_scope: Option<String>,
 }
 
 /// Escapes a host value for use inside a generated element id.
@@ -79,8 +87,25 @@ fn escape_id_fragment(value: &str) -> String {
 /// focus-return destination after the item's context menu closes. The value
 /// is escaped (see [`escape_id_fragment`]), so the id never contains a raw
 /// `~` or whitespace and stays distinct from every end-label id.
+///
+/// For hosts mounting several sidebars in one id space, prefer the scoped
+/// [`sidebar_nav_item_id_in`]: unscoped ids are only unique because a host
+/// promises exactly one unscoped nav per window.
 pub fn sidebar_nav_item_id(value: &str) -> String {
     format!("sidebar-nav-{}", escape_id_fragment(value))
+}
+
+/// The scoped form of [`sidebar_nav_item_id`]: two mounted navs carrying the
+/// same item values stay distinct end to end — activation, focus return, and
+/// described_by all key off these ids. Scoped ids always contain the
+/// structural `~` after the prefix, so they can never collide with an
+/// unscoped id (which never contains one).
+pub fn sidebar_nav_item_id_in(scope: &str, value: &str) -> String {
+    format!(
+        "sidebar-nav~{}~{}",
+        escape_id_fragment(scope),
+        escape_id_fragment(value)
+    )
 }
 
 /// The element id of one sidebar item's end-label text.
@@ -92,6 +117,32 @@ pub fn sidebar_nav_item_id(value: &str) -> String {
 /// end-label id can share with an item id.
 pub fn sidebar_nav_item_end_label_id(value: &str) -> String {
     format!("sidebar-nav-{}~end-label", escape_id_fragment(value))
+}
+
+/// The scoped form of [`sidebar_nav_item_end_label_id`]; see
+/// [`sidebar_nav_item_id_in`] for the namespace rule.
+pub fn sidebar_nav_item_end_label_id_in(scope: &str, value: &str) -> String {
+    format!(
+        "sidebar-nav~{}~{}~end-label",
+        escape_id_fragment(scope),
+        escape_id_fragment(value)
+    )
+}
+
+/// The element id of one sidebar item's flexible label text — a geometry
+/// anchor (paint bounds, baseline assertions), not an accessibility
+/// surface: text nodes carry no role and stay out of the a11y projection.
+pub fn sidebar_nav_item_label_id(value: &str) -> String {
+    format!("sidebar-nav-{}~label", escape_id_fragment(value))
+}
+
+/// The scoped form of [`sidebar_nav_item_label_id`].
+pub fn sidebar_nav_item_label_id_in(scope: &str, value: &str) -> String {
+    format!(
+        "sidebar-nav~{}~{}~label",
+        escape_id_fragment(scope),
+        escape_id_fragment(value)
+    )
 }
 
 /// `on_change` fires with the value of the item that was chosen.
@@ -161,6 +212,21 @@ pub fn sidebar_nav_with_handlers(
 
     let visible_groups = spec.visible_groups();
     let has_multiple_groups = visible_groups.len() > 1;
+    // The host's stable instance scope, if any: scoped ids keep two mounted
+    // navs carrying the same values distinct end to end.
+    let instance_scope = handlers.instance_scope.as_deref();
+    let item_id = |value: &str| match instance_scope {
+        Some(scope) => sidebar_nav_item_id_in(scope, value),
+        None => sidebar_nav_item_id(value),
+    };
+    let end_label_id = |value: &str| match instance_scope {
+        Some(scope) => sidebar_nav_item_end_label_id_in(scope, value),
+        None => sidebar_nav_item_end_label_id(value),
+    };
+    let label_id = |value: &str| match instance_scope {
+        Some(scope) => sidebar_nav_item_label_id_in(scope, value),
+        None => sidebar_nav_item_label_id(value),
+    };
 
     // ── Root: <nav> as a flex column with panel padding ──────
     let mut el = Node::container();
@@ -258,7 +324,7 @@ pub fn sidebar_nav_with_handlers(
             // to survive from mouse-down to mouse-up, so every click is
             // dropped. It is also the focus-return destination after the
             // item's context menu closes.
-            item_el.id = Some(sidebar_nav_item_id(&item.value));
+            item_el.id = Some(item_id(&item.value));
             {
                 let s = &mut item_el.style;
                 s.min_height = Some(item_height);
@@ -267,7 +333,20 @@ pub fn sidebar_nav_with_handlers(
                 s.min_width = Some(0.0);
                 s.self_stretch = true;
                 s.descriptor.layout.direction = LayoutDirection::Row;
-                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                // Contract §8 `[data-end-label="true"]` sets align-items:
+                // baseline — the end label sits on the label's first line
+                // even when the label wraps. gpui/taffy's baseline channel
+                // has no text baselines here and falls back to flex-end
+                // (count at the row's bottom), so start alignment is the
+                // faithful stand-in: tops flush with the label's first line,
+                // and identical to baseline for single-line labels up to the
+                // 13px/11px ascent difference. Single-text rows keep the
+                // centring that stands in for the contract padding-block.
+                s.descriptor.layout.alignment.cross = if end_label.is_some() {
+                    CrossAxisAlignment::Start
+                } else {
+                    CrossAxisAlignment::Center
+                };
                 if end_label.is_some() {
                     // Contract §8 `[data-end-label="true"]`: the row gap
                     // between label and end label.
@@ -363,9 +442,16 @@ pub fn sidebar_nav_with_handlers(
                     s.text_size = Some(end_label_font);
                     s.text_weight = Some(500);
                     s.descriptor.text_color = Some(end_label_color);
+                    // Contract §8: font-variant-numeric: tabular-nums —
+                    // counts are metadata you scan in a column.
+                    s.tabular_figures = true;
                 }
-                end.id = Some(sidebar_nav_item_end_label_id(&item.value));
-                item_el.a11y.described_by = Some(sidebar_nav_item_end_label_id(&item.value));
+                end.id = Some(end_label_id(&item.value));
+                item_el.a11y.described_by = Some(end_label_id(&item.value));
+                // The flexible label gets a geometry anchor of its own (paint
+                // bounds for hosts and baseline assertions); text nodes carry
+                // no role, so this stays out of the a11y projection.
+                label.id = Some(label_id(&item.value));
                 item_el = item_el.child(label).child(end);
             }
 

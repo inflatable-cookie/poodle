@@ -391,8 +391,10 @@ pub use separator::separator;
 pub use settings_shell::{settings_shell, SettingsShellHandlers};
 pub use shell_status_bar::shell_status_bar;
 pub use sidebar_nav::{
-    sidebar_nav, sidebar_nav_item_end_label_id, sidebar_nav_item_id, sidebar_nav_with_handlers,
-    SidebarNavContextMenuOrigin, SidebarNavHandlers,
+    sidebar_nav, sidebar_nav_item_end_label_id, sidebar_nav_item_end_label_id_in,
+    sidebar_nav_item_id, sidebar_nav_item_id_in, sidebar_nav_item_label_id,
+    sidebar_nav_item_label_id_in, sidebar_nav_with_handlers, SidebarNavContextMenuOrigin,
+    SidebarNavHandlers,
 };
 pub use skeleton::skeleton;
 pub use slider::{slider, SliderHandlers};

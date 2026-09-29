@@ -386,7 +386,18 @@ None.
   are escaped into ids (`%` → `%25`, `~` → `%7E`, whitespace → `%XX`), the
   item is `sidebar-nav-{value}` (never containing a raw `~`), and the end
   label is `sidebar-nav-{value}~end-label` — the namespaces are disjoint, so
-  an item valued `foo-end-label` cannot collide with `foo`'s end label
+  an item valued `foo-end-label` cannot collide with `foo`'s end label. A
+  host mounting several sidebars in one window sets `instance_scope` on
+  each: scoped ids take the form `sidebar-nav~{scope}~{value}` (+
+  `~end-label` / `~label`), which cannot collide with any unscoped id, and
+  keep two same-value navs distinct for activation, focus, and description
+- End-label rows implement the §8 `align-items: baseline` intent — the end
+  label stays on the label's first line when the label wraps — with start
+  alignment, because gpui/taffy's baseline channel has no text baselines and
+  falls back to flex-end. The end label requests tabular figures (§8
+  `font-variant-numeric: tabular-nums`) through the node vocabulary's
+  `tabular_figures` channel (OpenType `tnum`), so equal-digit counts paint
+  at equal widths
 - Per-item context menus follow the Tree host pattern: items carrying rows
   raise `on_context_menu(value, origin)` on secondary click and on the
   keyboard menu gestures (`NodeKey::ContextMenu`, or `NodeKey::F10` with

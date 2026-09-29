@@ -36413,6 +36413,7 @@ fn sidebar_menu_tree(me: &Arc<SidebarMenuHost>) -> Node {
         &spec,
         &ctx,
         poodle_render::SidebarNavHandlers {
+            instance_scope: None,
             on_change: Some(Arc::new(move |value| {
                 activations_host
                     .activations
@@ -36533,7 +36534,183 @@ fn sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids() {
     });
 }
 
+/// Two mounted sidebars carrying the same item values stay distinct end to
+/// end: scoped ids keep activation, description, and focus per nav, so a
+/// pointer on one nav's row can never anchor the other nav's menu or focus.
+#[test]
+fn sidebar_nav_instance_scopes_keep_same_value_rows_distinct() {
+    use poodle_gpui_node_backend::{bounds_for, focus_state_for};
+    use poodle_specs::{MenuEntry, SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
 
+    run_headless(|cx| {
+        let groups = || {
+            vec![SidebarNavGroup::new(
+                "saved",
+                vec![
+                    SidebarNavItem::new("q4", "Q4 close")
+                        .with_end_label("3")
+                        .with_context_menu_items(vec![MenuEntry::new("rename", "Rename")]),
+                    SidebarNavItem::new("all", "All records"),
+                ],
+            )
+            .with_label("Saved views")]
+        };
+        let activations: Arc<Mutex<Vec<(&'static str, String)>>> =
+            Arc::new(Mutex::new(Vec::new()));
+        let mut root = Node::container();
+        root.id = Some(FIXTURE_ID.to_owned());
+        root.position = NodePosition::Relative;
+        {
+            let s = &mut root.style;
+            s.descriptor.layout.width = LayoutSizing::Fixed(260.0);
+            s.descriptor.layout.height = LayoutSizing::Fixed(160.0);
+        }
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        for scope in ["alpha", "beta"] {
+            let activations_host = Arc::clone(&activations);
+            let tag: &'static str = if scope == "alpha" { "alpha" } else { "beta" };
+            let mut nav = Node::container();
+            nav.style.descriptor.layout.width = LayoutSizing::Fixed(240.0);
+            root = root.child(poodle_render::sidebar_nav_with_handlers(
+                &SidebarNavSpec::new(groups()).with_aria_label(scope),
+                &ctx,
+                poodle_render::SidebarNavHandlers {
+                    instance_scope: Some(scope.to_owned()),
+                    on_change: Some(Arc::new(move |value| {
+                        activations_host
+                            .lock()
+                            .expect("activation lock")
+                            .push((tag, value.to_string()));
+                    })),
+                    ..poodle_render::SidebarNavHandlers::default()
+                },
+            ));
+        }
+        let node = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 280.0, 220.0);
+        driver.wait_for_focus_handle("sidebar-nav~alpha~q4");
+
+        // Renderer-level: the same value yields two distinct ids.
+        assert_ne!(
+            poodle_render::sidebar_nav_item_id_in("alpha", "q4"),
+            poodle_render::sidebar_nav_item_id_in("beta", "q4")
+        );
+
+        // Mounted: every projected id is unique, and each item describes its
+        // own scoped end label.
+        let mounted = driver.accessibility_nodes();
+        let mut ids: Vec<&str> = mounted.iter().map(|n| n.element_id.as_str()).collect();
+        ids.sort_unstable();
+        let unique = ids.iter().cloned().collect::<std::collections::HashSet<_>>();
+        assert_eq!(unique.len(), ids.len(), "duplicate mounted ids: {ids:?}");
+        let beta = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav~beta~q4")
+            .expect("mounted beta q4 row");
+        assert_eq!(
+            beta.described_by.as_deref(),
+            Some("sidebar-nav~beta~q4~end-label")
+        );
+        assert!(bounds_for("sidebar-nav~beta~q4~end-label").is_some());
+        assert!(bounds_for("sidebar-nav~alpha~q4~end-label").is_some());
+
+        // Activating beta's row reaches beta's handler only — the same-value
+        // alpha row is a different element — and real focus lands there.
+        driver.pointer_activate_id("sidebar-nav~beta~q4");
+        assert_eq!(
+            activations.lock().expect("activation lock").as_slice(),
+            [("beta", "q4".to_owned())]
+        );
+        driver.draw_frame();
+        assert_eq!(focus_state_for("sidebar-nav~beta~q4"), Some(true));
+        assert_eq!(focus_state_for("sidebar-nav~alpha~q4"), Some(false));
+    });
+}
+
+/// Contract §8 `[data-end-label="true"]` sets align-items: baseline: the end
+/// label stays on the label's first line even when the label wraps, instead
+/// of floating to the row's vertical centre or bottom.
+#[test]
+fn sidebar_nav_wrapped_label_keeps_the_end_label_on_its_first_line() {
+    use poodle_gpui_node_backend::bounds_for;
+
+    run_headless(|cx| {
+        let spec = sidebar_end_label_spec();
+        let node = poodle_render::sidebar_nav(&spec, &RenderContext::new(&theme()), None);
+        // Renderer-level: the end label requests tabular figures (contract
+        // §8 font-variant-numeric: tabular-nums); the flexible label does not.
+        let end = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-videos~end-label"))
+            .expect("end label");
+        assert!(end.style.tabular_figures);
+        let label = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-videos~label"))
+            .expect("flexible label carries a geometry anchor");
+        assert!(!label.style.tabular_figures);
+
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 260.0, 220.0);
+        driver.wait_for_focus_handle("sidebar-nav-videos");
+
+        // Mounted geometry: in the wrapped row the end label's top is flush
+        // with the label's first line (the contract's baseline intent), far
+        // above both the vertical-centre and flex-end positions the other
+        // alignments would produce.
+        let row = bounds_for("sidebar-nav-long").expect("wrapped row bounds");
+        let label = bounds_for("sidebar-nav-long~label").expect("label bounds");
+        let end = bounds_for("sidebar-nav-long~end-label").expect("end-label bounds");
+        assert!(row.size.height > end.size.height, "the label wrapped");
+        assert!(
+            end.origin.y - label.origin.y < px(2.0),
+            "the end label tops out on the label's first line (delta {:?})",
+            end.origin.y - label.origin.y
+        );
+        assert!(
+            end.origin.y < row.origin.y + (row.size.height - end.size.height) / 2.0,
+            "first-line alignment, not centring or bottom alignment"
+        );
+    });
+}
+
+/// Contract §8 gives the end label tabular numerals: same-digit-count counts
+/// paint at the same width, which is the observable the OpenType `tnum`
+/// channel buys on native.
+#[test]
+fn sidebar_nav_end_label_counts_paint_tabular() {
+    use poodle_gpui_node_backend::bounds_for;
+    use poodle_specs::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
+
+    run_headless(|cx| {
+        let spec = SidebarNavSpec::new(vec![SidebarNavGroup::new(
+            "counts",
+            vec![
+                SidebarNavItem::new("ones", "Ones").with_end_label("111"),
+                SidebarNavItem::new("nines", "Nines").with_end_label("999"),
+            ],
+        )
+        .with_label("Counts")])
+        .with_aria_label("Counts navigation");
+        let node = Arc::new(Mutex::new(poodle_render::sidebar_nav(
+            &spec,
+            &RenderContext::new(&theme()),
+            None,
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 260.0, 120.0);
+        driver.wait_for_focus_handle("sidebar-nav-ones");
+
+        let ones = bounds_for("sidebar-nav-ones~end-label").expect("111 end-label bounds");
+        let nines = bounds_for("sidebar-nav-nines~end-label").expect("999 end-label bounds");
+        assert!(
+            (ones.size.width - nines.size.width).abs() < px(1.0),
+            "tabular figures give 111 and 999 the same advance ({} vs {})",
+            ones.size.width,
+            nines.size.width
+        );
+    });
+}
+
+/// SidebarNav's per-item context menu: secondary click and the keyboard menu
 /// gestures open the shared ContextMenu for the invoking item only, a
 /// committed row emits `(itemValue, actionValue)` without activating the nav
 /// item, and both Escape and selection restore real focus to the item.
