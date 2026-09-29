@@ -31,6 +31,7 @@ const bounds = (overrides: Partial<ValidationBounds> = {}): ValidationBounds => 
   boardTimeoutMs: 15 * 60 * 1000,
   childTimeoutMs: 5 * 60 * 1000,
   tasks: {},
+  readyFiles: {},
   ...overrides,
 });
 
@@ -154,7 +155,18 @@ describe("validation board process lifecycle", () => {
         "",
       ].join("\n"),
     );
-    await Bun.write(boundsPath, JSON.stringify({ boardTimeoutMs: 10000, childTimeoutMs: 1500, tasks: {} }));
+    await Bun.write(
+      boundsPath,
+      JSON.stringify({
+        boardTimeoutMs: 10000,
+        childTimeoutMs: 1500,
+        tasks: {},
+        // Arm the 1500ms child bound only once the planted shell has written
+        // its pid file. On a loaded host `bash -lc` can still be starting when
+        // the bound fires, which measured process start instead of the hang.
+        readyFiles: { hang: pidFile },
+      }),
+    );
     const child = Bun.spawn(
       ["bun", "scripts/validation/run-board.ts", "--root", root, "--tasks", tasksPath, "--bounds", boundsPath, "--json", "board"],
       { cwd: process.cwd(), stdout: "pipe", stderr: "pipe" },
@@ -174,6 +186,40 @@ describe("validation board process lifecycle", () => {
     expect(alive(grandchildPid)).toBe(false);
     const summary = JSON.parse(stdout);
     expect(summary.schema).toBe("poodle.validation-board.v1");
+    expect(summary.ok).toBe(false);
+    expect(summary.failure).toContain("hang");
+    expect(summary.units[0].status).toBe("timeout");
+  });
+
+  test("a task that never signals readiness is still killed and named", async () => {
+    const root = tempRoot();
+    const neverReady = join(root, "never.ready");
+    const tasksPath = join(root, "tasks.toml");
+    const boundsPath = join(root, "bounds.json");
+    await Bun.write(tasksPath, [`"hang" = "sleep 30"`, `"board" = [{ task = "hang" }]`, ""].join("\n"));
+    await Bun.write(
+      boundsPath,
+      JSON.stringify({
+        boardTimeoutMs: 1500,
+        childTimeoutMs: 60_000,
+        tasks: {},
+        readyFiles: { hang: neverReady },
+      }),
+    );
+    const child = Bun.spawn(
+      ["bun", "scripts/validation/run-board.ts", "--root", root, "--tasks", tasksPath, "--bounds", boundsPath, "--json", "board"],
+      { cwd: process.cwd(), stdout: "pipe", stderr: "pipe" },
+    );
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(child.stdout).text(),
+      new Response(child.stderr).text(),
+      child.exited,
+    ]);
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain("hang");
+    expect(stderr).toContain("signalled readiness");
+    expect(existsSync(neverReady)).toBe(false);
+    const summary = JSON.parse(stdout);
     expect(summary.ok).toBe(false);
     expect(summary.failure).toContain("hang");
     expect(summary.units[0].status).toBe("timeout");

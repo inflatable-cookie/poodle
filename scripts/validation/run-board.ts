@@ -29,6 +29,10 @@ export type ValidationBounds = {
   boardTimeoutMs: number;
   childTimeoutMs: number;
   tasks: Record<string, number>;
+  // Task name -> marker file the task touches once it is actually running.
+  // The child bound for that task starts when the marker appears, not when
+  // `bash` is spawned; see `runUnit`.
+  readyFiles?: Record<string, string>;
 };
 
 export type BoardUnit = {
@@ -37,6 +41,7 @@ export type BoardUnit = {
   command: string;
   env: Record<string, string>;
   timeoutMs: number;
+  readyFile: string | null;
   reused: boolean;
 };
 
@@ -235,6 +240,7 @@ export function collectUnits(
           command: substitute(node.command, root),
           env: substituteEnv(node.env),
           timeoutMs: bounds.tasks[name] ?? bounds.childTimeoutMs,
+          readyFile: bounds.readyFiles?.[name] ?? null,
         },
         `task:${name}`,
         seenNames,
@@ -256,6 +262,7 @@ export function collectUnits(
           command: substitute(step.command, root),
           env: substituteEnv(step.env),
           timeoutMs: bounds.childTimeoutMs,
+          readyFile: null,
         },
         `run:${step.command}`,
         seenCommands,
@@ -271,6 +278,7 @@ export const DEFAULT_BOUNDS: ValidationBounds = {
   boardTimeoutMs: 15 * 60 * 1000,
   childTimeoutMs: 5 * 60 * 1000,
   tasks: {},
+  readyFiles: {},
 };
 
 export function readBounds(path: string): ValidationBounds {
@@ -280,6 +288,7 @@ export function readBounds(path: string): ValidationBounds {
     boardTimeoutMs: raw.boardTimeoutMs ?? DEFAULT_BOUNDS.boardTimeoutMs,
     childTimeoutMs: raw.childTimeoutMs ?? DEFAULT_BOUNDS.childTimeoutMs,
     tasks: raw.tasks ?? {},
+    readyFiles: raw.readyFiles ?? {},
   };
 }
 
@@ -308,14 +317,40 @@ async function runUnit(
     // Own process group so a timeout kills every descendant the child owns.
     detached: true,
   });
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
+  const killGroup = () => {
     try {
       process.kill(-child.pid, "SIGKILL");
     } catch {
       child.kill("SIGKILL");
     }
+  };
+  // A unit that declares `readyFile` does not arm its child bound until that
+  // file appears. On a loaded host a login `bash` can still be starting when a
+  // short bound fires, so the bound would time process start rather than the
+  // work: run-board.test.ts's planted hang hit exactly that at 1500ms. Readiness
+  // is itself bounded by the remaining board budget, so a task that never
+  // signals is still killed and named.
+  if (unit.readyFile !== null) {
+    const deadline = Date.now() + remainingBoardMs;
+    while (child.exitCode === null && !existsSync(unit.readyFile) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    if (!existsSync(unit.readyFile)) {
+      const ownExit = child.exitCode;
+      killGroup();
+      const killedExit = await child.exited;
+      if (ownExit !== null && ownExit !== 0) {
+        log(`  ✘ ${unit.label} failed with exit ${ownExit} before readiness`);
+        return { status: "failed", exitCode: ownExit };
+      }
+      log(`  ✘ ${unit.label} killed before it signalled readiness (${unit.readyFile})`);
+      return { status: "timeout", exitCode: killedExit };
+    }
+  }
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    killGroup();
   }, timeoutMs);
   const exitCode = await child.exited;
   clearTimeout(timer);
