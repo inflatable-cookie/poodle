@@ -33278,6 +33278,7 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         let viewport_size = driver.with_window(|window, _| window.viewport_size());
         let backdrop_bounds = poodle_gpui_node_backend::bounds_for(&left_backdrop).unwrap();
         let surface_bounds = poodle_gpui_node_backend::bounds_for(&left_surface).unwrap();
+        let trigger_bounds = poodle_gpui_node_backend::bounds_for(&left_trigger).unwrap();
         let body_bounds = poodle_gpui_node_backend::bounds_for(&left_body).unwrap();
         let cancel_bounds = poodle_gpui_node_backend::bounds_for(&left_cancel).unwrap();
         let confirm_bounds = poodle_gpui_node_backend::bounds_for(&left_confirm).unwrap();
@@ -33302,6 +33303,7 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
             "the sibling-collapsed backdrop used to be no larger than the mount box: backdrop={backdrop_bounds:?} mount={mount_bounds:?}"
         );
         assert!(bounds_contain(backdrop_bounds, mount_bounds));
+        assert!(bounds_contain(backdrop_bounds, trigger_bounds));
         assert!(bounds_contain(backdrop_bounds, surface_bounds));
         for bounds in [body_bounds, cancel_bounds, confirm_bounds] {
             assert!(bounds_contain(surface_bounds, bounds));
@@ -33474,7 +33476,7 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
             &[
                 "production ConfirmAction composes Dialog and Button nodes with exact title, description, body, action labels, alert-dialog role, variants, tone, size, and density metadata",
                 "destructive trigger and confirm actions resolve the production danger recipes while an ordinary warning request resolves default action tone",
-                "the positive 800x600 mount, backdrop, and surface bounds preserve exact mount-to-backdrop equality and mount-to-backdrop-to-surface containment",
+                "the open backdrop sits at the window origin at full viewport size instead of collapsing to the 800x600 mount box, the default trigger stays mounted beside it, and mount, trigger, and surface bounds stay contained by the backdrop",
                 "body and action bounds remain contained by the surface, ordered, and non-overlapping",
                 "confirm, cancel button, backdrop, and Escape each emit exactly one callback in mounted input order and immediate host refusal leaves the Dialog mounted",
                 "pending state disables both actions, removes the close affordance, and suppresses all pointer and Escape callbacks",
