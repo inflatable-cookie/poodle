@@ -1226,7 +1226,6 @@ fn build_select(
 /// `combobox` vs Svelte `button`, unnamed GPUI listbox, focusable Svelte
 /// option buttons, Svelte indicator button). The Svelte reference wins; the
 /// repair belongs to the NP-2 tranche (`g16.113`), not this foundation card.
-/// Log: `docs/logs/2026-09/20260905-g16-111-nucleus-a1-accessibility-receipt-foundation.md`.
 /// g16.117 aligned Select, so this row runs with the rest of the cohort.
 #[test]
 fn select_a1_accessibility_projection_matches_svelte() {
@@ -1968,7 +1967,7 @@ fn radio_group_a1_accessibility_projection_matches_svelte() {
 //
 // `callout`, `editable-label`, and `text-input` carry committed A1 receipts
 // and committed GPUI snapshots, but no probe survived the tranche merges
-// (`PAPERCUTS.md`, 2026-09-05). Without a probe the cohort cannot be
+// (2026-09-05). Without a probe the cohort cannot be
 // re-emitted at a new head, so the rows are restored here. Each one is
 // checked against its committed `<row>.gpui.json`, so a reconstruction that
 // does not reproduce the recorded projection fails rather than republishes.

@@ -1,7 +1,7 @@
 # Pill
 
 Status: detailed contract
-Updated: 2026-09-27
+Updated: 2026-09-29
 
 ## 1. Purpose
 
@@ -50,7 +50,7 @@ Updated: 2026-09-27
 | `dot` | `boolean` | `false` | no | renders a leading `0.5em` status dot filled with the tone's status color (accent color when `accent` is set, `--poodle-color-text-secondary` for neutral) |
 | `title` | `string \| null` | `null` | no | optional native tooltip forwarded to the root element's `title` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
-| `dismissible` | `boolean` | `false` | no | **Web targets only** — renders a trailing dismiss button; native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
+| `dismissible` | `boolean` | `false` | no | **Web targets only** — renders a trailing dismiss button; native admission pending (`lane:native-admission`) |
 | `dismissLabel` | `string` | `"Dismiss"` | no | **Web targets only** — accessible name for the dismiss button |
 
 ### Controlled And Uncontrolled
@@ -485,8 +485,7 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
   `em` behavior with ratio-preserving metrics from a 1rem baseline until
   parent-relative inline layout exists
 - `dismissible` and `dismissLabel` are web-admitted. The portable Rust spec and
-  GPUI mapping land with the next Nucleus evidence repin
-  (`lane:pinned-source-paths`).
+  GPUI mapping remain native admission pending (`lane:native-admission`).
 
 ## 11. Parity Checklist
 
@@ -516,7 +515,7 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 |-------|-------------|-----------------|-----------|
 | `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
 | Jetstream mono font styling | current Jetstream `JsEl` text surface does not expose font-family or letter-spacing controls | allowed | implement text-family and tracking support in Jetstream, then apply `font="mono"` literally |
-| `dismissible` / `dismissLabel` are web-admitted | Nucleus receipts pin `packages/{contracts,render,gpui}` | operator 2026-09-27 | portable spec in `lane:pinned-source-paths` |
+| `dismissible` / `dismissLabel` are web-admitted | web-only until native admission | operator 2026-09-27 | native admission pending (`lane:native-admission`) |
 
 ## 13. Specimen Definitions
 
@@ -589,7 +588,7 @@ Pills with a trailing dismiss button. The accessible name comes from
 - future follow-up: add dismissible-chip semantics separately if needed
 - implemented 2026-09-27: optional dismiss control (`dismissible`,
   `dismissLabel`, `onDismiss`) is web-admitted in Svelte and React; the
-  portable spec follows with the next Nucleus evidence repin
+  portable spec remains native admission pending (`lane:native-admission`)
 
 ## Rust Spec Note
 

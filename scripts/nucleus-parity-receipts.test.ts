@@ -6,6 +6,7 @@ import { describe, expect, it } from "bun:test";
 import {
   deriveV1Receipts,
   loadNucleusManifest,
+  loadValidatedNucleusReceipts,
   loadValidatedV1Bundle,
   NUCLEUS_V1_BUNDLE_DIR,
   NUCLEUS_V1_DIRECTORY_SHA256,
@@ -96,6 +97,10 @@ describe("g16.062 Nucleus parity receipt contract", () => {
     const manifest = loadNucleusManifest(root);
     expect(JSON.parse(readFileSync(path.join(root, NUCLEUS_SCHEMA_PATH), "utf8")).properties.proof_level.enum).toEqual(["M1", "A1", "V1"]);
     expect(() => validateNucleusManifest(manifest, root)).not.toThrow();
+  });
+
+  it("validates committed receipts as frozen records without tying them to current source", () => {
+    expect(() => loadValidatedNucleusReceipts(root)).not.toThrow();
   });
 
   it("accepts a receipt only for an observed mounted M1 execution", () => {

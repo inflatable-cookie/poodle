@@ -43,12 +43,6 @@ allow = [
   "docs/knowledge/specs/archive/",
   # Historical closed-candidate release policies match exact past diffs.
   "test/package-install/scope.ts",
-  # Runtime source pinned by Nucleus receipts; comments are fixed at the next
-  # evidence repin (`lane:pinned-source-paths`).
-  "packages/render/src/lib.rs",
-  "packages/contracts/ir/src/lib.rs",
-  "packages/contracts/ir/src/shared.rs",
-  "packages/gpui/preview/tests/headless/nucleus_a11y.rs",
 ]
 
 [[retired]]
@@ -63,8 +57,6 @@ allow = [
   # Historical g16.059 certification allowlist and its planted fixtures.
   "test/package-install/scope.ts",
   "test/package-install/scope.test.ts",
-  # Runtime source pinned by Nucleus receipts (`lane:pinned-source-paths`).
-  "packages/gpui/preview/tests/headless/nucleus_a11y.rs",
 ]
 
 [[retired]]
@@ -73,4 +65,20 @@ retired = "2026-09-27"
 replacement = "The plan is Queue lanes, lane documents and plan order; leads are Queue records (lead.add)."
 owner = "docs/knowledge/README.md"
 paths = ["docs/plan.md", "docs/triage/"]
+allow = ["CHANGELOG.md"]
+
+[[retired]]
+id = "nucleus-receipt-source-pin"
+retired = "2026-09-29"
+replacement = "Nucleus receipts are frozen history for the archived Nucleus and no longer pin runtime source. See docs/knowledge/vision.md#direction. Native web-only features wait on lane:native-admission, not a receipt rewrite."
+owner = "docs/knowledge/vision.md"
+terms = [
+  "evidence repin",
+  "Nucleus evidence repin",
+  "pinned-source-paths",
+  "SOURCE_PATHS",
+  "currentSourceMatchesReceipt",
+  "pinned by Nucleus receipts",
+]
+config_keys = ["SOURCE_PATHS"]
 allow = ["CHANGELOG.md"]

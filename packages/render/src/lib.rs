@@ -8,8 +8,7 @@
 //!
 //! The g12.019 migration consolidated the former GPUI and Jetstream component
 //! tiers here after proving the node vocabulary against `Select`. Migration
-//! history and parity evidence live in
-//! `docs/roadmaps/g12/019-gpui-node-backend.md`.
+//! history lives in git; parity evidence lives with each backend.
 
 pub mod accordion;
 pub mod action_discovery_panel;

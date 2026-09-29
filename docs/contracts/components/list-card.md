@@ -3,7 +3,7 @@
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-09-27
+Updated: 2026-09-29
 
 ## 1. Purpose
 
@@ -72,7 +72,7 @@ Updated: 2026-09-27
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `title` | `string` | — | yes | primary display text |
-| `eyebrow` | `string \| null` | `null` | no | **Web targets only** — small uppercase label rendered above the title, for family/category naming on each card; renders nothing when unset. Native admission follows the next Nucleus evidence repin (`lane:pinned-source-paths`) |
+| `eyebrow` | `string \| null` | `null` | no | **Web targets only** — small uppercase label rendered above the title, for family/category naming on each card; renders nothing when unset. Native admission pending (`lane:native-admission`) |
 | `subtitle` | `string \| null` | `null` | no | secondary display text |
 | `meta` | `string \| null` | `null` | no | right-aligned metadata text |
 | `href` | `string \| null` | `null` | no | when present and not disabled/selectable, renders a real link root |
@@ -501,7 +501,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - Leading snippet provides default container styling (circle or rounded-square)
 - Trailing snippet is unstyled pass-through
 - Badges and corner snippets render inside the `header-accessories` cluster inline with the title
-- Eyebrow text or the `eyebrowContent` snippet renders above the title as the first body child; `eyebrow` is web-admitted and the portable spec gains the field at the next Nucleus evidence repin (`lane:pinned-source-paths`)
+- Eyebrow text or the `eyebrowContent` snippet renders above the title as the first body child; `eyebrow` is web-admitted and the portable spec remains native admission pending (`lane:native-admission`)
 - Footer snippet renders below subtitle for counter icons
 - Built-in context menu: when `contextMenuItems` is non-empty the card owns a context-menu overlay (right-click, or leading-trigger via `contextMenuTrigger="leading"`), with `ContextMenu`/`Shift+F10` keyboard support and `onContextAction(value)`; a standalone ContextMenu wrapper remains an alternative for fully external ownership
 - `data-highlighted` reflects the `highlighted` prop on root
@@ -559,7 +559,7 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | tabular-nums font variant | may require GPUI font feature flag | allowed | match where possible |
 | GPUI active bar is a child rectangle with rounded leading corners, not an inset shadow | GPUI's `BoxShadow` has no inset flag, so the bar cannot be clipped by the card's radius as it is on the web and Jetstream | allowed | revisit if gpui gains inset shadows |
 | ListCardCounter helper | Svelte-specific helper, GPUI may inline | allowed | match API if feasible |
-| `eyebrow` is web-admitted | Nucleus receipts pin `packages/{contracts,render,gpui}` | operator 2026-09-27 | portable spec in `lane:pinned-source-paths` |
+| `eyebrow` is web-admitted | web-only until native admission | operator 2026-09-27 | native admission pending (`lane:native-admission`) |
 
 ## 14. Specimen Definitions
 

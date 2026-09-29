@@ -145,32 +145,32 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
       "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
   },
   text: {
-    wrap: "operator ruling 2026-09-27: web-admitted; portable spec waits for the next Nucleus evidence repin",
+    wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
   },
   code: {
-    wrap: "operator ruling 2026-09-27: web-admitted; portable spec waits for the next Nucleus evidence repin",
+    wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
   },
   "sidebar-nav": {
     endLabel:
-      "operator ruling 2026-09-27: web-admitted item field; recorded here for the next Nucleus evidence repin",
+      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
     contextMenuItems:
-      "operator ruling 2026-09-27: web-admitted item field; recorded here for the next Nucleus evidence repin",
+      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
     contextMenuAriaLabel:
-      "operator ruling 2026-09-27: web-admitted item field; recorded here for the next Nucleus evidence repin",
+      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
   },
   "list-card": {
     eyebrow:
-      "operator ruling 2026-09-27: web-admitted; ListCardSpec gains eyebrow at the next Nucleus evidence repin",
+      "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
   },
   pill: {
     dismissible:
-      "operator ruling 2026-09-27: web-admitted Public Prop; portable spec waits for the next Nucleus evidence repin",
+      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
     dismissLabel:
-      "operator ruling 2026-09-27: web-admitted Public Prop; portable spec waits for the next Nucleus evidence repin",
+      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
   },
   keyboard: {
     computerBaseNote:
-      "planner ruling 2026-09-28: portable computer-key mapping; web-admitted until the headless keyboard machine gains it at the next Nucleus evidence repin",
+      "planner ruling 2026-09-28: portable computer-key mapping; web-admitted until the headless keyboard machine gains it (`lane:native-admission`)",
   },
 };
 

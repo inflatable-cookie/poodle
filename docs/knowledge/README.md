@@ -26,6 +26,6 @@ Product documentation for users or consumers lives outside `docs/knowledge/`:
 | Developer guides and pattern recipes | [`docs/guides/`](../guides/README.md) |
 | Release notes | [`docs/release-notes/`](../release-notes/README.md) |
 
-Executable evidence (generated receipts, ledgers and census output checked by
-repository scripts) lives in [`docs/evidence/`](../evidence/README.md). It
-records what was observed and is regenerated, never hand-edited.
+Executable evidence lives in [`docs/evidence/`](../evidence/README.md). GPUI
+census output is regenerated, never hand-edited. Nucleus receipts are frozen
+history: they still validate, and they no longer pin current source.
