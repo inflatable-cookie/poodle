@@ -14,14 +14,22 @@ import {
   symlinkSync,
   writeFileSync,
 } from "node:fs";
-import { createServer } from "node:net";
-import { tmpdir } from "node:os";
+import { createConnection, createServer } from "node:net";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { findRepoRoot } from "./core-build";
 
 const repoRoot = findRepoRoot();
+
+// Scratch lives under `/tmp`, not `os.tmpdir()`. On this host the shared temp
+// root had accumulated ~237k stale entries (`ls` of it measured 45-48s), and
+// bun walks the entry-heavy ancestor on startup: every spawned build child
+// (`bun x tsc`, `svelte-package`, `vite`) paid 7-12s and a cold preview build
+// blew past PREVIEW_TIMEOUT_MS. `/tmp` held ~3k entries and spawned bun in
+// ~0.03s; the same test dropped from 397s to 127s. Linux CI already uses /tmp
+// and this repository does not target Windows.
+const SCRATCH_BASE = "/tmp";
 
 const PLANTED_EXPORT = "installCodeEditorFocusEntry";
 const STALE_EDITOR_MARKER = "g18_015_stale_framework_dist";
@@ -39,7 +47,15 @@ const SVELTE_ENGINE_SOURCE = "packages/svelte/components/src/code-editor-engine.
 const REACT_ENGINE_SOURCE = "packages/react/components/src/code-editor-engine.ts";
 
 const RUN_TIMEOUT_MS = 120_000;
-const PREVIEW_TIMEOUT_MS = 360_000;
+// The preview selectors build core + one shell package before Vite listens, so
+// their wait covers the cold build. Measured 2026-09-29 on an 18-core host with
+// scratch under `/tmp` and the readiness loops spawn-free: the whole file was
+// 129s at load 30 and 314-323s at load 52-66. The longest single selector wait
+// is a fraction of that, and the old 360s left only ~1.1x margin on the total,
+// so 600s restores >2x on the worst observed wait (and >4x on the load-30 run)
+// while a real hang still fails inside the test cap. Do not grow this again
+// without a fresh measurement.
+const PREVIEW_TIMEOUT_MS = 600_000;
 const MODULE_FETCH_TIMEOUT_MS = 30_000;
 const CLEANUP_TIMEOUT_MS = 60_000;
 
@@ -122,7 +138,7 @@ function copyPackageNodeModules(fromRoot: string, toRoot: string): void {
 }
 
 function createFixture(): string {
-  const parent = mkdtempSync(join(tmpdir(), "poodle-preview-preflight-"));
+  const parent = mkdtempSync(join(SCRATCH_BASE, "poodle-preview-preflight-"));
   const root = join(parent, "checkout");
   const added = run("git", ["worktree", "add", "--detach", root, "HEAD"], repoRoot, 60_000);
   if (added.status !== 0) {
@@ -191,6 +207,27 @@ function listenersOn(port: number): number[] {
     .filter(Boolean)
     .map(Number)
     .filter((pid) => Number.isInteger(pid) && pid > 0);
+}
+
+// The readiness loops used to call `listenersOn` every 150ms. Each `lsof` is a
+// whole-host listen-table scan that measured 1.1-3.3s on a loaded 18-core host
+// (load ~50), so the poll itself became the load: the wait-for-listen loop spent
+// almost every moment inside a 2.5s `lsof`, which slowed the concurrent package
+// build and could push the selector past its deadline. A connect probe answers
+// "is something listening on this port?" without spawning anything. Keep
+// `listenersOn` where the pid is needed (pre-spawn check, kill, cleanup).
+function portListening(port: number, timeoutMs = 1_000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = createConnection({ host: "127.0.0.1", port });
+    const finish = (value: boolean) => {
+      socket.destroy();
+      resolve(value);
+    };
+    socket.setTimeout(timeoutMs);
+    socket.once("connect", () => finish(true));
+    socket.once("timeout", () => finish(false));
+    socket.once("error", () => finish(false));
+  });
 }
 
 function isAlive(pid: number): boolean {
@@ -354,7 +391,7 @@ async function waitForListener(
         `selector exited ${item.child.exitCode ?? item.child.signalCode} before listen\n${item.log.text()}`,
       );
     }
-    const listening = listenersOn(item.port).length > 0;
+    const listening = await portListening(item.port);
     const fresh = distHasExport(root);
     if (listening && requireFreshCore && !fresh) {
       throw new Error(`Vite listened on ${item.port} before core dist exported ${PLANTED_EXPORT}\n${item.log.text()}`);
@@ -378,12 +415,12 @@ async function waitForExit(item: OwnedProcess, timeout: number): Promise<number>
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
     if (item.child.exitCode !== null) {
-      if (listenersOn(item.port).length > 0) {
+      if (await portListening(item.port)) {
         throw new Error(`builder failed but Vite still listened on ${item.port}\n${item.log.text()}`);
       }
       return item.child.exitCode;
     }
-    if (listenersOn(item.port).length > 0) {
+    if (await portListening(item.port)) {
       throw new Error(`builder failed but Vite still listened on ${item.port}\n${item.log.text()}`);
     }
     await sleep(100);
@@ -428,7 +465,7 @@ async function fetchFirstOk(urls: string[]): Promise<{ url: string; body: string
 }
 
 async function importNamed(source: string, name: string): Promise<"present" | "missing"> {
-  const dir = mkdtempSync(join(tmpdir(), "poodle-served-mod-"));
+  const dir = mkdtempSync(join(SCRATCH_BASE, "poodle-served-mod-"));
   const modPath = join(dir, "mod.mjs");
   const probePath = join(dir, "probe.mjs");
   writeFileSync(modPath, source);

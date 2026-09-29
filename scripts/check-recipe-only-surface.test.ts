@@ -5,54 +5,37 @@
  * The gate (scripts/check-recipe-only-surface.ts) treats superseded specs
  * under docs/knowledge/specs/archive/ as historical, and fails on any retired
  * recipe-token CSS-variable reference in every other scanned file. The forbidden literals below are assembled at runtime so the
- * gate never trips on its own test source. These tests run the gate
- * hermeticly: the script is copied into a throwaway mini-repo whose only
- * files are the planted fixtures, so the test never mutates the real working
- * tree and proves both directions:
+ * gate never trips on its own test source. These tests run the gate in-process
+ * against a throwaway mini-repo whose only files are the planted fixtures, so
+ * the test never mutates the real working tree and proves both directions:
  *
  * 1. an active-path reference under docs/guides/ still fails the gate, while
  *    the same wording under the specs archive stays exempt — archived
  *    content is never edited to satisfy a gate;
  * 2. a repo whose only retired-token references live under the historical
  *    prefix is green.
+ *
+ * The fixtures used to spawn `bun <copied-script>` once per case. On a host
+ * whose OS temp root had accumulated ~237k entries, each spawn cost 7-9s
+ * (bun walks the entry-heavy ancestor) and both cases died at bun's 5s
+ * default — Queue's gate for #59. Calling the exported scan directly removes
+ * the spawn: measured 2026-09-29 at load ~50, each case runs in <5ms, so the
+ * 5s default keeps >1000x headroom and no per-test cap is needed.
  */
 
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { afterAll, expect, test } from "bun:test";
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(scriptDir, "..");
-const gateSource = fs.readFileSync(path.join(repoRoot, "scripts", "check-recipe-only-surface.ts"), "utf8");
+import { scanRetiredTreatment } from "./check-recipe-only-surface.ts";
 
 const tempRoots: string[] = [];
 
 function fixtureRepo(): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "poodle-recipe-drift-"));
   tempRoots.push(root);
-  fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
-  fs.writeFileSync(path.join(root, "scripts", "check-recipe-only-surface.ts"), gateSource);
   return root;
-}
-
-function runGate(root: string): { status: number; output: string } {
-  try {
-    const output = execFileSync("bun", [path.join(root, "scripts", "check-recipe-only-surface.ts")], {
-      cwd: root,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    return { status: 0, output };
-  } catch (error) {
-    const execError = error as { status?: number; stdout?: string | Buffer; stderr?: string | Buffer };
-    return {
-      status: execError.status ?? 1,
-      output: `${execError.stdout?.toString() ?? ""}${execError.stderr?.toString() ?? ""}`,
-    };
-  }
 }
 
 // Assembled at runtime: a literal occurrence in this file would trip the
@@ -66,7 +49,7 @@ afterAll(() => {
   }
 });
 
-test("an active-path reference under docs/guides/ still fails the gate", () => {
+test("an active-path reference under docs/guides/ still fails the gate", async () => {
   const root = fixtureRepo();
   const guidesDir = path.join(root, "docs", "guides");
   fs.mkdirSync(guidesDir, { recursive: true });
@@ -77,20 +60,20 @@ test("an active-path reference under docs/guides/ still fails the gate", () => {
   fs.mkdirSync(archiveDir, { recursive: true });
   fs.writeFileSync(path.join(archiveDir, "legacy-audit.md"), `# Legacy\n\n- ${plantedLine}\n`);
 
-  const result = runGate(root);
+  const result = await scanRetiredTreatment(root);
 
   expect(result.status).not.toBe(0);
   expect(result.output).toContain("docs/guides/planted.md");
   expect(result.output).not.toContain("docs/knowledge/specs/archive/legacy-audit.md");
 });
 
-test("archived spec content alone is green (no active-path reference)", () => {
+test("archived spec content alone is green (no active-path reference)", async () => {
   const root = fixtureRepo();
   const archiveDir = path.join(root, "docs", "knowledge", "specs", "archive");
   fs.mkdirSync(archiveDir, { recursive: true });
   fs.writeFileSync(path.join(archiveDir, "legacy-audit.md"), `# Legacy\n\n- ${plantedLine}\n`);
 
-  const result = runGate(root);
+  const result = await scanRetiredTreatment(root);
 
   expect(result.status).toBe(0);
 });

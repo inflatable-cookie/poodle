@@ -1,17 +1,14 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
-  checkoutRoot,
   DOCS_DEPS_HINT,
   docsDepsInstalled,
+  runDocsDepsPreflight,
 } from "./docs-deps-preflight.ts";
 
-const repoRoot = checkoutRoot();
-const script = join(repoRoot, "scripts/docs-deps-preflight.ts");
 const plantRoots: string[] = [];
 
 afterAll(() => {
@@ -23,16 +20,16 @@ afterAll(() => {
 function initPlant(): string {
   const root = mkdtempSync(join(tmpdir(), "poodle-docs-deps-"));
   plantRoots.push(root);
-  const git = spawnSync("git", ["init", "--quiet"], { cwd: root, encoding: "utf8" });
-  if (git.status !== 0) {
-    throw new Error(`git init failed: ${git.stderr}`);
-  }
   writeFileSync(join(root, "bun.lock"), "{}\n");
   return root;
 }
 
-function runPreflight(cwd: string): ReturnType<typeof spawnSync> {
-  return spawnSync("bun", [script], { cwd, encoding: "utf8" });
+// In-process: each case used to spawn `bun <script>`, which cost ~11s on a
+// host whose OS temp root had grown to ~237k entries (bun walks the
+// entry-heavy ancestor) and broke both the 5s default and the explicit 5s
+// bound below. Measured 2026-09-29 at load ~50: each case now runs in <1ms.
+function runPreflight(cwd: string): { status: number; stderr: string } {
+  return runDocsDepsPreflight(cwd);
 }
 
 describe("docs:check missing-deps preflight", () => {
