@@ -6,8 +6,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection,
+    LayoutSizing, MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
@@ -205,6 +205,13 @@ pub fn pill_with_remove(
         remove.id = Some("poodle-pill-remove".to_string());
         remove.a11y.role = Some(NodeRole::Button);
         remove.a11y.label = Some(spec.dismiss_label.clone());
+        remove.a11y.tab_index = Some(0);
+        remove.interaction.focusable = true;
+        remove.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.0625),
+        });
         remove.style.descriptor.layout.direction = LayoutDirection::Row;
         remove.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         remove.style.descriptor.cursor = CursorHint::Pointer;
@@ -258,6 +265,13 @@ mod tests {
 
         assert_eq!(remove.a11y.role, Some(NodeRole::Button));
         assert_eq!(remove.a11y.label.as_deref(), Some("Dismiss"));
+        assert_eq!(remove.a11y.tab_index, Some(0));
+        assert!(remove.interaction.focusable);
+        let ring = remove.style.focus_ring.expect("dismiss focus ring");
+        assert_eq!(
+            ring.color,
+            ctx.theme().resolve_color("color.accent.focusRing")
+        );
         (remove
             .interaction
             .on_activate

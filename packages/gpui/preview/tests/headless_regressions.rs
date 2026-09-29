@@ -1019,6 +1019,7 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             &ctx,
         );
         normal_code.id = Some("admit-code-wrap-normal".into());
+        normal_code.style.max_width = Some(72.0);
         let mut anywhere_code = poodle_render::code(
             &CodeSpec::new()
                 .with_content(long)
@@ -1027,10 +1028,21 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             &ctx,
         );
         anywhere_code.id = Some("admit-code-wrap-anywhere".into());
-        assert!(normal_code.style.no_wrap);
+        anywhere_code.style.max_width = Some(72.0);
+        assert!(normal_code.style.text_wrap);
+        assert!(!normal_code.style.no_wrap);
         assert!(!normal_code.style.wrap_anywhere);
         assert!(anywhere_code.style.wrap_anywhere);
         assert!(!anywhere_code.style.no_wrap);
+
+        let mut spaced_code = poodle_render::code(
+            &CodeSpec::new()
+                .with_content("npm install extra packages")
+                .with_inline(true),
+            &ctx,
+        );
+        spaced_code.id = Some("admit-code-wrap-normal-spaced".into());
+        spaced_code.style.max_width = Some(72.0);
 
         let block_source = format!("fn main() {{\n    {long}\n}}");
         let mut normal_block = poodle_render::code(
@@ -1108,6 +1120,9 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             dismiss.a11y.label.as_deref(),
             Some("Remove filter: Videos")
         );
+        assert_eq!(dismiss.a11y.tab_index, Some(0));
+        assert!(dismiss.interaction.focusable);
+        assert!(dismiss.style.focus_ring.is_some());
         (dismiss
             .interaction
             .on_activate
@@ -1141,6 +1156,7 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             .child(spaced_text)
             .child(normal_code)
             .child(anywhere_code)
+            .child(spaced_code)
             .child(normal_block)
             .child(anywhere_block)
             .child(card)
@@ -1156,10 +1172,31 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         let anywhere_code_paint =
             poodle_gpui_node_backend::painted_node_for("admit-code-wrap-anywhere")
                 .expect("painted anywhere code");
-        assert!(normal_code_paint.no_wrap);
+        assert!(normal_code_paint.text_wrap);
+        assert!(!normal_code_paint.no_wrap);
         assert!(!normal_code_paint.wrap_anywhere);
         assert!(anywhere_code_paint.wrap_anywhere);
         assert!(!anywhere_code_paint.no_wrap);
+        let normal_code_bounds = poodle_gpui_node_backend::bounds_for("admit-code-wrap-normal")
+            .expect("normal inline code bounds");
+        let anywhere_code_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-code-wrap-anywhere")
+                .expect("anywhere inline code bounds");
+        assert!(
+            anywhere_code_bounds.size.height > normal_code_bounds.size.height,
+            "inline wrap=anywhere must mid-token wrap; wrap=normal must not. normal={:?} anywhere={:?}",
+            normal_code_bounds.size,
+            anywhere_code_bounds.size
+        );
+        let spaced_code_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-code-wrap-normal-spaced")
+                .expect("spaced inline code bounds");
+        assert!(
+            spaced_code_bounds.size.height > normal_code_bounds.size.height,
+            "inline wrap=normal must still wrap at spaces. spaced={:?} identifier={:?}",
+            spaced_code_bounds.size,
+            normal_code_bounds.size
+        );
 
         let anywhere_text_paint =
             poodle_gpui_node_backend::painted_node_for("admit-text-wrap-anywhere")
@@ -1234,9 +1271,22 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         );
         assert_eq!(pill_paint.a11y_role, None);
 
-        driver.pointer_activate_id("poodle-pill-remove");
+        driver.wait_for_focus_handle("poodle-pill-remove");
+        tab_until_focused(&mut driver, "poodle-pill-remove");
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for("poodle-pill-remove").is_some(),
+            "focused dismiss must paint its focus ring",
+        );
+        driver.dispatch_key_raw("enter");
         driver.draw_frame();
         assert_eq!(*dismisses.lock().unwrap(), 2);
+        driver.dispatch_key_raw("space");
+        driver.draw_frame();
+        assert_eq!(*dismisses.lock().unwrap(), 3);
+
+        driver.pointer_activate_id("poodle-pill-remove");
+        driver.draw_frame();
+        assert_eq!(*dismisses.lock().unwrap(), 4);
 
         poodle_gpui_node_backend::take_probe_capture();
     });

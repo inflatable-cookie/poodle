@@ -373,7 +373,8 @@ face reads larger or smaller than the default sans family.
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
 - `wrap="anywhere"` maps through the shared `wrap_anywhere` channel so long
-  identifiers mid-token wrap. Unset and `normal` leave source `no_wrap`.
+  identifiers mid-token wrap. Block source `normal` keeps `white-space:pre`
+  (`no_wrap`). Inline `normal` uses the same space-break path as Text.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`

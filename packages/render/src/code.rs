@@ -53,7 +53,10 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
                 s.text_wrap = true;
                 s.wrap_anywhere = true;
             } else {
-                s.no_wrap = true;
+                // Svelte inline <code> has no nowrap/pre rule. wrap=normal
+                // keeps space breaks and forbids mid-token breaks — the same
+                // path as Text wrap=normal.
+                s.text_wrap = true;
             }
             if spec.inline_variant == CodeInlineVariant::Default {
                 let inline_bg = mix_srgb(panel, elevated, 0.72);
@@ -263,7 +266,8 @@ mod tests {
             &ctx,
         );
         assert!(!unset.style.wrap_anywhere);
-        assert!(unset.style.no_wrap);
+        assert!(unset.style.text_wrap);
+        assert!(!unset.style.no_wrap);
     }
 
     #[test]
