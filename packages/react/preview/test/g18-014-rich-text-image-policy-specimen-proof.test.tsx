@@ -15,7 +15,7 @@ import {
   RICH_TEXT_PICKED_IMAGE_ALT,
   RICH_TEXT_PICKED_IMAGE_SRC,
   countRichTextImages,
-} from "../../../svelte/preview/src/specimens/web-editor-documents";
+} from "@poodle/svelte-preview/specimens/web-editor-documents";
 
 const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 

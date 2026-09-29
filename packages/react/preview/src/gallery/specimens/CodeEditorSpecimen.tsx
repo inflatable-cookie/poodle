@@ -9,7 +9,7 @@ import {
   CODE_DIAGNOSTICS,
   CODE_JSON_SOURCE,
   CODE_TYPESCRIPT_SOURCE,
-} from "../../../../../svelte/preview/src/specimens/web-editor-documents";
+} from "@poodle/svelte-preview/specimens/web-editor-documents";
 
 // Consumer-owned language registry (g18.012): this preview app installs
 // exactly the grammar packages it names here. Poodle carries no grammar

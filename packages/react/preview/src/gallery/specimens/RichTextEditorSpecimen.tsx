@@ -20,7 +20,7 @@ import {
   RICH_TEXT_SPARSE_HEADING_TOOLBAR,
   RICH_TEXT_STANDARD_DOCUMENT,
   countRichTextImages,
-} from "../../../../../svelte/preview/src/specimens/web-editor-documents";
+} from "@poodle/svelte-preview/specimens/web-editor-documents";
 
 /** Consumers choose commands, not their icons or grouping. */
 const SUBSET_TOOLBAR: readonly RichTextCommand[] = ["bold", "italic", "link"];

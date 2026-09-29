@@ -9,6 +9,11 @@ export default defineConfig({
   build: { chunkSizeWarningLimit: 2200 },
   resolve: {
     alias: {
+      // The gallery consumes the canonical Svelte preview catalogue; the alias
+      // keeps those imports independent of this file's depth.
+      "@poodle/svelte-preview": fileURLToPath(
+        new URL("../../svelte/preview/src", import.meta.url),
+      ),
       "@inflatable-cookie/poodle-react/markdown": fileURLToPath(
         new URL("../components/src/markdown.ts", import.meta.url),
       ),

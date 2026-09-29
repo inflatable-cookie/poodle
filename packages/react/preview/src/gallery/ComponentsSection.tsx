@@ -5,7 +5,7 @@ import {
   componentsBySection,
   isFamilyDisclosed,
   matchesCatalogueSearch,
-} from "../../../../svelte/preview/src/catalogue-nav";
+} from "@poodle/svelte-preview/catalogue-nav";
 import { CatalogueLanding } from "./CatalogueLanding";
 import { ComponentPage } from "./ComponentPage";
 import { specimenMap } from "./specimen-map";

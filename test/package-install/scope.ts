@@ -692,6 +692,24 @@ export function forbiddenCertificationSurfaceLabels(
   return [...new Set(filteredLabels)];
 }
 
+/**
+ * A forbidden workflow surface is not a version or release leak: it means the
+ * range edits CI, which only an approved lane may do. Say that plainly instead
+ * of the generic "forbidden workflow surface" label so the next worker does not
+ * have to read the classifier to learn the rule. Every other surface keeps the
+ * version/release wording.
+ */
+export function forbiddenSurfaceRejectionMessage(
+  forbidden: readonly { path: string; surface: string }[],
+): string {
+  const parts = forbidden.map(({ path, surface }) =>
+    surface === "workflow"
+      ? `${path}: workflow surfaces require an approved lane`
+      : `forbidden ${surface} surface: ${path}`,
+  );
+  return `certification scope rejected ${parts.join(", ")}`;
+}
+
 function looksLikeCargoManifest(text: string): boolean {
   return text.split(/\r?\n/).some((line) => /^\s*\[[^\]]+\]\s*(?:#.*)?$/.test(line));
 }
@@ -1983,11 +2001,7 @@ async function assertClosedCandidateRange(
     })),
   );
   if (forbidden.length > 0) {
-    throw new Error(
-      `certification scope rejected forbidden ${forbidden
-        .map(({ surface, path }) => `${surface} surface: ${path}`)
-        .join(", ")}`,
-    );
+    throw new Error(forbiddenSurfaceRejectionMessage(forbidden));
   }
   await assertFrozenCandidateRange(
     checkoutRoot,
@@ -2159,11 +2173,7 @@ export async function assertInstalledScope(
     }
   }
   if (forbidden.length > 0) {
-    throw new Error(
-      `certification scope rejected forbidden ${forbidden
-        .map(({ surface, path }) => `${surface} surface: ${path}`)
-        .join(", ")}`,
-    );
+    throw new Error(forbiddenSurfaceRejectionMessage(forbidden));
   }
   if (policy?.requiresFrozenReleaseInputs) {
     await assertClosedCandidateRange(
