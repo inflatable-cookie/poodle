@@ -1285,12 +1285,7 @@ const consumerManifest = {
     // grammars stay absent from this isolated install graph.
     "@codemirror/lang-json": "6.0.2",
   },
-  overrides: {
-    ...tarballDependencies,
-    // vitest@4.1.10 depends on std-env ^4.0.0-rc.1. Keep the consumer on the
-    // 4.2.0 tarball bun.lock already uses; npm latest 4.3.0 404'd on 2026-09-29.
-    "std-env": "4.2.0",
-  },
+  overrides: tarballDependencies,
   devDependencies: {
     "@sveltejs/vite-plugin-svelte": "6.2.1",
     "@testing-library/react": "16.3.0",
