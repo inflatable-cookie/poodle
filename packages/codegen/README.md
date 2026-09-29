@@ -41,13 +41,12 @@ cargo run --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- \
   Gates compose only `*:check` selectors; `ir:build` is never part of a gate.
   `effigy ci:rust` runs `ir:check` and `catalogue:check` so a `GENERATOR_VERSION`
   restamp fails the board Queue runs, not only the optional selectors.
-- Production `--out` directories are exclusive: each selected target owns
-  a distinct subdirectory, and its orphan sweep deletes every top-level
-  file it did not emit (a stray `.rs` in a TypeScript catalogue root is
-  stale). Selecting two targets that share an `output_root` string in one
-  run is a configuration error. The protecting write/check helpers exist
-  for tests that plant two targets in one directory; they keep exact
-  sibling paths, not an extension glob.
+- Targets that share an `output_root` string (`shell-scene` / `shell-rust`,
+  `specimen-ts` / `specimen-rust`, and the catalogue and machine pairs)
+  protect each other's **exact emit paths** on every CLI invocation, so
+  two separate `--target` runs against the same `--out` keep sibling
+  artifacts and still delete unclaimed garbage (a stray `stale.rs` is
+  not the sibling's path). Targets with a unique root stay exclusive.
 - The remaining targets (JSON schema, registry, conformance vectors, docs
   fragments) are a follow-up card; the machinery here is target-independent.
 

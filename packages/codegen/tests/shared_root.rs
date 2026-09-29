@@ -4,6 +4,7 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
 
 use poodle_codegen::{
     check_outputs, check_outputs_protecting, colliding_output_roots, targets, write_outputs,
@@ -177,7 +178,7 @@ fn shell_and_specimen_pairs_collide_on_their_shared_output_root_strings() {
     assert_eq!(
         shell,
         vec![("generated", vec!["shell-scene", "shell-rust"])],
-        "selecting both shell targets in one run must refuse"
+        "selecting both shell targets shares the generated/ root string"
     );
 
     let specimens = colliding_output_roots([
@@ -187,6 +188,119 @@ fn shell_and_specimen_pairs_collide_on_their_shared_output_root_strings() {
     assert_eq!(
         specimens,
         vec![("generated/specimens", vec!["specimen-ts", "specimen-rust"])],
-        "selecting both specimen targets in one run must refuse"
+        "selecting both specimen targets shares the generated/specimens root string"
+    );
+}
+
+const SHELL_FIXTURE: &str = "packages/codegen/fixtures/shell-model.json";
+
+fn repo_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
+fn run_cli(out: &std::path::Path, target: &str, check: bool) -> std::process::Output {
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let mut command = Command::new(bin);
+    command
+        .args([SHELL_FIXTURE, "--out"])
+        .arg(out)
+        .args(["--target", target])
+        .current_dir(repo_root());
+    if check {
+        command.arg("--check");
+    }
+    command.output().expect("bin runs")
+}
+
+#[test]
+fn cli_sequential_shell_targets_keep_siblings_and_remove_orphans() {
+    let out = scratch("cli-shell-shared");
+    let generated = out.join("generated");
+
+    let first = run_cli(&out, "shell-scene", false);
+    assert!(
+        first.status.success(),
+        "shell-scene write failed: {}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    assert!(generated.join("preview-shell.ts").exists());
+
+    let second = run_cli(&out, "shell-rust", false);
+    assert!(
+        second.status.success(),
+        "shell-rust write failed: {}",
+        String::from_utf8_lossy(&second.stderr)
+    );
+    assert!(
+        generated.join("preview-shell.ts").exists(),
+        "shell-scene artifact must survive a later shell-rust write to the same --out"
+    );
+    assert!(generated.join("preview-shell.rs").exists());
+
+    let check_ts = run_cli(&out, "shell-scene", true);
+    assert!(
+        check_ts.status.success(),
+        "shell-scene check must accept the sibling rust file: {}",
+        String::from_utf8_lossy(&check_ts.stderr)
+    );
+    let check_rs = run_cli(&out, "shell-rust", true);
+    assert!(
+        check_rs.status.success(),
+        "shell-rust check must accept the sibling ts file: {}",
+        String::from_utf8_lossy(&check_rs.stderr)
+    );
+
+    fs::write(generated.join("orphan.json"), "{}\n").expect("plant unclaimed orphan");
+    fs::write(
+        generated.join("stale.rs"),
+        "pub const STALE: bool = true;\n",
+    )
+    .expect("plant same-extension orphan");
+
+    let rewrite = run_cli(&out, "shell-scene", false);
+    assert!(
+        rewrite.status.success(),
+        "shell-scene rewrite failed: {}",
+        String::from_utf8_lossy(&rewrite.stderr)
+    );
+    assert!(generated.join("preview-shell.ts").exists());
+    assert!(generated.join("preview-shell.rs").exists());
+    assert!(
+        !generated.join("orphan.json").exists(),
+        "unclaimed garbage is still an orphan"
+    );
+    assert!(
+        !generated.join("stale.rs").exists(),
+        "a stray .rs that is not the sibling's exact path is still an orphan"
+    );
+
+    fs::write(
+        generated.join("stale.rs"),
+        "pub const STALE: bool = true;\n",
+    )
+    .expect("replant same-extension orphan");
+    let before = fs::read_to_string(generated.join("preview-shell.rs")).expect("sibling bytes");
+    let check_orphan = run_cli(&out, "shell-scene", true);
+    assert!(
+        !check_orphan.status.success(),
+        "stale.rs must fail shell-scene check"
+    );
+    let stderr = String::from_utf8_lossy(&check_orphan.stderr);
+    assert!(
+        stderr.contains("stale.rs"),
+        "check must name the real orphan: {stderr}"
+    );
+    assert!(
+        !stderr.contains("preview-shell.rs"),
+        "check must not treat the sibling as stale: {stderr}"
+    );
+    assert_eq!(
+        fs::read_to_string(generated.join("preview-shell.rs")).expect("sibling unchanged"),
+        before,
+        "check mode never writes"
+    );
+    assert!(
+        generated.join("stale.rs").exists(),
+        "check mode must not delete the planted orphan"
     );
 }

@@ -17,8 +17,9 @@
 //!   classification, and stale-orphan detection. Structurally incapable of
 //!   writing.
 //! - [`orphan`] — top-level scan and exact-path sibling protection so two
-//!   targets that share one concrete directory do not delete each other's
-//!   artifacts. Production per-platform roots stay exclusive.
+//!   targets that share one output-root string (including sequential CLI
+//!   `--target` runs against the same `--out`) do not delete each other's
+//!   artifacts. A unique root stays exclusive.
 //! - [`write`] — write mode: materializes [`GeneratedFile`]s and deletes
 //!   stale orphans.
 //! - [`model`] — load and validate a serialized `IrModel`.
