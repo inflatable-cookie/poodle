@@ -49,22 +49,25 @@ pub struct SidebarNavHandlers {
 
 /// Escapes a host value for use inside a generated element id.
 ///
-/// `%` becomes `%25`, `~` becomes `%7E`, and whitespace becomes its `%XX`
-/// form; every other character passes through unchanged. The escape is
-/// injective, and its output never contains a raw `~` or whitespace — which
-/// is what keeps the item and end-label id namespaces disjoint for arbitrary
-/// values (see [`sidebar_nav_item_end_label_id`]) and keeps `described_by`
-/// (a space-separated id list) well-formed.
+/// `%` becomes `%25`, `~` becomes `%7E`, and every ASCII whitespace
+/// character — space, tab, line feed, vertical tab, form feed, carriage
+/// return — becomes its `%XX` form; every other character passes through
+/// unchanged. The escape is injective, and its output never contains a raw
+/// `~` or whitespace — which is what keeps the item and end-label id
+/// namespaces disjoint for arbitrary values (see
+/// [`sidebar_nav_item_end_label_id`]) and keeps `described_by` (a
+/// space-separated id list) well-formed: no whitespace character, including
+/// the control-whitespace ones, survives to split the reference.
 fn escape_id_fragment(value: &str) -> String {
     let mut escaped = String::with_capacity(value.len());
     for character in value.chars() {
         match character {
             '%' => escaped.push_str("%25"),
             '~' => escaped.push_str("%7E"),
-            ' ' => escaped.push_str("%20"),
-            '\t' => escaped.push_str("%09"),
-            '\n' => escaped.push_str("%0A"),
-            '\r' => escaped.push_str("%0D"),
+            ' ' | '\t' | '\n' | '\r' | '\u{0B}' | '\u{0C}' => {
+                escaped.push('%');
+                escaped.push_str(&format!("{:02X}", character as u32));
+            }
             other => escaped.push(other),
         }
     }
@@ -568,8 +571,36 @@ mod tests {
         assert_eq!(escape_id_fragment("a~b"), "a%7Eb");
         assert_eq!(escape_id_fragment("a b"), "a%20b");
         assert_ne!(escape_id_fragment("a%7Eb"), escape_id_fragment("a~b"));
-        assert!(!escape_id_fragment("a~b %c").contains('~'));
-        assert!(!escape_id_fragment("a~b %c").contains(' '));
+
+        // Every ASCII whitespace character — including vertical tab and form
+        // feed — is encoded, so a described_by reference never splits and no
+        // control byte survives into an id.
+        for (raw, encoded) in [
+            (' ', "%20"),
+            ('\t', "%09"),
+            ('\n', "%0A"),
+            ('\r', "%0D"),
+            ('\u{0B}', "%0B"),
+            ('\u{0C}', "%0C"),
+        ] {
+            let value = format!("a{raw}b");
+            let escaped = escape_id_fragment(&value);
+            assert_eq!(escaped, format!("a{encoded}b"));
+            assert!(!escaped.chars().any(char::is_whitespace));
+            assert_eq!(
+                sidebar_nav_item_end_label_id(&value),
+                format!("sidebar-nav-a{encoded}b~end-label")
+            );
+        }
+        let vt = Item::new("vt\u{0B}item", "Vertical tab").with_end_label("1");
+        let ff = Item::new("ff\u{0C}item", "Form feed").with_end_label("2");
+        let node = sidebar_nav(&spec_with(vec![vt, ff]), &ctx, None);
+        let vt_item = find(&node, "sidebar-nav-vt%0Bitem").expect("vt item id escapes the control byte");
+        assert_eq!(
+            vt_item.a11y.described_by.as_deref(),
+            Some("sidebar-nav-vt%0Bitem~end-label")
+        );
+        assert!(find(&node, "sidebar-nav-ff%0Citem~end-label").is_some());
     }
 
     #[test]

@@ -36467,7 +36467,73 @@ fn sidebar_menu_tree(me: &Arc<SidebarMenuHost>) -> Node {
 }
 
 
-/// SidebarNav's per-item context menu: secondary click and the keyboard menu
+/// Control-whitespace item values: vertical tab and form feed are ASCII
+/// whitespace, so the generated ids must encode them or the space-separated
+/// `described_by` reference would split into bogus ids.
+#[test]
+fn sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids() {
+    use poodle_specs::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
+
+    run_headless(|cx| {
+        let spec = SidebarNavSpec::new(vec![SidebarNavGroup::new(
+            "control",
+            vec![
+                SidebarNavItem::new("vt\u{0B}view", "Vertical tab view").with_end_label("11"),
+                SidebarNavItem::new("ff\u{0C}view", "Form feed view").with_end_label("12"),
+            ],
+        )
+        .with_label("Control whitespace")])
+        .with_aria_label("Control whitespace navigation");
+        let node = poodle_render::sidebar_nav(&spec, &RenderContext::new(&theme()), None);
+
+        // Both values encode in both namespaces; the ids carry the %XX forms
+        // and never a raw control byte.
+        assert!(node.find(&|n| n.id.as_deref() == Some("sidebar-nav-vt%0Bview")).is_some());
+        let vt_end = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-vt%0Bview~end-label"))
+            .expect("vertical-tab end label encodes into the ~ namespace");
+        assert!(matches!(&vt_end.kind, poodle_node::NodeKind::Text { content } if content == "11"));
+        assert!(
+            node.find(&|n| n.id.as_deref() == Some("sidebar-nav-ff%0Cview~end-label"))
+                .is_some()
+        );
+        assert!(
+            node.find(&|n| {
+                n.id.as_deref().is_some_and(|id| id.chars().any(char::is_whitespace))
+            })
+            .is_none(),
+            "no generated id carries a raw whitespace character"
+        );
+
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 260.0, 140.0);
+        driver.wait_for_focus_handle("sidebar-nav-vt%0Bview");
+
+        // Mounted: the a11y projection reports the encoded described_by, so
+        // the reference stays one id and resolves against the painted tree.
+        let mounted = driver.accessibility_nodes();
+        let vt = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-vt%0Bview")
+            .expect("mounted vertical-tab item");
+        assert_eq!(
+            vt.described_by.as_deref(),
+            Some("sidebar-nav-vt%0Bview~end-label")
+        );
+        assert_eq!(vt.text_content, vec!["Vertical tab view", "11"]);
+        let ff = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-ff%0Cview")
+            .expect("mounted form-feed item");
+        assert_eq!(
+            ff.described_by.as_deref(),
+            Some("sidebar-nav-ff%0Cview~end-label")
+        );
+        assert!(poodle_gpui_node_backend::bounds_for("sidebar-nav-ff%0Cview~end-label").is_some());
+    });
+}
+
+
 /// gestures open the shared ContextMenu for the invoking item only, a
 /// committed row emits `(itemValue, actionValue)` without activating the nav
 /// item, and both Escape and selection restore real focus to the item.

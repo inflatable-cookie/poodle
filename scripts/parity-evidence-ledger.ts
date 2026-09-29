@@ -95,6 +95,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   SidebarNav: [
     "sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item",
     "sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids",
+    "sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids",
     "sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus",
   ],
   EditableList: "editable_list_substrate_reorder_rebuilds_the_host_spec",
