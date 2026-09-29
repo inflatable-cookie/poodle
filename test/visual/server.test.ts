@@ -10,6 +10,16 @@ import {
   waitForSpawnedPreview,
 } from "./server";
 
+// Each occupancy call spawns `lsof` (a whole-host listen-table scan) and `ps`;
+// the scan dominates. Measured 2026-09-29 on an 18-core host at load ~50: one
+// lsof 1.1-3.3s, so a single `assertPreviewPortFree` check can take ~3.4s and
+// the slowest two-scan test run measured 3.75s. The bound is ~4x the slowest
+// measurement (still far under the old 60s squatter poll this test guards
+// against); the per-test cap is ~8x the test's loaded runtime rather than
+// bun's 5s default.
+const OCCUPANCY_CHECK_BOUND_MS = 15_000;
+const OCCUPANCY_TEST_TIMEOUT_MS = 30_000;
+
 const planted: { close: () => Promise<void> }[] = [];
 
 afterAll(async () => {
@@ -59,12 +69,12 @@ describe("visual preview port occupancy", () => {
     } catch (error) {
       thrown = error instanceof Error ? error : new Error(String(error));
     }
-    expect(Date.now() - started).toBeLessThan(2_000);
+    expect(Date.now() - started).toBeLessThan(OCCUPANCY_CHECK_BOUND_MS);
     expect(thrown, "occupied port must fail closed").toBeTruthy();
     expect(thrown!.message).toContain(`port ${squatter.port}`);
     expect(thrown!.message).toContain(`pid ${occupant!.pid}`);
     expect(thrown!.message).toContain(occupant!.command.split(" ")[0]!);
-  });
+  }, OCCUPANCY_TEST_TIMEOUT_MS);
 
   test("the owned-preview waiter reads the spawn handle's exit promise", async () => {
     // The 042 refactor wrapped the spawn in `{ proc, output }`; passing that

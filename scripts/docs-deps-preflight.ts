@@ -48,13 +48,26 @@ export function missingDocsDepsMessage(): string {
   return DOCS_DEPS_HINT;
 }
 
+/**
+ * Decide the preflight for `root` and return the CLI's exit status and stderr.
+ * Exported so the planted test can exercise the real logic in-process: one
+ * `bun <script>` spawn per fixture cost ~11s on a host whose temp root had
+ * grown to ~237k entries (bun walks the entry-heavy ancestor), which tripped
+ * the test's explicit 5s bound and bun's 5s default.
+ */
+export function runDocsDepsPreflight(root: string): { status: number; stderr: string } {
+  if (!docsDepsInstalled(root)) {
+    return { status: 1, stderr: `${missingDocsDepsMessage()}\n` };
+  }
+  return { status: 0, stderr: "" };
+}
+
 if (import.meta.main) {
   try {
     const root = checkoutRoot();
-    if (!docsDepsInstalled(root)) {
-      console.error(missingDocsDepsMessage());
-      process.exit(1);
-    }
+    const result = runDocsDepsPreflight(root);
+    if (result.stderr !== "") process.stderr.write(result.stderr);
+    process.exit(result.status);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

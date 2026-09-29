@@ -23,8 +23,8 @@ export type StylesheetImportFailure = {
   stylesheets: string[];
 };
 
-function listFiles(dir: string, extension: string): string[] {
-  const full = path.join(ROOT, dir);
+function listFiles(root: string, dir: string, extension: string): string[] {
+  const full = path.join(root, dir);
   if (!fs.existsSync(full)) return [];
   const files: string[] = [];
   for (const entry of fs.readdirSync(full, { withFileTypes: true })) {
@@ -35,12 +35,12 @@ function listFiles(dir: string, extension: string): string[] {
   return files.sort();
 }
 
-function cssGraph(): { owners: Map<string, Set<string>>; imports: Map<string, string[]> } {
+function cssGraph(root: string): { owners: Map<string, Set<string>>; imports: Map<string, string[]> } {
   const owners = new Map<string, Set<string>>();
   const imports = new Map<string, string[]>();
-  for (const relative of listFiles(STYLES_DIR, ".css")) {
+  for (const relative of listFiles(root, STYLES_DIR, ".css")) {
     const sheet = path.basename(relative, ".css");
-    const source = fs.readFileSync(path.join(ROOT, relative), "utf8");
+    const source = fs.readFileSync(path.join(root, relative), "utf8");
     imports.set(
       sheet,
       [...source.matchAll(CSS_RELATIVE_IMPORT)].map((match) => match[1]),
@@ -105,11 +105,11 @@ function renderedClasses(source: string): string[] {
   return [...classes];
 }
 
-export function collectReactStylesheetImportFailures(): StylesheetImportFailure[] {
-  const { owners, imports } = cssGraph();
+export function collectReactStylesheetImportFailures(root: string = ROOT): StylesheetImportFailure[] {
+  const { owners, imports } = cssGraph(root);
   const failures: StylesheetImportFailure[] = [];
-  for (const relative of listFiles(REACT_SRC, ".tsx").concat(listFiles(REACT_SRC, ".ts"))) {
-    const source = fs.readFileSync(path.join(ROOT, relative), "utf8");
+  for (const relative of listFiles(root, REACT_SRC, ".tsx").concat(listFiles(root, REACT_SRC, ".ts"))) {
+    const source = fs.readFileSync(path.join(root, relative), "utf8");
     const imported = importedSheetClosure(source, imports);
     for (const className of renderedClasses(source)) {
       const sheets = owners.get(className);
@@ -125,8 +125,15 @@ export function collectReactStylesheetImportFailures(): StylesheetImportFailure[
   return failures;
 }
 
-function main(): void {
-  const failures = collectReactStylesheetImportFailures();
+/**
+ * Run the gate against `root` and return the CLI's exit status and output.
+ * Exported so the planted test can exercise the real logic in-process: one
+ * `bun <copied-script>` spawn per fixture cost 11-12s on a host whose temp
+ * root had grown to ~237k entries (bun walks the entry-heavy ancestor) and
+ * timed both planted cases out at bun's 5s default.
+ */
+export function runReactStylesheetImportGate(root: string): { status: number; output: string } {
+  const failures = collectReactStylesheetImportFailures(root);
   if (failures.length > 0) {
     const lines = failures.map(
       (failure) =>
@@ -134,10 +141,21 @@ function main(): void {
           .map((sheet) => `@inflatable-cookie/poodle-core/styles/${sheet}.css`)
           .join(" or ")}`,
     );
-    console.error(`React stylesheet import drift:\n${lines.join("\n")}`);
+    return { status: 1, output: `React stylesheet import drift:\n${lines.join("\n")}\n` };
+  }
+  return {
+    status: 0,
+    output: "React stylesheet imports: every rendered Poodle class imports its core sheet.\n",
+  };
+}
+
+function main(): void {
+  const result = runReactStylesheetImportGate(ROOT);
+  if (result.status !== 0) {
+    process.stderr.write(result.output);
     process.exit(1);
   }
-  console.log("React stylesheet imports: every rendered Poodle class imports its core sheet.");
+  process.stdout.write(result.output);
 }
 
 if (import.meta.main) main();
