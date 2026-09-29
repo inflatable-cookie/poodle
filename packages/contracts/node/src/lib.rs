@@ -597,6 +597,15 @@ pub enum NodeKey {
     F2,
     /// Close/delete on a focused item (closable tabs, for example).
     Delete,
+    /// The physical keyboard context-menu key. A component that hosts an
+    /// item-scoped menu maps this to the same open path as its secondary
+    /// activation (the web `ContextMenu` key); the backend reports it and
+    /// never decides which node opens a menu.
+    ContextMenu,
+    /// The F10 function key. Shift+F10 is the web's second context-menu
+    /// gesture; the bare key carries no menu meaning, so the component
+    /// checks the modifiers it receives alongside this variant.
+    F10,
 }
 
 /// Where a drop lands relative to the target it is over — the three-value

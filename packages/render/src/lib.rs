@@ -390,7 +390,10 @@ pub use selection_summary::{selection_summary, SelectionSummaryHandlers};
 pub use separator::separator;
 pub use settings_shell::{settings_shell, SettingsShellHandlers};
 pub use shell_status_bar::shell_status_bar;
-pub use sidebar_nav::sidebar_nav;
+pub use sidebar_nav::{
+    sidebar_nav, sidebar_nav_item_end_label_id, sidebar_nav_item_id, sidebar_nav_with_handlers,
+    SidebarNavContextMenuOrigin, SidebarNavHandlers,
+};
 pub use skeleton::skeleton;
 pub use slider::{slider, SliderHandlers};
 pub use spacer::spacer;

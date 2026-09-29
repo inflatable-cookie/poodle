@@ -1,4 +1,4 @@
-use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::{types::MenuEntry, ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
 /// A single navigation item in a sidebar group.
@@ -8,6 +8,19 @@ pub struct SidebarNavItem {
     pub label: String,
     pub href: Option<String>,
     pub is_disabled: bool,
+    /// Compact end-aligned metadata such as a count ("198" in "Videos 198").
+    /// Exposed as the item's accessible description, never its name; put
+    /// counts here, not in `label`. `None` renders the label as the item's
+    /// direct text with no description.
+    pub end_label: Option<String>,
+    /// Per-item context-menu rows (same shape as ListCard's
+    /// `context_menu_items`). Non-empty on a non-disabled item, secondary
+    /// click or the keyboard menu gesture opens the shared ContextMenu for
+    /// that item. Unset or empty leaves item behaviour unchanged.
+    pub context_menu_items: Vec<MenuEntry>,
+    /// Accessible name for the item's context-menu overlay. When `None`, the
+    /// overlay is labelled `{label} actions`.
+    pub context_menu_aria_label: Option<String>,
 }
 
 impl SidebarNavItem {
@@ -17,6 +30,9 @@ impl SidebarNavItem {
             label: label.into(),
             href: None,
             is_disabled: false,
+            end_label: None,
+            context_menu_items: Vec::new(),
+            context_menu_aria_label: None,
         }
     }
 
@@ -28,6 +44,36 @@ impl SidebarNavItem {
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
         self
+    }
+
+    pub fn with_end_label(mut self, end_label: impl Into<String>) -> Self {
+        self.end_label = Some(end_label.into());
+        self
+    }
+
+    pub fn with_context_menu_items(mut self, items: Vec<MenuEntry>) -> Self {
+        self.context_menu_items = items;
+        self
+    }
+
+    pub fn with_context_menu_aria_label(mut self, label: impl Into<String>) -> Self {
+        self.context_menu_aria_label = Some(label.into());
+        self
+    }
+
+    /// Whether the item hosts its built-in context menu: only a non-disabled
+    /// item with at least one row does. Disabled items never open a menu,
+    /// and unset or empty rows leave native item behaviour unchanged.
+    pub fn has_context_menu(&self) -> bool {
+        !self.is_disabled && !self.context_menu_items.is_empty()
+    }
+
+    /// The item's context-menu accessible name: the explicit override, else
+    /// the generated `{label} actions` default.
+    pub fn context_menu_aria_label_or_default(&self) -> String {
+        self.context_menu_aria_label
+            .clone()
+            .unwrap_or_else(|| format!("{} actions", self.label))
     }
 }
 
@@ -136,6 +182,22 @@ impl SidebarNavSpec {
 
     pub fn disabled_opacity_token(&self) -> &'static str {
         "state.opacity.disabled"
+    }
+
+    pub fn end_label_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_TERTIARY
+    }
+
+    /// Gap between the flexible label and the end label in rem (contract §8):
+    /// half the item's inline padding, so it scales with density.
+    pub fn end_label_gap_rem(&self, density: ControlDensity) -> f32 {
+        self.item_pad_inline_rem(density) * 0.5
+    }
+
+    /// End-label font-size in rem (contract §8): 0.85× the item font, so it
+    /// scales with size.
+    pub fn end_label_font_rem(&self, size: ControlSize) -> f32 {
+        self.item_font_rem(size) * 0.85
     }
 
     /// Effective control size after resolving the semantic size role against
@@ -285,5 +347,35 @@ mod tests {
     fn chrome_role_resolves_one_stop_smaller() {
         let spec = SidebarNavSpec::new(vec![]).with_size_role(SemanticControlSizeRole::Chrome);
         assert_eq!(spec.effective_size(ControlSize::Md), ControlSize::Sm);
+    }
+
+    #[test]
+    fn end_label_geometry_scales_with_size_and_density() {
+        let spec = SidebarNavSpec::new(vec![]);
+        assert_eq!(spec.end_label_font_rem(ControlSize::Md), 0.8125 * 0.85);
+        assert_eq!(spec.end_label_gap_rem(ControlDensity::Default), 0.375);
+        assert_eq!(spec.end_label_gap_rem(ControlDensity::Comfortable), 0.4375);
+    }
+
+    #[test]
+    fn context_menu_semantics_follow_the_contract() {
+        let plain = SidebarNavItem::new("all", "All records");
+        assert!(!plain.has_context_menu());
+        assert_eq!(plain.context_menu_aria_label_or_default(), "All records actions");
+
+        let rows = vec![MenuEntry::new("rename", "Rename")];
+        let hosted = SidebarNavItem::new("q4", "Q4 close")
+            .with_context_menu_items(rows.clone())
+            .with_context_menu_aria_label("Q4 close actions");
+        assert!(hosted.has_context_menu());
+        assert_eq!(hosted.context_menu_aria_label_or_default(), "Q4 close actions");
+
+        // A disabled item never hosts a menu, even with rows set.
+        let disabled = SidebarNavItem::new("archive", "Archive")
+            .with_context_menu_items(rows)
+            .with_disabled(true);
+        assert!(!disabled.has_context_menu());
+        // And the generated default still names itself after the item.
+        assert_eq!(disabled.context_menu_aria_label_or_default(), "Archive actions");
     }
 }

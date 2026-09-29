@@ -32064,6 +32064,7 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
 
         // 3c. Destructive action
         driver.pointer_activate_id("menu-item:delete");
+        eprintln!("DBG delete row clicked");
         assert_eq!(actions.lock().unwrap().as_slice(), ["new", "delete"]);
 
         // 3d. Shortcut action
@@ -36067,3 +36068,487 @@ fn tabs_card_item_surfaces_project_through_mounted_gpui() {
     });
 }
 
+
+// ── SidebarNav end labels and per-item context menus (poodle#060) ─────────
+
+/// The counted-library fixture the end-label regression mounts, including one
+/// item whose long title must wrap while its end label stays on one line.
+fn sidebar_end_label_spec() -> poodle_specs::SidebarNavSpec {
+    use poodle_specs::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
+    SidebarNavSpec::new(vec![
+        SidebarNavGroup::new(
+            "library",
+            vec![
+                SidebarNavItem::new("videos", "Videos").with_end_label("198"),
+                SidebarNavItem::new("long", "A very long saved navigation title")
+                    .with_end_label("42"),
+                SidebarNavItem::new("images", "Images")
+                    .with_end_label("7")
+                    .with_disabled(true),
+                SidebarNavItem::new("notes", "Notes"),
+            ],
+        )
+        .with_label("Library"),
+    ])
+    .with_aria_label("Library navigation")
+}
+
+/// SidebarNav's admitted end labels: muted end-aligned metadata at the
+/// contract's 0.85× item size, the accessible name kept exactly `label`, the
+/// metadata carried as the item's description, and long titles wrapping while
+/// the end label stays on one line at the item's end edge.
+#[test]
+fn sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item() {
+    use poodle_gpui_node_backend::bounds_for;
+
+    run_headless(|cx| {
+        let spec = sidebar_end_label_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = poodle_render::sidebar_nav(&spec, &ctx, None);
+
+        // Renderer-level claims: the description relationship and the muted,
+        // smaller end-label text both exist; the plain item carries neither.
+        let videos = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-videos"))
+            .expect("videos item");
+        assert_eq!(videos.a11y.label.as_deref(), Some("Videos"));
+        assert_eq!(
+            videos.a11y.described_by.as_deref(),
+            Some("sidebar-nav-videos-end-label"),
+            "the end label is the item's description, never part of its name"
+        );
+        let end = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-videos-end-label"))
+            .expect("end label text");
+        assert!(matches!(&end.kind, poodle_node::NodeKind::Text { content } if content == "198"));
+        assert_eq!(
+            end.style.descriptor.text_color,
+            Some(ctx.theme().resolve_color("color.text.tertiary")),
+            "the end label keeps its muted tertiary colour"
+        );
+        assert_eq!(
+            end.style.text_size,
+            Some(poodle_render::presentation::rem_to_px(
+                spec.end_label_font_rem(ControlSize::Md)
+            )),
+            "the end label renders at the contract's 0.85× item size"
+        );
+        assert!(
+            node.find(&|n| n.id.as_deref() == Some("sidebar-nav-notes-end-label"))
+                .is_none(),
+            "an item without an end label renders no end-label element or description"
+        );
+
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 260.0, 220.0);
+        driver.wait_for_focus_handle("sidebar-nav-videos");
+
+        // Mounted accessibility projection: role, name, description, and the
+        // end label's text arriving after the label, not instead of it.
+        let mounted = driver.accessibility_nodes();
+        let videos = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-videos")
+            .expect("mounted videos item");
+        assert_eq!(videos.role, poodle_node::NodeRole::Button);
+        assert_eq!(videos.label.as_deref(), Some("Videos"));
+        assert_eq!(
+            videos.described_by.as_deref(),
+            Some("sidebar-nav-videos-end-label")
+        );
+        assert_eq!(videos.text_content, vec!["Videos", "198"]);
+        let notes = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-notes")
+            .expect("mounted notes item");
+        assert_eq!(notes.described_by, None);
+        assert!(
+            notes.text_content.is_empty(),
+            "a plain item renders its label as direct text, with no end-label element"
+        );
+
+        // Mounted geometry: the end label hugs the item's end padding on one
+        // line while a long title wraps and grows the row past its minimum.
+        let min_height = px(poodle_render::presentation::rem_to_px(
+            spec.item_height_rem(ControlSize::Md),
+        ));
+        let wrapped = bounds_for("sidebar-nav-long").expect("long item bounds");
+        eprintln!(
+            "DEBUG long item {:?} root {:?}",
+            bounds_for("sidebar-nav-long").map(|b| (b.size.width, b.size.height)),
+            bounds_for(FIXTURE_ID).map(|b| (b.size.width, b.size.height)),
+        );
+        assert!(
+            wrapped.size.height > min_height,
+            "a long title wraps and grows the row past its minimum height"
+        );
+        let end_bounds = bounds_for("sidebar-nav-long-end-label").expect("long end-label bounds");
+        let item_pad = px(poodle_render::presentation::rem_to_px(
+            spec.item_pad_inline_rem(ControlDensity::Default),
+        ));
+        assert!(
+            (wrapped.right() - end_bounds.right() - item_pad).abs() < px(2.0),
+            "the end label stays end-aligned at the item's inline padding"
+        );
+        assert!(
+            end_bounds.size.height < wrapped.size.height,
+            "the end label stays on one line inside the wrapped row (end {:?}, item {:?})",
+            end_bounds.size.height,
+            wrapped.size.height
+        );
+
+        // The disabled item keeps its count under the disabled opacity
+        // (contract: the whole item dims, nothing disappears).
+        let disabled = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-images")
+            .expect("mounted disabled item");
+        assert_eq!(disabled.text_content, vec!["Images", "7"]);
+        assert!(disabled.disabled);
+    });
+}
+
+/// The saved-views fixture the per-item context-menu regression mounts.
+fn sidebar_menu_groups() -> Vec<poodle_specs::SidebarNavGroup> {
+    use poodle_specs::{MenuEntry, MenuItemKind, SidebarNavGroup, SidebarNavItem};
+    let rows = vec![
+        MenuEntry::new("rename", "Rename"),
+        MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+        MenuEntry::new("delete", "Delete").with_destructive(true),
+    ];
+    vec![SidebarNavGroup::new(
+        "saved",
+        vec![
+            SidebarNavItem::new("q4", "Q4 close")
+                .with_href("/views/q4")
+                .with_context_menu_items(rows.clone())
+                .with_context_menu_aria_label("Q4 close actions"),
+            SidebarNavItem::new("cash", "Cash flow").with_context_menu_items(rows),
+            SidebarNavItem::new("all", "All records"),
+            SidebarNavItem::new("archive", "Archive")
+                .with_context_menu_items(Vec::new())
+                .with_disabled(true),
+        ],
+    )
+    .with_label("Saved views")]
+}
+
+/// Host state for the per-item context-menu regression. The host owns the
+/// shared ContextMenu overlay — its anchor, its action routing, and focus on
+/// close — exactly as the Tree host pattern prescribes; the component only
+/// reports which item was invoked and from where.
+struct SidebarMenuHost {
+    /// `(item value, keyboard?)` context-menu requests.
+    requests: Mutex<Vec<(String, bool)>>,
+    /// `onValueChange` payloads: opening or using a menu never activates.
+    activations: Mutex<Vec<String>>,
+    /// `(itemValue, actionValue)` payloads from the committed menu row.
+    payloads: Mutex<Vec<(String, String)>>,
+    /// Why the overlay closed, in order.
+    closes: Mutex<Vec<&'static str>>,
+    /// The open menu: item value plus its root-relative anchor.
+    open: Mutex<Option<(String, (f32, f32))>>,
+    /// The mounted tree this host rebuilds, set once the driver owns it.
+    mount: Mutex<Option<Arc<Mutex<Node>>>>,
+}
+
+impl SidebarMenuHost {
+    fn new() -> Arc<Self> {
+        Arc::new(Self {
+            requests: Mutex::new(Vec::new()),
+            activations: Mutex::new(Vec::new()),
+            payloads: Mutex::new(Vec::new()),
+            closes: Mutex::new(Vec::new()),
+            open: Mutex::new(None),
+            mount: Mutex::new(None),
+        })
+    }
+
+    /// Rebuild the mounted tree from host state — the way a GPUI host view
+    /// re-renders its spec-derived overlay across frames. Called from the
+    /// test between dispatched inputs, never inside a handler.
+    fn remount(me: &Arc<Self>) {
+        let guard = me.mount.lock().expect("mount ref");
+        if let Some(mount) = guard.as_ref() {
+            *mount.lock().expect("mount lock") = SidebarMenuHost::tree(me);
+        }
+    }
+
+    /// A component request: resolve the anchor (pointer points carry their
+    /// window position; keyboard opens anchor at the item, the web's
+    /// `rect + 16px` rule) and open the overlay. Focus moves to the first
+    /// enabled row once the overlay exists — the host applies
+    /// `request_focus` after its rebuild, like ContextMenu's own
+    /// `focusFirstItem` effect.
+    fn request(me: &Arc<Self>, value: &str, origin: poodle_render::SidebarNavContextMenuOrigin) {
+        use poodle_gpui_node_backend::bounds_for;
+
+        let anchor = match origin {
+            poodle_render::SidebarNavContextMenuOrigin::Pointer(point) => (point.x, point.y),
+            poodle_render::SidebarNavContextMenuOrigin::Keyboard => {
+                let item = bounds_for(&poodle_render::sidebar_nav_item_id(value))
+                    .expect("invoking item has painted bounds");
+                (
+                    f32::from(item.origin.x) + 16.0,
+                    f32::from(item.origin.y) + 16.0,
+                )
+            }
+        };
+        let root_origin = bounds_for(FIXTURE_ID).expect("root bounds").origin;
+        *me.open.lock().expect("open lock") = Some((
+            value.to_string(),
+            (
+                anchor.0 - f32::from(root_origin.x),
+                anchor.1 - f32::from(root_origin.y),
+            ),
+        ));
+        me.requests
+            .lock()
+            .expect("request lock")
+            .push((
+                value.to_string(),
+                origin == poodle_render::SidebarNavContextMenuOrigin::Keyboard,
+            ));
+}
+
+    /// Close from a dismissal (Escape or outside) and put focus back on the
+    /// invoking item.
+    fn dismiss(me: &Arc<Self>, reason: poodle_node::DismissReason) {
+        SidebarMenuHost::close(me, &match reason {
+            poodle_node::DismissReason::Escape => "escape",
+            poodle_node::DismissReason::Outside => "outside",
+        });
+    }
+
+    /// Close after a committed row and put focus back on the invoking item.
+    fn close(me: &Arc<Self>, reason: &'static str) {
+        use poodle_gpui_node_backend::request_focus;
+
+        if let Some((value, _)) = me.open.lock().expect("open lock").take() {
+            request_focus(&poodle_render::sidebar_nav_item_id(&value));
+            me.closes.lock().expect("close lock").push(reason);
+        }
+    }
+
+    /// The mounted tree: the production SidebarNav plus, when open, the
+    /// shared ContextMenu overlay anchored inside the root.
+    fn tree(me: &Arc<Self>) -> Node {
+        use poodle_specs::ContextMenuSpec;
+
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = poodle_specs::SidebarNavSpec::new(sidebar_menu_groups())
+            .with_aria_label("Saved views navigation");
+        let requests_host = Arc::clone(me);
+        let activations_host = Arc::clone(me);
+        let mut root = Node::container();
+        root.id = Some(FIXTURE_ID.to_owned());
+        root.position = NodePosition::Relative;
+        {
+            let s = &mut root.style;
+            s.descriptor.layout.width = LayoutSizing::Fixed(260.0);
+            s.descriptor.layout.height = LayoutSizing::Fixed(200.0);
+        }
+        root = root.child(poodle_render::sidebar_nav_with_handlers(
+            &spec,
+            &ctx,
+            poodle_render::SidebarNavHandlers {
+                on_change: Some(Arc::new(move |value| {
+                    activations_host
+                        .activations
+                        .lock()
+                        .expect("activation lock")
+                        .push(value.to_string());
+                })),
+                on_context_menu: Some(Arc::new(move |value, origin| {
+                    SidebarMenuHost::request(&requests_host, value, origin);
+                })),
+            },
+        ));
+
+        if let Some((value, (x, y))) = me.open.lock().expect("open lock").clone() {
+            let groups = sidebar_menu_groups();
+            let item = groups
+                .iter()
+                .flat_map(|group| group.items.iter())
+                .find(|item| item.value == value)
+                .expect("open menu item exists");
+            let actions_host = Arc::clone(me);
+            let action_value = value.clone();
+            let mut menu = poodle_render::context_menu(
+                &ContextMenuSpec::new(item.context_menu_items.clone())
+                    .with_aria_label(item.context_menu_aria_label_or_default()),
+                &ctx,
+                Some(Arc::new(move |action| {
+                    actions_host
+                        .payloads
+                        .lock()
+                        .expect("payload lock")
+                        .push((action_value.clone(), action.to_string()));
+                    SidebarMenuHost::close(&actions_host, "action");
+                })),
+            );
+            // The overlay joins the dismiss stack under its own layer so
+            // Escape and outside interactions close it through the real
+            // event tree; the web ContextMenu registers the same layer.
+            menu.interaction.dismiss_layer = Some("sidebar-nav-item-menu".to_owned());
+            let dismiss_host = Arc::clone(me);
+            menu.interaction.on_dismiss =
+                Some(Arc::new(move |reason| SidebarMenuHost::dismiss(&dismiss_host, reason)));
+            menu.position = NodePosition::Absolute {
+                top: Some(y),
+                left: Some(x),
+                right: None,
+                bottom: None,
+            };
+            root = root.child(menu);
+        }
+        root
+    }
+}
+
+/// SidebarNav's per-item context menu: secondary click and the keyboard menu
+/// gestures open the shared ContextMenu for the invoking item only, a
+/// committed row emits `(itemValue, actionValue)` without activating the nav
+/// item, and both Escape and selection restore real focus to the item.
+#[test]
+fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus() {
+    use poodle_gpui_node_backend::{bounds_for, focus_state_for};
+
+    run_headless(|cx| {
+        let host = SidebarMenuHost::new();
+        let mounted = Arc::new(Mutex::new(SidebarMenuHost::tree(&host)));
+        *host.mount.lock().expect("mount ref") = Some(Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 220.0);
+        driver.wait_for_focus_handle("sidebar-nav-q4");
+
+        // Unset and disabled items never intercept a secondary click.
+        driver.pointer_secondary_activate_id("sidebar-nav-all");
+        driver.pointer_secondary_activate_id("sidebar-nav-archive");
+        assert!(
+            host.requests.lock().expect("request lock").is_empty(),
+            "items without rows — and disabled items — host no menu"
+        );
+
+        // Pointer path: right-click opens the item's menu at the pointer.
+        let q4_center = driver.activation_target("sidebar-nav-q4").expect("q4 bounds");
+        driver.pointer_press_right(q4_center);
+        SidebarMenuHost::remount(&host);
+        poodle_gpui_node_backend::request_focus("menu-item:rename");
+        driver.draw_frame();
+        assert_eq!(
+            host.requests.lock().expect("request lock").as_slice(),
+            [("q4".to_owned(), false)]
+        );
+        assert!(bounds_for("menu-item:delete").is_some(), "the overlay paints");
+        assert_eq!(
+            focus_state_for("menu-item:rename"),
+            Some(true),
+            "the host moves real focus to the menu's first enabled row"
+        );
+        let mounted_menu = driver.accessibility_nodes();
+        let surface = mounted_menu
+            .iter()
+            .find(|n| n.role == poodle_node::NodeRole::Menu)
+            .expect("the shared menu surface mounts");
+        assert_eq!(surface.label.as_deref(), Some("Q4 close actions"));
+        assert!(
+            host.activations.lock().expect("activation lock").is_empty(),
+            "opening a menu never activates the nav item"
+        );
+
+        // A committed row emits (itemValue, actionValue) and restores focus.
+        driver.pointer_activate_id("menu-item:delete");
+        SidebarMenuHost::remount(&host);
+        driver.draw_frame();
+        assert_eq!(
+            host.payloads.lock().expect("payload lock").as_slice(),
+            [("q4".to_owned(), "delete".to_owned())]
+        );
+        assert_eq!(host.closes.lock().expect("close lock").as_slice(), ["action"]);
+        driver.draw_frame();
+        assert_eq!(
+            focus_state_for("sidebar-nav-q4"),
+            Some(true),
+            "selection returns real focus to the invoking item"
+        );
+        assert!(bounds_for("menu-item:delete").is_none(), "the overlay unmounts");
+
+        // Keyboard path: Shift+F10 on the focused item opens at the item.
+        driver.focus_element("sidebar-nav-cash");
+        driver.dispatch_key_raw("shift-f10");
+        SidebarMenuHost::remount(&host);
+        poodle_gpui_node_backend::request_focus("menu-item:rename");
+        driver.draw_frame();
+        assert_eq!(
+            host.requests.lock().expect("request lock").as_slice(),
+            [("q4".to_owned(), false), ("cash".to_owned(), true)]
+        );
+        driver.draw_frame();
+        let cash = bounds_for("sidebar-nav-cash").expect("cash item bounds");
+        let panel = bounds_for("menu-item:rename").expect("keyboard-anchored menu row");
+        assert!(
+            (panel.origin.x - (cash.origin.x + px(16.0))).abs() < px(24.0)
+                && (panel.origin.y - (cash.origin.y + px(16.0))).abs() < px(24.0),
+            "the keyboard anchor sits at the item's rect + 16px"
+        );
+        assert_eq!(
+            focus_state_for("menu-item:rename"),
+            Some(true),
+            "the keyboard gesture moves focus into the menu"
+        );
+        let mounted_menu = driver.accessibility_nodes();
+        let surface = mounted_menu
+            .iter()
+            .find(|n| n.role == poodle_node::NodeRole::Menu)
+            .expect("the regenerated menu surface");
+        assert_eq!(
+            surface.label.as_deref(),
+            Some("Cash flow actions"),
+            "the generated default labels the overlay when no override is set"
+        );
+
+        // Escape closes through the dismiss stack and restores focus.
+        driver.dispatch_key("escape");
+        SidebarMenuHost::remount(&host);
+        driver.draw_frame();
+        assert_eq!(host.closes.lock().expect("close lock").as_slice(), ["action", "escape"]);
+        assert_eq!(
+            focus_state_for("sidebar-nav-cash"),
+            Some(true),
+            "Escape restores real focus to the invoking item"
+        );
+
+        // The physical context-menu key opens the same menu.
+        driver.focus_element("sidebar-nav-cash");
+        driver.dispatch_key_raw("menu");
+        SidebarMenuHost::remount(&host);
+        poodle_gpui_node_backend::request_focus("menu-item:rename");
+        driver.draw_frame();
+        assert_eq!(
+            host.requests.lock().expect("request lock").as_slice(),
+            [("q4".to_owned(), false), ("cash".to_owned(), true), ("cash".to_owned(), true)]
+        );
+        assert_eq!(
+            focus_state_for("menu-item:rename"),
+            Some(true),
+            "the context-menu key opens the same menu with real focus in it"
+        );
+        driver.dispatch_key("escape");
+        SidebarMenuHost::remount(&host);
+        driver.draw_frame();
+        assert_eq!(
+            host.closes.lock().expect("close lock").as_slice(),
+            ["action", "escape", "escape"]
+        );
+        driver.draw_frame();
+        assert_eq!(focus_state_for("sidebar-nav-cash"), Some(true));
+
+        // Using the menu never changed the nav value.
+        assert!(
+            host.activations.lock().expect("activation lock").is_empty(),
+            "menu invocation and action never activate the nav item"
+        );
+    });
+}
