@@ -124,9 +124,13 @@ const REPO_LOCK = `{
     "@inflatable-cookie/poodle-core": ["@inflatable-cookie/poodle-core@workspace:packages/core"],
     "react": ["react@19.3.0", "", {}, "sha512-react=="],
     "std-env": ["std-env@4.2.0", "", {}, "sha512-stdenv=="],
+    "magic-string": ["magic-string@1.4.2", "", {}, "sha512-magic=="],
+    "aria-query": ["aria-query@5.3.0", "", {}, "sha512-aria=="],
     "vitest": ["vitest@5.0.2", "", { "dependencies": { "std-env": "^4.2.0" } }, "sha512-vitest=="],
     "@vitest/mocker": ["@vitest/mocker@5.0.2", "", {}, "sha512-mocker=="],
-    "vite": ["vite@8.3.1", "", {}, "sha512-vite=="]
+    "vite": ["vite@8.3.1", "", {}, "sha512-vite=="],
+    "svelte/magic-string": ["magic-string@0.30.21", "", {}, "sha512-svelte-magic=="],
+    "svelte/aria-query": ["aria-query@5.3.1", "", {}, "sha512-svelte-aria=="]
   }
 }
 `;
@@ -141,11 +145,27 @@ describe("packed consumer lock from bun.lock", () => {
       ),
     });
     expect(overrides["std-env"]).toBe("4.2.0");
+    expect(overrides["magic-string"]).toBeUndefined();
+    expect(overrides["aria-query"]).toBeUndefined();
     expect(overrides.react).toBeUndefined();
     expect(overrides.vitest).toBeUndefined();
     expect(overrides["@vitest/mocker"]).toBeUndefined();
     expect(overrides.vite).toBeUndefined();
     expect(overrides["@inflatable-cookie/poodle-core"]).toBeUndefined();
+  });
+
+  test("the repository lock does not globally override svelte's magic-string", () => {
+    const lockText = readFileSync(join(import.meta.dir, "../..", "bun.lock"), "utf8");
+    const overrides = lockedTransitiveOverrides({
+      lockText,
+      declaredNames: declaredPackageNames(
+        { svelte: "5.56.8", react: "18.0.0" },
+        { vitest: "4.1.10", vite: "7.3.1" },
+      ),
+    });
+    expect(overrides["std-env"]).toBe("4.2.0");
+    expect(overrides["magic-string"]).toBeUndefined();
+    expect(overrides["aria-query"]).toBeUndefined();
   });
 });
 
@@ -197,6 +217,50 @@ describe("packed consumer install against a planted registry", () => {
       readFileSync(join(root, "node_modules", "poodle-plant-leaf", "package.json"), "utf8"),
     ) as { version: string };
     expect(installed.version).toBe("1.0.0");
+  });
+
+  test("a package-context lock version is not collapsed into a global override", async () => {
+    const leafOld = packNpmTarball("poodle-plant-ctx-leaf", "0.30.21");
+    const leafNew = packNpmTarball("poodle-plant-ctx-leaf", "1.4.2");
+    const host = packNpmTarball("poodle-plant-ctx-host", "1.0.0", {
+      dependencies: { "poodle-plant-ctx-leaf": "^0.30.11" },
+    });
+    const registry = startRegistry({
+      "poodle-plant-ctx-host": {
+        latest: "1.0.0",
+        versions: { "1.0.0": host },
+        dependencies: { "1.0.0": { "poodle-plant-ctx-leaf": "^0.30.11" } },
+      },
+      "poodle-plant-ctx-leaf": {
+        latest: "1.4.2",
+        versions: { "0.30.21": leafOld, "1.4.2": leafNew },
+      },
+    });
+    const root = mkdtempSync(join(tmpdir(), "poodle-consumer-lock-ctx-"));
+    roots.push(root);
+    const dependencies = { "poodle-plant-ctx-host": "1.0.0" };
+    const lockText = `{
+      "packages": {
+        "poodle-plant-ctx-leaf": ["poodle-plant-ctx-leaf@1.4.2", "", {}, "sha512-new=="],
+        "poodle-plant-ctx-host/poodle-plant-ctx-leaf": ["poodle-plant-ctx-leaf@0.30.21", "", {}, "sha512-old=="]
+      }
+    }`;
+    const overrides = lockedTransitiveOverrides({
+      lockText,
+      declaredNames: declaredPackageNames(dependencies),
+    });
+    expect(overrides["poodle-plant-ctx-leaf"]).toBeUndefined();
+    writeFileSync(
+      join(root, "package.json"),
+      `${JSON.stringify({ name: "poodle-plant-consumer", private: true, dependencies, overrides }, null, 2)}\n`,
+    );
+    writeFileSync(join(root, ".npmrc"), `registry=${registry}\n`);
+    const result = await bunInstall(root, registry);
+    if (result.exitCode !== 0) throw new Error(result.output);
+    const installed = JSON.parse(
+      readFileSync(join(root, "node_modules", "poodle-plant-ctx-leaf", "package.json"), "utf8"),
+    ) as { version: string };
+    expect(installed.version).toBe("0.30.21");
   });
 
   test("a dependency with no resolvable version still fails", async () => {

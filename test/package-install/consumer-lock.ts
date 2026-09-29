@@ -34,6 +34,16 @@ function skipForDeclared(name: string, declared: Set<string>): boolean {
   return false;
 }
 
+function packageContextNames(packages: Record<string, unknown>): Set<string> {
+  const names = new Set<string>();
+  for (const [key, value] of Object.entries(packages)) {
+    if (isWorkspaceResolution(value) || !Array.isArray(value) || typeof value[0] !== "string") continue;
+    const spec = specNameAndVersion(value[0]);
+    if (spec !== undefined && spec.name !== key) names.add(spec.name);
+  }
+  return names;
+}
+
 /**
  * Transitive pins for a source-free consumer, taken from the repository
  * `bun.lock`. Direct consumer specs stay as declared (React 18, Vitest 4,
@@ -43,16 +53,21 @@ function skipForDeclared(name: string, declared: Set<string>): boolean {
  *
  * bun 1.4.2 ignores an incomplete rewritten lock ("Failed to resolve root
  * prod dependency"), so this is an override map rather than a lock file.
+ * Package-context keys (`svelte/magic-string`) keep a different version than
+ * the top-level package; a global override would collapse them, so those
+ * names are omitted.
  */
 export function lockedTransitiveOverrides(input: ConsumerLockInput): Record<string, string> {
   const parsed = parseJsonc(input.lockText) as BunLockFile;
+  const packages = parsed.packages ?? {};
   const declared = new Set(input.declaredNames);
+  const contextual = packageContextNames(packages);
   const overrides: Record<string, string> = {};
-  for (const [key, value] of Object.entries(parsed.packages ?? {})) {
+  for (const [key, value] of Object.entries(packages)) {
     if (isWorkspaceResolution(value) || !Array.isArray(value) || typeof value[0] !== "string") continue;
     const spec = specNameAndVersion(value[0]);
     if (spec === undefined || spec.name !== key) continue;
-    if (skipForDeclared(key, declared)) continue;
+    if (skipForDeclared(key, declared) || contextual.has(key)) continue;
     overrides[key] = spec.version;
   }
   return overrides;

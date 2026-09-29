@@ -181,7 +181,8 @@ The harness must:
 3. install archive `file:` references into a fresh no-workspace consumer with
    concrete peers and no TypeScript paths or source aliases; transitives that
    the repository `bun.lock` already resolved stay at those versions rather
-   than floating to npm latest;
+   than floating to npm latest, except package-context resolutions (for
+   example `svelte/magic-string`) which must not become a global override;
 4. mount installed root/direct Button and Select plus `./markdown` under the
    browser condition, with expected DOM and no page errors;
 5. render those installed Svelte entries through `svelte/server` under normal
