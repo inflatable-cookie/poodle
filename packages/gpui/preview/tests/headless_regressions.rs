@@ -36,18 +36,19 @@ use poodle_node::{
     NodeDropTarget, NodeKind, NodePosition, NodeRole, NodeWheelEvent,
 };
 use poodle_render::{
-    audio_entry_id, fader_spec_from_context, fader_with_handlers, history_center,
+    audio_entry_id, collapsible_trigger_focus_id, collapsible_with_handlers, fader_spec_from_context,
+    fader_with_handlers, history_center, icon_button,
     knob_spec_from_context, knob_with_handlers, skeleton, spinner, tabs, time_input_with_persistent_context,
     toast_stack, ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
-    xy_pad_y_id, FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView,
+    xy_pad_y_id, CollapsibleHandlers, FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView,
     KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
     TabsHandlers, ToastStackHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
-    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, ControlDensity,
-    ControlSize, FaderSpec, HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation,
-    PopoverSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec, SelectSpec, SkeletonSpec,
-    SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
+    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CollapsibleSpec,
+    ControlDensity, ControlSize, FaderSpec, HistoryCenterRejection, HistoryCenterSpec, IconButtonSpec,
+    KnobSpec, Orientation, PopoverSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec, SelectSpec,
+    SkeletonSpec, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
     TabPin, TabVariant,
     TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
@@ -15018,6 +15019,86 @@ fn a_borderless_node_paints_the_declared_ring_without_a_resting_border() {
         assert_eq!(
             poodle_gpui_node_backend::painted_ring_for("ring-proof"),
             None,
+        );
+    });
+}
+
+// ── Component-owned focus rings: bare IconButton and Collapsible trigger ──
+//
+// The compositions no longer stamp focus patches over these components:
+// `icon_button` and the Collapsible trigger declare the contracted ring
+// themselves, and that declaration is what makes the backend track a handle.
+// A bare icon button and a collapsible with no composition chrome must
+// therefore be reachable by real tab traversal, take a focus request, and
+// paint the contracted ring.
+
+/// Tab reaches a bare IconButton and a Collapsible trigger; a focus request
+/// lands on each; the focused control paints the contracted ring — with no
+/// composition-declared focus patch anywhere in the tree.
+#[test]
+fn bare_icon_button_and_collapsible_trigger_take_tab_and_focus_requests() {
+    run_headless(|cx| {
+        const BUTTON_ID: &str = "probe-icon-button";
+        let trigger_id = collapsible_trigger_focus_id("probe");
+
+        let mut button = icon_button(
+            &IconButtonSpec::new()
+                .with_icon("plus")
+                .with_aria_label("Add"),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        button.id = Some(BUTTON_ID.to_owned());
+        button.runtime_id = Some(BUTTON_ID.to_owned());
+
+        let collapsible = collapsible_with_handlers(
+            &CollapsibleSpec::new().with_title("Advanced"),
+            &RenderContext::new(&theme()),
+            Some(Node::text("inside")),
+            CollapsibleHandlers {
+                instance_id: Some("probe".to_owned()),
+                ..CollapsibleHandlers::default()
+            },
+        );
+
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Row;
+        let node = Arc::new(Mutex::new(root.child(button).child(collapsible)));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // The component-declared rings alone put tracked handles on both.
+        driver.wait_for_focus_handle(BUTTON_ID);
+        driver.wait_for_focus_handle(&trigger_id);
+
+        // Tab reaches the bare icon button with no pointer input anywhere.
+        tab_until_focused(&mut driver, BUTTON_ID);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(BUTTON_ID),
+            Some(true),
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(BUTTON_ID).is_some(),
+            "the focused icon button paints its ring",
+        );
+
+        // A focus request lands on the collapsible trigger and paints there.
+        driver.focus_element(&trigger_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&trigger_id),
+            Some(true),
+            "a focus request lands on the collapsible trigger",
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(&trigger_id).is_some(),
+            "the focused collapsible trigger paints its ring",
+        );
+
+        // The trigger is a real tab stop too.
+        driver.blur_element_focus(&trigger_id);
+        tab_until_focused(&mut driver, &trigger_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&trigger_id),
+            Some(true),
         );
     });
 }

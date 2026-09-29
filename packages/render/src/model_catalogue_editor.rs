@@ -31,7 +31,7 @@ use poodle_headless::model_connection::{
 };
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    NodeDropCommit, NodeKey, NodeRole, StylePatch,
+    NodeDropCommit, NodeKey, NodeRole,
 };
 use poodle_specs::{
     ButtonVariant, CallOutSpec, CalloutAnnounceMode, CollapsibleSpec, ControlSize, EmptyStateSpec,
@@ -264,7 +264,7 @@ pub fn model_catalogue_editor_with_slots(
         // outer region Collapsible returns is not focusable — its trigger is —
         // so naming the outer node would hand the backend a destination it can
         // never focus.
-        mark_hidden_disclosure(&mut section, handlers.instance_id.as_deref(), ctx);
+        mark_hidden_disclosure(&mut section, handlers.instance_id.as_deref());
         let mut wrapper = Node::container();
         {
             let s = &mut wrapper.style;
@@ -293,7 +293,7 @@ pub fn model_catalogue_editor_with_slots(
 
 /// Stamp the hidden-section disclosure on `Collapsible`'s direct trigger and
 /// optional content wrapper only. Nested focusable controls keep their own ids.
-fn mark_hidden_disclosure(section: &mut Node, instance_id: Option<&str>, ctx: &RenderContext<'_>) {
+fn mark_hidden_disclosure(section: &mut Node, instance_id: Option<&str>) {
     let trigger_focus = model_catalogue_hidden_focus_id(instance_id);
     let content_focus = model_catalogue_hidden_content_focus_id(instance_id);
 
@@ -302,10 +302,6 @@ fn mark_hidden_disclosure(section: &mut Node, instance_id: Option<&str>, ctx: &R
             trigger.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
             trigger.runtime_id = Some(trigger_focus.clone());
             trigger.a11y.controls = Some(content_focus.clone());
-            trigger.style.focus = Some(StylePatch {
-                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
-                ..StylePatch::default()
-            });
         }
     }
 
@@ -316,19 +312,6 @@ fn mark_hidden_disclosure(section: &mut Node, instance_id: Option<&str>, ctx: &R
             content.a11y.labelled_by = Some(trigger_focus);
         }
     }
-}
-
-/// `icon_button` renders no focus patch, and the GPUI backend only creates a
-/// focus handle for a focusable node that carries one — so every utility here
-/// would be unreachable by keyboard, and a keyboard reorder could not receive
-/// focus at all (PAPERCUTS: icon-button focus patch). Same workaround
-/// `poodle-render::history_center` already carries.
-fn focusable_chrome(mut node: Node, ctx: &RenderContext<'_>) -> Node {
-    node.style.focus = Some(StylePatch {
-        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
-        ..StylePatch::default()
-    });
-    node
 }
 
 fn count_line(shown: usize, hidden: usize) -> String {
@@ -451,7 +434,7 @@ fn shown_row(
     );
 
     // ── Reorder handle: grab, keyboard move, and the pointer drag source ──
-    let handle = icon_button(
+    let mut handle = icon_button(
         &IconButtonSpec::new()
             .with_icon("grip-vertical")
             .with_variant(ButtonVariant::Ghost)
@@ -489,7 +472,6 @@ fn shown_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
-    let mut handle = focusable_chrome(handle, ctx);
     handle.id = Some(spec.row_handle_id(&item.id));
     handle.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "handle");
     handle.a11y.toggled = Some(if is_grabbed {
@@ -618,7 +600,7 @@ fn shown_row(
     if let Some(handler) = &handlers.on_info {
         let handler = Arc::clone(handler);
         let id = item.id.clone();
-        let info = icon_button(
+        let mut info = icon_button(
             &IconButtonSpec::new()
                 .with_icon("info")
                 .with_variant(ButtonVariant::Ghost)
@@ -630,14 +612,13 @@ fn shown_row(
             ctx,
             (!locked).then(|| Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>),
         );
-        let mut info = focusable_chrome(info, ctx);
         info.id = Some(format!("model-catalogue-editor:{}:info", item.id));
         info.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "info");
         utilities = utilities.child(info);
     }
     if spec.show_move_actions {
         let up_disabled = row_locked || index == 0;
-        let up = icon_button(
+        let mut up = icon_button(
             &IconButtonSpec::new()
                 .with_icon("arrow-up")
                 .with_variant(ButtonVariant::Ghost)
@@ -654,12 +635,11 @@ fn shown_row(
                 }) as Arc<dyn Fn() + Send + Sync>
             }),
         );
-        let mut up = focusable_chrome(up, ctx);
         up.id = Some(format!("model-catalogue-editor:{}:up", item.id));
         up.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "up");
 
         let down_disabled = row_locked || index + 1 == shown.len();
-        let down = icon_button(
+        let mut down = icon_button(
             &IconButtonSpec::new()
                 .with_icon("arrow-down")
                 .with_variant(ButtonVariant::Ghost)
@@ -676,12 +656,11 @@ fn shown_row(
                 }) as Arc<dyn Fn() + Send + Sync>
             }),
         );
-        let mut down = focusable_chrome(down, ctx);
         down.id = Some(format!("model-catalogue-editor:{}:down", item.id));
         down.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "down");
         utilities = utilities.child(up).child(down);
     }
-    let hide = icon_button(
+    let mut hide = icon_button(
         &IconButtonSpec::new()
             .with_icon("eye")
             .with_variant(ButtonVariant::Ghost)
@@ -725,7 +704,6 @@ fn shown_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
-    let mut hide = focusable_chrome(hide, ctx);
     hide.id = Some(format!("model-catalogue-editor:{}:hide", item.id));
     hide.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "hide");
     let utilities = utilities.child(hide);
@@ -827,7 +805,7 @@ fn hidden_row(
         label_row = label_row.child(secondary_text(ctx, provider));
     }
 
-    let restore = icon_button(
+    let mut restore = icon_button(
         &IconButtonSpec::new()
             .with_icon("undo")
             .with_variant(ButtonVariant::Ghost)
@@ -851,7 +829,6 @@ fn hidden_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
-    let mut restore = focusable_chrome(restore, ctx);
     restore.id = Some(format!("model-catalogue-editor:{}:restore", item.id));
     restore.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "restore");
 
@@ -1449,8 +1426,8 @@ mod tests {
             "the focus destination must be the focusable trigger, not the outer region"
         );
         assert!(
-            disclosure.style.focus.is_some(),
-            "the GPUI backend only tracks a focusable node that draws differently when focused"
+            disclosure.style.focus_ring.is_some(),
+            "the Collapsible trigger carries the component's structured focus ring"
         );
         assert!(disclosure.interaction.on_activate.is_some());
     }
@@ -1550,7 +1527,7 @@ mod tests {
         let target = disclosed
             .find(&|n| n.id.as_deref() == Some(requested.as_str()))
             .expect("the requested id exists in the next render");
-        assert!(target.interaction.focusable && target.style.focus.is_some());
+        assert!(target.interaction.focusable && target.style.focus_ring.is_some());
     }
 
     #[test]
