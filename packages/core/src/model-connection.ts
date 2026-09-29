@@ -161,7 +161,9 @@ export function groupModelConnectionOptions(
       groups.push({ group: option.group, options: [option] });
       continue;
     }
-    groups[existing].options.push(option);
+    const group = groups[existing];
+    if (!group) continue;
+    group.options.push(option);
   }
 
   return groups;

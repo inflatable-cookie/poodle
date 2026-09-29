@@ -93,7 +93,8 @@ describe("ColorPicker (react)", () => {
 
     fireEvent.change(red, { target: { value: "200" } });
 
-    const expected = hsvToHex(...Object.values(rgbToHsv(200, g, b)));
+    const next = rgbToHsv(200, g, b);
+    const expected = hsvToHex(next.h, next.s, next.v);
     expect(onChange).toHaveBeenCalledWith(expected);
   });
 

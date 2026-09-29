@@ -208,7 +208,10 @@ describe("conformance: dragDrop sessions", () => {
         const label = `${vector.name} step ${index} (${String(step.event.type)})`;
         const result = dragSessionTransition(phase as never, context as never, step.event as never);
 
-        expect({ step: label, phase: result.state }).toEqual({ step: label, phase: step.phase });
+        expect({ step: label, phase: result.state as unknown }).toEqual({
+          step: label,
+          phase: step.phase,
+        });
         expect({ step: label, effects: result.effects }).toEqual({
           step: label,
           effects: step.effects,

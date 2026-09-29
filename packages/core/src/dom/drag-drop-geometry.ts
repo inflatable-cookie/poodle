@@ -153,7 +153,7 @@ export function treeResolveOutlineDrop(input: {
   if (hoveredIndex < 0) return null;
 
   const hovered = input.rows[hoveredIndex]!;
-  const fromRow = fromIndex >= 0 ? input.rows[fromIndex] : null;
+  const fromRow = fromIndex >= 0 ? (input.rows[fromIndex] ?? null) : null;
   const band = verticalBand(input, hovered, fromRow, hoveredIndex, fromIndex);
   if (!band) return null;
 

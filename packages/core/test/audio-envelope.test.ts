@@ -17,7 +17,7 @@ const points = [
 describe("envelope machine", () => {
   test("normalizes points, preserves ids, and rejects duplicates", () => {
     expect(normalizeEnvelopePoints([{ id: "b", x: 2, y: -1, curve: 2 }, points[0]!])).toEqual([
-      points[0], { id: "b", x: 1, y: 0, curve: 1 },
+      points[0]!, { id: "b", x: 1, y: 0, curve: 1 },
     ]);
     expect(() => normalizeEnvelopePoints([points[0]!, points[0]!])).toThrow(RangeError);
   });

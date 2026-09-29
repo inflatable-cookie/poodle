@@ -6,7 +6,7 @@ import { fireEvent, render } from "@testing-library/react";
 import { StrictMode, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createDragDropController } from "@inflatable-cookie/poodle-core";
+import { createDragDropController, type DropIntent } from "@inflatable-cookie/poodle-core";
 
 import { DragDropProvider, useDragSource, useDropTarget } from "../src/drag-drop";
 import { DragDropCustomSurface } from "./DragDropCustomSurface";
@@ -41,7 +41,7 @@ describe("DragDropProvider (react)", () => {
   });
 
   it("commits a pointer drag onto the list", () => {
-    const onDropA = vi.fn(() => ({ status: "committed" as const }));
+    const onDropA = vi.fn((_intent: DropIntent) => ({ status: "committed" as const }));
     const view = render(<DragDropCustomSurface onDropA={onDropA} />);
     const { source } = layout(view.container);
 

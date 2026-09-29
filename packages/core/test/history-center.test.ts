@@ -241,7 +241,7 @@ describe("display order — R3", () => {
     ]);
 
     expect(joined.map((item) => item.id)).toEqual(["e1", "e2", "e3", "e4"]);
-    expect(joined[0].id).toBe("e1");
+    expect(joined[0]?.id).toBe("e1");
 
     const rows = historyCenterVisibleRows(
       [page([entry("e4", 0, "current"), entry("e3")], { offset: 0 }), page([entry("e2"), entry("e1")], { offset: 2 })],
@@ -475,9 +475,10 @@ describe("visible-row derivation — forks as data (R1)", () => {
     // no time is derived or invented.
     const noTime = entry("e1", 1);
     const rows = historyCenterVisibleRows([page([noTime])], null);
-    expect(rows[0]).toMatchObject({ kind: "entry", entry: noTime });
+    const first = rows[0];
+    expect(first).toMatchObject({ kind: "entry", entry: noTime });
     expect(JSON.stringify(rows)).not.toContain("recordedAtMs");
-    expect(rows[0].kind === "entry" && rows[0].entry.recordedAtMs).toBeUndefined();
+    expect(first && first.kind === "entry" ? first.entry.recordedAtMs : undefined).toBeUndefined();
 
     const source = readFileSync(join(import.meta.dir, "..", "src", "history-center.ts"), "utf8");
     expect(source).not.toMatch(/Date\.now|performance\.now|new Date|setTimeout/);

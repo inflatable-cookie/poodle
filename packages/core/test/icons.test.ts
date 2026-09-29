@@ -57,7 +57,7 @@ describe("icon catalogue boundary", () => {
       const nodes = [["path", { d: canonicalName }]] as never;
       expect(resolveIconNodes(legacyName, { [canonicalName]: nodes })).toBe(nodes);
       expect(resolveIconNodes(legacyName)).toBe(
-        defaultLucideIconSet[canonicalName],
+        defaultLucideIconSet[canonicalName] ?? [],
       );
     }
   });

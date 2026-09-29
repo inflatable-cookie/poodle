@@ -37,11 +37,15 @@ function parseSelector(selector: string): Pick<Rule, "conditions" | "target" | "
   for (const [pattern, target] of [[ROOT, "root"], [DOT, "dot"]] as const) {
     const match = pattern.exec(selector.trim());
     if (!match) continue;
+    const attrs = match[1] ?? "";
     const conditions: Record<string, string> = {};
-    for (const condition of match[1].matchAll(CONDITIONS)) {
-      conditions[`data-${condition[1]}`] = condition[2];
+    for (const condition of attrs.matchAll(CONDITIONS)) {
+      const name = condition[1];
+      const value = condition[2];
+      if (!name || value === undefined) continue;
+      conditions[`data-${name}`] = value;
     }
-    return { conditions, target, specificity: 1 + match[1].matchAll(CONDITIONS).toArray().length };
+    return { conditions, target, specificity: 1 + [...attrs.matchAll(CONDITIONS)].length };
   }
   return null;
 }
@@ -52,10 +56,14 @@ function parseRules(source: string): Rule[] {
   let order = 0;
   for (const block of blocks) {
     const declarations: Declarations = {};
-    for (const declaration of block[2].matchAll(/(--[\w-]+|font-weight|letter-spacing|text-transform|opacity)\s*:\s*([^;]+);/g)) {
-      declarations[declaration[1]] = declaration[2].trim().replace(/\s+/g, " ");
+    const body = block[2] ?? "";
+    for (const declaration of body.matchAll(/(--[\w-]+|font-weight|letter-spacing|text-transform|opacity)\s*:\s*([^;]+);/g)) {
+      const property = declaration[1];
+      const value = declaration[2];
+      if (!property || value === undefined) continue;
+      declarations[property] = value.trim().replace(/\s+/g, " ");
     }
-    for (const selector of block[1].split(",")) {
+    for (const selector of (block[1] ?? "").split(",")) {
       const parsed = parseSelector(selector);
       if (parsed && Object.keys(declarations).length > 0) {
         rules.push({ ...parsed, declarations, order: order++ });
@@ -116,9 +124,10 @@ function resolveVars(value: string, props: Declarations, stack: string[] = []): 
     if (stack.includes(name)) {
       throw new Error(`custom property cycle: ${[...stack, name].join(" -> ")}`);
     }
-    if (name in props) {
+    const owned = props[name];
+    if (owned !== undefined) {
       // Component-owned variable: substitute through the cascade.
-      result += resolveVars(props[name], props, [...stack, name]);
+      result += resolveVars(owned, props, [...stack, name]);
     } else if (name.startsWith("--poodle-recipe-")) {
       // Optional recipe override hook: absent in these tests, so the authored
       // fallback recipe applies.
@@ -163,7 +172,9 @@ describe("pill.css appearance recipes", () => {
             // Every component-owned variable must resolve through the cascade;
             // only --poodle-pill-accent stays literal (the component sets it
             // inline when a custom accent is provided).
-            const leftovers = [...value.matchAll(/var\((--poodle-pill-[\w-]+)/g)].map((m) => m[1]);
+            const leftovers = [...value.matchAll(/var\((--poodle-pill-[\w-]+)/g)]
+              .map((m) => m[1])
+              .filter((name): name is string => Boolean(name));
             const allowed = attrs["data-accent"] === "custom" ? ["--poodle-pill-accent"] : [];
             for (const leftover of new Set(leftovers)) {
               expect(allowed).toContain(leftover);

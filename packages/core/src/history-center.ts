@@ -261,7 +261,8 @@ export function historyCenterForksAt(
   if (continuations === null) {
     return [];
   }
-  const ownId = anchorIndex + 1 < runEntries.length ? runEntries[anchorIndex + 1].id : null;
+  const successor = runEntries[anchorIndex + 1];
+  const ownId = successor ? successor.id : null;
   return continuations.filter((continuation) =>
     ownId === null ? !continuation.preferred : continuation.entryId !== ownId,
   );
@@ -298,11 +299,13 @@ function pushRun(
 ): void {
   for (let i = 0; i < entries.length; i += 1) {
     const entry = entries[i];
+    if (!entry) continue;
+    const previous = entries[i - 1];
     rows.push({
       kind: "entry",
       entry,
       depth,
-      parentEntryId: i === 0 ? parentOfFirst : entries[i - 1].id,
+      parentEntryId: i === 0 ? parentOfFirst : (previous?.id ?? null),
       forkId,
       branchId,
       forkCount: historyCenterForkCount(entry.continuationCount),
@@ -571,11 +574,13 @@ function clampFocus(context: HistoryCenterContext, anchorEntryId: string | null)
   }
   if (anchorEntryId !== null) {
     const anchor = rows.findIndex((row) => row.kind === "entry" && row.entry.id === anchorEntryId);
-    if (anchor !== -1) {
-      return { ...context, focusRow: rowIdOf(rows[anchor]) };
+    const anchorRow = anchor !== -1 ? rows[anchor] : undefined;
+    if (anchorRow) {
+      return { ...context, focusRow: rowIdOf(anchorRow) };
     }
   }
-  return { ...context, focusRow: rowIdOf(rows[0]) };
+  const first = rows[0];
+  return { ...context, focusRow: first ? rowIdOf(first) : null };
 }
 
 function moveFocus(context: HistoryCenterContext, direction: "next" | "prev" | "first" | "last"): HistoryCenterResult {
@@ -599,7 +604,11 @@ function moveFocus(context: HistoryCenterContext, direction: "next" | "prev" | "
     next = (current - 1 + rows.length) % rows.length;
   }
 
-  const row = rowIdOf(rows[next]);
+  const focused = rows[next];
+  if (!focused) {
+    return stay("open", context);
+  }
+  const row = rowIdOf(focused);
   return {
     state: "open",
     context: { ...context, focusRow: row },
@@ -844,23 +853,26 @@ function continuationsLoaded(
   const runContext = anchorRunContext(context, entryId);
   if (runContext !== null) {
     const anchor = runContext.entries[runContext.index];
-    const forkCount = historyCenterForkCount(anchor.continuationCount);
-    if (forkCount === 1) {
-      // Exactly one fork: no picker needed — choose it and request its run.
-      const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
-      if (forks.length >= 1) {
-        updated = { ...updated, chosen: forks[0] };
-        effects.push({ type: "loadContinuationRun", fromEntryId: forks[0].entryId });
-      }
-    } else if (forkCount > 1) {
-      // R3: more than one fork — select the current one (preferred; first in
-      // supplied order when none is preferred) and show its run. The select
-      // previews; checkout is CONFIRM's job (R2).
-      const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
-      const initial = forks.find((fork) => fork.preferred) ?? forks[0] ?? null;
-      if (initial !== null) {
-        updated = { ...updated, pick: initial };
-        effects.push({ type: "loadContinuationRun", fromEntryId: initial.entryId });
+    if (anchor) {
+      const forkCount = historyCenterForkCount(anchor.continuationCount);
+      if (forkCount === 1) {
+        // Exactly one fork: no picker needed — choose it and request its run.
+        const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
+        const chosen = forks[0];
+        if (chosen) {
+          updated = { ...updated, chosen };
+          effects.push({ type: "loadContinuationRun", fromEntryId: chosen.entryId });
+        }
+      } else if (forkCount > 1) {
+        // R3: more than one fork — select the current one (preferred; first in
+        // supplied order when none is preferred) and show its run. The select
+        // previews; checkout is CONFIRM's job (R2).
+        const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
+        const initial = forks.find((fork) => fork.preferred) ?? forks[0] ?? null;
+        if (initial !== null) {
+          updated = { ...updated, pick: initial };
+          effects.push({ type: "loadContinuationRun", fromEntryId: initial.entryId });
+        }
       }
     }
   }
@@ -909,7 +921,7 @@ function pickContinuation(context: HistoryCenterContext, entryId: string): Histo
       continue;
     }
     const anchor = runContext.entries[runContext.index];
-    if (historyCenterForkCount(anchor.continuationCount) <= 1) {
+    if (!anchor || historyCenterForkCount(anchor.continuationCount) <= 1) {
       continue;
     }
     const forks = historyCenterForksAt(level.continuations, runContext.entries, runContext.index);

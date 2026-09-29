@@ -228,30 +228,36 @@ const vectors = JSON.parse(
   ),
 ) as DomainVectors;
 
+/** JSON vectors are untyped; pin compares the typed core result to the recorded value. */
+function pin(actual: unknown, expected: unknown): void {
+  expect(actual).toEqual(expected);
+}
+
+
 describe("domain conformance: date", () => {
   for (const case_ of vectors.date) {
     test(`${case_.op}: ${JSON.stringify(case_.iso ?? case_.left ?? case_.start)}`, () => {
       switch (case_.op) {
         case "addDays": {
           const date = parseIsoDate(case_.iso ?? null);
-          expect(formatIsoDate(date ? addDays(date, case_.amount ?? 0) : null)).toBe(case_.expect);
+          pin(formatIsoDate(date ? addDays(date, case_.amount ?? 0) : null), case_.expect);
           return;
         }
         case "addMonths": {
           const date = parseIsoDate(case_.iso ?? null);
-          expect(formatIsoDate(date ? addMonths(date, case_.amount ?? 0) : null)).toBe(case_.expect);
+          pin(formatIsoDate(date ? addMonths(date, case_.amount ?? 0) : null), case_.expect);
           return;
         }
         case "parse": {
-          expect(formatIsoDate(parseIsoDate(case_.iso ?? null))).toBe(case_.expect);
+          pin(formatIsoDate(parseIsoDate(case_.iso ?? null)), case_.expect);
           return;
         }
         case "compare": {
-          expect(compareIsoDate(case_.left ?? null, case_.right ?? null)).toBe(case_.expect);
+          pin(compareIsoDate(case_.left ?? null, case_.right ?? null), case_.expect);
           return;
         }
         case "monthAnchor": {
-          expect(monthAnchorIso(case_.iso ?? null)).toBe(case_.expect);
+          pin(monthAnchorIso(case_.iso ?? null), case_.expect);
           return;
         }
         case "normalizeRange": {
@@ -264,24 +270,24 @@ describe("domain conformance: date", () => {
         case "withinRange": {
           expect(
             isIsoDateWithinRange(case_.iso ?? "", { start: case_.start ?? null, end: case_.end ?? null }),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "startOfWeek": {
           const date = parseIsoDate(case_.iso ?? null);
           expect(
             formatIsoDate(date ? startOfWeek(date, case_.weekStartsOn as CalendarWeekStart) : null),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "weekBoundaryDelta": {
           expect(
             dayDeltaForWeekBoundary(case_.iso ?? "", case_.weekStartsOn as CalendarWeekStart, case_.edge ?? "start"),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "daysBetween": {
-          expect(daysBetween(case_.start ?? "", case_.end ?? "")).toBe(case_.expect);
+          pin(daysBetween(case_.start ?? "", case_.end ?? ""), case_.expect);
           return;
         }
         case "calendarWeeks": {
@@ -295,7 +301,7 @@ describe("domain conformance: date", () => {
             weeks.map((week) =>
               week.map((day) => ({ iso: day.iso, label: day.label, inMonth: day.inMonth })),
             ),
-          ).toEqual(case_.expect);
+          ).toEqual(case_.expect as never);
           return;
         }
         default:
@@ -310,11 +316,11 @@ describe("domain conformance: color", () => {
     test(`${case_.op}: ${case_.hex ?? [case_.r, case_.g, case_.b].join(",")}`, () => {
       switch (case_.op) {
         case "normalizeHex": {
-          expect(normalizeHex(case_.hex ?? "")).toBe(case_.expect);
+          pin(normalizeHex(case_.hex ?? ""), case_.expect);
           return;
         }
         case "isValidHex": {
-          expect(isValidHex(case_.hex ?? "")).toBe(case_.expect);
+          pin(isValidHex(case_.hex ?? ""), case_.expect);
           return;
         }
         case "hexToRgb": {
@@ -330,35 +336,35 @@ describe("domain conformance: color", () => {
           return;
         }
         case "rgbToHex": {
-          expect(rgbToHex(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0)).toBe(case_.expect);
+          pin(rgbToHex(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0), case_.expect);
           return;
         }
         case "rgbToHexAlpha": {
-          expect(rgbToHex(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0, case_.a)).toBe(case_.expect);
+          pin(rgbToHex(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0, case_.a), case_.expect);
           return;
         }
         case "rgbToHsv": {
-          expect(rgbToHsv(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0)).toEqual(case_.expect);
+          pin(rgbToHsv(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0), case_.expect);
           return;
         }
         case "rgbToHsl": {
-          expect(rgbToHsl(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0)).toEqual(case_.expect);
+          pin(rgbToHsl(case_.r ?? 0, case_.g ?? 0, case_.b ?? 0), case_.expect);
           return;
         }
         case "hsvToRgb": {
-          expect(hsvToRgb(case_.h ?? 0, case_.s ?? 0, case_.v ?? 0)).toEqual(case_.expect);
+          pin(hsvToRgb(case_.h ?? 0, case_.s ?? 0, case_.v ?? 0), case_.expect);
           return;
         }
         case "hsvToHex": {
-          expect(hsvToHex(case_.h ?? 0, case_.s ?? 0, case_.v ?? 0)).toBe(case_.expect);
+          pin(hsvToHex(case_.h ?? 0, case_.s ?? 0, case_.v ?? 0), case_.expect);
           return;
         }
         case "hslToRgb": {
-          expect(hslToRgb(case_.h ?? 0, case_.s ?? 0, case_.l ?? 0)).toEqual(case_.expect);
+          pin(hslToRgb(case_.h ?? 0, case_.s ?? 0, case_.l ?? 0), case_.expect);
           return;
         }
         case "hexToHsv": {
-          expect(hexToHsv(case_.hex ?? "")).toEqual(case_.expect);
+          pin(hexToHsv(case_.hex ?? ""), case_.expect);
           return;
         }
         default:
@@ -374,13 +380,13 @@ describe("domain conformance: pagination", () => {
       switch (case_.op) {
         case "visiblePages": {
           expect(buildVisiblePages(case_.page ?? 0, case_.count ?? 0, case_.siblings ?? 0)).toEqual(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
         case "canRequestPage": {
           expect(canRequestPage(case_.next ?? 0, case_.current ?? 0, case_.total ?? 0)).toBe(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
@@ -417,13 +423,13 @@ describe("domain conformance: tree", () => {
               parent: row.parent,
               disabled: row.node.isDisabled === true,
             })),
-          ).toEqual(case_.expect);
+          ).toEqual(case_.expect as never);
           return;
         }
         case "checkState": {
           const node = findTreeNode(treeNodes, case_.value ?? "");
           expect(node ? treeCheckState(node, (case_.checked ?? []).map(String)) : null).toBe(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
@@ -436,14 +442,14 @@ describe("domain conformance: tree", () => {
         case "range": {
           const rows = flattenVisibleTreeRows(treeNodes, expanded);
           expect(treeRangeSelection(rows, case_.anchor ?? case_.to ?? null, case_.to ?? "")).toEqual(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
         case "siblingTarget": {
           const siblings = (case_.siblings ?? []).map((value: string) => ({ value }));
           expect(treeSiblingReorderTarget(siblings, case_.value ?? "", case_.up ? -1 : 1)).toEqual(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
@@ -456,7 +462,7 @@ describe("domain conformance: tree", () => {
             { altKey: false, shiftKey: case_.shift === true },
             { reorderable: false, expandedValues: expanded },
           );
-          expect(intent).toEqual(case_.expect);
+          pin(intent, case_.expect);
           return;
         }
         case "virtualWindow": {
@@ -468,7 +474,7 @@ describe("domain conformance: tree", () => {
               case_.viewport ?? 0,
               case_.overscan ?? 0,
             ),
-          ).toEqual(case_.expect);
+          ).toEqual(case_.expect as never);
           return;
         }
         default:
@@ -492,7 +498,7 @@ describe("domain conformance: duration", () => {
     test(`${case_.op}: ${case_.name ?? ""}`, () => {
       switch (case_.op) {
         case "totalSeconds": {
-          expect(durationTotalSeconds(durationValueFrom(case_))).toBe(case_.expect);
+          pin(durationTotalSeconds(durationValueFrom(case_)), case_.expect);
           return;
         }
         case "adjust": {
@@ -503,7 +509,7 @@ describe("domain conformance: duration", () => {
               case_.delta ?? 0,
               case_.maxHours ?? 0,
             ),
-          ).toEqual(case_.expect);
+          ).toEqual(case_.expect as never);
           return;
         }
         case "set": {
@@ -514,11 +520,11 @@ describe("domain conformance: duration", () => {
               case_.raw ?? 0,
               case_.maxHours ?? 0,
             ),
-          ).toEqual(case_.expect);
+          ).toEqual(case_.expect as never);
           return;
         }
         case "pad": {
-          expect(padDurationSegment(Number(case_.value))).toBe(case_.expect);
+          pin(padDurationSegment(Number(case_.value)), case_.expect);
           return;
         }
         default:
@@ -535,13 +541,17 @@ describe("domain conformance: nav", () => {
 
       switch (case_.op) {
         case "findNext": {
-          const result = findNextEnabledIndex(items, case_.startIndex ?? 0, case_.direction ?? 1);
-          expect(result < 0 ? null : result).toBe(case_.expect);
+          const result = findNextEnabledIndex(
+            items,
+            case_.startIndex ?? 0,
+            case_.direction === -1 ? -1 : 1,
+          );
+          pin(result < 0 ? null : result, case_.expect);
           return;
         }
         case "firstEnabled": {
           const result = firstEnabledIndex(items);
-          expect(result < 0 ? null : result).toBe(case_.expect);
+          pin(result < 0 ? null : result, case_.expect);
           return;
         }
         default:
@@ -556,12 +566,12 @@ describe("domain conformance: timeInput", () => {
     test(`${case_.op}: ${case_.name ?? ""}`, () => {
       switch (case_.op) {
         case "parse": {
-          expect(parseTime(case_.value ?? null)).toEqual(case_.expect);
+          pin(parseTime(case_.value ?? null), case_.expect);
           return;
         }
         case "format": {
           expect(formatTime(case_.parts ?? { hour: 0, minute: 0, second: 0 }, case_.seconds === true)).toBe(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
@@ -574,18 +584,18 @@ describe("domain conformance: timeInput", () => {
               min: case_.min ?? null,
               max: case_.max ?? null,
             }),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "inBounds": {
           expect(timeInBounds(case_.parts ?? { hour: 0, minute: 0, second: 0 }, case_.min ?? null, case_.max ?? null)).toBe(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
         case "stepAligned": {
           expect(timeStepAligned(case_.parts ?? { hour: 0, minute: 0, second: 0 }, case_.min ?? null, case_.step ?? 60)).toBe(
-            case_.expect,
+            case_.expect as never,
           );
           return;
         }
@@ -610,7 +620,7 @@ describe("domain conformance: timeInput", () => {
                     step: case_.step ?? 60,
                   }),
                 );
-          expect(formatted).toBe(case_.expect);
+          pin(formatted, case_.expect);
           return;
         }
         case "transition": {
@@ -619,7 +629,7 @@ describe("domain conformance: timeInput", () => {
             context: result.context,
             effects: result.effects,
             invalid: timeInputInvalid(result.context),
-          }).toEqual(case_.expect);
+          }).toEqual(case_.expect as never);
           return;
         }
         default:
@@ -649,7 +659,7 @@ describe("domain conformance: numberInput", () => {
           if (!Object.prototype.hasOwnProperty.call(case_.expect as object, "value")) {
             delete actual.value;
           }
-          expect(actual).toEqual(case_.expect);
+          pin(actual, case_.expect);
           return;
         }
         case "configValid": {
@@ -660,15 +670,15 @@ describe("domain conformance: numberInput", () => {
               min: case_.min ?? null,
               max: case_.max ?? null,
             }),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "inBounds": {
-          expect(numberInBounds(Number(case_.value), case_.min ?? null, case_.max ?? null)).toBe(case_.expect);
+          pin(numberInBounds(Number(case_.value), case_.min ?? null, case_.max ?? null), case_.expect);
           return;
         }
         case "stepAligned": {
-          expect(numberStepAligned(Number(case_.value), case_.min ?? null, case_.step ?? null)).toBe(case_.expect);
+          pin(numberStepAligned(Number(case_.value), case_.min ?? null, case_.step ?? null), case_.expect);
           return;
         }
         case "draftValid": {
@@ -680,12 +690,12 @@ describe("domain conformance: numberInput", () => {
               case_.step ?? null,
               case_.precision ?? null,
             ),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "format": {
           const value = case_.value === undefined ? null : (case_.value as number | null);
-          expect(formatNumberCommitted(value, case_.precision ?? null)).toBe(case_.expect);
+          pin(formatNumberCommitted(value, case_.precision ?? null), case_.expect);
           return;
         }
         case "step": {
@@ -698,7 +708,7 @@ describe("domain conformance: numberInput", () => {
               case_.step ?? null,
               case_.precision ?? null,
             ),
-          ).toBe(case_.expect);
+          ).toBe(case_.expect as never);
           return;
         }
         case "transition": {
@@ -710,7 +720,7 @@ describe("domain conformance: numberInput", () => {
             context: result.context,
             effects: result.effects,
             invalid: numberInputInvalid(result.context),
-          }).toEqual(case_.expect);
+          }).toEqual(case_.expect as never);
           return;
         }
         default:

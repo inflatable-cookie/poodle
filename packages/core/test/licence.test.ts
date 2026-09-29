@@ -457,23 +457,23 @@ describe("licenceSeatRows", () => {
 
   test("labelled rows show their label verbatim", () => {
     const rows = licenceSeatRows(seats);
-    expect(rows[0].displayLabel).toBe("Studio Mac");
-    expect(rows[1].displayLabel).toBe("Laptop");
-    expect(rows[0].named).toBe(true);
+    expect(rows[0]?.displayLabel).toBe("Studio Mac");
+    expect(rows[1]?.displayLabel).toBe("Laptop");
+    expect(rows[0]?.named).toBe(true);
   });
 
   test("unnamed and whitespace-only labels read as Unnamed machine", () => {
     const rows = licenceSeatRows(seats);
-    expect(rows[2].displayLabel).toBe(LICENCE_UNNAMED_MACHINE);
-    expect(rows[3].displayLabel).toBe(LICENCE_UNNAMED_MACHINE);
-    expect(rows[2].named).toBe(false);
-    expect(rows[3].named).toBe(false);
+    expect(rows[2]?.displayLabel).toBe(LICENCE_UNNAMED_MACHINE);
+    expect(rows[3]?.displayLabel).toBe(LICENCE_UNNAMED_MACHINE);
+    expect(rows[2]?.named).toBe(false);
+    expect(rows[3]?.named).toBe(false);
   });
 
   test("this machine is not releasable and every other seat is", () => {
     const rows = licenceSeatRows(seats);
-    expect(rows[0].thisMachine).toBe(true);
-    expect(rows[0].releasable).toBe(false);
+    expect(rows[0]?.thisMachine).toBe(true);
+    expect(rows[0]?.releasable).toBe(false);
     expect(rows.slice(1).every((row) => row.releasable)).toBe(true);
     expect(licenceOtherSeats(seats).map((seat) => seat.machineId)).toEqual(["m-2", "m-3", "m-4"]);
   });
@@ -488,9 +488,9 @@ describe("licenceSeatRows", () => {
 
   test("release names stay honest for unnamed rows", () => {
     const rows = licenceSeatRows(seats);
-    expect(rows[1].releaseName).toBe("Release Laptop");
-    expect(rows[2].releaseName).toBe("Release unnamed machine");
-    expect(licenceSeatRows(seats, null, "Remove")[1].releaseName).toBe("Remove Laptop");
+    expect(rows[1]?.releaseName).toBe("Release Laptop");
+    expect(rows[2]?.releaseName).toBe("Release unnamed machine");
+    expect(licenceSeatRows(seats, null, "Remove")[1]?.releaseName).toBe("Remove Laptop");
   });
 
   test("pending affects only the matching row", () => {

@@ -67,7 +67,7 @@ function injectAppHeaderStyles(widthPx?: number): void {
 
 // Computed grid, with the stylesheet's line breaks collapsed (the multi-line
 // `grid-template-columns` source serializes verbatim into the computed value).
-function gridOf(element: HTMLElement): string {
+function gridOf(element: Element): string {
   return getComputedStyle(element).gridTemplateColumns.replace(/\s+/g, " ");
 }
 

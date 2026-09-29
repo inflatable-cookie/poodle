@@ -288,7 +288,7 @@ describe("EditableList (react)", () => {
         onReorder={onReorder}
         item={(entry) => (
           <>
-            <div contentEditable="" data-testid={`edit-${entry.id}`}>
+            <div contentEditable suppressContentEditableWarning data-testid={`edit-${entry.id}`}>
               {entry.label}
             </div>
             <button type="button" data-testid={`action-${entry.id}`}>

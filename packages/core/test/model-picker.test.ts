@@ -52,9 +52,12 @@ const models: ModelOption[] = [
 
 describe("model picker", () => {
   it("merges per-model axis bindings", () => {
-    expect(axesForModel(axes, models[1])).toEqual([
+    const effort = axes[0];
+    const other = models[1];
+    if (!effort || !other) throw new Error("missing model picker fixtures");
+    expect(axesForModel(axes, other)).toEqual([
       {
-        ...axes[0],
+        ...effort,
         options: [
           { value: "minimal", label: "Minimal" },
           { value: "deep", label: "Deep" },
@@ -90,7 +93,9 @@ describe("model picker", () => {
   });
 
   it("uses a list only when an automatic select axis exceeds three options", () => {
-    expect(axisControlKind(axes[0])).toBe("segmented");
+    const effort = axes[0];
+    if (!effort) throw new Error("missing effort axis fixture");
+    expect(axisControlKind(effort)).toBe("segmented");
     expect(
       axisControlKind({
         key: "level",

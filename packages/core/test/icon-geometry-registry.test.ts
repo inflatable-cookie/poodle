@@ -27,7 +27,9 @@ describe("icon geometry registry", () => {
     expect(new Set(ICON_GEOMETRY_REGISTRY.pairs.map((pair) => pair.status))).toEqual(
       new Set(["candidate", "rejected"]),
     );
-    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "accepted")).toHaveLength(0);
+    expect(
+      ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => (pair.status as string) === "accepted"),
+    ).toHaveLength(0);
     expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "candidate")).toHaveLength(6);
     expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "rejected")).toHaveLength(6);
     expect(
