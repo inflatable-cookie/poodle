@@ -36,6 +36,10 @@ impl EmitTarget for SpecimenRustTarget {
         "generated/specimens"
     }
 
+    fn sibling_extensions(&self) -> &'static [&'static str] {
+        &["ts"]
+    }
+
     fn render(&self, model: &IrModel, source_path: &str) -> Result<Vec<GeneratedFile>> {
         Ok(vec![GeneratedFile::new(
             "specimens.rs".to_owned(),

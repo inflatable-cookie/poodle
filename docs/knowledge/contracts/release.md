@@ -47,7 +47,10 @@ process failure, not a discovery: stop and return to planning.
 ## Steps (npm/web)
 
 1. **Candidate PR.** On a branch, bump root, core, Svelte and React to the same
-   target version, retarget the current-minor core ranges and `bun.lock`,
+   target version, retarget the current-minor core ranges, refresh `bun.lock`
+   workspace versions and intra-repo ranges with `effigy lock:workspaces-refresh`
+   (Bun 1.4.2 leaves that slice stale through `bun install`, `--force` and
+   `--lockfile-only`; `--frozen-lockfile` still passes),
    add the `CHANGELOG.md` entry and one `docs/release-notes/<version>.md`, and
    list it in `docs/release-notes/README.md`. Nothing else may change except
    generated stamps and evidence that release policy admits. In a second

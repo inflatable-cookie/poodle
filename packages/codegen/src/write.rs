@@ -12,6 +12,7 @@ use std::path::Path;
 
 use crate::emit::GeneratedFile;
 use crate::error::{CodegenError, Result};
+use crate::orphan::{is_protected_sibling, list_top_level_files};
 
 /// Materializes the generated files under `output_root`, mirroring the
 /// icons script's write mode: stale orphans are deleted, every expected
@@ -21,14 +22,30 @@ use crate::error::{CodegenError, Result};
 /// owns the top level of `generated/` inside the web preview packages,
 /// so a recursive sweep would delete a sibling target's artifact). Write
 /// mode and check mode agree on what "stale" means.
+///
+/// Exclusive ownership (the default): every top-level file not in
+/// `files` is an orphan. Shared roots pass [`write_outputs_protecting`]
+/// with the sibling target's extension so those artifacts survive and
+/// unclaimed garbage is still removed.
 pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> {
+    write_outputs_protecting(output_root, files, &[])
+}
+
+/// [`write_outputs`] for a target that shares its output root. Files whose
+/// extension is in `sibling_extensions` are left in place; everything else
+/// not in `files` is still deleted.
+pub fn write_outputs_protecting(
+    output_root: &Path,
+    files: &[GeneratedFile],
+    sibling_extensions: &[&str],
+) -> Result<()> {
     let expected: std::collections::BTreeSet<&str> =
         files.iter().map(|file| file.path.as_str()).collect();
 
     // A fresh output root has no orphans to delete; the check mode treats
     // the same situation as Missing drift.
     if output_root.exists() {
-        let on_disk = list_files(output_root)?;
+        let on_disk = list_top_level_files(output_root)?;
         for path in on_disk {
             let relative = path
                 .strip_prefix(output_root)
@@ -36,12 +53,16 @@ pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> 
                 .to_str()
                 .expect("generated paths are UTF-8")
                 .replace(std::path::MAIN_SEPARATOR, "/");
-            if !expected.contains(relative.as_str()) {
-                fs::remove_file(&path).map_err(|error| CodegenError::Write {
-                    path: path.clone(),
-                    source: error,
-                })?;
+            if expected.contains(relative.as_str()) {
+                continue;
             }
+            if is_protected_sibling(&relative, sibling_extensions) {
+                continue;
+            }
+            fs::remove_file(&path).map_err(|error| CodegenError::Write {
+                path: path.clone(),
+                source: error,
+            })?;
         }
     }
 
@@ -59,26 +80,4 @@ pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> 
         })?;
     }
     Ok(())
-}
-
-/// Lists the top-level files of `root`, sorted. Directories are skipped:
-/// they are sibling targets' output roots, not this target's files (the
-/// card 041 shared-`generated/` layout).
-fn list_files(root: &Path) -> Result<Vec<std::path::PathBuf>> {
-    let mut out = Vec::new();
-    for entry in fs::read_dir(root).map_err(|error| CodegenError::Read {
-        path: root.to_path_buf(),
-        source: error,
-    })? {
-        let entry = entry.map_err(|error| CodegenError::Read {
-            path: root.to_path_buf(),
-            source: error,
-        })?;
-        let path = entry.path();
-        if !path.is_dir() {
-            out.push(path);
-        }
-    }
-    out.sort();
-    Ok(out)
 }

@@ -16,6 +16,8 @@
 //! - [`check`] — read-only drift gate: byte-exact comparison, whitespace-only
 //!   classification, and stale-orphan detection. Structurally incapable of
 //!   writing.
+//! - [`orphan`] — top-level scan and sibling-extension protection so two
+//!   targets that share an output root do not delete each other's artifacts.
 //! - [`write`] — write mode: materializes [`GeneratedFile`]s and deletes
 //!   stale orphans.
 //! - [`model`] — load and validate a serialized `IrModel`.
@@ -41,14 +43,15 @@ pub mod error;
 pub mod machine_interfaces;
 pub mod model;
 pub mod models;
+pub mod orphan;
 pub mod targets;
 pub mod write;
 
-pub use check::{check_outputs, CheckReport, DriftKind};
+pub use check::{check_outputs, check_outputs_protecting, CheckReport, DriftKind};
 pub use emit::{catalogue_header, generate, header, machine_header, EmitTarget, GeneratedFile};
 pub use error::{CodegenError, Result};
 pub use model::load_and_validate;
-pub use write::write_outputs;
+pub use write::{write_outputs, write_outputs_protecting};
 
 /// Generator version carried in every emitted header (`IR-07` "generator
 /// version"). Compile-time from this crate's manifest — deterministic and

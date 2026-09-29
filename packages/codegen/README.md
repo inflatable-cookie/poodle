@@ -41,6 +41,10 @@ cargo run --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- \
   Gates compose only `*:check` selectors; `ir:build` is never part of a gate.
   `effigy ci:rust` runs `ir:check` and `catalogue:check` so a `GENERATOR_VERSION`
   restamp fails the board Queue runs, not only the optional selectors.
+- Two targets may share one output root (catalogue TS/Rust, shell TS/Rust).
+  Each sweep deletes files it owns and unclaimed garbage, and leaves the
+  sibling's artifacts in place. Unprotected exclusive sweeps of a shared
+  root are a configuration error.
 - The remaining targets (JSON schema, registry, conformance vectors, docs
   fragments) are a follow-up card; the machinery here is target-independent.
 

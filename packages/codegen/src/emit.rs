@@ -46,6 +46,14 @@ pub trait EmitTarget {
     /// `ts`. Check mode scans exactly this root for stale orphans.
     fn output_root(&self) -> &'static str;
 
+    /// File extensions belonging to a sibling target that shares this
+    /// output root (for example `"rs"` when this target emits `.ts`).
+    /// Those artifacts are not this target's orphans. Empty means
+    /// exclusive ownership of the root's top-level files.
+    fn sibling_extensions(&self) -> &'static [&'static str] {
+        &[]
+    }
+
     /// Renders the model into files. Pure: no I/O, no environment access.
     /// `source_path` is the repo-relative authored source path carried into
     /// the header (`IR-07`).
