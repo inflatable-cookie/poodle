@@ -94,12 +94,7 @@ pub fn token_input(
             .with_appearance(PillAppearance::Subtle)
             .with_size(pill_size(effective_size))
             .with_removable(can_edit);
-        row = row.child(pill_with_remove(
-            &token_pill,
-            ctx,
-            remove,
-            Some(token.as_str()),
-        ));
+        row = row.child(pill_with_remove(&token_pill, ctx, remove));
     }
 
     // Live draft control — a real composed text input. Inherits size,

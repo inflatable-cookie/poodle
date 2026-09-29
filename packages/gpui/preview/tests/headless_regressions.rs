@@ -970,15 +970,16 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
     });
 }
 
-/// Native admission of ListCard eyebrow, Pill dismiss, and Keyboard
-/// computerBaseNote. Text/Code wrap stays web-only (brief stop condition).
+/// Native admission of ListCard eyebrow and Keyboard computerBaseNote.
+/// Text/Code wrap stays web-only (brief stop condition); Pill dismissible was
+/// dropped from this PR (closing ruling 2026-09-29) and stays web-only.
 /// Headless GPUI mount plus the shared keyboard machine — no windowed path.
 #[test]
-fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
+fn eyebrow_and_keyboard_base_note_admit_on_native() {
     use poodle_headless::audio::{
         keyboard_computer_key_down, keyboard_computer_note, KeyboardContext, KeyboardEffect,
     };
-    use poodle_specs::{ListCardSpec, PillSpec};
+    use poodle_specs::ListCardSpec;
 
     run_headless(|cx| {
         let theme = theme();
@@ -1004,37 +1005,6 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             "eyebrow must render above the title, got {body_texts:?}"
         );
 
-        let dismisses = Arc::new(Mutex::new(0));
-        let sink = Arc::clone(&dismisses);
-        let dismiss_id = poodle_render::pill_dismiss_focus_id(Some("admit"));
-        let mut pill = poodle_render::pill_with_remove(
-            &PillSpec::new()
-                .with_label("Videos")
-                .with_dismissible(true)
-                .with_dismiss_label("Remove filter: Videos"),
-            &ctx,
-            Some(Arc::new(move || *sink.lock().unwrap() += 1)),
-            Some("admit"),
-        );
-        pill.id = Some("admit-pill-dismissible".into());
-        let dismiss = pill
-            .find(&|n| n.runtime_id.as_deref() == Some(dismiss_id.as_str()))
-            .expect("dismiss button");
-        assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
-        assert_eq!(
-            dismiss.a11y.label.as_deref(),
-            Some("Remove filter: Videos")
-        );
-        assert_eq!(dismiss.a11y.tab_index, Some(0));
-        assert!(dismiss.interaction.focusable);
-        assert!(dismiss.style.focus_ring.is_some());
-        (dismiss
-            .interaction
-            .on_activate
-            .as_ref()
-            .expect("dismiss event"))();
-        assert_eq!(*dismisses.lock().unwrap(), 1);
-
         let context = KeyboardContext {
             first_note: 48,
             last_note: 96,
@@ -1055,7 +1025,7 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         root.id = Some("admit-native-root".into());
         root.style.descriptor.layout.direction = LayoutDirection::Column;
         root.style.max_width = Some(96.0);
-        root = root.child(card).child(pill);
+        root = root.child(card);
 
         poodle_gpui_node_backend::begin_probe_capture();
         let mounted = Arc::new(Mutex::new(root));
@@ -1072,232 +1042,6 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             "mounted eyebrow must sit above the title, got {:?}",
             card_paint.texts
         );
-
-        let pill_paint = poodle_gpui_node_backend::painted_node_for("admit-pill-dismissible")
-            .expect("painted pill");
-        assert_eq!(
-            poodle_gpui_node_backend::painted_node_for(&dismiss_id)
-                .expect("painted dismiss")
-                .a11y_label
-                .as_deref(),
-            Some("Remove filter: Videos")
-        );
-        assert_eq!(pill_paint.a11y_role, None);
-
-        driver.wait_for_focus_handle(&dismiss_id);
-        tab_until_focused(&mut driver, &dismiss_id);
-        assert!(
-            poodle_gpui_node_backend::painted_ring_for(&dismiss_id).is_some(),
-            "focused dismiss must paint its focus ring",
-        );
-        driver.dispatch_key_raw("enter");
-        driver.draw_frame();
-        assert_eq!(*dismisses.lock().unwrap(), 2);
-        driver.dispatch_key_raw("space");
-        driver.draw_frame();
-        assert_eq!(*dismisses.lock().unwrap(), 3);
-
-        driver.pointer_activate_id(&dismiss_id);
-        driver.draw_frame();
-        assert_eq!(*dismisses.lock().unwrap(), 4);
-
-        poodle_gpui_node_backend::take_probe_capture();
-    });
-}
-
-/// Two dismissible Pills keep independent dismiss identity, event, and focus.
-#[test]
-fn two_dismissible_pills_keep_independent_dismiss_identity() {
-    use poodle_specs::PillSpec;
-
-    run_headless(|cx| {
-        let theme = theme();
-        let ctx = RenderContext::new(&theme);
-        let videos_hits = Arc::new(Mutex::new(0));
-        let audio_hits = Arc::new(Mutex::new(0));
-        let videos_sink = Arc::clone(&videos_hits);
-        let audio_sink = Arc::clone(&audio_hits);
-        let videos_id = poodle_render::pill_dismiss_focus_id(Some("videos"));
-        let audio_id = poodle_render::pill_dismiss_focus_id(Some("audio"));
-
-        let mut videos = poodle_render::pill_with_remove(
-            &PillSpec::new()
-                .with_label("Videos")
-                .with_dismissible(true)
-                .with_dismiss_label("Remove filter: Videos"),
-            &ctx,
-            Some(Arc::new(move || *videos_sink.lock().unwrap() += 1)),
-            Some("videos"),
-        );
-        videos.id = Some("admit-pill-videos".into());
-        let mut audio = poodle_render::pill_with_remove(
-            &PillSpec::new()
-                .with_label("Audio")
-                .with_dismissible(true)
-                .with_dismiss_label("Remove filter: Audio"),
-            &ctx,
-            Some(Arc::new(move || *audio_sink.lock().unwrap() += 1)),
-            Some("audio"),
-        );
-        audio.id = Some("admit-pill-audio".into());
-
-        assert_ne!(videos_id, audio_id);
-        assert_eq!(
-            videos
-                .find(&|n| n.runtime_id.as_deref() == Some(videos_id.as_str()))
-                .expect("videos dismiss")
-                .a11y
-                .label
-                .as_deref(),
-            Some("Remove filter: Videos")
-        );
-        assert_eq!(
-            audio
-                .find(&|n| n.runtime_id.as_deref() == Some(audio_id.as_str()))
-                .expect("audio dismiss")
-                .a11y
-                .label
-                .as_deref(),
-            Some("Remove filter: Audio")
-        );
-
-        let mut root = Node::container();
-        root.id = Some("admit-two-pills-root".into());
-        root.style.descriptor.layout.direction = LayoutDirection::Row;
-        root = root.child(videos).child(audio);
-
-        poodle_gpui_node_backend::begin_probe_capture();
-        let mounted = Arc::new(Mutex::new(root));
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
-        driver.draw_frame();
-
-        driver.wait_for_focus_handle(&videos_id);
-        driver.wait_for_focus_handle(&audio_id);
-        assert_ne!(
-            poodle_gpui_node_backend::focus_handle_for(&videos_id),
-            poodle_gpui_node_backend::focus_handle_for(&audio_id),
-            "two dismiss buttons must not share one focus handle"
-        );
-
-        driver.focus_element(&videos_id);
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&videos_id),
-            Some(true)
-        );
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&audio_id),
-            Some(false)
-        );
-        driver.dispatch_key_raw("enter");
-        driver.draw_frame();
-        assert_eq!(*videos_hits.lock().unwrap(), 1);
-        assert_eq!(*audio_hits.lock().unwrap(), 0);
-
-        driver.focus_element(&audio_id);
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&audio_id),
-            Some(true)
-        );
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&videos_id),
-            Some(false)
-        );
-        driver.dispatch_key_raw("enter");
-        driver.draw_frame();
-        assert_eq!(*videos_hits.lock().unwrap(), 1);
-        assert_eq!(*audio_hits.lock().unwrap(), 1);
-
-        driver.pointer_activate_id(&videos_id);
-        driver.draw_frame();
-        assert_eq!(*videos_hits.lock().unwrap(), 2);
-        assert_eq!(*audio_hits.lock().unwrap(), 1);
-
-        poodle_gpui_node_backend::take_probe_capture();
-    });
-}
-
-/// Same-label dismissible Pills through the production adapter keep
-/// independent dismiss identity, event, and focus with no manual scopes: the
-/// adapter mints a per-instance scope, so the label can never alias two
-/// buttons onto one focus handle again.
-#[test]
-fn same_label_adapter_pills_keep_independent_dismiss_identity() {
-    use node_compat::IntoCompatNode;
-    use poodle_specs::PillSpec;
-
-    run_headless(|cx| {
-        let theme = theme();
-        let left_hits = Arc::new(Mutex::new(0));
-        let right_hits = Arc::new(Mutex::new(0));
-        let left_sink = Arc::clone(&left_hits);
-        let right_sink = Arc::clone(&right_hits);
-
-        let left = node_compat::Pill::from_spec(
-            PillSpec::new()
-                .with_label("Shared")
-                .with_dismissible(true)
-                .with_dismiss_label("Remove"),
-            &theme,
-        )
-        .on_remove(move || *left_sink.lock().unwrap() += 1)
-        .into_compat_node();
-        let right = node_compat::Pill::from_spec(
-            PillSpec::new()
-                .with_label("Shared")
-                .with_dismissible(true)
-                .with_dismiss_label("Remove"),
-            &theme,
-        )
-        .on_remove(move || *right_sink.lock().unwrap() += 1)
-        .into_compat_node();
-
-        fn dismiss_id(pill: &Node) -> String {
-            pill.find(&|n| {
-                n.a11y.role == Some(NodeRole::Button) && n.runtime_id.is_some()
-            })
-            .expect("adapter pill dismiss")
-            .runtime_id
-            .clone()
-            .expect("dismiss runtime id")
-        }
-        let left_id = dismiss_id(&left);
-        let right_id = dismiss_id(&right);
-        assert_ne!(left_id, right_id);
-
-        let mut root = Node::container();
-        root.id = Some("admit-same-label-pills-root".into());
-        root.style.descriptor.layout.direction = LayoutDirection::Row;
-        root = root.child(left).child(right);
-
-        poodle_gpui_node_backend::begin_probe_capture();
-        let mounted = Arc::new(Mutex::new(root));
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
-        driver.draw_frame();
-
-        driver.wait_for_focus_handle(&left_id);
-        driver.wait_for_focus_handle(&right_id);
-        assert_ne!(
-            poodle_gpui_node_backend::focus_handle_for(&left_id),
-            poodle_gpui_node_backend::focus_handle_for(&right_id),
-            "same-label dismiss buttons must not share one focus handle"
-        );
-
-        driver.focus_element(&left_id);
-        driver.dispatch_key_raw("enter");
-        driver.draw_frame();
-        assert_eq!(*left_hits.lock().unwrap(), 1);
-        assert_eq!(*right_hits.lock().unwrap(), 0);
-
-        driver.focus_element(&right_id);
-        driver.dispatch_key_raw("enter");
-        driver.draw_frame();
-        assert_eq!(*left_hits.lock().unwrap(), 1);
-        assert_eq!(*right_hits.lock().unwrap(), 1);
-
-        driver.pointer_activate_id(&left_id);
-        driver.draw_frame();
-        assert_eq!(*left_hits.lock().unwrap(), 2);
-        assert_eq!(*right_hits.lock().unwrap(), 1);
 
         poodle_gpui_node_backend::take_probe_capture();
     });

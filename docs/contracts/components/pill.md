@@ -50,8 +50,8 @@ Updated: 2026-09-29
 | `dot` | `boolean` | `false` | no | renders a leading `0.5em` status dot filled with the tone's status color (accent color when `accent` is set, `--poodle-color-text-secondary` for neutral) |
 | `title` | `string \| null` | `null` | no | optional native tooltip forwarded to the root element's `title` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
-| `dismissible` | `boolean` | `false` | no | renders a trailing dismiss button |
-| `dismissLabel` | `string` | `"Dismiss"` | no | accessible name for the dismiss button |
+| `dismissible` | `boolean` | `false` | no | **Web targets only** — renders a trailing dismiss button; native admission pending (`lane:native-admission`) |
+| `dismissLabel` | `string` | `"Dismiss"` | no | **Web targets only** — accessible name for the dismiss button |
 
 ### Controlled And Uncontrolled
 
@@ -96,11 +96,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 ## 5. Events
 
 The portable pill is a non-interactive display primitive and emits no events
-of its own. The optional dismiss control adds one:
+of its own. The web-admitted dismiss control adds one:
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onDismiss` | dismiss button clicked | `() => void` | only fires when `dismissible` is true; the consumer removes or hides the pill |
+| `onDismiss` | dismiss button clicked | `() => void` | **Web targets only** — only fires when `dismissible` is true; the consumer removes or hides the pill |
 
 ## 6. Accessibility
 
@@ -123,18 +123,18 @@ The pill root is not focusable and has no keyboard behavior of its own.
 | Key | Behavior |
 |-----|----------|
 | none | the pill root is not focusable by default |
-| Tab | moves focus to the dismiss button when `dismissible` is true |
-| Enter / Space | activates the focused dismiss button and fires `onDismiss` |
+| Tab | **Web targets only** — moves focus to the dismiss button when `dismissible` is true |
+| Enter / Space | **Web targets only** — activates the focused dismiss button and fires `onDismiss` |
 
 ### Focus And Announcement
 
-- focus entry: the pill root is not focusable; the dismiss button is keyboard
-  focusable when present
+- focus entry: the pill root is not focusable; the web-admitted dismiss button
+  is keyboard focusable when present
 - focus-visible: the dismiss button draws the shared focus ring
 - live-region behavior: none
 - GPUI-native accessibility mapping notes: expose pill content as text-like
-  metadata, not as a control; the dismiss control is its own button with
-  `dismissLabel` as the accessible name
+  metadata, not as a control; the web-admitted dismiss control is not part of
+  the portable native surface
 
 ## 7. Layout
 
@@ -484,8 +484,8 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 - for `typography="inherit"`, non-CSS runtimes may approximate parent-owned
   `em` behavior with ratio-preserving metrics from a 1rem baseline until
   parent-relative inline layout exists
-- `dismissible` renders a trailing dismiss button labelled by `dismissLabel`
-  (default `"Dismiss"`) and fires `onDismiss` on activate.
+- `dismissible` and `dismissLabel` are web-admitted. The portable Rust spec and
+  GPUI mapping remain native admission pending (`lane:native-admission`).
 
 ## 11. Parity Checklist
 
@@ -515,6 +515,7 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 |-------|-------------|-----------------|-----------|
 | `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
 | Jetstream mono font styling | current Jetstream `JsEl` text surface does not expose font-family or letter-spacing controls | allowed | implement text-family and tracking support in Jetstream, then apply `font="mono"` literally |
+| `dismissible` / `dismissLabel` are web-admitted | web-only until native admission | operator 2026-09-27 | native admission pending (`lane:native-admission`) |
 
 ## 13. Specimen Definitions
 
@@ -585,8 +586,9 @@ Pills with a trailing dismiss button. The accessible name comes from
 - approvers: pending
 - downstream adopters: metadata displays, labels, status tags, card headers
 - future follow-up: add dismissible-chip semantics separately if needed
-- optional dismiss control (`dismissible`, `dismissLabel`, `onDismiss`) is
-  portable across Svelte, React, and the shared native renderer
+- implemented 2026-09-27: optional dismiss control (`dismissible`,
+  `dismissLabel`, `onDismiss`) is web-admitted in Svelte and React; the
+  portable spec remains native admission pending (`lane:native-admission`)
 
 ## Rust Spec Note
 

@@ -6,7 +6,6 @@
 //! in the shared contracts and renderer.
 
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use gpui::{
@@ -3968,13 +3967,10 @@ impl IntoElement for Separator {
     }
 }
 
-/// Adapter-owned Pill: each instance carries its own dismiss scope, so two
-/// Pills never share a dismiss identity even with identical labels.
 pub(crate) struct Pill {
     spec: PillSpec,
     theme: GpuiThemeProvider,
     on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
-    instance_id: Option<String>,
 }
 
 impl Pill {
@@ -3983,13 +3979,7 @@ impl Pill {
             spec,
             theme: theme.clone(),
             on_remove: None,
-            instance_id: None,
         }
-    }
-
-    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
-        self.instance_id = Some(instance_id.into());
-        self
     }
 
     pub(crate) fn on_remove(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
@@ -3998,15 +3988,7 @@ impl Pill {
     }
 
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
-        let scope = self.instance_id.unwrap_or_else(|| {
-            static NEXT_PILL_SCOPE: AtomicU64 = AtomicU64::new(1);
-            format!(
-                "adapter-{}",
-                NEXT_PILL_SCOPE.fetch_add(1, Ordering::Relaxed)
-            )
-        });
-        let mut node =
-            poodle_render::pill_with_remove(&self.spec, ctx, self.on_remove, Some(&scope));
+        let mut node = poodle_render::pill_with_remove(&self.spec, ctx, self.on_remove);
         // The old GPUI Pill made its root focusable even though the shared
         // contract treats Pill as display metadata. Keep that preview-local.
         node.interaction.focusable = true;

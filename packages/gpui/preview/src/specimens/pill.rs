@@ -216,25 +216,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )),
         ))
         .child(group(
-            "Dismissible",
-            theme,
-            div()
-                .flex()
-                .gap(px(8.0))
-                .flex_wrap()
-                .child(pill(
-                    theme,
-                    PillSpec::new()
-                        .with_label("Videos")
-                        .with_dismissible(true)
-                        .with_dismiss_label("Remove filter: Videos"),
-                ))
-                .child(pill(
-                    theme,
-                    PillSpec::new().with_label("Audio").with_dismissible(true),
-                )),
-        ))
-        .child(group(
             "Appearances",
             theme,
             div()
