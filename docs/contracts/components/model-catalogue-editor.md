@@ -241,8 +241,9 @@ and disclosure transition for the hidden section.
   the backend performs the move. Hiding the last shown model also asks for the
   hidden section to be disclosed, so the destination exists. That destination
   is `Collapsible`'s own focusable trigger — the outer region it returns is not
-  focusable — and the trigger is stamped with a focus patch so the backend
-  creates a handle for it.
+  focusable — and the trigger's declared focus ring is what makes the backend
+  create a handle for it. The composition stamps only the scoped identity
+  (trigger and content `runtime_id`s, `aria-controls`) onto the disclosure.
 - `ModelCatalogueEditorHandlers::instance_id` is the backend-state scope.
   Semantic row ids stay readable; the scope lives on `runtime_id`, and focus
   destinations are named with `model_catalogue_handle_focus_id` /

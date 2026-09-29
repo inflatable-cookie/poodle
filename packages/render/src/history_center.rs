@@ -346,11 +346,6 @@ fn trigger_cluster(
     undo.a11y.role = Some(NodeRole::Button);
     undo.a11y.label = Some(spec.undo_label.clone());
     undo.interaction.disabled = spec.undo_is_disabled();
-    // The focus ring is also what makes the control reachable: the backend
-    // creates a focus handle only for a focusable node that carries a focus
-    // patch, so a control without one can never be focused or activated by
-    // keyboard. `icon_button` supplies neither today.
-    undo.style.focus = Some(focus_ring(ctx));
 
     let mut redo = icon_button(
         &IconButtonSpec::new()
@@ -368,7 +363,6 @@ fn trigger_cluster(
     redo.a11y.role = Some(NodeRole::Button);
     redo.a11y.label = Some(spec.redo_label.clone());
     redo.interaction.disabled = spec.redo_is_disabled();
-    redo.style.focus = Some(focus_ring(ctx));
 
     cluster
         .child(undo)
@@ -1017,6 +1011,7 @@ fn picker_actions(
         &IconButtonSpec::new()
             .with_icon("ellipsis")
             .with_aria_label("Fork actions")
+            .with_expanded(is_open)
             .with_size(size)
             .with_density(density),
         ctx,
@@ -1029,8 +1024,6 @@ fn picker_actions(
     trigger.runtime_id = part_id(instance, &semantic);
     trigger.a11y.role = Some(NodeRole::Button);
     trigger.a11y.label = Some("Fork actions".to_owned());
-    trigger.a11y.expanded = Some(is_open);
-    trigger.style.focus = Some(focus_ring(ctx));
 
     if !is_open {
         return trigger;
@@ -1549,35 +1542,38 @@ mod tests {
         assert!(find(&node, HISTORY_CENTER_SURFACE_ID).is_none());
     }
 
-    /// g14.007 retained regression. `icon_button` carries no focus patch, and
-    /// the GPUI backend creates a focus handle only for a focusable node that
-    /// has one — so undo, redo and the picker's actions trigger were
-    /// unreachable by keyboard and unfocusable by the backend. The composition
-    /// stamps its own ring. The `icon_button` gap itself is tracked in
-    /// PAPERCUTS.
+    /// Retained regression. Every focusable control the centre renders must
+    /// be reachable: `icon_button` owns the structured focus ring that makes
+    /// the backend track undo, redo and the picker's actions trigger, while
+    /// the composition's bespoke controls (list trigger, entry rows) carry
+    /// their own focus patches.
     #[test]
-    fn every_focusable_control_carries_the_ring_the_backend_keys_handles_on() {
+    fn every_focusable_control_is_reachable_through_a_declared_focus_treatment() {
         let pages = spine();
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let node = history_center(
-            &open_spec(),
+            &open_spec().with_can_undo(true).with_can_redo(true),
             &ctx,
             &view_for(&pages, &[]),
             &HistoryCenterHandlers::default(),
         );
-
-        for id in [
-            HISTORY_CENTER_UNDO_ID,
-            HISTORY_CENTER_REDO_ID,
-            HISTORY_CENTER_LIST_TRIGGER_ID,
-        ] {
+        // The icon buttons carry the component's structured ring (enabled
+        // here — a disabled control is not focusable by design); the bespoke
+        // list trigger keeps the composition's own focus patch.
+        for id in [HISTORY_CENTER_UNDO_ID, HISTORY_CENTER_REDO_ID] {
             let control = find(&node, id).unwrap_or_else(|| panic!("{id} renders"));
             assert!(
-                control.style.focus.is_some(),
+                control.style.focus_ring.is_some(),
                 "{id} has no focus ring, so the backend never creates a handle for it",
             );
         }
+        let list_trigger = find(&node, HISTORY_CENTER_LIST_TRIGGER_ID)
+            .unwrap_or_else(|| panic!("{} renders", HISTORY_CENTER_LIST_TRIGGER_ID));
+        assert!(
+            list_trigger.style.focus.is_some(),
+            "the bespoke list trigger keeps its own focus patch",
+        );
 
         let entry = find(&node, &history_center_entry_id("e2")).expect("entry button renders");
         assert!(entry.interaction.focusable);
