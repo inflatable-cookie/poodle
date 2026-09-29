@@ -1,8 +1,9 @@
 import { chromium } from "playwright";
 
-import { captureSpecimen, pinPage, specimenUrl } from "./capture";
+import { specimenUrl } from "./capture";
 import { SMOKE_AXES } from "./config";
 import { startPreviews } from "./server";
+import { captureSession } from "./session";
 
 /**
  * Ad-hoc triage probe for the visual gate:
@@ -22,40 +23,41 @@ if (!slug || !selector) {
 const servers = await startPreviews();
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const session = captureSession({ context });
 
 for (const framework of ["svelte", "react"] as const) {
-  const page = await context.newPage();
-  await pinPage(page);
-  await page.goto(specimenUrl(servers.urls[framework], slug, SMOKE_AXES[0]), {
-    waitUntil: "load",
-  });
-  await page.locator(".poodle-component-page__section").first().waitFor();
+  const readings = await session.run(`${framework} ${slug}`, async (page) => {
+    await page.goto(specimenUrl(servers.urls[framework], slug, SMOKE_AXES[0]), {
+      waitUntil: "load",
+    });
+    await page.locator(".poodle-component-page__section").first().waitFor();
 
-  const readings = await page.evaluate(
-    ([sel, wanted, limit]) => {
-      return Array.from(document.querySelectorAll(sel as string))
-        .slice(0, limit as number)
-        .map((el) => {
-          const rect = el.getBoundingClientRect();
-          const styles = getComputedStyle(el);
-          const picked: Record<string, string> = {};
-          for (const prop of wanted as string[]) picked[prop] = styles.getPropertyValue(prop);
-          return {
-            tag: el.tagName.toLowerCase(),
-            cls: el.className,
-            w: Math.round(rect.width * 100) / 100,
-            h: Math.round(rect.height * 100) / 100,
-            ...picked,
-          };
-        });
-    },
-    [selector, props, Number(process.env.PROBE_LIMIT ?? 5)] as const,
-  );
+    return page.evaluate(
+      ([sel, wanted, limit]) => {
+        return Array.from(document.querySelectorAll(sel as string))
+          .slice(0, limit as number)
+          .map((el) => {
+            const rect = el.getBoundingClientRect();
+            const styles = getComputedStyle(el);
+            const picked: Record<string, string> = {};
+            for (const prop of wanted as string[]) picked[prop] = styles.getPropertyValue(prop);
+            return {
+              tag: el.tagName.toLowerCase(),
+              cls: el.className,
+              w: Math.round(rect.width * 100) / 100,
+              h: Math.round(rect.height * 100) / 100,
+              ...picked,
+            };
+          });
+      },
+      [selector, props, Number(process.env.PROBE_LIMIT ?? 5)] as const,
+    );
+  });
 
   console.log(`\n${framework}:`);
   for (const reading of readings) console.log(" ", JSON.stringify(reading));
-  await page.close();
 }
 
+await session.close();
 await browser.close();
 await servers.stop();

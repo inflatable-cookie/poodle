@@ -16,8 +16,8 @@ import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright";
 
 import type { ButtonFixture } from "../fixtures/button-visual-inventory.ts";
-import { pinPage } from "../capture.ts";
-import { ensureUp, startPreviews, type PreviewServers } from "../server.ts";
+import { startPreviews, type PreviewServers } from "../server.ts";
+import { captureSession, type CaptureSession } from "../session.ts";
 import {
   CaptureIntegrityError,
   isRecoverableTransportError,
@@ -339,7 +339,7 @@ async function captureOnce(page: Page, url: string): Promise<CapturedScene> {
 }
 
 async function captureFixtureRuntime(
-  page: Page,
+  session: CaptureSession,
   browser: Browser,
   base: string,
   fixture: ButtonFixture,
@@ -349,10 +349,10 @@ async function captureFixtureRuntime(
   const url = fixtureUrl(base, fixture);
   const id = `${fixture.name} [${runtime}]`;
 
-  const first = await captureOnce(page, url);
+  const first = await session.run(`${id} capture`, (page) => captureOnce(page, url));
   // Fresh navigation for the repeat: byte-identical output from the same
   // fixed input is the determinism contract, not a sampled average.
-  const repeat = await captureOnce(page, url);
+  const repeat = await session.run(`${id} repeat`, (page) => captureOnce(page, url));
 
   const sha256 = sha256Hex(first.png);
   const repeatSha256 = sha256Hex(repeat.png);
@@ -430,45 +430,31 @@ export async function captureWebBatch(
       colorScheme: "dark",
     });
 
-    // A page degrades after a dozen or so SPA navigations (vite client state
+    // A page degrades after ~15-20 SPA navigations (vite client state
     // accumulates) until navigations stop settling — the same failure the
-    // g12.009 gate recycles pages for. Recycle on a fixed cadence, and on a
-    // PRE-CAPTURE transport failure restart a dead preview and retry once on
-    // a young page. Determinism, receipt, and host-rejection failures are
-    // evidence failures: they rethrow immediately and stop the batch. This is
+    // g12.009 gate recycles pages for. The session counts navigations, so a
+    // dozen lands before the degradation window. On a PRE-CAPTURE transport
+    // failure it also restarts a dead preview and retries once on a young
+    // page. Determinism, receipt, and host-rejection failures are evidence
+    // failures: they rethrow immediately and stop the batch. This is
     // infrastructure recovery, never frame picking — the byte-identity rule
     // inside captureFixtureRuntime can never reach this branch.
-    const RECYCLE_AFTER = 12;
-    let page = await context.newPage();
-    // Fixed clock + seeded Math.random; the freeze stylesheet lands per
-    // navigation inside captureOnce.
-    await pinPage(page);
-    let capturesOnPage = 0;
-
-    const recycle = async () => {
-      await page.close();
-      page = await context.newPage();
-      await pinPage(page);
-      capturesOnPage = 0;
-    };
+    const session = captureSession({ context, recycleAfter: 12 });
 
     const records: WebCaptureRecord[] = [];
     for (const fixture of fixtures) {
       for (const runtime of WEB_RUNTIMES) {
-        if (capturesOnPage >= RECYCLE_AFTER) await recycle();
-        capturesOnPage += 1;
         try {
           records.push(
-            await captureFixtureRuntime(page, browser, servers.urls[runtime], fixture, runtime, outDir),
+            await captureFixtureRuntime(session, browser, servers.urls[runtime], fixture, runtime, outDir),
           );
         } catch (error) {
           if (!isRecoverableTransportError(error)) throw error;
-          if (servers && (await ensureUp(runtime))) {
+          if (servers && (await session.recover(runtime))) {
             console.log(`  restarted ${runtime} preview after capture failure`);
           }
-          await recycle();
           records.push(
-            await captureFixtureRuntime(page, browser, servers.urls[runtime], fixture, runtime, outDir),
+            await captureFixtureRuntime(session, browser, servers.urls[runtime], fixture, runtime, outDir),
           );
           console.log(`  recovered ${fixture.name} [${runtime}] after: ${(error as Error).message.split("\n")[0]}`);
         }

@@ -285,6 +285,11 @@
 "test:visual" = "bun test/visual/run.ts --tier=axis"
 "test:visual-smoke" = "bun test/visual/run.ts --tier=smoke"
 "test:visual-sweep" = "bun test/visual/run.ts --tier=sweep"
+# Planted cases for the shared preview harness (test/visual/session.ts): a file
+# chooser and a dialog are absorbed, and a hung navigation ends at the per-page
+# deadline with a fresh page instead of hanging the run. Needs playwright
+# browsers, so it rides with the visual gate instead of ci:web.
+"test:visual-harness" = "bun test test/visual/session.test.ts"
 # g14.024 batched meter surface: headless Chromium + WebKit behavior matrix over
 # both previews. Needs playwright browsers + vite dev servers; stays out of
 # ci:web like the visual gate.
@@ -461,7 +466,10 @@
 # failing pair is a new regression and fails the process. Artifacts land in
 # test/visual/out.
 "visual:report" = "bun test/visual/run.ts --tier=sweep --report"
-"ci:visual" = [{ task = "test:visual" }]
+"ci:visual" = [
+  { task = "test:visual-harness" },
+  { task = "test:visual" },
+]
 
 # g15.046 Button visual fixture inventory. Data validation only: no browser, no
 # preview server, no window, no capture. The two commands are the two loaders

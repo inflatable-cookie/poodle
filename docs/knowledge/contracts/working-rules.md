@@ -1,7 +1,7 @@
 # Working Rules
 
 Status: active
-Updated: 2026-09-28
+Updated: 2026-09-29
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -244,8 +244,8 @@ completed or deprecated.
 
 ## Test-Environment Traps
 
-Known behaviour of the tools Poodle tests with. None has a Poodle fix, so
-work around them:
+Known behaviour of the tools Poodle tests with. Work around them as follows;
+where the repository already provides the workaround, the trap links to it:
 
 - **Svelte:** a prop named `state` collides with the `$state` rune at runtime
   (`store_invalid_shape`). Alias it in `$props()`, for example
@@ -264,6 +264,14 @@ work around them:
   that is not a healthy preview, the spawn exits and a waiter that only
   probes HTTP will poll the squatter's 404s until timeout. Check the listen
   table before spawn, name the occupant, and print the child output on death.
+- **Playwright preview harnesses:** a page degrades after ~15–20 SPA
+  navigations as vite client state accumulates, a preview started earlier in a
+  batch can die mid-run, and an unhandled native file chooser or dialog can
+  wedge the page. Use the shared `captureSession` in
+  [`test/visual/session.ts`](../../../test/visual/session.ts): it absorbs
+  choosers and dialogs, recycles the page on a fixed cadence, restarts a dead
+  preview, and enforces a per-page deadline. Boot previews through
+  `startPreviews()` so the fixed port is bound with `--strictPort`.
 - **WebKit:** some ports are restricted (for example 4190: "Not allowed to use
   restricted network port"). Browser probes pick a free port outside that
   list, and run one Playwright engine per process.
