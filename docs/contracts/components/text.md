@@ -23,7 +23,7 @@ Updated: 2026-09-29
 | `leading` | `"normal" \| "relaxed"` | `"normal"` | line-height |
 | `spacing` | `"none" \| "compact"` | `"none"` | compact grid gap for child paragraphs |
 | `clamp` | `"none" \| 1 \| 2 \| 3` | `"none"` | optional line clamp |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; `normal` leaves overflow wrapping unchanged |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; `normal` leaves overflow wrapping unchanged. Native admission pending (`lane:native-admission`) |
 | `children` | `Snippet` | none | text/content |
 
 ## 3. Visual Rules
@@ -46,11 +46,9 @@ Updated: 2026-09-29
 - `clamp={1 | 2 | 3}` applies `-webkit-line-clamp`, `line-clamp`, hidden
   overflow, and vertical box orientation.
 - `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
-  `wrap="normal"` do not change overflow wrapping. Native maps `anywhere`
-  through the shared `wrap_anywhere` channel (GPUI `WhiteSpace::Normal`,
-  which mid-token wraps). `normal` keeps ordinary CSS line-break
-  opportunities (spaces, hyphens, CJK) and does not take that mid-token
-  path, so a long identifier stays on one line.
+  `wrap="normal"` do not change overflow wrapping.
+- `wrap` is web-admitted. The portable Rust spec and GPUI mapping remain
+  native admission pending (`lane:native-admission`).
 
 ## 4. Accessibility
 

@@ -365,17 +365,9 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
         el = el.line_height(relative(lh));
         record_probe_channel("content.typography.line-height");
     }
-    if style.wrap_anywhere {
-        // GPUI 0.2.2 WhiteSpace::Normal wraps at spaces first, then mid-token
-        // when a single word exceeds the line (LineWrapper else-branch; their
-        // own test wraps `aaa aaaaaaaaaaaaaaaaaa`). That is overflow-wrap:
-        // anywhere.
+    if style.text_wrap {
         el = el.whitespace_normal();
     }
-    // wrap=normal (`text_wrap` without `wrap_anywhere`) must not use Nowrap
-    // on the run: that also kills ordinary CSS breaks. It must not use Normal
-    // on a single run either: that mid-token wraps. Text nodes emit nowrap
-    // fragments at space/hyphen/CJK opportunities (see wrap_normal_text_run).
     if let Some(family) = style.font_family {
         // Sans is the app's default (the preview sets Inter at the root), so
         // silence is faithful; Mono names gpui's system monospace stack, the

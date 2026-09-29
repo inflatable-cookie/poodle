@@ -269,10 +269,6 @@ pub struct NodeStyle {
     pub line_height: Option<f32>,
     /// Soft-wrap text to the container width (white-space: normal).
     pub text_wrap: bool,
-    /// Allow breaks inside a long identifier (`overflow-wrap: anywhere`).
-    /// Backends that wrap at spaces first still mid-token wrap when a single
-    /// word exceeds the line, which is the observable result.
-    pub wrap_anywhere: bool,
     /// Fill the parent's height (height: 100%), the vertical `fill_width`.
     pub fill_height: bool,
     /// Fill the parent's width (width: 100%). Candidate for a
@@ -396,7 +392,6 @@ impl Default for NodeStyle {
             font_family: None,
             line_height: None,
             text_wrap: false,
-            wrap_anywhere: false,
             fill_height: false,
             fill_width: false,
             flex_none: false,

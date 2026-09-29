@@ -99,7 +99,6 @@ pub struct PaintedNodeSnapshot {
     pub shadow_layers: Vec<ShadowLayer>,
     pub border_dashed: bool,
     pub text_wrap: bool,
-    pub wrap_anywhere: bool,
     pub text_ellipsis: bool,
     pub no_wrap: bool,
     pub text_size: Option<f32>,
@@ -119,7 +118,6 @@ impl PaintedNodeSnapshot {
             shadow_layers: node.style.shadow_layers.clone(),
             border_dashed: node.style.border_dashed,
             text_wrap: node.style.text_wrap,
-            wrap_anywhere: node.style.wrap_anywhere,
             text_ellipsis: node.style.text_ellipsis,
             no_wrap: node.style.no_wrap,
             text_size: node.style.text_size,
@@ -371,14 +369,7 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
                 element.ime = Some(ime);
                 return build_box(node, div().child(element));
             }
-            // GPUI WhiteSpace::Normal mid-token wraps; Nowrap suppresses
-            // space breaks too. wrap=normal keeps space breaks by wrapping
-            // nowrap fragments, which is overflow-wrap:normal.
-            if node.style.text_wrap && !node.style.wrap_anywhere && !node.style.no_wrap {
-                build_box(node, div().child(wrap_normal_text_run(content)))
-            } else {
-                build_box(node, div().child(content.clone()))
-            }
+            build_box(node, div().child(content.clone()))
         }
         // GPUI has no native button element; the old tier's buttons are styled
         // divs too, so the label-child div is the faithful mapping. Same for
@@ -650,83 +641,6 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
         svg.with_transformation(Transformation::rotate(gpui::radians(radians)))
     })
     .into_any_element()
-}
-
-/// GPUI has no overflow-wrap:normal. WhiteSpace::Normal mid-token wraps;
-/// Nowrap also kills ordinary CSS breaks. wrap=normal is a wrapping row of
-/// nowrap fragments at whitespace, hyphen, and ideographic opportunities.
-fn wrap_normal_text_run(content: &str) -> Div {
-    if !content.contains('\n') {
-        return wrap_normal_line(content);
-    }
-    let mut column = div().flex().flex_col();
-    for line in content.split('\n') {
-        column = column.child(wrap_normal_line(line));
-    }
-    column
-}
-
-fn wrap_normal_line(line: &str) -> Div {
-    let mut row = div().flex().flex_row().flex_wrap();
-    for fragment in wrap_normal_fragments(line) {
-        row = row.child(
-            div()
-                .flex_shrink_0()
-                .whitespace_nowrap()
-                .child(fragment),
-        );
-    }
-    row
-}
-
-pub(crate) fn wrap_normal_fragments(content: &str) -> Vec<SharedString> {
-    let chars: Vec<char> = content.chars().collect();
-    let mut fragments = Vec::new();
-    let mut current = String::new();
-    for (i, &c) in chars.iter().enumerate() {
-        current.push(c);
-        if wrap_normal_break_after(c, chars.get(i + 1).copied()) {
-            fragments.push(SharedString::from(std::mem::take(&mut current)));
-        }
-    }
-    if !current.is_empty() {
-        fragments.push(SharedString::from(current));
-    }
-    if fragments.is_empty() {
-        fragments.push(SharedString::from(""));
-    }
-    fragments
-}
-
-/// CSS `overflow-wrap:normal` / UAX #14 opportunities we can express as
-/// nowrap flex items: spaces, hyphen-class characters, and ideographs.
-/// ASCII identifiers stay one fragment so they do not mid-token wrap.
-fn wrap_normal_break_after(c: char, next: Option<char>) -> bool {
-    if c.is_whitespace() || is_normal_hyphen_break(c) {
-        return true;
-    }
-    let Some(next) = next else {
-        return false;
-    };
-    is_ideographic(next) || (is_ideographic(c) && !next.is_whitespace() && !is_normal_hyphen_break(next))
-}
-
-fn is_normal_hyphen_break(c: char) -> bool {
-    matches!(
-        c,
-        '-' | '\u{00AD}' | '\u{2010}' | '\u{2013}' | '\u{200B}'
-    )
-}
-
-fn is_ideographic(c: char) -> bool {
-    matches!(
-        c,
-        '\u{3040}'..='\u{30FF}'
-            | '\u{3400}'..='\u{4DBF}'
-            | '\u{4E00}'..='\u{9FFF}'
-            | '\u{F900}'..='\u{FAFF}'
-            | '\u{AC00}'..='\u{D7AF}'
-    )
 }
 
 /// Container-shaped nodes: the full channel walk. Interaction that needs

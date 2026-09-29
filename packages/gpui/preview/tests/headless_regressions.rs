@@ -585,16 +585,6 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
             LayoutOverflow::Hidden
         );
 
-        let wrap_normal = poodle_render::text(&TextSpec::new("very-long-identifier"), &ctx);
-        assert!(wrap_normal.style.text_wrap);
-        assert!(!wrap_normal.style.wrap_anywhere);
-        let wrap_anywhere = poodle_render::text(
-            &TextSpec::new("very-long-identifier").with_wrap(poodle_specs::TextWrap::Anywhere),
-            &ctx,
-        );
-        assert!(wrap_anywhere.style.text_wrap);
-        assert!(wrap_anywhere.style.wrap_anywhere);
-
         let compact = poodle_render::text(
             &TextSpec::new("compact").with_spacing(TextSpacing::Compact),
             &ctx,
@@ -957,7 +947,7 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
                 "pointer hover dispatch through HeadlessDriver",
             ],
             &[
-                "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, clamp metadata, and wrap_anywhere",
+                "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, and clamp metadata",
                 "mounted bounds confirm text is contained within the parent Surface layout",
                 "text node remains non-focusable and outside the focus chain",
             ],
@@ -980,111 +970,19 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
     });
 }
 
-/// Native admission of Text/Code wrap, ListCard eyebrow, Pill dismiss, and
-/// Keyboard computerBaseNote. Headless GPUI mount plus the shared keyboard
-/// machine — no windowed path.
+/// Native admission of ListCard eyebrow, Pill dismiss, and Keyboard
+/// computerBaseNote. Text/Code wrap stays web-only (brief stop condition).
+/// Headless GPUI mount plus the shared keyboard machine — no windowed path.
 #[test]
-fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
+fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
     use poodle_headless::audio::{
         keyboard_computer_key_down, keyboard_computer_note, KeyboardContext, KeyboardEffect,
     };
-    use poodle_specs::{
-        CodeSpec, CodeWrap, ListCardSpec, PillSpec, TextSpec, TextWrap,
-    };
+    use poodle_specs::{ListCardSpec, PillSpec};
 
     run_headless(|cx| {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let long = "supercalifragilisticexpialidociousidentifier";
-
-        let mut normal_text = poodle_render::text(&TextSpec::new(long), &ctx);
-        normal_text.id = Some("admit-text-wrap-normal".into());
-        normal_text.style.max_width = Some(72.0);
-        let mut anywhere_text = poodle_render::text(
-            &TextSpec::new(long).with_wrap(TextWrap::Anywhere),
-            &ctx,
-        );
-        anywhere_text.id = Some("admit-text-wrap-anywhere".into());
-        anywhere_text.style.max_width = Some(72.0);
-        assert!(!normal_text.style.wrap_anywhere);
-        assert!(anywhere_text.style.wrap_anywhere);
-
-        let spaced = "aa bb cc dd ee ff gg hh ii jj kk";
-        let mut spaced_text = poodle_render::text(&TextSpec::new(spaced), &ctx);
-        spaced_text.id = Some("admit-text-wrap-normal-spaced".into());
-        spaced_text.style.max_width = Some(72.0);
-
-        let hyphen = "alpha-beta-gamma-delta-epsilon";
-        let mut hyphen_text = poodle_render::text(&TextSpec::new(hyphen), &ctx);
-        hyphen_text.id = Some("admit-text-wrap-normal-hyphen".into());
-        hyphen_text.style.max_width = Some(72.0);
-
-        let mut normal_code = poodle_render::code(
-            &CodeSpec::new().with_content(long).with_inline(true),
-            &ctx,
-        );
-        normal_code.id = Some("admit-code-wrap-normal".into());
-        normal_code.style.max_width = Some(72.0);
-        let mut anywhere_code = poodle_render::code(
-            &CodeSpec::new()
-                .with_content(long)
-                .with_inline(true)
-                .with_wrap(CodeWrap::Anywhere),
-            &ctx,
-        );
-        anywhere_code.id = Some("admit-code-wrap-anywhere".into());
-        anywhere_code.style.max_width = Some(72.0);
-        assert!(normal_code.style.text_wrap);
-        assert!(!normal_code.style.no_wrap);
-        assert!(!normal_code.style.wrap_anywhere);
-        assert!(anywhere_code.style.wrap_anywhere);
-        assert!(!anywhere_code.style.no_wrap);
-
-        let mut spaced_code = poodle_render::code(
-            &CodeSpec::new()
-                .with_content("npm install extra packages")
-                .with_inline(true),
-            &ctx,
-        );
-        spaced_code.id = Some("admit-code-wrap-normal-spaced".into());
-        spaced_code.style.max_width = Some(72.0);
-
-        let block_source = format!("fn main() {{\n    {long}\n}}");
-        let mut normal_block = poodle_render::code(
-            &CodeSpec::new()
-                .with_content(&block_source)
-                .with_copyable(false),
-            &ctx,
-        );
-        normal_block.id = Some("admit-block-code-wrap-normal".into());
-        {
-            let source = normal_block
-                .children
-                .last_mut()
-                .and_then(|scroll| scroll.children.first_mut())
-                .expect("normal block source");
-            source.id = Some("admit-block-code-wrap-normal-source".into());
-            source.style.max_width = Some(72.0);
-            assert!(source.style.no_wrap);
-        }
-        let mut anywhere_block = poodle_render::code(
-            &CodeSpec::new()
-                .with_content(&block_source)
-                .with_copyable(false)
-                .with_wrap(CodeWrap::Anywhere),
-            &ctx,
-        );
-        anywhere_block.id = Some("admit-block-code-wrap-anywhere".into());
-        {
-            let source = anywhere_block
-                .children
-                .last_mut()
-                .and_then(|scroll| scroll.children.first_mut())
-                .expect("anywhere block source");
-            source.id = Some("admit-block-code-wrap-anywhere-source".into());
-            source.style.max_width = Some(72.0);
-            assert!(source.style.wrap_anywhere);
-        }
 
         let mut card = poodle_render::list_card(
             &ListCardSpec::new()
@@ -1155,114 +1053,12 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         root.id = Some("admit-native-root".into());
         root.style.descriptor.layout.direction = LayoutDirection::Column;
         root.style.max_width = Some(96.0);
-        root = root
-            .child(normal_text)
-            .child(anywhere_text)
-            .child(spaced_text)
-            .child(hyphen_text)
-            .child(normal_code)
-            .child(anywhere_code)
-            .child(spaced_code)
-            .child(normal_block)
-            .child(anywhere_block)
-            .child(card)
-            .child(pill);
+        root = root.child(card).child(pill);
 
         poodle_gpui_node_backend::begin_probe_capture();
         let mounted = Arc::new(Mutex::new(root));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 400.0);
         driver.draw_frame();
-
-        let normal_code_paint = poodle_gpui_node_backend::painted_node_for("admit-code-wrap-normal")
-            .expect("painted normal code");
-        let anywhere_code_paint =
-            poodle_gpui_node_backend::painted_node_for("admit-code-wrap-anywhere")
-                .expect("painted anywhere code");
-        assert!(normal_code_paint.text_wrap);
-        assert!(!normal_code_paint.no_wrap);
-        assert!(!normal_code_paint.wrap_anywhere);
-        assert!(anywhere_code_paint.wrap_anywhere);
-        assert!(!anywhere_code_paint.no_wrap);
-        let normal_code_bounds = poodle_gpui_node_backend::bounds_for("admit-code-wrap-normal")
-            .expect("normal inline code bounds");
-        let anywhere_code_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-code-wrap-anywhere")
-                .expect("anywhere inline code bounds");
-        assert!(
-            anywhere_code_bounds.size.height > normal_code_bounds.size.height,
-            "inline wrap=anywhere must mid-token wrap; wrap=normal must not. normal={:?} anywhere={:?}",
-            normal_code_bounds.size,
-            anywhere_code_bounds.size
-        );
-        let spaced_code_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-code-wrap-normal-spaced")
-                .expect("spaced inline code bounds");
-        assert!(
-            spaced_code_bounds.size.height > normal_code_bounds.size.height,
-            "inline wrap=normal must still wrap at spaces. spaced={:?} identifier={:?}",
-            spaced_code_bounds.size,
-            normal_code_bounds.size
-        );
-
-        let anywhere_text_paint =
-            poodle_gpui_node_backend::painted_node_for("admit-text-wrap-anywhere")
-                .expect("painted anywhere text");
-        let normal_text_paint = poodle_gpui_node_backend::painted_node_for("admit-text-wrap-normal")
-            .expect("painted normal text");
-        assert!(anywhere_text_paint.wrap_anywhere);
-        assert!(!normal_text_paint.wrap_anywhere);
-        let normal_text_bounds = poodle_gpui_node_backend::bounds_for("admit-text-wrap-normal")
-            .expect("normal text bounds");
-        let anywhere_text_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-text-wrap-anywhere")
-                .expect("anywhere text bounds");
-        assert!(
-            anywhere_text_bounds.size.height > normal_text_bounds.size.height,
-            "wrap=anywhere must mid-token wrap a long identifier; wrap=normal must not. normal={:?} anywhere={:?}",
-            normal_text_bounds.size,
-            anywhere_text_bounds.size
-        );
-        let spaced_text_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-text-wrap-normal-spaced")
-                .expect("spaced normal text bounds");
-        assert!(
-            spaced_text_bounds.size.height > normal_text_bounds.size.height,
-            "wrap=normal must still wrap at spaces. spaced={:?} identifier={:?}",
-            spaced_text_bounds.size,
-            normal_text_bounds.size
-        );
-        let hyphen_text_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-text-wrap-normal-hyphen")
-                .expect("hyphenated normal text bounds");
-        assert!(
-            hyphen_text_bounds.size.height > normal_text_bounds.size.height,
-            "wrap=normal must wrap at hyphens. hyphenated={:?} identifier={:?}",
-            hyphen_text_bounds.size,
-            normal_text_bounds.size
-        );
-
-        let normal_block_paint =
-            poodle_gpui_node_backend::painted_node_for("admit-block-code-wrap-normal-source")
-                .expect("painted normal block source");
-        let anywhere_block_paint =
-            poodle_gpui_node_backend::painted_node_for("admit-block-code-wrap-anywhere-source")
-                .expect("painted anywhere block source");
-        assert!(normal_block_paint.no_wrap);
-        assert!(!normal_block_paint.wrap_anywhere);
-        assert!(anywhere_block_paint.wrap_anywhere);
-        assert!(!anywhere_block_paint.no_wrap);
-        let normal_block_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-block-code-wrap-normal-source")
-                .expect("normal block bounds");
-        let anywhere_block_bounds =
-            poodle_gpui_node_backend::bounds_for("admit-block-code-wrap-anywhere-source")
-                .expect("anywhere block bounds");
-        assert!(
-            anywhere_block_bounds.size.height > normal_block_bounds.size.height,
-            "block wrap=normal must stay preformatted; anywhere must wrap. normal={:?} anywhere={:?}",
-            normal_block_bounds.size,
-            anywhere_block_bounds.size
-        );
 
         let card_paint = poodle_gpui_node_backend::painted_node_for("admit-list-card-eyebrow")
             .expect("painted list card");
