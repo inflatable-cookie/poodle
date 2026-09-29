@@ -1742,6 +1742,9 @@ pub struct KeyboardContext {
     pub octave_shift: i8,
     /// Base MIDI note for computer-key offsets (contract `computerBaseNote`, default 60).
     pub computer_base_note: u8,
+    /// Key to semitone offset (contract `computerKeyMap`). Defaults to the
+    /// chromatic A–K map; callers overlay extra or replacement entries.
+    pub computer_key_map: Vec<(String, i16)>,
     pub active_inputs: Vec<(String, u8, u8)>,
     pub external_held_notes: Vec<u8>,
     pub focused_note: Option<u8>,
@@ -1756,6 +1759,7 @@ impl Default for KeyboardContext {
             orientation: KeyboardOrientation::Horizontal,
             octave_shift: 0,
             computer_base_note: 60,
+            computer_key_map: default_computer_key_map(),
             active_inputs: vec![],
             external_held_notes: vec![],
             focused_note: None,
@@ -1781,15 +1785,28 @@ pub const DEFAULT_COMPUTER_KEY_MAP: &[(&str, i16)] = &[
     ("k", 12),
 ];
 
+fn default_computer_key_map() -> Vec<(String, i16)> {
+    DEFAULT_COMPUTER_KEY_MAP
+        .iter()
+        .map(|(key, offset)| ((*key).to_string(), *offset))
+        .collect()
+}
+
+fn computer_key_offset(context: &KeyboardContext, key: &str) -> Option<i16> {
+    context
+        .computer_key_map
+        .iter()
+        .find(|(name, _)| name.eq_ignore_ascii_case(key))
+        .map(|(_, offset)| *offset)
+}
+
 /// MIDI note for a computer key: `computerBaseNote + offset + octaveShift * 12`.
+/// The offset comes from `KeyboardContext.computer_key_map` (default A–K).
 /// Returns `None` when the key is unmapped or the computed note is outside
 /// 0..=127. Svelte's PRESS path rejects the raw sum the same way — it does
 /// not saturate into range.
 pub fn keyboard_computer_note(context: &KeyboardContext, key: &str) -> Option<u8> {
-    let offset = DEFAULT_COMPUTER_KEY_MAP
-        .iter()
-        .find(|(name, _)| name.eq_ignore_ascii_case(key))
-        .map(|(_, offset)| *offset)?;
+    let offset = computer_key_offset(context, key)?;
     let note =
         i16::from(context.computer_base_note) + offset + i16::from(context.octave_shift) * 12;
     u8::try_from(note).ok().filter(|note| *note <= 127)
@@ -2494,6 +2511,30 @@ mod tests {
         high.octave_shift = -1;
         assert_eq!(keyboard_computer_note(&high, "a"), None);
         assert_eq!(keyboard_computer_key_down(high, "a", 90, false).1, vec![]);
+    }
+
+    #[test]
+    fn computer_keys_use_the_configured_key_map() {
+        let mut context = KeyboardContext {
+            first_note: 48,
+            last_note: 96,
+            ..KeyboardContext::default()
+        };
+        context.computer_key_map.push(("q".into(), 0));
+        assert_eq!(keyboard_computer_note(&context, "q"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "Q"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "z"), None);
+
+        let (pressed, effects) = keyboard_computer_key_down(context, "q", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 60,
+                velocity: 90
+            }]
+        );
+        assert_eq!(keyboard_visual_state(&pressed).held_notes, vec![60]);
     }
 
     #[test]
