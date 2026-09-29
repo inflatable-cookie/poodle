@@ -30,6 +30,10 @@ prefer the narrower current authority and repair the stale document.
 
 ## Catalogue Specimens
 
+- Component and portable-route counts are derived from one generated source
+  that every gate consumes; adding a public component never needs a
+  hand-bumped count in several files (operator ruling 2026-09-29).
+
 - Every public component has an addressable, representative specimen in every
   runtime included by its admission. A staged web admission therefore requires
   both Svelte and React catalogue pages before the task is complete; excluding

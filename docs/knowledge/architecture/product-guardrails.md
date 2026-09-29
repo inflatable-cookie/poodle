@@ -21,3 +21,9 @@ Owner: Poodle core
   public Poodle contracts.
 - Freeze a bounded owner before widening a migration or parity tranche.
 - Record intentional runtime differences and validate them against the contract.
+- Poodle's internal class names are not public API. A consumer's `:global`
+  override of Poodle internals marks an unmet need; Poodle closes it with a
+  contracted prop or token rather than keeping the selector stable (operator
+  ruling 2026-09-29).
+- The default icon set carries generic application affordances, including
+  undo, redo, history and pin (operator ruling 2026-09-29).

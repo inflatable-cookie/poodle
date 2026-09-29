@@ -40,6 +40,11 @@ scope admits a workflow change only when its sole changed lines are
 setup-bun's `bun-version`/`bun-version-file` inputs; any other workflow edit
 needs operator approval.
 
+The root `package.json` is a release surface for its version and its
+published shape, but not for development tooling: an ordinary PR may change
+root `devDependencies` alone, since they ship in no published package
+(operator ruling 2026-09-29).
+
 Every release is operator-approved: releases and workflow dispatch are release
 mutations (see [AGENTS.md](../../../AGENTS.md)). A failed release run is a
 process failure, not a discovery: stop and return to planning.
