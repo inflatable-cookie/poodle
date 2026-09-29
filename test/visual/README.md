@@ -40,6 +40,39 @@ parity-debt inventory (`debt.ts`): a recorded pair reports as known debt;
 any other failing pair is a new regression and fails the process. The strict
 tiers never read the inventory — a gate failure is always a failure.
 
+## Shared harness
+
+`session.ts` is the one headless-browser helper every multi-capture harness
+and agent-driven preview uses. It absorbs native file choosers and dialogs,
+recycles a page before vite's client state degrades it, restarts a preview
+that dies mid-batch, and puts a hard deadline on every attempt:
+
+```ts
+import { captureSession } from "./session";
+
+const session = captureSession({ context });
+const capture = await session.run(`${framework} ${slug}`, (page) =>
+  captureSpecimen(page, base, slug, axis),
+);
+if (!capture.ok && (await session.recover(framework))) {
+  // a dead preview was restarted; retry once on a young page
+}
+```
+
+`run` recycles the page on the shared `RECYCLE_AFTER` cadence and rejects
+with `PageDeadlineError` when an attempt exceeds `PAGE_DEADLINE_MS`, so a
+wedged specimen can never consume the whole run. Recovery is the caller's
+decision: only infrastructure failures (dead preview, degraded page) may be
+retried — a specimen that cannot settle is evidence, not a flake.
+
+Previews are always booted through `startPreviews()` in `server.ts`: it binds
+the configured ports with `--strictPort`, checks the listen table first, and
+fails fast naming a squatter rather than trusting the "ready" banner. Do not
+reach for `bun run --cwd packages/*/preview dev` from a harness: it takes
+whatever port is free and a stale server can shadow it.
+
+The planted cases live in `session.test.ts` (`effigy test:visual-harness`).
+
 ## Triage
 
 `probe.ts` prints one selector's box and computed styles side by side in
@@ -63,7 +96,8 @@ Order of suspicion, learned from wave 1:
 | file | role |
 | --- | --- |
 | `config.ts` | tiers, axes, skip list, ports, capture selector |
-| `server.ts` | boots/reuses/restarts the two vite previews |
+| `server.ts` | boots/reuses/restarts the two vite previews on strict ports |
+| `session.ts` | shared headless-browser session: recycling, deadlines, chooser/dialog handling, preview restart |
 | `capture.ts` | determinism pinning + specimen capture |
 | `run.ts` | drives the matrix, diffs, writes the summary |
 | `probe.ts` | side-by-side measurement helper for triage |

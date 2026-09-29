@@ -129,6 +129,25 @@ function collectSpawnOutput(proc: ReturnType<typeof Bun.spawn>): () => string {
   return () => chunks.join("");
 }
 
+/**
+ * `OwnedPreview` keeps the spawn handle under `proc`; the waiter wants it flat.
+ * Passing the wrapper straight to `waitForSpawnedPreview` read
+ * `undefined.exited` and crashed the gate before its first capture.
+ */
+export function waitForOwnedPreview(
+  preview: { proc: { exited: Promise<number> }; output: () => string },
+  port: number,
+  framework: Framework,
+  timeoutMs = 60_000,
+): Promise<void> {
+  return waitForSpawnedPreview(
+    { exited: preview.proc.exited, output: preview.output },
+    port,
+    framework,
+    timeoutMs,
+  );
+}
+
 function spawnPreview(framework: Framework): OwnedPreview {
   const { cwd, port } = SERVERS[framework];
   const proc = Bun.spawn(
@@ -162,7 +181,7 @@ export async function ensureUp(framework: Framework): Promise<boolean> {
   }
   assertPreviewPortFree(port);
   const preview = spawnPreview(framework);
-  await waitForSpawnedPreview(preview, port, framework);
+  await waitForOwnedPreview(preview, port, framework);
   return true;
 }
 
@@ -190,7 +209,7 @@ export async function startPreviews(): Promise<PreviewServers> {
     (Object.keys(SERVERS) as Framework[]).map((framework) => {
       const preview = owned.get(framework);
       if (!preview) return Promise.resolve();
-      return waitForSpawnedPreview(preview, SERVERS[framework].port, framework);
+      return waitForOwnedPreview(preview, SERVERS[framework].port, framework);
     }),
   );
 

@@ -6,6 +6,7 @@ import {
   assertPreviewPortFree,
   formatPreviewSpawnFailure,
   previewPortOccupant,
+  waitForOwnedPreview,
   waitForSpawnedPreview,
 } from "./server";
 
@@ -63,6 +64,21 @@ describe("visual preview port occupancy", () => {
     expect(thrown!.message).toContain(`port ${squatter.port}`);
     expect(thrown!.message).toContain(`pid ${occupant!.pid}`);
     expect(thrown!.message).toContain(occupant!.command.split(" ")[0]!);
+  });
+
+  test("the owned-preview waiter reads the spawn handle's exit promise", async () => {
+    // The 042 refactor wrapped the spawn in `{ proc, output }`; passing that
+    // wrapper to `waitForSpawnedPreview` (which wants `{ exited, output }`) read
+    // `undefined.exited` and crashed the gate before its first capture.
+    const owner = { proc: { exited: Promise.resolve(7) }, output: () => "boom" };
+    let thrown: Error | undefined;
+    try {
+      await waitForOwnedPreview(owner, 59998, "svelte", 5_000);
+    } catch (error) {
+      thrown = error instanceof Error ? error : new Error(String(error));
+    }
+    expect(thrown?.message).toContain("exited 7");
+    expect(thrown?.message).toContain("boom");
   });
 
   test("spawn death names the port and prints the child output", async () => {

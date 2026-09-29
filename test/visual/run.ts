@@ -2,13 +2,14 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { chromium, type Browser, type Page } from "playwright";
+import { chromium, type Browser } from "playwright";
 
 import { ALLOWLIST, DEFAULT_MAX_DIFF_RATIO } from "./allowlist";
 import { DEBT, type VisualDebtEntry } from "./debt";
-import { captureSpecimen, pinPage } from "./capture";
+import { captureSpecimen, type CaptureResult } from "./capture";
 import { SKIPPED, VIEWPORT, tierPlan, type Axis, type Tier } from "./config";
-import { ensureUp, startPreviews } from "./server";
+import { startPreviews } from "./server";
+import { PageDeadlineError, captureSession } from "./session";
 
 /**
  * Cross-framework visual gate (g12.009).
@@ -106,44 +107,42 @@ async function main(): Promise<void> {
       reducedMotion: "reduce",
     });
 
-    const pages: Record<"svelte" | "react", Page> = {
-      svelte: await context.newPage(),
-      react: await context.newPage(),
-    };
-    await pinPage(pages.svelte);
-    await pinPage(pages.react);
-
-    // A page degrades after a few dozen SPA loads (vite client + specimen state
-    // accumulate) until heavy specimens stop settling inside the timeout.
-    // Recycling keeps every capture on a young page; the retry covers the rest.
-    let capturesOnPage = 0;
-    const RECYCLE_AFTER = 20;
-
-    const recycle = async (framework: "svelte" | "react") => {
-      await pages[framework].close();
-      pages[framework] = await context.newPage();
-      await pinPage(pages[framework]);
+    // One session per preview. The shared helper owns page recycling, the
+    // per-capture deadline, and the file-chooser/dialog handlers; each preview
+    // keeps its own young page so a degraded one never spreads.
+    const sessions = {
+      svelte: captureSession({ context }),
+      react: captureSession({ context }),
     };
 
     const capture = async (framework: "svelte" | "react", slug: string, axis: Axis) => {
-      const first = await captureSpecimen(pages[framework], servers.urls[framework], slug, axis);
+      const label = `${framework} ${slug} [${axis.id}]`;
+      const attempt = (): Promise<CaptureResult> =>
+        sessions[framework].run(label, (page) =>
+          captureSpecimen(page, servers.urls[framework], slug, axis),
+        );
+
+      let first: CaptureResult;
+      try {
+        first = await attempt();
+      } catch (error) {
+        // A per-page deadline poisons the page. Treat it like the other
+        // infrastructure failures below and give the specimen one attempt on a
+        // fresh page before the pair is reported as a capture failure.
+        if (!(error instanceof PageDeadlineError)) throw error;
+        first = { ok: false, error: error.message };
+      }
       if (first.ok) return first;
       // A preview can die mid-run (an externally started dev server outliving
       // its shell); restart it before blaming the specimen.
-      if (await ensureUp(framework)) console.log(`  restarted ${framework} preview`);
-      await recycle(framework);
-      return captureSpecimen(pages[framework], servers.urls[framework], slug, axis);
+      if (await sessions[framework].recover(framework)) {
+        console.log(`  restarted ${framework} preview`);
+      }
+      return attempt();
     };
 
     for (const axis of plan.axes) {
       for (const slug of slugs) {
-        if (capturesOnPage >= RECYCLE_AFTER) {
-          await recycle("svelte");
-          await recycle("react");
-          capturesOnPage = 0;
-        }
-        capturesOnPage += 1;
-
         // Sequential on purpose: capturing both previews at once starves heavy
         // specimens (ListCard, DataTable) on a loaded machine and produces
         // spurious render timeouts.
