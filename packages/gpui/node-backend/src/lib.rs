@@ -653,8 +653,8 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
 }
 
 /// GPUI has no overflow-wrap:normal. WhiteSpace::Normal mid-token wraps;
-/// Nowrap also kills space breaks. wrap=normal is a wrapping row of nowrap
-/// fragments so ordinary whitespace stays a break opportunity.
+/// Nowrap also kills ordinary CSS breaks. wrap=normal is a wrapping row of
+/// nowrap fragments at whitespace, hyphen, and ideographic opportunities.
 fn wrap_normal_text_run(content: &str) -> Div {
     if !content.contains('\n') {
         return wrap_normal_line(content);
@@ -679,12 +679,13 @@ fn wrap_normal_line(line: &str) -> Div {
     row
 }
 
-fn wrap_normal_fragments(content: &str) -> Vec<SharedString> {
+pub(crate) fn wrap_normal_fragments(content: &str) -> Vec<SharedString> {
+    let chars: Vec<char> = content.chars().collect();
     let mut fragments = Vec::new();
     let mut current = String::new();
-    for c in content.chars() {
+    for (i, &c) in chars.iter().enumerate() {
         current.push(c);
-        if c.is_whitespace() {
+        if wrap_normal_break_after(c, chars.get(i + 1).copied()) {
             fragments.push(SharedString::from(std::mem::take(&mut current)));
         }
     }
@@ -695,6 +696,37 @@ fn wrap_normal_fragments(content: &str) -> Vec<SharedString> {
         fragments.push(SharedString::from(""));
     }
     fragments
+}
+
+/// CSS `overflow-wrap:normal` / UAX #14 opportunities we can express as
+/// nowrap flex items: spaces, hyphen-class characters, and ideographs.
+/// ASCII identifiers stay one fragment so they do not mid-token wrap.
+fn wrap_normal_break_after(c: char, next: Option<char>) -> bool {
+    if c.is_whitespace() || is_normal_hyphen_break(c) {
+        return true;
+    }
+    let Some(next) = next else {
+        return false;
+    };
+    is_ideographic(next) || (is_ideographic(c) && !next.is_whitespace() && !is_normal_hyphen_break(next))
+}
+
+fn is_normal_hyphen_break(c: char) -> bool {
+    matches!(
+        c,
+        '-' | '\u{00AD}' | '\u{2010}' | '\u{2013}' | '\u{200B}'
+    )
+}
+
+fn is_ideographic(c: char) -> bool {
+    matches!(
+        c,
+        '\u{3040}'..='\u{30FF}'
+            | '\u{3400}'..='\u{4DBF}'
+            | '\u{4E00}'..='\u{9FFF}'
+            | '\u{F900}'..='\u{FAFF}'
+            | '\u{AC00}'..='\u{D7AF}'
+    )
 }
 
 /// Container-shaped nodes: the full channel walk. Interaction that needs

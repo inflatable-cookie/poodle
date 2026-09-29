@@ -1014,6 +1014,11 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         spaced_text.id = Some("admit-text-wrap-normal-spaced".into());
         spaced_text.style.max_width = Some(72.0);
 
+        let hyphen = "alpha-beta-gamma-delta-epsilon";
+        let mut hyphen_text = poodle_render::text(&TextSpec::new(hyphen), &ctx);
+        hyphen_text.id = Some("admit-text-wrap-normal-hyphen".into());
+        hyphen_text.style.max_width = Some(72.0);
+
         let mut normal_code = poodle_render::code(
             &CodeSpec::new().with_content(long).with_inline(true),
             &ctx,
@@ -1154,6 +1159,7 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             .child(normal_text)
             .child(anywhere_text)
             .child(spaced_text)
+            .child(hyphen_text)
             .child(normal_code)
             .child(anywhere_code)
             .child(spaced_code)
@@ -1223,6 +1229,15 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             spaced_text_bounds.size.height > normal_text_bounds.size.height,
             "wrap=normal must still wrap at spaces. spaced={:?} identifier={:?}",
             spaced_text_bounds.size,
+            normal_text_bounds.size
+        );
+        let hyphen_text_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-text-wrap-normal-hyphen")
+                .expect("hyphenated normal text bounds");
+        assert!(
+            hyphen_text_bounds.size.height > normal_text_bounds.size.height,
+            "wrap=normal must wrap at hyphens. hyphenated={:?} identifier={:?}",
+            hyphen_text_bounds.size,
             normal_text_bounds.size
         );
 

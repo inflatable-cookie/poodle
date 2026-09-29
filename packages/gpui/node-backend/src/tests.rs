@@ -712,3 +712,25 @@ fn a_dialog_root_overlay_stays_inside_its_host_slot() {
         );
     });
 }
+
+fn fragment_strings(content: &str) -> Vec<String> {
+    wrap_normal_fragments(content)
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect()
+}
+
+#[test]
+fn wrap_normal_fragments_keep_legal_breaks_and_whole_identifiers() {
+    assert_eq!(fragment_strings("hello world"), vec!["hello ", "world"]);
+    assert_eq!(fragment_strings("alpha-beta"), vec!["alpha-", "beta"]);
+    assert_eq!(
+        fragment_strings("你好世界"),
+        vec!["你", "好", "世", "界"]
+    );
+    assert_eq!(fragment_strings("hello世界"), vec!["hello", "世", "界"]);
+    assert_eq!(
+        fragment_strings("supercalifragilistic"),
+        vec!["supercalifragilistic"]
+    );
+}

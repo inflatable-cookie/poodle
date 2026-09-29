@@ -48,8 +48,9 @@ Updated: 2026-09-29
 - `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
   `wrap="normal"` do not change overflow wrapping. Native maps `anywhere`
   through the shared `wrap_anywhere` channel (GPUI `WhiteSpace::Normal`,
-  which mid-token wraps). `normal` keeps ordinary space breaks and does
-  not take that mid-token path, so a long identifier stays on one line.
+  which mid-token wraps). `normal` keeps ordinary CSS line-break
+  opportunities (spaces, hyphens, CJK) and does not take that mid-token
+  path, so a long identifier stays on one line.
 
 ## 4. Accessibility
 
