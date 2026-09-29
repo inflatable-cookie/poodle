@@ -15,6 +15,24 @@ use crate::color::{hex_color, mix_srgb, solid_tone_surface, with_alpha, WHITE};
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
+/// Semantic id of the dismiss control. Backends key per-instance state on
+/// `runtime_id`; this stays readable.
+pub const PILL_DISMISS_ID: &str = "poodle-pill-remove";
+
+/// The backend-state id of the dismiss control.
+pub fn pill_dismiss_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id.filter(|scope| !scope.is_empty()) {
+        Some(scope) => format!("pill:{scope}:{PILL_DISMISS_ID}"),
+        None => PILL_DISMISS_ID.to_string(),
+    }
+}
+
+fn pill_dismiss_scope<'a>(spec: &'a PillSpec, instance_id: Option<&'a str>) -> Option<&'a str> {
+    instance_id
+        .filter(|scope| !scope.is_empty())
+        .or_else(|| (!spec.label.is_empty()).then_some(spec.label.as_str()))
+}
+
 /// Per-size metrics in rem: `(min_w, min_h, pad_x, pad_y, font)`.
 #[expect(
     clippy::approx_constant,
@@ -112,13 +130,14 @@ fn pill_colors(
 }
 
 pub fn pill(spec: &PillSpec, ctx: &RenderContext<'_>) -> Node {
-    pill_with_remove(spec, ctx, None)
+    pill_with_remove(spec, ctx, None, None)
 }
 
 pub fn pill_with_remove(
     spec: &PillSpec,
     ctx: &RenderContext<'_>,
     on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
+    instance_id: Option<&str>,
 ) -> Node {
     let (min_w, min_h, pad_x, pad_y, font_size) =
         pill_metrics(spec.resolved_size(), spec.typography);
@@ -202,7 +221,8 @@ pub fn pill_with_remove(
 
     if spec.is_removable {
         let mut remove = Node::container();
-        remove.id = Some("poodle-pill-remove".to_string());
+        remove.id = Some(PILL_DISMISS_ID.to_string());
+        remove.runtime_id = Some(pill_dismiss_focus_id(pill_dismiss_scope(spec, instance_id)));
         remove.a11y.role = Some(NodeRole::Button);
         remove.a11y.label = Some(spec.dismiss_label.clone());
         remove.a11y.tab_index = Some(0);
@@ -258,11 +278,16 @@ mod tests {
             &spec,
             &ctx,
             Some(Arc::new(move || *sink.lock().unwrap() += 1)),
+            None,
         );
         let remove = node
-            .find(&|child| child.id.as_deref() == Some("poodle-pill-remove"))
+            .find(&|child| child.id.as_deref() == Some(PILL_DISMISS_ID))
             .expect("remove action");
 
+        assert_eq!(
+            remove.runtime_id.as_deref(),
+            Some(pill_dismiss_focus_id(Some("Filter")).as_str())
+        );
         assert_eq!(remove.a11y.role, Some(NodeRole::Button));
         assert_eq!(remove.a11y.label.as_deref(), Some("Dismiss"));
         assert_eq!(remove.a11y.tab_index, Some(0));
@@ -285,17 +310,65 @@ mod tests {
             .with_dismiss_label("Remove filter: Videos");
         let labelled_node = pill(&labelled, &ctx);
         let dismiss = labelled_node
-            .find(&|child| child.id.as_deref() == Some("poodle-pill-remove"))
+            .find(&|child| child.id.as_deref() == Some(PILL_DISMISS_ID))
             .expect("dismiss action");
         assert_eq!(
-            dismiss.a11y.label.as_deref(),
-            Some("Remove filter: Videos")
+            dismiss.runtime_id.as_deref(),
+            Some(pill_dismiss_focus_id(Some("Videos")).as_str())
         );
-        assert!(
-            pill(&PillSpec::new().with_label("Audio"), &ctx)
-                .find(&|child| child.id.as_deref() == Some("poodle-pill-remove"))
-                .is_none()
+        assert_eq!(dismiss.a11y.label.as_deref(), Some("Remove filter: Videos"));
+        assert!(pill(&PillSpec::new().with_label("Audio"), &ctx)
+            .find(&|child| child.id.as_deref() == Some(PILL_DISMISS_ID))
+            .is_none());
+    }
+
+    #[test]
+    fn two_dismissible_pills_do_not_share_dismiss_identity() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let left_hits = Arc::new(Mutex::new(0));
+        let right_hits = Arc::new(Mutex::new(0));
+        let left_sink = Arc::clone(&left_hits);
+        let right_sink = Arc::clone(&right_hits);
+        let left = pill_with_remove(
+            &PillSpec::new()
+                .with_label("Videos")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove filter: Videos"),
+            &ctx,
+            Some(Arc::new(move || *left_sink.lock().unwrap() += 1)),
+            Some("left"),
         );
+        let right = pill_with_remove(
+            &PillSpec::new()
+                .with_label("Audio")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove filter: Audio"),
+            &ctx,
+            Some(Arc::new(move || *right_sink.lock().unwrap() += 1)),
+            Some("right"),
+        );
+        let left_dismiss = left
+            .find(&|child| child.runtime_id.as_deref() == Some("pill:left:poodle-pill-remove"))
+            .expect("left dismiss");
+        let right_dismiss = right
+            .find(&|child| child.runtime_id.as_deref() == Some("pill:right:poodle-pill-remove"))
+            .expect("right dismiss");
+        assert_ne!(left_dismiss.runtime_id, right_dismiss.runtime_id);
+        (left_dismiss
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("left event"))();
+        assert_eq!(*left_hits.lock().unwrap(), 1);
+        assert_eq!(*right_hits.lock().unwrap(), 0);
+        (right_dismiss
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("right event"))();
+        assert_eq!(*left_hits.lock().unwrap(), 1);
+        assert_eq!(*right_hits.lock().unwrap(), 1);
     }
 
     #[test]
@@ -402,7 +475,7 @@ mod tests {
             true,
             0.34,
         );
-        let node = pill_with_remove(&spec, &ctx, None);
+        let node = pill_with_remove(&spec, &ctx, None, None);
 
         let dot = node.children.first().expect("solid dot");
         assert_eq!(dot.style.descriptor.background, Some(expected.foreground));

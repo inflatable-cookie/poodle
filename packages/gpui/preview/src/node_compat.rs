@@ -3988,7 +3988,7 @@ impl Pill {
     }
 
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
-        let mut node = poodle_render::pill_with_remove(&self.spec, ctx, self.on_remove);
+        let mut node = poodle_render::pill_with_remove(&self.spec, ctx, self.on_remove, None);
         // The old GPUI Pill made its root focusable even though the shared
         // contract treats Pill as display metadata. Keep that preview-local.
         node.interaction.focusable = true;

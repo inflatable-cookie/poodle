@@ -1006,6 +1006,7 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
 
         let dismisses = Arc::new(Mutex::new(0));
         let sink = Arc::clone(&dismisses);
+        let dismiss_id = poodle_render::pill_dismiss_focus_id(Some("admit"));
         let mut pill = poodle_render::pill_with_remove(
             &PillSpec::new()
                 .with_label("Videos")
@@ -1013,10 +1014,11 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
                 .with_dismiss_label("Remove filter: Videos"),
             &ctx,
             Some(Arc::new(move || *sink.lock().unwrap() += 1)),
+            Some("admit"),
         );
         pill.id = Some("admit-pill-dismissible".into());
         let dismiss = pill
-            .find(&|n| n.id.as_deref() == Some("poodle-pill-remove"))
+            .find(&|n| n.runtime_id.as_deref() == Some(dismiss_id.as_str()))
             .expect("dismiss button");
         assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
         assert_eq!(
@@ -1074,7 +1076,7 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         let pill_paint = poodle_gpui_node_backend::painted_node_for("admit-pill-dismissible")
             .expect("painted pill");
         assert_eq!(
-            poodle_gpui_node_backend::painted_node_for("poodle-pill-remove")
+            poodle_gpui_node_backend::painted_node_for(&dismiss_id)
                 .expect("painted dismiss")
                 .a11y_label
                 .as_deref(),
@@ -1082,10 +1084,10 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         );
         assert_eq!(pill_paint.a11y_role, None);
 
-        driver.wait_for_focus_handle("poodle-pill-remove");
-        tab_until_focused(&mut driver, "poodle-pill-remove");
+        driver.wait_for_focus_handle(&dismiss_id);
+        tab_until_focused(&mut driver, &dismiss_id);
         assert!(
-            poodle_gpui_node_backend::painted_ring_for("poodle-pill-remove").is_some(),
+            poodle_gpui_node_backend::painted_ring_for(&dismiss_id).is_some(),
             "focused dismiss must paint its focus ring",
         );
         driver.dispatch_key_raw("enter");
@@ -1095,9 +1097,120 @@ fn eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         driver.draw_frame();
         assert_eq!(*dismisses.lock().unwrap(), 3);
 
-        driver.pointer_activate_id("poodle-pill-remove");
+        driver.pointer_activate_id(&dismiss_id);
         driver.draw_frame();
         assert_eq!(*dismisses.lock().unwrap(), 4);
+
+        poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Two dismissible Pills keep independent dismiss identity, event, and focus.
+#[test]
+fn two_dismissible_pills_keep_independent_dismiss_identity() {
+    use poodle_specs::PillSpec;
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let videos_hits = Arc::new(Mutex::new(0));
+        let audio_hits = Arc::new(Mutex::new(0));
+        let videos_sink = Arc::clone(&videos_hits);
+        let audio_sink = Arc::clone(&audio_hits);
+        let videos_id = poodle_render::pill_dismiss_focus_id(Some("videos"));
+        let audio_id = poodle_render::pill_dismiss_focus_id(Some("audio"));
+
+        let mut videos = poodle_render::pill_with_remove(
+            &PillSpec::new()
+                .with_label("Videos")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove filter: Videos"),
+            &ctx,
+            Some(Arc::new(move || *videos_sink.lock().unwrap() += 1)),
+            Some("videos"),
+        );
+        videos.id = Some("admit-pill-videos".into());
+        let mut audio = poodle_render::pill_with_remove(
+            &PillSpec::new()
+                .with_label("Audio")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove filter: Audio"),
+            &ctx,
+            Some(Arc::new(move || *audio_sink.lock().unwrap() += 1)),
+            Some("audio"),
+        );
+        audio.id = Some("admit-pill-audio".into());
+
+        assert_ne!(videos_id, audio_id);
+        assert_eq!(
+            videos
+                .find(&|n| n.runtime_id.as_deref() == Some(videos_id.as_str()))
+                .expect("videos dismiss")
+                .a11y
+                .label
+                .as_deref(),
+            Some("Remove filter: Videos")
+        );
+        assert_eq!(
+            audio
+                .find(&|n| n.runtime_id.as_deref() == Some(audio_id.as_str()))
+                .expect("audio dismiss")
+                .a11y
+                .label
+                .as_deref(),
+            Some("Remove filter: Audio")
+        );
+
+        let mut root = Node::container();
+        root.id = Some("admit-two-pills-root".into());
+        root.style.descriptor.layout.direction = LayoutDirection::Row;
+        root = root.child(videos).child(audio);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        driver.draw_frame();
+
+        driver.wait_for_focus_handle(&videos_id);
+        driver.wait_for_focus_handle(&audio_id);
+        assert_ne!(
+            poodle_gpui_node_backend::focus_handle_for(&videos_id),
+            poodle_gpui_node_backend::focus_handle_for(&audio_id),
+            "two dismiss buttons must not share one focus handle"
+        );
+
+        driver.focus_element(&videos_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&videos_id),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&audio_id),
+            Some(false)
+        );
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(*videos_hits.lock().unwrap(), 1);
+        assert_eq!(*audio_hits.lock().unwrap(), 0);
+
+        driver.focus_element(&audio_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&audio_id),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&videos_id),
+            Some(false)
+        );
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(*videos_hits.lock().unwrap(), 1);
+        assert_eq!(*audio_hits.lock().unwrap(), 1);
+
+        driver.pointer_activate_id(&videos_id);
+        driver.draw_frame();
+        assert_eq!(*videos_hits.lock().unwrap(), 2);
+        assert_eq!(*audio_hits.lock().unwrap(), 1);
 
         poodle_gpui_node_backend::take_probe_capture();
     });

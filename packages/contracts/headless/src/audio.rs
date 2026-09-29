@@ -1792,10 +1792,33 @@ fn default_computer_key_map() -> Vec<(String, i16)> {
         .collect()
 }
 
+/// Defaults first, then caller entries. A later pair for the same key
+/// replaces the default — same as core `{ ...DEFAULT, ...input.computerKeyMap }`.
+pub fn merge_computer_key_map<K, I>(overrides: I) -> Vec<(String, i16)>
+where
+    I: IntoIterator<Item = (K, i16)>,
+    K: Into<String>,
+{
+    let mut map = default_computer_key_map();
+    for (key, offset) in overrides {
+        let key = key.into();
+        if let Some((_, existing)) = map
+            .iter_mut()
+            .find(|(name, _)| name.eq_ignore_ascii_case(&key))
+        {
+            *existing = offset;
+        } else {
+            map.push((key, offset));
+        }
+    }
+    map
+}
+
 fn computer_key_offset(context: &KeyboardContext, key: &str) -> Option<i16> {
     context
         .computer_key_map
         .iter()
+        .rev()
         .find(|(name, _)| name.eq_ignore_ascii_case(key))
         .map(|(_, offset)| *offset)
 }
@@ -2515,18 +2538,20 @@ mod tests {
 
     #[test]
     fn computer_keys_use_the_configured_key_map() {
-        let mut context = KeyboardContext {
+        let context = KeyboardContext {
             first_note: 48,
             last_note: 96,
+            computer_key_map: merge_computer_key_map([("a", 5), ("q", 0)]),
             ..KeyboardContext::default()
         };
-        context.computer_key_map.push(("q".into(), 0));
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(65));
+        assert_eq!(keyboard_computer_note(&context, "A"), Some(65));
+        assert_eq!(keyboard_computer_note(&context, "s"), Some(62));
         assert_eq!(keyboard_computer_note(&context, "q"), Some(60));
         assert_eq!(keyboard_computer_note(&context, "Q"), Some(60));
-        assert_eq!(keyboard_computer_note(&context, "a"), Some(60));
         assert_eq!(keyboard_computer_note(&context, "z"), None);
 
-        let (pressed, effects) = keyboard_computer_key_down(context, "q", 90, false);
+        let (pressed, effects) = keyboard_computer_key_down(context.clone(), "q", 90, false);
         assert_eq!(
             effects,
             vec![KeyboardEffect::NoteOn {
@@ -2535,6 +2560,16 @@ mod tests {
             }]
         );
         assert_eq!(keyboard_visual_state(&pressed).held_notes, vec![60]);
+
+        let (pressed, effects) = keyboard_computer_key_down(context, "a", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 65,
+                velocity: 90
+            }]
+        );
+        assert_eq!(keyboard_visual_state(&pressed).held_notes, vec![65]);
     }
 
     #[test]
