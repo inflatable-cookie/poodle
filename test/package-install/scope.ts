@@ -295,6 +295,10 @@ export function candidatePolicy(mode: CandidateScopeMode): CandidatePolicy {
 const PRIVATE_DECLARATION_TOOLS_MANIFEST =
   "scripts/web-distribution/declaration-tools/package.json";
 
+/** The private root repository manifest; its development tooling is ordinary. */
+const ROOT_MANIFEST_PATH = "package.json";
+const ROOT_MANIFEST_DEV_DEPENDENCIES = "devDependencies";
+
 export const CERTIFICATION_FORBIDDEN_SURFACES = [
   {
     label: "workflow",
@@ -907,6 +911,54 @@ export function changedJsonLeafPaths(
   return JSON.stringify(before) === JSON.stringify(after) ? [] : [prefix];
 }
 
+/**
+ * Ordinary root-manifest admission. The private root repository manifest is a
+ * release surface for its version and published shape, but not for development
+ * tooling: root `devDependencies` ship in no published package, so a range that
+ * changes only them - plus their generated `bun.lock` companion - is admitted
+ * (operator ruling 2026-09-29). Every other changed root field stays
+ * release-scoped and is rejected by name, so the next worker learns which field
+ * needs a release candidate instead of reading the classifier. Unparsable,
+ * added, or deleted manifests fail closed as version surfaces.
+ *
+ * Version and name keep the established `version` label, and the publication
+ * transport fields keep `registry`, because the precursor-alignment admission
+ * filters the root `version` label by path.
+ */
+function ordinaryRootManifestForbiddenLabels(
+  before: string | null,
+  after: string | null,
+): string[] {
+  if (before === null || after === null) return ["version"];
+  let beforeJson: unknown;
+  let afterJson: unknown;
+  try {
+    beforeJson = JSON.parse(before);
+  } catch {
+    return ["version"];
+  }
+  try {
+    afterJson = JSON.parse(after);
+  } catch {
+    return ["version"];
+  }
+  if (!isJsonRecord(beforeJson) || !isJsonRecord(afterJson)) return ["version"];
+  const changedFields = sortedUnique(
+    changedJsonLeafPaths(beforeJson, afterJson).map((leaf) => leaf.split(".")[0]),
+  );
+  return sortedUnique(
+    changedFields
+      .filter((field) => field !== ROOT_MANIFEST_DEV_DEPENDENCIES)
+      .map((field) => {
+        if (field === "version" || field === "name") return "version";
+        if (field === "private" || field === "publishConfig" || field === "registry") {
+          return "registry";
+        }
+        return field;
+      }),
+  );
+}
+
 export async function runCapture(
   command: string[],
   cwd: string,
@@ -966,7 +1018,11 @@ async function ordinaryJsForbiddenSurfaces(
     if (!isJsManifestPath(path) || path === PRIVATE_DECLARATION_TOOLS_MANIFEST) continue;
     const before = await gitShowFile(checkoutRoot, requiredBaseCommit, path);
     const after = await gitShowFile(checkoutRoot, sourceCommit, path);
-    for (const surface of ordinaryJsForbiddenLabels(before, after)) {
+    const labels =
+      path === ROOT_MANIFEST_PATH
+        ? ordinaryRootManifestForbiddenLabels(before, after)
+        : ordinaryJsForbiddenLabels(before, after);
+    for (const surface of labels) {
       forbidden.push({ path, surface });
     }
   }

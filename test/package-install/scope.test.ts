@@ -1523,6 +1523,93 @@ describe("g18.031 precursor root version alignment", () => {
   });
 });
 
+describe("ordinary root manifest devDependency scope", () => {
+  const rootManifest = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+    name: "poodle",
+    version: "0.4.0",
+    private: true,
+    packageManager: "bun@1.4.2",
+    workspaces: ["packages/*"],
+    scripts: { test: "vitest run" },
+    devDependencies: { typescript: "^7.0.2" },
+    ...overrides,
+  });
+
+  async function plantRootManifestRange(
+    mutateHead: (manifest: Record<string, unknown>) => void,
+  ): Promise<{ root: string; base: string; head: string }> {
+    const root = await initPlant();
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(rootManifest(), null, 2)}\n`,
+      "bun.lock": "lock base\n",
+    });
+    const base = await commitAll(root, "ordinary root base");
+    const target = rootManifest();
+    mutateHead(target);
+    await writeFiles(root, {
+      "package.json": `${JSON.stringify(target, null, 2)}\n`,
+      "bun.lock": "lock head\n",
+    });
+    const head = await commitAll(root, "ordinary root head");
+    return { root, base, head };
+  }
+
+  test("a devDependency-only root change with its lock refresh is admitted", async () => {
+    const { root, base, head } = await plantRootManifestRange((manifest) => {
+      (manifest.devDependencies as Record<string, string>).typescript = "^7.0.3";
+    });
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toEqual(["bun.lock", "package.json"]);
+    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
+  });
+
+  test("a root field outside devDependencies is rejected by name", async () => {
+    const plants: Record<string, { field: string; mutate: (manifest: Record<string, unknown>) => void }> = {
+      version: {
+        field: "version",
+        mutate: (manifest) => {
+          manifest.version = "0.4.1";
+        },
+      },
+      packageManager: {
+        field: "packageManager",
+        mutate: (manifest) => {
+          manifest.packageManager = "bun@1.4.3";
+        },
+      },
+      dependencies: {
+        field: "dependencies",
+        mutate: (manifest) => {
+          manifest.dependencies = { "left-pad": "1.0.0" };
+        },
+      },
+      scripts: {
+        field: "scripts",
+        mutate: (manifest) => {
+          (manifest.scripts as Record<string, unknown>).test = "echo planted";
+        },
+      },
+      workspaces: {
+        field: "workspaces",
+        mutate: (manifest) => {
+          manifest.workspaces = ["packages/*", "extra/*"];
+        },
+      },
+    };
+    for (const [kind, plant] of Object.entries(plants)) {
+      const { root, base, head } = await plantRootManifestRange((manifest) => {
+        (manifest.devDependencies as Record<string, string>).typescript = "^7.0.3";
+        plant.mutate(manifest);
+      });
+      await expect(
+        assertInstalledScope(root, base, head, "ordinary"),
+        kind,
+      ).rejects.toThrow(`forbidden ${plant.field} surface: package.json`);
+    }
+  });
+});
+
 describe("g18.009 npm/web release wrapper repair", () => {
   const guardModule =
     '// RELEASE_WRAPPER_REQUIRED_RUNS + RELEASE_WRAPPER_FORBIDDEN_SELECTORS\n' +
