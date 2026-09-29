@@ -12,7 +12,7 @@ import {
   CODE_TYPESCRIPT_SOURCE,
   RICH_TEXT_IMAGE_ALT,
   RICH_TEXT_STANDARD_DOCUMENT,
-} from "../../../svelte/preview/src/specimens/web-editor-documents";
+} from "@poodle/svelte-preview/specimens/web-editor-documents";
 
 const PREVIEW_ROOT = join(import.meta.dirname, "..");
 const EDITOR_SLUGS = ["code-editor", "rich-text-editor", "rich-text-renderer"] as const;

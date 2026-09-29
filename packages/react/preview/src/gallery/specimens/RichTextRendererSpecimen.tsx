@@ -9,7 +9,7 @@ import {
   RICH_TEXT_IMAGE_DOCUMENT,
   RICH_TEXT_IMAGE_FEATURES,
   RICH_TEXT_STANDARD_DOCUMENT,
-} from "../../../../../svelte/preview/src/specimens/web-editor-documents";
+} from "@poodle/svelte-preview/specimens/web-editor-documents";
 
 export function RichTextRendererSpecimen() {
   return (

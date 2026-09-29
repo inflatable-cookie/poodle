@@ -11,4 +11,4 @@ export {
   type SlotDoc,
   type EventDoc,
   type ComponentDocs,
-} from "../../../../svelte/preview/src/component-docs";
+} from "@poodle/svelte-preview/component-docs";

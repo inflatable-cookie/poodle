@@ -13,7 +13,7 @@ import "../../../tokens/artifacts/css/poodle-control-size-md.css";
 import "../../../tokens/artifacts/css/poodle-control-size-lg.css";
 import "../../../tokens/artifacts/css/poodle-control-size-xl.css";
 import "./gallery/gallery.css";
-import "../../../svelte/preview/src/catalogue.css";
+import "@poodle/svelte-preview/catalogue.css";
 
 import { App } from "./gallery/App";
 import { FixtureHost } from "./fixture-host/FixtureHost";

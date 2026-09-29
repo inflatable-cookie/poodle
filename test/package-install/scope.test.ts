@@ -283,8 +283,12 @@ describe("installed-package scope routing", () => {
       const base = await commitAll(root, "forbidden base");
       await writeFiles(root, { [path]: "planted\n" });
       const head = await commitAll(root, "forbidden mutation");
+      const message =
+        surface === "workflow"
+          ? `certification scope rejected ${path}: workflow surfaces require an approved lane`
+          : `certification scope rejected forbidden ${surface} surface: ${path}`;
       await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-        new RegExp(`certification scope rejected forbidden ${surface} surface: ${path}`),
+        new RegExp(message),
       );
     }
   });
@@ -1588,7 +1592,7 @@ describe("g18.009 npm/web release wrapper repair", () => {
         narrowWorkflow({ "        run: effigy test:web-pack-install": plant }),
       );
       await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-        /forbidden workflow surface: \.github\/workflows\/release\.yml/,
+        /\.github\/workflows\/release\.yml: workflow surfaces require an approved lane/,
       );
     }
   });
@@ -1598,7 +1602,7 @@ describe("g18.009 npm/web release wrapper repair", () => {
       narrowWorkflow({ "        run: effigy test:web-pack-install": "        run: effigy docs:lint" }),
     );
     await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /forbidden workflow surface: \.github\/workflows\/release\.yml/,
+      /\.github\/workflows\/release\.yml: workflow surfaces require an approved lane/,
     );
   });
 
@@ -1607,7 +1611,7 @@ describe("g18.009 npm/web release wrapper repair", () => {
       "test/package-install/scope.ts": "// guard stripped\n",
     });
     await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /forbidden workflow surface: \.github\/workflows\/release\.yml/,
+      /\.github\/workflows\/release\.yml: workflow surfaces require an approved lane/,
     );
   });
 
@@ -1669,10 +1673,10 @@ describe("setup-bun version-input admission", () => {
     expect(proof.changedPaths).toContain(".github/workflows/ci-web.yml");
   });
 
-  test("any other workflow line change stays a forbidden workflow surface", async () => {
+  test("any other workflow line change still needs an approved lane", async () => {
     const { root, base, head } = await plantWorkflowRange(workflow('bun-version-file: "package.json"', " --fast"));
     await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
-      /forbidden workflow surface: \.github\/workflows\/ci-web\.yml/,
+      /\.github\/workflows\/ci-web\.yml: workflow surfaces require an approved lane/,
     );
   });
 });

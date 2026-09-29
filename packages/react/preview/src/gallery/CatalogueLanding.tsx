@@ -1,5 +1,5 @@
 import { Eyebrow } from "@inflatable-cookie/poodle-react";
-import { componentsBySection } from "../../../../svelte/preview/src/catalogue-nav";
+import { componentsBySection } from "@poodle/svelte-preview/catalogue-nav";
 import type { ComponentEntry } from "./registry";
 
 export interface CatalogueLandingProps {

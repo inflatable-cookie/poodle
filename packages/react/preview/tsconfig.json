@@ -8,7 +8,10 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@poodle/svelte-preview/*": ["../../svelte/preview/src/*"]
+    }
   },
   "include": ["src", "test", "../components/src"]
 }

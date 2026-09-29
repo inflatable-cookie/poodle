@@ -29,6 +29,10 @@ const domAccessibilityApi = createRequire(
   createRequire(import.meta.url).resolve("@testing-library/dom/package.json"),
 ).resolve("dom-accessibility-api");
 const workspaceAliases = {
+  // The React preview gallery consumes the canonical Svelte preview catalogue.
+  // A workspace alias replaces the depth-sensitive `../../../../svelte/preview`
+  // relative imports that break when a file moves.
+  "@poodle/svelte-preview": join(repoRoot, "packages/svelte/preview/src"),
   "@inflatable-cookie/poodle-svelte/markdown": join(
     repoRoot,
     "packages/svelte/components/src/markdown.ts",

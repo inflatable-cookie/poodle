@@ -1,12 +1,12 @@
 import {
   decorateCanonical,
   type CatalogueNavEntry,
-} from "../../../../svelte/preview/src/catalogue-nav";
+} from "@poodle/svelte-preview/catalogue-nav";
 import { canonicalComponents } from "../generated/catalogue/catalogue";
 // The web-only supplement is declared once, in the canonical (Svelte) preview
 // registry, and mirrored here so both galleries catalogue the same surfaces
 // without either entering the portable inventory.
-import { webOnlyComponents } from "../../../../svelte/preview/src/component-registry";
+import { webOnlyComponents } from "@poodle/svelte-preview/component-registry";
 
 export type ComponentEntry = CatalogueNavEntry & {
   packageName: string;

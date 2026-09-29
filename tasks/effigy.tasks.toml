@@ -99,7 +99,10 @@
 # and driven with real input. It proves nothing about Svelte, React, or
 # cross-runtime parity — those live on `check:svelte`, `react:build`, and the
 # component test boards.
-"regressions:native" = { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions", env = { POODLE_NUCLEUS_RECEIPT_DIR = "{repo}/target/nucleus-receipts" } }
+# `{args}` forwards a test filter and harness flags, for example
+# `effigy regressions:native my_test -- --exact`; without the placeholder the
+# tokens are accepted and dropped, and the whole target runs.
+"regressions:native" = { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions {args}", env = { POODLE_NUCLEUS_RECEIPT_DIR = "{repo}/target/nucleus-receipts" } }
 # Headless native specimen probe (g15.026): mounts the production GPUI
 # `PreviewRoot` on the in-memory test platform and constructs all 174 portable
 # catalogue routes at 768px, asserting each paints a real specimen card (never
@@ -219,6 +222,14 @@
 "core:build" = "bun scripts/web-distribution/core-build.ts"
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
+# Rebuild every web package `dist` in one step. A `file:`-linked consumer
+# resolves core, Svelte and React through their ignored `dist` exports; pulling
+# a new commit leaves those trees stale and nothing in the pull path rebuilds
+# them. `svelte:preview` / `react:preview` rebuild only what their own app needs.
+"web:dist" = [
+  { task = "svelte:package" },
+  { task = "react:package" },
+]
 "test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/pack-archives.test.ts scripts/gate-tree-guard.test.ts scripts/docs-deps-preflight.test.ts"
 # g18.032: the installed-package scope suite plants dozens of git ranges and
 # exceeds Bun's default per-test timeout when it shares a parallel test-file
@@ -273,9 +284,15 @@
 # Runtime accessibility sweep (axe-core) over every Svelte component. Runs inside
 # test:components already; A11Y_REPORT=1 lists findings instead of failing.
 "test:a11y" = "bunx vitest run --project a11y"
-# g16.111 Nucleus A1: Svelte half of the paired accessibility receipt. Regenerate
-# the committed Svelte snapshots with POODLE_NUCLEUS_A11Y_WRITE=1.
-"test:nucleus-a11y" = "bunx vitest run --project nucleus-a11y"
+# g16.111 Nucleus A1: Svelte half of the paired accessibility receipt. The
+# mounted Svelte components resolve `poodle-core/styles/*.css` from the built
+# core dist, so build it first; a fresh worker checkout has no
+# `packages/core/dist` and the suite fails module resolution. Regenerate the
+# committed Svelte snapshots with POODLE_NUCLEUS_A11Y_WRITE=1.
+"test:nucleus-a11y" = [
+  { task = "core:build" },
+  { run = "bunx vitest run --project nucleus-a11y" },
+]
 # Cross-framework visual gate (g12.009): boots both vite previews and pixel-diffs
 # the Svelte and React specimens at the same slug + axis. Needs a browser
 # (`bunx playwright install chromium`) and two preview servers, so it stays out of
