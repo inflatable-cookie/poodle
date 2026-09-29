@@ -86,9 +86,11 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
   application was Nucleus; its fixed component cohort and receipts live in
   [`docs/evidence/nucleus/`](../evidence/nucleus/README.md). Operator note
   2026-09-29: that Nucleus has been archived and is being rebuilt from
-  scratch, with no Poodle in it yet. The receipts are evidence for a
-  consumer that no longer exists; what that means for their source pin is
-  [Q-002](questions.md#q-002--does-the-nucleus-receipt-pin-still-bind).
+  scratch, with no Poodle in it yet. Operator ruling the same day: the
+  receipts stay as frozen history and no longer pin runtime source, so native
+  fixes in `packages/gpui`, `packages/render` and `packages/contracts` need no
+  evidence repin. GPUI parity stays the goal; the rebuilt Nucleus can anchor
+  new evidence once it adopts Poodle.
 - **Svelte is the parity authority.** When runtimes disagree, the others are
   brought up to Svelte; see
   [working rules](contracts/working-rules.md#runtime-parity-authority).
