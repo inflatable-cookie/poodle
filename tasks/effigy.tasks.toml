@@ -239,7 +239,7 @@
 # takes ~6s alone hit 30s at ~4x slowdown (poodle#028, 2026-09-27), so the
 # per-test cap is 120s. A genuine hang still fails well inside the 5-minute
 # child bound.
-"test:web-scope" = "bun test --timeout 120000 test/package-install/scope.test.ts test/package-install/web-preview-harness.test.ts"
+"test:web-scope" = "bun test --timeout 120000 test/package-install/scope.test.ts test/package-install/web-preview-harness.test.ts test/package-install/consumer-lock.test.ts"
 # Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
 # its parallel test-file workers; the helper still validates the exact nested
 # realpath on every build.
