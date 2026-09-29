@@ -27,8 +27,9 @@ Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing.
 - `effigy tasks` — list selectors; pick the narrow ones for the change
 - `effigy docs:lint` — contract, docs and generated-evidence checks
 - `effigy ci:web` / `effigy ci:rust` — the required PR CI lanes
-- `effigy ci:fresh` — fresh-checkout PR validation: frozen install, then `ci`,
-  both with the Bun pinned in `package.json` `packageManager`
+- `effigy ci:fresh` — milestone validation on `main` (the planner runs it at
+  release points; no per-task full QA): frozen install, then `ci`, both with
+  the Bun pinned in `package.json` `packageManager`
 - `effigy qa` — the broad headless repository board
 
 ## Product rules
@@ -67,12 +68,20 @@ Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing.
 
 ## Validate
 
-Every brief names a bounded validation budget: the focused selectors allowed
-during implementation and at most one final broad selector. Do not stack
-overlapping boards (`docs:check`, `ci:web`, `qa`, release gates) or rerun a
-green broad selector after narrower checks. Aggregate runs must show live child
-progress; stop and report a named over-budget child. Workers do not wait or
-poll for GitHub checks. The full rules are in
-[working rules](docs/knowledge/contracts/working-rules.md#validation).
+Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 
-Run `git diff --check` and the brief's selectors before opening a PR.
+- **Workers** run, once, the Effigy selectors for the code they changed, a
+  compile or type check of what they touched, and `effigy docs:lint` if docs
+  or evidence changed. Then they open the PR. No whole suites (`qa`,
+  `ci:web`, `ci:rust`, `docs:check`, `ci:fresh`), no repeat passes.
+- **Reviewers** read the diff, run the same targeted checks and exercise the
+  behaviour. No suites.
+- **The planner** runs `effigy ci:fresh` on `main` at release points and after
+  a major chunk of work, and briefs fixes for what it finds.
+- Briefs name the targeted checks as acceptance. Required PR CI still runs on
+  GitHub; workers don't wait or poll for it.
+
+Run validation through Effigy selectors, not raw `cargo`, `bun` or `vitest`.
+Kill only processes you started, by PID; never `pkill -f` or `killall`. Run
+`git diff --check` before opening a PR. The full rules are in
+[working rules](docs/knowledge/contracts/working-rules.md#validation).

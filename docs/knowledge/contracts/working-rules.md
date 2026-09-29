@@ -293,31 +293,33 @@ where the repository already provides the workaround, the trap links to it:
 
 Use Effigy as the command surface. Match proof cost to the delivery stage:
 
-1. **Worker loop:** run the narrow selectors that exercise the changed paths,
-   plus any generator/checker pair needed by changed evidence. Do not use
-   `effigy qa`, `effigy ci:web`, `effigy docs:check`, or a release gate as a
-   discovery loop. Every handoff names the allowed focused selectors and a
-   maximum final broad selector count. If that budget proves insufficient,
-   stop and explain the missing proof instead of improvising overlapping
-   boards.
+1. **Worker loop:** run, once, the narrow selectors that exercise the
+   changed paths, a compile or type check of what changed, any
+   generator/checker pair needed by changed evidence, and `docs:lint` when
+   docs or evidence changed. Never run a whole suite (`effigy qa`, `ci:web`,
+   `ci:rust`, `docs:check`, `ci:fresh`) or a release gate per task (Tom,
+   2026-09-30). Every brief names its targeted checks as acceptance. If they
+   prove insufficient, stop and explain the missing proof instead of
+   improvising a broader board.
 2. **Exact-head PR proof:** push the stable head and use the repository's
    required CI lanes for broad web/Rust coverage. Do not repeat an equivalent
    broad local board merely to restate green CI unless the task changes that
    board or its reproducibility. The worker reports `ready_for_review` as soon
    as the clean PR head and local task proof exist, then stops. Queue
    coordination observes CI asynchronously; workers never run sleep/poll loops
-   for GitHub checks. Queue's pre-merge command is `effigy ci:fresh`:
-   `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`), both
-   run with the Bun pinned in `package.json` `packageManager`, fetched through
-   `bunx` when the host Bun differs, because Bun versions lay out
-   `node_modules` differently and that changes declaration emit. It must
-   pass in a disposable checkout with Queue's hook environment (`PATH`, `HOME`,
-   `TMPDIR`, `LANG`, `LC_ALL`) and leave `git status --porcelain` empty.
-   Native, windowed and release gates stay out. Queue runs it on every
-   prospective merge (`repository.set`, 20-minute timeout; it takes about ten
-   minutes on a fresh clone). If its runtime approaches the timeout, fix the
-   command or raise the setting; don't let merges time out.
-3. **Release proof:** the npm candidate task runs the bounded npm artifact gate
+   for GitHub checks. Queue runs no per-task validation command (Tom,
+   2026-09-30: per-task full QA wedged the machine and filled the disk).
+   Tasks merge on targeted checks, exact-head review and required PR CI.
+3. **Milestone proof:** the planner runs `effigy ci:fresh` on `main` at
+   release points and after a major chunk of work. It runs
+   `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`) with
+   the Bun pinned in `package.json` `packageManager`, fetched through `bunx`
+   when the host Bun differs, because Bun versions lay out `node_modules`
+   differently and that changes declaration emit. It must leave
+   `git status --porcelain` empty. Native, windowed and release gates stay
+   out. A red milestone run is triaged into papercuts or tasks before the
+   release goes on.
+4. **Release proof:** the npm candidate task runs the bounded npm artifact gate
    once after the candidate is complete and stable. Required PR CI owns source
    behavior; candidate mode owns archive certification; publish mode verifies
    and ships those same bytes. Do not stack a local aggregate board, candidate
@@ -325,10 +327,9 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
 
 A broad selector subsumes the narrower selectors in its task graph. Do not run
 `docs:check`, `ci:web`, `qa`, and release gates serially to restate the same
-proof. After review feedback, rerun the affected leaf selector and only a final
-gate whose inputs changed. Reviewers consume exact-head CI and recorded worker
-receipts; they add focused adversarial proof for a finding rather than another
-complete local board.
+proof. After review feedback, rerun the affected leaf selector only. Reviewers
+read the diff, run the same targeted checks and exercise the behaviour; they
+add focused adversarial proof for a finding, never a complete local board.
 
 Aggregate selectors must emit live child progress and elapsed time. A full
 headless board hard-stops after fifteen minutes and an individual silent child
