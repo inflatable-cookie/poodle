@@ -279,7 +279,11 @@ where the repository already provides the workaround, the trap links to it:
   `window.draw`, so interactive nodes in mounted regressions declare explicit
   ids, or press and release land on different elements. `Frame::clear` never
   clears `debug_bounds` in gpui 0.2.2, so a probe that discovers elements
-  across routes uses a fresh window per route.
+  across routes uses a fresh window per route. Hit testing clips at the window
+  viewport, not at the driver's 160x60 mount box (a press below the box but on
+  screen still dispatches), so `HeadlessDriver::pointer_activate_id` fails with
+  the element named when its center is off screen instead of pressing the
+  mount-box guess.
 
 ## Validation
 

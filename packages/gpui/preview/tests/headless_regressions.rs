@@ -188,6 +188,133 @@ fn counting_handler() -> (Arc<dyn Fn() + Send + Sync>, Arc<Mutex<usize>>) {
 
 // ── Driver infrastructure ──────────────────────────────────────────────────
 
+/// The mount box has never clipped hit testing in gpui 0.2.2: a press below a
+/// 160x60 box still dispatches. What does clip is the window viewport, and on
+/// a clipped or off-screen element `pointer_activate_id` used to fall back to
+/// `pointer_activate_at(0.92)` — or press the element's stale center — and pass
+/// silently. A tall component's lower control must either activate for real or
+/// fail with its name, never nothing.
+#[test]
+fn a_tall_components_lower_control_activates_in_a_box_that_fits_it() {
+    run_headless(|cx| {
+        let hits = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&hits);
+        let mut node = Node::container()
+            .child({
+                let mut spacer = Node::container();
+                spacer.style.descriptor.layout.height = LayoutSizing::Fixed(360.0);
+                spacer
+            })
+            .child({
+                let mut control = Node::container().interaction_on_activate(move || {
+                    *sink.lock().expect("count") += 1;
+                });
+                control.id = Some("tall-lower-control".to_owned());
+                control.interaction.focusable = true;
+                control.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+                control
+            });
+        node.style.descriptor.layout.direction = LayoutDirection::Column;
+        node.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        node.style.descriptor.layout.height = LayoutSizing::Fixed(400.0);
+        let mounted = Arc::new(Mutex::new(node));
+        // The test sets the box to the content height, so the lower control is
+        // on screen and its center is a real input point.
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 400.0);
+        driver.draw_frame();
+        driver.pointer_activate_id("tall-lower-control");
+        assert_eq!(*hits.lock().expect("count lock"), 1);
+    });
+}
+
+/// A tall component left in the default 160x60 box is centered until its
+/// lower control sits off the window. `pointer_activate_id` must fail with the
+/// element named rather than press nothing. (The former fallback pressed
+/// `pointer_activate_at(0.92)`, which could hit an unrelated control.)
+#[test]
+fn a_tall_components_off_screen_lower_control_fails_loudly_with_its_name() {
+    run_headless(|cx| {
+        let hits = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&hits);
+        let mut node = Node::container()
+            .child({
+                let mut spacer = Node::container();
+                spacer.style.descriptor.layout.height = LayoutSizing::Fixed(2560.0);
+                spacer
+            })
+            .child({
+                let mut control = Node::container().interaction_on_activate(move || {
+                    *sink.lock().expect("count") += 1;
+                });
+                control.id = Some("tall-offscreen-control".to_owned());
+                control.interaction.focusable = true;
+                control.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+                control
+            });
+        node.style.descriptor.layout.direction = LayoutDirection::Column;
+        node.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        node.style.descriptor.layout.height = LayoutSizing::Fixed(2600.0);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let message = driver
+            .activation_target("tall-offscreen-control")
+            .expect_err("the lower control is below the viewport");
+        assert!(
+            message.contains("tall-offscreen-control"),
+            "the failure must name the element: {message}"
+        );
+        assert!(
+            message.contains("viewport"),
+            "the failure must say the target is off screen: {message}"
+        );
+        assert_eq!(
+            *hits.lock().expect("count lock"),
+            0,
+            "nothing may be pressed for an unreachable target"
+        );
+    });
+}
+
+/// The old fallback on a missing id clicked `pointer_activate_at(0.92)` — a
+/// guess at the mount box that could fire whatever sat there. It must instead
+/// fail with the id named and dispatch nothing.
+#[test]
+fn a_missing_id_fails_loudly_and_never_falls_back_to_a_guess_click() {
+    run_headless(|cx| {
+        let hits = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&hits);
+        let mut node = Node::container().interaction_on_activate(move || {
+            *sink.lock().expect("count") += 1;
+        });
+        node.id = Some("fallback-target".to_owned());
+        node.interaction.focusable = true;
+        node.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        node.style.descriptor.layout.height = LayoutSizing::Fixed(60.0);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let message = driver
+            .activation_target("no-such-element")
+            .expect_err("an unknown id has no painted bounds");
+        assert!(
+            message.contains("no-such-element"),
+            "the failure must name the missing id: {message}"
+        );
+
+        // And the loud path panics rather than pressing the box guess.
+        let panicked = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            driver.pointer_activate_id("no-such-element");
+        }));
+        assert!(panicked.is_err(), "`pointer_activate_id` must panic");
+        assert_eq!(
+            *hits.lock().expect("count lock"),
+            0,
+            "a missing id must never click whatever sits at 0.92 of the mount box"
+        );
+    });
+}
+
 /// The driver mounts through the real backend and reads real focus state.
 /// Without this the rest of the file proves nothing: every claim below is only
 /// meaningful if the backend — not the test — is the thing reacting.
@@ -29419,7 +29546,16 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
             f32::from(first.size.height)
         );
 
-        driver.pointer_activate_id("md-preview-tail");
+        // The tail is clipped by the preview viewport and, before scroll, sits
+        // below the window, so an activation cannot reach it. That used to be a
+        // silent no-op; now the driver reports it with the element named.
+        let clipped = driver
+            .activation_target("md-preview-tail")
+            .expect_err("the clipped preview tail is off the viewport before scroll");
+        assert!(
+            clipped.contains("md-preview-tail") && clipped.contains("viewport"),
+            "the clipped tail must fail loudly, not pass silently: {clipped}"
+        );
         assert!(
             !*activated.lock().expect("activated lock"),
             "clipped preview tail must not activate before scroll"

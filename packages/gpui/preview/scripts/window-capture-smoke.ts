@@ -60,7 +60,22 @@ const unit = spawnSync(
   ["test", "--quiet", "--manifest-path", MANIFEST, "--bin", "poodle-window-capture", "--features", FEATURE],
   { encoding: "utf8" },
 );
-check("capture target unit tests pass", unit.status === 0, unit.stdout.trim().split("\n").slice(-3).join(" | "));
+if (unit.status !== 0) {
+  // A red target must show why. The old check kept only the last three stdout
+  // lines and dropped stderr, but cargo writes the failing assertion and the
+  // test name to stderr, so the one line that mattered never reached the
+  // operator. Print both streams in full; the check detail stays short.
+  console.error("---- cargo test: full stdout ----");
+  console.error(unit.stdout);
+  console.error("---- cargo test: full stderr ----");
+  console.error(unit.stderr);
+  console.error("---- end cargo test output ----");
+}
+check(
+  "capture target unit tests pass",
+  unit.status === 0,
+  unit.status === 0 ? "" : `cargo test exited ${unit.status}; full output above`,
+);
 
 const work = mkdtempSync(join(tmpdir(), "poodle-window-capture-smoke-"));
 try {
