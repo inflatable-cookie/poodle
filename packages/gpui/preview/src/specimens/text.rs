@@ -9,7 +9,7 @@ use poodle_gpui::GpuiThemeProvider;
 
 use poodle_specs::{
     EyebrowSpec, TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone,
-    TextWeight,
+    TextWeight, TextWrap,
 };
 
 /// One captioned example group: an Eyebrow caption over its content.
@@ -105,6 +105,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_clamp(2),
                 theme,
             ),
+        ))
+        .child(group(
+            theme,
+            "Wrap — anywhere breaks a long identifier",
+            stack()
+                .child(
+                    div()
+                        .w(px(120.0))
+                        .child(Text::from_spec(
+                            TextSpec::new("supercalifragilisticexpialidociousidentifier"),
+                            theme,
+                        )),
+                )
+                .child(
+                    div()
+                        .w(px(120.0))
+                        .child(Text::from_spec(
+                            TextSpec::new("supercalifragilisticexpialidociousidentifier")
+                                .with_wrap(TextWrap::Anywhere),
+                            theme,
+                        )),
+                ),
         ))
         .into_any_element();
 

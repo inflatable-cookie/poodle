@@ -16,10 +16,12 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, ShadowLayer,
-    StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
+    NodePosition, ShadowLayer, StylePatch,
 };
-use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
+use poodle_specs::{
+    EyebrowSpec, LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator,
+};
 
 use crate::color::{hex_color, mix_srgb, with_alpha};
 use crate::context::RenderContext;
@@ -30,6 +32,8 @@ use crate::presentation::rem_to_px;
 pub struct ListCardSlots {
     /// Avatar/icon/thumbnail content; overrides the derived first-letter glyph.
     pub leading: Option<Node>,
+    /// Custom rich eyebrow content; wins over `ListCardSpec::eyebrow`.
+    pub eyebrow: Option<Node>,
     /// Pills/badges in the header-accessories cluster beside the title.
     pub badges: Vec<Node>,
     /// Counter row below the subtitle.
@@ -59,6 +63,17 @@ fn square(size: f32) -> Node {
     s.descriptor.layout.height = LayoutSizing::Fixed(size);
     s.flex_none = true;
     n
+}
+
+/// Eyebrow lane: Eyebrow primitive values plus title truncation (contract §8).
+fn list_card_eyebrow_lane(mut node: Node) -> Node {
+    {
+        let s = &mut node.style;
+        s.no_wrap = true;
+        s.text_ellipsis = true;
+        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+    }
+    node
 }
 
 /// The whole card is the hit target; only an interactive card fires
@@ -152,7 +167,16 @@ pub fn list_card(
     all_corners(&mut leading_el, leading_radius);
     let leading_el = leading_el.child(leading_inner);
 
-    // ── Body: header (title + accessories) + subtitle + footer ──────────
+    let eyebrow_el = slots.eyebrow.map(list_card_eyebrow_lane).or_else(|| {
+        spec.eyebrow.as_deref().map(|label| {
+            list_card_eyebrow_lane(crate::eyebrow::eyebrow(
+                &EyebrowSpec::new().with_content(label),
+                ctx,
+            ))
+        })
+    });
+
+    // ── Body: eyebrow + header (title + accessories) + subtitle + footer ──
     let mut body = Node::container();
     {
         let s = &mut body.style;
@@ -174,6 +198,10 @@ pub fn list_card(
         s.no_wrap = true;
         s.flex_fill = true;
         s.min_width = Some(0.0);
+    }
+
+    if let Some(eyebrow) = eyebrow_el {
+        body = body.child(eyebrow);
     }
 
     let mut body = if slots.badges.is_empty() && slots.corner.is_none() {
@@ -507,6 +535,7 @@ mod tests {
     use std::sync::Mutex;
 
     use super::*;
+    use poodle_node::NodeKind;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -578,5 +607,65 @@ mod tests {
         );
         (node.interaction.on_activate.as_ref().expect("click handler owns the slot"))();
         assert_eq!(*clicks.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn eyebrow_renders_above_the_title_and_is_absent_when_unset() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        let plain = list_card(
+            &ListCardSpec::new().with_title("logo-primary.svg"),
+            &ctx,
+            ListCardSlots::default(),
+            None,
+        );
+        let body = plain
+            .find(&|n| {
+                n.style.descriptor.layout.direction == LayoutDirection::Column
+                    && n.children.iter().any(|child| {
+                        matches!(&child.kind, NodeKind::Text { content } if content == "logo-primary.svg")
+                    })
+            })
+            .expect("body");
+        assert_eq!(
+            body.children
+                .iter()
+                .filter_map(|child| match &child.kind {
+                    NodeKind::Text { content } => Some(content.as_str()),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+            vec!["logo-primary.svg"]
+        );
+
+        let with_eyebrow = list_card(
+            &ListCardSpec::new()
+                .with_title("logo-primary.svg")
+                .with_eyebrow("Brand kit"),
+            &ctx,
+            ListCardSlots::default(),
+            None,
+        );
+        let body = with_eyebrow
+            .find(&|n| {
+                n.style.descriptor.layout.direction == LayoutDirection::Column
+                    && n.children.iter().any(|child| {
+                        matches!(&child.kind, NodeKind::Text { content } if content == "logo-primary.svg")
+                    })
+            })
+            .expect("body");
+        let texts: Vec<_> = body
+            .children
+            .iter()
+            .filter_map(|child| match &child.kind {
+                NodeKind::Text { content } => Some(content.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(texts, vec!["BRAND KIT", "logo-primary.svg"]);
+        let eyebrow = body.children.first().expect("eyebrow is first");
+        assert!(eyebrow.style.no_wrap);
+        assert!(eyebrow.style.text_ellipsis);
     }
 }

@@ -78,7 +78,7 @@ Updated: 2026-09-29
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; block source also uses `white-space: pre-wrap`. Unset and `normal` leave overflow wrapping and `white-space: pre` unchanged. Native admission pending (`lane:native-admission`) |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; block source also uses `white-space: pre-wrap`. Unset and `normal` leave overflow wrapping and `white-space: pre` unchanged |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -372,8 +372,8 @@ face reads larger or smaller than the default sans family.
 - Inline mode: GPUI renders as a styled text run within a parent text element
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
-- `wrap` is web-admitted. The portable Rust spec and GPUI mapping remain
-  native admission pending (`lane:native-admission`).
+- `wrap="anywhere"` maps through the shared `wrap_anywhere` channel so long
+  identifiers mid-token wrap. Unset and `normal` leave source `no_wrap`.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
@@ -422,7 +422,6 @@ face reads larger or smaller than the default sans family.
 |-------|-------------|-----------------|-----------|
 | syntax highlighting not specified | tokenization is implementation-specific | allowed | may add token color contracts later |
 | clipboard API differs per platform | GPUI uses native clipboard vs navigator.clipboard | allowed | keep 2s feedback timing |
-| `wrap` is web-admitted | web-only until native admission | operator 2026-09-27 | native admission pending (`lane:native-admission`) |
 
 ## 13. Specimen Definitions
 

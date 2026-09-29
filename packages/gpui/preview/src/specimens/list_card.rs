@@ -230,6 +230,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .child(
                                         ListCard::from_spec(
                                             ListCardSpec::new()
+                                                .with_eyebrow("Brand kit")
+                                                .with_title("logo-primary.svg")
+                                                .with_subtitle("Updated 2 days ago")
+                                                .with_meta("1.2 MB")
+                                                .with_interactive(true),
+                                            theme,
+                                        )
+                                        .with_leading(
+                                            Icon::from_spec(
+                                                IconSpec::new("image").with_size(IconSize::Sm),
+                                                theme,
+                                            )
+                                            .with_color(color_to_hsla(text_muted)),
+                                        )
+                                        .on_click(card_click(state, "logo-primary.svg")),
+                                    )
+                                    .child(
+                                        ListCard::from_spec(
+                                            ListCardSpec::new()
+                                                .with_eyebrow("Contracts")
+                                                .with_title("msa-2026.pdf")
+                                                .with_subtitle("Signed by legal")
+                                                .with_meta("824 KB")
+                                                .with_interactive(true),
+                                            theme,
+                                        )
+                                        .with_leading(
+                                            Icon::from_spec(
+                                                IconSpec::new("file-text").with_size(IconSize::Sm),
+                                                theme,
+                                            )
+                                            .with_color(color_to_hsla(text_muted)),
+                                        )
+                                        .on_click(card_click(state, "msa-2026.pdf")),
+                                    )
+                                    .child(
+                                        ListCard::from_spec(
+                                            ListCardSpec::new()
                                                 .with_title("Alice Chen")
                                                 .with_subtitle("alice@example.com")
                                                 .with_selectable(true)

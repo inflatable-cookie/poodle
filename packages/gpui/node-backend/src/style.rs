@@ -365,7 +365,11 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
         el = el.line_height(relative(lh));
         record_probe_channel("content.typography.line-height");
     }
-    if style.text_wrap {
+    if style.wrap_anywhere || style.text_wrap {
+        // GPUI 0.2.2 WhiteSpace::Normal wraps at spaces first, then mid-token
+        // when a single word exceeds the line (LineWrapper else-branch; their
+        // own test wraps `aaa aaaaaaaaaaaaaaaaaa`). That is the
+        // overflow-wrap:anywhere result for long identifiers.
         el = el.whitespace_normal();
     }
     if let Some(family) = style.font_family {

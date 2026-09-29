@@ -585,6 +585,16 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
             LayoutOverflow::Hidden
         );
 
+        let wrap_normal = poodle_render::text(&TextSpec::new("very-long-identifier"), &ctx);
+        assert!(wrap_normal.style.text_wrap);
+        assert!(!wrap_normal.style.wrap_anywhere);
+        let wrap_anywhere = poodle_render::text(
+            &TextSpec::new("very-long-identifier").with_wrap(poodle_specs::TextWrap::Anywhere),
+            &ctx,
+        );
+        assert!(wrap_anywhere.style.text_wrap);
+        assert!(wrap_anywhere.style.wrap_anywhere);
+
         let compact = poodle_render::text(
             &TextSpec::new("compact").with_spacing(TextSpacing::Compact),
             &ctx,
@@ -947,7 +957,7 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
                 "pointer hover dispatch through HeadlessDriver",
             ],
             &[
-                "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, and clamp metadata",
+                "production render path emits NodeKind::Text with resolved tone, size, weight, line-height, compact spacing, clamp metadata, and wrap_anywhere",
                 "mounted bounds confirm text is contained within the parent Surface layout",
                 "text node remains non-focusable and outside the focus chain",
             ],
@@ -967,6 +977,178 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
                 "surface container remains non-focusable and outside the focus chain",
             ],
         );
+    });
+}
+
+/// Native admission of Text/Code wrap, ListCard eyebrow, Pill dismiss, and
+/// Keyboard computerBaseNote. Headless GPUI mount plus the shared keyboard
+/// machine — no windowed path.
+#[test]
+fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
+    use poodle_headless::audio::{
+        keyboard_computer_key_down, keyboard_computer_note, KeyboardContext, KeyboardEffect,
+    };
+    use poodle_specs::{
+        CodeSpec, CodeWrap, ListCardSpec, PillSpec, TextSpec, TextWrap,
+    };
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let long = "supercalifragilisticexpialidociousidentifier";
+
+        let mut normal_text = poodle_render::text(&TextSpec::new(long), &ctx);
+        normal_text.id = Some("admit-text-wrap-normal".into());
+        let mut anywhere_text = poodle_render::text(
+            &TextSpec::new(long).with_wrap(TextWrap::Anywhere),
+            &ctx,
+        );
+        anywhere_text.id = Some("admit-text-wrap-anywhere".into());
+        assert!(!normal_text.style.wrap_anywhere);
+        assert!(anywhere_text.style.wrap_anywhere);
+
+        let mut normal_code = poodle_render::code(
+            &CodeSpec::new().with_content(long).with_inline(true),
+            &ctx,
+        );
+        normal_code.id = Some("admit-code-wrap-normal".into());
+        let mut anywhere_code = poodle_render::code(
+            &CodeSpec::new()
+                .with_content(long)
+                .with_inline(true)
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        anywhere_code.id = Some("admit-code-wrap-anywhere".into());
+        assert!(normal_code.style.no_wrap);
+        assert!(!normal_code.style.wrap_anywhere);
+        assert!(anywhere_code.style.wrap_anywhere);
+        assert!(!anywhere_code.style.no_wrap);
+
+        let mut card = poodle_render::list_card(
+            &ListCardSpec::new()
+                .with_title("logo-primary.svg")
+                .with_eyebrow("Brand kit"),
+            &ctx,
+            poodle_render::ListCardSlots::default(),
+            None,
+        );
+        card.id = Some("admit-list-card-eyebrow".into());
+        let body_texts: Vec<_> = card
+            .texts()
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            body_texts.windows(2).any(|pair| pair[0] == "BRAND KIT"
+                && pair[1] == "logo-primary.svg"),
+            "eyebrow must render above the title, got {body_texts:?}"
+        );
+
+        let dismisses = Arc::new(Mutex::new(0));
+        let sink = Arc::clone(&dismisses);
+        let mut pill = poodle_render::pill_with_remove(
+            &PillSpec::new()
+                .with_label("Videos")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove filter: Videos"),
+            &ctx,
+            Some(Arc::new(move || *sink.lock().unwrap() += 1)),
+        );
+        pill.id = Some("admit-pill-dismissible".into());
+        let dismiss = pill
+            .find(&|n| n.id.as_deref() == Some("poodle-pill-remove"))
+            .expect("dismiss button");
+        assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            dismiss.a11y.label.as_deref(),
+            Some("Remove filter: Videos")
+        );
+        (dismiss
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("dismiss event"))();
+        assert_eq!(*dismisses.lock().unwrap(), 1);
+
+        let context = KeyboardContext {
+            first_note: 48,
+            last_note: 96,
+            computer_base_note: 48,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(48));
+        let (_, effects) = keyboard_computer_key_down(context, "a", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 48,
+                velocity: 90
+            }]
+        );
+
+        let mut root = Node::container();
+        root.id = Some("admit-native-root".into());
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.max_width = Some(96.0);
+        root = root
+            .child(normal_text)
+            .child(anywhere_text)
+            .child(normal_code)
+            .child(anywhere_code)
+            .child(card)
+            .child(pill);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 400.0);
+        driver.draw_frame();
+
+        let normal_code_paint = poodle_gpui_node_backend::painted_node_for("admit-code-wrap-normal")
+            .expect("painted normal code");
+        let anywhere_code_paint =
+            poodle_gpui_node_backend::painted_node_for("admit-code-wrap-anywhere")
+                .expect("painted anywhere code");
+        assert!(normal_code_paint.no_wrap);
+        assert!(!normal_code_paint.wrap_anywhere);
+        assert!(anywhere_code_paint.wrap_anywhere);
+        assert!(!anywhere_code_paint.no_wrap);
+
+        let anywhere_text_paint =
+            poodle_gpui_node_backend::painted_node_for("admit-text-wrap-anywhere")
+                .expect("painted anywhere text");
+        let normal_text_paint = poodle_gpui_node_backend::painted_node_for("admit-text-wrap-normal")
+            .expect("painted normal text");
+        assert!(anywhere_text_paint.wrap_anywhere);
+        assert!(!normal_text_paint.wrap_anywhere);
+
+        let card_paint = poodle_gpui_node_backend::painted_node_for("admit-list-card-eyebrow")
+            .expect("painted list card");
+        assert!(
+            card_paint
+                .texts
+                .windows(2)
+                .any(|pair| pair[0] == "BRAND KIT" && pair[1] == "logo-primary.svg"),
+            "mounted eyebrow must sit above the title, got {:?}",
+            card_paint.texts
+        );
+
+        let pill_paint = poodle_gpui_node_backend::painted_node_for("admit-pill-dismissible")
+            .expect("painted pill");
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("poodle-pill-remove")
+                .expect("painted dismiss")
+                .a11y_label
+                .as_deref(),
+            Some("Remove filter: Videos")
+        );
+        assert_eq!(pill_paint.a11y_role, None);
+
+        driver.pointer_activate_id("poodle-pill-remove");
+        driver.draw_frame();
+        assert_eq!(*dismisses.lock().unwrap(), 2);
+
+        poodle_gpui_node_backend::take_probe_capture();
     });
 }
 

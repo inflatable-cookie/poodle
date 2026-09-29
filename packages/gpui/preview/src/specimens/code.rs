@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, EyebrowSpec};
+use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, CodeWrap, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -158,6 +158,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_copyable(false),
                     theme,
                 )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Wrap anywhere"),
+                    theme,
+                ))
+                .child(
+                    div().w(px(160.0)).child(Code::from_spec(
+                        CodeSpec::new()
+                            .with_content("supercalifragilisticexpialidociousidentifier")
+                            .with_wrap(CodeWrap::Anywhere),
+                        theme,
+                    )),
+                ),
         )
         .into_any_element();
 

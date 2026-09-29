@@ -204,7 +204,7 @@ pub fn pill_with_remove(
         let mut remove = Node::container();
         remove.id = Some("poodle-pill-remove".to_string());
         remove.a11y.role = Some(NodeRole::Button);
-        remove.a11y.label = Some(format!("Remove {}", spec.label));
+        remove.a11y.label = Some(spec.dismiss_label.clone());
         remove.style.descriptor.layout.direction = LayoutDirection::Row;
         remove.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         remove.style.descriptor.cursor = CursorHint::Pointer;
@@ -257,13 +257,31 @@ mod tests {
             .expect("remove action");
 
         assert_eq!(remove.a11y.role, Some(NodeRole::Button));
-        assert_eq!(remove.a11y.label.as_deref(), Some("Remove Filter"));
+        assert_eq!(remove.a11y.label.as_deref(), Some("Dismiss"));
         (remove
             .interaction
             .on_activate
             .as_ref()
             .expect("activatable"))();
         assert_eq!(*removes.lock().unwrap(), 1);
+
+        let labelled = PillSpec::new()
+            .with_label("Videos")
+            .with_removable(true)
+            .with_dismiss_label("Remove filter: Videos");
+        let labelled_node = pill(&labelled, &ctx);
+        let dismiss = labelled_node
+            .find(&|child| child.id.as_deref() == Some("poodle-pill-remove"))
+            .expect("dismiss action");
+        assert_eq!(
+            dismiss.a11y.label.as_deref(),
+            Some("Remove filter: Videos")
+        );
+        assert!(
+            pill(&PillSpec::new().with_label("Audio"), &ctx)
+                .find(&|child| child.id.as_deref() == Some("poodle-pill-remove"))
+                .is_none()
+        );
     }
 
     #[test]

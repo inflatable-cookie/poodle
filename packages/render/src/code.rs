@@ -8,7 +8,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, TextAlign,
 };
-use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
+use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, CodeWrap};
 
 use crate::color::{mix_srgb, with_alpha, BLACK};
 use crate::context::RenderContext;
@@ -49,7 +49,12 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
             s.text_size = Some(inline_font);
             s.descriptor.text_color = Some(text_color);
             s.font_family = Some(FontFamily::Mono);
-            s.no_wrap = true;
+            if spec.wrap == CodeWrap::Anywhere {
+                s.text_wrap = true;
+                s.wrap_anywhere = true;
+            } else {
+                s.no_wrap = true;
+            }
             if spec.inline_variant == CodeInlineVariant::Default {
                 let inline_bg = mix_srgb(panel, elevated, 0.72);
                 s.descriptor.layout.spacing.padding.left = rem_to_px(0.375);
@@ -201,12 +206,21 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
 
             let mut source = Node::text(line.to_string());
             source.style.font_family = Some(FontFamily::Mono);
-            source.style.no_wrap = true;
+            if spec.wrap == CodeWrap::Anywhere {
+                source.style.text_wrap = true;
+                source.style.wrap_anywhere = true;
+            } else {
+                source.style.no_wrap = true;
+            }
             scroll = scroll.child(row.child(source));
         }
     } else {
         let mut source = Node::text(&spec.content);
         source.style.font_family = Some(FontFamily::Mono);
+        if spec.wrap == CodeWrap::Anywhere {
+            source.style.text_wrap = true;
+            source.style.wrap_anywhere = true;
+        }
         scroll = scroll.child(source);
     }
 
@@ -222,6 +236,32 @@ mod tests {
     use super::*;
 
     #[test]
+    fn inline_wrap_anywhere_clears_no_wrap() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let node = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_inline(true)
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        assert!(node.style.text_wrap);
+        assert!(node.style.wrap_anywhere);
+        assert!(!node.style.no_wrap);
+
+        let unset = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_inline(true),
+            &ctx,
+        );
+        assert!(!unset.style.wrap_anywhere);
+        assert!(unset.style.no_wrap);
+    }
+
+    #[test]
     fn block_source_uses_contract_relative_line_height() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
@@ -233,5 +273,35 @@ mod tests {
             .expect("block code always renders a source surface");
 
         assert_eq!(scroll.style.line_height, Some(1.4));
+    }
+
+    #[test]
+    fn block_wrap_anywhere_sets_the_shared_channel_on_source() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let node = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        let source = node
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("block code without gutter has one source text child");
+        assert!(source.style.text_wrap);
+        assert!(source.style.wrap_anywhere);
+        assert!(!source.style.no_wrap);
+
+        let unset = code(&CodeSpec::new().with_content("very-long-identifier"), &ctx);
+        let unset_source = unset
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("unset block source");
+        assert!(!unset_source.style.wrap_anywhere);
+        assert!(!unset_source.style.text_wrap);
     }
 }

@@ -144,12 +144,6 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
     focusOnValueChange:
       "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
   },
-  text: {
-    wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
-  },
-  code: {
-    wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
-  },
   "sidebar-nav": {
     endLabel:
       "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
@@ -157,20 +151,6 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
       "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
     contextMenuAriaLabel:
       "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
-  },
-  "list-card": {
-    eyebrow:
-      "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
-  },
-  pill: {
-    dismissible:
-      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
-    dismissLabel:
-      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
-  },
-  keyboard: {
-    computerBaseNote:
-      "planner ruling 2026-09-28: portable computer-key mapping; web-admitted until the headless keyboard machine gains it (`lane:native-admission`)",
   },
 };
 
@@ -220,7 +200,9 @@ const ALIASES: Record<string, Record<string, string>> = {
   // The contract calls the code text `source`; the Spec calls it `content`.
   code: { source: "content" },
   // A custom accent is a colour string.
-  pill: { accent: "accent_color" },
+  // `dismissible` is the contract name; the spec already stored the flag as
+  // `is_removable` before native admission.
+  pill: { accent: "accent_color", dismissible: "is_removable" },
   // The contract's `options` record is decomposed into one field per state.
   "tri-state-switch": { value: "state", options: "excluded_label" },
   // The Spec names the instant it renders, not the HTML attribute that carries it.
