@@ -1216,6 +1216,93 @@ fn two_dismissible_pills_keep_independent_dismiss_identity() {
     });
 }
 
+/// Same-label dismissible Pills through the production adapter keep
+/// independent dismiss identity, event, and focus with no manual scopes: the
+/// adapter mints a per-instance scope, so the label can never alias two
+/// buttons onto one focus handle again.
+#[test]
+fn same_label_adapter_pills_keep_independent_dismiss_identity() {
+    use node_compat::IntoCompatNode;
+    use poodle_specs::PillSpec;
+
+    run_headless(|cx| {
+        let theme = theme();
+        let left_hits = Arc::new(Mutex::new(0));
+        let right_hits = Arc::new(Mutex::new(0));
+        let left_sink = Arc::clone(&left_hits);
+        let right_sink = Arc::clone(&right_hits);
+
+        let left = node_compat::Pill::from_spec(
+            PillSpec::new()
+                .with_label("Shared")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove"),
+            &theme,
+        )
+        .on_remove(move || *left_sink.lock().unwrap() += 1)
+        .into_compat_node();
+        let right = node_compat::Pill::from_spec(
+            PillSpec::new()
+                .with_label("Shared")
+                .with_dismissible(true)
+                .with_dismiss_label("Remove"),
+            &theme,
+        )
+        .on_remove(move || *right_sink.lock().unwrap() += 1)
+        .into_compat_node();
+
+        fn dismiss_id(pill: &Node) -> String {
+            pill.find(&|n| {
+                n.a11y.role == Some(NodeRole::Button) && n.runtime_id.is_some()
+            })
+            .expect("adapter pill dismiss")
+            .runtime_id
+            .clone()
+            .expect("dismiss runtime id")
+        }
+        let left_id = dismiss_id(&left);
+        let right_id = dismiss_id(&right);
+        assert_ne!(left_id, right_id);
+
+        let mut root = Node::container();
+        root.id = Some("admit-same-label-pills-root".into());
+        root.style.descriptor.layout.direction = LayoutDirection::Row;
+        root = root.child(left).child(right);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 80.0);
+        driver.draw_frame();
+
+        driver.wait_for_focus_handle(&left_id);
+        driver.wait_for_focus_handle(&right_id);
+        assert_ne!(
+            poodle_gpui_node_backend::focus_handle_for(&left_id),
+            poodle_gpui_node_backend::focus_handle_for(&right_id),
+            "same-label dismiss buttons must not share one focus handle"
+        );
+
+        driver.focus_element(&left_id);
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(*left_hits.lock().unwrap(), 1);
+        assert_eq!(*right_hits.lock().unwrap(), 0);
+
+        driver.focus_element(&right_id);
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(*left_hits.lock().unwrap(), 1);
+        assert_eq!(*right_hits.lock().unwrap(), 1);
+
+        driver.pointer_activate_id(&left_id);
+        driver.draw_frame();
+        assert_eq!(*left_hits.lock().unwrap(), 2);
+        assert_eq!(*right_hits.lock().unwrap(), 1);
+
+        poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// g16.069: AppHeader mounts through production poodle_render, Node,
 /// and GPUI backend paths. Proof covers exact shell metadata (background 94% alpha,
 /// 1.0px bottom border, min-height, fill-width, size and density ladders,

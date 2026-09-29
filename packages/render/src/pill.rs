@@ -3,6 +3,7 @@
 //! Contract: `docs/contracts/components/pill.md`
 //! Ported from: `packages/jetstream/components/src/pill.rs`.
 
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
 use poodle_node::{
@@ -19,18 +20,22 @@ use crate::presentation::rem_to_px;
 /// `runtime_id`; this stays readable.
 pub const PILL_DISMISS_ID: &str = "poodle-pill-remove";
 
-/// The backend-state id of the dismiss control.
+/// The backend-state id of the dismiss control. The scope must come from the
+/// Pill instance that owns the button: callers pass an explicit per-instance
+/// scope, and an unscoped Pill mints a unique anonymous scope. There is
+/// deliberately no label or fixed-id fallback — either would let two Pills
+/// share one focus handle again.
 pub fn pill_dismiss_focus_id(instance_id: Option<&str>) -> String {
     match instance_id.filter(|scope| !scope.is_empty()) {
         Some(scope) => format!("pill:{scope}:{PILL_DISMISS_ID}"),
-        None => PILL_DISMISS_ID.to_string(),
+        None => {
+            static NEXT_ANON_SCOPE: AtomicU64 = AtomicU64::new(1);
+            format!(
+                "pill:anon-{}:{PILL_DISMISS_ID}",
+                NEXT_ANON_SCOPE.fetch_add(1, Ordering::Relaxed)
+            )
+        }
     }
-}
-
-fn pill_dismiss_scope<'a>(spec: &'a PillSpec, instance_id: Option<&'a str>) -> Option<&'a str> {
-    instance_id
-        .filter(|scope| !scope.is_empty())
-        .or_else(|| (!spec.label.is_empty()).then_some(spec.label.as_str()))
 }
 
 /// Per-size metrics in rem: `(min_w, min_h, pad_x, pad_y, font)`.
@@ -222,7 +227,7 @@ pub fn pill_with_remove(
     if spec.is_removable {
         let mut remove = Node::container();
         remove.id = Some(PILL_DISMISS_ID.to_string());
-        remove.runtime_id = Some(pill_dismiss_focus_id(pill_dismiss_scope(spec, instance_id)));
+        remove.runtime_id = Some(pill_dismiss_focus_id(instance_id));
         remove.a11y.role = Some(NodeRole::Button);
         remove.a11y.label = Some(spec.dismiss_label.clone());
         remove.a11y.tab_index = Some(0);
@@ -278,7 +283,7 @@ mod tests {
             &spec,
             &ctx,
             Some(Arc::new(move || *sink.lock().unwrap() += 1)),
-            None,
+            Some("filter"),
         );
         let remove = node
             .find(&|child| child.id.as_deref() == Some(PILL_DISMISS_ID))
@@ -286,7 +291,7 @@ mod tests {
 
         assert_eq!(
             remove.runtime_id.as_deref(),
-            Some(pill_dismiss_focus_id(Some("Filter")).as_str())
+            Some(pill_dismiss_focus_id(Some("filter")).as_str())
         );
         assert_eq!(remove.a11y.role, Some(NodeRole::Button));
         assert_eq!(remove.a11y.label.as_deref(), Some("Dismiss"));
@@ -308,13 +313,13 @@ mod tests {
             .with_label("Videos")
             .with_removable(true)
             .with_dismiss_label("Remove filter: Videos");
-        let labelled_node = pill(&labelled, &ctx);
+        let labelled_node = pill_with_remove(&labelled, &ctx, None, Some("videos"));
         let dismiss = labelled_node
             .find(&|child| child.id.as_deref() == Some(PILL_DISMISS_ID))
             .expect("dismiss action");
         assert_eq!(
             dismiss.runtime_id.as_deref(),
-            Some(pill_dismiss_focus_id(Some("Videos")).as_str())
+            Some(pill_dismiss_focus_id(Some("videos")).as_str())
         );
         assert_eq!(dismiss.a11y.label.as_deref(), Some("Remove filter: Videos"));
         assert!(pill(&PillSpec::new().with_label("Audio"), &ctx)
@@ -369,6 +374,14 @@ mod tests {
             .expect("right event"))();
         assert_eq!(*left_hits.lock().unwrap(), 1);
         assert_eq!(*right_hits.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn unscoped_dismiss_ids_never_alias() {
+        let first = pill_dismiss_focus_id(None);
+        let second = pill_dismiss_focus_id(None);
+        assert_ne!(first, second);
+        assert_ne!(first, PILL_DISMISS_ID);
     }
 
     #[test]
