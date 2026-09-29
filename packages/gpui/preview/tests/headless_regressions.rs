@@ -1009,6 +1009,11 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         assert!(!normal_text.style.wrap_anywhere);
         assert!(anywhere_text.style.wrap_anywhere);
 
+        let spaced = "aa bb cc dd ee ff gg hh ii jj kk";
+        let mut spaced_text = poodle_render::text(&TextSpec::new(spaced), &ctx);
+        spaced_text.id = Some("admit-text-wrap-normal-spaced".into());
+        spaced_text.style.max_width = Some(72.0);
+
         let mut normal_code = poodle_render::code(
             &CodeSpec::new().with_content(long).with_inline(true),
             &ctx,
@@ -1133,6 +1138,7 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
         root = root
             .child(normal_text)
             .child(anywhere_text)
+            .child(spaced_text)
             .child(normal_code)
             .child(anywhere_code)
             .child(normal_block)
@@ -1172,6 +1178,15 @@ fn wrap_eyebrow_pill_dismiss_and_keyboard_base_note_admit_on_native() {
             "wrap=anywhere must mid-token wrap a long identifier; wrap=normal must not. normal={:?} anywhere={:?}",
             normal_text_bounds.size,
             anywhere_text_bounds.size
+        );
+        let spaced_text_bounds =
+            poodle_gpui_node_backend::bounds_for("admit-text-wrap-normal-spaced")
+                .expect("spaced normal text bounds");
+        assert!(
+            spaced_text_bounds.size.height > normal_text_bounds.size.height,
+            "wrap=normal must still wrap at spaces. spaced={:?} identifier={:?}",
+            spaced_text_bounds.size,
+            normal_text_bounds.size
         );
 
         let normal_block_paint =

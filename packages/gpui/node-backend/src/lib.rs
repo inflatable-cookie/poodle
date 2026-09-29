@@ -371,7 +371,14 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
                 element.ime = Some(ime);
                 return build_box(node, div().child(element));
             }
-            build_box(node, div().child(content.clone()))
+            // GPUI WhiteSpace::Normal mid-token wraps; Nowrap suppresses
+            // space breaks too. wrap=normal keeps space breaks by wrapping
+            // nowrap fragments, which is overflow-wrap:normal.
+            if node.style.text_wrap && !node.style.wrap_anywhere && !node.style.no_wrap {
+                build_box(node, div().child(wrap_normal_text_run(content)))
+            } else {
+                build_box(node, div().child(content.clone()))
+            }
         }
         // GPUI has no native button element; the old tier's buttons are styled
         // divs too, so the label-child div is the faithful mapping. Same for
@@ -643,6 +650,51 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
         svg.with_transformation(Transformation::rotate(gpui::radians(radians)))
     })
     .into_any_element()
+}
+
+/// GPUI has no overflow-wrap:normal. WhiteSpace::Normal mid-token wraps;
+/// Nowrap also kills space breaks. wrap=normal is a wrapping row of nowrap
+/// fragments so ordinary whitespace stays a break opportunity.
+fn wrap_normal_text_run(content: &str) -> Div {
+    if !content.contains('\n') {
+        return wrap_normal_line(content);
+    }
+    let mut column = div().flex().flex_col();
+    for line in content.split('\n') {
+        column = column.child(wrap_normal_line(line));
+    }
+    column
+}
+
+fn wrap_normal_line(line: &str) -> Div {
+    let mut row = div().flex().flex_row().flex_wrap();
+    for fragment in wrap_normal_fragments(line) {
+        row = row.child(
+            div()
+                .flex_shrink_0()
+                .whitespace_nowrap()
+                .child(fragment),
+        );
+    }
+    row
+}
+
+fn wrap_normal_fragments(content: &str) -> Vec<SharedString> {
+    let mut fragments = Vec::new();
+    let mut current = String::new();
+    for c in content.chars() {
+        current.push(c);
+        if c.is_whitespace() {
+            fragments.push(SharedString::from(std::mem::take(&mut current)));
+        }
+    }
+    if !current.is_empty() {
+        fragments.push(SharedString::from(current));
+    }
+    if fragments.is_empty() {
+        fragments.push(SharedString::from(""));
+    }
+    fragments
 }
 
 /// Container-shaped nodes: the full channel walk. Interaction that needs

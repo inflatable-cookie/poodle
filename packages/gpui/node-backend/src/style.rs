@@ -369,15 +369,13 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
         // GPUI 0.2.2 WhiteSpace::Normal wraps at spaces first, then mid-token
         // when a single word exceeds the line (LineWrapper else-branch; their
         // own test wraps `aaa aaaaaaaaaaaaaaaaaa`). That is overflow-wrap:
-        // anywhere. wrap=normal must not take this path or a long identifier
-        // breaks the same way as anywhere.
+        // anywhere.
         el = el.whitespace_normal();
-    } else if style.text_wrap {
-        // GPUI has no overflow-wrap:normal: Normal always mid-token wraps an
-        // overlong word. Nowrap keeps that word on one line, matching Svelte
-        // wrap=normal for the unbroken-identifier case the contract admits.
-        el = el.whitespace_nowrap();
     }
+    // wrap=normal (`text_wrap` without `wrap_anywhere`) must not use Nowrap
+    // on the run: that also kills breaks at spaces. It must not use Normal
+    // on a single run either: that mid-token wraps. Text nodes emit nowrap
+    // word fragments in a wrapping row instead (see wrap_normal_text_run).
     if let Some(family) = style.font_family {
         // Sans is the app's default (the preview sets Inter at the root), so
         // silence is faithful; Mono names gpui's system monospace stack, the
