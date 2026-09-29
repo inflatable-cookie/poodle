@@ -53,10 +53,10 @@ export const manifest = {
       "packages/tokens/artifacts/ts/metadata.ts"
     ],
     "rust": [
-      "packages/tokens/artifacts/rust/mod.rs",
-      "packages/tokens/artifacts/rust/themes.rs",
-      "packages/tokens/artifacts/rust/density.rs",
-      "packages/tokens/artifacts/rust/metadata.rs"
+      "packages/contracts/tokens/src/generated/mod.rs",
+      "packages/contracts/tokens/src/generated/themes.rs",
+      "packages/contracts/tokens/src/generated/density.rs",
+      "packages/contracts/tokens/src/generated/metadata.rs"
     ]
   }
 } as const;

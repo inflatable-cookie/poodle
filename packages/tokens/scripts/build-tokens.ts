@@ -80,6 +80,10 @@ const tokensDir = path.resolve(scriptDir, "..");
 const schemaDir = path.join(tokensDir, "schema");
 const artifactDir = path.join(tokensDir, "artifacts");
 const svelteTokensGeneratedDir = path.resolve(tokensDir, "../core/src/tokens/generated");
+// The Rust artifact family lives inside the poodle-tokens crate so the crate
+// is self-contained: `cargo package` and a plain copy of the crate directory
+// build without reaching outside the package root.
+const rustCrateSrcDir = path.resolve(tokensDir, "../contracts/tokens/src/generated");
 
 function readJson<T>(filePath: string): T {
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
@@ -237,8 +241,8 @@ function rel(filePath: string): string {
   return path.relative(repoRoot, filePath);
 }
 
-function writeFile(relativePath: string, contents: string): void {
-  const filePath = path.join(artifactDir, relativePath);
+function writeFileInto(dir: string, relativePath: string, contents: string): void {
+  const filePath = path.join(dir, relativePath);
   expected.add(filePath);
   if (checkOnly) {
     compare(filePath, contents);
@@ -246,6 +250,14 @@ function writeFile(relativePath: string, contents: string): void {
   }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, contents);
+}
+
+function writeFile(relativePath: string, contents: string): void {
+  writeFileInto(artifactDir, relativePath, contents);
+}
+
+function writeRustFile(relativePath: string, contents: string): void {
+  writeFileInto(rustCrateSrcDir, relativePath, contents);
 }
 
 function compare(filePath: string, contents: string): void {
@@ -293,7 +305,7 @@ function walkFiles(dir: string): string[] {
 
 function staleFiles(): string[] {
   const stale: string[] = [];
-  for (const root of [artifactDir, svelteTokensGeneratedDir]) {
+  for (const root of [artifactDir, svelteTokensGeneratedDir, rustCrateSrcDir]) {
     for (const file of walkFiles(root)) {
       if (!expected.has(file)) stale.push(file);
     }
@@ -804,8 +816,8 @@ function buildRustDefinitionArray(entries: ResolvedTokenEntry[]): string {
     .join("\n");
 }
 
-writeFile(
-  "rust/mod.rs",
+writeRustFile(
+  "mod.rs",
   `${formatHeader("//")}
 pub mod density;
 pub mod metadata;
@@ -816,22 +828,22 @@ pub mod typed;
 `,
 );
 
-writeFile(
-  "rust/primitives.rs",
+writeRustFile(
+  "primitives.rs",
   `${formatHeader("//")}
 ${buildRustConstants(primitiveEntries, "primitives")}
 `,
 );
 
-writeFile(
-  "rust/semantic.rs",
+writeRustFile(
+  "semantic.rs",
   `${formatHeader("//")}
 ${buildRustSemanticPathConstants(semanticEntries, "")}
 `,
 );
 
-writeFile(
-  "rust/themes.rs",
+writeRustFile(
+  "themes.rs",
   `${formatHeader("//")}
 #[derive(Debug, Clone, Copy)]
 pub struct ThemeDefinition {
@@ -854,8 +866,8 @@ ${buildRustDefinitionArray(theme.entries)}
 `,
 );
 
-writeFile(
-  "rust/density.rs",
+writeRustFile(
+  "density.rs",
   `${formatHeader("//")}
 #[derive(Debug, Clone, Copy)]
 pub struct DensityDefinition {
@@ -897,8 +909,8 @@ ${buildRustDefinitionArray(mode.entries)}
 `,
 );
 
-writeFile(
-  "rust/metadata.rs",
+writeRustFile(
+  "metadata.rs",
   `${formatHeader("//")}
 pub const MANIFEST_NAME: &str = ${jsString(schema.manifest.name)};
 pub const MANIFEST_VERSION: &str = ${jsString(schema.manifest.version)};
@@ -921,8 +933,8 @@ ${deprecationsMetadata
 
 // --- Typed token artifacts ---
 
-writeFile(
-  "rust/typed/mod.rs",
+writeRustFile(
+  "typed/mod.rs",
   `${formatHeader("//")}
 mod types;
 pub mod primitives;
@@ -932,8 +944,8 @@ pub use types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 `,
 );
 
-writeFile(
-  "rust/typed/types.rs",
+writeRustFile(
+  "typed/types.rs",
   `${formatHeader("//")}
 /// RGBA color as four f32 values in 0.0\u20131.0 range.
 /// Compatible with Jetstream \`Vec4\` and GPUI color types.
@@ -994,8 +1006,8 @@ pub struct ShadowValue {
 `,
 );
 
-writeFile(
-  "rust/typed/primitives.rs",
+writeRustFile(
+  "typed/primitives.rs",
   `${formatHeader("//")}
 use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 
@@ -1003,8 +1015,8 @@ ${buildTypedRustConstants(primitiveEntries, "primitives")}
 `,
 );
 
-writeFile(
-  "rust/typed/semantic.rs",
+writeRustFile(
+  "typed/semantic.rs",
   `${formatHeader("//")}
 use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 
