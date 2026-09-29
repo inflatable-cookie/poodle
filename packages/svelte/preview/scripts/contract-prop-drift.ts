@@ -57,7 +57,7 @@ const BASELINE: Record<string, { contractOnly?: string[]; svelteOnly?: string[] 
   // g13-027 Part 2 tranche (see the batch log): web-only or spec-surface-pending
   // props the contract deliberately does not table. Tabling them would fail
   // contract-spec-drift until the poodle-specs structs carry the fields, and
-  // WEB_ONLY_PROPS is out of scope for this card.
+  // the WEB_ONLY register is out of scope for this card.
   //
   // dialog `closeButtonSize` — cross-target close-button size; DialogSpec
   //   carries `show_close_button` only, so the field is a spec-surface tranche.

@@ -41,6 +41,12 @@ cargo run --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- \
   Gates compose only `*:check` selectors; `ir:build` is never part of a gate.
   `effigy ci:rust` runs `ir:check` and `catalogue:check` so a `GENERATOR_VERSION`
   restamp fails the board Queue runs, not only the optional selectors.
+- Targets that share an `output_root` string (`shell-scene` / `shell-rust`,
+  `specimen-ts` / `specimen-rust`, and the catalogue and machine pairs)
+  protect each other's **exact emit paths** on every CLI invocation, so
+  two separate `--target` runs against the same `--out` keep sibling
+  artifacts and still delete unclaimed garbage (a stray `stale.rs` is
+  not the sibling's path). Targets with a unique root stay exclusive.
 - The remaining targets (JSON schema, registry, conformance vectors, docs
   fragments) are a follow-up card; the machinery here is target-independent.
 

@@ -3,13 +3,17 @@
 //! Structural property: this module contains no filesystem write call. It
 //! reads committed files, compares byte-exact, classifies whitespace-only
 //! differences, and scans the output root's top level for stale orphans —
-//! then reports everything at once. The write path lives in [`crate::write`]
+//! then reports everything at once. Two targets that actually share one
+//! directory pass exact sibling paths so a neighbour's artifacts are not
+//! stale; unclaimed files still are. Production per-platform roots stay
+//! exclusive. The write path lives in [`crate::write`]
 //! and is only reachable from write mode; the two can never be confused.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::emit::GeneratedFile;
+use crate::orphan::{is_protected_path, list_top_level_files};
 
 /// Why a committed file disagrees with the emitter.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -83,6 +87,17 @@ impl CheckReport {
 /// of writing: this is the only entry point the `--check` branch of the bin
 /// calls.
 pub fn check_outputs(output_root: &Path, files: &[GeneratedFile]) -> crate::Result<CheckReport> {
+    check_outputs_protecting(output_root, files, &[])
+}
+
+/// [`check_outputs`] when two targets share one concrete directory.
+/// `protected` is exact relative paths the sibling currently emits, not
+/// an extension glob.
+pub fn check_outputs_protecting(
+    output_root: &Path,
+    files: &[GeneratedFile],
+    protected: &[&str],
+) -> crate::Result<CheckReport> {
     let mut report = CheckReport::default();
 
     for file in files {
@@ -119,10 +134,7 @@ pub fn check_outputs(output_root: &Path, files: &[GeneratedFile]) -> crate::Resu
     // there are no orphans on disk); the walk is skipped so the report
     // stays all-findings rather than erroring on the missing directory.
     let on_disk = if output_root.exists() {
-        walk_files(output_root).map_err(|error| crate::CodegenError::Read {
-            path: output_root.to_path_buf(),
-            source: error,
-        })?
+        list_top_level_files(output_root)?
     } else {
         Vec::new()
     };
@@ -134,9 +146,13 @@ pub fn check_outputs(output_root: &Path, files: &[GeneratedFile]) -> crate::Resu
             .to_str()
             .expect("generated paths are UTF-8")
             .replace(std::path::MAIN_SEPARATOR, "/");
-        if !expected.contains(relative.as_str()) {
-            report.stale.push(relative.into());
+        if expected.contains(relative.as_str()) {
+            continue;
         }
+        if is_protected_path(&relative, protected) {
+            continue;
+        }
+        report.stale.push(relative.into());
     }
 
     report.drifted.sort_by(|a, b| a.0.cmp(&b.0));
@@ -151,23 +167,6 @@ pub fn check_outputs(output_root: &Path, files: &[GeneratedFile]) -> crate::Resu
 fn whitespace_equivalent(a: &str, b: &str) -> bool {
     let stripped = |s: &str| s.chars().filter(|c| !c.is_whitespace()).collect::<String>();
     stripped(a) == stripped(b)
-}
-
-/// Lists the top-level files of `root`, sorted, as absolute paths.
-/// Directories are skipped: they are sibling targets' output roots, not
-/// this target's files (the card 041 shared-`generated/` layout — a
-/// recursive scan would report the sibling target's artifact as stale).
-fn walk_files(root: &Path) -> std::io::Result<Vec<PathBuf>> {
-    let mut out = Vec::new();
-    for entry in fs::read_dir(root)? {
-        let entry = entry?;
-        let path = entry.path();
-        if !path.is_dir() {
-            out.push(path);
-        }
-    }
-    out.sort();
-    Ok(out)
 }
 
 #[cfg(test)]

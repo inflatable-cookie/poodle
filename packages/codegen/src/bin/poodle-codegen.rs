@@ -10,7 +10,7 @@
 //! `--check` regenerates in memory and byte-compares against the committed
 //! files under `--out`, failing on drift without writing (ruling R3). The
 //! check branch is structurally incapable of writing: it calls
-//! [`poodle_codegen::check_outputs`], which contains no write call, and the
+//! [`poodle_codegen::check_outputs_protecting`], which contains no write call, and the
 //! write path lives in a separate function the check branch never reaches.
 //! `--target` restricts emission to one target (e.g. the scene-scoped
 //! `shell-scene`, which renders into the consuming web packages and is not
@@ -31,8 +31,8 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    catalogue, check_outputs, generate, load_and_validate, machine_interfaces, models,
-    targets, write_outputs, CodegenError,
+    catalogue, check_outputs_protecting, generate, load_and_validate, machine_interfaces, models,
+    targets, write_outputs_protecting, CodegenError, GeneratedFile,
 };
 
 fn usage() -> String {
@@ -125,8 +125,7 @@ fn parse_args() -> Result<Args, String> {
             }
             "--catalogue" => {
                 catalogue = Some(PathBuf::from(
-                    args.next()
-                        .ok_or("--catalogue requires a manifest path")?,
+                    args.next().ok_or("--catalogue requires a manifest path")?,
                 ));
             }
             "--target" => {
@@ -150,10 +149,7 @@ fn parse_args() -> Result<Args, String> {
         .count()
         > 1
     {
-        return Err(
-            "run --catalogue, --author-*, and --machine-interfaces separately"
-                .to_owned(),
-        );
+        return Err("run --catalogue, --author-*, and --machine-interfaces separately".to_owned());
     }
 
     if catalogue_mode {
@@ -191,9 +187,7 @@ fn parse_args() -> Result<Args, String> {
 
     if machine_mode {
         if !positional.is_empty() {
-            return Err(
-                "machine-interface mode takes no positional FIXTURE argument".to_owned(),
-            );
+            return Err("machine-interface mode takes no positional FIXTURE argument".to_owned());
         }
         if out.is_none() {
             return Err("--out is required with --machine-interfaces".to_owned());
@@ -289,6 +283,37 @@ fn run(args: &Args) -> Result<(), CodegenError> {
     )
 }
 
+/// Exact relative paths a sibling target currently emits into the same
+/// output-root string. Empty when this target exclusively owns the root.
+fn sibling_owned_paths(
+    target: &dyn poodle_codegen::EmitTarget,
+    model: &poodle_ir::IrModel,
+    source_path: &str,
+) -> Result<Vec<String>, CodegenError> {
+    let mut paths = Vec::new();
+    for sibling in targets::sharing_output_root(target) {
+        for file in generate(model, source_path, sibling)? {
+            paths.push(file.path);
+        }
+    }
+    Ok(paths)
+}
+
+fn sync_outputs(
+    root: &Path,
+    files: &[GeneratedFile],
+    protected: &[String],
+    check: bool,
+) -> Result<Option<poodle_codegen::CheckReport>, CodegenError> {
+    let protected: Vec<&str> = protected.iter().map(String::as_str).collect();
+    if check {
+        Ok(Some(check_outputs_protecting(root, files, &protected)?))
+    } else {
+        write_outputs_protecting(root, files, &protected)?;
+        Ok(None)
+    }
+}
+
 fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError> {
     let document = machine_interfaces::load_and_validate(schema)?;
     let source_path = schema.to_string_lossy().into_owned();
@@ -296,14 +321,16 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
         .target
         .as_deref()
         .expect("parse requires --target in machine-interface mode");
-    let (files, output_root) = match target_id {
+    let (files, output_root, sibling) = match target_id {
         targets::machine_ts::ID => (
             targets::machine_ts::render(&document, &source_path),
             targets::machine_ts::OUTPUT_ROOT,
+            targets::machine_rust::render(&document, &source_path),
         ),
         targets::machine_rust::ID => (
             targets::machine_rust::render(&document, &source_path),
             targets::machine_rust::OUTPUT_ROOT,
+            targets::machine_ts::render(&document, &source_path),
         ),
         other => {
             return Err(CodegenError::UnknownTarget {
@@ -315,11 +342,12 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
             });
         }
     };
+    let protected: Vec<String> = sibling.into_iter().map(|file| file.path).collect();
     let out = args.out.as_ref().expect("parse requires --out");
     let root = out.join(output_root);
 
     if args.check {
-        let report = check_outputs(&root, &files)?;
+        let report = sync_outputs(&root, &files, &protected, true)?.expect("check yields a report");
         if !report.is_clean() {
             return Err(CodegenError::Gate {
                 message: format!(
@@ -335,7 +363,7 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
             document.schema_version
         );
     } else {
-        write_outputs(&root, &files)?;
+        sync_outputs(&root, &files, &protected, false)?;
         println!(
             "Generated {} files (target: {target_id}, machine interface schema {}).",
             files.len(),
@@ -352,14 +380,16 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
         .target
         .as_deref()
         .expect("parse requires --target in catalogue mode");
-    let (files, output_root) = match target_id {
+    let (files, output_root, sibling) = match target_id {
         targets::catalogue_ts::ID => (
             targets::catalogue_ts::render(&document, &source_path),
             targets::catalogue_ts::OUTPUT_ROOT,
+            targets::catalogue_rust::render(&document, &source_path),
         ),
         targets::catalogue_rust::ID => (
             targets::catalogue_rust::render(&document, &source_path),
             targets::catalogue_rust::OUTPUT_ROOT,
+            targets::catalogue_ts::render(&document, &source_path),
         ),
         other => {
             return Err(CodegenError::UnknownTarget {
@@ -371,11 +401,12 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
             });
         }
     };
+    let protected: Vec<String> = sibling.into_iter().map(|file| file.path).collect();
     let out = args.out.as_ref().expect("parse requires --out");
     let root = out.join(output_root);
 
     if args.check {
-        let report = check_outputs(&root, &files)?;
+        let report = sync_outputs(&root, &files, &protected, true)?.expect("check yields a report");
         if !report.is_clean() {
             return Err(CodegenError::Gate {
                 message: format!(
@@ -391,7 +422,7 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
             document.schema_version
         );
     } else {
-        write_outputs(&root, &files)?;
+        sync_outputs(&root, &files, &protected, false)?;
         println!(
             "Generated {} files (target: {target_id}, catalogue schema {}).",
             files.len(),
@@ -404,7 +435,8 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
 /// Serializes a Rust-authored model to the fixture after a validate round
 /// trip (card 035 R1): the bytes written are exactly the bytes the
 /// pipeline's `load_and_validate` will accept.
-fn author_document(model: &poodle_ir::IrModel, label: &str) -> Result<String, CodegenError> {    let document = serde_json::to_string_pretty(model).map_err(|error| CodegenError::Gate {
+fn author_document(model: &poodle_ir::IrModel, label: &str) -> Result<String, CodegenError> {
+    let document = serde_json::to_string_pretty(model).map_err(|error| CodegenError::Gate {
         message: format!("cannot serialize the authored {label} model: {error}"),
     })?;
     // Validate the serialized form, not just the in-memory model: the
@@ -423,7 +455,11 @@ fn author_document(model: &poodle_ir::IrModel, label: &str) -> Result<String, Co
     Ok(format!("{document}\n"))
 }
 
-fn write_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) -> Result<(), CodegenError> {
+fn write_author_model(
+    out_path: &Path,
+    model: &poodle_ir::IrModel,
+    label: &str,
+) -> Result<(), CodegenError> {
     let document = author_document(model, label)?;
     if let Some(parent) = out_path.parent() {
         fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
@@ -446,7 +482,11 @@ fn write_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) 
 /// Read-only twin of [`write_author_model`]: regenerate in memory and
 /// byte-compare against the committed fixture. No write call exists on this
 /// path.
-fn check_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) -> Result<(), CodegenError> {
+fn check_author_model(
+    out_path: &Path,
+    model: &poodle_ir::IrModel,
+    label: &str,
+) -> Result<(), CodegenError> {
     let document = author_document(model, label)?;
     let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
         path: out_path.to_path_buf(),
@@ -490,9 +530,11 @@ fn run_emit(fixture: &Path, args: &Args) -> Result<(), CodegenError> {
         let source_path = fixture_source_path(fixture);
         let files = generate(&model, &source_path, target)?;
         let root = out.join(target.output_root());
+        let protected = sibling_owned_paths(target, &model, &source_path)?;
 
         if args.check {
-            let report = check_outputs(&root, &files)?;
+            let report =
+                sync_outputs(&root, &files, &protected, true)?.expect("check yields a report");
             if !report.is_clean() {
                 return Err(CodegenError::Gate {
                     message: format!(
@@ -510,7 +552,7 @@ fn run_emit(fixture: &Path, args: &Args) -> Result<(), CodegenError> {
                 poodle_ir::IR_SCHEMA_VERSION
             );
         } else {
-            write_outputs(&root, &files)?;
+            sync_outputs(&root, &files, &protected, false)?;
             any_written = true;
             println!(
                 "Generated {} files (target: {}, IR schema {}).",
