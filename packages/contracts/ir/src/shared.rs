@@ -10,9 +10,8 @@
 //! where `ButtonSpec` accepted `ButtonTone::Success` while `button.md`
 //! permitted three tones and the web silently rendered default.
 //!
-//! Governing refs: `docs/roadmaps/g13/batch-cards/003-crate-placement-ruling-and-schema-handoff.md`
-//! (R6.1, R6.2), `docs/specs/063-rust-authored-component-and-scene-ir.md`
-//! ("Shared types and permitted subsets"), `docs/contracts/004-shared-control-types.md`.
+//! Governing refs: spec 063 ("Shared types and permitted subsets"),
+//! `docs/contracts/004-shared-control-types.md`.
 //!
 //! [`PermittedSubset`] is validated by
 //! [`validate`](crate::validate): any [`Value`](crate::Value) that names a

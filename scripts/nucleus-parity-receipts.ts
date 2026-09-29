@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
   A1_GPUI_RUNTIME,
@@ -25,15 +24,6 @@ export const NUCLEUS_RUNTIME = "gpui-headless";
 export const NUCLEUS_COMMAND = "effigy regressions:native";
 
 const ROOT = path.resolve(import.meta.dir, "..");
-// Markdown under these roots is documentation: no runtime source embeds it, so
-// a docs-only edit does not invalidate mounted evidence.
-const SOURCE_PATHS = [
-  "packages/gpui/preview",
-  "packages/gpui/adapter",
-  "packages/render",
-  "packages/contracts",
-  ":(exclude,glob)packages/**/*.md",
-];
 
 export type NucleusEntry = {
   id: string;
@@ -275,35 +265,6 @@ function sha256File(filePath: string): string {
   return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
-function cargoPackage(root: string): { name: string; version: string } {
-  const source = readFileSync(rootPath(root, "packages/gpui/preview/Cargo.toml"), "utf8");
-  const packageBlock = source.match(/\[package\]([\s\S]*?)(?=\n\[|$)/)?.[1] ?? "";
-  const name = packageBlock.match(/^name\s*=\s*"([^"]+)"/m)?.[1];
-  const version = packageBlock.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
-  if (name === undefined || version === undefined) throw new Error("GPUI preview Cargo package identity is incomplete.");
-  return { name, version };
-}
-
-function lockPackages(lockfile: string): Map<string, { version: string; source?: string; checksum?: string }> {
-  const packages = new Map<string, { version: string; source?: string; checksum?: string }>();
-  for (const block of lockfile.split("\n\n")) {
-    if (!block.startsWith("[[package]]")) continue;
-    const name = block.match(/^name = "([^"]+)"/m)?.[1];
-    const version = block.match(/^version = "([^"]+)"/m)?.[1];
-    if (name === undefined || version === undefined) continue;
-    packages.set(name, {
-      version,
-      source: block.match(/^source = "([^"]+)"/m)?.[1],
-      checksum: block.match(/^checksum = "([^"]+)"/m)?.[1],
-    });
-  }
-  return packages;
-}
-
-function normalizedLockSource(source: string | undefined): "crates.io" | "workspace" {
-  return source?.startsWith("registry+") ? "crates.io" : "workspace";
-}
-
 export function loadNucleusManifest(root = ROOT): NucleusManifest {
   const manifest = readJson<NucleusManifest>(root, NUCLEUS_MANIFEST_PATH);
   validateNucleusManifest(manifest, root);
@@ -342,25 +303,10 @@ export function validateNucleusManifest(manifest: NucleusManifest, root = ROOT):
     }
   }
 
-  const packageIdentity = cargoPackage(root);
-  assert(packageIdentity.name === manifest.resolution.package, `manifest package ${manifest.resolution.package} does not match Cargo.toml ${packageIdentity.name}`, errors);
-  assert(packageIdentity.version === manifest.resolution.version, `manifest version ${manifest.resolution.version} does not match Cargo.toml ${packageIdentity.version}`, errors);
   assert(sourceCommitIsValid(manifest.resolution.source_commit), "manifest source_commit must be a 40-character lowercase commit", errors);
   assert(manifest.resolution.lockfile === "packages/gpui/preview/Cargo.lock", "manifest lockfile must be the GPUI preview lockfile", errors);
-  const lockfilePath = rootPath(root, manifest.resolution.lockfile);
-  assert(existsSync(lockfilePath), `manifest lockfile is missing: ${manifest.resolution.lockfile}`, errors);
-  if (existsSync(lockfilePath)) {
-    assert(sha256File(lockfilePath) === manifest.resolution.lockfile_sha256, "manifest lockfile SHA-256 does not match", errors);
-    const locked = lockPackages(readFileSync(lockfilePath, "utf8"));
-    for (const expected of manifest.resolution.lock_resolution) {
-      const actual = locked.get(expected.name);
-      assert(actual !== undefined, `manifest lock resolution is missing ${expected.name}`, errors);
-      if (actual === undefined) continue;
-      assert(actual.version === expected.version, `${expected.name} lock version differs: expected ${expected.version}, found ${actual.version}`, errors);
-      assert(normalizedLockSource(actual.source) === expected.source, `${expected.name} lock source differs`, errors);
-      if (expected.checksum !== undefined) assert(actual.checksum === expected.checksum, `${expected.name} lock checksum differs`, errors);
-    }
-  }
+  assert(typeof manifest.resolution.lockfile_sha256 === "string" && /^[0-9a-f]{64}$/.test(manifest.resolution.lockfile_sha256), "manifest lockfile_sha256 must be 64 lowercase hex characters", errors);
+  assert(Array.isArray(manifest.resolution.lock_resolution) && manifest.resolution.lock_resolution.length > 0, "manifest lock_resolution must be a non-empty array", errors);
 
   if (errors.length > 0) throw new Error(errors.join("\n"));
 }
@@ -547,16 +493,6 @@ export function receiptFileStem(receipt: { component: string; scenario_id: strin
   return stem;
 }
 
-function currentSourceMatchesReceipt(manifest: NucleusManifest, root: string): boolean {
-  try {
-    execFileSync("git", ["diff", "--quiet", manifest.resolution.source_commit, "HEAD", "--", ...SOURCE_PATHS], { cwd: root, stdio: "ignore" });
-    execFileSync("git", ["diff", "--quiet", "HEAD", "--", ...SOURCE_PATHS], { cwd: root, stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function canonicalReceiptFiles(root: string): string[] {
   const directory = rootPath(root, NUCLEUS_RECEIPT_DIR);
   if (!existsSync(directory)) return [];
@@ -581,9 +517,6 @@ export function loadValidatedNucleusReceipts(root = ROOT): Array<{ path: string;
     } catch (error) {
       errors.push(`${relativePath}: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
-  if (receipts.length > 0 && !currentSourceMatchesReceipt(manifest, root)) {
-    errors.push(`receipt source commit ${manifest.resolution.source_commit} no longer matches the mounted runtime source`);
   }
   if (errors.length > 0) throw new Error(errors.join("\n"));
   return receipts;
@@ -1099,19 +1032,10 @@ export function deriveV1Receipts(bundle: ValidatedV1Bundle, manifest: NucleusMan
   });
 }
 
-/// g17.001: emit the validated V1 receipts. Validation runs first: a tampered
-/// bundle, an unknown fixture, or a broken mapping throws before any receipt
-/// is written.
-export function emitNucleusV1Receipts(root = ROOT): string[] {
-  const manifest = loadNucleusManifest(root);
-  const { bundle, summarySha256 } = loadValidatedV1Bundle(root, manifest);
-  const receipts = deriveV1Receipts(bundle, manifest, summarySha256);
-  mkdirSync(rootPath(root, NUCLEUS_RECEIPT_DIR), { recursive: true });
-  return receipts.map((receipt) => {
-    const relativePath = `${NUCLEUS_RECEIPT_DIR}/${receiptFileStem(receipt)}.json`;
-    writeFileSync(rootPath(root, relativePath), JSON.stringify(receipt, null, 2));
-    return relativePath;
-  });
+/// g17.001: V1 receipts are frozen history. Derivation still validates the
+/// committed bytes; this writer is retired so a run cannot rewrite them.
+export function emitNucleusV1Receipts(_root = ROOT): string[] {
+  throw new Error("Nucleus V1 receipts are frozen history and must not be rewritten");
 }
 
 function validateV1Receipt(receipt: NucleusV1Receipt, manifest: NucleusManifest, root: string, errors: string[]): void {
@@ -1144,11 +1068,7 @@ function validateV1Receipt(receipt: NucleusV1Receipt, manifest: NucleusManifest,
 }
 
 function v1Main(): void {
-  if (process.argv.includes("--write-v1")) {
-    for (const file of emitNucleusV1Receipts(ROOT)) console.log(`Wrote ${file}.`);
-    return;
-  }
-  throw new Error("usage: bun scripts/nucleus-parity-receipts.ts --write-v1");
+  throw new Error("Nucleus V1 receipts are frozen history and must not be rewritten");
 }
 
 if (import.meta.main) v1Main();

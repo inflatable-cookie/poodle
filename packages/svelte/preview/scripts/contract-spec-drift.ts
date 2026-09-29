@@ -168,32 +168,26 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // g16.060. Controlled-panel focus transfer is a DOM adapter effect.
   // Native has no panel-unmount capture in this bounded consumer unblock.
   tabs: ["focusOnValueChange"],
-  // Text/Code wrap (operator ruling 2026-09-27). Web-admitted now; the
-  // portable spec and GPUI channel wait for the next Nucleus evidence
-  // repin because receipts pin packages/contracts, render, and gpui
-  // byte-for-byte (plan lane `pinned-source-paths`).
+  // Text/Code wrap (operator ruling 2026-09-27). Web-admitted now; native
+  // admission pending (`lane:native-admission`).
   text: ["wrap"],
   code: ["wrap"],
   // SidebarNavItem.endLabel / contextMenuItems / contextMenuAriaLabel
   // (operator ruling 2026-09-27), web-admitted on the same terms as `wrap`.
   // They are item fields, not Public Props, so this checker never reads them;
-  // the entry records the status where the next repin will look for them.
+  // the entry records the status where native admission will look for them.
   "sidebar-nav": ["endLabel", "contextMenuItems", "contextMenuAriaLabel"],
   // ListCard.eyebrow (operator ruling 2026-09-27, planning-thread approval
   // briefing the Bovine Desktop gaps). Web-admitted on the same terms as
-  // Text/Code `wrap`: Nucleus receipts pin packages/contracts, render, and
-  // gpui byte-for-byte, so ListCardSpec gains `eyebrow` at the next evidence
-  // repin (plan lane `pinned-source-paths`).
+  // Text/Code `wrap`. Native admission pending (`lane:native-admission`).
   "list-card": ["eyebrow"],
   // Pill dismiss control (operator ruling 2026-09-27), web-admitted on the
-  // same terms as `wrap`. Both are Public Props in the contract; the portable
-  // spec and GPUI channel wait for the next Nucleus evidence repin
-  // (`lane:pinned-source-paths`).
+  // same terms as `wrap`. Both are Public Props in the contract; native
+  // admission pending (`lane:native-admission`).
   pill: ["dismissible", "dismissLabel"],
   // Keyboard.computerBaseNote (planner ruling 2026-09-28) is portable
   // computer-key mapping semantics. Web-admitted pending native until the
-  // headless keyboard machine gains it with the next Nucleus evidence repin
-  // (`lane:pinned-source-paths`).
+  // headless keyboard machine gains it (`lane:native-admission`).
   keyboard: ["computerBaseNote"],
 };
 

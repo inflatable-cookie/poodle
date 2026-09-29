@@ -1,12 +1,11 @@
 //! Versioned Rust-authored component and scene IR — data and validation only.
 //!
-//! Serves [`docs/specs/063-rust-authored-component-and-scene-ir.md`] (`IR-01`
+//! Serves [`docs/knowledge/specs/063-rust-authored-component-and-scene-ir.md`] (`IR-01`
 //! Rust authority, `IR-02` serializable boundary, `IR-04` semantic authoring
 //! layer above `poodle-node`, `IR-06` VisualState purity, `IR-07` deterministic
-//! and versioned artifacts). The vocabulary is the 129 requirements of
-//! `docs/roadmaps/g13/pilot-expressiveness-corpus.md`; every public type and
-//! field doc-comments the corpus requirement ID (`CROSS-*`, `BTN-*`, `RNG-*`,
-//! `TXT-*`, `SHELL-*`) or contract section it serves.
+//! and versioned artifacts). Public types and fields doc-comment the
+//! expressiveness-corpus requirement ID (`CROSS-*`, `BTN-*`, `RNG-*`,
+//! `TXT-*`, `SHELL-*`) or contract section they serve.
 //!
 //! Hard boundary (`NEG-01`–`NEG-08`): this crate holds typed, serializable
 //! declarations only. No executable Rust is cross-compiled, no framework or

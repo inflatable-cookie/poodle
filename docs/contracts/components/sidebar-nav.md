@@ -1,7 +1,7 @@
 # SidebarNav
 
 Status: detailed contract
-Updated: 2026-09-27
+Updated: 2026-09-29
 
 ## 1. Purpose
 
@@ -58,7 +58,7 @@ Updated: 2026-09-27
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Semantic size intent |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
 | `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | Fires when a non-disabled item is activated; payload is the item `value` |
-| `onContextAction` | `((itemValue: string, actionValue: string) => void) \| undefined` | `undefined` | no | **Web targets only.** Fires when a built-in per-item context-menu row is activated. First argument is the nav item's `value`; second is the menu item's `value`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
+| `onContextAction` | `((itemValue: string, actionValue: string) => void) \| undefined` | `undefined` | no | **Web targets only.** Fires when a built-in per-item context-menu row is activated. First argument is the nav item's `value`; second is the menu item's `value`. Native admission pending (`lane:native-admission`) |
 
 ### Type: SidebarNavGroup
 
@@ -76,9 +76,9 @@ Updated: 2026-09-27
 | `label` | `string` | yes | Visible item label |
 | `href` | `string \| null` | no | When present, renders an anchor |
 | `disabled` | `boolean` | no | Disabled items render inertly |
-| `endLabel` | `string \| null` | no | Default `null`. **Web targets only.** Compact end-aligned metadata such as a count ("198" in "Videos 198"). Exposed as the item's accessible description, never its name. Put counts here, not in `label`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
-| `contextMenuItems` | `MenuItem[] \| null` | no | Default `null`. **Web targets only.** Same shape as ListCard's `contextMenuItems`. When non-empty, right-click or keyboard `ContextMenu`/`Shift+F10` on that item opens the shared ContextMenu. Unset, `null`, or empty leaves native item behaviour unchanged. Disabled items never open a menu. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
-| `contextMenuAriaLabel` | `string \| null` | no | Default `null`. **Web targets only.** Accessible name for that item's context-menu overlay. When unset, the overlay is labelled `{item.label} actions`. Native admission follows the next Nucleus evidence repin (plan lane `pinned-source-paths`) |
+| `endLabel` | `string \| null` | no | Default `null`. **Web targets only.** Compact end-aligned metadata such as a count ("198" in "Videos 198"). Exposed as the item's accessible description, never its name. Put counts here, not in `label`. Native admission pending (`lane:native-admission`) |
+| `contextMenuItems` | `MenuItem[] \| null` | no | Default `null`. **Web targets only.** Same shape as ListCard's `contextMenuItems`. When non-empty, right-click or keyboard `ContextMenu`/`Shift+F10` on that item opens the shared ContextMenu. Unset, `null`, or empty leaves native item behaviour unchanged. Disabled items never open a menu. Native admission pending (`lane:native-admission`) |
+| `contextMenuAriaLabel` | `string \| null` | no | Default `null`. **Web targets only.** Accessible name for that item's context-menu overlay. When unset, the overlay is labelled `{item.label} actions`. Native admission pending (`lane:native-admission`) |
 
 ### Slots
 
@@ -366,8 +366,8 @@ None.
 - Item activation calls `onValueChange` unless the item is disabled
 - Uses callback props instead of a dispatcher event surface
 - `endLabel` is web-admitted (Svelte and React). The portable Rust spec and
-  GPUI mapping land with the next Nucleus evidence repin (plan lane
-  `pinned-source-paths`), following the Text and Code `wrap` precedent
+  GPUI mapping remain native admission pending (`lane:native-admission`),
+  following the Text and Code `wrap` precedent
 - `contextMenuItems` / `contextMenuAriaLabel` are web-admitted item fields
   (Svelte and React) on the same terms. Invocation is on the item link or
   button; the overlay is ContextMenu with `trigger={false}`.
@@ -379,8 +379,8 @@ None.
 - Active indicator is a left border (not a pseudo-element); GPUI should use a border or equivalent edge element
 - Size/density scaling must match the custom property override tables
 - `SidebarNavItem.endLabel`, `contextMenuItems`, and `contextMenuAriaLabel`
-  are not yet carried by the portable spec; they are web-admitted until the
-  next Nucleus evidence repin
+  are not yet carried by the portable spec; they are web-admitted until
+  native admission (`lane:native-admission`)
 
 ## 10a. Jetstream Notes
 

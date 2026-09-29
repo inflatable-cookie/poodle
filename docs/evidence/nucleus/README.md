@@ -1,12 +1,18 @@
 # Nucleus Parity Evidence
 
-Status: active evidence
+Status: frozen history
+
+The original Nucleus application is archived. These receipts, the manifest,
+the V1 cohort bundle and the generated ledger stay as a closed record of that
+cohort. They still validate as schema-consistent artefacts. They do not pin
+current runtime source under `packages/gpui`, `packages/render` or
+`packages/contracts`. See [vision](../../knowledge/vision.md#direction).
 
 ## Boundary
 
-The fixed denominator is the 29 Poodle components rendered by Nucleus.
+The frozen denominator is the 29 Poodle components rendered by Nucleus.
 `IconProvider` is a mandatory construction prerequisite but not a rendered row.
-Poodle owns reusable component evidence; Nucleus owns application data,
+Poodle owns reusable component evidence; Nucleus owned application data,
 callbacks, journeys, and adoption; the lab and platform accessibility authority
 own V2 and A2.
 
@@ -21,9 +27,9 @@ own V2 and A2.
 | V1 | deterministic component comparison for Nucleus-used states | Poodle |
 | V2 | actual Nucleus or Nucleus-owned harness captured in the lab | lab + Nucleus |
 
-M1, A1, and V1 are complete 29/29. Each row needs
-M1+A1+A2+V1 before the switch packet; the composed target also needs M2+V2.
-Missing external evidence blocks the switch decision, not unrelated Poodle
+M1, A1, and V1 are complete 29/29 for this frozen cohort. Each row needed
+M1+A1+A2+V1 before a switch packet; the composed target also needed M2+V2.
+Missing external evidence blocked that switch decision, not unrelated Poodle
 work.
 
 The generated ledger also records the full 176-component active-cohort
@@ -34,11 +40,12 @@ completion for the other 146 portable components; see the
 
 ## Artifacts
 
-- `nucleus-parity-manifest.json` — fixed cohort and exact dependency identity.
+- `nucleus-parity-manifest.json` — frozen cohort and recorded dependency identity.
 - `nucleus-parity-receipt.schema.json` — closed M1/A1 receipt contract.
 - `nucleus-parity-receipts/` — validated M1 and A1 receipts.
 - `parity-evidence-ledger.md` — generated component evidence denominator.
 
-Generators and checks live in `scripts/nucleus-parity-receipts.ts` and
-`scripts/parity-evidence-ledger.ts`. A source import, test name, or route is not
-execution evidence; only validated receipts advance the ledger.
+Validators live in `scripts/nucleus-parity-receipts.ts` and
+`scripts/parity-evidence-ledger.ts`. They check schema and internal consistency.
+They must not rewrite these artefacts. A source import, test name, or route is
+not execution evidence; only the frozen validated receipts advance the ledger.
