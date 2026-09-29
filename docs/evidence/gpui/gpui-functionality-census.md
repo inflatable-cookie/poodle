@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `e85a780efbae353eae4bcf21e5360a1030716bcd`
+Evidence commit (execution identity from the execution record, not the checkout): `1a06aab18a07d46429211937e45716d24df3c364`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -17,7 +17,7 @@ Construction is not functional completion. A passing route, a test name, or one 
 Rows with at least one admitted capability: **74**/175.
 Fully admitted rows: **25**/175.
 Missing by axis: semantic 101; events 100; pointer 111; keyboard_focus 96; accessibility 122; visual 143.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **232**.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 
 ## Rows
 
@@ -164,7 +164,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **232**.
 | RelationPicker | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | SelectionSummary | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | SettingsShell | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); keyboard_focus (expected-test) | pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SettingsShell--settings-shell-navigates-and-refused-close-stays-open.json` |
-| SidebarNav | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-labels-render-muted-metadata-and-describe-the-item.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-foo-and-foo-end-label-values-keep-distinct-ids.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-vertical-tab-and-form-feed-values-encode-in-ids.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-item-context-menu-opens-by-pointer-and-keyboard-and-restores-focus.json` |
+| SidebarNav | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-labels-render-muted-metadata-and-describe-the-item.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-foo-and-foo-end-label-values-keep-distinct-ids.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-vertical-tab-and-form-feed-values-encode-in-ids.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-instance-scopes-keep-same-value-rows-distinct.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-wrapped-label-keeps-the-end-label-on-its-first-line.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-label-counts-paint-tabular.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-item-context-menu-opens-by-pointer-and-keyboard-and-restores-focus.json` |
 | Tree | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test) | accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Tree--tree-selection-expand-and-substrate-reorder-rebuild-the-host-spec.json` |
 | SplitView | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | pointer | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SplitView--two-composed-split-views-do-not-share-a-divider-focus-handle.json` |
 | MetricTile | semantic; events; pointer; accessibility; visual | — | semantic; events; pointer; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -390,6 +390,9 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **232**.
 - SidebarNav: Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no events claim; events stays missing.
 - SidebarNav: Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no pointer claim; pointer stays missing.
 - SidebarNav: Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no keyboard_focus claim; keyboard_focus stays missing.
+- SidebarNav: Expected test sidebar_nav_instance_scopes_keep_same_value_rows_distinct proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_wrapped_label_keeps_the_end_label_on_its_first_line proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_end_label_counts_paint_tabular proves no events claim; events stays missing.
 - Tree: Expected test tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.
 - Tree: Expected test tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec proves no visual claim; visual stays missing.
 - SplitView: Expected test two_composed_split_views_do_not_share_a_divider_focus_handle proves no pointer claim; pointer stays missing.

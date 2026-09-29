@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-09-29-poodle-060-all-whitespace-ids-expected",
-  "source_commit": "e85a780efbae353eae4bcf21e5360a1030716bcd",
+  "run_id": "2026-09-29-poodle-060-instance-baseline-tabular-expected",
+  "source_commit": "1a06aab18a07d46429211937e45716d24df3c364",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -280,7 +280,19 @@
     },
     "sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids": {
       "outcome": "passed",
-      "body_sha256": "47cb1edfd00e70f94bb98b78806b26c4e748235936d78ff58d2f34b510629aed"
+      "body_sha256": "974ce9fde9732734cbe63637cd02dc2093c2841ed91ec055c6f3ba39200174c6"
+    },
+    "sidebar_nav_instance_scopes_keep_same_value_rows_distinct": {
+      "outcome": "passed",
+      "body_sha256": "46aaaed62fdb06d2545598f31b127e6726dc409c349aab49b30ae8601f7f4eac"
+    },
+    "sidebar_nav_wrapped_label_keeps_the_end_label_on_its_first_line": {
+      "outcome": "passed",
+      "body_sha256": "b382b1400f1c802e53c2de349ae4038f62dbb117a6e664b747fb40ae3e18db27"
+    },
+    "sidebar_nav_end_label_counts_paint_tabular": {
+      "outcome": "passed",
+      "body_sha256": "754f50ca278eb8d4ef9b233b506d2b6a9b8d88eb95c0c6da3f9cf4df79e8f02f"
     }
   }
 }
