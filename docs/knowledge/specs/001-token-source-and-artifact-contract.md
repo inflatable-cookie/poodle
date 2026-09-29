@@ -1,7 +1,7 @@
 # 001 Token Source And Artifact Contract
 
 Status: active
-Updated: 2026-09-05
+Updated: 2026-09-30
 Depends on: `../architecture/002-token-system-and-package-layout.md`
 
 ## Purpose
@@ -102,10 +102,14 @@ definition across targets.
 
 ### Rust
 
-- `packages/tokens/artifacts/rust/mod.rs`
-- `packages/tokens/artifacts/rust/themes.rs`
-- `packages/tokens/artifacts/rust/density.rs`
-- `packages/tokens/artifacts/rust/metadata.rs`
+The Rust artifact family is emitted directly into the `poodle-tokens` crate so
+the crate builds from its own directory (vendoring and `cargo package` both
+work):
+
+- `packages/contracts/tokens/src/generated/mod.rs`
+- `packages/contracts/tokens/src/generated/themes.rs`
+- `packages/contracts/tokens/src/generated/density.rs`
+- `packages/contracts/tokens/src/generated/metadata.rs`
 
 ## Theme Translation Rule
 
