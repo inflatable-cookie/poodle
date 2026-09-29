@@ -47,16 +47,48 @@ pub struct SidebarNavHandlers {
     pub on_context_menu: Option<Arc<dyn Fn(&str, SidebarNavContextMenuOrigin) + Send + Sync>>,
 }
 
+/// Escapes a host value for use inside a generated element id.
+///
+/// `%` becomes `%25`, `~` becomes `%7E`, and whitespace becomes its `%XX`
+/// form; every other character passes through unchanged. The escape is
+/// injective, and its output never contains a raw `~` or whitespace — which
+/// is what keeps the item and end-label id namespaces disjoint for arbitrary
+/// values (see [`sidebar_nav_item_end_label_id`]) and keeps `described_by`
+/// (a space-separated id list) well-formed.
+fn escape_id_fragment(value: &str) -> String {
+    let mut escaped = String::with_capacity(value.len());
+    for character in value.chars() {
+        match character {
+            '%' => escaped.push_str("%25"),
+            '~' => escaped.push_str("%7E"),
+            ' ' => escaped.push_str("%20"),
+            '\t' => escaped.push_str("%09"),
+            '\n' => escaped.push_str("%0A"),
+            '\r' => escaped.push_str("%0D"),
+            other => escaped.push(other),
+        }
+    }
+    escaped
+}
+
 /// The element id of one sidebar item: stable across frames (the backend's
 /// click pipeline needs it to survive from mouse-down to mouse-up) and the
-/// focus-return destination after the item's context menu closes.
+/// focus-return destination after the item's context menu closes. The value
+/// is escaped (see [`escape_id_fragment`]), so the id never contains a raw
+/// `~` or whitespace and stays distinct from every end-label id.
 pub fn sidebar_nav_item_id(value: &str) -> String {
-    format!("sidebar-nav-{value}")
+    format!("sidebar-nav-{}", escape_id_fragment(value))
 }
 
 /// The element id of one sidebar item's end-label text.
+///
+/// Collision-safe for arbitrary item values: the value is escaped, so it can
+/// never supply the separating `~`, and item ids (which never contain a raw
+/// `~`) cannot mirror this form. `foo` and a second item valued
+/// `foo-end-label` therefore stay three distinct ids — there is no suffix an
+/// end-label id can share with an item id.
 pub fn sidebar_nav_item_end_label_id(value: &str) -> String {
-    format!("sidebar-nav-{value}-end-label")
+    format!("sidebar-nav-{}~end-label", escape_id_fragment(value))
 }
 
 /// `on_change` fires with the value of the item that was chosen.
@@ -449,11 +481,11 @@ mod tests {
         assert_eq!(item.a11y.role, Some(NodeRole::Button));
         assert_eq!(
             item.a11y.described_by.as_deref(),
-            Some("sidebar-nav-videos-end-label"),
+            Some("sidebar-nav-videos~end-label"),
             "the end label is the item's description, never its name"
         );
 
-        let end = find(&node, "sidebar-nav-videos-end-label").expect("end label");
+        let end = find(&node, "sidebar-nav-videos~end-label").expect("end label");
         assert!(matches!(&end.kind, poodle_node::NodeKind::Text { content } if content == "198"));
         assert_eq!(
             end.style.descriptor.text_color,
@@ -475,8 +507,69 @@ mod tests {
 
         let item = find(&node, "sidebar-nav-notes").expect("item");
         assert!(item.a11y.described_by.is_none());
-        assert!(find(&node, "sidebar-nav-notes-end-label").is_none());
+        assert!(find(&node, "sidebar-nav-notes~end-label").is_none());
         assert!(matches!(&item.kind, poodle_node::NodeKind::Button { label } if label == "Notes"));
+    }
+
+    #[test]
+    fn adversarial_values_keep_item_and_end_label_ids_distinct() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        // `foo-end-label` is exactly the suffix the end-label id used to be
+        // spelled with; both items carry end labels so every id exists.
+        let spec = spec_with(vec![
+            Item::new("foo", "Foo").with_end_label("198"),
+            Item::new("foo-end-label", "Foo end label").with_end_label("7"),
+        ]);
+        let node = sidebar_nav(&spec, &ctx, None);
+
+        // Every element id in the tree is unique.
+        let mut ids: Vec<&str> = Vec::new();
+        fn collect<'a>(node: &'a Node, ids: &mut Vec<&'a str>) {
+            if let Some(id) = node.id.as_deref() {
+                ids.push(id);
+            }
+            for child in &node.children {
+                collect(child, ids);
+            }
+        }
+        collect(&node, &mut ids);
+        let unique = ids.iter().collect::<std::collections::HashSet<_>>();
+        assert_eq!(unique.len(), ids.len(), "duplicate element ids: {ids:?}");
+
+        // The three ids the adversarial pair produces are exactly the
+        // intended ones — the end label of `foo` cannot double as the item
+        // `foo-end-label`.
+        assert_eq!(sidebar_nav_item_id("foo"), "sidebar-nav-foo");
+        assert_eq!(
+            sidebar_nav_item_end_label_id("foo"),
+            "sidebar-nav-foo~end-label"
+        );
+        assert_eq!(
+            sidebar_nav_item_id("foo-end-label"),
+            "sidebar-nav-foo-end-label"
+        );
+        assert_ne!(
+            sidebar_nav_item_id("foo-end-label"),
+            sidebar_nav_item_end_label_id("foo")
+        );
+        assert!(find(&node, "sidebar-nav-foo~end-label").is_some());
+        let foo_end_label_item =
+            find(&node, "sidebar-nav-foo-end-label").expect("item foo-end-label");
+        assert_eq!(
+            foo_end_label_item.a11y.described_by.as_deref(),
+            Some("sidebar-nav-foo-end-label~end-label")
+        );
+
+        // Values with the reserved characters stay distinct too: escaping is
+        // injective and never emits a raw `~`, so no crafted value can cross
+        // the namespaces.
+        assert_eq!(escape_id_fragment("a%b"), "a%25b");
+        assert_eq!(escape_id_fragment("a~b"), "a%7Eb");
+        assert_eq!(escape_id_fragment("a b"), "a%20b");
+        assert_ne!(escape_id_fragment("a%7Eb"), escape_id_fragment("a~b"));
+        assert!(!escape_id_fragment("a~b %c").contains('~'));
+        assert!(!escape_id_fragment("a~b %c").contains(' '));
     }
 
     #[test]

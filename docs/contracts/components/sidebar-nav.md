@@ -382,6 +382,11 @@ None.
   label at the contract's 0.85× item size in muted tertiary. The item's
   accessible name is the explicit `label`; the end label's generated id is
   the item's `described_by`, the native carrier of `aria-describedby`
+- Generated native ids are collision-safe for arbitrary item values: values
+  are escaped into ids (`%` → `%25`, `~` → `%7E`, whitespace → `%XX`), the
+  item is `sidebar-nav-{value}` (never containing a raw `~`), and the end
+  label is `sidebar-nav-{value}~end-label` — the namespaces are disjoint, so
+  an item valued `foo-end-label` cannot collide with `foo`'s end label
 - Per-item context menus follow the Tree host pattern: items carrying rows
   raise `on_context_menu(value, origin)` on secondary click and on the
   keyboard menu gestures (`NodeKey::ContextMenu`, or `NodeKey::F10` with

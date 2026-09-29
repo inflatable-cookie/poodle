@@ -36115,11 +36115,11 @@ fn sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item() {
         assert_eq!(videos.a11y.label.as_deref(), Some("Videos"));
         assert_eq!(
             videos.a11y.described_by.as_deref(),
-            Some("sidebar-nav-videos-end-label"),
+            Some("sidebar-nav-videos~end-label"),
             "the end label is the item's description, never part of its name"
         );
         let end = node
-            .find(&|n| n.id.as_deref() == Some("sidebar-nav-videos-end-label"))
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-videos~end-label"))
             .expect("end label text");
         assert!(matches!(&end.kind, poodle_node::NodeKind::Text { content } if content == "198"));
         assert_eq!(
@@ -36135,7 +36135,7 @@ fn sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item() {
             "the end label renders at the contract's 0.85× item size"
         );
         assert!(
-            node.find(&|n| n.id.as_deref() == Some("sidebar-nav-notes-end-label"))
+            node.find(&|n| n.id.as_deref() == Some("sidebar-nav-notes~end-label"))
                 .is_none(),
             "an item without an end label renders no end-label element or description"
         );
@@ -36155,7 +36155,7 @@ fn sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item() {
         assert_eq!(videos.label.as_deref(), Some("Videos"));
         assert_eq!(
             videos.described_by.as_deref(),
-            Some("sidebar-nav-videos-end-label")
+            Some("sidebar-nav-videos~end-label")
         );
         assert_eq!(videos.text_content, vec!["Videos", "198"]);
         let notes = mounted
@@ -36183,7 +36183,7 @@ fn sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item() {
             wrapped.size.height > min_height,
             "a long title wraps and grows the row past its minimum height"
         );
-        let end_bounds = bounds_for("sidebar-nav-long-end-label").expect("long end-label bounds");
+        let end_bounds = bounds_for("sidebar-nav-long~end-label").expect("long end-label bounds");
         let item_pad = px(poodle_render::presentation::rem_to_px(
             spec.item_pad_inline_rem(ControlDensity::Default),
         ));
@@ -36206,6 +36206,74 @@ fn sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item() {
             .expect("mounted disabled item");
         assert_eq!(disabled.text_content, vec!["Images", "7"]);
         assert!(disabled.disabled);
+    });
+}
+
+/// Adversarial item values: `foo-end-label` is spelled exactly like the old
+/// end-label suffix, so the mounted nav must keep every element id unique
+/// and each item's description pointing at its own end label.
+#[test]
+fn sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids() {
+    use poodle_gpui_node_backend::bounds_for;
+    use poodle_specs::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
+
+    run_headless(|cx| {
+        let spec = SidebarNavSpec::new(vec![SidebarNavGroup::new(
+            "adversarial",
+            vec![
+                SidebarNavItem::new("foo", "Foo").with_end_label("198"),
+                SidebarNavItem::new("foo-end-label", "Foo end label").with_end_label("7"),
+            ],
+        )
+        .with_label("Adversarial values")])
+        .with_aria_label("Adversarial navigation");
+        let node = poodle_render::sidebar_nav(&spec, &RenderContext::new(&theme()), None);
+
+        // The three intended ids all exist and are distinct: the item
+        // `foo`, its end label, and the item literally valued
+        // `foo-end-label` (whose end label carries the value-escaped `~`).
+        assert!(node.find(&|n| n.id.as_deref() == Some("sidebar-nav-foo")).is_some());
+        let foo_end = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-foo~end-label"))
+            .expect("foo's end label uses the collision-safe `~` namespace");
+        assert!(matches!(&foo_end.kind, poodle_node::NodeKind::Text { content } if content == "198"));
+        let foo_end_label_item = node
+            .find(&|n| n.id.as_deref() == Some("sidebar-nav-foo-end-label"))
+            .expect("the item valued foo-end-label keeps its own id");
+        assert_eq!(
+            foo_end_label_item.a11y.described_by.as_deref(),
+            Some("sidebar-nav-foo-end-label~end-label"),
+            "the adversarial item describes its own end label, not foo's"
+        );
+
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, node, 260.0, 140.0);
+        driver.wait_for_focus_handle("sidebar-nav-foo");
+
+        // Mounted: every painted element id is unique, and both end labels
+        // resolve to their own painted geometry.
+        let mounted = driver.accessibility_nodes();
+        let mut ids: Vec<&str> = mounted.iter().map(|n| n.element_id.as_str()).collect();
+        ids.sort_unstable();
+        let unique = ids.iter().cloned().collect::<std::collections::HashSet<_>>();
+        assert_eq!(unique.len(), ids.len(), "duplicate mounted element ids: {ids:?}");
+        assert!(bounds_for("sidebar-nav-foo~end-label").is_some());
+        assert!(bounds_for("sidebar-nav-foo-end-label~end-label").is_some());
+
+        let foo = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-foo")
+            .expect("mounted foo item");
+        assert_eq!(foo.described_by.as_deref(), Some("sidebar-nav-foo~end-label"));
+        let adversarial = mounted
+            .iter()
+            .find(|n| n.element_id == "sidebar-nav-foo-end-label")
+            .expect("mounted adversarial item");
+        assert_eq!(
+            adversarial.described_by.as_deref(),
+            Some("sidebar-nav-foo-end-label~end-label")
+        );
+        assert_eq!(adversarial.text_content, vec!["Foo end label", "7"]);
     });
 }
 
