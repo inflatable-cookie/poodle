@@ -12,7 +12,7 @@ use std::path::Path;
 
 use crate::emit::GeneratedFile;
 use crate::error::{CodegenError, Result};
-use crate::orphan::{is_protected_sibling, list_top_level_files};
+use crate::orphan::{is_protected_path, list_top_level_files};
 
 /// Materializes the generated files under `output_root`, mirroring the
 /// icons script's write mode: stale orphans are deleted, every expected
@@ -23,21 +23,22 @@ use crate::orphan::{is_protected_sibling, list_top_level_files};
 /// so a recursive sweep would delete a sibling target's artifact). Write
 /// mode and check mode agree on what "stale" means.
 ///
-/// Exclusive ownership (the default): every top-level file not in
-/// `files` is an orphan. Shared roots pass [`write_outputs_protecting`]
-/// with the sibling target's extension so those artifacts survive and
-/// unclaimed garbage is still removed.
+/// Exclusive ownership (the default, and every production `--out`): every
+/// top-level file not in `files` is an orphan. Two targets that actually
+/// share one directory pass [`write_outputs_protecting`] with the sibling's
+/// exact relative paths so those artifacts survive and unclaimed garbage
+/// is still removed.
 pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> {
     write_outputs_protecting(output_root, files, &[])
 }
 
-/// [`write_outputs`] for a target that shares its output root. Files whose
-/// extension is in `sibling_extensions` are left in place; everything else
-/// not in `files` is still deleted.
+/// [`write_outputs`] when two targets share one concrete directory.
+/// `protected` is exact relative paths the sibling currently emits, not
+/// an extension glob.
 pub fn write_outputs_protecting(
     output_root: &Path,
     files: &[GeneratedFile],
-    sibling_extensions: &[&str],
+    protected: &[&str],
 ) -> Result<()> {
     let expected: std::collections::BTreeSet<&str> =
         files.iter().map(|file| file.path.as_str()).collect();
@@ -56,7 +57,7 @@ pub fn write_outputs_protecting(
             if expected.contains(relative.as_str()) {
                 continue;
             }
-            if is_protected_sibling(&relative, sibling_extensions) {
+            if is_protected_path(&relative, protected) {
                 continue;
             }
             fs::remove_file(&path).map_err(|error| CodegenError::Write {

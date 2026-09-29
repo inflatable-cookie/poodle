@@ -3,16 +3,17 @@
 //! Structural property: this module contains no filesystem write call. It
 //! reads committed files, compares byte-exact, classifies whitespace-only
 //! differences, and scans the output root's top level for stale orphans —
-//! then reports everything at once. Shared-root targets pass sibling
-//! extensions so a neighbour's artifacts are not stale; unclaimed files
-//! still are. The write path lives in [`crate::write`]
+//! then reports everything at once. Two targets that actually share one
+//! directory pass exact sibling paths so a neighbour's artifacts are not
+//! stale; unclaimed files still are. Production per-platform roots stay
+//! exclusive. The write path lives in [`crate::write`]
 //! and is only reachable from write mode; the two can never be confused.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::emit::GeneratedFile;
-use crate::orphan::{is_protected_sibling, list_top_level_files};
+use crate::orphan::{is_protected_path, list_top_level_files};
 
 /// Why a committed file disagrees with the emitter.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -89,13 +90,13 @@ pub fn check_outputs(output_root: &Path, files: &[GeneratedFile]) -> crate::Resu
     check_outputs_protecting(output_root, files, &[])
 }
 
-/// [`check_outputs`] for a target that shares its output root. Sibling
-/// artifacts (matching `sibling_extensions`) are not stale; unclaimed
-/// files still are.
+/// [`check_outputs`] when two targets share one concrete directory.
+/// `protected` is exact relative paths the sibling currently emits, not
+/// an extension glob.
 pub fn check_outputs_protecting(
     output_root: &Path,
     files: &[GeneratedFile],
-    sibling_extensions: &[&str],
+    protected: &[&str],
 ) -> crate::Result<CheckReport> {
     let mut report = CheckReport::default();
 
@@ -148,7 +149,7 @@ pub fn check_outputs_protecting(
         if expected.contains(relative.as_str()) {
             continue;
         }
-        if is_protected_sibling(&relative, sibling_extensions) {
+        if is_protected_path(&relative, protected) {
             continue;
         }
         report.stale.push(relative.into());

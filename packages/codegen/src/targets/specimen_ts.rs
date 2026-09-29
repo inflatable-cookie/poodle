@@ -38,10 +38,6 @@ impl EmitTarget for SpecimenTsTarget {
         "generated/specimens"
     }
 
-    fn sibling_extensions(&self) -> &'static [&'static str] {
-        &["rs"]
-    }
-
     fn render(&self, model: &IrModel, source_path: &str) -> Result<Vec<GeneratedFile>> {
         Ok(render_scenes(model, source_path))
     }

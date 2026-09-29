@@ -10,7 +10,7 @@
 //! `--check` regenerates in memory and byte-compares against the committed
 //! files under `--out`, failing on drift without writing (ruling R3). The
 //! check branch is structurally incapable of writing: it calls
-//! [`poodle_codegen::check_outputs_protecting`], which contains no write call, and the
+//! [`poodle_codegen::check_outputs`], which contains no write call, and the
 //! write path lives in a separate function the check branch never reaches.
 //! `--target` restricts emission to one target (e.g. the scene-scoped
 //! `shell-scene`, which renders into the consuming web packages and is not
@@ -31,8 +31,8 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    catalogue, check_outputs_protecting, generate, load_and_validate, machine_interfaces, models,
-    targets, write_outputs_protecting, CodegenError,
+    catalogue, check_outputs, generate, load_and_validate, machine_interfaces, models, targets,
+    write_outputs, CodegenError,
 };
 
 fn usage() -> String {
@@ -290,16 +290,14 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
         .target
         .as_deref()
         .expect("parse requires --target in machine-interface mode");
-    let (files, output_root, sibling_extensions) = match target_id {
+    let (files, output_root) = match target_id {
         targets::machine_ts::ID => (
             targets::machine_ts::render(&document, &source_path),
             targets::machine_ts::OUTPUT_ROOT,
-            targets::machine_ts::SIBLING_EXTENSIONS,
         ),
         targets::machine_rust::ID => (
             targets::machine_rust::render(&document, &source_path),
             targets::machine_rust::OUTPUT_ROOT,
-            targets::machine_rust::SIBLING_EXTENSIONS,
         ),
         other => {
             return Err(CodegenError::UnknownTarget {
@@ -315,7 +313,7 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
     let root = out.join(output_root);
 
     if args.check {
-        let report = check_outputs_protecting(&root, &files, sibling_extensions)?;
+        let report = check_outputs(&root, &files)?;
         if !report.is_clean() {
             return Err(CodegenError::Gate {
                 message: format!(
@@ -331,7 +329,7 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
             document.schema_version
         );
     } else {
-        write_outputs_protecting(&root, &files, sibling_extensions)?;
+        write_outputs(&root, &files)?;
         println!(
             "Generated {} files (target: {target_id}, machine interface schema {}).",
             files.len(),
@@ -348,16 +346,14 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
         .target
         .as_deref()
         .expect("parse requires --target in catalogue mode");
-    let (files, output_root, sibling_extensions) = match target_id {
+    let (files, output_root) = match target_id {
         targets::catalogue_ts::ID => (
             targets::catalogue_ts::render(&document, &source_path),
             targets::catalogue_ts::OUTPUT_ROOT,
-            targets::catalogue_ts::SIBLING_EXTENSIONS,
         ),
         targets::catalogue_rust::ID => (
             targets::catalogue_rust::render(&document, &source_path),
             targets::catalogue_rust::OUTPUT_ROOT,
-            targets::catalogue_rust::SIBLING_EXTENSIONS,
         ),
         other => {
             return Err(CodegenError::UnknownTarget {
@@ -373,7 +369,7 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
     let root = out.join(output_root);
 
     if args.check {
-        let report = check_outputs_protecting(&root, &files, sibling_extensions)?;
+        let report = check_outputs(&root, &files)?;
         if !report.is_clean() {
             return Err(CodegenError::Gate {
                 message: format!(
@@ -389,7 +385,7 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
             document.schema_version
         );
     } else {
-        write_outputs_protecting(&root, &files, sibling_extensions)?;
+        write_outputs(&root, &files)?;
         println!(
             "Generated {} files (target: {target_id}, catalogue schema {}).",
             files.len(),
@@ -491,36 +487,15 @@ fn run_emit(fixture: &Path, args: &Args) -> Result<(), CodegenError> {
     };
     let out = args.out.as_ref().expect("emit mode always carries --out");
 
-    {
-        use std::collections::BTreeMap;
-        let mut by_root: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
-        for target in &selected {
-            by_root
-                .entry(target.output_root())
-                .or_default()
-                .push(target.id());
-        }
-        for (root, ids) in by_root {
-            if ids.len() < 2 {
-                continue;
-            }
-            let unprotected: Vec<&str> = selected
-                .iter()
-                .filter(|target| {
-                    target.output_root() == root && target.sibling_extensions().is_empty()
-                })
-                .map(|target| target.id())
-                .collect();
-            if !unprotected.is_empty() {
-                return Err(CodegenError::Gate {
-                    message: format!(
-                        "targets {} share output root '{root}' without sibling_extensions; \
-                         a shared root must declare sibling protection so each target sweeps only files it owns",
-                        unprotected.join(", ")
-                    ),
-                });
-            }
-        }
+    for (root, ids) in poodle_codegen::colliding_output_roots(selected.iter().copied()) {
+        return Err(CodegenError::Gate {
+            message: format!(
+                "targets {} share output root '{root}'; each selected target \
+                 must own a distinct directory so its exclusive orphan sweep \
+                 cannot delete a sibling's artifacts",
+                ids.join(", ")
+            ),
+        });
     }
 
     let mut any_written = false;
@@ -529,10 +504,9 @@ fn run_emit(fixture: &Path, args: &Args) -> Result<(), CodegenError> {
         let source_path = fixture_source_path(fixture);
         let files = generate(&model, &source_path, target)?;
         let root = out.join(target.output_root());
-        let sibling_extensions = target.sibling_extensions();
 
         if args.check {
-            let report = check_outputs_protecting(&root, &files, sibling_extensions)?;
+            let report = check_outputs(&root, &files)?;
             if !report.is_clean() {
                 return Err(CodegenError::Gate {
                     message: format!(
@@ -550,7 +524,7 @@ fn run_emit(fixture: &Path, args: &Args) -> Result<(), CodegenError> {
                 poodle_ir::IR_SCHEMA_VERSION
             );
         } else {
-            write_outputs_protecting(&root, &files, sibling_extensions)?;
+            write_outputs(&root, &files)?;
             any_written = true;
             println!(
                 "Generated {} files (target: {}, IR schema {}).",

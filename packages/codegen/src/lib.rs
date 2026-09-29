@@ -16,8 +16,9 @@
 //! - [`check`] — read-only drift gate: byte-exact comparison, whitespace-only
 //!   classification, and stale-orphan detection. Structurally incapable of
 //!   writing.
-//! - [`orphan`] — top-level scan and sibling-extension protection so two
-//!   targets that share an output root do not delete each other's artifacts.
+//! - [`orphan`] — top-level scan and exact-path sibling protection so two
+//!   targets that share one concrete directory do not delete each other's
+//!   artifacts. Production per-platform roots stay exclusive.
 //! - [`write`] — write mode: materializes [`GeneratedFile`]s and deletes
 //!   stale orphans.
 //! - [`model`] — load and validate a serialized `IrModel`.
@@ -48,7 +49,10 @@ pub mod targets;
 pub mod write;
 
 pub use check::{check_outputs, check_outputs_protecting, CheckReport, DriftKind};
-pub use emit::{catalogue_header, generate, header, machine_header, EmitTarget, GeneratedFile};
+pub use emit::{
+    catalogue_header, colliding_output_roots, generate, header, machine_header, EmitTarget,
+    GeneratedFile,
+};
 pub use error::{CodegenError, Result};
 pub use model::load_and_validate;
 pub use write::{write_outputs, write_outputs_protecting};

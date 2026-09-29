@@ -41,10 +41,13 @@ cargo run --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- \
   Gates compose only `*:check` selectors; `ir:build` is never part of a gate.
   `effigy ci:rust` runs `ir:check` and `catalogue:check` so a `GENERATOR_VERSION`
   restamp fails the board Queue runs, not only the optional selectors.
-- Two targets may share one output root (catalogue TS/Rust, shell TS/Rust).
-  Each sweep deletes files it owns and unclaimed garbage, and leaves the
-  sibling's artifacts in place. Unprotected exclusive sweeps of a shared
-  root are a configuration error.
+- Production `--out` directories are exclusive: each selected target owns
+  a distinct subdirectory, and its orphan sweep deletes every top-level
+  file it did not emit (a stray `.rs` in a TypeScript catalogue root is
+  stale). Selecting two targets that share an `output_root` string in one
+  run is a configuration error. The protecting write/check helpers exist
+  for tests that plant two targets in one directory; they keep exact
+  sibling paths, not an extension glob.
 - The remaining targets (JSON schema, registry, conformance vectors, docs
   fragments) are a follow-up card; the machinery here is target-independent.
 

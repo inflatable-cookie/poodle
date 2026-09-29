@@ -46,18 +46,30 @@ pub trait EmitTarget {
     /// `ts`. Check mode scans exactly this root for stale orphans.
     fn output_root(&self) -> &'static str;
 
-    /// File extensions belonging to a sibling target that shares this
-    /// output root (for example `"rs"` when this target emits `.ts`).
-    /// Those artifacts are not this target's orphans. Empty means
-    /// exclusive ownership of the root's top-level files.
-    fn sibling_extensions(&self) -> &'static [&'static str] {
-        &[]
-    }
-
     /// Renders the model into files. Pure: no I/O, no environment access.
     /// `source_path` is the repo-relative authored source path carried into
     /// the header (`IR-07`).
     fn render(&self, model: &IrModel, source_path: &str) -> Result<Vec<GeneratedFile>>;
+}
+
+/// Colliding `output_root` groups among `targets`. Production CLI refuses
+/// these so an exclusive orphan sweep cannot delete a sibling's artifacts.
+pub fn colliding_output_roots<'a, I>(targets: I) -> Vec<(&'static str, Vec<&'static str>)>
+where
+    I: IntoIterator<Item = &'a dyn EmitTarget>,
+{
+    use std::collections::BTreeMap;
+    let mut by_root: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+    for target in targets {
+        by_root
+            .entry(target.output_root())
+            .or_default()
+            .push(target.id());
+    }
+    by_root
+        .into_iter()
+        .filter(|(_, ids)| ids.len() >= 2)
+        .collect()
 }
 
 /// The generated header (`IR-07`): authored source path, IR schema version,

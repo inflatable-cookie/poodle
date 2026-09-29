@@ -13,9 +13,6 @@ pub const ID: &str = "catalogue-ts";
 /// Output root relative to `--out` (the consuming package's `src/`).
 pub const OUTPUT_ROOT: &str = "generated/catalogue";
 
-/// Rust sibling writes `.rs` into the same root; those files are not orphans.
-pub const SIBLING_EXTENSIONS: &[&str] = &["rs"];
-
 /// Renders the canonical TypeScript catalogue module.
 pub fn render(document: &Document, source_path: &str) -> Vec<GeneratedFile> {
     vec![GeneratedFile::new(
