@@ -1,30 +1,25 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Stepper",
-  "test": "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring",
+  "component": "SidebarNav",
+  "test": "sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
-    "semantic",
-    "keyboard_focus"
+    "semantic"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
-    ],
-    "keyboard_focus": [
-      "dispatch_key",
-      "keyboard_"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::stepper",
+    "renderer": "poodle_render::sidebar_nav",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -37,11 +32,10 @@
     "command": "effigy regressions:native",
     "run_id": "2026-09-29-poodle-060-instance-baseline-tabular-expected",
     "outcome": "passed",
-    "body_sha256": "0ad74cd9b88f6082c557ab6cde35741f44a63bc5380eb462a3f6335005690878"
+    "body_sha256": "974ce9fde9732734cbe63637cd02dc2093c2841ed91ec055c6f3ba39200174c6"
   },
   "observed": [
-    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "drove real keyboard input or backend focus through the mounted tree"
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning"
   ],
   "outcome": "passed"
 }

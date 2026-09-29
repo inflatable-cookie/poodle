@@ -1130,6 +1130,11 @@ fn node_key(key: &str) -> Option<NodeKey> {
         "pagedown" => NodeKey::PageDown,
         "space" => NodeKey::Space,
         "f2" => NodeKey::F2,
+        "f10" => NodeKey::F10,
+        // The physical context-menu key, as gpui names it. Shift+F10 arrives
+        // as `f10` plus the shift modifier; both menu gestures reach the
+        // component through `Interaction::on_key`.
+        "menu" => NodeKey::ContextMenu,
         "delete" => NodeKey::Delete,
         _ => return None,
     })

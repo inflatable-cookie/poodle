@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `a797ce413d378795a8698d6782b003560878315a`
+Evidence commit (execution identity from the execution record, not the checkout): `1a06aab18a07d46429211937e45716d24df3c364`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **73**/175.
-Fully admitted rows: **24**/175.
-Missing by axis: semantic 102; events 101; pointer 112; keyboard_focus 97; accessibility 123; visual 144.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **224**.
+Rows with at least one admitted capability: **74**/175.
+Fully admitted rows: **25**/175.
+Missing by axis: semantic 101; events 100; pointer 111; keyboard_focus 96; accessibility 122; visual 143.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 
 ## Rows
 
@@ -164,7 +164,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **224**.
 | RelationPicker | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | SelectionSummary | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | SettingsShell | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); keyboard_focus (expected-test) | pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SettingsShell--settings-shell-navigates-and-refused-close-stays-open.json` |
-| SidebarNav | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| SidebarNav | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-labels-render-muted-metadata-and-describe-the-item.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-foo-and-foo-end-label-values-keep-distinct-ids.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-vertical-tab-and-form-feed-values-encode-in-ids.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-instance-scopes-keep-same-value-rows-distinct.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-wrapped-label-keeps-the-end-label-on-its-first-line.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-label-counts-paint-tabular.json`; `docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-item-context-menu-opens-by-pointer-and-keyboard-and-restores-focus.json` |
 | Tree | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test) | accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Tree--tree-selection-expand-and-substrate-reorder-rebuild-the-host-spec.json` |
 | SplitView | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | pointer | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/SplitView--two-composed-split-views-do-not-share-a-divider-focus-handle.json` |
 | MetricTile | semantic; events; pointer; accessibility; visual | — | semantic; events; pointer; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -381,7 +381,18 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **224**.
 - SettingsShell: Expected test settings_shell_navigates_and_refused_close_stays_open proves no pointer claim; pointer stays missing.
 - SettingsShell: Expected test settings_shell_navigates_and_refused_close_stays_open proves no accessibility claim; accessibility stays missing.
 - SettingsShell: Expected test settings_shell_navigates_and_refused_close_stays_open proves no visual claim; visual stays missing.
-- SidebarNav: No validated receipt and no retained expected test for SidebarNav; every required capability stays missing.
+- SidebarNav: Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no pointer claim; pointer stays missing.
+- SidebarNav: Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no keyboard_focus claim; keyboard_focus stays missing.
+- SidebarNav: Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no pointer claim; pointer stays missing.
+- SidebarNav: Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no keyboard_focus claim; keyboard_focus stays missing.
+- SidebarNav: Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no pointer claim; pointer stays missing.
+- SidebarNav: Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no keyboard_focus claim; keyboard_focus stays missing.
+- SidebarNav: Expected test sidebar_nav_instance_scopes_keep_same_value_rows_distinct proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_wrapped_label_keeps_the_end_label_on_its_first_line proves no events claim; events stays missing.
+- SidebarNav: Expected test sidebar_nav_end_label_counts_paint_tabular proves no events claim; events stays missing.
 - Tree: Expected test tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.
 - Tree: Expected test tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec proves no visual claim; visual stays missing.
 - SplitView: Expected test two_composed_split_views_do_not_share_a_divider_focus_handle proves no pointer claim; pointer stays missing.
@@ -432,7 +443,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **224**.
 
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
-- overlay-dismissal: 45 components (AgentPlanRecord, AlertDialog, Breadcrumbs, ColorPicker, ContextMenu, DataTable, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, DebugDialog, Drawer, Field, FilterBuilder, FilterToolbar, FormDialog, HistoryCenter, HoverCard, ListCardCounter, MediaBrowsePanel, MediaPicker, MediaThumbnail, Menubar, ModelConnectionSetup, NavigationMenu, OrderBy, PageLoading, PickerShell, RangeSlider, RefSelect, RelationPicker, RemediationBanner, ResizeHandle, SettingsShell, SidebarNav, Slider, SplitButton, ThemeSelect, ToastStack, Toolbar, Tree, UpdateCenter, UpdateStatus, VideoPlayer); missing semantic 33; events 37; pointer 41; keyboard_focus 35; accessibility 40; visual 43
+- overlay-dismissal: 44 components (AgentPlanRecord, AlertDialog, Breadcrumbs, ColorPicker, ContextMenu, DataTable, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, DebugDialog, Drawer, Field, FilterBuilder, FilterToolbar, FormDialog, HistoryCenter, HoverCard, ListCardCounter, MediaBrowsePanel, MediaPicker, MediaThumbnail, Menubar, ModelConnectionSetup, NavigationMenu, OrderBy, PageLoading, PickerShell, RangeSlider, RefSelect, RelationPicker, RemediationBanner, ResizeHandle, SettingsShell, Slider, SplitButton, ThemeSelect, ToastStack, Toolbar, Tree, UpdateCenter, UpdateStatus, VideoPlayer); missing semantic 32; events 36; pointer 40; keyboard_focus 34; accessibility 39; visual 42
 - selection-navigation: 24 components (Accordion, AudioPlayer, BulkActionBar, Button, ChangedFiles, Checkbox, CodeInput, CollapseToggle, DurationInput, ListContainer, LogList, ModelConnectionPicker, NavCard, Pagination, PaginationSummary, Pill, Radio, SelectionSummary, Table, TimeInput, TimeZoneSelect, ToggleGroup, ToolCallGroup, TriStateSwitch); missing semantic 10; events 14; pointer 15; keyboard_focus 10; accessibility 18; visual 23
 - feedback-status: 21 components (ActionDiscoveryPanel, AgentSubagent, AgentTranscript, Avatar, DetailSectionGroup, DetailShell, EmbedPreview, EmptyState, ErrorBoundary, InlineListSection, LicenceSeats, MetaBar, MetaItem, Meter, PageHeader, PasswordRequirements, Progress, Region, Spinner, StatusBar, ToolCall); missing semantic 16; events 16; pointer 16; keyboard_focus 12; accessibility 19; visual 20
 - drag-resize-reorder: 15 components (AppHeader, BlockEditor, Card, CardRadioGroup, CardToggleGroup, DockRegion, DragNumberField, EditableList, FileUpload, ListCard, MarkdownEditor, ModelCatalogueEditor, Separator, SplitView, TokenInput); missing semantic 8; events 7; pointer 10; keyboard_focus 9; accessibility 10; visual 13
