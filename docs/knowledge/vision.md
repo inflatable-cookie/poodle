@@ -83,8 +83,12 @@ Renderer-specific input, lifecycle, and drawing remain in the backend.
 - **GPUI parity is the goal.** Operator ruling 2026-09-02: missing parity is
   what blocks committing applications to GPUI, and real parity lets many
   applications switch. Do not recommend slowing native work. The first parity
-  application is Nucleus; its fixed component cohort and receipts live in
-  [`docs/evidence/nucleus/`](../evidence/nucleus/README.md).
+  application was Nucleus; its fixed component cohort and receipts live in
+  [`docs/evidence/nucleus/`](../evidence/nucleus/README.md). Operator note
+  2026-09-29: that Nucleus has been archived and is being rebuilt from
+  scratch, with no Poodle in it yet. The receipts are evidence for a
+  consumer that no longer exists; what that means for their source pin is
+  [Q-002](questions.md#q-002--does-the-nucleus-receipt-pin-still-bind).
 - **Svelte is the parity authority.** When runtimes disagree, the others are
   brought up to Svelte; see
   [working rules](contracts/working-rules.md#runtime-parity-authority).
