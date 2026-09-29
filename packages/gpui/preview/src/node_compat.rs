@@ -9,7 +9,7 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use gpui::{
-    canvas, div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, ParentElement, Rgba,
+    div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, ParentElement, Rgba,
     StatefulInteractiveElement, Styled, Window,
 };
 use poodle_adapter::ThemeProvider;
@@ -6856,7 +6856,7 @@ impl IntoElement for AlertDialog {
             self.spec.item_label.is_some(),
             self.theme.resolve_space("typography.body.size"),
         );
-        native_dialog_element(node)
+        poodle_gpui_node_backend::to_gpui(&node)
     }
 }
 
@@ -6959,7 +6959,7 @@ impl IntoElement for ConfirmAction {
                 self.theme.resolve_space("typography.body.size"),
             );
         }
-        native_dialog_element(node)
+        poodle_gpui_node_backend::to_gpui(&node)
     }
 }
 
@@ -7029,88 +7029,6 @@ fn stamp_confirm_action_identity(
     );
     stamp(&mut buttons.children[0], format!("{scope}:cancel"));
     stamp(&mut buttons.children[1], format!("{scope}:confirm"));
-}
-
-fn native_dialog_element(mut node: poodle_node::Node) -> AnyElement {
-    if matches!(node.position, poodle_node::NodePosition::Absolute { .. }) {
-        return native_dialog_backdrop(node);
-    }
-
-    let Some(backdrop_index) = node
-        .children
-        .iter()
-        .rposition(|child| matches!(child.position, poodle_node::NodePosition::Absolute { .. }))
-    else {
-        return poodle_gpui_node_backend::to_gpui(&node);
-    };
-    let backdrop = node.children.remove(backdrop_index);
-    let mut host = div();
-    for child in &node.children {
-        host = host.child(poodle_gpui_node_backend::to_gpui(child));
-    }
-    host.child(native_dialog_backdrop(backdrop))
-        .into_any_element()
-}
-
-fn native_dialog_backdrop(mut node: poodle_node::Node) -> AnyElement {
-    let backdrop_id = node
-        .runtime_id
-        .clone()
-        .or_else(|| node.id.clone())
-        .unwrap_or_else(|| "poodle-dialog-backdrop".to_string());
-    // The shared backdrop now carries its dismiss target ahead of the surface
-    // panel, so the panel is taken by identity rather than by position.
-    let panel_index = node
-        .children
-        .iter()
-        .position(|child| child.id.as_deref() == Some("poodle-dialog-surface"))
-        .or_else(|| node.children.len().checked_sub(1));
-    let Some(panel_index) = panel_index else {
-        return poodle_gpui_node_backend::to_gpui(&node);
-    };
-    let panel = node.children.remove(panel_index);
-    let siblings: Vec<poodle_node::Node> = std::mem::take(&mut node.children);
-    let fill = node
-        .style
-        .descriptor
-        .background
-        .map(poodle_gpui_node_backend::color)
-        .unwrap_or_else(gpui::transparent_black);
-    // Backdrop dismissal lives on the dedicated dismiss node when the shared
-    // surface projects one; the legacy wrapper only keeps the older seam.
-    let dismiss = node.interaction.on_activate.filter(|_| siblings.is_empty());
-    // This legacy native wrapper is not converted from a Node, so give its
-    // exact inset paint box to the backend's mounted-bounds registry.
-    let bounds_id = backdrop_id.clone();
-    let bounds_probe = canvas(
-        move |bounds, _window, _cx| {
-            poodle_gpui_node_backend::record_element_bounds(&bounds_id, bounds);
-        },
-        |_, _, _, _| {},
-    )
-    .absolute()
-    .inset_0();
-    let mut backdrop = div()
-        .id(gpui::SharedString::from(backdrop_id))
-        .absolute()
-        .inset_0()
-        .bg(fill)
-        .flex()
-        .items_center()
-        .justify_center()
-        .occlude()
-        .child(bounds_probe);
-    for sibling in &siblings {
-        backdrop = backdrop.child(poodle_gpui_node_backend::to_gpui(sibling));
-    }
-    backdrop = backdrop.child(poodle_gpui_node_backend::to_gpui(&panel));
-    if let Some(dismiss) = dismiss {
-        backdrop = backdrop.on_click(move |_event, _window, cx| {
-            dismiss();
-            cx.refresh_windows();
-        });
-    }
-    backdrop.into_any_element()
 }
 
 fn native_alert_dialog_spacing(

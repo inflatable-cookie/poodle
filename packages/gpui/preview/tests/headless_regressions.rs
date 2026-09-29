@@ -33442,6 +33442,19 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
                 "open ConfirmAction paints {part}"
             );
         }
+        // Svelte keeps the default trigger mounted while the dialog is open.
+        // The trigger is the in-flow sibling whose containing block used to
+        // collapse the Absolute backdrop.
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&left_trigger).is_some(),
+            "open ConfirmAction keeps its default trigger mounted beside the dialog"
+        );
+        let mounted_trigger = poodle_gpui_node_backend::painted_node_for(&left_trigger)
+            .expect("open default trigger reaches mounted backend");
+        assert!(
+            mounted_trigger.texts.iter().any(|text| text == "Delete"),
+            "open ConfirmAction keeps the default trigger label"
+        );
         let surface_snapshot = poodle_gpui_node_backend::painted_node_for(&left_surface)
             .expect("Dialog surface reaches mounted backend");
         for text in [
@@ -33479,19 +33492,35 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         assert_eq!(mounted_confirm.roles.get("tone").map(String::as_str), Some("danger"));
 
         let mount_bounds = driver.mount_box_bounds();
+        let viewport_size = driver.with_window(|window, _| window.viewport_size());
         let backdrop_bounds = poodle_gpui_node_backend::bounds_for(&left_backdrop).unwrap();
         let surface_bounds = poodle_gpui_node_backend::bounds_for(&left_surface).unwrap();
+        let trigger_bounds = poodle_gpui_node_backend::bounds_for(&left_trigger).unwrap();
         let body_bounds = poodle_gpui_node_backend::bounds_for(&left_body).unwrap();
         let cancel_bounds = poodle_gpui_node_backend::bounds_for(&left_cancel).unwrap();
         let confirm_bounds = poodle_gpui_node_backend::bounds_for(&left_confirm).unwrap();
         for bounds in [mount_bounds, backdrop_bounds, surface_bounds] {
             assert!(bounds.size.width > px(0.0) && bounds.size.height > px(0.0));
         }
+        // The trigger beside the open dialog is an in-flow sibling. The
+        // backdrop must resolve against the window, not collapse onto that
+        // sibling's row: window origin and full viewport size.
         assert_eq!(
-            backdrop_bounds, mount_bounds,
-            "production backdrop fills the exact mounted host box"
+            backdrop_bounds.origin,
+            point(px(0.0), px(0.0)),
+            "production backdrop sits at the window origin beside its mounted trigger"
         );
-        assert!(bounds_contain(mount_bounds, backdrop_bounds));
+        assert_eq!(
+            backdrop_bounds.size, viewport_size,
+            "production backdrop covers the viewport beside its mounted trigger"
+        );
+        assert!(
+            backdrop_bounds.size.width > mount_bounds.size.width
+                && backdrop_bounds.size.height > mount_bounds.size.height,
+            "the sibling-collapsed backdrop used to be no larger than the mount box: backdrop={backdrop_bounds:?} mount={mount_bounds:?}"
+        );
+        assert!(bounds_contain(backdrop_bounds, mount_bounds));
+        assert!(bounds_contain(backdrop_bounds, trigger_bounds));
         assert!(bounds_contain(backdrop_bounds, surface_bounds));
         for bounds in [body_bounds, cancel_bounds, confirm_bounds] {
             assert!(bounds_contain(surface_bounds, bounds));
@@ -33544,10 +33573,7 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
         assert!(poodle_gpui_node_backend::bounds_for(&left_backdrop).is_some());
         assert!(poodle_gpui_node_backend::bounds_for(&left_surface).is_some());
 
-        let outside_surface = point(
-            mount_bounds.right() - px(8.0),
-            mount_bounds.bottom() - px(8.0),
-        );
+        let outside_surface = point(px(4.0), px(4.0));
         driver.pointer_press(outside_surface);
         driver.pointer_release(outside_surface);
         assert_eq!(
@@ -33667,7 +33693,7 @@ fn confirm_action_composition_dismissal_inertia_and_identity_rebuild_the_host_sp
             &[
                 "production ConfirmAction composes Dialog and Button nodes with exact title, description, body, action labels, alert-dialog role, variants, tone, size, and density metadata",
                 "destructive trigger and confirm actions resolve the production danger recipes while an ordinary warning request resolves default action tone",
-                "the positive 800x600 mount, backdrop, and surface bounds preserve exact mount-to-backdrop equality and mount-to-backdrop-to-surface containment",
+                "the open backdrop sits at the window origin at full viewport size instead of collapsing to the 800x600 mount box, the default trigger stays mounted beside it, and mount, trigger, and surface bounds stay contained by the backdrop",
                 "body and action bounds remain contained by the surface, ordered, and non-overlapping",
                 "confirm, cancel button, backdrop, and Escape each emit exactly one callback in mounted input order and immediate host refusal leaves the Dialog mounted",
                 "pending state disables both actions, removes the close affordance, and suppresses all pointer and Escape callbacks",
