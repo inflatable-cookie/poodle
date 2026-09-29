@@ -639,6 +639,11 @@ impl DragDropController {
         self.state.borrow_mut().describe_announcement = Some(Rc::new(describe));
     }
 
+    #[cfg(test)]
+    pub(crate) fn drop_target_depth(&self, target_id: &str) -> Option<i32> {
+        self.state.borrow().depths.get(target_id).copied()
+    }
+
     pub fn snapshot(&self) -> DragDropSnapshot {
         let state = self.state.borrow();
         let session = state.context.session.as_ref();
@@ -2463,12 +2468,11 @@ impl DragDropController {
     /// Record nesting depth for this subtree, keeping the first answer of the
     /// frame.
     ///
-    /// The backend converts each child through the public `to_gpui` entry, so
-    /// this walk re-enters once per node with the depth reset to zero. The
-    /// outermost walk is the one that saw the whole tree, and it runs first —
-    /// so the first value recorded is the true depth and every later
-    /// re-entry must leave it alone. Overwriting flattened every nested
-    /// target to depth zero and handed arbitration to explicit priority.
+    /// Children convert through the private `to_gpui_impl` entry, so this
+    /// walk runs once per independently converted root. Independently
+    /// converted roots in the same frame still start at depth zero; keep the
+    /// first recorded depth so a later root cannot flatten a nested target
+    /// that the outer walk already saw.
     fn record_depths(&self, node: &Node, depth: i32) {
         let next = match &node.interaction.drop_target {
             Some(target) => {
