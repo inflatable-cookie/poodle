@@ -48,6 +48,7 @@ mod inset_shadow;
 mod interaction;
 mod layers;
 mod measured_node;
+mod overlay;
 mod style;
 mod tooltip;
 mod tracked_scroll;
@@ -270,8 +271,15 @@ fn element_id_text(id: &ElementId) -> String {
     }
 }
 
+thread_local! {
+    /// Public `to_gpui` pre-walks. Children recurse through [`to_gpui_impl`],
+    /// so this counts independently converted roots, not nodes.
+    static TO_GPUI_PREWALKS: Cell<u32> = const { Cell::new(0) };
+}
+
 /// Interpret one node (and its subtree) as a GPUI element.
 pub fn to_gpui(node: &Node) -> AnyElement {
+    TO_GPUI_PREWALKS.with(|count| count.set(count.get() + 1));
     // Layer registration runs for every independently converted root; the
     // frame-scoped registries are cleared by the host's overlay_frame_begin
     // once per rendered frame (the production preview and the conformance
@@ -284,6 +292,11 @@ pub fn to_gpui(node: &Node) -> AnyElement {
     // exists. Paint order and measured rectangles cannot recover it.
     drag::collect_drop_depths(node);
     to_gpui_impl(node)
+}
+
+#[cfg(test)]
+pub(crate) fn take_to_gpui_prewalks() -> u32 {
+    TO_GPUI_PREWALKS.with(|count| count.replace(0))
 }
 
 fn to_gpui_impl(node: &Node) -> AnyElement {
@@ -667,7 +680,9 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
     if node.style.overlay {
         DEFERRED_SCOPE.with(|scope| scope.set(was_deferred));
         record_probe_channel("overlay.intent.painted");
-        if was_deferred {
+        if overlay::fills_viewport(node) {
+            overlay::viewport_containing_block(element, !was_deferred).into_any_element()
+        } else if was_deferred {
             element
         } else {
             deferred(element).with_priority(1).into_any_element()
@@ -1023,7 +1038,7 @@ fn apply_children<E: ParentElement>(mut el: E, node: &Node, id: &str) -> E {
     let scope = inherited || (tracks_focus(node) && is_focused(id));
     FOCUS_SCOPE.with(|f| f.set(scope));
     for child in &node.children {
-        el = el.child(to_gpui(child));
+        el = el.child(to_gpui_impl(child));
     }
     FOCUS_SCOPE.with(|f| f.set(inherited));
     el

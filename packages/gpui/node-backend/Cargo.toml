@@ -43,6 +43,11 @@ anyhow = "1"
 # the consumer gate keeps resolving current releases.
 tinyvec = { version = "1", features = ["std"] }
 
+# Headless GPUI tests (TestAppContext / VisualTestContext). Ordinary builds
+# and the published interpretation path never pull test-support in.
+[dev-dependencies]
+gpui = { version = "0.2.2", features = ["test-support"] }
+
 [package.metadata.poodle]
 public-intent = true
 channel = "preview"
