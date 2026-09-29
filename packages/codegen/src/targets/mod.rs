@@ -60,3 +60,13 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
 pub fn by_id(id: &str) -> Option<&'static dyn EmitTarget> {
     selectable().into_iter().find(|target| target.id() == id)
 }
+
+/// Other selectable targets that share `target`'s `output_root` string.
+/// Sequential `--target` invocations against the same `--out` protect these
+/// siblings' exact emit paths so they are not treated as orphans.
+pub fn sharing_output_root(target: &dyn EmitTarget) -> Vec<&'static dyn EmitTarget> {
+    selectable()
+        .into_iter()
+        .filter(|other| other.id() != target.id() && other.output_root() == target.output_root())
+        .collect()
+}

@@ -17,179 +17,167 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { allComponents } from "../src/component-registry.ts";
 
-const repoRoot = path.resolve(import.meta.dir, "../../../..");
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const contractsDir = path.join(repoRoot, "docs/contracts/components");
 const specsDir = path.join(repoRoot, "packages/contracts/components/src");
 
 /**
- * Props that never reach a Spec by design — they are web-platform plumbing, not
- * component semantics, and a native target has no use for them:
+ * One keyed register of web-only prop exemptions.
  *
- *   - escape hatches into the host's styling: `className`, `class`, `style`,
- *     `contentClassName`, `contentStyle`, `overlayClassName`
- *   - raw HTML attributes: `type`, `form*`, `list`, `id`, `name`, `spellcheck`,
- *     `autocapitalize`, `autocorrect`, `enterKeyHint`
- *   - ARIA wiring by DOM id: `describedBy` (natives label by object, not id)
- *   - the rendered element / role: `as`, `asRole`
- *   - JS callbacks and timings: `validate*`, `debounce`, `parseDebounce`,
- *     `resolveParseState`, `controller`, `compressionOptions`
- *   - DOM-node scroll targets: `scrollTarget`, `scrollOffset`
- *   - snippet slots typed as props: `leading`, `trailing`
+ * Outer key `"*"` is every component. Any other key is a slug: the same prop
+ * name can be a real Spec field elsewhere, so a slug-scoped entry must not
+ * leak. Each inner value is the reason the prop stays out of the portable
+ * spec.
  */
-const WEB_ONLY_PROPS = new Set([
-  "as",
-  // AudioMeter batched surface tier (spec 068 / g14.024): a web rendering
-  // strategy only. Native runtimes already batch meter nodes in their renderer
-  // scene, so `MeterSurface` has no Rust spec by fixed decision and these
-  // props are marked **Web targets only** in the contract.
-  "surface",
-  "channel",
-  "rightChannel",
-  // Tree virtual scroll: the contract marks both **Svelte only** in its own
-  // props table. Surfaced the moment the gate learned to resolve module specs
-  // — `TreeSpec` lives in `tree/mod.rs` and had never been checked.
-  "virtualized",
-  "virtualHeight",
-  // g16.036 paired-web Tree authority adapter. Native would require pending
-  // local Node commits and durable multi-row session payloads; this card does
-  // not fake those through TreeSpec.
-  "reorderAuthority",
-  // Dialog/FormDialog initial-focus intent. Web-only *for now*, by decision:
-  // the "auto"/"none" policy is portable but the third form is a CSS selector,
-  // which cannot cross to native. Rather than design portable focus-intent
-  // semantics for one component ad hoc, this defers to the g13 IR, which owns
-  // the focus/adapter-capability boundary (spec 063 IR-05; corpus CROSS-17,
-  // NEG-03). Remove this entry when the IR rules on declarative focus intent.
-  "initialFocus",
-  // HistoryCenter's two result feeds (g14.007). The portable claim is that
-  // the host answers `loadContinuations` / `loadContinuationRun` and the
-  // answer reaches the picker; the conformance corpus asserts exactly that on
-  // Svelte, React and GPUI. *How* the answer arrives is shell mechanism: the
-  // web shells take it as a reference-diffed prop because that suits
-  // data-down flow, while a native host holds the fork tree in its own state
-  // and hands the renderer a resolved view. Same boundary as TextInput's DOM
-  // vs GPUI editing paths. Marked as a known delta in the contract.
-  "continuationsResult",
-  "runResult",
-  "asRole",
-  "autocapitalize",
-  "autocorrect",
-  // Native input attribute, same class as autocapitalize/autocorrect/spellcheck
-  // above: web runtimes forward it to the element, and it stays out of the
-  // portable spec (001-working-rules.md, Runtime Parity Authority).
-  "autofocus",
-  "class",
-  "className",
-  "compressionOptions",
-  "contentClassName",
-  "contentStyle",
-  "controller",
-  "debounce",
-  "describedBy",
-  "enterKeyHint",
-  "form",
-  "formaction",
-  "formenctype",
-  "formmethod",
-  "formnovalidate",
-  "formtarget",
-  "id",
-  "leading",
-  "list",
-  "name",
-  "overlayClassName",
-  "parseDebounce",
-  "resolveParseState",
-  "scrollOffset",
-  "scrollTarget",
-  "spellcheck",
-  "style",
-  "trailing",
-  "type",
-  "validate",
-  "validateOnBlur",
-  "validationContext",
-  "validationDebounce",
-  "validationKey",
-  // Decided in g12.013: an async options loader is behaviour, not data — a
-  // native target drives the same flow through `is_loading` plus `options`.
-  "loadOptions",
-  // Renders the platform `<select>` instead of the custom listbox. There is no
-  // native equivalent to defer to, so the flag has nothing to mean off the web.
-  "native",
-  // Cross-window bridges are host capabilities rather than renderer-neutral
-  // component data. Native hosts own equivalent traits at their window/source
-  // integration boundary; copying trait objects into Specs would make host
-  // authority look serializable.
-  "crossWindowDragSource",
-  "crossWindowDropTarget",
-  "crossWindowSourceBridge",
-  // AppHeader's bindable `element` escape hatch (g13-b014). Exposes the raw
-  // `<header>` DOM node for host-attached behaviour (e.g. window dragging);
-  // GPUI/Jetstream own window dragging as an adapter capability and have no
-  // element to hand out. The React counterpart is `ref`, documented in prose
-  // (React's own mechanism, not a member of AppHeaderProps).
-  "element",
-]);
+export const WEB_ONLY_GLOBAL = "*";
 
-/**
- * Web-only props scoped to one component, for cases where the same prop name
- * is a real spec field elsewhere.
- *
- * `WEB_ONLY_PROPS` above is global, so putting `defaultValue` in it would
- * exempt the ~20 components that legitimately carry `default_value` and hide
- * the next one that drops it. These entries exempt exactly one component each,
- * and every one is marked **Web targets only** in its own props table.
- */
-const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
-  // Model-connection family (g15.008). The native binding keeps the current
-  // value on the host: GPUI/AppState owns stage/value/query/open and rerenders
-  // after a callback requests a change, so an uncontrolled seed has nothing to
-  // seed. Stated in each contract's Native Binding note and in
-  // task g15.008 (Git history).
-  "model-connection-card": ["defaultOpen"],
-  "model-connection-picker": ["defaultQuery", "defaultValue"],
-  "model-connection-setup": ["defaultStage", "defaultValue"],
-  // Update family (g15.009). `observe` is a Svelte lazy-getter /
-  // React `useSyncExternalStore` subscription; a native host rerenders with
-  // fresh props. SettingsShell's `page` is a web snippet; native hosts pass a
-  // composed Node into `poodle_render::settings_shell`, not a spec field.
-  "update-status": ["observe"],
-  "update-center": ["observe"],
-  "settings-shell": ["page"],
-  // g16.046. Closures resolve to strings before the native spec; the Spec
-  // carries `visible_value_text` / `visible_lower_text` / `visible_upper_text`
-  // / `visible_range_text` instead of the functions.
-  slider: ["formatVisibleValue"],
-  "range-slider": ["formatVisibleValue", "formatVisibleRange"],
-  // g16.060. Controlled-panel focus transfer is a DOM adapter effect.
-  // Native has no panel-unmount capture in this bounded consumer unblock.
-  tabs: ["focusOnValueChange"],
-  // Text/Code wrap (operator ruling 2026-09-27). Web-admitted now; native
-  // admission pending (`lane:native-admission`).
-  text: ["wrap"],
-  code: ["wrap"],
-  // SidebarNavItem.endLabel / contextMenuItems / contextMenuAriaLabel
-  // (operator ruling 2026-09-27), web-admitted on the same terms as `wrap`.
-  // They are item fields, not Public Props, so this checker never reads them;
-  // the entry records the status where native admission will look for them.
-  "sidebar-nav": ["endLabel", "contextMenuItems", "contextMenuAriaLabel"],
-  // ListCard.eyebrow (operator ruling 2026-09-27, planning-thread approval
-  // briefing the Bovine Desktop gaps). Web-admitted on the same terms as
-  // Text/Code `wrap`. Native admission pending (`lane:native-admission`).
-  "list-card": ["eyebrow"],
-  // Pill dismiss control (operator ruling 2026-09-27), web-admitted on the
-  // same terms as `wrap`. Both are Public Props in the contract; native
-  // admission pending (`lane:native-admission`).
-  pill: ["dismissible", "dismissLabel"],
-  // Keyboard.computerBaseNote (planner ruling 2026-09-28) is portable
-  // computer-key mapping semantics. Web-admitted pending native until the
-  // headless keyboard machine gains it (`lane:native-admission`).
-  keyboard: ["computerBaseNote"],
+export const WEB_ONLY: Record<string, Record<string, string>> = {
+  [WEB_ONLY_GLOBAL]: {
+    as: "rendered element / role; native has no equivalent",
+    asRole: "rendered element / role; native has no equivalent",
+    surface:
+      "AudioMeter batched surface tier (spec 068 / g14.024): web rendering strategy only; native runtimes already batch meter nodes",
+    channel:
+      "AudioMeter batched surface tier (spec 068 / g14.024): web rendering strategy only; native runtimes already batch meter nodes",
+    rightChannel:
+      "AudioMeter batched surface tier (spec 068 / g14.024): web rendering strategy only; native runtimes already batch meter nodes",
+    virtualized: "Tree virtual scroll; contract marks Svelte only",
+    virtualHeight: "Tree virtual scroll; contract marks Svelte only",
+    reorderAuthority:
+      "g16.036 paired-web Tree authority adapter; native would need pending local Node commits and durable multi-row session payloads",
+    initialFocus:
+      "Dialog/FormDialog focus intent: auto/none is portable but the third form is a CSS selector (spec 063 IR-05). Remove when the IR rules on declarative focus intent.",
+    continuationsResult:
+      "HistoryCenter result feed (g14.007): web takes a reference-diffed prop; a native host holds the fork tree and hands the renderer a resolved view",
+    runResult:
+      "HistoryCenter result feed (g14.007): web takes a reference-diffed prop; a native host holds the fork tree and hands the renderer a resolved view",
+    autocapitalize: "native HTML attribute; web runtimes forward it, portable spec does not (Runtime Parity Authority)",
+    autocorrect: "native HTML attribute; web runtimes forward it, portable spec does not (Runtime Parity Authority)",
+    autofocus: "native HTML attribute; web runtimes forward it, portable spec does not (Runtime Parity Authority)",
+    spellcheck: "native HTML attribute; web runtimes forward it, portable spec does not (Runtime Parity Authority)",
+    enterKeyHint: "native HTML attribute; web runtimes forward it, portable spec does not (Runtime Parity Authority)",
+    class: "escape hatch into the host's styling",
+    className: "escape hatch into the host's styling",
+    style: "escape hatch into the host's styling",
+    contentClassName: "escape hatch into the host's styling",
+    contentStyle: "escape hatch into the host's styling",
+    overlayClassName: "escape hatch into the host's styling",
+    compressionOptions: "JS callback / options bag; not component semantics",
+    controller: "JS callback / controller; not component semantics",
+    debounce: "JS timing; not component semantics",
+    parseDebounce: "JS timing; not component semantics",
+    validationDebounce: "JS timing; not component semantics",
+    resolveParseState: "JS callback; not component semantics",
+    validate: "JS callback; not component semantics",
+    validateOnBlur: "JS callback; not component semantics",
+    validationContext: "JS callback / context; not component semantics",
+    validationKey: "JS callback / key; not component semantics",
+    describedBy: "ARIA wiring by DOM id; natives label by object, not id",
+    form: "raw HTML form attribute",
+    formaction: "raw HTML form attribute",
+    formenctype: "raw HTML form attribute",
+    formmethod: "raw HTML form attribute",
+    formnovalidate: "raw HTML form attribute",
+    formtarget: "raw HTML form attribute",
+    type: "raw HTML attribute",
+    list: "raw HTML attribute",
+    id: "raw HTML attribute",
+    name: "raw HTML attribute",
+    leading: "snippet slot typed as a prop",
+    trailing: "snippet slot typed as a prop",
+    scrollOffset: "DOM-node scroll target",
+    scrollTarget: "DOM-node scroll target",
+    loadOptions:
+      "g12.013: async options loader is behaviour, not data; native drives the same flow through is_loading plus options",
+    native: "renders the platform <select> instead of the custom listbox; no native equivalent",
+    crossWindowDragSource:
+      "cross-window bridge is a host capability, not renderer-neutral component data",
+    crossWindowDropTarget:
+      "cross-window bridge is a host capability, not renderer-neutral component data",
+    crossWindowSourceBridge:
+      "cross-window bridge is a host capability, not renderer-neutral component data",
+    element:
+      "AppHeader bindable DOM node (g13-b014) for host-attached behaviour; GPUI/Jetstream own window dragging as an adapter capability",
+  },
+  "model-connection-card": {
+    defaultOpen:
+      "g15.008: native binding keeps the current value on the host; an uncontrolled seed has nothing to seed",
+  },
+  "model-connection-picker": {
+    defaultQuery:
+      "g15.008: native binding keeps the current value on the host; an uncontrolled seed has nothing to seed",
+    defaultValue:
+      "g15.008: native binding keeps the current value on the host; an uncontrolled seed has nothing to seed",
+  },
+  "model-connection-setup": {
+    defaultStage:
+      "g15.008: native binding keeps the current value on the host; an uncontrolled seed has nothing to seed",
+    defaultValue:
+      "g15.008: native binding keeps the current value on the host; an uncontrolled seed has nothing to seed",
+  },
+  "update-status": {
+    observe:
+      "g15.009: Svelte lazy-getter / React useSyncExternalStore; a native host rerenders with fresh props",
+  },
+  "update-center": {
+    observe:
+      "g15.009: Svelte lazy-getter / React useSyncExternalStore; a native host rerenders with fresh props",
+  },
+  "settings-shell": {
+    page: "g15.009: web snippet; native hosts pass a composed Node into poodle_render::settings_shell, not a spec field",
+  },
+  slider: {
+    formatVisibleValue:
+      "g16.046: closures resolve to strings before the native spec; Spec carries visible_value_text instead",
+  },
+  "range-slider": {
+    formatVisibleValue:
+      "g16.046: closures resolve to strings before the native spec; Spec carries visible_*_text instead",
+    formatVisibleRange:
+      "g16.046: closures resolve to strings before the native spec; Spec carries visible_range_text instead",
+  },
+  tabs: {
+    focusOnValueChange:
+      "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
+  },
+  text: {
+    wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
+  },
+  code: {
+    wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
+  },
+  "sidebar-nav": {
+    endLabel:
+      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
+    contextMenuItems:
+      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
+    contextMenuAriaLabel:
+      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
+  },
+  "list-card": {
+    eyebrow:
+      "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
+  },
+  pill: {
+    dismissible:
+      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
+    dismissLabel:
+      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
+  },
+  keyboard: {
+    computerBaseNote:
+      "planner ruling 2026-09-28: portable computer-key mapping; web-admitted until the headless keyboard machine gains it (`lane:native-admission`)",
+  },
 };
+
+/** True when `prop` is a sanctioned web-only exemption for `slug`. */
+export function isWebOnly(slug: string, prop: string): boolean {
+  return WEB_ONLY[WEB_ONLY_GLOBAL]?.[prop] !== undefined || WEB_ONLY[slug]?.[prop] !== undefined;
+}
 
 /**
  * Real gaps: props the contract documents, Svelte implements, and the Spec does
@@ -386,13 +374,11 @@ export function contractSpecDrift(): {
 
     const fields = reachableFields(`${entry.displayName}Spec`, structs);
     const allow = OPEN_GAPS[entry.slug] ?? [];
-    const webOnly = new Set(WEB_ONLY_BY_SLUG[entry.slug] ?? []);
     const aliases = ALIASES[entry.slug] ?? {};
     const missing = props
       .filter(
         (p) =>
-          !WEB_ONLY_PROPS.has(p) &&
-          !webOnly.has(p) &&
+          !isWebOnly(entry.slug, p) &&
           !covered(p, fields) &&
           !(aliases[p] && fields.has(aliases[p])) &&
           !allow.includes(p),

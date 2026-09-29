@@ -90,7 +90,7 @@ Non-goals (deliberate, per g13-b014 rulings):
 #### Parity Notes
 
 - `element` (Svelte) and `ref` (React) are **web-only** and deliberately
-  absent from `AppHeaderSpec` (sanctioned `WEB_ONLY_PROPS` entry in
+  absent from `AppHeaderSpec` (sanctioned `WEB_ONLY` entry in
   `packages/svelte/preview/scripts/contract-spec-drift.ts`).
 - GPUI and Jetstream: **`AC` (adapter capability)**. Native window dragging is
   a platform capability the shell owns, and a native renderer has no element

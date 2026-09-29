@@ -77,7 +77,7 @@ and `FormDialogSpec`. The `"auto"`/`"none"` policy is portable intent, but the
 selector form is a CSS selector that cannot cross to native, and focus delivery
 is an adapter capability (spec 063 `IR-05`). Rather than design portable
 focus-intent semantics for one component, this defers to the g13 IR. Recorded as
-a sanctioned entry in `contract-spec-drift.ts` `WEB_ONLY_PROPS`, to be removed
+a sanctioned entry in `contract-spec-drift.ts` `WEB_ONLY`, to be removed
 when the IR rules on declarative focus intent.
 
 

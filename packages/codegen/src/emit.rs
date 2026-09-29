@@ -52,6 +52,26 @@ pub trait EmitTarget {
     fn render(&self, model: &IrModel, source_path: &str) -> Result<Vec<GeneratedFile>>;
 }
 
+/// Colliding `output_root` groups among `targets`. Production CLI refuses
+/// these so an exclusive orphan sweep cannot delete a sibling's artifacts.
+pub fn colliding_output_roots<'a, I>(targets: I) -> Vec<(&'static str, Vec<&'static str>)>
+where
+    I: IntoIterator<Item = &'a dyn EmitTarget>,
+{
+    use std::collections::BTreeMap;
+    let mut by_root: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+    for target in targets {
+        by_root
+            .entry(target.output_root())
+            .or_default()
+            .push(target.id());
+    }
+    by_root
+        .into_iter()
+        .filter(|(_, ids)| ids.len() >= 2)
+        .collect()
+}
+
 /// The generated header (`IR-07`): authored source path, IR schema version,
 /// generator version. No timestamp, no absolute path, no machine or user
 /// identifier — the nondeterminism this card exists to exclude. A pure

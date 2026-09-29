@@ -126,9 +126,9 @@ Distinguish two things that sound alike:
   component.
 - **Web-platform prop parity is not.** Native attributes like `autocomplete`,
   `autofocus` and `spellcheck`, imperative escape hatches, and DOM-node props
-  stay web-only and out of the portable spec. `WEB_ONLY_PROPS` in
-  `contract-spec-drift.ts` is the sanctioned register for these, and each entry
-  carries its reason.
+  stay web-only and out of the portable spec. `WEB_ONLY` in
+  `contract-spec-drift.ts` is the sanctioned register: each prop is keyed
+  under `"*"` (every component) or a slug, and each entry carries its reason.
 
 A capability that genuinely cannot cross — a CSS selector, a DOM element
 reference — is a documented delta with its rationale, not a silent omission.

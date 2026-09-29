@@ -518,3 +518,197 @@ fn tooltip_state_reset_increments_generation_and_clears_fields() {
     assert!(!state.painted_this_frame);
     assert!(state.task.is_none());
 }
+
+fn drop_target_node(id: &str) -> Node {
+    let mut node = Node::container();
+    node.interaction.drop_target = Some(poodle_node::NodeDropTarget::new(id, "item", id));
+    node
+}
+
+/// Children used to re-enter the public `to_gpui` pre-walk, resetting nested
+/// drop-target depth to zero. The private recursion entry walks once per tree.
+#[test]
+fn a_to_gpui_prewalk_runs_once_per_tree_and_keeps_nested_drop_depth() {
+    let inner = drop_target_node("inner");
+    let mut outer = drop_target_node("outer");
+    outer = outer.child(inner).child(Node::text("leaf"));
+    let mut root = Node::container();
+    root = root.child(outer).child(Node::text("sibling"));
+
+    let _ = take_to_gpui_prewalks();
+    let controller = DragDropController::new();
+    let _tree = drag_drop_provider(&controller, || div().child(to_gpui(&root)));
+
+    assert_eq!(
+        take_to_gpui_prewalks(),
+        1,
+        "the public pre-walk must run once for the tree, not once per node"
+    );
+    assert_eq!(controller.drop_target_depth("outer"), Some(0));
+    assert_eq!(
+        controller.drop_target_depth("inner"),
+        Some(1),
+        "a nested drop target must keep the depth the outer walk recorded"
+    );
+}
+
+struct OverlayMount {
+    node: Node,
+    nested_host: Option<(f32, f32, f32, f32)>,
+}
+
+impl gpui::Render for OverlayMount {
+    fn render(
+        &mut self,
+        window: &mut gpui::Window,
+        cx: &mut gpui::Context<Self>,
+    ) -> impl gpui::IntoElement {
+        let handle = window.window_handle();
+        overlay_frame_begin_for(handle, cx);
+        cx.defer(move |_| overlay_frame_end_for(handle));
+        reset_element_ids();
+        let tree = if let Some((left, top, width, height)) = self.nested_host {
+            // CommandPalette hosts `dialog()` as a to_gpui root inside a sized
+            // relative slot. Window-filling that root would spill the mount.
+            div().size_full().child(
+                div()
+                    .absolute()
+                    .left(px(left))
+                    .top(px(top))
+                    .w(px(width))
+                    .h(px(height))
+                    .child(to_gpui(&self.node)),
+            )
+        } else {
+            div().size_full().child(to_gpui(&self.node))
+        };
+        attach_overlay_host(tree, handle)
+    }
+}
+
+fn dialog_like_backdrop(surface: Node) -> Node {
+    let mut backdrop = Node::container();
+    backdrop.id = Some("backdrop".into());
+    backdrop.runtime_id = Some("backdrop".into());
+    backdrop.style.overlay = true;
+    backdrop.position = NodePosition::Absolute {
+        top: Some(0.0),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: Some(0.0),
+    };
+    backdrop.style.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.5));
+    backdrop.style.descriptor.layout.direction = LayoutDirection::Row;
+    backdrop.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+    backdrop.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    backdrop.child(surface)
+}
+
+fn run_headless(body: impl FnOnce(&mut gpui::TestAppContext)) {
+    reset_focus_registry();
+    let mut cx = gpui::TestAppContext::single();
+    body(&mut cx);
+    cx.dispatcher.run_until_parked();
+    cx.background_executor.forbid_parking();
+    cx.quit();
+    cx.dispatcher.run_until_parked();
+}
+
+fn paint_mount(cx: &mut gpui::VisualTestContext, root: &gpui::Entity<OverlayMount>) {
+    root.update(cx, |_root, cx| cx.notify());
+    cx.update(|window, cx| {
+        window.refresh();
+        let _ = window.draw(cx);
+    });
+    cx.run_until_parked();
+}
+
+/// Before: Absolute inset-0 used the sibling row as containing block, so the
+/// backdrop collapsed to the trigger height. After: an overlay+inset-0 that
+/// shares a parent with an in-flow sibling layouts against the window viewport.
+#[test]
+fn a_dialog_backdrop_covers_the_window_with_a_sibling_trigger_mounted() {
+    run_headless(|cx| {
+        let mut trigger = Node::container();
+        trigger.id = Some("trigger".into());
+        trigger.runtime_id = Some("trigger".into());
+        trigger.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        trigger.style.descriptor.layout.height = LayoutSizing::Fixed(32.0);
+
+        let mut surface = Node::container();
+        surface.id = Some("surface".into());
+        surface.runtime_id = Some("surface".into());
+        surface.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        surface.style.descriptor.layout.height = LayoutSizing::Fixed(80.0);
+
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row = row.child(trigger).child(dialog_like_backdrop(surface));
+
+        let (root, cx) = cx.add_window_view(|window, _cx| {
+            window.refresh();
+            OverlayMount {
+                node: row,
+                nested_host: None,
+            }
+        });
+        paint_mount(cx, &root);
+
+        let viewport = cx.update(|window, _| window.viewport_size());
+        let backdrop = bounds_for("backdrop").expect("backdrop painted");
+        let trigger = bounds_for("trigger").expect("trigger painted");
+        let surface = bounds_for("surface").expect("surface painted");
+
+        assert_eq!(f32::from(backdrop.origin.x), 0.0);
+        assert_eq!(f32::from(backdrop.origin.y), 0.0);
+        assert_eq!(f32::from(backdrop.size.width), f32::from(viewport.width));
+        assert_eq!(f32::from(backdrop.size.height), f32::from(viewport.height));
+        assert!(
+            f32::from(trigger.size.height) < f32::from(viewport.height) / 2.0,
+            "the sibling trigger must stay its own row, not the backdrop containing block: trigger={trigger:?} viewport={viewport:?}"
+        );
+        assert!(
+            f32::from(surface.origin.x) >= f32::from(backdrop.origin.x)
+                && f32::from(surface.origin.y) >= f32::from(backdrop.origin.y)
+                && f32::from(surface.origin.x) + f32::from(surface.size.width)
+                    <= f32::from(backdrop.origin.x) + f32::from(backdrop.size.width)
+                && f32::from(surface.origin.y) + f32::from(surface.size.height)
+                    <= f32::from(backdrop.origin.y) + f32::from(backdrop.size.height),
+            "surface {surface:?} must sit on the window-sized backdrop {backdrop:?}"
+        );
+    });
+}
+
+/// CommandPalette converts `dialog()` as a `to_gpui` root inside a sized host
+/// slot. Window-filling every overlay+inset-0 spilled those roots across the
+/// mount; a conversion root with no in-flow sibling stays in the host.
+#[test]
+fn a_dialog_root_overlay_stays_inside_its_host_slot() {
+    run_headless(|cx| {
+        let mut surface = Node::container();
+        surface.id = Some("surface".into());
+        surface.runtime_id = Some("surface".into());
+        surface.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        surface.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+
+        let (root, cx) = cx.add_window_view(|window, _cx| {
+            window.refresh();
+            OverlayMount {
+                node: dialog_like_backdrop(surface),
+                nested_host: Some((32.0, 48.0, 200.0, 120.0)),
+            }
+        });
+        paint_mount(cx, &root);
+
+        let viewport = cx.update(|window, _| window.viewport_size());
+        let backdrop = bounds_for("backdrop").expect("backdrop painted");
+        assert_eq!(f32::from(backdrop.origin.x), 32.0);
+        assert_eq!(f32::from(backdrop.origin.y), 48.0);
+        assert_eq!(f32::from(backdrop.size.width), 200.0);
+        assert_eq!(f32::from(backdrop.size.height), 120.0);
+        assert!(
+            f32::from(backdrop.size.width) < f32::from(viewport.width),
+            "a conversion-root overlay must not fill the window: backdrop={backdrop:?} viewport={viewport:?}"
+        );
+    });
+}
