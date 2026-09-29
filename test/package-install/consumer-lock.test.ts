@@ -145,8 +145,9 @@ describe("packed consumer lock from bun.lock", () => {
       ),
     });
     expect(overrides["std-env"]).toBe("4.2.0");
-    expect(overrides["magic-string"]).toBeUndefined();
-    expect(overrides["aria-query"]).toBeUndefined();
+    expect(overrides["magic-string"]).toBe("1.4.2");
+    expect(overrides["aria-query"]).toBe("5.3.0");
+    expect(overrides.svelte).toEqual({ "magic-string": "0.30.21", "aria-query": "5.3.1" });
     expect(overrides.react).toBeUndefined();
     expect(overrides.vitest).toBeUndefined();
     expect(overrides["@vitest/mocker"]).toBeUndefined();
@@ -154,7 +155,7 @@ describe("packed consumer lock from bun.lock", () => {
     expect(overrides["@inflatable-cookie/poodle-core"]).toBeUndefined();
   });
 
-  test("the repository lock does not globally override svelte's magic-string", () => {
+  test("the repository lock pins svelte's package-context versions as nested overrides", () => {
     const lockText = readFileSync(join(import.meta.dir, "../..", "bun.lock"), "utf8");
     const overrides = lockedTransitiveOverrides({
       lockText,
@@ -164,8 +165,9 @@ describe("packed consumer lock from bun.lock", () => {
       ),
     });
     expect(overrides["std-env"]).toBe("4.2.0");
-    expect(overrides["magic-string"]).toBeUndefined();
-    expect(overrides["aria-query"]).toBeUndefined();
+    expect(overrides["magic-string"]).toBe("1.4.2");
+    expect(overrides["aria-query"]).toBe("5.3.0");
+    expect(overrides.svelte).toEqual({ "magic-string": "0.30.21", "aria-query": "5.3.1" });
   });
 });
 
@@ -249,7 +251,8 @@ describe("packed consumer install against a planted registry", () => {
       lockText,
       declaredNames: declaredPackageNames(dependencies),
     });
-    expect(overrides["poodle-plant-ctx-leaf"]).toBeUndefined();
+    expect(overrides["poodle-plant-ctx-leaf"]).toBe("1.4.2");
+    expect(overrides["poodle-plant-ctx-host"]).toEqual({ "poodle-plant-ctx-leaf": "0.30.21" });
     writeFileSync(
       join(root, "package.json"),
       `${JSON.stringify({ name: "poodle-plant-consumer", private: true, dependencies, overrides }, null, 2)}\n`,
@@ -259,6 +262,48 @@ describe("packed consumer install against a planted registry", () => {
     if (result.exitCode !== 0) throw new Error(result.output);
     const installed = JSON.parse(
       readFileSync(join(root, "node_modules", "poodle-plant-ctx-leaf", "package.json"), "utf8"),
+    ) as { version: string };
+    expect(installed.version).toBe("0.30.21");
+  });
+
+  test("a package-context pin still installs when the matching latest 404s", async () => {
+    const leafLocked = packNpmTarball("poodle-plant-ctx-404-leaf", "0.30.21");
+    const host = packNpmTarball("poodle-plant-ctx-404-host", "1.0.0", {
+      dependencies: { "poodle-plant-ctx-404-leaf": "^0.30.11" },
+    });
+    const registry = startRegistry({
+      "poodle-plant-ctx-404-host": {
+        latest: "1.0.0",
+        versions: { "1.0.0": host },
+        dependencies: { "1.0.0": { "poodle-plant-ctx-404-leaf": "^0.30.11" } },
+      },
+      "poodle-plant-ctx-404-leaf": {
+        latest: "0.30.22",
+        versions: { "0.30.21": leafLocked, "0.30.22": "missing" },
+      },
+    });
+    const root = mkdtempSync(join(tmpdir(), "poodle-consumer-lock-ctx-404-"));
+    roots.push(root);
+    const dependencies = { "poodle-plant-ctx-404-host": "1.0.0" };
+    const lockText = `{
+      "packages": {
+        "poodle-plant-ctx-404-host/poodle-plant-ctx-404-leaf": ["poodle-plant-ctx-404-leaf@0.30.21", "", {}, "sha512-old=="]
+      }
+    }`;
+    const overrides = lockedTransitiveOverrides({
+      lockText,
+      declaredNames: declaredPackageNames(dependencies),
+    });
+    expect(overrides["poodle-plant-ctx-404-host"]).toEqual({ "poodle-plant-ctx-404-leaf": "0.30.21" });
+    writeFileSync(
+      join(root, "package.json"),
+      `${JSON.stringify({ name: "poodle-plant-consumer", private: true, dependencies, overrides }, null, 2)}\n`,
+    );
+    writeFileSync(join(root, ".npmrc"), `registry=${registry}\n`);
+    const result = await bunInstall(root, registry);
+    if (result.exitCode !== 0) throw new Error(result.output);
+    const installed = JSON.parse(
+      readFileSync(join(root, "node_modules", "poodle-plant-ctx-404-leaf", "package.json"), "utf8"),
     ) as { version: string };
     expect(installed.version).toBe("0.30.21");
   });

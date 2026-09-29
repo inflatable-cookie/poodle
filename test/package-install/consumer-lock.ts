@@ -5,6 +5,9 @@ export type ConsumerLockInput = {
   declaredNames: Iterable<string>;
 };
 
+export type LockOverrideValue = string | Record<string, string>;
+export type LockOverrideMap = Record<string, LockOverrideValue>;
+
 type BunLockFile = {
   packages?: Record<string, unknown>;
 };
@@ -34,14 +37,32 @@ function skipForDeclared(name: string, declared: Set<string>): boolean {
   return false;
 }
 
-function packageContextNames(packages: Record<string, unknown>): Set<string> {
-  const names = new Set<string>();
-  for (const [key, value] of Object.entries(packages)) {
-    if (isWorkspaceResolution(value) || !Array.isArray(value) || typeof value[0] !== "string") continue;
-    const spec = specNameAndVersion(value[0]);
-    if (spec !== undefined && spec.name !== key) names.add(spec.name);
+function parentOfContextKey(key: string, name: string): string | undefined {
+  const suffix = `/${name}`;
+  if (key.endsWith(suffix) && key.length > suffix.length) return key.slice(0, -suffix.length);
+  return undefined;
+}
+
+function setTopLevel(overrides: LockOverrideMap, name: string, version: string): void {
+  const current = overrides[name];
+  if (current === undefined) {
+    overrides[name] = version;
+    return;
   }
-  return names;
+  if (typeof current === "object" && current["."] === undefined) current["."] = version;
+}
+
+function setNested(overrides: LockOverrideMap, parent: string, name: string, version: string): void {
+  const current = overrides[parent];
+  if (current === undefined) {
+    overrides[parent] = { [name]: version };
+    return;
+  }
+  if (typeof current === "string") {
+    overrides[parent] = { ".": current, [name]: version };
+    return;
+  }
+  current[name] = version;
 }
 
 /**
@@ -54,21 +75,26 @@ function packageContextNames(packages: Record<string, unknown>): Set<string> {
  * bun 1.4.2 ignores an incomplete rewritten lock ("Failed to resolve root
  * prod dependency"), so this is an override map rather than a lock file.
  * Package-context keys (`svelte/magic-string`) keep a different version than
- * the top-level package; a global override would collapse them, so those
- * names are omitted.
+ * the top-level package; those become nested overrides under the parent so
+ * both resolutions stay locked.
  */
-export function lockedTransitiveOverrides(input: ConsumerLockInput): Record<string, string> {
+export function lockedTransitiveOverrides(input: ConsumerLockInput): LockOverrideMap {
   const parsed = parseJsonc(input.lockText) as BunLockFile;
   const packages = parsed.packages ?? {};
   const declared = new Set(input.declaredNames);
-  const contextual = packageContextNames(packages);
-  const overrides: Record<string, string> = {};
+  const overrides: LockOverrideMap = {};
   for (const [key, value] of Object.entries(packages)) {
     if (isWorkspaceResolution(value) || !Array.isArray(value) || typeof value[0] !== "string") continue;
     const spec = specNameAndVersion(value[0]);
-    if (spec === undefined || spec.name !== key) continue;
-    if (skipForDeclared(key, declared) || contextual.has(key)) continue;
-    overrides[key] = spec.version;
+    if (spec === undefined) continue;
+    if (skipForDeclared(spec.name, declared)) continue;
+    if (spec.name === key) {
+      setTopLevel(overrides, key, spec.version);
+      continue;
+    }
+    const parent = parentOfContextKey(key, spec.name);
+    if (parent === undefined) continue;
+    setNested(overrides, parent, spec.name, spec.version);
   }
   return overrides;
 }
