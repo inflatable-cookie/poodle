@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Pagination",
-  "test": "pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard",
+  "component": "SidebarNav",
+  "test": "sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -18,19 +18,20 @@
       "production-mount"
     ],
     "events": [
-      "assert!(\n                option.interaction.on_activate.is_some(),\n                \"open option must carry the production change"
+      "payloads.lock",
+      "assert_eq!(\n            host.payloads.lock().expect(\"payload"
     ],
     "pointer": [
-      "pointer_activate"
+      "pointer_activate",
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
+      "focus_state_for",
       "focus_element",
       "dispatch_key"
     ],
     "accessibility": [
-      "NodeRole",
-      "a11y."
+      "NodeRole"
     ]
   },
   "production_path_observation": {
@@ -38,7 +39,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::pagination_with_handlers",
+    "renderer": "fixture-helper:sidebar_menu_remount",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -51,7 +52,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-09-29-poodle-060-sidebar-native-admission-expected",
     "outcome": "passed",
-    "body_sha256": "660be308328274821a183204ef05d80e99808948590fb157646635417e2f5e75"
+    "body_sha256": "94f6c9418a0e26efd0671cfe3af9bda880ad313cde9ac41b432b190e97a8aeac"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

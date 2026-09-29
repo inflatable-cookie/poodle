@@ -1,7 +1,7 @@
 # SidebarNav
 
 Status: detailed contract
-Updated: 2026-09-29
+Updated: 2026-09-29 (endLabel and per-item context menu admitted portable)
 
 ## 1. Purpose
 
@@ -58,7 +58,7 @@ Updated: 2026-09-29
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Semantic size intent |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
 | `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | Fires when a non-disabled item is activated; payload is the item `value` |
-| `onContextAction` | `((itemValue: string, actionValue: string) => void) \| undefined` | `undefined` | no | **Web targets only.** Fires when a built-in per-item context-menu row is activated. First argument is the nav item's `value`; second is the menu item's `value`. Native admission pending (`lane:native-admission`) |
+| `onContextAction` | `((itemValue: string, actionValue: string) => void) \| undefined` | `undefined` | no | Fires when a built-in per-item context-menu row is activated. First argument is the nav item's `value`; second is the menu item's `value` |
 
 ### Type: SidebarNavGroup
 
@@ -76,9 +76,9 @@ Updated: 2026-09-29
 | `label` | `string` | yes | Visible item label |
 | `href` | `string \| null` | no | When present, renders an anchor |
 | `disabled` | `boolean` | no | Disabled items render inertly |
-| `endLabel` | `string \| null` | no | Default `null`. **Web targets only.** Compact end-aligned metadata such as a count ("198" in "Videos 198"). Exposed as the item's accessible description, never its name. Put counts here, not in `label`. Native admission pending (`lane:native-admission`) |
-| `contextMenuItems` | `MenuItem[] \| null` | no | Default `null`. **Web targets only.** Same shape as ListCard's `contextMenuItems`. When non-empty, right-click or keyboard `ContextMenu`/`Shift+F10` on that item opens the shared ContextMenu. Unset, `null`, or empty leaves native item behaviour unchanged. Disabled items never open a menu. Native admission pending (`lane:native-admission`) |
-| `contextMenuAriaLabel` | `string \| null` | no | Default `null`. **Web targets only.** Accessible name for that item's context-menu overlay. When unset, the overlay is labelled `{item.label} actions`. Native admission pending (`lane:native-admission`) |
+| `endLabel` | `string \| null` | no | Default `null`. Compact end-aligned metadata such as a count ("198" in "Videos 198"). Exposed as the item's accessible description, never its name. Put counts here, not in `label` |
+| `contextMenuItems` | `MenuItem[] \| null` | no | Default `null`. Same shape as ListCard's `contextMenuItems`. When non-empty, right-click or keyboard `ContextMenu`/`Shift+F10` on that item opens the shared ContextMenu. Unset, `null`, or empty leaves native item behaviour unchanged. Disabled items never open a menu |
+| `contextMenuAriaLabel` | `string \| null` | no | Default `null`. Accessible name for that item's context-menu overlay. When unset, the overlay is labelled `{item.label} actions` |
 
 ### Slots
 
@@ -365,22 +365,33 @@ None.
 - `data-separated` attribute on groups tracks whether multiple visible groups exist
 - Item activation calls `onValueChange` unless the item is disabled
 - Uses callback props instead of a dispatcher event surface
-- `endLabel` is web-admitted (Svelte and React). The portable Rust spec and
-  GPUI mapping remain native admission pending (`lane:native-admission`),
-  following the Text and Code `wrap` precedent
-- `contextMenuItems` / `contextMenuAriaLabel` are web-admitted item fields
-  (Svelte and React) on the same terms. Invocation is on the item link or
-  button; the overlay is ContextMenu with `trigger={false}`.
-  `onContextAction(itemValue, actionValue)` fires for a committed menu row
+- `endLabel` is portable: the Rust spec carries it and the shared renderer
+  lays the row out (flexible label plus end-aligned metadata)
+- `contextMenuItems` / `contextMenuAriaLabel` are portable item fields on the
+  same terms. Invocation is on the item link or button; the overlay is
+  ContextMenu with `trigger={false}`. `onContextAction(itemValue,
+  actionValue)` fires for a committed menu row
 
 ## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::sidebar_nav`
-- Active indicator is a left border (not a pseudo-element); GPUI should use a border or equivalent edge element
+- Active indicator is a left border (not a pseudo-element); GPUI uses a border or equivalent edge element
 - Size/density scaling must match the custom property override tables
-- `SidebarNavItem.endLabel`, `contextMenuItems`, and `contextMenuAriaLabel`
-  are not yet carried by the portable spec; they are web-admitted until
-  native admission (`lane:native-admission`)
+- `SidebarNavItem.endLabel` renders through the shared renderer: the item
+  becomes a row with a flexible, wrapping label and a fixed, one-line end
+  label at the contract's 0.85× item size in muted tertiary. The item's
+  accessible name is the explicit `label`; the end label's generated id is
+  the item's `described_by`, the native carrier of `aria-describedby`
+- Per-item context menus follow the Tree host pattern: items carrying rows
+  raise `on_context_menu(value, origin)` on secondary click and on the
+  keyboard menu gestures (`NodeKey::ContextMenu`, or `NodeKey::F10` with
+  Shift). The pointer origin carries the window point; a keyboard origin
+  anchors at the invoking item (`rect + 16px`), which the host resolves from
+  the item's painted bounds. The host mounts the shared ContextMenu overlay
+  at that anchor, routes `onContextAction(itemValue, actionValue)`, moves
+  focus to the menu's first enabled row, and returns focus to the item —
+  which the renderer names with a stable `sidebar-nav-{value}` id — when the
+  overlay closes. Disabled items and items without rows never intercept
 
 ## 10a. Jetstream Notes
 
@@ -436,13 +447,13 @@ None.
 |-------|---------------|-----------------|
 | With disabled | One group with items where one is `disabled: true` | Disabled item at reduced opacity, non-interactive |
 
-### End Labels (web)
+### End Labels
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Library counts | One titled group "Library" with items carrying `endLabel` counts (Videos 198, Audio 42, Images 1,204) plus one disabled item with a count, `value="videos"` | Counts sit end-aligned in muted tabular figures; the active item keeps its count muted |
 
-### Item context menu (web)
+### Item Context Menu
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|

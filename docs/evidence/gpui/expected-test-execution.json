@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-09-12-g18-006-v040-release-candidate-expected",
-  "source_commit": "a797ce413d378795a8698d6782b003560878315a",
+  "run_id": "2026-09-29-poodle-060-sidebar-native-admission-expected",
+  "source_commit": "283e5d65ce1ab84bfd12133efc4538ce23d80de0",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -265,6 +265,14 @@
     "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring": {
       "outcome": "passed",
       "body_sha256": "0ad74cd9b88f6082c557ab6cde35741f44a63bc5380eb462a3f6335005690878"
+    },
+    "sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item": {
+      "outcome": "passed",
+      "body_sha256": "ee5b16494fabbff07c4b4c44309aaa16e3d581d9b1484c1b390d015ae35f2e0f"
+    },
+    "sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus": {
+      "outcome": "passed",
+      "body_sha256": "94f6c9418a0e26efd0671cfe3af9bda880ad313cde9ac41b432b190e97a8aeac"
     }
   }
 }

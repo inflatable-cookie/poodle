@@ -36253,160 +36253,151 @@ struct SidebarMenuHost {
     mount: Mutex<Option<Arc<Mutex<Node>>>>,
 }
 
-impl SidebarMenuHost {
-    fn new() -> Arc<Self> {
-        Arc::new(Self {
-            requests: Mutex::new(Vec::new()),
-            activations: Mutex::new(Vec::new()),
-            payloads: Mutex::new(Vec::new()),
-            closes: Mutex::new(Vec::new()),
-            open: Mutex::new(None),
-            mount: Mutex::new(None),
-        })
+/// Rebuild the mounted tree from host state — the way a GPUI host view
+/// re-renders its spec-derived overlay across frames. Called from the test
+/// between dispatched inputs, never inside a handler.
+fn sidebar_menu_remount(me: &Arc<SidebarMenuHost>) {
+    let guard = me.mount.lock().expect("mount ref");
+    if let Some(mount) = guard.as_ref() {
+        *mount.lock().expect("mount lock") = sidebar_menu_tree(me);
     }
-
-    /// Rebuild the mounted tree from host state — the way a GPUI host view
-    /// re-renders its spec-derived overlay across frames. Called from the
-    /// test between dispatched inputs, never inside a handler.
-    fn remount(me: &Arc<Self>) {
-        let guard = me.mount.lock().expect("mount ref");
-        if let Some(mount) = guard.as_ref() {
-            *mount.lock().expect("mount lock") = SidebarMenuHost::tree(me);
-        }
-    }
-
-    /// A component request: resolve the anchor (pointer points carry their
-    /// window position; keyboard opens anchor at the item, the web's
-    /// `rect + 16px` rule) and open the overlay. Focus moves to the first
-    /// enabled row once the overlay exists — the host applies
-    /// `request_focus` after its rebuild, like ContextMenu's own
-    /// `focusFirstItem` effect.
-    fn request(me: &Arc<Self>, value: &str, origin: poodle_render::SidebarNavContextMenuOrigin) {
-        use poodle_gpui_node_backend::bounds_for;
-
-        let anchor = match origin {
-            poodle_render::SidebarNavContextMenuOrigin::Pointer(point) => (point.x, point.y),
-            poodle_render::SidebarNavContextMenuOrigin::Keyboard => {
-                let item = bounds_for(&poodle_render::sidebar_nav_item_id(value))
-                    .expect("invoking item has painted bounds");
-                (
-                    f32::from(item.origin.x) + 16.0,
-                    f32::from(item.origin.y) + 16.0,
-                )
-            }
-        };
-        let root_origin = bounds_for(FIXTURE_ID).expect("root bounds").origin;
-        *me.open.lock().expect("open lock") = Some((
-            value.to_string(),
-            (
-                anchor.0 - f32::from(root_origin.x),
-                anchor.1 - f32::from(root_origin.y),
-            ),
-        ));
-        me.requests
-            .lock()
-            .expect("request lock")
-            .push((
-                value.to_string(),
-                origin == poodle_render::SidebarNavContextMenuOrigin::Keyboard,
-            ));
 }
 
-    /// Close from a dismissal (Escape or outside) and put focus back on the
-    /// invoking item.
-    fn dismiss(me: &Arc<Self>, reason: poodle_node::DismissReason) {
-        SidebarMenuHost::close(me, &match reason {
+/// A component request: resolve the anchor (pointer points carry their
+/// window position; keyboard opens anchor at the item, the web's
+/// `rect + 16px` rule) and open the overlay. Focus moves to the first
+/// enabled row once the overlay exists — the host applies `request_focus`
+/// after its rebuild, like ContextMenu's own `focusFirstItem` effect.
+fn sidebar_menu_request(
+    me: &Arc<SidebarMenuHost>,
+    value: &str,
+    origin: poodle_render::SidebarNavContextMenuOrigin,
+) {
+    use poodle_gpui_node_backend::bounds_for;
+
+    let anchor = match origin {
+        poodle_render::SidebarNavContextMenuOrigin::Pointer(point) => (point.x, point.y),
+        poodle_render::SidebarNavContextMenuOrigin::Keyboard => {
+            let item = bounds_for(&poodle_render::sidebar_nav_item_id(value))
+                .expect("invoking item has painted bounds");
+            (
+                f32::from(item.origin.x) + 16.0,
+                f32::from(item.origin.y) + 16.0,
+            )
+        }
+    };
+    let root_origin = bounds_for(FIXTURE_ID).expect("root bounds").origin;
+    *me.open.lock().expect("open lock") = Some((
+        value.to_string(),
+        (
+            anchor.0 - f32::from(root_origin.x),
+            anchor.1 - f32::from(root_origin.y),
+        ),
+    ));
+    me.requests.lock().expect("request lock").push((
+        value.to_string(),
+        origin == poodle_render::SidebarNavContextMenuOrigin::Keyboard,
+    ));
+}
+
+/// Close from a dismissal (Escape or outside) and put focus back on the
+/// invoking item.
+fn sidebar_menu_dismiss(me: &Arc<SidebarMenuHost>, reason: poodle_node::DismissReason) {
+    sidebar_menu_close(
+        me,
+        &match reason {
             poodle_node::DismissReason::Escape => "escape",
             poodle_node::DismissReason::Outside => "outside",
-        });
-    }
+        },
+    );
+}
 
-    /// Close after a committed row and put focus back on the invoking item.
-    fn close(me: &Arc<Self>, reason: &'static str) {
-        use poodle_gpui_node_backend::request_focus;
+/// Close after a committed row and put focus back on the invoking item.
+fn sidebar_menu_close(me: &Arc<SidebarMenuHost>, reason: &'static str) {
+    use poodle_gpui_node_backend::request_focus;
 
-        if let Some((value, _)) = me.open.lock().expect("open lock").take() {
-            request_focus(&poodle_render::sidebar_nav_item_id(&value));
-            me.closes.lock().expect("close lock").push(reason);
-        }
-    }
-
-    /// The mounted tree: the production SidebarNav plus, when open, the
-    /// shared ContextMenu overlay anchored inside the root.
-    fn tree(me: &Arc<Self>) -> Node {
-        use poodle_specs::ContextMenuSpec;
-
-        let theme = theme();
-        let ctx = RenderContext::new(&theme);
-        let spec = poodle_specs::SidebarNavSpec::new(sidebar_menu_groups())
-            .with_aria_label("Saved views navigation");
-        let requests_host = Arc::clone(me);
-        let activations_host = Arc::clone(me);
-        let mut root = Node::container();
-        root.id = Some(FIXTURE_ID.to_owned());
-        root.position = NodePosition::Relative;
-        {
-            let s = &mut root.style;
-            s.descriptor.layout.width = LayoutSizing::Fixed(260.0);
-            s.descriptor.layout.height = LayoutSizing::Fixed(200.0);
-        }
-        root = root.child(poodle_render::sidebar_nav_with_handlers(
-            &spec,
-            &ctx,
-            poodle_render::SidebarNavHandlers {
-                on_change: Some(Arc::new(move |value| {
-                    activations_host
-                        .activations
-                        .lock()
-                        .expect("activation lock")
-                        .push(value.to_string());
-                })),
-                on_context_menu: Some(Arc::new(move |value, origin| {
-                    SidebarMenuHost::request(&requests_host, value, origin);
-                })),
-            },
-        ));
-
-        if let Some((value, (x, y))) = me.open.lock().expect("open lock").clone() {
-            let groups = sidebar_menu_groups();
-            let item = groups
-                .iter()
-                .flat_map(|group| group.items.iter())
-                .find(|item| item.value == value)
-                .expect("open menu item exists");
-            let actions_host = Arc::clone(me);
-            let action_value = value.clone();
-            let mut menu = poodle_render::context_menu(
-                &ContextMenuSpec::new(item.context_menu_items.clone())
-                    .with_aria_label(item.context_menu_aria_label_or_default()),
-                &ctx,
-                Some(Arc::new(move |action| {
-                    actions_host
-                        .payloads
-                        .lock()
-                        .expect("payload lock")
-                        .push((action_value.clone(), action.to_string()));
-                    SidebarMenuHost::close(&actions_host, "action");
-                })),
-            );
-            // The overlay joins the dismiss stack under its own layer so
-            // Escape and outside interactions close it through the real
-            // event tree; the web ContextMenu registers the same layer.
-            menu.interaction.dismiss_layer = Some("sidebar-nav-item-menu".to_owned());
-            let dismiss_host = Arc::clone(me);
-            menu.interaction.on_dismiss =
-                Some(Arc::new(move |reason| SidebarMenuHost::dismiss(&dismiss_host, reason)));
-            menu.position = NodePosition::Absolute {
-                top: Some(y),
-                left: Some(x),
-                right: None,
-                bottom: None,
-            };
-            root = root.child(menu);
-        }
-        root
+    if let Some((value, _)) = me.open.lock().expect("open lock").take() {
+        request_focus(&poodle_render::sidebar_nav_item_id(&value));
+        me.closes.lock().expect("close lock").push(reason);
     }
 }
+
+/// The mounted tree: the production SidebarNav plus, when open, the shared
+/// ContextMenu overlay anchored inside the root.
+fn sidebar_menu_tree(me: &Arc<SidebarMenuHost>) -> Node {
+    use poodle_specs::ContextMenuSpec;
+
+    let theme = theme();
+    let ctx = RenderContext::new(&theme);
+    let spec = poodle_specs::SidebarNavSpec::new(sidebar_menu_groups())
+        .with_aria_label("Saved views navigation");
+    let requests_host = Arc::clone(me);
+    let activations_host = Arc::clone(me);
+    let mut root = Node::container();
+    root.id = Some(FIXTURE_ID.to_owned());
+    root.position = NodePosition::Relative;
+    {
+        let s = &mut root.style;
+        s.descriptor.layout.width = LayoutSizing::Fixed(260.0);
+        s.descriptor.layout.height = LayoutSizing::Fixed(200.0);
+    }
+    root = root.child(poodle_render::sidebar_nav_with_handlers(
+        &spec,
+        &ctx,
+        poodle_render::SidebarNavHandlers {
+            on_change: Some(Arc::new(move |value| {
+                activations_host
+                    .activations
+                    .lock()
+                    .expect("activation lock")
+                    .push(value.to_string());
+            })),
+            on_context_menu: Some(Arc::new(move |value, origin| {
+                sidebar_menu_request(&requests_host, value, origin);
+            })),
+        },
+    ));
+
+    if let Some((value, (x, y))) = me.open.lock().expect("open lock").clone() {
+        let groups = sidebar_menu_groups();
+        let item = groups
+            .iter()
+            .flat_map(|group| group.items.iter())
+            .find(|item| item.value == value)
+            .expect("open menu item exists");
+        let actions_host = Arc::clone(me);
+        let action_value = value.clone();
+        let mut menu = poodle_render::context_menu(
+            &ContextMenuSpec::new(item.context_menu_items.clone())
+                .with_aria_label(item.context_menu_aria_label_or_default()),
+            &ctx,
+            Some(Arc::new(move |action| {
+                actions_host
+                    .payloads
+                    .lock()
+                    .expect("payload lock")
+                    .push((action_value.clone(), action.to_string()));
+                sidebar_menu_close(&actions_host, "action");
+            })),
+        );
+        // The overlay joins the dismiss stack under its own layer so Escape
+        // and outside interactions close it through the real event tree; the
+        // web ContextMenu registers the same layer.
+        menu.interaction.dismiss_layer = Some("sidebar-nav-item-menu".to_owned());
+        let dismiss_host = Arc::clone(me);
+        menu.interaction.on_dismiss =
+            Some(Arc::new(move |reason| sidebar_menu_dismiss(&dismiss_host, reason)));
+        menu.position = NodePosition::Absolute {
+            top: Some(y),
+            left: Some(x),
+            right: None,
+            bottom: None,
+        };
+        root = root.child(menu);
+    }
+    root
+}
+
 
 /// SidebarNav's per-item context menu: secondary click and the keyboard menu
 /// gestures open the shared ContextMenu for the invoking item only, a
@@ -36417,8 +36408,15 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
     use poodle_gpui_node_backend::{bounds_for, focus_state_for};
 
     run_headless(|cx| {
-        let host = SidebarMenuHost::new();
-        let mounted = Arc::new(Mutex::new(SidebarMenuHost::tree(&host)));
+        let host = Arc::new(SidebarMenuHost {
+            requests: Mutex::new(Vec::new()),
+            activations: Mutex::new(Vec::new()),
+            payloads: Mutex::new(Vec::new()),
+            closes: Mutex::new(Vec::new()),
+            open: Mutex::new(None),
+            mount: Mutex::new(None),
+        });
+        let mounted = Arc::new(Mutex::new(sidebar_menu_tree(&host)));
         *host.mount.lock().expect("mount ref") = Some(Arc::clone(&mounted));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 220.0);
         driver.wait_for_focus_handle("sidebar-nav-q4");
@@ -36434,7 +36432,7 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
         // Pointer path: right-click opens the item's menu at the pointer.
         let q4_center = driver.activation_target("sidebar-nav-q4").expect("q4 bounds");
         driver.pointer_press_right(q4_center);
-        SidebarMenuHost::remount(&host);
+        sidebar_menu_remount(&host);
         poodle_gpui_node_backend::request_focus("menu-item:rename");
         driver.draw_frame();
         assert_eq!(
@@ -36460,7 +36458,7 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
 
         // A committed row emits (itemValue, actionValue) and restores focus.
         driver.pointer_activate_id("menu-item:delete");
-        SidebarMenuHost::remount(&host);
+        sidebar_menu_remount(&host);
         driver.draw_frame();
         assert_eq!(
             host.payloads.lock().expect("payload lock").as_slice(),
@@ -36478,7 +36476,7 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
         // Keyboard path: Shift+F10 on the focused item opens at the item.
         driver.focus_element("sidebar-nav-cash");
         driver.dispatch_key_raw("shift-f10");
-        SidebarMenuHost::remount(&host);
+        sidebar_menu_remount(&host);
         poodle_gpui_node_backend::request_focus("menu-item:rename");
         driver.draw_frame();
         assert_eq!(
@@ -36511,7 +36509,7 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
 
         // Escape closes through the dismiss stack and restores focus.
         driver.dispatch_key("escape");
-        SidebarMenuHost::remount(&host);
+        sidebar_menu_remount(&host);
         driver.draw_frame();
         assert_eq!(host.closes.lock().expect("close lock").as_slice(), ["action", "escape"]);
         assert_eq!(
@@ -36523,7 +36521,7 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
         // The physical context-menu key opens the same menu.
         driver.focus_element("sidebar-nav-cash");
         driver.dispatch_key_raw("menu");
-        SidebarMenuHost::remount(&host);
+        sidebar_menu_remount(&host);
         poodle_gpui_node_backend::request_focus("menu-item:rename");
         driver.draw_frame();
         assert_eq!(
@@ -36536,7 +36534,7 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
             "the context-menu key opens the same menu with real focus in it"
         );
         driver.dispatch_key("escape");
-        SidebarMenuHost::remount(&host);
+        sidebar_menu_remount(&host);
         driver.draw_frame();
         assert_eq!(
             host.closes.lock().expect("close lock").as_slice(),
