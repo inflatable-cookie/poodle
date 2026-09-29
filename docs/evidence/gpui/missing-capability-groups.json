@@ -40,7 +40,6 @@
         "RemediationBanner",
         "ResizeHandle",
         "SettingsShell",
-        "SidebarNav",
         "Slider",
         "SplitButton",
         "ThemeSelect",
@@ -52,12 +51,12 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 33,
-        "events": 37,
-        "pointer": 41,
-        "keyboard_focus": 35,
-        "accessibility": 40,
-        "visual": 43
+        "semantic": 32,
+        "events": 36,
+        "pointer": 40,
+        "keyboard_focus": 34,
+        "accessibility": 39,
+        "visual": 42
       },
       "contracts": [
         "docs/contracts/components/agent-plan-record.md",
@@ -95,7 +94,6 @@
         "docs/contracts/components/remediation-banner.md",
         "docs/contracts/components/resize-handle.md",
         "docs/contracts/components/settings-shell.md",
-        "docs/contracts/components/sidebar-nav.md",
         "docs/contracts/components/slider.md",
         "docs/contracts/components/split-button.md",
         "docs/contracts/components/theme-select.md",

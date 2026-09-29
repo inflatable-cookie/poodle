@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Checkbox",
-  "test": "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec",
+  "component": "SidebarNav",
+  "test": "sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,27 +19,27 @@
     ],
     "events": [
       "payloads.lock",
-      "assert!(\n            payloads.lock().unwrap().is_empty(),\n            \"readonly does not change or emit",
-      "assert!(\n            payload"
+      "assert_eq!(\n            host.payloads.lock().expect(\"payload"
     ],
     "pointer": [
-      "pointer_activate"
+      "pointer_activate",
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
       "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
-      "NodeToggled"
+      "NodeRole"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::checkbox",
+    "renderer": "fixture-helper:sidebar_menu_remount",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -52,7 +52,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-09-29-poodle-060-instance-baseline-tabular-expected",
     "outcome": "passed",
-    "body_sha256": "906ac4b73bf343e60dd3d238fdb52a1bc087353e0e3458091651d9cc9866de19"
+    "body_sha256": "94f6c9418a0e26efd0671cfe3af9bda880ad313cde9ac41b432b190e97a8aeac"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

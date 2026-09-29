@@ -1,7 +1,7 @@
 # 002 Token System and Package Layout
 
 Status: active
-Updated: 2026-08-09
+Updated: 2026-09-30
 Depends on: [001 Poodle System Shape](001-poodle-system-shape.md)
 
 ## Purpose
@@ -46,8 +46,10 @@ W3C DTCG JSON
       +-- Rust token modules and theme definitions
 ```
 
-Generated outputs live under `packages/tokens/artifacts/` and are copied into
-their consumer packages where required. Do not edit generated artifacts by
+Generated CSS and TypeScript outputs live under `packages/tokens/artifacts/`
+and are copied into their consumer packages where required; the Rust family is
+emitted directly into the `poodle-tokens` crate so the crate is
+self-contained. Do not edit generated artifacts by
 hand. Run:
 
 ```sh
@@ -161,11 +163,11 @@ introduce backend-only theme values.
 ## Package Ownership
 
 ```text
-packages/tokens/            canonical schema and generated artifacts
+packages/tokens/            canonical schema; generated CSS and TS artifacts
 packages/core/              public framework-free web surface
 packages/svelte/components/ Svelte component package
 packages/react/components/  React component package
-packages/contracts/tokens/  generated Rust token consumer
+packages/contracts/tokens/  generated Rust token consumer crate
 packages/render/            shared Rust component renderer
 packages/gpui/              GPUI adapter and node backend
 packages/jetstream/         Jetstream adapter

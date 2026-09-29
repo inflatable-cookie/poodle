@@ -9,11 +9,7 @@ Status: answered 2026-09-29 — no. See [vision](vision.md#direction).
 
 ## Q-001 — Which product frontier comes next?
 
-Status: open (asked 2026-09-24)
-
-No Poodle work is queued. The candidates are the Queue plan's lanes (`lane:next-frontier`). The
-planner's recommendation is a small GPUI repair tranche on basic
-selection-navigation controls (Button, Checkbox, Radio, ToggleGroup,
-Accordion), compiled from the
-[GPUI functionality census](../evidence/gpui/gpui-functionality-census.md).
-The operator has not answered.
+Status: answered 2026-09-29 — finish `lane:native-admission`, then a small
+GPUI repair tranche on Button, Checkbox, Radio, ToggleGroup and Accordion from
+the [GPUI functionality census](../evidence/gpui/gpui-functionality-census.md)
+(`lane:gpui-selection-repair`). The Queue plan holds the order.

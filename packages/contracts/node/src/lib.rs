@@ -265,6 +265,12 @@ pub struct NodeStyle {
     pub text_italic: bool,
     /// Font family request (`poodle_style::FontFamily`), same optionality.
     pub font_family: Option<FontFamily>,
+    /// Request tabular figures (OpenType `tnum`) for this text: every digit
+    /// advances the same width, so counts in a column line up. Maps to the
+    /// font's `tnum` feature where the backend supports font features; a
+    /// backend without the channel ignores the flag rather than substituting
+    /// a different alignment trick.
+    pub tabular_figures: bool,
     /// Line height as a multiple of the font size.
     pub line_height: Option<f32>,
     /// Soft-wrap text to the container width (white-space: normal).
@@ -390,6 +396,7 @@ impl Default for NodeStyle {
             text_weight: None,
             text_italic: false,
             font_family: None,
+            tabular_figures: false,
             line_height: None,
             text_wrap: false,
             fill_height: false,
@@ -597,6 +604,15 @@ pub enum NodeKey {
     F2,
     /// Close/delete on a focused item (closable tabs, for example).
     Delete,
+    /// The physical keyboard context-menu key. A component that hosts an
+    /// item-scoped menu maps this to the same open path as its secondary
+    /// activation (the web `ContextMenu` key); the backend reports it and
+    /// never decides which node opens a menu.
+    ContextMenu,
+    /// The F10 function key. Shift+F10 is the web's second context-menu
+    /// gesture; the bare key carries no menu meaning, so the component
+    /// checks the modifiers it receives alongside this variant.
+    F10,
 }
 
 /// Where a drop lands relative to the target it is over — the three-value

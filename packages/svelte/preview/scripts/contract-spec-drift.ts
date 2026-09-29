@@ -150,14 +150,6 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
   code: {
     wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
   },
-  "sidebar-nav": {
-    endLabel:
-      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
-    contextMenuItems:
-      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
-    contextMenuAriaLabel:
-      "operator ruling 2026-09-27: web-admitted item field; native admission pending (`lane:native-admission`)",
-  },
   pill: {
     dismissible:
       "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",

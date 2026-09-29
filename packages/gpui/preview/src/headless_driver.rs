@@ -438,6 +438,38 @@ impl<'a> HeadlessDriver<'a> {
         }));
     }
 
+    /// Right-button pointer press: the secondary activation the node backend
+    /// routes through `Interaction::on_context`.
+    pub fn pointer_press_right(&mut self, position: Point<Pixels>) {
+        self.pointer_event(PlatformInput::MouseDown(MouseDownEvent {
+            position,
+            modifiers: Modifiers::none(),
+            button: MouseButton::Right,
+            click_count: 1,
+            first_mouse: false,
+        }));
+    }
+
+    /// Right-button release matching [`Self::pointer_press_right`].
+    pub fn pointer_release_right(&mut self, position: Point<Pixels>) {
+        self.pointer_event(PlatformInput::MouseUp(MouseUpEvent {
+            position,
+            modifiers: Modifiers::none(),
+            button: MouseButton::Right,
+            click_count: 1,
+        }));
+    }
+
+    /// Secondary activation (right press/release) at a named element's
+    /// painted bounds center.
+    pub fn pointer_secondary_activate_id(&mut self, element_id: &str) {
+        let Ok(center) = self.activation_target(element_id) else {
+            panic!("no painted bounds for secondary activation: {element_id}");
+        };
+        self.pointer_press_right(center);
+        self.pointer_release_right(center);
+    }
+
     /// Pointer drag: a move while the left button is held.
     pub fn pointer_drag(&mut self, position: Point<Pixels>) {
         self.pointer_drag_details(position, Modifiers::none());

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "a797ce413d378795a8698d6782b003560878315a",
+  "source_commit": "1a06aab18a07d46429211937e45716d24df3c364",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -5999,15 +5999,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#sidebar_nav_instance_scopes_keep_same_value_rows_distinct"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#sidebar_nav_instance_scopes_keep_same_value_rows_distinct"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6016,9 +6040,28 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-labels-render-muted-metadata-and-describe-the-item.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-foo-and-foo-end-label-values-keep-distinct-ids.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-vertical-tab-and-form-feed-values-encode-in-ids.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-instance-scopes-keep-same-value-rows-distinct.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-wrapped-label-keeps-the-end-label-on-its-first-line.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-end-label-counts-paint-tabular.json",
+        "docs/evidence/gpui/mounted-receipts/SidebarNav--sidebar-nav-item-context-menu-opens-by-pointer-and-keyboard-and-restores-focus.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for SidebarNav; every required capability stays missing."
+        "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no events claim; events stays missing.",
+        "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no pointer claim; pointer stays missing.",
+        "Expected test sidebar_nav_end_labels_render_muted_metadata_and_describe_the_item proves no keyboard_focus claim; keyboard_focus stays missing.",
+        "Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no events claim; events stays missing.",
+        "Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no pointer claim; pointer stays missing.",
+        "Expected test sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids proves no keyboard_focus claim; keyboard_focus stays missing.",
+        "Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no events claim; events stays missing.",
+        "Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no pointer claim; pointer stays missing.",
+        "Expected test sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids proves no keyboard_focus claim; keyboard_focus stays missing.",
+        "Expected test sidebar_nav_instance_scopes_keep_same_value_rows_distinct proves no events claim; events stays missing.",
+        "Expected test sidebar_nav_wrapped_label_keeps_the_end_label_on_its_first_line proves no events claim; events stays missing.",
+        "Expected test sidebar_nav_end_label_counts_paint_tabular proves no events claim; events stays missing."
       ]
     },
     {
@@ -7522,18 +7565,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 73,
-    "fullyAdmittedRows": 24,
+    "admittedRows": 74,
+    "fullyAdmittedRows": 25,
     "missingTally": {
-      "semantic": 102,
-      "events": 101,
-      "pointer": 112,
-      "keyboard_focus": 97,
-      "accessibility": 123,
-      "visual": 144
+      "semantic": 101,
+      "events": 100,
+      "pointer": 111,
+      "keyboard_focus": 96,
+      "accessibility": 122,
+      "visual": 143
     },
     "holdCount": 175,
-    "refusalCount": 224
+    "refusalCount": 235
   },
   "groups": [
     {
@@ -7574,7 +7617,6 @@
         "RemediationBanner",
         "ResizeHandle",
         "SettingsShell",
-        "SidebarNav",
         "Slider",
         "SplitButton",
         "ThemeSelect",
@@ -7586,12 +7628,12 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 33,
-        "events": 37,
-        "pointer": 41,
-        "keyboard_focus": 35,
-        "accessibility": 40,
-        "visual": 43
+        "semantic": 32,
+        "events": 36,
+        "pointer": 40,
+        "keyboard_focus": 34,
+        "accessibility": 39,
+        "visual": 42
       },
       "contracts": [
         "docs/contracts/components/agent-plan-record.md",
@@ -7629,7 +7671,6 @@
         "docs/contracts/components/remediation-banner.md",
         "docs/contracts/components/resize-handle.md",
         "docs/contracts/components/settings-shell.md",
-        "docs/contracts/components/sidebar-nav.md",
         "docs/contracts/components/slider.md",
         "docs/contracts/components/split-button.md",
         "docs/contracts/components/theme-select.md",

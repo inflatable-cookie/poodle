@@ -137,7 +137,9 @@ Component parity depends on a small renderer vocabulary. Poodle certifies:
 - layout, sizing, clipping, and scroll
 - surface, border, radius, shadow, text, and icon
 - control state and semantic token projection
-- focus, keyboard, pointer, dismissal, and overlay placement
+- focus, keyboard, pointer, dismissal, and overlay placement (the shared
+  vocabulary names Escape as its own `NodeKey`; `Interaction::on_cancel`
+  stays for cancelling an input edit, operator ruling 2026-09-29)
 - accessibility projection
 - text editing and IME boundaries
 

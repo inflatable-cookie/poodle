@@ -10,7 +10,11 @@ archive set, then publishes those exact bytes.
 With `POODLE_WEB_PACK_INSTALL_SCOPE_MODE` unset, the selector is ordinary
 installed-package smoke. It clones the exact committed proof point into a
 disposable checkout, builds and packs each package twice, and installs the
-archives into a consumer with no workspace or source aliases. It checks archive
+archives into a consumer with no workspace or source aliases. Transitives
+already resolved in the repository `bun.lock` stay at those versions instead
+of floating to npm latest. Package-context resolutions become nested overrides
+under their parent so both the top-level and context versions stay locked.
+It checks archive
 members, export targets, build receipts, CSS/parser edges, browser and SSR
 lanes, the Svelte `5.56.8` floor, the visible `5.38.6` below-floor failure,
 declarations under Bundler and NodeNext, and the frozen 176-name roster.
