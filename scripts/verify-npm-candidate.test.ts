@@ -17,8 +17,19 @@ afterAll(() => {
 });
 
 const SOURCE_COMMIT = "a".repeat(40);
+const PACKED_PACKAGES = [
+  { name: "@inflatable-cookie/poodle-core", path: "packages/core", tarball: "core.tgz" },
+  { name: "@inflatable-cookie/poodle-svelte", path: "packages/svelte/components", tarball: "svelte.tgz" },
+] as const;
 
-function packFake(work: string, name: string, version: string, tarballName: string): string {
+// Identity cases used to hit bun's default 5s timeout under load (all 4
+// packed per case at Queue's gate for #55). Pack once, copy the two tiny
+// tarballs into each case — same cut as the shared clone in
+// web-candidate.test.ts. Measured 2026-09-29 at load 23–27: 5 consecutive
+// runs 84–157ms, slowest case 77ms. Default 5s keeps ~60x headroom; no cap.
+let packedTemplate: { dir: string; version: string } | undefined;
+
+function packFake(work: string, name: string, version: string, tarballName: string): void {
   const staging = join(work, `staging-${tarballName}`);
   mkdirSync(join(staging, "package"), { recursive: true });
   writeFileSync(
@@ -28,7 +39,15 @@ function packFake(work: string, name: string, version: string, tarballName: stri
   const tarball = join(work, tarballName);
   const child = Bun.spawnSync(["tar", "-czf", tarball, "-C", staging, "package"]);
   if (child.exitCode !== 0) throw new Error(child.stderr.toString());
-  return tarball;
+}
+
+function ensurePackedTemplate(version: string): string {
+  if (packedTemplate?.version === version) return packedTemplate.dir;
+  const dir = mkdtempSync(join(tmpdir(), "poodle-npm-candidate-pack-"));
+  roots.push(dir);
+  for (const entry of PACKED_PACKAGES) packFake(dir, entry.name, version, entry.tarball);
+  packedTemplate = { dir, version };
+  return dir;
 }
 
 function makeCandidate(options: { version?: string; stray?: boolean } = {}): {
@@ -36,16 +55,17 @@ function makeCandidate(options: { version?: string; stray?: boolean } = {}): {
   manifestPath: string;
 } {
   const version = options.version ?? "0.5.0";
+  const template = ensurePackedTemplate(version);
   const dir = mkdtempSync(join(tmpdir(), "poodle-npm-candidate-"));
   roots.push(dir);
-  const packages = [
-    { name: "@inflatable-cookie/poodle-core", path: "packages/core", tarball: "core.tgz" },
-    { name: "@inflatable-cookie/poodle-svelte", path: "packages/svelte/components", tarball: "svelte.tgz" },
-  ];
-  const entries = packages.map((entry) => {
-    packFake(dir, entry.name, version, entry.tarball);
-    return { ...entry, version, sha256: sha256File(join(dir, entry.tarball)) };
-  });
+  for (const entry of PACKED_PACKAGES) {
+    cpSync(join(template, entry.tarball), join(dir, entry.tarball));
+  }
+  const entries = PACKED_PACKAGES.map((entry) => ({
+    ...entry,
+    version,
+    sha256: sha256File(join(dir, entry.tarball)),
+  }));
   if (options.stray) cpSync(join(dir, entries[0].tarball), join(dir, "stray.tgz"));
   const manifestPath = join(dir, "poodle-npm-candidate.json");
   writeFileSync(

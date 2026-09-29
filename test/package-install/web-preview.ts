@@ -14,6 +14,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve, basename } from "node:path";
 
 import { packedMemberMissing } from "./archive-membership";
+import { declaredPackageNames, lockedTransitiveOverrides } from "./consumer-lock";
 import { resolvePackArchivePath } from "./pack-archives";
 import { buildCore } from "../../scripts/web-distribution/core-build";
 import { readNpmPublicationAuthority } from "../../scripts/npm-publication";
@@ -1270,33 +1271,41 @@ const tarballDependencies = Object.fromEntries(
     `file:${packedPackage.archivePath}`,
   ]),
 );
+const consumerDependencies = {
+  ...tarballDependencies,
+  react: "18.0.0",
+  "react-dom": "18.0.0",
+  svelte: "5.56.8",
+  marked: "^18.0.9",
+  // g18.012: the consumer chooses its own grammar packages. Exactly one is
+  // installed here; the EditorLanguageRegistry fixture proves unselected
+  // grammars stay absent from this isolated install graph.
+  "@codemirror/lang-json": "6.0.2",
+};
+const consumerDevDependencies = {
+  "@sveltejs/vite-plugin-svelte": "6.2.1",
+  "@testing-library/react": "16.3.0",
+  "@testing-library/svelte": "5.4.2",
+  "@types/react": "18.3.18",
+  "@types/react-dom": "18.3.5",
+  "happy-dom": "20.11.1",
+  typescript: "7.0.2",
+  vite: "7.3.1",
+  vitest: "4.1.10",
+};
 const consumerManifest = {
   name: "@inflatable-cookie/poodle-packed-install-proof",
   private: true,
   type: "module",
-  dependencies: {
+  dependencies: consumerDependencies,
+  overrides: {
+    ...lockedTransitiveOverrides({
+      lockText: readFileSync(join(repoRoot, "bun.lock"), "utf8"),
+      declaredNames: declaredPackageNames(consumerDependencies, consumerDevDependencies),
+    }),
     ...tarballDependencies,
-    react: "18.0.0",
-    "react-dom": "18.0.0",
-    svelte: "5.56.8",
-    marked: "^18.0.9",
-    // g18.012: the consumer chooses its own grammar packages. Exactly one is
-    // installed here; the EditorLanguageRegistry fixture proves unselected
-    // grammars stay absent from this isolated install graph.
-    "@codemirror/lang-json": "6.0.2",
   },
-  overrides: tarballDependencies,
-  devDependencies: {
-    "@sveltejs/vite-plugin-svelte": "6.2.1",
-    "@testing-library/react": "16.3.0",
-    "@testing-library/svelte": "5.4.2",
-    "@types/react": "18.3.18",
-    "@types/react-dom": "18.3.5",
-    "happy-dom": "20.11.1",
-    typescript: "7.0.2",
-    vite: "7.3.1",
-    vitest: "4.1.10",
-  },
+  devDependencies: consumerDevDependencies,
 };
 await Bun.write(
   join(consumerRoot, "package.json"),
