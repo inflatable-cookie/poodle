@@ -498,14 +498,51 @@ impl<'a> HeadlessDriver<'a> {
     }
 
     /// One press/release at the last-painted bounds of a named element.
+    ///
+    /// Fails loudly, never silently: an element the last frame never painted,
+    /// or whose center cannot be dispatched to, panics with the element named
+    /// by way of [`Self::activation_target`]. There is no fallback click — a
+    /// missing id must never turn into a guess at the mount box.
     pub fn pointer_activate_id(&mut self, element_id: &str) {
-        match poodle_gpui_node_backend::bounds_for(element_id) {
-            Some(bounds) => {
-                self.pointer_press(bounds.center());
-                self.pointer_release(bounds.center());
-            }
-            None => self.pointer_activate_at(0.92),
+        let target = self
+            .activation_target(element_id)
+            .unwrap_or_else(|message| panic!("headless driver: {message}"));
+        self.pointer_press(target);
+        self.pointer_release(target);
+    }
+
+    /// The point `pointer_activate_id` would press, or why it cannot.
+    ///
+    /// gpui 0.2.2's hit test intersects each registered hitbox with the
+    /// content mask active where it painted, and the mask the mount host
+    /// leaves in place is the window viewport. The mount box itself never
+    /// clips (a press outside it but inside the viewport still dispatches),
+    /// so the honest boundary for "this input cannot reach the element" is
+    /// the viewport, not the 160x60 box. Returning the reason instead of
+    /// pressing at the box lets a regression assert unreachability without
+    /// relying on a silent no-op.
+    pub fn activation_target(&mut self, element_id: &str) -> Result<Point<Pixels>, String> {
+        let Some(bounds) = poodle_gpui_node_backend::bounds_for(element_id) else {
+            return Err(format!(
+                "element `{element_id}` has no painted bounds, so there is nothing to click; \
+                 the id is wrong, the element did not paint, or it belongs to another window"
+            ));
+        };
+        let target = bounds.center();
+        let viewport = self.cx.update(|window, _cx| window.viewport_size());
+        let visible = Bounds {
+            origin: point(px(0.0), px(0.0)),
+            size: viewport,
+        };
+        if !visible.contains(&target) {
+            return Err(format!(
+                "element `{element_id}` center {target:?} is outside the window viewport \
+                 {visible:?}, so the press can never reach it and the click would pass \
+                 silently; mount the tree in a box that keeps it on screen with \
+                 `HeadlessDriver::new_in_box`, or scroll it into view first"
+            ));
         }
+        Ok(target)
     }
 
     /// Scroll the mounted box through GPUI's real wheel dispatch.
