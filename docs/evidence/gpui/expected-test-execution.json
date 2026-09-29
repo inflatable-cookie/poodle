@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-09-29-poodle-060-collision-safe-ids-expected",
-  "source_commit": "62d52ecd7a9b967225ba7df40450cd6e48db5437",
+  "run_id": "2026-09-29-poodle-060-all-whitespace-ids-expected",
+  "source_commit": "e85a780efbae353eae4bcf21e5360a1030716bcd",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -277,6 +277,10 @@
     "sidebar_nav_foo_and_foo_end_label_values_keep_distinct_ids": {
       "outcome": "passed",
       "body_sha256": "6f99a3b470035d44c73f2dfe150855592ca952e7a5c7d285641a2dcf90c1333d"
+    },
+    "sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids": {
+      "outcome": "passed",
+      "body_sha256": "47cb1edfd00e70f94bb98b78806b26c4e748235936d78ff58d2f34b510629aed"
     }
   }
 }

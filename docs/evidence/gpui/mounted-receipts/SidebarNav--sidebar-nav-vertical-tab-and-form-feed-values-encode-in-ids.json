@@ -1,35 +1,25 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "ResizeHandle",
-  "test": "a_focused_resize_handle_steps_the_pane_and_its_declared_value",
+  "component": "SidebarNav",
+  "test": "sidebar_nav_vertical_tab_and_form_feed_values_encode_in_ids",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
-    "semantic",
-    "keyboard_focus",
-    "accessibility"
+    "semantic"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
-    ],
-    "keyboard_focus": [
-      "focus_state_for",
-      "focus_element",
-      "dispatch_key"
-    ],
-    "accessibility": [
-      "a11y."
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::ResizePhase",
+    "renderer": "poodle_render::sidebar_nav",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -42,12 +32,10 @@
     "command": "effigy regressions:native",
     "run_id": "2026-09-29-poodle-060-all-whitespace-ids-expected",
     "outcome": "passed",
-    "body_sha256": "b67f2c0dc0acad950e54a8cd22ed9836f7ed461832f64c5d007780d743a9fdf1"
+    "body_sha256": "47cb1edfd00e70f94bb98b78806b26c4e748235936d78ff58d2f34b510629aed"
   },
   "observed": [
-    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning"
   ],
   "outcome": "passed"
 }
