@@ -788,17 +788,21 @@
 # which would reformat generated Rust that must stay byte-identical to its
 # generator (ir:check, catalogue:check, audit:tokens and audit:icons own that
 # identity). The script enumerates each crate's authored `.rs` files and drives
-# rustfmt with the crate's edition and `--config skip_children=true`; the
-# colocated test pins that flag and the exclusion patterns. `--write` is the
-# formatting twin: `bun scripts/check-rustfmt.ts --write` before committing.
+# rustfmt with the crate's edition and `--config skip_children=true`;
+# `--self-test` proves the exclusion boundary and that recursion guard end to
+# end on a scratch crate. It is POSIX shell on purpose: the ubuntu ci:rust job
+# ships sh, git and rustfmt and no Bun (a `bun:` selector there failed with
+# exit 127), and workflow edits are out of scope. `--write` is the formatting
+# twin: `sh scripts/check-rustfmt.sh --write` before committing.
 # Generated-and-excluded: `generated/` directories (build-tokens.ts,
 # poodle-codegen machine-rust / shell-rust / specimen-rust / catalogue-rust)
 # and `*.generated.rs` (build-default-icons.ts).
 # Runtime recorded 2026-09-30 (warm checkout, rustfmt 1.95 and 1.97 agree):
-# ~1.6s wall for the check; the script's unit tests add ~0.1s.
+# ~2.3s wall for the check (17 crates, 867 files) and ~0.1s for the
+# self-test; identical result under macOS sh and dash.
 "check:rustfmt" = [
-  { run = "bun scripts/check-rustfmt.ts" },
-  { run = "bun test scripts/check-rustfmt.test.ts" },
+  { run = "sh scripts/check-rustfmt.sh" },
+  { run = "sh scripts/check-rustfmt.sh --self-test" },
 ]
 # ir:check / catalogue:check need cargo; they stay off ci:web. A GENERATOR_VERSION
 # restamp that is not regenerated used to pass every board Queue runs.
