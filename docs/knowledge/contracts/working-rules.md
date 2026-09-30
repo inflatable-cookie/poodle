@@ -311,13 +311,16 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    2026-09-30: per-task full QA wedged the machine and filled the disk).
    Tasks merge on targeted checks, exact-head review and required PR CI.
 3. **Milestone proof:** the planner runs `effigy ci:fresh` on `main` at
-   release points and after a major chunk of work. It runs
+   release points and after a major chunk of work, through Queue
+   (`project.qa.run` with `{"repository": "inflatable-cookie/poodle",
+   "baseBranch": "main"}`, then `project.qa.get`; the repository's Queue `qa`
+   setting is `effigy ci:fresh`, one-hour timeout). It runs
    `bun install --frozen-lockfile` then `ci` (`ci:web` and `ci:rust`) with
    the Bun pinned in `package.json` `packageManager`, fetched through `bunx`
    when the host Bun differs, because Bun versions lay out `node_modules`
    differently and that changes declaration emit. It must leave
    `git status --porcelain` empty. Native, windowed and release gates stay
-   out. On macOS the planner also runs `effigy check:gpui`, which carries the
+   out. The planner also runs `effigy check:gpui` locally on macOS, which carries the
    macOS-only GPUI preview unit tests (`test:gpui-preview`) that the Ubuntu
    PR lanes can't compile (planner ruling 2026-09-30). A red milestone run is
    triaged into papercuts or tasks before the release goes on.

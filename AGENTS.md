@@ -76,8 +76,9 @@ Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
   `ci:web`, `ci:rust`, `docs:check`, `ci:fresh`), no repeat passes.
 - **Reviewers** read the diff, run the same targeted checks and exercise the
   behaviour. No suites.
-- **The planner** runs `effigy ci:fresh` on `main` at release points and after
-  a major chunk of work, and briefs fixes for what it finds.
+- **The planner** runs milestone QA (`effigy ci:fresh`) on `main` through
+  Queue's `project.qa.run` at release points and after a major chunk of work,
+  and briefs fixes for what it finds.
 - Briefs name the targeted checks as acceptance. Required PR CI still runs on
   GitHub; workers don't wait or poll for it.
 
