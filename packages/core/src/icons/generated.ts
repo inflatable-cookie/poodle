@@ -54,6 +54,7 @@ import { gripVertical } from "./icons/grip-vertical";
 import { heading } from "./icons/heading";
 import { heart } from "./icons/heart";
 import { helpCircle } from "./icons/help-circle";
+import { history } from "./icons/history";
 import { home } from "./icons/home";
 import { house } from "./icons/house";
 import { image } from "./icons/image";
@@ -83,11 +84,13 @@ import { pause } from "./icons/pause";
 import { pauseCircle } from "./icons/pause-circle";
 import { pencil } from "./icons/pencil";
 import { piano } from "./icons/piano";
+import { pin } from "./icons/pin";
 import { play } from "./icons/play";
 import { plus } from "./icons/plus";
 import { quote } from "./icons/quote";
 import { redo } from "./icons/redo";
 import { refreshCw } from "./icons/refresh-cw";
+import { rotateCcwClock } from "./icons/rotate-ccw-clock";
 import { save } from "./icons/save";
 import { search } from "./icons/search";
 import { settings } from "./icons/settings";
@@ -172,6 +175,7 @@ export {
   heading,
   heart,
   helpCircle,
+  history,
   home,
   house,
   image,
@@ -201,11 +205,13 @@ export {
   pauseCircle,
   pencil,
   piano,
+  pin,
   play,
   plus,
   quote,
   redo,
   refreshCw,
+  rotateCcwClock,
   save,
   search,
   settings,
@@ -291,6 +297,7 @@ export const defaultLucideIconSet: IconSet = {
   "heading": heading,
   "heart": heart,
   "help-circle": helpCircle,
+  "history": history,
   "home": home,
   "house": house,
   "image": image,
@@ -320,11 +327,13 @@ export const defaultLucideIconSet: IconSet = {
   "pause-circle": pauseCircle,
   "pencil": pencil,
   "piano": piano,
+  "pin": pin,
   "play": play,
   "plus": plus,
   "quote": quote,
   "redo": redo,
   "refresh-cw": refreshCw,
+  "rotate-ccw-clock": rotateCcwClock,
   "save": save,
   "search": search,
   "settings": settings,

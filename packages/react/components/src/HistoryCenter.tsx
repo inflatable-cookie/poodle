@@ -671,7 +671,7 @@ export function HistoryCenter({
               disabled={state.disabled}
               title={listLabel}
             >
-              <Icon name="chevron-down" size={resolvedSize} />
+              <Icon name="history" size={resolvedSize} />
             </button>
           )}
         >
@@ -768,7 +768,7 @@ export function HistoryCenter({
                                 >
                                   {row.entry.checkpoint === true ? (
                                     <span className="poodle-history-center__pin">
-                                      <Icon name="git-commit-horizontal" size={resolvedSize} />
+                                      <Icon name="pin" size={resolvedSize} />
                                     </span>
                                   ) : (
                                     <span
