@@ -23,7 +23,7 @@ Updated: 2026-07-10
 ```text
 [Root .poodle-form-layout]  <div>
   ├── [Description .poodle-form-layout__description]  <p> (optional)
-  ├── [ErrorCallout]  Callout (tone="danger") (optional)
+  ├── [ErrorCallout]  Callout (tone="danger", announceMode="assertive") (optional)
   ├── [SuccessCallout]  Callout (tone="success") (optional)
   ├── [FieldErrors .poodle-form-layout__field-errors]  <div> (optional)
   │     ├── [ErrorHeading]  <p> "Please fix the following errors:"
@@ -40,7 +40,7 @@ Updated: 2026-07-10
 |------|----------|-------------|---------------|
 | Root | yes | flex column container with container-type inline-size | gap (stack-lg) |
 | Description | no | introductory help text | text-secondary, body typography |
-| ErrorCallout | no | form-level error message via Callout | delegates to Callout contract (tone="danger") |
+| ErrorCallout | no | form-level error message via assertive alert Callout | delegates to Callout contract (tone="danger", announceMode="assertive") |
 | SuccessCallout | no | form-level success message via Callout | delegates to Callout contract (tone="success") |
 | FieldErrors | no | accessible error summary list | status-danger background/border, label typography |
 | Grid | yes | responsive CSS grid for form fields | grid columns, row-gap (`stack-lg + 0.625rem`), column-gap (`inline-md`) |
@@ -120,10 +120,13 @@ None. FormLayout is a structural composite with no component-owned events.
 
 - Field Error Summary: `role="alert"` with `aria-live="polite"` for automatic
   announcement when errors appear
+- Form-level error Callout: `role="alert"` with `aria-live="assertive"`; the
+  full error message is announced when it first appears and when its text
+  changes, while an unchanged message does not create a new alert
 - Error list heading: `<p>` with text "Please fix the following errors:"
 - Error list: `<ul>` with `<li>` items showing `<strong>{field}</strong>: {message}`
 - Individual field errors: managed by Field primitive's own accessibility
-- Callout components: provide their own ARIA semantics
+- Success Callout: uses the Callout contract's default non-announcing semantics
 
 ### Keyboard
 
@@ -261,7 +264,7 @@ Uses `container-type: inline-size` on the root element.
 
 | Part | Delegates To |
 |------|-------------|
-| ErrorCallout | Callout contract (foundation), `tone="danger"` |
+| ErrorCallout | Callout contract (foundation), `tone="danger"`, `announceMode="assertive"` |
 | SuccessCallout | Callout contract (foundation), `tone="success"` |
 | FormActions | FormActions contract (foundation) |
 

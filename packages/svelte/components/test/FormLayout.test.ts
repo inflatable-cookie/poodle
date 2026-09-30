@@ -29,6 +29,10 @@ describe("FormLayout (svelte)", () => {
     });
     expect(container.textContent).toContain("Unable to save");
     expect(container.textContent).toContain("Saved");
+    const errorCallout = container.querySelector('.poodle-callout[data-tone="danger"]') as HTMLElement;
+    expect(errorCallout.getAttribute("role")).toBe("alert");
+    expect(errorCallout.getAttribute("aria-live")).toBe("assertive");
+    expect(errorCallout.textContent).toContain("Unable to save");
   });
 
   it("renders the field error summary as a polite alert", () => {

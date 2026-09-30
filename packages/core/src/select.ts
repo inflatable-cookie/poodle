@@ -227,13 +227,15 @@ function openList(context: SelectContext): SelectResult {
     return inert(context);
   }
 
+  const query = context.searchable ? "" : context.query;
   const next: SelectContext = {
     ...context,
     open: true,
-    highlightedValue: selectOpenHighlightValue({ ...context, open: true }),
+    query,
+    highlightedValue: selectOpenHighlightValue({ ...context, open: true, query }),
   };
 
-  return { context: next, effects: orderedEffects(context, next, false) };
+  return { context: next, effects: orderedEffects(context, next, context.searchable) };
 }
 
 function closeList(context: SelectContext): SelectResult {

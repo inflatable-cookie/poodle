@@ -140,8 +140,11 @@ fn open_list(context: SelectContext) -> (SelectContext, Vec<SelectEffect>) {
 
     let mut next = context.clone();
     next.open = true;
+    if next.searchable {
+        next.query.clear();
+    }
     next.highlighted_value = select_open_highlight_value(&next);
-    let effects = ordered_effects(&context, &next, false);
+    let effects = ordered_effects(&context, &next, next.searchable);
     (next, effects)
 }
 

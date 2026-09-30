@@ -159,6 +159,7 @@ export function Select({
   const isGrouped = normalizedOptions.length > 0 && "options" in normalizedOptions[0];
   const normalizedGroups = isGrouped ? (normalizedOptions as SelectOptionGroup[]) : [];
   const selectedOption = flatOptions.find((entry) => entry.value === currentValue) ?? null;
+  const searchInputValue = open ? query : hasSelection ? (selectedOption?.label ?? currentValue) : query;
   const filteredOptions =
     searchable && query.length > 0
       ? flatOptions.filter((entry) => entry.label.toLowerCase().includes(query.toLowerCase()))
@@ -283,7 +284,18 @@ export function Select({
   }
 
   function dispatch(event: SelectEvent, from = machineContext()): SelectContext {
-    return applyResult(selectTransition(from, event));
+    const result = selectTransition(from, event);
+    const next = applyResult(result);
+
+    const queryChanged = result.effects.some((effect) => effect.type === "queryChanged");
+    if (
+      isLazy &&
+      ((result.context.open && queryChanged) || (event.type === "CLEAR" && result.effects.length > 0))
+    ) {
+      void startLoad(result.context.query);
+    }
+
+    return next;
   }
 
   function selectOption(option: SelectOption): void {
@@ -293,7 +305,6 @@ export function Select({
   function handleInputInput(event: ChangeEvent<HTMLInputElement>): void {
     const next = event.currentTarget.value;
     dispatch({ type: "QUERY", query: next });
-    if (isLazy) void startLoad(next);
   }
 
   function handleKeydown(event: KeyboardEvent): void {
@@ -330,7 +341,6 @@ export function Select({
   function handleClear(event: MouseEvent): void {
     event.stopPropagation();
     dispatch({ type: "CLEAR" });
-    if (isLazy) void startLoad("");
   }
 
   function handleControlFocusOut(event: FocusEvent<HTMLDivElement>): void {
@@ -557,7 +567,7 @@ export function Select({
             ref={inputRef}
             className="poodle-select__input"
             type="text"
-            value={query}
+            value={searchInputValue}
             disabled={disabled}
             placeholder={placeholder ?? undefined}
             aria-autocomplete="list"

@@ -66,7 +66,7 @@ Updated: 2026-09-07
 | Indicator | conditional | decorative disclosure chevron (Icon component); always present in native, searchable custom, and non-searchable custom mode — ghost keeps it too | icon color |
 | Trigger Area | custom + searchable | combobox container with ARIA role | position |
 | Trigger Button | custom + non-searchable | button that opens the dropdown | typography, text color |
-| Input | custom + searchable | text query input for filtering | border, background, typography |
+| Input | custom + searchable | active query input while open; shows the committed option label (or freeform value) while closed | border, background, typography |
 | Hidden Input | custom + name prop | hidden input for form submission | none |
 | Listbox | custom mode | dropdown overlay containing options | position, border, radius, background, shadow |
 | Option Button | custom mode | selectable option in dropdown | padding, radius, background, color, cursor |
@@ -160,6 +160,7 @@ The component automatically determines whether to render a native `<select>` or 
 | placeholder | no value selected, placeholder prop set | placeholder text in secondary color, `data-placeholder="true"` |
 | clearable reset | `clearable=true` | placeholder option remains selectable and maps to `defaultValue` |
 | selected | value matches an option | option label displayed in primary color |
+| searchable open | searchable custom Select opens | active query is empty, all options are visible, and the committed option remains selected and highlighted |
 | focus | keyboard focus within (`:root[data-poodle-input-modality="keyboard"]`) | focus ring via border-color change, background shift, box-shadow |
 | disabled | `disabled=true` | reduced opacity on root, non-interactive |
 | loading | lazy loader pending | native fallback option shows `Loading...` |
@@ -176,6 +177,7 @@ The component automatically determines whether to render a native `<select>` or 
 | value selected | user picks an option | `value` updates and `onValueChange` fires with selected option value |
 | placeholder shown | no value and placeholder set | placeholder option displayed, disabled in dropdown |
 | query active (custom) | user types in searchable input | options filtered by query, `onQueryChange` fires; `onValueChange` does not fire |
+| query reset on open | searchable custom Select opens | prior query clears without changing the committed value; the input displays that value again when closed |
 | highlight tracked (custom) | ArrowDown/ArrowUp or hover | one option visually highlighted via `data-highlighted`, keyed by option value |
 | value committed (custom) | Enter on highlighted option or click | `value` updates, query copies the option label, dropdown closes |
 | dismissed (custom) | Escape, Tab, or click outside | dropdown closes without changing value |
@@ -217,6 +219,9 @@ Rules:
 - a disabled Select is inert
 - opening highlights the selected enabled visible option, otherwise the
   first enabled visible option; no enabled result means no highlight
+- opening a searchable Select clears its prior query, shows all loaded options,
+  and reports the reset through `queryChanged` when the query was non-empty;
+  the committed value and selected highlight are preserved
 - query edit opens the list, filters case-insensitively, and highlights the
   first enabled match even when the committed option also matches later; it
   never reports `onValueChange`
@@ -231,7 +236,9 @@ Rules:
   option is highlighted, and the query differs from the committed value
 - Escape, Tab, and outside close without changing value
 - non-freeform close restores query to the committed option label or empty;
-  that internal reset is not a user `onQueryChange` effect
+  that internal reset is not an `onQueryChange` effect. When closed, searchable
+  input display comes from the committed option label or freeform value, not the
+  active query
 - clear reports the effective clear value, resets query, and does not emit
   an open change
 - repeated open/value transitions with no semantic change emit no effects
@@ -247,7 +254,7 @@ uses the dismissable-layer stack (innermost-first), guarded by
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
 | `onValueChange` | committed value changes | `value: string` | option selection, clear, or explicit freeform Enter/control-blur commit; not freeform keystrokes |
-| `onQueryChange` | user types in searchable input | `query: string` | custom mode with `searchable` only; fires on every input change; not the internal non-freeform close reset |
+| `onQueryChange` | searchable query changes through typing or opening with a prior query | `query: string` | custom mode with `searchable` only; not the internal non-freeform close reset |
 | `onOpenChange` | dropdown opens or closes | `open: boolean` | custom mode only; fires on open and close transitions |
 
 ## 6. Accessibility

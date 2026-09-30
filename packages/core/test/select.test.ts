@@ -151,14 +151,23 @@ describe("selectTransition", () => {
     ).toBe("c");
   });
 
-  test("a searchable list keeps narrowing keyboard navigation by the typed query", () => {
+  test("opening a searchable list clears the prior query and keeps the committed value", () => {
     const opened = selectTransition(
-      ctx({ value: "c", query: "ch", searchable: true }),
+      ctx({ value: "c", query: "Cherry", searchable: true }),
       { type: "OPEN" },
     );
+
+    expect(opened.context.query).toBe("");
     expect(opened.context.highlightedValue).toBe("c");
+    expect(opened.effects).toEqual([
+      { type: "openChanged", open: true },
+      { type: "queryChanged", query: "" },
+    ]);
+    expect(selectTransition(opened.context, { type: "HIGHLIGHT_FIRST" }).context.highlightedValue).toBe("a");
+
+    const typed = selectTransition(opened.context, { type: "QUERY", query: "ch" });
     expect(
-      selectTransition(opened.context, { type: "HIGHLIGHT_FIRST" }).context.highlightedValue,
+      selectTransition(typed.context, { type: "HIGHLIGHT_FIRST" }).context.highlightedValue,
     ).toBe("c");
     expect(selectQueryHighlightValue(ctx({ value: "c", query: "zz", searchable: true }))).toBeNull();
   });
