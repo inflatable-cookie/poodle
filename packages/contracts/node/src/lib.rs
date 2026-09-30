@@ -584,10 +584,11 @@ pub struct NodePoint {
 ///
 /// Named physically, not semantically: ArrowDown means "next row" in a tree
 /// and "next option" in a select, so the meaning belongs to the component.
-/// Enter and Escape are deliberately absent — they stay on
-/// [`Interaction::on_submit`] and [`Interaction::on_cancel`]. Tab is absent
-/// for a different reason: it is sequential focus traversal, which the
-/// backend owns outright, so no node ever sees it.
+/// Enter stays on [`Interaction::on_submit`], and `on_cancel` handles only
+/// cancellation of the current input edit. Escape is also available here for
+/// other focused-node interactions. Tab is absent for a different reason: it
+/// is sequential focus traversal, which the backend owns outright, so no node
+/// ever sees it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NodeKey {
     ArrowUp,
@@ -596,6 +597,8 @@ pub enum NodeKey {
     ArrowRight,
     Home,
     End,
+    /// The Escape key.
+    Escape,
     /// Ten-step nudge on value controls (Knob, Fader, XYPad axis sliders).
     PageUp,
     /// Ten-step nudge in the opposite direction of [`Self::PageUp`].
@@ -685,7 +688,8 @@ pub struct Interaction {
     /// focus leaves observes the blur through [`Self::on_focus_change`] — the
     /// same division a web field has between `keydown` and `blur`.
     pub on_submit: Option<SubmitHandler>,
-    /// Cancels the current input edit on Escape.
+    /// Cancels the current input edit on Escape. Other focused-node Escape
+    /// interactions use [`NodeKey::Escape`].
     pub on_cancel: Option<CancelHandler>,
     /// Raw editing keys for a text field: the key name (`"a"`, `"left"`,
     /// `"backspace"`, …) and the modifiers held.

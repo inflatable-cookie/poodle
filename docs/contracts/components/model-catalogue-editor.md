@@ -234,9 +234,8 @@ and disclosure transition for the hidden section.
   for the next value through `on_grab_change`, `on_drop_target_change`,
   `on_hidden_open_change`, and `on_announce`.
 - Keyboard grab and drop ride the backend's own activation path (Enter and
-  Space), arrows ride `on_key`, and Escape rides `on_cancel`: the vocabulary
-  has no other Escape channel for a plain control, and binding Space in both
-  places would toggle the grab twice.
+  Space); arrows and Escape ride `on_key`. Binding Space there as well would
+  toggle the grab twice.
 - Focus after a move or a hide is a request naming the destination element id;
   the backend performs the move. Hiding the last shown model also asks for the
   hidden section to be disclosed, so the destination exists. That destination

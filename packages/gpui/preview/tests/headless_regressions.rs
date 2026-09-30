@@ -10778,6 +10778,16 @@ fn model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window() {
             .lock()
             .unwrap()
             .contains(&"Cancelled keyboard move.".to_string()));
+        assert_eq!(
+            orders.lock().unwrap().last().expect("the moved order").as_slice(),
+            [
+                "model-alpha".to_string(),
+                "model-gamma".to_string(),
+                "model-beta".to_string(),
+                "model-dup-a".to_string(),
+            ],
+            "Escape ends the grab and leaves the last emitted order intact"
+        );
     });
 }
 

@@ -2952,8 +2952,6 @@ impl ModelPicker {
                 let activate = Arc::clone(&handler);
                 trigger.interaction.on_activate = Some(Arc::new(move || activate(!is_open)));
                 if is_open {
-                    let cancel = Arc::clone(&handler);
-                    trigger.interaction.on_cancel = Some(Arc::new(move || cancel(false)));
                     trigger.interaction.on_dismiss = Some(Arc::new(move |reason| {
                         if reason != poodle_node::DismissReason::Outside || dismiss_on_outside {
                             handler(false);

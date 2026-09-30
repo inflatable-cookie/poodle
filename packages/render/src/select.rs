@@ -246,11 +246,6 @@ fn wire_open_keys(
                 SelectEvent::CommitHighlighted,
             );
         }));
-        let spec_cancel = spec.clone();
-        let handlers_cancel = handlers.clone();
-        node.interaction.on_cancel = Some(Arc::new(move || {
-            emit_select(&spec_cancel, &handlers_cancel, SelectEvent::Close);
-        }));
         if spec.searchable {
             let spec_blur = spec.clone();
             let handlers_blur = handlers.clone();
@@ -1405,7 +1400,7 @@ mod tests {
         assert!(search.interaction.on_edit_key.is_some());
         assert!(search.interaction.on_edit_insert.is_some());
         assert!(search.interaction.on_submit.is_some());
-        assert!(search.interaction.on_cancel.is_some());
+        assert!(search.interaction.on_cancel.is_none());
         assert!(search.interaction.on_focus_change.is_some());
         assert!(search.caret.is_some());
         assert_eq!(search.id.as_deref(), Some("select:search-edit:search"));
@@ -1478,10 +1473,14 @@ mod tests {
             .with_open(true)
             .with_value("apple");
         let (node, seen) = select_with_sink(spec, "esc");
-        let search = node
-            .find(&|n| n.runtime_id.as_deref() == Some("select:esc:search"))
-            .expect("search editor");
-        (search.interaction.on_cancel.as_ref().expect("cancel"))();
+        let trigger = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:esc:trigger"))
+            .expect("trigger");
+        (trigger
+            .interaction
+            .on_dismiss
+            .as_ref()
+            .expect("dismiss"))(DismissReason::Escape);
         let captured = seen.lock().unwrap();
         assert!(!captured[0].0.open);
         assert_eq!(captured[0].0.value, "apple");
