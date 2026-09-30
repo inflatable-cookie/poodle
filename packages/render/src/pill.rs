@@ -268,8 +268,9 @@ fn pill_inner(
             width: ctx.theme().resolve_border_width("border.width.focus"),
             offset: rem_to_px(0.0625),
         });
-        dismiss.style.descriptor.layout.width = LayoutSizing::Fixed(font_size);
-        dismiss.style.descriptor.layout.height = LayoutSizing::Fixed(font_size);
+        let dismiss_size = rem_to_px(font_size);
+        dismiss.style.descriptor.layout.width = LayoutSizing::Fixed(dismiss_size);
+        dismiss.style.descriptor.layout.height = LayoutSizing::Fixed(dismiss_size);
         dismiss.style.descriptor.layout.direction = LayoutDirection::Row;
         dismiss.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         dismiss.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
@@ -283,7 +284,7 @@ fn pill_inner(
             opacity: None,
         });
 
-        let mut icon = Node::icon("x", font_size * 0.75);
+        let mut icon = Node::icon("x", rem_to_px(font_size * 0.75));
         icon.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.icon.muted"));
         if let Some(instance_id) = instance_id {
             icon.runtime_id = Some(format!("pill:{instance_id}:dismiss-icon"));

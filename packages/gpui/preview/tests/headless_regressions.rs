@@ -486,6 +486,10 @@ fn pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild() {
         let mut driver = HeadlessDriver::new_element_in_box(cx, build, 320.0, 100.0);
         driver.wait_for_focus_handle(left_id);
         driver.wait_for_focus_handle(right_id);
+        let left_bounds =
+            poodle_gpui_node_backend::bounds_for(left_id).expect("left dismiss bounds");
+        assert_eq!(f32::from(left_bounds.size.width), 11.0);
+        assert_eq!(f32::from(left_bounds.size.height), 11.0);
         assert!(poodle_gpui_node_backend::focus_handle_for("pill:left").is_none());
         assert!(poodle_gpui_node_backend::focus_handle_for("pill:right").is_none());
 

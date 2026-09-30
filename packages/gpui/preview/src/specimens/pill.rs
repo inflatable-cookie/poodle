@@ -42,6 +42,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .child(group(
+            "Dismissible",
+            theme,
+            div()
+                .flex()
+                .gap(px(12.0))
+                .flex_wrap()
+                .items_center()
+                .child(
+                    pill(
+                        theme,
+                        PillSpec::new()
+                            .with_label("Videos")
+                            .with_dismissible(true)
+                            .with_dismiss_label("Remove filter: Videos"),
+                    )
+                    .with_instance_id("pill-specimen-dismiss-videos"),
+                )
+                .child(
+                    pill(
+                        theme,
+                        PillSpec::new()
+                            .with_label("Audio")
+                            .with_dismissible(true),
+                    )
+                    .with_instance_id("pill-specimen-dismiss-audio"),
+                )
+                .child(
+                    pill(
+                        theme,
+                        PillSpec::new()
+                            .with_label("Published")
+                            .with_tone(PillTone::Info)
+                            .with_appearance(PillAppearance::Subtle)
+                            .with_dismissible(true)
+                            .with_dismiss_label("Remove filter: Published"),
+                    )
+                    .with_instance_id("pill-specimen-dismiss-published"),
+                ),
+        ))
+        .child(group(
             "Tones",
             theme,
             div()
