@@ -317,8 +317,10 @@ Use Effigy as the command surface. Match proof cost to the delivery stage:
    when the host Bun differs, because Bun versions lay out `node_modules`
    differently and that changes declaration emit. It must leave
    `git status --porcelain` empty. Native, windowed and release gates stay
-   out. A red milestone run is triaged into papercuts or tasks before the
-   release goes on.
+   out. On macOS the planner also runs `effigy check:gpui`, which carries the
+   macOS-only GPUI preview unit tests (`test:gpui-preview`) that the Ubuntu
+   PR lanes can't compile (planner ruling 2026-09-30). A red milestone run is
+   triaged into papercuts or tasks before the release goes on.
 4. **Release proof:** the npm candidate task runs the bounded npm artifact gate
    once after the candidate is complete and stable. Required PR CI owns source
    behavior; candidate mode owns archive certification; publish mode verifies
