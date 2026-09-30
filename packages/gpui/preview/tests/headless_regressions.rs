@@ -424,6 +424,95 @@ fn a_pointer_press_reaches_the_backend_listener_once() {
     });
 }
 
+/// Dismissible Pill actions use the instance key supplied by the production
+/// adapter, so duplicate labels remain isolated and focus survives a host
+/// rebuild.
+#[test]
+fn pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_specs::PillSpec;
+
+    run_headless(|cx| {
+        let left_dismisses = Arc::new(Mutex::new(0usize));
+        let right_dismisses = Arc::new(Mutex::new(0usize));
+        let dismiss_label = Rc::new(RefCell::new("Dismiss filter".to_owned()));
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let left_dismisses = Arc::clone(&left_dismisses);
+            let right_dismisses = Arc::clone(&right_dismisses);
+            let dismiss_label = Rc::clone(&dismiss_label);
+            let theme_provider = theme_provider.clone();
+            Rc::new(move || {
+                let label = dismiss_label.borrow().clone();
+                div()
+                    .flex()
+                    .gap(px(8.0))
+                    .child(
+                        node_compat::Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Same label")
+                                .with_dismissible(true)
+                                .with_dismiss_label(label.clone()),
+                            &theme_provider,
+                        )
+                        .with_instance_id("left")
+                        .on_dismiss({
+                            let dismisses = Arc::clone(&left_dismisses);
+                            move || *dismisses.lock().expect("left dismiss count") += 1
+                        })
+                        .into_element(),
+                    )
+                    .child(
+                        node_compat::Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Same label")
+                                .with_dismissible(true)
+                                .with_dismiss_label(label),
+                            &theme_provider,
+                        )
+                        .with_instance_id("right")
+                        .on_dismiss({
+                            let dismisses = Arc::clone(&right_dismisses);
+                            move || *dismisses.lock().expect("right dismiss count") += 1
+                        })
+                        .into_element(),
+                    )
+                    .into_any_element()
+            })
+        };
+
+        let left_id = "pill:left:dismiss";
+        let right_id = "pill:right:dismiss";
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 320.0, 100.0);
+        driver.wait_for_focus_handle(left_id);
+        driver.wait_for_focus_handle(right_id);
+        let left_bounds =
+            poodle_gpui_node_backend::bounds_for(left_id).expect("left dismiss bounds");
+        assert_eq!(f32::from(left_bounds.size.width), 11.0);
+        assert_eq!(f32::from(left_bounds.size.height), 11.0);
+        assert!(poodle_gpui_node_backend::focus_handle_for("pill:left").is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for("pill:right").is_none());
+
+        driver.focus_element(left_id);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(left_id), Some(true));
+        *dismiss_label.borrow_mut() = "Dismiss this filter".to_owned();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(left_id),
+            Some(true),
+            "the stable dismiss identity keeps real focus through rebuild"
+        );
+
+        driver.keyboard_activate(left_id);
+        assert_eq!(*left_dismisses.lock().expect("left dismiss count"), 1);
+        assert_eq!(*right_dismisses.lock().expect("right dismiss count"), 0);
+        driver.keyboard_activate(right_id);
+        assert_eq!(*left_dismisses.lock().expect("left dismiss count"), 1);
+        assert_eq!(*right_dismisses.lock().expect("right dismiss count"), 1);
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
 /// g16.067: Icon mounts through the production render path and backend,
 /// proving its named SVG path handoff, token size, primary tint, explicit
 /// accessible label, and mounted layout reach the backend.

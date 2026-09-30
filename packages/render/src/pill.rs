@@ -6,8 +6,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection,
+    LayoutSizing, MainAxisAlignment, Node, NodeRole, StylePatch,
 };
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
@@ -120,6 +120,35 @@ pub fn pill_with_remove(
     ctx: &RenderContext<'_>,
     on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
+    assert!(
+        !spec.is_dismissible,
+        "dismissible Pill rendering requires a stable instance id; use pill_with_handlers"
+    );
+    pill_inner(spec, ctx, on_remove, None, None)
+}
+
+/// Render a Pill with its optional removable and dismissible actions.
+///
+/// `instance_id` is the caller's stable element id or key. GPUI derives the
+/// dismiss button's runtime identity from this value so the focus handle is
+/// unique per Pill and survives host rebuilds.
+pub fn pill_with_handlers(
+    spec: &PillSpec,
+    ctx: &RenderContext<'_>,
+    on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    instance_id: &str,
+) -> Node {
+    pill_inner(spec, ctx, on_remove, on_dismiss, Some(instance_id))
+}
+
+fn pill_inner(
+    spec: &PillSpec,
+    ctx: &RenderContext<'_>,
+    on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    instance_id: Option<&str>,
+) -> Node {
     let (min_w, min_h, pad_x, pad_y, font_size) =
         pill_metrics(spec.resolved_size(), spec.typography);
     let (fill, border, text_color) = pill_colors(spec, ctx);
@@ -137,6 +166,9 @@ pub fn pill_with_remove(
     let radius = ctx.theme().resolve_radius("radius.pill");
 
     let mut el = Node::text(label);
+    if let Some(instance_id) = instance_id {
+        el.runtime_id = Some(format!("pill:{instance_id}"));
+    }
     {
         let s = &mut el.style;
         s.min_width = Some(rem_to_px(min_w));
@@ -222,6 +254,48 @@ pub fn pill_with_remove(
         el = el.child(remove);
     }
 
+    if spec.is_dismissible {
+        let mut dismiss = Node::button("");
+        if let Some(instance_id) = instance_id {
+            dismiss.runtime_id = Some(format!("pill:{instance_id}:dismiss"));
+        }
+        dismiss.a11y.role = Some(NodeRole::Button);
+        dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        dismiss.a11y.tab_index = Some(0);
+        dismiss.interaction.focusable = true;
+        dismiss.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.0625),
+        });
+        let dismiss_size = rem_to_px(font_size);
+        dismiss.style.descriptor.layout.width = LayoutSizing::Fixed(dismiss_size);
+        dismiss.style.descriptor.layout.height = LayoutSizing::Fixed(dismiss_size);
+        dismiss.style.descriptor.layout.direction = LayoutDirection::Row;
+        dismiss.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        dismiss.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        dismiss.style.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.0));
+        dismiss.style.descriptor.border.width = 0.0;
+        dismiss.style.descriptor.cursor = CursorHint::Pointer;
+        dismiss.style.hover = Some(StylePatch {
+            background: None,
+            border_color: None,
+            text_color: Some(ctx.theme().resolve_color("color.text.primary")),
+            opacity: None,
+        });
+
+        let mut icon = Node::icon("x", rem_to_px(font_size * 0.75));
+        icon.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.icon.muted"));
+        if let Some(instance_id) = instance_id {
+            icon.runtime_id = Some(format!("pill:{instance_id}:dismiss-icon"));
+        }
+        dismiss = dismiss.child(icon);
+        if let Some(handler) = on_dismiss {
+            dismiss.interaction.on_activate = Some(handler);
+        }
+        el = el.child(dismiss);
+    }
+
     if let Some(aria) = spec.aria_label.as_deref() {
         el.a11y.label = Some(aria.to_string());
     }
@@ -264,6 +338,39 @@ mod tests {
             .as_ref()
             .expect("activatable"))();
         assert_eq!(*removes.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn dismissible_pill_uses_its_stable_instance_identity_and_label() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = PillSpec::new()
+            .with_label("Videos")
+            .with_dismissible(true)
+            .with_dismiss_label("Remove filter: Videos");
+
+        let first = pill_with_handlers(&spec, &ctx, None, None, "filters:videos");
+        let second = pill_with_handlers(&spec, &ctx, None, None, "filters:audio");
+        let rebuilt = pill_with_handlers(&spec, &ctx, None, None, "filters:videos");
+        let dismiss_id = "pill:filters:videos:dismiss";
+        let dismiss = first
+            .find(&|node| node.runtime_id.as_deref() == Some(dismiss_id))
+            .expect("dismiss button");
+        let other_dismiss = second
+            .find(&|node| node.runtime_id.as_deref() == Some("pill:filters:audio:dismiss"))
+            .expect("second dismiss button");
+        let rebuilt_dismiss = rebuilt
+            .find(&|node| node.runtime_id.as_deref() == Some(dismiss_id))
+            .expect("rebuilt dismiss button");
+
+        assert!(matches!(dismiss.kind, NodeKind::Button { .. }));
+        assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
+        assert_eq!(dismiss.a11y.label.as_deref(), Some("Remove filter: Videos"));
+        assert_eq!(dismiss.a11y.tab_index, Some(0));
+        assert!(dismiss.interaction.focusable);
+        assert!(dismiss.style.focus_ring.is_some());
+        assert_eq!(other_dismiss.runtime_id.as_deref(), Some("pill:filters:audio:dismiss"));
+        assert_eq!(rebuilt_dismiss.runtime_id.as_deref(), Some(dismiss_id));
     }
 
     #[test]
