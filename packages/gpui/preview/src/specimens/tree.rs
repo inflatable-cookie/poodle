@@ -335,7 +335,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         NodeKey::F2 | NodeKey::Delete | NodeKey::PageUp | NodeKey::PageDown
                         // The menu gestures belong to the row's host menu;
                         // this specimen opens its menus by pointer only.
-                        | NodeKey::ContextMenu | NodeKey::F10 => {}
+                        | NodeKey::ContextMenu | NodeKey::F10 | NodeKey::Escape => {}
                     }
                 })
             });

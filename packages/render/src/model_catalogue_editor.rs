@@ -12,8 +12,8 @@
 //! Three movement routes share one decision function: the explicit up/down
 //! buttons, the keyboard grab-and-move on the handle, and the admitted pointer
 //! drag. Keyboard grab/drop rides the backend's own activation path (Enter and
-//! Space), arrows ride `on_key`, and Escape rides `on_cancel` — the vocabulary
-//! has no other Escape channel, and binding Space twice would toggle twice.
+//! Space), arrows and Escape ride `on_key`, and binding Space there as well
+//! would toggle the grab twice.
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -489,6 +489,7 @@ fn shown_row(
                 let key = match key {
                     NodeKey::ArrowUp => "ArrowUp",
                     NodeKey::ArrowDown => "ArrowDown",
+                    NodeKey::Escape => "Escape",
                     // Space is the backend's activation path; handling it here
                     // as well would grab and drop in one keystroke.
                     _ => return None,
@@ -504,21 +505,16 @@ fn shown_row(
                         announce(&handlers, MODEL_CATALOGUE_BOUNDARY_ANNOUNCEMENT);
                         None
                     }
+                    ModelCatalogueKeyIntent::CancelGrab => {
+                        announce(&handlers, MODEL_CATALOGUE_CANCEL_GRAB_ANNOUNCEMENT);
+                        grab(&handlers, None);
+                        None
+                    }
                     _ => None,
                 }
             }
         };
         handle.interaction.on_key = Some(Arc::new(arrows));
-
-        // Escape cancels a live grab. The vocabulary routes Escape through
-        // `on_cancel`; no other channel carries it to a plain control.
-        if is_grabbed {
-            let handlers = Arc::clone(handlers);
-            handle.interaction.on_cancel = Some(Arc::new(move || {
-                announce(&handlers, MODEL_CATALOGUE_CANCEL_GRAB_ANNOUNCEMENT);
-                grab(&handlers, None);
-            }));
-        }
 
         if spec.is_drag_enabled {
             let mut source =
@@ -1073,26 +1069,30 @@ mod tests {
             ]
         );
 
-        // A second activation on the grabbed row drops it.
-        press(&grabbed, "Frontier Beta, position 2 of 4");
+        // Escape cancels the grab through the focused-node key channel.
+        let escape = handle.interaction.on_key.as_ref().expect("key handler");
+        escape(NodeKey::Escape, poodle_node::NodeModifiers::default());
+        assert_eq!(recorder.grabs.lock().unwrap().last().unwrap(), &None);
+        assert!(recorder
+            .announcements
+            .lock()
+            .unwrap()
+            .contains(&"Cancelled keyboard move.".to_string()));
+
+        // A fresh grab still drops through the shared activation path.
+        press(&node, "Frontier Beta, position 2 of 4");
+        let grabbed_again = model_catalogue_editor(
+            &spec().with_grabbed(Some("model-beta".to_string())),
+            &RenderContext::new(&theme()),
+            recorder.handlers(),
+        );
+        press(&grabbed_again, "Frontier Beta, position 2 of 4");
         assert_eq!(recorder.grabs.lock().unwrap().last().unwrap(), &None);
         assert!(recorder
             .announcements
             .lock()
             .unwrap()
             .contains(&"Dropped item.".to_string()));
-
-        // Escape cancels the grab.
-        (handle
-            .interaction
-            .on_cancel
-            .as_ref()
-            .expect("escape cancels a live grab"))();
-        assert!(recorder
-            .announcements
-            .lock()
-            .unwrap()
-            .contains(&"Cancelled keyboard move.".to_string()));
     }
 
     #[test]

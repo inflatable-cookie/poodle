@@ -1126,6 +1126,7 @@ fn node_key(key: &str) -> Option<NodeKey> {
         "right" => NodeKey::ArrowRight,
         "home" => NodeKey::Home,
         "end" => NodeKey::End,
+        "escape" => NodeKey::Escape,
         "pageup" => NodeKey::PageUp,
         "pagedown" => NodeKey::PageDown,
         "space" => NodeKey::Space,
@@ -1348,6 +1349,11 @@ mod scrub_axis_tests {
             Some((0.0, -1.0))
         );
         assert_eq!(wheel_direction(ScrollDelta::Lines(point(0.0, 0.0))), None);
+    }
+
+    #[test]
+    fn escape_maps_to_the_shared_node_key() {
+        assert_eq!(node_key("escape"), Some(NodeKey::Escape));
     }
 
     #[test]
