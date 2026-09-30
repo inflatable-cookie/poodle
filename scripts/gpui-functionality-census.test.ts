@@ -28,6 +28,12 @@ import {
   type ManifestEntry,
 } from "./gpui-functionality-census";
 
+import {
+  PORTABLE_ROUTE_COUNT,
+  PUBLIC_COMPONENT_COUNT,
+  ROSTER_WEB_ONLY_NAMES,
+} from "./component-denominator";
+
 const axes = [...CENSUS_AXES];
 
 function manifestEntry(overrides: Partial<ManifestEntry> = {}): ManifestEntry {
@@ -74,7 +80,11 @@ function censusDoc(overrides: Partial<CensusDoc> = {}): CensusDoc {
     schema: "poodle.g18-gpui-functionality-census.v1",
     task: "g18.001",
     source_commit: "d8e174fb40b2634b7d00018c721816ffc037d712",
-    denominator: { public: 176, portable: 175, notApplicable: ["MeterSurface"] },
+    denominator: {
+      public: PUBLIC_COMPONENT_COUNT,
+      portable: PORTABLE_ROUTE_COUNT,
+      notApplicable: [...ROSTER_WEB_ONLY_NAMES],
+    },
     axes: [...axes],
     manifest: [manifestEntry()],
     rows,
@@ -88,7 +98,7 @@ function censusDoc(overrides: Partial<CensusDoc> = {}): CensusDoc {
     groups: [],
     crossRuntime: {
       constructionClaim: "Every portable component route constructs through the headless GPUI specimen probe.",
-      mountedScope: "bounded named regression set, not a 175-component behaviour pass",
+      mountedScope: "bounded named regression set, not a roster-wide behaviour pass",
       note: "Construction is not functional completion.",
     },
     ...overrides,
@@ -106,7 +116,7 @@ describe("g18.001 census oracles", () => {
 
   it("denominator oracle: rejects a dropped component row", () => {
     const doc = censusDoc({ rows: [] });
-    expect(() => validateCensusDoc(doc)).toThrow(/denominator|176 rows/i);
+    expect(() => validateCensusDoc(doc)).toThrow(/denominator|rows/i);
   });
 
   it("denominator oracle: rejects a duplicated component row", () => {
@@ -210,7 +220,7 @@ describe("g18.001 census oracles", () => {
     const doc = censusDoc({
       crossRuntime: {
         constructionClaim: "All 175 portable routes construct, so the catalogue is fully functional.",
-        mountedScope: "bounded named regression set, not a 175-component behaviour pass",
+        mountedScope: "bounded named regression set, not a roster-wide behaviour pass",
         note: "Construction is not functional completion.",
       },
     });

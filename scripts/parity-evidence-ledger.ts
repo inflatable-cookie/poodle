@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { canonicalComponents } from "../packages/svelte/preview/src/generated/catalogue/catalogue";
+import { assertPublicBarrelAgrees } from "./component-denominator";
 import {
   deriveNucleusReceiptRows,
   NUCLEUS_MANIFEST_PATH,
@@ -369,27 +370,11 @@ export function deriveLiveRoster(root = ROOT): LiveComponent[] {
     slug: canonicalByName.get(name)?.slug ?? toSlug(name),
     portable: canonicalByName.has(name),
   }));
-  const names = new Set(entries.map((entry) => entry.name));
-  const nativeExclusions = entries.filter((entry) => !entry.portable);
 
-  if (entries.length !== 176) {
-    throw new Error(`Expected 176 public Svelte components, found ${entries.length}.`);
-  }
-  if (canonicalComponents.length !== 175) {
-    throw new Error(`Expected 175 portable catalogue components, found ${canonicalComponents.length}.`);
-  }
-  if (nativeExclusions.length !== 1 || nativeExclusions[0].name !== "MeterSurface") {
-    throw new Error(
-      `Expected MeterSurface as the sole native exclusion, found ${nativeExclusions.map((entry) => entry.name).join(", ")}.`,
-    );
-  }
-  if (names.size !== entries.length) throw new Error("The public Svelte component export list contains duplicates.");
-
-  const canonicalNames = new Set(canonicalComponents.map((component) => component.displayName));
-  const missingCanonical = [...canonicalNames].filter((name) => !names.has(name));
-  if (missingCanonical.length > 0) {
-    throw new Error(`Portable catalogue components missing from the public Svelte index: ${missingCanonical.join(", ")}.`);
-  }
+  // The expected public and portable counts come from the generated catalogue;
+  // this is the agreement check that the barrel still carries exactly those
+  // names plus the declared web-only supplement.
+  assertPublicBarrelAgrees(entries.map((entry) => entry.name));
 
   return entries;
 }

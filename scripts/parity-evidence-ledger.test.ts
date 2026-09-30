@@ -9,16 +9,62 @@ import {
   resolveSourceFile,
   validateLedgerText,
 } from "./parity-evidence-ledger";
+import {
+  assertPublicBarrelAgrees,
+  PORTABLE_COMPONENT_NAMES,
+  PORTABLE_ROUTE_COUNT,
+  PUBLIC_COMPONENT_COUNT,
+  PUBLIC_COMPONENT_NAMES,
+  ROSTER_WEB_ONLY_NAMES,
+} from "./component-denominator";
 
 const root = path.resolve(import.meta.dir, "..");
 const ledgerPath = path.join(root, "docs/evidence/nucleus/parity-evidence-ledger.md");
 setDefaultTimeout(90_000);
 
+describe("component denominator", () => {
+  it("reads both counts from the one generated catalogue", () => {
+    expect(PORTABLE_COMPONENT_NAMES).toHaveLength(PORTABLE_ROUTE_COUNT);
+    expect(PUBLIC_COMPONENT_COUNT).toBe(PORTABLE_ROUTE_COUNT + ROSTER_WEB_ONLY_NAMES.length);
+    expect(PUBLIC_COMPONENT_NAMES).toHaveLength(PUBLIC_COMPONENT_COUNT);
+  });
+
+  it("accepts the live public barrel", () => {
+    expect(() => assertPublicBarrelAgrees(PUBLIC_COMPONENT_NAMES)).not.toThrow();
+  });
+
+  it("plants an extra public portable component and moves both counts with no literal", () => {
+    const planted = [...PUBLIC_COMPONENT_NAMES, "PlantedComponent"];
+    const portable = [...PORTABLE_COMPONENT_NAMES, "PlantedComponent"];
+    expect(planted).toHaveLength(PUBLIC_COMPONENT_COUNT + 1);
+    expect(portable).toHaveLength(PORTABLE_ROUTE_COUNT + 1);
+  });
+
+  it("fails a planted barrel-only component", () => {
+    expect(() => assertPublicBarrelAgrees([...PUBLIC_COMPONENT_NAMES, "PlantedComponent"])).toThrow(
+      /unexpected PlantedComponent/,
+    );
+  });
+
+  it("fails a planted catalogue-only component", () => {
+    const barrel = PUBLIC_COMPONENT_NAMES.filter((name) => name !== PORTABLE_COMPONENT_NAMES[0]);
+    expect(() => assertPublicBarrelAgrees(barrel)).toThrow(/missing /);
+  });
+
+  it("fails a duplicate barrel export", () => {
+    expect(() => assertPublicBarrelAgrees([...PUBLIC_COMPONENT_NAMES, PUBLIC_COMPONENT_NAMES[0]])).toThrow(
+      /duplicate/,
+    );
+  });
+});
+
 describe("g16.001 parity evidence ledger", () => {
-  it("derives the fixed 176/175 roster", () => {
+  it("derives the public and portable roster from the generated denominator", () => {
     const roster = deriveLiveRoster(root);
-    expect(roster).toHaveLength(176);
-    expect(roster.filter((component) => component.portable)).toHaveLength(175);
+    expect(roster.map((component) => component.name).sort()).toEqual([...PUBLIC_COMPONENT_NAMES].sort());
+    expect(roster.filter((component) => component.portable).map((component) => component.name).sort()).toEqual(
+      [...PORTABLE_COMPONENT_NAMES].sort(),
+    );
     expect(roster.find((component) => component.name === "MeterSurface")?.portable).toBe(false);
   });
 

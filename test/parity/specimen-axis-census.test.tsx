@@ -35,6 +35,10 @@ import AxisHelperDensitiesOnly from "../../packages/svelte/preview/test/AxisHelp
 import AxisHelperHiddenRenderers from "../../packages/svelte/preview/test/AxisHelperHiddenRenderers.svelte";
 import AxisHelperPartialSizes from "../../packages/svelte/preview/test/AxisHelperPartialSizes.svelte";
 import catalogue from "../../packages/codegen/fixtures/preview-catalogue.json";
+import {
+  ROSTER_WEB_ONLY_ROUTE_SLUGS,
+  WEB_COMPONENT_ROUTE_SLUGS,
+} from "../../scripts/component-denominator";
 import { SpecimenLayout } from "../../packages/react/preview/src/gallery/SpecimenLayout";
 import { specimenScenes } from "../../packages/react/preview/src/generated/specimens/specimen-scenes";
 
@@ -45,9 +49,10 @@ const { components: catalogueComponents } = catalogue as {
   components: Array<{ slug: string; displayName: string }>;
 };
 
-/** The 175-route denominator: the 174 portable catalogue entries plus the
- *  web-only `MeterSurface` from `component-registry.ts`. */
-const ROUTES = [...catalogueComponents.map((entry) => entry.slug), "meter-surface"];
+/** The web route denominator: the generated portable catalogue entries plus
+ *  the declared web-only roster routes (web-only `MeterSurface` from
+ *  `component-registry.ts`). */
+const ROUTES = [...catalogueComponents.map((entry) => entry.slug), ...ROSTER_WEB_ONLY_ROUTE_SLUGS];
 
 /** The five fixture scenes, all generated from specimens-model.json. These
  *  render through SceneSpecimen, which needs the slug (the fixture data), not
@@ -704,10 +709,10 @@ describe("overlay axes open one at a time", () => {
   }
 });
 
-describe("web axis census (176 routes)", () => {
+describe(`web axis census (${ROUTES.length} routes)`, () => {
   it("covers the full catalogue denominator", () => {
-    expect(ROUTES).toHaveLength(176);
-    expect(new Set(ROUTES).size).toBe(176);
+    expect([...ROUTES].sort()).toEqual([...WEB_COMPONENT_ROUTE_SLUGS].sort());
+    expect(new Set(ROUTES).size).toBe(ROUTES.length);
   });
 
   for (const slug of CORRECTED_ROUTES) {
