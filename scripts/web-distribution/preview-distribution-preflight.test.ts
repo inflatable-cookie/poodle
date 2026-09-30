@@ -321,6 +321,18 @@ function isAlive(pid: number): boolean {
   }
 }
 
+// Process group of a pid, or undefined when it is gone or unreportable. The
+// selector child is spawned detached, so it leads its own group and every
+// process it spawns inherits that group: `processGroupOf(suspect) ===
+// child.pid` is exact test ownership, and a foreign squatter on the port has
+// some other group and is left alone.
+function processGroupOf(pid: number): number | undefined {
+  const result = spawnSync("ps", ["-o", "pgid=", "-p", String(pid)], { encoding: "utf8" });
+  if (result.status !== 0) return undefined;
+  const pgid = Number.parseInt(result.stdout.trim(), 10);
+  return Number.isInteger(pgid) && pgid > 0 ? pgid : undefined;
+}
+
 function drain(child: ChildProcess): { text: () => string } {
   let data = "";
   const collect = (stream: NodeJS.ReadableStream | null) => {
@@ -410,8 +422,11 @@ async function startSelector(root: string, selector: string, port: number): Prom
 // The child is spawned detached, so it leads its own process group and one
 // group signal reaches the whole selector tree (effigy -> bun -> vite).
 // `listenersOn` only runs when the port is still occupied after the group
-// kill: a listener that left the group is hunted by pid, which is the one
-// case that genuinely needs the whole-host listen-table scan.
+// kill, and it only ever feeds the ownership check: a listener is killed iff
+// its process group is the child's pid. Port occupancy alone is not
+// ownership (review finding on PR 324) -- an unrelated process squatting the
+// ephemeral port is never signalled; the final assertion fails and names it
+// instead.
 async function stopOwned(target?: OwnedProcess): Promise<void> {
   const batch = target ? [target] : [...owned];
   for (const item of batch) {
@@ -439,16 +454,21 @@ async function stopOwned(target?: OwnedProcess): Promise<void> {
         /* ignore */
       }
     }
-    if (!(await portFree(item.port))) {
-      const pids = new Set<number>(listenersOn(item.port));
-      for (const escaper of pids) {
+    // Escapers: owned listeners that outlived the group kill (for example
+    // vite lingering after effigy already exited). Kill by pid, but only
+    // after the group check proves the listener belongs to this selector's
+    // tree; anything else on the port stays untouched.
+    let unowned: number[] = [];
+    if (pid && !(await portFree(item.port))) {
+      for (const suspect of listenersOn(item.port)) {
+        if (processGroupOf(suspect) !== pid) continue;
         try {
-          process.kill(-escaper, "SIGKILL");
+          process.kill(-pid, "SIGKILL");
         } catch {
           /* ignore */
         }
         try {
-          process.kill(escaper, "SIGKILL");
+          process.kill(suspect, "SIGKILL");
         } catch {
           /* ignore */
         }
@@ -456,6 +476,9 @@ async function stopOwned(target?: OwnedProcess): Promise<void> {
       const sweepDeadline = Date.now() + 5_000;
       while (Date.now() < sweepDeadline && !(await portFree(item.port))) {
         await sleep(50);
+      }
+      if (!(await portFree(item.port))) {
+        unowned = listenersOn(item.port).filter((suspect) => processGroupOf(suspect) !== pid);
       }
     }
     try {
@@ -473,7 +496,12 @@ async function stopOwned(target?: OwnedProcess): Promise<void> {
     ) {
       await sleep(25);
     }
-    expect(await portFree(item.port), item.log.text()).toBe(true);
+    expect(
+      await portFree(item.port),
+      `port ${item.port} is still occupied after stop` +
+        (unowned.length > 0 ? `; unowned listener pids left alone: ${unowned.join(", ")}` : "") +
+        `\n${item.log.text()}`,
+    ).toBe(true);
     if (item.child.pid) expect(isAlive(item.child.pid)).toBe(false);
     owned.delete(item);
   }
