@@ -68,18 +68,13 @@ fn build_close_button(
     btn.child(x)
 }
 
-pub fn tab_strip(
-    spec: &TabStripSpec,
-    ctx: &RenderContext<'_>,
-    handlers: TabStripHandlers,
-) -> Node {
+pub fn tab_strip(spec: &TabStripSpec, ctx: &RenderContext<'_>, handlers: TabStripHandlers) -> Node {
     // ── Size / density resolution (contract §6 + size/density axes) ──────
     let effective_size = ctx.resolve_size(spec.size, SemanticControlSizeRole::Control);
     let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Tab inline padding = density control-x + per-size offset (mirrors Button).
-    let pad_x =
-        rem_to_px(control_space_x_rem(density) + size_padding_x_offset_rem(effective_size));
+    let pad_x = rem_to_px(control_space_x_rem(density) + size_padding_x_offset_rem(effective_size));
     let control_y = ctx.theme().resolve_space("space.control.y");
     let inline_gap = ctx.theme().resolve_space("space.inline.sm");
     let item_gap = ctx.theme().resolve_space(spec.item_gap_token());

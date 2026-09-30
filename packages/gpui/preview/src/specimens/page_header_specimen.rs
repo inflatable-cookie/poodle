@@ -8,8 +8,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
-use poodle_render::{RenderContext, SlotBuilder};
 use poodle_render::icon_button;
+use poodle_render::{RenderContext, SlotBuilder};
 use poodle_specs::PageHeaderSpec;
 use poodle_specs::{
     BreadcrumbItem, BreadcrumbsSpec, ButtonVariant, EyebrowSpec, IconButtonSpec, PillAppearance,
@@ -110,14 +110,12 @@ fn meta(theme: &GpuiThemeProvider) -> SlotBuilder<'static> {
         let mut last_label = Node::text("Last run");
         last_label.style.text_size = Some(13.0);
         last_label.style.descriptor.text_color = Some(secondary);
-        row.child(
-            last.child(last_label).child({
-                let mut last_value = Node::text("4mo ago");
-                last_value.style.text_size = Some(13.0);
-                last_value.style.descriptor.text_color = Some(secondary);
-                last_value
-            }),
-        )
+        row.child(last.child(last_label).child({
+            let mut last_value = Node::text("4mo ago");
+            last_value.style.text_size = Some(13.0);
+            last_value.style.descriptor.text_color = Some(secondary);
+            last_value
+        }))
     })
 }
 
@@ -170,180 +168,173 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         ))
-        .child(
-            group(
-                "Navigation and actions",
-                theme,
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(16.0))
-                    .child(
-                        PageHeader::from_spec(
-                            PageHeaderSpec::new("Media Library")
-                                .with_subtitle("Browse, review, and manage uploaded files.")
-                                .with_back("/dashboard", "Dashboard"),
-                            theme,
-                        )
-                        .with_actions({
-                            let events = Arc::clone(&events);
-                            move |ctx: &RenderContext<'_>| {
-                                icon_actions(
-                                    ctx,
-                                    "page-header-nav-action",
-                                    &[
-                                        ("upload", "Upload", "Upload"),
-                                        ("settings", "Settings", "Settings"),
-                                    ],
-                                    &events,
-                                )
-                            }
-                        }),
-                    )
-                    .child(
-                        PageHeader::from_spec(
-                            PageHeaderSpec::new("Cash flow forecasts")
-                                .with_section("Module")
-                                .with_subtitle("Manage content and ordering for this module.")
-                                .with_back("/learning/pathways", "Pathways"),
-                            theme,
-                        )
-                        .with_breadcrumbs(
-                            Breadcrumbs::from_spec(
-                                BreadcrumbsSpec::new(vec![
-                                    BreadcrumbItem::new("pathways", "Pathways"),
-                                    BreadcrumbItem::new("foundation", "Foundation"),
-                                    BreadcrumbItem::new("module", "Module"),
-                                ]),
-                                theme,
-                            )
-                            .into_slot(),
-                        )
-                        .with_actions({
-                            let events = Arc::clone(&events);
-                            move |ctx: &RenderContext<'_>| {
-                                icon_actions(
-                                    ctx,
-                                    "page-header-nav-action",
-                                    &[
-                                        ("upload", "Upload", "Upload module"),
-                                        ("settings", "Settings", "Settings module"),
-                                    ],
-                                    &events,
-                                )
-                            }
-                        }),
-                    )
-                    .child(last_action_hint(theme, &nav_action)),
-            ),
-        )
-        .child(
-            group(
-                "Hierarchy and count",
-                theme,
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(16.0))
-                    .child(
-                        PageHeader::from_spec(
-                            PageHeaderSpec::new("Button")
-                                .with_eyebrow("Primitive")
-                                .with_subtitle(
-                                    "Primary interactive control for triggering actions.",
-                                ),
-                            theme,
-                        )
-                        .with_actions({
-                            let events = Arc::clone(&events);
-                            move |ctx: &RenderContext<'_>| {
-                                icon_actions(
-                                    ctx,
-                                    "page-header-hierarchy-action",
-                                    &[("code", "View source", "View source"), ("pencil", "Edit", "Edit")],
-                                    &events,
-                                )
-                            }
-                        }),
-                    )
-                    .child(PageHeader::from_spec(
-                        PageHeaderSpec::new("Users")
-                            .with_count(128)
+        .child(group(
+            "Navigation and actions",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(
+                    PageHeader::from_spec(
+                        PageHeaderSpec::new("Media Library")
+                            .with_subtitle("Browse, review, and manage uploaded files.")
                             .with_back("/dashboard", "Dashboard"),
                         theme,
-                    ))
-                    .child(last_action_hint(theme, &hierarchy_action)),
-            ),
-        )
-        .child(
-            group(
-                "Contextual status",
-                theme,
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(8.0))
-                    .child(
-                        PageHeader::from_spec(
-                            PageHeaderSpec::new("Nightly Sync")
-                                .with_section("Scheduled Task")
-                                .with_back("/system/tasks", "Tasks")
-                                .with_back_is_contextual(true)
-                                .with_banner("This task is currently paused.", StatusTone::Warning),
+                    )
+                    .with_actions({
+                        let events = Arc::clone(&events);
+                        move |ctx: &RenderContext<'_>| {
+                            icon_actions(
+                                ctx,
+                                "page-header-nav-action",
+                                &[
+                                    ("upload", "Upload", "Upload"),
+                                    ("settings", "Settings", "Settings"),
+                                ],
+                                &events,
+                            )
+                        }
+                    }),
+                )
+                .child(
+                    PageHeader::from_spec(
+                        PageHeaderSpec::new("Cash flow forecasts")
+                            .with_section("Module")
+                            .with_subtitle("Manage content and ordering for this module.")
+                            .with_back("/learning/pathways", "Pathways"),
+                        theme,
+                    )
+                    .with_breadcrumbs(
+                        Breadcrumbs::from_spec(
+                            BreadcrumbsSpec::new(vec![
+                                BreadcrumbItem::new("pathways", "Pathways"),
+                                BreadcrumbItem::new("foundation", "Foundation"),
+                                BreadcrumbItem::new("module", "Module"),
+                            ]),
                             theme,
                         )
-                        .with_actions({
-                            let events = Arc::clone(&events);
-                            move |ctx: &RenderContext<'_>| {
-                                icon_actions(
-                                    ctx,
-                                    "page-header-status-action",
-                                    &[
-                                        ("play", "Run now", "Run now"),
-                                        ("pencil", "Edit", "Edit task"),
-                                    ],
-                                    &events,
-                                )
-                            }
-                        }),
+                        .into_slot(),
                     )
-                    .child(last_action_hint(theme, &status_action)),
-            ),
-        )
-        .child(
-            group(
-                "Operational metadata",
-                theme,
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(8.0))
-                    .child(
-                        PageHeader::from_spec(
-                            PageHeaderSpec::new("Nightly Sync")
-                                .with_section("Scheduled Task")
-                                .with_back("/system/tasks", "Tasks"),
-                            theme,
-                        )
-                        .with_meta(meta(theme))
-                        .with_actions({
-                            let events = Arc::clone(&events);
-                            move |ctx: &RenderContext<'_>| {
-                                icon_actions(
-                                    ctx,
-                                    "page-header-meta-action",
-                                    &[
-                                        ("play", "Run now", "Run now"),
-                                        ("calendar", "Edit schedule", "Edit schedule"),
-                                    ],
-                                    &events,
-                                )
-                            }
-                        }),
+                    .with_actions({
+                        let events = Arc::clone(&events);
+                        move |ctx: &RenderContext<'_>| {
+                            icon_actions(
+                                ctx,
+                                "page-header-nav-action",
+                                &[
+                                    ("upload", "Upload", "Upload module"),
+                                    ("settings", "Settings", "Settings module"),
+                                ],
+                                &events,
+                            )
+                        }
+                    }),
+                )
+                .child(last_action_hint(theme, &nav_action)),
+        ))
+        .child(group(
+            "Hierarchy and count",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(
+                    PageHeader::from_spec(
+                        PageHeaderSpec::new("Button")
+                            .with_eyebrow("Primitive")
+                            .with_subtitle("Primary interactive control for triggering actions."),
+                        theme,
                     )
-                    .child(last_action_hint(theme, &meta_action)),
-            ),
-        )
+                    .with_actions({
+                        let events = Arc::clone(&events);
+                        move |ctx: &RenderContext<'_>| {
+                            icon_actions(
+                                ctx,
+                                "page-header-hierarchy-action",
+                                &[
+                                    ("code", "View source", "View source"),
+                                    ("pencil", "Edit", "Edit"),
+                                ],
+                                &events,
+                            )
+                        }
+                    }),
+                )
+                .child(PageHeader::from_spec(
+                    PageHeaderSpec::new("Users")
+                        .with_count(128)
+                        .with_back("/dashboard", "Dashboard"),
+                    theme,
+                ))
+                .child(last_action_hint(theme, &hierarchy_action)),
+        ))
+        .child(group(
+            "Contextual status",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    PageHeader::from_spec(
+                        PageHeaderSpec::new("Nightly Sync")
+                            .with_section("Scheduled Task")
+                            .with_back("/system/tasks", "Tasks")
+                            .with_back_is_contextual(true)
+                            .with_banner("This task is currently paused.", StatusTone::Warning),
+                        theme,
+                    )
+                    .with_actions({
+                        let events = Arc::clone(&events);
+                        move |ctx: &RenderContext<'_>| {
+                            icon_actions(
+                                ctx,
+                                "page-header-status-action",
+                                &[
+                                    ("play", "Run now", "Run now"),
+                                    ("pencil", "Edit", "Edit task"),
+                                ],
+                                &events,
+                            )
+                        }
+                    }),
+                )
+                .child(last_action_hint(theme, &status_action)),
+        ))
+        .child(group(
+            "Operational metadata",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    PageHeader::from_spec(
+                        PageHeaderSpec::new("Nightly Sync")
+                            .with_section("Scheduled Task")
+                            .with_back("/system/tasks", "Tasks"),
+                        theme,
+                    )
+                    .with_meta(meta(theme))
+                    .with_actions({
+                        let events = Arc::clone(&events);
+                        move |ctx: &RenderContext<'_>| {
+                            icon_actions(
+                                ctx,
+                                "page-header-meta-action",
+                                &[
+                                    ("play", "Run now", "Run now"),
+                                    ("calendar", "Edit schedule", "Edit schedule"),
+                                ],
+                                &events,
+                            )
+                        }
+                    }),
+                )
+                .child(last_action_hint(theme, &meta_action)),
+        ))
         .into_any_element();
 
     specimen_layout(

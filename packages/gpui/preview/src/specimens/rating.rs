@@ -236,7 +236,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 Rating::from_spec(
-                    RatingSpec::new().with_value(3.0).with_step(1.0).with_size(size),
+                    RatingSpec::new()
+                        .with_value(3.0)
+                        .with_step(1.0)
+                        .with_size(size),
                     theme,
                     format!("specimen-size-{size:?}"),
                 )

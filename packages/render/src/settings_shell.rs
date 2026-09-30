@@ -11,9 +11,8 @@ use std::sync::Arc;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
     CallOutSpec, CalloutAnnounceMode, DialogSpec, DialogWidth, Direction, EmptyStateSize,
-    EmptyStateSpec,
-    EmptyStateVariant, PaddingScale, ScrollShellSpec, SettingsShellSpec, SidebarNavSpec,
-    StatusTone, SurfaceBorder, SurfaceSpec, SurfaceTone, TextInputSpec,
+    EmptyStateSpec, EmptyStateVariant, PaddingScale, ScrollShellSpec, SettingsShellSpec,
+    SidebarNavSpec, StatusTone, SurfaceBorder, SurfaceSpec, SurfaceTone, TextInputSpec,
 };
 
 use crate::callout::{callout, CalloutHandlers};
@@ -166,7 +165,8 @@ fn nav_rail(
             ctx,
         )
     } else {
-        let mut nav_spec = SidebarNavSpec::new(spec.groups.clone()).with_aria_label("Settings pages");
+        let mut nav_spec =
+            SidebarNavSpec::new(spec.groups.clone()).with_aria_label("Settings pages");
         if let Some(id) = &spec.active_page_id {
             nav_spec = nav_spec.with_value(id);
         }
@@ -260,11 +260,10 @@ mod tests {
     }
 
     fn groups() -> Vec<SidebarNavGroup> {
-        vec![SidebarNavGroup::new(
-            "general",
-            vec![SidebarNavItem::new("general", "General")],
-        )
-        .with_label("General")]
+        vec![
+            SidebarNavGroup::new("general", vec![SidebarNavItem::new("general", "General")])
+                .with_label("General"),
+        ]
     }
 
     fn open_spec() -> SettingsShellSpec {
@@ -308,7 +307,9 @@ mod tests {
         );
         let rendered = texts(&node);
         assert!(rendered.iter().any(|t| t == "Page content"));
-        assert!(rendered.iter().any(|t| t == "Search settings" || t == "storage"));
+        assert!(rendered
+            .iter()
+            .any(|t| t == "Search settings" || t == "storage"));
     }
 
     #[test]
@@ -388,7 +389,9 @@ mod tests {
             &open_spec(),
             &ctx,
             SettingsShellHandlers {
-                on_navigate: Some(Arc::new(move |id| sink.lock().unwrap().push(id.to_string()))),
+                on_navigate: Some(Arc::new(move |id| {
+                    sink.lock().unwrap().push(id.to_string())
+                })),
                 ..SettingsShellHandlers::default()
             },
             Some(Node::text("Page content")),

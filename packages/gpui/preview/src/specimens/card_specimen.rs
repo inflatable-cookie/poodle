@@ -13,8 +13,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{ColorValue, LayoutDirection, Node};
-use poodle_render::RenderContext;
 use poodle_render::presentation::rem_to_px;
+use poodle_render::RenderContext;
 use poodle_specs::{CardSpec, CardVariant, ControlDensity, EyebrowSpec};
 
 fn text(content: &str, size: f32, color: ColorValue, weight: Option<u16>) -> Node {

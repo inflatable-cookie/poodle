@@ -307,10 +307,7 @@ mod tests {
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let ctx = RenderContext::new(&theme);
         let normal = code(&CodeSpec::new().with_content("first\n"), &ctx);
-        let normal_scroll = normal
-            .children
-            .last()
-            .expect("block code scroll");
+        let normal_scroll = normal.children.last().expect("block code scroll");
         assert_eq!(normal_scroll.children.len(), 2);
         let normal_source = normal_scroll.children[0]
             .children

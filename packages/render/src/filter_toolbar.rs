@@ -34,7 +34,10 @@ pub fn filter_toolbar(
     // the raw (not role-mapped) base size and resolved density
     // (FilterToolbar.svelte): host children build inside that scope.
     let host_scope = ctx.scoped(base_size, density);
-    let children: Vec<Node> = children.into_iter().map(|build| build(&host_scope)).collect();
+    let children: Vec<Node> = children
+        .into_iter()
+        .map(|build| build(&host_scope))
+        .collect();
     let actions = actions.map(|build| build(&host_scope));
     let secondary = secondary.map(|build| build(&host_scope));
     // Contract §8 summary size table (size-scaled label-size).

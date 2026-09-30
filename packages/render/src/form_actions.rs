@@ -13,11 +13,7 @@ use crate::icon_button::icon_button;
 use crate::presentation::rem_to_px;
 
 /// Render a form-actions row with no inline danger content (the common case).
-pub fn form_actions(
-    spec: &FormActionsSpec,
-    ctx: &RenderContext<'_>,
-    children: Vec<Node>,
-) -> Node {
+pub fn form_actions(spec: &FormActionsSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     form_actions_full(spec, ctx, Vec::new(), children)
 }
 

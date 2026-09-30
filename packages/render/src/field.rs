@@ -11,28 +11,21 @@ use poodle_specs::{FieldSpec, ValidationState};
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::{RenderContext, SlotBuilder};
 
-pub fn field(
-    spec: &FieldSpec,
-    ctx: &RenderContext<'_>,
-    control: Option<SlotBuilder<'_>>,
-) -> Node {
+pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<SlotBuilder<'_>>) -> Node {
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
     // The web pair builds the slotted control inside a UiPresentationProvider
     // publishing this field's role-resolved size and resolved density
     // (Field.svelte): the host control is built inside that scope.
-    let control = control.map(|build| {
-        build(&ctx.scoped(ctx.resolve_size(spec.size, spec.size_role), density))
-    });
+    let control = control
+        .map(|build| build(&ctx.scoped(ctx.resolve_size(spec.size, spec.size_role), density)));
     let label_size = ctx
         .theme()
         .resolve_space(spec.label_typography_token(base_size));
     let desc_color = ctx.theme().resolve_color(spec.description_color_token());
     let error_color = ctx.theme().resolve_color(spec.error_color_token());
     // Contract §8: label = color-mix(text-primary 45%, text-secondary).
-    let label_primary = ctx
-        .theme()
-        .resolve_color(spec.label_color_primary_token());
+    let label_primary = ctx.theme().resolve_color(spec.label_color_primary_token());
     let label_secondary = ctx
         .theme()
         .resolve_color(spec.label_color_secondary_token());
@@ -57,9 +50,7 @@ pub fn field(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = ctx
-            .theme()
-            .resolve_space(spec.header_gap_token(density));
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space(spec.header_gap_token(density));
     }
 
     // Label row — label + required marker + info icon.
@@ -68,9 +59,8 @@ pub fn field(
         let s = &mut label_row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = ctx
-            .theme()
-            .resolve_space(spec.label_row_gap_token(density));
+        s.descriptor.layout.spacing.gap =
+            ctx.theme().resolve_space(spec.label_row_gap_token(density));
     }
 
     let mut label = Node::text(&spec.label);

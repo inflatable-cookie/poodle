@@ -26,10 +26,10 @@ use std::borrow::Cow;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use anyhow::{Context as _, Result, bail};
+use anyhow::{bail, Context as _, Result};
 use gpui::{
-    AnyElement, App, AppContext as _, AssetSource, Context, IntoElement, ParentElement, Render,
-    SharedString, Styled, TextRun, Window, div, px,
+    div, px, AnyElement, App, AppContext as _, AssetSource, Context, IntoElement, ParentElement,
+    Render, SharedString, Styled, TextRun, Window,
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_node_backend::bounds_for;
@@ -40,8 +40,8 @@ use sha2::{Digest, Sha256};
 
 use crate::inventory::{self, ButtonFixture, FixtureContent, FixtureState};
 use crate::presentation_axes::ControlSize;
-use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 use crate::publish_pair;
+use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 
 /// Versioned fixture receipt schema identity, shared with the TypeScript
 /// verifier (`test/visual/button-comparison/receipt.ts`). `v3` (g17.003)
@@ -171,12 +171,12 @@ fn build_spec(fixture: &ButtonFixture) -> ButtonSpec {
     };
     match &fixture.content {
         FixtureContent::Label { label } => spec.with_label(label.clone()),
-        FixtureContent::LeadingIcon { label, icon } => {
-            spec.with_label(label.clone()).with_leading_icon(icon.clone())
-        }
-        FixtureContent::IconOnly { icon, aria_label } => {
-            spec.with_leading_icon(icon.clone()).with_aria_label(aria_label.clone())
-        }
+        FixtureContent::LeadingIcon { label, icon } => spec
+            .with_label(label.clone())
+            .with_leading_icon(icon.clone()),
+        FixtureContent::IconOnly { icon, aria_label } => spec
+            .with_leading_icon(icon.clone())
+            .with_aria_label(aria_label.clone()),
     }
 }
 
@@ -542,8 +542,7 @@ pub fn run(args: &FixtureArgs) -> ! {
 /// without a single window having opened. The transport then opens, captures,
 /// and closes one window per shot in turn.
 pub fn run_batch(batch: &[FixtureArgs]) -> ! {
-    let prepared: Result<Vec<transport::Shot<FixtureRoot>>> =
-        batch.iter().map(prepare).collect();
+    let prepared: Result<Vec<transport::Shot<FixtureRoot>>> = batch.iter().map(prepare).collect();
     let fonts = prepared.as_ref().ok().and(inter_fonts().ok());
     match (prepared, fonts) {
         (Ok(shots), Some(fonts)) => transport::capture_batch(
@@ -570,7 +569,12 @@ fn prepare(args: &FixtureArgs) -> Result<transport::Shot<FixtureRoot>> {
     let fixture = fixtures
         .iter()
         .find(|fixture| fixture.name == args.fixture)
-        .with_context(|| format!("fixture '{}' is not in the canonical inventory", args.fixture))?
+        .with_context(|| {
+            format!(
+                "fixture '{}' is not in the canonical inventory",
+                args.fixture
+            )
+        })?
         .clone();
     preflight_icon_assets(&fixture)?;
 

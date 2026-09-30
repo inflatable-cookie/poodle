@@ -781,12 +781,43 @@
 ]
 # Planted GENERATOR_VERSION restamp; ir:check is the committed-tree gate on ci:rust.
 "test:codegen-stamp" = "cargo test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
+# poodle#072: the rustfmt gate over every Poodle Rust crate. `cargo fmt` cannot
+# be the gate: there is no root workspace, and stable rustfmt has no per-path
+# exclusion (`ignore` in rustfmt.toml is nightly-only), while rustfmt recurses
+# into `#[path = "generated/…"]` child modules from every file it is passed —
+# which would reformat generated Rust that must stay byte-identical to its
+# generator (ir:check, catalogue:check, audit:tokens and audit:icons own that
+# identity). The script enumerates each crate's authored `.rs` files and drives
+# rustfmt with the crate's edition and `--config skip_children=true`; it
+# probes `rustfmt --version` first and repairs a component-less toolchain via
+# `rustup component add rustfmt` (the ubuntu ci:rust image ships 1.95 without
+# the component), and only real `Diff in` output may produce the unformatted
+# verdict — a diff-less exit 1 is an environment error, never a finding.
+# `--self-test` proves the exclusion boundary, the recursion guard, the exit-
+# status classification and a broken-toolchain run end to end on scratch
+# crates. It is POSIX shell on purpose: the ubuntu ci:rust job
+# ships sh, git and rustfmt and no Bun (a `bun:` selector there failed with
+# exit 127), and workflow edits are out of scope. `--write` is the formatting
+# twin: `sh scripts/check-rustfmt.sh --write` before committing.
+# Generated-and-excluded: `generated/` directories (build-tokens.ts,
+# poodle-codegen machine-rust / shell-rust / specimen-rust / catalogue-rust)
+# and `*.generated.rs` (build-default-icons.ts).
+# Runtime recorded 2026-09-30 (warm checkout, rustfmt 1.95 and 1.97 agree):
+# ~3.8s wall for the check (17 crates, 867 files) and ~0.7s for the
+# self-test; identical result under macOS sh and dash. First run on a
+# component-less toolchain adds a one-time `rustup component add rustfmt`
+# download.
+"check:rustfmt" = [
+  { run = "sh scripts/check-rustfmt.sh" },
+  { run = "sh scripts/check-rustfmt.sh --self-test" },
+]
 # ir:check / catalogue:check need cargo; they stay off ci:web. A GENERATOR_VERSION
 # restamp that is not regenerated used to pass every board Queue runs.
 "ci:rust" = [
   { task = "test:contracts" },
   { task = "ir:check" },
   { task = "catalogue:check" },
+  { task = "check:rustfmt" },
 ]
 "ci" = [
   { task = "ci:web" },

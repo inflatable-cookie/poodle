@@ -21,12 +21,22 @@ fn field_errors_summary(spec: &FormLayoutSpec, ctx: &RenderContext<'_>) -> Node 
     let border_width = ctx
         .theme()
         .resolve_space(spec.field_errors_border_width_token());
-    let pad_x = ctx.theme().resolve_space(spec.field_errors_padding_x_token());
-    let pad_y = ctx.theme().resolve_space(spec.field_errors_padding_y_token());
-    let font_size = ctx.theme().resolve_space(spec.field_errors_font_size_token());
+    let pad_x = ctx
+        .theme()
+        .resolve_space(spec.field_errors_padding_x_token());
+    let pad_y = ctx
+        .theme()
+        .resolve_space(spec.field_errors_padding_y_token());
+    let font_size = ctx
+        .theme()
+        .resolve_space(spec.field_errors_font_size_token());
     let text_color = ctx.theme().resolve_color(spec.field_errors_text_token());
-    let heading_gap = ctx.theme().resolve_space(spec.field_errors_stack_gap_token());
-    let item_gap = ctx.theme().resolve_space(spec.field_errors_stack_gap_token());
+    let heading_gap = ctx
+        .theme()
+        .resolve_space(spec.field_errors_stack_gap_token());
+    let item_gap = ctx
+        .theme()
+        .resolve_space(spec.field_errors_stack_gap_token());
 
     // color-mix toward transparent: 8% fill, 40% border.
     let transparent = ColorValue(tone.0, tone.1, tone.2, 0.0);
@@ -180,11 +190,7 @@ pub fn form_layout(
 
     // Actions delegate to the FormActions primitive (contract §2 / §8).
     if let Some(actions_el) = actions {
-        el = el.child(form_actions(
-            &FormActionsSpec::new(),
-            ctx,
-            vec![actions_el],
-        ));
+        el = el.child(form_actions(&FormActionsSpec::new(), ctx, vec![actions_el]));
     }
 
     el

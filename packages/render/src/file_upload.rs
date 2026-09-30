@@ -591,12 +591,7 @@ mod tests {
             },
         );
         let remove = node
-            .find(&|n| {
-                n.a11y
-                    .label
-                    .as_deref()
-                    .is_some_and(|l| l == "Remove x.lic")
-            })
+            .find(&|n| n.a11y.label.as_deref().is_some_and(|l| l == "Remove x.lic"))
             .expect("remove button");
         (remove.interaction.on_activate.as_ref().unwrap())();
         assert_eq!(removed.lock().unwrap().as_slice(), ["x.lic"]);

@@ -157,7 +157,11 @@ pub fn licence_status(spec: &LicenceStatusSpec, ctx: &RenderContext<'_>) -> Node
     }
     let trust_value = match view.trust.timestamp_ms {
         Some(timestamp_ms) => {
-            format!("{} {}", view.trust.text, relative_row_text(timestamp_ms, "ends", "ended"))
+            format!(
+                "{} {}",
+                view.trust.text,
+                relative_row_text(timestamp_ms, "ends", "ended")
+            )
         }
         None => view.trust.text.clone(),
     };
@@ -180,11 +184,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, ctx: &RenderContext<'_>) -> Node
     let mut root = root.child(head).child(body).child(dl);
     if let Some(detail) = &view.detail {
         let detail_text = match detail.timestamp_ms {
-            Some(timestamp_ms) => format!(
-                "{} {}",
-                detail.text,
-                absolute_time_text(timestamp_ms)
-            ),
+            Some(timestamp_ms) => format!("{} {}", detail.text, absolute_time_text(timestamp_ms)),
             None => detail.text.clone(),
         };
         let mut quiet = Node::text(&detail_text);
@@ -196,7 +196,8 @@ pub fn licence_status(spec: &LicenceStatusSpec, ctx: &RenderContext<'_>) -> Node
     // ── Section identity + authority reads as data state ──
     root.a11y.role = Some(NodeRole::Region);
     root.a11y.label = Some(spec.title.clone());
-    root.roles.insert("state".to_owned(), view.state.to_string());
+    root.roles
+        .insert("state".to_owned(), view.state.to_string());
     root.roles.insert(
         "tone".to_owned(),
         format!("{:?}", view.tone).to_ascii_lowercase(),
@@ -205,7 +206,8 @@ pub fn licence_status(spec: &LicenceStatusSpec, ctx: &RenderContext<'_>) -> Node
         "attention".to_owned(),
         format!("{:?}", view.attention).to_ascii_lowercase(),
     );
-    root.roles.insert("usable".to_owned(), view.usable.to_string());
+    root.roles
+        .insert("usable".to_owned(), view.usable.to_string());
     root
 }
 
@@ -238,9 +240,7 @@ fn dl_row(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_headless::licence::{
-        LicenceAttention, LicenceUsability,
-    };
+    use poodle_headless::licence::{LicenceAttention, LicenceUsability};
     use poodle_specs::LicenceStatusSpec;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
@@ -264,21 +264,22 @@ mod tests {
     fn every_state_renders_with_the_web_copy() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let active = licence_status(
-            &spec().with_usability(LicenceUsability::Active),
-            &ctx,
-        );
+        let active = licence_status(&spec().with_usability(LicenceUsability::Active), &ctx);
         let rendered = texts(&active);
         assert!(rendered.iter().any(|t| t == "Licence active"));
         assert!(rendered.iter().any(|t| t == "Use is currently covered."));
 
         let grace = licence_status(
-            &spec().with_usability(LicenceUsability::InGrace { until: 1_799_999_100 }),
+            &spec().with_usability(LicenceUsability::InGrace {
+                until: 1_799_999_100,
+            }),
             &ctx,
         );
         let rendered = texts(&grace);
         assert!(rendered.iter().any(|t| t == "Licence active"));
-        assert!(rendered.iter().any(|t| t.starts_with("Use continues until")));
+        assert!(rendered
+            .iter()
+            .any(|t| t.starts_with("Use continues until")));
         assert!(rendered.iter().any(|t| t.contains("2027")), "{rendered:?}");
 
         let expired = licence_status(
@@ -287,23 +288,26 @@ mod tests {
         );
         let rendered = texts(&expired);
         assert!(rendered.iter().any(|t| t == "Use coverage ended"));
-        assert!(rendered.iter().any(|t| t.starts_with("This licence stopped covering use")));
+        assert!(rendered
+            .iter()
+            .any(|t| t.starts_with("This licence stopped covering use")));
 
         let lapsed = licence_status(
             &spec().with_usability(LicenceUsability::LeaseLapsed { at: 1_799_999_100 }),
             &ctx,
         );
         let rendered = texts(&lapsed);
-        assert!(rendered.iter().any(|t| t == "Licence confirmation required"));
+        assert!(rendered
+            .iter()
+            .any(|t| t == "Licence confirmation required"));
 
-        let clock = licence_status(
-            &spec().with_usability(LicenceUsability::ClockRefused),
-            &ctx,
-        );
+        let clock = licence_status(&spec().with_usability(LicenceUsability::ClockRefused), &ctx);
         let rendered = texts(&clock);
         assert!(rendered.iter().any(|t| t == "Check this machine's clock"));
         assert!(rendered.iter().any(|t| t.contains("clock moved backwards")));
-        assert!(!rendered.iter().any(|t| t.to_lowercase().contains("expired")));
+        assert!(!rendered
+            .iter()
+            .any(|t| t.to_lowercase().contains("expired")));
     }
 
     /// Use and update coverage are two visible rows in all null/value
@@ -335,7 +339,9 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let node = licence_status(
             &spec()
-                .with_usability(LicenceUsability::InGrace { until: 1_800_000_000 })
+                .with_usability(LicenceUsability::InGrace {
+                    until: 1_800_000_000,
+                })
                 .with_attention(LicenceAttention::Informational)
                 .with_usable(true),
             &ctx,

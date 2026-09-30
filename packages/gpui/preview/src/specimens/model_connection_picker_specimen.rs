@@ -130,8 +130,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "picker-error",
                 )))
                 .child(panel(scoped(
-                    ModelConnectionPickerSpec::new()
-                        .with_state(ModelConnectionPickerState::Empty),
+                    ModelConnectionPickerSpec::new().with_state(ModelConnectionPickerState::Empty),
                     theme,
                     "picker-empty",
                 )))

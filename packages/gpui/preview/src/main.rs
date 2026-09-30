@@ -429,8 +429,7 @@ impl Render for PreviewRoot {
         // them in tasks (g15.007): dialog completion drives the render, and
         // a route change makes a late result stale so it cannot land.
         let root_weak = cx.entity().downgrade();
-        self.state
-            .start_file_picks(window, cx, &root_weak);
+        self.state.start_file_picks(window, cx, &root_weak);
         // Restart the backend's generated-id counter so a node that declares no
         // id keeps the same ElementId between frames. gpui keys a click's
         // pending mouse-down by element id, and a real click spans frames.
@@ -466,61 +465,61 @@ impl Render for PreviewRoot {
         let drag = self.drag.clone();
         let drag_host = self.drag_host.clone();
         poodle_gpui_node_backend::drag_drop_window_host(&drag_host, || {
-        poodle_gpui_node_backend::drag_drop_provider(&drag, || {
-        poodle_gpui_node_backend::attach_overlay_host(
-            div()
-                .size_full()
-                .flex()
-                .flex_col()
-                .font_family("Inter")
-                .bg(color_to_hsla(canvas_bg))
-                .text_color(color_to_hsla(text_primary))
-            // ── Top bar ──────────────────────────────────────────────
-            .child(
-                div()
-                    .w_full()
-                    .h(top_bar_h)
-                    .flex()
-                    .items_center()
-                    .gap(px(16.0))
-                    .px(px(16.0))
-                    .py(px(8.0))
-                    .flex_shrink_0()
-                    .bg(color_to_hsla(elevated_bg))
-                    .border_b_1()
-                    .border_color(color_to_hsla(border_subtle))
-                    // Title — bold, 16px
-                    .child(
-                        div()
-                            .text_size(px(16.0))
-                            .font_weight(FontWeight::BOLD)
-                            .child("Poodle"),
-                    )
-                    // Nav tabs (pill style)
-                    .child(self.render_nav_tabs(text_secondary, accent, cx))
-                    // Spacer
-                    .child(div().flex_1())
-                    // Right pills showing current settings
-                    .child(self.render_status_pills(text_secondary, border)),
-            )
-            // ── Display controls bar ─────────────────────────────────
-            .child(self.render_display_controls(
-                text_secondary,
-                accent,
-                border,
-                border_subtle,
-                panel_bg,
-                controls_h,
-                cx,
-            ))
-            // ── Main content area ────────────────────────────────────
-            // Section content is a direct child of root — no intermediate wrapper.
-            // Each section is given an explicit pixel height so overflow_y_scroll
-            // containers get a definite content-mask for hit testing.
-            .child(self.render_section_content(content_h, cx)),
-            window_handle,
-        )
-        })
+            poodle_gpui_node_backend::drag_drop_provider(&drag, || {
+                poodle_gpui_node_backend::attach_overlay_host(
+                    div()
+                        .size_full()
+                        .flex()
+                        .flex_col()
+                        .font_family("Inter")
+                        .bg(color_to_hsla(canvas_bg))
+                        .text_color(color_to_hsla(text_primary))
+                        // ── Top bar ──────────────────────────────────────────────
+                        .child(
+                            div()
+                                .w_full()
+                                .h(top_bar_h)
+                                .flex()
+                                .items_center()
+                                .gap(px(16.0))
+                                .px(px(16.0))
+                                .py(px(8.0))
+                                .flex_shrink_0()
+                                .bg(color_to_hsla(elevated_bg))
+                                .border_b_1()
+                                .border_color(color_to_hsla(border_subtle))
+                                // Title — bold, 16px
+                                .child(
+                                    div()
+                                        .text_size(px(16.0))
+                                        .font_weight(FontWeight::BOLD)
+                                        .child("Poodle"),
+                                )
+                                // Nav tabs (pill style)
+                                .child(self.render_nav_tabs(text_secondary, accent, cx))
+                                // Spacer
+                                .child(div().flex_1())
+                                // Right pills showing current settings
+                                .child(self.render_status_pills(text_secondary, border)),
+                        )
+                        // ── Display controls bar ─────────────────────────────────
+                        .child(self.render_display_controls(
+                            text_secondary,
+                            accent,
+                            border,
+                            border_subtle,
+                            panel_bg,
+                            controls_h,
+                            cx,
+                        ))
+                        // ── Main content area ────────────────────────────────────
+                        // Section content is a direct child of root — no intermediate wrapper.
+                        // Each section is given an explicit pixel height so overflow_y_scroll
+                        // containers get a definite content-mask for hit testing.
+                        .child(self.render_section_content(content_h, cx)),
+                    window_handle,
+                )
+            })
         })
     }
 }
@@ -1393,8 +1392,8 @@ impl PreviewRoot {
     /// Render a single specimen for a specific component by slug.
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
         let base_motion_context = poodle_render::RenderContext::new(&self.state.theme);
-        let motion_context = base_motion_context
-            .with_first_frame_committed(self.first_frame_committed);
+        let motion_context =
+            base_motion_context.with_first_frame_committed(self.first_frame_committed);
         specimens::render_single_specimen(slug, &self.state, cx, &motion_context)
     }
 }
@@ -2616,7 +2615,11 @@ mod file_pick_tests {
         // First frame: the dialog is still open, nothing has landed.
         cx.run_until_parked();
         let landed = cx.read(|app: &App| {
-            root.read(app).state.specimens.text.contains_key("la-file-name")
+            root.read(app)
+                .state
+                .specimens
+                .text
+                .contains_key("la-file-name")
         });
         assert!(!landed, "no result before the dialog completes");
 

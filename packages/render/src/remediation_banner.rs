@@ -71,9 +71,8 @@ pub fn remediation_banner(
     } else {
         0.34
     };
-    let solid_surface = solid.then(|| {
-        solid_tone_surface(ctx, tone_color, spec.is_neutral_tone(), tint_border_mix)
-    });
+    let solid_surface =
+        solid.then(|| solid_tone_surface(ctx, tone_color, spec.is_neutral_tone(), tint_border_mix));
 
     // Surface fill = color-mix(tone, panel) at the spec's tone ratio; border = tone.
     let fill = solid_surface

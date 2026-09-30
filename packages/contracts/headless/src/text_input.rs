@@ -60,7 +60,10 @@ fn splice(value: &str, from: usize, to: usize, insert: &str) -> String {
 /// `<input maxlength>` does.
 fn budget(value: &str, start: usize, end: usize, limit: Option<usize>) -> Option<usize> {
     let limit = limit?;
-    let kept = value.chars().count().saturating_sub(end.saturating_sub(start));
+    let kept = value
+        .chars()
+        .count()
+        .saturating_sub(end.saturating_sub(start));
     Some(limit.saturating_sub(kept))
 }
 
@@ -566,11 +569,25 @@ mod tests {
     fn backspace_at_the_start_and_delete_at_the_end_are_inert_but_consumed() {
         // Consumed matters: an unhandled key would fall through to another
         // handler. `Some` with no value change is the contract.
-        let outcome = edit_transition("abc", EditState { anchor: 0, head: 0 }, "backspace", false, false, None)
+        let outcome = edit_transition(
+            "abc",
+            EditState { anchor: 0, head: 0 },
+            "backspace",
+            false,
+            false,
+            None,
+        )
         .expect("backspace is ours even with nothing to delete");
         assert!(outcome.value.is_none());
 
-        let outcome = edit_transition("abc", EditState { anchor: 3, head: 3 }, "delete", false, false, None)
+        let outcome = edit_transition(
+            "abc",
+            EditState { anchor: 3, head: 3 },
+            "delete",
+            false,
+            false,
+            None,
+        )
         .expect("delete is ours even at the end");
         assert!(outcome.value.is_none());
     }
@@ -578,9 +595,15 @@ mod tests {
     #[test]
     fn arrows_home_and_end_move_without_changing_the_value() {
         for key in ["left", "right", "home", "end"] {
-            let outcome =
-                edit_transition("abc", EditState { anchor: 1, head: 1 }, key, false, false, None)
-                    .unwrap_or_else(|| panic!("{key} moves the caret"));
+            let outcome = edit_transition(
+                "abc",
+                EditState { anchor: 1, head: 1 },
+                key,
+                false,
+                false,
+                None,
+            )
+            .unwrap_or_else(|| panic!("{key} moves the caret"));
             assert!(outcome.value.is_none(), "{key} must not edit");
         }
         let (_, state) = type_keys("abc", &[("home", false, false)]);
@@ -646,8 +669,15 @@ mod tests {
             ("c", true),
         ] {
             assert!(
-                edit_transition("abc", EditState { anchor: 3, head: 3 }, key, false, accel, None)
-                    .is_none(),
+                edit_transition(
+                    "abc",
+                    EditState { anchor: 3, head: 3 },
+                    key,
+                    false,
+                    accel,
+                    None
+                )
+                .is_none(),
                 "{key} must fall through"
             );
         }
@@ -656,7 +686,14 @@ mod tests {
     #[test]
     fn a_cursor_past_a_shortened_value_is_clamped() {
         // The host owns the value and can rewrite it between frames.
-        let outcome = edit_transition("ab", EditState { anchor: 9, head: 9 }, "backspace", false, false, None)
+        let outcome = edit_transition(
+            "ab",
+            EditState { anchor: 9, head: 9 },
+            "backspace",
+            false,
+            false,
+            None,
+        )
         .unwrap();
         assert_eq!(outcome.value.as_deref(), Some("a"));
     }

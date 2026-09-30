@@ -154,7 +154,12 @@ pub fn validate(document: &Document) -> Vec<String> {
         ));
     }
 
-    validate_named_list("sections", REQUIRED_SECTIONS, &document.sections, &mut findings);
+    validate_named_list(
+        "sections",
+        REQUIRED_SECTIONS,
+        &document.sections,
+        &mut findings,
+    );
     validate_kinds(&document.kinds, &mut findings);
     validate_families(&document.families, &mut findings);
     validate_named_unique("collections", &document.collections, &mut findings);
@@ -291,8 +296,8 @@ fn validate_named_unique(what: &str, entries: &[NamedEntry], findings: &mut Vec<
     }
 }
 
-    #[allow(clippy::too_many_arguments)]
-    fn validate_component(
+#[allow(clippy::too_many_arguments)]
+fn validate_component(
     component: &ComponentEntry,
     sections: &BTreeSet<&str>,
     families: &BTreeMap<&str, &FamilyEntry>,
@@ -328,10 +333,7 @@ fn validate_named_unique(what: &str, entries: &[NamedEntry], findings: &mut Vec<
     }
 
     match families.get(component.family.as_str()) {
-        None => findings.push(format!(
-            "{ident}: unknown family '{}'",
-            component.family
-        )),
+        None => findings.push(format!("{ident}: unknown family '{}'", component.family)),
         Some(family) => {
             if family.section != component.section {
                 findings.push(format!(
@@ -353,9 +355,7 @@ fn validate_named_unique(what: &str, entries: &[NamedEntry], findings: &mut Vec<
     }
     for collection in &component.collections {
         if !collections.contains(collection.as_str()) {
-            findings.push(format!(
-                "{ident}: unknown collection '{collection}'"
-            ));
+            findings.push(format!("{ident}: unknown collection '{collection}'"));
         }
     }
 }

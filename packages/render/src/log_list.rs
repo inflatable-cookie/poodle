@@ -200,10 +200,7 @@ pub fn log_list(
             }
             return el.child(
                 state
-                    .child(spinner(
-                        &SpinnerSpec::new().with_size(SpinnerSize::Md),
-                        ctx,
-                    ))
+                    .child(spinner(&SpinnerSpec::new().with_size(SpinnerSize::Md), ctx))
                     .child(text(
                         "Loading log entries\u{2026}".to_string(),
                         text_secondary,
@@ -509,7 +506,12 @@ mod tests {
     fn level_filter_drops_non_matching_rows() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec().with_filter_level("error"), &ctx, "log-list", None);
+        let node = log_list(
+            &stream_spec().with_filter_level("error"),
+            &ctx,
+            "log-list",
+            None,
+        );
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Timeout"));
         assert!(!runs.iter().any(|run| run == "Server started"));
@@ -519,7 +521,12 @@ mod tests {
     fn text_filter_matches_the_message_case_insensitively() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec().with_filter_text("CACHE"), &ctx, "log-list", None);
+        let node = log_list(
+            &stream_spec().with_filter_text("CACHE"),
+            &ctx,
+            "log-list",
+            None,
+        );
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Cache miss"));
         assert!(!runs.iter().any(|run| run == "Timeout"));

@@ -46,9 +46,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider, context: &RenderContext<'_>) -> 
         .child(group(
             theme,
             "Preset: avatar-line",
-            from_spec(
-                SkeletonSpec::new().with_preset(SkeletonPreset::AvatarLine),
-            ),
+            from_spec(SkeletonSpec::new().with_preset(SkeletonPreset::AvatarLine)),
         ))
         // --- Preset: list-item (x3) ---
         .child(group(

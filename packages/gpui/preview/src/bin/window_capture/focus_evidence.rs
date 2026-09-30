@@ -112,17 +112,10 @@ fn build_scene(scene: &str, ctx: &poodle_render::RenderContext<'_>) -> EvidenceS
             // Two bordered secondary Buttons at rest; the right one takes
             // focus. Distinct stamped ids make the focus target addressable
             // and keep the resting twin observable.
-            let mut rest = poodle_render::button(
-                &ButtonSpec::new().with_label("Save"),
-                ctx,
-                None,
-            );
+            let mut rest = poodle_render::button(&ButtonSpec::new().with_label("Save"), ctx, None);
             rest.id = Some("evidence:button:rest".to_owned());
-            let mut focused = poodle_render::button(
-                &ButtonSpec::new().with_label("Save"),
-                ctx,
-                None,
-            );
+            let mut focused =
+                poodle_render::button(&ButtonSpec::new().with_label("Save"), ctx, None);
             focused.id = Some("evidence:button:focus".to_owned());
             let mut row = Node::container();
             row.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -376,9 +369,12 @@ mod tests {
     }
 
     const VALID: &[&str] = &[
-        "--focus-evidence", "button",
-        "--out", "ring.png",
-        "--receipt", "ring.json",
+        "--focus-evidence",
+        "button",
+        "--out",
+        "ring.png",
+        "--receipt",
+        "ring.json",
     ];
 
     #[test]

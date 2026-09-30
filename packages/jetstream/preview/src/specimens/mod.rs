@@ -99,11 +99,11 @@ pub mod progress;
 pub mod radio_group;
 pub mod range_slider;
 pub mod rating;
-pub mod scene_specimen;
 pub mod ref_select;
 pub mod region;
 pub mod relation_picker;
 pub mod remediation_banner;
+pub mod scene_specimen;
 pub mod theme_select;
 // reorderable_list merged into editable_list on the contract side.
 // pub mod reorderable_list;
@@ -111,6 +111,7 @@ pub mod agent_question;
 pub mod agent_transcript;
 pub mod audio_controls;
 pub mod date_time_zone_picker;
+pub mod motion_policy_provider;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod segmented_control;
@@ -148,7 +149,6 @@ pub mod tooltip;
 pub mod tree;
 pub mod tri_state_switch;
 pub mod ui_presentation_provider;
-pub mod motion_policy_provider;
 pub mod validation_summary;
 pub mod video_player;
 

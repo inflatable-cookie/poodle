@@ -285,7 +285,9 @@ mod tests {
         let base = ToolCallSpec::new("a", "x");
         for density in [ControlDensity::Compact, ControlDensity::Comfortable] {
             assert_eq!(
-                base.clone().with_density(density).row_height_rem(ControlSize::Md),
+                base.clone()
+                    .with_density(density)
+                    .row_height_rem(ControlSize::Md),
                 base.row_height_rem(ControlSize::Md)
             );
         }

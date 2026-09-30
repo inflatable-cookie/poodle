@@ -24,10 +24,16 @@
 pub enum LicenceUsability {
     Active,
     /// Renewal pending; use continues. Never warning/danger.
-    InGrace { until: i64 },
-    UseWindowExpired { at: i64 },
+    InGrace {
+        until: i64,
+    },
+    UseWindowExpired {
+        at: i64,
+    },
     /// Lapsed, not expired — the licence is intact, the confirmation stale.
-    LeaseLapsed { at: i64 },
+    LeaseLapsed {
+        at: i64,
+    },
     ClockRefused,
 }
 
@@ -308,7 +314,9 @@ fn coverage_row(id: &'static str, until: Option<i64>) -> LicenceCoverageRow {
             id,
             term: "Updates".to_string(),
             text: None,
-            timestamp_ms: Some(licence_timestamp_milliseconds(until.expect("checked above"))),
+            timestamp_ms: Some(licence_timestamp_milliseconds(
+                until.expect("checked above"),
+            )),
             future_prefix: Some("end".to_string()),
             past_prefix: Some("ended".to_string()),
         },
@@ -497,7 +505,11 @@ pub struct LicenceSeatRow {
 
 /// Seats other than this machine — the only rows that can be released.
 pub fn licence_other_seats(seats: &[LicenceSeat]) -> Vec<LicenceSeat> {
-    seats.iter().filter(|seat| !seat.this_machine).cloned().collect()
+    seats
+        .iter()
+        .filter(|seat| !seat.this_machine)
+        .cloned()
+        .collect()
 }
 
 /// One row per seat. Several unnamed rows look alike, and they stay that
@@ -547,13 +559,7 @@ pub fn licence_seat_rows(
 /// into local civil parts at the runtime boundary; fixing the presentation
 /// keeps the Svelte, React, and native surfaces identical without pretending a
 /// two-locale approximation is the user's locale.
-pub fn format_time_date_parts(
-    year: i64,
-    month: i64,
-    day: i64,
-    hour: i64,
-    minute: i64,
-) -> String {
+pub fn format_time_date_parts(year: i64, month: i64, day: i64, hour: i64, minute: i64) -> String {
     format!("{hour:02}:{minute:02} {day:02}/{month:02}/{year:04}")
 }
 
@@ -602,7 +608,10 @@ mod tests {
 
     #[test]
     fn timestamp_conversion_is_authority_seconds_to_ms() {
-        assert_eq!(licence_timestamp_milliseconds(1_800_000_000), 1_800_000_000_000);
+        assert_eq!(
+            licence_timestamp_milliseconds(1_800_000_000),
+            1_800_000_000_000
+        );
     }
 
     #[test]
@@ -621,7 +630,9 @@ mod tests {
         assert_eq!(active.coverage[0].text.as_deref(), Some("No end date"));
 
         let grace = licence_status_view(LicenceStatusInput {
-            usability: LicenceUsability::InGrace { until: 1_800_000_000 },
+            usability: LicenceUsability::InGrace {
+                until: 1_800_000_000,
+            },
             trust_basis: LicenceTrustBasis::OfflineSignature,
             use_until: Some(1_800_000_000),
             update_until: None,

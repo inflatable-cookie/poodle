@@ -348,19 +348,23 @@ fn render_row(
 
         // Leaves have no inside band. A child dropped on its parent also
         // splits in half so the lower half un-nests rather than no-op inside.
-        let mut target = crate::drag_drop::nested_target(
-            TREE_DRAG_SCOPE,
-            &value,
-            &node.label,
-            is_branch,
-        );
+        let mut target =
+            crate::drag_drop::nested_target(TREE_DRAG_SCOPE, &value, &node.label, is_branch);
         {
             let nodes = spec.nodes.clone();
             let to = value.clone();
             let target_is_branch = is_branch;
-            target.resolve_position = Some(Arc::new(move |input: &poodle_node::NodeDropPositionInput| {
-                Some(tree_drop_position(&nodes, &input.subject.id, &to, input.fraction_y, target_is_branch))
-            }));
+            target.resolve_position = Some(Arc::new(
+                move |input: &poodle_node::NodeDropPositionInput| {
+                    Some(tree_drop_position(
+                        &nodes,
+                        &input.subject.id,
+                        &to,
+                        input.fraction_y,
+                        target_is_branch,
+                    ))
+                },
+            ));
         }
         if let Some(handler) = &handlers.on_drag_over {
             let handler = Arc::clone(handler);

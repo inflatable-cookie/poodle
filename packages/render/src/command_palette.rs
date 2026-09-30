@@ -26,9 +26,7 @@ use poodle_specs::{
     DialogSpec, DiscoveryState, TextInputSpec,
 };
 
-use crate::action_discovery_panel::{
-    action_discovery_panel, ActionDiscoveryPanelHandlers,
-};
+use crate::action_discovery_panel::{action_discovery_panel, ActionDiscoveryPanelHandlers};
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::dialog::dialog;
@@ -437,7 +435,10 @@ pub fn command_palette_with_handlers(
                 format!("poodle-cmd-palette-{}", action.id)
             });
             let stamped = stamp_action_row(&mut results, &action.id, row_id);
-            debug_assert!(stamped, "ActionDiscoveryPanel must render every ready action");
+            debug_assert!(
+                stamped,
+                "ActionDiscoveryPanel must render every ready action"
+            );
         }
     }
     let results_id = scoped_id(instance_id, "results", || {

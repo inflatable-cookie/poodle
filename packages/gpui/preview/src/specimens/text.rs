@@ -8,8 +8,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_specs::{
-    EyebrowSpec, TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone,
-    TextWeight,
+    EyebrowSpec, TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight,
 };
 
 /// One captioned example group: an Eyebrow caption over its content.
@@ -113,8 +112,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "text",
         examples,
-        SpecimenAxes::examples_only()
-            .with_named_sizes(TEXT_SIZES, |value, theme: &GpuiThemeProvider| {
+        SpecimenAxes::examples_only().with_named_sizes(
+            TEXT_SIZES,
+            |value, theme: &GpuiThemeProvider| {
                 let text_size = match value {
                     "xs" => TextSize::Xs,
                     "sm" => TextSize::Sm,
@@ -126,6 +126,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .into_any_element()
-            }),
+            },
+        ),
     )
 }

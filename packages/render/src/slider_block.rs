@@ -56,10 +56,14 @@ pub fn stamp_forced_color(node: &mut Node, fill: &str, text: &str) {
 pub fn stamp_handle_roles(node: &mut Node) {
     node.roles
         .insert("forced-color-fill".to_owned(), "control".to_owned());
-    node.roles
-        .insert("forced-color-border".to_owned(), "control-border".to_owned());
-    node.roles
-        .insert("forced-color-focus".to_owned(), "focus-highlight".to_owned());
+    node.roles.insert(
+        "forced-color-border".to_owned(),
+        "control-border".to_owned(),
+    );
+    node.roles.insert(
+        "forced-color-focus".to_owned(),
+        "focus-highlight".to_owned(),
+    );
 }
 
 pub fn stamp_disabled_roles(node: &mut Node) {
@@ -76,8 +80,7 @@ pub fn stamp_disabled_roles(node: &mut Node) {
 pub fn block_hit(hit_px: f32, thumb: Node, thumb_name: &str) -> Node {
     let mut hit = Node::container();
     hit.roles.insert("part".to_owned(), "hit".to_owned());
-    hit.roles
-        .insert("thumb".to_owned(), thumb_name.to_owned());
+    hit.roles.insert("thumb".to_owned(), thumb_name.to_owned());
     {
         let s = &mut hit.style;
         s.descriptor.layout.width = LayoutSizing::Fixed(hit_px);
@@ -101,7 +104,9 @@ pub fn block_hit(hit_px: f32, thumb: Node, thumb_name: &str) -> Node {
 /// margin, padding, minimum size, or row height.
 pub fn block_surface(cross_px: f32) -> Node {
     let mut surface = Node::container();
-    surface.roles.insert("part".to_owned(), "block-surface".to_owned());
+    surface
+        .roles
+        .insert("part".to_owned(), "block-surface".to_owned());
     surface.style.fill_width = true;
     surface.style.descriptor.layout.height = LayoutSizing::Fixed(cross_px);
     surface.style.min_height = Some(cross_px);
@@ -114,7 +119,9 @@ pub fn block_surface(cross_px: f32) -> Node {
 /// (g18.024).
 pub fn block_surface_vertical(cross_px: f32) -> Node {
     let mut surface = Node::container();
-    surface.roles.insert("part".to_owned(), "block-surface".to_owned());
+    surface
+        .roles
+        .insert("part".to_owned(), "block-surface".to_owned());
     surface.style.fill_height = true;
     surface.style.descriptor.layout.width = LayoutSizing::Fixed(cross_px);
     surface.style.min_width = Some(cross_px);
@@ -229,7 +236,11 @@ pub fn fraction_anchor_vertical(
     layer.child(spacer.child(child))
 }
 
-pub fn visible_thumb(size: ControlSize, fill: poodle_node::ColorValue, border: poodle_node::ColorValue) -> Node {
+pub fn visible_thumb(
+    size: ControlSize,
+    fill: poodle_node::ColorValue,
+    border: poodle_node::ColorValue,
+) -> Node {
     let thumb_size = rem_to_px(visible_thumb_rem(size));
     let mut thumb = Node::container();
     {

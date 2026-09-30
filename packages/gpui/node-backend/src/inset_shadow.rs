@@ -31,10 +31,10 @@
 //! not honoured, so the approximation is visible in probe evidence rather than
 //! being folklore.
 
-use gpui::{ParentElement, Pixels, Styled, px};
+use gpui::{px, ParentElement, Pixels, Styled};
 use poodle_node::{Node, ShadowLayer};
 
-use super::{PaintedInsetShadow, color, record_painted_inset_shadows, record_probe_channel};
+use super::{color, record_painted_inset_shadows, record_probe_channel, PaintedInsetShadow};
 
 /// Per-side band widths, in logical pixels.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -100,20 +100,20 @@ pub(super) fn apply<E: ParentElement + 'static>(mut el: E, node: &Node, id: &str
     let radii = node.style.descriptor.corner_radii;
     let recorded_id = id.to_owned();
 
-    el = el.child(gpui::canvas(
-        move |_, _, _| {},
-        move |bounds, (), window, _cx| {
-            let mut painted: Vec<PaintedInsetShadow> = Vec::new();
-            // The canvas is anchored at the element's top-left inset, so its
-            // bounds ARE the padding box — exactly the box a CSS inset shadow
-            // is clipped to.
-            for layer in &layers {
-                let bands = band_widths(layer);
-                if bands.is_empty() {
-                    continue;
-                }
-                window.paint_quad(
-                    gpui::PaintQuad {
+    el = el.child(
+        gpui::canvas(
+            move |_, _, _| {},
+            move |bounds, (), window, _cx| {
+                let mut painted: Vec<PaintedInsetShadow> = Vec::new();
+                // The canvas is anchored at the element's top-left inset, so its
+                // bounds ARE the padding box — exactly the box a CSS inset shadow
+                // is clipped to.
+                for layer in &layers {
+                    let bands = band_widths(layer);
+                    if bands.is_empty() {
+                        continue;
+                    }
+                    window.paint_quad(gpui::PaintQuad {
                         bounds,
                         corner_radii: gpui::Corners {
                             top_left: inner_radius(radii.top_left, border_left, border_top),
@@ -123,7 +123,11 @@ pub(super) fn apply<E: ParentElement + 'static>(mut el: E, node: &Node, id: &str
                                 border_right,
                                 border_bottom,
                             ),
-                            bottom_left: inner_radius(radii.bottom_left, border_left, border_bottom),
+                            bottom_left: inner_radius(
+                                radii.bottom_left,
+                                border_left,
+                                border_bottom,
+                            ),
                         },
                         background: gpui::transparent_black().into(),
                         border_widths: gpui::Edges {
@@ -134,34 +138,34 @@ pub(super) fn apply<E: ParentElement + 'static>(mut el: E, node: &Node, id: &str
                         },
                         border_color: color(layer.color),
                         border_style: gpui::BorderStyle::default(),
-                    },
-                );
-                painted.push(PaintedInsetShadow {
-                    left: bands.left,
-                    right: bands.right,
-                    top: bands.top,
-                    bottom: bands.bottom,
-                    color: layer.color,
-                    bounds: [
-                        f32::from(bounds.origin.x),
-                        f32::from(bounds.origin.y),
-                        f32::from(bounds.size.width),
-                        f32::from(bounds.size.height),
-                    ],
-                });
-            }
-            // Written only from the real paint pass, so an assertion against
-            // this is evidence that bands were emitted — not that a style was
-            // declared.
-            record_painted_inset_shadows(&recorded_id, painted);
-        },
-    )
-    // Anchored exactly like the g15.052 ring canvas: an absolute child that
-    // is NOT anchored sits at its justify-static position, so the explicit
-    // top/left plus `size_full` is what makes these bounds the padding box.
-    .absolute()
-    .top(px(0.0))
-    .left(px(0.0))
-    .size_full());
+                    });
+                    painted.push(PaintedInsetShadow {
+                        left: bands.left,
+                        right: bands.right,
+                        top: bands.top,
+                        bottom: bands.bottom,
+                        color: layer.color,
+                        bounds: [
+                            f32::from(bounds.origin.x),
+                            f32::from(bounds.origin.y),
+                            f32::from(bounds.size.width),
+                            f32::from(bounds.size.height),
+                        ],
+                    });
+                }
+                // Written only from the real paint pass, so an assertion against
+                // this is evidence that bands were emitted — not that a style was
+                // declared.
+                record_painted_inset_shadows(&recorded_id, painted);
+            },
+        )
+        // Anchored exactly like the g15.052 ring canvas: an absolute child that
+        // is NOT anchored sits at its justify-static position, so the explicit
+        // top/left plus `size_full` is what makes these bounds the padding box.
+        .absolute()
+        .top(px(0.0))
+        .left(px(0.0))
+        .size_full(),
+    );
     el
 }

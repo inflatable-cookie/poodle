@@ -290,8 +290,7 @@ fn destination_row() -> SlotBuilder<'static> {
         for label in ["Editor", "Preview", "Terminal"] {
             let mut t = Node::text(label);
             t.style.text_size = Some(12.0);
-            t.style.descriptor.text_color =
-                Some(ctx.theme().resolve_color("color.text.secondary"));
+            t.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
             row = row.child(t);
         }
         row

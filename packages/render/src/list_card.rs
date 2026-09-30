@@ -317,7 +317,9 @@ pub fn list_card(
     let selection_el = (spec.is_selectable
         && spec.selection_indicator == SelectionIndicator::Checkbox)
         .then(|| {
-            let box_size = ctx.theme().resolve_space(spec.selection_indicator_size_token());
+            let box_size = ctx
+                .theme()
+                .resolve_space(spec.selection_indicator_size_token());
             let pill = ctx.theme().resolve_radius(spec.leading_radius_token());
             let (box_bg, box_border) = if spec.is_selected {
                 (accent, accent)
@@ -579,7 +581,12 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         // Web default `true`: the card root carries no refusal marker.
-        let node = list_card(&ListCardSpec::default(), &ctx, ListCardSlots::default(), None);
+        let node = list_card(
+            &ListCardSpec::default(),
+            &ctx,
+            ListCardSlots::default(),
+            None,
+        );
         assert!(node.interaction.on_activate.is_none());
 
         // Refusal: the root — the surface a host hit-tests for the context
@@ -605,7 +612,11 @@ mod tests {
             ListCardSlots::default(),
             Some(handler),
         );
-        (node.interaction.on_activate.as_ref().expect("click handler owns the slot"))();
+        (node
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("click handler owns the slot"))();
         assert_eq!(*clicks.lock().unwrap(), 1);
     }
 

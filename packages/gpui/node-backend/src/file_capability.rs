@@ -48,7 +48,10 @@ pub struct PickedFile {
 pub enum FilePickOutcome {
     /// The file passed the accept/size rules and was encoded to bare base64
     /// (no data-URL prefix). Credential contents never render.
-    Selected { name: String, contents_base64: String },
+    Selected {
+        name: String,
+        contents_base64: String,
+    },
     /// The user cancelled the prompt; nothing was selected.
     Cancelled,
     /// The accept or size rule refused the file. Reported honestly — the OS
@@ -190,7 +193,10 @@ mod tests {
                 contents_base64: poodle_headless::file_upload::base64_encode(b"payload"),
             }
         );
-        let FilePickOutcome::Selected { contents_base64, .. } = &outcome else {
+        let FilePickOutcome::Selected {
+            contents_base64, ..
+        } = &outcome
+        else {
             panic!("expected a selection");
         };
         assert!(!contents_base64.starts_with("data:"));
@@ -200,7 +206,11 @@ mod tests {
     #[test]
     fn cancellation_stays_quiet() {
         let mut source = InjectedFileSource::new(Ok(None));
-        assert!(source.poll().expect("resolved").expect("no error").is_none());
+        assert!(source
+            .poll()
+            .expect("resolved")
+            .expect("no error")
+            .is_none());
     }
 
     /// The accept rule is enforced after selection — the OS dialog could not
@@ -210,9 +220,7 @@ mod tests {
         let outcome = finish_file_pick(picked("machine.txt", b"x"), &spec());
         assert_eq!(
             outcome,
-            FilePickOutcome::Rejected(
-                "File type not accepted. Accepted types: .lic".to_string()
-            )
+            FilePickOutcome::Rejected("File type not accepted. Accepted types: .lic".to_string())
         );
     }
 
@@ -260,7 +268,10 @@ mod tests {
     /// cancellation, not a pending dialog.
     #[test]
     fn os_selection_cancellation_is_not_pending() {
-        assert_eq!(resolve_os_selection(Ok(None), &spec()), FilePickOutcome::Cancelled);
+        assert_eq!(
+            resolve_os_selection(Ok(None), &spec()),
+            FilePickOutcome::Cancelled
+        );
         assert_eq!(
             resolve_os_selection(Ok(Some(vec![])), &spec()),
             FilePickOutcome::Cancelled

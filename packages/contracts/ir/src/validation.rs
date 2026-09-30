@@ -1215,7 +1215,11 @@ fn scene_size_axis_values(model: &IrModel, scene: &crate::Scene) -> BTreeSet<Str
         let Some(component) = model.component(instance.component.as_str()) else {
             continue;
         };
-        let Some(prop) = component.props.iter().find(|prop| prop.id.as_str() == "size") else {
+        let Some(prop) = component
+            .props
+            .iter()
+            .find(|prop| prop.id.as_str() == "size")
+        else {
             continue;
         };
         if let Some(subset) = &prop.permitted_subset {
@@ -1313,7 +1317,11 @@ fn validate_scene_axes(model: &IrModel, scene: &crate::Scene, findings: &mut Vec
                                 "size axis value '{}' is not in the scene's allowed size domain \
                                  [{}] (SHELL-02, CROSS-07)",
                                 value,
-                                sizes.iter().map(String::as_str).collect::<Vec<_>>().join(", ")
+                                sizes
+                                    .iter()
+                                    .map(String::as_str)
+                                    .collect::<Vec<_>>()
+                                    .join(", ")
                             ),
                         ));
                     }
@@ -1504,9 +1512,10 @@ mod scene_size_axis_tests {
                 required: false,
                 web_only: false,
                 description: "fixture".to_owned(),
-                permitted_subset: Some(
-                    PermittedSubset::new("empty-state-size", ["default", "compact"]),
-                ),
+                permitted_subset: Some(PermittedSubset::new(
+                    "empty-state-size",
+                    ["default", "compact"],
+                )),
             }],
             controlled_state: Vec::new(),
             events: Vec::new(),
@@ -1538,9 +1547,7 @@ mod scene_size_axis_tests {
             }],
             axes: vec![SceneAxis {
                 kind: SceneAxisKind::Size,
-                values: AxisValues::Named(
-                    values.iter().map(|v| Identifier::new(*v)).collect(),
-                ),
+                values: AxisValues::Named(values.iter().map(|v| Identifier::new(*v)).collect()),
                 description: "fixture".to_owned(),
             }],
             layout: None,

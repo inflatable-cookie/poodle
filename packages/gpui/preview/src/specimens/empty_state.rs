@@ -4,7 +4,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EmptyStateSpec, EmptyStateSize, EmptyStateVariant, EyebrowSpec};
+use poodle_specs::{EmptyStateSize, EmptyStateSpec, EmptyStateVariant, EyebrowSpec};
 
 fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div {
     div()
@@ -73,20 +73,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "empty-state",
         examples,
         SpecimenAxes::examples_only()
-            .with_named_sizes(&["default", "compact"], |value, theme: &GpuiThemeProvider| {
-                let size = if value == "compact" {
-                    EmptyStateSize::Compact
-                } else {
-                    EmptyStateSize::Default
-                };
-                EmptyState::from_spec(
-                    EmptyStateSpec::new("No projects yet")
-                        .with_message("Create your first project to get started.")
-                        .with_size(size),
-                    theme,
-                )
-                .into_any_element()
-            })
+            .with_named_sizes(
+                &["default", "compact"],
+                |value, theme: &GpuiThemeProvider| {
+                    let size = if value == "compact" {
+                        EmptyStateSize::Compact
+                    } else {
+                        EmptyStateSize::Default
+                    };
+                    EmptyState::from_spec(
+                        EmptyStateSpec::new("No projects yet")
+                            .with_message("Create your first project to get started.")
+                            .with_size(size),
+                        theme,
+                    )
+                    .into_any_element()
+                },
+            )
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 EmptyState::from_spec(
                     EmptyStateSpec::new("No projects yet")

@@ -370,10 +370,12 @@ mod tests {
     fn split_body_shrinks_and_preview_owns_scroll() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let spec = MarkdownEditorSpec::new().with_mode("split").with_value(format!(
-            "short source\n\n{}",
-            "# Heading\n\nparagraph\n\n".repeat(30)
-        ));
+        let spec = MarkdownEditorSpec::new()
+            .with_mode("split")
+            .with_value(format!(
+                "short source\n\n{}",
+                "# Heading\n\nparagraph\n\n".repeat(30)
+            ));
         let node = markdown_editor(&spec, &ctx);
         let body = node.children.get(1).expect("toolbar then body");
         assert_eq!(body.style.min_height, Some(0.0));

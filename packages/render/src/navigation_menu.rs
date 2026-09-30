@@ -121,13 +121,21 @@ pub fn navigation_menu(
             };
             (
                 fill_bg,
-                if outline_on { outline_selected_border } else { TRANSPARENT },
+                if outline_on {
+                    outline_selected_border
+                } else {
+                    TRANSPARENT
+                },
                 if outline_on { border_w } else { 0.0 },
             )
         } else {
             // Reserve a transparent border under the outline so the open
             // trigger's visible border does not shift the list.
-            (idle_bg, TRANSPARENT, if outline_on { border_w } else { 0.0 })
+            (
+                idle_bg,
+                TRANSPARENT,
+                if outline_on { border_w } else { 0.0 },
+            )
         };
 
         // Contract §3 `icon`: an entry with a leading icon composes icon +
@@ -282,10 +290,8 @@ mod tests {
 
     /// The trigger button whose subtree contains `label`.
     fn trigger_of<'a>(root: &'a Node, label: &str) -> &'a Node {
-        root.find(&|n| {
-            n.a11y.role == Some(NodeRole::Button) && n.has_text(label)
-        })
-        .unwrap_or_else(|| panic!("trigger {label} exists"))
+        root.find(&|n| n.a11y.role == Some(NodeRole::Button) && n.has_text(label))
+            .unwrap_or_else(|| panic!("trigger {label} exists"))
     }
 
     /// The label text node for `label`.
@@ -377,7 +383,10 @@ mod tests {
         let root = navigation_menu(&spec, &ctx, None);
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.background, Some(accent));
-        assert_eq!(label_text(&root, "A").style.descriptor.text_color, Some(inverse));
+        assert_eq!(
+            label_text(&root, "A").style.descriptor.text_color,
+            Some(inverse)
+        );
 
         let closed = trigger_of(&root, "B");
         assert_eq!(
@@ -403,10 +412,18 @@ mod tests {
         let accent = ctx.theme().resolve_color("color.accent.base");
 
         let root = navigation_menu(&spec, &ctx, None);
-        let open_hover = trigger_of(&root, "A").style.hover.as_ref().expect("hover patch");
+        let open_hover = trigger_of(&root, "A")
+            .style
+            .hover
+            .as_ref()
+            .expect("hover patch");
         assert_eq!(open_hover.background, Some(accent));
 
-        let closed_hover = trigger_of(&root, "B").style.hover.as_ref().expect("hover patch");
+        let closed_hover = trigger_of(&root, "B")
+            .style
+            .hover
+            .as_ref()
+            .expect("hover patch");
         assert_eq!(
             closed_hover.background,
             Some(with_alpha(accent, accent.3 * 0.12))
@@ -450,12 +467,16 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items()).with_value("a");
         let node = navigation_menu(&spec, &ctx, None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open viewport carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
         let node = navigation_menu(&refusing, &ctx, None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
     }
 }

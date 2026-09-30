@@ -100,8 +100,7 @@ pub fn validate_upload_file(
 /// payload. Dependency-free on purpose (the shared Rust target has no runtime
 /// base64 and a new crate dependency is not this card's to add).
 pub fn base64_encode(bytes: &[u8]) -> String {
-    const TABLE: &[u8; 64] =
-        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
     for chunk in bytes.chunks(3) {
         let b0 = chunk[0] as u32;
@@ -139,11 +138,23 @@ mod tests {
 
     #[test]
     fn mime_rules_need_a_mime_read_and_never_guess() {
-        assert!(file_accepts(Some("image/*"), "photo.png", Some("image/png")));
-        assert!(file_accepts(Some("image/png"), "photo.png", Some("image/png")));
+        assert!(file_accepts(
+            Some("image/*"),
+            "photo.png",
+            Some("image/png")
+        ));
+        assert!(file_accepts(
+            Some("image/png"),
+            "photo.png",
+            Some("image/png")
+        ));
         assert!(!file_accepts(Some("image/*"), "photo.png", None));
         assert!(!file_accepts(Some("image/png"), "photo.png", None));
-        assert!(!file_accepts(Some("image/*"), "photo.png", Some("text/plain")));
+        assert!(!file_accepts(
+            Some("image/*"),
+            "photo.png",
+            Some("text/plain")
+        ));
     }
 
     #[test]

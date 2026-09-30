@@ -526,7 +526,12 @@ fn paint_slider_block(
     // the pill. The visible thumb stays circular.
     let control_radius = ctx.theme().resolve_radius("radius.control");
     let label = omit_empty_owned(spec.visible_label.as_deref());
-    let value_text = resolved_visible_text(visual.value, spec.min, spec.step, spec.visible_value_text.as_deref());
+    let value_text = resolved_visible_text(
+        visual.value,
+        spec.min,
+        spec.step,
+        spec.visible_value_text.as_deref(),
+    );
     let (capsule_span, measure) = ctx.require_block_layout("Slider");
     let layout = layout_slider_block(
         capsule_span,
@@ -546,17 +551,22 @@ fn paint_slider_block(
     let text_layers: Option<(Node, Node)> = if paint_text {
         let selected_span = fraction.clamp(0.0, 1.0) * capsule_span;
         let remainder_span = (capsule_span - selected_span).max(0.0);
-        let make_row = |role_color: ColorValue,
-                        role_fill: &str,
-                        role_text: &str,
-                        role_id: &str| {
+        let make_row = |role_color: ColorValue, role_fill: &str, role_text: &str, role_id: &str| {
             let mut row = block_text_row(
                 label.clone().filter(|_| layout.label_inline),
                 value_text.clone().filter(|_| layout.value_inline),
                 role_color,
                 font_px,
-                if vertical { capsule_cross } else { capsule_span },
-                if vertical { capsule_span } else { capsule_cross },
+                if vertical {
+                    capsule_cross
+                } else {
+                    capsule_span
+                },
+                if vertical {
+                    capsule_span
+                } else {
+                    capsule_cross
+                },
                 rtl,
                 vertical,
                 &format!("block-slider-label-{role_id}"),
@@ -566,13 +576,22 @@ fn paint_slider_block(
             row
         };
 
-        let selected_row = make_row(selected_text_color, "selection", "selection-text", "selected");
+        let selected_row = make_row(
+            selected_text_color,
+            "selection",
+            "selection-text",
+            "selected",
+        );
         let remainder_row = make_row(remainder_text_color, "canvas", "canvas-text", "remainder");
         let selected_row = if vertical {
             selected_row
         } else {
             let mut selected_row = selected_row;
-            let selected_row_left = if rtl { selected_span - capsule_span } else { 0.0 };
+            let selected_row_left = if rtl {
+                selected_span - capsule_span
+            } else {
+                0.0
+            };
             selected_row.position = NodePosition::Absolute {
                 top: Some(0.0),
                 left: Some(selected_row_left),
@@ -827,7 +846,10 @@ fn paint_slider_block(
     }
     root.roles
         .insert("appearance".to_owned(), "block".to_owned());
-    root.roles.insert("orientation".to_owned(), orientation_name(spec.orientation).to_owned());
+    root.roles.insert(
+        "orientation".to_owned(),
+        orientation_name(spec.orientation).to_owned(),
+    );
     root.roles.insert(
         "direction".to_owned(),
         if rtl { "rtl" } else { "ltr" }.to_owned(),
@@ -1188,7 +1210,6 @@ mod tests {
     fn block_hit_is_forty_four_and_forced_colors_keep_roles() {
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-
             .with_visible_label("Blur")
             .with_visible_value_text("50");
         let (node, _) = armed(spec);
@@ -1228,7 +1249,6 @@ mod tests {
     fn collision_suppresses_the_label_and_keeps_the_exact_value() {
         let spec = SliderSpec::new(10.0)
             .with_bounds(0.0, 100.0)
-
             .with_visible_label("Compressor makeup gain")
             .with_visible_value_text("10");
         let (node, _) = armed(spec);
@@ -1251,7 +1271,6 @@ mod tests {
     fn block_text_layers_split_at_the_fill_boundary() {
         let spec = SliderSpec::new(25.0)
             .with_bounds(0.0, 100.0)
-
             .with_visible_label("Blur")
             .with_visible_value_text("25");
         let (node, _) = armed(spec);
@@ -1264,8 +1283,7 @@ mod tests {
         let LayoutSizing::Fixed(selected_w) = selected_clip.style.descriptor.layout.width else {
             panic!("selected clip width");
         };
-        let LayoutSizing::Fixed(remainder_w) = remainder_clip.style.descriptor.layout.width
-        else {
+        let LayoutSizing::Fixed(remainder_w) = remainder_clip.style.descriptor.layout.width else {
             panic!("remainder clip width");
         };
         assert!((selected_w - 40.0).abs() < 1e-4, "clip tracks the 25% fill");
@@ -1285,15 +1303,24 @@ mod tests {
         let remainder_slot = remainder_row
             .find(&|n| n.id.as_deref() == Some("block-slider-value-remainder"))
             .expect("remainder value slot");
-        assert_eq!(selected_slot.style.text_size, remainder_slot.style.text_size);
+        assert_eq!(
+            selected_slot.style.text_size,
+            remainder_slot.style.text_size
+        );
         let selected_row = &selected_clip.children[0];
         let remainder_row = &remainder_clip.children[0];
         assert_eq!(
-            selected_row.roles.get("forced-color-text").map(String::as_str),
+            selected_row
+                .roles
+                .get("forced-color-text")
+                .map(String::as_str),
             Some("selection-text")
         );
         assert_eq!(
-            remainder_row.roles.get("forced-color-text").map(String::as_str),
+            remainder_row
+                .roles
+                .get("forced-color-text")
+                .map(String::as_str),
             Some("canvas-text")
         );
     }
@@ -1302,7 +1329,6 @@ mod tests {
     fn block_rtl_remaps_scrub_without_changing_keys() {
         let spec = SliderSpec::new(0.0)
             .with_bounds(0.0, 100.0)
-
             .with_direction(poodle_specs::SliderDirection::Rtl);
         let (node, seen) = armed(spec);
         let scrub = Arc::clone(
@@ -1325,9 +1351,7 @@ mod tests {
 
     #[test]
     fn a_second_scrub_release_is_inert() {
-        let spec = SliderSpec::new(0.0)
-            .with_bounds(0.0, 100.0)
-            ;
+        let spec = SliderSpec::new(0.0).with_bounds(0.0, 100.0);
         let (node, seen) = armed(spec);
         let scrub = Arc::clone(
             find_scrub(&node)
@@ -1352,7 +1376,6 @@ mod tests {
         let theme = theme();
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-
             .with_visible_label("AB")
             .with_visible_value_text("50");
         let measure: crate::context::BlockTextMeasure =
@@ -1388,9 +1411,7 @@ mod tests {
     #[test]
     fn block_without_layout_inputs_panics() {
         let theme = theme();
-        let spec = SliderSpec::new(50.0)
-            .with_bounds(0.0, 100.0)
-            ;
+        let spec = SliderSpec::new(50.0).with_bounds(0.0, 100.0);
         let _node = slider(
             &spec,
             &RenderContext::new(&theme),
@@ -1427,14 +1448,15 @@ mod tests {
         assert!(node
             .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
             .is_none());
-        assert_eq!(slider_control(&node).a11y.orientation.as_deref(), Some("vertical"));
+        assert_eq!(
+            slider_control(&node).a11y.orientation.as_deref(),
+            Some("vertical")
+        );
     }
 
     #[test]
     fn aria_label_never_becomes_visible_block_text() {
-        let mut spec = SliderSpec::new(50.0)
-            .with_bounds(0.0, 100.0)
-            ;
+        let mut spec = SliderSpec::new(50.0).with_bounds(0.0, 100.0);
         spec.aria_label = Some("Gain".into());
         let (node, _) = armed(spec);
         let texts = node.texts().join(" ");
@@ -1446,7 +1468,6 @@ mod tests {
     fn visible_label_never_becomes_block_accessible_name() {
         let spec = SliderSpec::new(50.0)
             .with_bounds(0.0, 100.0)
-
             .with_visible_label("Blur");
         let (node, _) = armed(spec);
         assert_eq!(slider_control(&node).a11y.label, None);

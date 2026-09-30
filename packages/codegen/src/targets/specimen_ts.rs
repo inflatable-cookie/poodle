@@ -54,7 +54,11 @@ fn value_literal(value: &Value) -> String {
         Value::Pair(a, b) => format!("[{}, {}]", value_literal(a), value_literal(b)),
         Value::List(items) => format!(
             "[{}]",
-            items.iter().map(value_literal).collect::<Vec<_>>().join(", ")
+            items
+                .iter()
+                .map(value_literal)
+                .collect::<Vec<_>>()
+                .join(", ")
         ),
     }
 }
@@ -121,7 +125,10 @@ pub fn render_scenes(model: &IrModel, source_path: &str) -> Vec<GeneratedFile> {
         .collect();
 
     let registry = render_registry(&scenes, source_path);
-    files.push(GeneratedFile::new("specimen-scenes.ts".to_owned(), registry));
+    files.push(GeneratedFile::new(
+        "specimen-scenes.ts".to_owned(),
+        registry,
+    ));
     files
 }
 
@@ -145,8 +152,14 @@ fn render_scene_file(scene: &Scene, source_path: &str) -> String {
         .iter()
         .find(|axis| axis.kind == poodle_ir::SceneAxisKind::Density);
 
-    out.push_str(&format!("export const {} = {{\n", camel_case(scene.id.as_str())));
-    out.push_str(&format!("  id: {},\n", ts_string_literal(scene.id.as_str())));
+    out.push_str(&format!(
+        "export const {} = {{\n",
+        camel_case(scene.id.as_str())
+    ));
+    out.push_str(&format!(
+        "  id: {},\n",
+        ts_string_literal(scene.id.as_str())
+    ));
     out.push_str(&format!("  name: {},\n", ts_string_literal(&scene.name)));
     out.push_str(&format!(
         "  description: {},\n",
@@ -218,7 +231,10 @@ fn render_instance(instance: &poodle_ir::ComponentInstance) -> String {
         ts_string_literal(instance.component.as_str())
     ));
     if let Some(caption) = &instance.caption {
-        out.push_str(&format!("        caption: {},\n", ts_string_literal(caption)));
+        out.push_str(&format!(
+            "        caption: {},\n",
+            ts_string_literal(caption)
+        ));
     }
     out.push_str("        props: {\n");
     for binding in &instance.bindings {

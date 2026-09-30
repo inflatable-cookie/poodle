@@ -21,7 +21,7 @@
     "events": [
       "assert_eq!(\n            beta_changes.lock().unwrap().as_slice(),\n            [\"other\"],\n            \"Pointer activation on alpha instance must not fire beta change",
       "assert!(\n            alpha_changes.lock().unwrap().is_empty(),\n            \"Keyboard navigation on beta instance must not fire alpha change",
-      "assert!(orders.lock().unwrap().is_empty(), \"Drag cancelled via Escape must not commit"
+      "assert_eq!(\n            live.lock().unwrap().as_str(),\n            \"two\",\n            \"Manual mode: Enter commit"
     ],
     "pointer": [
       "pointer_activate",
@@ -33,9 +33,9 @@
       "focus_element"
     ],
     "accessibility": [
+      "a11y\n                .",
       "accessible",
-      "NodeRole",
-      "a11y."
+      "NodeRole"
     ],
     "visual": [
       "resolve_opacity",
@@ -53,15 +53,15 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "1a06aab18a07d46429211937e45716d24df3c364",
+  "source_commit": "fd434be25818ef89d58e272e4f494de0b1e3cefa",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-09-29-poodle-060-instance-baseline-tabular-expected",
+    "run_id": "2026-09-30-poodle-072-rustfmt-clean-expected",
     "outcome": "passed",
-    "body_sha256": "8fe7198b282047cb98b28c09fb6627fd98bc1d26691c24eb70e23a5dbcb427b9"
+    "body_sha256": "da05d65fa635a8f08cf17703f7f18cc89f25824e15ea94362117eacd8b7aae60"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

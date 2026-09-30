@@ -405,31 +405,33 @@ pub fn capture_batch<V: Render, A: AssetSource>(
     // Baseline BEFORE the application exists, let alone a window.
     let monitor = Arc::new(ForegroundMonitor::start());
 
-    Application::new().with_assets(assets).run(move |cx: &mut App| {
-        if !fonts.is_empty() {
-            if let Err(error) = cx
-                .text_system()
-                .add_fonts(fonts)
-                .with_context(|| "load the capture scene fonts")
-            {
-                fail(error);
-            }
-        }
-
-        let monitor = Arc::clone(&monitor);
-        cx.spawn(async move |cx: &mut AsyncApp| {
-            let total = shots.len();
-            for (index, shot) in shots.into_iter().enumerate() {
-                if let Err(error) = capture_one(cx, shot, &monitor, index + 1, total).await {
-                    monitor.stop();
+    Application::new()
+        .with_assets(assets)
+        .run(move |cx: &mut App| {
+            if !fonts.is_empty() {
+                if let Err(error) = cx
+                    .text_system()
+                    .add_fonts(fonts)
+                    .with_context(|| "load the capture scene fonts")
+                {
                     fail(error);
                 }
             }
-            monitor.stop();
-            std::process::exit(0);
-        })
-        .detach();
-    });
+
+            let monitor = Arc::clone(&monitor);
+            cx.spawn(async move |cx: &mut AsyncApp| {
+                let total = shots.len();
+                for (index, shot) in shots.into_iter().enumerate() {
+                    if let Err(error) = capture_one(cx, shot, &monitor, index + 1, total).await {
+                        monitor.stop();
+                        fail(error);
+                    }
+                }
+                monitor.stop();
+                std::process::exit(0);
+            })
+            .detach();
+        });
 
     // `Application::run` does not return on macOS; if it ever does, the run
     // produced no capture, which is a failure rather than a silent success.
@@ -558,7 +560,9 @@ async fn capture_one<V: Render>(
             "{label}: the capture process (pid {}) became the frontmost application (baseline \
              {:?}, observed {:?}) — the non-activating contract was violated and nothing was \
              published",
-            foreground.capturer_pid, foreground.baseline, foreground.observed
+            foreground.capturer_pid,
+            foreground.baseline,
+            foreground.observed
         ),
         ForegroundVerdict::Unprovable => bail!(
             "{label}: the run cannot prove the capture process never became frontmost (baseline \
@@ -700,8 +704,12 @@ fn capture_window(window_id: u64) -> Result<Vec<u8>> {
     let pid = std::process::id();
 
     let directory = std::env::temp_dir().join(format!("poodle-window-capture-{pid}"));
-    std::fs::create_dir_all(&directory)
-        .with_context(|| format!("create the capture staging directory {}", directory.display()))?;
+    std::fs::create_dir_all(&directory).with_context(|| {
+        format!(
+            "create the capture staging directory {}",
+            directory.display()
+        )
+    })?;
     let staged = directory.join("capture.png");
     let _ = std::fs::remove_file(&staged);
 
@@ -713,7 +721,9 @@ fn capture_window(window_id: u64) -> Result<Vec<u8>> {
             "-o",
             "-l",
             &window_id.to_string(),
-            staged.to_str().with_context(|| "capture path is not UTF-8")?,
+            staged
+                .to_str()
+                .with_context(|| "capture path is not UTF-8")?,
         ])
         .status()
         .with_context(|| "run screencapture")?;
@@ -809,13 +819,7 @@ mod tests {
     fn a_run_that_only_ever_saw_the_baseline_is_proof() {
         let editor = editor();
         assert_eq!(
-            evaluate_foreground(
-                CAPTURER_PID,
-                editor.first(),
-                &editor,
-                ENOUGH,
-                0
-            ),
+            evaluate_foreground(CAPTURER_PID, editor.first(), &editor, ENOUGH, 0),
             ForegroundVerdict::Proved
         );
     }
@@ -831,13 +835,7 @@ mod tests {
             ("com.example.editor", EDITOR_PID),
         ]);
         assert_eq!(
-            evaluate_foreground(
-                CAPTURER_PID,
-                observed.first(),
-                &observed,
-                ENOUGH,
-                0
-            ),
+            evaluate_foreground(CAPTURER_PID, observed.first(), &observed, ENOUGH, 0),
             ForegroundVerdict::Proved
         );
         assert_eq!(observed.len(), 3);
@@ -1012,12 +1010,11 @@ mod tests {
         ] {
             assert!(object.contains_key(key), "missing receipt field '{key}'");
         }
-        let baseline = object["baseline"].as_object().expect("baseline is an object");
+        let baseline = object["baseline"]
+            .as_object()
+            .expect("baseline is an object");
         for key in ["identity", "pid"] {
-            assert!(
-                baseline.contains_key(key),
-                "missing baseline field '{key}'"
-            );
+            assert!(baseline.contains_key(key), "missing baseline field '{key}'");
         }
         assert_eq!(object["capturer_pid"], CAPTURER_PID);
         assert_eq!(object["failed_reads"], 0);

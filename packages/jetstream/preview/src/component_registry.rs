@@ -43,7 +43,10 @@ pub fn all_components() -> &'static [ComponentEntry] {
 }
 
 pub fn specimen_count() -> usize {
-    all_components().iter().filter(|entry| entry.has_specimen).count()
+    all_components()
+        .iter()
+        .filter(|entry| entry.has_specimen)
+        .count()
 }
 
 fn jetstream_has_specimen(slug: &str) -> bool {

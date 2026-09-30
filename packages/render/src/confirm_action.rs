@@ -178,7 +178,9 @@ mod tests {
             false,
             "Working\u{2026}",
             ConfirmActionHandlers {
-                on_trigger: Some(Arc::new(move || trigger_seen.lock().unwrap().push("trigger"))),
+                on_trigger: Some(Arc::new(move || {
+                    trigger_seen.lock().unwrap().push("trigger")
+                })),
                 on_confirm: None,
                 on_cancel: None,
             },

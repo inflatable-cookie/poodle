@@ -25,7 +25,9 @@ pub fn list_grid(
     } else {
         ctx.theme().resolve_space(spec.min_item_width_token())
     };
-    let header_gap = ctx.theme().resolve_space(ListGridSpec::header_actions_gap_token());
+    let header_gap = ctx
+        .theme()
+        .resolve_space(ListGridSpec::header_actions_gap_token());
     let header_after = ctx.theme().resolve_space(spec.header_margin_bottom_token());
 
     let mut root = Node::container();

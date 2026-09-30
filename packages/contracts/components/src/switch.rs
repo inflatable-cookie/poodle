@@ -267,7 +267,10 @@ mod tests {
             .with_default_checked(true)
             .with_checked(false);
         assert!(!controlled.current_checked());
-        assert_eq!(controlled.track_fill_token(), semantic::COLOR_BACKGROUND_SURFACE);
+        assert_eq!(
+            controlled.track_fill_token(),
+            semantic::COLOR_BACKGROUND_SURFACE
+        );
     }
 
     #[test]
@@ -285,9 +288,21 @@ mod tests {
     #[test]
     fn switch_tone_color_tokens_map_to_semantics() {
         assert_eq!(SwitchTone::Default.color_token(), None);
-        assert_eq!(SwitchTone::Primary.color_token(), Some(semantic::COLOR_ACCENT_BASE));
-        assert_eq!(SwitchTone::Success.color_token(), Some(semantic::COLOR_STATUS_SUCCESS));
-        assert_eq!(SwitchTone::Warning.color_token(), Some(semantic::COLOR_STATUS_WARNING));
-        assert_eq!(SwitchTone::Danger.color_token(), Some(semantic::COLOR_STATUS_DANGER));
+        assert_eq!(
+            SwitchTone::Primary.color_token(),
+            Some(semantic::COLOR_ACCENT_BASE)
+        );
+        assert_eq!(
+            SwitchTone::Success.color_token(),
+            Some(semantic::COLOR_STATUS_SUCCESS)
+        );
+        assert_eq!(
+            SwitchTone::Warning.color_token(),
+            Some(semantic::COLOR_STATUS_WARNING)
+        );
+        assert_eq!(
+            SwitchTone::Danger.color_token(),
+            Some(semantic::COLOR_STATUS_DANGER)
+        );
     }
 }

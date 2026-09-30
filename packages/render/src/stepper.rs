@@ -615,7 +615,10 @@ mod tests {
         let cells = cells(&root);
 
         let first_trigger = trigger(cells[0]);
-        let ring = first_trigger.style.focus_ring.expect("the trigger declares a ring");
+        let ring = first_trigger
+            .style
+            .focus_ring
+            .expect("the trigger declares a ring");
         assert_eq!(ring.color, ring_color);
         assert_eq!(ring.width, 2.0);
         assert_eq!(ring.offset, 2.0, "the trigger ring draws 2px outside");
@@ -626,7 +629,10 @@ mod tests {
         );
 
         let rerun = rerun(cells[0]).expect("a completed step carries the rerun control");
-        let ring = rerun.style.focus_ring.expect("the rerun control declares a ring");
+        let ring = rerun
+            .style
+            .focus_ring
+            .expect("the rerun control declares a ring");
         assert_eq!(ring.color, ring_color);
         assert_eq!(ring.offset, 2.0);
         assert_eq!(rerun.id.as_deref(), Some("poodle-stepper:rerun:state"));
@@ -650,7 +656,10 @@ mod tests {
         let summary = collapsible
             .find(&|node| node.id.as_deref() == Some("poodle-stepper-summary"))
             .expect("a collapsible vertical stepper has a summary row");
-        let ring = summary.style.focus_ring.expect("the summary declares a ring");
+        let ring = summary
+            .style
+            .focus_ring
+            .expect("the summary declares a ring");
         assert_eq!(ring.color, ring_color);
         assert_eq!(ring.width, 2.0);
         assert_eq!(ring.offset, -2.0);
@@ -788,7 +797,11 @@ mod tests {
             .find(&|node| node.id.as_deref() == Some("poodle-stepper-summary"))
             .expect("a collapsible vertical stepper has a summary row");
         summary.interaction.on_activate.as_ref().unwrap()();
-        assert_eq!(emissions.collapses(), [false], "the toggle carries the next state");
+        assert_eq!(
+            emissions.collapses(),
+            [false],
+            "the toggle carries the next state"
+        );
         assert!(emissions.changes().is_empty());
         assert!(emissions.reruns().is_empty());
         assert!(

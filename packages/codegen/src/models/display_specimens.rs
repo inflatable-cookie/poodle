@@ -32,7 +32,11 @@ use poodle_ir::{
 };
 
 fn ids(values: impl IntoIterator<Item = impl Into<String>>) -> Vec<Identifier> {
-    values.into_iter().map(Into::into).map(Identifier::new).collect()
+    values
+        .into_iter()
+        .map(Into::into)
+        .map(Identifier::new)
+        .collect()
 }
 
 /// The fixture definitions carry no accessibility model — validation needs
@@ -51,7 +55,10 @@ fn a11y() -> Accessibility {
 fn subset(shared: &str, members: &[&str]) -> PermittedSubset {
     PermittedSubset::new(
         Identifier::new(shared),
-        members.iter().map(|member| Identifier::new(*member)).collect::<Vec<_>>(),
+        members
+            .iter()
+            .map(|member| Identifier::new(*member))
+            .collect::<Vec<_>>(),
     )
 }
 
@@ -63,7 +70,9 @@ fn shared_type(id: &str, name: &str, contract_path: &str, members: &[(&str, &str
     SharedType {
         id: Identifier::new(id),
         name: name.to_owned(),
-        description: format!("{name} — the union the contract fragment defines; specimen fixtures bind its members."),
+        description: format!(
+            "{name} — the union the contract fragment defines; specimen fixtures bind its members."
+        ),
         canonical_ref: ContractRef {
             path: contract_path.to_owned(),
             section: None,
@@ -734,53 +743,136 @@ pub fn display_specimens_model() -> IrModel {
     IrModel {
         schema_version: poodle_ir::IR_SCHEMA_VERSION,
         shared_types: vec![
-            shared_type("status-tone", "StatusTone", "docs/contracts/components/callout.md", &[
-                ("neutral", "Neutral"), ("info", "Info"), ("success", "Success"),
-                ("warning", "Warning"), ("danger", "Danger"), ("pending", "Pending"),
-            ]),
-            shared_type("tone-fill", "ToneFill", "docs/contracts/004-shared-control-types.md", &[
-                ("tint", "Tint"), ("solid", "Solid"),
-            ]),
-            shared_type("pill-tone", "PillTone", "docs/contracts/components/pill.md", &[
-                ("neutral", "Neutral"), ("info", "Info"), ("success", "Success"),
-                ("warning", "Warning"), ("danger", "Danger"),
-            ]),
-            shared_type("control-size", "ControlSize", "docs/contracts/components/slider.md", &[
-                ("xs", "Xs"), ("sm", "Sm"), ("md", "Md"), ("lg", "Lg"), ("xl", "Xl"),
-            ]),
-            shared_type("control-density", "ControlDensity", "docs/contracts/components/slider.md", &[
-                ("compact", "Compact"), ("default", "Default"), ("comfortable", "Comfortable"),
-            ]),
-            shared_type("semantic-size-role", "SemanticControlSizeRole", "docs/contracts/components/pill.md", &[
-                ("chrome", "Chrome"), ("control", "Control"), ("prominent", "Prominent"),
-            ]),
-            shared_type("pill-appearance", "PillAppearance", "docs/contracts/components/pill.md", &[
-                ("tint", "Tint"), ("solid", "Solid"), ("subtle", "Subtle"), ("badge", "Badge"),
-            ]),
-            shared_type("pill-font", "PillFont", "docs/contracts/components/pill.md", &[
-                ("normal", "Normal"), ("mono", "Mono"),
-            ]),
-            shared_type("pill-typography", "PillTypography", "docs/contracts/components/pill.md", &[
-                ("label", "Label"), ("inherit", "Inherit"),
-            ]),
-            shared_type("avatar-tone", "AvatarTone", "docs/contracts/components/avatar.md", &[
-                ("neutral", "Neutral"), ("accent", "Accent"),
-            ]),
-            shared_type("avatar-shape", "AvatarShape", "docs/contracts/components/avatar.md", &[
-                ("circle", "Circle"), ("rounded", "Rounded"),
-            ]),
-            shared_type("spinner-variant", "SpinnerVariant", "docs/contracts/components/spinner.md", &[
-                ("ring", "Ring"), ("grid", "Grid"), ("dots", "Dots"),
-            ]),
-            shared_type("spinner-tone", "SpinnerTone", "docs/contracts/components/spinner.md", &[
-                ("current", "Current"), ("accent", "Accent"), ("muted", "Muted"),
-            ]),
-            shared_type("empty-state-variant", "EmptyStateVariant", "docs/contracts/components/empty-state.md", &[
-                ("neutral", "Neutral"), ("search", "Search"), ("firstRun", "FirstRun"),
-            ]),
-            shared_type("empty-state-size", "EmptyStateSize", "docs/contracts/components/empty-state.md", &[
-                ("default", "Default"), ("compact", "Compact"),
-            ]),
+            shared_type(
+                "status-tone",
+                "StatusTone",
+                "docs/contracts/components/callout.md",
+                &[
+                    ("neutral", "Neutral"),
+                    ("info", "Info"),
+                    ("success", "Success"),
+                    ("warning", "Warning"),
+                    ("danger", "Danger"),
+                    ("pending", "Pending"),
+                ],
+            ),
+            shared_type(
+                "tone-fill",
+                "ToneFill",
+                "docs/contracts/004-shared-control-types.md",
+                &[("tint", "Tint"), ("solid", "Solid")],
+            ),
+            shared_type(
+                "pill-tone",
+                "PillTone",
+                "docs/contracts/components/pill.md",
+                &[
+                    ("neutral", "Neutral"),
+                    ("info", "Info"),
+                    ("success", "Success"),
+                    ("warning", "Warning"),
+                    ("danger", "Danger"),
+                ],
+            ),
+            shared_type(
+                "control-size",
+                "ControlSize",
+                "docs/contracts/components/slider.md",
+                &[
+                    ("xs", "Xs"),
+                    ("sm", "Sm"),
+                    ("md", "Md"),
+                    ("lg", "Lg"),
+                    ("xl", "Xl"),
+                ],
+            ),
+            shared_type(
+                "control-density",
+                "ControlDensity",
+                "docs/contracts/components/slider.md",
+                &[
+                    ("compact", "Compact"),
+                    ("default", "Default"),
+                    ("comfortable", "Comfortable"),
+                ],
+            ),
+            shared_type(
+                "semantic-size-role",
+                "SemanticControlSizeRole",
+                "docs/contracts/components/pill.md",
+                &[
+                    ("chrome", "Chrome"),
+                    ("control", "Control"),
+                    ("prominent", "Prominent"),
+                ],
+            ),
+            shared_type(
+                "pill-appearance",
+                "PillAppearance",
+                "docs/contracts/components/pill.md",
+                &[
+                    ("tint", "Tint"),
+                    ("solid", "Solid"),
+                    ("subtle", "Subtle"),
+                    ("badge", "Badge"),
+                ],
+            ),
+            shared_type(
+                "pill-font",
+                "PillFont",
+                "docs/contracts/components/pill.md",
+                &[("normal", "Normal"), ("mono", "Mono")],
+            ),
+            shared_type(
+                "pill-typography",
+                "PillTypography",
+                "docs/contracts/components/pill.md",
+                &[("label", "Label"), ("inherit", "Inherit")],
+            ),
+            shared_type(
+                "avatar-tone",
+                "AvatarTone",
+                "docs/contracts/components/avatar.md",
+                &[("neutral", "Neutral"), ("accent", "Accent")],
+            ),
+            shared_type(
+                "avatar-shape",
+                "AvatarShape",
+                "docs/contracts/components/avatar.md",
+                &[("circle", "Circle"), ("rounded", "Rounded")],
+            ),
+            shared_type(
+                "spinner-variant",
+                "SpinnerVariant",
+                "docs/contracts/components/spinner.md",
+                &[("ring", "Ring"), ("grid", "Grid"), ("dots", "Dots")],
+            ),
+            shared_type(
+                "spinner-tone",
+                "SpinnerTone",
+                "docs/contracts/components/spinner.md",
+                &[
+                    ("current", "Current"),
+                    ("accent", "Accent"),
+                    ("muted", "Muted"),
+                ],
+            ),
+            shared_type(
+                "empty-state-variant",
+                "EmptyStateVariant",
+                "docs/contracts/components/empty-state.md",
+                &[
+                    ("neutral", "Neutral"),
+                    ("search", "Search"),
+                    ("firstRun", "FirstRun"),
+                ],
+            ),
+            shared_type(
+                "empty-state-size",
+                "EmptyStateSize",
+                "docs/contracts/components/empty-state.md",
+                &[("default", "Default"), ("compact", "Compact")],
+            ),
         ],
         components: display_components(),
         conformance_vectors: Vec::new(),

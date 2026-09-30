@@ -303,6 +303,44 @@ describe("g18.001 census oracles", () => {
     expect(admission.production).toBe(true);
     expect(admission.axes).not.toContain("accessibility");
   });
+
+  it("formatting-tolerance oracle: a chain rustfmt splits across lines claims what the one-line form claims", () => {
+    // poodle#072 census ruling (2026-09-30): formatting must never change a
+    // census claim. rustfmt wrapped `n.a11y.label` onto separate chain lines
+    // and the one-line `a11y\.` matcher dropped a true accessibility
+    // admission; the matcher and the claim must be wrap-invariant.
+    const mounted = [
+      "run_headless(|cx| {",
+      "  let node = poodle_render::button(&spec, &ctx, handler);",
+      "  let mut driver = HeadlessDriver::new(cx, node);",
+      "  driver.pointer_activate();",
+    ];
+    const oneLine = admitTestAxes(
+      [
+        ...mounted,
+        '  assert!(give_first_id(&mut node, "card-switch", &|n| n.a11y.label.as_deref() == Some("Ready")));',
+        "});",
+      ].join("\n"),
+    );
+    const split = admitTestAxes(
+      [
+        ...mounted,
+        '  assert!(give_first_id(&mut node, "card-switch", &|n| n',
+        "    .a11y",
+        "    .label",
+        "    .as_deref()",
+        '    == Some("Ready")));',
+        "});",
+      ].join("\n"),
+    );
+    expect(oneLine.production).toBe(true);
+    expect(split.production).toBe(true);
+    expect(oneLine.axes).toContain("accessibility");
+    expect(split.axes).toEqual(oneLine.axes);
+    expect(split.signals.accessibility.map((fragment) => fragment.replaceAll(/\s+/g, ""))).toEqual(
+      oneLine.signals.accessibility.map((fragment) => fragment.replaceAll(/\s+/g, "")),
+    );
+  });
 });
 
 describe("g18.031 census release provenance", () => {

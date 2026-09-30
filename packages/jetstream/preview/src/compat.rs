@@ -16,11 +16,7 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::spinner(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_accordion(
-    spec: &AccordionSpec,
-    theme: &JetstreamThemeProvider,
-    instance_id: &str,
-) -> El {
+pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider, instance_id: &str) -> El {
     El(pr::accordion(
         spec,
         &pr::RenderContext::new(theme),
@@ -47,7 +43,11 @@ pub fn js_message_center(spec: &MessageCenterSpec, theme: &JetstreamThemeProvide
         on_mark_all_read: Some(std::sync::Arc::new(|| {})),
         ..Default::default()
     };
-    El(pr::message_center(spec, &pr::RenderContext::new(theme), handlers))
+    El(pr::message_center(
+        spec,
+        &pr::RenderContext::new(theme),
+        handlers,
+    ))
 }
 
 pub fn js_agent_chat_input(
@@ -113,7 +113,14 @@ pub fn js_alert_dialog_working(
 }
 
 pub fn js_app_header(spec: &AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::app_header(spec, &pr::RenderContext::new(theme), None, None, None, None))
+    El(pr::app_header(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+        None,
+        None,
+        None,
+    ))
 }
 
 pub fn js_app_header_with_slots(
@@ -187,11 +194,19 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::calendar(spec, &pr::RenderContext::new(theme), pr::CalendarHandlers::default()))
+    El(pr::calendar(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::CalendarHandlers::default(),
+    ))
 }
 
 pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::callout(spec, &pr::RenderContext::new(theme), pr::CalloutHandlers::default()))
+    El(pr::callout(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::CalloutHandlers::default(),
+    ))
 }
 
 pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
@@ -200,11 +215,19 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<El
 }
 
 pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::card_radio_group(spec, &pr::RenderContext::new(theme), None))
+    El(pr::card_radio_group(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_card_toggle_group(spec: &CardToggleGroupSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::card_toggle_group(spec, &pr::RenderContext::new(theme), None))
+    El(pr::card_toggle_group(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> El {
@@ -220,7 +243,11 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> El
 }
 
 pub fn js_collapse_toggle(spec: &CollapseToggleSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::collapse_toggle(spec, &pr::RenderContext::new(theme), None))
+    El(pr::collapse_toggle(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_collapsible(
@@ -229,7 +256,12 @@ pub fn js_collapsible(
     content: Option<El>,
 ) -> El {
     let content: Option<Node> = content.map(Node::from);
-    El(pr::collapsible(spec, &pr::RenderContext::new(theme), content, None))
+    El(pr::collapsible(
+        spec,
+        &pr::RenderContext::new(theme),
+        content,
+        None,
+    ))
 }
 
 pub fn js_color_picker(
@@ -246,7 +278,11 @@ pub fn js_color_picker(
 }
 
 pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::command_palette(spec, &pr::RenderContext::new(theme), None))
+    El(pr::command_palette(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvider) -> El {
@@ -274,7 +310,11 @@ pub fn js_data_table_loading(
     theme: &JetstreamThemeProvider,
     row_count: usize,
 ) -> El {
-    El(pr::data_table_loading(spec, &pr::RenderContext::new(theme), row_count))
+    El(pr::data_table_loading(
+        spec,
+        &pr::RenderContext::new(theme),
+        row_count,
+    ))
 }
 
 pub fn js_date_picker(spec: &DatePickerSpec, theme: &JetstreamThemeProvider) -> El {
@@ -356,7 +396,12 @@ pub fn js_detail_section(
 ) -> El {
     let content: Vec<Node> = content.into_iter().map(Node::from).collect();
     let actions: Option<Node> = actions.map(Node::from);
-    El(pr::detail_section(spec, &pr::RenderContext::new(theme), content, actions))
+    El(pr::detail_section(
+        spec,
+        &pr::RenderContext::new(theme),
+        content,
+        actions,
+    ))
 }
 
 pub fn js_detail_section_group(
@@ -395,7 +440,13 @@ pub fn js_dialog(
 ) -> El {
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
     let actions: Option<Node> = actions.map(Node::from);
-    El(pr::dialog(spec, &pr::RenderContext::new(theme), children, actions, None))
+    El(pr::dialog(
+        spec,
+        &pr::RenderContext::new(theme),
+        children,
+        actions,
+        None,
+    ))
 }
 
 pub fn js_dock_region(
@@ -414,7 +465,13 @@ pub fn js_dock_region(
 
 pub fn js_drawer(spec: &DrawerSpec, theme: &JetstreamThemeProvider, content: Option<El>) -> El {
     let content: Option<Node> = content.map(Node::from);
-    El(pr::drawer(spec, &pr::RenderContext::new(theme), content, None, None))
+    El(pr::drawer(
+        spec,
+        &pr::RenderContext::new(theme),
+        content,
+        None,
+        None,
+    ))
 }
 
 pub fn js_drawer_with_actions(
@@ -425,7 +482,13 @@ pub fn js_drawer_with_actions(
 ) -> El {
     let content: Option<Node> = content.map(Node::from);
     let actions: Option<Node> = actions.map(Node::from);
-    El(pr::drawer(spec, &pr::RenderContext::new(theme), content, actions, None))
+    El(pr::drawer(
+        spec,
+        &pr::RenderContext::new(theme),
+        content,
+        actions,
+        None,
+    ))
 }
 
 pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvider) -> El {
@@ -433,7 +496,11 @@ pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvide
 }
 
 pub fn js_editable_label(spec: &EditableLabelSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::editable_label(spec, &pr::RenderContext::new(theme), None))
+    El(pr::editable_label(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_editable_list(
@@ -466,7 +533,11 @@ pub fn js_error_boundary(
     child: Option<El>,
 ) -> El {
     let child: Option<Node> = child.map(Node::from);
-    El(pr::error_boundary(spec, &pr::RenderContext::new(theme), child))
+    El(pr::error_boundary(
+        spec,
+        &pr::RenderContext::new(theme),
+        child,
+    ))
 }
 
 pub fn js_eyebrow(spec: &EyebrowSpec, theme: &JetstreamThemeProvider) -> El {
@@ -484,7 +555,11 @@ pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Optio
 
 pub fn js_field_set(spec: &FieldSetSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    El(pr::field_set(spec, &pr::RenderContext::new(theme), children))
+    El(pr::field_set(
+        spec,
+        &pr::RenderContext::new(theme),
+        children,
+    ))
 }
 
 pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> El {
@@ -520,7 +595,8 @@ pub fn js_filter_toolbar(
         .map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>)
         .collect();
     let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
-    let secondary = secondary.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
+    let secondary =
+        secondary.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
     El(pr::filter_toolbar(
         spec,
         &pr::RenderContext::new(theme),
@@ -554,7 +630,11 @@ pub fn js_form_actions(
     children: Vec<El>,
 ) -> El {
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    El(pr::form_actions(spec, &pr::RenderContext::new(theme), children))
+    El(pr::form_actions(
+        spec,
+        &pr::RenderContext::new(theme),
+        children,
+    ))
 }
 
 pub fn js_form_actions_full(
@@ -565,7 +645,12 @@ pub fn js_form_actions_full(
 ) -> El {
     let danger: Vec<Node> = danger.into_iter().map(Node::from).collect();
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    El(pr::form_actions_full(spec, &pr::RenderContext::new(theme), danger, children))
+    El(pr::form_actions_full(
+        spec,
+        &pr::RenderContext::new(theme),
+        danger,
+        children,
+    ))
 }
 
 pub fn js_form_dialog(
@@ -593,7 +678,12 @@ pub fn js_form_layout(
 ) -> El {
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
     let actions: Option<Node> = actions.map(Node::from);
-    El(pr::form_layout(spec, &pr::RenderContext::new(theme), children, actions))
+    El(pr::form_layout(
+        spec,
+        &pr::RenderContext::new(theme),
+        children,
+        actions,
+    ))
 }
 
 pub fn js_form_shell(
@@ -607,7 +697,12 @@ pub fn js_form_shell(
         .into_iter()
         .map(|s| s.map(Node::from))
         .collect();
-    El(pr::form_shell(spec, &pr::RenderContext::new(theme), section_slots, actions_slot))
+    El(pr::form_shell(
+        spec,
+        &pr::RenderContext::new(theme),
+        section_slots,
+        actions_slot,
+    ))
 }
 
 pub fn js_grid(spec: &GridSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
@@ -621,7 +716,11 @@ pub fn js_hover_card(
     content: Option<El>,
 ) -> El {
     let content: Option<Node> = content.map(Node::from);
-    El(pr::hover_card(spec, &pr::RenderContext::new(theme), content))
+    El(pr::hover_card(
+        spec,
+        &pr::RenderContext::new(theme),
+        content,
+    ))
 }
 
 pub fn js_icon(spec: &IconSpec, theme: &JetstreamThemeProvider) -> El {
@@ -640,7 +739,12 @@ pub fn js_inline_list_section(
 ) -> El {
     let items: Vec<Node> = items.into_iter().map(Node::from).collect();
     let action: Option<Node> = action.map(Node::from);
-    El(pr::inline_list_section(spec, &pr::RenderContext::new(theme), items, action))
+    El(pr::inline_list_section(
+        spec,
+        &pr::RenderContext::new(theme),
+        items,
+        action,
+    ))
 }
 
 pub fn js_inline_remediation(spec: &InlineRemediationSpec, theme: &JetstreamThemeProvider) -> El {
@@ -648,7 +752,11 @@ pub fn js_inline_remediation(spec: &InlineRemediationSpec, theme: &JetstreamThem
 }
 
 pub fn js_list_card_counter(spec: &ListCardCounterSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::list_card_counter(spec, &pr::RenderContext::new(theme), None))
+    El(pr::list_card_counter(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_list_grid(
@@ -659,7 +767,12 @@ pub fn js_list_grid(
 ) -> El {
     let header: Option<Node> = header.map(Node::from);
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    El(pr::list_grid(spec, &pr::RenderContext::new(theme), header, children))
+    El(pr::list_grid(
+        spec,
+        &pr::RenderContext::new(theme),
+        header,
+        children,
+    ))
 }
 
 pub fn js_log_list(
@@ -680,7 +793,11 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
 }
 
 pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::media_browse_panel(spec, &pr::RenderContext::new(theme), None))
+    El(pr::media_browse_panel(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -> El {
@@ -704,7 +821,12 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::menubar(spec, &pr::RenderContext::new(theme), None, None))
+    El(pr::menubar(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+        None,
+    ))
 }
 
 pub fn js_meta_bar(spec: &MetaBarSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
@@ -745,7 +867,12 @@ pub fn js_model_picker(
     theme: &JetstreamThemeProvider,
     instance_id: &str,
 ) -> El {
-    El(pr::model_picker(spec, &pr::RenderContext::new(theme), instance_id, None))
+    El(pr::model_picker(
+        spec,
+        &pr::RenderContext::new(theme),
+        instance_id,
+        None,
+    ))
 }
 
 pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> El {
@@ -753,7 +880,11 @@ pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::navigation_menu(spec, &pr::RenderContext::new(theme), None))
+    El(pr::navigation_menu(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -> El {
@@ -777,7 +908,13 @@ pub fn js_order_by(
 }
 
 pub fn js_page_header(spec: &PageHeaderSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::page_header(spec, &pr::RenderContext::new(theme), None, None, None))
+    El(pr::page_header(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+        None,
+        None,
+    ))
 }
 
 pub fn js_page_header_with_slots(
@@ -791,7 +928,8 @@ pub fn js_page_header_with_slots(
     // eagerly, so the already-built node is wrapped in the slot builder the
     // shared renderer now requires. The internal scope cannot reach it until
     // this preview defers construction; no parity claim is made.
-    let breadcrumbs = breadcrumbs.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
+    let breadcrumbs =
+        breadcrumbs.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
     let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
     let meta = meta.map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>);
     El(pr::page_header(
@@ -828,7 +966,10 @@ pub fn js_password_requirements(
     spec: &PasswordRequirementsSpec,
     theme: &JetstreamThemeProvider,
 ) -> El {
-    El(pr::password_requirements(spec, &pr::RenderContext::new(theme)))
+    El(pr::password_requirements(
+        spec,
+        &pr::RenderContext::new(theme),
+    ))
 }
 
 pub fn js_picker_shell(
@@ -934,7 +1075,11 @@ pub fn js_remediation_banner(spec: &RemediationBannerSpec, theme: &JetstreamThem
 }
 
 pub fn js_resize_handle(spec: &ResizeHandleSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::resize_handle(spec, &pr::RenderContext::new(theme), None))
+    El(pr::resize_handle(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_scroll_shell(
@@ -943,11 +1088,19 @@ pub fn js_scroll_shell(
     children: Vec<El>,
 ) -> El {
     let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    El(pr::scroll_shell(spec, &pr::RenderContext::new(theme), children))
+    El(pr::scroll_shell(
+        spec,
+        &pr::RenderContext::new(theme),
+        children,
+    ))
 }
 
 pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::segmented_control(spec, &pr::RenderContext::new(theme), None))
+    El(pr::segmented_control(
+        spec,
+        &pr::RenderContext::new(theme),
+        None,
+    ))
 }
 
 pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> El {
@@ -978,7 +1131,12 @@ pub fn js_shell_status_bar(
 ) -> El {
     let leading: Vec<Node> = leading.into_iter().map(Node::from).collect();
     let trailing: Vec<Node> = trailing.into_iter().map(Node::from).collect();
-    El(pr::shell_status_bar(spec, &pr::RenderContext::new(theme), leading, trailing))
+    El(pr::shell_status_bar(
+        spec,
+        &pr::RenderContext::new(theme),
+        leading,
+        trailing,
+    ))
 }
 
 pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> El {
@@ -1046,7 +1204,11 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
 }
 
 pub fn js_stepper(spec: &StepperSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::stepper(spec, &pr::RenderContext::new(theme), pr::StepperHandlers::default()))
+    El(pr::stepper(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::StepperHandlers::default(),
+    ))
 }
 
 pub fn js_surface(spec: &SurfaceSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
@@ -1059,7 +1221,11 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_tab_strip(spec: &TabStripSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::tab_strip(spec, &pr::RenderContext::new(theme), pr::TabStripHandlers::default()))
+    El(pr::tab_strip(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::TabStripHandlers::default(),
+    ))
 }
 
 pub fn js_table(spec: &TableSpec, theme: &JetstreamThemeProvider) -> El {
@@ -1153,7 +1319,11 @@ pub fn js_tooltip(spec: &TooltipSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::tree(spec, &pr::RenderContext::new(theme), pr::TreeHandlers::default()))
+    El(pr::tree(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::TreeHandlers::default(),
+    ))
 }
 
 pub fn js_tri_state_switch(
@@ -1228,7 +1398,16 @@ pub fn js_list_container(
     filters: Option<El>,
     batch: Option<El>,
 ) -> El {
-    js_list_container_with_slots(spec, theme, instance_id, content, filters, batch, None, None)
+    js_list_container_with_slots(
+        spec,
+        theme,
+        instance_id,
+        content,
+        filters,
+        batch,
+        None,
+        None,
+    )
 }
 
 pub fn js_list_container_with_slots(

@@ -464,9 +464,7 @@ fn conformance_vectors_carry_steps_kinds_and_declared_by() {
     assert_eq!(steps[1]["kind"], "transition");
     assert_eq!(steps[2]["kind"], "effect-intent");
     assert!(
-        steps
-            .iter()
-            .all(|step| step.get("guard").is_none()),
+        steps.iter().all(|step| step.get("guard").is_none()),
         "guard expressions are gone (g13.017)"
     );
 }
@@ -532,9 +530,7 @@ fn docs_fragments_render_contract_style_props_tables() {
         "web-only props are included and marked (the TypeScript target's include-and-mark decision)"
     );
     assert!(
-        search
-            .contents
-            .contains("| `hint` | `string` | `—` | no |"),
+        search.contents.contains("| `hint` | `string` | `—` | no |"),
         "a prop without a default renders the em dash; expression defaults are gone (g13.017)"
     );
     assert!(

@@ -349,7 +349,11 @@ evidence. Use `docs:check` when the task changes public documentation,
 documentation generation, or the docs gate itself. Generated evidence must
 describe the current implementation and must not be edited by hand.
 `ir:check` and `catalogue:check` run on `ci:rust` (they need cargo; they stay
-off `ci:web`). Cheap `docs:check` leaves that need no Rust
+off `ci:web`), and so does `check:rustfmt`: it drives rustfmt over each
+crate's authored `.rs` files directly, because stable rustfmt has no per-path
+exclusion and recurses into `#[path]` child modules — plain `cargo fmt` would
+reformat generated Rust that must stay byte-identical to its generator. Cheap
+`docs:check` leaves that need no Rust
 (`check:gpui-census`, `docs:react-prop-drift`, `docs:value-domain-drift`) also
 run on `ci:web`, so a stale GPUI census or a new prop-domain drift cannot land
 with required CI green. `docs:snippet-check` and `docs:build` stay on

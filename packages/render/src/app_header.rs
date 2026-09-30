@@ -234,17 +234,11 @@ mod tests {
         Some(Box::new(move |_| Node::text(text)))
     }
 
-    fn header(
-        center: bool,
-        actions: bool,
-        utility: bool,
-    ) -> Node {
+    fn header(center: bool, actions: bool, utility: bool) -> Node {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         app_header(
-            &AppHeaderSpec::new()
-                .with_title("Finch")
-                .with_center(center),
+            &AppHeaderSpec::new().with_title("Finch").with_center(center),
             &ctx,
             None,
             if center { text_slot("centre") } else { None },
@@ -302,10 +296,7 @@ mod tests {
 
         let trailing = &node.children[2];
         assert!(
-            matches!(
-                trailing.style.descriptor.layout.width,
-                LayoutSizing::Grow
-            ),
+            matches!(trailing.style.descriptor.layout.width, LayoutSizing::Grow),
             "trailing column must grow symmetrically with identity"
         );
         assert_eq!(
@@ -353,14 +344,7 @@ mod tests {
             .with_center(true);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = app_header(
-            &spec,
-            &ctx,
-            None,
-            text_slot("centre"),
-            None,
-            None,
-        );
+        let node = app_header(&spec, &ctx, None, text_slot("centre"), None, None);
         assert_eq!(
             node.style.min_height,
             Some(rem_to_px(spec.min_height_rem(ControlSize::Lg)))
@@ -375,24 +359,35 @@ mod tests {
         let spec = AppHeaderSpec::new().with_title("Studio");
         let node = app_header(&spec, &ctx, None, None, None, None);
 
-        let panel_color = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_BACKGROUND_PANEL);
+        let panel_color = ctx
+            .theme()
+            .resolve_color(poodle_tokens::semantic::COLOR_BACKGROUND_PANEL);
         let expected_bg = with_alpha(panel_color, panel_color.3 * 0.94);
-        let expected_border = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_BORDER_SUBTLE);
+        let expected_border = ctx
+            .theme()
+            .resolve_color(poodle_tokens::semantic::COLOR_BORDER_SUBTLE);
 
         assert_eq!(node.style.descriptor.background, Some(expected_bg));
         assert_eq!(node.style.border_bottom_width, Some(1.0));
         assert_eq!(node.style.descriptor.border.color, expected_border);
         assert!(node.style.fill_width);
         assert_eq!(node.style.descriptor.layout.direction, LayoutDirection::Row);
-        assert_eq!(node.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
+        assert_eq!(
+            node.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
     }
 
     #[test]
     fn app_header_size_ladder_and_typography() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let title_color = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_TEXT_PRIMARY);
-        let subtitle_color = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_TEXT_SECONDARY);
+        let title_color = ctx
+            .theme()
+            .resolve_color(poodle_tokens::semantic::COLOR_TEXT_PRIMARY);
+        let subtitle_color = ctx
+            .theme()
+            .resolve_color(poodle_tokens::semantic::COLOR_TEXT_SECONDARY);
 
         for (size, expected_min_h, expected_title_sz, expected_sub_sz) in [
             (ControlSize::Xs, 36.0, 13.0, 11.0),
@@ -422,7 +417,10 @@ mod tests {
             assert!(title_node.style.no_wrap);
 
             let subtitle_node = &title_group.children[1];
-            assert_eq!(subtitle_node.style.descriptor.text_color, Some(subtitle_color));
+            assert_eq!(
+                subtitle_node.style.descriptor.text_color,
+                Some(subtitle_color)
+            );
             assert_eq!(subtitle_node.style.text_size, Some(expected_sub_sz));
             assert_eq!(subtitle_node.style.line_height, Some(1.2));
             assert!(subtitle_node.style.no_wrap);
@@ -440,9 +438,7 @@ mod tests {
             (ControlDensity::Default, 16.0, 8.0, 6.0, 16.0),
             (ControlDensity::Comfortable, 16.0, 10.0, 8.0, 18.0),
         ] {
-            let spec = AppHeaderSpec::new()
-                .with_title("App")
-                .with_density(density);
+            let spec = AppHeaderSpec::new().with_title("App").with_density(density);
             let node = app_header(&spec, &ctx, None, None, None, None);
 
             assert_eq!(node.style.descriptor.layout.spacing.gap, expected_gap);
@@ -453,7 +449,10 @@ mod tests {
             assert_eq!(pad.right, expected_pad_x);
 
             let identity_region = &node.children[0];
-            assert_eq!(identity_region.style.descriptor.layout.spacing.gap, expected_region_gap);
+            assert_eq!(
+                identity_region.style.descriptor.layout.spacing.gap,
+                expected_region_gap
+            );
         }
     }
 
@@ -470,7 +469,10 @@ mod tests {
         assert_eq!(node.children.len(), 1);
         let identity_region = &node.children[0];
         assert_eq!(identity_region.children.len(), 1);
-        assert_eq!(identity_region.children[0].texts(), vec!["custom-brand-logo"]);
+        assert_eq!(
+            identity_region.children[0].texts(),
+            vec!["custom-brand-logo"]
+        );
         assert!(!node.texts().contains(&"Ignored Title"));
         assert!(!node.texts().contains(&"Ignored Subtitle"));
     }
@@ -503,7 +505,10 @@ mod tests {
             None,
             None,
         );
-        assert_eq!(override_label.a11y.label.as_deref(), Some("Custom Shell Header"));
+        assert_eq!(
+            override_label.a11y.label.as_deref(),
+            Some("Custom Shell Header")
+        );
 
         // Custom identity with explicit aria_label and no title
         let custom_with_label = app_header(
@@ -514,17 +519,13 @@ mod tests {
             None,
             None,
         );
-        assert_eq!(custom_with_label.a11y.label.as_deref(), Some("Branded Shell Header"));
+        assert_eq!(
+            custom_with_label.a11y.label.as_deref(),
+            Some("Branded Shell Header")
+        );
 
         // Neither title nor aria_label
-        let bare = app_header(
-            &AppHeaderSpec::new(),
-            &ctx,
-            None,
-            None,
-            None,
-            None,
-        );
+        let bare = app_header(&AppHeaderSpec::new(), &ctx, None, None, None, None);
         assert_eq!(bare.a11y.label, None);
     }
 
@@ -540,7 +541,8 @@ mod tests {
         let mut observed_density = None;
 
         let slot: Option<SlotBuilder<'_>> = Some(Box::new(|scope| {
-            observed_size = Some(scope.resolve_size(None, poodle_specs::SemanticControlSizeRole::Control));
+            observed_size =
+                Some(scope.resolve_size(None, poodle_specs::SemanticControlSizeRole::Control));
             observed_density = Some(scope.resolve_density(None));
             Node::text("scoped-slot")
         }));

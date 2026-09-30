@@ -30,7 +30,12 @@ fn slider_visible_texts(spec: &SliderSpec) -> Vec<String> {
     {
         texts.push(label.to_owned());
     }
-    if let Some(value) = resolved_visible_text(spec.value, spec.min, spec.step, spec.visible_value_text.as_deref()) {
+    if let Some(value) = resolved_visible_text(
+        spec.value,
+        spec.min,
+        spec.step,
+        spec.visible_value_text.as_deref(),
+    ) {
         texts.push(value);
     }
     texts
@@ -45,8 +50,18 @@ fn range_visible_texts(spec: &RangeSliderSpec) -> Vec<String> {
     {
         texts.push(label.to_owned());
     }
-    let lower = resolved_visible_text(spec.low, spec.min, spec.step, spec.visible_lower_text.as_deref());
-    let upper = resolved_visible_text(spec.high, spec.min, spec.step, spec.visible_upper_text.as_deref());
+    let lower = resolved_visible_text(
+        spec.low,
+        spec.min,
+        spec.step,
+        spec.visible_lower_text.as_deref(),
+    );
+    let upper = resolved_visible_text(
+        spec.high,
+        spec.min,
+        spec.step,
+        spec.visible_upper_text.as_deref(),
+    );
     for text in [lower, upper].into_iter().flatten() {
         if !text.is_empty() {
             texts.push(text);

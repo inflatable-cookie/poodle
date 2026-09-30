@@ -62,9 +62,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     pill(
                         theme,
-                        PillSpec::new()
-                            .with_label("Audio")
-                            .with_dismissible(true),
+                        PillSpec::new().with_label("Audio").with_dismissible(true),
                     )
                     .with_instance_id("pill-specimen-dismiss-audio"),
                 )

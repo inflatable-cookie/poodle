@@ -18,7 +18,9 @@ use crate::compat::js_navigation_menu;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ActiveEdge, ActiveFill, ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec};
+use poodle_specs::{
+    ActiveEdge, ActiveFill, ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec,
+};
 
 /// The full item set with leading icons + viewport descriptions (mirrors GPUI),
 /// ending in a disabled Changelog entry.

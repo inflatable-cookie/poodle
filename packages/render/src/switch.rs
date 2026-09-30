@@ -308,7 +308,9 @@ mod tests {
     fn custom_colors_take_precedence_over_tones() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let border_default = ctx.theme().resolve_color(poodle_tokens::semantic::COLOR_BORDER_DEFAULT);
+        let border_default = ctx
+            .theme()
+            .resolve_color(poodle_tokens::semantic::COLOR_BORDER_DEFAULT);
         let node = switch(
             &SwitchSpec::new()
                 .with_checked(true)

@@ -32,7 +32,9 @@ fn schema_path() -> PathBuf {
 }
 
 fn scratch(name: &str) -> PathBuf {
-    let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("machine-interfaces").join(name);
+    let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR"))
+        .join("machine-interfaces")
+        .join(name);
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).expect("scratch dir creates");
     dir
@@ -97,9 +99,10 @@ fn planted_schema_divergence_names_the_machine() {
         "gate names the machine via its artifact: {message}"
     );
     assert!(
-        report.drifted.iter().any(|(path, kind)| {
-            path.ends_with("hover.ts") && *kind == DriftKind::Content
-        }),
+        report
+            .drifted
+            .iter()
+            .any(|(path, kind)| { path.ends_with("hover.ts") && *kind == DriftKind::Content }),
         "hover is content drift: {:?}",
         report.drifted
     );
@@ -174,7 +177,9 @@ fn committed_artifacts_match_the_emitter() {
     let document = load();
     let ts = machine_ts::render(&document, SCHEMA);
     let rs = machine_rust::render(&document, SCHEMA);
-    let ts_root = repo_root().join("packages/core/src").join(machine_ts::OUTPUT_ROOT);
+    let ts_root = repo_root()
+        .join("packages/core/src")
+        .join(machine_ts::OUTPUT_ROOT);
     let rs_root = repo_root()
         .join("packages/contracts/headless/src")
         .join(machine_rust::OUTPUT_ROOT);

@@ -106,7 +106,8 @@ fn ring(
 
     if spec.show_value {
         let mut readout = Node::text(spec.value_display_text());
-        readout.style.descriptor.text_color = Some(ctx.theme().resolve_color(spec.value_color_token()));
+        readout.style.descriptor.text_color =
+            Some(ctx.theme().resolve_color(spec.value_color_token()));
         readout.style.text_size = Some(diameter * 0.34);
         el = el.child(readout);
     }

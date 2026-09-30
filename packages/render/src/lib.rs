@@ -51,7 +51,6 @@ pub mod command_palette;
 pub mod confirm_action;
 pub mod context;
 pub mod context_menu;
-pub mod motion;
 pub mod data_table;
 pub mod date_picker;
 pub mod date_range_picker;
@@ -89,11 +88,11 @@ pub mod grid;
 pub mod history_center;
 pub mod hover_card;
 pub mod icon;
+pub mod icon_button;
 #[cfg(feature = "icon-geometry-internal")]
 pub mod icon_geometry;
 #[cfg(not(feature = "icon-geometry-internal"))]
 pub(crate) mod icon_geometry;
-pub mod icon_button;
 pub mod icon_provider;
 pub mod inline_list_section;
 pub mod inline_remediation;
@@ -122,6 +121,7 @@ pub mod model_connection_card;
 pub mod model_connection_picker;
 pub mod model_connection_setup;
 pub mod model_picker;
+pub mod motion;
 pub mod nav_card;
 pub mod navigation_menu;
 pub mod number_input;
@@ -256,7 +256,9 @@ pub use command_palette::{command_palette, command_palette_with_handlers, Comman
 pub use confirm_action::{confirm_action, confirm_action_with_slots, ConfirmActionHandlers};
 // The fixed public path for the construction-time presentation API
 // (architecture 010): `poodle_render::RenderContext`.
-pub use context::{motion_policy_provider, ui_presentation_provider, BlockTextMeasure, RenderContext, SlotBuilder};
+pub use context::{
+    motion_policy_provider, ui_presentation_provider, BlockTextMeasure, RenderContext, SlotBuilder,
+};
 pub use context_menu::context_menu;
 pub use data_table::{data_table, data_table_loading, DataTableHandlers};
 pub use date_picker::{date_picker, DatePickerHandlers};
@@ -275,10 +277,9 @@ pub use dock_region::{
 };
 pub use drag_drop::{
     attach_source, attach_target, edge_from_position, file_export_source, horizontal_band_resolver,
-    inbound_file_target, linear_keyboard_resolver, move_only,
-    nested_target, position_for_fraction, position_from_edge, rejects_self, reorder_kind,
-    reorder_source,
-    reorder_subject, reorder_target, vertical_band_resolver, REORDER_SUBJECT_KIND,
+    inbound_file_target, linear_keyboard_resolver, move_only, nested_target, position_for_fraction,
+    position_from_edge, rejects_self, reorder_kind, reorder_source, reorder_subject,
+    reorder_target, vertical_band_resolver, REORDER_SUBJECT_KIND,
 };
 pub use drawer::drawer;
 pub use duration_input::{duration_input, duration_input_with_handlers, DurationInputHandlers};

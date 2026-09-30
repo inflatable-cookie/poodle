@@ -13,10 +13,9 @@ use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage, TranscriptRole};
 use poodle_node::Node;
 use poodle_render::{
-    AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers,
-    CalloutHandlers, CommandPaletteHandlers, ConfirmActionHandlers,
-    MessageCenterHandlers, PopoverHandlers, RadioGroupHandlers, RenderContext, SelectHandlers,
-    TabsHandlers, ToastStackHandlers,
+    AgentPlanHandlers, AgentQuestionHandlers, AgentTranscriptHandlers, CalloutHandlers,
+    CommandPaletteHandlers, ConfirmActionHandlers, MessageCenterHandlers, PopoverHandlers,
+    RadioGroupHandlers, RenderContext, SelectHandlers, TabsHandlers, ToastStackHandlers,
 };
 use poodle_specs::{
     AgentChatInputSpec, AgentPlanSpec, AgentQuestionSpec, AgentTranscriptSpec, AppHeaderSpec,
@@ -818,12 +817,7 @@ fn build_model_picker_a1(
     host: &Arc<Mutex<ModelPickerSpec>>,
     mounted: &Arc<Mutex<Node>>,
 ) -> Node {
-    let mut node = poodle_render::model_picker(
-        spec,
-        &RenderContext::new(&theme()),
-        "a1",
-        None,
-    );
+    let mut node = poodle_render::model_picker(spec, &RenderContext::new(&theme()), "a1", None);
     let trigger_id = poodle_render::select_trigger_focus_id("model-picker:a1");
     if !spec.is_disabled {
         let is_open = spec.is_open;
@@ -1370,11 +1364,7 @@ fn popover_a1_accessibility_projection_matches_svelte() {
             instance_id: Some("a1".to_owned()),
             ..PopoverHandlers::default()
         };
-        let trigger = poodle_render::button(
-            &ButtonSpec::new().with_label("Settings"),
-            &ctx,
-            None,
-        );
+        let trigger = poodle_render::button(&ButtonSpec::new().with_label("Settings"), &ctx, None);
         let content = Node::text("Quick settings panel");
         let mounted = Arc::new(Mutex::new(poodle_render::popover(
             &spec,
@@ -1804,9 +1794,7 @@ fn segmented_control_a1_accessibility_projection_matches_svelte() {
         prove(
             &mut driver,
             &loaded,
-            &[
-                "mount production SegmentedControl and replay the shared selection action",
-            ],
+            &["mount production SegmentedControl and replay the shared selection action"],
             &["one native-radio group entry stop matches the roving GPUI segment"],
         );
     });

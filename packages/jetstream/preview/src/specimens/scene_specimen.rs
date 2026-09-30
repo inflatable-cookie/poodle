@@ -13,12 +13,12 @@ use poodle_specs::{
 };
 
 use crate::compat::{js_avatar, js_callout, js_empty_state, js_pill, js_spinner};
-use crate::nel::{div, label, resolve_color, El};
+use crate::nel::{El, div, label, resolve_color};
 
 #[path = "../generated/specimens/specimens.rs"]
 mod fixture;
 
-use fixture::{SpecimenGroup, SpecimenInstance, SpecimenProp, SPECIMEN_SCENES};
+use fixture::{SPECIMEN_SCENES, SpecimenGroup, SpecimenInstance, SpecimenProp};
 
 /// Looks up the scene for a component slug (`callout` → `callout-specimen`).
 fn scene_for(slug: &str) -> Option<&'static fixture::SpecimenScene<'static>> {
@@ -173,8 +173,6 @@ fn empty_state_variant(value: &str) -> EmptyStateVariant {
     }
 }
 
-
-
 /// Renders one fixture instance through the shared native renderer.
 fn render_instance(instance: &SpecimenInstance, theme: &JetstreamThemeProvider) -> El {
     match instance.component {
@@ -202,7 +200,9 @@ fn render_instance(instance: &SpecimenInstance, theme: &JetstreamThemeProvider) 
             let mut spec = PillSpec::new()
                 .with_label(prop(instance, "content").unwrap_or(""))
                 .with_tone(pill_tone(prop(instance, "tone").unwrap_or("neutral")))
-                .with_appearance(pill_appearance(prop(instance, "appearance").unwrap_or("tint")));
+                .with_appearance(pill_appearance(
+                    prop(instance, "appearance").unwrap_or("tint"),
+                ));
             if let Some(role) = prop(instance, "sizeRole") {
                 spec = spec.with_size_role(size_role(role));
             }
@@ -261,8 +261,9 @@ fn render_instance(instance: &SpecimenInstance, theme: &JetstreamThemeProvider) 
             js_avatar(&spec, theme)
         }
         "empty-state" => {
-            let mut spec = EmptyStateSpec::new(prop(instance, "title").unwrap_or(""))
-                .with_variant(empty_state_variant(prop(instance, "variant").unwrap_or("neutral")));
+            let mut spec = EmptyStateSpec::new(prop(instance, "title").unwrap_or("")).with_variant(
+                empty_state_variant(prop(instance, "variant").unwrap_or("neutral")),
+            );
             if let Some(message) = prop(instance, "message") {
                 spec = spec.with_message(message);
             }
@@ -298,7 +299,13 @@ fn render_group(group: &SpecimenGroup, theme: &JetstreamThemeProvider) -> El {
 
 /// The matrix sections render the scene's first instance at each axis value
 /// (the projection convention the web renderers share).
-fn render_matrix(theme: &JetstreamThemeProvider, title: &str, axis: &[&str], instance: &SpecimenInstance, prop_name: &str) -> El {
+fn render_matrix(
+    theme: &JetstreamThemeProvider,
+    title: &str,
+    axis: &[&str],
+    instance: &SpecimenInstance,
+    prop_name: &str,
+) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
     let mut content = div().flex_col().gap(12.0);
     for value in axis {

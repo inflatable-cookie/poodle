@@ -247,7 +247,6 @@ impl TextInputSpec {
     }
 }
 
-
 impl TextInputSpec {
     /// Place the caret, or select a range when the two differ.
     pub fn with_selection(mut self, start: usize, end: usize) -> Self {

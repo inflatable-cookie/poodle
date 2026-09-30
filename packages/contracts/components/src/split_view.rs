@@ -278,10 +278,12 @@ mod tests {
         let explicit = SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(0.35);
         assert_eq!(explicit.current_ratio(), 0.35);
 
-        let clamped_low = SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(-0.5);
+        let clamped_low =
+            SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(-0.5);
         assert_eq!(clamped_low.current_ratio(), 0.0);
 
-        let clamped_high = SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(1.5);
+        let clamped_high =
+            SplitViewSpec::new("split", SplitOrientation::Horizontal).with_ratio(1.5);
         assert_eq!(clamped_high.current_ratio(), 1.0);
     }
 

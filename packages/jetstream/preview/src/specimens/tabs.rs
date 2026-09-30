@@ -5,7 +5,7 @@ use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
-    ActiveEdge, ControlDensity, ControlSize, Orientation, ActiveFill, TabDefinition, TabVariant,
+    ActiveEdge, ActiveFill, ControlDensity, ControlSize, Orientation, TabDefinition, TabVariant,
     TabsSpec,
 };
 

@@ -430,10 +430,9 @@ impl Element for InputText {
             underline: None,
             strikethrough: None,
         };
-        let line =
-            window
-                .text_system()
-                .shape_line(display.clone().into(), font_size, &[run], None);
+        let line = window
+            .text_system()
+            .shape_line(display.clone().into(), font_size, &[run], None);
 
         // The caret is the height of the text, not the field — a field-height
         // caret in a padded input looks like a divider.

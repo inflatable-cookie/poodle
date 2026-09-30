@@ -439,9 +439,9 @@ mod tests {
         assert!(effects.is_empty());
         let (committed, commit_effects) = select_transition(next, SelectEvent::CommitHighlighted);
         assert_eq!(committed.value, "apple");
-        assert!(commit_effects
-            .iter()
-            .any(|effect| matches!(effect, SelectEffect::ValueChanged { value } if value == "apple")));
+        assert!(commit_effects.iter().any(
+            |effect| matches!(effect, SelectEffect::ValueChanged { value } if value == "apple")
+        ));
         assert!(commit_effects.iter().all(
             |effect| !matches!(effect, SelectEffect::ValueChanged { value } if value == "banana")
         ));

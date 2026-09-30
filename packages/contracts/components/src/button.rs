@@ -15,7 +15,8 @@ use crate::types::{ButtonTone, ButtonVariant};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum ButtonFit {
-    #[default] Default,
+    #[default]
+    Default,
     Content,
 }
 
@@ -156,7 +157,6 @@ impl ButtonSpec {
         self
     }
 }
-
 
 impl ButtonSpec {
     pub fn with_danger(mut self) -> Self {

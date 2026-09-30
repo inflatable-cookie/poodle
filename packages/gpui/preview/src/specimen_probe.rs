@@ -293,15 +293,15 @@ fn unknown_dispatch_paints_the_fallback_marker() {
         cx.update(|_window, app: &mut App| {
             root.update(app, |root, cx| {
                 let base_motion_context = poodle_render::RenderContext::new(&root.state.theme);
-                let motion_context = base_motion_context
-                    .with_first_frame_committed(root.first_frame_committed);
+                let motion_context =
+                    base_motion_context.with_first_frame_committed(root.first_frame_committed);
                 specimens::render_single_specimen(
                     "not-a-catalogue-route",
                     &root.state,
                     cx,
                     &motion_context,
                 )
-                    .into_any_element()
+                .into_any_element()
             })
         })
     };

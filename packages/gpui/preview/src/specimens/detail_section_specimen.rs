@@ -74,26 +74,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .into_compat_node(),
-                DetailItem::from_spec(
-                    DetailItemSpec::new("Status").with_value("Active"),
-                    theme,
-                )
-                .into_compat_node(),
+                DetailItem::from_spec(DetailItemSpec::new("Status").with_value("Active"), theme)
+                    .into_compat_node(),
             ])),
         ))
-        .child(
-            group(
-                "Section actions",
-                theme,
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(8.0))
-                    .child(
-                        DetailSection::from_spec(
-                            DetailSectionSpec::new().with_title("Billing"),
-                            theme,
-                        )
+        .child(group(
+            "Section actions",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    DetailSection::from_spec(DetailSectionSpec::new().with_title("Billing"), theme)
                         .with_actions(
                             Button::from_spec(
                                 ButtonSpec::new()
@@ -127,41 +120,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             )
                             .into_compat_node(),
                         ])),
+                )
+                .when(!section_action.is_empty(), |d| {
+                    d.child(
+                        div()
+                            .text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("Last action: {section_action}")),
                     )
-                    .when(!section_action.is_empty(), |d| {
-                        d.child(
-                            div()
-                                .text_sm()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child(format!("Last action: {section_action}")),
-                        )
-                    }),
-            ),
-        )
+                }),
+        ))
         .child(group(
             "Described detail rows",
             theme,
-            DetailSection::from_spec(
-                DetailSectionSpec::new().with_title("Configuration"),
-                theme,
-            )
-            .with_body(node_column(vec![
-                DetailItem::from_spec(
-                    DetailItemSpec::new("API endpoint")
-                        .with_value("https://api.example.com/v2")
-                        .with_description("The base URL for all API requests.")
-                        .with_truncate_value(true),
-                    theme,
-                )
-                .into_compat_node(),
-                DetailItem::from_spec(
-                    DetailItemSpec::new("Rate limit")
-                        .with_value("1,000 req/min")
-                        .with_description("Maximum requests per minute."),
-                    theme,
-                )
-                .into_compat_node(),
-            ])),
+            DetailSection::from_spec(DetailSectionSpec::new().with_title("Configuration"), theme)
+                .with_body(node_column(vec![
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("API endpoint")
+                            .with_value("https://api.example.com/v2")
+                            .with_description("The base URL for all API requests.")
+                            .with_truncate_value(true),
+                        theme,
+                    )
+                    .into_compat_node(),
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("Rate limit")
+                            .with_value("1,000 req/min")
+                            .with_description("Maximum requests per minute."),
+                        theme,
+                    )
+                    .into_compat_node(),
+                ])),
         ))
         .child(group(
             "Two-column details",

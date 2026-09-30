@@ -158,10 +158,7 @@ pub fn radio(
     } else {
         NodeToggled::False
     });
-    root.a11y.label = spec
-        .aria_label
-        .clone()
-        .or_else(|| spec.label.clone());
+    root.a11y.label = spec.aria_label.clone().or_else(|| spec.label.clone());
     root
 }
 

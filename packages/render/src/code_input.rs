@@ -203,9 +203,7 @@ pub fn code_input_with_handlers(
     // carries the polite check-passed/check-failed status label.
     if let Some(completion) = spec.visible_completion() {
         let (icon, color, status) = match completion {
-            CodeInputCompletion::Passed(_) => {
-                ("check", success, "Code check passed")
-            }
+            CodeInputCompletion::Passed(_) => ("check", success, "Code check passed"),
             CodeInputCompletion::Failed(_) => ("x", danger, "Code check failed"),
         };
         let mut indicator = Node::icon(icon, font_size);
@@ -528,7 +526,9 @@ mod tests {
         assert!(margin_rights(&CodeInputSpec::new().with_length(6)).is_empty());
 
         // Explicit 5x4: breaks after slots 4, 9, 14.
-        let grouped = CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]);
+        let grouped = CodeInputSpec::new()
+            .with_length(20)
+            .with_groups([5, 5, 5, 5]);
         assert_eq!(margin_rights(&grouped), vec![4, 9, 14]);
 
         // Explicit 3+3: the break after slot 2, exactly where the old
@@ -562,7 +562,9 @@ mod tests {
             out
         }
 
-        let grouped = CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]);
+        let grouped = CodeInputSpec::new()
+            .with_length(20)
+            .with_groups([5, 5, 5, 5]);
         assert_eq!(separator_count(&grouped), 0, "separator without separator");
         assert_eq!(
             separator_count(&grouped.clone().with_separator("-")),
@@ -598,17 +600,13 @@ mod tests {
             &ctx,
             CodeInputHandlers::default(),
         );
-        let row = node
-            .find(&|n| n.interaction.focusable)
-            .expect("slot row");
+        let row = node.find(&|n| n.interaction.focusable).expect("slot row");
         let slot_chars: Vec<char> = row
             .children
             .iter()
             .filter_map(|slot| {
                 slot.children.iter().find_map(|c| match &c.kind {
-                    poodle_node::NodeKind::Text { content } => {
-                        content.chars().next()
-                    }
+                    poodle_node::NodeKind::Text { content } => content.chars().next(),
                     _ => None,
                 })
             })
@@ -641,9 +639,9 @@ mod tests {
         let node = code_input_with_handlers(&checked, &ctx, CodeInputHandlers::default());
         assert_eq!(indicator(&node), Some(("check", "Code check passed")));
 
-        let failed = checked.clone().with_completion_result(
-            CodeInputCompletion::Failed("123456".to_string()),
-        );
+        let failed = checked
+            .clone()
+            .with_completion_result(CodeInputCompletion::Failed("123456".to_string()));
         let node = code_input_with_handlers(&failed, &ctx, CodeInputHandlers::default());
         assert_eq!(indicator(&node), Some(("x", "Code check failed")));
 

@@ -7,8 +7,8 @@ use std::sync::Arc;
 
 use poodle_node::{CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{
-    DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec, IconSpec, PopoverSpec,
-    TextSpec, TextWeight,
+    DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec, IconSpec,
+    PopoverSpec, TextSpec, TextWeight,
 };
 
 use crate::color::mix_srgb;

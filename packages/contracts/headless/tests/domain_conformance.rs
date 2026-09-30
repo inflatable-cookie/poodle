@@ -895,7 +895,11 @@ fn number_input_conformance() {
                 if expect.get("value").is_none() {
                     actual.as_object_mut().unwrap().remove("value");
                 }
-                assert_eq!(canonicalize(&actual), canonicalize(expect), "classify {case}");
+                assert_eq!(
+                    canonicalize(&actual),
+                    canonicalize(expect),
+                    "classify {case}"
+                );
             }
             "configValid" => {
                 let context = NumberInputContext {
@@ -939,7 +943,8 @@ fn number_input_conformance() {
                 assert_eq!(actual, expect.as_bool().unwrap(), "draftValid {case}");
             }
             "format" => {
-                let actual = format_number_committed(opt_f64(&case["value"]), opt_f64(&case["precision"]));
+                let actual =
+                    format_number_committed(opt_f64(&case["value"]), opt_f64(&case["precision"]));
                 assert_eq!(actual, expect.as_str().unwrap(), "format {case}");
             }
             "step" => {

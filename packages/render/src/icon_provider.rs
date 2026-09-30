@@ -27,9 +27,8 @@ mod tests {
 
     #[test]
     fn passthrough_returns_the_child_unchanged() {
-        let theme = poodle_jetstream::JetstreamThemeProvider::from_theme(
-            &poodle_tokens::themes::ECLIPSE,
-        );
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let ctx = RenderContext::new(&theme);
         let child = Node::text("search");
         let out = icon_provider(&IconProviderSpec::new(), &ctx, Some(child));

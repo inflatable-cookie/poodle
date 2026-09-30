@@ -16,23 +16,24 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_render::{AccordionHandlers, RenderContext, SlotBuilder};
 use poodle_specs::{
-    AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
-    AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
-    AgentSubagentSpec, AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec,
-    AvatarSpec, BlockEditorSpec, BoxSpec, BreadcrumbsSpec, BulkActionBarSpec, ButtonSpec,
-    CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec, CheckboxSpec, CodeInputSpec,
-    CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec, CommandPaletteSpec,
-    ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize, DataTableSpec, DatePickerSpec,
-    DateRangePickerSpec, DateRangeValue, DateTimePickerSpec, DateTimeRangePickerSpec,
-    DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec, DetailSectionGroupSpec,
-    DetailSectionSpec, DetailShellSpec, DialogSpec, DockRegionSpec, DrawerSpec, DurationInputSpec,
-    EditableLabelSpec, EditableListSpec, EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
-    ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec, FileUploadSpec, FilterBuilderSpec,
-    FilterToolbarSpec, FormActionsSpec, FormDialogSpec, FormLayoutSpec, FormShellSpec, GridSpec,
-    HoverCardSpec, IconButtonSpec, IconSpec, InlineListSectionSpec, LicenceActivationSpec,
-    LicenceSeatsSpec, LicenceStatusSpec, ListCardCounterSpec, ListCardSpec, ListContainerSpec,
-    ListGridSpec, LogListSpec, MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec,
-    MediaPreviewSpec, MediaThumbnailSpec, MenuSpec, MenubarSpec, MessageCenterSpec, MetaBarSpec, MetaItemSpec,
+    AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec,
+    AgentMessageSpec, AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec,
+    AgentQuestionSpec, AgentSubagentSpec, AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec,
+    AudioPlayerSpec, AvatarSpec, BlockEditorSpec, BoxSpec, BreadcrumbsSpec, BulkActionBarSpec,
+    ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec, CheckboxSpec,
+    CodeInputSpec, CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec,
+    CommandPaletteSpec, ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize,
+    DataTableSpec, DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
+    DateTimeRangePickerSpec, DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec,
+    DetailSectionGroupSpec, DetailSectionSpec, DetailShellSpec, DialogSpec, DockRegionSpec,
+    DrawerSpec, DurationInputSpec, EditableLabelSpec, EditableListSpec, EmbedInputSpec,
+    EmbedPreviewSpec, EmptyStateSpec, ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec,
+    FileUploadSpec, FilterBuilderSpec, FilterToolbarSpec, FormActionsSpec, FormDialogSpec,
+    FormLayoutSpec, FormShellSpec, GridSpec, HoverCardSpec, IconButtonSpec, IconSpec,
+    InlineListSectionSpec, LicenceActivationSpec, LicenceSeatsSpec, LicenceStatusSpec,
+    ListCardCounterSpec, ListCardSpec, ListContainerSpec, ListGridSpec, LogListSpec,
+    MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec,
+    MediaThumbnailSpec, MenuSpec, MenubarSpec, MessageCenterSpec, MetaBarSpec, MetaItemSpec,
     MeterSpec, MetricTileSpec, ModelPickerSpec, NavCardSpec, NavigationMenuSpec, NumberInputSpec,
     OrderBySpec, OverlayPlacement, PageHeaderSpec, PageLoadingSpec, PaginationSpec,
     PaginationSummarySpec, PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec,
@@ -57,7 +58,10 @@ pub(crate) struct Eyebrow;
 
 impl Eyebrow {
     pub(crate) fn from_spec(spec: EyebrowSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::eyebrow(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::eyebrow(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -134,7 +138,8 @@ impl StatusIndicator {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::status_indicator(&self.spec, &RenderContext::new(&self.theme));
+        let mut node =
+            poodle_render::status_indicator(&self.spec, &RenderContext::new(&self.theme));
         if let Some(scope) = self.instance_id {
             let root_id = format!("status-indicator:{scope}");
             node.id = Some(root_id.clone());
@@ -230,7 +235,11 @@ impl CollapseToggle {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::collapse_toggle(&self.spec, &RenderContext::new(&self.theme), self.on_toggle);
+        let mut node = poodle_render::collapse_toggle(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_toggle,
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-collapse-toggle-{id}"));
         }
@@ -468,7 +477,11 @@ impl RemediationBanner {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::remediation_banner(&self.spec, &RenderContext::new(&self.theme), self.handlers)
+        poodle_render::remediation_banner(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        )
     }
 }
 
@@ -1001,7 +1014,11 @@ impl MediaPreview {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::media_preview_with_content(&self.spec, &RenderContext::new(&self.theme), self.media_content)
+        poodle_render::media_preview_with_content(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.media_content,
+        )
     }
 }
 
@@ -1044,7 +1061,11 @@ impl CardRadioGroup {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::card_radio_group(&self.spec, &RenderContext::new(&self.theme), self.on_change)
+        poodle_render::card_radio_group(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_change,
+        )
     }
 }
 
@@ -1144,11 +1165,7 @@ impl AgentQuestion {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::agent_question(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        )
+        poodle_render::agent_question(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 
@@ -1179,7 +1196,10 @@ impl IntoElement for AgentMessage {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -1473,11 +1493,7 @@ impl AgentTranscript {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::agent_transcript(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        )
+        poodle_render::agent_transcript(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 
@@ -1602,10 +1618,7 @@ impl ToastStack {
         self
     }
 
-    pub(crate) fn on_dismiss(
-        mut self,
-        handler: Arc<dyn Fn(&str) + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_dismiss = Some(handler);
         self
     }
@@ -1648,10 +1661,7 @@ impl ToastHost {
         self
     }
 
-    pub(crate) fn on_dismiss(
-        mut self,
-        handler: Arc<dyn Fn(&str) + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_dismiss = Some(handler);
         self
     }
@@ -1699,10 +1709,7 @@ impl MessageCenter {
         self
     }
 
-    pub(crate) fn on_read_change(
-        mut self,
-        handler: Arc<dyn Fn(&str, bool) + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn on_read_change(mut self, handler: Arc<dyn Fn(&str, bool) + Send + Sync>) -> Self {
         self.handlers.on_read_change = Some(handler);
         self
     }
@@ -1735,8 +1742,8 @@ impl IntoElement for MessageCenter {
         let current_open = self.spec.current_open();
         let run_machine = {
             use poodle_headless::popover::{
-                popover_transition, PopoverContext, PopoverEffect, PopoverEvent, PopoverInitialFocus,
-                PopoverState,
+                popover_transition, PopoverContext, PopoverEffect, PopoverEvent,
+                PopoverInitialFocus, PopoverState,
             };
             let surface_id = surface_id.clone();
             let trigger_id = trigger_id.clone();
@@ -1802,7 +1809,10 @@ impl IntoElement for DebugDialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -1912,10 +1922,7 @@ impl AgentChatInput {
         self
     }
 
-    pub(crate) fn on_focus_change(
-        mut self,
-        handler: Arc<dyn Fn(bool) + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
         self.on_focus_change = Some(handler);
         self
     }
@@ -1993,9 +2000,9 @@ impl AgentChatInput {
 
         let submit_value = spec.value.clone();
         handlers.on_action = if spec.is_busy() {
-            on_stop.clone().map(|handler| {
-                Arc::new(move || handler()) as Arc<dyn Fn() + Send + Sync>
-            })
+            on_stop
+                .clone()
+                .map(|handler| Arc::new(move || handler()) as Arc<dyn Fn() + Send + Sync>)
         } else if spec.can_submit() {
             on_submit.clone().map(move |handler| {
                 Arc::new(move || handler(&submit_value)) as Arc<dyn Fn() + Send + Sync>
@@ -2070,8 +2077,8 @@ impl AgentChatInput {
             },
         );
         let effective_size = ctx.resolve_size(spec.size, spec.size_role);
-        let line_height = poodle_render::presentation::rem_to_px(spec.editor_font_rem(effective_size))
-            * 1.5;
+        let line_height =
+            poodle_render::presentation::rem_to_px(spec.editor_font_rem(effective_size)) * 1.5;
         editor.style.descriptor.background = None;
         editor.style.descriptor.border.width = 0.0;
         editor.style.descriptor.layout.height = poodle_node::LayoutSizing::Constrained {
@@ -2085,8 +2092,7 @@ impl AgentChatInput {
         editor.style.text_size = Some(poodle_render::presentation::rem_to_px(
             spec.editor_font_rem(effective_size),
         ));
-        editor.style.descriptor.text_color =
-            Some(ctx.theme().resolve_color(spec.text_token()));
+        editor.style.descriptor.text_color = Some(ctx.theme().resolve_color(spec.text_token()));
         let editor_value_id = format!("poodle-input-agent-chat-input-{instance_id}-editor-value");
         let editor_value = editor
             .children
@@ -2162,11 +2168,13 @@ impl AgentChatInput {
         let mut action = poodle_render::button(
             &action_spec,
             &ctx,
-            trailing.children.last().and_then(|current| {
-                current.interaction.on_activate.clone()
-            }),
+            trailing
+                .children
+                .last()
+                .and_then(|current| current.interaction.on_activate.clone()),
         );
-        let action_box = poodle_render::presentation::rem_to_px(spec.action_size_rem(effective_size));
+        let action_box =
+            poodle_render::presentation::rem_to_px(spec.action_size_rem(effective_size));
         action.id = Some(format!("agent-chat-input:{instance_id}:action"));
         action.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(action_box);
         action.style.descriptor.layout.height = poodle_node::LayoutSizing::Fixed(action_box);
@@ -2929,10 +2937,8 @@ impl ModelPicker {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let trigger_id = poodle_render::select_trigger_focus_id(&format!(
-            "model-picker:{}",
-            self.instance_id
-        ));
+        let trigger_id =
+            poodle_render::select_trigger_focus_id(&format!("model-picker:{}", self.instance_id));
         let is_open = self.spec.is_open;
         let is_disabled = self.spec.is_disabled;
         let dismiss_on_outside = self.spec.dismiss_on_outside_interact;
@@ -3123,7 +3129,12 @@ impl FormLayout {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::form_layout(&self.spec, &RenderContext::new(&self.theme), self.children, self.actions)
+        poodle_render::form_layout(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+            self.actions,
+        )
     }
 }
 
@@ -3173,7 +3184,12 @@ impl FormShell {
                 self.theme.resolve_space("space.stack.sm");
             Some(self.actions.into_iter().fold(row, poodle_node::Node::child))
         };
-        poodle_render::form_shell(&self.spec, &RenderContext::new(&self.theme), self.section_slots, actions)
+        poodle_render::form_shell(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.section_slots,
+            actions,
+        )
     }
 }
 
@@ -3384,7 +3400,12 @@ impl FormActions {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::form_actions_full(&self.spec, &RenderContext::new(&self.theme), self.danger, self.actions)
+        poodle_render::form_actions_full(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.danger,
+            self.actions,
+        )
     }
 }
 
@@ -3476,7 +3497,12 @@ impl StatusBar {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::shell_status_bar(&self.spec, &RenderContext::new(&self.theme), self.leading, self.trailing)
+        poodle_render::shell_status_bar(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.leading,
+            self.trailing,
+        )
     }
 }
 
@@ -3510,7 +3536,12 @@ impl NavCard {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::nav_card_with_icon(&self.spec, &RenderContext::new(&self.theme), self.on_click, self.icon)
+        poodle_render::nav_card_with_icon(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_click,
+            self.icon,
+        )
     }
 }
 
@@ -3601,7 +3632,10 @@ impl IntoElement for Progress {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -3687,7 +3721,10 @@ impl IntoElement for EmptyState {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -4008,16 +4045,9 @@ impl Pill {
             ..
         } = self;
         if spec.is_dismissible {
-            let instance_id = instance_id.expect(
-                "dismissible Pill requires the stable instance id supplied by its host",
-            );
-            poodle_render::pill_with_handlers(
-                &spec,
-                ctx,
-                on_remove,
-                on_dismiss,
-                &instance_id,
-            )
+            let instance_id = instance_id
+                .expect("dismissible Pill requires the stable instance id supplied by its host");
+            poodle_render::pill_with_handlers(&spec, ctx, on_remove, on_dismiss, &instance_id)
         } else {
             poodle_render::pill_with_remove(&spec, ctx, on_remove)
         }
@@ -4111,7 +4141,11 @@ impl ListCardCounter {
 
 impl IntoCompatNode for ListCardCounter {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::list_card_counter(&self.spec, &RenderContext::new(&self.theme), self.on_link_click)
+        poodle_render::list_card_counter(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_link_click,
+        )
     }
 }
 
@@ -4141,7 +4175,10 @@ impl IntoElement for MetricTile {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -4163,7 +4200,10 @@ impl IntoElement for StateTile {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -4281,7 +4321,12 @@ impl ListGrid {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::list_grid(&self.spec, &RenderContext::new(&self.theme), self.header, self.children)
+        poodle_render::list_grid(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.header,
+            self.children,
+        )
     }
 }
 
@@ -4372,7 +4417,12 @@ impl InlineListSection {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::inline_list_section(&self.spec, &RenderContext::new(&self.theme), self.items, self.action)
+        poodle_render::inline_list_section(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.items,
+            self.action,
+        )
     }
 }
 
@@ -4986,7 +5036,10 @@ impl IntoElement for LicenceStatus {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -6344,9 +6397,9 @@ impl TimeInput {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let live = self.live_context.unwrap_or_else(|| {
-            Arc::new(Mutex::new(poodle_render::context_from_spec(&self.spec)))
-        });
+        let live = self
+            .live_context
+            .unwrap_or_else(|| Arc::new(Mutex::new(poodle_render::context_from_spec(&self.spec))));
         {
             let mut context = live.lock().expect("time input context");
             context.min = self.spec.min.clone();
@@ -6991,11 +7044,7 @@ impl IntoElement for ConfirmAction {
     }
 }
 
-fn stamp_confirm_action_identity(
-    node: &mut poodle_node::Node,
-    instance_id: &str,
-    is_open: bool,
-) {
+fn stamp_confirm_action_identity(node: &mut poodle_node::Node, instance_id: &str, is_open: bool) {
     fn stamp(node: &mut poodle_node::Node, id: String) {
         node.id = Some(id.clone());
         node.runtime_id = Some(id);
@@ -7037,11 +7086,7 @@ fn stamp_confirm_action_identity(
         .find(|child| child.id.as_deref() == Some("poodle-dialog-surface"))
         .expect("ConfirmAction Dialog keeps a surface panel");
     stamp(surface, format!("{scope}:surface"));
-    let _ = stamp_existing_id(
-        surface,
-        "poodle-dialog-close",
-        format!("{scope}:close"),
-    );
+    let _ = stamp_existing_id(surface, "poodle-dialog-close", format!("{scope}:close"));
     let actions = surface
         .children
         .last_mut()
@@ -7175,7 +7220,11 @@ impl Menu {
             wrapper = wrapper.child(trigger);
         }
         if self.spec.current_open() {
-            wrapper = wrapper.child(poodle_render::menu(&self.spec, &RenderContext::new(&self.theme), self.on_select));
+            wrapper = wrapper.child(poodle_render::menu(
+                &self.spec,
+                &RenderContext::new(&self.theme),
+                self.on_select,
+            ));
         }
         wrapper
     }
@@ -7322,7 +7371,11 @@ impl IntoElement for ContextMenu {
 
     fn into_element(self) -> Self::Element {
         let menu = self.spec.current_open().then(|| {
-            let node = poodle_render::context_menu(&self.spec, &RenderContext::new(&self.theme), self.on_select);
+            let node = poodle_render::context_menu(
+                &self.spec,
+                &RenderContext::new(&self.theme),
+                self.on_select,
+            );
             let menu = poodle_gpui_node_backend::to_gpui(&node);
             if let Some((x, y)) = self.spec.anchor_point {
                 div()
@@ -7458,7 +7511,10 @@ impl IntoElement for Tooltip {
             });
         }
         let bubble = (self.spec.current_open() && self.spec.has_content()).then(|| {
-            poodle_gpui_node_backend::to_gpui(&poodle_render::tooltip(&self.spec, &RenderContext::new(&self.theme)))
+            poodle_gpui_node_backend::to_gpui(&poodle_render::tooltip(
+                &self.spec,
+                &RenderContext::new(&self.theme),
+            ))
         });
         floating_overlay(trigger.into_any_element(), bubble, self.spec.placement)
     }
@@ -7869,7 +7925,11 @@ impl DetailSectionGroup {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::detail_section_group(&self.spec, &RenderContext::new(&self.theme), self.children)
+        poodle_render::detail_section_group(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+        )
     }
 }
 
@@ -7992,7 +8052,8 @@ impl Checkbox {
                 .clone()
                 .unwrap_or_else(|| "anon".to_string())
         });
-        let mut node = poodle_render::checkbox(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let mut node =
+            poodle_render::checkbox(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some(format!("poodle-checkbox-{id}"));
         node
     }
@@ -8050,7 +8111,8 @@ impl IntoElement for Switch {
                 .clone()
                 .unwrap_or_else(|| "anon".to_string())
         });
-        let mut node = poodle_render::switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let mut node =
+            poodle_render::switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some(format!("poodle-switch-{id}"));
         poodle_gpui_node_backend::to_gpui(&node)
     }
@@ -8143,13 +8205,11 @@ impl IntoElement for Slider {
         };
         if self.spec.variant == poodle_specs::SliderVariant::Block {
             return crate::block_slider_host::slider_element(
-                self.spec,
-                self.theme,
-                handlers,
-                self.id,
+                self.spec, self.theme, handlers, self.id,
             );
         }
-        let mut node = poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
+        let mut node =
+            poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
         if let Some(id) = self.id {
             fn stamp(node: &mut poodle_node::Node, id: &str) {
                 if node.a11y.role == Some(poodle_node::NodeRole::Slider) {
@@ -8214,13 +8274,11 @@ impl IntoElement for RangeSlider {
         };
         if self.spec.variant == poodle_specs::SliderVariant::Block {
             return crate::block_slider_host::range_slider_element(
-                self.spec,
-                self.theme,
-                handlers,
-                self.id,
+                self.spec, self.theme, handlers, self.id,
             );
         }
-        let mut node = poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
+        let mut node =
+            poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -8260,11 +8318,8 @@ impl IntoElement for RadioGroup {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio_group(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        );
+        let mut node =
+            poodle_render::radio_group(&self.spec, &RenderContext::new(&self.theme), self.handlers);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -8304,7 +8359,11 @@ impl IntoElement for Radio {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio(&self.spec, &RenderContext::new(&self.theme), self.on_checked_change);
+        let mut node = poodle_render::radio(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_checked_change,
+        );
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -8523,7 +8582,10 @@ pub(crate) struct AudioPlayer;
 
 impl AudioPlayer {
     pub(crate) fn from_spec(spec: AudioPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -8531,7 +8593,10 @@ pub(crate) struct VideoPlayer;
 
 impl VideoPlayer {
     pub(crate) fn from_spec(spec: VideoPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::video_player(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::video_player(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -8539,7 +8604,10 @@ pub(crate) struct TimeAgo;
 
 impl TimeAgo {
     pub(crate) fn from_spec(spec: TimeAgoSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::time_ago(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::time_ago(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -8747,7 +8815,12 @@ impl DockRegion {
             accept_panel: self.accept_panel,
             cross_window_drag_source: self.cross_window_drag_source,
         };
-        poodle_render::dock_region(&self.spec, &RenderContext::new(&self.theme), self.content, handlers)
+        poodle_render::dock_region(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.content,
+            handlers,
+        )
     }
 }
 

@@ -41,7 +41,11 @@ fn action_id(handlers: &UpdateStatusHandlers, suffix: &str) -> String {
     }
 }
 
-fn dispatch_action(action: UpdateStatusAction, spec: &UpdateStatusSpec, handlers: &UpdateStatusHandlers) {
+fn dispatch_action(
+    action: UpdateStatusAction,
+    spec: &UpdateStatusSpec,
+    handlers: &UpdateStatusHandlers,
+) {
     match action {
         UpdateStatusAction::Install => {
             if spec.confirm_install {
@@ -528,7 +532,10 @@ mod tests {
                 disabled += 1;
             }
         });
-        assert!(disabled >= 2, "install and defer are disabled while pending");
+        assert!(
+            disabled >= 2,
+            "install and defer are disabled while pending"
+        );
     }
 
     #[test]

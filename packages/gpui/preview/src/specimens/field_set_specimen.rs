@@ -31,12 +31,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             FieldSpec::new("fs-name", "Full Name").with_required(true),
                             theme,
                         )
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("fs-name")
-                                .with_placeholder("Jane Smith"),
-                            theme,
-                        ).into_slot()),
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("fs-name")
+                                    .with_placeholder("Jane Smith"),
+                                theme,
+                            )
+                            .into_slot(),
+                        ),
                     )
                     .with_child(
                         Field::from_spec(
@@ -45,24 +48,30 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_description("We'll never share your email."),
                             theme,
                         )
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("fs-email")
-                                .with_placeholder("jane@example.com"),
-                            theme,
-                        ).into_slot()),
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("fs-email")
+                                    .with_placeholder("jane@example.com"),
+                                theme,
+                            )
+                            .into_slot(),
+                        ),
                     )
                     .with_child(
                         Field::from_spec(
                             FieldSpec::new("fs-phone", "Phone").with_optional_label("Optional"),
                             theme,
                         )
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("fs-phone")
-                                .with_placeholder("+1 (555) 000-0000"),
-                            theme,
-                        ).into_slot()),
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("fs-phone")
+                                    .with_placeholder("+1 (555) 000-0000"),
+                                theme,
+                            )
+                            .into_slot(),
+                        ),
                     ),
                 ),
         )
@@ -88,12 +97,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             FieldSpec::new("fs-street", "Street").with_span("full"),
                             theme,
                         )
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("fs-street")
-                                .with_placeholder("123 Main St"),
-                            theme,
-                        ).into_slot()),
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("fs-street")
+                                    .with_placeholder("123 Main St"),
+                                theme,
+                            )
+                            .into_slot(),
+                        ),
                     )
                     .with_child(
                         Field::from_spec(FieldSpec::new("fs-city", "City"), theme).with_control(
@@ -136,21 +148,27 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_child(
                         Field::from_spec(FieldSpec::new("fs-first", "First Name"), theme)
-                            .with_control(TextInput::from_spec(
-                                TextInputSpec::new()
-                                    .with_id("fs-first")
-                                    .with_placeholder("Jane"),
-                                theme,
-                            ).into_slot()),
+                            .with_control(
+                                TextInput::from_spec(
+                                    TextInputSpec::new()
+                                        .with_id("fs-first")
+                                        .with_placeholder("Jane"),
+                                    theme,
+                                )
+                                .into_slot(),
+                            ),
                     )
                     .with_child(
                         Field::from_spec(FieldSpec::new("fs-last", "Last Name"), theme)
-                            .with_control(TextInput::from_spec(
-                                TextInputSpec::new()
-                                    .with_id("fs-last")
-                                    .with_placeholder("Smith"),
-                                theme,
-                            ).into_slot()),
+                            .with_control(
+                                TextInput::from_spec(
+                                    TextInputSpec::new()
+                                        .with_id("fs-last")
+                                        .with_placeholder("Smith"),
+                                    theme,
+                                )
+                                .into_slot(),
+                            ),
                     ),
                 ),
         )
@@ -178,7 +196,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_id("fs-line1")
                                     .with_placeholder("Apartment, suite, etc."),
                                 theme,
-                            ).into_slot(),
+                            )
+                            .into_slot(),
                         ),
                     )
                     .with_child(
@@ -188,7 +207,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_id("fs-line2")
                                     .with_placeholder("Building, floor, etc."),
                                 theme,
-                            ).into_slot(),
+                            )
+                            .into_slot(),
                         ),
                     ),
                 ),
@@ -222,7 +242,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     TextInput::from_spec(
                                         TextInputSpec::new().with_id("fs2-first"),
                                         theme,
-                                    ).into_slot(),
+                                    )
+                                    .into_slot(),
                                 ),
                             )
                             .with_child(
@@ -234,7 +255,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     TextInput::from_spec(
                                         TextInputSpec::new().with_id("fs2-last"),
                                         theme,
-                                    ).into_slot(),
+                                    )
+                                    .into_slot(),
                                 ),
                             ),
                         )
@@ -245,12 +267,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             )
                             .with_child(
                                 Field::from_spec(FieldSpec::new("fs2-lang", "Language"), theme)
-                                    .with_control(TextInput::from_spec(
-                                        TextInputSpec::new()
-                                            .with_id("fs2-lang")
-                                            .with_placeholder("Select language"),
-                                        theme,
-                                    ).into_slot()),
+                                    .with_control(
+                                        TextInput::from_spec(
+                                            TextInputSpec::new()
+                                                .with_id("fs2-lang")
+                                                .with_placeholder("Select language"),
+                                            theme,
+                                        )
+                                        .into_slot(),
+                                    ),
                             )
                             .with_child(
                                 Field::from_spec(
@@ -264,7 +289,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                             .with_id("fs2-tz")
                                             .with_placeholder("Select time zone"),
                                         theme,
-                                    ).into_slot(),
+                                    )
+                                    .into_slot(),
                                 ),
                             ),
                         ),

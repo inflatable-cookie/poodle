@@ -142,8 +142,14 @@ fn render_axis(scene: &poodle_ir::Scene, kind: poodle_ir::SceneAxisKind) -> Stri
 fn render_scene(scene: &poodle_ir::Scene) -> String {
     let mut out = String::new();
     out.push_str("    SpecimenScene {\n");
-    out.push_str(&format!("        id: {},\n", ts_string_literal(scene.id.as_str())));
-    out.push_str(&format!("        name: {},\n", ts_string_literal(&scene.name)));
+    out.push_str(&format!(
+        "        id: {},\n",
+        ts_string_literal(scene.id.as_str())
+    ));
+    out.push_str(&format!(
+        "        name: {},\n",
+        ts_string_literal(&scene.name)
+    ));
     out.push_str(&format!(
         "        description: {},\n",
         ts_string_literal(&scene.description)

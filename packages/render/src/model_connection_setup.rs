@@ -105,12 +105,7 @@ pub fn model_connection_setup(
     ctx: &RenderContext<'_>,
     handlers: ModelConnectionSetupHandlers,
 ) -> Node {
-    model_connection_setup_with_slots(
-        spec,
-        ctx,
-        ModelConnectionSetupSlots::default(),
-        handlers,
-    )
+    model_connection_setup_with_slots(spec, ctx, ModelConnectionSetupSlots::default(), handlers)
 }
 
 pub fn model_connection_setup_with_slots(
@@ -312,7 +307,8 @@ pub fn model_connection_setup_with_slots(
                 pad.right = inset;
                 s.descriptor.border.width = rem_to_px(0.0625);
                 s.descriptor.border.color = ctx.theme().resolve_color("color.border.subtle");
-                s.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
+                s.descriptor.background =
+                    Some(ctx.theme().resolve_color("color.background.surface"));
                 s.fill_width = true;
                 s.min_width = Some(0.0);
                 surface_radius(&mut configuration.style, ctx);
@@ -326,7 +322,8 @@ pub fn model_connection_setup_with_slots(
                 {
                     let s = &mut wrapper.style;
                     s.descriptor.layout.direction = LayoutDirection::Column;
-                    s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+                    s.descriptor.text_color =
+                        Some(ctx.theme().resolve_color("color.text.secondary"));
                     s.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
                     s.fill_width = true;
                 }
@@ -405,7 +402,11 @@ pub fn model_connection_setup_with_slots(
             ctx,
             spec,
             instance.as_deref(),
-            if requires_configuration { "continue" } else { "submit" },
+            if requires_configuration {
+                "continue"
+            } else {
+                "submit"
+            },
             effective_size,
             label,
             ButtonVariant::Primary,
@@ -512,7 +513,8 @@ fn action_button(
         (!disabled).then_some(on_click),
     );
     node.id = Some(model_connection_setup_action_id(None, action));
-    node.runtime_id = instance_id.map(|scope| model_connection_setup_action_id(Some(scope), action));
+    node.runtime_id =
+        instance_id.map(|scope| model_connection_setup_action_id(Some(scope), action));
     node
 }
 
@@ -700,7 +702,11 @@ mod tests {
 
     #[test]
     fn continue_stays_disabled_until_a_selectable_route_is_chosen() {
-        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), ModelConnectionSetupHandlers::default());
+        let node = model_connection_setup(
+            &spec(),
+            &RenderContext::new(&theme()),
+            ModelConnectionSetupHandlers::default(),
+        );
         let continue_button = button_labelled(&node, "Continue").expect("continue");
         assert!(continue_button.interaction.disabled);
         assert!(continue_button.interaction.on_activate.is_none());
@@ -825,7 +831,10 @@ mod tests {
 
         for label in ["Back", "Cancel", "Add connection"] {
             let button = button_labelled(&node, label).unwrap_or_else(|| panic!("{label}"));
-            assert!(button.interaction.disabled, "{label} is locked while pending");
+            assert!(
+                button.interaction.disabled,
+                "{label} is locked while pending"
+            );
             assert!(button.interaction.on_activate.is_none());
         }
 
@@ -846,16 +855,19 @@ mod tests {
             &RenderContext::new(&theme()),
             ModelConnectionSetupHandlers::default(),
         );
-        assert!(node
-            .texts().contains(&"That route refused the request."));
+        assert!(node.texts().contains(&"That route refused the request."));
         assert!(node.texts().contains(&"Connection added."));
-        assert_eq!(node.roles.get("stage").map(String::as_str), Some("configure"));
+        assert_eq!(
+            node.roles.get("stage").map(String::as_str),
+            Some("configure")
+        );
     }
 
     #[test]
     fn the_choose_stage_forwards_picker_selection_and_query_requests() {
         let recorder = Recorder::default();
-        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_connection_setup(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         let option = node
             .find(&|n| n.id.as_deref() == Some(model_connection_option_id("ollama-local").as_str()))
@@ -873,7 +885,11 @@ mod tests {
 
     #[test]
     fn the_configure_heading_can_actually_take_focus() {
-        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), ModelConnectionSetupHandlers::default());
+        let node = model_connection_setup(
+            &spec(),
+            &RenderContext::new(&theme()),
+            ModelConnectionSetupHandlers::default(),
+        );
         let heading = node
             .find(&|n| n.id.as_deref() == Some(MODEL_CONNECTION_SETUP_TITLE_ID))
             .expect("the workflow heading");
@@ -892,7 +908,8 @@ mod tests {
             ..ModelConnectionSetupHandlers::default()
         };
         let first = model_connection_setup(&spec(), &RenderContext::new(&theme()), scoped("first"));
-        let second = model_connection_setup(&spec(), &RenderContext::new(&theme()), scoped("second"));
+        let second =
+            model_connection_setup(&spec(), &RenderContext::new(&theme()), scoped("second"));
 
         for (node, scope) in [(&first, "first"), (&second, "second")] {
             assert!(node
@@ -945,14 +962,18 @@ mod tests {
         press(&node, "Back");
         assert_eq!(
             recorder.focus.lock().unwrap().as_slice(),
-            [model_connection_option_focus_id(Some("second"), "openai-responses")]
+            [model_connection_option_focus_id(
+                Some("second"),
+                "openai-responses"
+            )]
         );
     }
 
     #[test]
     fn cancel_requests_closure_and_the_root_is_a_region_not_a_dialog() {
         let recorder = Recorder::default();
-        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_connection_setup(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Cancel");
         assert_eq!(*recorder.cancels.lock().unwrap(), 1);
         assert_eq!(node.a11y.role, Some(NodeRole::Region));

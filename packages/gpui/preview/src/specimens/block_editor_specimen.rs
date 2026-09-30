@@ -208,26 +208,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
-                BlockEditor::from_spec(BlockEditorSpec::new().with_size(size), theme, "block-editor-5")
-                    .with_child(|ctx: &RenderContext<'_>| {
-                        text_block(
-                            "A text block with regular content.",
-                            14.0,
-                            ctx.theme().resolve_color("color.text.primary"),
-                        )
-                    })
-                    .into_any_element()
+                BlockEditor::from_spec(
+                    BlockEditorSpec::new().with_size(size),
+                    theme,
+                    "block-editor-5",
+                )
+                .with_child(|ctx: &RenderContext<'_>| {
+                    text_block(
+                        "A text block with regular content.",
+                        14.0,
+                        ctx.theme().resolve_color("color.text.primary"),
+                    )
+                })
+                .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
-                BlockEditor::from_spec(BlockEditorSpec::new().with_density(density), theme, "block-editor-6")
-                    .with_child(|ctx: &RenderContext<'_>| {
-                        text_block(
-                            "A text block with regular content.",
-                            14.0,
-                            ctx.theme().resolve_color("color.text.primary"),
-                        )
-                    })
-                    .into_any_element()
+                BlockEditor::from_spec(
+                    BlockEditorSpec::new().with_density(density),
+                    theme,
+                    "block-editor-6",
+                )
+                .with_child(|ctx: &RenderContext<'_>| {
+                    text_block(
+                        "A text block with regular content.",
+                        14.0,
+                        ctx.theme().resolve_color("color.text.primary"),
+                    )
+                })
+                .into_any_element()
             }),
     )
 }

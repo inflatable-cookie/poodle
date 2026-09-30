@@ -217,7 +217,11 @@ fn build_controls_bar(
 
     if let Some(control) = find_control("size") {
         let size_labels: Vec<&str> = ControlSize::ALL.iter().map(|s| s.label()).collect();
-        bar = bar.child(group(control.label, &size_labels, state.control_size.label()));
+        bar = bar.child(group(
+            control.label,
+            &size_labels,
+            state.control_size.label(),
+        ));
     }
 
     // Contrast group — a real engine slider driving the oklch neutral-contrast

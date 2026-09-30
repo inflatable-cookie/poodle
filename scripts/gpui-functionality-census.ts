@@ -62,12 +62,18 @@ const PRODUCTION_RENDER_RE = /poodle_render::(?!color::)\w+|node_compat::\w+/;
 /// read as production-backend evidence: admission additionally requires the
 /// production mount (run_headless + HeadlessDriver + production renderer), so a
 /// renderer unit test or a direct handler call can never satisfy any axis.
+/// Matchers must stay formatting-tolerant: rustfmt wraps method chains and
+/// argument lists across lines, so a pattern may only rely on token sequences
+/// rustfmt never splits (identifiers, `::` paths) or must bridge the wrap with
+/// `\s*` / `[^;]`-style classes. `a11y\s*\.` exists because rustfmt split
+/// `n.a11y.label` onto separate chain lines and the split once dropped a true
+/// accessibility admission (poodle#072 census ruling, 2026-09-30).
 export const AXIS_TEST_SIGNALS: Record<CensusAxis, RegExp[]> = {
   semantic: [PRODUCTION_RENDER_RE, ASSERT_RE],
   events: [/counting_handler/i, /payloads?\.\s*lock/i, /assert[^;]*(emit|payload|change|commit|callback)/i],
   pointer: [/pointer_activate|pointer_press|dispatch_pointer|mouse_|simulate_click|\.click\(/i],
   keyboard_focus: [/dispatch_key|focus_element|focus_state_for|focus_handle_for|roving|key_press|press_key|keyboard_/i],
-  accessibility: [/a11y\.|NodeToggled|NodeRole|\baria\b|accessible/i, /assert[^;]*announce|announcements\(\)|on_announce/i],
+  accessibility: [/a11y\s*\.|NodeToggled|NodeRole|\baria\b|accessible/i, /assert[^;]*announce|announcements\(\)|on_announce/i],
   visual: [/rem_to_px|resolve_color|resolve_space|resolve_opacity|resolve_radius|_geometry|Geometry|computed_rect|dimensions/i],
 };
 

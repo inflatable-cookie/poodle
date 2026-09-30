@@ -147,19 +147,23 @@ fn fractional_key_handler(
         };
         match key {
             NodeKey::ArrowRight | NodeKey::ArrowUp => {
-                let base = normalize_rating_value(current.or(Some(0.0)), item_count, step)
-                    .unwrap_or(0.0);
+                let base =
+                    normalize_rating_value(current.or(Some(0.0)), item_count, step).unwrap_or(0.0);
                 let next = rating_keyboard_step(base, 1, step, item_count, min_selectable);
                 handler(normalize_rating_value(Some(next), item_count, step));
             }
             NodeKey::ArrowLeft | NodeKey::ArrowDown => {
-                let base = normalize_rating_value(current.or(Some(0.0)), item_count, step)
-                    .unwrap_or(0.0);
+                let base =
+                    normalize_rating_value(current.or(Some(0.0)), item_count, step).unwrap_or(0.0);
                 let next = rating_keyboard_step(base, -1, step, item_count, min_selectable);
                 handler(normalize_rating_value(Some(next), item_count, step));
             }
             NodeKey::Home => {
-                handler(normalize_rating_value(Some(min_selectable), item_count, step));
+                handler(normalize_rating_value(
+                    Some(min_selectable),
+                    item_count,
+                    step,
+                ));
             }
             NodeKey::End => {
                 handler(normalize_rating_value(Some(item_count), item_count, step));
@@ -293,8 +297,7 @@ pub fn rating(spec: &RatingSpec, ctx: &RenderContext<'_>, handlers: RatingHandle
                     let count = item_count as f64;
                     let index = i as f64;
                     target.interaction.on_scrub = Some(Arc::new(move |fraction: f32, phase| {
-                        let next =
-                            rating_pointer_value(fraction as f64, index, step, count);
+                        let next = rating_pointer_value(fraction as f64, index, step, count);
                         match phase {
                             ScrubPhase::Release => {}
                             ScrubPhase::Press => {
@@ -303,8 +306,7 @@ pub fn rating(spec: &RatingSpec, ctx: &RenderContext<'_>, handlers: RatingHandle
                             ScrubPhase::Drag => {
                                 // Live drag never clears; only moves to a new snapped value.
                                 if let Some(handler) = &on_change {
-                                    let payload =
-                                        normalize_rating_value(Some(next), count, step);
+                                    let payload = normalize_rating_value(Some(next), count, step);
                                     if payload != current {
                                         handler(payload);
                                     }
@@ -450,10 +452,7 @@ mod tests {
             &RatingSpec::new().with_value(2.5),
             RatingHandlers::new("scope-b"),
         );
-        assert_eq!(
-            fractional.id.as_deref(),
-            Some("rating:scope-b:root")
-        );
+        assert_eq!(fractional.id.as_deref(), Some("rating:scope-b:root"));
         assert_eq!(
             fractional.runtime_id.as_deref(),
             Some("rating:scope-b:root")
@@ -465,10 +464,7 @@ mod tests {
         let node = render(&RatingSpec::new().with_value(3.5), RatingHandlers::new("r"));
         assert_eq!(node.a11y.role, Some(NodeRole::Slider));
         assert_eq!(node.a11y.value, Some(3.5));
-        assert_eq!(
-            node.a11y.value_text.as_deref(),
-            Some("3.5 out of 5")
-        );
+        assert_eq!(node.a11y.value_text.as_deref(), Some("3.5 out of 5"));
         let star = item(&node, "r", 1);
         assert!(star.a11y.role.is_none());
         assert!(!star.interaction.focusable);
@@ -501,15 +497,20 @@ mod tests {
         );
         let keys = item(&node, "r", 2).interaction.on_key.as_ref().unwrap();
         let mods = NodeModifiers::default();
-        assert_eq!(
-            keys(NodeKey::ArrowRight, mods),
-            Some(item_focus_id("r", 3))
-        );
+        assert_eq!(keys(NodeKey::ArrowRight, mods), Some(item_focus_id("r", 3)));
         assert!(seen.lock().unwrap().is_empty());
-        (item(&node, "r", 3).interaction.on_activate.as_ref().unwrap())();
+        (item(&node, "r", 3)
+            .interaction
+            .on_activate
+            .as_ref()
+            .unwrap())();
         assert_eq!(seen.lock().unwrap().as_slice(), &[Some(3.0)]);
         seen.lock().unwrap().clear();
-        (item(&node, "r", 2).interaction.on_activate.as_ref().unwrap())();
+        (item(&node, "r", 2)
+            .interaction
+            .on_activate
+            .as_ref()
+            .unwrap())();
         assert!(
             seen.lock().unwrap().is_empty(),
             "re-selecting the current value without clear is inert"
@@ -527,7 +528,10 @@ mod tests {
         let mods = NodeModifiers::default();
         assert!(first(NodeKey::ArrowLeft, mods).is_none());
         assert!(first(NodeKey::ArrowDown, mods).is_none());
-        assert_eq!(first(NodeKey::ArrowRight, mods), Some(item_focus_id("r", 2)));
+        assert_eq!(
+            first(NodeKey::ArrowRight, mods),
+            Some(item_focus_id("r", 2))
+        );
         assert!(last(NodeKey::ArrowRight, mods).is_none());
         assert!(last(NodeKey::ArrowUp, mods).is_none());
         assert_eq!(last(NodeKey::ArrowLeft, mods), Some(item_focus_id("r", 4)));
@@ -546,7 +550,11 @@ mod tests {
                 sink.lock().unwrap().push(v);
             })),
         );
-        (item(&node, "r", 3).interaction.on_activate.as_ref().unwrap())();
+        (item(&node, "r", 3)
+            .interaction
+            .on_activate
+            .as_ref()
+            .unwrap())();
         assert_eq!(seen.lock().unwrap().as_slice(), &[None]);
 
         let seen: Arc<Mutex<Vec<Option<f64>>>> = Arc::new(Mutex::new(Vec::new()));

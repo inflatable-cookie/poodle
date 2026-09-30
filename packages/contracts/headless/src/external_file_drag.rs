@@ -485,9 +485,11 @@ pub fn validate_inbound_files(
         return refuse(InboundFileRefusal::TooMany);
     }
 
-    let max_files = constraints
-        .max_files
-        .or(if capabilities.multiple_files { None } else { Some(1) });
+    let max_files = constraints.max_files.or(if capabilities.multiple_files {
+        None
+    } else {
+        Some(1)
+    });
     if let Some(max) = max_files {
         if batch.files.len() > max {
             return refuse(InboundFileRefusal::TooMany);
@@ -688,9 +690,9 @@ mod tests {
         assert!(!is_presentable_file_name(".."));
         assert!(!is_presentable_file_name(""));
         assert!(!is_presentable_file_name("   "));
-        assert!(!is_presentable_file_name(&"n".repeat(
-            EXTERNAL_FILE_MAX_NAME_LENGTH + 1
-        )));
+        assert!(!is_presentable_file_name(
+            &"n".repeat(EXTERNAL_FILE_MAX_NAME_LENGTH + 1)
+        ));
     }
 
     /// An adapter that returns more than it advertised has produced a drag
@@ -700,7 +702,10 @@ mod tests {
     fn a_prepared_export_cannot_exceed_its_own_advertised_capabilities() {
         let capabilities = export_capabilities();
         let single = PreparedFileExport::file("lease-1", DragExportForm::ExistingFile);
-        assert_eq!(validate_file_export(&single, &capabilities), DragExportValidation::Accepted);
+        assert_eq!(
+            validate_file_export(&single, &capabilities),
+            DragExportValidation::Accepted
+        );
 
         let many = PreparedFileExport {
             file_count: Some(3),
@@ -739,7 +744,10 @@ mod tests {
             data_types: vec!["application/x-loophole-clip".to_string()],
             ..PreparedFileExport::file("lease-1", DragExportForm::CustomData)
         };
-        assert_eq!(validate_file_export(&agreed, &capabilities), DragExportValidation::Accepted);
+        assert_eq!(
+            validate_file_export(&agreed, &capabilities),
+            DragExportValidation::Accepted
+        );
         assert!(can_export_anything(&capabilities));
 
         let unadvertised = PreparedFileExport {
@@ -805,7 +813,11 @@ mod tests {
 
         let dropped = batch(vec![receipt("f1", "take.wav", "audio/wav", Some(2_000))]);
         assert_eq!(
-            refused(validate_inbound_files(&dropped, &constraints, &capabilities)),
+            refused(validate_inbound_files(
+                &dropped,
+                &constraints,
+                &capabilities
+            )),
             Some(InboundFileRefusal::TooLarge)
         );
     }
@@ -843,7 +855,11 @@ mod tests {
 
         let wrong_type = batch(vec![receipt("f1", "notes.txt", "text/plain", Some(10))]);
         assert_eq!(
-            refused(validate_inbound_files(&wrong_type, &accept_audio, &capabilities)),
+            refused(validate_inbound_files(
+                &wrong_type,
+                &accept_audio,
+                &capabilities
+            )),
             Some(InboundFileRefusal::UnsupportedType)
         );
 
@@ -852,13 +868,21 @@ mod tests {
             receipt("f1", "b.wav", "audio/wav", Some(10)),
         ]);
         assert_eq!(
-            refused(validate_inbound_files(&duplicate, &accept_audio, &capabilities)),
+            refused(validate_inbound_files(
+                &duplicate,
+                &accept_audio,
+                &capabilities
+            )),
             Some(InboundFileRefusal::Unidentified)
         );
 
         let path_named = batch(vec![receipt("f1", "/tmp/a.wav", "audio/wav", Some(10))]);
         assert_eq!(
-            refused(validate_inbound_files(&path_named, &accept_audio, &capabilities)),
+            refused(validate_inbound_files(
+                &path_named,
+                &accept_audio,
+                &capabilities
+            )),
             Some(InboundFileRefusal::NameIsAPath)
         );
 
@@ -867,7 +891,11 @@ mod tests {
             ..two.clone()
         };
         assert_eq!(
-            refused(validate_inbound_files(&foreign, &accept_audio, &capabilities)),
+            refused(validate_inbound_files(
+                &foreign,
+                &accept_audio,
+                &capabilities
+            )),
             Some(InboundFileRefusal::Malformed)
         );
 
@@ -913,7 +941,11 @@ mod tests {
         // extension rule is answered there.
         let dropped = batch(vec![receipt("f1", "notes.txt", "text/plain", Some(1))]);
         assert_eq!(
-            refused(validate_inbound_files(&dropped, &by_extension, &capabilities)),
+            refused(validate_inbound_files(
+                &dropped,
+                &by_extension,
+                &capabilities
+            )),
             Some(InboundFileRefusal::UnsupportedType)
         );
     }

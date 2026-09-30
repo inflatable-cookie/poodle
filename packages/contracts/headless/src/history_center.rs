@@ -229,7 +229,6 @@ impl HistoryContinuation {
     }
 }
 
-
 // ── Visible-row model ──────────────────────────────────────────────────────
 
 /// What kind of row an identity names. Focus is keyed by identity and never
@@ -403,7 +402,9 @@ pub fn history_center_forks_at(
     let Some(continuations) = continuations else {
         return Vec::new();
     };
-    let own_id = run_entries.get(anchor_index + 1).map(|entry| entry.id.as_str());
+    let own_id = run_entries
+        .get(anchor_index + 1)
+        .map(|entry| entry.id.as_str());
     continuations
         .iter()
         .filter(|continuation| match own_id {
@@ -466,10 +467,7 @@ fn push_run(
             fork_count: entry.fork_count(),
         });
 
-        if let Some(level) = open
-            .iter()
-            .find(|level| level.anchor_entry_id == entry.id)
-        {
+        if let Some(level) = open.iter().find(|level| level.anchor_entry_id == entry.id) {
             push_disclosed(rows, level, entry, entries, index, depth, root_entries);
         }
     }
@@ -642,19 +640,28 @@ pub enum HistoryCenterEvent {
     /// Activate a row; `None` activates the focused row.
     ActivateRow(Option<HistoryCenterRowId>),
     /// Toggle the fork disclosure at an entry.
-    Disclose { entry_id: String },
+    Disclose {
+        entry_id: String,
+    },
     ContinuationsLoaded {
         entry_id: String,
         continuations: Vec<HistoryContinuation>,
     },
-    PickContinuation { entry_id: String },
+    PickContinuation {
+        entry_id: String,
+    },
     Confirm,
-    DeleteContinuation { entry_id: String },
+    DeleteContinuation {
+        entry_id: String,
+    },
     RunLoaded {
         from_entry_id: String,
         pages: Vec<HistoryPathPage>,
     },
-    Rename { branch_id: String, name: String },
+    Rename {
+        branch_id: String,
+        name: String,
+    },
     ShowRejection(HistoryCenterRejectionCode),
     DismissRejection,
     /// The host supplied new root pages. Carries nothing and changes nothing
@@ -667,24 +674,39 @@ pub enum HistoryCenterEvent {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum HistoryCenterEffect {
-    EmitOpenChange { open: bool },
-    FocusRow { row: HistoryCenterRowId },
+    EmitOpenChange {
+        open: bool,
+    },
+    FocusRow {
+        row: HistoryCenterRowId,
+    },
     /// The clicked row's own branch and entry — never an ancestor, never
     /// another branch's divergence entry. `branch_id` is `None` on the spine.
     EmitNavigateEntry {
         branch_id: Option<String>,
         entry_id: String,
     },
-    EmitRenameBranch { branch_id: String, name: String },
-    LoadContinuations { entry_id: String },
-    LoadContinuationRun { from_entry_id: String },
+    EmitRenameBranch {
+        branch_id: String,
+        name: String,
+    },
+    LoadContinuations {
+        entry_id: String,
+    },
+    LoadContinuationRun {
+        from_entry_id: String,
+    },
     /// The picker's commit: the selected fork becomes primary. Poodle does not
     /// build the new root — it emits the command and renders whatever root
     /// pages the host supplies afterwards.
-    CheckoutContinuation { entry_id: String },
+    CheckoutContinuation {
+        entry_id: String,
+    },
     /// The host deletes the selected continuation. The machine invalidates
     /// the affected level and re-requests its continuations separately.
-    DeleteContinuation { entry_id: String },
+    DeleteContinuation {
+        entry_id: String,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -756,7 +778,10 @@ fn with_added_level(
     open: &[HistoryCenterOpenFork],
     added: HistoryCenterOpenFork,
 ) -> Vec<HistoryCenterOpenFork> {
-    fn insert(levels: &[HistoryCenterOpenFork], added: &HistoryCenterOpenFork) -> Option<Vec<HistoryCenterOpenFork>> {
+    fn insert(
+        levels: &[HistoryCenterOpenFork],
+        added: &HistoryCenterOpenFork,
+    ) -> Option<Vec<HistoryCenterOpenFork>> {
         for (index, level) in levels.iter().enumerate() {
             if run_contains(&level.run_pages, &added.anchor_entry_id) {
                 let mut next = levels.to_vec();
@@ -829,7 +854,10 @@ fn index_of_row(rows: &[HistoryCenterRow], id: Option<&HistoryCenterRowId>) -> O
 /// Keep focus on the same row identity after a shape change. When the focused
 /// row vanished, fall back to the toggled anchor's entry row, then the first
 /// row — never a stale identity into a list that changed shape.
-fn clamp_focus(mut context: HistoryCenterContext, anchor_entry_id: Option<&str>) -> HistoryCenterContext {
+fn clamp_focus(
+    mut context: HistoryCenterContext,
+    anchor_entry_id: Option<&str>,
+) -> HistoryCenterContext {
     let rows = history_center_visible_rows(context.pages.as_ref(), &context.open);
     if rows.is_empty() {
         context.focus_row = None;
@@ -932,10 +960,7 @@ fn disclose(context: HistoryCenterContext, entry_id: &str) -> HistoryCenterResul
         let open = without_level(&context.open, entry_id);
         return HistoryCenterResult {
             state: HistoryCenterState::Open,
-            context: clamp_focus(
-                HistoryCenterContext { open, ..context },
-                Some(entry_id),
-            ),
+            context: clamp_focus(HistoryCenterContext { open, ..context }, Some(entry_id)),
             effects: Vec::new(),
         };
     }
@@ -1073,9 +1098,12 @@ fn pick_continuation(context: HistoryCenterContext, entry_id: &str) -> HistoryCe
 fn confirm(context: HistoryCenterContext) -> HistoryCenterResult {
     // The auto-chosen single fork counts as picked: confirm commits the
     // displayed fork, whichever way it came to be displayed.
-    let picked = walk_levels(&context.open)
-        .into_iter()
-        .find_map(|level| level.shown().cloned().map(|shown| (level.anchor_entry_id.clone(), shown)));
+    let picked = walk_levels(&context.open).into_iter().find_map(|level| {
+        level
+            .shown()
+            .cloned()
+            .map(|shown| (level.anchor_entry_id.clone(), shown))
+    });
     let Some((anchor_entry_id, shown)) = picked else {
         return stay(HistoryCenterState::Open, context);
     };
@@ -1574,12 +1602,19 @@ mod tests {
     fn the_child_already_on_the_list_is_filtered_by_id() {
         let run = vec![entry("e1", 3), entry("e2", 0)];
         let forks = history_center_forks_at(
-            Some(&vec![fork("e2", "main"), fork("f1", "wide"), fork("f2", "duck")]),
+            Some(&vec![
+                fork("e2", "main"),
+                fork("f1", "wide"),
+                fork("f2", "duck"),
+            ]),
             &run,
             0,
         );
         assert_eq!(
-            forks.iter().map(|f| f.entry_id.as_str()).collect::<Vec<_>>(),
+            forks
+                .iter()
+                .map(|f| f.entry_id.as_str())
+                .collect::<Vec<_>>(),
             ["f1", "f2"],
         );
     }
@@ -1598,7 +1633,10 @@ mod tests {
             0,
         );
         assert_eq!(
-            forks.iter().map(|f| f.entry_id.as_str()).collect::<Vec<_>>(),
+            forks
+                .iter()
+                .map(|f| f.entry_id.as_str())
+                .collect::<Vec<_>>(),
             ["f1"],
         );
     }
@@ -1865,8 +1903,11 @@ mod tests {
             }],
             ..HistoryCenterContext::default()
         };
-        let result =
-            history_center_transition(HistoryCenterState::Open, context, HistoryCenterEvent::Confirm);
+        let result = history_center_transition(
+            HistoryCenterState::Open,
+            context,
+            HistoryCenterEvent::Confirm,
+        );
         assert_eq!(
             result.effects,
             [HistoryCenterEffect::CheckoutContinuation {

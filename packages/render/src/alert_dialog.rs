@@ -150,11 +150,5 @@ pub fn alert_dialog_with_content(
         dialog_spec = dialog_spec.with_aria_label(aria.clone());
     }
 
-    dialog(
-        &dialog_spec,
-        ctx,
-        children,
-        Some(actions),
-        handlers.cancel,
-    )
+    dialog(&dialog_spec, ctx, children, Some(actions), handlers.cancel)
 }

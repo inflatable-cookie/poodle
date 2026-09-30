@@ -41,7 +41,10 @@ fn render_machine(machine: &MachineInterface, source_path: &str, schema_version:
     out.push('\n');
     out.push_str(&render_context(&machine.prefix, &machine.context));
     out.push('\n');
-    out.push_str(&render_variant_enum(&format!("{}Event", machine.prefix), &machine.events));
+    out.push_str(&render_variant_enum(
+        &format!("{}Event", machine.prefix),
+        &machine.events,
+    ));
     out.push('\n');
     out.push_str(&render_variant_enum(
         &format!("{}Effect", machine.prefix),

@@ -61,7 +61,9 @@ pub fn agent_chat_input(
     let placeholder = with_alpha(
         placeholder_base,
         placeholder_base.3
-            * ctx.theme().resolve_opacity(spec.placeholder_opacity_token())
+            * ctx
+                .theme()
+                .resolve_opacity(spec.placeholder_opacity_token())
             * spec.placeholder_opacity_ratio(),
     );
     let border = ctx.theme().resolve_color(spec.field_border_token());
@@ -194,8 +196,7 @@ pub fn agent_chat_input(
             if let Some(kind) = &attachment.kind {
                 chip.roles.insert("kind".to_owned(), kind.clone());
             }
-            chip.roles
-                .insert("variant".to_owned(), "chip".to_owned());
+            chip.roles.insert("variant".to_owned(), "chip".to_owned());
 
             if let Some(icon) = &attachment.icon {
                 let mut glyph = Node::icon(icon, rem_to_px(0.75));
@@ -265,10 +266,9 @@ pub fn agent_chat_input(
         s.descriptor.layout.width = LayoutSizing::Grow;
         s.min_width = Some(0.0);
     }
-    leading.roles.insert(
-        "dividers".to_owned(),
-        spec.toolbar_dividers.to_string(),
-    );
+    leading
+        .roles
+        .insert("dividers".to_owned(), spec.toolbar_dividers.to_string());
     for (index, child) in toolbar_children.into_iter().enumerate() {
         // Hairline dividers between leading children (contract §8).
         if index > 0 && spec.toolbar_dividers {
@@ -496,7 +496,10 @@ mod tests {
             Some("comfortable")
         );
         assert_eq!(node.roles.get("status").map(String::as_str), Some("idle"));
-        assert_eq!(node.roles.get("disabled").map(String::as_str), Some("false"));
+        assert_eq!(
+            node.roles.get("disabled").map(String::as_str),
+            Some("false")
+        );
 
         let field = &node.children[0];
         let (pad_y, pad_x) = spec.field_padding_rem(ControlSize::Md);
@@ -512,10 +515,20 @@ mod tests {
             field.style.descriptor.corner_radii.top_left,
             ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5
         );
-        assert_eq!(field.style.descriptor.layout.spacing.padding.top, rem_to_px(pad_y));
-        assert_eq!(field.style.descriptor.layout.spacing.padding.left, rem_to_px(pad_x));
         assert_eq!(
-            field.style.hover.as_ref().and_then(|patch| patch.border_color),
+            field.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(pad_y)
+        );
+        assert_eq!(
+            field.style.descriptor.layout.spacing.padding.left,
+            rem_to_px(pad_x)
+        );
+        assert_eq!(
+            field
+                .style
+                .hover
+                .as_ref()
+                .and_then(|patch| patch.border_color),
             Some(mix_srgb(
                 ctx.theme().resolve_color(spec.field_border_token()),
                 ctx.theme().resolve_color(spec.text_token()),
@@ -523,10 +536,14 @@ mod tests {
             ))
         );
         let ring = field.style.focus_ring.expect("field focus-within ring");
-        assert_eq!(ring.color, ctx.theme().resolve_color(spec.focus_ring_color_token()));
+        assert_eq!(
+            ring.color,
+            ctx.theme().resolve_color(spec.focus_ring_color_token())
+        );
         assert_eq!(
             ring.width,
-            ctx.theme().resolve_border_width(spec.focus_ring_width_token())
+            ctx.theme()
+                .resolve_border_width(spec.focus_ring_width_token())
         );
         assert_eq!(ring.offset, rem_to_px(0.0625));
         assert!(field.style.focus_ring_within);
@@ -553,7 +570,10 @@ mod tests {
             ctx.theme().resolve_radius(spec.attachment_radius_token())
         );
         let thumbnail = &attachments.children[1];
-        assert_eq!(thumbnail.roles.get("kind").map(String::as_str), Some("image"));
+        assert_eq!(
+            thumbnail.roles.get("kind").map(String::as_str),
+            Some("image")
+        );
         assert_eq!(
             thumbnail.roles.get("variant").map(String::as_str),
             Some("thumbnail")
@@ -603,13 +623,20 @@ mod tests {
         let action = toolbar.children[1].children.last().expect("action");
         assert_eq!(action.a11y.role, Some(NodeRole::Button));
         assert_eq!(action.a11y.label.as_deref(), Some("Send"));
-        assert_eq!(action.roles.get("state").map(String::as_str), Some("submit"));
+        assert_eq!(
+            action.roles.get("state").map(String::as_str),
+            Some("submit")
+        );
         assert_eq!(
             action.style.descriptor.background,
             Some(ctx.theme().resolve_color(spec.action_fill_token()))
         );
         assert_eq!(
-            action.style.hover.as_ref().and_then(|patch| patch.background),
+            action
+                .style
+                .hover
+                .as_ref()
+                .and_then(|patch| patch.background),
             Some(mix_srgb(
                 ctx.theme().resolve_color(spec.action_fill_token()),
                 WHITE,
@@ -651,10 +678,14 @@ mod tests {
             Vec::new(),
             AgentChatInputHandlers::default(),
         );
-        assert_eq!(disabled.roles.get("disabled").map(String::as_str), Some("true"));
+        assert_eq!(
+            disabled.roles.get("disabled").map(String::as_str),
+            Some("true")
+        );
         assert_eq!(
             disabled.style.descriptor.opacity,
-            ctx.theme().resolve_opacity(disabled_spec.disabled_opacity_token())
+            ctx.theme()
+                .resolve_opacity(disabled_spec.disabled_opacity_token())
         );
         assert!(disabled.children[0].style.focus_ring.is_none());
     }

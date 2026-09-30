@@ -361,14 +361,20 @@ mod tests {
     fn context_menu_semantics_follow_the_contract() {
         let plain = SidebarNavItem::new("all", "All records");
         assert!(!plain.has_context_menu());
-        assert_eq!(plain.context_menu_aria_label_or_default(), "All records actions");
+        assert_eq!(
+            plain.context_menu_aria_label_or_default(),
+            "All records actions"
+        );
 
         let rows = vec![MenuEntry::new("rename", "Rename")];
         let hosted = SidebarNavItem::new("q4", "Q4 close")
             .with_context_menu_items(rows.clone())
             .with_context_menu_aria_label("Q4 close actions");
         assert!(hosted.has_context_menu());
-        assert_eq!(hosted.context_menu_aria_label_or_default(), "Q4 close actions");
+        assert_eq!(
+            hosted.context_menu_aria_label_or_default(),
+            "Q4 close actions"
+        );
 
         // A disabled item never hosts a menu, even with rows set.
         let disabled = SidebarNavItem::new("archive", "Archive")
@@ -376,6 +382,9 @@ mod tests {
             .with_disabled(true);
         assert!(!disabled.has_context_menu());
         // And the generated default still names itself after the item.
-        assert_eq!(disabled.context_menu_aria_label_or_default(), "Archive actions");
+        assert_eq!(
+            disabled.context_menu_aria_label_or_default(),
+            "Archive actions"
+        );
     }
 }

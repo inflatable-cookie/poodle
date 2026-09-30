@@ -34,7 +34,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Jane"),
                                     theme,
                                 )
-                                .with_id("fl-first").into_slot(),
+                                .with_id("fl-first")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -43,7 +44,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Doe"),
                                     theme,
                                 )
-                                .with_id("fl-last").into_slot(),
+                                .with_id("fl-last")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -52,7 +54,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("jane@example.com"),
                                     theme,
                                 )
-                                .with_id("fl-email").into_slot(),
+                                .with_id("fl-email")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -61,7 +64,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Phone number"),
                                     theme,
                                 )
-                                .with_id("fl-phone").into_slot(),
+                                .with_id("fl-phone")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -72,7 +76,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                         .with_rows(3),
                                     theme,
                                 )
-                                .with_id("fl-notes").into_slot(),
+                                .with_id("fl-notes")
+                                .into_slot(),
                             ),
                         )
                         .with_actions(
@@ -120,7 +125,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Jane"),
                                     theme,
                                 )
-                                .with_id("fl-mix-first").into_slot(),
+                                .with_id("fl-mix-first")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -129,7 +135,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("M."),
                                     theme,
                                 )
-                                .with_id("fl-mix-middle").into_slot(),
+                                .with_id("fl-mix-middle")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -138,7 +145,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Doe"),
                                     theme,
                                 )
-                                .with_id("fl-mix-last").into_slot(),
+                                .with_id("fl-mix-last")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -147,7 +155,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("jane@example.com"),
                                     theme,
                                 )
-                                .with_id("fl-mix-email").into_slot(),
+                                .with_id("fl-mix-email")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -156,7 +165,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("+1 555 0100"),
                                     theme,
                                 )
-                                .with_id("fl-mix-phone").into_slot(),
+                                .with_id("fl-mix-phone")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -165,7 +175,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Engineering"),
                                     theme,
                                 )
-                                .with_id("fl-mix-dept").into_slot(),
+                                .with_id("fl-mix-dept")
+                                .into_slot(),
                             ),
                         )
                         .with_actions(
@@ -212,7 +223,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Enter a name"),
                                     theme,
                                 )
-                                .with_id("fl-display").into_slot(),
+                                .with_id("fl-display")
+                                .into_slot(),
                             ),
                         )
                         .with_child(
@@ -223,7 +235,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                         .with_rows(3),
                                     theme,
                                 )
-                                .with_id("fl-bio").into_slot(),
+                                .with_id("fl-bio")
+                                .into_slot(),
                             ),
                         )
                         .with_child(Checkbox::from_spec(
@@ -268,7 +281,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                             .with_validation_state(ValidationState::Invalid),
                                         theme,
                                     )
-                                    .with_id("fl-err-email").into_slot(),
+                                    .with_id("fl-err-email")
+                                    .into_slot(),
                                 ),
                         )
                         .with_child(
@@ -282,7 +296,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                             .with_validation_state(ValidationState::Invalid),
                                         theme,
                                     )
-                                    .with_id("fl-err-role").into_slot(),
+                                    .with_id("fl-err-role")
+                                    .into_slot(),
                                 ),
                         )
                         .with_actions(
@@ -316,7 +331,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_value("My Project"),
                                     theme,
                                 )
-                                .with_id("fl-site").into_slot(),
+                                .with_id("fl-site")
+                                .into_slot(),
                             ),
                         )
                         .with_actions(

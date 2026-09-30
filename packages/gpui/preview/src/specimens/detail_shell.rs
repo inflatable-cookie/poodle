@@ -13,8 +13,7 @@ use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, DetailItemSpec, DetailSectionSpec, DetailShellSpec,
-    DetailState, EyebrowSpec, PageHeaderSpec, PillAppearance, PillSpec, PillTone,
-    SeparatorSpec,
+    DetailState, EyebrowSpec, PageHeaderSpec, PillAppearance, PillSpec, PillTone, SeparatorSpec,
 };
 use std::sync::Arc;
 
@@ -87,125 +86,118 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )),
             ),
         ))
-        .child(
-            group(
-                "Multi-section layout with header",
-                theme,
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(8.0))
-                    .child(
-                        div().h(px(280.0)).child(
-                            DetailShell::from_spec(DetailShellSpec::new(), theme)
-                                .with_header(
-                                    PageHeader::from_spec(
-                                        PageHeaderSpec::new("Poodle Design System")
-                                            .with_eyebrow("Project")
-                                            .with_subtitle(
-                                                "A comprehensive component library.",
-                                            ),
-                                        theme,
-                                    )
-                                    .with_actions({
-                                        let theme = theme.clone();
-                                        move |ctx: &RenderContext<'_>| {
-                                            let mut row = Node::container();
-                                            row.style.descriptor.layout.direction =
-                                                LayoutDirection::Row;
-                                            row.style.descriptor.layout.spacing.gap = 6.0;
-                                            row = row.child(
-                                                Pill::from_spec(
-                                                    PillSpec::new()
-                                                        .with_label("Active")
-                                                        .with_tone(PillTone::Success)
-                                                        .with_appearance(PillAppearance::Badge),
-                                                    &theme,
-                                                )
-                                                .into_node_with(ctx),
-                                            );
-                                            row.child(
-                                                Button::from_spec(
-                                                    ButtonSpec::new()
-                                                        .with_variant(ButtonVariant::Secondary)
-                                                        .with_label("Edit"),
-                                                    &theme,
-                                                )
-                                                .with_id("detail-shell-edit")
-                                                .on_click(Arc::new(move || {
-                                                    let next = if edit_theme == "Light" {
-                                                        "Dark"
-                                                    } else {
-                                                        "Light"
-                                                    };
-                                                    let mut queue = edit_events.lock().unwrap();
-                                                    queue.push(NodeSpecimenEvent::SetText {
-                                                        key: "detail-shell-theme".to_string(),
-                                                        value: next.to_string(),
-                                                    });
-                                                    queue.push(NodeSpecimenEvent::SetText {
-                                                        key: "detail-shell-action".to_string(),
-                                                        value: "Edit project".to_string(),
-                                                    });
-                                                }))
-                                                .into_node_with(ctx),
-                                            )
-                                        }
-                                    })
-                                    .into_compat_node(),
+        .child(group(
+            "Multi-section layout with header",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div().h(px(280.0)).child(
+                        DetailShell::from_spec(DetailShellSpec::new(), theme)
+                            .with_header(
+                                PageHeader::from_spec(
+                                    PageHeaderSpec::new("Poodle Design System")
+                                        .with_eyebrow("Project")
+                                        .with_subtitle("A comprehensive component library."),
+                                    theme,
                                 )
-                                .with_content(node_column(
-                                    8.0,
-                                    vec![
-                                        DetailSection::from_spec(
-                                            DetailSectionSpec::new().with_title("General"),
-                                            theme,
-                                        )
-                                        .with_body(node_column(
-                                            0.0,
-                                            vec![
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Owner")
-                                                        .with_value("Clay"),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Created")
-                                                        .with_value("March 2025"),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Repository")
-                                                        .with_value(
-                                                            "github.com/poodle-ui/poodle",
-                                                        ),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                            ],
-                                        ))
-                                        .into_compat_node(),
-                                        Separator::from_spec(SeparatorSpec::new(), theme)
-                                            .into_compat_node(),
-                                        DetailSection::from_spec(
-                                            DetailSectionSpec::new()
-                                                .with_title("Configuration"),
-                                            theme,
-                                        )
-                                        .with_actions(
+                                .with_actions({
+                                    let theme = theme.clone();
+                                    move |ctx: &RenderContext<'_>| {
+                                        let mut row = Node::container();
+                                        row.style.descriptor.layout.direction =
+                                            LayoutDirection::Row;
+                                        row.style.descriptor.layout.spacing.gap = 6.0;
+                                        row = row.child(
+                                            Pill::from_spec(
+                                                PillSpec::new()
+                                                    .with_label("Active")
+                                                    .with_tone(PillTone::Success)
+                                                    .with_appearance(PillAppearance::Badge),
+                                                &theme,
+                                            )
+                                            .into_node_with(ctx),
+                                        );
+                                        row.child(
                                             Button::from_spec(
                                                 ButtonSpec::new()
-                                                    .with_variant(ButtonVariant::Ghost)
-                                                    .with_size(ControlSize::Sm)
-                                                    .with_label("Reset"),
+                                                    .with_variant(ButtonVariant::Secondary)
+                                                    .with_label("Edit"),
+                                                &theme,
+                                            )
+                                            .with_id("detail-shell-edit")
+                                            .on_click(Arc::new(move || {
+                                                let next = if edit_theme == "Light" {
+                                                    "Dark"
+                                                } else {
+                                                    "Light"
+                                                };
+                                                let mut queue = edit_events.lock().unwrap();
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-theme".to_string(),
+                                                    value: next.to_string(),
+                                                });
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-action".to_string(),
+                                                    value: "Edit project".to_string(),
+                                                });
+                                            }))
+                                            .into_node_with(ctx),
+                                        )
+                                    }
+                                })
+                                .into_compat_node(),
+                            )
+                            .with_content(node_column(
+                                8.0,
+                                vec![
+                                    DetailSection::from_spec(
+                                        DetailSectionSpec::new().with_title("General"),
+                                        theme,
+                                    )
+                                    .with_body(node_column(
+                                        0.0,
+                                        vec![
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Owner").with_value("Clay"),
                                                 theme,
                                             )
-                                            .with_id("detail-shell-reset")
-                                            .on_click(Arc::new(move || {
-                                                let mut queue =
-                                                    reset_events.lock().unwrap();
+                                            .into_compat_node(),
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Created")
+                                                    .with_value("March 2025"),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Repository")
+                                                    .with_value("github.com/poodle-ui/poodle"),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                        ],
+                                    ))
+                                    .into_compat_node(),
+                                    Separator::from_spec(SeparatorSpec::new(), theme)
+                                        .into_compat_node(),
+                                    DetailSection::from_spec(
+                                        DetailSectionSpec::new().with_title("Configuration"),
+                                        theme,
+                                    )
+                                    .with_actions(
+                                        Button::from_spec(
+                                            ButtonSpec::new()
+                                                .with_variant(ButtonVariant::Ghost)
+                                                .with_size(ControlSize::Sm)
+                                                .with_label("Reset"),
+                                            theme,
+                                        )
+                                        .with_id("detail-shell-reset")
+                                        .on_click(
+                                            Arc::new(move || {
+                                                let mut queue = reset_events.lock().unwrap();
                                                 queue.push(NodeSpecimenEvent::SetText {
                                                     key: "detail-shell-theme".to_string(),
                                                     value: "Dark".to_string(),
@@ -215,79 +207,77 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                                     value: "Compact".to_string(),
                                                 });
                                                 queue.push(NodeSpecimenEvent::SetText {
-                                                    key: "detail-shell-default-size"
-                                                        .to_string(),
+                                                    key: "detail-shell-default-size".to_string(),
                                                     value: "Medium".to_string(),
                                                 });
                                                 queue.push(NodeSpecimenEvent::SetText {
                                                     key: "detail-shell-action".to_string(),
                                                     value: "Reset configuration".to_string(),
                                                 });
-                                            })),
-                                        )
-                                        .with_body(node_column(
-                                            0.0,
-                                            vec![
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Theme")
-                                                        .with_value(&config_theme),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Density")
-                                                        .with_value(&config_density),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Default size")
-                                                        .with_value(&config_size),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                            ],
-                                        ))
-                                        .into_compat_node(),
-                                        Separator::from_spec(SeparatorSpec::new(), theme)
+                                            }),
+                                        ),
+                                    )
+                                    .with_body(node_column(
+                                        0.0,
+                                        vec![
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Theme")
+                                                    .with_value(&config_theme),
+                                                theme,
+                                            )
                                             .into_compat_node(),
-                                        DetailSection::from_spec(
-                                            DetailSectionSpec::new()
-                                                .with_title("Integrations"),
-                                            theme,
-                                        )
-                                        .with_body(node_column(
-                                            0.0,
-                                            vec![
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Figma")
-                                                        .with_value("Connected"),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                                DetailItem::from_spec(
-                                                    DetailItemSpec::new("Storybook")
-                                                        .with_value("Not configured"),
-                                                    theme,
-                                                )
-                                                .into_compat_node(),
-                                            ],
-                                        ))
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Density")
+                                                    .with_value(&config_density),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Default size")
+                                                    .with_value(&config_size),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                        ],
+                                    ))
+                                    .into_compat_node(),
+                                    Separator::from_spec(SeparatorSpec::new(), theme)
                                         .into_compat_node(),
-                                    ],
-                                )),
-                        ),
+                                    DetailSection::from_spec(
+                                        DetailSectionSpec::new().with_title("Integrations"),
+                                        theme,
+                                    )
+                                    .with_body(node_column(
+                                        0.0,
+                                        vec![
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Figma")
+                                                    .with_value("Connected"),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                            DetailItem::from_spec(
+                                                DetailItemSpec::new("Storybook")
+                                                    .with_value("Not configured"),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                        ],
+                                    ))
+                                    .into_compat_node(),
+                                ],
+                            )),
+                    ),
+                )
+                .when(!shell_action.is_empty(), |d| {
+                    d.child(
+                        div()
+                            .text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("Last action: {shell_action}")),
                     )
-                    .when(!shell_action.is_empty(), |d| {
-                        d.child(
-                            div()
-                                .text_sm()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child(format!("Last action: {shell_action}")),
-                        )
-                    }),
-            ),
-        )
+                }),
+        ))
         .child(group(
             "Loading state",
             theme,

@@ -122,12 +122,9 @@ impl AudioSpecimen {
                 at_size(mod_matrix_grid_base(), size, super::mod_matrix_grid, ctx)
             }
             Self::ValueReadout => at_size(value_readout_base(), size, super::value_readout, ctx),
-            Self::WaveformDisplay => at_size(
-                waveform_display_base(),
-                size,
-                super::waveform_display,
-                ctx,
-            ),
+            Self::WaveformDisplay => {
+                at_size(waveform_display_base(), size, super::waveform_display, ctx)
+            }
             Self::XyPad => at_size(xy_pad_base(), size, super::xy_pad, ctx),
         }
     }
@@ -136,21 +133,16 @@ impl AudioSpecimen {
     pub fn density(self, density: ControlDensity, ctx: &RenderContext<'_>) -> Node {
         match self {
             Self::AudioMeter => at_density(audio_meter_base(), density, super::audio_meter, ctx),
-            Self::AudioSwitch => {
-                at_density(audio_switch_base(), density, super::audio_switch, ctx)
-            }
+            Self::AudioSwitch => at_density(audio_switch_base(), density, super::audio_switch, ctx),
             Self::DragNumberField => at_density(
                 drag_number_field_base(),
                 density,
                 super::drag_number_field,
                 ctx,
             ),
-            Self::EnvelopeEditor => at_density(
-                envelope_editor_base(),
-                density,
-                super::envelope_editor,
-                ctx,
-            ),
+            Self::EnvelopeEditor => {
+                at_density(envelope_editor_base(), density, super::envelope_editor, ctx)
+            }
             Self::Fader => at_density(fader_base(), density, super::fader, ctx),
             Self::GainReductionMeter => at_density(
                 gain_reduction_meter_base(),
@@ -160,12 +152,9 @@ impl AudioSpecimen {
             ),
             Self::Keyboard => at_density(keyboard_base(), density, super::keyboard, ctx),
             Self::Knob => at_density(knob_base(), density, super::knob, ctx),
-            Self::ModMatrixGrid => at_density(
-                mod_matrix_grid_base(),
-                density,
-                super::mod_matrix_grid,
-                ctx,
-            ),
+            Self::ModMatrixGrid => {
+                at_density(mod_matrix_grid_base(), density, super::mod_matrix_grid, ctx)
+            }
             Self::ValueReadout => {
                 at_density(value_readout_base(), density, super::value_readout, ctx)
             }
@@ -364,14 +353,7 @@ fn knob_examples(ctx: &RenderContext<'_>) -> Node {
             (
                 "Type-in and keyboard bounds",
                 vec![
-                    knob_node(
-                        0.25,
-                        0.0,
-                        1.0,
-                        AudioValueLaw::Linear,
-                        "Type-in value",
-                        ctx,
-                    ),
+                    knob_node(0.25, 0.0, 1.0, AudioValueLaw::Linear, "Type-in value", ctx),
                     knob_node(0.0, 0.0, 1.0, AudioValueLaw::Linear, "Minimum", ctx),
                     knob_node(1.0, 0.0, 1.0, AudioValueLaw::Linear, "Maximum", ctx),
                 ],
@@ -712,10 +694,7 @@ fn drag_field(
     text: &str,
     ctx: &RenderContext<'_>,
 ) -> Node {
-    super::drag_number_field(
-        &DragNumberFieldSpec::new(value, min, max, step, text),
-        ctx,
-    )
+    super::drag_number_field(&DragNumberFieldSpec::new(value, min, max, step, text), ctx)
 }
 
 fn drag_number_field_examples(ctx: &RenderContext<'_>) -> Node {
@@ -727,10 +706,7 @@ fn drag_number_field_examples(ctx: &RenderContext<'_>) -> Node {
     disabled.visual_state.enabled = false;
     page(
         vec![
-            (
-                "Default",
-                vec![drag_field(0.5, 0.0, 1.0, 0.01, "0.5", ctx)],
-            ),
+            ("Default", vec![drag_field(0.5, 0.0, 1.0, 0.01, "0.5", ctx)]),
             (
                 "Integer step",
                 vec![drag_field(4.0, 0.0, 10.0, 1.0, "4", ctx)],
@@ -746,10 +722,7 @@ fn drag_number_field_examples(ctx: &RenderContext<'_>) -> Node {
                     super::drag_number_field(&fine, ctx),
                 ],
             ),
-            (
-                "Direct entry",
-                vec![super::drag_number_field(&direct, ctx)],
-            ),
+            ("Direct entry", vec![super::drag_number_field(&direct, ctx)]),
             (
                 "Keyboard bounds",
                 vec![
@@ -926,22 +899,8 @@ fn xy_pad_examples(ctx: &RenderContext<'_>) -> Node {
             (
                 "Corners",
                 vec![
-                    xy(
-                        0.0,
-                        0.0,
-                        DragState::None,
-                        AutomationState::None,
-                        true,
-                        ctx,
-                    ),
-                    xy(
-                        1.0,
-                        1.0,
-                        DragState::None,
-                        AutomationState::None,
-                        true,
-                        ctx,
-                    ),
+                    xy(0.0, 0.0, DragState::None, AutomationState::None, true, ctx),
+                    xy(1.0, 1.0, DragState::None, AutomationState::None, true, ctx),
                 ],
             ),
             (
@@ -966,14 +925,7 @@ fn xy_pad_examples(ctx: &RenderContext<'_>) -> Node {
                         true,
                         ctx,
                     ),
-                    xy(
-                        0.4,
-                        0.6,
-                        DragState::Fine,
-                        AutomationState::None,
-                        true,
-                        ctx,
-                    ),
+                    xy(0.4, 0.6, DragState::Fine, AutomationState::None, true, ctx),
                 ],
             ),
             (
@@ -1083,28 +1035,12 @@ fn audio_switch_examples(ctx: &RenderContext<'_>) -> Node {
                 "Lamp override",
                 vec![
                     switch(0, 2, false, Some(true), true, AudioSwitchMode::Latch, ctx),
-                    switch(
-                        1,
-                        2,
-                        false,
-                        Some(false),
-                        true,
-                        AudioSwitchMode::Latch,
-                        ctx,
-                    ),
+                    switch(1, 2, false, Some(false), true, AudioSwitchMode::Latch, ctx),
                 ],
             ),
             (
                 "Pressed / focused",
-                vec![switch(
-                    1,
-                    2,
-                    true,
-                    None,
-                    true,
-                    AudioSwitchMode::Latch,
-                    ctx,
-                )],
+                vec![switch(1, 2, true, None, true, AudioSwitchMode::Latch, ctx)],
             ),
             (
                 "Disabled",

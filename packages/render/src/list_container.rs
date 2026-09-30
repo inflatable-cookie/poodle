@@ -234,7 +234,13 @@ mod tests {
             .with_total_pages(3)
             .with_total_items(24)
             .with_page_size(10);
-        let node = list_container(&spec, &ctx, ListContainerSlots::default(), "list-container", None);
+        let node = list_container(
+            &spec,
+            &ctx,
+            ListContainerSlots::default(),
+            "list-container",
+            None,
+        );
         let header = &node.children[0];
         let pager = node.children.last().expect("ready list renders pager");
 

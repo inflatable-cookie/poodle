@@ -202,14 +202,11 @@ pub fn number_input(
     let field_id = match spec.id.as_deref() {
         Some(id) => format!("poodle-number-input-{id}"),
         None => {
-            let descriptor = [
-                spec.aria_label.as_deref(),
-                spec.placeholder.as_deref(),
-            ]
-            .into_iter()
-            .flatten()
-            .collect::<Vec<_>>()
-            .join("-");
+            let descriptor = [spec.aria_label.as_deref(), spec.placeholder.as_deref()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>()
+                .join("-");
             if descriptor.is_empty() {
                 "poodle-number-input".to_string()
             } else {
@@ -240,12 +237,7 @@ pub fn number_input(
 
     let stepper_bg = ctx.theme().resolve_color(spec.stepper_fill_token());
     let stepper_bg = with_alpha(stepper_bg, stepper_bg.3 * 0.88);
-    let stepper = |icon: &str,
-                   label: &str,
-                   id: &str,
-                   blocked: bool,
-                   direction: i32|
-     -> Node {
+    let stepper = |icon: &str, label: &str, id: &str, blocked: bool, direction: i32| -> Node {
         let mut btn = Node::button("");
         btn.a11y.label = Some(label.to_string());
         btn.id = Some(id.to_string());
@@ -662,9 +654,15 @@ mod tests {
         );
         let steppers = &node.children[1];
         let inc = &steppers.children[0];
-        assert!(!inc.interaction.focusable, "steppers stay out of focus order");
+        assert!(
+            !inc.interaction.focusable,
+            "steppers stay out of focus order"
+        );
         assert!(inc.style.focus.is_none());
-        assert!(node.style.focus.is_some(), "the field owns the focus treatment");
+        assert!(
+            node.style.focus.is_some(),
+            "the field owns the focus treatment"
+        );
         let activate = inc.interaction.on_activate.as_ref().expect("inc active");
         activate();
         assert_eq!(*committed.lock().unwrap(), Some(2.0));

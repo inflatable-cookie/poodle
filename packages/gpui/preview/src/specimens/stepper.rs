@@ -137,17 +137,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(16.0))
                 .child(
-                    div()
-                        .debug_selector(|| WIZARD_MARKER.to_string())
-                        .child(
-                            Stepper::from_spec(
-                                StepperSpec::new(wizard_steps())
-                                    .with_value(wizard_current.clone())
-                                    .with_aria_label("DAW sync steps"),
-                                theme,
-                            )
-                            .on_change(set_text(state, WIZARD_CURRENT)),
-                        ),
+                    div().debug_selector(|| WIZARD_MARKER.to_string()).child(
+                        Stepper::from_spec(
+                            StepperSpec::new(wizard_steps())
+                                .with_value(wizard_current.clone())
+                                .with_aria_label("DAW sync steps"),
+                            theme,
+                        )
+                        .on_change(set_text(state, WIZARD_CURRENT)),
+                    ),
                 )
                 .child(
                     div().max_w(px(320.0)).child(
@@ -241,19 +239,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(
-                    div()
-                        .debug_selector(|| RERUN_MARKER.to_string())
-                        .child(
-                            Stepper::from_spec(
-                                StepperSpec::new(completed.clone())
-                                    .with_value(rerun_current.clone())
-                                    .with_show_rerun(true)
-                                    .with_aria_label("Completed pipeline"),
-                                theme,
-                            )
-                            .on_change(set_text(state, RERUN_CURRENT))
-                            .on_rerun(set_text(state, RERUN_LAST)),
-                        ),
+                    div().debug_selector(|| RERUN_MARKER.to_string()).child(
+                        Stepper::from_spec(
+                            StepperSpec::new(completed.clone())
+                                .with_value(rerun_current.clone())
+                                .with_show_rerun(true)
+                                .with_aria_label("Completed pipeline"),
+                            theme,
+                        )
+                        .on_change(set_text(state, RERUN_CURRENT))
+                        .on_rerun(set_text(state, RERUN_LAST)),
+                    ),
                 )
                 .child(receipt(format!(
                     "Current step: {} — last re-run: {}",

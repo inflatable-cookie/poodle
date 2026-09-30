@@ -17,12 +17,10 @@ use poodle_headless::history_center::{
     HistoryEntryPosition, HistoryPathPage,
 };
 use poodle_render::{
-    RenderContext, history_center, HistoryCenterDelete, HistoryCenterHandlers,
-    HistoryCenterRename, HistoryCenterView,
+    history_center, HistoryCenterDelete, HistoryCenterHandlers, HistoryCenterRename,
+    HistoryCenterView, RenderContext,
 };
-use poodle_specs::{
-    EyebrowSpec, HistoryCenterRejection, HistoryCenterSpec,
-};
+use poodle_specs::{EyebrowSpec, HistoryCenterRejection, HistoryCenterSpec};
 
 const T: u64 = 1_750_000_000_000;
 
@@ -38,12 +36,7 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .child(child)
 }
 
-fn entry(
-    id: &str,
-    label: &str,
-    position: HistoryEntryPosition,
-    count: usize,
-) -> HistoryEntry {
+fn entry(id: &str, label: &str, position: HistoryEntryPosition, count: usize) -> HistoryEntry {
     HistoryEntry::new(id, label)
         .with_position(position)
         .with_continuation_count(count)
@@ -63,11 +56,7 @@ fn page(entries: Vec<HistoryEntry>) -> HistoryPathPage {
     HistoryPathPage::new(entries)
 }
 
-fn continuation(
-    entry_id: &str,
-    label: &str,
-    branch_id: &str,
-) -> HistoryContinuation {
+fn continuation(entry_id: &str, label: &str, branch_id: &str) -> HistoryContinuation {
     HistoryContinuation::new(entry_id, label, branch_id).with_entry_count(2)
 }
 
@@ -87,13 +76,7 @@ fn linear_pages() -> Vec<HistoryPathPage> {
             1,
             T + 600_000,
         ),
-        entry_at(
-            "e1",
-            "Committed mix 1",
-            HistoryEntryPosition::Past,
-            1,
-            T,
-        ),
+        entry_at("e1", "Committed mix 1", HistoryEntryPosition::Past, 1, T),
     ])]
 }
 
@@ -113,13 +96,7 @@ fn two_fork_pages() -> Vec<HistoryPathPage> {
             3,
             T + 600_000,
         ),
-        entry_at(
-            "c1",
-            "Committed mix 1",
-            HistoryEntryPosition::Past,
-            1,
-            T,
-        ),
+        entry_at("c1", "Committed mix 1", HistoryEntryPosition::Past, 1, T),
     ])]
 }
 
@@ -136,12 +113,36 @@ fn two_fork_continuations() -> Vec<HistoryContinuation> {
 fn two_fork_run(fork: &str) -> Vec<HistoryPathPage> {
     match fork {
         "x1" => vec![page(vec![
-            entry_at("x2", "Alt mix", HistoryEntryPosition::Past, 0, T + 2_300_000),
-            entry_at("x1", "Alt intro", HistoryEntryPosition::Past, 1, T + 1_100_000),
+            entry_at(
+                "x2",
+                "Alt mix",
+                HistoryEntryPosition::Past,
+                0,
+                T + 2_300_000,
+            ),
+            entry_at(
+                "x1",
+                "Alt intro",
+                HistoryEntryPosition::Past,
+                1,
+                T + 1_100_000,
+            ),
         ])],
         "l1" => vec![page(vec![
-            entry_at("l2", "Lead mix", HistoryEntryPosition::Past, 0, T + 2_400_000),
-            entry_at("l1", "Lead intro", HistoryEntryPosition::Past, 1, T + 1_200_000),
+            entry_at(
+                "l2",
+                "Lead mix",
+                HistoryEntryPosition::Past,
+                0,
+                T + 2_400_000,
+            ),
+            entry_at(
+                "l1",
+                "Lead intro",
+                HistoryEntryPosition::Past,
+                1,
+                T + 1_200_000,
+            ),
         ])],
         _ => Vec::new(),
     }
@@ -168,13 +169,43 @@ fn nested_continuations(anchor: &str) -> Vec<HistoryContinuation> {
 fn nested_run(fork: &str) -> Vec<HistoryPathPage> {
     match fork {
         "l1" => vec![page(vec![
-            entry_at("l3", "Lead outro", HistoryEntryPosition::Past, 0, T + 3_000_000),
-            entry_at("l2", "Lead bridge", HistoryEntryPosition::Past, 2, T + 2_400_000),
-            entry_at("l1", "Lead intro", HistoryEntryPosition::Past, 1, T + 1_200_000),
+            entry_at(
+                "l3",
+                "Lead outro",
+                HistoryEntryPosition::Past,
+                0,
+                T + 3_000_000,
+            ),
+            entry_at(
+                "l2",
+                "Lead bridge",
+                HistoryEntryPosition::Past,
+                2,
+                T + 2_400_000,
+            ),
+            entry_at(
+                "l1",
+                "Lead intro",
+                HistoryEntryPosition::Past,
+                1,
+                T + 1_200_000,
+            ),
         ])],
         "i1" => vec![page(vec![
-            entry_at("i2", "Inner mix", HistoryEntryPosition::Past, 0, T + 2_700_000),
-            entry_at("i1", "Inner intro", HistoryEntryPosition::Past, 1, T + 2_500_000),
+            entry_at(
+                "i2",
+                "Inner mix",
+                HistoryEntryPosition::Past,
+                0,
+                T + 2_700_000,
+            ),
+            entry_at(
+                "i1",
+                "Inner intro",
+                HistoryEntryPosition::Past,
+                1,
+                T + 2_500_000,
+            ),
         ])],
         _ => Vec::new(),
     }
@@ -196,13 +227,7 @@ fn single_continuation_pages() -> Vec<HistoryPathPage> {
             1,
             T + 600_000,
         ),
-        entry_at(
-            "c1",
-            "Committed mix 1",
-            HistoryEntryPosition::Past,
-            1,
-            T,
-        ),
+        entry_at("c1", "Committed mix 1", HistoryEntryPosition::Past, 1, T),
     ])]
 }
 
@@ -220,9 +245,27 @@ fn run_tail_continuations() -> Vec<HistoryContinuation> {
 fn run_tail_run(fork: &str) -> Vec<HistoryPathPage> {
     match fork {
         "l1" => vec![page(vec![
-            entry_at("l3", "Lead outro", HistoryEntryPosition::Past, 0, T + 3_000_000),
-            entry_at("l2", "Lead bridge", HistoryEntryPosition::Past, 1, T + 2_400_000),
-            entry_at("l1", "Lead intro", HistoryEntryPosition::Past, 1, T + 1_200_000),
+            entry_at(
+                "l3",
+                "Lead outro",
+                HistoryEntryPosition::Past,
+                0,
+                T + 3_000_000,
+            ),
+            entry_at(
+                "l2",
+                "Lead bridge",
+                HistoryEntryPosition::Past,
+                1,
+                T + 2_400_000,
+            ),
+            entry_at(
+                "l1",
+                "Lead intro",
+                HistoryEntryPosition::Past,
+                1,
+                T + 1_200_000,
+            ),
         ])],
         _ => Vec::new(),
     }
@@ -333,16 +376,18 @@ impl<'a> SectionState<'a> {
         let mut inner = Vec::new();
         if self.is_on("inner-disclosed") {
             let inner_pick = nested_continuations("l2").into_iter().next();
-            inner.push(self.open_fork(
-                "l2",
-                nested_continuations("l2"),
-                inner_pick.clone(),
-                inner_pick
-                    .as_ref()
-                    .map(|fork| nested_run(&fork.entry_id))
-                    .unwrap_or_default(),
-                Vec::new(),
-            ));
+            inner.push(
+                self.open_fork(
+                    "l2",
+                    nested_continuations("l2"),
+                    inner_pick.clone(),
+                    inner_pick
+                        .as_ref()
+                        .map(|fork| nested_run(&fork.entry_id))
+                        .unwrap_or_default(),
+                    Vec::new(),
+                ),
+            );
         }
         vec![self.open_fork(
             "c2",
@@ -369,12 +414,8 @@ impl<'a> SectionState<'a> {
                 .iter()
                 .map(|level| level.anchor_entry_id.clone())
                 .collect(),
-            open_select_anchor: self
-                .is_on("select-open")
-                .then(|| "c2".to_string()),
-            open_actions_anchor: self
-                .is_on("actions-open")
-                .then(|| "c2".to_string()),
+            open_select_anchor: self.is_on("select-open").then(|| "c2".to_string()),
+            open_actions_anchor: self.is_on("actions-open").then(|| "c2".to_string()),
             rename: self.is_on("renaming").then(|| HistoryCenterRename {
                 anchor_entry_id: "c2".to_string(),
                 branch_id: "feature/lead".to_string(),
@@ -643,223 +684,171 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let fork_levels = forks.fork_open_levels("c2", two_fork_continuations(), "x1", two_fork_run);
     let run_tail_levels =
         run_tail.fork_open_levels("c2", run_tail_continuations(), "l1", run_tail_run);
-    let manage_levels =
-        manage.fork_open_levels("c2", run_tail_continuations(), "l1", run_tail_run);
+    let manage_levels = manage.fork_open_levels("c2", run_tail_continuations(), "l1", run_tail_run);
     let rename_levels = rename.nested_open_levels();
-    let no_ts_levels = no_ts.fork_open_levels("c2", no_timestamp_continuations(), "l1", no_timestamp_run);
+    let no_ts_levels =
+        no_ts.fork_open_levels("c2", no_timestamp_continuations(), "l1", no_timestamp_run);
 
     let rejection_spec = HistoryCenterSpec::new()
         .with_can_undo(true)
         .with_rejection(HistoryCenterRejection::AlreadyAtTarget);
     let rejection_message = rejection_spec.rejection_message().map(str::to_string);
 
-    let nested_extra = inner_disclose_handler(
-        queue.clone(),
-        "hc-nested",
-        nested.is_on("inner-disclosed"),
-    );
-    let rename_extra = inner_disclose_handler(
-        queue.clone(),
-        "hc-rename",
-        rename.is_on("inner-disclosed"),
-    );
+    let nested_extra =
+        inner_disclose_handler(queue.clone(), "hc-nested", nested.is_on("inner-disclosed"));
+    let rename_extra =
+        inner_disclose_handler(queue.clone(), "hc-rename", rename.is_on("inner-disclosed"));
 
-    let examples = div()
-        .flex()
-        .flex_col()
-        .gap(px(24.0))
-        .child(group(
-            "Linear history",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(
-                    div()
-                        .flex()
-                        .justify_end()
-                        .w_full()
-                        .max_w(px(672.0))
-                        .child(render_instance(
+    let examples =
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(24.0))
+            .child(group(
+                "Linear history",
+                theme,
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.0))
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
                             theme,
                             &HistoryCenterSpec::new().with_can_undo(true),
                             &linear.view(&linear_pages(), &[], None),
                             linear.handlers(queue.clone(), "c2", None),
                             "hc-linear",
-                        )),
-                )
-                .child(hint(
-                    theme,
-                    "Last host command",
-                    &linear.text("command", ""),
-                )),
-        ))
-        .child(group(
-            "Choosing between continuations",
-            theme,
-            div()
-                .flex()
-                .justify_end()
-                .w_full()
-                .max_w(px(672.0))
-                .child(render_instance(
-                    theme,
-                    &HistoryCenterSpec::new().with_can_undo(true),
-                    &forks.view(&two_fork_pages(), &fork_levels, None),
-                    forks.handlers(queue.clone(), "c2", None),
-                    "hc-forks",
-                )),
-        ))
-        .child(group(
-            "Nested continuation runs",
-            theme,
-            div()
-                .flex()
-                .justify_end()
-                .w_full()
-                .max_w(px(672.0))
-                .child(render_instance(
-                    theme,
-                    &HistoryCenterSpec::new().with_can_undo(true),
-                    &nested.view(&nested_pages(), &nested.nested_open_levels(), None),
-                    nested.handlers(queue.clone(), "c2", Some(nested_extra)),
-                    "hc-nested",
-                )),
-        ))
-        .child(group(
-            "Single continuation and run boundaries",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(16.0))
-                .child(
-                    div()
-                        .flex()
-                        .justify_end()
-                        .w_full()
-                        .max_w(px(672.0))
-                        .child(render_instance(
+                        ),
+                    ))
+                    .child(hint(
+                        theme,
+                        "Last host command",
+                        &linear.text("command", ""),
+                    )),
+            ))
+            .child(group(
+                "Choosing between continuations",
+                theme,
+                div()
+                    .flex()
+                    .justify_end()
+                    .w_full()
+                    .max_w(px(672.0))
+                    .child(render_instance(
+                        theme,
+                        &HistoryCenterSpec::new().with_can_undo(true),
+                        &forks.view(&two_fork_pages(), &fork_levels, None),
+                        forks.handlers(queue.clone(), "c2", None),
+                        "hc-forks",
+                    )),
+            ))
+            .child(group(
+                "Nested continuation runs",
+                theme,
+                div()
+                    .flex()
+                    .justify_end()
+                    .w_full()
+                    .max_w(px(672.0))
+                    .child(render_instance(
+                        theme,
+                        &HistoryCenterSpec::new().with_can_undo(true),
+                        &nested.view(&nested_pages(), &nested.nested_open_levels(), None),
+                        nested.handlers(queue.clone(), "c2", Some(nested_extra)),
+                        "hc-nested",
+                    )),
+            ))
+            .child(group(
+                "Single continuation and run boundaries",
+                theme,
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(16.0))
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
                             theme,
                             &HistoryCenterSpec::new().with_can_undo(true),
                             &single.view(&single_continuation_pages(), &[], None),
                             single.handlers(queue.clone(), "c2", None),
                             "hc-single",
-                        )),
-                )
-                .child(
-                    div()
-                        .flex()
-                        .justify_end()
-                        .w_full()
-                        .max_w(px(672.0))
-                        .child(render_instance(
+                        ),
+                    ))
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
                             theme,
                             &HistoryCenterSpec::new().with_can_undo(true),
                             &run_tail.view(&run_tail_pages(), &run_tail_levels, None),
                             run_tail.handlers(queue.clone(), "c2", None),
                             "hc-run-tail",
-                        )),
-                ),
-        ))
-        .child(
-            group(
+                        ),
+                    )),
+            ))
+            .child(group(
                 "Rename and manage a continuation",
                 theme,
                 div()
                     .flex()
                     .flex_col()
                     .gap(px(16.0))
-                    .child(
-                        div()
-                            .flex()
-                            .justify_end()
-                            .w_full()
-                            .max_w(px(672.0))
-                            .child(render_instance(
-                                theme,
-                                &HistoryCenterSpec::new().with_can_undo(true),
-                                &manage.view(&run_tail_pages(), &manage_levels, None),
-                                manage.with_delete_handlers(
-                                    manage.handlers(queue.clone(), "c2", None),
-                                    queue.clone(),
-                                ),
-                                "hc-manage",
-                            )),
-                    )
-                    .child(
-                        div()
-                            .flex()
-                            .justify_end()
-                            .w_full()
-                            .max_w(px(672.0))
-                            .child(render_instance(
-                                theme,
-                                &HistoryCenterSpec::new().with_can_undo(true),
-                                &rename.view(&nested_pages(), &rename_levels, None),
-                                rename.handlers(queue.clone(), "c2", Some(rename_extra)),
-                                "hc-rename",
-                            )),
-                    )
-                    .child(hint(
-                        theme,
-                        "Last command",
-                        &{
-                            let rename_command = rename.text("command", "");
-                            if rename_command.is_empty() {
-                                manage.text("command", "")
-                            } else {
-                                rename_command
-                            }
-                        },
-                    )),
-            ),
-        )
-        .child(
-            group(
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
+                            theme,
+                            &HistoryCenterSpec::new().with_can_undo(true),
+                            &manage.view(&run_tail_pages(), &manage_levels, None),
+                            manage.with_delete_handlers(
+                                manage.handlers(queue.clone(), "c2", None),
+                                queue.clone(),
+                            ),
+                            "hc-manage",
+                        ),
+                    ))
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
+                            theme,
+                            &HistoryCenterSpec::new().with_can_undo(true),
+                            &rename.view(&nested_pages(), &rename_levels, None),
+                            rename.handlers(queue.clone(), "c2", Some(rename_extra)),
+                            "hc-rename",
+                        ),
+                    ))
+                    .child(hint(theme, "Last command", &{
+                        let rename_command = rename.text("command", "");
+                        if rename_command.is_empty() {
+                            manage.text("command", "")
+                        } else {
+                            rename_command
+                        }
+                    })),
+            ))
+            .child(group(
                 "Failure and incomplete metadata",
                 theme,
                 div()
                     .flex()
                     .flex_col()
                     .gap(px(16.0))
-                    .child(
-                        div()
-                            .flex()
-                            .justify_end()
-                            .w_full()
-                            .max_w(px(672.0))
-                            .child(render_instance(
-                                theme,
-                                &rejection_spec,
-                                &failure.view(&two_fork_pages(), &[], rejection_message.clone()),
-                                failure.handlers(queue.clone(), "c2", None),
-                                "hc-failure",
-                            )),
-                    )
-                    .child(
-                        div()
-                            .flex()
-                            .justify_end()
-                            .w_full()
-                            .max_w(px(672.0))
-                            .child(render_instance(
-                                theme,
-                                &HistoryCenterSpec::new().with_can_undo(true),
-                                &no_ts.view(&no_timestamp_pages(), &no_ts_levels, None),
-                                no_ts.handlers(queue.clone(), "c2", None),
-                                "hc-no-ts",
-                            )),
-                    )
-                    .child(hint(
-                        theme,
-                        "Last command",
-                        &failure.text("command", ""),
-                    )),
-            ),
-        )
-        .into_any_element();
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
+                            theme,
+                            &rejection_spec,
+                            &failure.view(&two_fork_pages(), &[], rejection_message.clone()),
+                            failure.handlers(queue.clone(), "c2", None),
+                            "hc-failure",
+                        ),
+                    ))
+                    .child(div().flex().justify_end().w_full().max_w(px(672.0)).child(
+                        render_instance(
+                            theme,
+                            &HistoryCenterSpec::new().with_can_undo(true),
+                            &no_ts.view(&no_timestamp_pages(), &no_ts_levels, None),
+                            no_ts.handlers(queue.clone(), "c2", None),
+                            "hc-no-ts",
+                        ),
+                    ))
+                    .child(hint(theme, "Last command", &failure.text("command", ""))),
+            ))
+            .into_any_element();
 
     specimen_layout(
         state,
