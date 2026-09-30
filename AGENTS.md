@@ -22,7 +22,14 @@ next with `plan.get` (see the `northstar` skill).
 
 ## Commands
 
-Use the repo-local `.agents/skills/effigy/SKILL.md` for task routing.
+Use the installed shared Effigy skill for task routing, resolved from
+`~/.agents/skills/effigy/SKILL.md`; the `~/.codex`, `~/.claude` and `~/.cursor`
+skill roots are aliases to that same canonical directory. Resolve symlinks
+before comparing roots, and treat two distinct matches as ambiguous rather than
+picking one. This repository does not vendor a copy: if no installed Effigy
+skill is present, say so and run `npx skills add inflatable-cookie/effigy -g`,
+then confirm discovery from a fresh agent context. The selectors and
+guardrails below stay local.
 
 - `effigy tasks` — list selectors; pick the narrow ones for the change
 - `effigy docs:lint` — contract, docs and generated-evidence checks
