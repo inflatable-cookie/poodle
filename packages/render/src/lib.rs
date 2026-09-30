@@ -361,7 +361,7 @@ pub use pagination::{pagination, pagination_with_handlers, PaginationHandlers};
 pub use pagination_summary::pagination_summary;
 pub use password_requirements::password_requirements;
 pub use picker_shell::picker_shell;
-pub use pill::{pill, pill_with_remove};
+pub use pill::{pill, pill_with_handlers, pill_with_remove};
 pub use poodle_headless::motion_policy::MotionPolicy;
 pub use poodle_headless::select::{SelectContext, SelectEffect, SelectEvent};
 pub use popover::{

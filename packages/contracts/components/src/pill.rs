@@ -54,6 +54,8 @@ pub struct PillSpec {
     pub typography: InlineTypographyMode,
     pub is_muted: bool,
     pub is_removable: bool,
+    pub is_dismissible: bool,
+    pub dismiss_label: String,
     pub is_selected: bool,
     pub is_disabled: bool,
     /// `None` inherits from the presentation context; an explicit value always wins.
@@ -84,6 +86,8 @@ impl Default for PillSpec {
             typography: InlineTypographyMode::default(),
             is_muted: false,
             is_removable: false,
+            is_dismissible: false,
+            dismiss_label: "Dismiss".to_owned(),
             is_selected: false,
             is_disabled: false,
             density: None,
@@ -168,6 +172,16 @@ impl PillSpec {
 
     pub fn with_removable(mut self, is_removable: bool) -> Self {
         self.is_removable = is_removable;
+        self
+    }
+
+    pub fn with_dismissible(mut self, is_dismissible: bool) -> Self {
+        self.is_dismissible = is_dismissible;
+        self
+    }
+
+    pub fn with_dismiss_label(mut self, dismiss_label: impl Into<String>) -> Self {
+        self.dismiss_label = dismiss_label.into();
         self
     }
 

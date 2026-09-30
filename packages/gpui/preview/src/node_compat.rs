@@ -3969,6 +3969,8 @@ pub(crate) struct Pill {
     spec: PillSpec,
     theme: GpuiThemeProvider,
     on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    instance_id: Option<String>,
 }
 
 impl Pill {
@@ -3977,6 +3979,8 @@ impl Pill {
             spec,
             theme: theme.clone(),
             on_remove: None,
+            on_dismiss: None,
+            instance_id: None,
         }
     }
 
@@ -3985,12 +3989,38 @@ impl Pill {
         self
     }
 
+    pub(crate) fn on_dismiss(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_dismiss = Some(Arc::new(handler));
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
+    }
+
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
-        let mut node = poodle_render::pill_with_remove(&self.spec, ctx, self.on_remove);
-        // The old GPUI Pill made its root focusable even though the shared
-        // contract treats Pill as display metadata. Keep that preview-local.
-        node.interaction.focusable = true;
-        node
+        let Self {
+            spec,
+            on_remove,
+            on_dismiss,
+            instance_id,
+            ..
+        } = self;
+        if spec.is_dismissible {
+            let instance_id = instance_id.expect(
+                "dismissible Pill requires the stable instance id supplied by its host",
+            );
+            poodle_render::pill_with_handlers(
+                &spec,
+                ctx,
+                on_remove,
+                on_dismiss,
+                &instance_id,
+            )
+        } else {
+            poodle_render::pill_with_remove(&spec, ctx, on_remove)
+        }
     }
 
     fn into_node(self) -> poodle_node::Node {
