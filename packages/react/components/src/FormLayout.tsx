@@ -30,7 +30,7 @@ export function FormLayout({
     <div className="poodle-form-layout">
       {description ? <p className="poodle-form-layout__description">{description}</p> : null}
 
-      {error ? <Callout tone="danger" message={error} /> : null}
+      {error ? <Callout tone="danger" message={error} announceMode="assertive" /> : null}
 
       {success ? <Callout tone="success" message={success} /> : null}
 

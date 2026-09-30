@@ -78,6 +78,52 @@ describe("Select (svelte) option identity", () => {
   });
 });
 
+describe("Select (svelte) searchable committed values", () => {
+  const inputOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-select__input") as HTMLInputElement;
+  const indicatorOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-select__indicator-button") as HTMLButtonElement;
+
+  it("opens unfiltered and lets a different option be selected by click", async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(Select, {
+      props: { options, defaultValue: "alpha", searchable: true, native: false, onValueChange },
+    });
+
+    await fireEvent.click(indicatorOf(container));
+
+    expect(inputOf(container).value).toBe("");
+    expect([...document.querySelectorAll('[role="option"]')].map((option) => option.getAttribute("data-value"))).toEqual([
+      "alpha",
+      "beta",
+    ]);
+
+    const beta = document.querySelector('[role="option"][data-value="beta"]') as HTMLElement;
+    await fireEvent.mouseDown(beta);
+    await fireEvent.click(beta);
+
+    expect(onValueChange).toHaveBeenCalledWith("beta");
+    expect(inputOf(container).value).toBe("Beta");
+  });
+
+  it("lets typing replace the committed label and choose another option", async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(Select, {
+      props: { options, defaultValue: "alpha", searchable: true, native: false, onValueChange },
+    });
+
+    await fireEvent.click(indicatorOf(container));
+    await fireEvent.input(inputOf(container), { target: { value: "Be" } });
+    expect([...document.querySelectorAll('[role="option"]')].map((option) => option.getAttribute("data-value"))).toEqual([
+      "beta",
+    ]);
+    await fireEvent.keyDown(inputOf(container), { key: "Enter" });
+
+    expect(onValueChange).toHaveBeenCalledWith("beta");
+    expect(inputOf(container).value).toBe("Beta");
+  });
+});
+
 describe("Select (svelte) semantic machine", () => {
   const triggerOf = (container: HTMLElement) =>
     container.querySelector(".poodle-select__trigger") as HTMLButtonElement;

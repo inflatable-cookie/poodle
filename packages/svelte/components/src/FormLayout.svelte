@@ -34,7 +34,7 @@
   {/if}
 
   {#if error}
-    <Callout tone="danger" message={error} />
+    <Callout tone="danger" message={error} announceMode="assertive" />
   {/if}
 
   {#if success}
@@ -64,4 +64,3 @@
     </div>
   {/if}
 </div>
-

@@ -105,7 +105,7 @@ when the IR rules on declarative focus intent.
 | closed | `open` is false or omitted and internal state is false | dialog not visible |
 | open | `open` is true | dialog visible with form content and action buttons |
 | submitting | `submitting` is true | submit button shows "Submitting..." text, both buttons disabled, dismiss on Escape and backdrop disabled |
-| error | `error` is set | FormLayout displays error message above form content |
+| error | `error` is set | FormLayout displays the full error message above form content as an assertive alert |
 | success | `success` is set | FormLayout displays success message above form content |
 | shell mode | `showDefaultActions` is false | caller supplies the full footer via the `actions` snippet |
 | bare mode | `bare` is true | snippet content rendered directly without FormLayout wrapper; `showDefaultActions` automatically set to false |
@@ -140,6 +140,8 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Dialog: `kind="dialog"` — standard dialog semantics (not alertdialog)
 - Dialog: `showCloseButton={true}` — always shows the Dialog close button
 - Dialog: optional `ariaLabel` for custom accessible name
+- FormLayout error: exposed as a `role="alert"` with `aria-live="assertive"`
+  through the FormLayout contract; the Callout keeps its danger styling
 - CancelButton and SubmitButton: standard button semantics
 - Both buttons: `disabled` attribute set during submitting state
 - Dismiss: Escape and backdrop dismiss disabled during submitting

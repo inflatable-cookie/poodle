@@ -502,6 +502,32 @@
       }
     },
     {
+      "name": "searchable opening clears the prior query and keeps the committed highlight",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "Cherry",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": true,
+        "disabled": false
+      },
+      "event": { "type": "OPEN" },
+      "expect": {
+        "context": { "open": true, "query": "", "highlightedValue": "c" },
+        "effects": [
+          { "type": "openChanged", "open": true },
+          { "type": "queryChanged", "query": "" }
+        ]
+      }
+    },
+    {
       "name": "opening without a selection highlights the first enabled option",
       "context": {
         "value": "",
