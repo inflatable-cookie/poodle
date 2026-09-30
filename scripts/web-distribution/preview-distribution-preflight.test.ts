@@ -20,6 +20,7 @@ import { rm } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 import { findRepoRoot } from "./core-build";
+import { listeningPidsOnPort } from "../port-listeners";
 
 const repoRoot = findRepoRoot();
 
@@ -260,15 +261,7 @@ function freePort(): Promise<number> {
 }
 
 function listenersOn(port: number): number[] {
-  const result = spawnSync("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"], {
-    encoding: "utf8",
-  });
-  return result.stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map(Number)
-    .filter((pid) => Number.isInteger(pid) && pid > 0);
+  return listeningPidsOnPort(port);
 }
 
 // `listenersOn` costs a whole-host listen-table scan (measured 1.1-3.3s per
