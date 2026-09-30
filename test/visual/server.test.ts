@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createServer } from "node:http";
 
+import { listeningPidsOnPort } from "../../scripts/port-listeners";
 import { SERVERS } from "./config";
 import {
   assertPreviewPortFree,
@@ -52,6 +53,36 @@ function listen404(port: number): Promise<{ port: number; close: () => Promise<v
 }
 
 describe("visual preview port occupancy", () => {
+  test("a null lsof status retries then fails closed with the port", () => {
+    const port = 59997;
+    let calls = 0;
+    let thrown: Error | undefined;
+    try {
+      listeningPidsOnPort(port, () => {
+        calls += 1;
+        return { status: null, signal: null, stdout: "", stderr: "" };
+      });
+    } catch (error) {
+      thrown = error instanceof Error ? error : new Error(String(error));
+    }
+
+    expect(calls).toBe(2);
+    expect(thrown?.message).toContain(`port ${port}`);
+    expect(thrown?.message).toContain("status null");
+  });
+
+  test("lsof exit 1 with no output means there are no listeners", () => {
+    const port = 59996;
+    let calls = 0;
+    const pids = listeningPidsOnPort(port, () => {
+      calls += 1;
+      return { status: 1, signal: null, stdout: "", stderr: "" };
+    });
+
+    expect(calls).toBe(1);
+    expect(pids).toEqual([]);
+  });
+
   test("the gate still uses the baseline ports", () => {
     expect(SERVERS.svelte.port).toBe(4174);
     expect(SERVERS.react.port).toBe(4180);

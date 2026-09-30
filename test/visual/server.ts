@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 
+import { listeningPidsOnPort } from "../../scripts/port-listeners";
 import { SERVERS, type Framework } from "./config";
 
 /**
@@ -41,15 +42,7 @@ export async function isUp(port: number, timeoutMs = 5000): Promise<boolean> {
 }
 
 export function previewPortOccupant(port: number): PortOccupant | null {
-  const listed = spawnSync("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"], {
-    encoding: "utf8",
-  });
-  const pids = listed.stdout
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map(Number)
-    .filter((pid) => Number.isInteger(pid) && pid > 0);
+  const pids = listeningPidsOnPort(port);
   const pid = pids[0];
   if (pid === undefined) return null;
   const args = spawnSync("ps", ["-p", String(pid), "-o", "args="], {
