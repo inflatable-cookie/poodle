@@ -1,7 +1,7 @@
 # Code
 
 Status: detailed contract
-Updated: 2026-09-29
+Updated: 2026-09-30
 
 ## 1. Purpose
 
@@ -78,7 +78,7 @@ Updated: 2026-09-29
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | **Web targets only** — inline `normal` keeps long tokens intact even when mixed with other text; `anywhere` allows breaks inside them. Block source preserves whitespace and line feeds with `pre-wrap`. Native admission pending GPUI support for normal token boundaries (`lane:native-admission`) |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | Inline `normal` preserves long tokens at ordinary break opportunities; `anywhere` allows breaks inside them. Block source preserves whitespace and line feeds with `pre-wrap`. See Known Deltas for the GPUI mixed-content token behavior. |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -379,9 +379,8 @@ face reads larger or smaller than the default sans family.
   wrapping; a trailing LF leaves a zero-height empty line span unless line
   numbers add content. `anywhere` preserves line feeds and wraps long
   identifiers.
-- GPUI 0.2.2's normal line wrapper emergency-breaks long tokens in inline Code
-  mixed with ordinary words; native `wrap` admission remains pending support
-  for the Svelte break rules.
+- GPUI inline `wrap="normal"` has the mixed-content token delta recorded in
+  Known Deltas.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
@@ -426,10 +425,11 @@ face reads larger or smaller than the default sans family.
 
 ## 12. Known Deltas
 
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| syntax highlighting not specified | tokenization is implementation-specific | allowed | may add token color contracts later |
-| clipboard API differs per platform | GPUI uses native clipboard vs navigator.clipboard | allowed | keep 2s feedback timing |
+| Delta | Svelte behavior | GPUI behavior | Cause | Approval Status | Follow-Up |
+|-------|-----------------|---------------|-------|-----------------|-----------|
+| Syntax highlighting is unspecified | — | Tokenization is implementation-specific | Syntax tokenization is platform-owned | allowed | may add token color contracts later |
+| Clipboard API differs per platform | Uses `navigator.clipboard` | Uses the native clipboard API | Clipboard access is platform-specific | allowed | keep 2s feedback timing |
+| Inline `wrap="normal"` with a long unbroken token mixed with ordinary words | Keeps the token intact at ordinary break opportunities; it overflows rather than breaking inside the token | May emergency-break the token when it exceeds the available width | GPUI 0.2.2 `LineWrapper::wrap_line` has no normal-token-boundary option and emergency-breaks overlong tokens | accepted by planner ruling (2026-09-30) | upstream GPUI line-wrapper support |
 
 ## 13. Specimen Definitions
 
