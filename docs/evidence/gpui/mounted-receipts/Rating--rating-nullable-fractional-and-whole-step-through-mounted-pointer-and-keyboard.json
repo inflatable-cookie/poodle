@@ -31,6 +31,7 @@
       "dispatch_key"
     ],
     "accessibility": [
+      "a11y\n                .",
       "NodeRole",
       "a11y."
     ]
@@ -45,15 +46,15 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "1a06aab18a07d46429211937e45716d24df3c364",
+  "source_commit": "fd434be25818ef89d58e272e4f494de0b1e3cefa",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-09-29-poodle-060-instance-baseline-tabular-expected",
+    "run_id": "2026-09-30-poodle-072-rustfmt-clean-expected",
     "outcome": "passed",
-    "body_sha256": "dd202d9eef6037d9bfe734666d849063b14815a870e98adbc10dfdaa97919c51"
+    "body_sha256": "f1df3179aa70532e063c340c86b5eb8113361b8e480112ad45f54b188a5246c9"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
