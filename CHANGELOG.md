@@ -7,6 +7,52 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.7] - 2026-09-30
+
+`0.4.7` is an additive patch candidate with no breaking API change.
+
+### Added
+
+- **History and pin icons.** The default icon set adds `pin` and
+  `rotate-ccw-clock`, with the semantic alias `history` for
+  `rotate-ccw-clock` (Lucide 1.48.0 has no `history` glyph). HistoryCenter
+  uses them for its history and checkpoint-pin affordances.
+- **Surface hover token.** `--poodle-color-surface-hover`
+  (`color.surface.hover`) joins the token schema.
+
+### Fixed
+
+- **Svelte package JavaScript.** The Svelte package build no longer ships a
+  component whose script declares an optional parameter as invalid
+  JavaScript; every consumer import of such a component failed before.
+- **FormLayout errors.** A FormLayout (and FormDialog) submission error is
+  exposed as an alert with its full message, so assistive technology and
+  semantic snapshots read it.
+- **Searchable Select.** A searchable Select opens showing every option
+  instead of only those matching its committed label; choosing another option
+  needs no clearing.
+- **CodeEditor active line.** The active line and gutter use the real
+  `--poodle-color-surface-hover` token instead of an undefined variable.
+- **MessageCenter width.** MessageCenter content no longer fights its
+  popover surface's width and spills past its edge.
+- **SplitView and TextInput.** SplitView pins its seam to a fixed secondary
+  pane, and multiline TextInput forwards `required`, `inputMode` and
+  `enterKeyHint`.
+- **Tabs focus.** Controlled Tabs keep focus on the latched transfer timer
+  when a later commit supersedes it.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.7 <0.5`. Svelte, React, React DOM and Marked peer ranges stay
+  unchanged.
+- **Release status.** Core and Svelte are the `0.4.7` npm publication set.
+  React follows the web version for paired validation and remains private.
+  Native features admitted to Rust and GPUI since `0.4.6` (Text/Code wrap,
+  ListCard eyebrow, Pill dismiss, Keyboard `computerBaseNote`, SidebarNav end
+  label and context menu, `NodeKey::Escape`) belong to the native train, which
+  has no release procedure yet; Cargo packages do not move in this patch.
+
 ## [0.4.6] - 2026-09-27
 
 `0.4.6` is an additive patch candidate with no breaking API change.
@@ -609,6 +655,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.7]: docs/release-notes/0.4.7.md
 [0.4.6]: docs/release-notes/0.4.6.md
 [0.4.5]: docs/release-notes/0.4.5.md
 [0.4.4]: docs/release-notes/0.4.4.md
