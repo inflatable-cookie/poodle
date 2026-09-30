@@ -61,16 +61,17 @@ const MODULE_FETCH_TIMEOUT_MS = 30_000;
 // Milestone QA (queue papercut f42a7ca5, load 38-70) timed this whole afterAll
 // out at 68.9s against a 60s budget that also absorbed ~2-3 `lsof`
 // whole-host scans from `stopOwned` when a failed test left a server running.
-// The bind probes removed the scans and each stage now reports its duration,
-// so the budget is measured against the recorded stage sum on a loaded host
-// (2026-09-30, load ~50: stop+ fingerprint+ remove, see the run record in the
-// PR). 120s keeps >5x headroom on that sum while a real leak still fails
+// The bind probes removed the scans and each stage now reports its duration:
+// measured 477ms total (stop 0 / fingerprint 0 / remove 477) on the fix's
+// loaded-host runs, load 20-52, 2026-09-30. The 68.9s outlier is the worst
+// observed cleanup, so 120s keeps >1.7x on it while a real leak still fails
 // inside the cap. No retries.
 const CLEANUP_TIMEOUT_MS = 120_000;
 // One awaited `git worktree` step inside `removeFixture`. Measured
-// 2026-09-30 at load 20-33: `worktree add` 0.55s, `worktree remove --force`
-// 0.21s (45MB, ~4.4k files); a loaded-host run in the PR record is the
-// multiple to beat.
+// 2026-09-30: `worktree add` 0.55s, `worktree remove --force` 0.21s
+// standalone at load 20-33 (45MB, ~4.4k files); the whole awaited removal
+// stage (remove + prune + rm) measured 477ms on the fix's loaded-host run
+// (load 20-52).
 const FIXTURE_STEP_MS = 60_000;
 
 const childEnv = { ...process.env };
