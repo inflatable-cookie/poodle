@@ -95,7 +95,9 @@ describe("core compiled distribution", () => {
     // strikethrough, list-ordered, square-code, table, and the
     // between-horizontal/vertical-start add-row/add-column pair.
     // 115: the lucide 1.48 `trash-2` -> `trash` rename adds canonical `trash`.
-    expect(CORE_ICON_MODULES).toHaveLength(115);
+    // 118: the generic-affordances ruling (2026-09-29) — canonical `pin` and
+    // the history glyph (`rotate-ccw-clock` plus its `history` alias).
+    expect(CORE_ICON_MODULES).toHaveLength(118);
     const manifest = JSON.parse(readFileSync(join(coreRoot, "package.json"), "utf8")) as {
       exports: unknown;
       files: string[];

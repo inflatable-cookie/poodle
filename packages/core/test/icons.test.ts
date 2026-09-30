@@ -22,7 +22,12 @@ describe("icon catalogue boundary", () => {
     // distinguishes the add-row/add-column table actions.
     // 115: the lucide 1.48 `trash-2` -> `trash` upstream rename adds the
     // canonical `trash` alongside the retained `trash-2` alias.
-    expect(Object.keys(defaultLucideIconSet)).toHaveLength(115);
+    // 118: the generic affordances ruling (2026-09-29) — HistoryCenter's
+    // checkpoint pin needs `pin`, and the history disclosure needs the
+    // history glyph: canonical `rotate-ccw-clock` (lucide 1.48's closest name;
+    // the upstream `history` geometry) plus its `history` alias, following the
+    // `spinner` -> `loader-circle` precedent.
+    expect(Object.keys(defaultLucideIconSet)).toHaveLength(118);
     expect(defaultLucideIconSet.search).toBe(search);
     expect(defaultLucideIconSet.x).toBe(x);
     expect("biohazard" in defaultLucideIconSet).toBe(false);
@@ -46,6 +51,7 @@ describe("icon catalogue boundary", () => {
       "more-horizontal": "ellipsis",
       "more-vertical": "ellipsis-vertical",
       "help-circle": "circle-question-mark",
+      history: "rotate-ccw-clock",
       "pause-circle": "circle-pause",
       spinner: "loader-circle",
       "trash-2": "trash",

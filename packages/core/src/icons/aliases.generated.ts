@@ -10,6 +10,7 @@ export const iconAliases: Readonly<Record<string, string>> = {
   "file-question": "file-question-mark",
   "filter": "list-filter",
   "help-circle": "circle-question-mark",
+  "history": "rotate-ccw-clock",
   "home": "house",
   "more-horizontal": "ellipsis",
   "more-vertical": "ellipsis-vertical",

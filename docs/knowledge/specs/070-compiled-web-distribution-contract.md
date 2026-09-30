@@ -607,6 +607,7 @@ grip-vertical
 heading
 heart
 help-circle
+history
 home
 house
 image
@@ -635,11 +636,13 @@ pause
 pause-circle
 pencil
 piano
+pin
 play
 plus
 quote
 redo
 refresh-cw
+rotate-ccw-clock
 save
 search
 settings

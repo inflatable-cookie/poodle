@@ -7,7 +7,7 @@ Updated: 2026-09-01
 
 - Component name: `HistoryCenter`
 - Layer: composite
-- Summary: the history counterpart to `MessageCenter` — a compact titlebar-grade trigger cluster (undo / list / redo) plus a popover rendering the flat history list: the spine's entries and each open fork's run at its true depth, with node-owned fork disclosure (a fork icon, a counter badge, a persistent `Select` picker for several forks, and an opened region carrying the run's name and inline rename)
+- Summary: the history counterpart to `MessageCenter` — a compact titlebar-grade trigger cluster (undo / history / redo) plus a popover rendering the flat history list: the spine's entries and each open fork's run at its true depth, with node-owned fork disclosure (a fork icon, a counter badge, a persistent `Select` picker for several forks, and an opened region carrying the run's name and inline rename)
 - Composes: `IconButton`, `Popover`, `Select`, `Icon`, `Spinner`, `EmptyState`
 - In scope: undo/redo commands, popover open state, flat list rendering (spine + open fork runs, one loop over the core's visible rows), current-position marker, entry navigation, fork disclosure and picker, inline branch rename (opened region and picker), checkpoint pins, transient rejection display, loading/failed status
 - Out of scope: history storage, authority logic, protocol validation, checkpoint creation, undo/redo semantics, persistence, and any Longhorn knowledge
@@ -37,7 +37,8 @@ lives in the picker and the opened region (ruling R6).
 HistoryCenter
 ├── Trigger cluster
 │   ├── IconButton undo (icon `undo`; enabled from canUndo, busy)
-│   ├── Chevron glyph (a bare button, not an IconButton; opens the popover)
+│   ├── History glyph (a bare button, not an IconButton; icon `history`;
+│   │   opens the popover)
 │   └── IconButton redo (icon `redo`; enabled from canRedo, busy)
 └── Popover
     └── Surface
@@ -46,8 +47,8 @@ HistoryCenter
         ├── Status row (loading spinner / failed message)
         ├── History list (the flat visible rows, one loop)
         │   ├── Entry row (depth inset; row button + fork disclosure)
-        │   │   ├── Entry button: checkpoint pin or position marker, label,
-        │   │   │   group meta; navigates
+        │   │   ├── Entry button: checkpoint pin (icon `pin`) or position
+        │   │   │   marker, label, group meta; navigates
         │   │   └── Fork disclosure (forkCount > 0): fork icon, counter badge
         │   │       (forkCount > 1), chevron; toggles the fork open/closed
         │   ├── Picker row (an open fork with forkCount >= 1): a persistent

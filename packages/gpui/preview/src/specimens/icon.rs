@@ -38,6 +38,7 @@ const SPECIMEN_ICONS: &[&str] = &[
     "refresh-cw",
     "redo",
     "undo",
+    "history",
     "share",
     // Status
     "alert-circle",
@@ -68,6 +69,7 @@ const SPECIMEN_ICONS: &[&str] = &[
     "unlock",
     "mail",
     "map-pin",
+    "pin",
     "message-circle",
     "monitor",
     "paperclip",

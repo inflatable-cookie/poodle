@@ -409,7 +409,7 @@ fn list_trigger(
             ..StylePatch::default()
         });
     }
-    node.child(icon_glyph("chevron-down", ctx, size))
+    node.child(icon_glyph("history", ctx, size))
 }
 
 // ── Surface ────────────────────────────────────────────────────────────────
@@ -714,7 +714,7 @@ fn entry_button(
     }
     // The pin and the marker are decorative; the label carries the meaning.
     let marker = if is_checkpoint {
-        icon_glyph("git-commit-horizontal", ctx, size)
+        icon_glyph("pin", ctx, size)
     } else {
         position_marker(position, ctx)
     };
