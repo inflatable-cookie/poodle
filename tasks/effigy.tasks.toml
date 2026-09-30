@@ -781,12 +781,32 @@
 ]
 # Planted GENERATOR_VERSION restamp; ir:check is the committed-tree gate on ci:rust.
 "test:codegen-stamp" = "cargo test --quiet --manifest-path packages/codegen/Cargo.toml --test emission check_detects_stale_generator_version_stamp -- --exact"
+# poodle#072: the rustfmt gate over every Poodle Rust crate. `cargo fmt` cannot
+# be the gate: there is no root workspace, and stable rustfmt has no per-path
+# exclusion (`ignore` in rustfmt.toml is nightly-only), while rustfmt recurses
+# into `#[path = "generated/…"]` child modules from every file it is passed —
+# which would reformat generated Rust that must stay byte-identical to its
+# generator (ir:check, catalogue:check, audit:tokens and audit:icons own that
+# identity). The script enumerates each crate's authored `.rs` files and drives
+# rustfmt with the crate's edition and `--config skip_children=true`; the
+# colocated test pins that flag and the exclusion patterns. `--write` is the
+# formatting twin: `bun scripts/check-rustfmt.ts --write` before committing.
+# Generated-and-excluded: `generated/` directories (build-tokens.ts,
+# poodle-codegen machine-rust / shell-rust / specimen-rust / catalogue-rust)
+# and `*.generated.rs` (build-default-icons.ts).
+# Runtime recorded 2026-09-30 (warm checkout, rustfmt 1.95 and 1.97 agree):
+# ~1.6s wall for the check; the script's unit tests add ~0.1s.
+"check:rustfmt" = [
+  { run = "bun scripts/check-rustfmt.ts" },
+  { run = "bun test scripts/check-rustfmt.test.ts" },
+]
 # ir:check / catalogue:check need cargo; they stay off ci:web. A GENERATOR_VERSION
 # restamp that is not regenerated used to pass every board Queue runs.
 "ci:rust" = [
   { task = "test:contracts" },
   { task = "ir:check" },
   { task = "catalogue:check" },
+  { task = "check:rustfmt" },
 ]
 "ci" = [
   { task = "ci:web" },
