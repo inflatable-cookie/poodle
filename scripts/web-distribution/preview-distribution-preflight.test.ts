@@ -16,6 +16,7 @@ import {
 } from "node:fs";
 import { createConnection, createServer } from "node:net";
 import { dirname, join } from "node:path";
+import { rm } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 import { findRepoRoot } from "./core-build";
@@ -57,7 +58,21 @@ const RUN_TIMEOUT_MS = 120_000;
 // without a fresh measurement.
 const PREVIEW_TIMEOUT_MS = 600_000;
 const MODULE_FETCH_TIMEOUT_MS = 30_000;
-const CLEANUP_TIMEOUT_MS = 60_000;
+// Milestone QA (queue papercut f42a7ca5, load 38-70) timed this whole afterAll
+// out at 68.9s against a 60s budget that also absorbed ~2-3 `lsof`
+// whole-host scans from `stopOwned` when a failed test left a server running.
+// The bind probes removed the scans and each stage now reports its duration:
+// measured 477ms total (stop 0 / fingerprint 0 / remove 477) on the fix's
+// loaded-host runs, load 20-52, 2026-09-30. The 68.9s outlier is the worst
+// observed cleanup, so 120s keeps >1.7x on it while a real leak still fails
+// inside the cap. No retries.
+const CLEANUP_TIMEOUT_MS = 120_000;
+// One awaited `git worktree` step inside `removeFixture`. Measured
+// 2026-09-30: `worktree add` 0.55s, `worktree remove --force` 0.21s
+// standalone at load 20-33 (45MB, ~4.4k files); the whole awaited removal
+// stage (remove + prune + rm) measured 477ms on the fix's loaded-host run
+// (load 20-52).
+const FIXTURE_STEP_MS = 60_000;
 
 const childEnv = { ...process.env };
 delete childEnv.FORCE_COLOR;
@@ -83,6 +98,41 @@ function run(
     encoding: "utf8",
     env: childEnv,
     timeout,
+  });
+}
+
+// Awaited sibling of `run` for the cleanup path: a blocked event loop cannot
+// fire the runner's deadline timer, so the afterAll bound only means anything
+// if its steps yield.
+function runAsync(command: string, args: string[], cwd: string, timeout: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { cwd, env: childEnv, stdio: ["ignore", "pipe", "pipe"] });
+    let output = "";
+    const settle = (error?: Error) => {
+      clearTimeout(timer);
+      if (error) reject(error);
+      else resolve();
+    };
+    const timer = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        /* already gone */
+      }
+      settle(new Error(`${command} ${args.join(" ")} exceeded ${timeout}ms`));
+    }, timeout);
+    const collect = (stream: NodeJS.ReadableStream | null) => {
+      stream?.on("data", (chunk: Buffer | string) => {
+        output += chunk.toString();
+      });
+    };
+    collect(child.stdout);
+    collect(child.stderr);
+    child.once("error", (error) => settle(error));
+    child.once("exit", (code) => {
+      if (code === 0) settle();
+      else settle(new Error(`${command} ${args.join(" ")} exited ${code}: ${output}`));
+    });
   });
 }
 
@@ -150,10 +200,22 @@ function createFixture(): string {
   return root;
 }
 
-function removeFixture(root: string): void {
-  run("git", ["worktree", "remove", "--force", root], repoRoot, 60_000);
-  run("git", ["worktree", "prune"], repoRoot, 30_000);
-  rmSync(dirname(root), { recursive: true, force: true });
+// The fixture is small and quick to delete (45MB, ~4.4k files: `worktree add`
+// 0.55s, `worktree remove --force` 0.21s at load 20-33, 2026-09-30), so the
+// removal is not cut by shrinking the tree; it is cut by not doing it
+// synchronously. Steps are awaited under their own bounds so the afterAll
+// deadline stays enforceable, and each failure is tolerated because the final
+// `rm` still clears the tree and `worktree prune` still clears metadata.
+async function removeFixture(root: string): Promise<void> {
+  await runAsync("git", ["worktree", "remove", "--force", root], repoRoot, FIXTURE_STEP_MS).catch(
+    () => {
+      /* the rm below still clears the tree */
+    },
+  );
+  await runAsync("git", ["worktree", "prune"], repoRoot, FIXTURE_STEP_MS).catch(() => {
+    /* stale metadata is inert */
+  });
+  await rm(dirname(root), { recursive: true, force: true });
 }
 
 function sequenceFor(toml: string, name: string): Array<{ task?: string; run?: string }> {
@@ -209,6 +271,26 @@ function listenersOn(port: number): number[] {
     .filter((pid) => Number.isInteger(pid) && pid > 0);
 }
 
+// `listenersOn` costs a whole-host listen-table scan (measured 1.1-3.3s per
+// call on a loaded 18-core host, see the portListening note), and the pre-fix
+// file made ~16 of those calls per run just to ask "is this port free?" and
+// "did the listener go away?" (pre-spawn guard, stop verification, planted
+// exit check). A bind probe answers both spawn-free: binding fails with
+// EADDRINUSE exactly when an active listener overlaps the port, and node's
+// default SO_REUSEADDR keeps TIME_WAIT sockets from producing false
+// positives. Keep `listenersOn` where the pid is genuinely required: the
+// escaper sweep in `stopOwned`, after the process-group kill did not free the
+// port.
+function portFree(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.once("error", () => resolve(false));
+    server.listen(port, "127.0.0.1", () => {
+      server.close(() => resolve(true));
+    });
+  });
+}
+
 // The readiness loops used to call `listenersOn` every 150ms. Each `lsof` is a
 // whole-host listen-table scan that measured 1.1-3.3s on a loaded 18-core host
 // (load ~50), so the poll itself became the load: the wait-for-listen loop spent
@@ -237,6 +319,18 @@ function isAlive(pid: number): boolean {
   } catch {
     return false;
   }
+}
+
+// Process group of a pid, or undefined when it is gone or unreportable. The
+// selector child is spawned detached, so it leads its own group and every
+// process it spawns inherits that group: `processGroupOf(suspect) ===
+// child.pid` is exact test ownership, and a foreign squatter on the port has
+// some other group and is left alone.
+function processGroupOf(pid: number): number | undefined {
+  const result = spawnSync("ps", ["-o", "pgid=", "-p", String(pid)], { encoding: "utf8" });
+  if (result.status !== 0) return undefined;
+  const pgid = Number.parseInt(result.stdout.trim(), 10);
+  return Number.isInteger(pgid) && pgid > 0 ? pgid : undefined;
 }
 
 function drain(child: ChildProcess): { text: () => string } {
@@ -309,8 +403,8 @@ function plantStaleEditor(root: string, framework: "svelte" | "react"): void {
   writeFileSync(path, `export const ${STALE_EDITOR_MARKER} = true;\n`);
 }
 
-function startSelector(root: string, selector: string, port: number): OwnedProcess {
-  if (listenersOn(port).length > 0) {
+async function startSelector(root: string, selector: string, port: number): Promise<OwnedProcess> {
+  if (!(await portFree(port))) {
     throw new Error(`port ${port} already has a listener`);
   }
   const child = spawn("effigy", [selector], {
@@ -325,29 +419,30 @@ function startSelector(root: string, selector: string, port: number): OwnedProce
   return ownedProcess;
 }
 
+// The child is spawned detached, so it leads its own process group and one
+// group signal reaches the whole selector tree (effigy -> bun -> vite).
+// `listenersOn` only runs when the port is still occupied after the group
+// kill, and it only ever feeds the ownership check: a listener is killed iff
+// its process group is the child's pid. Port occupancy alone is not
+// ownership (review finding on PR 324) -- an unrelated process squatting the
+// ephemeral port is never signalled; the final assertion fails and names it
+// instead.
 async function stopOwned(target?: OwnedProcess): Promise<void> {
   const batch = target ? [target] : [...owned];
   for (const item of batch) {
-    const pids = new Set<number>(listenersOn(item.port));
-    if (item.child.pid) pids.add(item.child.pid);
-    for (const pid of pids) {
+    const pid = item.child.pid;
+    for (const groupPid of pid ? [-pid, pid] : []) {
       try {
-        process.kill(-pid, "SIGTERM");
+        process.kill(groupPid, "SIGTERM");
       } catch {
-        /* process group may not exist */
-      }
-      try {
-        process.kill(pid, "SIGTERM");
-      } catch {
-        /* already gone */
+        /* group or pid may not exist */
       }
     }
     const deadline = Date.now() + 5_000;
     while (Date.now() < deadline && (item.child.exitCode === null && item.child.signalCode === null)) {
       await sleep(50);
     }
-    for (const pid of new Set<number>([...pids, ...listenersOn(item.port)])) {
-      if (!isAlive(pid)) continue;
+    if (item.child.exitCode === null && item.child.signalCode === null && pid) {
       try {
         process.kill(-pid, "SIGKILL");
       } catch {
@@ -359,16 +454,54 @@ async function stopOwned(target?: OwnedProcess): Promise<void> {
         /* ignore */
       }
     }
+    // Escapers: owned listeners that outlived the group kill (for example
+    // vite lingering after effigy already exited). Kill by pid, but only
+    // after the group check proves the listener belongs to this selector's
+    // tree; anything else on the port stays untouched.
+    let unowned: number[] = [];
+    if (pid && !(await portFree(item.port))) {
+      for (const suspect of listenersOn(item.port)) {
+        if (processGroupOf(suspect) !== pid) continue;
+        try {
+          process.kill(-pid, "SIGKILL");
+        } catch {
+          /* ignore */
+        }
+        try {
+          process.kill(suspect, "SIGKILL");
+        } catch {
+          /* ignore */
+        }
+      }
+      const sweepDeadline = Date.now() + 5_000;
+      while (Date.now() < sweepDeadline && !(await portFree(item.port))) {
+        await sleep(50);
+      }
+      if (!(await portFree(item.port))) {
+        unowned = listenersOn(item.port).filter((suspect) => processGroupOf(suspect) !== pid);
+      }
+    }
     try {
       item.child.kill("SIGKILL");
     } catch {
       /* ignore */
     }
-    await Promise.race([
-      new Promise<void>((resolve) => item.child.once("exit", () => resolve())),
-      sleep(2_000),
-    ]);
-    expect(listenersOn(item.port), item.log.text()).toEqual([]);
+    // Bound the reap wait by polling instead of an exit-event race: the event
+    // may have fired before a listener was attached, which cost a fixed 2s
+    // per stop for already-exited children (the planted-failure items).
+    const reapedDeadline = Date.now() + 2_000;
+    while (
+      Date.now() < reapedDeadline &&
+      (item.child.exitCode === null && item.child.signalCode === null)
+    ) {
+      await sleep(25);
+    }
+    expect(
+      await portFree(item.port),
+      `port ${item.port} is still occupied after stop` +
+        (unowned.length > 0 ? `; unowned listener pids left alone: ${unowned.join(", ")}` : "") +
+        `\n${item.log.text()}`,
+    ).toBe(true);
     if (item.child.pid) expect(isAlive(item.child.pid)).toBe(false);
     owned.delete(item);
   }
@@ -523,13 +656,26 @@ function plantBuilderFailure(root: string): void {
 }
 
 afterAll(async () => {
-  await stopOwned();
-  if (liveFingerprint) {
-    expect(fingerprintDist(repoRoot)).toEqual(liveFingerprint);
-  }
-  if (fixtureRoot) {
-    removeFixture(fixtureRoot);
-    fixtureRoot = undefined;
+  const started = Date.now();
+  const stages: Record<string, number> = {};
+  try {
+    const stopStarted = Date.now();
+    await stopOwned();
+    stages.stopMs = Date.now() - stopStarted;
+    if (liveFingerprint) {
+      const fingerprintStarted = Date.now();
+      expect(fingerprintDist(repoRoot)).toEqual(liveFingerprint);
+      stages.fingerprintMs = Date.now() - fingerprintStarted;
+    }
+  } finally {
+    if (fixtureRoot) {
+      const root = fixtureRoot;
+      fixtureRoot = undefined;
+      const removeStarted = Date.now();
+      await removeFixture(root);
+      stages.removeMs = Date.now() - removeStarted;
+    }
+    console.log(`[g18.015] cleanup total=${Date.now() - started}ms ${JSON.stringify(stages)}`);
   }
 }, CLEANUP_TIMEOUT_MS);
 
@@ -565,7 +711,7 @@ describe("g18.015 preview distribution build preflight", () => {
 
       const svelteMissingPort = await freePort();
       patchPreviewPort(fixture, "svelte", svelteMissingPort);
-      const svelteMissing = startSelector(fixture, "svelte:preview", svelteMissingPort);
+      const svelteMissing = await startSelector(fixture, "svelte:preview", svelteMissingPort);
       await waitForListener(svelteMissing, fixture, PREVIEW_TIMEOUT_MS, true);
       expect(distHasExport(fixture)).toBe(true);
       await assertServedFresh(fixture, svelteMissingPort, "svelte");
@@ -575,7 +721,7 @@ describe("g18.015 preview distribution build preflight", () => {
       plantStaleEditor(fixture, "svelte");
       const svelteRunPort = await freePort();
       patchPreviewPort(fixture, "svelte", svelteRunPort);
-      const svelteRun = startSelector(fixture, "svelte:run", svelteRunPort);
+      const svelteRun = await startSelector(fixture, "svelte:run", svelteRunPort);
       await waitForListener(svelteRun, fixture, RUN_TIMEOUT_MS, false);
       expect(distHasExport(fixture)).toBe(false);
       expect(readFileSync(join(fixture, SVELTE_EDITOR_DIST), "utf8")).toContain(STALE_EDITOR_MARKER);
@@ -584,7 +730,7 @@ describe("g18.015 preview distribution build preflight", () => {
 
       const svelteStalePort = await freePort();
       patchPreviewPort(fixture, "svelte", svelteStalePort);
-      const svelteStale = startSelector(fixture, "svelte:preview", svelteStalePort);
+      const svelteStale = await startSelector(fixture, "svelte:preview", svelteStalePort);
       await waitForListener(svelteStale, fixture, PREVIEW_TIMEOUT_MS, true);
       expect(distHasExport(fixture)).toBe(true);
       expect(readFileSync(join(fixture, SVELTE_EDITOR_DIST), "utf8")).not.toContain(STALE_EDITOR_MARKER);
@@ -595,7 +741,7 @@ describe("g18.015 preview distribution build preflight", () => {
       plantStaleEditor(fixture, "react");
       const reactRunPort = await freePort();
       patchPreviewPort(fixture, "react", reactRunPort);
-      const reactRun = startSelector(fixture, "react:run", reactRunPort);
+      const reactRun = await startSelector(fixture, "react:run", reactRunPort);
       await waitForListener(reactRun, fixture, RUN_TIMEOUT_MS, false);
       expect(distHasExport(fixture)).toBe(false);
       await assertServedMismatch(fixture, reactRunPort, "react");
@@ -603,7 +749,7 @@ describe("g18.015 preview distribution build preflight", () => {
 
       const reactStalePort = await freePort();
       patchPreviewPort(fixture, "react", reactStalePort);
-      const reactStale = startSelector(fixture, "react:preview", reactStalePort);
+      const reactStale = await startSelector(fixture, "react:preview", reactStalePort);
       await waitForListener(reactStale, fixture, PREVIEW_TIMEOUT_MS, true);
       expect(distHasExport(fixture)).toBe(true);
       expect(readFileSync(join(fixture, REACT_EDITOR_DIST), "utf8")).not.toContain(STALE_EDITOR_MARKER);
@@ -614,11 +760,11 @@ describe("g18.015 preview distribution build preflight", () => {
       for (const selector of ["svelte:preview", "react:preview"] as const) {
         const port = await freePort();
         patchPreviewPort(fixture, selector.startsWith("svelte") ? "svelte" : "react", port);
-        const item = startSelector(fixture, selector, port);
+        const item = await startSelector(fixture, selector, port);
         const code = await waitForExit(item, RUN_TIMEOUT_MS);
         expect(code, item.log.text()).not.toBe(0);
         expect(item.log.text()).toContain("planted g18.015 core-build failure");
-        expect(listenersOn(port)).toEqual([]);
+        expect(await portFree(port)).toBe(true);
         if (item.child.pid) expect(isAlive(item.child.pid)).toBe(false);
         await stopOwned(item);
       }
