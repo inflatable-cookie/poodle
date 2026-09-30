@@ -1305,7 +1305,10 @@ mod tests {
             listbox.style.descriptor.shadow,
             Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY)
         );
-        assert_eq!(listbox.style.descriptor.corner_radii.top_left, surface_radius);
+        assert_eq!(
+            listbox.style.descriptor.corner_radii.top_left,
+            surface_radius
+        );
         assert_eq!(listbox.style.min_width, Some(rem_to_px(12.0)));
         assert_eq!(listbox.style.max_height, Some(max_height));
         assert!(listbox.style.overlay);
@@ -1476,11 +1479,7 @@ mod tests {
         let trigger = node
             .find(&|n| n.runtime_id.as_deref() == Some("select:esc:trigger"))
             .expect("trigger");
-        (trigger
-            .interaction
-            .on_dismiss
-            .as_ref()
-            .expect("dismiss"))(DismissReason::Escape);
+        (trigger.interaction.on_dismiss.as_ref().expect("dismiss"))(DismissReason::Escape);
         let captured = seen.lock().unwrap();
         assert!(!captured[0].0.open);
         assert_eq!(captured[0].0.value, "apple");

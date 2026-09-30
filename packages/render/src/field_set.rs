@@ -36,10 +36,12 @@ pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Nod
 
     if let Some(ref description) = spec.description {
         let mut d = Node::text(description);
-        d.style.descriptor.text_color = Some(ctx.theme().resolve_color(spec.description_color_token()));
+        d.style.descriptor.text_color =
+            Some(ctx.theme().resolve_color(spec.description_color_token()));
         d.style.text_size = Some(ctx.theme().resolve_space(spec.description_size_token()));
-        d.style.descriptor.layout.spacing.margin.bottom =
-            ctx.theme().resolve_space(spec.description_margin_bottom_token());
+        d.style.descriptor.layout.spacing.margin.bottom = ctx
+            .theme()
+            .resolve_space(spec.description_margin_bottom_token());
         root = root.child(d);
     }
 

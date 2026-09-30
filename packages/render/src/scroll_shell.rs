@@ -15,11 +15,7 @@ use poodle_specs::{Direction, ScrollShellSpec};
 
 use crate::context::RenderContext;
 
-pub fn scroll_shell(
-    spec: &ScrollShellSpec,
-    ctx: &RenderContext<'_>,
-    children: Vec<Node>,
-) -> Node {
+pub fn scroll_shell(spec: &ScrollShellSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let needs_horizontal = matches!(spec.direction, Direction::Horizontal | Direction::Both);
 
     // ── Content — sizing wrapper ──

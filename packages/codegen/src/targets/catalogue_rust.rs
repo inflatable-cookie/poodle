@@ -106,7 +106,9 @@ fn render_module(document: &Document, source_path: &str) -> String {
          }\n\n",
     );
 
-    out.push_str("pub const CATALOGUE_SECTIONS: &[CatalogueSectionId] = CatalogueSectionId::ALL;\n\n");
+    out.push_str(
+        "pub const CATALOGUE_SECTIONS: &[CatalogueSectionId] = CatalogueSectionId::ALL;\n\n",
+    );
     out.push_str("pub const CATALOGUE_FAMILIES: &[CatalogueFamily] = &[\n");
     for family in &document.families {
         out.push_str(&format!(

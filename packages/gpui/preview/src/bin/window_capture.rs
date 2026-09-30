@@ -47,8 +47,8 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    AnyElement, App, AppContext as _, Context, IntoElement, ParentElement, Render, Styled, Window,
-    div, px,
+    div, px, AnyElement, App, AppContext as _, Context, IntoElement, ParentElement, Render, Styled,
+    Window,
 };
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ButtonSpec, ButtonVariant};
@@ -390,7 +390,8 @@ fn parse_args(argv: &[String]) -> Result<CaptureArgs> {
         logical_width: width.with_context(|| format!("--width is required\n{USAGE}"))?,
         logical_height: height.with_context(|| format!("--height is required\n{USAGE}"))?,
         theme: theme.with_context(|| format!("--theme is required\n{USAGE}"))?,
-        control_size: control_size.with_context(|| format!("--control-size is required\n{USAGE}"))?,
+        control_size: control_size
+            .with_context(|| format!("--control-size is required\n{USAGE}"))?,
     })
 }
 
@@ -546,59 +547,57 @@ fn run(args: &CaptureArgs) -> ! {
         },
         Vec::new(),
         transport::Shot {
-        label: "smoke".to_owned(),
-        logical_width,
-        logical_height,
-        build: Box::new(move |_window, cx: &mut App| {
-            cx.new(|_| CaptureRoot { theme })
-        }),
-        // The smoke scene has nothing to read back: its evidence is the
-        // rasterized frame and its hash.
-        on_frame: transport::settle_after(transport::FRAMES_BEFORE_CAPTURE),
-        finish: Box::new(move |facts: &transport::CaptureFacts| {
-            let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
-            let receipt = CaptureReceipt {
-                schema: RECEIPT_SCHEMA,
-                component: ComponentSmoke {
-                    name: "Button",
-                    variant: "primary",
-                    label: "Save",
-                },
-                gpui_source: GPUI_SOURCE,
-                gpui_version: GPUI_VERSION,
-                transport: TRANSPORT,
-                platform: "macos",
-                theme: theme_label,
-                control_size: control_size_label,
-                logical_viewport: Viewport {
-                    width: logical_width,
-                    height: logical_height,
-                },
-                scale: facts.scale,
-                device_dimensions: DeviceDimensions {
-                    width: facts.device_width,
-                    height: facts.device_height,
-                },
-                png_sha256,
-                foreground: facts.foreground.clone(),
-            };
-            let receipt_json = serde_json::to_vec_pretty(&receipt)?;
-            publish_pair(&out_png, &facts.png, &out_receipt, &receipt_json)?;
+            label: "smoke".to_owned(),
+            logical_width,
+            logical_height,
+            build: Box::new(move |_window, cx: &mut App| cx.new(|_| CaptureRoot { theme })),
+            // The smoke scene has nothing to read back: its evidence is the
+            // rasterized frame and its hash.
+            on_frame: transport::settle_after(transport::FRAMES_BEFORE_CAPTURE),
+            finish: Box::new(move |facts: &transport::CaptureFacts| {
+                let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
+                let receipt = CaptureReceipt {
+                    schema: RECEIPT_SCHEMA,
+                    component: ComponentSmoke {
+                        name: "Button",
+                        variant: "primary",
+                        label: "Save",
+                    },
+                    gpui_source: GPUI_SOURCE,
+                    gpui_version: GPUI_VERSION,
+                    transport: TRANSPORT,
+                    platform: "macos",
+                    theme: theme_label,
+                    control_size: control_size_label,
+                    logical_viewport: Viewport {
+                        width: logical_width,
+                        height: logical_height,
+                    },
+                    scale: facts.scale,
+                    device_dimensions: DeviceDimensions {
+                        width: facts.device_width,
+                        height: facts.device_height,
+                    },
+                    png_sha256,
+                    foreground: facts.foreground.clone(),
+                };
+                let receipt_json = serde_json::to_vec_pretty(&receipt)?;
+                publish_pair(&out_png, &facts.png, &out_receipt, &receipt_json)?;
 
-            eprintln!(
-                "captured {}x{} (logical {}x{} @ {}) theme={} size={} sha256={}",
-                facts.device_width,
-                facts.device_height,
-                logical_width,
-                logical_height,
-                facts.scale,
-                theme_label,
-                control_size_label,
-                receipt.png_sha256
-            );
-            Ok(())
-        }),
-    },
+                eprintln!(
+                    "captured {}x{} (logical {}x{} @ {}) theme={} size={} sha256={}",
+                    facts.device_width,
+                    facts.device_height,
+                    logical_width,
+                    logical_height,
+                    facts.scale,
+                    theme_label,
+                    control_size_label,
+                    receipt.png_sha256
+                );
+                Ok(())
+            }),
+        },
     )
 }
 
@@ -634,13 +633,20 @@ mod tests {
     }
 
     const VALID: &[&str] = &[
-        "--out", "button.png",
-        "--receipt", "button.json",
-        "--width", "240",
-        "--height", "80",
-        "--theme", "default",
-        "--control-size", "md",
-        "--scale", "2.0",
+        "--out",
+        "button.png",
+        "--receipt",
+        "button.json",
+        "--width",
+        "240",
+        "--height",
+        "80",
+        "--theme",
+        "default",
+        "--control-size",
+        "md",
+        "--scale",
+        "2.0",
     ];
 
     #[test]
@@ -682,7 +688,13 @@ mod tests {
     #[test]
     fn every_flag_is_required() {
         for flag in [
-            "--out", "--receipt", "--width", "--height", "--theme", "--control-size", "--scale",
+            "--out",
+            "--receipt",
+            "--width",
+            "--height",
+            "--theme",
+            "--control-size",
+            "--scale",
         ] {
             let mut v = argv(VALID);
             let i = v.iter().position(|a| a == flag).expect("flag present");
@@ -756,14 +768,18 @@ mod tests {
     // ── g15.047 fixture mode ────────────────────────────────────────────
 
     const FIXTURE_VALID: &[&str] = &[
-        "--fixture", "button/rest-secondary",
-        "--out", "fixture.png",
-        "--receipt", "fixture.json",
+        "--fixture",
+        "button/rest-secondary",
+        "--out",
+        "fixture.png",
+        "--receipt",
+        "fixture.json",
     ];
 
     #[test]
     fn fixture_invocation_parses() {
-        let mode = parse_cli(&argv(FIXTURE_VALID)).expect("the canonical fixture invocation parses");
+        let mode =
+            parse_cli(&argv(FIXTURE_VALID)).expect("the canonical fixture invocation parses");
         let CaptureMode::Fixture(args) = mode else {
             panic!("--fixture must select fixture mode");
         };
@@ -773,9 +789,12 @@ mod tests {
     #[test]
     fn unknown_fixture_is_rejected_by_name() {
         let args = argv(&[
-            "--fixture", "button/bogus",
-            "--out", "fixture.png",
-            "--receipt", "fixture.json",
+            "--fixture",
+            "button/bogus",
+            "--out",
+            "fixture.png",
+            "--receipt",
+            "fixture.json",
         ]);
         let result = parse_cli(&args);
         assert!(result.is_err(), "an unknown fixture must not parse");
@@ -824,9 +843,12 @@ mod tests {
     #[test]
     fn fixture_mode_rejects_colliding_output_paths() {
         let args = argv(&[
-            "--fixture", "button/rest-secondary",
-            "--out", "same.png",
-            "--receipt", "./same.png",
+            "--fixture",
+            "button/rest-secondary",
+            "--out",
+            "same.png",
+            "--receipt",
+            "./same.png",
         ]);
         assert!(parse_cli(&args).is_err());
     }
@@ -977,7 +999,11 @@ mod tests {
             node: poodle_node::Node,
         }
         impl Render for IconRoot {
-            fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+            fn render(
+                &mut self,
+                _window: &mut Window,
+                _cx: &mut Context<Self>,
+            ) -> impl IntoElement {
                 poodle_gpui_node_backend::reset_element_ids();
                 div()
                     .size_full()

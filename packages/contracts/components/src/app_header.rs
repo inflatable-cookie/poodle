@@ -326,12 +326,19 @@ mod tests {
     #[test]
     fn app_header_effective_size_resolution() {
         let spec_control = AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Control);
-        assert_eq!(spec_control.effective_size(ControlSize::Md), ControlSize::Md);
+        assert_eq!(
+            spec_control.effective_size(ControlSize::Md),
+            ControlSize::Md
+        );
 
         let spec_chrome = AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Chrome);
         assert_eq!(spec_chrome.effective_size(ControlSize::Md), ControlSize::Sm);
 
-        let spec_prominent = AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Prominent);
-        assert_eq!(spec_prominent.effective_size(ControlSize::Md), ControlSize::Lg);
+        let spec_prominent =
+            AppHeaderSpec::new().with_size_role(SemanticControlSizeRole::Prominent);
+        assert_eq!(
+            spec_prominent.effective_size(ControlSize::Md),
+            ControlSize::Lg
+        );
     }
 }

@@ -370,7 +370,10 @@ mod tests {
         let panel = &node.children[1];
         assert_eq!(panel.id.as_deref(), Some("poodle-dialog-surface"));
         assert_eq!(panel.a11y.role, Some(NodeRole::Dialog));
-        assert_eq!(panel.a11y.labelled_by.as_deref(), Some("poodle-dialog-title"));
+        assert_eq!(
+            panel.a11y.labelled_by.as_deref(),
+            Some("poodle-dialog-title")
+        );
         assert!(panel.interaction.dismiss_layer.is_none());
         assert!(panel.interaction.on_activate.is_none());
         let title = panel
@@ -430,9 +433,14 @@ mod tests {
         }
 
         // Escape disabled omits dismissal
-        let escape_disabled_spec = DialogSpec::new()
-            .with_dismiss_on_escape(false);
-        let escape_disabled_node = dialog(&escape_disabled_spec, &ctx, vec![], None, Some(Arc::new(|| {})));
+        let escape_disabled_spec = DialogSpec::new().with_dismiss_on_escape(false);
+        let escape_disabled_node = dialog(
+            &escape_disabled_spec,
+            &ctx,
+            vec![],
+            None,
+            Some(Arc::new(|| {})),
+        );
         let escape_disabled_panel = &escape_disabled_node.children[1];
         assert!(escape_disabled_panel.interaction.on_dismiss.is_none());
     }

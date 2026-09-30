@@ -143,8 +143,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "eyebrow",
         examples,
-        SpecimenAxes::examples_only()
-            .with_named_sizes(EYEBROW_SIZES, |value, theme: &GpuiThemeProvider| {
+        SpecimenAxes::examples_only().with_named_sizes(
+            EYEBROW_SIZES,
+            |value, theme: &GpuiThemeProvider| {
                 let eyebrow_size = match value {
                     "xs" => EyebrowSize::Xs,
                     "sm" => EyebrowSize::Sm,
@@ -157,6 +158,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .into_any_element()
-            }),
+            },
+        ),
     )
 }

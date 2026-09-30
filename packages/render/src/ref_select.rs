@@ -288,9 +288,7 @@ pub fn ref_select(
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = ctx
-            .theme()
-            .resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     if !spec.aria_label.is_empty() {
@@ -314,12 +312,16 @@ mod tests {
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = RefSelectSpec::new().with_open(true);
         let node = ref_select(&spec, &ctx, None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
         let node = ref_select(&refusing, &ctx, None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
     }
 }

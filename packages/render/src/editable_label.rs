@@ -140,8 +140,7 @@ pub fn editable_label_with_handlers(
     let radius = ctx.theme().resolve_radius(spec.radius_token());
     let font_size = rem_to_px(font_rem(effective_size));
     let font_weight = poodle_tokens::typed::semantic::TYPOGRAPHY_LABEL_WEIGHT as u16;
-    let line_height =
-        ctx.theme().resolve_space("typography.label.lineHeight") / font_size;
+    let line_height = ctx.theme().resolve_space("typography.label.lineHeight") / font_size;
 
     let base_pad_y = ctx.theme().resolve_space("space.control.y");
     let base_pad_x = ctx.theme().resolve_space("space.control.x");

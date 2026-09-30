@@ -88,7 +88,10 @@ pub fn status_indicator(spec: &StatusIndicatorSpec, ctx: &RenderContext<'_>) -> 
 
     // Contract: optional label.
     if let Some(ref label_text) = spec.label {
-        let mut label = text(&TextSpec::new(label_text).with_weight(TextWeight::Semibold), ctx);
+        let mut label = text(
+            &TextSpec::new(label_text).with_weight(TextWeight::Semibold),
+            ctx,
+        );
         label.style.descriptor.text_color = Some(text_primary);
         label.style.text_size = Some(label_size);
         label.style.text_weight = Some(600);

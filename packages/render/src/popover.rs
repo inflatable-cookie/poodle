@@ -12,9 +12,7 @@
 //! (the spec's `open`/`defaultOpen`); the host rebuilds the tree when it
 //! changes.
 
-use poodle_node::{
-    DismissReason, LayoutDirection, LayoutSizing, Node, NodeRole, ShadowLayer,
-};
+use poodle_node::{DismissReason, LayoutDirection, LayoutSizing, Node, NodeRole, ShadowLayer};
 use poodle_specs::PopoverSpec;
 
 use crate::color::with_alpha;
@@ -206,11 +204,13 @@ pub fn popover(
             spec.initial_focus,
             poodle_specs::PopoverInitialFocus::Content
         );
-        node.a11y.tab_index = Some(if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content {
-            0
-        } else {
-            -1
-        });
+        node.a11y.tab_index = Some(
+            if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content {
+                0
+            } else {
+                -1
+            },
+        );
         if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content {
             node.a11y.initial_focus = true;
             // The surface itself is the focus target in content mode; the
@@ -247,10 +247,9 @@ pub fn popover(
     );
     // Token roles project onto the composition root (the web root carries
     // the data-* attributes). Values are kebab-cased like the web's.
-    wrapper.roles.insert(
-        "placement".to_owned(),
-        kebab_case_debug(spec.placement),
-    );
+    wrapper
+        .roles
+        .insert("placement".to_owned(), kebab_case_debug(spec.placement));
     wrapper.roles.insert(
         "surfaceWidth".to_owned(),
         kebab_case_debug(spec.surface_width),
@@ -341,8 +340,7 @@ mod tests {
             "surface fill must be background-elevated"
         );
         assert_eq!(
-            surface.style.descriptor.border.width,
-            8.0,
+            surface.style.descriptor.border.width, 8.0,
             "border must use the default border width resolved as a space"
         );
         assert_eq!(
@@ -415,22 +413,38 @@ mod tests {
             Some(Node::text("Panel")),
         );
 
-        assert_eq!(node.style.descriptor.layout.width, LayoutSizing::Fixed(96.0));
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(96.0)
+        );
         assert_eq!(
             node.style.descriptor.layout.height,
             LayoutSizing::Fixed(32.0)
         );
         assert_eq!(node.position, NodePosition::Relative);
-        assert_eq!(node.roles.get("placement").map(String::as_str), Some("bottom-start"));
-        assert_eq!(node.roles.get("surfaceWidth").map(String::as_str), Some("content"));
+        assert_eq!(
+            node.roles.get("placement").map(String::as_str),
+            Some("bottom-start")
+        );
+        assert_eq!(
+            node.roles.get("surfaceWidth").map(String::as_str),
+            Some("content")
+        );
 
-        assert_eq!(node.children.len(), 2, "open composition has trigger + surface");
+        assert_eq!(
+            node.children.len(),
+            2,
+            "open composition has trigger + surface"
+        );
         let trigger = &node.children[0];
         assert_eq!(trigger.id.as_deref(), Some(POPOVER_TRIGGER_ID));
         assert_eq!(trigger.runtime_id.as_deref(), Some("alpha:popover-trigger"));
         assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
         assert_eq!(trigger.a11y.expanded, Some(true));
-        assert_eq!(trigger.a11y.controls.as_deref(), Some("alpha:popover-surface"));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some("alpha:popover-surface")
+        );
         assert_eq!(trigger.a11y.tab_index, Some(0));
         assert_eq!(trigger.a11y.label.as_deref(), Some("Open"));
         assert!(trigger.interaction.focusable);
@@ -442,7 +456,10 @@ mod tests {
             Some("popover-layer:alpha"),
             "the open trigger joins the instance-scoped layer"
         );
-        assert!(trigger.style.focus.is_some(), "trigger declares a focus patch");
+        assert!(
+            trigger.style.focus.is_some(),
+            "trigger declares a focus patch"
+        );
 
         let positioned = &node.children[1];
         assert_eq!(
@@ -479,7 +496,11 @@ mod tests {
             Some(Node::text("Open")),
             Some(Node::text("Panel")),
         );
-        assert_eq!(closed.children.len(), 1, "closed composition has no surface");
+        assert_eq!(
+            closed.children.len(),
+            1,
+            "closed composition has no surface"
+        );
         assert!(closed.children[0].interaction.on_dismiss.is_none());
         assert!(closed.children[0].interaction.dismiss_layer.is_none());
 
@@ -490,7 +511,11 @@ mod tests {
             Some(Node::text("Open")),
             Some(Node::text("Panel")),
         );
-        assert_eq!(disabled.children.len(), 1, "disabled never mounts the surface");
+        assert_eq!(
+            disabled.children.len(),
+            1,
+            "disabled never mounts the surface"
+        );
         assert!(disabled.children[0].interaction.disabled);
         assert_eq!(disabled.children[0].a11y.tab_index, Some(-1));
         assert_eq!(disabled.children[0].a11y.expanded, Some(false));
@@ -506,8 +531,7 @@ mod tests {
         );
         let surface = &trigger_width.children[1].children[0];
         assert_eq!(
-            surface.style.min_width,
-            None,
+            surface.style.min_width, None,
             "trigger width overrides the 14rem floor"
         );
         assert_eq!(
@@ -582,6 +606,9 @@ mod tests {
             Some(Node::text("Open")),
             Some(Node::text("Panel")),
         );
-        assert_eq!(node.roles.get("placement").map(String::as_str), Some("right-end"));
+        assert_eq!(
+            node.roles.get("placement").map(String::as_str),
+            Some("right-end")
+        );
     }
 }

@@ -3,9 +3,9 @@
 //! Select-only: not in [`super::all`], reachable only via `--catalogue` +
 //! `--target catalogue-ts`. Renders one module under `generated/catalogue/`.
 
+use super::ts::ts_string_literal;
 use crate::catalogue::{components_in_order, Document};
 use crate::emit::{catalogue_header, GeneratedFile};
-use super::ts::ts_string_literal;
 
 /// Target id accepted by `--target` in catalogue mode.
 pub const ID: &str = "catalogue-ts";

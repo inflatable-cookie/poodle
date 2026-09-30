@@ -99,7 +99,9 @@ impl ThemePreset {
             ThemePreset::Hornet => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::HORNET)
             }
-            ThemePreset::Cobalt => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::COBALT),
+            ThemePreset::Cobalt => {
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::COBALT)
+            }
             ThemePreset::Clay => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::CLAY),
             ThemePreset::Meadow => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MEADOW)

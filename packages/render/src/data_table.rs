@@ -595,11 +595,7 @@ pub fn data_table(
 /// Render a loading skeleton for the data table body (used when data is
 /// in-flight). Renders `row_count` skeleton rows, each with a skeleton per
 /// visible column.
-pub fn data_table_loading(
-    spec: &DataTableSpec,
-    ctx: &RenderContext<'_>,
-    row_count: usize,
-) -> Node {
+pub fn data_table_loading(spec: &DataTableSpec, ctx: &RenderContext<'_>, row_count: usize) -> Node {
     use poodle_specs::SkeletonSpec;
 
     let density = ctx.resolve_density(spec.density);

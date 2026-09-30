@@ -949,9 +949,7 @@ fn rejects_identified_instance_that_is_not_a_part() {
         "an identified instance must be a part in the same component: {findings:#?}"
     );
     assert!(
-        invalid
-            .iter()
-            .any(|f| f.message.contains("ghost-instance")),
+        invalid.iter().any(|f| f.message.contains("ghost-instance")),
         "the finding must name the missing instance: {findings:#?}"
     );
 }
@@ -994,9 +992,7 @@ fn rejects_an_omitted_runtime_in_a_declared_provision() {
         "a declared provision must list every runtime: {findings:#?}"
     );
     assert!(
-        incomplete
-            .iter()
-            .any(|f| f.message.contains("Jetstream")),
+        incomplete.iter().any(|f| f.message.contains("Jetstream")),
         "the finding must name the omitted runtime: {findings:#?}"
     );
 }
@@ -1030,9 +1026,7 @@ fn rejects_a_duplicate_runtime_in_a_declared_provision() {
 
     let findings = validate(&model);
     assert!(
-        findings
-            .iter()
-            .any(|f| f.kind == FindingKind::DuplicateId),
+        findings.iter().any(|f| f.kind == FindingKind::DuplicateId),
         "one row per runtime: {findings:#?}"
     );
 }

@@ -20,14 +20,16 @@ use crate::types::{ControlDensity, ControlSize};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum HistoryCenterStatus {
-    #[default] Idle,
+    #[default]
+    Idle,
     Loading,
     Failed,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum HistoryCenterRejection {
-    #[default] AlreadyAtTarget,
+    #[default]
+    AlreadyAtTarget,
     UnknownEntry,
     StaleHistory,
     ProtectedEntry,
@@ -172,7 +174,6 @@ impl HistoryCenterSpec {
     }
 }
 
-
 impl HistoryCenterSpec {
     /// The resolved control size: the explicit size when set, else the
     /// inherited presentation scale stepped by the semantic role.
@@ -247,7 +248,9 @@ mod tests {
         assert!(spec.undo_is_disabled());
         assert!(spec.redo_is_disabled());
 
-        let ready = HistoryCenterSpec::new().with_can_undo(true).with_can_redo(true);
+        let ready = HistoryCenterSpec::new()
+            .with_can_undo(true)
+            .with_can_redo(true);
         assert!(!ready.undo_is_disabled());
         assert!(!ready.redo_is_disabled());
 
@@ -322,7 +325,9 @@ mod tests {
             HistoryCenterRejection::DeletionUnavailable,
         ] {
             assert_ne!(
-                HistoryCenterSpec::new().with_rejection(code).rejection_message(),
+                HistoryCenterSpec::new()
+                    .with_rejection(code)
+                    .rejection_message(),
                 unknown,
                 "{code:?} is a refused deletion, not a missing entry",
             );
@@ -344,7 +349,8 @@ mod tests {
         let spec = HistoryCenterSpec::new();
         assert_eq!(spec.resolved_size(ControlSize::Md), ControlSize::Sm);
         assert_eq!(
-            spec.with_size(ControlSize::Lg).resolved_size(ControlSize::Md),
+            spec.with_size(ControlSize::Lg)
+                .resolved_size(ControlSize::Md),
             ControlSize::Lg,
         );
     }

@@ -100,7 +100,6 @@ impl PopoverSpec {
     }
 }
 
-
 /// Default surface min-width in rem (contract §7 / §8 `14rem`).
 pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
 /// Default surface max-width in rem (contract §7 / §8 `min(24rem, 90vw)`;
@@ -182,9 +181,7 @@ impl PopoverSpec {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{
-        Dimension, OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth,
-    };
+    use crate::types::{Dimension, OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
 
     #[test]
     fn portable_width_bound_accepts_rem() {
@@ -260,7 +257,10 @@ mod tests {
         // Contract §8: background = background-elevated; border = border-subtle
         // at 74%; shadow = the overlay elevation recipe.
         let spec = PopoverSpec::new();
-        assert_eq!(spec.surface_fill_token(), semantic::COLOR_BACKGROUND_ELEVATED);
+        assert_eq!(
+            spec.surface_fill_token(),
+            semantic::COLOR_BACKGROUND_ELEVATED
+        );
         assert_eq!(spec.surface_border_token(), semantic::COLOR_BORDER_SUBTLE);
         assert_eq!(spec.surface_border_alpha(), 0.74);
         assert_eq!(spec.shadow_token(), semantic::ELEVATION_OVERLAY);

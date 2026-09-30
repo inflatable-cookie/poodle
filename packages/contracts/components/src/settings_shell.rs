@@ -121,13 +121,14 @@ mod tests {
 
     #[test]
     fn open_is_host_owned_and_the_dialog_name_falls_back_to_title() {
-        let spec = SettingsShellSpec::new()
-            .with_open(true)
-            .with_groups(vec![SidebarNavGroup::new(
-                "general",
-                vec![SidebarNavItem::new("general", "General")],
-            )
-            .with_label("General")]);
+        let spec =
+            SettingsShellSpec::new()
+                .with_open(true)
+                .with_groups(vec![SidebarNavGroup::new(
+                    "general",
+                    vec![SidebarNavItem::new("general", "General")],
+                )
+                .with_label("General")]);
         assert!(spec.current_open());
         assert_eq!(spec.effective_aria_label(), "Settings");
     }

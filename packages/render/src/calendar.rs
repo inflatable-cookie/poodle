@@ -178,11 +178,7 @@ fn compute_next_range(
     }
 }
 
-pub fn calendar(
-    spec: &CalendarSpec,
-    ctx: &RenderContext<'_>,
-    handlers: CalendarHandlers,
-) -> Node {
+pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: CalendarHandlers) -> Node {
     let theme = ctx.theme();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 

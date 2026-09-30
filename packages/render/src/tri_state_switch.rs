@@ -68,11 +68,7 @@ fn tri_state_min_content_width_rem(size: ControlSize) -> f32 {
 }
 
 /// Resolve a per-state color, preferring an instance hex override (sRGB).
-fn override_or(
-    ctx: &RenderContext<'_>,
-    token: &str,
-    override_hex: &Option<String>,
-) -> ColorValue {
+fn override_or(ctx: &RenderContext<'_>, token: &str, override_hex: &Option<String>) -> ColorValue {
     if let Some(hex) = override_hex {
         if let Some(c) = hex_color(hex) {
             return c;
@@ -103,7 +99,9 @@ fn roving_key_handler(
     current: TriStateValue,
     on_value_change: Option<Arc<dyn Fn(TriStateValue) + Send + Sync>>,
 ) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
-    let index = TriStateValue::ALL.iter().position(|candidate| *candidate == value)?;
+    let index = TriStateValue::ALL
+        .iter()
+        .position(|candidate| *candidate == value)?;
     Some(Arc::new(move |key, _modifiers| {
         let last = TriStateValue::ALL.len() - 1;
         let next = match key {
@@ -438,8 +436,14 @@ mod tests {
             .as_ref()
             .expect("arrow handler exists");
         let focus = handler(NodeKey::ArrowRight, NodeModifiers::default());
-        assert_eq!(focus, Some(segment_focus_id("filter", TriStateValue::Excluded)));
-        assert_eq!(payloads.lock().unwrap().as_slice(), [TriStateValue::Excluded]);
+        assert_eq!(
+            focus,
+            Some(segment_focus_id("filter", TriStateValue::Excluded))
+        );
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [TriStateValue::Excluded]
+        );
     }
 
     #[test]

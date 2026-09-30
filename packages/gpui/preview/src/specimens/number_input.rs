@@ -30,12 +30,7 @@ fn live_number_input(
     if let Some(draft) = state.specimens.text.get(&draft_key) {
         spec = spec.with_draft_value(Some(draft.clone()));
     }
-    let (start, end) = state
-        .specimens
-        .carets
-        .get(key)
-        .copied()
-        .unwrap_or_default();
+    let (start, end) = state.specimens.carets.get(key).copied().unwrap_or_default();
     spec = spec.with_selection(start, end);
     if state
         .specimens
@@ -71,11 +66,14 @@ fn live_number_input(
                 });
         }))
         .on_selection_change(Arc::new(move |start: usize, end: usize| {
-            caret_events.lock().unwrap().push(NodeSpecimenEvent::SetCaret {
-                key: key.to_string(),
-                start,
-                end,
-            });
+            caret_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetCaret {
+                    key: key.to_string(),
+                    start,
+                    end,
+                });
         }))
         .on_focus_change(Arc::new(move |focused: bool| {
             focus_events

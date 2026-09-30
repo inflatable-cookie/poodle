@@ -222,8 +222,7 @@ mod tests {
         assert_eq!(icon_only.tooltip_text(), Some("Table"));
 
         // Icon-only requested but no icon provided -> is_icon_only is false
-        let pseudo_icon_only = SegmentedControlOption::new("cards", "Cards")
-            .with_icon_only(true);
+        let pseudo_icon_only = SegmentedControlOption::new("cards", "Cards").with_icon_only(true);
         assert!(!pseudo_icon_only.is_icon_only());
         assert_eq!(pseudo_icon_only.accessible_name_override(), None);
         assert_eq!(pseudo_icon_only.tooltip_text(), None);

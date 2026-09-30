@@ -6,9 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{
-    EyebrowSpec, Orientation, RangeSliderSpec, SliderDirection, SliderPolarity,
-};
+use poodle_specs::{EyebrowSpec, Orientation, RangeSliderSpec, SliderDirection, SliderPolarity};
 use std::sync::Arc;
 
 fn range_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64, f64) + Send + Sync> {
@@ -345,7 +343,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Age range"),
                         theme,
                     )
-                    .on_change("range-slider-block-rtl", range_change(state, "range-slider-step")),
+                    .on_change(
+                        "range-slider-block-rtl",
+                        range_change(state, "range-slider-step"),
+                    ),
                 ),
         )
         .into_any_element();

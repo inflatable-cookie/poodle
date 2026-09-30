@@ -228,14 +228,17 @@ fn size_row(theme: &poodle_gpui::GpuiThemeProvider, size: ControlSize) -> Div {
                 .with_size(size),
             theme,
         )
-        .with_control(TextInput::from_spec(
-            TextInputSpec::new()
-                .with_id(id)
-                .with_placeholder(label)
-                .with_size(size)
-                .with_aria_label("Display name"),
-            theme,
-        ).into_slot()),
+        .with_control(
+            TextInput::from_spec(
+                TextInputSpec::new()
+                    .with_id(id)
+                    .with_placeholder(label)
+                    .with_size(size)
+                    .with_aria_label("Display name"),
+                theme,
+            )
+            .into_slot(),
+        ),
     )
 }
 
@@ -249,13 +252,16 @@ fn density_row(theme: &poodle_gpui::GpuiThemeProvider, density: ControlDensity) 
                 .with_density(density),
             theme,
         )
-        .with_control(TextInput::from_spec(
-            TextInputSpec::new()
-                .with_id(id)
-                .with_placeholder(label)
-                .with_density(density)
-                .with_aria_label("Display name"),
-            theme,
-        ).into_slot()),
+        .with_control(
+            TextInput::from_spec(
+                TextInputSpec::new()
+                    .with_id(id)
+                    .with_placeholder(label)
+                    .with_density(density)
+                    .with_aria_label("Display name"),
+                theme,
+            )
+            .into_slot(),
+        ),
     )
 }

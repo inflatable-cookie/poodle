@@ -39,8 +39,8 @@ mod presentation_axes;
 mod inventory;
 
 use inventory::{
-    BUTTON_FIXTURE_NAMES, INVENTORY_SCHEMA, MAX_EXACT_INTEGER, Problems, canonical_json,
-    integral_number, inventory_path, validate,
+    canonical_json, integral_number, inventory_path, validate, Problems, BUTTON_FIXTURE_NAMES,
+    INVENTORY_SCHEMA, MAX_EXACT_INTEGER,
 };
 use presentation_axes::{ControlSize, ThemePreset};
 
@@ -80,7 +80,11 @@ fn assert_problem(problems: &Problems, needle: &str) {
 fn canonical_inventory_validates_and_holds_exactly_eighteen_identities() {
     let inventory = canonical_json();
     let problems = validate(&inventory);
-    assert!(problems.0.is_empty(), "canonical inventory is invalid: {:#?}", problems.0);
+    assert!(
+        problems.0.is_empty(),
+        "canonical inventory is invalid: {:#?}",
+        problems.0
+    );
 
     let names: Vec<&str> = inventory["fixtures"]
         .as_array()
@@ -102,7 +106,10 @@ fn rust_and_typescript_read_the_same_checked_in_file() {
     assert!(source.contains("button-visual-inventory.json"));
     assert!(source.contains(INVENTORY_SCHEMA));
     for name in BUTTON_FIXTURE_NAMES {
-        assert!(source.contains(name), "TypeScript roster is missing '{name}'");
+        assert!(
+            source.contains(name),
+            "TypeScript roster is missing '{name}'"
+        );
     }
 }
 
@@ -114,16 +121,24 @@ fn every_row_resolves_the_fixed_environment() {
         assert_eq!(row["viewport"]["height"], 80);
         assert_eq!(row["scale"], 2);
         let theme = row["theme"].as_str().expect("theme");
-        assert!(ThemePreset::parse(theme).is_some(), "unknown theme '{theme}'");
+        assert!(
+            ThemePreset::parse(theme).is_some(),
+            "unknown theme '{theme}'"
+        );
         let size = row["size"].as_str().expect("size");
-        assert!(ControlSize::parse(size).is_some(), "unknown control size '{size}'");
+        assert!(
+            ControlSize::parse(size).is_some(),
+            "unknown control size '{size}'"
+        );
     }
 }
 
 #[test]
 fn missing_identity_is_named() {
     let problems = problems_for(|inventory| {
-        let fixtures = inventory["fixtures"].as_array_mut().expect("fixtures array");
+        let fixtures = inventory["fixtures"]
+            .as_array_mut()
+            .expect("fixtures array");
         fixtures.retain(|row| row["name"] != "button/size-lg");
     });
     assert_problem(&problems, "missing fixture name 'button/size-lg'");
@@ -134,7 +149,10 @@ fn extra_identity_is_named() {
     let problems = problems_for(|inventory| {
         let mut extra = Value::Object(row_at(inventory, "button/tone-danger").clone());
         extra["name"] = Value::String("button/tone-info".into());
-        inventory["fixtures"].as_array_mut().expect("fixtures array").push(extra);
+        inventory["fixtures"]
+            .as_array_mut()
+            .expect("fixtures array")
+            .push(extra);
     });
     assert_problem(&problems, "unknown fixture name 'button/tone-info'");
 }
@@ -143,7 +161,10 @@ fn extra_identity_is_named() {
 fn duplicate_identity_is_named() {
     let problems = problems_for(|inventory| {
         let clone = Value::Object(row_at(inventory, "button/variant-ghost").clone());
-        inventory["fixtures"].as_array_mut().expect("fixtures array").push(clone);
+        inventory["fixtures"]
+            .as_array_mut()
+            .expect("fixtures array")
+            .push(clone);
     });
     assert_problem(&problems, "duplicate fixture name 'button/variant-ghost'");
 }
@@ -153,7 +174,10 @@ fn unknown_domain_values_are_named() {
     let tone = problems_for(|inventory| {
         row_at(inventory, "button/tone-danger").insert("tone".into(), "info".into());
     });
-    assert_problem(&tone, "fixture 'button/tone-danger': field 'tone' value 'info'");
+    assert_problem(
+        &tone,
+        "fixture 'button/tone-danger': field 'tone' value 'info'",
+    );
 
     let variant = problems_for(|inventory| {
         row_at(inventory, "button/variant-primary").insert("variant".into(), "danger".into());
@@ -226,7 +250,10 @@ fn invalid_viewport_and_scale_are_named() {
     let zero = problems_for(|inventory| {
         row_at(inventory, "button/size-xs")["viewport"]["width"] = Value::from(0);
     });
-    assert_problem(&zero, "fixture 'button/size-xs': viewport.width must be a positive whole");
+    assert_problem(
+        &zero,
+        "fixture 'button/size-xs': viewport.width must be a positive whole",
+    );
 
     let fractional = problems_for(|inventory| {
         row_at(inventory, "button/size-sm")["viewport"]["height"] = Value::from(80.5);
@@ -242,12 +269,18 @@ fn invalid_viewport_and_scale_are_named() {
             .expect("viewport object")
             .insert("dpr".into(), Value::from(2));
     });
-    assert_problem(&stray_key, "fixture 'button/size-lg': viewport has unknown key 'dpr'");
+    assert_problem(
+        &stray_key,
+        "fixture 'button/size-lg': viewport has unknown key 'dpr'",
+    );
 
     let row_scale = problems_for(|inventory| {
         row_at(inventory, "button/state-loading").insert("scale".into(), Value::from(1));
     });
-    assert_problem(&row_scale, "fixture 'button/state-loading': scale 1 is not one of");
+    assert_problem(
+        &row_scale,
+        "fixture 'button/state-loading': scale 1 is not one of",
+    );
 
     let unsupported = problems_for(|inventory| {
         inventory["captureScales"] = Value::from(vec![3]);
@@ -261,10 +294,15 @@ fn invalid_viewport_and_scale_are_named() {
 #[test]
 fn shape_faults_keep_the_format_button_specific() {
     let props_bag = problems_for(|inventory| {
-        row_at(inventory, "button/rest-secondary")
-            .insert("props".into(), serde_json::json!({ "variant": "secondary" }));
+        row_at(inventory, "button/rest-secondary").insert(
+            "props".into(),
+            serde_json::json!({ "variant": "secondary" }),
+        );
     });
-    assert_problem(&props_bag, "fixture 'button/rest-secondary': unknown field 'props'");
+    assert_problem(
+        &props_bag,
+        "fixture 'button/rest-secondary': unknown field 'props'",
+    );
 
     let second_component = problems_for(|inventory| {
         inventory["component"] = Value::String("icon-button".into());
@@ -309,7 +347,10 @@ fn numeric_spelling_is_normalized_consistently() {
         problems.0
     );
     assert_eq!(
-        decimal["fixtures"].as_array().expect("fixtures array").len(),
+        decimal["fixtures"]
+            .as_array()
+            .expect("fixtures array")
+            .len(),
         18
     );
 }
@@ -319,7 +360,10 @@ fn numeric_domain_faults_are_still_rejected() {
     let fractional_scale = problems_for(|inventory| {
         row_at(inventory, "button/size-xs").insert("scale".into(), Value::from(2.5));
     });
-    assert_problem(&fractional_scale, "fixture 'button/size-xs': scale 2.5 is not one of");
+    assert_problem(
+        &fractional_scale,
+        "fixture 'button/size-xs': scale 2.5 is not one of",
+    );
 
     let fractional_declared = problems_for(|inventory| {
         inventory["captureScales"] = serde_json::json!([2.5]);
@@ -340,7 +384,10 @@ fn numeric_domain_faults_are_still_rejected() {
     let negative_scale = problems_for(|inventory| {
         row_at(inventory, "button/size-lg").insert("scale".into(), Value::from(-2));
     });
-    assert_problem(&negative_scale, "fixture 'button/size-lg': scale -2 is not one of");
+    assert_problem(
+        &negative_scale,
+        "fixture 'button/size-lg': scale -2 is not one of",
+    );
 
     let numeric_string = problems_for(|inventory| {
         row_at(inventory, "button/variant-ghost").insert("scale".into(), Value::String("2".into()));
@@ -368,7 +415,10 @@ fn the_numeric_rule_itself() {
     assert_eq!(integral_number(&Value::from(0)), Some(0));
     assert_eq!(integral_number(&Value::from(2.5)), None);
     assert_eq!(integral_number(&Value::from(-2)), None);
-    assert_eq!(integral_number(&Value::from(MAX_EXACT_INTEGER)), Some(MAX_EXACT_INTEGER));
+    assert_eq!(
+        integral_number(&Value::from(MAX_EXACT_INTEGER)),
+        Some(MAX_EXACT_INTEGER)
+    );
     assert_eq!(integral_number(&Value::from(MAX_EXACT_INTEGER + 2)), None);
     assert_eq!(integral_number(&Value::String("2".into())), None);
     assert_eq!(integral_number(&Value::Null), None);
@@ -410,7 +460,10 @@ fn declared_arrays_must_match_element_by_element() {
     let not_an_array = problems_for(|inventory| {
         inventory["reportRoles"] = Value::String("fill border text shadow focus-ring".into());
     });
-    assert_problem(&not_an_array, "inventory reportRoles must be an array of strings");
+    assert_problem(
+        &not_an_array,
+        "inventory reportRoles must be an array of strings",
+    );
 
     let collapsed_landmark = problems_for(|inventory| {
         row_at(inventory, "button/rest-secondary")
@@ -422,8 +475,10 @@ fn declared_arrays_must_match_element_by_element() {
     );
 
     let non_string_landmark = problems_for(|inventory| {
-        row_at(inventory, "button/state-loading")
-            .insert("landmarks".into(), serde_json::json!(["root", "content", 7]));
+        row_at(inventory, "button/state-loading").insert(
+            "landmarks".into(),
+            serde_json::json!(["root", "content", 7]),
+        );
     });
     assert_problem(
         &non_string_landmark,

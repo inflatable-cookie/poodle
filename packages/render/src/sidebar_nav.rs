@@ -199,7 +199,9 @@ pub fn sidebar_nav_with_handlers(
     let end_label_color = ctx.theme().resolve_color(spec.end_label_color_token());
     let group_title_color = ctx.theme().resolve_color(spec.group_title_color_token());
     let separator_color = ctx.theme().resolve_color(spec.separator_color_token());
-    let accent = ctx.theme().resolve_color(spec.active_indicator_color_token());
+    let accent = ctx
+        .theme()
+        .resolve_color(spec.active_indicator_color_token());
     let hover_fill = ctx.theme().resolve_color(spec.hover_fill_token());
     let focus_ring = ctx.theme().resolve_color(spec.focus_ring_color_token());
     let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
@@ -681,7 +683,8 @@ mod tests {
         let vt = Item::new("vt\u{0B}item", "Vertical tab").with_end_label("1");
         let ff = Item::new("ff\u{0C}item", "Form feed").with_end_label("2");
         let node = sidebar_nav(&spec_with(vec![vt, ff]), &ctx, None);
-        let vt_item = find(&node, "sidebar-nav-vt%0Bitem").expect("vt item id escapes the control byte");
+        let vt_item =
+            find(&node, "sidebar-nav-vt%0Bitem").expect("vt item id escapes the control byte");
         assert_eq!(
             vt_item.a11y.described_by.as_deref(),
             Some("sidebar-nav-vt%0Bitem~end-label")
@@ -708,7 +711,10 @@ mod tests {
             &ctx,
             SidebarNavHandlers {
                 on_context_menu: Some(Arc::new(move |_value, origin| {
-                    assert_eq!(origin, SidebarNavContextMenuOrigin::Pointer(NodePoint::default()));
+                    assert_eq!(
+                        origin,
+                        SidebarNavContextMenuOrigin::Pointer(NodePoint::default())
+                    );
                     sink.lock().unwrap().push("q4".to_string());
                 })),
                 ..SidebarNavHandlers::default()
@@ -746,10 +752,9 @@ mod tests {
             SidebarNavHandlers {
                 on_context_menu: Some(Arc::new(move |value, origin| {
                     let keyboard = origin == SidebarNavContextMenuOrigin::Keyboard;
-                    sink.lock().unwrap().push((
-                        if keyboard { "keyboard" } else { "pointer" },
-                        keyboard,
-                    ));
+                    sink.lock()
+                        .unwrap()
+                        .push((if keyboard { "keyboard" } else { "pointer" }, keyboard));
                 })),
                 ..SidebarNavHandlers::default()
             },
@@ -759,10 +764,20 @@ mod tests {
         let mods = poodle_node::NodeModifiers::default();
 
         assert!(keys(NodeKey::ContextMenu, mods).is_none());
-        assert!(keys(NodeKey::F10, poodle_node::NodeModifiers { shift: true, ..mods }).is_none());
+        assert!(keys(
+            NodeKey::F10,
+            poodle_node::NodeModifiers {
+                shift: true,
+                ..mods
+            }
+        )
+        .is_none());
         // A bare F10 is not a menu gesture, and other keys pass through.
         assert!(keys(NodeKey::F10, mods).is_none() && requests.lock().unwrap().len() == 2);
         assert!(keys(NodeKey::ArrowDown, mods).is_none());
-        assert_eq!(requests.lock().unwrap().as_slice(), [("keyboard", true), ("keyboard", true)]);
+        assert_eq!(
+            requests.lock().unwrap().as_slice(),
+            [("keyboard", true), ("keyboard", true)]
+        );
     }
 }

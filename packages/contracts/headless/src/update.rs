@@ -89,13 +89,19 @@ impl UpdateProgressProjection {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum DeferralCause {
     UserPostponed,
-    WorkInFlight { detail: String },
-    InstallationNotWritable { detail: String },
+    WorkInFlight {
+        detail: String,
+    },
+    InstallationNotWritable {
+        detail: String,
+    },
     ExternallyManaged {
         manager: InstallManager,
         command: Option<String>,
     },
-    InstallFailed { detail: String },
+    InstallFailed {
+        detail: String,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -156,9 +162,7 @@ pub fn update_rejection_message(code: UpdateRejectionCode) -> &'static str {
         UpdateRejectionCode::StaleAuthority => "The update service returned a stale result.",
         UpdateRejectionCode::NoOffer => "No update is available right now.",
         UpdateRejectionCode::Unavailable => "The update service is unavailable.",
-        UpdateRejectionCode::ChannelMismatch => {
-            "The update feed answered for a different channel."
-        }
+        UpdateRejectionCode::ChannelMismatch => "The update feed answered for a different channel.",
         UpdateRejectionCode::Unreachable => "The update service could not be reached.",
         UpdateRejectionCode::SignatureRejected => {
             "The update failed its signature check and was not installed."
@@ -417,9 +421,7 @@ fn availability_view(
     let notice = notice_for(input);
 
     match availability {
-        UpdateAvailabilityProjection::Offer {
-            version, notes, ..
-        } => UpdateStatusView {
+        UpdateAvailabilityProjection::Offer { version, notes, .. } => UpdateStatusView {
             state: UpdateStatusViewState::Offer,
             tone: UpdateStatusTone::Attention,
             title: format!("Version {version} is available"),
@@ -439,14 +441,14 @@ fn availability_view(
             busy: false,
             actions: Vec::new(),
         },
-        UpdateAvailabilityProjection::AheadOfChannel {
-            installed,
-            channel,
-        } => {
-            let ahead = input.ahead_of_channel.clone().unwrap_or(UpdateAheadOfChannel {
-                installed: installed.clone(),
-                channel: channel.clone(),
-            });
+        UpdateAvailabilityProjection::AheadOfChannel { installed, channel } => {
+            let ahead = input
+                .ahead_of_channel
+                .clone()
+                .unwrap_or(UpdateAheadOfChannel {
+                    installed: installed.clone(),
+                    channel: channel.clone(),
+                });
             UpdateStatusView {
                 state: UpdateStatusViewState::AheadOfChannel,
                 tone: UpdateStatusTone::Neutral,
@@ -475,10 +477,7 @@ fn availability_view(
             state: UpdateStatusViewState::ManagedElsewhere,
             tone: UpdateStatusTone::Info,
             title: format!("Version {version} is available"),
-            body: Some(format!(
-                "Managed by {}.",
-                install_manager_label(*manager)
-            )),
+            body: Some(format!("Managed by {}.", install_manager_label(*manager))),
             progress: None,
             notice,
             busy: false,
@@ -527,7 +526,10 @@ fn notice_for(input: &UpdateStatusInput) -> Option<UpdateStatusNotice> {
             retry: update_rejection_retry(code),
         });
     }
-    input.deferral.as_ref().map(|deferral| deferral_notice(&deferral.cause))
+    input
+        .deferral
+        .as_ref()
+        .map(|deferral| deferral_notice(&deferral.cause))
 }
 
 fn deferral_notice(cause: &DeferralCause) -> UpdateStatusNotice {
@@ -686,10 +688,7 @@ mod tests {
         let view = update_status_view(input);
         let notice = view.notice.expect("deferral notice");
         assert_eq!(notice.tone, UpdateStatusNoticeTone::Neutral);
-        assert_eq!(
-            notice.message,
-            "Install is on hold: A transfer is running."
-        );
+        assert_eq!(notice.message, "Install is on hold: A transfer is running.");
         assert_eq!(notice.retry, Some(UpdateStatusAction::Install));
         assert_eq!(view.tone, UpdateStatusTone::Attention);
     }

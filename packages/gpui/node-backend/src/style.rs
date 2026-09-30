@@ -368,8 +368,12 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
     if style.tabular_figures {
         // Vocabulary: tabular figures → OpenType `tnum`, so every digit
         // advances the same width (count columns align across rows).
-        el.text_style().get_or_insert_with(Default::default).font_features =
-            Some(gpui::FontFeatures(std::sync::Arc::new(vec![("tnum".to_owned(), 1)])));
+        el.text_style()
+            .get_or_insert_with(Default::default)
+            .font_features = Some(gpui::FontFeatures(std::sync::Arc::new(vec![(
+            "tnum".to_owned(),
+            1,
+        )])));
         record_probe_channel("content.typography.tabular-figures");
     }
     if style.text_wrap || style.wrap_anywhere {

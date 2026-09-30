@@ -71,7 +71,8 @@ pub fn menu(
     let menu_py = rem_to_px(0.25);
     let item_gap = ctx.theme().resolve_space("space.inline.sm");
     let separator_my = rem_to_px(0.25);
-    let item_radius = (ctx.theme()
+    let item_radius = (ctx
+        .theme()
         .resolve_radius(spec.overlay_radius_token())
         .min(ctx.theme().resolve_radius("radius.control"))
         - rem_to_px(0.125))
@@ -440,23 +441,45 @@ mod tests {
         ]);
         let node = menu(&spec, &ctx, None);
 
-        let d0 = node.find(&|n| n.id.as_deref() == Some("menu-item:disabled_0")).unwrap();
+        let d0 = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:disabled_0"))
+            .unwrap();
         assert_eq!(d0.a11y.tab_index, Some(-1));
         assert!(!d0.interaction.focusable);
 
-        let e2 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_2")).unwrap();
-        assert_eq!(e2.a11y.tab_index, Some(0), "first enabled item must be single tab entry stop");
+        let e2 = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:enabled_2"))
+            .unwrap();
+        assert_eq!(
+            e2.a11y.tab_index,
+            Some(0),
+            "first enabled item must be single tab entry stop"
+        );
         assert!(e2.interaction.focusable);
 
-        let e3 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_3")).unwrap();
-        assert_eq!(e3.a11y.tab_index, Some(-1), "subsequent enabled item must be tab_index -1");
+        let e3 = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:enabled_3"))
+            .unwrap();
+        assert_eq!(
+            e3.a11y.tab_index,
+            Some(-1),
+            "subsequent enabled item must be tab_index -1"
+        );
         assert!(e3.interaction.focusable);
 
-        let e5 = node.find(&|n| n.id.as_deref() == Some("menu-item:enabled_5")).unwrap();
-        assert_eq!(e5.a11y.tab_index, Some(-1), "subsequent enabled item must be tab_index -1");
+        let e5 = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:enabled_5"))
+            .unwrap();
+        assert_eq!(
+            e5.a11y.tab_index,
+            Some(-1),
+            "subsequent enabled item must be tab_index -1"
+        );
         assert!(e5.interaction.focusable);
 
-        let d6 = node.find(&|n| n.id.as_deref() == Some("menu-item:disabled_6")).unwrap();
+        let d6 = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:disabled_6"))
+            .unwrap();
         assert_eq!(d6.a11y.tab_index, Some(-1));
         assert!(!d6.interaction.focusable);
 
@@ -490,8 +513,7 @@ mod tests {
         let accent = ctx.theme().resolve_color("color.accent.base");
 
         let spec = MenuSpec::new(vec![
-            poodle_specs::MenuEntry::new("action_checked", "Checked Action")
-                .with_checked(true),
+            poodle_specs::MenuEntry::new("action_checked", "Checked Action").with_checked(true),
             poodle_specs::MenuEntry::new("checkbox_checked", "Checked Box")
                 .with_kind(MenuItemKind::Checkbox)
                 .with_checked(true),
@@ -508,8 +530,14 @@ mod tests {
         let node = menu(&spec, &ctx, None);
 
         // Action checked has trailing check icon
-        let action_item = node.find(&|n| n.id.as_deref() == Some("menu-item:action_checked")).unwrap();
-        let action_icon = action_item.children.iter().find(|c| matches!(c.kind, NodeKind::Icon { .. })).unwrap();
+        let action_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:action_checked"))
+            .unwrap();
+        let action_icon = action_item
+            .children
+            .iter()
+            .find(|c| matches!(c.kind, NodeKind::Icon { .. }))
+            .unwrap();
         match &action_icon.kind {
             NodeKind::Icon { name, size } => {
                 assert_eq!(name, "check");
@@ -517,13 +545,24 @@ mod tests {
             }
             _ => panic!("expected NodeKind::Icon"),
         }
-        assert_eq!(action_icon.style.descriptor.layout.direction, LayoutDirection::Row);
-        assert_eq!(action_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
-        assert_eq!(action_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(
+            action_icon.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            action_icon.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(
+            action_icon.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center
+        );
         assert_eq!(action_icon.style.descriptor.text_color, Some(accent));
 
         // Checkbox checked has leading check icon
-        let cb_item = node.find(&|n| n.id.as_deref() == Some("menu-item:checkbox_checked")).unwrap();
+        let cb_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:checkbox_checked"))
+            .unwrap();
         let cb_icon = &cb_item.children[0];
         match &cb_icon.kind {
             NodeKind::Icon { name, size } => {
@@ -532,13 +571,24 @@ mod tests {
             }
             _ => panic!("expected NodeKind::Icon"),
         }
-        assert_eq!(cb_icon.style.descriptor.layout.direction, LayoutDirection::Row);
-        assert_eq!(cb_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
-        assert_eq!(cb_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(
+            cb_icon.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            cb_icon.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(
+            cb_icon.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center
+        );
         assert_eq!(cb_icon.style.descriptor.text_color, Some(accent));
 
         // Radio checked has leading check icon
-        let radio_item = node.find(&|n| n.id.as_deref() == Some("menu-item:radio_checked")).unwrap();
+        let radio_item = node
+            .find(&|n| n.id.as_deref() == Some("menu-item:radio_checked"))
+            .unwrap();
         let radio_icon = &radio_item.children[0];
         match &radio_icon.kind {
             NodeKind::Icon { name, size } => {
@@ -547,9 +597,18 @@ mod tests {
             }
             _ => panic!("expected NodeKind::Icon"),
         }
-        assert_eq!(radio_icon.style.descriptor.layout.direction, LayoutDirection::Row);
-        assert_eq!(radio_icon.style.descriptor.layout.alignment.cross, CrossAxisAlignment::Center);
-        assert_eq!(radio_icon.style.descriptor.layout.alignment.main, MainAxisAlignment::Center);
+        assert_eq!(
+            radio_icon.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert_eq!(
+            radio_icon.style.descriptor.layout.alignment.cross,
+            CrossAxisAlignment::Center
+        );
+        assert_eq!(
+            radio_icon.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::Center
+        );
         assert_eq!(radio_icon.style.descriptor.text_color, Some(accent));
     }
 }

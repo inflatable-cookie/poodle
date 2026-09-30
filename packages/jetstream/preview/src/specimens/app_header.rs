@@ -82,7 +82,9 @@ fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
 /// utility.
 fn centered_header(theme: &JetstreamThemeProvider) -> El {
     js_app_header_with_slots(
-        &AppHeaderSpec::new().with_title("My Application").with_center(true),
+        &AppHeaderSpec::new()
+            .with_title("My Application")
+            .with_center(true),
         theme,
         None,
         Some(destination_row(theme)),

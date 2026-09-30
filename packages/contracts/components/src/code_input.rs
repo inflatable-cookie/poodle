@@ -177,7 +177,9 @@ impl CodeInputSpec {
     /// partition of `length` — grouping is never inferred.
     pub fn group_end_indices(&self) -> Vec<usize> {
         match &self.groups {
-            Some(groups) => poodle_headless::text_input::code_group_end_indices(self.length, groups),
+            Some(groups) => {
+                poodle_headless::text_input::code_group_end_indices(self.length, groups)
+            }
             None => Vec::new(),
         }
     }
@@ -339,18 +341,30 @@ mod tests {
     /// inference: a six-character input has no break without `groups`.
     #[test]
     fn grouping_is_explicit_and_never_inferred() {
-        assert_eq!(CodeInputSpec::new().with_length(6).group_end_indices(), vec![]);
         assert_eq!(
-            CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]).group_end_indices(),
+            CodeInputSpec::new().with_length(6).group_end_indices(),
+            vec![]
+        );
+        assert_eq!(
+            CodeInputSpec::new()
+                .with_length(20)
+                .with_groups([5, 5, 5, 5])
+                .group_end_indices(),
             vec![4, 9, 14]
         );
         assert_eq!(
-            CodeInputSpec::new().with_length(6).with_groups([3, 3]).group_end_indices(),
+            CodeInputSpec::new()
+                .with_length(6)
+                .with_groups([3, 3])
+                .group_end_indices(),
             vec![2]
         );
         // An invalid partition renders no breaks.
         assert_eq!(
-            CodeInputSpec::new().with_length(6).with_groups([2, 2]).group_end_indices(),
+            CodeInputSpec::new()
+                .with_length(6)
+                .with_groups([2, 2])
+                .group_end_indices(),
             vec![]
         );
     }
@@ -363,7 +377,10 @@ mod tests {
             .with_length(6)
             .with_value("123456")
             .with_completion_result(CodeInputCompletion::Passed("123456".to_string()));
-        assert_eq!(spec.visible_completion(), Some(&CodeInputCompletion::Passed("123456".to_string())));
+        assert_eq!(
+            spec.visible_completion(),
+            Some(&CodeInputCompletion::Passed("123456".to_string()))
+        );
         assert!(spec.visible_completion().unwrap().is_passed());
 
         // Same length, different content: the indicator is gone.
@@ -381,6 +398,9 @@ mod tests {
     /// Without a completion result there is nothing to show.
     #[test]
     fn no_completion_means_no_indicator() {
-        assert_eq!(CodeInputSpec::new().with_length(6).visible_completion(), None);
+        assert_eq!(
+            CodeInputSpec::new().with_length(6).visible_completion(),
+            None
+        );
     }
 }

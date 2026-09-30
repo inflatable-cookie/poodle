@@ -180,9 +180,10 @@ pub fn text_input_with_handlers(
         inner = inner.child(el);
     }
 
-    let leading_name = spec.leading_icon.clone().or_else(|| {
-        (spec.input_type == "search").then(|| "search".to_owned())
-    });
+    let leading_name = spec
+        .leading_icon
+        .clone()
+        .or_else(|| (spec.input_type == "search").then(|| "search".to_owned()));
     if let Some(name) = &leading_name {
         let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), ctx);
         glyph.id = Some("text-input-leading".to_owned());
@@ -348,8 +349,10 @@ pub fn text_input_with_handlers(
         clear.interaction.focusable = true;
         {
             let s = &mut clear.style;
-            s.descriptor.layout.width = LayoutSizing::Fixed(ctx.theme().resolve_space("size.icon.sm"));
-            s.descriptor.layout.height = LayoutSizing::Fixed(ctx.theme().resolve_space("size.icon.sm"));
+            s.descriptor.layout.width =
+                LayoutSizing::Fixed(ctx.theme().resolve_space("size.icon.sm"));
+            s.descriptor.layout.height =
+                LayoutSizing::Fixed(ctx.theme().resolve_space("size.icon.sm"));
         }
         let change = on_change.clone();
         let on_clear = handlers.on_clear.clone();
@@ -376,8 +379,10 @@ pub fn text_input_with_handlers(
                 };
                 let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), ctx);
                 glyph.id = Some("text-input-validation".to_owned());
-                glyph.style.descriptor.text_color =
-                    Some(ctx.theme().resolve_color(spec.validation_indicator_color_token()));
+                glyph.style.descriptor.text_color = Some(
+                    ctx.theme()
+                        .resolve_color(spec.validation_indicator_color_token()),
+                );
                 inner = inner.child(glyph);
             }
             ValidationState::Pending => {
@@ -389,8 +394,10 @@ pub fn text_input_with_handlers(
                     ctx,
                 );
                 pending.id = Some("text-input-validation".to_owned());
-                pending.style.descriptor.text_color =
-                    Some(ctx.theme().resolve_color(spec.validation_indicator_color_token()));
+                pending.style.descriptor.text_color = Some(
+                    ctx.theme()
+                        .resolve_color(spec.validation_indicator_color_token()),
+                );
                 inner = inner.child(pending);
             }
             ValidationState::None => {}
@@ -562,7 +569,8 @@ pub fn text_input_with_handlers(
         "validation".to_owned(),
         format!("{:?}", spec.validation_state).to_ascii_lowercase(),
     );
-    root.roles.insert("type".to_owned(), spec.input_type.clone());
+    root.roles
+        .insert("type".to_owned(), spec.input_type.clone());
     root.child(inner)
 }
 
@@ -573,7 +581,9 @@ fn affix(
     spec: &TextInputSpec,
     ctx: &RenderContext<'_>,
 ) -> Node {
-    let separator_base = ctx.theme().resolve_color(spec.affix_separator_color_token());
+    let separator_base = ctx
+        .theme()
+        .resolve_color(spec.affix_separator_color_token());
     let separator = with_alpha(separator_base, separator_base.3 * 0.52);
     let mut el = Node::container();
     {
@@ -738,8 +748,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let callback: TextChangeHandler = Arc::new(|_| {});
-        let editable =
-            text_input_with_change(&TextInputSpec::new(), &ctx, Some(callback.clone()));
+        let editable = text_input_with_change(&TextInputSpec::new(), &ctx, Some(callback.clone()));
         assert!(editable.interaction.on_text_change.is_some());
 
         let read_only = text_input_with_change(

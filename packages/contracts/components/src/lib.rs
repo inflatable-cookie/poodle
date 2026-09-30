@@ -3,7 +3,6 @@ mod alert_dialog;
 mod avatar;
 mod badge;
 mod banner;
-mod history_center;
 mod r#box;
 mod breadcrumbs;
 mod bulk_action_bar;
@@ -38,13 +37,14 @@ mod form_actions;
 mod form_dialog;
 mod form_layout;
 mod grid;
+mod history_center;
 mod hover_card;
 mod icon;
 // g16.049/g16.050 geometry and its generated registry stay an internal
 // module: not a public component API, even as `pub mod`.
+mod icon_button;
 #[allow(dead_code)]
 pub(crate) mod icon_geometry;
-mod icon_button;
 mod icon_provider;
 mod list_card;
 mod list_card_counter;
@@ -54,6 +54,7 @@ mod menubar;
 mod meta_bar;
 mod meta_item;
 mod meter;
+mod motion_policy_provider;
 mod nav_card;
 mod navigation_menu;
 mod number_input;
@@ -63,8 +64,8 @@ mod password_requirements;
 mod pill;
 mod popover;
 mod progress;
-mod radio_group;
 mod radio;
+mod radio_group;
 mod range_slider;
 mod rating;
 mod region;
@@ -100,7 +101,6 @@ mod tooltip;
 mod tri_state_switch;
 mod types;
 mod ui_presentation_provider;
-mod motion_policy_provider;
 
 // Composite modules
 mod action_discovery_panel;
@@ -235,23 +235,21 @@ pub use hover_card::HoverCardSpec;
 pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
 pub use icon_provider::IconProviderSpec;
+pub use licence_activation::{LicenceActivationSpec, LicenceKeyCodeInputOptions};
+pub use licence_seats::LicenceSeatsSpec;
+pub use licence_status::LicenceStatusSpec;
 pub use list_card::{
     LeadingFill, LeadingShape, ListCardContextMenuTrigger, ListCardLayout, ListCardSpec,
     SelectionIndicator,
 };
 pub use list_card_counter::ListCardCounterSpec;
 pub use list_grid::{ListGridSpec, ListGridVariant};
-pub use licence_activation::{LicenceActivationSpec, LicenceKeyCodeInputOptions};
-pub use licence_seats::LicenceSeatsSpec;
-pub use licence_status::LicenceStatusSpec;
 pub use menu::MenuSpec;
 pub use menubar::MenubarSpec;
 pub use meta_bar::MetaBarSpec;
 pub use meta_item::MetaItemSpec;
 pub use meter::{MeterLevel, MeterShape, MeterSpec, MeterTone};
-pub use model_catalogue_editor::{
-    ModelCatalogueEditorSpec, MODEL_CATALOGUE_HIDDEN_SECTION_ID,
-};
+pub use model_catalogue_editor::{ModelCatalogueEditorSpec, MODEL_CATALOGUE_HIDDEN_SECTION_ID};
 pub use model_connection_card::ModelConnectionCardSpec;
 pub use model_connection_picker::ModelConnectionPickerSpec;
 pub use model_connection_setup::ModelConnectionSetupSpec;
@@ -273,8 +271,8 @@ pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 pub use popover::PopoverSpec;
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
-pub use radio_group::RadioGroupSpec;
 pub use radio::RadioSpec;
+pub use radio_group::RadioGroupSpec;
 pub use ref_select::{RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant};
 pub use tool_call::ToolCallSpec;
 pub use tool_call_group::ToolCallGroupSpec;
@@ -323,12 +321,12 @@ pub use toolbar::ToolbarSpec;
 /// Deprecated: Toggle has been superseded by Button with `pressed` prop.
 pub type ToggleSpec = ButtonSpec;
 pub use date_time_zone_picker::DateTimeZonePickerSpec;
+pub use motion_policy_provider::MotionPolicyProviderSpec;
+pub use poodle_headless::motion_policy::MotionPolicy;
 pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
 pub use ui_presentation_provider::UiPresentationProviderSpec;
-pub use motion_policy_provider::MotionPolicyProviderSpec;
-pub use poodle_headless::motion_policy::MotionPolicy;
 /// Deprecated: Use `DateTimeZonePickerSpec` instead.
 pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
@@ -336,13 +334,12 @@ pub use types::{
     BadgeVariant, ButtonTone, ButtonVariant, CalendarWeekStart, CheckState, ChoiceOption,
     ControlDensity, ControlSize, DateRangeValue, DateTimeRangeValue, DateTimeValue, DialogKind,
     DialogWidth, Dimension, Direction, DrawerEdge, FormActionAlign, FormActionDangerItem,
-    HistoryContinuation, HistoryEntry, HistoryEntryPosition, HistoryPathPage,
-    InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
-    Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus,
-    PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
-    SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabPin, TabStripItem,
-    TabVariant, TimeZoneOption, TriStateValue, ValidationState, ZonedDateTimeValue,
-    ToneFill,
+    HistoryContinuation, HistoryEntry, HistoryEntryPosition, HistoryPathPage, InlineTypographyMode,
+    Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation, Overflow,
+    OverlayPlacement, PaddingScale, PopoverInitialFocus, PopoverSurfaceWidth, RuleTone,
+    SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder, SurfaceRole,
+    SurfaceTone, TabActivationMode, TabDefinition, TabPin, TabStripItem, TabVariant,
+    TimeZoneOption, ToneFill, TriStateValue, ValidationState, ZonedDateTimeValue,
 };
 
 // Composite exports
@@ -495,19 +492,18 @@ mod tests {
     use poodle_tokens::semantic;
 
     use super::{
-        AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec, BadgeSpec, BadgeVariant,
-        BoxSpec, ButtonSpec, ButtonVariant, CalendarMode, CalendarSpec, CalendarWeekStart,
-        CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlDensity,
-        ControlSize,
-        DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
-        DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, DialogKind, DialogSpec,
-        Direction, DrawerEdge, DrawerSpec, FieldSpec, FormActionAlign, FormActionDangerItem,
-        FormActionsSpec, GridSpec, IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry,
-        MenubarSpec, NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement,
-        PaddingScale, PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec,
-        ScrollShellSpec, SegmentedControlOption, SegmentedControlSpec, SelectSpec, SeparatorSpec,
-        SliderSpec, StackSpec, StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone,
-        SwitchSpec, TabActivationMode,
+        AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec,
+        BadgeSpec, BadgeVariant, BoxSpec, ButtonSpec, ButtonVariant, CalendarMode, CalendarSpec,
+        CalendarWeekStart, CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec,
+        ContextMenuSpec, ControlDensity, ControlSize, DatePickerSpec, DateRangePickerSpec,
+        DateRangeValue, DateTimePickerSpec, DateTimeRangePickerSpec, DateTimeRangeValue,
+        DateTimeValue, DialogKind, DialogSpec, Direction, DrawerEdge, DrawerSpec, FieldSpec,
+        FormActionAlign, FormActionDangerItem, FormActionsSpec, GridSpec, IconButtonSpec,
+        MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec, NavigationMenuEntry,
+        NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale, PopoverInitialFocus,
+        PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec, SegmentedControlOption,
+        SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
+        StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
         TabDefinition, TabPin, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeInputSpec,
         TooltipSpec, ValidationState,
     };
@@ -618,7 +614,10 @@ mod tests {
         assert!(spec.current_pressed());
         assert_eq!(spec.is_expanded, Some(true));
         assert_eq!(spec.controls.as_deref(), Some("panel"));
-        assert_eq!(spec.control_height_token(ControlSize::Md), semantic::SIZE_CONTROL_HEIGHT);
+        assert_eq!(
+            spec.control_height_token(ControlSize::Md),
+            semantic::SIZE_CONTROL_HEIGHT
+        );
         assert_eq!(
             IconButtonSpec::new().tooltip_placement,
             OverlayPlacement::Top
@@ -742,7 +741,10 @@ mod tests {
         assert!(spec.danger_items[1].disabled);
         // Inline danger gap mirrors the root action gap.
         assert_eq!(spec.danger_inline_gap_token(), spec.action_gap_token());
-        assert_eq!(spec.danger_inline_gap_rem(ControlDensity::Default), spec.gap_rem(ControlDensity::Default));
+        assert_eq!(
+            spec.danger_inline_gap_rem(ControlDensity::Default),
+            spec.gap_rem(ControlDensity::Default)
+        );
     }
 
     #[test]
@@ -798,10 +800,13 @@ mod tests {
 
     #[test]
     fn segmented_control_uses_selected_fill() {
-        let spec = SegmentedControlSpec::new("contract-test", vec![
-            SegmentedControlOption::new("grid", "Grid"),
-            SegmentedControlOption::new("list", "List"),
-        ])
+        let spec = SegmentedControlSpec::new(
+            "contract-test",
+            vec![
+                SegmentedControlOption::new("grid", "Grid"),
+                SegmentedControlOption::new("list", "List"),
+            ],
+        )
         .with_default_value("grid");
 
         assert_eq!(spec.current_value(), Some("grid"));
@@ -1244,7 +1249,10 @@ mod tests {
         assert!(!detail.has_ready_content());
         assert_eq!(detail.body_fill_token(), semantic::COLOR_BACKGROUND_PANEL);
         assert_eq!(empty.action_count(), 1);
-        assert_eq!(empty.layout_gap_token(ControlDensity::Default), semantic::SPACE_STACK_MD);
+        assert_eq!(
+            empty.layout_gap_token(ControlDensity::Default),
+            semantic::SPACE_STACK_MD
+        );
     }
 
     #[test]
@@ -1258,7 +1266,10 @@ mod tests {
         assert!(toolbar.is_grid_visible());
         // Default density resolves the contract §8 density-table root gap
         // (space.inline.sm), not the un-scoped base (space.stack.sm).
-        assert_eq!(toolbar.gap_token(ControlDensity::Default), semantic::SPACE_INLINE_SM);
+        assert_eq!(
+            toolbar.gap_token(ControlDensity::Default),
+            semantic::SPACE_INLINE_SM
+        );
         assert_eq!(summary.start_index(), 26);
         assert_eq!(summary.end_index(), 50);
     }

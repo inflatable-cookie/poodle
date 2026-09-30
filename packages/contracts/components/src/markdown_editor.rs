@@ -303,7 +303,10 @@ mod tests {
         assert_eq!(compact.toolbar_y_rem(ControlDensity::Compact), 0.25);
         assert_eq!(compact.tool_gap_rem(ControlDensity::Compact), 0.0625);
         assert_eq!(comfortable.pane_pad_rem(ControlDensity::Comfortable), 0.875);
-        assert_eq!(comfortable.tool_gap_rem(ControlDensity::Comfortable), 0.1875);
+        assert_eq!(
+            comfortable.tool_gap_rem(ControlDensity::Comfortable),
+            0.1875
+        );
     }
 
     #[test]

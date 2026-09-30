@@ -125,21 +125,37 @@ mod tests {
 
         // Clamp
         let unclamped = text(&TextSpec::new("c"), &ctx);
-        assert_eq!(unclamped.style.descriptor.layout.overflow_x, LayoutOverflow::Visible);
-        assert_eq!(unclamped.style.descriptor.layout.overflow_y, LayoutOverflow::Visible);
+        assert_eq!(
+            unclamped.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Visible
+        );
+        assert_eq!(
+            unclamped.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Visible
+        );
         let clamped = text(&TextSpec::new("c").with_clamp(2), &ctx);
-        assert_eq!(clamped.style.descriptor.layout.overflow_x, LayoutOverflow::Hidden);
-        assert_eq!(clamped.style.descriptor.layout.overflow_y, LayoutOverflow::Hidden);
+        assert_eq!(
+            clamped.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Hidden
+        );
+        assert_eq!(
+            clamped.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Hidden
+        );
 
         // Compact spacing
         let compact = text(
             &TextSpec::new("compact").with_spacing(TextSpacing::Compact),
             &ctx,
         );
-        assert_eq!(compact.style.descriptor.layout.direction, LayoutDirection::Column);
+        assert_eq!(
+            compact.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
         assert_eq!(
             compact.style.descriptor.layout.spacing.gap,
-            ctx.theme().resolve_space(poodle_tokens::semantic::SPACE_STACK_SM)
+            ctx.theme()
+                .resolve_space(poodle_tokens::semantic::SPACE_STACK_SM)
         );
         assert_eq!(compact.children.len(), 1);
         match &compact.children[0].kind {

@@ -16,8 +16,7 @@ use poodle_node::{
 };
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSize,
-    EmptyStateSpec,
-    EmptyStateVariant, EyebrowSpec, SkeletonSpec,
+    EmptyStateSpec, EmptyStateVariant, EyebrowSpec, SkeletonSpec,
 };
 
 use crate::color::{mix_srgb, with_alpha};
@@ -273,10 +272,7 @@ pub fn action_discovery_panel(
         let mut section_el = section_el;
 
         // Section heading via the Eyebrow primitive.
-        let mut heading = eyebrow(
-            &EyebrowSpec::new().with_content(&section.title),
-            ctx,
-        );
+        let mut heading = eyebrow(&EyebrowSpec::new().with_content(&section.title), ctx);
         heading
             .roles
             .insert("dependency".to_owned(), "eyebrow".to_owned());
@@ -443,8 +439,7 @@ pub fn action_discovery_panel(
                         s.font_family = Some(FontFamily::Mono);
                     }
                     let mut chip = chip_shell(with_alpha(surface, surface.3 * 0.76));
-                    chip.roles
-                        .insert("part".to_owned(), "shortcut".to_owned());
+                    chip.roles.insert("part".to_owned(), "shortcut".to_owned());
                     trailing = trailing.child(chip.child(label));
                 }
 

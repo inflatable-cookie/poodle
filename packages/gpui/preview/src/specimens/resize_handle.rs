@@ -21,8 +21,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let panel_bg = theme.resolve_color("color.background.panel");
     let border_subtle = theme.resolve_color("color.border.subtle");
-    let left_px = stored_px(state, HORIZONTAL_LEFT_KEY, 120.0, MIN_HORIZONTAL_PX, MAX_HORIZONTAL_PX);
-    let top_px = stored_px(state, VERTICAL_TOP_KEY, 80.0, MIN_VERTICAL_PX, MAX_VERTICAL_PX);
+    let left_px = stored_px(
+        state,
+        HORIZONTAL_LEFT_KEY,
+        120.0,
+        MIN_HORIZONTAL_PX,
+        MAX_HORIZONTAL_PX,
+    );
+    let top_px = stored_px(
+        state,
+        VERTICAL_TOP_KEY,
+        80.0,
+        MIN_VERTICAL_PX,
+        MAX_VERTICAL_PX,
+    );
     let _ = cx;
 
     div()
@@ -124,7 +136,10 @@ fn example_group(theme: &GpuiThemeProvider, title: &str, content: Div) -> Div {
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(title), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(title),
+            theme,
+        ))
         .child(content)
 }
 
@@ -245,7 +260,7 @@ mod interaction_tests {
     use crate::app_state::NodeSpecimenEvent;
     use poodle_gpui::GpuiThemeProvider;
     use poodle_node::{NodeDragPhase, NodeKey, NodeModifiers};
-    use poodle_render::{RenderContext, resize_handle, ResizePhase};
+    use poodle_render::{resize_handle, RenderContext, ResizePhase};
     use poodle_specs::{Orientation, ResizeHandleSpec};
     use std::sync::{Arc, Mutex};
 
@@ -269,13 +284,8 @@ mod interaction_tests {
     #[test]
     fn move_emits_resize_delta() {
         let events: Arc<Mutex<Vec<NodeSpecimenEvent>>> = Arc::new(Mutex::new(Vec::new()));
-        let handler = resize_delta_handler(
-            HORIZONTAL_LEFT_KEY,
-            Arc::clone(&events),
-            120.0,
-            48.0,
-            280.0,
-        );
+        let handler =
+            resize_delta_handler(HORIZONTAL_LEFT_KEY, Arc::clone(&events), 120.0, 48.0, 280.0);
         handler(ResizePhase::Start, 0.0);
         handler(ResizePhase::Move, 16.0);
         let queue = events.lock().unwrap();
@@ -292,13 +302,8 @@ mod interaction_tests {
     fn rendered_handle_carries_drag_handler() {
         let events: Arc<Mutex<Vec<NodeSpecimenEvent>>> = Arc::new(Mutex::new(Vec::new()));
         let theme = GpuiThemeProvider::new();
-        let handler = resize_delta_handler(
-            HORIZONTAL_LEFT_KEY,
-            Arc::clone(&events),
-            120.0,
-            48.0,
-            280.0,
-        );
+        let handler =
+            resize_delta_handler(HORIZONTAL_LEFT_KEY, Arc::clone(&events), 120.0, 48.0, 280.0);
         let node = resize_handle(
             &ResizeHandleSpec::new(HORIZONTAL_LEFT_KEY).with_orientation(Orientation::Horizontal),
             &RenderContext::new(&theme),

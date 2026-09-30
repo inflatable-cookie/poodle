@@ -55,17 +55,16 @@ use poodle_headless::drag_drop::{
     DropTargetCandidate,
 };
 use poodle_node::{
-    CrossWindowAbort, CrossWindowCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
+    can_export_anything, validate_file_export, validate_inbound_files, CrossWindowAbort,
+    CrossWindowCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
     CrossWindowDragReceipt, CrossWindowDragSourceBridge, CrossWindowDragTargetBridge,
-    CrossWindowDragTargetEvent, CrossWindowDragTransport, DragDropCommitResult, Node,
-    NodeDragCapabilities, NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent,
-    NodeDropIntentEvent, NodeDropPositionInput, NodeDropTarget, NodeKeyboardDropDirection,
-    NodeKeyboardPositionInput,
-    DragExportBridge, DragExportForm, DragExportSnapshot, DragExportState, DragExportTerminal,
+    CrossWindowDragTargetEvent, CrossWindowDragTransport, DragDropCommitResult, DragExportBridge,
+    DragExportForm, DragExportSnapshot, DragExportState, DragExportTerminal, DragExportValidation,
     InboundFileBatch, InboundFileCapabilities, InboundFileConstraints, InboundFileEvent,
-    InboundFileHostBridge, InboundFileOutcome, PreparedFileExport, InboundFileValidation,
-    DragExportValidation, can_export_anything, validate_file_export, validate_inbound_files,
-    INBOUND_FILE_SUBJECT_KIND,
+    InboundFileHostBridge, InboundFileOutcome, InboundFileValidation, Node, NodeDragCapabilities,
+    NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent, NodeDropIntentEvent,
+    NodeDropPositionInput, NodeDropTarget, NodeKeyboardDropDirection, NodeKeyboardPositionInput,
+    PreparedFileExport, INBOUND_FILE_SUBJECT_KIND,
 };
 use std::sync::Arc;
 
@@ -435,10 +434,7 @@ type DragHostWaker = futures::channel::mpsc::UnboundedSender<()>;
 /// One function, used by every callback, so a new host answer cannot be added
 /// that queues without waking — which is exactly the hang this exists to stop.
 fn post(inbox: &DragHostInbox, waker: &Option<DragHostWaker>, message: DragHostMessage) {
-    inbox
-        .lock()
-        .expect("drag host inbox")
-        .push_back(message);
+    inbox.lock().expect("drag host inbox").push_back(message);
     if let Some(waker) = waker {
         // Unbounded: the send only fails once the pump is gone, and a dropped
         // pump means the controller is gone too.
@@ -652,7 +648,10 @@ impl DragDropController {
         // A refusal is only current while the gesture is live and nothing has
         // been accepted, matching `createDragDropController`'s
         // `targetPosture` rule exactly.
-        let rejected = state.rejected.as_ref().filter(|_| dragging && intent.is_none());
+        let rejected = state
+            .rejected
+            .as_ref()
+            .filter(|_| dragging && intent.is_none());
         let target_posture = match (dragging, intent.is_some(), rejected.is_some()) {
             (true, true, _) => Some(DragDropTargetPosture::Accepted),
             (true, false, true) => Some(DragDropTargetPosture::Rejected),
@@ -737,7 +736,6 @@ impl DragDropController {
             self.dispatch(DragSessionEvent::Cancel { session_id }, cx);
         }
     }
-
 
     // ── Cross-window host bridge ───────────────────────────────────────────
 
@@ -1016,12 +1014,7 @@ impl DragDropController {
     /// session as it is applied: a queue is not a licence to act on stale news.
     fn drain_host_answers(&self, cx: &mut App) {
         loop {
-            let Some(message) = self
-                .inbox()
-                .lock()
-                .expect("drag host inbox")
-                .pop_front()
-            else {
+            let Some(message) = self.inbox().lock().expect("drag host inbox").pop_front() else {
                 return;
             };
             match message {
@@ -1134,12 +1127,7 @@ impl DragDropController {
         }
     }
 
-    fn apply_source_terminal(
-        &self,
-        session_id: &str,
-        outcome: DragTerminalOutcome,
-        cx: &mut App,
-    ) {
+    fn apply_source_terminal(&self, session_id: &str, outcome: DragTerminalOutcome, cx: &mut App) {
         {
             let mut state = self.state.borrow_mut();
             let Some(transaction) = state.cross_window_source.as_mut() else {
@@ -1379,12 +1367,7 @@ impl DragDropController {
     /// exactly not what the person doing it did. The kernel records the truth
     /// it can check; the export state records what the host reported. Neither
     /// claims a destination consumed the file.
-    fn apply_export_terminal(
-        &self,
-        session_id: &str,
-        terminal: DragExportTerminal,
-        cx: &mut App,
-    ) {
+    fn apply_export_terminal(&self, session_id: &str, terminal: DragExportTerminal, cx: &mut App) {
         {
             let mut state = self.state.borrow_mut();
             let Some(transaction) = state.file_export.as_mut() else {
@@ -1442,18 +1425,13 @@ impl DragDropController {
         }
     }
 
-
     // ── Inbound external files ─────────────────────────────────────────
 
     /// Install this window's inbound file bridge.
     ///
     /// One per window and exclusive: the bridge's transport claim names the
     /// only source of external file events this window will listen to.
-    pub fn set_inbound_file_bridge(
-        &self,
-        bridge: Arc<dyn InboundFileHostBridge>,
-        cx: &mut App,
-    ) {
+    pub fn set_inbound_file_bridge(&self, bridge: Arc<dyn InboundFileHostBridge>, cx: &mut App) {
         self.ensure_wake(cx);
 
         // Replacing a bridge while a batch is live ends that batch's session
@@ -1550,7 +1528,12 @@ impl DragDropController {
         }
         transaction.released = true;
         let bridge = Arc::clone(&transaction.bridge);
-        self.answer_inbound_batch(&bridge, transaction.generation, &transaction.batch_id, outcome);
+        self.answer_inbound_batch(
+            &bridge,
+            transaction.generation,
+            &transaction.batch_id,
+            outcome,
+        );
     }
 
     fn inbound_outcome(outcome: Option<&DragTerminalOutcome>) -> InboundFileOutcome {
@@ -1810,12 +1793,7 @@ impl DragDropController {
         cx.refresh_windows();
     }
 
-    fn apply_target_event(
-        &self,
-        generation: u64,
-        event: CrossWindowDragTargetEvent,
-        cx: &mut App,
-    ) {
+    fn apply_target_event(&self, generation: u64, event: CrossWindowDragTargetEvent, cx: &mut App) {
         // News from an unsubscribed or replaced installation is discarded
         // whole. It cannot start a transaction, clear one, or cancel one: the
         // host that published it is no longer this window's authority.
@@ -1895,7 +1873,8 @@ impl DragDropController {
                 if self.active_session_id().as_deref() != Some(session_id.as_str()) {
                     return;
                 }
-                if let Some(transaction) = self.state.borrow_mut().cross_window_projection.as_mut() {
+                if let Some(transaction) = self.state.borrow_mut().cross_window_projection.as_mut()
+                {
                     transaction.projection = projection.clone();
                 }
                 self.resolve_projected_intent(&session_id, &projection, cx);
@@ -2098,9 +2077,7 @@ impl DragDropController {
                     &waker,
                     DragHostMessage::Target {
                         generation,
-                        event: CrossWindowDragTargetEvent::Projection {
-                            projection: picked,
-                        },
+                        event: CrossWindowDragTargetEvent::Projection { projection: picked },
                     },
                 );
             }),
@@ -2930,17 +2907,14 @@ impl DragDropController {
         let eligible = {
             let state = self.state.borrow();
             let inbound = inbound_context(&state);
-            state
-                .targets
-                .get(&target_id)
-                .map(|record| {
-                    eligibility_for(
-                        &record.registration,
-                        &intent,
-                        &session.subject,
-                        inbound.as_ref(),
-                    )
-                })
+            state.targets.get(&target_id).map(|record| {
+                eligibility_for(
+                    &record.registration,
+                    &intent,
+                    &session.subject,
+                    inbound.as_ref(),
+                )
+            })
         };
         match eligible {
             Some(DropEligibility::Accepted { intent }) => {
@@ -3123,8 +3097,7 @@ impl DragDropController {
                     .as_ref()
                     .is_some_and(|transaction| transaction.session_id == session_id);
                 if owns_inbound {
-                    let outcome =
-                        Self::inbound_outcome(self.state.borrow().last_outcome.as_ref());
+                    let outcome = Self::inbound_outcome(self.state.borrow().last_outcome.as_ref());
                     self.release_inbound_files(outcome);
                 }
                 self.clear_intent_notification();
@@ -3172,7 +3145,8 @@ impl DragDropController {
             };
         };
 
-        let revalidated = match eligibility_for(&registration, &intent, &subject, inbound.as_ref()) {
+        let revalidated = match eligibility_for(&registration, &intent, &subject, inbound.as_ref())
+        {
             DropEligibility::Accepted { intent } => intent,
             DropEligibility::Rejected { reason } => {
                 return DragSessionEvent::DropRejected { session_id, reason }
@@ -3197,7 +3171,9 @@ impl DragDropController {
             NodeDropCommit::Rejected { reason } => {
                 DragSessionEvent::DropRejected { session_id, reason }
             }
-            NodeDropCommit::Failed { reason } => DragSessionEvent::DropFailed { session_id, reason },
+            NodeDropCommit::Failed { reason } => {
+                DragSessionEvent::DropFailed { session_id, reason }
+            }
         }
     }
 
@@ -3332,7 +3308,10 @@ impl DragDropController {
                         .map(|_| state.export_state),
                     source_label,
                     target_label: target,
-                    position: session.intent.as_ref().map(|intent| intent.position.clone()),
+                    position: session
+                        .intent
+                        .as_ref()
+                        .map(|intent| intent.position.clone()),
                     operation: Some(session.operation),
                     reason,
                 },
@@ -3391,12 +3370,18 @@ impl DragDropController {
             }
             moves.pointer_move(event.event.position, window, cx);
         })
-        .on_mouse_up(MouseButton::Left, move |event: &MouseUpEvent, window, cx| {
-            up.pointer_release(event.position, window, cx);
-        })
-        .on_mouse_up_out(MouseButton::Left, move |event: &MouseUpEvent, window, cx| {
-            up_out.pointer_release(event.position, window, cx);
-        })
+        .on_mouse_up(
+            MouseButton::Left,
+            move |event: &MouseUpEvent, window, cx| {
+                up.pointer_release(event.position, window, cx);
+            },
+        )
+        .on_mouse_up_out(
+            MouseButton::Left,
+            move |event: &MouseUpEvent, window, cx| {
+                up_out.pointer_release(event.position, window, cx);
+            },
+        )
         .capture_key_down(move |event: &KeyDownEvent, window, cx| {
             let key = event.keystroke.key.as_str();
             let handled = keys.key(key, window, cx);
@@ -3435,8 +3420,12 @@ fn pointer_candidate(
     let top: f32 = bounds.origin.y.into();
     let width: f32 = bounds.size.width.into();
     let height: f32 = bounds.size.height.into();
-    let contains_point =
-        width > 0.0 && height > 0.0 && x >= left && x < left + width && y >= top && y < top + height;
+    let contains_point = width > 0.0
+        && height > 0.0
+        && x >= left
+        && x < left + width
+        && y >= top
+        && y < top + height;
 
     let resolve = record.registration.resolve_position.clone()?;
     let position = resolve(&NodeDropPositionInput {
@@ -3489,10 +3478,7 @@ fn inbound_refusal(
     let Some(context) = inbound.filter(|context| context.batch.batch_id == subject.id) else {
         return Some("external-files-unavailable".to_string());
     };
-    let constraints = registration
-        .inbound_files
-        .clone()
-        .unwrap_or_default();
+    let constraints = registration.inbound_files.clone().unwrap_or_default();
     match validate_inbound_files(&context.batch, &constraints, &context.capabilities) {
         InboundFileValidation::Accepted => None,
         InboundFileValidation::Refused { reason } => Some(format!("{reason:?}")),
@@ -3514,9 +3500,7 @@ fn inbound_refusal(
 /// registry iteration order. Deterministic beats incidental: with nested
 /// targets, "whichever we happened to visit first" is not a rule a consumer
 /// can rely on.
-fn resolve_rejected_target(
-    candidates: &[DropTargetCandidate],
-) -> Option<(String, Option<String>)> {
+fn resolve_rejected_target(candidates: &[DropTargetCandidate]) -> Option<(String, Option<String>)> {
     let refused: Vec<DropTargetCandidate> = candidates
         .iter()
         .filter(|candidate| matches!(candidate.eligibility, DropEligibility::Rejected { .. }))
@@ -3575,7 +3559,10 @@ fn eligibility_for(
 ) -> DropEligibility {
     if !registration.accepts(subject) {
         return DropEligibility::Rejected {
-            reason: Some(format!("`{}` does not accept this item", registration.label)),
+            reason: Some(format!(
+                "`{}` does not accept this item",
+                registration.label
+            )),
         };
     }
     // External data is validated before the target is asked, so a consumer
@@ -3610,7 +3597,10 @@ fn default_announcement(event: &DragAnnouncementEvent) -> String {
             (DragAnnouncementKind::Cancelled, DragExportState::Cancelled) => {
                 return format!("Cancelled exporting {source}.")
             }
-            (DragAnnouncementKind::Cancelled | DragAnnouncementKind::Failed, DragExportState::Failed) => {
+            (
+                DragAnnouncementKind::Cancelled | DragAnnouncementKind::Failed,
+                DragExportState::Failed,
+            ) => {
                 return match &event.reason {
                     Some(reason) => format!("Export failed for {source}. {reason}"),
                     None => format!("Export failed for {source}."),
@@ -3655,7 +3645,6 @@ impl Render for NodeDragPreview {
         div().children(self.view.clone())
     }
 }
-
 
 // ── Window host ────────────────────────────────────────────────────────────
 
@@ -3984,7 +3973,10 @@ mod tests {
         assert_ne!(first.id(), second.id());
         assert_eq!(first.snapshot().phase, DragSessionPhase::Idle);
         assert_eq!(second.snapshot().phase, DragSessionPhase::Idle);
-        assert!(first.clone().id() == first.id(), "a clone is the same controller");
+        assert!(
+            first.clone().id() == first.id(),
+            "a clone is the same controller"
+        );
     }
 
     /// A target refuses a subject whose kind it never accepted, with a reason

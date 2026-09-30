@@ -278,12 +278,7 @@ mod tests {
         let spec = CollapsibleSpec::new()
             .with_title("Advanced options")
             .with_default_open(true);
-        let node = collapsible(
-            &spec,
-            &ctx,
-            Some(Node::text("inside")),
-            None,
-        );
+        let node = collapsible(&spec, &ctx, Some(Node::text("inside")), None);
         assert!(content(&node).is_some(), "default-open paints content");
         let trigger = trigger(&node);
         assert_eq!(trigger.a11y.expanded, Some(true));
@@ -393,7 +388,10 @@ mod tests {
             },
         );
         let trigger = trigger(&node);
-        assert_eq!(trigger.runtime_id.as_deref(), Some("collapsible:scope:trigger"));
+        assert_eq!(
+            trigger.runtime_id.as_deref(),
+            Some("collapsible:scope:trigger")
+        );
         assert_eq!(trigger.id.as_deref(), Some("collapsible:scope:trigger"));
         assert_eq!(
             trigger.a11y.controls.as_deref(),
@@ -402,10 +400,7 @@ mod tests {
         assert!(trigger.style.focus_ring.is_some());
 
         let region = content(&node).expect("open content");
-        assert_eq!(
-            region.id.as_deref(),
-            Some("collapsible:scope:content")
-        );
+        assert_eq!(region.id.as_deref(), Some("collapsible:scope:content"));
         assert_eq!(
             region.a11y.labelled_by.as_deref(),
             Some("collapsible:scope:trigger")
@@ -419,10 +414,7 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let spec = CollapsibleSpec::new().with_aria_label("Hidden section");
         let node = collapsible(&spec, &ctx, None, None);
-        assert_eq!(
-            trigger(&node).a11y.label.as_deref(),
-            Some("Hidden section")
-        );
+        assert_eq!(trigger(&node).a11y.label.as_deref(), Some("Hidden section"));
     }
 
     #[test]
@@ -458,8 +450,14 @@ mod tests {
             second_trigger.runtime_id.as_deref(),
             Some("collapsible:second:trigger")
         );
-        assert_eq!(first_trigger.id.as_deref(), Some("collapsible:first:trigger"));
-        assert_eq!(second_trigger.id.as_deref(), Some("collapsible:second:trigger"));
+        assert_eq!(
+            first_trigger.id.as_deref(),
+            Some("collapsible:first:trigger")
+        );
+        assert_eq!(
+            second_trigger.id.as_deref(),
+            Some("collapsible:second:trigger")
+        );
     }
 
     #[test]
@@ -467,7 +465,9 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let shut = collapsible_with_handlers(
-            &CollapsibleSpec::new().with_title("Section").with_open(false),
+            &CollapsibleSpec::new()
+                .with_title("Section")
+                .with_open(false),
             &ctx,
             None,
             CollapsibleHandlers {
@@ -492,7 +492,6 @@ mod tests {
     }
 
     fn outer_has_region_role(node: &Node) -> bool {
-        matches!(&node.kind, NodeKind::Container { .. })
-            && node.a11y.role == Some(NodeRole::Region)
+        matches!(&node.kind, NodeKind::Container { .. }) && node.a11y.role == Some(NodeRole::Region)
     }
 }

@@ -49,8 +49,8 @@ pub fn model_picker(
         spec.models
             .iter()
             .map(|model| {
-                let mut option = ChoiceOption::new(&model.value, &model.label)
-                    .with_disabled(model.is_disabled);
+                let mut option =
+                    ChoiceOption::new(&model.value, &model.label).with_disabled(model.is_disabled);
                 if spec.show_model_descriptions {
                     if let Some(description) = &model.description {
                         option = option.with_description(description);
@@ -196,7 +196,8 @@ pub fn model_picker(
         muted
     };
     let subdued_opacity = if spec.emphasis.is_subdued() {
-        ctx.theme().resolve_opacity(spec.trigger_subdued_opacity_token())
+        ctx.theme()
+            .resolve_opacity(spec.trigger_subdued_opacity_token())
     } else {
         1.0
     };
@@ -261,8 +262,7 @@ pub fn model_picker(
         .insert("variant".to_owned(), spec.variant.as_str().to_owned());
     root.roles
         .insert("emphasis".to_owned(), spec.emphasis.as_str().to_owned());
-    root.roles
-        .insert("open".to_owned(), is_open.to_string());
+    root.roles.insert("open".to_owned(), is_open.to_string());
     root.roles
         .insert("disabled".to_owned(), spec.is_disabled.to_string());
     let mut root = root.child(trigger);
@@ -285,7 +285,9 @@ pub fn model_picker(
         models.position = poodle_node::NodePosition::InFlow;
         models.a11y.role = Some(NodeRole::RadioGroup);
         models.a11y.label = Some("Model".to_owned());
-        models.roles.insert("dependency".to_owned(), "select".to_owned());
+        models
+            .roles
+            .insert("dependency".to_owned(), "select".to_owned());
         let initial_focus_value = spec
             .models
             .iter()
@@ -332,7 +334,8 @@ pub fn model_picker(
                     row.style.descriptor.background = Some(row_selected_bg);
                 }
                 if let Some(image) = &model.image {
-                    row.children.insert(0, image_node(&image.src, rem_to_px(1.0)));
+                    row.children
+                        .insert(0, image_node(&image.src, rem_to_px(1.0)));
                 } else if let Some(icon) = &model.icon {
                     let mut glyph = Node::icon(icon, rem_to_px(0.875));
                     glyph.style.descriptor.text_color = Some(text_secondary);

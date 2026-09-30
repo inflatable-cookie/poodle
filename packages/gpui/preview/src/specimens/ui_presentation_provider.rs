@@ -147,7 +147,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             ),
         ))
         .child(group("Nested override", theme, nested))
-        .child(group("Explicit reset inside a scope", theme, explicit_reset))
+        .child(group(
+            "Explicit reset inside a scope",
+            theme,
+            explicit_reset,
+        ))
         .into_any_element();
 
     specimen_layout(

@@ -562,9 +562,12 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
                 to_index,
             },
         );
-        let reordered = effects
-            .iter()
-            .any(|effect| matches!(effect, poodle_headless::tabs::TabsEffect::EmitReorder { .. }));
+        let reordered = effects.iter().any(|effect| {
+            matches!(
+                effect,
+                poodle_headless::tabs::TabsEffect::EmitReorder { .. }
+            )
+        });
         apply_tab_effects(
             effects,
             &next.items,
@@ -1479,19 +1482,37 @@ mod tests {
 
         for pinned in ["home", "logs"] {
             let tab = tab_of(&root, pinned);
-            assert!(tab.interaction.drag_source.is_none(), "{pinned} wires no source");
-            assert!(tab.interaction.drop_target.is_none(), "{pinned} wires no target");
+            assert!(
+                tab.interaction.drag_source.is_none(),
+                "{pinned} wires no source"
+            );
+            assert!(
+                tab.interaction.drop_target.is_none(),
+                "{pinned} wires no target"
+            );
         }
         let middle = tab_of(&root, "mix");
-        assert!(middle.interaction.drag_source.is_some(), "unpinned tabs still wire sources");
-        assert!(middle.interaction.drop_target.is_some(), "unpinned tabs still wire targets");
+        assert!(
+            middle.interaction.drag_source.is_some(),
+            "unpinned tabs still wire sources"
+        );
+        assert!(
+            middle.interaction.drop_target.is_some(),
+            "unpinned tabs still wire targets"
+        );
 
         let mapped = super::tabs_items(&spec);
         assert_eq!(mapped[0].pinned, Some(poodle_headless::tabs::TabPin::Start));
         assert_eq!(mapped[3].pinned, Some(poodle_headless::tabs::TabPin::End));
-        assert!(!poodle_headless::tabs::is_tabs_reorder_allowed(&mapped, 1, 0));
-        assert!(!poodle_headless::tabs::is_tabs_reorder_allowed(&mapped, 2, 3));
-        assert!(poodle_headless::tabs::is_tabs_reorder_allowed(&mapped, 1, 2));
+        assert!(!poodle_headless::tabs::is_tabs_reorder_allowed(
+            &mapped, 1, 0
+        ));
+        assert!(!poodle_headless::tabs::is_tabs_reorder_allowed(
+            &mapped, 2, 3
+        ));
+        assert!(poodle_headless::tabs::is_tabs_reorder_allowed(
+            &mapped, 1, 2
+        ));
     }
 
     /// g16.026. The semantic family is choosable; the registration namespace
@@ -1881,10 +1902,7 @@ mod tests {
     fn fill_layout_grows_the_panel_and_leaves_the_strip_fixed() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let tabs_def = vec![
-            TabDefinition::new("a", "A"),
-            TabDefinition::new("b", "B"),
-        ];
+        let tabs_def = vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")];
 
         let fill = tabs_with_panel(
             &TabsSpec::new(tabs_def.clone())
@@ -1905,7 +1923,10 @@ mod tests {
             "fill panel owns vertical scrolling"
         );
         let strip = &fill.children[0];
-        assert_eq!(strip.style.flex_grow, None, "the strip keeps its natural height");
+        assert_eq!(
+            strip.style.flex_grow, None,
+            "the strip keeps its natural height"
+        );
 
         let auto = tabs_with_panel(
             &TabsSpec::new(tabs_def).with_value("a"),
@@ -1918,7 +1939,10 @@ mod tests {
             .expect("auto composes the panel");
         assert_eq!(panel.style.flex_grow, None);
         assert_eq!(panel.style.min_height, None);
-        assert_eq!(panel.style.descriptor.layout.overflow_y, LayoutOverflow::Visible);
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Visible
+        );
     }
 
     #[test]
@@ -1933,7 +1957,11 @@ mod tests {
             None,
             None,
         );
-        assert_eq!(fill.style.flex_grow, Some(1.0), "fill root takes the container");
+        assert_eq!(
+            fill.style.flex_grow,
+            Some(1.0),
+            "fill root takes the container"
+        );
 
         let auto = tabs(&TabsSpec::new(tabs_def), &ctx, None, None);
         assert_eq!(auto.style.flex_grow, None, "auto keeps the natural root");

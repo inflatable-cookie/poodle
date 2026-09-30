@@ -393,7 +393,9 @@ mod tests {
             .find(&|n| n.id.as_deref() == Some("changed-files-toggle-worked"))
             .is_some());
         assert!(second
-            .find(&|n| n.runtime_id.as_deref() == Some("changed-files:second:file:worked:src:lib.rs"))
+            .find(
+                &|n| n.runtime_id.as_deref() == Some("changed-files:second:file:worked:src:lib.rs")
+            )
             .is_some());
     }
 }

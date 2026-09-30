@@ -1,8 +1,8 @@
+use crate::node_compat::Table;
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use crate::node_compat::Table;
 use poodle_specs::{TableColumn, TableRow, TableSpec};
 
 #[derive(Clone, Copy)]

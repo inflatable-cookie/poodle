@@ -145,10 +145,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let interactive_collapse_events = state.node_events.clone();
     let bottom_collapse_events = state.node_events.clone();
 
-    let expanded_spec = DockRegionSpec::new(DockEdge::Left, flex_items())
-        .with_value(&flex_active);
-    let iconless_spec = DockRegionSpec::new(DockEdge::Left, iconless_items())
-        .with_value("inspector");
+    let expanded_spec = DockRegionSpec::new(DockEdge::Left, flex_items()).with_value(&flex_active);
+    let iconless_spec =
+        DockRegionSpec::new(DockEdge::Left, iconless_items()).with_value("inspector");
     let collapsed_spec = DockRegionSpec::new(DockEdge::Left, flex_items())
         .with_collapsed(true)
         .with_collapsed_posture(DockCollapsedPosture::IconStrip)

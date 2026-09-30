@@ -14,11 +14,7 @@ use crate::presentation::rem_to_px;
 const SEPARATOR_DOT_MIX: f32 = 0.72;
 
 pub fn meta_bar(spec: &MetaBarSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
-    meta_bar_sep(
-        spec,
-        ctx,
-        children.into_iter().map(|c| (c, true)).collect(),
-    )
+    meta_bar_sep(spec, ctx, children.into_iter().map(|c| (c, true)).collect())
 }
 
 /// Children paired with their per-child separator opt-in.

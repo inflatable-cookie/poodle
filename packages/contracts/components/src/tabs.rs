@@ -472,7 +472,10 @@ mod tests {
         assert!(!default_spec.uses_manual_activation());
         assert_eq!(default_spec.layout, TabsLayout::Auto);
         assert_eq!(default_spec.size_role, SemanticControlSizeRole::Chrome);
-        assert_eq!(default_spec.overflow_strategy, TabsOverflowStrategy::Collapse);
+        assert_eq!(
+            default_spec.overflow_strategy,
+            TabsOverflowStrategy::Collapse
+        );
 
         let custom = TabsSpec::new(vec![
             TabDefinition::new("x", "X"),
@@ -497,7 +500,10 @@ mod tests {
         assert_eq!(custom.default_value.as_deref(), Some("y"));
         assert_eq!(custom.orientation, Orientation::Vertical);
         assert!(custom.is_vertical());
-        assert!(!custom.uses_full_width(), "vertical tabs do not use full width");
+        assert!(
+            !custom.uses_full_width(),
+            "vertical tabs do not use full width"
+        );
         assert!(custom.uses_manual_activation());
         assert_eq!(custom.variant, TabVariant::Pill);
         assert!(custom.is_reorderable);
@@ -527,7 +533,10 @@ mod tests {
         .with_value("second")
         .with_default_value("first");
         assert_eq!(spec_val.current_value(), Some("second"));
-        assert_eq!(spec_val.selected_tab().map(|t| t.label.as_str()), Some("Second"));
+        assert_eq!(
+            spec_val.selected_tab().map(|t| t.label.as_str()),
+            Some("Second")
+        );
 
         // 2. Default value applies when explicit value is None
         let spec_def = TabsSpec::new(vec![
@@ -557,8 +566,14 @@ mod tests {
         assert_eq!(spec.list_gap_token(), semantic::SPACE_INLINE_SM);
         assert_eq!(spec.indicator_token(), semantic::COLOR_ACCENT_BASE);
         assert_eq!(spec.list_border_token(), semantic::COLOR_BORDER_SUBTLE);
-        assert_eq!(spec.focus_ring_color_token(), semantic::COLOR_ACCENT_FOCUS_RING);
-        assert_eq!(spec.disabled_opacity_token(), semantic::STATE_OPACITY_DISABLED);
+        assert_eq!(
+            spec.focus_ring_color_token(),
+            semantic::COLOR_ACCENT_FOCUS_RING
+        );
+        assert_eq!(
+            spec.disabled_opacity_token(),
+            semantic::STATE_OPACITY_DISABLED
+        );
         assert_eq!(spec.pill_border_opacity(), 0.68);
         assert_eq!(spec.pill_active_bg_opacity(), 0.18);
         assert_eq!(spec.block_list_bg_opacity(), 0.9);

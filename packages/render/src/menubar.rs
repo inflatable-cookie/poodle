@@ -13,9 +13,7 @@ use poodle_specs::{MenuSpec, MenubarSpec};
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::menu::menu as render_menu;
-use crate::presentation::{
-    control_space_x_rem, rem_to_px, size_font_rem, size_height_offset_rem,
-};
+use crate::presentation::{control_space_x_rem, rem_to_px, size_font_rem, size_height_offset_rem};
 
 const LABEL_WEIGHT: u16 = 600;
 

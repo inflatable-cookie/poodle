@@ -55,15 +55,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_description("Enter your full name."),
                         theme,
                     )
-                    .with_control(live_text_input(
-                        TextInputSpec::new()
-                            .with_id("name-field")
-                            .with_placeholder("Jane Doe")
-                            .with_value(&name_value),
-                        theme,
-                        state,
-                        "text-input-name",
-                    ).into_slot()),
+                    .with_control(
+                        live_text_input(
+                            TextInputSpec::new()
+                                .with_id("name-field")
+                                .with_placeholder("Jane Doe")
+                                .with_value(&name_value),
+                            theme,
+                            state,
+                            "text-input-name",
+                        )
+                        .into_slot(),
+                    ),
                 ),
         )
         .child(
@@ -87,22 +90,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                         .with_description("A valid email address is required.")
                                         .with_validation_state(validation_state);
                                     if !email_is_valid {
-                                        field = field.with_error("Please enter a valid email address.");
+                                        field =
+                                            field.with_error("Please enter a valid email address.");
                                     }
                                     field
                                 },
                                 theme,
                             )
-                            .with_control(live_text_input(
-                                TextInputSpec::new()
-                                    .with_id("email-field")
-                                    .with_placeholder("you@example.com")
-                                    .with_value(&email_value)
-                                    .with_validation_state(validation_state),
-                                theme,
-                                state,
-                                "text-input-email",
-                            ).into_slot()),
+                            .with_control(
+                                live_text_input(
+                                    TextInputSpec::new()
+                                        .with_id("email-field")
+                                        .with_placeholder("you@example.com")
+                                        .with_value(&email_value)
+                                        .with_validation_state(validation_state),
+                                    theme,
+                                    state,
+                                    "text-input-email",
+                                )
+                                .into_slot(),
+                            ),
                         )
                         .child(
                             Field::from_spec(
@@ -114,15 +121,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_pending_message("Checking availability..."),
                                 theme,
                             )
-                            .with_control(live_text_input(
-                                TextInputSpec::new()
-                                    .with_id("workspace-field")
-                                    .with_value(&workspace_value)
-                                    .with_validation_state(ValidationState::Pending),
-                                theme,
-                                state,
-                                "text-input-workspace",
-                            ).into_slot()),
+                            .with_control(
+                                live_text_input(
+                                    TextInputSpec::new()
+                                        .with_id("workspace-field")
+                                        .with_value(&workspace_value)
+                                        .with_validation_state(ValidationState::Pending),
+                                    theme,
+                                    state,
+                                    "text-input-workspace",
+                                )
+                                .into_slot(),
+                            ),
                         ),
                 ),
         )
@@ -173,16 +183,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     Field::from_spec(FieldSpec::new("multiline-field", "Description"), theme)
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("multiline-field")
-                                .with_input_type("multiline")
-                                .with_rows(3)
-                                .with_max_length(280)
-                                .with_show_char_count(true)
-                                .with_placeholder("Enter a description..."),
-                            theme,
-                        ).into_slot()),
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("multiline-field")
+                                    .with_input_type("multiline")
+                                    .with_rows(3)
+                                    .with_max_length(280)
+                                    .with_show_char_count(true)
+                                    .with_placeholder("Enter a description..."),
+                                theme,
+                            )
+                            .into_slot(),
+                        ),
                 ),
         )
         .child(
@@ -196,13 +209,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     Field::from_spec(FieldSpec::new("disabled-field", "API key"), theme)
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("disabled-field")
-                                .with_value("sk-xxxx-xxxx-xxxx")
-                                .with_disabled(true),
-                            theme,
-                        ).into_slot()),
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("disabled-field")
+                                    .with_value("sk-xxxx-xxxx-xxxx")
+                                    .with_disabled(true),
+                                theme,
+                            )
+                            .into_slot(),
+                        ),
                 ),
         )
         .into_any_element();

@@ -195,10 +195,8 @@ pub fn agent_message(spec: &AgentMessageSpec, ctx: &RenderContext<'_>) -> Node {
     let mut root = render_blocks(&blocks, &style);
     root.roles
         .insert("role".to_owned(), spec.role.as_str().to_owned());
-    root.roles.insert(
-        "streaming".to_owned(),
-        spec.is_streaming.to_string(),
-    );
+    root.roles
+        .insert("streaming".to_owned(), spec.is_streaming.to_string());
     root.roles.insert(
         "size".to_owned(),
         format!("{base_size:?}").to_ascii_lowercase(),
@@ -237,10 +235,9 @@ pub fn agent_message(spec: &AgentMessageSpec, ctx: &RenderContext<'_>) -> Node {
         bubble
             .roles
             .insert("role".to_owned(), spec.role.as_str().to_owned());
-        bubble.roles.insert(
-            "streaming".to_owned(),
-            spec.is_streaming.to_string(),
-        );
+        bubble
+            .roles
+            .insert("streaming".to_owned(), spec.is_streaming.to_string());
         bubble.roles.insert(
             "size".to_owned(),
             format!("{base_size:?}").to_ascii_lowercase(),

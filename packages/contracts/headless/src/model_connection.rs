@@ -809,7 +809,9 @@ pub fn model_catalogue_state_copy(state: ModelCatalogueState) -> ModelConnection
     };
 
     match state {
-        ModelCatalogueState::Loading => copy("Loading models", "Waiting for the connection catalogue."),
+        ModelCatalogueState::Loading => {
+            copy("Loading models", "Waiting for the connection catalogue.")
+        }
         ModelCatalogueState::Unavailable => copy(
             "Models unavailable",
             "This connection does not expose a model catalogue.",
@@ -904,7 +906,9 @@ pub fn model_catalogue_fixtures() -> Vec<ModelCatalogueItem> {
     vec![
         ModelCatalogueItem::new("model-alpha", "Frontier Alpha")
             .with_provider_label("OpenAI")
-            .with_badge(ModelConnectionBadge::new("Default").with_tone(ModelConnectionBadgeTone::Info)),
+            .with_badge(
+                ModelConnectionBadge::new("Default").with_tone(ModelConnectionBadgeTone::Info),
+            ),
         ModelCatalogueItem::new("model-beta", "Frontier Beta").with_provider_label("OpenAI"),
         ModelCatalogueItem::new("model-gamma", "Gateway Gamma")
             .with_provider_label("Anthropic")
@@ -1021,7 +1025,9 @@ mod tests {
             "openai-responses"
         )));
         assert!(!model_connection_option_selectable(&by_id("codex-app")));
-        assert!(!model_connection_option_selectable(&by_id("lmstudio-local")));
+        assert!(!model_connection_option_selectable(&by_id(
+            "lmstudio-local"
+        )));
         assert!(!model_connection_option_selectable(&by_id("vendor-legacy")));
     }
 
@@ -1415,7 +1421,11 @@ mod tests {
         let mut unique = titles.to_vec();
         unique.sort();
         unique.dedup();
-        assert_eq!(unique.len(), titles.len(), "no posture borrows another's copy");
+        assert_eq!(
+            unique.len(),
+            titles.len(),
+            "no posture borrows another's copy"
+        );
         assert_eq!(model_catalogue_state_copy(State::Empty).title, "No models");
         assert_eq!(
             model_catalogue_state_copy(State::SessionNegotiated).message,
@@ -1440,7 +1450,10 @@ mod tests {
             model_catalogue_reorder_key_intent("Escape", 2, Some(2), 5),
             Some(ModelCatalogueKeyIntent::CancelGrab)
         );
-        assert_eq!(model_catalogue_reorder_key_intent("Escape", 2, None, 5), None);
+        assert_eq!(
+            model_catalogue_reorder_key_intent("Escape", 2, None, 5),
+            None
+        );
         assert_eq!(model_catalogue_reorder_key_intent("x", 2, None, 5), None);
     }
 

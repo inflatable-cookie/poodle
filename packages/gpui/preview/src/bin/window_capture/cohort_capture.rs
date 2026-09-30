@@ -224,12 +224,19 @@ struct Exclusion {
 #[derive(Clone, Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
 enum Action {
-    PointerActivate { target: Target },
-    Key { target: Target, key: String },
+    PointerActivate {
+        target: Target,
+    },
+    Key {
+        target: Target,
+        key: String,
+    },
     /// Declared after-actions append for the AgentTranscript host. The item
     /// stays a raw scenario value until replay validates it through the
     /// renderer's closed transcript mapping.
-    ProgrammaticAppend { item: Value },
+    ProgrammaticAppend {
+        item: Value,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -1517,8 +1524,8 @@ impl ReplayController {
                         let (id, bounds) =
                             find_target(&host.mounted.lock().expect("cohort mount lock"), target)
                                 .with_context(|| {
-                                    format!("resolve cohort action target {:?}", target.name)
-                                })?;
+                                format!("resolve cohort action target {:?}", target.name)
+                            })?;
                         let position = bounds.center();
                         match action {
                             Action::PointerActivate { .. } => {
@@ -2006,7 +2013,10 @@ mod tests {
         let mapped = transcript_item(&item).expect("declared item maps through the renderer");
         assert!(matches!(
             mapped,
-            TranscriptItem::Message(TranscriptMessage { role: Some(TranscriptRole::Assistant), .. })
+            TranscriptItem::Message(TranscriptMessage {
+                role: Some(TranscriptRole::Assistant),
+                ..
+            })
         ));
         remount(&host);
         let texts = host

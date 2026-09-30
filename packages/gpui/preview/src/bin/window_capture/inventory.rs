@@ -21,7 +21,7 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::PathBuf;
 
-use anyhow::{Context as _, Result, bail};
+use anyhow::{bail, Context as _, Result};
 use poodle_specs::{ButtonTone, ButtonVariant, ControlDensity};
 use serde_json::{Map, Value};
 
@@ -200,7 +200,9 @@ fn resolved_field<'a>(
             None
         }
         Some(other) => {
-            problems.fail(format!("{where_}: field '{field}' must be a string, got {other}"));
+            problems.fail(format!(
+                "{where_}: field '{field}' must be a string, got {other}"
+            ));
             None
         }
     }
@@ -224,7 +226,9 @@ fn check_viewport(problems: &mut Problems, where_: &str, row: &Map<String, Value
         return;
     };
     let Some(viewport) = value.as_object() else {
-        problems.fail(format!("{where_}: field 'viewport' must be an object, got {value}"));
+        problems.fail(format!(
+            "{where_}: field 'viewport' must be an object, got {value}"
+        ));
         return;
     };
     let (missing, extra) = key_diff(viewport, &["width", "height"]);
@@ -235,7 +239,9 @@ fn check_viewport(problems: &mut Problems, where_: &str, row: &Map<String, Value
         problems.fail(format!("{where_}: viewport has unknown key '{key}'"));
     }
     for key in ["width", "height"] {
-        let Some(side) = viewport.get(key) else { continue };
+        let Some(side) = viewport.get(key) else {
+            continue;
+        };
         let ok = integral_number(side).is_some_and(|side| side > 0);
         if !ok {
             problems.fail(format!(
@@ -355,7 +361,9 @@ fn check_content(
         return None;
     };
     let Some(content) = value.as_object() else {
-        problems.fail(format!("{where_}: field 'content' must be an object, got {value}"));
+        problems.fail(format!(
+            "{where_}: field 'content' must be an object, got {value}"
+        ));
         return None;
     };
     let kind = resolved_field(
@@ -379,14 +387,18 @@ fn check_content(
         problems.fail(format!("{where_}: content '{kind}' is missing '{key}'"));
     }
     for key in &extra {
-        problems.fail(format!("{where_}: content '{kind}' has unknown key '{key}'"));
+        problems.fail(format!(
+            "{where_}: content '{kind}' has unknown key '{key}'"
+        ));
     }
     if !missing.is_empty() || !extra.is_empty() {
         return None;
     }
 
     for key in ["label", "ariaLabel"] {
-        let Some(text) = content.get(key) else { continue };
+        let Some(text) = content.get(key) else {
+            continue;
+        };
         if !text.as_str().is_some_and(|text| !text.is_empty()) {
             problems.fail(format!(
                 "{where_}: content.{key} must be a non-empty string, got {text}"
@@ -483,12 +495,16 @@ pub fn validate(raw: &Value) -> Problems {
 
     for (index, entry) in fixtures.iter().enumerate() {
         let Some(row) = entry.as_object() else {
-            problems.fail(format!("fixture at index {index} must be an object, got {entry}"));
+            problems.fail(format!(
+                "fixture at index {index} must be an object, got {entry}"
+            ));
             continue;
         };
         let name = row.get("name").and_then(Value::as_str).unwrap_or_default();
         if name.is_empty() {
-            problems.fail(format!("fixture at index {index}: 'name' must be a non-empty string"));
+            problems.fail(format!(
+                "fixture at index {index}: 'name' must be a non-empty string"
+            ));
             continue;
         }
         let where_ = format!("fixture '{name}'");
@@ -656,9 +672,9 @@ pub struct ButtonFixture {
 }
 
 fn required_string<'a>(row: &'a Map<String, Value>, key: &str) -> &'a str {
-    row.get(key)
-        .and_then(Value::as_str)
-        .unwrap_or_else(|| panic!("validated inventory: fixture string field '{key}' is unreadable"))
+    row.get(key).and_then(Value::as_str).unwrap_or_else(|| {
+        panic!("validated inventory: fixture string field '{key}' is unreadable")
+    })
 }
 
 fn decode_variant(value: &str) -> ButtonVariant {
@@ -786,8 +802,8 @@ pub fn decode_fixtures(raw: &Value) -> Vec<ButtonFixture> {
 /// from an inventory the test target would reject.
 pub fn load_inventory() -> Result<Vec<ButtonFixture>> {
     let path = inventory_path();
-    let text = fs::read_to_string(&path)
-        .with_context(|| format!("cannot read {}", path.display()))?;
+    let text =
+        fs::read_to_string(&path).with_context(|| format!("cannot read {}", path.display()))?;
     let raw: Value = serde_json::from_str(&text)
         .with_context(|| format!("{} is not valid JSON", path.display()))?;
     let problems = validate(&raw);

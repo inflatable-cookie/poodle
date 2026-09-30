@@ -94,12 +94,7 @@ pub fn model_connection_picker(
     ctx: &RenderContext<'_>,
     handlers: ModelConnectionPickerHandlers,
 ) -> Node {
-    model_connection_picker_with_slots(
-        spec,
-        ctx,
-        ModelConnectionPickerSlots::default(),
-        handlers,
-    )
+    model_connection_picker_with_slots(spec, ctx, ModelConnectionPickerSlots::default(), handlers)
 }
 
 pub fn model_connection_picker_with_slots(
@@ -120,10 +115,7 @@ pub fn model_connection_picker_with_slots(
     let has_visible_selection = selectable
         .iter()
         .any(|option| Some(option.id.as_str()) == spec.value.as_deref());
-    let roving_ids: Vec<String> = selectable
-        .iter()
-        .map(|option| option.id.clone())
-        .collect();
+    let roving_ids: Vec<String> = selectable.iter().map(|option| option.id.clone()).collect();
 
     let shell_state = resolve_model_connection_picker_shell_state(
         spec.state,
@@ -485,7 +477,8 @@ fn tab_index_for(
     if spec.value.as_deref() == Some(option.id.as_str()) {
         return 0;
     }
-    if !has_visible_selection && roving_ids.first().map(String::as_str) == Some(option.id.as_str()) {
+    if !has_visible_selection && roving_ids.first().map(String::as_str) == Some(option.id.as_str())
+    {
         return 0;
     }
     -1
@@ -512,7 +505,9 @@ fn roving_key_handler(
             NodeKey::ArrowDown | NodeKey::ArrowRight => {
                 Some(if index == last { 0 } else { index + 1 })
             }
-            NodeKey::ArrowUp | NodeKey::ArrowLeft => Some(if index == 0 { last } else { index - 1 }),
+            NodeKey::ArrowUp | NodeKey::ArrowLeft => {
+                Some(if index == 0 { last } else { index - 1 })
+            }
             NodeKey::Home => Some(0),
             NodeKey::End => Some(last),
             _ => None,
@@ -678,10 +673,10 @@ mod tests {
             .as_deref()
             .expect("name")
             .contains("Unsupported on this platform"));
-        assert!(unsupported
-            .texts().contains(&"Unsupported"));
+        assert!(unsupported.texts().contains(&"Unsupported"));
         assert!(!unsupported
-            .texts().contains(&"Unsupported on this platform"));
+            .texts()
+            .contains(&"Unsupported on this platform"));
     }
 
     #[test]
@@ -696,7 +691,9 @@ mod tests {
             .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "package"))
             .is_some());
         assert!(row
-            .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "check"))
+            .find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "check")
+            )
             .is_none());
 
         let selected = model_connection_picker(
@@ -719,7 +716,10 @@ mod tests {
             walk(row, &mut count);
             count
         };
-        assert_eq!(checks, 1, "exactly one selected indicator, in the mark lane");
+        assert_eq!(
+            checks, 1,
+            "exactly one selected indicator, in the mark lane"
+        );
         assert!(row
             .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "package"))
             .is_none());
@@ -743,7 +743,10 @@ mod tests {
         for id in ["codex-app", "lmstudio-local", "vendor-legacy"] {
             let row = option_node(&node, id);
             assert!(row.interaction.disabled, "{id} is inert");
-            assert!(row.interaction.on_activate.is_none(), "{id} has no activation");
+            assert!(
+                row.interaction.on_activate.is_none(),
+                "{id} has no activation"
+            );
             assert!(!row.interaction.focusable, "{id} is out of focus traversal");
             assert_eq!(row.a11y.tab_index, Some(-1));
         }
@@ -840,8 +843,7 @@ mod tests {
             &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
-        assert!(loading
-            .texts().contains(&"Loading connections"));
+        assert!(loading.texts().contains(&"Loading connections"));
         assert!(options_in_order(&loading).is_empty());
 
         let error = model_connection_picker(
@@ -849,8 +851,7 @@ mod tests {
             &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
-        assert!(error
-            .texts().contains(&"Could not load connections"));
+        assert!(error.texts().contains(&"Could not load connections"));
         assert!(options_in_order(&error).is_empty());
 
         let empty = model_connection_picker(
@@ -858,16 +859,14 @@ mod tests {
             &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
-        assert!(empty
-            .texts().contains(&"No connections available"));
+        assert!(empty.texts().contains(&"No connections available"));
 
         let no_results = model_connection_picker(
             &spec().with_query("zzz"),
             &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
-        assert!(no_results
-            .texts().contains(&"No matching connections"));
+        assert!(no_results.texts().contains(&"No matching connections"));
         assert!(options_in_order(&no_results).is_empty());
     }
 
@@ -898,8 +897,10 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..ModelConnectionPickerHandlers::default()
         };
-        let first = model_connection_picker(&spec(), &RenderContext::new(&theme()), scoped("first"));
-        let second = model_connection_picker(&spec(), &RenderContext::new(&theme()), scoped("second"));
+        let first =
+            model_connection_picker(&spec(), &RenderContext::new(&theme()), scoped("first"));
+        let second =
+            model_connection_picker(&spec(), &RenderContext::new(&theme()), scoped("second"));
 
         for (node, scope) in [(&first, "first"), (&second, "second")] {
             assert!(node
@@ -915,7 +916,9 @@ mod tests {
                 "poodle-input-{}",
                 model_connection_picker_search_id(Some(scope))
             );
-            assert!(node.find(&|n| n.id.as_deref() == Some(field.as_str())).is_some());
+            assert!(node
+                .find(&|n| n.id.as_deref() == Some(field.as_str()))
+                .is_some());
         }
         assert!(first
             .find(&|n| n.runtime_id.as_deref()
@@ -925,7 +928,8 @@ mod tests {
             .is_none());
         // The semantic id stays readable and unscoped in both.
         assert!(first
-            .find(&|n| n.id.as_deref() == Some(model_connection_option_id("openai-responses").as_str()))
+            .find(&|n| n.id.as_deref()
+                == Some(model_connection_option_id("openai-responses").as_str()))
             .is_some());
     }
 

@@ -35,13 +35,13 @@ pub use poodle_headless::drag_drop::{
     DROP_POSITION_AFTER, DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
 };
 pub use poodle_headless::external_file_drag::{
-    can_export_anything, is_presentable_file_name, validate_file_export,
-    validate_inbound_files, DragExportBridge, DragExportCapabilities, DragExportForm,
-    DragExportPrepareComplete, DragExportPrepareRequest, DragExportRefusal, DragExportSnapshot,
-    DragExportState, DragExportTerminal, DragExportTerminalCallback, DragExportValidation,
-    InboundFileBatch, InboundFileCapabilities, InboundFileConstraints, InboundFileEvent,
-    InboundFileHostBridge, InboundFileOutcome, InboundFileReceipt, InboundFileRefusal,
-    InboundFileTransport, InboundFileValidation, PreparedFileExport, INBOUND_FILE_PROTOCOL_VERSION,
+    can_export_anything, is_presentable_file_name, validate_file_export, validate_inbound_files,
+    DragExportBridge, DragExportCapabilities, DragExportForm, DragExportPrepareComplete,
+    DragExportPrepareRequest, DragExportRefusal, DragExportSnapshot, DragExportState,
+    DragExportTerminal, DragExportTerminalCallback, DragExportValidation, InboundFileBatch,
+    InboundFileCapabilities, InboundFileConstraints, InboundFileEvent, InboundFileHostBridge,
+    InboundFileOutcome, InboundFileReceipt, InboundFileRefusal, InboundFileTransport,
+    InboundFileValidation, PreparedFileExport, INBOUND_FILE_PROTOCOL_VERSION,
     INBOUND_FILE_SUBJECT_KIND,
 };
 
@@ -226,7 +226,11 @@ pub struct NodeDragSource {
 
 impl NodeDragSource {
     /// A move-only source with the required identity and accessible name.
-    pub fn new(source_id: impl Into<String>, subject: DragSubject, label: impl Into<String>) -> Self {
+    pub fn new(
+        source_id: impl Into<String>,
+        subject: DragSubject,
+        label: impl Into<String>,
+    ) -> Self {
         Self {
             source_id: source_id.into(),
             subject,

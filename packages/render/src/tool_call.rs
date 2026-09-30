@@ -39,11 +39,7 @@ fn scoped(instance_id: Option<&str>, spec_id: &str) -> Option<String> {
     instance_id.map(|scope| format!("tool-call:{scope}:{spec_id}"))
 }
 
-pub fn tool_call(
-    spec: &ToolCallSpec,
-    ctx: &RenderContext<'_>,
-    handlers: ToolCallHandlers,
-) -> Node {
+pub fn tool_call(spec: &ToolCallSpec, ctx: &RenderContext<'_>, handlers: ToolCallHandlers) -> Node {
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
 

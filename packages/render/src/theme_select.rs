@@ -322,12 +322,16 @@ mod tests {
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = ThemeSelectSpec::new().with_open(true);
         let node = theme_select(&spec, &ctx, None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open panel carries the inert activation marker a host
         // keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
         let node = theme_select(&refusing, &ctx, None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
     }
 }

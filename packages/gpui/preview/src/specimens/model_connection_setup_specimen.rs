@@ -61,10 +61,7 @@ fn missing_options() -> Vec<ModelConnectionOption> {
         .map(|option| {
             if option.id == "codex-app" {
                 option
-                    .with_availability(
-                        ModelConnectionAvailability::Unavailable,
-                        "Not detected",
-                    )
+                    .with_availability(ModelConnectionAvailability::Unavailable, "Not detected")
                     .with_disabled(true)
             } else {
                 option
@@ -270,8 +267,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(16.0))
                 .child(panel(
                     ModelConnectionSetup::from_spec(
-                        direct_add(interactive_options(), "codex-app")
-                            .with_can_submit(true),
+                        direct_add(interactive_options(), "codex-app").with_can_submit(true),
                         theme,
                     )
                     .with_instance_id("setup-detect-found"),
@@ -327,7 +323,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_instance_id("setup-invalid")
-                    .with_configuration(api_key_field(theme, "mcs-invalid-key", "••••••••")),
+                    .with_configuration(api_key_field(
+                        theme,
+                        "mcs-invalid-key",
+                        "••••••••",
+                    )),
                 ))
                 .child(panel(
                     ModelConnectionSetup::from_spec(
@@ -337,7 +337,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_instance_id("setup-pending")
-                    .with_configuration(api_key_field(theme, "mcs-pending-key", "••••••••")),
+                    .with_configuration(api_key_field(
+                        theme,
+                        "mcs-pending-key",
+                        "••••••••",
+                    )),
                 )),
         ))
 }

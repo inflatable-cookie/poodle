@@ -207,7 +207,8 @@ pub fn picker_shell(
         let mut bar = Node::container();
         bar.style.descriptor.layout.direction = LayoutDirection::Row;
         bar.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        bar.style.descriptor.layout.spacing.gap = ctx.theme().resolve_space(spec.footer_gap_token());
+        bar.style.descriptor.layout.spacing.gap =
+            ctx.theme().resolve_space(spec.footer_gap_token());
         shell = shell.child(bar.child(footer));
     }
 

@@ -51,8 +51,8 @@ pub fn collapse_toggle(
         s.line_height = Some(1.0);
     }
 
-    let icon_spec = IconSpec::new(spec.effective_icon_name())
-        .with_size(spec.effective_icon_size(base_size));
+    let icon_spec =
+        IconSpec::new(spec.effective_icon_name()).with_size(spec.effective_icon_size(base_size));
     let mut chevron = icon(&icon_spec, ctx);
     chevron.style.descriptor.text_color = Some(text_color);
     el = el.child(chevron);

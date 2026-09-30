@@ -21,8 +21,8 @@ mod surface;
 mod avatar;
 mod icon;
 mod icon_provider;
-mod ui_presentation_provider;
 mod motion_policy_provider;
+mod ui_presentation_provider;
 
 // ── Action ────────────────────────────────────────────────
 mod button;

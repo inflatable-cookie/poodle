@@ -129,14 +129,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex()
                 .flex_col()
                 .gap(px(12.0))
-                .child(RefSelect::from_spec(
-                    demo_spec().with_value(""),
-                    theme,
-                ))
-                .child(RefSelect::from_spec(
-                    demo_spec().with_disabled(true),
-                    theme,
-                ))
+                .child(RefSelect::from_spec(demo_spec().with_value(""), theme))
+                .child(RefSelect::from_spec(demo_spec().with_disabled(true), theme))
                 .into_any_element(),
         ))
         .into_any_element();

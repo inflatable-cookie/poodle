@@ -59,7 +59,8 @@ mod tests {
             disabled: false,
             read_only: false,
         };
-        let (next_ctx, effects) = switch_transition(ctx, SwitchEvent::Toggle { next_checked: true });
+        let (next_ctx, effects) =
+            switch_transition(ctx, SwitchEvent::Toggle { next_checked: true });
         assert_eq!(
             next_ctx,
             SwitchContext {
@@ -68,7 +69,10 @@ mod tests {
                 read_only: false,
             }
         );
-        assert_eq!(effects, vec![SwitchEffect::EmitCheckedChange { checked: true }]);
+        assert_eq!(
+            effects,
+            vec![SwitchEffect::EmitCheckedChange { checked: true }]
+        );
     }
 
     #[test]
@@ -78,7 +82,8 @@ mod tests {
             disabled: true,
             read_only: false,
         };
-        let (next_ctx, effects) = switch_transition(ctx, SwitchEvent::Toggle { next_checked: true });
+        let (next_ctx, effects) =
+            switch_transition(ctx, SwitchEvent::Toggle { next_checked: true });
         assert_eq!(next_ctx, ctx);
         assert!(effects.is_empty());
     }
@@ -90,7 +95,12 @@ mod tests {
             disabled: false,
             read_only: true,
         };
-        let (next_ctx, effects) = switch_transition(ctx, SwitchEvent::Toggle { next_checked: false });
+        let (next_ctx, effects) = switch_transition(
+            ctx,
+            SwitchEvent::Toggle {
+                next_checked: false,
+            },
+        );
         assert_eq!(next_ctx, ctx);
         assert_eq!(effects, vec![SwitchEffect::RevertNativeChecked]);
     }

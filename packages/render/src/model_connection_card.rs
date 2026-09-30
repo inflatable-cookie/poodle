@@ -263,8 +263,10 @@ pub fn model_connection_card_with_slots(
         .insert("open".to_string(), spec.is_open.to_string());
     root.roles
         .insert("enabled".to_string(), spec.is_enabled.to_string());
-    root.roles
-        .insert("readiness".to_string(), readiness_role(spec.readiness).to_string());
+    root.roles.insert(
+        "readiness".to_string(),
+        readiness_role(spec.readiness).to_string(),
+    );
     let mut root = root.child(summary);
 
     if spec.is_open {
@@ -362,7 +364,11 @@ fn disclosure_button(
 
     let mut node = icon_button(
         &IconButtonSpec::new()
-            .with_icon(if is_open { "chevron-up" } else { "chevron-down" })
+            .with_icon(if is_open {
+                "chevron-up"
+            } else {
+                "chevron-down"
+            })
             .with_variant(ButtonVariant::Ghost)
             .with_size_role(SemanticControlSizeRole::Chrome)
             .with_size(effective_size)
@@ -452,9 +458,12 @@ mod tests {
 
     #[test]
     fn ready_shows_the_access_summary_and_other_postures_show_readiness() {
-        let ready = model_connection_card(&spec(), &RenderContext::new(&theme()), ModelConnectionCardHandlers::default());
-        assert!(ready
-            .texts().contains(&"API key on file"));
+        let ready = model_connection_card(
+            &spec(),
+            &RenderContext::new(&theme()),
+            ModelConnectionCardHandlers::default(),
+        );
+        assert!(ready.texts().contains(&"API key on file"));
         assert!(!ready.texts().contains(&"Ready"));
 
         let checking = model_connection_card(
@@ -464,8 +473,7 @@ mod tests {
             &RenderContext::new(&theme()),
             ModelConnectionCardHandlers::default(),
         );
-        assert!(checking
-            .texts().contains(&"Checking install"));
+        assert!(checking.texts().contains(&"Checking install"));
         assert!(!checking.texts().contains(&"Signed in"));
         assert_eq!(
             checking.roles.get("readiness").map(String::as_str),
@@ -523,14 +531,14 @@ mod tests {
             .find(&|n| n.id.as_deref() == Some(spec.details_id().as_str()))
             .expect("details region");
         assert_eq!(details.a11y.role, Some(NodeRole::Region));
-        assert_eq!(
-            details.a11y.label.as_deref(),
-            Some("OpenAI · Work details")
-        );
+        assert_eq!(details.a11y.label.as_deref(), Some("OpenAI · Work details"));
 
         let control = disclosure(&node, &spec);
         assert_eq!(control.a11y.expanded, Some(true));
-        assert_eq!(control.a11y.controls.as_deref(), Some(spec.details_id().as_str()));
+        assert_eq!(
+            control.a11y.controls.as_deref(),
+            Some(spec.details_id().as_str())
+        );
         assert_eq!(
             control.a11y.label.as_deref(),
             Some("Collapse OpenAI · Work")
@@ -586,7 +594,11 @@ mod tests {
     #[test]
     fn an_off_card_dims_its_copy_but_never_its_switch() {
         let spec = spec().with_enabled(false);
-        let node = model_connection_card(&spec, &RenderContext::new(&theme()), ModelConnectionCardHandlers::default());
+        let node = model_connection_card(
+            &spec,
+            &RenderContext::new(&theme()),
+            ModelConnectionCardHandlers::default(),
+        );
         assert_eq!(node.roles.get("enabled").map(String::as_str), Some("false"));
 
         let switch = switch_node(&node, &spec);
@@ -617,8 +629,7 @@ mod tests {
         assert!(disclosure(&node, &spec).interaction.on_activate.is_none());
         assert!(switch_node(&node, &spec).interaction.on_activate.is_none());
         assert!(node.texts().contains(&"OpenAI · Work"));
-        assert!(node
-            .texts().contains(&"Responses API · 2026-08"));
+        assert!(node.texts().contains(&"Responses API · 2026-08"));
     }
 
     #[test]
@@ -647,7 +658,11 @@ mod tests {
         assert_ne!(first.details_id(), second.details_id());
         assert_ne!(first.disclosure_id(), second.disclosure_id());
 
-        let node = model_connection_card(&first, &RenderContext::new(&theme()), ModelConnectionCardHandlers::default());
+        let node = model_connection_card(
+            &first,
+            &RenderContext::new(&theme()),
+            ModelConnectionCardHandlers::default(),
+        );
         assert!(node
             .find(&|n| n.id.as_deref() == Some(second.details_id().as_str()))
             .is_none());
@@ -702,7 +717,10 @@ mod tests {
             .expect("activation"))();
         assert_eq!(
             focus.lock().unwrap().as_slice(),
-            [format!("model-connection-card:second:{}", spec.disclosure_id())]
+            [format!(
+                "model-connection-card:second:{}",
+                spec.disclosure_id()
+            )]
         );
     }
 

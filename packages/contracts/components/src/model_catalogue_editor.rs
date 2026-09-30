@@ -188,7 +188,6 @@ impl ModelCatalogueEditorSpec {
     pub fn row_handle_id(&self, item_id: &str) -> String {
         format!("model-catalogue-editor:{item_id}:handle")
     }
-
 }
 
 /// The hidden-section disclosure id — the focus destination when hiding the

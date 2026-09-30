@@ -27,9 +27,9 @@ use poodle_node::{
     MainAxisAlignment, Node, NodeKey, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, EmptyStateSize,
-    EmptyStateSpec, HistoryCenterSpec, HistoryCenterStatus, IconButtonSpec, PopoverSpec,
-    SeparatorSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
+    AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec,
+    HistoryCenterSpec, HistoryCenterStatus, IconButtonSpec, PopoverSpec, SeparatorSpec,
+    SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
 
 use crate::alert_dialog::{alert_dialog, AlertDialogHandlers, DEFAULT_WORKING_LABEL};
@@ -721,10 +721,7 @@ fn entry_button(
     node.child(marker).child(Node::text(label))
 }
 
-fn position_marker(
-    position: poodle_specs::HistoryEntryPosition,
-    ctx: &RenderContext<'_>,
-) -> Node {
+fn position_marker(position: poodle_specs::HistoryEntryPosition, ctx: &RenderContext<'_>) -> Node {
     let mut node = Node::container();
     let dot = rem_to_px(0.375);
     {
@@ -882,8 +879,8 @@ fn picker_select(
 ) -> Node {
     let semantic = history_center_picker_select_id(anchor_entry_id);
     let is_open = view.open_select_anchor.as_deref() == Some(anchor_entry_id);
-    let picked = picked_entry_id
-        .and_then(|id| continuations.iter().find(|fork| fork.entry_id == id));
+    let picked =
+        picked_entry_id.and_then(|id| continuations.iter().find(|fork| fork.entry_id == id));
 
     let mut trigger = Node::container();
     trigger.id = Some(semantic.clone());
@@ -921,12 +918,12 @@ fn picker_select(
     }
     // The trigger carries the fork's own facts: its label and the branch it
     // lands on.
-    let trigger = trigger.child(icon_glyph("git-branch", ctx, ControlSize::Xs)).child(
-        Node::text(match picked {
+    let trigger = trigger
+        .child(icon_glyph("git-branch", ctx, ControlSize::Xs))
+        .child(Node::text(match picked {
             Some(fork) => format!("{} · {}", fork.label, fork.display_branch()),
             None => "Choose a fork…".to_owned(),
-        }),
-    );
+        }));
 
     if !is_open {
         return trigger;
@@ -943,7 +940,13 @@ fn picker_select(
         s.overlay = true;
     }
     for fork in continuations {
-        listbox = listbox.child(picker_option(fork, picked_entry_id, ctx, handlers, instance));
+        listbox = listbox.child(picker_option(
+            fork,
+            picked_entry_id,
+            ctx,
+            handlers,
+            instance,
+        ));
     }
 
     let mut wrapper = Node::container();
@@ -1004,8 +1007,8 @@ fn picker_actions(
     let semantic = history_center_picker_actions_id(anchor_entry_id);
     let is_open = view.open_actions_anchor.as_deref() == Some(anchor_entry_id);
     let is_renaming = view.renaming_at(anchor_entry_id).is_some();
-    let picked = picked_entry_id
-        .and_then(|id| continuations.iter().find(|fork| fork.entry_id == id));
+    let picked =
+        picked_entry_id.and_then(|id| continuations.iter().find(|fork| fork.entry_id == id));
 
     let mut trigger = icon_button(
         &IconButtonSpec::new()
@@ -1069,10 +1072,7 @@ fn picker_actions(
         && handlers.on_delete_confirm.is_some()
         && handlers.on_delete_cancel.is_some();
     if delete_is_supported {
-        menu = menu.child(separator(
-            &SeparatorSpec::new().with_decorative(false),
-            ctx,
-        ));
+        menu = menu.child(separator(&SeparatorSpec::new().with_decorative(false), ctx));
         menu = menu.child(menu_item(
             HISTORY_CENTER_ACTION_DELETE_ID,
             "Delete",
@@ -1368,7 +1368,10 @@ mod tests {
         );
         let disclosure =
             find(&closed, &history_center_disclosure_id("e2")).expect("e2 has two forks");
-        assert_eq!(disclosure.a11y.label.as_deref(), Some("Show 2 continuations"));
+        assert_eq!(
+            disclosure.a11y.label.as_deref(),
+            Some("Show 2 continuations")
+        );
         assert_eq!(disclosure.a11y.expanded, Some(false));
 
         // A terminal entry has no forks, so it renders no disclosure at all —
@@ -1418,15 +1421,13 @@ mod tests {
     /// not merely dimmed.
     #[test]
     fn busy_makes_both_triggers_inert() {
-        let spec = open_spec().with_can_undo(true).with_can_redo(true).with_busy(true);
+        let spec = open_spec()
+            .with_can_undo(true)
+            .with_can_redo(true)
+            .with_busy(true);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = history_center(
-            &spec,
-            &ctx,
-            &open_view(),
-            &HistoryCenterHandlers::default(),
-        );
+        let node = history_center(&spec, &ctx, &open_view(), &HistoryCenterHandlers::default());
         assert!(
             find(&node, HISTORY_CENTER_UNDO_ID)
                 .expect("undo renders")
@@ -1467,8 +1468,7 @@ mod tests {
         );
         let select = find(&node, &history_center_picker_select_id("s2")).expect("select renders");
         assert!(select.interaction.disabled);
-        let actions =
-            find(&node, &history_center_picker_actions_id("s2")).expect("actions render");
+        let actions = find(&node, &history_center_picker_actions_id("s2")).expect("actions render");
         assert!(!actions.interaction.disabled);
     }
 
@@ -1493,12 +1493,7 @@ mod tests {
             branch_id: "wide".to_owned(),
             value: "Wide mix".to_owned(),
         });
-        let node = history_center(
-            &open_spec(),
-            &ctx,
-            &view,
-            &HistoryCenterHandlers::default(),
-        );
+        let node = history_center(&open_spec(), &ctx, &view, &HistoryCenterHandlers::default());
         let input =
             find(&node, &history_center_rename_input_id("e2")).expect("the rename input renders");
         assert_eq!(input.a11y.role, Some(NodeRole::TextInput));
@@ -1512,13 +1507,11 @@ mod tests {
         let spec = open_spec().with_status(HistoryCenterStatus::Loading);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = history_center(
-            &spec,
-            &ctx,
-            &open_view(),
-            &HistoryCenterHandlers::default(),
+        let node = history_center(&spec, &ctx, &open_view(), &HistoryCenterHandlers::default());
+        assert_eq!(
+            node.roles.get("status").map(String::as_str),
+            Some("loading")
         );
-        assert_eq!(node.roles.get("status").map(String::as_str), Some("loading"));
         assert_eq!(
             node.roles.get("placement").map(String::as_str),
             Some("bottom-end"),
@@ -1595,12 +1588,7 @@ mod tests {
             "e2".to_owned(),
         ));
 
-        let node = history_center(
-            &open_spec(),
-            &ctx,
-            &view,
-            &HistoryCenterHandlers::default(),
-        );
+        let node = history_center(&open_spec(), &ctx, &view, &HistoryCenterHandlers::default());
 
         let tab_index_of = |entry_id: &str| {
             find(&node, &history_center_entry_id(entry_id))
@@ -1691,12 +1679,8 @@ mod tests {
         let mut view = view_for(&pages, &[level]);
         view.open_actions_anchor = Some("e2".to_owned());
 
-        let unsupported = history_center(
-            &open_spec(),
-            &ctx,
-            &view,
-            &HistoryCenterHandlers::default(),
-        );
+        let unsupported =
+            history_center(&open_spec(), &ctx, &view, &HistoryCenterHandlers::default());
         assert!(find(&unsupported, HISTORY_CENTER_ACTION_DELETE_ID).is_none());
 
         let seen = Arc::new(Mutex::new(Vec::new()));
@@ -1776,8 +1760,16 @@ mod tests {
             })
             .expect("cancel button");
 
-        (confirm.interaction.on_activate.as_ref().expect("confirm wired"))();
-        (cancel.interaction.on_activate.as_ref().expect("cancel wired"))();
+        (confirm
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("confirm wired"))();
+        (cancel
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("cancel wired"))();
         assert_eq!(
             seen.lock().expect("seen").as_slice(),
             ["confirm:f1", "cancel"],
@@ -1817,7 +1809,9 @@ mod tests {
         let mut rendered: Vec<String> = Vec::new();
 
         for (code, expected) in REJECTION_COPY {
-            let spec = HistoryCenterSpec::new().with_open(true).with_rejection(code);
+            let spec = HistoryCenterSpec::new()
+                .with_open(true)
+                .with_rejection(code);
             let message = spec
                 .rejection_message()
                 .unwrap_or_else(|| panic!("{code:?} resolves component-owned copy"));

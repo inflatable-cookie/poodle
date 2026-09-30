@@ -35,14 +35,26 @@ fn render_machine(machine: &MachineInterface, source_path: &str, schema_version:
         out.push_str(&format!(
             "export type {} = {};\n\n",
             named.name,
-            ts_union(&named.variants.iter().map(|m| m.ts.as_str()).collect::<Vec<_>>())
+            ts_union(
+                &named
+                    .variants
+                    .iter()
+                    .map(|m| m.ts.as_str())
+                    .collect::<Vec<_>>()
+            )
         ));
     }
 
     out.push_str(&format!(
         "export type {}State = {};\n\n",
         machine.prefix,
-        ts_union(&machine.states.iter().map(|m| m.ts.as_str()).collect::<Vec<_>>())
+        ts_union(
+            &machine
+                .states
+                .iter()
+                .map(|m| m.ts.as_str())
+                .collect::<Vec<_>>()
+        )
     ));
 
     out.push_str(&format!("export interface {}Context {{\n", machine.prefix));
@@ -83,7 +95,8 @@ fn ts_variants(variants: &[Variant]) -> String {
     variants
         .iter()
         .map(|variant| {
-            let disc = serde_json::to_string(&variant.ts_type).expect("string serialization cannot fail");
+            let disc =
+                serde_json::to_string(&variant.ts_type).expect("string serialization cannot fail");
             if variant.fields.is_empty() {
                 format!("  | {{ type: {disc} }}")
             } else {

@@ -35,10 +35,7 @@ fn pill_metrics(size: PillSize, typography: InlineTypographyMode) -> (f32, f32, 
     }
 }
 
-fn pill_colors(
-    spec: &PillSpec,
-    ctx: &RenderContext<'_>,
-) -> (ColorValue, ColorValue, ColorValue) {
+fn pill_colors(spec: &PillSpec, ctx: &RenderContext<'_>) -> (ColorValue, ColorValue, ColorValue) {
     let surface_bg = ctx.theme().resolve_color("color.background.surface");
     let text_primary = ctx.theme().resolve_color("color.text.primary");
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
@@ -369,7 +366,10 @@ mod tests {
         assert_eq!(dismiss.a11y.tab_index, Some(0));
         assert!(dismiss.interaction.focusable);
         assert!(dismiss.style.focus_ring.is_some());
-        assert_eq!(other_dismiss.runtime_id.as_deref(), Some("pill:filters:audio:dismiss"));
+        assert_eq!(
+            other_dismiss.runtime_id.as_deref(),
+            Some("pill:filters:audio:dismiss")
+        );
         assert_eq!(rebuilt_dismiss.runtime_id.as_deref(), Some(dismiss_id));
     }
 

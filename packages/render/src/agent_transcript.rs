@@ -103,11 +103,7 @@ pub fn agent_transcript_root_id(instance_id: Option<&str>) -> String {
     }
 }
 
-pub fn agent_transcript_block_id(
-    instance_id: Option<&str>,
-    kind: &str,
-    item_id: &str,
-) -> String {
+pub fn agent_transcript_block_id(instance_id: Option<&str>, kind: &str, item_id: &str) -> String {
     format!(
         "{}:block:{kind}:{item_id}",
         agent_transcript_root_id(instance_id)
@@ -144,10 +140,8 @@ pub fn agent_transcript(
     root.a11y.label = Some(spec.aria_label.clone());
     root.roles
         .insert("empty".to_owned(), spec.is_empty().to_string());
-    root.roles.insert(
-        "virtualized".to_owned(),
-        spec.is_virtualized.to_string(),
-    );
+    root.roles
+        .insert("virtualized".to_owned(), spec.is_virtualized.to_string());
     root.roles.insert(
         "size".to_owned(),
         format!("{base_size:?}").to_ascii_lowercase(),
@@ -201,7 +195,12 @@ pub fn agent_transcript(
                 child.roles.insert("role".to_owned(), role);
                 child.roles.insert(
                     "status".to_owned(),
-                    if message.is_streaming { "streaming" } else { "complete" }.to_owned(),
+                    if message.is_streaming {
+                        "streaming"
+                    } else {
+                        "complete"
+                    }
+                    .to_owned(),
                 );
                 root = root.child(child);
             }
@@ -215,9 +214,10 @@ pub fn agent_transcript(
                 let group_handlers = ToolCallGroupHandlers {
                     on_toggle: handlers.on_tool_run_toggle.as_ref().map(Arc::clone),
                     on_call_toggle: handlers.on_tool_call_toggle.as_ref().map(Arc::clone),
-                    instance_id: handlers.instance_id.as_deref().map(|scope| {
-                        format!("{scope}:transcript-run:{}", run.id)
-                    }),
+                    instance_id: handlers
+                        .instance_id
+                        .as_deref()
+                        .map(|scope| format!("{scope}:transcript-run:{}", run.id)),
                 };
                 let status = group.status().as_str().to_owned();
                 let mut child = tool_call_group(&group, ctx, group_handlers);
@@ -239,9 +239,10 @@ pub fn agent_transcript(
                 let card_handlers = ChangedFilesHandlers {
                     on_toggle: handlers.on_changed_files_toggle.as_ref().map(Arc::clone),
                     on_file_select: handlers.on_file_select.as_ref().map(Arc::clone),
-                    instance_id: handlers.instance_id.as_deref().map(|scope| {
-                        format!("{scope}:transcript-files:{}", changed.id)
-                    }),
+                    instance_id: handlers
+                        .instance_id
+                        .as_deref()
+                        .map(|scope| format!("{scope}:transcript-files:{}", changed.id)),
                 };
                 let mut child = changed_files(&card, ctx, card_handlers);
                 child.runtime_id = Some(agent_transcript_block_id(
@@ -291,15 +292,12 @@ pub fn agent_transcript(
                         let id = group_id.clone();
                         Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
                     }),
-                    instance_id: handlers.instance_id.as_deref().map(|scope| {
-                        format!("{scope}:transcript-subagent:{}", group.id)
-                    }),
+                    instance_id: handlers
+                        .instance_id
+                        .as_deref()
+                        .map(|scope| format!("{scope}:transcript-subagent:{}", group.id)),
                 };
-                let mut child = crate::agent_subagent::agent_subagent(
-                    &card,
-                    ctx,
-                    group_handlers,
-                );
+                let mut child = crate::agent_subagent::agent_subagent(&card, ctx, group_handlers);
                 child.runtime_id = Some(agent_transcript_block_id(
                     handlers.instance_id.as_deref(),
                     block_kind,
@@ -317,9 +315,10 @@ pub fn agent_transcript(
                     &card,
                     ctx,
                     crate::agent_plan_record::AgentPlanRecordHandlers {
-                        instance_id: handlers.instance_id.as_deref().map(|scope| {
-                            format!("{scope}:transcript-plan:{block_id}")
-                        }),
+                        instance_id: handlers
+                            .instance_id
+                            .as_deref()
+                            .map(|scope| format!("{scope}:transcript-plan:{block_id}")),
                         ..crate::agent_plan_record::AgentPlanRecordHandlers::default()
                     },
                 );

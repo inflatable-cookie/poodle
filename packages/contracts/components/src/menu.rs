@@ -169,14 +169,20 @@ mod tests {
         assert_eq!(spec.density, Some(ControlDensity::Compact));
         assert_eq!(spec.actionable_item_count(), 2);
         assert_eq!(spec.checked_item_count(), 1);
-        assert_eq!(spec.surface_fill_token(), semantic::COLOR_BACKGROUND_ELEVATED);
+        assert_eq!(
+            spec.surface_fill_token(),
+            semantic::COLOR_BACKGROUND_ELEVATED
+        );
         assert_eq!(spec.shadow_token(), semantic::ELEVATION_OVERLAY);
         assert_eq!(spec.overlay_border_token(), semantic::COLOR_BORDER_DEFAULT);
         assert_eq!(spec.overlay_radius_token(), semantic::RADIUS_SURFACE);
         assert_eq!(spec.item_text_token(), semantic::COLOR_TEXT_PRIMARY);
         assert_eq!(spec.item_highlight_token(), semantic::COLOR_ACCENT_BASE);
         assert_eq!(spec.separator_color_token(), semantic::COLOR_BORDER_SUBTLE);
-        assert_eq!(spec.disabled_opacity_token(), semantic::STATE_OPACITY_DISABLED);
+        assert_eq!(
+            spec.disabled_opacity_token(),
+            semantic::STATE_OPACITY_DISABLED
+        );
     }
 
     #[test]

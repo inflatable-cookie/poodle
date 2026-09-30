@@ -27,27 +27,26 @@ use std::sync::Arc;
 pub mod drag;
 
 pub use drag::{
+    can_export_anything, is_presentable_file_name, validate_file_export, validate_inbound_files,
     CrossWindowAbort, CrossWindowCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
     CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
     CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
     CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,
-    CrossWindowPrepareComplete, CrossWindowTerminal, DragDropCommitResult,
-    CROSS_WINDOW_DRAG_MIME_TYPE, CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
-    DragAnnouncementKind, DragCancelReason, DragOperation, DragSession, DragSessionPhase,
-    DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
+    CrossWindowPrepareComplete, CrossWindowTerminal, DragAnnouncementKind, DragCancelReason,
+    DragDropCommitResult, DragExportBridge, DragExportCapabilities, DragExportForm,
+    DragExportPrepareComplete, DragExportPrepareRequest, DragExportRefusal, DragExportSnapshot,
+    DragExportState, DragExportTerminal, DragExportTerminalCallback, DragExportValidation,
+    DragOperation, DragSession, DragSessionPhase, DragSubject, DragTerminalOutcome,
+    DropEligibility, DropIntent, DropPosition, InboundFileBatch, InboundFileCapabilities,
+    InboundFileConstraints, InboundFileEvent, InboundFileHostBridge, InboundFileOutcome,
+    InboundFileReceipt, InboundFileRefusal, InboundFileTransport, InboundFileValidation,
     NodeDragCapabilities, NodeDragEndHandler, NodeDragInputKind, NodeDragSource,
-    NodeDragStartHandler, NodeDropCommit, NodeDropCommitHandler, NodeDropEligibilityResolver,
-    NodeDropCommitEvent, NodeDropIntentClearedHandler, NodeDropIntentEvent, NodeDropIntentHandler,
-    NodeDropPositionInput, NodeDropPositionResolver, NodeDropTarget, NodeKeyboardDropDirection,
-    NodeKeyboardPositionInput, NodeKeyboardPositionResolver, DROP_POSITION_AFTER,
-    DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
-    can_export_anything, is_presentable_file_name, validate_file_export, validate_inbound_files,
-    DragExportBridge, DragExportCapabilities, DragExportForm, DragExportPrepareComplete,
-    DragExportPrepareRequest, DragExportRefusal, DragExportSnapshot, DragExportState,
-    DragExportTerminal, DragExportTerminalCallback, DragExportValidation, InboundFileBatch,
-    InboundFileCapabilities, InboundFileConstraints, InboundFileEvent, InboundFileHostBridge,
-    InboundFileOutcome, InboundFileReceipt, InboundFileRefusal, InboundFileTransport,
-    InboundFileValidation, PreparedFileExport, INBOUND_FILE_PROTOCOL_VERSION,
+    NodeDragStartHandler, NodeDropCommit, NodeDropCommitEvent, NodeDropCommitHandler,
+    NodeDropEligibilityResolver, NodeDropIntentClearedHandler, NodeDropIntentEvent,
+    NodeDropIntentHandler, NodeDropPositionInput, NodeDropPositionResolver, NodeDropTarget,
+    NodeKeyboardDropDirection, NodeKeyboardPositionInput, NodeKeyboardPositionResolver,
+    PreparedFileExport, CROSS_WINDOW_DRAG_MIME_TYPE, CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+    DROP_POSITION_AFTER, DROP_POSITION_BEFORE, DROP_POSITION_INSIDE, INBOUND_FILE_PROTOCOL_VERSION,
     INBOUND_FILE_SUBJECT_KIND,
 };
 pub use poodle_layout::{
@@ -1127,7 +1126,7 @@ impl fmt::Debug for Node {
             NodeKind::Icon { name, .. } => format!("Icon({name:?})"),
             NodeKind::ResolvedIconGeometry { frame, .. } => {
                 format!("ResolvedIconGeometry(contours={})", frame.contours.len())
-            },
+            }
             NodeKind::Button { label } => format!("Button({label:?})"),
             NodeKind::Image { source } => format!("Image({source:?})"),
             NodeKind::Progress { fraction } => format!("Progress({fraction})"),

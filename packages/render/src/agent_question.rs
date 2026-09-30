@@ -406,7 +406,10 @@ mod tests {
         let prompt = node
             .find(&|candidate| candidate.id.as_deref() == Some(prompt_id.as_str()))
             .expect("prompt node");
-        assert!(prompt.a11y.role.is_none(), "prompt stays a name source, not a snapshot role");
+        assert!(
+            prompt.a11y.role.is_none(),
+            "prompt stays a name source, not a snapshot role"
+        );
         let group = node
             .find(&|candidate| candidate.a11y.role == Some(NodeRole::RadioGroup))
             .expect("option group");

@@ -64,7 +64,11 @@ fn summary_font_rem(size: ControlSize) -> f32 {
 
 /// Actions-row gap per density (contract §8: compact 0.125rem, default
 /// space.inline.sm, comfortable 0.5rem).
-fn actions_gap_px(spec: &BulkActionBarSpec, density: ControlDensity, ctx: &RenderContext<'_>) -> f32 {
+fn actions_gap_px(
+    spec: &BulkActionBarSpec,
+    density: ControlDensity,
+    ctx: &RenderContext<'_>,
+) -> f32 {
     match density {
         ControlDensity::Compact => rem_to_px(0.125),
         ControlDensity::Default => ctx.theme().resolve_space(spec.gap_token()),

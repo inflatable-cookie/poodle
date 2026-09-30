@@ -616,11 +616,7 @@ fn build_channel_inputs(
             .with_aria_label(aria)
             .with_size(base_size)
             .with_density(density);
-        number_input(
-            &n,
-            ctx,
-            crate::number_input::NumberInputHandlers::default(),
-        )
+        number_input(&n, ctx, crate::number_input::NumberInputHandlers::default())
     };
     let alpha_field = |row: Node| -> Node {
         row.child(labelled(

@@ -125,13 +125,14 @@ pub fn message_center(
         node.runtime_id = Some(surface_id.clone());
         node.roles
             .insert("dependency".to_owned(), "popover".to_owned());
-        node.interaction.focusable =
-            popover_spec.initial_focus == PopoverInitialFocus::Content;
-        node.a11y.tab_index = Some(if popover_spec.initial_focus == PopoverInitialFocus::Content {
-            1
-        } else {
-            -1
-        });
+        node.interaction.focusable = popover_spec.initial_focus == PopoverInitialFocus::Content;
+        node.a11y.tab_index = Some(
+            if popover_spec.initial_focus == PopoverInitialFocus::Content {
+                1
+            } else {
+                -1
+            },
+        );
         if popover_spec.initial_focus == PopoverInitialFocus::Content {
             node.a11y.initial_focus = true;
             node.style.focus = Some(StylePatch {
@@ -688,7 +689,11 @@ mod tests {
         assert_eq!(content.style.descriptor.corner_radii.bottom_right, radius);
         let surface = ctx.theme().resolve_color("color.background.surface");
         assert_eq!(
-            content.style.hover.as_ref().and_then(|hover| hover.background),
+            content
+                .style
+                .hover
+                .as_ref()
+                .and_then(|hover| hover.background),
             Some(with_alpha(surface, surface.3 * 0.72))
         );
         assert_eq!(

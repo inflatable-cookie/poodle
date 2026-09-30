@@ -340,7 +340,10 @@ fn terminal(
         DragSessionEffect::Announce { kind },
     ];
 
-    if matches!(phase, DragSessionPhase::Dragging | DragSessionPhase::Dropping) {
+    if matches!(
+        phase,
+        DragSessionPhase::Dragging | DragSessionPhase::Dropping
+    ) {
         effects.push(DragSessionEffect::ReturnFocus {
             session_id: session.session_id.clone(),
             subject: session.subject.clone(),
@@ -384,8 +387,10 @@ fn prepare(
     }
 
     // An active gesture owns its session; a terminal one must be reset first.
-    if matches!(phase, DragSessionPhase::Dragging | DragSessionPhase::Dropping)
-        || is_terminal_phase(phase)
+    if matches!(
+        phase,
+        DragSessionPhase::Dragging | DragSessionPhase::Dropping
+    ) || is_terminal_phase(phase)
     {
         return (phase, context, vec![]);
     }

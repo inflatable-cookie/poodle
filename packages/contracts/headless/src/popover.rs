@@ -164,7 +164,10 @@ mod tests {
         ] {
             for state in [PopoverState::Closed, PopoverState::Open] {
                 let (next, effects) = popover_transition(state, disabled, event);
-                assert_eq!(next, state, "disabled must never change state for {event:?}");
+                assert_eq!(
+                    next, state,
+                    "disabled must never change state for {event:?}"
+                );
                 assert!(effects.is_empty());
             }
         }
@@ -177,11 +180,8 @@ mod tests {
             PopoverInitialFocus::Content,
             PopoverInitialFocus::None,
         ] {
-            let (_, effects) = popover_transition(
-                PopoverState::Closed,
-                context(strategy),
-                PopoverEvent::Open,
-            );
+            let (_, effects) =
+                popover_transition(PopoverState::Closed, context(strategy), PopoverEvent::Open);
             assert_eq!(
                 effects,
                 vec![

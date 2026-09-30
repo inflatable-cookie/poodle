@@ -23,8 +23,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::RenderContext;
 use poodle_render::segmented_control;
+use poodle_render::RenderContext;
 use poodle_specs::{ControlSize, EyebrowSpec, SegmentedControlOption, SegmentedControlSpec};
 
 /// Build a node-tier SegmentedControl whose change handler records the picked

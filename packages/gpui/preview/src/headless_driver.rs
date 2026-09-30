@@ -885,7 +885,11 @@ impl HeadlessDriver<'_> {
     /// the first stop repeats or `limit` is reached. Each stop is attributed
     /// to a tracked node id, or `None` when the focused handle is a node the
     /// backend does not track. Moves real focus; read the snapshot first.
-    pub fn focus_traversal(&mut self, candidate_ids: &[String], limit: usize) -> Vec<Option<String>> {
+    pub fn focus_traversal(
+        &mut self,
+        candidate_ids: &[String],
+        limit: usize,
+    ) -> Vec<Option<String>> {
         self.cx.update(|window, _cx| window.blur());
         self.draw_frame();
         let mut first: Option<FocusHandle> = None;

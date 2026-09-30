@@ -142,7 +142,9 @@ pub enum TypeRef {
 }
 
 impl<'de> Deserialize<'de> for TypeRef {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(
+        deserializer: D,
+    ) -> std::result::Result<Self, D::Error> {
         let raw = String::deserialize(deserializer)?;
         Ok(match raw.as_str() {
             "boolean" => TypeRef::Boolean,
@@ -254,7 +256,10 @@ fn validate_machine(machine: &MachineInterface, findings: &mut Vec<String>) {
             findings.push(format!("{id}: duplicate named type '{}'", named_type.name));
         }
         if named_type.variants.is_empty() {
-            findings.push(format!("{id}: named type '{}' has no variants", named_type.name));
+            findings.push(format!(
+                "{id}: named type '{}' has no variants",
+                named_type.name
+            ));
         }
         validate_members(
             id,
@@ -266,8 +271,18 @@ fn validate_machine(machine: &MachineInterface, findings: &mut Vec<String>) {
 
     validate_members(id, "states", &machine.states, findings);
 
-    let named_names: BTreeSet<&str> = machine.named_types.iter().map(|n| n.name.as_str()).collect();
-    validate_fields(id, "context", &machine.context.fields, &named_names, findings);
+    let named_names: BTreeSet<&str> = machine
+        .named_types
+        .iter()
+        .map(|n| n.name.as_str())
+        .collect();
+    validate_fields(
+        id,
+        "context",
+        &machine.context.fields,
+        &named_names,
+        findings,
+    );
     validate_copy_eq(
         id,
         "context",
@@ -315,12 +330,24 @@ fn validate_variant_set(
             findings.push(format!("{id}: {what} has an empty tsType/rsVariant"));
         }
         if !ts.insert(variant.ts_type.as_str()) {
-            findings.push(format!("{id}: {what} duplicate tsType '{}'", variant.ts_type));
+            findings.push(format!(
+                "{id}: {what} duplicate tsType '{}'",
+                variant.ts_type
+            ));
         }
         if !rs.insert(variant.rs_variant.as_str()) {
-            findings.push(format!("{id}: {what} duplicate rsVariant '{}'", variant.rs_variant));
+            findings.push(format!(
+                "{id}: {what} duplicate rsVariant '{}'",
+                variant.rs_variant
+            ));
         }
-        validate_fields(id, &format!("{what}.{}", variant.ts_type), &variant.fields, named, findings);
+        validate_fields(
+            id,
+            &format!("{what}.{}", variant.ts_type),
+            &variant.fields,
+            named,
+            findings,
+        );
         fields.extend(&variant.fields);
     }
     validate_copy_eq(id, what, set.copy, set.eq, fields, findings);

@@ -326,7 +326,10 @@ mod tests {
         assert_eq!(handle.a11y.orientation.as_deref(), Some("horizontal"));
 
         let primary_toggle = &cluster(&node).children[0];
-        assert_eq!(primary_toggle.a11y.label.as_deref(), Some("Collapse primary"));
+        assert_eq!(
+            primary_toggle.a11y.label.as_deref(),
+            Some("Collapse primary")
+        );
     }
 
     #[test]
@@ -369,34 +372,40 @@ mod tests {
         );
         assert!(h_node.style.fill_width);
         assert!(h_node.style.fill_height);
-        assert_eq!(
-            h_node.style.descriptor.layout.width,
-            LayoutSizing::Grow
-        );
-        assert_eq!(
-            h_node.a11y.label.as_deref(),
-            Some("Horizontal split")
-        );
+        assert_eq!(h_node.style.descriptor.layout.width, LayoutSizing::Grow);
+        assert_eq!(h_node.a11y.label.as_deref(), Some("Horizontal split"));
 
         let p_pane = &h_node.children[0];
-        assert_eq!(p_pane.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(
+            p_pane.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
         assert!(p_pane.style.fill_height);
         assert!(!p_pane.style.fill_width);
         assert_eq!(p_pane.style.min_width, Some(0.0));
         assert_eq!(p_pane.style.min_height, Some(0.0));
-        assert_eq!(p_pane.style.descriptor.layout.overflow_x, LayoutOverflow::Hidden);
-        assert_eq!(p_pane.style.descriptor.layout.overflow_y, LayoutOverflow::Hidden);
+        assert_eq!(
+            p_pane.style.descriptor.layout.overflow_x,
+            LayoutOverflow::Hidden
+        );
+        assert_eq!(
+            p_pane.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Hidden
+        );
         assert_eq!(p_pane.style.flex_grow, Some(1.0));
         assert_eq!(p_pane.style.flex_basis_pct, Some(0.35));
 
         let s_pane = &h_node.children[2];
-        assert_eq!(s_pane.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert_eq!(
+            s_pane.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
         assert!(s_pane.style.fill_height);
         assert_eq!(s_pane.style.flex_grow, Some(1.0));
         assert!((s_pane.style.flex_basis_pct.unwrap() - 0.65).abs() < 1e-5);
 
-        let vertical_spec = SplitViewSpec::new("split-v", SplitOrientation::Vertical)
-            .with_ratio(0.4);
+        let vertical_spec =
+            SplitViewSpec::new("split-v", SplitOrientation::Vertical).with_ratio(0.4);
         let v_node = render(&vertical_spec);
         assert_eq!(
             v_node.style.descriptor.layout.direction,
@@ -428,8 +437,8 @@ mod tests {
 
     #[test]
     fn fixed_pane_sizes_and_collapses() {
-        let fixed_p = SplitViewSpec::new("fixed-p", SplitOrientation::Horizontal)
-            .with_primary_size(240.0);
+        let fixed_p =
+            SplitViewSpec::new("fixed-p", SplitOrientation::Horizontal).with_primary_size(240.0);
         let node_p = render(&fixed_p);
         assert_eq!(
             node_p.children[0].style.descriptor.layout.width,
@@ -437,8 +446,8 @@ mod tests {
         );
         assert_eq!(node_p.children[2].style.flex_grow, Some(1.0));
 
-        let fixed_s = SplitViewSpec::new("fixed-s", SplitOrientation::Vertical)
-            .with_secondary_size(300.0);
+        let fixed_s =
+            SplitViewSpec::new("fixed-s", SplitOrientation::Vertical).with_secondary_size(300.0);
         let node_s = render(&fixed_s);
         assert_eq!(
             node_s.children[2].style.descriptor.layout.height,
@@ -468,7 +477,13 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let disabled_spec = toggling_spec().with_disabled(true);
-        let node = split_view(&disabled_spec, &ctx, None, None, SplitViewHandlers::default());
+        let node = split_view(
+            &disabled_spec,
+            &ctx,
+            None,
+            None,
+            SplitViewHandlers::default(),
+        );
         assert_eq!(
             node.style.descriptor.opacity,
             ctx.theme().resolve_opacity("state.opacity.disabled")
@@ -561,7 +576,10 @@ mod tests {
         let divider = &node.children[1];
         let handle = &divider.children[0];
         let key_handler = handle.interaction.on_key.as_ref().expect("on_key");
-        key_handler(poodle_node::NodeKey::ArrowRight, poodle_node::NodeModifiers::default());
+        key_handler(
+            poodle_node::NodeKey::ArrowRight,
+            poodle_node::NodeModifiers::default(),
+        );
         assert_eq!(
             *resize_events.lock().unwrap(),
             [
@@ -573,11 +591,19 @@ mod tests {
 
         let cluster = &divider.children[1];
         let p_toggle = &cluster.children[0];
-        p_toggle.interaction.on_activate.as_ref().expect("p_toggle on_activate")();
+        p_toggle
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("p_toggle on_activate")();
         assert_eq!(*p_collapse.lock().unwrap(), [true]);
 
         let s_toggle = &cluster.children[1];
-        s_toggle.interaction.on_activate.as_ref().expect("s_toggle on_activate")();
+        s_toggle
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("s_toggle on_activate")();
         assert_eq!(*s_collapse.lock().unwrap(), [true]);
     }
 }

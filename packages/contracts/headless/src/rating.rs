@@ -45,12 +45,7 @@ pub fn rating_fill_ratio(index: f64, value: f64) -> f64 {
 
 /// Value for a pointer position within the item at `index`:
 /// `ratio_within_item` in `[0, 1]` snaps UP to the next step (minimum one step).
-pub fn rating_pointer_value(
-    ratio_within_item: f64,
-    index: f64,
-    step: f64,
-    item_count: f64,
-) -> f64 {
+pub fn rating_pointer_value(ratio_within_item: f64, index: f64, step: f64, item_count: f64) -> f64 {
     let snapped = step.max((ratio_within_item / step).ceil() * step);
     item_count.min(index + snapped.min(1.0))
 }
@@ -118,7 +113,10 @@ mod tests {
         assert_eq!(normalize_rating_value(Some(9.0), 5.0, 1.0), Some(5.0));
         assert_eq!(normalize_rating_value(Some(-2.0), 5.0, 1.0), Some(0.0));
         assert_eq!(normalize_rating_value(None, 5.0, 1.0), None);
-        assert_eq!(clamp_rating_display_value(Some(2.123456), 5.0), Some(2.1235));
+        assert_eq!(
+            clamp_rating_display_value(Some(2.123456), 5.0),
+            Some(2.1235)
+        );
     }
 
     #[test]
@@ -151,10 +149,7 @@ mod tests {
 
     #[test]
     fn value_text_keeps_empty_distinct_from_zero_display_path() {
-        assert_eq!(
-            rating_value_text(None, 5),
-            "No rating selected out of 5"
-        );
+        assert_eq!(rating_value_text(None, 5), "No rating selected out of 5");
         assert_eq!(
             rating_value_text(Some(0.0), 5),
             "No rating selected out of 5"

@@ -13,8 +13,8 @@ use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodePosition, NodeRole, ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    NodePosition, NodeRole, ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
 };
 use poodle_specs::{ControlSize, Orientation, RangeSliderSpec, SliderVariant};
 
@@ -548,8 +548,8 @@ fn range_slider_block(
     use poodle_headless::slider::{
         layout_range_slider_block, physical_to_value_norm, range_slider_control_transition,
         range_slider_transition, range_slider_visual_state, resolved_visible_text,
-        RangeSliderContext, RangeSliderControlContext, RangeSliderControlEvent,
-        RangeSliderEffect, RangeSliderEvent, RangeThumb, SLIDER_BLOCK_HIT_PX,
+        RangeSliderContext, RangeSliderControlContext, RangeSliderControlEvent, RangeSliderEffect,
+        RangeSliderEvent, RangeThumb, SLIDER_BLOCK_HIT_PX,
     };
     use poodle_node::{LayoutOverflow, NodeKey, NodeModifiers};
 
@@ -598,8 +598,18 @@ fn range_slider_block(
         .as_deref()
         .filter(|text| !text.is_empty())
         .map(ToOwned::to_owned);
-    let lower_text = resolved_visible_text(visual.value.0, spec.min, spec.step, spec.visible_lower_text.as_deref());
-    let upper_text = resolved_visible_text(visual.value.1, spec.min, spec.step, spec.visible_upper_text.as_deref());
+    let lower_text = resolved_visible_text(
+        visual.value.0,
+        spec.min,
+        spec.step,
+        spec.visible_lower_text.as_deref(),
+    );
+    let upper_text = resolved_visible_text(
+        visual.value.1,
+        spec.min,
+        spec.step,
+        spec.visible_upper_text.as_deref(),
+    );
     let (capsule_span, measure) = ctx.require_block_layout("RangeSlider");
     let layout = layout_range_slider_block(
         capsule_span,
@@ -846,8 +856,16 @@ fn range_slider_block(
     // keeps upright text: upper value at the physical top, label centered,
     // lower value at the physical bottom.
     let paint_text = layout.label_inline || layout.lower_inline || layout.upper_inline;
-    let row_span = if vertical { capsule_cross } else { capsule_span };
-    let row_height = if vertical { capsule_span } else { capsule_cross };
+    let row_span = if vertical {
+        capsule_cross
+    } else {
+        capsule_span
+    };
+    let row_height = if vertical {
+        capsule_span
+    } else {
+        capsule_cross
+    };
     let make_row = |role_color: poodle_node::ColorValue, role_fill: &str, role_text: &str| {
         let mut row = Node::container();
         row.style.descriptor.layout.width = LayoutSizing::Fixed(row_span);
@@ -894,19 +912,45 @@ fn range_slider_block(
                 right: Some(0.0),
                 bottom: Some(0.0),
             };
-            let label_wrap =
-                label_wrap.child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"));
-            row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
-                .child(label_wrap)
-                .child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
+            let label_wrap = label_wrap.child(slot(
+                label.as_deref().filter(|_| layout.label_inline),
+                "block-range-slider-label",
+            ));
+            row.child(slot(
+                upper_text.as_deref(),
+                "block-range-slider-value-upper",
+            ))
+            .child(label_wrap)
+            .child(slot(
+                lower_text.as_deref(),
+                "block-range-slider-value-lower",
+            ))
         } else if rtl {
-            row.child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
-                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
-                .child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
+            row.child(slot(
+                upper_text.as_deref(),
+                "block-range-slider-value-upper",
+            ))
+            .child(slot(
+                label.as_deref().filter(|_| layout.label_inline),
+                "block-range-slider-label",
+            ))
+            .child(slot(
+                lower_text.as_deref(),
+                "block-range-slider-value-lower",
+            ))
         } else {
-            row.child(slot(lower_text.as_deref(), "block-range-slider-value-lower"))
-                .child(slot(label.as_deref().filter(|_| layout.label_inline), "block-range-slider-label"))
-                .child(slot(upper_text.as_deref(), "block-range-slider-value-upper"))
+            row.child(slot(
+                lower_text.as_deref(),
+                "block-range-slider-value-lower",
+            ))
+            .child(slot(
+                label.as_deref().filter(|_| layout.label_inline),
+                "block-range-slider-label",
+            ))
+            .child(slot(
+                upper_text.as_deref(),
+                "block-range-slider-value-upper",
+            ))
         };
         stamp_forced_color(&mut row, role_fill, role_text);
         row
@@ -921,8 +965,10 @@ fn range_slider_block(
     // the horizontal `-origin` shift misaligned every vertical layer).
     let clip_pair = |row: Node, clip_origin: f32, clip_span: f32| -> Node {
         let mut clip = Node::container();
-        clip.style.descriptor.layout.width = LayoutSizing::Fixed(if vertical { capsule_cross } else { clip_span });
-        clip.style.descriptor.layout.height = LayoutSizing::Fixed(if vertical { clip_span } else { capsule_cross });
+        clip.style.descriptor.layout.width =
+            LayoutSizing::Fixed(if vertical { capsule_cross } else { clip_span });
+        clip.style.descriptor.layout.height =
+            LayoutSizing::Fixed(if vertical { clip_span } else { capsule_cross });
         clip.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
         clip.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         let mut offset_row = row;
@@ -1143,14 +1189,20 @@ fn range_slider_block(
             right: Some(0.0),
             bottom: None,
         };
-        let lower_anchor = fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5, anchor_offset);
-        let upper_anchor = fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5, anchor_offset);
+        let lower_anchor =
+            fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5, anchor_offset);
+        let upper_anchor =
+            fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5, anchor_offset);
         let mut s = block_surface(capsule_cross);
         s = s.child(capsule).child(lower_anchor).child(upper_anchor);
         s
     };
     if let Some(handler) = scrub_handler {
-        let axis = if vertical { ScrubAxis::Vertical } else { ScrubAxis::Horizontal };
+        let axis = if vertical {
+            ScrubAxis::Vertical
+        } else {
+            ScrubAxis::Horizontal
+        };
         let mut grab = block_grab_with_axis(handler, axis, inset);
         grab.id = Some("block-range-slider-grab".to_owned());
         surface = surface.child(grab);
@@ -1169,7 +1221,10 @@ fn range_slider_block(
     }
     el.a11y.role = Some(NodeRole::Group);
     el.roles.insert("appearance".to_owned(), "block".to_owned());
-    el.roles.insert("orientation".to_owned(), orientation_name(spec.orientation).to_owned());
+    el.roles.insert(
+        "orientation".to_owned(),
+        orientation_name(spec.orientation).to_owned(),
+    );
     el.roles.insert(
         "direction".to_owned(),
         if rtl { "rtl" } else { "ltr" }.to_owned(),
@@ -1451,7 +1506,6 @@ mod tests {
         let node = range_slider(
             &RangeSliderSpec::new(50.0, 50.0)
                 .with_bounds(0.0, 100.0)
-
                 .with_size(poodle_specs::ControlSize::Xs),
             &ctx,
             RangeSliderHandlers {
@@ -1532,9 +1586,7 @@ mod tests {
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
         let node = range_slider(
-            &RangeSliderSpec::new(50.0, 50.0)
-                .with_bounds(0.0, 100.0)
-                ,
+            &RangeSliderSpec::new(50.0, 50.0).with_bounds(0.0, 100.0),
             &ctx,
             RangeSliderHandlers {
                 on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),

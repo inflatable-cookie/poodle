@@ -293,18 +293,46 @@ mod tests {
 
     #[test]
     fn width_presets_match_contract_dimensions() {
-        assert_eq!(DialogSpec::new().with_width(DialogWidth::Sm).surface_width_rem(), 24.0);
-        assert_eq!(DialogSpec::new().with_width(DialogWidth::Md).surface_width_rem(), 34.0);
-        assert_eq!(DialogSpec::new().with_width(DialogWidth::Lg).surface_width_rem(), 48.0);
-        assert_eq!(DialogSpec::new().with_width(DialogWidth::Xl).surface_width_rem(), 64.0);
-        assert!(DialogSpec::new().with_width(DialogWidth::Full).is_full_width());
+        assert_eq!(
+            DialogSpec::new()
+                .with_width(DialogWidth::Sm)
+                .surface_width_rem(),
+            24.0
+        );
+        assert_eq!(
+            DialogSpec::new()
+                .with_width(DialogWidth::Md)
+                .surface_width_rem(),
+            34.0
+        );
+        assert_eq!(
+            DialogSpec::new()
+                .with_width(DialogWidth::Lg)
+                .surface_width_rem(),
+            48.0
+        );
+        assert_eq!(
+            DialogSpec::new()
+                .with_width(DialogWidth::Xl)
+                .surface_width_rem(),
+            64.0
+        );
+        assert!(DialogSpec::new()
+            .with_width(DialogWidth::Full)
+            .is_full_width());
     }
 
     #[test]
     fn semantic_token_resolvers_match_contract() {
         let spec = DialogSpec::default();
-        assert_eq!(spec.surface_fill_token(), semantic::COLOR_BACKGROUND_ELEVATED);
-        assert_eq!(spec.backdrop_fill_token(), semantic::COLOR_BACKGROUND_OVERLAY);
+        assert_eq!(
+            spec.surface_fill_token(),
+            semantic::COLOR_BACKGROUND_ELEVATED
+        );
+        assert_eq!(
+            spec.backdrop_fill_token(),
+            semantic::COLOR_BACKGROUND_OVERLAY
+        );
         assert_eq!(spec.shadow_token(), semantic::ELEVATION_DIALOG);
     }
 }

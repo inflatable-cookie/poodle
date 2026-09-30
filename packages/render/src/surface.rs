@@ -112,7 +112,9 @@ mod tests {
         // Panel tone (default): background-surface 96% alpha
         let panel_spec = SurfaceSpec::new().with_tone(SurfaceTone::Panel);
         let panel_node = surface(&panel_spec, &ctx, vec![]);
-        let base_surface = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_SURFACE);
+        let base_surface = ctx
+            .theme()
+            .resolve_color(semantic::COLOR_BACKGROUND_SURFACE);
         let expected_panel_bg = with_alpha(base_surface, base_surface.3 * 0.96);
         assert_eq!(
             panel_node.style.descriptor.background,
@@ -135,7 +137,9 @@ mod tests {
         // Elevated tone: background-elevated 96% mixed over background-panel
         let elevated_spec = SurfaceSpec::new().with_tone(SurfaceTone::Elevated);
         let elevated_node = surface(&elevated_spec, &ctx, vec![]);
-        let base_elevated = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_ELEVATED);
+        let base_elevated = ctx
+            .theme()
+            .resolve_color(semantic::COLOR_BACKGROUND_ELEVATED);
         let base_panel = ctx.theme().resolve_color(semantic::COLOR_BACKGROUND_PANEL);
         let expected_elevated_bg = mix_srgb(base_elevated, base_panel, 0.96);
         assert_eq!(
@@ -175,8 +179,7 @@ mod tests {
             .theme()
             .resolve_border_width(semantic::BORDER_WIDTH_DEFAULT);
         assert_eq!(
-            subtle.style.descriptor.border.color,
-            expected_border_subtle_color,
+            subtle.style.descriptor.border.color, expected_border_subtle_color,
             "Subtle border must resolve exact border-subtle color with 74% alpha"
         );
         assert_eq!(
@@ -193,8 +196,7 @@ mod tests {
         let expected_border_default_color =
             with_alpha(base_border_default, base_border_default.3 * 1.0);
         assert_eq!(
-            default_border.style.descriptor.border.color,
-            expected_border_default_color,
+            default_border.style.descriptor.border.color, expected_border_default_color,
             "Default border must resolve exact border-default color"
         );
         assert_eq!(
@@ -246,10 +248,22 @@ mod tests {
         );
         let expected_sm_x = ctx.theme().resolve_space(semantic::SPACE_INLINE_SM);
         let expected_sm_y = ctx.theme().resolve_space(semantic::SPACE_STACK_SM);
-        assert_eq!(pad_sm.style.descriptor.layout.spacing.padding.left, expected_sm_x);
-        assert_eq!(pad_sm.style.descriptor.layout.spacing.padding.right, expected_sm_x);
-        assert_eq!(pad_sm.style.descriptor.layout.spacing.padding.top, expected_sm_y);
-        assert_eq!(pad_sm.style.descriptor.layout.spacing.padding.bottom, expected_sm_y);
+        assert_eq!(
+            pad_sm.style.descriptor.layout.spacing.padding.left,
+            expected_sm_x
+        );
+        assert_eq!(
+            pad_sm.style.descriptor.layout.spacing.padding.right,
+            expected_sm_x
+        );
+        assert_eq!(
+            pad_sm.style.descriptor.layout.spacing.padding.top,
+            expected_sm_y
+        );
+        assert_eq!(
+            pad_sm.style.descriptor.layout.spacing.padding.bottom,
+            expected_sm_y
+        );
 
         let pad_md = surface(
             &SurfaceSpec::new().with_padding(PaddingScale::Md),
@@ -258,10 +272,22 @@ mod tests {
         );
         let expected_md_x = ctx.theme().resolve_space(semantic::SPACE_PANEL_X);
         let expected_md_y = ctx.theme().resolve_space(semantic::SPACE_PANEL_Y);
-        assert_eq!(pad_md.style.descriptor.layout.spacing.padding.left, expected_md_x);
-        assert_eq!(pad_md.style.descriptor.layout.spacing.padding.right, expected_md_x);
-        assert_eq!(pad_md.style.descriptor.layout.spacing.padding.top, expected_md_y);
-        assert_eq!(pad_md.style.descriptor.layout.spacing.padding.bottom, expected_md_y);
+        assert_eq!(
+            pad_md.style.descriptor.layout.spacing.padding.left,
+            expected_md_x
+        );
+        assert_eq!(
+            pad_md.style.descriptor.layout.spacing.padding.right,
+            expected_md_x
+        );
+        assert_eq!(
+            pad_md.style.descriptor.layout.spacing.padding.top,
+            expected_md_y
+        );
+        assert_eq!(
+            pad_md.style.descriptor.layout.spacing.padding.bottom,
+            expected_md_y
+        );
 
         let pad_lg = surface(
             &SurfaceSpec::new().with_padding(PaddingScale::Lg),
@@ -270,10 +296,22 @@ mod tests {
         );
         let expected_lg_x = ctx.theme().resolve_space(semantic::SPACE_INLINE_LG);
         let expected_lg_y = ctx.theme().resolve_space(semantic::SPACE_STACK_LG);
-        assert_eq!(pad_lg.style.descriptor.layout.spacing.padding.left, expected_lg_x);
-        assert_eq!(pad_lg.style.descriptor.layout.spacing.padding.right, expected_lg_x);
-        assert_eq!(pad_lg.style.descriptor.layout.spacing.padding.top, expected_lg_y);
-        assert_eq!(pad_lg.style.descriptor.layout.spacing.padding.bottom, expected_lg_y);
+        assert_eq!(
+            pad_lg.style.descriptor.layout.spacing.padding.left,
+            expected_lg_x
+        );
+        assert_eq!(
+            pad_lg.style.descriptor.layout.spacing.padding.right,
+            expected_lg_x
+        );
+        assert_eq!(
+            pad_lg.style.descriptor.layout.spacing.padding.top,
+            expected_lg_y
+        );
+        assert_eq!(
+            pad_lg.style.descriptor.layout.spacing.padding.bottom,
+            expected_lg_y
+        );
     }
 
     struct MockBorderWidthResolverTheme;

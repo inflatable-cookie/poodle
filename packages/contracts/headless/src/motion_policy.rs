@@ -319,8 +319,11 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
             let existing = &trace.clocks[index];
             let current =
                 existing.axis_from + (existing.axis_to - existing.axis_from) * existing.progress;
-            let axis_to = axis_for_target(&intent.target)
-                .unwrap_or(if existing.axis_to == 1.0 { 0.0 } else { 1.0 });
+            let axis_to = axis_for_target(&intent.target).unwrap_or(if existing.axis_to == 1.0 {
+                0.0
+            } else {
+                1.0
+            });
             let duration_ms =
                 ((axis_to - current).abs() * existing.original_duration_ms as f32).round() as u32;
             let mut continue_intent = intent.clone();

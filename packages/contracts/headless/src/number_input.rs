@@ -27,17 +27,27 @@ pub const NUMBER_INPUT_MAX_PRECISION: u32 = 324;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum NumberInputEvent {
-    RawEdit { text: String },
+    RawEdit {
+        text: String,
+    },
     Clear,
     Enter,
     Blur,
     Escape,
-    Step { direction: i32 },
+    Step {
+        direction: i32,
+    },
     Home,
     End,
-    Replace { value: Option<f64> },
-    SetDisabled { disabled: bool },
-    SetReadOnly { read_only: bool },
+    Replace {
+        value: Option<f64>,
+    },
+    SetDisabled {
+        disabled: bool,
+    },
+    SetReadOnly {
+        read_only: bool,
+    },
     SetConstraints {
         min: Option<f64>,
         max: Option<f64>,
@@ -98,9 +108,7 @@ pub fn number_input_effective_step(step: Option<f64>) -> f64 {
 }
 
 pub fn number_input_config_valid(context: &NumberInputContext) -> bool {
-    let check_optional = |value: Option<f64>| -> bool {
-        value.is_none_or(is_finite_number)
-    };
+    let check_optional = |value: Option<f64>| -> bool { value.is_none_or(is_finite_number) };
 
     if !check_optional(context.committed) {
         return false;
@@ -388,8 +396,12 @@ impl SignedDigits {
 
     fn add(&self, other: &Self) -> Self {
         match (self.negative, other.negative) {
-            (false, false) => Self::from_parts(false, add_unsigned_digits(&self.digits, &other.digits)),
-            (true, true) => Self::from_parts(true, add_unsigned_digits(&self.digits, &other.digits)),
+            (false, false) => {
+                Self::from_parts(false, add_unsigned_digits(&self.digits, &other.digits))
+            }
+            (true, true) => {
+                Self::from_parts(true, add_unsigned_digits(&self.digits, &other.digits))
+            }
             (false, true) => match cmp_unsigned_digits(&self.digits, &other.digits) {
                 std::cmp::Ordering::Less => {
                     Self::from_parts(true, sub_unsigned_digits(&other.digits, &self.digits))
@@ -866,11 +878,7 @@ fn last_on_grid(min: Option<f64>, max: f64, step: Option<f64>) -> Option<f64> {
     let max_decimal = decimal_from_number(max)?;
     let step_decimal = decimal_from_number(effective_step)?;
 
-    let scale = common_scale(&[
-        origin_decimal.scale,
-        max_decimal.scale,
-        step_decimal.scale,
-    ]);
+    let scale = common_scale(&[origin_decimal.scale, max_decimal.scale, step_decimal.scale]);
     let origin_digits = rescale_digits(&origin_decimal, scale);
     let max_digits = rescale_digits(&max_decimal, scale);
     let step_digits = rescale_digits(&step_decimal, scale);
@@ -880,10 +888,7 @@ fn last_on_grid(min: Option<f64>, max: f64, step: Option<f64>) -> Option<f64> {
     }
 
     let delta = max_digits.sub(&origin_digits);
-    let remainder = delta
-        .rem(&step_digits)
-        .add(&step_digits)
-        .rem(&step_digits);
+    let remainder = delta.rem(&step_digits).add(&step_digits).rem(&step_digits);
     let last_digits = max_digits.sub(&remainder);
     let decimal = NumberDecimal {
         negative: last_digits.is_negative(),
@@ -1032,10 +1037,7 @@ fn resolve_committed(
     }
 
     if value_changed {
-        push_unique(
-            &mut effects,
-            NumberInputEffect::EmitValueChange { value },
-        );
+        push_unique(&mut effects, NumberInputEffect::EmitValueChange { value });
     }
 
     if commit {
@@ -1325,14 +1327,32 @@ mod tests {
         assert_eq!(classify_number_draft("").kind, NumberDraftKind::Empty);
         assert_eq!(classify_number_draft("-").kind, NumberDraftKind::Incomplete);
         assert_eq!(classify_number_draft(".").kind, NumberDraftKind::Incomplete);
-        assert_eq!(classify_number_draft("-.").kind, NumberDraftKind::Incomplete);
-        assert_eq!(classify_number_draft("1.").kind, NumberDraftKind::Incomplete);
-        assert_eq!(classify_number_draft("01.20").kind, NumberDraftKind::Complete);
+        assert_eq!(
+            classify_number_draft("-.").kind,
+            NumberDraftKind::Incomplete
+        );
+        assert_eq!(
+            classify_number_draft("1.").kind,
+            NumberDraftKind::Incomplete
+        );
+        assert_eq!(
+            classify_number_draft("01.20").kind,
+            NumberDraftKind::Complete
+        );
         assert_eq!(classify_number_draft(".5").kind, NumberDraftKind::Complete);
-        assert_eq!(classify_number_draft("-12.5").kind, NumberDraftKind::Complete);
-        assert_eq!(classify_number_draft("1e3").kind, NumberDraftKind::Malformed);
+        assert_eq!(
+            classify_number_draft("-12.5").kind,
+            NumberDraftKind::Complete
+        );
+        assert_eq!(
+            classify_number_draft("1e3").kind,
+            NumberDraftKind::Malformed
+        );
         assert_eq!(classify_number_draft(" 1").kind, NumberDraftKind::Malformed);
-        assert_eq!(classify_number_draft("0x10").kind, NumberDraftKind::Malformed);
+        assert_eq!(
+            classify_number_draft("0x10").kind,
+            NumberDraftKind::Malformed
+        );
     }
 
     #[test]
@@ -1342,8 +1362,10 @@ mod tests {
 
         let mut context = number_input_context();
         context.step = Some(-1.0);
-        let (next, effects) =
-            number_input_transition(context.clone(), NumberInputEvent::RawEdit { text: "1".into() });
+        let (next, effects) = number_input_transition(
+            context.clone(),
+            NumberInputEvent::RawEdit { text: "1".into() },
+        );
         assert!(effects.is_empty());
         assert_eq!(next, context);
     }
@@ -1420,10 +1442,7 @@ mod tests {
             expand_scientific_decimal("1e-17").as_deref(),
             Some("0.00000000000000001")
         );
-        assert_eq!(
-            expand_scientific_decimal("1.5e+3").as_deref(),
-            Some("1500")
-        );
+        assert_eq!(expand_scientific_decimal("1.5e+3").as_deref(), Some("1500"));
         assert_eq!(
             expand_scientific_decimal("1.23e-2").as_deref(),
             Some("0.0123")

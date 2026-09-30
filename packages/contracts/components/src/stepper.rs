@@ -456,7 +456,9 @@ mod tests {
                 < spec.padding_inline_rem(ControlDensity::Default)
         );
         // The dash keeps its intrinsic size; only the space between dashes moves.
-        assert!(spec.rail_gap_rem(ControlDensity::Compact) < spec.rail_gap_rem(ControlDensity::Default));
+        assert!(
+            spec.rail_gap_rem(ControlDensity::Compact) < spec.rail_gap_rem(ControlDensity::Default)
+        );
     }
 
     /// Collapse is vertical-only, and horizontal must not half-honour it.

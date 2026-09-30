@@ -203,8 +203,7 @@ mod tests {
             );
 
             for token in tone_tokens {
-                let surface =
-                    solid_tone_surface(&ctx, provider.resolve_color(token), false, 0.34);
+                let surface = solid_tone_surface(&ctx, provider.resolve_color(token), false, 0.34);
                 assert_eq!(surface.border, surface.background);
                 let effective_background = composite_over(
                     surface.background,
