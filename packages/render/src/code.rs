@@ -50,9 +50,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
             s.text_size = Some(inline_font);
             s.descriptor.text_color = Some(text_color);
             s.font_family = Some(FontFamily::Mono);
-            s.text_wrap = spec.wrap == CodeWrap::Anywhere
-                || contains_whitespace_break(&spec.content)
-                || spec.content.is_empty();
+            s.text_wrap = true;
             s.wrap_anywhere = spec.wrap == CodeWrap::Anywhere;
             s.collapse_text_whitespace = true;
             s.no_wrap = spec.wrap == CodeWrap::Normal

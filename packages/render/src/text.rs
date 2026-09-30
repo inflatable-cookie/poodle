@@ -31,18 +31,16 @@ pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
         s.text_size = Some(rem_to_px(spec.font_size_rem()));
         s.text_weight = Some(weight);
         s.line_height = Some(spec.line_height());
-        s.text_wrap = spec.wrap == TextWrap::Anywhere
-            || contains_whitespace_break(&spec.content)
-            || spec.content.is_empty();
+        s.text_wrap = true;
         s.wrap_anywhere = spec.wrap == TextWrap::Anywhere;
         s.collapse_text_whitespace = true;
         if spec.wrap == TextWrap::Normal
             && !spec.content.is_empty()
             && !contains_whitespace_break(&spec.content)
         {
-            // GPUI's normal line wrapper breaks oversized tokens. A lone
-            // token has no normal break opportunity in CSS, so keep it
-            // unwrapped until the caller opts into `anywhere`.
+            // GPUI normal mode breaks oversized tokens; CSS has no normal
+            // break point in this run. Keep the normal wrapping channel
+            // available and let no_wrap override GPUI's emergency break.
             s.no_wrap = true;
         }
         // `clamp` degrades to wrapped text clipped at the box, as on both old
@@ -156,6 +154,7 @@ mod tests {
         let ctx = RenderContext::new(&theme);
 
         let normal_token = text(&TextSpec::new("very-long-identifier"), &ctx);
+        assert!(normal_token.style.text_wrap);
         assert!(!normal_token.style.wrap_anywhere);
         assert!(normal_token.style.no_wrap);
         assert!(normal_token.style.collapse_text_whitespace);
