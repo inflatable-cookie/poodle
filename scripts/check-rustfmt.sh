@@ -25,8 +25,15 @@
 #
 # This is a POSIX shell script on purpose: the ubuntu `ci:rust` job ships a
 # Rust toolchain, git and `sh` and no Bun (a `bun:` selector there fails with
-# exit 127), and workflow edits are out of scope. `--self-test` needs only
-# sh, git and rustfmt, so the gate carries its own proof on that job.
+# exit 127), and workflow edits are out of scope. That job's 1.95 toolchain
+# also ships without the rustfmt component, so the gate probes `rustfmt
+# --version` (the rustup shim is on PATH even when the component is missing
+# and fails with exit 1), repairs through `rustup component add rustfmt` when
+# rustup can, and classifies output before any verdict: only real `Diff in `
+# output may produce "not rustfmt-clean" — a diff-less exit 1 is an
+# environment error, which is exactly how CI's missing component first
+# presented. `--self-test` needs only sh, git and rustfmt, so the gate
+# carries its own proof on that job.
 #
 #   sh scripts/check-rustfmt.sh             # check mode (the gate)
 #   sh scripts/check-rustfmt.sh --write     # format in place, before committing
@@ -59,6 +66,36 @@ cd "$ROOT" || exit 1
 command -v rustfmt >/dev/null 2>&1 || {
   echo "check-rustfmt: rustfmt not found; is the Rust toolchain installed?" >&2
   exit 1
+}
+
+# The rustup shim answers `command -v rustfmt` even when the component is
+# missing and then fails with exit 1 — the same status real diffs produce.
+# Probe with --version, repair through rustup when it can, and refuse to
+# continue on a toolchain that cannot format at all.
+rustfmt_usable() {
+  rustfmt --version >/dev/null 2>&1
+}
+
+ensure_rustfmt() {
+  if rustfmt_usable; then
+    return 0
+  fi
+  if command -v rustup >/dev/null 2>&1; then
+    echo "check-rustfmt: rustfmt is missing from the active toolchain; running \`rustup component add rustfmt\`" >&2
+    rustup component add rustfmt >&2 || true
+  fi
+  if rustfmt_usable; then
+    return 0
+  fi
+  echo "check-rustfmt: rustfmt is unavailable and could not be installed; install the rustfmt component for the active toolchain" >&2
+  return 1
+}
+
+# Only real formatting output may produce the unformatted verdict. A
+# diff-less exit 1 (for example the rustup shim's component-missing error,
+# which also exits 1) is an environment failure, not a formatting finding.
+has_diff_output() {
+  printf '%s\n' "$1" | grep -q 'Diff in '
 }
 
 # Generated Rust stays byte-identical to its generator and is none of this
@@ -159,6 +196,111 @@ self_test() {
     fails=$((fails + 1))
   fi
 
+  # 4. Exit-status classification: the unformatted verdict requires real
+  #    `Diff in` output. The rustup shim's component-missing error also
+  #    exits 1 — CI hit exactly that (rustfmt absent from the 1.95
+  #    toolchain) and it must never read as "not rustfmt-clean".
+  if has_diff_output 'Diff in src/lib.rs at line 1:
+-fn a(){}
++fn a() {}'; then
+    echo "  ok   diff output classified as a formatting finding"
+  else
+    echo "  FAIL real diff output not classified as a formatting finding"
+    fails=$((fails + 1))
+  fi
+  for sample in \
+    "error: 'rustfmt' is not installed for the toolchain 'fake-1.95'" \
+    "" ; do
+    if has_diff_output "$sample"; then
+      echo "  FAIL non-diff output classified as a formatting finding: $sample"
+      fails=$((fails + 1))
+    else
+      echo "  ok   non-diff output kept out of the unformatted verdict"
+    fi
+  done
+
+  # 5. The gate under a broken toolchain, end to end in a scratch checkout:
+  #    a one-crate fake repository plus fake rustfmt/rustup binaries drive
+  #    the real script through each classification branch.
+  init_scratch_repo() {
+    git init -q "$1"
+    mkdir -p "$1/packages/scratch/src"
+    printf '[package]\nname = "scratch"\nversion = "0.0.0"\nedition = "2021"\n' >"$1/packages/scratch/Cargo.toml"
+    printf 'fn    badly_authored(  ) {}\n' >"$1/packages/scratch/src/lib.rs"
+    git -C "$1" add -A
+  }
+  init_scratch_repo "$tmp/repo"
+  fake_bin="$tmp/fakebin"
+  mkdir -p "$fake_bin"
+
+  # 5a. CI's exact failure: shim present, component missing.
+  cat >"$fake_bin/rustfmt" <<'EOF'
+#!/bin/sh
+echo "error: 'rustfmt' is not installed for the toolchain 'fake-1.95'" >&2
+exit 1
+EOF
+  cat >"$fake_bin/rustup" <<'EOF'
+#!/bin/sh
+echo "fake rustup cannot install components" >&2
+exit 1
+EOF
+  chmod +x "$fake_bin/rustfmt" "$fake_bin/rustup"
+  out=$(cd "$tmp/repo" && PATH="$fake_bin:$PATH" sh "$ROOT/scripts/check-rustfmt.sh" 2>&1)
+  status=$?
+  if [ "$status" -eq 1 ] &&
+    printf '%s\n' "$out" | grep -q 'rustfmt is unavailable' &&
+    ! printf '%s\n' "$out" | grep -q 'is not rustfmt-clean'; then
+    echo "  ok   missing component: clear environment error, never misreported as unformatted"
+  else
+    echo "  FAIL missing component misclassified: status=$status"
+    fails=$((fails + 1))
+  fi
+
+  # 5b. Exit 1 with real diff output: the unformatted verdict, end to end.
+  cat >"$fake_bin/rustfmt" <<'EOF'
+#!/bin/sh
+if [ "${1:-}" = "--version" ]; then
+  echo "rustfmt fake (classification fixture)"
+  exit 0
+fi
+printf 'Diff in packages/scratch/src/lib.rs at line 1:\n-fn a(){}\n+fn a() {}\n'
+exit 1
+EOF
+  chmod +x "$fake_bin/rustfmt"
+  out=$(cd "$tmp/repo" && PATH="$fake_bin:$PATH" sh "$ROOT/scripts/check-rustfmt.sh" 2>&1)
+  status=$?
+  if [ "$status" -eq 1 ] &&
+    printf '%s\n' "$out" | grep -q 'is not rustfmt-clean' &&
+    printf '%s\n' "$out" | grep -q 'Diff in ' &&
+    ! printf '%s\n' "$out" | grep -q 'rustfmt failed on'; then
+    echo "  ok   diff-bearing exit 1: reported as not rustfmt-clean"
+  else
+    echo "  FAIL diff-bearing exit 1 misclassified: status=$status"
+    fails=$((fails + 1))
+  fi
+
+  # 5c. A non-0/1 status: hard environment error, never a verdict.
+  cat >"$fake_bin/rustfmt" <<'EOF'
+#!/bin/sh
+if [ "${1:-}" = "--version" ]; then
+  echo "rustfmt fake (classification fixture)"
+  exit 0
+fi
+echo "boom" >&2
+exit 7
+EOF
+  chmod +x "$fake_bin/rustfmt"
+  out=$(cd "$tmp/repo" && PATH="$fake_bin:$PATH" sh "$ROOT/scripts/check-rustfmt.sh" 2>&1)
+  status=$?
+  if [ "$status" -eq 1 ] &&
+    printf '%s\n' "$out" | grep -q 'rustfmt failed on' &&
+    ! printf '%s\n' "$out" | grep -q 'is not rustfmt-clean'; then
+    echo "  ok   non-diff exit status: hard environment error"
+  else
+    echo "  FAIL non-diff exit status misclassified: status=$status"
+    fails=$((fails + 1))
+  fi
+
   if [ "$fails" -ne 0 ]; then
     echo "check-rustfmt self-test: $fails failure(s)" >&2
     exit 1
@@ -170,6 +312,8 @@ if [ "$MODE" = --self-test ]; then
   self_test
   exit $?
 fi
+
+ensure_rustfmt || exit 1
 
 manifests=$(git ls-files --cached -- 'packages/*/Cargo.toml' 'packages/*/*/Cargo.toml' | LC_ALL=C sort)
 if [ -z "$manifests" ]; then
@@ -218,7 +362,7 @@ for manifest in $manifests; do
   status=$?
   if [ "$status" -eq 0 ]; then
     echo "check-rustfmt: $crate_dir clean ($count file(s))"
-  elif [ "$status" -eq 1 ]; then
+  elif [ "$status" -eq 1 ] && has_diff_output "$out"; then
     unformatted="$unformatted $crate_dir"
     printf 'check-rustfmt: %s is not rustfmt-clean:\n%s\n' "$crate_dir" "$out"
   else
