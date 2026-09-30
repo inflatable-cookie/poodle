@@ -3,6 +3,7 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { deriveLiveRoster, EXPECTED_MOUNTED_BEHAVIOUR_TESTS } from "./parity-evidence-ledger";
+import { PORTABLE_ROUTE_COUNT, PUBLIC_COMPONENT_COUNT, ROSTER_WEB_ONLY_NAMES } from "./component-denominator";
 import { deriveNucleusReceiptRows } from "./nucleus-parity-receipts";
 
 const ROOT = path.resolve(import.meta.dir, "..");
@@ -49,9 +50,9 @@ export const PLATFORM_LANGUAGE =
 /// functional completion. Forbidden in every generated census claim.
 const OVERCLAIM_LANGUAGE = [
   /fully functional/i,
-  /all 175 [a-z ]*(proven|proved|complete|passing|pass)\b/i,
+  /all \d+ [a-z ]*(proven|proved|complete|passing|pass)\b/i,
   /construction (proves|proving|means|confirms) [a-z ]*functional/i,
-  /\b175\/175\b[^.\n]*functional(?! completion)/i,
+  /\b\d+\/\d+\b[^.\n]*functional(?! completion)/i,
 ];
 
 const ASSERT_RE = /\bassert(_eq|_ne)?!\s*\(/;
@@ -827,7 +828,11 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
     schema: CENSUS_SCHEMA,
     task: "g18.001",
     source_commit: commit,
-    denominator: { public: 176, portable: 175, notApplicable: ["MeterSurface"] },
+    denominator: {
+      public: PUBLIC_COMPONENT_COUNT,
+      portable: PORTABLE_ROUTE_COUNT,
+      notApplicable: [...ROSTER_WEB_ONLY_NAMES],
+    },
     axes: [...CENSUS_AXES],
     manifest,
     rows,
@@ -842,7 +847,7 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
     crossRuntime: {
       constructionClaim: "Every portable component route constructs through the headless GPUI specimen probe.",
       mountedScope:
-        "bounded named regression set, not a 175-component behaviour pass; the g18.001 capability census is the compilation input for repair tranches",
+        "bounded named regression set, not a roster-wide behaviour pass; the g18.001 capability census is the compilation input for repair tranches",
       note: "Construction is not functional completion. A passing route, a test name, or one passing test never marks a component complete.",
     },
   };
@@ -856,11 +861,16 @@ export function validateCensusDoc(doc: CensusDoc): void {
   if ([...doc.axes].sort().join(",") !== [...CENSUS_AXES].sort().join(",")) {
     throw new Error("Census must use exactly the closed capability axes.");
   }
-  if (doc.denominator.public !== 176 || doc.denominator.portable !== 175) {
-    throw new Error("Census denominator must stay 176 public / 175 portable.");
+  if (doc.denominator.public !== PUBLIC_COMPONENT_COUNT || doc.denominator.portable !== PORTABLE_ROUTE_COUNT) {
+    throw new Error(
+      `Census denominator must stay ${PUBLIC_COMPONENT_COUNT} public / ${PORTABLE_ROUTE_COUNT} portable, found ${doc.denominator.public}/${doc.denominator.portable}.`,
+    );
   }
-  if (doc.denominator.notApplicable.length !== 1 || doc.denominator.notApplicable[0] !== "MeterSurface") {
-    throw new Error("MeterSurface is the single contract-approved non-portable row.");
+  if (
+    doc.denominator.notApplicable.length !== ROSTER_WEB_ONLY_NAMES.length ||
+    !ROSTER_WEB_ONLY_NAMES.every((name) => doc.denominator.notApplicable.includes(name))
+  ) {
+    throw new Error(`${ROSTER_WEB_ONLY_NAMES.join(", ")} must be the single contract-approved non-portable row.`);
   }
   const seen = new Set<string>();
   for (const row of doc.rows) {
@@ -896,10 +906,12 @@ export function validateCensusDoc(doc: CensusDoc): void {
       if (pattern.test(claim)) throw new Error(`Census cross-runtime summary overclaims: ${claim}`);
     }
   }
-  if (!doc.crossRuntime.mountedScope.includes("bounded") || !doc.crossRuntime.mountedScope.includes("not a 175-component behaviour pass")) {
+  if (!doc.crossRuntime.mountedScope.includes("bounded") || !doc.crossRuntime.mountedScope.includes("not a roster-wide behaviour pass")) {
     throw new Error("Census mounted scope must stay bounded and refuse roster-wide promotion.");
   }
-  if (doc.rows.length !== 176) throw new Error(`Census must carry exactly 176 rows, found ${doc.rows.length}.`);
+  if (doc.rows.length !== doc.denominator.public) {
+    throw new Error(`Census must carry exactly ${doc.denominator.public} rows, found ${doc.rows.length}.`);
+  }
 }
 
 export function censusMarkdown(doc: CensusDoc): string {
@@ -1055,7 +1067,7 @@ function validateCrossRuntimeReport(root: string): void {
     if (pattern.test(claim)) throw new Error(`Cross-runtime construction claim overclaims: ${claim}`);
   }
   const scope = report.mountedBehaviour?.scope ?? "";
-  if (!scope.includes("bounded") || !scope.includes("not a 175-component behaviour pass")) {
+  if (!scope.includes("bounded") || !scope.includes("not a roster-wide behaviour pass")) {
     throw new Error("Cross-runtime mounted scope must stay bounded and refuse roster-wide promotion.");
   }
   if (!scope.includes("g18.001")) throw new Error("Cross-runtime mounted scope must cite the g18.001 census.");

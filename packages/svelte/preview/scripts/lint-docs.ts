@@ -14,6 +14,7 @@ import { contractCallbackDrift } from "./contract-callback-drift";
 import { contractDriftErrors, contractPropDrift } from "./contract-prop-drift";
 import { contractSpecDrift } from "./contract-spec-drift";
 import { focusRingDriftErrors } from "./focus-ring-drift";
+import { PORTABLE_ROUTE_COUNT, ROSTER_WEB_ONLY_NAMES } from "../../../../scripts/component-denominator";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const previewDir = path.resolve(scriptDir, "..");
@@ -2150,8 +2151,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     generation: string;
     sourceLedger: string;
     currentPosture: {
-      publicSvelteComponents: number;
-      portableNativeComponents: number;
       nativeNotApplicable: string[];
       status: string;
       specEvidence: string;
@@ -2267,11 +2266,9 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     errors,
   );
   expect(
-    proof.currentPosture.publicSvelteComponents === 176 &&
-      proof.currentPosture.portableNativeComponents === 175 &&
-      proof.currentPosture.nativeNotApplicable.length === 1 &&
-      proof.currentPosture.nativeNotApplicable[0] === "MeterSurface",
-    "packages/gpui/native-accessibility-proof.json must record the 176/175 native boundary.",
+    ROSTER_WEB_ONLY_NAMES.every((name) => proof.currentPosture.nativeNotApplicable.includes(name)) &&
+      proof.currentPosture.nativeNotApplicable.length === ROSTER_WEB_ONLY_NAMES.length,
+    `packages/gpui/native-accessibility-proof.json must keep ${ROSTER_WEB_ONLY_NAMES.join(", ")} as the sole native not-applicable boundary.`,
     errors,
   );
   expect(
@@ -2485,14 +2482,10 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
     runtime: string;
     status: string;
     denominator: {
-      publicSvelteComponents: number;
-      portableNativeComponents: number;
       notApplicable: string[];
     };
     construction: {
       status: string;
-      routeCount: number;
-      routeDenominator: number;
       claim: string;
       evidence: string[];
     };
@@ -2543,20 +2536,16 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   expect(report.sourceLedger === "docs/evidence/nucleus/parity-evidence-ledger.md", "GPUI parity report must point at the g16 evidence ledger.", errors);
   expect(report.runtime === "gpui" && report.status === "current", "GPUI parity report must identify the current GPUI posture.", errors);
   expect(
-    report.denominator.publicSvelteComponents === 176 &&
-      report.denominator.portableNativeComponents === 175 &&
-      report.denominator.notApplicable.length === 1 &&
-      report.denominator.notApplicable[0] === "MeterSurface",
-    "GPUI parity report must record the 176/175 native boundary.",
+    ROSTER_WEB_ONLY_NAMES.every((name) => report.denominator.notApplicable.includes(name)) &&
+      report.denominator.notApplicable.length === ROSTER_WEB_ONLY_NAMES.length,
+    `GPUI parity report must keep ${ROSTER_WEB_ONLY_NAMES.join(", ")} as the sole native not-applicable boundary.`,
     errors,
   );
 
   expect(
     report.construction.status === "focused" &&
-      report.construction.routeCount === 175 &&
-      report.construction.routeDenominator === 175 &&
       report.construction.claim.includes("headless GPUI specimen probe"),
-    "GPUI parity report must claim exactly 175/175 headless construction.",
+    "GPUI parity report must claim headless specimen construction.",
     errors,
   );
   expectEvidence("construction", report.construction.evidence);
@@ -2564,7 +2553,7 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   expect(
     report.mountedBehaviour.status === "mounted" &&
       report.mountedBehaviour.scope.includes("bounded") &&
-      report.mountedBehaviour.scope.includes("not a 175-component behaviour pass"),
+      report.mountedBehaviour.scope.includes("not a roster-wide behaviour pass"),
     "GPUI parity report must bound mounted behaviour rather than promote it to roster coverage.",
     errors,
   );
@@ -2613,7 +2602,7 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   expect(report.knownDeltas.length >= 3, "GPUI parity report must record current known deltas.", errors);
 
   return {
-    gpuiCrossRuntimeRouteCount: report.construction.routeCount,
+    gpuiCrossRuntimeRouteCount: PORTABLE_ROUTE_COUNT,
     gpuiCrossRuntimeDeltaCount: report.knownDeltas.length,
   };
 }

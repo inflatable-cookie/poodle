@@ -2,8 +2,6 @@
   "generation": "g16.001",
   "sourceLedger": "docs/evidence/nucleus/parity-evidence-ledger.md",
   "currentPosture": {
-    "publicSvelteComponents": 176,
-    "portableNativeComponents": 175,
     "nativeNotApplicable": ["MeterSurface"],
     "status": "manual",
     "specEvidence": "layerProof and sectionProof remain section/layer evidence only",

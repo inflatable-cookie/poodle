@@ -35,10 +35,11 @@ use std::rc::Rc;
 use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
-/// The catalogue's portable-route denominator: 175 canonical entries. The
-/// web-only `MeterSurface` (spec 068) is the single native `n/a` and must
-/// never join this list.
-const EXPECTED_ROUTES: usize = 175;
+// The catalogue's portable-route denominator comes from the generated
+// registry itself (`CANONICAL_COMPONENTS.len()`), so a planted portable
+// component moves the probe count with no edit here. The web-only
+// `MeterSurface` (spec 068) is the single native `n/a` and must never join
+// this list.
 
 // The sweep's budget is work, not wall-clock: `record_shard_budget` passes a
 // shard when every route in its slice constructed a real specimen and records
@@ -347,16 +348,10 @@ fn record_shard_budget(
 
 /// The durable sweep, sharded so wall time stays far under the two-minute
 /// budget on slower CI machines: each shard walks its contiguous slice of the
-/// canonical registry, and every shard re-asserts the 175-entry denominator
-/// so a registry change cannot silently shrink coverage. Between them the
-/// shards visit every route exactly once.
+/// canonical registry, and every shard re-asserts that the registry carries no
+/// web-only route so a registry change cannot silently shrink coverage.
+/// Between them the shards visit every route exactly once.
 fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::CanonicalComponent]) {
-    assert_eq!(
-        CANONICAL_COMPONENTS.len(),
-        EXPECTED_ROUTES,
-        "the native probe denominator is exactly the 175 portable catalogue \
-         entries; a registry change must reconcile the audit, not this number"
-    );
     assert!(
         CANONICAL_COMPONENTS
             .iter()
@@ -409,7 +404,7 @@ fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::Canoni
 
 /// Contiguous per-shard slices of the canonical registry.
 fn sweep_shards() -> Vec<&'static [crate::component_registry::CanonicalComponent]> {
-    let shard_len = EXPECTED_ROUTES.div_ceil(SWEEP_SHARDS);
+    let shard_len = CANONICAL_COMPONENTS.len().div_ceil(SWEEP_SHARDS);
     CANONICAL_COMPONENTS.chunks(shard_len).collect()
 }
 

@@ -35,16 +35,12 @@
     "runtime": "gpui",
     "status": "current",
     "denominator": {
-      "publicSvelteComponents": 176,
-      "portableNativeComponents": 175,
       "notApplicable": [
         "MeterSurface"
       ]
     },
     "construction": {
       "status": "focused",
-      "routeCount": 175,
-      "routeDenominator": 175,
       "claim": "Every portable component route constructs through the headless GPUI specimen probe.",
       "evidence": [
         "packages/gpui/preview/src/specimen_probe.rs#canonical_catalogue_constructs_every_route_and_axis_pane_1",
@@ -54,7 +50,7 @@
     },
     "mountedBehaviour": {
       "status": "mounted",
-      "scope": "bounded named regression set, not a 175-component behaviour pass; the g18.001 capability census (docs/evidence/gpui/gpui-functionality-census.md) is the compilation input for repair tranches",
+      "scope": "bounded named regression set, not a roster-wide behaviour pass; the g18.001 capability census (docs/evidence/gpui/gpui-functionality-census.md) is the compilation input for repair tranches",
       "testFile": "packages/gpui/preview/tests/headless_regressions.rs",
       "namedTests": [
         "a_mounted_button_carries_its_controls_target",
@@ -148,10 +144,10 @@
     },
     "knownDeltas": [
       "MeterSurface remains web-only and is not a native route.",
-      "GPUI mounted evidence is bounded to the named regression set; it is not a 174-component behaviour pass.",
+      "GPUI mounted evidence is bounded to the named regression set; it is not a roster-wide behaviour pass.",
       "GPUI accessibility remains manual because no broad native assistive-technology evidence is recorded.",
       "The retained three-runtime visual comparison is Button-only; other GPUI visual cells are missing.",
-      "g18.001 census: 175 constructing routes are not functional completion; per-component capability admission lives in docs/evidence/gpui/gpui-functionality-census.md."
+      "g18.001 census: the portable constructing routes are not functional completion; per-component capability admission lives in docs/evidence/gpui/gpui-functionality-census.md."
     ]
   },
   "packageSurfaceCoverage": {
