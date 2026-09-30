@@ -47,6 +47,9 @@ pub enum ListCardContextMenuTrigger {
 #[derive(Clone, Debug)]
 pub struct ListCardSpec {
     pub title: String,
+    /// Small uppercase family/category label above the title (contract §3
+    /// `eyebrow`). Renders nothing when unset.
+    pub eyebrow: Option<String>,
     pub subtitle: Option<String>,
     pub meta: Option<String>,
     pub leading_shape: LeadingShape,
@@ -113,6 +116,7 @@ impl Default for ListCardSpec {
     fn default() -> Self {
         Self {
             title: String::new(),
+            eyebrow: None,
             subtitle: None,
             meta: None,
             leading_shape: LeadingShape::Circle,
@@ -186,6 +190,11 @@ impl ListCardSpec {
 
     pub fn with_title(mut self, title: impl Into<String>) -> Self {
         self.title = title.into();
+        self
+    }
+
+    pub fn with_eyebrow(mut self, eyebrow: impl Into<String>) -> Self {
+        self.eyebrow = Some(eyebrow.into());
         self
     }
 

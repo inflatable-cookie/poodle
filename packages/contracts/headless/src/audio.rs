@@ -1740,6 +1740,11 @@ pub struct KeyboardContext {
     pub last_note: u8,
     pub orientation: KeyboardOrientation,
     pub octave_shift: i8,
+    /// Base MIDI note for computer-key offsets (contract `computerBaseNote`, default 60).
+    pub computer_base_note: u8,
+    /// Key to semitone offset (contract `computerKeyMap`). Defaults to the
+    /// chromatic A–K map; callers overlay extra or replacement entries.
+    pub computer_key_map: Vec<(String, i16)>,
     pub active_inputs: Vec<(String, u8, u8)>,
     pub external_held_notes: Vec<u8>,
     pub focused_note: Option<u8>,
@@ -1753,12 +1758,105 @@ impl Default for KeyboardContext {
             last_note: 72,
             orientation: KeyboardOrientation::Horizontal,
             octave_shift: 0,
+            computer_base_note: 60,
+            computer_key_map: default_computer_key_map(),
             active_inputs: vec![],
             external_held_notes: vec![],
             focused_note: None,
             disabled: false,
         }
     }
+}
+
+/// Chromatic A–K computer-key map (contract §3 default `computerKeyMap`).
+pub const DEFAULT_COMPUTER_KEY_MAP: &[(&str, i16)] = &[
+    ("a", 0),
+    ("w", 1),
+    ("s", 2),
+    ("e", 3),
+    ("d", 4),
+    ("f", 5),
+    ("t", 6),
+    ("g", 7),
+    ("y", 8),
+    ("h", 9),
+    ("u", 10),
+    ("j", 11),
+    ("k", 12),
+];
+
+fn default_computer_key_map() -> Vec<(String, i16)> {
+    DEFAULT_COMPUTER_KEY_MAP
+        .iter()
+        .map(|(key, offset)| ((*key).to_string(), *offset))
+        .collect()
+}
+
+/// Defaults first, then caller entries. A later pair for the same key
+/// replaces the default — same as core `{ ...DEFAULT, ...input.computerKeyMap }`.
+pub fn merge_computer_key_map<K, I>(overrides: I) -> Vec<(String, i16)>
+where
+    I: IntoIterator<Item = (K, i16)>,
+    K: Into<String>,
+{
+    let mut map = default_computer_key_map();
+    for (key, offset) in overrides {
+        let key = key.into();
+        if let Some((_, existing)) = map
+            .iter_mut()
+            .find(|(name, _)| name.eq_ignore_ascii_case(&key))
+        {
+            *existing = offset;
+        } else {
+            map.push((key, offset));
+        }
+    }
+    map
+}
+
+fn computer_key_offset(context: &KeyboardContext, key: &str) -> Option<i16> {
+    context
+        .computer_key_map
+        .iter()
+        .rev()
+        .find(|(name, _)| name.eq_ignore_ascii_case(key))
+        .map(|(_, offset)| *offset)
+}
+
+/// MIDI note for a computer key: `computerBaseNote + offset + octaveShift * 12`.
+/// The offset comes from `KeyboardContext.computer_key_map` (default A–K).
+/// Returns `None` when the key is unmapped or the computed note is outside
+/// 0..=127. Svelte's PRESS path rejects the raw sum the same way — it does
+/// not saturate into range.
+pub fn keyboard_computer_note(context: &KeyboardContext, key: &str) -> Option<u8> {
+    let offset = computer_key_offset(context, key)?;
+    let note =
+        i16::from(context.computer_base_note) + offset + i16::from(context.octave_shift) * 12;
+    u8::try_from(note).ok().filter(|note| *note <= 127)
+}
+
+pub fn keyboard_computer_key_down(
+    context: KeyboardContext,
+    key: &str,
+    velocity: u8,
+    repeat: bool,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    let key = key.to_ascii_lowercase();
+    let input = format!("key:{key}");
+    if repeat || context.active_inputs.iter().any(|active| active.0 == input) {
+        return (context, vec![]);
+    }
+    let Some(note) = keyboard_computer_note(&context, &key) else {
+        return (context, vec![]);
+    };
+    keyboard_press(context, input, note, velocity)
+}
+
+pub fn keyboard_computer_key_up(
+    context: KeyboardContext,
+    key: &str,
+) -> (KeyboardContext, Vec<KeyboardEffect>) {
+    keyboard_release(context, &format!("key:{}", key.to_ascii_lowercase()))
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -2377,6 +2475,101 @@ mod tests {
         let (context, effects) = keyboard_retarget(context, "pointer", None, 1);
         assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 62 }]);
         assert!(keyboard_visual_state(&context).held_notes.is_empty());
+    }
+
+    #[test]
+    fn computer_keys_map_from_computer_base_note() {
+        let mut context = KeyboardContext {
+            first_note: 48,
+            last_note: 96,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(context.computer_base_note, 60);
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "A"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "k"), Some(72));
+        assert_eq!(keyboard_computer_note(&context, "z"), None);
+
+        let (pressed, effects) = keyboard_computer_key_down(context.clone(), "a", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 60,
+                velocity: 90
+            }]
+        );
+        assert_eq!(
+            keyboard_computer_key_down(pressed.clone(), "a", 90, true).1,
+            vec![]
+        );
+        assert_eq!(keyboard_visual_state(&pressed).held_notes, vec![60]);
+
+        context.computer_base_note = 48;
+        context.octave_shift = 1;
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(60));
+        let (pressed, effects) = keyboard_computer_key_down(context, "a", 100, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 60,
+                velocity: 100
+            }]
+        );
+        let (_, effects) = keyboard_computer_key_up(pressed, "a");
+        assert_eq!(effects, vec![KeyboardEffect::NoteOff { note: 60 }]);
+
+        let mut high = KeyboardContext {
+            first_note: 0,
+            last_note: 127,
+            computer_base_note: 127,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_computer_note(&high, "k"), None);
+        assert_eq!(
+            keyboard_computer_key_down(high.clone(), "k", 90, false).1,
+            vec![]
+        );
+
+        high.computer_base_note = 0;
+        high.octave_shift = -1;
+        assert_eq!(keyboard_computer_note(&high, "a"), None);
+        assert_eq!(keyboard_computer_key_down(high, "a", 90, false).1, vec![]);
+    }
+
+    #[test]
+    fn computer_keys_use_the_configured_key_map() {
+        let context = KeyboardContext {
+            first_note: 48,
+            last_note: 96,
+            computer_key_map: merge_computer_key_map([("a", 5), ("q", 0)]),
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(65));
+        assert_eq!(keyboard_computer_note(&context, "A"), Some(65));
+        assert_eq!(keyboard_computer_note(&context, "s"), Some(62));
+        assert_eq!(keyboard_computer_note(&context, "q"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "Q"), Some(60));
+        assert_eq!(keyboard_computer_note(&context, "z"), None);
+
+        let (pressed, effects) = keyboard_computer_key_down(context.clone(), "q", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 60,
+                velocity: 90
+            }]
+        );
+        assert_eq!(keyboard_visual_state(&pressed).held_notes, vec![60]);
+
+        let (pressed, effects) = keyboard_computer_key_down(context, "a", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 65,
+                velocity: 90
+            }]
+        );
+        assert_eq!(keyboard_visual_state(&pressed).held_notes, vec![65]);
     }
 
     #[test]

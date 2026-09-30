@@ -970,6 +970,83 @@ fn text_and_surface_resolve_typography_container_styling_and_layout_through_moun
     });
 }
 
+/// Native admission of ListCard eyebrow and Keyboard computerBaseNote.
+/// Text/Code wrap stays web-only (brief stop condition); Pill dismissible was
+/// dropped from this PR (closing ruling 2026-09-29) and stays web-only.
+/// Headless GPUI mount plus the shared keyboard machine — no windowed path.
+#[test]
+fn eyebrow_and_keyboard_base_note_admit_on_native() {
+    use poodle_headless::audio::{
+        keyboard_computer_key_down, keyboard_computer_note, KeyboardContext, KeyboardEffect,
+    };
+    use poodle_specs::ListCardSpec;
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        let mut card = poodle_render::list_card(
+            &ListCardSpec::new()
+                .with_title("logo-primary.svg")
+                .with_eyebrow("Brand kit"),
+            &ctx,
+            poodle_render::ListCardSlots::default(),
+            None,
+        );
+        card.id = Some("admit-list-card-eyebrow".into());
+        let body_texts: Vec<_> = card
+            .texts()
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        assert!(
+            body_texts.windows(2).any(|pair| pair[0] == "BRAND KIT"
+                && pair[1] == "logo-primary.svg"),
+            "eyebrow must render above the title, got {body_texts:?}"
+        );
+
+        let context = KeyboardContext {
+            first_note: 48,
+            last_note: 96,
+            computer_base_note: 48,
+            ..KeyboardContext::default()
+        };
+        assert_eq!(keyboard_computer_note(&context, "a"), Some(48));
+        let (_, effects) = keyboard_computer_key_down(context, "a", 90, false);
+        assert_eq!(
+            effects,
+            vec![KeyboardEffect::NoteOn {
+                note: 48,
+                velocity: 90
+            }]
+        );
+
+        let mut root = Node::container();
+        root.id = Some("admit-native-root".into());
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.max_width = Some(96.0);
+        root = root.child(card);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 400.0);
+        driver.draw_frame();
+
+        let card_paint = poodle_gpui_node_backend::painted_node_for("admit-list-card-eyebrow")
+            .expect("painted list card");
+        assert!(
+            card_paint
+                .texts
+                .windows(2)
+                .any(|pair| pair[0] == "BRAND KIT" && pair[1] == "logo-primary.svg"),
+            "mounted eyebrow must sit above the title, got {:?}",
+            card_paint.texts
+        );
+
+        poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// g16.069: AppHeader mounts through production poodle_render, Node,
 /// and GPUI backend paths. Proof covers exact shell metadata (background 94% alpha,
 /// 1.0px bottom border, min-height, fill-width, size and density ladders,

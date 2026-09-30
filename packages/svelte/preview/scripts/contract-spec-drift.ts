@@ -150,19 +150,11 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
   code: {
     wrap: "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
   },
-  "list-card": {
-    eyebrow:
-      "operator ruling 2026-09-27: web-admitted; native admission pending (`lane:native-admission`)",
-  },
   pill: {
     dismissible:
       "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
     dismissLabel:
       "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
-  },
-  keyboard: {
-    computerBaseNote:
-      "planner ruling 2026-09-28: portable computer-key mapping; web-admitted until the headless keyboard machine gains it (`lane:native-admission`)",
   },
 };
 
