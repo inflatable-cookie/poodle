@@ -20,6 +20,10 @@ exists yet.
 
 ## Versions
 
+- [0.4.7](0.4.7.md) — 2026-09-30 — additive patch candidate with history and
+  pin icons, a surface hover token, FormLayout alerts, unfiltered searchable
+  Select, and the Svelte optional-parameter packaging fix; core and Svelte
+  publication set
 - [0.4.6](0.4.6.md) — 2026-09-27 — additive patch candidate with ListCard
   eyebrow, Pill dismiss, and SidebarNav per-item context menu; core and Svelte
   publication set
