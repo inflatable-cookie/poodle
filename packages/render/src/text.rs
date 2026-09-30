@@ -4,10 +4,16 @@
 //! Ported from: `packages/jetstream/components/src/text.rs`.
 
 use poodle_node::{LayoutDirection, LayoutOverflow, Node};
-use poodle_specs::{TextSpec, TextWeight};
+use poodle_specs::{TextSpec, TextWeight, TextWrap};
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
+
+pub(crate) fn contains_whitespace_break(content: &str) -> bool {
+    content
+        .chars()
+        .any(|character| matches!(character, ' ' | '\t' | '\n' | '\r' | '\u{000c}'))
+}
 
 pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
     let color = ctx.theme().resolve_color(spec.color_token());
@@ -26,6 +32,17 @@ pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
         s.text_weight = Some(weight);
         s.line_height = Some(spec.line_height());
         s.text_wrap = true;
+        s.wrap_anywhere = spec.wrap == TextWrap::Anywhere;
+        s.collapse_text_whitespace = true;
+        if spec.wrap == TextWrap::Normal
+            && !spec.content.is_empty()
+            && !contains_whitespace_break(&spec.content)
+        {
+            // GPUI normal mode breaks oversized tokens; CSS has no normal
+            // break point in this run. Keep the normal wrapping channel
+            // available and let no_wrap override GPUI's emergency break.
+            s.no_wrap = true;
+        }
         // `clamp` degrades to wrapped text clipped at the box, as on both old
         // native tiers — the exact N-line cap + ellipsis stays a backend gap.
         if spec.clamp.is_some() {
@@ -48,7 +65,7 @@ pub fn text(spec: &TextSpec, ctx: &RenderContext<'_>) -> Node {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::{TextLeading, TextSize, TextSpacing, TextTone, TextWeight};
+    use poodle_specs::{TextLeading, TextSize, TextSpacing, TextTone, TextWeight, TextWrap};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -129,5 +146,29 @@ mod tests {
             poodle_node::NodeKind::Text { content } => assert_eq!(content, "compact"),
             _ => panic!("Compact child must be a text node"),
         }
+    }
+
+    #[test]
+    fn text_wrap_distinguishes_normal_and_anywhere() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        let normal_token = text(&TextSpec::new("very-long-identifier"), &ctx);
+        assert!(normal_token.style.text_wrap);
+        assert!(!normal_token.style.wrap_anywhere);
+        assert!(normal_token.style.no_wrap);
+        assert!(normal_token.style.collapse_text_whitespace);
+
+        let normal_words = text(&TextSpec::new("first\nsecond"), &ctx);
+        assert!(normal_words.style.text_wrap);
+        assert!(!normal_words.style.no_wrap);
+
+        let anywhere = text(
+            &TextSpec::new("very-long-identifier").with_wrap(TextWrap::Anywhere),
+            &ctx,
+        );
+        assert!(anywhere.style.text_wrap);
+        assert!(anywhere.style.wrap_anywhere);
+        assert!(!anywhere.style.no_wrap);
     }
 }

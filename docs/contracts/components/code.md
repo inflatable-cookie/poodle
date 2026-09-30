@@ -1,7 +1,7 @@
 # Code
 
 Status: detailed contract
-Updated: 2026-09-29
+Updated: 2026-09-30
 
 ## 1. Purpose
 
@@ -78,7 +78,7 @@ Updated: 2026-09-29
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; block source also uses `white-space: pre-wrap`. Unset and `normal` leave overflow wrapping and `white-space: pre` unchanged. Native admission pending (`lane:native-admission`) |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | Inline `normal` preserves long tokens at ordinary break opportunities; `anywhere` allows breaks inside them. Block `normal` preserves source whitespace and line feeds with `white-space: pre`; `anywhere` uses `white-space: pre-wrap`. See Known Deltas for the GPUI mixed-content token behavior. |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -94,7 +94,8 @@ Updated: 2026-09-29
 | inline | `inline=true` | compact inline code fragment |
 | inline plain | `inline=true`, `inlineVariant="plain"` | inline fragment with no padding, radius, or background |
 | inline typography | `inline=true`, `typography="inline"` | inline fragment at `1em × adjustmentRatio` with inherited line-height |
-| wrap anywhere | `wrap="anywhere"` | long identifiers break with `overflow-wrap: anywhere`; block source uses `white-space: pre-wrap` |
+| wrap normal | `wrap="normal"` (default) | inline source uses normal whitespace and wrapping; block source preserves whitespace and line feeds with `white-space: pre` |
+| wrap anywhere | `wrap="anywhere"` | inline source allows breaks inside long identifiers; block source preserves whitespace and line feeds with `white-space: pre-wrap` |
 | block | `inline=false` (default) | full block with optional toolbar |
 | copied | user clicks copy button | icon changes to check mark for 2 seconds |
 | line-highlighted | line index in `highlightLines` | accent background on that line |
@@ -372,8 +373,14 @@ face reads larger or smaller than the default sans family.
 - Inline mode: GPUI renders as a styled text run within a parent text element
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
-- `wrap` is web-admitted. The portable Rust spec and GPUI mapping remain
-  native admission pending (`lane:native-admission`).
+- Inline `wrap="normal"` collapses whitespace and wraps at ordinary break
+  opportunities; `anywhere` also permits breaks inside long identifiers.
+- Block `wrap="normal"` preserves source whitespace and line feeds without
+  wrapping; a trailing LF leaves a zero-height empty line span unless line
+  numbers add content. `anywhere` preserves line feeds and wraps long
+  identifiers.
+- GPUI inline `wrap="normal"` has the mixed-content token delta recorded in
+  Known Deltas.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
@@ -418,11 +425,11 @@ face reads larger or smaller than the default sans family.
 
 ## 12. Known Deltas
 
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| syntax highlighting not specified | tokenization is implementation-specific | allowed | may add token color contracts later |
-| clipboard API differs per platform | GPUI uses native clipboard vs navigator.clipboard | allowed | keep 2s feedback timing |
-| `wrap` is web-admitted | web-only until native admission | operator 2026-09-27 | native admission pending (`lane:native-admission`) |
+| Delta | Svelte behavior | GPUI behavior | Cause | Approval Status | Follow-Up |
+|-------|-----------------|---------------|-------|-----------------|-----------|
+| Syntax highlighting is unspecified | — | Tokenization is implementation-specific | Syntax tokenization is platform-owned | allowed | may add token color contracts later |
+| Clipboard API differs per platform | Uses `navigator.clipboard` | Uses the native clipboard API | Clipboard access is platform-specific | allowed | keep 2s feedback timing |
+| Inline `wrap="normal"` with a long unbroken token mixed with ordinary words | Keeps the token intact at ordinary break opportunities; it overflows rather than breaking inside the token | May emergency-break the token when it exceeds the available width | GPUI 0.2.2 `LineWrapper::wrap_line` has no normal-token-boundary option and emergency-breaks overlong tokens | accepted by planner ruling (2026-09-30) | upstream GPUI line-wrapper support |
 
 ## 13. Specimen Definitions
 

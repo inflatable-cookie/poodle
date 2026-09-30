@@ -275,6 +275,10 @@ pub struct NodeStyle {
     pub line_height: Option<f32>,
     /// Soft-wrap text to the container width (white-space: normal).
     pub text_wrap: bool,
+    /// Allow breaks inside otherwise unbreakable identifiers.
+    pub wrap_anywhere: bool,
+    /// Collapse CSS whitespace in a normal white-space text run.
+    pub collapse_text_whitespace: bool,
     /// Fill the parent's height (height: 100%), the vertical `fill_width`.
     pub fill_height: bool,
     /// Fill the parent's width (width: 100%). Candidate for a
@@ -399,6 +403,8 @@ impl Default for NodeStyle {
             tabular_figures: false,
             line_height: None,
             text_wrap: false,
+            wrap_anywhere: false,
+            collapse_text_whitespace: false,
             fill_height: false,
             fill_width: false,
             flex_none: false,

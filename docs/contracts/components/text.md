@@ -1,7 +1,7 @@
 # Text
 
 Status: contract
-Updated: 2026-09-29
+Updated: 2026-09-30
 
 ## 1. Purpose
 
@@ -23,7 +23,7 @@ Updated: 2026-09-29
 | `leading` | `"normal" \| "relaxed"` | `"normal"` | line-height |
 | `spacing` | `"none" \| "compact"` | `"none"` | compact grid gap for child paragraphs |
 | `clamp` | `"none" \| 1 \| 2 \| 3` | `"none"` | optional line clamp |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; `normal` leaves overflow wrapping unchanged. Native admission pending (`lane:native-admission`) |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | `normal` preserves long tokens at ordinary break opportunities; `anywhere` allows breaks inside them. See Known Deltas for the GPUI mixed-content token behavior. |
 | `children` | `Snippet` | none | text/content |
 
 ## 3. Visual Rules
@@ -45,10 +45,11 @@ Updated: 2026-09-29
 - `spacing="compact"` renders a grid with `--poodle-space-stack-sm` gap.
 - `clamp={1 | 2 | 3}` applies `-webkit-line-clamp`, `line-clamp`, hidden
   overflow, and vertical box orientation.
-- `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
-  `wrap="normal"` do not change overflow wrapping.
-- `wrap` is web-admitted. The portable Rust spec and GPUI mapping remain
-  native admission pending (`lane:native-admission`).
+- `wrap="normal"` collapses CSS whitespace, including embedded and trailing
+  line feeds, and wraps at ordinary break opportunities. A long unbroken token
+  overflows rather than breaking inside the token.
+- `wrap="anywhere"` has the same whitespace behavior and allows breaks inside
+  long identifiers.
 
 ## 4. Accessibility
 
@@ -68,3 +69,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 - `TextSpecimen.svelte` covers tones, sizes, relaxed leading, inline text, and
   clamped text.
+
+## 6. Known Deltas
+
+| Delta | Svelte behavior | GPUI behavior | Cause | Approval Status | Follow-Up |
+|-------|-----------------|---------------|-------|-----------------|-----------|
+| `wrap="normal"` with a long unbroken token inside mixed Text content | Keeps the token intact at ordinary break opportunities; it overflows rather than breaking inside the token | May emergency-break the token when it exceeds the available width | GPUI 0.2.2 `LineWrapper::wrap_line` has no normal-token-boundary option and emergency-breaks overlong tokens | accepted by planner ruling (2026-09-30) | upstream GPUI line-wrapper support |

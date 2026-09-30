@@ -372,7 +372,11 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
             Some(gpui::FontFeatures(std::sync::Arc::new(vec![("tnum".to_owned(), 1)])));
         record_probe_channel("content.typography.tabular-figures");
     }
-    if style.text_wrap {
+    if style.text_wrap || style.wrap_anywhere {
+        // GPUI's normal line wrapper wraps oversized words as well as words
+        // with natural break opportunities. `wrap_anywhere` therefore uses
+        // the same backend mode; normal standalone tokens opt into nowrap in
+        // the shared renderer.
         el = el.whitespace_normal();
     }
     if let Some(family) = style.font_family {
