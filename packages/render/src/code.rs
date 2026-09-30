@@ -8,11 +8,12 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, TextAlign,
 };
-use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
+use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, CodeWrap};
 
 use crate::color::{mix_srgb, with_alpha, BLACK};
 use crate::context::RenderContext;
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
+use crate::text::contains_whitespace_break;
 
 fn rounded_all(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
@@ -49,7 +50,14 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
             s.text_size = Some(inline_font);
             s.descriptor.text_color = Some(text_color);
             s.font_family = Some(FontFamily::Mono);
-            s.no_wrap = true;
+            s.text_wrap = spec.wrap == CodeWrap::Anywhere
+                || contains_whitespace_break(&spec.content)
+                || spec.content.is_empty();
+            s.wrap_anywhere = spec.wrap == CodeWrap::Anywhere;
+            s.collapse_text_whitespace = true;
+            s.no_wrap = spec.wrap == CodeWrap::Normal
+                && !spec.content.is_empty()
+                && !contains_whitespace_break(&spec.content);
             if spec.inline_variant == CodeInlineVariant::Default {
                 let inline_bg = mix_srgb(panel, elevated, 0.72);
                 s.descriptor.layout.spacing.padding.left = rem_to_px(0.375);
@@ -159,6 +167,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
         s.descriptor.layout.spacing.padding.bottom = pre_pad_y;
         s.text_size = Some(source_font);
         s.line_height = Some(1.4);
+        s.fill_width = true;
         s.descriptor.layout.overflow_x = LayoutOverflow::Scroll;
         s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
         if let Some(mh) = spec.max_height {
@@ -169,7 +178,7 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
     let needs_per_line = spec.show_line_numbers || !spec.highlight_lines.is_empty();
 
     if needs_per_line {
-        for (i, line) in spec.content.lines().enumerate() {
+        for (i, line) in spec.content.split('\n').enumerate() {
             let line_no = i + 1;
             let is_highlighted = spec.highlight_lines.contains(&line_no);
 
@@ -201,12 +210,26 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
 
             let mut source = Node::text(line.to_string());
             source.style.font_family = Some(FontFamily::Mono);
-            source.style.no_wrap = true;
+            if spec.wrap == CodeWrap::Anywhere {
+                source.style.text_wrap = true;
+                source.style.wrap_anywhere = true;
+                source.style.flex_grow = Some(1.0);
+                source.style.min_width = Some(0.0);
+            } else {
+                source.style.no_wrap = true;
+            }
             scroll = scroll.child(row.child(source));
         }
     } else {
         let mut source = Node::text(&spec.content);
         source.style.font_family = Some(FontFamily::Mono);
+        if spec.wrap == CodeWrap::Anywhere {
+            source.style.text_wrap = true;
+            source.style.wrap_anywhere = true;
+            source.style.fill_width = true;
+        } else {
+            source.style.no_wrap = true;
+        }
         scroll = scroll.child(source);
     }
 
@@ -233,5 +256,84 @@ mod tests {
             .expect("block code always renders a source surface");
 
         assert_eq!(scroll.style.line_height, Some(1.4));
+    }
+
+    #[test]
+    fn inline_wrap_preserves_normal_breaks_and_anywhere_breaks_tokens() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let normal_token = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_inline(true),
+            &ctx,
+        );
+        assert!(normal_token.style.no_wrap);
+        assert!(!normal_token.style.wrap_anywhere);
+        assert!(normal_token.style.collapse_text_whitespace);
+
+        let normal_words = code(
+            &CodeSpec::new()
+                .with_content("first\nsecond")
+                .with_inline(true),
+            &ctx,
+        );
+        assert!(normal_words.style.text_wrap);
+        assert!(!normal_words.style.no_wrap);
+
+        let anywhere = code(
+            &CodeSpec::new()
+                .with_content("very-long-identifier")
+                .with_inline(true)
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        assert!(anywhere.style.text_wrap);
+        assert!(anywhere.style.wrap_anywhere);
+        assert!(!anywhere.style.no_wrap);
+    }
+
+    #[test]
+    fn block_wrap_preserves_newlines_and_controls_long_tokens() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let normal = code(&CodeSpec::new().with_content("first\n"), &ctx);
+        let normal_source = normal
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("block source");
+        assert!(normal_source.style.no_wrap);
+        assert!(!normal_source.style.collapse_text_whitespace);
+        assert!(matches!(
+            &normal_source.kind,
+            poodle_node::NodeKind::Text { content } if content == "first\n"
+        ));
+
+        let numbered = code(
+            &CodeSpec::new()
+                .with_content("first\n")
+                .with_show_line_numbers(true),
+            &ctx,
+        );
+        let numbered_scroll = numbered.children.last().expect("numbered code scroll");
+        assert_eq!(numbered_scroll.children.len(), 2);
+
+        let anywhere = code(
+            &CodeSpec::new()
+                .with_content("first\n")
+                .with_wrap(CodeWrap::Anywhere),
+            &ctx,
+        );
+        let anywhere_source = anywhere
+            .children
+            .last()
+            .and_then(|scroll| scroll.children.first())
+            .expect("block source");
+        assert!(anywhere_source.style.text_wrap);
+        assert!(anywhere_source.style.wrap_anywhere);
+        assert!(!anywhere_source.style.no_wrap);
     }
 }

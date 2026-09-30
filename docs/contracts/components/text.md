@@ -23,7 +23,7 @@ Updated: 2026-09-29
 | `leading` | `"normal" \| "relaxed"` | `"normal"` | line-height |
 | `spacing` | `"none" \| "compact"` | `"none"` | compact grid gap for child paragraphs |
 | `clamp` | `"none" \| 1 \| 2 \| 3` | `"none"` | optional line clamp |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | **Web targets only** — `anywhere` applies `overflow-wrap: anywhere` so long identifiers can break; `normal` leaves overflow wrapping unchanged. Native admission pending (`lane:native-admission`) |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | `anywhere` allows breaks inside long identifiers; `normal` wraps at ordinary break opportunities and leaves an unbroken token intact |
 | `children` | `Snippet` | none | text/content |
 
 ## 3. Visual Rules
@@ -45,10 +45,11 @@ Updated: 2026-09-29
 - `spacing="compact"` renders a grid with `--poodle-space-stack-sm` gap.
 - `clamp={1 | 2 | 3}` applies `-webkit-line-clamp`, `line-clamp`, hidden
   overflow, and vertical box orientation.
-- `wrap="anywhere"` applies `overflow-wrap: anywhere`. Unset and
-  `wrap="normal"` do not change overflow wrapping.
-- `wrap` is web-admitted. The portable Rust spec and GPUI mapping remain
-  native admission pending (`lane:native-admission`).
+- `wrap="normal"` collapses CSS whitespace, including embedded and trailing
+  line feeds, and wraps at ordinary break opportunities. A long unbroken token
+  overflows rather than breaking inside the token.
+- `wrap="anywhere"` has the same whitespace behavior and allows breaks inside
+  long identifiers.
 
 ## 4. Accessibility
 

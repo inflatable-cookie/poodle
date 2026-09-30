@@ -18,6 +18,14 @@ pub enum CodeTypography {
     Inline,
 }
 
+/// Overflow wrapping for long identifiers (contract §3 `wrap`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum CodeWrap {
+    #[default]
+    Normal,
+    Anywhere,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct CodeSpec {
     pub content: String,
@@ -38,6 +46,8 @@ pub struct CodeSpec {
     pub aria_label: Option<String>,
     /// Whether the copy-to-clipboard control renders.
     pub shows_copy_button: bool,
+    /// Overflow wrapping for long identifiers (contract §3 `wrap`).
+    pub wrap: CodeWrap,
 }
 
 impl Default for CodeSpec {
@@ -57,6 +67,7 @@ impl Default for CodeSpec {
             density: None,
             aria_label: None,
             shows_copy_button: true,
+            wrap: CodeWrap::Normal,
         }
     }
 }
@@ -177,6 +188,11 @@ impl CodeSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
+        self
+    }
+
+    pub fn with_wrap(mut self, wrap: CodeWrap) -> Self {
+        self.wrap = wrap;
         self
     }
 }

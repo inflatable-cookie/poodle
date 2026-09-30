@@ -208,7 +208,7 @@ pub use card::{CardLayout, CardSpec, CardVariant};
 pub use card_toggle_group::{CardToggleGroupSpec, CardToggleOption};
 pub use changed_files::ChangedFilesSpec;
 pub use checkbox::CheckboxSpec;
-pub use code::{CodeInlineVariant, CodeSpec, CodeTypography};
+pub use code::{CodeInlineVariant, CodeSpec, CodeTypography, CodeWrap};
 pub use code_input::{CodeInputCompletion, CodeInputSpec};
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;
@@ -305,7 +305,9 @@ pub use switch::{SwitchSpec, SwitchTone};
 pub use tab_strip::TabStripSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
 pub use tabs::{ActiveEdge, ActiveFill, TabsLayout, TabsOverflowStrategy, TabsShedPart, TabsSpec};
-pub use text::{TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight};
+pub use text::{
+    TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight, TextWrap,
+};
 /// Deprecated: use `TextInputSpec` with `rows > 1` instead.
 pub type TextAreaSpec = TextInputSpec;
 pub use history_center::{HistoryCenterRejection, HistoryCenterSpec, HistoryCenterStatus};

@@ -51,6 +51,14 @@ pub enum TextSpacing {
     Compact,
 }
 
+/// Overflow wrapping for long identifiers (contract §2 `wrap`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TextWrap {
+    #[default]
+    Normal,
+    Anywhere,
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct TextSpec {
     pub content: String,
@@ -61,6 +69,7 @@ pub struct TextSpec {
     pub leading: TextLeading,
     pub spacing: TextSpacing,
     pub clamp: Option<u8>,
+    pub wrap: TextWrap,
 }
 
 impl TextSpec {
@@ -103,6 +112,11 @@ impl TextSpec {
 
     pub fn with_clamp(mut self, clamp: u8) -> Self {
         self.clamp = Some(clamp.clamp(1, 3));
+        self
+    }
+
+    pub fn with_wrap(mut self, wrap: TextWrap) -> Self {
+        self.wrap = wrap;
         self
     }
 

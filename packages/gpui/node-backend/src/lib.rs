@@ -99,6 +99,8 @@ pub struct PaintedNodeSnapshot {
     pub shadow_layers: Vec<ShadowLayer>,
     pub border_dashed: bool,
     pub text_wrap: bool,
+    pub wrap_anywhere: bool,
+    pub collapse_text_whitespace: bool,
     pub text_ellipsis: bool,
     pub no_wrap: bool,
     pub text_size: Option<f32>,
@@ -118,6 +120,8 @@ impl PaintedNodeSnapshot {
             shadow_layers: node.style.shadow_layers.clone(),
             border_dashed: node.style.border_dashed,
             text_wrap: node.style.text_wrap,
+            wrap_anywhere: node.style.wrap_anywhere,
+            collapse_text_whitespace: node.style.collapse_text_whitespace,
             text_ellipsis: node.style.text_ellipsis,
             no_wrap: node.style.no_wrap,
             text_size: node.style.text_size,
@@ -369,7 +373,12 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
                 element.ime = Some(ime);
                 return build_box(node, div().child(element));
             }
-            build_box(node, div().child(content.clone()))
+            let display_content = if node.style.collapse_text_whitespace {
+                collapse_text_whitespace(content)
+            } else {
+                content.clone()
+            };
+            build_box(node, div().child(display_content))
         }
         // GPUI has no native button element; the old tier's buttons are styled
         // divs too, so the label-child div is the faithful mapping. Same for
@@ -562,6 +571,23 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
             build_leaf(node, el)
         }
     }
+}
+
+fn collapse_text_whitespace(content: &str) -> String {
+    let mut collapsed = String::with_capacity(content.len());
+    let mut pending_space = false;
+    for character in content.chars() {
+        if matches!(character, ' ' | '\t' | '\n' | '\r' | '\u{000c}') {
+            pending_space = true;
+        } else {
+            if pending_space && !collapsed.is_empty() {
+                collapsed.push(' ');
+            }
+            pending_space = false;
+            collapsed.push(character);
+        }
+    }
+    collapsed
 }
 
 /// Leaves (svg, img) implement `Styled` but not `InteractiveElement`/

@@ -45,13 +45,13 @@ use poodle_render::{
     TabsHandlers, ToastStackHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
-    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CollapsibleSpec,
+    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CodeSpec, CodeWrap, CollapsibleSpec,
     ControlDensity, ControlSize, FaderSpec, HistoryCenterRejection, HistoryCenterSpec, IconButtonSpec,
     KnobSpec, Orientation, PopoverSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec, SelectSpec,
     SkeletonSpec, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition,
     TabPin, TabVariant,
-    TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
-    UiPresentationProviderSpec, XYPadSpec,
+    TabsSpec, TextSpec, TextWrap, TimeInputSpec, Toast, ToastStackSpec, ToastTone,
+    TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec, XYPadSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -1133,6 +1133,138 @@ fn eyebrow_and_keyboard_base_note_admit_on_native() {
         );
 
         poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Text and Code wrap match Svelte's white-space rules in a bounded native
+/// mount. Svelte expectations: Text and inline Code collapse embedded and
+/// trailing line feeds for both values; normal keeps a lone token on one
+/// overflowing line, anywhere breaks it; block Code preserves embedded and
+/// trailing line feeds for both values, with anywhere also wrapping long
+/// tokens.
+#[test]
+fn text_and_code_wrap_match_svelte_line_feed_and_token_rows() {
+    fn append(root: &mut Node, id: &str, mut node: Node, width: f32) {
+        node.id = Some(id.into());
+        node.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+        root.children.push(node);
+    }
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let long = "supercalifragilisticexpialidociousidentifierlongtoken";
+        let width = 136.0;
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+
+        for (id, content, wrap) in [
+            ("wrap-text-normal-token", long, TextWrap::Normal),
+            ("wrap-text-anywhere-token", long, TextWrap::Anywhere),
+            ("wrap-text-normal-lines", "first\nsecond", TextWrap::Normal),
+            ("wrap-text-anywhere-lines", "first\nsecond", TextWrap::Anywhere),
+            ("wrap-text-normal-trailing", "first\n", TextWrap::Normal),
+            ("wrap-text-anywhere-trailing", "first\n", TextWrap::Anywhere),
+        ] {
+            append(
+                &mut root,
+                id,
+                poodle_render::text(&TextSpec::new(content).with_wrap(wrap), &ctx),
+                width,
+            );
+        }
+        for (id, content, wrap) in [
+            ("wrap-inline-normal-token", long, CodeWrap::Normal),
+            ("wrap-inline-anywhere-token", long, CodeWrap::Anywhere),
+            ("wrap-inline-normal-lines", "first\nsecond", CodeWrap::Normal),
+            ("wrap-inline-anywhere-lines", "first\nsecond", CodeWrap::Anywhere),
+            ("wrap-inline-normal-trailing", "first\n", CodeWrap::Normal),
+            ("wrap-inline-anywhere-trailing", "first\n", CodeWrap::Anywhere),
+        ] {
+            append(
+                &mut root,
+                id,
+                poodle_render::code(
+                    &CodeSpec::new()
+                        .with_content(content)
+                        .with_inline(true)
+                        .with_copyable(false)
+                        .with_wrap(wrap),
+                    &ctx,
+                ),
+                width,
+            );
+        }
+        for (id, content, wrap) in [
+            ("wrap-block-normal-token", long, CodeWrap::Normal),
+            ("wrap-block-anywhere-token", long, CodeWrap::Anywhere),
+            ("wrap-block-normal-first", "first", CodeWrap::Normal),
+            ("wrap-block-anywhere-first", "first", CodeWrap::Anywhere),
+            ("wrap-block-normal-lines", "first\nsecond", CodeWrap::Normal),
+            ("wrap-block-anywhere-lines", "first\nsecond", CodeWrap::Anywhere),
+            ("wrap-block-normal-trailing", "first\n", CodeWrap::Normal),
+            ("wrap-block-anywhere-trailing", "first\n", CodeWrap::Anywhere),
+        ] {
+            append(
+                &mut root,
+                id,
+                poodle_render::code(
+                    &CodeSpec::new()
+                        .with_content(content)
+                        .with_copyable(false)
+                        .with_wrap(wrap),
+                    &ctx,
+                ),
+                width,
+            );
+        }
+
+        let mounted = Arc::new(Mutex::new(root));
+        let _driver = HeadlessDriver::new_in_box(cx, mounted, width + 8.0, 900.0);
+        let height = |id: &str| {
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(id)
+                    .unwrap_or_else(|| panic!("mounted wrap row {id}"))
+                    .size
+                    .height,
+            )
+        };
+        let one = height("wrap-text-normal-lines");
+        let two = height("wrap-block-normal-lines");
+
+        assert!(height("wrap-text-normal-token") <= one + 1.0);
+        assert!(height("wrap-text-anywhere-token") > one * 2.0);
+        assert!((height("wrap-text-anywhere-lines") - one).abs() <= 1.0);
+        assert!((height("wrap-text-normal-trailing") - height("wrap-text-normal-lines")) < 1.0);
+        assert!((height("wrap-text-anywhere-trailing") - one).abs() <= 1.0);
+
+        assert!(height("wrap-inline-normal-token") <= height("wrap-inline-normal-lines") + 1.0);
+        assert!(height("wrap-inline-anywhere-token") > height("wrap-inline-normal-lines") * 2.0);
+        assert!(
+            (height("wrap-inline-anywhere-lines") - height("wrap-inline-normal-lines")).abs()
+                <= 1.0
+        );
+        assert!((height("wrap-inline-normal-trailing") - height("wrap-inline-normal-lines")) < 1.0);
+        assert!(
+            (height("wrap-inline-anywhere-trailing") - height("wrap-inline-anywhere-lines")).abs()
+                <= 1.0
+        );
+
+        assert!(height("wrap-block-normal-token") <= two + 1.0);
+        assert!(
+            height("wrap-block-anywhere-token") > two + 18.0,
+            "anywhere block token height {} should exceed the two-line height {two}",
+            height("wrap-block-anywhere-token")
+        );
+        assert!((height("wrap-block-anywhere-lines") - two).abs() <= 1.0);
+        assert!(height("wrap-block-normal-trailing") > height("wrap-block-normal-first"));
+        assert!(height("wrap-block-anywhere-trailing") > height("wrap-block-anywhere-first"));
+        assert!((height("wrap-block-normal-trailing") - two).abs() <= 1.0);
+        assert!(
+            (height("wrap-block-anywhere-trailing") - height("wrap-block-anywhere-lines")).abs()
+                <= 1.0
+        );
     });
 }
 
