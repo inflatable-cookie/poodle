@@ -632,12 +632,10 @@ export function unresolvedTypeKey(finding: UnresolvedTypeFinding): string {
 export const VALUE_DOMAIN_BASELINE = new Set<string>([
   "box|overflow|rust|impl-wider",
   "box|overflow|ts|contract-wider",
-  "button|fit|rust|contract-wider",
   "confirm-action|tone|rust|impl-wider",
   "dialog|role|rust|contract-wider",
   "editable-label|activationMode|rust|contract-wider",
   "empty-state|variant|rust|contract-wider",
-  "history-center|status|rust|contract-wider",
   "icon-button|tooltipPlacement|rust|impl-wider",
   "icon-button|tooltipPlacement|ts|impl-wider",
   "list-container|emptyVariant|rust|contract-wider",
