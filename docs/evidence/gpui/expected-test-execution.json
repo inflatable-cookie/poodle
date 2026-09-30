@@ -176,7 +176,7 @@
     },
     "model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window": {
       "outcome": "passed",
-      "body_sha256": "baf9a8a8532d63668fc2e21fee3235926f98beab169bdc25d3ae453defca5c43"
+      "body_sha256": "abba81e17488129e174435c5c56f1a4d81069387de4a47243b4108547ff21ccd"
     },
     "radio_selects_on_activate_and_does_not_uncheck_itself": {
       "outcome": "passed",

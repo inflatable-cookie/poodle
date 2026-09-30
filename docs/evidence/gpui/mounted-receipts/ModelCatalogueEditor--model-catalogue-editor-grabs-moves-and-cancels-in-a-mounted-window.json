@@ -17,6 +17,7 @@
       "production-mount"
     ],
     "events": [
+      "assert_eq!(\n            orders.lock().unwrap().last().expect(\"the moved order\").as_slice(),\n            [\n                \"model-alpha\".to_string(),\n                \"model-gamma\".to_string(),\n                \"model-beta\".to_string(),\n                \"model-dup-a\".to_string(),\n            ],\n            \"Escape ends the grab and leaves the last emit",
       "assert_eq!(\n            orders.lock().unwrap().last().expect(\"an order\").as_slice(),\n            [\n                \"model-alpha\".to_string(),\n                \"model-gamma\".to_string(),\n                \"model-beta\".to_string(),\n                \"model-dup-a\".to_string(),\n            ],\n            \"the move emit"
     ],
     "keyboard_focus": [
@@ -45,7 +46,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-09-29-poodle-060-instance-baseline-tabular-expected",
     "outcome": "passed",
-    "body_sha256": "baf9a8a8532d63668fc2e21fee3235926f98beab169bdc25d3ae453defca5c43"
+    "body_sha256": "abba81e17488129e174435c5c56f1a4d81069387de4a47243b4108547ff21ccd"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
