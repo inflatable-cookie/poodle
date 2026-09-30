@@ -23,7 +23,7 @@ Updated: 2026-09-29
 | `leading` | `"normal" \| "relaxed"` | `"normal"` | line-height |
 | `spacing` | `"none" \| "compact"` | `"none"` | compact grid gap for child paragraphs |
 | `clamp` | `"none" \| 1 \| 2 \| 3` | `"none"` | optional line clamp |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | `anywhere` allows breaks inside long identifiers; `normal` wraps at ordinary break opportunities and leaves an unbroken token intact |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | **Web targets only** — `normal` keeps long tokens intact even when mixed with other text; `anywhere` allows breaks inside them. Native admission pending GPUI support for wrapping at spaces without emergency-breaking a token (`lane:native-admission`) |
 | `children` | `Snippet` | none | text/content |
 
 ## 3. Visual Rules
@@ -50,6 +50,8 @@ Updated: 2026-09-29
   overflows rather than breaking inside the token.
 - `wrap="anywhere"` has the same whitespace behavior and allows breaks inside
   long identifiers.
+- GPUI 0.2.2's normal line wrapper breaks an overlong token inside mixed text;
+  native `wrap` admission remains pending support for the Svelte break rules.
 
 ## 4. Accessibility
 

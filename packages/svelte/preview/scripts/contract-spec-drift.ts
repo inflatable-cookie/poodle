@@ -144,6 +144,12 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
     focusOnValueChange:
       "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
   },
+  text: {
+    wrap: "GPUI 0.2.2 normal wrapping can break overlong tokens inside mixed text; native admission pending token-boundary support (`lane:native-admission`)",
+  },
+  code: {
+    wrap: "GPUI 0.2.2 normal inline wrapping can break overlong tokens inside mixed text; native admission pending token-boundary support (`lane:native-admission`)",
+  },
   pill: {
     dismissible:
       "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",

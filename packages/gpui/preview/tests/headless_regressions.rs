@@ -1140,8 +1140,9 @@ fn eyebrow_and_keyboard_base_note_admit_on_native() {
 /// mount. Svelte expectations: Text and inline Code collapse embedded and
 /// trailing line feeds for both values; normal keeps a lone token on one
 /// overflowing line, anywhere breaks it; block Code preserves embedded and
-/// trailing line feeds for both values, with anywhere also wrapping long
-/// tokens.
+/// line feeds for both values; a trailing LF leaves an empty zero-height
+/// source row unless the line-number gutter supplies content. Anywhere also
+/// wraps long tokens.
 #[test]
 fn text_and_code_wrap_match_svelte_line_feed_and_token_rows() {
     fn append(root: &mut Node, id: &str, mut node: Node, width: f32) {
@@ -1258,11 +1259,12 @@ fn text_and_code_wrap_match_svelte_line_feed_and_token_rows() {
             height("wrap-block-anywhere-token")
         );
         assert!((height("wrap-block-anywhere-lines") - two).abs() <= 1.0);
-        assert!(height("wrap-block-normal-trailing") > height("wrap-block-normal-first"));
-        assert!(height("wrap-block-anywhere-trailing") > height("wrap-block-anywhere-first"));
-        assert!((height("wrap-block-normal-trailing") - two).abs() <= 1.0);
         assert!(
-            (height("wrap-block-anywhere-trailing") - height("wrap-block-anywhere-lines")).abs()
+            (height("wrap-block-normal-trailing") - height("wrap-block-normal-first")).abs()
+                <= 1.0
+        );
+        assert!(
+            (height("wrap-block-anywhere-trailing") - height("wrap-block-anywhere-first")).abs()
                 <= 1.0
         );
     });

@@ -173,9 +173,13 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
         }
     }
 
-    let needs_per_line = spec.show_line_numbers || !spec.highlight_lines.is_empty();
+    let needs_per_line =
+        spec.show_line_numbers || !spec.highlight_lines.is_empty() || spec.content.ends_with('\n');
 
     if needs_per_line {
+        // Svelte renders each block line as its own block span. Empty source
+        // spans, including the one after a trailing LF, have zero height
+        // unless a line-number gutter supplies content.
         for (i, line) in spec.content.split('\n').enumerate() {
             let line_no = i + 1;
             let is_highlighted = spec.highlight_lines.contains(&line_no);
@@ -204,6 +208,11 @@ pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
                 s.font_family = Some(FontFamily::Mono);
                 s.text_align = Some(TextAlign::Right);
                 row = row.child(gutter);
+            }
+
+            if line.is_empty() {
+                scroll = scroll.child(row);
+                continue;
             }
 
             let mut source = Node::text(line.to_string());
@@ -298,17 +307,22 @@ mod tests {
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
         let ctx = RenderContext::new(&theme);
         let normal = code(&CodeSpec::new().with_content("first\n"), &ctx);
-        let normal_source = normal
+        let normal_scroll = normal
             .children
             .last()
-            .and_then(|scroll| scroll.children.first())
-            .expect("block source");
+            .expect("block code scroll");
+        assert_eq!(normal_scroll.children.len(), 2);
+        let normal_source = normal_scroll.children[0]
+            .children
+            .first()
+            .expect("first block source line");
         assert!(normal_source.style.no_wrap);
         assert!(!normal_source.style.collapse_text_whitespace);
         assert!(matches!(
             &normal_source.kind,
-            poodle_node::NodeKind::Text { content } if content == "first\n"
+            poodle_node::NodeKind::Text { content } if content == "first"
         ));
+        assert!(normal_scroll.children[1].children.is_empty());
 
         let numbered = code(
             &CodeSpec::new()
@@ -329,6 +343,7 @@ mod tests {
             .children
             .last()
             .and_then(|scroll| scroll.children.first())
+            .and_then(|row| row.children.first())
             .expect("block source");
         assert!(anywhere_source.style.text_wrap);
         assert!(anywhere_source.style.wrap_anywhere);

@@ -78,7 +78,7 @@ Updated: 2026-09-29
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | `anywhere` allows breaks inside long identifiers; block source preserves whitespace and line feeds with `pre-wrap` |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | **Web targets only** — inline `normal` keeps long tokens intact even when mixed with other text; `anywhere` allows breaks inside them. Block source preserves whitespace and line feeds with `pre-wrap`. Native admission pending GPUI support for normal token boundaries (`lane:native-admission`) |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -376,7 +376,12 @@ face reads larger or smaller than the default sans family.
 - Inline `wrap="normal"` collapses whitespace and wraps at ordinary break
   opportunities; `anywhere` also permits breaks inside long identifiers.
 - Block `wrap="normal"` preserves source whitespace and line feeds without
-  wrapping; `anywhere` preserves them and wraps long identifiers.
+  wrapping; a trailing LF leaves a zero-height empty line span unless line
+  numbers add content. `anywhere` preserves line feeds and wraps long
+  identifiers.
+- GPUI 0.2.2's normal line wrapper emergency-breaks long tokens in inline Code
+  mixed with ordinary words; native `wrap` admission remains pending support
+  for the Svelte break rules.
 - color-mix mappings:
   - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
   - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
