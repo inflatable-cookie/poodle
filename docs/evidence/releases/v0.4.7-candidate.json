@@ -1,0 +1,44 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.7",
+  "source_commit": "e9fdfe16bdb91568db8dc88ff0deaac58f457c79",
+  "base_commit": "e4c97492cd948e1caf003391c4df26ca384e699f",
+  "payload_commits": [
+    "0f5c4c5867388cdac2db5c92801e31d4ae606b28",
+    "5f9274ac341d8dab3c528884872cd81c639168df",
+    "0b90785ea8119dd7f0c2082bac02f13a5e4c1f1a",
+    "db179a9cf9f7423a22e408d73fb7a2550e51d392",
+    "0b513b21a9c62b1b77a9e9de7fd2f71520b05e78",
+    "1236aac93badf629989834fe0b3477119c8739f2",
+    "0c7effd86483eb7aa90522e95ed0488b4c020c3e",
+    "d3d5a3fb102c21c145cddf500a36b3ac684588c6",
+    "944ec381d7ff9f881a6868b1782c9c41f2608df6",
+    "684c6d849c4e957aa7dc61f95d2edefeb59c1902",
+    "caf88f1c9b71eca696c158c6e4916880425515df",
+    "f775ad1b00a6e697c9a2f103c0e6c11fbfdb6fac",
+    "d9d9a848b4164e348326324eb835a4f468aea06a",
+    "ad5b5c03e7ce2b3e98a4089016f553dbf308699b",
+    "8743cee497a452cabdd987a9a1b3fc01cc74a532",
+    "3a7d62ff28f4a402a56a697060f921b25e0d0560",
+    "2e60e0e7715469d2dab9761f3b503bc06c3a1402",
+    "1ed4625ed9e26557c77773e4637c2cf1c9f27dd5",
+    "1053e4608b796d89713205bb861413f5276d0587"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved cutting and publishing 0.4.7 on 2026-09-30 (Queue decision 3541a7a0: \"Cut and publish 0.4.7 now\"), after the four papercuts he required on decision d8940d89.",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run 32b95c3d ran effigy ci:fresh on main e4c97492c and passed in 5m07s; local effigy check:gpui passed on the same commit.",
+    "svelte_optional_parameter": "PR #301 makes the Svelte package build emit valid JavaScript for optional parameters; a planted component packages and imports cleanly.",
+    "form_layout_alert": "PR #332 exposes FormLayout/FormDialog submission errors as role=alert with the full message; focused Svelte and React tests cover it.",
+    "searchable_select": "PR #332 opens a searchable Select with every option visible; focused Svelte and React tests cover opening a committed value and choosing another by click and by typing.",
+    "icons": "PR #329 adds pin and rotate-ccw-clock (alias history) from lucide-static 1.48.0 through the generator; HistoryCenter uses them.",
+    "surface_hover_token": "PR #300 adds color.surface.hover through the token schema; CodeEditor's active line uses it.",
+    "frozen_lockfile": "effigy lock:workspaces-refresh updated the bun.lock workspace slice to 0.4.7 and core ranges >=0.4.7 <0.5; docs:lint lock:workspaces-check passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
