@@ -144,12 +144,6 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
     focusOnValueChange:
       "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
   },
-  pill: {
-    dismissible:
-      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
-    dismissLabel:
-      "operator ruling 2026-09-27: web-admitted Public Prop; native admission pending (`lane:native-admission`)",
-  },
 };
 
 /** True when `prop` is a sanctioned web-only exemption for `slug`. */

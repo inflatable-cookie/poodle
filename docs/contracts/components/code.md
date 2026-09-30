@@ -78,7 +78,7 @@ Updated: 2026-09-30
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | Inline `normal` preserves long tokens at ordinary break opportunities; `anywhere` allows breaks inside them. Block source preserves whitespace and line feeds with `pre-wrap`. See Known Deltas for the GPUI mixed-content token behavior. |
+| `wrap` | `"normal" \| "anywhere"` | `"normal"` | no | Inline `normal` preserves long tokens at ordinary break opportunities; `anywhere` allows breaks inside them. Block `normal` preserves source whitespace and line feeds with `white-space: pre`; `anywhere` uses `white-space: pre-wrap`. See Known Deltas for the GPUI mixed-content token behavior. |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
