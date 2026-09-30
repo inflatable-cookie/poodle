@@ -803,13 +803,25 @@
 # GPUI crate that needs a live window; since g12.019 the components themselves
 # are `poodle-render` nodes, so their real coverage is CPU-only and runs here
 # through `cargo test -p poodle-render` and the node backend's own tests.
+# The bin unit tests join them so contract-doc drift in the native usage-docs
+# surface cannot land with the board green.
 # The pixel gate is `test:native-visual`, which does need a window and is
 # LOCAL-ONLY; the scheduled workflow (ci-native.yml) checks gpui only.
 "check:gpui" = [
   { run = "cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml" },
+  { task = "test:gpui-preview" },
   { run = "cargo test -p poodle-render --manifest-path packages/render/Cargo.toml" },
   { run = "cargo test -p poodle-gpui-node-backend --manifest-path packages/gpui/node-backend/Cargo.toml" },
 ]
+# The poodle-preview bin's unit tests, headless: the contract usage-docs
+# loader (shared generated docs plus its contract-markdown fallback), the
+# package receipt lock, app-state and file-pick logic, and the specimen-probe
+# module. `probe:gpui-specimens` stays the probe's own ci:native member with
+# its own g15.026 contract; this lane's rerun of the probe is the price of
+# keeping every bin unit test on one selector instead of a filter list that
+# new modules would silently escape. Runtime recorded 2026-09-30 (warm
+# checkout): 8s wall, 1.6s of test time.
+"test:gpui-preview" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview"
 # `check:jetstream` and `test:jetstream` are gone: they drove
 # `poodle-jetstream-components`, deleted in `ee704699` when Jetstream moved onto
 # `poodle-render` nodes. The render probes they ran live in

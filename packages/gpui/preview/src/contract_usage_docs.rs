@@ -332,6 +332,11 @@ fn normalize_default(value: &str) -> Option<String> {
 mod tests {
     use super::*;
 
+    // The shared generated docs (packages/svelte/preview/artifacts/
+    // component-docs.json) mirror the Svelte components, the parity
+    // authority. Svelte 5 components expose callbacks as `onXxx` props, so
+    // the docs shape carries `onClick` / `onValueChange` — not the dispatched
+    // `click` / `valueChange` events of the pre-runes contracts.
     #[test]
     fn parses_button_contract_usage_data() {
         let docs = load_contract_usage_docs("button");
@@ -339,7 +344,7 @@ mod tests {
         assert!(docs.props.iter().any(|prop| prop.name == "variant"));
         assert!(docs.props.iter().any(|prop| prop.name == "pressed"));
         assert!(docs.slots.iter().any(|slot| slot.name == "default"));
-        assert!(docs.events.iter().any(|event| event.name == "click"));
+        assert!(docs.events.iter().any(|event| event.name == "onClick"));
     }
 
     #[test]
@@ -347,24 +352,104 @@ mod tests {
         let docs = load_contract_usage_docs("sidebar-nav");
         assert!(docs.exists);
         assert!(docs.props.iter().any(|prop| prop.name == "groups"));
-        assert!(docs.events.iter().any(|event| event.name == "valueChange"));
+        assert!(docs.props.iter().any(|prop| prop.name == "onValueChange"));
+        assert!(docs.events.is_empty());
         assert!(docs.slots.is_empty());
     }
 
     #[test]
-    fn parses_contracts_with_shifted_heading_numbers() {
+    fn parses_media_preview_contract_usage_data() {
         let docs = load_contract_usage_docs("media-preview");
         assert!(docs.exists);
         assert!(docs.props.iter().any(|prop| prop.name == "title"));
-        assert!(docs.slots.iter().any(|slot| slot.name == "media"));
+        assert!(docs.slots.iter().any(|slot| slot.name == "mediaContent"));
+        assert!(docs.slots.iter().any(|slot| slot.name == "children"));
+        assert!(docs.events.is_empty());
     }
 
     #[test]
-    fn parses_slots_and_events_without_public_props_heading() {
+    fn parses_empty_state_contract_usage_data() {
         let docs = load_contract_usage_docs("empty-state");
         assert!(docs.exists);
         assert!(docs.props.iter().any(|prop| prop.name == "title"));
         assert!(docs.slots.iter().any(|slot| slot.name == "visual"));
         assert!(docs.events.is_empty());
+    }
+
+    // The loader prefers the shared generated docs; the contract-markdown
+    // parser below is the fallback for a slug the docs map does not carry
+    // yet. These fixtures pin that fallback's parsing rules directly so the
+    // loader's short-circuit cannot silently retire the coverage.
+    #[test]
+    fn parses_markdown_fallback_with_numbered_headings() {
+        let markdown = "\
+# Button
+
+## 3. Props And Inputs
+
+### Public Props
+
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `variant` | `ButtonVariant` | `\"secondary\"` | no | Visual variant. |
+
+## 4. Slots
+
+| Slot | Description |
+|------|-------------|
+| `default` | Label content. |
+
+## 5. Events
+
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| `click` | activation | `MouseEvent` | suppressed while disabled |
+";
+
+        let props = parse_props(markdown);
+        assert_eq!(props.len(), 1);
+        assert_eq!(props[0].name, "variant");
+        assert_eq!(props[0].default_value.as_deref(), Some("\"secondary\""));
+        assert!(!props[0].required);
+
+        let slots = parse_slots(markdown);
+        assert_eq!(slots.len(), 1);
+        assert_eq!(slots[0].name, "default");
+
+        let events = parse_events(markdown);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].name, "click");
+        assert_eq!(events[0].payload, "MouseEvent");
+
+        assert_eq!(usage_block(markdown), None);
+    }
+
+    #[test]
+    fn parses_markdown_fallback_without_public_props_heading() {
+        let markdown = "\
+# Empty State
+
+## Slots
+
+| Slot | Description |
+|------|-------------|
+| `visual` | Visual content above the message. |
+
+## Events
+
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| `action` | action activated | `string` | fired once per activation |
+";
+
+        assert!(parse_props(markdown).is_empty());
+
+        let slots = parse_slots(markdown);
+        assert_eq!(slots.len(), 1);
+        assert_eq!(slots[0].name, "visual");
+
+        let events = parse_events(markdown);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].name, "action");
     }
 }
