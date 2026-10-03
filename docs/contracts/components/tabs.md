@@ -350,19 +350,30 @@ development diagnostic rather than silently normalizing host state.
 | root | `data-orientation` / `data-variant` / `data-bordered` / `data-active-edge` / `data-active-fill` / `data-collapsed` / `data-full-width` | resolved inputs and overflow state |
 | list | `data-part` / `role` | `list` / `"tablist"` |
 | list | `aria-label` / `aria-orientation` | `ariaLabel` / `orientation` |
+| measurement list | `data-measure` | `true` (the hidden measurement copy, inside the `aria-hidden` shell; carries no `data-part`) |
+| item wrapper | `data-part` | `item` |
+| item wrapper | `role` / `data-selected` / `data-drag-source` / `data-drop-target` | `"presentation"` / selection and drag flags |
 | tab | `data-part` / `role` / `id` | `trigger` / `"tab"` / `poodle-tab-{instance}-{value}` |
 | tab | `aria-selected` | `"true"` on the selected tab, else `"false"` |
 | tab | `aria-controls` | panel id, only when a panel snippet exists |
 | tab | `tabindex` | `0` at `focusIndex`, else `-1` (roving) |
 | tab | `disabled` | item `disabled` |
-| tab | `data-state` | `active` \| `inactive` |
-| item wrapper | `role` / `data-selected` / `data-drag-source` / `data-drop-target` | `"presentation"` / selection and drag flags |
+| label | `data-part` | `label` |
+| close | `data-part` / `aria-label` | `close` / `Close {label}` |
+| separator | `data-part` / `aria-hidden` | `separator` / `"true"` |
+| actions | `data-part` | `actions` |
+| indicator | `data-part` / `aria-hidden` | `indicator` / `"true"` |
 | panel | `data-part` / `role` / `id` | `panel` / `"tabpanel"` / `poodle-tabpanel-{instance}-{value}` |
 | panel | `aria-labelledby` / `tabindex` | selected tab id / `0` |
-| close | `aria-label` | `Close {label}` |
+| tooltip | `data-part` / `role` | `tooltip` / `"tooltip"` |
 
-Note: `data-scope`/`data-part`/`data-state` are added during the core swap
-(additive); the remaining attributes match the current implementation.
+The part hooks are additive: consumers target `[data-part=…]` instead of the
+internal `poodle-tabs__*` classes. The hidden measurement list carries
+`data-measure="true"` and no consumer `data-part`, so selecting
+`[data-part="list"]` never reaches the measurement copy — a consumer that
+excluded `.poodle-tabs__list--measure` instead uses `:not([data-measure])`.
+Item-level `data-drop-target` is unchanged. `data-state` on the tab (`active` \|
+`inactive`) remains an additive core-swap item and is not emitted yet.
 
 #### Machinery Dependencies
 

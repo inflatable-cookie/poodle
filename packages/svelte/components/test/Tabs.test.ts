@@ -7,6 +7,7 @@ import {
   type CrossWindowDragSourceBridge,
 } from "@inflatable-cookie/poodle-core";
 import Tabs from "../src/Tabs.svelte";
+import TabsPartHooksHarness from "./TabsPartHooksHarness.svelte";
 
 const items = [
   { value: "mix", label: "Mix" },
@@ -408,5 +409,45 @@ describe("Tabs (svelte)", () => {
 
     expect(prepare).toHaveBeenCalledTimes(1);
     expect(prepare).toHaveBeenCalledWith("mix");
+  });
+
+  it("hooks every rendered part with a contracted data-part", () => {
+    const { container } = render(TabsPartHooksHarness, {});
+
+    const values = (part: string) =>
+      [...container.querySelectorAll<HTMLElement>(`[data-part="${part}"]`)];
+
+    expect(container.querySelector<HTMLElement>(".poodle-tabs")?.getAttribute("data-scope")).toBe(
+      "tabs",
+    );
+    for (const part of ["root", "list", "actions", "panel", "indicator"]) {
+      expect(values(part), part).toHaveLength(1);
+    }
+    expect(values("item")).toHaveLength(3);
+    expect(values("trigger")).toHaveLength(3);
+    expect(values("label")).toHaveLength(3);
+    expect(values("close")).toHaveLength(1);
+    expect(values("separator")).toHaveLength(1);
+    // The item keeps the drop-target hook consumers read for reorder state.
+    expect(values("item")[1].getAttribute("data-drop-target")).toBeNull();
+  });
+
+  it("marks the hidden measurement list and keeps it out of the part hooks", () => {
+    const { container } = render(TabsPartHooksHarness, {
+      props: { collapseWhenOverflow: true },
+    });
+
+    const measure = container.querySelector<HTMLElement>(".poodle-tabs__list--measure");
+    const shell = container.querySelector<HTMLElement>(".poodle-tabs__measure-shell");
+    expect(measure).not.toBeNull();
+    expect(measure?.getAttribute("data-measure")).toBe("true");
+    expect(measure?.hasAttribute("data-part")).toBe(false);
+    expect(shell?.getAttribute("aria-hidden")).toBe("true");
+    expect(shell?.contains(measure)).toBe(true);
+
+    // Only the visible list carries the list hook, so the internal
+    // `:not(.poodle-tabs__list--measure)` guard becomes `:not([data-measure])`
+    // while the visible list is the single `[data-part="list"]`.
+    expect(container.querySelectorAll('[data-part="list"]')).toHaveLength(1);
   });
 });

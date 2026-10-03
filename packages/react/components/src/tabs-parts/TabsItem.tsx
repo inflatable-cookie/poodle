@@ -150,6 +150,7 @@ export function TabsItem({
         onMouseLeave: onLeave,
       })}
       data-selected={selected}
+      data-part="item"
       data-reorderable={canDrag || undefined}
       data-pinned={item.pinned ?? undefined}
       data-drag-source={dragging || undefined}
@@ -171,6 +172,7 @@ export function TabsItem({
         type="button"
         disabled={item.disabled === true}
         id={`poodle-tab-${tabsId}-${item.value}`}
+        data-part="trigger"
         data-value={item.value}
         role="tab"
         tabIndex={focused ? 0 : -1}
@@ -184,6 +186,7 @@ export function TabsItem({
         <button
           type="button"
           className="poodle-tabs__close"
+          data-part="close"
           aria-label={`Close ${item.label}`}
           onClick={(event) => {
             event.stopPropagation();

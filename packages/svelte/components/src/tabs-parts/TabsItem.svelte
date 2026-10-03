@@ -166,6 +166,7 @@
 
 <div
   class="poodle-tabs__item"
+  data-part="item"
   role="presentation"
   data-selected={selected}
   data-pinned={item.pinned ?? undefined}
@@ -183,6 +184,7 @@
     }
     type="button"
     class="poodle-tabs__tab"
+    data-part="trigger"
     disabled={item.disabled === true}
     id={`poodle-tab-${tabsId}-${item.value}`}
     data-value={item.value}
@@ -203,7 +205,7 @@
     {#if item.icon}
       <Icon icon={item.icon} size={iconSize} />
     {/if}
-    <span class="poodle-tabs__label">{item.label}</span>
+    <span class="poodle-tabs__label" data-part="label">{item.label}</span>
     {#if item.count !== undefined}
       <Pill
         tone="neutral"
@@ -222,6 +224,7 @@
     <button
       type="button"
       class="poodle-tabs__close"
+      data-part="close"
       aria-label={`Close ${item.label}`}
       onclick={(event) => {
         event.stopPropagation();
@@ -240,6 +243,7 @@
         offset: 6,
       }}
       class="poodle-tabs__tooltip"
+      data-part="tooltip"
       data-placement={isVertical ? "right" : "bottom"}
       role="tooltip"
     >

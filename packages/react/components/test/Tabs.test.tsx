@@ -365,4 +365,49 @@ describe("Tabs (react)", () => {
       expect(tab?.getAttribute("draggable")).toBe("false");
     }
   });
+
+  it("hooks every rendered part with a contracted data-part", () => {
+    const item = { value: "mix", label: "Mix" };
+    const { container } = render(
+      <Tabs
+        items={[item, { value: "master", label: "Master", separator: true }, { value: "notes", label: "Notes", closable: true }]}
+        defaultValue="mix"
+        activeEdge="underline"
+        ariaLabel="Part hooks"
+        actions={<button type="button">Add</button>}
+      >
+        {(value) => <p>Panel for {value}</p>}
+      </Tabs>,
+    );
+
+    const values = (part: string) =>
+      [...container.querySelectorAll<HTMLElement>(`[data-part="${part}"]`)];
+
+    expect(container.querySelector<HTMLElement>(".poodle-tabs")?.getAttribute("data-scope")).toBe(
+      "tabs",
+    );
+    for (const part of ["root", "list", "actions", "panel", "indicator"]) {
+      expect(values(part), part).toHaveLength(1);
+    }
+    expect(values("item")).toHaveLength(3);
+    expect(values("trigger")).toHaveLength(3);
+    expect(values("label")).toHaveLength(3);
+    expect(values("close")).toHaveLength(1);
+    expect(values("separator")).toHaveLength(1);
+  });
+
+  it("marks the hidden measurement list and keeps it out of the part hooks", () => {
+    const { container } = render(
+      <Tabs items={items} defaultValue="mix" collapseWhenOverflow ariaLabel="Part hooks" />,
+    );
+
+    const measure = container.querySelector<HTMLElement>(".poodle-tabs__list--measure");
+    const shell = container.querySelector<HTMLElement>(".poodle-tabs__measure-shell");
+    expect(measure).not.toBeNull();
+    expect(measure?.getAttribute("data-measure")).toBe("true");
+    expect(measure?.hasAttribute("data-part")).toBe(false);
+    expect(shell?.getAttribute("aria-hidden")).toBe("true");
+    expect(shell?.contains(measure)).toBe(true);
+    expect(container.querySelectorAll('[data-part="list"]')).toHaveLength(1);
+  });
 });
