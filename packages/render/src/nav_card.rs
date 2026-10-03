@@ -10,8 +10,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    StylePatch,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeRole, StylePatch,
 };
 use poodle_specs::NavCardSpec;
 
@@ -208,9 +208,21 @@ fn nav_card_inner(
     }
     let mut el = el.child(icon_slot).child(content).child(arrow);
 
+    el.a11y.role = Some(if spec.href.is_some() && !spec.is_disabled {
+        NodeRole::Link
+    } else {
+        NodeRole::Button
+    });
+    el.a11y.label = Some(
+        spec.aria_label
+            .clone()
+            .unwrap_or_else(|| spec.title.clone()),
+    );
+
     if spec.is_disabled {
         el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
+        el.a11y.tab_index = Some(-1);
     } else {
         // Hover: elevated fill + accent-tinted border. The focus ring colour
         // is host-painted, as in the reference tier.
@@ -222,6 +234,14 @@ fn nav_card_inner(
             text_color: None,
             opacity: None,
         });
+        el.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            width: ctx
+                .theme()
+                .resolve_border_width(spec.focus_border_width_token()),
+            offset: rem_to_px(0.0625),
+        });
+        el.a11y.tab_index = Some(0);
         if let Some(handler) = on_click {
             el.interaction.on_activate = Some(Arc::new(move || handler()));
         }

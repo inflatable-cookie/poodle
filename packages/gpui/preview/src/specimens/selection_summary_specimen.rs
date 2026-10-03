@@ -38,6 +38,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_clear_action(RemediationAction::new("clear", "Clear")),
                         theme,
                     )
+                    .with_instance_id("multiple-items")
                     .on_remove(Arc::new(|_id| {}))
                     .on_clear(Arc::new(|| {})),
                 ),
@@ -76,6 +77,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_clear_action(RemediationAction::new("clear", "Clear")),
                         theme,
                     )
+                    .with_instance_id("single-item")
                     .on_clear(Arc::new(|| {})),
                 ),
         )

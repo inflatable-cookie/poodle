@@ -1791,13 +1791,26 @@
       "substrate": "selection-navigation",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no callbacks; PaginationSummary only reports the supplied item range and page count.",
+          "contractRef": "docs/contracts/components/pagination-summary.md#5. Callbacks"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract defines a static readout with no pointer action.",
+          "contractRef": "docs/contracts/components/pagination-summary.md#6. Accessibility"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract declares the component is not focusable and host focus behavior is unaffected.",
+          "contractRef": "docs/contracts/components/pagination-summary.md#Keyboard"
+        }
+      ]
     },
     {
       "component": "PasswordRequirements",
@@ -1846,26 +1859,13 @@
       "substrate": "selection-navigation",
       "required": [
         "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": [
-        {
-          "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
-          "contractRef": "docs/contracts/components/pill.md#5. Events"
-        },
-        {
-          "axis": "pointer",
-          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
-          "contractRef": "docs/contracts/components/pill.md#Keyboard"
-        },
-        {
-          "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
-          "contractRef": "docs/contracts/components/pill.md#Keyboard"
-        }
-      ]
+      "notApplicable": []
     },
     {
       "component": "Popover",

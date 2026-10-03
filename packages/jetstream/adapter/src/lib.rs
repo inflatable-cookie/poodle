@@ -77,6 +77,7 @@ pub fn accesskit_role(role: NodeRole) -> &'static str {
         NodeRole::Heading => "heading",
         NodeRole::SearchBox => "searchbox",
         NodeRole::Label => "label",
+        NodeRole::Link => "link",
         NodeRole::List => "list",
         NodeRole::ListItem => "listitem",
         NodeRole::ListBox => "listbox",
