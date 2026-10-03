@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "fd434be25818ef89d58e272e4f494de0b1e3cefa",
+  "source_commit": "04c4ca61be58d6808cd247c2967f8e192d9c589c",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -56,11 +56,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#accordion_result_disclosure_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#accordion_result_disclosure_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -72,9 +75,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Accordion--accordion-result-disclosure-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": [
-        "Expected test accordion_result_disclosure_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "AgentChatInput",
@@ -659,11 +660,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -675,9 +679,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Checkbox--checkbox-toggle-readonly-and-disabled-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Calendar",
@@ -4149,12 +4151,19 @@
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4166,10 +4175,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ToggleGroup--toggle-group-result-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": [
-        "Expected test toggle_group_result_focus_identity_and_disabled_paths proves no accessibility claim; accessibility stays missing.",
-        "Expected test toggle_group_result_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Toolbar",
@@ -7566,17 +7572,17 @@
   ],
   "summary": {
     "admittedRows": 74,
-    "fullyAdmittedRows": 25,
+    "fullyAdmittedRows": 28,
     "missingTally": {
       "semantic": 101,
       "events": 100,
       "pointer": 111,
       "keyboard_focus": 96,
-      "accessibility": 122,
-      "visual": 143
+      "accessibility": 121,
+      "visual": 140
     },
     "holdCount": 175,
-    "refusalCount": 235
+    "refusalCount": 231
   },
   "groups": [
     {
@@ -7685,12 +7691,10 @@
     {
       "substrate": "selection-navigation",
       "components": [
-        "Accordion",
         "AudioPlayer",
         "BulkActionBar",
         "Button",
         "ChangedFiles",
-        "Checkbox",
         "CodeInput",
         "CollapseToggle",
         "DurationInput",
@@ -7706,7 +7710,6 @@
         "Table",
         "TimeInput",
         "TimeZoneSelect",
-        "ToggleGroup",
         "ToolCallGroup",
         "TriStateSwitch"
       ],
@@ -7715,16 +7718,14 @@
         "events": 14,
         "pointer": 15,
         "keyboard_focus": 10,
-        "accessibility": 18,
-        "visual": 23
+        "accessibility": 17,
+        "visual": 20
       },
       "contracts": [
-        "docs/contracts/components/accordion.md",
         "docs/contracts/components/audio-player.md",
         "docs/contracts/components/bulk-action-bar.md",
         "docs/contracts/components/button.md",
         "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/checkbox.md",
         "docs/contracts/components/code-input.md",
         "docs/contracts/components/collapse-toggle.md",
         "docs/contracts/components/duration-input.md",
@@ -7740,7 +7741,6 @@
         "docs/contracts/components/table.md",
         "docs/contracts/components/time-input.md",
         "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/toggle-group.md",
         "docs/contracts/components/tool-call-group.md",
         "docs/contracts/components/tri-state-switch.md"
       ]

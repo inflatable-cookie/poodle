@@ -108,12 +108,10 @@
     {
       "substrate": "selection-navigation",
       "components": [
-        "Accordion",
         "AudioPlayer",
         "BulkActionBar",
         "Button",
         "ChangedFiles",
-        "Checkbox",
         "CodeInput",
         "CollapseToggle",
         "DurationInput",
@@ -129,7 +127,6 @@
         "Table",
         "TimeInput",
         "TimeZoneSelect",
-        "ToggleGroup",
         "ToolCallGroup",
         "TriStateSwitch"
       ],
@@ -138,16 +135,14 @@
         "events": 14,
         "pointer": 15,
         "keyboard_focus": 10,
-        "accessibility": 18,
-        "visual": 23
+        "accessibility": 17,
+        "visual": 20
       },
       "contracts": [
-        "docs/contracts/components/accordion.md",
         "docs/contracts/components/audio-player.md",
         "docs/contracts/components/bulk-action-bar.md",
         "docs/contracts/components/button.md",
         "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/checkbox.md",
         "docs/contracts/components/code-input.md",
         "docs/contracts/components/collapse-toggle.md",
         "docs/contracts/components/duration-input.md",
@@ -163,7 +158,6 @@
         "docs/contracts/components/table.md",
         "docs/contracts/components/time-input.md",
         "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/toggle-group.md",
         "docs/contracts/components/tool-call-group.md",
         "docs/contracts/components/tri-state-switch.md"
       ]
