@@ -89,6 +89,20 @@ describe("svelte <-> react anatomy parity", () => {
     expect(shared.length).toBeGreaterThan(100);
   });
 
+  it("Tabs matches fill layout and scroll-owner attributes", () => {
+    const props = { items: [], layout: "fill", panelScroll: "content" };
+    const svRoot = renderSvelte(svelteByName.get("Tabs") as never, { props }).container
+      .querySelector<HTMLElement>(".poodle-tabs");
+    cleanupSvelte();
+
+    const reRoot = renderReact(createElement(reactByName.get("Tabs") as never, props)).container
+      .querySelector<HTMLElement>(".poodle-tabs");
+    cleanupReact();
+
+    expect(svRoot && [svRoot.dataset.layout, svRoot.dataset.panelScroll]).toEqual(["fill", "content"]);
+    expect(reRoot && [reRoot.dataset.layout, reRoot.dataset.panelScroll]).toEqual(["fill", "content"]);
+  });
+
   for (const name of shared) {
     it(`${name} emits matching poodle- anatomy classes`, () => {
       const props = COMPONENT_PROPS[name] ?? {};

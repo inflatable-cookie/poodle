@@ -13,7 +13,7 @@
     --poodle-tabs-block-close-margin-end: 0.25rem;
     --poodle-tabs-panel-padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     display: grid;
-    gap: var(--poodle-space-stack-md);
+    gap: var(--poodle-tabs-gap);
     min-width: 0;
     position: relative;
   }
@@ -118,23 +118,35 @@
     align-items: start;
   }
 
-  /* ── Fill layout (g16.102) ──
+  .poodle-tabs:not([data-variant="block"]) {
+    --poodle-tabs-list-background: transparent;
+  }
+
+  .poodle-tabs[data-variant="block"] {
+    --poodle-tabs-list-border: var(--poodle-border-width-default) solid var(--poodle-color-border-subtle);
+  }
+
+  /* ── Fill layout ──
 
      `layout="fill"` turns Tabs into a full-height surface: the root takes its
      container's block size, the strip keeps its natural height, and the
-     active panel scrolls within the rest. Orientation-independent — the
-     vertical orientation fills through a single stretched row instead of
-     row tracks. Requires a sized container: without a definite block size on
-     the parent, `height: 100%` computes to auto and Tabs renders the
-     ordinary natural-height grid. */
+     selected scroll owner takes the remaining space. A flex allocation also
+     lets the root grow when the parent has no explicit block size; grid items
+     stretch to their track. */
   .poodle-tabs[data-layout="fill"] {
     height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     grid-template-rows: auto minmax(0, 1fr);
   }
 
   .poodle-tabs[data-layout="fill"] .poodle-tabs__panel {
     min-height: 0;
     overflow: auto;
+  }
+
+  .poodle-tabs[data-layout="fill"][data-panel-scroll="content"] .poodle-tabs__panel {
+    overflow: visible;
   }
 
   .poodle-tabs[data-layout="fill"][data-orientation="vertical"] {
@@ -152,6 +164,8 @@
     flex-wrap: wrap;
     align-items: stretch;
     gap: var(--poodle-tabs-list-gap);
+    padding: var(--poodle-tabs-list-padding);
+    background: var(--poodle-tabs-list-background);
   }
 
   .poodle-tabs[data-full-width="true"]:not([data-orientation="vertical"]) .poodle-tabs__list {
@@ -175,7 +189,7 @@
      strip the padding with a CSS override. */
   .poodle-tabs[data-variant="card"][data-bordered="true"] .poodle-tabs__list {
     padding-bottom: var(--poodle-space-inline-sm);
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
+    border-bottom: var(--poodle-tabs-list-border);
   }
 
   .poodle-tabs[data-variant="card"][data-orientation="vertical"] .poodle-tabs__list {
@@ -187,8 +201,8 @@
   /* Vertical drew border-right unconditionally, so `bordered={false}` had no
      effect in that orientation. Same pairing as horizontal. */
   .poodle-tabs[data-variant="card"][data-orientation="vertical"][data-bordered="true"] .poodle-tabs__list {
-    padding-right: 0.5rem;
-    border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
+    padding-right: var(--poodle-space-inline-sm);
+    border-right: var(--poodle-tabs-list-border);
   }
 
   /* Pill + Block: no wrapping, allow scroll on main axis only */
@@ -219,15 +233,15 @@
     display: flex;
     width: 100%;
     gap: 0;
-    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: var(--poodle-recipe-tabs-block-list-fill, color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent));
+    border-bottom: var(--poodle-tabs-list-border);
+    background: var(--poodle-recipe-tabs-block-list-fill, var(--poodle-tabs-list-background));
   }
 
   /* Block vertical absorbed the former strip variant's list handling: the
      border shifts to the inline-end edge and the list stops clipping so the
      negative-margin underline can overlap it. */
   .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__list {
-    border-right: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-right: var(--poodle-tabs-list-border);
     overflow: visible;
   }
 

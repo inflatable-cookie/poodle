@@ -185,6 +185,10 @@
   --poodle-space-button-iconInset: 0.125rem;
   --poodle-state-opacity-disabled: 0.48;
   --poodle-state-opacity-muted: 0.72;
+  --poodle-tabs-gap: var(--poodle-space-stack-md);
+  --poodle-tabs-list-padding: 0;
+  --poodle-tabs-list-background: color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent);
+  --poodle-tabs-list-border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   --poodle-typography-body-family: "Inter", "SF Pro Display", system-ui, sans-serif;
   --poodle-typography-body-size: 0.875rem;
   --poodle-typography-body-lineHeight: 1.25rem;
