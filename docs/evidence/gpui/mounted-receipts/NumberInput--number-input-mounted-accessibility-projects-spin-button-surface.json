@@ -34,13 +34,13 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "36ac229b5ee800a7c62c0a3733893f7053473dc3",
+  "source_commit": "117667491406b116b1ea9a230ddfe61262861713",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-03-poodle-076-radio-geometry-review",
+    "run_id": "2026-10-04-poodle-077-merge-main-5403339529",
     "outcome": "passed",
     "body_sha256": "e7615e6ea0cb76dad76b1f40cfefc5ab36579e712e166f596bc12c5ed50c4280"
   },

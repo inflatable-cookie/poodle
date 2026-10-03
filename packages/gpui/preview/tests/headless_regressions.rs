@@ -16773,6 +16773,7 @@ fn spec_from_accordion_result(value: &AccordionSelectionValue) -> AccordionSelec
 /// skips, and two-instance identity all travel through the real mounted tree.
 #[test]
 fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
+    use poodle_adapter::ThemeProvider;
     use poodle_render::{accordion_with_content, AccordionHandlers};
     use poodle_specs::{
         AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec,
@@ -16792,7 +16793,10 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
                 AccordionItemSpec::new("second", "Second"),
             ])
             .with_collapsible(collapsible)
-            .with_value(value);
+            .with_value(value)
+            .with_aria_label("FAQ")
+            .with_size(poodle_specs::ControlSize::Md)
+            .with_density(poodle_specs::ControlDensity::Default);
             let mut node = accordion_with_content(
                 &spec,
                 &RenderContext::new(&theme()),
@@ -16824,21 +16828,107 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
         let first = accordion_trigger_id("single", "first");
         let second = accordion_trigger_id("single", "second");
         let panel = accordion_panel_id("single", "first");
+        let visual_theme = theme();
 
         {
             let root = mounted.lock().unwrap();
             assert!(root.a11y.role.is_none());
+            assert_eq!(root.a11y.label.as_deref(), Some("FAQ"));
+            assert_eq!(
+                root.style.descriptor.layout.spacing.gap,
+                visual_theme.resolve_space("space.stack.md")
+            );
+            let item = &root.children[0];
+            let border_subtle = visual_theme.resolve_color("color.border.subtle");
+            let elevated = visual_theme.resolve_color("color.background.elevated");
+            let panel_fill = visual_theme.resolve_color("color.background.panel");
+            let item_border =
+                poodle_render::color::with_alpha(border_subtle, border_subtle.3 * 0.36);
+            let item_fill = poodle_render::color::mix_srgb(elevated, panel_fill, 0.40);
+            assert_eq!(item.style.descriptor.background, Some(item_fill));
+            assert_eq!(item.style.descriptor.border.color, item_border);
+            assert_eq!(
+                item.style.descriptor.border.width,
+                visual_theme.resolve_border_width("border.width.default")
+            );
+            assert_eq!(
+                item.style.descriptor.corner_radii.top_left,
+                visual_theme.resolve_radius("radius.surface")
+            );
+            assert_eq!(
+                item.style.descriptor.layout.spacing.gap,
+                poodle_render::presentation::rem_to_px(0.625)
+            );
+            assert_eq!(
+                item.style.descriptor.layout.spacing.padding.left,
+                poodle_render::presentation::rem_to_px(1.0)
+            );
+            assert_eq!(
+                item.style.descriptor.layout.spacing.padding.right,
+                poodle_render::presentation::rem_to_px(1.0)
+            );
+            assert_eq!(
+                item.style.descriptor.layout.spacing.padding.top,
+                poodle_render::presentation::rem_to_px(0.625)
+            );
+            let highlight = item
+                .style
+                .shadow_layers
+                .first()
+                .expect("item top highlight");
+            let inverse = visual_theme.resolve_color("color.text.inverse");
+            assert_eq!(
+                highlight.offset_y,
+                poodle_render::presentation::rem_to_px(0.0625)
+            );
+            assert_eq!(
+                highlight.color,
+                poodle_node::ColorValue(inverse.0, inverse.1, inverse.2, 0.08)
+            );
+            assert!(highlight.inset);
+
             let trigger = accordion_target(&root, &first);
             assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
             assert_eq!(trigger.a11y.expanded, Some(true));
             assert_eq!(trigger.a11y.controls.as_deref(), Some(panel.as_str()));
-            assert!(trigger.style.focus_ring.is_some());
+            let focus_ring = trigger.style.focus_ring.expect("production accordion ring");
+            assert_eq!(
+                focus_ring.color,
+                visual_theme.resolve_color("color.accent.focusRing")
+            );
+            assert_eq!(
+                focus_ring.width,
+                visual_theme.resolve_border_width("border.width.focus")
+            );
+            assert_eq!(
+                focus_ring.offset,
+                poodle_render::presentation::rem_to_px(0.125)
+            );
+            assert_eq!(
+                trigger.style.descriptor.layout.spacing.gap,
+                visual_theme.resolve_space("space.inline.md")
+            );
+            let title = &trigger.children[0].children[0];
+            assert_eq!(
+                title.style.text_size,
+                Some(poodle_render::presentation::rem_to_px(1.0))
+            );
+            assert_eq!(title.style.text_weight, Some(700));
+            assert_eq!(title.style.line_height, Some(1.2));
             let region = accordion_target(&root, &panel);
             assert_eq!(region.a11y.role, Some(NodeRole::Region));
             assert_eq!(region.a11y.labelled_by.as_deref(), Some(first.as_str()));
+            assert_eq!(region.style.min_width, Some(0.0));
         }
 
         driver.wait_for_focus_handle(&first);
+        let trigger_bounds =
+            poodle_gpui_node_backend::bounds_for(&first).expect("mounted accordion trigger bounds");
+        let panel_bounds =
+            poodle_gpui_node_backend::bounds_for(&panel).expect("mounted accordion panel bounds");
+        eprintln!("Accordion trigger/panel mounted bounds: {trigger_bounds:?} / {panel_bounds:?}");
+        assert!(trigger_bounds.size.width > px(0.0) && trigger_bounds.size.height > px(0.0));
+        assert!(panel_bounds.size.width > px(0.0) && panel_bounds.size.height > px(0.0));
         driver.pointer_activate_id(&second);
         assert_eq!(
             payloads.lock().unwrap().as_slice(),
@@ -17198,6 +17288,7 @@ fn checkbox_toggled(node: &Node) -> Option<poodle_node::NodeToggled> {
 /// supplies the rebuilt spec; mixed resolves to checked on the first accept.
 #[test]
 fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
     use poodle_node::NodeToggled;
     use poodle_specs::CheckboxSpec;
 
@@ -17233,12 +17324,80 @@ fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().unwrap() = build(false, true, Arc::clone(&mounted), Arc::clone(&payloads));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let visual_theme = theme();
+        let visual_context = RenderContext::new(&visual_theme);
+        let icon_size = visual_theme.resolve_space("size.icon.md");
+        let indicator_size = icon_size + poodle_render::presentation::rem_to_px(0.125);
+        let selected = visual_theme.resolve_color("color.accent.base");
+        let surface = visual_theme.resolve_color("color.background.surface");
+        let border_default = visual_theme.resolve_color("color.border.default");
+        let text_inverse = visual_theme.resolve_color("color.text.inverse");
 
         assert_eq!(
             checkbox_toggled(&mounted.lock().unwrap()),
             Some(NodeToggled::Mixed)
         );
         driver.wait_for_focus_handle(FIXTURE_ID);
+        {
+            let root = mounted.lock().unwrap();
+            assert_eq!(
+                root.style.descriptor.layout.spacing.gap,
+                visual_context.theme().resolve_space("space.inline.sm")
+            );
+            assert_eq!(
+                root.children.len(),
+                2,
+                "indicator and visible label are mounted"
+            );
+            let indicator = &root.children[0];
+            assert_eq!(
+                indicator.style.descriptor.layout.width,
+                poodle_node::LayoutSizing::Fixed(indicator_size)
+            );
+            assert_eq!(
+                indicator.style.descriptor.layout.height,
+                poodle_node::LayoutSizing::Fixed(indicator_size)
+            );
+            assert_eq!(
+                indicator.style.descriptor.corner_radii.top_left,
+                poodle_render::presentation::rem_to_px(0.3125)
+            );
+            assert_eq!(indicator.style.descriptor.background, Some(selected));
+            assert_eq!(indicator.style.descriptor.border.color, selected);
+            assert_eq!(
+                indicator.style.descriptor.border.width,
+                visual_context
+                    .theme()
+                    .resolve_border_width("border.width.default")
+            );
+            match &indicator.children[0].kind {
+                poodle_node::NodeKind::Icon { name, size } => {
+                    assert_eq!(name, "minus", "mixed state uses the contracted mark");
+                    assert_eq!(
+                        *size,
+                        icon_size - poodle_render::presentation::rem_to_px(0.125)
+                    );
+                    assert_eq!(
+                        indicator.children[0].style.descriptor.text_color,
+                        Some(text_inverse)
+                    );
+                }
+                _ => panic!("mixed checkbox mark is not an icon"),
+            }
+        }
+        let bounds =
+            poodle_gpui_node_backend::bounds_for(FIXTURE_ID).expect("mounted checkbox bounds");
+        eprintln!("Checkbox mounted bounds: {bounds:?}");
+        assert!(bounds.size.width > px(0.0) && bounds.size.height > px(0.0));
+        let checkbox_a11y = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == FIXTURE_ID)
+            .expect("mounted checkbox accessibility node");
+        assert_eq!(checkbox_a11y.role, poodle_node::NodeRole::CheckBox);
+        assert_eq!(checkbox_a11y.text_content, vec!["Notify".to_owned()]);
+        assert_eq!(checkbox_a11y.toggled, Some(NodeToggled::Mixed));
+
         driver.pointer_activate();
         assert_eq!(payloads.lock().unwrap().as_slice(), [true]);
         assert_eq!(
@@ -17246,6 +17405,16 @@ fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
             Some(NodeToggled::True),
             "mixed resolves to checked on the first accepted activation"
         );
+        {
+            let root = mounted.lock().unwrap();
+            let indicator = &root.children[0];
+            assert_eq!(indicator.style.descriptor.background, Some(selected));
+            assert_eq!(indicator.style.descriptor.border.color, selected);
+            assert!(matches!(
+                &indicator.children[0].kind,
+                poodle_node::NodeKind::Icon { name, .. } if name == "check"
+            ));
+        }
 
         driver.pointer_activate();
         assert_eq!(payloads.lock().unwrap().as_slice(), [true, false]);
@@ -17253,6 +17422,13 @@ fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
             checkbox_toggled(&mounted.lock().unwrap()),
             Some(NodeToggled::False)
         );
+        {
+            let root = mounted.lock().unwrap();
+            let indicator = &root.children[0];
+            assert_eq!(indicator.style.descriptor.background, Some(surface));
+            assert_eq!(indicator.style.descriptor.border.color, border_default);
+            assert!(indicator.children.is_empty(), "unchecked state has no mark");
+        }
     });
 
     run_headless(|cx| {
@@ -17295,8 +17471,14 @@ fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
             Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
         );
         node.id = Some("checkbox-disabled".to_owned());
-        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
         driver.draw_frame();
+        assert_eq!(
+            mounted.lock().unwrap().style.descriptor.opacity,
+            theme().resolve_opacity("state.opacity.disabled"),
+            "disabled checkbox resolves the contracted opacity token"
+        );
         assert!(
             poodle_gpui_node_backend::focus_handle_for("checkbox-disabled").is_none(),
             "disabled does not accept focus"
@@ -19973,8 +20155,11 @@ fn selection_toggle_options() -> Vec<poodle_specs::ToggleGroupOption> {
 /// independent instance focus identity through the mounted tree.
 #[test]
 fn toggle_group_result_focus_identity_and_disabled_paths() {
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::toggle_group::ToggleGroupValue;
-    use poodle_specs::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+    use poodle_specs::{
+        ControlDensity, ControlSize, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec,
+    };
 
     run_headless(|cx| {
         fn build(
@@ -19984,7 +20169,13 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
         ) -> Node {
             let mount = Arc::clone(&mounted);
             let sink = Arc::clone(&payloads);
-            let spec = ToggleGroupSpec::new(selection_toggle_options()).with_value(value);
+            let mut options = selection_toggle_options();
+            options[0].aria_label = Some("Grid layout".to_owned());
+            let spec = ToggleGroupSpec::new(options)
+                .with_value(value)
+                .with_aria_label("View mode")
+                .with_size(ControlSize::Md)
+                .with_density(ControlDensity::Default);
             let mut node = poodle_render::toggle_group(
                 &spec,
                 &RenderContext::new(&theme()),
@@ -20014,6 +20205,132 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
         let list = toggle_option_id("view", "list");
         let board = toggle_option_id("view", "board");
         driver.wait_for_focus_handle(&grid);
+        {
+            let root = mounted.lock().unwrap();
+            assert_eq!(root.a11y.role, Some(poodle_node::NodeRole::RadioGroup));
+            assert_eq!(root.a11y.label.as_deref(), Some("View mode"));
+            let grid_node = root
+                .find(&|node| node.runtime_id.as_deref() == Some(grid.as_str()))
+                .expect("selected radio option");
+            let list_node = root
+                .find(&|node| node.runtime_id.as_deref() == Some(list.as_str()))
+                .expect("disabled radio option");
+            assert_eq!(grid_node.a11y.label.as_deref(), Some("Grid layout"));
+            assert_eq!(
+                grid_node.a11y.role,
+                Some(poodle_node::NodeRole::RadioButton)
+            );
+            assert_eq!(grid_node.a11y.toggled, Some(poodle_node::NodeToggled::True));
+            assert_eq!(grid_node.a11y.tab_index, Some(0));
+            assert_eq!(list_node.a11y.label.as_deref(), Some("List"));
+            assert_eq!(
+                list_node.a11y.role,
+                Some(poodle_node::NodeRole::RadioButton)
+            );
+            assert_eq!(
+                list_node.a11y.toggled,
+                Some(poodle_node::NodeToggled::False)
+            );
+            assert!(list_node.interaction.disabled);
+
+            let visual_theme = theme();
+            let accent = visual_theme.resolve_color("color.accent.base");
+            let surface = visual_theme.resolve_color("color.background.surface");
+            let text_primary = visual_theme.resolve_color("color.text.primary");
+            let border_subtle = visual_theme.resolve_color("color.border.subtle");
+            let border_default = visual_theme.resolve_color("color.border.default");
+            let item_fill = poodle_render::color::mix_srgb(surface, text_primary, 0.93);
+            let selected_fill = poodle_render::color::mix_srgb(accent, item_fill, 0.22);
+            let selected_border = poodle_render::color::mix_srgb(accent, border_default, 0.42);
+            let item_border =
+                poodle_render::color::with_alpha(border_subtle, border_subtle.3 * 0.82);
+            let radius = visual_theme.resolve_radius("radius.control");
+            let item_height = poodle_render::presentation::rem_to_px(
+                poodle_render::presentation::control_height_rem(ControlSize::Md),
+            );
+            let item_border_width = poodle_render::presentation::rem_to_px(0.0625);
+            let item_pad_x = visual_theme.resolve_space("space.control.x");
+            assert_eq!(grid_node.style.descriptor.background, Some(selected_fill));
+            assert_eq!(grid_node.style.descriptor.border.color, selected_border);
+            assert_eq!(list_node.style.descriptor.background, Some(item_fill));
+            assert_eq!(list_node.style.descriptor.border.color, item_border);
+            assert_eq!(grid_node.style.min_height, Some(item_height));
+            assert_eq!(
+                grid_node.style.descriptor.layout.spacing.padding.left,
+                item_pad_x
+            );
+            assert_eq!(
+                grid_node.style.descriptor.layout.spacing.padding.right,
+                item_pad_x
+            );
+            assert_eq!(grid_node.style.descriptor.corner_radii.top_left, radius);
+            assert_eq!(grid_node.style.descriptor.border.width, item_border_width);
+            assert_eq!(
+                grid_node.style.text_size,
+                Some(poodle_render::presentation::rem_to_px(
+                    poodle_render::presentation::size_font_rem(ControlSize::Md),
+                ))
+            );
+            assert_eq!(grid_node.style.text_weight, Some(600));
+            let focus_ring = grid_node
+                .style
+                .focus_ring
+                .expect("selected radio focus ring");
+            assert_eq!(
+                focus_ring.color,
+                visual_theme.resolve_color("color.accent.focusRing")
+            );
+            assert_eq!(
+                focus_ring.width,
+                visual_theme.resolve_border_width("border.width.focus")
+            );
+            assert_eq!(
+                focus_ring.offset,
+                poodle_render::presentation::rem_to_px(0.125)
+            );
+            assert_eq!(
+                root.style.descriptor.layout.spacing.gap,
+                poodle_render::presentation::rem_to_px(
+                    poodle_render::presentation::toggle_group_gap_rem(ControlDensity::Default),
+                )
+            );
+        }
+        let accessibility = driver.accessibility_nodes();
+        let group_ax = accessibility
+            .iter()
+            .find(|node| node.element_id == FIXTURE_ID)
+            .expect("mounted radiogroup accessibility node");
+        assert_eq!(group_ax.role, poodle_node::NodeRole::RadioGroup);
+        assert_eq!(group_ax.label.as_deref(), Some("View mode"));
+        let grid_ax = accessibility
+            .iter()
+            .find(|node| node.element_id == grid)
+            .expect("mounted selected radio accessibility node");
+        assert_eq!(grid_ax.role, poodle_node::NodeRole::RadioButton);
+        assert_eq!(grid_ax.label.as_deref(), Some("Grid layout"));
+        assert_eq!(grid_ax.toggled, Some(poodle_node::NodeToggled::True));
+        assert_eq!(grid_ax.tab_index, Some(0));
+        let list_ax = accessibility
+            .iter()
+            .find(|node| node.element_id == list)
+            .expect("mounted disabled radio accessibility node");
+        assert_eq!(list_ax.label.as_deref(), Some("List"));
+        assert_eq!(list_ax.toggled, Some(poodle_node::NodeToggled::False));
+        assert!(list_ax.disabled);
+        let grid_bounds = poodle_gpui_node_backend::bounds_for(&grid)
+            .expect("mounted selected ToggleGroup item bounds");
+        eprintln!("ToggleGroup selected item bounds: {grid_bounds:?}");
+        assert!(grid_bounds.size.width > px(0.0) && grid_bounds.size.height > px(0.0));
+        let expected_item_height = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::control_height_rem(ControlSize::Md),
+        );
+        let mounted_border_box_height = f32::from(grid_bounds.size.height)
+            + 2.0 * poodle_render::presentation::rem_to_px(0.0625);
+        assert_eq!(
+            mounted_border_box_height,
+            expected_item_height,
+            "mounted ToggleGroup content bounds plus its 1px border edges should match Svelte's {expected_item_height}px minimum"
+        );
         driver.pointer_activate_id(&board);
         assert_eq!(
             payloads.lock().unwrap().as_slice(),
@@ -20115,6 +20432,7 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
                 ToggleGroupOption::new("docs", "Docs"),
             ])
             .with_value(value)
+            .with_aria_label("Tags")
             .with_selection_mode(ToggleGroupSelectionMode::Multiple);
             let mut node = poodle_render::toggle_group(
                 &spec,
@@ -20143,6 +20461,30 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
         let design = toggle_option_id("tags", "design");
         let engineering = toggle_option_id("tags", "engineering");
         driver.wait_for_focus_handle(&design);
+        let accessibility = driver.accessibility_nodes();
+        let group_ax = accessibility
+            .iter()
+            .find(|node| node.element_id == FIXTURE_ID)
+            .expect("mounted multiple-selection group accessibility node");
+        assert_eq!(group_ax.role, poodle_node::NodeRole::Group);
+        assert_eq!(group_ax.label.as_deref(), Some("Tags"));
+        let design_ax = accessibility
+            .iter()
+            .find(|node| node.element_id == design)
+            .expect("mounted selected multiple option accessibility node");
+        assert_eq!(design_ax.role, poodle_node::NodeRole::Button);
+        assert_eq!(design_ax.label.as_deref(), Some("Design"));
+        assert_eq!(design_ax.toggled, Some(poodle_node::NodeToggled::True));
+        let engineering_ax = accessibility
+            .iter()
+            .find(|node| node.element_id == engineering)
+            .expect("mounted unselected multiple option accessibility node");
+        assert_eq!(engineering_ax.role, poodle_node::NodeRole::Button);
+        assert_eq!(engineering_ax.label.as_deref(), Some("Engineering"));
+        assert_eq!(
+            engineering_ax.toggled,
+            Some(poodle_node::NodeToggled::False)
+        );
         driver.pointer_activate_id(&engineering);
         assert_eq!(
             payloads.lock().unwrap().as_slice(),
