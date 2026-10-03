@@ -9,10 +9,14 @@
   let {
     layout = "auto",
     hostHeight = "300px",
+    hostDisplay = "block",
+    panelScroll = "panel",
     panelPadding = null,
   }: {
     layout?: "auto" | "fill";
     hostHeight?: string;
+    hostDisplay?: "block" | "flex";
+    panelScroll?: "panel" | "content";
     panelPadding?: string | null;
   } = $props();
 
@@ -24,16 +28,25 @@
 
 <div
   data-testid="fill-host"
-  style="height: {hostHeight};{panelPadding !== null
+  style="display: {hostDisplay}; flex-direction: column; height: {hostHeight};{panelPadding !== null
     ? ` --poodle-tabs-panel-padding: ${panelPadding};`
     : ''}"
 >
-  <Tabs {layout} ariaLabel="Fill layout" {items}>
+  <Tabs {layout} {panelScroll} ariaLabel="Fill layout" {items}>
     {#snippet children(value)}
-      <p data-testid="panel-content">Panel for {value}</p>
-      {#each { length: 40 } as _, row (row)}
-        <div data-testid="panel-row">Fill panel row {row}</div>
-      {/each}
+      {#if panelScroll === "content"}
+        <div data-testid="content-scroll" style="max-height: 150px; overflow: auto; min-height: 0">
+          <p data-testid="panel-content">Panel for {value}</p>
+          {#each { length: 40 } as _, row (row)}
+            <div data-testid="panel-row">Fill panel row {row}</div>
+          {/each}
+        </div>
+      {:else}
+        <p data-testid="panel-content">Panel for {value}</p>
+        {#each { length: 40 } as _, row (row)}
+          <div data-testid="panel-row">Fill panel row {row}</div>
+        {/each}
+      {/if}
     {/snippet}
   </Tabs>
 </div>

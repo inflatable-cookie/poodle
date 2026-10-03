@@ -73,13 +73,10 @@ export interface TabsProps {
   activeFill?: "none" | "tint" | "solid";
   orientation?: Orientation;
   activationMode?: "automatic" | "manual";
-  /**
-   * Fill-layout seam. `"fill"` makes the root take its container's block
-   * size and the active panel scroll within it while the strip keeps its
-   * natural height; `"auto"` keeps the natural-height grid. Requires a
-   * sized container.
-   */
+  /** Fill-layout seam. `"fill"` fills an allocated flex or grid child area. */
   layout?: "auto" | "fill";
+  /** For fill layout, choose whether the panel or consumer content scrolls. */
+  panelScroll?: "panel" | "content";
   bordered?: boolean;
   fullWidth?: boolean;
   reorderable?: boolean;
@@ -176,6 +173,7 @@ export function Tabs({
   sizeRole = "chrome",
   density = null,
   layout = "auto",
+  panelScroll = "panel",
   collapseWhenOverflow = false,
   overflowStrategy = "collapse",
   shed = ["icon", "count"],
@@ -857,6 +855,7 @@ export function Tabs({
       data-active-fill={activeFill}
       data-orientation={orientation}
       data-layout={layout}
+      data-panel-scroll={panelScroll}
       data-size={resolvedSize}
       data-density={resolvedDensity}
       data-collapsed={collapsedByOverflow || undefined}

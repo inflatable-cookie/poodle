@@ -1,0 +1,26 @@
+{
+  "tabs": {
+    "gap": {
+      "$type": "dimension",
+      "$value": "var(--poodle-space-stack-md)",
+      "$description": "Gap between a Tabs list and its panel."
+    },
+    "list": {
+      "padding": {
+        "$type": "string",
+        "$value": "0",
+        "$description": "Additional CSS padding applied to the Tabs list; variant border clearance stays unchanged."
+      },
+      "background": {
+        "$type": "color",
+        "$value": "color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)",
+        "$description": "Default Tabs list background used by the Block variant."
+      },
+      "border": {
+        "$type": "string",
+        "$value": "0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)",
+        "$description": "Default Tabs list border style, used by the bordered Card variant."
+      }
+    }
+  }
+}
