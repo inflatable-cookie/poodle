@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "36ac229b5ee800a7c62c0a3733893f7053473dc3",
+  "source_commit": "117667491406b116b1ea9a230ddfe61262861713",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -56,11 +56,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#accordion_result_disclosure_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#accordion_result_disclosure_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -72,9 +75,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Accordion--accordion-result-disclosure-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": [
-        "Expected test accordion_result_disclosure_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "AgentChatInput",
@@ -663,11 +664,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -679,9 +683,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Checkbox--checkbox-toggle-readonly-and-disabled-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Calendar",
@@ -4163,12 +4165,19 @@
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4180,10 +4189,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ToggleGroup--toggle-group-result-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": [
-        "Expected test toggle_group_result_focus_identity_and_disabled_paths proves no accessibility claim; accessibility stays missing.",
-        "Expected test toggle_group_result_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Toolbar",
@@ -7580,17 +7586,17 @@
   ],
   "summary": {
     "admittedRows": 74,
-    "fullyAdmittedRows": 27,
+    "fullyAdmittedRows": 30,
     "missingTally": {
       "semantic": 101,
       "events": 98,
       "pointer": 110,
       "keyboard_focus": 95,
-      "accessibility": 121,
-      "visual": 142
+      "accessibility": 120,
+      "visual": 139
     },
     "holdCount": 175,
-    "refusalCount": 229
+    "refusalCount": 225
   },
   "groups": [
     {
@@ -7697,65 +7703,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "Accordion",
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "Checkbox",
-        "CodeInput",
-        "CollapseToggle",
-        "DurationInput",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "NavCard",
-        "Pagination",
-        "PaginationSummary",
-        "Pill",
-        "SelectionSummary",
-        "Table",
-        "TimeInput",
-        "TimeZoneSelect",
-        "ToggleGroup",
-        "ToolCallGroup",
-        "TriStateSwitch"
-      ],
-      "missingTally": {
-        "semantic": 10,
-        "events": 12,
-        "pointer": 14,
-        "keyboard_focus": 9,
-        "accessibility": 17,
-        "visual": 22
-      },
-      "contracts": [
-        "docs/contracts/components/accordion.md",
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/checkbox.md",
-        "docs/contracts/components/code-input.md",
-        "docs/contracts/components/collapse-toggle.md",
-        "docs/contracts/components/duration-input.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/nav-card.md",
-        "docs/contracts/components/pagination-summary.md",
-        "docs/contracts/components/pagination.md",
-        "docs/contracts/components/pill.md",
-        "docs/contracts/components/selection-summary.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-input.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/toggle-group.md",
-        "docs/contracts/components/tool-call-group.md",
-        "docs/contracts/components/tri-state-switch.md"
-      ]
-    },
-    {
       "substrate": "feedback-status",
       "components": [
         "ActionDiscoveryPanel",
@@ -7810,6 +7757,59 @@
         "docs/contracts/components/spinner.md",
         "docs/contracts/components/status-bar.md",
         "docs/contracts/components/tool-call.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ChangedFiles",
+        "CodeInput",
+        "CollapseToggle",
+        "DurationInput",
+        "ListContainer",
+        "LogList",
+        "ModelConnectionPicker",
+        "NavCard",
+        "Pagination",
+        "PaginationSummary",
+        "Pill",
+        "SelectionSummary",
+        "Table",
+        "TimeInput",
+        "TimeZoneSelect",
+        "ToolCallGroup",
+        "TriStateSwitch"
+      ],
+      "missingTally": {
+        "semantic": 10,
+        "events": 12,
+        "pointer": 14,
+        "keyboard_focus": 9,
+        "accessibility": 16,
+        "visual": 19
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/code-input.md",
+        "docs/contracts/components/collapse-toggle.md",
+        "docs/contracts/components/duration-input.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/model-connection-picker.md",
+        "docs/contracts/components/nav-card.md",
+        "docs/contracts/components/pagination-summary.md",
+        "docs/contracts/components/pagination.md",
+        "docs/contracts/components/pill.md",
+        "docs/contracts/components/selection-summary.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-input.md",
+        "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/tool-call-group.md",
+        "docs/contracts/components/tri-state-switch.md"
       ]
     },
     {
