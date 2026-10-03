@@ -583,6 +583,48 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
   }
 }
 
+/** Run the selected retained mounted regressions through Effigy and refresh
+ * their execution provenance. Keeping this in the census writer prevents a
+ * test-body hash from being copied into the evidence record without a passing
+ * production-mount execution. The selected names must already be expected
+ * census tests; the complete record is then validated before any write. */
+export function recordExpectedTestExecution(testNames: string[], runId: string, root = ROOT): ExecutionRecord {
+  if (runId.trim().length === 0) throw new Error("Execution recording needs a non-empty run id.");
+  if (testNames.length === 0) throw new Error("Execution recording needs at least one expected test.");
+  if (new Set(testNames).size !== testNames.length) throw new Error("Execution recording contains a duplicate test name.");
+
+  const expectedTests = new Set(
+    Object.values(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).flatMap((tests) => (Array.isArray(tests) ? tests : [tests])),
+  );
+  for (const test of testNames) {
+    if (!/^[A-Za-z0-9_]+$/.test(test) || !expectedTests.has(test)) {
+      throw new Error(`Execution recording refuses non-retained expected test ${test}.`);
+    }
+    if (extractTestBody(root, test) === undefined || testIsIgnored(root, test)) {
+      throw new Error(`Execution recording refuses stale or ignored expected test ${test}.`);
+    }
+  }
+
+  for (const test of testNames) {
+    execSync(`${NATIVE_SELECTOR} ${test} -- --exact`, { cwd: root, stdio: "inherit" });
+  }
+
+  const record = loadExecutionRecord(root);
+  const sourceCommit = execSync("git rev-parse HEAD", { cwd: root, encoding: "utf8" }).trim();
+  const lockfile = read(root, GPUI_LOCKFILE);
+  record.source_commit = sourceCommit;
+  record.lockfile_sha256 = sha256Hex(lockfile);
+  record.run_id = runId;
+  for (const test of testNames) {
+    const bodySha = testBodySha256(root, test);
+    if (bodySha === undefined) throw new Error(`Expected test ${test} disappeared after execution.`);
+    record.results[test] = { outcome: "passed", body_sha256: bodySha };
+  }
+  validateExecutionRecord(record, root);
+  writeFile(root, EXECUTION_RECORD_PATH, `${JSON.stringify(record, null, 2)}\n`);
+  return record;
+}
+
 const OBSERVED_SENTENCES: Record<CensusAxis, string> = {
   semantic: "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
   events: "asserted emitted payloads or handler delivery through mounted input",
@@ -1121,6 +1163,18 @@ export function checkCensusArtifacts(root = ROOT): void {
 }
 
 function main(): void {
+  const args = process.argv.slice(2);
+  if (args[0] === "--record-execution") {
+    const [runId, ...testNames] = args.slice(1);
+    if (runId === undefined) throw new Error("Usage: gpui-functionality-census.ts --record-execution <run-id> <expected-test>...");
+    const record = recordExpectedTestExecution(testNames, runId);
+    const stats = writeCensusArtifacts();
+    checkCensusArtifacts();
+    console.log(
+      `gpui-functionality-census: recorded ${testNames.length} expected tests as ${record.run_id}; ${stats.rows} rows, ${stats.admitted} admitted, ${stats.receipts} mounted receipts.`,
+    );
+    return;
+  }
   const check = process.argv.includes("--check");
   if (check) {
     checkCensusArtifacts();

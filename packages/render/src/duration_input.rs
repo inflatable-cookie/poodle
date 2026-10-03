@@ -19,7 +19,8 @@ use poodle_headless::duration::{
     DurationSegment, DurationValue,
 };
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, StylePatch,
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+    StylePatch,
 };
 use poodle_specs::{ControlSize, DurationInputSpec};
 
@@ -191,6 +192,18 @@ pub fn duration_input_with_handlers(
                 s.descriptor.corner_radii.bottom_right = segment_radius;
                 s.descriptor.corner_radii.bottom_left = segment_radius;
             }
+            seg.a11y.role = Some(NodeRole::TextInput);
+            seg.a11y.label = Some(
+                match unit {
+                    Some(DurationSegment::Hours) => "Hours",
+                    Some(DurationSegment::Minutes) => "Minutes",
+                    Some(DurationSegment::Seconds) => "Seconds",
+                    None => unit_label,
+                }
+                .to_string(),
+            );
+            seg.a11y.value_text = Some(value_text.to_string());
+            seg.interaction.disabled = spec.is_disabled;
             // Keys act on the focused segment. Disabled inputs stay inert, and a
             // segment with no handler stays a plain visual rather than advertising
             // a focus stop that does nothing.
@@ -352,11 +365,14 @@ pub fn duration_input_with_handlers(
         });
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            root.a11y.label = Some(label.to_string());
-        }
-    }
+    root.a11y.role = Some(NodeRole::Group);
+    root.a11y.label = Some(
+        spec.aria_label
+            .as_deref()
+            .filter(|label| !label.is_empty())
+            .unwrap_or("Duration")
+            .to_string(),
+    );
     root
 }
 

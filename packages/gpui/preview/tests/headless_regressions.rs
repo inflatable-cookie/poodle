@@ -10050,6 +10050,7 @@ fn give_first_id(node: &mut Node, id: &str, predicate: &dyn Fn(&Node) -> bool) -
 /// without hyphens, and a full-length entry completes exactly once.
 #[test]
 fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::CodeInputSpec;
 
     run_headless(|cx| {
@@ -10063,7 +10064,8 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
                 .with_length(20)
                 .with_groups([5, 5, 5, 5])
                 .with_separator("-")
-                .with_numbers_only(false),
+                .with_numbers_only(false)
+                .with_aria_label("Recovery code"),
             &RenderContext::new(&theme()),
             poodle_render::CodeInputHandlers {
                 on_value_change: Some(Arc::new(move |value: &str| {
@@ -10083,6 +10085,33 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+        {
+            let mounted = node.lock().unwrap();
+            assert_eq!(mounted.a11y.role, Some(NodeRole::Group));
+            assert_eq!(mounted.a11y.label.as_deref(), Some("Recovery code"));
+            let row = mounted
+                .find(&|n| n.id.as_deref() == Some("code-input-row"))
+                .expect("mounted code entry row");
+            assert_eq!(row.a11y.role, Some(NodeRole::TextInput));
+            assert_eq!(row.a11y.label.as_deref(), Some("Recovery code"));
+
+            let slot = row.children.first().expect("first visual slot");
+            assert_eq!(
+                slot.style.descriptor.background,
+                Some(theme().resolve_color("color.background.surface"))
+            );
+            assert!(matches!(
+                slot.style.descriptor.layout.width,
+                LayoutSizing::Fixed(width)
+                    if (width - poodle_render::presentation::rem_to_px(2.25)).abs() < 1e-6
+            ));
+            assert!(matches!(
+                slot.style.descriptor.layout.height,
+                LayoutSizing::Fixed(height)
+                    if (height - poodle_render::presentation::rem_to_px(2.25)).abs() < 1e-6
+            ));
+        }
 
         // A real pointer press focuses the slot row, then keys walk the focus
         // chain — no handler is invoked as a test shortcut.
@@ -10106,7 +10135,8 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
                 &CodeInputSpec::new()
                     .with_length(4)
                     .with_numbers_only(false)
-                    .with_value(value),
+                    .with_value(value)
+                    .with_aria_label("Recovery code"),
                 &RenderContext::new(&theme()),
                 poodle_render::CodeInputHandlers {
                     on_value_change: Some(Arc::new(move |next: &str| {
@@ -10157,6 +10187,42 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
             ["abcd"],
             "completion fires on the transition into a full code, once"
         );
+        {
+            let mounted = row.lock().unwrap();
+            let input = mounted
+                .find(&|n| n.a11y.role == Some(NodeRole::TextInput))
+                .expect("mounted code input");
+            assert_eq!(input.a11y.label.as_deref(), Some("Recovery code"));
+            assert_eq!(input.a11y.value_text.as_deref(), Some("abcd"));
+        }
+    });
+
+    run_headless(|cx| {
+        let mut disabled = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(4)
+                .with_disabled(true)
+                .with_aria_label("Disabled code"),
+            &RenderContext::new(&theme()),
+            poodle_render::CodeInputHandlers::default(),
+        );
+        let id = "code-input-disabled-row";
+        assert!(give_first_id(&mut disabled, id, &|node| {
+            node.a11y.role == Some(NodeRole::TextInput)
+        }));
+        disabled.id = Some(FIXTURE_ID.to_owned());
+        let mounted = Arc::new(Mutex::new(disabled));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.draw_frame();
+
+        let tree = mounted.lock().unwrap();
+        let input = tree
+            .find(&|node| node.id.as_deref() == Some(id))
+            .expect("disabled code input");
+        assert!(input.interaction.disabled);
+        assert!(!input.interaction.focusable);
+        assert!(input.interaction.on_edit_key.is_none());
+        assert!(poodle_gpui_node_backend::focus_handle_for(id).is_none());
     });
 }
 
@@ -19838,6 +19904,7 @@ fn assert_tri_state_radio_semantics(
 /// skip, and independent instance focus identity through the mounted tree.
 #[test]
 fn tri_state_switch_value_focus_identity_and_disabled_paths() {
+    use poodle_adapter::ThemeProvider;
     run_headless(|cx| {
         fn build(
             value: TriStateValue,
@@ -19869,6 +19936,29 @@ fn tri_state_switch_value_focus_identity_and_disabled_paths() {
             Arc::clone(&mounted),
             Arc::clone(&payloads),
         );
+        {
+            let root = mounted.lock().unwrap();
+            let theme = theme();
+            assert_eq!(
+                root.style.descriptor.layout.height,
+                LayoutSizing::Fixed(theme.resolve_space("size.control.height"))
+            );
+            let selection = root.children.first().expect("selected capsule");
+            let canvas = theme.resolve_color("color.background.canvas");
+            let track = poodle_render::color::mix_srgb(
+                canvas,
+                poodle_node::ColorValue(0.0, 0.0, 0.0, 1.0),
+                0.70,
+            );
+            assert_eq!(
+                selection.style.descriptor.background,
+                Some(poodle_render::color::mix_srgb(
+                    theme.resolve_color("color.text.primary"),
+                    track,
+                    0.08,
+                ))
+            );
+        }
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 60.0);
 
         let excluded = tri_state_segment_id("filter", TriStateValue::Excluded);
@@ -21580,6 +21670,17 @@ fn duration_host(hours: u32, minutes: u32, seconds: u32) -> DurationRouting {
     }
 }
 
+fn stamp_accessible_segment_ids(node: &mut Node, ids: &[(&str, &str)]) {
+    if let Some(label) = node.a11y.label.as_deref() {
+        if let Some((_, id)) = ids.iter().find(|(candidate, _)| *candidate == label) {
+            node.id = Some((*id).to_owned());
+        }
+    }
+    for child in &mut node.children {
+        stamp_accessible_segment_ids(child, ids);
+    }
+}
+
 fn duration_routing_tree(host: &Arc<DurationRouting>, mounted: &Arc<Mutex<Node>>) -> Node {
     let provider = theme();
     let ctx = RenderContext::new(&provider);
@@ -21593,7 +21694,7 @@ fn duration_routing_tree(host: &Arc<DurationRouting>, mounted: &Arc<Mutex<Node>>
 
     let change_host = Arc::clone(host);
     let change_mount = Arc::clone(mounted);
-    let duration = poodle_render::duration_input_with_handlers(
+    let mut duration = poodle_render::duration_input_with_handlers(
         &spec,
         &ctx,
         poodle_render::DurationInputHandlers {
@@ -21608,6 +21709,14 @@ fn duration_routing_tree(host: &Arc<DurationRouting>, mounted: &Arc<Mutex<Node>>
                 *change_mount.lock().expect("mount") = tree;
             })),
         },
+    );
+    stamp_accessible_segment_ids(
+        &mut duration,
+        &[
+            ("Hours", "duration-hours"),
+            ("Minutes", "duration-minutes"),
+            ("Seconds", "duration-seconds"),
+        ],
     );
     routing_column(vec![
         traversal_marker("duration-before", &host.log, &ctx),
@@ -22426,10 +22535,12 @@ fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
 /// traversal, and disabled inertia all go through production focus/key
 /// dispatch and a host rebuild from those fields.
 ///
-/// Deliberately not claimed: IME, free-form parsing, selection ranges, native
-/// accessibility, visual comparison, or Jetstream admission.
+/// Deliberately not claimed: IME, free-form parsing, selection ranges, visual
+/// comparison, or Jetstream admission.
 #[test]
 fn duration_input_segments_edit_and_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
+
     fn last_total(host: &DurationRouting) -> u64 {
         host.last_total
             .lock()
@@ -22443,6 +22554,44 @@ fn duration_input_segments_edit_and_rebuild_the_host_spec() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount");
+            let group = tree
+                .find(&|node| {
+                    node.a11y.role == Some(NodeRole::Group)
+                        && node.a11y.label.as_deref() == Some("duration")
+                })
+                .expect("mounted duration group");
+            assert_eq!(group.a11y.role, Some(NodeRole::Group));
+            assert_eq!(group.a11y.label.as_deref(), Some("duration"));
+            for label in ["Hours", "Minutes", "Seconds"] {
+                let segment = group
+                    .find(&|node| node.a11y.label.as_deref() == Some(label))
+                    .unwrap_or_else(|| panic!("missing {label} accessible segment"));
+                assert_eq!(segment.a11y.role, Some(NodeRole::TextInput));
+            }
+            assert_eq!(
+                group.style.descriptor.background,
+                Some(theme().resolve_color("color.background.surface"))
+            );
+            assert_eq!(
+                group.style.min_height,
+                Some(theme().resolve_space("size.control.height"))
+            );
+            let hours = group
+                .find(&|node| {
+                    node.a11y.role == Some(NodeRole::TextInput)
+                        && node.a11y.label.as_deref() == Some("Hours")
+                })
+                .expect("Hours text input");
+            assert_eq!(hours.a11y.value_text.as_deref(), Some("00"));
+            assert!(matches!(
+                hours.children[1].style.descriptor.layout.width,
+                LayoutSizing::Fixed(width)
+                    if (width - poodle_render::presentation::rem_to_px(1.75)).abs() < 1e-6
+            ));
+        }
         driver.wait_for_focus_handle("poodle-input-duration-before");
         driver.focus_element("poodle-input-duration-before");
         take_events(&host.log);
@@ -22480,6 +22629,21 @@ fn duration_input_segments_edit_and_rebuild_the_host_spec() {
             poodle_gpui_node_backend::focus_state_for("poodle-input-duration-after"),
             Some(true)
         );
+    });
+
+    // Pointer activation lands on the clicked production segment; its key
+    // handler edits Minutes rather than the first segment or the host default.
+    run_headless(|cx| {
+        let host = Arc::new(duration_host(1, 2, 3));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("duration-minutes").is_some());
+        driver.pointer_activate_id("duration-minutes");
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (1, 3, 3));
+        assert_eq!(last_total(&host), 3783);
     });
 
     run_headless(|cx| {
@@ -22586,6 +22750,20 @@ fn duration_input_segments_edit_and_rebuild_the_host_spec() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount");
+            let group = tree
+                .find(&|node| node.a11y.role == Some(NodeRole::Group))
+                .expect("disabled duration group");
+            assert!(group.interaction.disabled);
+            let hours = group
+                .find(&|node| node.a11y.label.as_deref() == Some("Hours"))
+                .expect("disabled Hours input");
+            assert_eq!(hours.a11y.role, Some(NodeRole::TextInput));
+            assert!(hours.interaction.disabled);
+            assert!(!hours.interaction.focusable);
+        }
         driver.wait_for_focus_handle("poodle-input-duration-before");
         driver.focus_element("poodle-input-duration-before");
         take_events(&host.log);
@@ -22645,7 +22823,7 @@ fn time_routing_tree(host: &Arc<TimeRouting>, mounted: &Arc<Mutex<Node>>) -> Nod
     let change_host = Arc::clone(host);
     let change_mount = Arc::clone(mounted);
     let live = Arc::clone(&host.context);
-    let time = time_input_with_persistent_context(
+    let mut time = time_input_with_persistent_context(
         &spec,
         &ctx,
         live,
@@ -22668,6 +22846,14 @@ fn time_routing_tree(host: &Arc<TimeRouting>, mounted: &Arc<Mutex<Node>>) -> Nod
             let tree = time_routing_tree(&change_host, &change_mount);
             *change_mount.lock().expect("mount") = tree;
         })),
+    );
+    stamp_accessible_segment_ids(
+        &mut time,
+        &[
+            ("Hour", "time-hour"),
+            ("Minute", "time-minute"),
+            ("Second", "time-second"),
+        ],
     );
 
     let after_host = Arc::clone(host);
@@ -22710,9 +22896,11 @@ fn time_routing_tree(host: &Arc<TimeRouting>, mounted: &Arc<Mutex<Node>>) -> Nod
 /// Tab traversal, and disabled inertia.
 ///
 /// Deliberately not claimed: IME, locale/12-hour presentation, picker overlays,
-/// native accessibility proof, visual comparison, or Jetstream admission.
+/// visual comparison, or Jetstream admission.
 #[test]
 fn time_input_segmented_editor_commits_drafts_and_bounds() {
+    use poodle_adapter::ThemeProvider;
+
     fn committed(host: &TimeRouting) -> Option<String> {
         host.context.lock().expect("context").committed.clone()
     }
@@ -22722,6 +22910,55 @@ fn time_input_segmented_editor_commits_drafts_and_bounds() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("time-minute").is_some());
+        driver.pointer_activate_id("time-minute");
+        driver.dispatch_key_raw("up");
+        assert_eq!(committed(&host).as_deref(), Some("14:31"));
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("14:30")));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount");
+            let group = tree
+                .find(&|node| node.a11y.role == Some(NodeRole::Group))
+                .expect("mounted time group");
+            assert_eq!(group.a11y.label.as_deref(), Some("time"));
+            assert_eq!(group.a11y.value_text.as_deref(), Some("14:30"));
+            assert_eq!(
+                group.style.descriptor.background,
+                Some(theme().resolve_color("color.background.surface"))
+            );
+            assert_eq!(
+                group.style.descriptor.border.color,
+                theme().resolve_color("color.border.default")
+            );
+            assert_eq!(
+                group.style.min_height,
+                Some(theme().resolve_space("size.control.height"))
+            );
+            let hour = group
+                .find(&|node| node.a11y.label.as_deref() == Some("Hour"))
+                .expect("Hour spin button");
+            assert_eq!(hour.a11y.role, Some(NodeRole::SpinButton));
+            assert_eq!(hour.a11y.value, Some(14.0));
+            assert_eq!(hour.a11y.value_text.as_deref(), Some("14"));
+            assert_eq!(hour.a11y.value_min, Some(0.0));
+            assert_eq!(hour.a11y.value_max, Some(23.0));
+            let minute = group
+                .find(&|node| node.a11y.label.as_deref() == Some("Minute"))
+                .expect("Minute spin button");
+            assert_eq!(minute.a11y.role, Some(NodeRole::SpinButton));
+            assert_eq!(minute.a11y.value, Some(30.0));
+            assert_eq!(minute.a11y.value_text.as_deref(), Some("30"));
+            assert_eq!(minute.a11y.value_min, Some(0.0));
+            assert_eq!(minute.a11y.value_max, Some(59.0));
+        }
         driver.wait_for_focus_handle("poodle-input-time-before");
         driver.focus_element("poodle-input-time-before");
         take_events(&host.log);
@@ -22923,6 +23160,20 @@ fn time_input_segmented_editor_commits_drafts_and_bounds() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount");
+            let group = tree
+                .find(&|node| node.a11y.role == Some(NodeRole::Group))
+                .expect("disabled time group");
+            assert!(group.interaction.disabled);
+            let hour = group
+                .find(&|node| node.a11y.label.as_deref() == Some("Hour"))
+                .expect("disabled Hour spin button");
+            assert_eq!(hour.a11y.role, Some(NodeRole::SpinButton));
+            assert!(hour.interaction.disabled);
+            assert!(!hour.interaction.focusable);
+        }
         driver.wait_for_focus_handle("poodle-input-time-before");
         driver.focus_element("poodle-input-time-before");
         take_events(&host.log);
@@ -25280,6 +25531,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
 /// rebuild, focus, and disabled inertia through the production renderer.
 #[test]
 fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard() {
+    use poodle_adapter::ThemeProvider;
     use poodle_node::NodeKind;
     use poodle_specs::{CollapseDirection, CollapseToggleSpec};
 
@@ -25320,8 +25572,8 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
 
     // ── Semantics, naming, inert skips ─────────────────────────────────
     run_headless(|cx| {
-        let reported = Arc::new(Mutex::new(Vec::<bool>::new()));
-        let sink = Arc::clone(&reported);
+        let payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let sink = Arc::clone(&payloads);
         let mut root = Node::container();
         root.style.descriptor.layout.direction = LayoutDirection::Column;
         root.style.descriptor.layout.spacing.gap = 8.0;
@@ -25358,6 +25610,18 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
             assert_eq!(icon_name(enabled), "chevron-left");
             assert_eq!(enabled.a11y.tab_index, Some(0));
             assert!(enabled.style.focus_ring.is_some());
+            let visual_theme = theme();
+            assert_eq!(
+                enabled.style.descriptor.corner_radii.top_left,
+                visual_theme.resolve_radius("radius.control")
+            );
+            let chevron = enabled
+                .find(&|child| matches!(&child.kind, NodeKind::Icon { .. }))
+                .expect("painted chevron");
+            assert_eq!(
+                chevron.style.descriptor.text_color,
+                Some(visual_theme.resolve_color("color.text.primary"))
+            );
 
             let labeled = target(&root, "ct-labeled");
             assert_eq!(labeled.a11y.label.as_deref(), Some("Collapse left dock"));
@@ -25384,7 +25648,7 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
             "pointer proof needs a real hit target"
         );
         driver.pointer_activate_id("ct-enabled");
-        assert_eq!(*reported.lock().expect("report lock"), [true]);
+        assert_eq!(*payloads.lock().expect("report lock"), [true]);
 
         assert!(
             poodle_gpui_node_backend::bounds_for("ct-disabled").is_some(),
@@ -25395,7 +25659,7 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
             poodle_gpui_node_backend::focus_handle_for("ct-disabled").is_none(),
             "disabled toggle never registers a sequential stop"
         );
-        assert_eq!(*reported.lock().expect("report lock"), [true]);
+        assert_eq!(*payloads.lock().expect("report lock"), [true]);
 
         driver.focus_element("ct-before");
         driver.focus_next_tab_stop();
@@ -25552,6 +25816,7 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
 /// landmark/current-page accessibility, visual comparison, or Jetstream.
 #[test]
 fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard() {
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::{PaginationSpec, PaginationVariant};
 
     #[derive(Clone)]
@@ -25696,10 +25961,35 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
         {
             let root = mounted.lock().expect("mount lock");
             assert!(root.has_text("..."));
-            assert!(target(&root, "pagination-page-5")
-                .interaction
-                .on_activate
-                .is_none());
+            let current = target(&root, "pagination-page-5");
+            assert!(current.interaction.on_activate.is_none());
+            let visual_theme = theme();
+            let accent = visual_theme.resolve_color("color.accent.base");
+            assert_eq!(
+                current.style.descriptor.background,
+                Some(poodle_render::color::with_alpha(accent, accent.3 * 0.18))
+            );
+            assert_eq!(
+                current.style.descriptor.border.color,
+                poodle_render::color::mix_srgb(
+                    accent,
+                    visual_theme.resolve_color("color.border.default"),
+                    0.58,
+                )
+            );
+            assert_eq!(
+                current.style.descriptor.text_color,
+                Some(visual_theme.resolve_color("color.text.primary"))
+            );
+            assert!(matches!(
+                current.style.descriptor.layout.height,
+                LayoutSizing::Fixed(height)
+                    if (height
+                        - (visual_theme.resolve_space("size.control.height")
+                            - poodle_render::presentation::rem_to_px(0.125)))
+                        .abs()
+                        < 1e-6
+            ));
             assert!(!target(&root, "pagination-prev").interaction.disabled);
             assert!(!target(&root, "pagination-next").interaction.disabled);
         }
