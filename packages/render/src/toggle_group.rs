@@ -201,13 +201,10 @@ pub fn toggle_group(
     // `toggle_group_gap_rem` transcribes exactly.
     let gap = rem_to_px(toggle_group_gap_rem(density));
 
-    // Contract: min-height = calc(control-height − 0.25rem). Unlike
-    // select/button, this component's old GPUI tier is deliberately
-    // fixed-table here — `control_height_rem(size) − 0.25rem`, Svelte's
-    // per-size stops verbatim — so the height does NOT follow the
-    // density/control-size axis. Exact transcription (zero-diff at the
-    // visual gate) outranks the token + offset form.
-    let item_height = rem_to_px(control_height_rem(effective_size) - 0.25);
+    // Svelte's `--poodle-toggle-group-height` follows the resolved control
+    // height, with the same per-size overrides. Density affects item padding
+    // and group gap, not this minimum height.
+    let item_height = rem_to_px(control_height_rem(effective_size));
     // Contract §8 Item: padding `0 toggle-group-x`. The old GPUI tier
     // resolves the `space.control.x` token directly — density-only, no
     // per-size offset — so the density axis carries through the theme.
@@ -414,16 +411,14 @@ mod tests {
     }
 
     #[test]
-    fn item_metrics_follow_the_old_tiers_recipe() {
-        // min-height = control_height_rem(size) − 0.25rem — the old GPUI
-        // tier's fixed per-size table (Svelte's stops), deliberately NOT the
-        // token + offset ladder select/button use.
+    fn item_metrics_follow_the_control_size_height_ladder() {
+        // Match Svelte's --poodle-toggle-group-height size stops.
         let cases = [
-            (ControlSize::Xs, 20.0),
-            (ControlSize::Sm, 24.0),
-            (ControlSize::Md, 32.0),
-            (ControlSize::Lg, 40.0),
-            (ControlSize::Xl, 48.0),
+            (ControlSize::Xs, 24.0),
+            (ControlSize::Sm, 28.0),
+            (ControlSize::Md, 36.0),
+            (ControlSize::Lg, 44.0),
+            (ControlSize::Xl, 52.0),
         ];
         for (size, expected) in cases {
             let spec = ToggleGroupSpec::new(view_options()).with_size(size);

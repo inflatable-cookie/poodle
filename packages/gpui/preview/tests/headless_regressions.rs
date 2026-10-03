@@ -20093,8 +20093,9 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
                 poodle_render::color::with_alpha(border_subtle, border_subtle.3 * 0.82);
             let radius = visual_theme.resolve_radius("radius.control");
             let item_height = poodle_render::presentation::rem_to_px(
-                poodle_render::presentation::control_height_rem(ControlSize::Md) - 0.25,
+                poodle_render::presentation::control_height_rem(ControlSize::Md),
             );
+            let item_border_width = poodle_render::presentation::rem_to_px(0.0625);
             let item_pad_x = visual_theme.resolve_space("space.control.x");
             assert_eq!(grid_node.style.descriptor.background, Some(selected_fill));
             assert_eq!(grid_node.style.descriptor.border.color, selected_border);
@@ -20112,7 +20113,7 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
             assert_eq!(grid_node.style.descriptor.corner_radii.top_left, radius);
             assert_eq!(
                 grid_node.style.descriptor.border.width,
-                poodle_render::presentation::rem_to_px(0.0625)
+                item_border_width
             );
             assert_eq!(
                 grid_node.style.text_size,
@@ -20170,14 +20171,15 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
             .expect("mounted selected ToggleGroup item bounds");
         eprintln!("ToggleGroup selected item bounds: {grid_bounds:?}");
         assert!(grid_bounds.size.width > px(0.0) && grid_bounds.size.height > px(0.0));
-        assert!(
-            (f32::from(grid_bounds.size.height)
-                - poodle_render::presentation::rem_to_px(
-                    poodle_render::presentation::control_height_rem(ControlSize::Md) - 0.25,
-                ))
-            .abs()
-                <= 4.0,
-            "mounted ToggleGroup item height follows its resolved control-size geometry"
+        let expected_item_height = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::control_height_rem(ControlSize::Md),
+        );
+        let mounted_border_box_height = f32::from(grid_bounds.size.height)
+            + 2.0 * poodle_render::presentation::rem_to_px(0.0625);
+        assert_eq!(
+            mounted_border_box_height,
+            expected_item_height,
+            "mounted ToggleGroup content bounds plus its 1px border edges should match Svelte's {expected_item_height}px minimum"
         );
         driver.pointer_activate_id(&board);
         assert_eq!(
