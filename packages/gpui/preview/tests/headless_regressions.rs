@@ -1782,19 +1782,60 @@ fn app_header_resolves_structure_token_styling_and_layout_through_mounted_backen
 #[test]
 fn a_mounted_button_carries_its_controls_target() {
     run_headless(|cx| {
+        let (handler, activations) = counting_handler();
         let node = Arc::new(Mutex::new(button_node(
             poodle_specs::ButtonSpec::new()
                 .with_label("Details")
                 .with_controls("details"),
-            None,
+            Some(handler),
         )));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
 
         driver.wait_for_focus_handle(FIXTURE_ID);
+        let button = driver
+            .accessibility_nodes()
+            .into_iter()
+            .next()
+            .expect("mounted Button accessibility node");
+        assert_eq!(button.role, NodeRole::Button);
+        assert_eq!(button.label.as_deref(), Some("Details"));
+        assert_eq!(button.controls.as_deref(), Some("details"));
+        assert!(button.focusable && button.focus_tracked);
         assert_eq!(
             node.lock().expect("node lock").a11y.controls.as_deref(),
             Some("details"),
         );
+
+        // The real backend focus handle, not a renderer-side flag, owns the
+        // keyboard focus state and the visible contract focus ring.
+        driver.focus_element(FIXTURE_ID);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
+            Some(true),
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(FIXTURE_ID).is_some(),
+            "focused Button paints its declared focus ring",
+        );
+
+        driver.keyboard_activate(FIXTURE_ID);
+        assert_eq!(
+            *activations.lock().expect("activation count"),
+            1,
+            "one Enter produces one Button callback",
+        );
+        driver.pointer_activate_id(FIXTURE_ID);
+        assert_eq!(
+            *activations.lock().expect("activation count"),
+            2,
+            "one pointer press produces one Button callback",
+        );
+        driver.blur_element_focus(FIXTURE_ID);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
+            Some(false),
+        );
+        assert!(poodle_gpui_node_backend::painted_ring_for(FIXTURE_ID).is_none());
 
         // Absence stays absence: a bare spec mounts carrying no target.
         let bare = button_node(poodle_specs::ButtonSpec::new().with_label("Save"), None);
@@ -11746,56 +11787,168 @@ fn two_model_connection_pickers_do_not_share_backend_focus_handles() {
 
 /// Radio selects on activate and never unchecks itself. Group exclusivity is
 /// host-owned on native; this case is the single-option control, not RadioGroup.
+/// Expected icon and indicator sizes are literal Svelte CSS values so a broken
+/// GPUI resolver cannot prove itself.
 #[test]
 fn radio_selects_on_activate_and_does_not_uncheck_itself() {
+    use poodle_node::NodeToggled;
+    use poodle_render::color::hex_color;
+    use poodle_render::presentation::rem_to_px;
     use poodle_specs::RadioSpec;
 
     run_headless(|cx| {
         let selected = Arc::new(Mutex::new(Vec::new()));
-        let sink = Arc::clone(&selected);
-        let mut node = poodle_render::radio(
-            &RadioSpec::new()
-                .with_name("shipping")
-                .with_value("standard")
-                .with_label("Standard shipping"),
-            &RenderContext::new(&theme()),
-            Some(Arc::new(move |checked| {
-                sink.lock().unwrap().push(checked);
-            })),
-        );
-        node.id = Some(FIXTURE_ID.to_owned());
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let cases = [
+            (ControlSize::Xs, "xs", "size.icon.xs", 0.625, 0.875),
+            (ControlSize::Sm, "sm", "size.icon.sm", 0.75, 1.0),
+            (ControlSize::Md, "md", "size.icon.md", 1.0, 1.125),
+            (ControlSize::Lg, "lg", "size.icon.lg", 1.25, 1.375),
+            (ControlSize::Xl, "xl", "size.icon.xl", 1.5, 1.625),
+        ];
+        let mut node = Node::container();
+        for &(size, suffix, _, _, _) in &cases {
+            let sink = Arc::clone(&selected);
+            let mut radio = poodle_render::radio(
+                &RadioSpec::new()
+                    .with_name("shipping")
+                    .with_value("standard")
+                    .with_label(format!("Standard shipping {suffix}"))
+                    .with_size(size),
+                &ctx,
+                Some(Arc::new(move |checked| {
+                    sink.lock().unwrap().push(checked);
+                })),
+            );
+            radio.id = Some(format!("headless-radio-{suffix}"));
+            radio.children[0].id = Some(format!("headless-radio-indicator-{suffix}"));
+            node = node.child(radio);
+        }
         let node = Arc::new(Mutex::new(node));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 240.0);
 
-        driver.wait_for_focus_handle(FIXTURE_ID);
-        driver.keyboard_activate(FIXTURE_ID);
+        driver.wait_for_focus_handle("headless-radio-xs");
+        let accessibility = driver.accessibility_nodes();
+        assert_eq!(accessibility.len(), cases.len());
+        for &(_, suffix, icon_token, expected_icon_rem, expected_indicator_rem) in &cases {
+            let radio_id = format!("headless-radio-{suffix}");
+            let label = format!("Standard shipping {suffix}");
+            let radio = accessibility
+                .iter()
+                .find(|entry| entry.element_id == radio_id)
+                .expect("mounted Radio accessibility node");
+            assert_eq!(radio.role, NodeRole::RadioButton);
+            assert_eq!(radio.label.as_deref(), Some(label.as_str()));
+            assert_eq!(radio.toggled, Some(NodeToggled::False));
+            assert!(radio.focusable && radio.focus_tracked);
+
+            let rendered = node.lock().expect("node lock").clone();
+            let rendered_radio = rendered
+                .find(&|candidate| candidate.id.as_deref() == Some(radio_id.as_str()))
+                .expect("production Radio node remains in the mounted tree");
+            let indicator = &rendered_radio.children[0];
+            let expected_icon = rem_to_px(expected_icon_rem);
+            assert_eq!(
+                ctx.theme().resolve_space(icon_token),
+                expected_icon,
+                "{suffix} icon token matches its Svelte CSS primitive",
+            );
+            let expected_indicator = rem_to_px(expected_indicator_rem);
+            let expected_border = ctx.theme().resolve_color("color.border.default");
+            let expected_surface = ctx.theme().resolve_color("color.background.surface");
+            assert_eq!(
+                indicator.style.descriptor.layout.width,
+                LayoutSizing::Fixed(expected_indicator),
+                "{suffix} indicator follows radio.css's size token and offset",
+            );
+            assert_eq!(indicator.style.descriptor.border.color, expected_border);
+            assert_eq!(
+                indicator.style.descriptor.background,
+                Some(expected_surface)
+            );
+            assert!(indicator.children.is_empty(), "unchecked Radio has no dot");
+            let indicator_id = format!("headless-radio-indicator-{suffix}");
+            let bounds = poodle_gpui_node_backend::bounds_for(&indicator_id)
+                .expect("production GPUI painted the Radio indicator bounds");
+            let painted_width = f32::from(bounds.size.width);
+            let painted_height = f32::from(bounds.size.height);
+            let expected_content_edge = expected_indicator - 2.0 * rem_to_px(0.0625);
+            assert!((painted_width - expected_content_edge).abs() < 0.01);
+            assert!((painted_height - expected_content_edge).abs() < 0.01);
+        }
+
+        driver.focus_element("headless-radio-xs");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("headless-radio-xs"),
+            Some(true),
+            "the real backend focus handle tracks the Radio",
+        );
+        driver.keyboard_activate("headless-radio-xs");
         assert_eq!(
             selected.lock().unwrap().as_slice(),
             [true],
-            "an unchecked radio selects"
+            "onCheckedChange reports true when an unchecked Radio activates"
+        );
+        driver.pointer_activate_id("headless-radio-xs");
+        assert_eq!(
+            selected.lock().unwrap().as_slice(),
+            [true, true],
+            "pointer activation also selects through the mounted listener",
         );
     });
 
     run_headless(|cx| {
         let selected = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&selected);
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
         let mut node = poodle_render::radio(
             &RadioSpec::new()
                 .with_name("shipping")
                 .with_value("standard")
                 .with_label("Standard shipping")
-                .with_checked(true),
-            &RenderContext::new(&theme()),
+                .with_checked(true)
+                .with_size(ControlSize::Xs)
+                .with_selected_color("#14b8a6"),
+            &ctx,
             Some(Arc::new(move |checked| {
                 sink.lock().unwrap().push(checked);
             })),
         );
         node.id = Some(FIXTURE_ID.to_owned());
+        node.children[0].id = Some("headless-radio-indicator".to_owned());
         let node = Arc::new(Mutex::new(node));
-        let mut driver = HeadlessDriver::new(cx, node);
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
 
         driver.wait_for_focus_handle(FIXTURE_ID);
+        let radio = driver
+            .accessibility_nodes()
+            .into_iter()
+            .next()
+            .expect("mounted selected Radio accessibility node");
+        assert_eq!(radio.role, NodeRole::RadioButton);
+        assert_eq!(radio.label.as_deref(), Some("Standard shipping"));
+        assert_eq!(radio.toggled, Some(NodeToggled::True));
+
+        let selected_color = hex_color("#14b8a6").expect("valid selected color");
+        let rendered = node.lock().expect("node lock").clone();
+        let indicator = &rendered.children[0];
+        let dot = &indicator.children[0];
+        assert_eq!(indicator.style.descriptor.border.color, selected_color);
+        assert_eq!(dot.style.descriptor.background, Some(selected_color));
+        let expected_dot = rem_to_px(0.4);
+        assert_eq!(
+            dot.style.descriptor.layout.width,
+            LayoutSizing::Fixed(expected_dot)
+        );
+        assert_eq!(
+            dot.style.descriptor.layout.height,
+            LayoutSizing::Fixed(expected_dot)
+        );
+
         driver.keyboard_activate(FIXTURE_ID);
+        driver.pointer_activate_id(FIXTURE_ID);
         assert!(
             selected.lock().unwrap().is_empty(),
             "an already-checked radio does not uncheck"

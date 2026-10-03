@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `fd434be25818ef89d58e272e4f494de0b1e3cefa`
+Evidence commit (execution identity from the execution record, not the checkout): `36ac229b5ee800a7c62c0a3733893f7053473dc3`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -15,9 +15,9 @@ Construction is not functional completion. A passing route, a test name, or one 
 ## Summary
 
 Rows with at least one admitted capability: **74**/175.
-Fully admitted rows: **25**/175.
-Missing by axis: semantic 101; events 100; pointer 111; keyboard_focus 96; accessibility 122; visual 143.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
+Fully admitted rows: **27**/175.
+Missing by axis: semantic 101; events 98; pointer 110; keyboard_focus 95; accessibility 121; visual 142.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **229**.
 
 ## Rows
 
@@ -31,7 +31,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 | Box | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Breadcrumbs | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | events; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Breadcrumbs--breadcrumbs-callback-navigation-through-mounted-pointer-and-keyboard.json` |
 | BulkActionBar | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| Button | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); pointer (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-v1) | events; keyboard_focus | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Button--a-mounted-button-carries-its-controls-target.json` |
+| Button | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (expected-test); pointer (nucleus-m1); keyboard_focus (expected-test); accessibility (nucleus-a1); visual (nucleus-v1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Button--a-mounted-button-carries-its-controls-target.json` |
 | Callout | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Callout--callout-dismiss-rebuilds-the-host-spec-through-mounted-input.json` |
 | RemediationBanner | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test) | events; pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RemediationBanner--remediation-banner-action-and-dismiss-rebuild-the-host-spec.json` |
 | Card | semantic; pointer; keyboard_focus; accessibility; visual | — | semantic; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -80,7 +80,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 | PaginationSummary | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | PasswordRequirements | semantic; events; pointer; accessibility; visual | — | semantic; events; pointer; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Progress | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
-| Radio | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test) | events; pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Radio--radio-selects-on-activate-and-does-not-uncheck-itself.json` |
+| Radio | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Radio--radio-selects-on-activate-and-does-not-uncheck-itself.json` |
 | RefSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | RadioGroup | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RadioGroup--radio-group-exclusive-focus-identity-and-disabled-paths.json` |
 | Rating | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Rating--rating-nullable-fractional-and-whole-step-through-mounted-pointer-and-keyboard.json` |
@@ -211,8 +211,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 - Breadcrumbs: Expected test breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard proves no events claim; events stays missing.
 - Breadcrumbs: Expected test breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing.
 - BulkActionBar: No validated receipt and no retained expected test for BulkActionBar; every required capability stays missing.
-- Button: Expected test a_mounted_button_carries_its_controls_target proves no events claim; events stays missing.
-- Button: Expected test a_mounted_button_carries_its_controls_target proves no keyboard_focus claim; keyboard_focus stays missing.
 - RemediationBanner: Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no events claim; events stays missing.
 - RemediationBanner: Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no pointer claim; pointer stays missing.
 - RemediationBanner: Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.
@@ -266,10 +264,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 - PaginationSummary: No validated receipt and no retained expected test for PaginationSummary; every required capability stays missing.
 - PasswordRequirements: No validated receipt and no retained expected test for PasswordRequirements; every required capability stays missing.
 - Progress: No validated receipt and no retained expected test for Progress; every required capability stays missing.
-- Radio: Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no events claim; events stays missing.
-- Radio: Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no pointer claim; pointer stays missing.
-- Radio: Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no accessibility claim; accessibility stays missing.
-- Radio: Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no visual claim; visual stays missing.
 - RefSelect: No validated receipt and no retained expected test for RefSelect; every required capability stays missing.
 - Rating: Expected test rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing.
 - Region: No validated receipt and no retained expected test for Region; every required capability stays missing.
@@ -444,7 +438,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **235**.
 Shared-substrate groupings for repair-tranche compilation. Grouping only; no tranche is planned here.
 
 - overlay-dismissal: 44 components (AgentPlanRecord, AlertDialog, Breadcrumbs, ColorPicker, ContextMenu, DataTable, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, DebugDialog, Drawer, Field, FilterBuilder, FilterToolbar, FormDialog, HistoryCenter, HoverCard, ListCardCounter, MediaBrowsePanel, MediaPicker, MediaThumbnail, Menubar, ModelConnectionSetup, NavigationMenu, OrderBy, PageLoading, PickerShell, RangeSlider, RefSelect, RelationPicker, RemediationBanner, ResizeHandle, SettingsShell, Slider, SplitButton, ThemeSelect, ToastStack, Toolbar, Tree, UpdateCenter, UpdateStatus, VideoPlayer); missing semantic 32; events 36; pointer 40; keyboard_focus 34; accessibility 39; visual 42
-- selection-navigation: 24 components (Accordion, AudioPlayer, BulkActionBar, Button, ChangedFiles, Checkbox, CodeInput, CollapseToggle, DurationInput, ListContainer, LogList, ModelConnectionPicker, NavCard, Pagination, PaginationSummary, Pill, Radio, SelectionSummary, Table, TimeInput, TimeZoneSelect, ToggleGroup, ToolCallGroup, TriStateSwitch); missing semantic 10; events 14; pointer 15; keyboard_focus 10; accessibility 18; visual 23
+- selection-navigation: 22 components (Accordion, AudioPlayer, BulkActionBar, ChangedFiles, Checkbox, CodeInput, CollapseToggle, DurationInput, ListContainer, LogList, ModelConnectionPicker, NavCard, Pagination, PaginationSummary, Pill, SelectionSummary, Table, TimeInput, TimeZoneSelect, ToggleGroup, ToolCallGroup, TriStateSwitch); missing semantic 10; events 12; pointer 14; keyboard_focus 9; accessibility 17; visual 22
 - feedback-status: 21 components (ActionDiscoveryPanel, AgentSubagent, AgentTranscript, Avatar, DetailSectionGroup, DetailShell, EmbedPreview, EmptyState, ErrorBoundary, InlineListSection, LicenceSeats, MetaBar, MetaItem, Meter, PageHeader, PasswordRequirements, Progress, Region, Spinner, StatusBar, ToolCall); missing semantic 16; events 16; pointer 16; keyboard_focus 12; accessibility 19; visual 20
 - drag-resize-reorder: 15 components (AppHeader, BlockEditor, Card, CardRadioGroup, CardToggleGroup, DockRegion, DragNumberField, EditableList, FileUpload, ListCard, MarkdownEditor, ModelCatalogueEditor, Separator, SplitView, TokenInput); missing semantic 8; events 7; pointer 10; keyboard_focus 9; accessibility 10; visual 13
 - form-editing: 13 components (AgentQuestionRecord, Calendar, EmbedInput, Fader, FormActions, FormLayout, Keyboard, Knob, LicenceActivation, NumberInput, Rating, Stepper, ValidationSummary); missing semantic 7; events 6; pointer 8; keyboard_focus 7; accessibility 8; visual 13
