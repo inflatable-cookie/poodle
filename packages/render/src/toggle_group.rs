@@ -270,6 +270,16 @@ pub fn toggle_group(
         } else {
             NodeRole::Button
         });
+        // A native button's visible label is implicit in the web accessibility
+        // tree. The renderer-neutral node projection carries names explicitly,
+        // so preserve Svelte's aria-label override and visible-label fallback.
+        item.a11y.label = Some(
+            option
+                .aria_label
+                .as_deref()
+                .unwrap_or(&option.label)
+                .to_owned(),
+        );
         item.a11y.toggled = Some(if is_selected {
             NodeToggled::True
         } else {
