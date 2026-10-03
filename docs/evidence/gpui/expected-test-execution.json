@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-10-03-poodle-076-mounted-parity",
-  "source_commit": "8501a72141595c58c3355547505b700afa78e5b3",
+  "run_id": "2026-10-03-poodle-076-radio-geometry-review",
+  "source_commit": "36ac229b5ee800a7c62c0a3733893f7053473dc3",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -208,7 +208,7 @@
     },
     "radio_selects_on_activate_and_does_not_uncheck_itself": {
       "outcome": "passed",
-      "body_sha256": "3e05165afd51062c8fb84c5bed4828632cabcbcfa2c4782d18227bb97cdb723f"
+      "body_sha256": "16b95e2bbfedba512b6a20e7b88b2eca55546a832e8a830d68a6f001cc4e7763"
     },
     "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds": {
       "outcome": "passed",
