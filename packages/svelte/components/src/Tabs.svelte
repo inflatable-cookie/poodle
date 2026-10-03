@@ -835,6 +835,8 @@
 <div
   bind:this={rootElement}
   class="poodle-tabs"
+  data-scope="tabs"
+  data-part="root"
   data-variant={variant}
   data-bordered={bordered}
   data-active-edge={activeEdge}
@@ -852,7 +854,11 @@
 >
   {#if canCollapse}
     <div class="poodle-tabs__measure-shell" aria-hidden="true">
-      <div bind:this={measureListElement} class="poodle-tabs__list poodle-tabs__list--measure">
+      <div
+        bind:this={measureListElement}
+        class="poodle-tabs__list poodle-tabs__list--measure"
+        data-measure="true"
+      >
         {#each renderedItems as item, index (item.value)}
           <div class="poodle-tabs__item" role="presentation" data-selected={currentValue === item.value}>
             <span class="poodle-tabs__tab">
@@ -914,7 +920,7 @@
       </Menu>
 
       {#if actions}
-        <div class="poodle-tabs__actions">
+        <div class="poodle-tabs__actions" data-part="actions">
           {@render actions()}
         </div>
       {/if}
@@ -923,6 +929,7 @@
     <div
       bind:this={listElement}
       class="poodle-tabs__list"
+      data-part="list"
       role="tablist"
       aria-label={ariaLabel ?? undefined}
       aria-orientation={orientation}
@@ -966,20 +973,21 @@
           }}
         />
         {#if item.separator && index < renderedItems.length - 1}
-          <span class="poodle-tabs__separator" aria-hidden="true"></span>
+          <span class="poodle-tabs__separator" data-part="separator" aria-hidden="true"></span>
         {/if}
       {/each}
 
       {#if activeEdge === "underline" && indicatorBox}
         <span
           class="poodle-tabs__indicator"
+          data-part="indicator"
           aria-hidden="true"
           style="left: {indicatorBox.left}px; top: {indicatorBox.top}px; width: {indicatorBox.width}px; height: {indicatorBox.height}px"
         ></span>
       {/if}
 
       {#if actions}
-        <div class="poodle-tabs__actions">
+        <div class="poodle-tabs__actions" data-part="actions">
           {@render actions()}
         </div>
       {/if}
@@ -989,6 +997,7 @@
   {#if hasPanel && currentValue}
     <div
       class="poodle-tabs__panel"
+      data-part="panel"
       id={`poodle-tabpanel-${tabsId}-${currentValue}`}
       data-value={currentValue}
       role="tabpanel"

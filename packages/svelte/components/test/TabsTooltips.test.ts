@@ -68,6 +68,7 @@ describe("Tabs tooltips (svelte)", () => {
     expect(tooltip()).toBeNull();
     await vi.advanceTimersByTimeAsync(1);
     expect(tooltip()?.getAttribute("role")).toBe("tooltip");
+    expect(tooltip()?.getAttribute("data-part")).toBe("tooltip");
     expect(tooltip()?.textContent?.trim()).toBe("Search");
   });
 

@@ -821,11 +821,13 @@ export function Tabs({
     send(machineEvent);
   }
 
-  function tabContent(item: TabItem): ReactNode {
+  function tabContent(item: TabItem, withParts = true): ReactNode {
     return (
       <>
         {item.icon ? <Icon icon={item.icon} size={resolvedIconSize} /> : null}
-        <span className="poodle-tabs__label">{item.label}</span>
+        <span className="poodle-tabs__label" data-part={withParts ? "label" : undefined}>
+          {item.label}
+        </span>
         {item.count !== undefined ? (
           <Pill tone="neutral" appearance="badge" size={resolvedIconSize} muted adaptiveWidth ariaLabel={`${item.count}`}>
             {item.count}
@@ -849,6 +851,8 @@ export function Tabs({
       <div
         ref={rootRef}
         className="poodle-tabs"
+      data-scope="tabs"
+      data-part="root"
       data-variant={variant}
       data-bordered={bordered}
       data-active-edge={activeEdge}
@@ -866,11 +870,11 @@ export function Tabs({
     >
       {canCollapse ? (
         <div className="poodle-tabs__measure-shell" aria-hidden="true">
-          <div ref={measureListRef} className="poodle-tabs__list poodle-tabs__list--measure">
+          <div ref={measureListRef} className="poodle-tabs__list poodle-tabs__list--measure" data-measure="true">
             {renderedItems.map((item, index) => (
               <Fragment key={item.value}>
                 <div className="poodle-tabs__item" role="presentation" data-selected={currentValue === item.value}>
-                  <span className="poodle-tabs__tab">{tabContent(item)}</span>
+                  <span className="poodle-tabs__tab">{tabContent(item, false)}</span>
 
                   {item.closable ? (
                     <span className="poodle-tabs__close" aria-hidden="true">
@@ -911,10 +915,10 @@ export function Tabs({
             }
           />
 
-          {actions ? <div className="poodle-tabs__actions">{actions}</div> : null}
+          {actions ? <div className="poodle-tabs__actions" data-part="actions">{actions}</div> : null}
         </div>
       ) : (
-        <div ref={listRef} className="poodle-tabs__list" role="tablist" aria-label={ariaLabel ?? undefined} aria-orientation={orientation}>
+        <div ref={listRef} className="poodle-tabs__list" data-part="list" role="tablist" aria-label={ariaLabel ?? undefined} aria-orientation={orientation}>
           {renderedItems.map((item, index) => (
             <Fragment key={item.value}>
               <TabsItem
@@ -961,6 +965,7 @@ export function Tabs({
                       placement={isVertical ? "right" : "bottom"}
                       offset={6}
                       className="poodle-tabs__tooltip"
+                      data-part="tooltip"
                       data-placement={isVertical ? "right" : "bottom"}
                       role="tooltip"
                     >
@@ -970,7 +975,7 @@ export function Tabs({
                 }
               />
               {item.separator && index < renderedItems.length - 1 ? (
-                <span className="poodle-tabs__separator" aria-hidden="true" />
+                <span className="poodle-tabs__separator" data-part="separator" aria-hidden="true" />
               ) : null}
             </Fragment>
           ))}
@@ -978,6 +983,7 @@ export function Tabs({
           {activeEdge === "underline" && indicatorBox ? (
             <span
               className="poodle-tabs__indicator"
+              data-part="indicator"
               aria-hidden="true"
               style={{
                 left: indicatorBox.left,
@@ -988,13 +994,14 @@ export function Tabs({
             />
           ) : null}
 
-          {actions ? <div className="poodle-tabs__actions">{actions}</div> : null}
+          {actions ? <div className="poodle-tabs__actions" data-part="actions">{actions}</div> : null}
         </div>
       )}
 
       {hasPanel && currentValue ? (
         <div
           className="poodle-tabs__panel"
+          data-part="panel"
           id={`poodle-tabpanel-${tabsId}-${currentValue}`}
           data-value={currentValue}
           role="tabpanel"
