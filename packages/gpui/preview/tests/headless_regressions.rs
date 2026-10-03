@@ -20111,10 +20111,7 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
                 item_pad_x
             );
             assert_eq!(grid_node.style.descriptor.corner_radii.top_left, radius);
-            assert_eq!(
-                grid_node.style.descriptor.border.width,
-                item_border_width
-            );
+            assert_eq!(grid_node.style.descriptor.border.width, item_border_width);
             assert_eq!(
                 grid_node.style.text_size,
                 Some(poodle_render::presentation::rem_to_px(
