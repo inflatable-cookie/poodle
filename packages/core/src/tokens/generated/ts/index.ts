@@ -345,6 +345,14 @@ export const tokens = {
         "muted": 0.72
       }
     },
+    "tabs": {
+      "gap": "var(--poodle-space-stack-md)",
+      "list": {
+        "padding": "0",
+        "background": "color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)",
+        "border": "0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)"
+      }
+    },
     "typography": {
       "body": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
@@ -568,6 +576,10 @@ export const tokenPaths = [
   "space.button.iconInset",
   "state.opacity.disabled",
   "state.opacity.muted",
+  "tabs.gap",
+  "tabs.list.padding",
+  "tabs.list.background",
+  "tabs.list.border",
   "typography.body.family",
   "typography.body.size",
   "typography.body.lineHeight",
@@ -674,6 +686,10 @@ export const cssVars = {
   "space.button.iconInset": "--poodle-space-button-iconInset",
   "state.opacity.disabled": "--poodle-state-opacity-disabled",
   "state.opacity.muted": "--poodle-state-opacity-muted",
+  "tabs.gap": "--poodle-tabs-gap",
+  "tabs.list.padding": "--poodle-tabs-list-padding",
+  "tabs.list.background": "--poodle-tabs-list-background",
+  "tabs.list.border": "--poodle-tabs-list-border",
   "typography.body.family": "--poodle-typography-body-family",
   "typography.body.size": "--poodle-typography-body-size",
   "typography.body.lineHeight": "--poodle-typography-body-lineHeight",

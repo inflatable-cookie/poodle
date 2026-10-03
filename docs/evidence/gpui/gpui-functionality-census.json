@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "e53288c68a5dee112f1b3618d221d1a3372c4915",
+  "source_commit": "36ac229b5ee800a7c62c0a3733893f7053473dc3",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -56,14 +56,11 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#accordion_result_disclosure_focus_identity_and_disabled_paths"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#accordion_result_disclosure_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [],
+      "missing": [
+        "visual"
+      ],
       "holds": [
         {
           "axis": "accessibility",
@@ -75,7 +72,9 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Accordion--accordion-result-disclosure-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": []
+      "refusals": [
+        "Expected test accordion_result_disclosure_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
+      ]
     },
     {
       "component": "AgentChatInput",
@@ -378,9 +377,19 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/button--nucleus-shell-button.json#proof_level"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_mounted_button_carries_its_controls_target"
+        },
+        {
           "axis": "pointer",
           "via": "nucleus-m1",
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/button--nucleus-shell-button.json#proof_level"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_mounted_button_carries_its_controls_target"
         },
         {
           "axis": "accessibility",
@@ -393,10 +402,7 @@
           "ref": "docs/evidence/nucleus/nucleus-parity-receipts/button--nucleus-shell-button--v1.json#proof_level"
         }
       ],
-      "missing": [
-        "events",
-        "keyboard_focus"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -408,10 +414,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Button--a-mounted-button-carries-its-controls-target.json"
       ],
-      "refusals": [
-        "Expected test a_mounted_button_carries_its_controls_target proves no events claim; events stays missing.",
-        "Expected test a_mounted_button_carries_its_controls_target proves no keyboard_focus claim; keyboard_focus stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Callout",
@@ -660,14 +663,11 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec"
         }
       ],
-      "missing": [],
+      "missing": [
+        "visual"
+      ],
       "holds": [
         {
           "axis": "accessibility",
@@ -679,7 +679,9 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Checkbox--checkbox-toggle-readonly-and-disabled-rebuild-the-host-spec.json"
       ],
-      "refusals": []
+      "refusals": [
+        "Expected test checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec proves no visual claim; visual stays missing."
+      ]
     },
     {
       "component": "Calendar",
@@ -2448,17 +2450,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#radio_selects_on_activate_and_does_not_uncheck_itself"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#radio_selects_on_activate_and_does_not_uncheck_itself"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#radio_selects_on_activate_and_does_not_uncheck_itself"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#radio_selects_on_activate_and_does_not_uncheck_itself"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#radio_selects_on_activate_and_does_not_uncheck_itself"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#radio_selects_on_activate_and_does_not_uncheck_itself"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2470,12 +2487,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Radio--radio-selects-on-activate-and-does-not-uncheck-itself.json"
       ],
-      "refusals": [
-        "Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no events claim; events stays missing.",
-        "Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no pointer claim; pointer stays missing.",
-        "Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no accessibility claim; accessibility stays missing.",
-        "Expected test radio_selects_on_activate_and_does_not_uncheck_itself proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "RefSelect",
@@ -4151,19 +4163,12 @@
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
-        },
-        {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#toggle_group_result_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [],
+      "missing": [
+        "accessibility",
+        "visual"
+      ],
       "holds": [
         {
           "axis": "accessibility",
@@ -4175,7 +4180,10 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ToggleGroup--toggle-group-result-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": []
+      "refusals": [
+        "Expected test toggle_group_result_focus_identity_and_disabled_paths proves no accessibility claim; accessibility stays missing.",
+        "Expected test toggle_group_result_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
+      ]
     },
     {
       "component": "Toolbar",
@@ -7572,17 +7580,17 @@
   ],
   "summary": {
     "admittedRows": 74,
-    "fullyAdmittedRows": 28,
+    "fullyAdmittedRows": 27,
     "missingTally": {
       "semantic": 101,
-      "events": 100,
-      "pointer": 111,
-      "keyboard_focus": 96,
+      "events": 98,
+      "pointer": 110,
+      "keyboard_focus": 95,
       "accessibility": 121,
-      "visual": 140
+      "visual": 142
     },
     "holdCount": 175,
-    "refusalCount": 231
+    "refusalCount": 229
   },
   "groups": [
     {
@@ -7691,10 +7699,11 @@
     {
       "substrate": "selection-navigation",
       "components": [
+        "Accordion",
         "AudioPlayer",
         "BulkActionBar",
-        "Button",
         "ChangedFiles",
+        "Checkbox",
         "CodeInput",
         "CollapseToggle",
         "DurationInput",
@@ -7705,27 +7714,28 @@
         "Pagination",
         "PaginationSummary",
         "Pill",
-        "Radio",
         "SelectionSummary",
         "Table",
         "TimeInput",
         "TimeZoneSelect",
+        "ToggleGroup",
         "ToolCallGroup",
         "TriStateSwitch"
       ],
       "missingTally": {
         "semantic": 10,
-        "events": 14,
-        "pointer": 15,
-        "keyboard_focus": 10,
+        "events": 12,
+        "pointer": 14,
+        "keyboard_focus": 9,
         "accessibility": 17,
-        "visual": 20
+        "visual": 22
       },
       "contracts": [
+        "docs/contracts/components/accordion.md",
         "docs/contracts/components/audio-player.md",
         "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/button.md",
         "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/checkbox.md",
         "docs/contracts/components/code-input.md",
         "docs/contracts/components/collapse-toggle.md",
         "docs/contracts/components/duration-input.md",
@@ -7736,11 +7746,11 @@
         "docs/contracts/components/pagination-summary.md",
         "docs/contracts/components/pagination.md",
         "docs/contracts/components/pill.md",
-        "docs/contracts/components/radio.md",
         "docs/contracts/components/selection-summary.md",
         "docs/contracts/components/table.md",
         "docs/contracts/components/time-input.md",
         "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/toggle-group.md",
         "docs/contracts/components/tool-call-group.md",
         "docs/contracts/components/tri-state-switch.md"
       ]

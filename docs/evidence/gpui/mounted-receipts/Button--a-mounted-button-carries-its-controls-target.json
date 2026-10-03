@@ -7,6 +7,9 @@
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus",
     "accessibility"
   ],
   "signals": {
@@ -14,7 +17,21 @@
       "assert",
       "production-mount"
     ],
+    "events": [
+      "counting_handler",
+      "assert_eq!(\n            *activations.lock().expect(\"activation count\"),\n            2,\n            \"one pointer press produces one Button callback",
+      "assert_eq!(\n            *activations.lock().expect(\"activation count\"),\n            1,\n            \"one Enter produces one Button callback"
+    ],
+    "pointer": [
+      "pointer_activate"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "keyboard_"
+    ],
     "accessibility": [
+      "NodeRole",
       "a11y."
     ]
   },
@@ -28,18 +45,21 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "e53288c68a5dee112f1b3618d221d1a3372c4915",
+  "source_commit": "36ac229b5ee800a7c62c0a3733893f7053473dc3",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-03-poodle-077-review-5403099469",
+    "run_id": "2026-10-03-poodle-076-radio-geometry-review",
     "outcome": "passed",
-    "body_sha256": "3e8f73c0709cb298d457a3f15c4e5f53bad0920007fcd9c02b1fb8a0cf7c9fc4"
+    "body_sha256": "708147f3b0997417d840b568b7b40767c8eacd3c5d983b0f3b1d84397eb44b2c"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree"
   ],
   "outcome": "passed"

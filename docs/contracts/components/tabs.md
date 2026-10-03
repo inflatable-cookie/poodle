@@ -62,7 +62,8 @@ Updated: 2026-09-10
 | `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `none` draws no **selection** fill (the variant's idle surface, edge, and selected text colour remain — `block` + `activeFill="none"` + `activeEdge="underline"` is exactly the deleted `strip` variant), `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 | `bordered` | `boolean` | `false` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. `card` is a plain baseline by default — `bordered` for tabs above content, `activeEdge`/`activeFill` for selection emphasis. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
-| `layout` | `"auto" \| "fill"` | `"auto"` | no | fill-layout seam. `"fill"` makes the root take its container's block size (`height: 100%`) and the active panel scroll within it while the strip keeps its natural height; `"auto"` keeps the natural-height grid. Orientation-independent — vertical fill stretches a single row instead. `fill` requires a sized container: in a parent without a definite block size it renders the auto grid at natural height |
+| `layout` | `"auto" \| "fill"` | `"auto"` | no | fill-layout seam. `"fill"` fills an allocated flex or grid child area, including when the parent has no explicit block size; the strip keeps its natural height and `panelScroll` chooses the scroll owner. `"auto"` keeps the natural-height grid. Orientation-independent — vertical fill stretches a single row instead |
+| `panelScroll` | `"panel" \| "content"` | `"panel"` | no | for `layout="fill"`, chooses whether the Tabs panel scrolls (`"panel"`) or leaves scrolling to a consumer-owned element inside the panel (`"content"`). Ignored by `layout="auto"` |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
@@ -92,6 +93,10 @@ and the source-free packed-consumer fixture must observe the same one-time
 `focusOnValueChange` is web-only and is deliberately absent from `TabsSpec`.
 Capture and transfer are DOM adapter effects; this bounded consumer unblock
 does not add a GPUI or Jetstream focus promise.
+
+`panelScroll` is web-only and is deliberately absent from `TabsSpec`. It
+selects CSS overflow ownership for the web panel; native renderers do not use a
+DOM panel overflow box and have no admitted native scroll-owner input yet.
 
 The old DOM-shaped `onDragPrepare`, `onDragStart`, and `onDragEnd` escape
 hatches are deleted by g16.026. `crossWindowSourceBridge` owns asynchronous host
@@ -428,11 +433,12 @@ the spec.
 
 ### Sizing
 
-- Root: `display: grid`, `gap: space-stack-md`, `min-width: 0`
+- Root: `display: grid`, `gap: var(--poodle-tabs-gap)`, `min-width: 0`
 - Vertical: `grid-template-columns: auto minmax(0, 1fr)`, `align-items: start`
-- Fill (`layout="fill"`): root `height: 100%`, `grid-template-rows: auto minmax(0, 1fr)`; panel `min-height: 0`, `overflow: auto`
+- Fill (`layout="fill"`): root `height: 100%`, can grow as a flex child, and can shrink within flex or grid tracks; `grid-template-rows: auto minmax(0, 1fr)`
+- Fill scroll owner: `panelScroll="panel"` makes the panel `min-height: 0; overflow: auto`; `panelScroll="content"` leaves panel overflow visible so a consumer-owned element in the panel can scroll
 - Fill vertical: root `grid-template-rows: minmax(0, 1fr)`; panel `align-self: stretch`; the strip stays at its natural height
-- `fill` requires a sized container — the root sizes to the container's block size, so an unsized parent renders the auto grid
+- `fill` uses the available flex or grid allocation; `min-height: 0` lets the Tabs root and panel shrink into that area without requiring an explicit parent block size
 - List: `display: inline-flex`, `flex-wrap: wrap` (card), `flex-wrap: nowrap` (pill/block)
 - Pill/Block overflow: `overflow-x: auto; overflow-y: hidden`
 - Item: `display: inline-flex`, `align-items: center`, `min-width: 0`, `position: relative`
@@ -454,7 +460,7 @@ the spec.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--poodle-space-stack-md)` |
+| `gap` | `var(--poodle-tabs-gap)` |
 | `min-width` | `0` |
 
 ### Root (vertical orientation)
@@ -468,7 +474,9 @@ the spec.
 
 | Property | Value |
 |----------|-------|
-| `height` | `100%` |
+| `height` | `100%` when the parent block size is definite |
+| `flex` | `1 1 auto` |
+| `min-height` | `0` |
 | `grid-template-rows` | `auto minmax(0, 1fr)` |
 
 ### Root (layout="fill", vertical)
@@ -477,13 +485,21 @@ the spec.
 |----------|-------|
 | `grid-template-rows` | `minmax(0, 1fr)` |
 
-### Panel (layout="fill")
+### Panel (layout="fill", `panelScroll="panel"`)
 
 | Property | Value |
 |----------|-------|
 | `min-height` | `0` |
 | `overflow` | `auto` |
 | `align-self` | `stretch` (vertical orientation only) |
+
+### Panel (layout="fill", `panelScroll="content"`)
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0` |
+| `overflow` | `visible` |
+| Scroll owner | consumer-owned content inside the panel |
 
 ### List (all variants)
 
@@ -493,13 +509,15 @@ the spec.
 | `flex-wrap` | `wrap` |
 | `align-items` | `stretch` |
 | `gap` | `0.25rem` |
+| `padding` | `var(--poodle-tabs-list-padding)`; defaults to `0` |
+| `background` | `var(--poodle-tabs-list-background)`; transparent except Block's existing surface |
 
 ### List — Card variant
 
 | Property | Value |
 |----------|-------|
-| `padding-bottom` | `0.25rem` |
-| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
+| `padding-bottom` | `var(--poodle-space-inline-sm)` |
+| `border-bottom` | `var(--poodle-tabs-list-border)` |
 
 When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 
@@ -509,9 +527,22 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 |----------|-------|
 | `flex-direction` | `column` |
 | `padding-bottom` | `0` |
-| `padding-right` | `0.5rem` |
+| `padding-right` | `var(--poodle-space-inline-sm)` |
 | `border-bottom` | `0` |
-| `border-right` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
+| `border-right` | `var(--poodle-tabs-list-border)` |
+
+### Root and list chrome tokens
+
+These component tokens are emitted from the token schema. Set them on the
+`.poodle-tabs` root; list tokens can also be set directly on
+`.poodle-tabs__list`. Defaults preserve the current chrome.
+
+| Token | Default | Used for |
+|-------|---------|----------|
+| `--poodle-tabs-gap` | `var(--poodle-space-stack-md)` | Root gap between list and panel |
+| `--poodle-tabs-list-padding` | `0` | Additional list padding; existing card border clearance remains variant-owned |
+| `--poodle-tabs-list-background` | `color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)` | Block list background; the existing recipe override still takes precedence |
+| `--poodle-tabs-list-border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` | List border style; Block keeps its historical solid subtle border |
 
 ### List — Pill + Block
 

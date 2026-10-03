@@ -1,18 +1,18 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-10-03-poodle-077-review-5403099469",
-  "source_commit": "e53288c68a5dee112f1b3618d221d1a3372c4915",
+  "run_id": "2026-10-03-poodle-076-radio-geometry-review",
+  "source_commit": "36ac229b5ee800a7c62c0a3733893f7053473dc3",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
     "a_mounted_button_carries_its_controls_target": {
       "outcome": "passed",
-      "body_sha256": "3e8f73c0709cb298d457a3f15c4e5f53bad0920007fcd9c02b1fb8a0cf7c9fc4"
+      "body_sha256": "708147f3b0997417d840b568b7b40767c8eacd3c5d983b0f3b1d84397eb44b2c"
     },
     "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec": {
       "outcome": "passed",
-      "body_sha256": "2b27eaf05b337f01539155ca1b29d67bd14f8446969262ffa8ec114c62dfdb4a"
+      "body_sha256": "906ac4b73bf343e60dd3d238fdb52a1bc087353e0e3458091651d9cc9866de19"
     },
     "switch_toggle_readonly_and_disabled_rebuild_the_host_spec": {
       "outcome": "passed",
@@ -28,7 +28,7 @@
     },
     "toggle_group_result_focus_identity_and_disabled_paths": {
       "outcome": "passed",
-      "body_sha256": "658292673d496a48e3a078bbfa3cf440ce9ec797c7ee90e67bdca667737dd207"
+      "body_sha256": "5a13a3bdcc9862c5a6e44ebfd8f64be8492a80e55f06c61de302224b2fe27fb0"
     },
     "a_scrub_reports_change_while_dragging_and_commits_once_at_release": {
       "outcome": "passed",
@@ -152,7 +152,7 @@
     },
     "accordion_result_disclosure_focus_identity_and_disabled_paths": {
       "outcome": "passed",
-      "body_sha256": "10f0c46d2d2b129f011111a9ec20d074b4ddb4472e5b5b54a9ad1e0b407bd186"
+      "body_sha256": "19f0e5a8562ba0a9a79bf1a92b11f8c486678c4ac0f2f2c4098abee12e842b6c"
     },
     "tri_state_switch_value_focus_identity_and_disabled_paths": {
       "outcome": "passed",
@@ -208,7 +208,7 @@
     },
     "radio_selects_on_activate_and_does_not_uncheck_itself": {
       "outcome": "passed",
-      "body_sha256": "678c362bd33721a72b02791cdc207da660e4b60f01fd60bf908054ed4f6ba4b4"
+      "body_sha256": "16b95e2bbfedba512b6a20e7b88b2eca55546a832e8a830d68a6f001cc4e7763"
     },
     "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds": {
       "outcome": "passed",

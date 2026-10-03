@@ -108,10 +108,11 @@
     {
       "substrate": "selection-navigation",
       "components": [
+        "Accordion",
         "AudioPlayer",
         "BulkActionBar",
-        "Button",
         "ChangedFiles",
+        "Checkbox",
         "CodeInput",
         "CollapseToggle",
         "DurationInput",
@@ -122,27 +123,28 @@
         "Pagination",
         "PaginationSummary",
         "Pill",
-        "Radio",
         "SelectionSummary",
         "Table",
         "TimeInput",
         "TimeZoneSelect",
+        "ToggleGroup",
         "ToolCallGroup",
         "TriStateSwitch"
       ],
       "missingTally": {
         "semantic": 10,
-        "events": 14,
-        "pointer": 15,
-        "keyboard_focus": 10,
+        "events": 12,
+        "pointer": 14,
+        "keyboard_focus": 9,
         "accessibility": 17,
-        "visual": 20
+        "visual": 22
       },
       "contracts": [
+        "docs/contracts/components/accordion.md",
         "docs/contracts/components/audio-player.md",
         "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/button.md",
         "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/checkbox.md",
         "docs/contracts/components/code-input.md",
         "docs/contracts/components/collapse-toggle.md",
         "docs/contracts/components/duration-input.md",
@@ -153,11 +155,11 @@
         "docs/contracts/components/pagination-summary.md",
         "docs/contracts/components/pagination.md",
         "docs/contracts/components/pill.md",
-        "docs/contracts/components/radio.md",
         "docs/contracts/components/selection-summary.md",
         "docs/contracts/components/table.md",
         "docs/contracts/components/time-input.md",
         "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/toggle-group.md",
         "docs/contracts/components/tool-call-group.md",
         "docs/contracts/components/tri-state-switch.md"
       ]

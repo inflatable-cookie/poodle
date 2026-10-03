@@ -143,6 +143,8 @@ export const WEB_ONLY: Record<string, Record<string, string>> = {
   tabs: {
     focusOnValueChange:
       "g16.060: controlled-panel focus transfer is a DOM adapter effect; native has no panel-unmount capture here",
+    panelScroll:
+      "web-only scroll ownership is CSS overflow on the DOM panel; GPUI/Jetstream have no DOM panel scroll container",
   },
 };
 
