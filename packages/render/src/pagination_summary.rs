@@ -2,7 +2,7 @@
 //!
 //! Ported from: `packages/jetstream/components/src/pagination_summary.rs`.
 
-use poodle_node::Node;
+use poodle_node::{Node, NodeRole};
 use poodle_specs::PaginationSummarySpec;
 
 use crate::context::RenderContext;
@@ -15,5 +15,7 @@ pub fn pagination_summary(spec: &PaginationSummarySpec, ctx: &RenderContext<'_>)
     let mut label = Node::text(spec.summary_text());
     label.style.descriptor.text_color = Some(text_color);
     label.style.text_size = Some(font_size);
+    label.a11y.role = Some(NodeRole::Status);
+    label.a11y.label = Some(spec.accessible_label());
     label
 }
