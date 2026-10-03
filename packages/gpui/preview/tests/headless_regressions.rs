@@ -11787,6 +11787,8 @@ fn two_model_connection_pickers_do_not_share_backend_focus_handles() {
 
 /// Radio selects on activate and never unchecks itself. Group exclusivity is
 /// host-owned on native; this case is the single-option control, not RadioGroup.
+/// Expected icon and indicator sizes are literal Svelte CSS values so a broken
+/// GPUI resolver cannot prove itself.
 #[test]
 fn radio_selects_on_activate_and_does_not_uncheck_itself() {
     use poodle_node::NodeToggled;
@@ -11799,14 +11801,14 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
         let theme_provider = theme();
         let ctx = RenderContext::new(&theme_provider);
         let cases = [
-            (ControlSize::Xs, "xs", "size.icon.xs", 0.25),
-            (ControlSize::Sm, "sm", "size.icon.sm", 0.25),
-            (ControlSize::Md, "md", "size.icon.md", 0.125),
-            (ControlSize::Lg, "lg", "size.icon.lg", 0.125),
-            (ControlSize::Xl, "xl", "size.icon.xl", 0.125),
+            (ControlSize::Xs, "xs", "size.icon.xs", 0.625, 0.875),
+            (ControlSize::Sm, "sm", "size.icon.sm", 0.75, 1.0),
+            (ControlSize::Md, "md", "size.icon.md", 1.0, 1.125),
+            (ControlSize::Lg, "lg", "size.icon.lg", 1.25, 1.375),
+            (ControlSize::Xl, "xl", "size.icon.xl", 1.5, 1.625),
         ];
         let mut node = Node::container();
-        for &(size, suffix, _, _) in &cases {
+        for &(size, suffix, _, _, _) in &cases {
             let sink = Arc::clone(&selected);
             let mut radio = poodle_render::radio(
                 &RadioSpec::new()
@@ -11829,7 +11831,7 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
         driver.wait_for_focus_handle("headless-radio-xs");
         let accessibility = driver.accessibility_nodes();
         assert_eq!(accessibility.len(), cases.len());
-        for &(_, suffix, icon_token, offset_rem) in &cases {
+        for &(_, suffix, icon_token, expected_icon_rem, expected_indicator_rem) in &cases {
             let radio_id = format!("headless-radio-{suffix}");
             let label = format!("Standard shipping {suffix}");
             let radio = accessibility
@@ -11846,7 +11848,13 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
                 .find(&|candidate| candidate.id.as_deref() == Some(radio_id.as_str()))
                 .expect("production Radio node remains in the mounted tree");
             let indicator = &rendered_radio.children[0];
-            let expected_indicator = ctx.theme().resolve_space(icon_token) + rem_to_px(offset_rem);
+            let expected_icon = rem_to_px(expected_icon_rem);
+            assert_eq!(
+                ctx.theme().resolve_space(icon_token),
+                expected_icon,
+                "{suffix} icon token matches its Svelte CSS primitive",
+            );
+            let expected_indicator = rem_to_px(expected_indicator_rem);
             let expected_border = ctx.theme().resolve_color("color.border.default");
             let expected_surface = ctx.theme().resolve_color("color.background.surface");
             assert_eq!(

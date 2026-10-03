@@ -252,9 +252,11 @@ impl GpuiThemeProvider {
             "space.button.iconInset" => typed::semantic::SPACE_BUTTON_ICON_INSET.as_f32(),
             "size.control.height" => typed::semantic::SIZE_CONTROL_HEIGHT.as_f32(),
             "size.control.minWidth" => typed::semantic::SIZE_CONTROL_MIN_WIDTH.as_f32(),
+            "size.icon.xs" => typed::semantic::SIZE_ICON_XS.as_f32(),
             "size.icon.sm" => typed::semantic::SIZE_ICON_SM.as_f32(),
             "size.icon.md" => typed::semantic::SIZE_ICON_MD.as_f32(),
             "size.icon.lg" => typed::semantic::SIZE_ICON_LG.as_f32(),
+            "size.icon.xl" => typed::semantic::SIZE_ICON_XL.as_f32(),
             "size.panel.header" => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
             "size.list.grid.minItemWidth" => {
                 typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.as_f32()
@@ -391,6 +393,20 @@ mod tests {
         let space = theme.resolve_space(semantic::SPACE_STACK_MD);
         // 0.75rem = 12px
         assert_eq!(space, 12.0);
+    }
+
+    #[test]
+    fn resolves_every_icon_size_token() {
+        let theme = GpuiThemeProvider::default();
+        for (token, expected_px) in [
+            (semantic::SIZE_ICON_XS, 10.0),
+            (semantic::SIZE_ICON_SM, 12.0),
+            (semantic::SIZE_ICON_MD, 16.0),
+            (semantic::SIZE_ICON_LG, 20.0),
+            (semantic::SIZE_ICON_XL, 24.0),
+        ] {
+            assert_eq!(theme.resolve_space(token), expected_px, "{token}");
+        }
     }
 
     #[test]
