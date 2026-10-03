@@ -25613,14 +25613,14 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
             let visual_theme = theme();
             assert_eq!(
                 enabled.style.descriptor.corner_radii.top_left,
-                visual_theme.resolve_radius("radius.control")
+                visual_theme.resolve_radius(CollapseToggleSpec::new().radius_token())
             );
             let chevron = enabled
                 .find(&|child| matches!(&child.kind, NodeKind::Icon { .. }))
                 .expect("painted chevron");
             assert_eq!(
                 chevron.style.descriptor.text_color,
-                Some(visual_theme.resolve_color("color.text.primary"))
+                Some(visual_theme.resolve_color("color.text.secondary"))
             );
 
             let labeled = target(&root, "ct-labeled");
