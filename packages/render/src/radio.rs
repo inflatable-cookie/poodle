@@ -19,23 +19,20 @@ use crate::color::hex_color;
 use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_font_rem};
 
-fn indicator_size_px(size: ControlSize, icon_md_px: f32) -> f32 {
+fn indicator_size_px(size: ControlSize, icon_px: f32) -> f32 {
     match size {
-        ControlSize::Xs => icon_md_px - rem_to_px(0.125),
-        ControlSize::Sm => icon_md_px,
-        ControlSize::Md => rem_to_px(1.125),
-        ControlSize::Lg => icon_md_px + rem_to_px(0.375),
-        ControlSize::Xl => icon_md_px + rem_to_px(0.625),
+        ControlSize::Xs | ControlSize::Sm => icon_px + rem_to_px(0.25),
+        ControlSize::Md | ControlSize::Lg | ControlSize::Xl => icon_px + rem_to_px(0.125),
     }
 }
 
-fn dot_size_px(size: ControlSize, icon_md_px: f32) -> f32 {
+fn dot_size_px(size: ControlSize) -> f32 {
     match size {
-        ControlSize::Xs => icon_md_px * 0.40,
-        ControlSize::Sm => icon_md_px * 0.45,
+        ControlSize::Xs => rem_to_px(0.4),
+        ControlSize::Sm => rem_to_px(0.45),
         ControlSize::Md => rem_to_px(0.5),
-        ControlSize::Lg => icon_md_px * 0.55,
-        ControlSize::Xl => icon_md_px * 0.60,
+        ControlSize::Lg => rem_to_px(0.55),
+        ControlSize::Xl => rem_to_px(0.6),
     }
 }
 
@@ -61,9 +58,16 @@ pub fn radio(
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_md = ctx.theme().resolve_space("size.icon.md");
-    let indicator_size = indicator_size_px(effective_size, icon_md);
-    let dot_size = dot_size_px(effective_size, icon_md);
+    let icon_token = match effective_size {
+        ControlSize::Xs => "size.icon.xs",
+        ControlSize::Sm => "size.icon.sm",
+        ControlSize::Md => "size.icon.md",
+        ControlSize::Lg => "size.icon.lg",
+        ControlSize::Xl => "size.icon.xl",
+    };
+    let icon_size = ctx.theme().resolve_space(icon_token);
+    let indicator_size = indicator_size_px(effective_size, icon_size);
+    let dot_size = dot_size_px(effective_size);
     let border_width = rem_to_px(0.0625);
     let item_gap = match density {
         ControlDensity::Compact => rem_to_px(0.375),
