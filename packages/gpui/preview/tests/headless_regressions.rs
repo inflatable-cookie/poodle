@@ -16618,9 +16618,8 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
 
         // Visual: tabs resolve the accent token and paint real geometry.
         {
-            let tab_geometry =
-                poodle_gpui_node_backend::bounds_for("dock-tab-search")
-                    .expect("mounted tab geometry");
+            let tab_geometry = poodle_gpui_node_backend::bounds_for("dock-tab-search")
+                .expect("mounted tab geometry");
             assert!(f32::from(tab_geometry.size.width) > 0.0);
             assert!(f32::from(tab_geometry.size.height) > 0.0);
             assert!(theme().resolve_color("color.accent.base").3 > 0.0);
@@ -49487,10 +49486,7 @@ fn first_mounted_parity_separator() {
     let ctx = RenderContext::new(&theme_provider);
 
     // Witness: semantic versus decorative, matching Svelte's split.
-    let semantic = poodle_render::separator(
-        &SeparatorSpec::new().with_decorative(false),
-        &ctx,
-    );
+    let semantic = poodle_render::separator(&SeparatorSpec::new().with_decorative(false), &ctx);
     assert_eq!(semantic.a11y.role, Some(NodeRole::Splitter));
     assert_eq!(semantic.a11y.orientation.as_deref(), Some("horizontal"));
     assert!(
@@ -49557,9 +49553,7 @@ fn first_mounted_parity_separator() {
         after.id = Some("sep-after".to_owned());
         let mut column = Node::container();
         column.style.descriptor.layout.direction = LayoutDirection::Column;
-        let node = Arc::new(Mutex::new(
-            column.child(before).child(rule).child(after),
-        ));
+        let node = Arc::new(Mutex::new(column.child(before).child(rule).child(after)));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 120.0);
 
         // Keyboard: the rule is never a tab stop — Tab moves past it and no
@@ -49600,9 +49594,10 @@ fn first_mounted_parity_separator() {
 fn first_mounted_parity_card() {
     // Card is a surface container: variants resolve token fills and borders,
     // the selected state keeps the accent ring, interactive cards take the
-    // pointer cursor and the button face the parity list names, and slot
-    // content owns pointer and keyboard input — the card itself never takes
-    // focus, matching Svelte's article without tab stops.
+    // pointer cursor and hover treatment while keeping their spoken name —
+    // with no role, matching Svelte's article — and slot content owns
+    // pointer and keyboard input. The card itself never takes focus, matching
+    // Svelte's article without tab stops.
     use poodle_adapter::ThemeProvider;
     use poodle_render::presentation::rem_to_px;
     use poodle_specs::{CardLayout, CardSpec};
@@ -49631,13 +49626,15 @@ fn first_mounted_parity_card() {
         LayoutDirection::Row
     );
 
-    // Interactive cards take the button face and keep their spoken name.
+    // Interactive cards keep their spoken name and hover treatment, with no
+    // role — Svelte renders an article in both modes, and the contract
+    // records button semantics as not implemented there.
     let interactive = poodle_render::card(
         &CardSpec::new().interactive().with_aria_label("Learn more"),
         &ctx,
         vec![],
     );
-    assert_eq!(interactive.a11y.role, Some(NodeRole::Button));
+    assert_eq!(interactive.a11y.role, None);
     assert_eq!(interactive.a11y.label.as_deref(), Some("Learn more"));
     assert!(
         interactive.style.hover.is_some(),
@@ -49645,8 +49642,7 @@ fn first_mounted_parity_card() {
     );
 
     // Selected keeps the accent ring; tokens resolve real values.
-    let selected =
-        poodle_render::card(&CardSpec::new().interactive().selected(), &ctx, vec![]);
+    let selected = poodle_render::card(&CardSpec::new().interactive().selected(), &ctx, vec![]);
     let accent = theme_provider.resolve_color("color.accent.base");
     assert!(accent.3 > 0.0);
     assert_eq!(selected.style.descriptor.border.color, accent);
@@ -49700,14 +49696,14 @@ fn first_mounted_parity_card() {
             "keyboard Enter fires the slotted action"
         );
 
-        // Painted: the spoken name and button face reach mounted GPUI with
-        // real geometry.
+        // Painted: the spoken name reaches mounted GPUI with real geometry;
+        // the card carries no role, matching Svelte's article.
         let painted = poodle_gpui_node_backend::painted_node_for("mounted-card")
             .expect("card reached GPUI paint");
-        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_role, None);
         assert_eq!(painted.a11y_label.as_deref(), Some("Learn more"));
-        let geometry = poodle_gpui_node_backend::bounds_for("mounted-card")
-            .expect("mounted card geometry");
+        let geometry =
+            poodle_gpui_node_backend::bounds_for("mounted-card").expect("mounted card geometry");
         assert!(f32::from(geometry.size.width) > 0.0);
         assert!(f32::from(geometry.size.height) > 0.0);
         assert!(driver.mounted_observation().is_valid());

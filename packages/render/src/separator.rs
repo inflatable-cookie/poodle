@@ -17,7 +17,9 @@ pub fn separator(spec: &SeparatorSpec, ctx: &RenderContext<'_>) -> Node {
     // The stroke is a border width, so it resolves through the border-width
     // channel: the space channel has no border tokens and answers 0, which
     // collapsed every rule to zero height on providers without a fallback.
-    let stroke = ctx.theme().resolve_border_width(spec.resolved_stroke_width());
+    let stroke = ctx
+        .theme()
+        .resolve_border_width(spec.resolved_stroke_width());
 
     let mut el = Node::container();
     {
@@ -40,12 +42,10 @@ pub fn separator(spec: &SeparatorSpec, ctx: &RenderContext<'_>) -> Node {
         // The backend projects Splitter as the `separator` ARIA string;
         // the orientation is what tells horizontal from vertical, matching
         // Svelte's `aria-orientation` on the semantic variant.
-        el.a11y.orientation = Some(
-            match spec.orientation {
-                SeparatorOrientation::Horizontal => "horizontal".to_string(),
-                SeparatorOrientation::Vertical => "vertical".to_string(),
-            },
-        );
+        el.a11y.orientation = Some(match spec.orientation {
+            SeparatorOrientation::Horizontal => "horizontal".to_string(),
+            SeparatorOrientation::Vertical => "vertical".to_string(),
+        });
     }
     el
 }
