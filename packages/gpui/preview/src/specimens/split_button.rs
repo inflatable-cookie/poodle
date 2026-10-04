@@ -165,8 +165,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 on_dropdown: None,
                                 on_action: None,
 
-                        ..SplitButtonHandlers::default()
-                    },
+                                ..SplitButtonHandlers::default()
+                            },
                         ))
                         .child(node_split_button(
                             SplitButtonSpec::new()
@@ -183,8 +183,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 on_dropdown: None,
                                 on_action: None,
 
-                        ..SplitButtonHandlers::default()
-                    },
+                                ..SplitButtonHandlers::default()
+                            },
                         ))
                         .child(node_split_button(
                             SplitButtonSpec::new()
@@ -201,8 +201,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 on_dropdown: None,
                                 on_action: None,
 
-                        ..SplitButtonHandlers::default()
-                    },
+                                ..SplitButtonHandlers::default()
+                            },
                         )),
                 ),
         )

@@ -157,7 +157,7 @@ pre-machine component re-fired the callback; recorded delta).
 | `Home` | moves to first enabled item |
 | `End` | moves to last enabled item |
 | `Enter` or `Space` | activates the focused item |
-| `Escape` | closes the menu and restores focus to the invoking target |
+| `Escape` | closes the menu; focus is not restored and stays where it is (Svelte) |
 | `Arrow Right` | on a submenu parent: opens the flyout and focuses its first enabled item |
 | `Arrow Left` | inside a flyout: closes it and restores focus to the parent item |
 | Outside click | any mousedown outside the overlay closes the menu |
@@ -172,13 +172,14 @@ leaf-only activation.
 
 - focus entry: keyboard invocation keeps the invocation target knowable and
   moves active item focus into the menu
-- focus restoration: close returns focus to the invoking target or nearest
-  surviving fallback
+- focus restoration: none. Escape and outside close leave focus where it is
+  (Svelte); only item activation and flyout `Arrow Left` move focus, as
+  contracted above
 - live-region behavior: none; item roles and states must be exposed through
   native menu semantics
 - GPUI-native accessibility mapping notes: GPUI must support both pointer-based
   invocation and keyboard context invocation without dropping accessible origin
-  context or focus restoration
+  context
 
 ## 7. Layout
 
@@ -340,7 +341,7 @@ leaf-only activation.
 - [ ] aria-checked on checkbox/radio items matches
 - [ ] item navigation, activation, and dismissal behavior match
 - [ ] outside click (mousedown outside overlay) closes the menu
-- [ ] focus restoration to the invocation target matches
+- [ ] close leaves focus where it is (no restoration) matches
 - [ ] openChange and action event semantics match
 
 ### Tier 2: Visual Parity

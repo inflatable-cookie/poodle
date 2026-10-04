@@ -65,7 +65,11 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         // Default `true`: the composed menu surface stays marker-free.
-        let node = context_menu(&ContextMenuSpec::default(), &ctx, ContextMenuHandlers::default());
+        let node = context_menu(
+            &ContextMenuSpec::default(),
+            &ctx,
+            ContextMenuHandlers::default(),
+        );
         assert!(node.interaction.on_activate.is_none());
 
         // ContextMenu's own refusal wins over the composed MenuSpec default

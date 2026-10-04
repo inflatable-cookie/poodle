@@ -1224,24 +1224,23 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
     }
     if let Some(handler) = &node.interaction.on_key_activate {
         let activate = handler.clone();
-        el = el
-            .on_key_down(move |event: &KeyDownEvent, window, cx| {
-                let key = event.keystroke.key.as_str();
-                let m = &event.keystroke.modifiers;
-                if matches!(key, "enter" | "space")
-                    && !event.is_held
-                    && !(m.platform || m.control || m.alt || m.shift)
-                {
-                    KEY_ACTIVATED.with(|keys| keys.borrow_mut().insert(key.to_owned()));
-                    if let Some(target) = activate() {
-                        if let Some(handle) = focus_handle_for(&target) {
-                            handle.focus(window);
-                        }
+        el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
+            let key = event.keystroke.key.as_str();
+            let m = &event.keystroke.modifiers;
+            if matches!(key, "enter" | "space")
+                && !event.is_held
+                && !(m.platform || m.control || m.alt || m.shift)
+            {
+                KEY_ACTIVATED.with(|keys| keys.borrow_mut().insert(key.to_owned()));
+                if let Some(target) = activate() {
+                    if let Some(handle) = focus_handle_for(&target) {
+                        handle.focus(window);
                     }
-                    cx.stop_propagation();
-                    cx.refresh_windows();
                 }
-            });
+                cx.stop_propagation();
+                cx.refresh_windows();
+            }
+        });
     }
     if let Some(handler) = &node.interaction.on_key {
         let keys = handler.clone();

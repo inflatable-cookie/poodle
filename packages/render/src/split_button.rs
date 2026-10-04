@@ -358,19 +358,17 @@ pub fn split_button(
             let key_dropdown = handlers.on_dropdown.clone();
             let was_open = spec.is_open;
             let first_item = first_item_id.clone();
-            toggle.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
-                match key {
-                    NodeKey::ArrowDown => {
-                        if was_open {
-                            return first_item.clone();
-                        }
-                        if let Some(dropdown) = &key_dropdown {
-                            dropdown();
-                        }
-                        None
+            toggle.interaction.on_key = Some(Arc::new(move |key, _modifiers| match key {
+                NodeKey::ArrowDown => {
+                    if was_open {
+                        return first_item.clone();
                     }
-                    _ => None,
+                    if let Some(dropdown) = &key_dropdown {
+                        dropdown();
+                    }
+                    None
                 }
+                _ => None,
             }));
         }
 

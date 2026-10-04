@@ -47,7 +47,12 @@ pub struct MenubarHandlers {
 /// Focus target for one arrow step across triggers, or `None` when the
 /// step goes nowhere (single enabled trigger). Wrapping skip-disabled
 /// matches Svelte's `findNextEnabledIndex`/`firstEnabledIndex` pair.
-fn roving_target(disabled: &[bool], ids: &[String], idx: usize, mv: MenuListMove) -> Option<String> {
+fn roving_target(
+    disabled: &[bool],
+    ids: &[String],
+    idx: usize,
+    mv: MenuListMove,
+) -> Option<String> {
     let next = menu_list_navigate(disabled, idx, mv);
     if next == idx {
         return None;
@@ -146,8 +151,7 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
     // Trigger focus roving (Svelte moves focus only on arrows; opening is
     // a host transition below). Disabled triggers are skipped with
     // wrapping, through the shared menu-list machinery.
-    let trigger_disabled: Vec<bool> =
-        spec.items.iter().map(|entry| entry.is_disabled).collect();
+    let trigger_disabled: Vec<bool> = spec.items.iter().map(|entry| entry.is_disabled).collect();
     let trigger_ids: Vec<String> = spec
         .items
         .iter()
@@ -249,12 +253,8 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
                         NodeKey::ArrowLeft => {
                             roving_target(&siblings, &ids, idx, MenuListMove::Prev)
                         }
-                        NodeKey::Home => {
-                            roving_target(&siblings, &ids, idx, MenuListMove::First)
-                        }
-                        NodeKey::End => {
-                            roving_target(&siblings, &ids, idx, MenuListMove::Last)
-                        }
+                        NodeKey::Home => roving_target(&siblings, &ids, idx, MenuListMove::First),
+                        NodeKey::End => roving_target(&siblings, &ids, idx, MenuListMove::Last),
                         NodeKey::ArrowDown => {
                             // Svelte opens the focused trigger's menu: a
                             // no-op when this menu is already open, an

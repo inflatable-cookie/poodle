@@ -19,7 +19,12 @@ use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
 /// Focus target for one arrow step across triggers, or `None` when the
 /// step goes nowhere (single enabled trigger). Wrapping skip-disabled
 /// matches Svelte's `findNextEnabledIndex`/`firstEnabledIndex` pair.
-fn roving_target(disabled: &[bool], ids: &[String], idx: usize, mv: MenuListMove) -> Option<String> {
+fn roving_target(
+    disabled: &[bool],
+    ids: &[String],
+    idx: usize,
+    mv: MenuListMove,
+) -> Option<String> {
     let next = menu_list_navigate(disabled, idx, mv);
     if next == idx {
         return None;
@@ -246,10 +251,7 @@ pub fn navigation_menu(
         btn.id = Some(trigger_id.clone());
         btn.a11y.expanded = Some(is_active);
         if is_active {
-            btn.a11y.controls = Some(format!(
-                "navigation-menu-panel:{}",
-                entry.value
-            ));
+            btn.a11y.controls = Some(format!("navigation-menu-panel:{}", entry.value));
         }
         btn.a11y.tab_index = Some(if Some(idx) == focus_idx { 0 } else { -1 });
         btn.interaction.focusable = true;
@@ -279,12 +281,8 @@ pub fn navigation_menu(
                         NodeKey::ArrowLeft => {
                             roving_target(&siblings, &ids, idx, MenuListMove::Prev)
                         }
-                        NodeKey::Home => {
-                            roving_target(&siblings, &ids, idx, MenuListMove::First)
-                        }
-                        NodeKey::End => {
-                            roving_target(&siblings, &ids, idx, MenuListMove::Last)
-                        }
+                        NodeKey::Home => roving_target(&siblings, &ids, idx, MenuListMove::First),
+                        NodeKey::End => roving_target(&siblings, &ids, idx, MenuListMove::Last),
                         NodeKey::ArrowDown => {
                             // Svelte opens the focused trigger's viewport:
                             // a no-op when this entry is already active, an
@@ -379,10 +377,7 @@ pub fn navigation_menu(
         // Svelte viewport identity: the active trigger labels it via
         // `aria-labelledby`, and the trigger's `aria-controls` targets it.
         viewport.id = Some(format!("navigation-menu-panel:{}", active_item.value));
-        viewport.a11y.labelled_by = Some(format!(
-            "navigation-menu-trigger:{}",
-            active_item.value
-        ));
+        viewport.a11y.labelled_by = Some(format!("navigation-menu-trigger:{}", active_item.value));
         {
             let s = &mut viewport.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
