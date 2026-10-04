@@ -48949,6 +48949,7 @@ fn toast_stack_action_removal_hands_focus_on_or_leaves_it_alone() {
                 .with_message("In flight.")
                 .with_action_label("Retry"),
             Toast::new("other", "Syncing").with_message("Working."),
+            Toast::new("end", "Done").with_message("All clear."),
         ],
     }));
 
@@ -49040,6 +49041,39 @@ fn toast_stack_action_removal_hands_focus_on_or_leaves_it_alone() {
             poodle_gpui_node_backend::focus_state_for("outside-button"),
             Some(true),
             "removal after focus left the action moves nothing"
+        );
+
+        // Removing the whole row while its action owns focus still hands
+        // focus on: the next surviving row's dismiss control, found from the
+        // removed row's position in the pre-removal order.
+        host.lock().expect("action host").toasts[1].action_label = Some("Retry".to_owned());
+        driver.draw_frame();
+        driver.wait_for_focus_handle("toast-host:action:toast:other:action");
+        driver.focus_element("toast-host:action:toast:other:action");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:action:toast:other:action"),
+            Some(true)
+        );
+        host.lock()
+            .expect("action host")
+            .toasts
+            .retain(|toast| toast.id != "other");
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:action:toast:other")
+                .expect("removed row paints as a remnant")
+                .roles
+                .get("phase")
+                .map(String::as_str),
+            Some("exit"),
+            "the removed row survives only as an inert remnant"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:action:toast:end:dismiss"),
+            Some(true),
+            "the removed row's focused action hands focus to the next surviving row"
         );
         // Exercise real pointer dispatch too, then prove the harness observed
         // both paint and input.
