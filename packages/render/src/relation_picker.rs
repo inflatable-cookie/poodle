@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node,
+    Node, NodeRole, NodeToggled, StylePatch,
 };
 use poodle_specs::{
     BrowseState, ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlSize,
@@ -25,6 +25,7 @@ use crate::button::button;
 use crate::checkbox::checkbox;
 use crate::color::{mix_srgb, TRANSPARENT};
 use crate::context::RenderContext;
+use crate::menu::roving_key_handler;
 use crate::picker_shell::picker_shell;
 use crate::presentation::{
     control_space_x_rem, relation_picker_desc_size_rem, relation_picker_item_gap_rem,
@@ -33,7 +34,7 @@ use crate::presentation::{
 };
 use crate::select::{select, SelectHandlers};
 use crate::selection_summary::{selection_summary, SelectionSummaryHandlers};
-use crate::text_input::text_input;
+use crate::text_input::{text_input_with_handlers, TextInputHandlers};
 
 /// Candidate / drill copy strong label weight (Svelte `strong { font-weight: 500 }`).
 const LABEL_WEIGHT: u16 = 500;
@@ -171,6 +172,14 @@ pub fn relation_picker(
                 )));
             } else {
                 let mut list = Node::container();
+                list.a11y.role = Some(NodeRole::List);
+                list.a11y.label = Some(
+                    spec.drill_down
+                        .as_ref()
+                        .and_then(|dd| dd.next_level(&spec.drill_down_path))
+                        .map(|level| level.label.clone())
+                        .unwrap_or_else(|| "Items".to_string()),
+                );
                 list.style.descriptor.layout.direction = LayoutDirection::Column;
                 list.style.descriptor.layout.spacing.gap = list_gap;
                 let mut list = list;
@@ -198,10 +207,18 @@ pub fn relation_picker(
             }
         } else {
             let mut list = Node::container();
+            list.a11y.role = Some(NodeRole::List);
+            list.a11y.label = Some("Available candidates".to_string());
             list.style.descriptor.layout.direction = LayoutDirection::Column;
             list.style.descriptor.layout.spacing.gap = list_gap;
             let mut list = list;
-            for item in spec.current_items() {
+            let candidates = spec.current_items();
+            let candidate_ids: Vec<String> = candidates
+                .iter()
+                .map(|item| format!("{}:candidate:{}", handlers.instance_id, item.id))
+                .collect();
+            let candidate_disabled = vec![false; candidates.len()];
+            for (index, item) in candidates.into_iter().enumerate() {
                 let is_selected = spec
                     .selected_ids
                     .iter()
@@ -224,6 +241,12 @@ pub fn relation_picker(
                     desc_font,
                     spec,
                 );
+                // Contract §6: candidates are `aria-pressed` buttons named by
+                // their label, and arrows rove between them.
+                row.id = Some(candidate_ids[index].clone());
+                row.runtime_id = Some(candidate_ids[index].clone());
+                row.interaction.on_key =
+                    roving_key_handler(&candidate_disabled, &candidate_ids, index);
                 if let Some(handler) = &handlers.on_select {
                     let handler = Arc::clone(handler);
                     let id = item.id.clone();
@@ -343,6 +366,7 @@ fn build_search(
             back.style.descriptor.text_color = Some(text_secondary);
             back.style.text_size = Some(label_size);
             back.interaction.focusable = true;
+            back.a11y.label = Some("Go back".to_string());
             if let Some(handler) = &handlers.on_breadcrumb_click {
                 let handler = Arc::clone(handler);
                 let depth = spec.drill_down_path.len().saturating_sub(1);
@@ -403,7 +427,26 @@ fn build_search(
     if !spec.query.is_empty() {
         search_spec = search_spec.with_value(spec.query.clone());
     }
-    col = col.child(text_input(&search_spec, ctx, None));
+    // Contract §6: Escape during drill-down goes back one level.
+    let on_cancel: Option<Arc<dyn Fn() + Send + Sync>> =
+        match (&handlers.on_breadcrumb_click, spec.drill_down_path.len()) {
+            (Some(handler), depth) if depth > 0 => {
+                let handler = Arc::clone(handler);
+                Some(Arc::new(move || handler(depth - 1)))
+            }
+            _ => None,
+        };
+    let mut search_node = text_input_with_handlers(
+        &search_spec,
+        ctx,
+        TextInputHandlers {
+            on_cancel,
+            ..TextInputHandlers::default()
+        },
+    );
+    // Contract §6: the search field receives initial focus.
+    search_node.a11y.initial_focus = true;
+    col = col.child(search_node);
 
     // Toolbar filter controls — one labeled Select per `filters` entry.
     if !spec.filters.is_empty() {
@@ -475,6 +518,8 @@ fn drill_row(
     }
     all_radius(&mut row, radius);
     row.interaction.focusable = true;
+    row.a11y.role = Some(NodeRole::Button);
+    row.a11y.label = Some(item.label.clone());
 
     let mut copy = Node::container();
     copy.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -559,6 +604,20 @@ fn candidate_row(
     }
     all_radius(&mut row, radius);
     row.interaction.focusable = true;
+    // Contract §6: an `aria-pressed` button named by its label.
+    row.style.focus = Some(StylePatch {
+        background: None,
+        border_color: Some(accent),
+        text_color: None,
+        opacity: None,
+    });
+    row.a11y.role = Some(NodeRole::Button);
+    row.a11y.label = Some(item.label.clone());
+    row.a11y.toggled = Some(if is_selected {
+        NodeToggled::True
+    } else {
+        NodeToggled::False
+    });
     let mut row = row;
 
     if selection_mode == SelectionMode::Multiple {

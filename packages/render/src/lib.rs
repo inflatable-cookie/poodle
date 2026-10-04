@@ -378,7 +378,7 @@ pub use radio::radio;
 pub use radio_group::{radio_group, RadioGroupHandlers};
 pub use range_slider::{range_slider, RangeSliderHandlers};
 pub use rating::{rating, RatingHandlers};
-pub use ref_select::ref_select;
+pub use ref_select::{ref_select, ref_select_with_handlers, RefSelectHandlers};
 pub use region::region;
 pub use relation_picker::{relation_picker, RelationPickerHandlers};
 pub use remediation_banner::{

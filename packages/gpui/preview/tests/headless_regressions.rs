@@ -36389,7 +36389,6 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
 
         // 3c. Destructive action
         driver.pointer_activate_id("menu-item:delete");
-        eprintln!("DBG delete row clicked");
         assert_eq!(actions.lock().unwrap().as_slice(), ["new", "delete"]);
 
         // 3d. Shortcut action
@@ -43025,6 +43024,616 @@ fn first_mounted_parity_drawer() {
             ["open:false", "open:false"],
             "backdrop callback closes the drawer"
         );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_theme_select() {
+    // ThemeSelect exposes its dialog-opener trigger, listbox tiles, selection,
+    // focus entry and dismissal through mounted GPUI input.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::DismissReason;
+    use poodle_render::{RenderContext, ThemeSelectHandlers};
+    use poodle_specs::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
+
+    #[derive(Default)]
+    struct Host {
+        open: bool,
+        value: String,
+        calls: Vec<String>,
+        dismissed: Vec<DismissReason>,
+    }
+
+    let themes = vec![
+        ThemeOption::new(
+            "eclipse",
+            "Eclipse",
+            ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333"),
+        ),
+        ThemeOption::new(
+            "iceberg",
+            "Iceberg",
+            ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b"),
+        ),
+        ThemeOption::new(
+            "midnight",
+            "Midnight",
+            ThemeSwatch::new("#0b1020", "#121933", "#6d8cff", "#e6ecff", "#333"),
+        ),
+    ];
+    const ID: &str = "theme-proof";
+    const TRIGGER: &str = "theme-proof:trigger";
+    const SURFACE: &str = "theme-proof:surface";
+    const ICEBERG: &str = "theme-proof:tile:iceberg";
+    const MIDNIGHT: &str = "theme-proof:tile:midnight";
+
+    let theme_provider = theme();
+    let witness = poodle_render::theme_select_with_handlers(
+        &ThemeSelectSpec::new()
+            .with_themes(themes.clone())
+            .with_value("iceberg")
+            .with_open(true),
+        &RenderContext::new(&theme_provider),
+        ThemeSelectHandlers {
+            instance_id: ID.to_owned(),
+            ..ThemeSelectHandlers::default()
+        },
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Group));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Theme"));
+    let trigger = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(TRIGGER))
+        .expect("trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.label.as_deref(), Some("Theme: Iceberg"));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    let surface = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(SURFACE))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    let selected_tile = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(ICEBERG))
+        .expect("selected tile");
+    assert_eq!(selected_tile.a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(selected_tile.a11y.selected, Some(true));
+    assert!(
+        selected_tile.a11y.initial_focus,
+        "focus enters the selected tile"
+    );
+    let other_tile = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(MIDNIGHT))
+        .expect("other tile");
+    assert_eq!(other_tile.a11y.selected, Some(false));
+    assert!(!other_tile.a11y.initial_focus);
+
+    let host = Arc::new(Mutex::new(Host {
+        value: "iceberg".to_owned(),
+        ..Host::default()
+    }));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        let themes = themes.clone();
+        Rc::new(move || {
+            let (open, value) = {
+                let host = host.lock().expect("theme host");
+                (host.open, host.value.clone())
+            };
+            let spec = ThemeSelectSpec::new()
+                .with_themes(themes.clone())
+                .with_value(value)
+                .with_open(open);
+            let change_host = Arc::clone(&host);
+            let open_host = Arc::clone(&host);
+            let dismiss_host = Arc::clone(&host);
+            node_compat::ThemeSelect::from_spec(spec, &theme_provider)
+                .with_instance_id(ID)
+                .on_change(Arc::new(move |value| {
+                    let mut host = change_host.lock().expect("theme host");
+                    host.value = value.to_owned();
+                    host.calls.push(format!("value:{value}"));
+                }))
+                .on_open_change(Arc::new(move |next| {
+                    let mut host = open_host.lock().expect("theme host");
+                    host.open = next;
+                    host.calls.push(format!("open:{next}"));
+                }))
+                .on_dismiss(Arc::new(move |reason| {
+                    dismiss_host
+                        .lock()
+                        .expect("theme host")
+                        .dismissed
+                        .push(reason);
+                }))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 420.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(TRIGGER)
+            .expect("trigger reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Theme: Iceberg"));
+        let trigger_geometry =
+            poodle_gpui_node_backend::bounds_for(TRIGGER).expect("trigger geometry");
+        assert!(f32::from(trigger_geometry.size.width) > 0.0);
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_none());
+
+        driver.pointer_activate_id(TRIGGER);
+        assert!(host.lock().expect("theme host").open);
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_some());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ICEBERG),
+            Some(true),
+            "opening moves real focus to the selected tile"
+        );
+        let tile = poodle_gpui_node_backend::painted_node_for(ICEBERG).expect("tile paint");
+        assert_eq!(tile.a11y_role, Some(NodeRole::ListBoxOption));
+
+        driver.dispatch_key("escape");
+        {
+            let host = host.lock().expect("theme host");
+            assert!(!host.open, "Escape closes the popover");
+            assert_eq!(host.dismissed, vec![DismissReason::Escape]);
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_none());
+
+        driver.pointer_activate_id(TRIGGER);
+        driver.pointer_activate_id(MIDNIGHT);
+        {
+            let host = host.lock().expect("theme host");
+            assert_eq!(
+                host.value, "midnight",
+                "the change callback carries the chosen theme value"
+            );
+            assert!(!host.open, "choosing a theme closes the popover");
+            assert_eq!(
+                host.calls,
+                vec![
+                    "open:true".to_owned(),
+                    "open:false".to_owned(),
+                    "open:true".to_owned(),
+                    "value:midnight".to_owned(),
+                    "open:false".to_owned(),
+                ]
+            );
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(TRIGGER)
+                .expect("trigger repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Theme: Midnight")
+        );
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_ref_select() {
+    // RefSelect opens from its trigger, filters through the search field, roves
+    // with arrows, chooses a ref and dismisses with Escape on mounted GPUI.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::DismissReason;
+    use poodle_render::{RefSelectHandlers, RenderContext};
+    use poodle_specs::{RefKind, RefOption, RefSelectSpec};
+
+    #[derive(Default)]
+    struct Host {
+        open: bool,
+        value: String,
+        query: String,
+        calls: Vec<String>,
+        dismissed: Vec<DismissReason>,
+    }
+
+    const ID: &str = "ref-proof";
+    const TRIGGER: &str = "ref-proof:trigger";
+    const SURFACE: &str = "ref-proof:surface";
+    const SEARCH: &str = "poodle-input-ref-proof:search";
+    const MAIN: &str = "ref-proof:option:main";
+    const FEATURE: &str = "ref-proof:option:feature";
+    const TAG: &str = "ref-proof:option:v1";
+    let refs = vec![
+        RefOption::new("main", "main").with_kind(RefKind::Branch),
+        RefOption::new("feature", "feature").with_kind(RefKind::Branch),
+        RefOption::new("v1", "v1.0").with_kind(RefKind::Tag),
+    ];
+
+    let theme_provider = theme();
+    let witness = poodle_render::ref_select_with_handlers(
+        &RefSelectSpec::new()
+            .with_refs(refs.clone())
+            .with_value("feature")
+            .with_current_ref("main")
+            .with_open(true),
+        &RenderContext::new(&theme_provider),
+        RefSelectHandlers {
+            instance_id: ID.to_owned(),
+            ..RefSelectHandlers::default()
+        },
+    );
+    let trigger = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(TRIGGER))
+        .expect("trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.label.as_deref(), Some("Ref: feature"));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    let surface = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(SURFACE))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(surface.a11y.label.as_deref(), Some("Ref"));
+    let main = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(MAIN))
+        .expect("current option");
+    assert_eq!(main.a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(main.a11y.selected, Some(false));
+    assert_eq!(main.a11y.label.as_deref(), Some("main current"));
+    assert_eq!(
+        witness
+            .find(&|n| n.runtime_id.as_deref() == Some(FEATURE))
+            .expect("selected option")
+            .a11y
+            .selected,
+        Some(true)
+    );
+
+    let host = Arc::new(Mutex::new(Host {
+        value: "feature".to_owned(),
+        ..Host::default()
+    }));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        let refs = refs.clone();
+        Rc::new(move || {
+            let (open, value, query) = {
+                let host = host.lock().expect("ref host");
+                (host.open, host.value.clone(), host.query.clone())
+            };
+            let spec = RefSelectSpec::new()
+                .with_refs(refs.clone())
+                .with_value(value)
+                .with_current_ref("main")
+                .with_search_value(query)
+                .with_open(open);
+            let change_host = Arc::clone(&host);
+            let search_host = Arc::clone(&host);
+            let open_host = Arc::clone(&host);
+            let dismiss_host = Arc::clone(&host);
+            node_compat::RefSelect::from_spec(spec, &theme_provider)
+                .with_instance_id(ID)
+                .on_change(Arc::new(move |value| {
+                    let mut host = change_host.lock().expect("ref host");
+                    host.value = value.to_owned();
+                    host.calls.push(format!("value:{value}"));
+                }))
+                .on_search_change(Arc::new(move |query| {
+                    let mut host = search_host.lock().expect("ref host");
+                    host.query = query.to_owned();
+                    host.calls.push(format!("query:{query}"));
+                }))
+                .on_open_change(Arc::new(move |next| {
+                    let mut host = open_host.lock().expect("ref host");
+                    host.open = next;
+                    host.calls.push(format!("open:{next}"));
+                }))
+                .on_dismiss(Arc::new(move |reason| {
+                    dismiss_host
+                        .lock()
+                        .expect("ref host")
+                        .dismissed
+                        .push(reason);
+                }))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 520.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(TRIGGER)
+            .expect("trigger reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Ref: feature"));
+        assert!(
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(TRIGGER)
+                    .expect("trigger geometry")
+                    .size
+                    .width
+            ) > 0.0
+        );
+
+        driver.pointer_activate_id(TRIGGER);
+        assert!(host.lock().expect("ref host").open);
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_some());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(SEARCH),
+            Some(true),
+            "opening moves real focus to the search field"
+        );
+        driver.dispatch_key_raw("v");
+        assert!(
+            host.lock()
+                .expect("ref host")
+                .calls
+                .contains(&"query:v".to_owned()),
+            "typing reports the query"
+        );
+
+        // Roving: ArrowDown from an option moves real focus to the next one.
+        driver.focus_element(MAIN);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FEATURE),
+            Some(true)
+        );
+
+        driver.dispatch_key("escape");
+        {
+            let host = host.lock().expect("ref host");
+            assert!(!host.open, "Escape closes the popover");
+            assert_eq!(host.dismissed, vec![DismissReason::Escape]);
+        }
+
+        driver.pointer_activate_id(TRIGGER);
+        driver.pointer_activate_id(TAG);
+        {
+            let host = host.lock().expect("ref host");
+            assert_eq!(
+                host.value, "v1",
+                "the change callback carries the chosen ref value"
+            );
+            assert!(!host.open, "choosing a ref closes the popover");
+            assert!(host.calls.contains(&"value:v1".to_owned()));
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(TRIGGER)
+                .expect("trigger repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Ref: v1.0")
+        );
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_picker_shell() {
+    // PickerShell is static chrome: its landmark, heading, status line and the
+    // slotted controls reach mounted GPUI, and slotted controls take real input.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::RenderContext;
+    use poodle_specs::{ButtonSpec, PickerShellSpec};
+
+    let theme_provider = theme();
+    let spec = PickerShellSpec::new("Select assets")
+        .with_description("Pick the assets to attach.")
+        .with_aria_label("Asset picker")
+        .with_result_count(12)
+        .with_selected_count(2)
+        .with_status_text("12 results, 2 selected");
+    let slot_button = |label: &str, id: &str| {
+        let mut node = poodle_render::button(
+            &ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme_provider),
+            None,
+        );
+        node.id = Some(id.to_owned());
+        node
+    };
+    let witness = poodle_render::picker_shell(
+        &spec,
+        &RenderContext::new(&theme_provider),
+        Some(slot_button("Filter", "picker-shell-filter")),
+        None,
+        Some(Node::text("Results")),
+        None,
+        Some(slot_button("Done", "picker-shell-done")),
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Region));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Asset picker"));
+    let heading = witness
+        .find(&|n| n.a11y.role == Some(NodeRole::Heading))
+        .expect("title heading");
+    assert_eq!(heading.a11y.level, Some(3));
+    assert!(witness.has_text("Select assets"));
+    assert!(witness.has_text("12 results"));
+    assert!(witness.has_text("2 selected"));
+    let status = witness
+        .find(&|n| n.a11y.role == Some(NodeRole::Status))
+        .expect("status line");
+    assert!(status.has_text("12 results, 2 selected"));
+
+    let clicks = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let clicks = Arc::clone(&clicks);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let ctx = RenderContext::new(&theme_provider);
+            let filter_sink = Arc::clone(&clicks);
+            let done_sink = Arc::clone(&clicks);
+            let mut filter = poodle_render::button(
+                &ButtonSpec::new().with_label("Filter"),
+                &ctx,
+                Some(Arc::new(move || {
+                    filter_sink.lock().expect("clicks").push("filter")
+                })),
+            );
+            filter.id = Some("picker-shell-filter".to_owned());
+            let mut done = poodle_render::button(
+                &ButtonSpec::new().with_label("Done"),
+                &ctx,
+                Some(Arc::new(move || {
+                    done_sink.lock().expect("clicks").push("done")
+                })),
+            );
+            done.id = Some("picker-shell-done".to_owned());
+            let mut shell = node_compat::PickerShell::from_spec(spec.clone(), &theme_provider)
+                .with_toolbar(filter)
+                .with_footer(done);
+            shell = shell.with_body(Node::text("Results"));
+            shell.into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 480.0);
+        for id in ["picker-shell-filter", "picker-shell-done"] {
+            assert!(
+                f32::from(
+                    poodle_gpui_node_backend::bounds_for(id)
+                        .expect("slotted control geometry")
+                        .size
+                        .width
+                ) > 0.0
+            );
+        }
+        driver.focus_element("picker-shell-filter");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("picker-shell-filter"),
+            Some(true),
+            "focus enters the slotted toolbar control, not the shell"
+        );
+        driver.pointer_activate_id("picker-shell-filter");
+        driver.pointer_activate_id("picker-shell-done");
+        assert_eq!(*clicks.lock().expect("clicks"), vec!["filter", "done"]);
+        assert!(theme_provider.resolve_color("color.background.panel").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_relation_picker() {
+    // RelationPicker names its candidates, shows the pressed one, roves between
+    // them and selects through mounted GPUI input.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{PickerItemSpec, RelationPickerSpec, SelectionMode};
+
+    #[derive(Default)]
+    struct Host {
+        selected: Vec<String>,
+    }
+
+    const ID: &str = "relation-proof";
+    const ALPHA: &str = "relation-proof:candidate:alpha";
+    const BETA: &str = "relation-proof:candidate:beta";
+    let items = vec![
+        PickerItemSpec::new("alpha", "Alpha"),
+        PickerItemSpec::new("beta", "Beta"),
+    ];
+    let make_spec = |selected: Vec<String>| {
+        RelationPickerSpec::new(items.clone())
+            .with_aria_label("Related records")
+            .with_selection_mode(SelectionMode::Single)
+            .with_selected_ids(selected)
+    };
+
+    let theme_provider = theme();
+    let witness = poodle_render::relation_picker(
+        &make_spec(vec!["beta".to_owned()]),
+        &RenderContext::new(&theme_provider),
+        poodle_render::RelationPickerHandlers::new(ID),
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Region));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Related records"));
+    let list = witness
+        .find(&|n| n.a11y.role == Some(NodeRole::List))
+        .expect("candidate list");
+    assert_eq!(list.a11y.label.as_deref(), Some("Available candidates"));
+    let alpha = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(ALPHA))
+        .expect("alpha candidate");
+    assert_eq!(alpha.a11y.label.as_deref(), Some("Alpha"));
+    assert_eq!(alpha.a11y.toggled, Some(poodle_node::NodeToggled::False));
+    assert_eq!(
+        witness
+            .find(&|n| n.runtime_id.as_deref() == Some(BETA))
+            .expect("beta candidate")
+            .a11y
+            .toggled,
+        Some(poodle_node::NodeToggled::True)
+    );
+
+    let host = Arc::new(Mutex::new(Host::default()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        let items = items.clone();
+        Rc::new(move || {
+            let selected = host.lock().expect("relation host").selected.clone();
+            let spec = RelationPickerSpec::new(items.clone())
+                .with_aria_label("Related records")
+                .with_selection_mode(SelectionMode::Single)
+                .with_selected_ids(selected);
+            let select_host = Arc::clone(&host);
+            node_compat::RelationPicker::from_spec(spec, &theme_provider, ID)
+                .on_select(Arc::new(move |id| {
+                    select_host.lock().expect("relation host").selected = vec![id.to_owned()];
+                }))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 560.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(ALPHA)
+            .expect("candidate reached GPUI paint");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Alpha"));
+        assert!(
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(ALPHA)
+                    .expect("candidate geometry")
+                    .size
+                    .height
+            ) > 0.0
+        );
+
+        driver.focus_element(ALPHA);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(BETA),
+            Some(true),
+            "ArrowDown moves real focus to the next candidate"
+        );
+        driver.pointer_activate_id(BETA);
+        assert_eq!(
+            host.lock().expect("relation host").selected,
+            vec!["beta".to_owned()],
+            "the select callback payload carries the candidate id"
+        );
+        let border_of = |id: &str| {
+            poodle_gpui_node_backend::painted_node_for(id)
+                .expect("candidate repaint")
+                .style
+                .border
+                .color
+        };
+        assert_ne!(
+            border_of(BETA),
+            border_of(ALPHA),
+            "the pressed candidate repaints with the accent border"
+        );
+        assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });

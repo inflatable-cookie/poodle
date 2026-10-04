@@ -5,6 +5,7 @@
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    NodeRole,
 };
 use poodle_specs::{
     BrowseState, PickerShellSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
@@ -94,12 +95,11 @@ pub fn picker_shell(
     let mut title_block = Node::container();
     title_block.style.descriptor.layout.direction = LayoutDirection::Column;
     title_block.style.descriptor.layout.spacing.gap = stack_sm;
-    let mut title_block = title_block.child(text(
-        spec.title.clone(),
-        text_primary,
-        title_size,
-        Some(600),
-    ));
+    // Contract §2: the title is the shell's `<h3>`.
+    let mut title_node = text(spec.title.clone(), text_primary, title_size, Some(600));
+    title_node.a11y.role = Some(NodeRole::Heading);
+    title_node.a11y.level = Some(3);
+    let mut title_block = title_block.child(title_node);
 
     if let Some(description) = spec.description.as_ref() {
         title_block =
@@ -152,8 +152,10 @@ pub fn picker_shell(
             s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
             s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         }
-        shell =
-            shell.child(clip.child(text(status_text.clone(), text_secondary, label_size, None)));
+        // Contract §6: the live status line is `role="status"`.
+        let mut status = text(status_text.clone(), text_secondary, label_size, None);
+        status.a11y.role = Some(NodeRole::Status);
+        shell = shell.child(clip.child(status));
     }
 
     if spec.state == BrowseState::Ready {
@@ -214,6 +216,8 @@ pub fn picker_shell(
 
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
+            // A `<section>` is a landmark only when it is named.
+            shell.a11y.role = Some(NodeRole::Region);
             shell.a11y.label = Some(label.to_string());
         }
     }

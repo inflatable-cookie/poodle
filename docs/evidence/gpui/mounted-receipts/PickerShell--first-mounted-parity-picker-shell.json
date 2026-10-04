@@ -1,35 +1,44 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "NumberInput",
-  "test": "number_input_mounted_accessibility_projects_spin_button_surface",
+  "component": "PickerShell",
+  "test": "first_mounted_parity_picker_shell",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
     ],
+    "pointer": [
+      "pointer_activate"
+    ],
     "keyboard_focus": [
-      "focus_element",
-      "dispatch_key"
+      "focus_state_for",
+      "focus_element"
     ],
     "accessibility": [
       "NodeRole",
       "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "mount-helper:mount_number_fields",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "fixture-helper:mount_number_fields",
+    "renderer": "poodle_render::RenderContext",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -42,12 +51,14 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-091",
     "outcome": "passed",
-    "body_sha256": "e7615e6ea0cb76dad76b1f40cfefc5ab36579e712e166f596bc12c5ed50c4280"
+    "body_sha256": "47ae98123672f2273af85b9452eb92c4f0da71d74f7814d271760332bb3cdeb9"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

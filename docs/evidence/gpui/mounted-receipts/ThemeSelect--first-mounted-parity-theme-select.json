@@ -1,35 +1,49 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "NumberInput",
-  "test": "number_input_mounted_accessibility_projects_spin_button_surface",
+  "component": "ThemeSelect",
+  "test": "first_mounted_parity_theme_select",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
+    "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
     ],
+    "events": [
+      "assert_eq!(\n                host.value, \"midnight\",\n                \"the change callback"
+    ],
+    "pointer": [
+      "pointer_activate"
+    ],
     "keyboard_focus": [
-      "focus_element",
+      "focus_state_for",
       "dispatch_key"
     ],
     "accessibility": [
       "NodeRole",
       "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "_geometry",
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "mount-helper:mount_number_fields",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "fixture-helper:mount_number_fields",
+    "renderer": "poodle_render::theme_select_with_handlers",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -42,12 +56,15 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-091",
     "outcome": "passed",
-    "body_sha256": "e7615e6ea0cb76dad76b1f40cfefc5ab36579e712e166f596bc12c5ed50c4280"
+    "body_sha256": "7c430b7bcd018ed60841cf54938579daf2805021719ba573196502866e27bbce"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }
