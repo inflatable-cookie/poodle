@@ -270,7 +270,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/box.md#5. Events"
         },
         {
@@ -280,7 +280,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/box.md#Keyboard"
         }
       ]
@@ -375,7 +375,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/card.md#5. Events"
         }
       ]
@@ -455,7 +455,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/code.md#5. Events"
         }
       ]
@@ -923,7 +923,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/eyebrow.md#5. Events"
         },
         {
@@ -933,7 +933,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/eyebrow.md#Keyboard"
         }
       ]
@@ -968,7 +968,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/field.md#5. Events"
         }
       ]
@@ -1048,7 +1048,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/form-actions.md#5. Events"
         }
       ]
@@ -1111,7 +1111,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/grid.md#5. Events"
         },
         {
@@ -1121,7 +1121,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/grid.md#Keyboard"
         }
       ]
@@ -1171,7 +1171,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/icon.md#5. Events"
         }
       ]
@@ -1206,7 +1206,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/icon-provider.md#5. Events"
         }
       ]
@@ -1539,7 +1539,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/meter.md#5. Events"
         },
         {
@@ -1549,7 +1549,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/meter.md#Keyboard"
         }
       ]
@@ -1569,7 +1569,7 @@
       "notApplicable": [
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/metric-tile.md#Keyboard"
         }
       ]
@@ -1791,13 +1791,26 @@
       "substrate": "selection-navigation",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component callbacks or events.",
+          "contractRef": "docs/contracts/components/pagination-summary.md#5. Callbacks"
+        },
+        {
+          "axis": "pointer",
+          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+          "contractRef": "docs/contracts/components/pagination-summary.md#Keyboard"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "Contract states the component is not focusable and Tab leaves host focus behavior unaffected.",
+          "contractRef": "docs/contracts/components/pagination-summary.md#Keyboard"
+        }
+      ]
     },
     {
       "component": "PasswordRequirements",
@@ -1814,7 +1827,7 @@
       "notApplicable": [
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/password-requirements.md#Keyboard"
         }
       ]
@@ -1834,7 +1847,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/picker-shell.md#5. Events"
         }
       ]
@@ -1846,26 +1859,13 @@
       "substrate": "selection-navigation",
       "required": [
         "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": [
-        {
-          "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
-          "contractRef": "docs/contracts/components/pill.md#5. Events"
-        },
-        {
-          "axis": "pointer",
-          "reason": "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
-          "contractRef": "docs/contracts/components/pill.md#Keyboard"
-        },
-        {
-          "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
-          "contractRef": "docs/contracts/components/pill.md#Keyboard"
-        }
-      ]
+      "notApplicable": []
     },
     {
       "component": "Popover",
@@ -1895,7 +1895,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/progress.md#5. Events"
         },
         {
@@ -1905,7 +1905,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/progress.md#Keyboard"
         }
       ]
@@ -2119,7 +2119,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/separator.md#5. Events"
         },
         {
@@ -2173,7 +2173,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/skeleton.md#5. Events"
         },
         {
@@ -2212,7 +2212,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/spacer.md#5. Events"
         },
         {
@@ -2235,7 +2235,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/spinner.md#5. Events"
         },
         {
@@ -2245,7 +2245,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/spinner.md#Keyboard"
         }
       ]
@@ -2293,7 +2293,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/stack.md#5. Events"
         },
         {
@@ -2303,7 +2303,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/stack.md#Keyboard"
         }
       ]
@@ -2338,7 +2338,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/status-bar.md#5. Events"
         }
       ]
@@ -2356,7 +2356,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/status-indicator.md#5. Events"
         },
         {
@@ -2366,7 +2366,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/status-indicator.md#Keyboard"
         }
       ]
@@ -2399,7 +2399,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/surface.md#5. Events"
         },
         {
@@ -2409,7 +2409,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/surface.md#Keyboard"
         }
       ]
@@ -2444,7 +2444,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/table.md#5. Events"
         }
       ]
@@ -2537,7 +2537,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/time-ago.md#5. Events"
         },
         {
@@ -2547,7 +2547,7 @@
         },
         {
           "axis": "keyboard_focus",
-          "reason": "Contract declares the control not focusable with no keyboard behavior.",
+          "reason": "Contract declares the component not focusable with no keyboard behavior.",
           "contractRef": "docs/contracts/components/time-ago.md#Keyboard"
         }
       ]
@@ -2687,7 +2687,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/toolbar.md#5. Events"
         }
       ]
@@ -2752,7 +2752,7 @@
       "notApplicable": [
         {
           "axis": "events",
-          "reason": "Contract declares no events; layout or display primitive only.",
+          "reason": "Contract declares no component callbacks or events.",
           "contractRef": "docs/contracts/components/ui-presentation-provider.md#5. Events"
         }
       ]

@@ -387,7 +387,9 @@ pub use select::{
     select, select_option_id, select_search_focus_id, select_trigger_focus_id, SelectHandlers,
     SelectTransitionResult,
 };
-pub use selection_summary::{selection_summary, SelectionSummaryHandlers};
+pub use selection_summary::{
+    selection_summary, selection_summary_with_actions, SelectionSummaryHandlers,
+};
 pub use separator::separator;
 pub use settings_shell::{settings_shell, SettingsShellHandlers};
 pub use shell_status_bar::shell_status_bar;

@@ -3530,6 +3530,11 @@ impl NavCard {
         }
     }
 
+    pub(crate) fn on_click(mut self, handler: impl Fn() + Send + Sync + 'static) -> Self {
+        self.on_click = Some(Arc::new(handler));
+        self
+    }
+
     pub(crate) fn with_icon(mut self, icon: impl IntoCompatNode) -> Self {
         self.icon = Some(icon.into_compat_node());
         self
@@ -3571,16 +3576,23 @@ impl PaginationSummary {
             theme: theme.clone(),
         }
     }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::pagination_summary(&self.spec, &RenderContext::new(&self.theme))
+    }
+}
+
+impl IntoCompatNode for PaginationSummary {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
 }
 
 impl IntoElement for PaginationSummary {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_summary(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -5686,8 +5698,10 @@ impl TextLink {
 pub(crate) struct SelectionSummary {
     spec: SelectionSummarySpec,
     theme: GpuiThemeProvider,
+    on_activate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    instance_id: Option<String>,
 }
 
 impl SelectionSummary {
@@ -5695,8 +5709,10 @@ impl SelectionSummary {
         Self {
             spec,
             theme: theme.clone(),
+            on_activate: None,
             on_remove: None,
             on_clear: None,
+            instance_id: None,
         }
     }
 
@@ -5715,9 +5731,49 @@ impl SelectionSummary {
         self
     }
 
+    pub(crate) fn on_activate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_activate = Some(handler);
+        self
+    }
+
     pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.on_clear = Some(handler);
         self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let context = RenderContext::new(&self.theme);
+        let handlers = poodle_render::SelectionSummaryHandlers {
+            on_remove: self.on_remove,
+            on_clear: self.on_clear,
+        };
+        match self.instance_id {
+            Some(instance_id) => poodle_render::selection_summary_with_actions(
+                &self.spec,
+                &context,
+                handlers,
+                self.on_activate,
+                &instance_id,
+            ),
+            None => {
+                assert!(
+                    self.on_activate.is_none(),
+                    "split SelectionSummary controls require a stable instance id"
+                );
+                poodle_render::selection_summary(&self.spec, &context, handlers)
+            }
+        }
+    }
+}
+
+impl IntoCompatNode for SelectionSummary {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
     }
 }
 
@@ -5725,14 +5781,7 @@ impl IntoElement for SelectionSummary {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::selection_summary(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            poodle_render::SelectionSummaryHandlers {
-                on_remove: self.on_remove,
-                on_clear: self.on_clear,
-            },
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 

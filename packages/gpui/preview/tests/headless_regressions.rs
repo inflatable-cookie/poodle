@@ -435,8 +435,10 @@ fn a_pointer_press_reaches_the_backend_listener_once() {
 /// adapter, so duplicate labels remain isolated and focus survives a host
 /// rebuild.
 #[test]
-fn pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild() {
+fn gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild() {
     use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::PillSpec;
 
     run_headless(|cx| {
@@ -451,39 +453,47 @@ fn pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild() {
             let theme_provider = theme_provider.clone();
             Rc::new(move || {
                 let label = dismiss_label.borrow().clone();
+                let left = node_compat::Pill::from_spec(
+                    PillSpec::new()
+                        .with_label("Same label")
+                        .with_dismissible(true)
+                        .with_dismiss_label(label.clone()),
+                    &theme_provider,
+                )
+                .with_instance_id("left")
+                .on_dismiss({
+                    let dismisses = Arc::clone(&left_dismisses);
+                    move || *dismisses.lock().expect("left dismiss count") += 1
+                })
+                .into_compat_node();
+                assert_eq!(left.a11y.role, None, "Pill text stays non-interactive");
+                let dismiss = left
+                    .find(&|node| node.runtime_id.as_deref() == Some("pill:left:dismiss"))
+                    .expect("production Pill dismiss node");
+                assert_eq!(dismiss.a11y.role, Some(poodle_node::NodeRole::Button));
+                assert_eq!(dismiss.a11y.label.as_deref(), Some(label.as_str()));
+                assert_eq!(
+                    left.style.descriptor.corner_radii.top_left,
+                    theme_provider.resolve_radius("radius.pill")
+                );
+                let right = node_compat::Pill::from_spec(
+                    PillSpec::new()
+                        .with_label("Same label")
+                        .with_dismissible(true)
+                        .with_dismiss_label(label),
+                    &theme_provider,
+                )
+                .with_instance_id("right")
+                .on_dismiss({
+                    let dismisses = Arc::clone(&right_dismisses);
+                    move || *dismisses.lock().expect("right dismiss count") += 1
+                })
+                .into_compat_node();
                 div()
                     .flex()
                     .gap(px(8.0))
-                    .child(
-                        node_compat::Pill::from_spec(
-                            PillSpec::new()
-                                .with_label("Same label")
-                                .with_dismissible(true)
-                                .with_dismiss_label(label.clone()),
-                            &theme_provider,
-                        )
-                        .with_instance_id("left")
-                        .on_dismiss({
-                            let dismisses = Arc::clone(&left_dismisses);
-                            move || *dismisses.lock().expect("left dismiss count") += 1
-                        })
-                        .into_element(),
-                    )
-                    .child(
-                        node_compat::Pill::from_spec(
-                            PillSpec::new()
-                                .with_label("Same label")
-                                .with_dismissible(true)
-                                .with_dismiss_label(label),
-                            &theme_provider,
-                        )
-                        .with_instance_id("right")
-                        .on_dismiss({
-                            let dismisses = Arc::clone(&right_dismisses);
-                            move || *dismisses.lock().expect("right dismiss count") += 1
-                        })
-                        .into_element(),
-                    )
+                    .child(poodle_gpui_node_backend::to_gpui(&left))
+                    .child(poodle_gpui_node_backend::to_gpui(&right))
                     .into_any_element()
             })
         };
@@ -513,11 +523,18 @@ fn pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild() {
             "the stable dismiss identity keeps real focus through rebuild"
         );
 
+        driver.pointer_activate_id(right_id);
+        assert_eq!(
+            *right_dismisses.lock().expect("right dismiss count"),
+            1,
+            "pointer activation fires the dismiss callback for its own Pill"
+        );
         driver.keyboard_activate(left_id);
-        assert_eq!(*left_dismisses.lock().expect("left dismiss count"), 1);
-        assert_eq!(*right_dismisses.lock().expect("right dismiss count"), 0);
-        driver.keyboard_activate(right_id);
-        assert_eq!(*left_dismisses.lock().expect("left dismiss count"), 1);
+        assert_eq!(
+            *left_dismisses.lock().expect("left dismiss count"),
+            1,
+            "keyboard activation fires the dismiss callback for its own Pill"
+        );
         assert_eq!(*right_dismisses.lock().expect("right dismiss count"), 1);
         assert!(driver.mounted_observation().is_valid());
     });
@@ -39336,5 +39353,214 @@ fn sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focu
             host.activations.lock().expect("activation lock").is_empty(),
             "menu invocation and action never activate the nav item"
         );
+    });
+}
+
+/// PaginationSummary is a static readout: its displayed range and polite status
+/// name match Svelte, and its real mounted text uses the shared body token.
+#[test]
+fn gpui_mounted_pagination_summary_range_live_name_and_geometry() {
+    use node_compat::IntoCompatNode;
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::PaginationSummarySpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let mut summary = node_compat::PaginationSummary::from_spec(
+            PaginationSummarySpec::new(8, 20, 156).with_total_pages(8),
+            &theme_provider,
+        )
+        .into_compat_node();
+        summary.runtime_id = Some("pagination-summary-proof".to_owned());
+
+        assert_eq!(summary.texts(), ["Showing 141-156 of 156"]);
+        assert_eq!(summary.a11y.role, Some(poodle_node::NodeRole::Status));
+        assert_eq!(
+            summary.a11y.label.as_deref(),
+            Some("Showing 141-156 of 156 across 8 pages")
+        );
+        assert!(!summary.interaction.focusable);
+        assert_eq!(
+            summary.style.text_size,
+            Some(theme_provider.resolve_space("typography.body.size"))
+        );
+
+        let mounted = Arc::new(Mutex::new(summary));
+        let _driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let summary_bounds = poodle_gpui_node_backend::bounds_for("pagination-summary-proof")
+            .expect("mounted summary text bounds");
+        assert!(f32::from(summary_bounds.size.width) > 0.0);
+        assert!(f32::from(summary_bounds.size.height) > 0.0);
+    });
+}
+
+/// SelectionSummary mounts the contract's split chip controls and clear link,
+/// retaining accessible names, callback ids, keyboard focus, and token sizing.
+#[test]
+fn gpui_mounted_selection_summary_split_actions_and_accessible_names() {
+    use node_compat::{IntoCompatNode, SelectionSummary};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{SelectionSummaryItem, SelectionSummarySpec};
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let activate_events = Arc::clone(&payloads);
+        let remove_events = Arc::clone(&payloads);
+        let clear_events = Arc::clone(&payloads);
+        let on_activate: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |id| {
+            activate_events
+                .lock()
+                .expect("selection callback payloads")
+                .push(format!("activate:{id}"));
+        });
+        let on_remove: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |id| {
+            remove_events
+                .lock()
+                .expect("selection callback payloads")
+                .push(format!("remove:{id}"));
+        });
+        let on_clear: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
+            clear_events
+                .lock()
+                .expect("selection callback payloads")
+                .push("clear".to_owned());
+        });
+        let theme_provider = theme();
+        let spec = SelectionSummarySpec::new(vec![
+            SelectionSummaryItem::new("button", "Button"),
+            SelectionSummaryItem::new("card", "Card"),
+            SelectionSummaryItem::new("dialog", "Dialog"),
+        ])
+        .with_max_visible_items(2);
+        let summary = SelectionSummary::from_spec(spec, &theme_provider)
+            .with_instance_id("selection-proof")
+            .on_activate(on_activate)
+            .on_remove(on_remove)
+            .on_clear(on_clear)
+            .into_compat_node();
+
+        assert_eq!(summary.a11y.role, Some(poodle_node::NodeRole::Region));
+        assert_eq!(summary.a11y.label.as_deref(), Some("Current selection"));
+        assert!(summary.has_text("+1 more"));
+        let activate = summary
+            .find(&|node| node.runtime_id.as_deref() == Some("selection-proof:activate:button"))
+            .expect("mounted activation button");
+        assert_eq!(activate.a11y.role, Some(poodle_node::NodeRole::Button));
+        assert_eq!(activate.a11y.label.as_deref(), Some("Edit Button"));
+        assert!(activate.style.focus_ring.is_some());
+        let remove = summary
+            .find(&|node| node.runtime_id.as_deref() == Some("selection-proof:remove:card"))
+            .expect("mounted remove button");
+        assert_eq!(remove.a11y.role, Some(poodle_node::NodeRole::Button));
+        assert_eq!(remove.a11y.label.as_deref(), Some("Remove Card"));
+        assert!(remove.style.focus_ring.is_some());
+        let clear = summary
+            .find(&|node| node.runtime_id.as_deref() == Some("selection-proof:clear"))
+            .expect("mounted clear link");
+        assert_eq!(clear.a11y.role, Some(poodle_node::NodeRole::Link));
+        assert_eq!(clear.a11y.label.as_deref(), Some("Clear"));
+        assert_eq!(
+            remove.style.min_height,
+            Some(SelectionSummarySpec::chip_min_height_rem(poodle_specs::ControlSize::Md) * 16.0)
+        );
+        assert!(theme_provider.resolve_space("space.inline.sm") > 0.0);
+
+        let mounted = Arc::new(Mutex::new(summary));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 440.0, 120.0);
+        assert!(poodle_gpui_node_backend::bounds_for("selection-proof:activate:button").is_some());
+        assert!(poodle_gpui_node_backend::bounds_for("selection-proof:remove:card").is_some());
+        assert!(poodle_gpui_node_backend::bounds_for("selection-proof:clear").is_some());
+        driver.wait_for_focus_handle("selection-proof:remove:card");
+        driver.keyboard_activate("selection-proof:remove:card");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("selection-proof:remove:card"),
+            Some(true)
+        );
+        driver.pointer_activate_id("selection-proof:activate:button");
+        driver.pointer_activate_id("selection-proof:clear");
+        assert_eq!(
+            payloads
+                .lock()
+                .expect("selection callback payloads")
+                .as_slice(),
+            ["remove:card", "activate:button", "clear"],
+            "mounted callback payloads preserve the selected item ids"
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// NavCard uses link semantics for destinations and button semantics for
+/// disabled cards, with pointer and keyboard callbacks dispatched by GPUI.
+#[test]
+fn gpui_mounted_nav_card_link_button_actions_and_accessibility() {
+    use node_compat::{IntoCompatNode, NavCard};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::NavCardSpec;
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let link_payloads = Arc::clone(&payloads);
+        let theme_provider = theme();
+        let mut link = NavCard::from_spec(
+            NavCardSpec::new()
+                .with_title("Documentation")
+                .with_href("/docs")
+                .with_aria_label("Open documentation"),
+            &theme_provider,
+        )
+        .on_click(move || {
+            link_payloads
+                .lock()
+                .expect("NavCard callback payloads")
+                .push("documentation".to_owned());
+        })
+        .into_compat_node();
+        link.runtime_id = Some("nav-card:link".to_owned());
+        assert_eq!(link.a11y.role, Some(poodle_node::NodeRole::Link));
+        assert_eq!(link.a11y.label.as_deref(), Some("Open documentation"));
+        assert_eq!(link.a11y.tab_index, Some(0));
+        assert!(link.style.focus_ring.is_some());
+        assert_eq!(
+            link.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+
+        let mut disabled = NavCard::from_spec(
+            NavCardSpec::new()
+                .with_title("Unavailable")
+                .with_disabled(true),
+            &theme_provider,
+        )
+        .into_compat_node();
+        disabled.runtime_id = Some("nav-card:disabled".to_owned());
+        assert_eq!(disabled.a11y.role, Some(poodle_node::NodeRole::Button));
+        assert_eq!(disabled.a11y.label.as_deref(), Some("Unavailable"));
+        assert_eq!(disabled.a11y.tab_index, Some(-1));
+        assert!(disabled.interaction.disabled);
+        assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+        let root = poodle_node::Node::container().children([link, disabled]);
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 440.0, 180.0);
+        assert!(poodle_gpui_node_backend::bounds_for("nav-card:link").is_some());
+        assert!(poodle_gpui_node_backend::bounds_for("nav-card:disabled").is_some());
+        driver.wait_for_focus_handle("nav-card:link");
+        driver.keyboard_activate("nav-card:link");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("nav-card:link"),
+            Some(true)
+        );
+        driver.pointer_activate_id("nav-card:link");
+        driver.pointer_activate_id("nav-card:disabled");
+        assert_eq!(
+            payloads
+                .lock()
+                .expect("NavCard callback payloads")
+                .as_slice(),
+            ["documentation", "documentation"],
+            "enabled card callbacks run through pointer and keyboard; disabled suppresses them"
+        );
+        assert!(driver.mounted_observation().is_valid());
     });
 }
