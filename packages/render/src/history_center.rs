@@ -253,6 +253,10 @@ pub fn history_center(
         node.runtime_id = part_id(instance, HISTORY_CENTER_SURFACE_ID);
         node.interaction.dismiss_layer = Some(history_center_layer_id(instance));
         node.interaction.on_dismiss = handlers.on_dismiss.clone();
+        // Contract §6: Tab/Shift+Tab stays trapped within the open surface,
+        // wrapping first-last — the surface applies the web's
+        // `trapFocusKeydown` while open.
+        node.interaction.trap_focus = true;
         node
     });
 

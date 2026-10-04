@@ -1000,6 +1000,12 @@ pub(crate) fn claim_initial_focus(id: &str) -> bool {
     INITIAL_FOCUS_REQUESTED.with(|ids| ids.borrow_mut().insert(id.to_owned()))
 }
 
+/// The element id holding backend-tracked focus right now, if any. The
+/// overlay Tab trap reads this to step within the open layer.
+pub(crate) fn focused_element_id() -> Option<String> {
+    FOCUSED_FIELD.with(|f| f.borrow().clone())
+}
+
 /// Whether the node with this element id held focus as of the last frame.
 /// The conformance observer reads this for the `backend-focus` state — real
 /// window focus, observed both ways, never a latched flag.

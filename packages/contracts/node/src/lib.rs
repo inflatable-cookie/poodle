@@ -792,6 +792,12 @@ pub struct Interaction {
     /// the backend records their rendered bounds for outside-interaction
     /// checks and orders layers by tree position.
     pub dismiss_layer: Option<String>,
+    /// Trap Tab/Shift+Tab inside this node's layer while it is the innermost
+    /// open one, wrapping first-last (the web surface's `trapFocusKeydown`).
+    /// Opt-in per surface: the component's contract decides (a trapped
+    /// popover keeps Tab inside; an untrapped one lets it blur out).
+    /// Declared beside `dismiss_layer`, which names the trapped set.
+    pub trap_focus: bool,
     /// Navigation and command keys, while this node holds focus.
     ///
     /// Returning an element id asks the backend to move focus there. The

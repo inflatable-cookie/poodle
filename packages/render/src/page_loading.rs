@@ -6,8 +6,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeRole,
 };
 use poodle_specs::{
     PageLoadingSpec, ProgressSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
