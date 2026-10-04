@@ -125,10 +125,10 @@ pub fn form_dialog(
             handlers.on_cancel.as_ref().map(Arc::clone),
         );
 
-        // Submit — primary Button. Label flips to "Submitting…" and the button
-        // is disabled while submitting or explicitly disabled.
+        // Submit — primary Button. Label flips to "Submitting..." (contract
+        // ASCII dots) and the button is disabled while submitting or disabled.
         let submit_label = if spec.is_submitting {
-            "Submitting\u{2026}".to_string()
+            "Submitting...".to_string()
         } else {
             spec.submit_label.clone()
         };
@@ -184,8 +184,7 @@ pub fn form_dialog(
         dialog_spec = dialog_spec.with_aria_label(aria.clone());
     }
 
-    // Dismiss routes (Escape/backdrop/close) are host-wired; the old tier does
-    // not attach on_cancel to the shell either, so the close affordance stays
-    // handler-free here for byte parity.
-    dialog(&dialog_spec, ctx, vec![body], actions, None)
+    // Svelte `handleDialogOpenChange` runs `onCancel` on every user close
+    // path that is not submitting: Escape, backdrop, and the close button.
+    dialog(&dialog_spec, ctx, vec![body], actions, handlers.on_cancel)
 }

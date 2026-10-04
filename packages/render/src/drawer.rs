@@ -8,7 +8,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+    CrossAxisAlignment, DismissReason, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    NodePosition, NodeRole,
 };
 use poodle_specs::{DrawerEdge, DrawerSpec};
 
@@ -46,7 +47,13 @@ pub fn drawer(
 
     // ── Panel: edge-specific sizing and border edge ──
     let mut panel = Node::container();
+    panel.id = Some("poodle-drawer-surface".to_string());
     panel.a11y.role = Some(NodeRole::Dialog);
+    panel.a11y.initial_focus = spec.is_modal;
+    if spec.is_modal {
+        panel.interaction.focusable = true;
+        panel.a11y.tab_index = Some(-1);
+    }
     {
         let s = &mut panel.style;
         s.descriptor.background = Some(fill);
@@ -93,6 +100,7 @@ pub fn drawer(
         }
         if let Some(ref title) = spec.title {
             let mut t = Node::text(title);
+            t.id = Some("poodle-drawer-title".to_string());
             t.style.descriptor.text_color = Some(title_color);
             t.style.text_size = Some(title_font);
             t.style.text_weight = Some(600);
@@ -131,12 +139,28 @@ pub fn drawer(
         panel = panel.child(row.child(actions_el));
     }
 
-    // ── Overlay: edge controls the anchor ──
+    if spec.title.is_some() {
+        panel.a11y.labelled_by = Some("poodle-drawer-title".to_string());
+        panel.a11y.label = spec.title.clone();
+    } else if let Some(label) = spec.aria_label.as_deref() {
+        panel.a11y.label = Some(label.to_string());
+    }
+
+    // ── Overlay: window-hosted backdrop, edge controls the anchor ──
     let mut overlay = Node::container();
+    overlay.id = Some("poodle-drawer-backdrop".to_string());
+    overlay.position = NodePosition::Absolute {
+        top: Some(0.0),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: Some(0.0),
+    };
     {
         let s = &mut overlay.style;
-        s.descriptor.background = Some(backdrop);
         s.overlay = true;
+        if spec.is_modal {
+            s.descriptor.background = Some(backdrop);
+        }
         match spec.edge {
             DrawerEdge::Right => {
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -156,18 +180,39 @@ pub fn drawer(
         }
     }
 
-    // Inside-clicks must end at the panel, not reach the dismissing backdrop.
-    if let (true, true, Some(handler)) =
-        (spec.is_modal, spec.dismiss_on_backdrop, &on_request_close)
-    {
-        let handler = Arc::clone(handler);
-        overlay.interaction.on_activate = Some(Arc::new(move || handler()));
+    if on_request_close.is_some() {
+        panel.interaction.dismiss_layer = Some("poodle-drawer-layer".to_string());
         panel.interaction.on_activate = Some(Arc::new(|| {}));
+        if spec.dismiss_on_escape {
+            let handler = Arc::clone(on_request_close.as_ref().unwrap());
+            let outside = spec.dismiss_on_outside_interact;
+            panel.interaction.on_dismiss = Some(Arc::new(move |reason| match reason {
+                DismissReason::Escape => handler(),
+                DismissReason::Outside if outside => handler(),
+                _ => {}
+            }));
+        }
     }
 
-    let mut root = overlay.child(panel);
-    if let Some(label) = spec.aria_label.as_deref() {
-        root.a11y.label = Some(label.to_string());
+    if spec.is_modal {
+        let mut backdrop_button = Node::container();
+        backdrop_button.id = Some("poodle-drawer-backdrop-dismiss".to_string());
+        backdrop_button.a11y.role = Some(NodeRole::Button);
+        backdrop_button.a11y.label = Some("Dismiss drawer backdrop".to_string());
+        backdrop_button.interaction.focusable = true;
+        backdrop_button.position = NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: Some(0.0),
+        };
+        backdrop_button.style.descriptor.layout.direction = LayoutDirection::Row;
+        if let (true, Some(handler)) = (spec.dismiss_on_backdrop, &on_request_close) {
+            let handler = Arc::clone(handler);
+            backdrop_button.interaction.on_activate = Some(Arc::new(move || handler()));
+        }
+        overlay.child(backdrop_button).child(panel)
+    } else {
+        overlay.child(panel)
     }
-    root
 }

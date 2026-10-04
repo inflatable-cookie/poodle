@@ -5,7 +5,6 @@
     {
       "substrate": "overlay-dismissal",
       "components": [
-        "AlertDialog",
         "ColorPicker",
         "ContextMenu",
         "DataTable",
@@ -14,12 +13,9 @@
         "DateTimePicker",
         "DateTimeRangePicker",
         "DateTimeZonePicker",
-        "DebugDialog",
-        "Drawer",
         "Field",
         "FilterBuilder",
         "FilterToolbar",
-        "FormDialog",
         "HistoryCenter",
         "HoverCard",
         "ListCardCounter",
@@ -39,15 +35,14 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 32,
-        "events": 29,
-        "pointer": 32,
-        "keyboard_focus": 32,
-        "accessibility": 32,
-        "visual": 32
+        "semantic": 28,
+        "events": 25,
+        "pointer": 28,
+        "keyboard_focus": 28,
+        "accessibility": 28,
+        "visual": 28
       },
       "contracts": [
-        "docs/contracts/components/alert-dialog.md",
         "docs/contracts/components/color-picker.md",
         "docs/contracts/components/context-menu.md",
         "docs/contracts/components/data-table.md",
@@ -56,12 +51,9 @@
         "docs/contracts/components/date-time-picker.md",
         "docs/contracts/components/date-time-range-picker.md",
         "docs/contracts/components/date-time-zone-picker.md",
-        "docs/contracts/components/debug-dialog.md",
-        "docs/contracts/components/drawer.md",
         "docs/contracts/components/field.md",
         "docs/contracts/components/filter-builder.md",
         "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/form-dialog.md",
         "docs/contracts/components/history-center.md",
         "docs/contracts/components/hover-card.md",
         "docs/contracts/components/list-card-counter.md",

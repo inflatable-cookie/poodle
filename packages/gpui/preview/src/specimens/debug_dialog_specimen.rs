@@ -25,7 +25,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_trigger_label("Inspect payload")
                     .with_value(sample_value()),
                 theme,
-            ),
+            )
+            .open(true),
         ))
         // --- Custom trigger (secondary variant, xs size, tighter max-height) ---
         .child(group(
@@ -40,7 +41,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_max_height("18rem")
                     .with_value(sample_value()),
                 theme,
-            ),
+            )
+            .open(true),
         ))
         // --- Hidden when null (renders nothing; trigger only when value present) ---
         .child(group(

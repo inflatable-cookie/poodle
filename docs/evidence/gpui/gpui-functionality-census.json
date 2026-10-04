@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "b0ce71cc7a597137953177b6ada51d56dc51d821",
+  "source_commit": "1da9837a4ce9100be613534f8e2d1d49c602dcd4",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -200,15 +200,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_alert_dialog"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_alert_dialog"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_alert_dialog"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_alert_dialog"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_alert_dialog"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_alert_dialog"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -217,10 +241,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for AlertDialog; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/AlertDialog--first-mounted-parity-alert-dialog.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Avatar",
@@ -1192,15 +1216,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_drawer"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_drawer"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_drawer"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_drawer"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_drawer"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_drawer"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1209,10 +1257,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Drawer; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Drawer--first-mounted-parity-drawer.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DurationInput",
@@ -5493,15 +5541,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_dialog"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_dialog"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_dialog"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_dialog"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_dialog"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_form_dialog"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5510,10 +5582,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for FormDialog; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/FormDialog--first-mounted-parity-form-dialog.json"
+      ],
+      "refusals": []
     },
     {
       "component": "FormLayout",
@@ -5598,15 +5670,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_debug_dialog"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_debug_dialog"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_debug_dialog"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_debug_dialog"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_debug_dialog"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_debug_dialog"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5615,10 +5711,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DebugDialog; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DebugDialog--first-mounted-parity-debug-dialog.json"
+      ],
+      "refusals": []
     },
     {
       "component": "LicenceActivation",
@@ -7932,24 +8028,23 @@
     }
   ],
   "summary": {
-    "admittedRows": 84,
-    "fullyAdmittedRows": 61,
+    "admittedRows": 88,
+    "fullyAdmittedRows": 65,
     "missingTally": {
-      "semantic": 91,
-      "events": 79,
-      "pointer": 88,
-      "keyboard_focus": 84,
-      "accessibility": 97,
-      "visual": 110
+      "semantic": 87,
+      "events": 75,
+      "pointer": 84,
+      "keyboard_focus": 80,
+      "accessibility": 93,
+      "visual": 106
     },
     "holdCount": 175,
-    "refusalCount": 154
+    "refusalCount": 150
   },
   "groups": [
     {
       "substrate": "overlay-dismissal",
       "components": [
-        "AlertDialog",
         "ColorPicker",
         "ContextMenu",
         "DataTable",
@@ -7958,12 +8053,9 @@
         "DateTimePicker",
         "DateTimeRangePicker",
         "DateTimeZonePicker",
-        "DebugDialog",
-        "Drawer",
         "Field",
         "FilterBuilder",
         "FilterToolbar",
-        "FormDialog",
         "HistoryCenter",
         "HoverCard",
         "ListCardCounter",
@@ -7983,15 +8075,14 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 32,
-        "events": 29,
-        "pointer": 32,
-        "keyboard_focus": 32,
-        "accessibility": 32,
-        "visual": 32
+        "semantic": 28,
+        "events": 25,
+        "pointer": 28,
+        "keyboard_focus": 28,
+        "accessibility": 28,
+        "visual": 28
       },
       "contracts": [
-        "docs/contracts/components/alert-dialog.md",
         "docs/contracts/components/color-picker.md",
         "docs/contracts/components/context-menu.md",
         "docs/contracts/components/data-table.md",
@@ -8000,12 +8091,9 @@
         "docs/contracts/components/date-time-picker.md",
         "docs/contracts/components/date-time-range-picker.md",
         "docs/contracts/components/date-time-zone-picker.md",
-        "docs/contracts/components/debug-dialog.md",
-        "docs/contracts/components/drawer.md",
         "docs/contracts/components/field.md",
         "docs/contracts/components/filter-builder.md",
         "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/form-dialog.md",
         "docs/contracts/components/history-center.md",
         "docs/contracts/components/hover-card.md",
         "docs/contracts/components/list-card-counter.md",
