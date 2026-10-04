@@ -1241,13 +1241,15 @@ where
         || sample_property(anim, AnimProperty::TranslateY, 0.0).is_some();
     let scaled = sample_property(anim, AnimProperty::ScaleX, 0.0).is_some()
         || sample_property(anim, AnimProperty::ScaleY, 0.0).is_some();
-    if translated {
+    let anchored = matches!(node.position, NodePosition::Absolute { .. });
+    if translated && !anchored {
         record_probe_channel("surface.animation.applied.translation");
     }
-    if scaled && sample_property(anim, AnimProperty::Opacity, 0.0).is_some() {
+    if (scaled || (translated && anchored))
+        && sample_property(anim, AnimProperty::Opacity, 0.0).is_some()
+    {
         record_probe_channel("surface.animation.approximation.opacity-stand-in");
     }
-    let anchored = matches!(node.position, NodePosition::Absolute { .. });
     let anim = anim.clone();
     let id = element_id(node);
     el.with_animation(id, gpui_animation(&anim), move |el, t| {
