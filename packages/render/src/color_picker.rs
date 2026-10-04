@@ -25,8 +25,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow,
-    LayoutSizing, Node, NodePosition, NodeRole, ShadowLayer,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection,
+    LayoutOverflow, LayoutSizing, Node, NodePosition, NodeRole, ShadowLayer,
 };
 use poodle_specs::{
     ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlOption, SegmentedControlSpec,
@@ -138,7 +138,23 @@ pub fn color_picker(
         s.descriptor.cursor = CursorHint::Pointer;
     }
     all_radius(&mut trigger, trigger_radius);
-    trigger.interaction.focusable = true;
+    // Contract §6: the trigger is a button (focus ring on :focus-visible,
+    // aria-expanded/controls pairing with the surface). A disabled picker
+    // leaves the tab order, like a native disabled button.
+    trigger.a11y.role = Some(NodeRole::Button);
+    trigger.a11y.expanded = Some(spec.current_open());
+    trigger.a11y.controls = Some("color-picker-surface".to_string());
+    trigger.interaction.focusable = !spec.is_disabled;
+    if spec.is_disabled {
+        trigger.a11y.tab_index = None;
+    } else {
+        trigger.a11y.tab_index = Some(0);
+        trigger.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
+    }
     if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_toggle) {
         let handler = Arc::clone(handler);
         trigger.interaction.on_activate = Some(Arc::new(move || handler()));
@@ -192,8 +208,9 @@ pub fn color_picker(
         // border-subtle, radius-surface, elevated bg.
         let surface_pad = rem_to_px(0.75);
         let mut surface = Node::container();
-        // Contract: the open surface popover is a `dialog`.
+        // Contract: the open surface popover is a `dialog` named "Color picker".
         surface.a11y.role = Some(NodeRole::Dialog);
+        surface.a11y.label = Some("Color picker".to_string());
         surface.id = Some("color-picker-surface".to_string());
         {
             let s = &mut surface.style;
@@ -235,11 +252,18 @@ pub fn color_picker(
 
         // ── Swatch grid (opt-in) ──────────────────────────────────
         if !spec.swatches.is_empty() {
+            // Contract §6: swatches are buttons with a :focus-visible outline.
+            let swatch_ring = FocusRing {
+                color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+                width: ctx.theme().resolve_border_width("border.width.focus"),
+                offset: rem_to_px(0.125),
+            };
             surface = surface.child(build_swatch_grid(
                 &spec.swatches,
                 &current,
                 text_primary,
                 border_subtle,
+                swatch_ring,
                 handlers.on_change.as_ref(),
             ));
         }
@@ -708,6 +732,7 @@ fn build_swatch_grid(
     current: &str,
     text_primary: ColorValue,
     border_subtle: ColorValue,
+    focus_ring: FocusRing,
     on_change: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let swatch_size = rem_to_px(1.25);
@@ -757,6 +782,8 @@ fn build_swatch_grid(
         }
         all_radius(&mut swatch, swatch_radius);
         swatch.interaction.focusable = true;
+        swatch.a11y.tab_index = Some(0);
+        swatch.style.focus_ring = Some(focus_ring);
 
         if let Some(handler) = on_change {
             let handler = Arc::clone(handler);

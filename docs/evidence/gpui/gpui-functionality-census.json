@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "42f7e3dc909558cf2f7446b61668d1977870a7ce",
+  "source_commit": "f762dc96ba6e0808f8e0cb28fb386a7b9c8c05e3",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -684,15 +684,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_color_picker"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_color_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_color_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_color_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_color_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_color_picker"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -701,10 +725,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ColorPicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ColorPicker--first-mounted-parity-color-picker.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Checkbox",
@@ -1518,14 +1542,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_field"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1534,10 +1578,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Field; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Field--first-mounted-parity-field.json"
+      ],
+      "refusals": []
     },
     {
       "component": "FieldSet",
@@ -1760,15 +1804,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_hover_card"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_hover_card"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_hover_card"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_hover_card"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_hover_card"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_hover_card"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1777,10 +1845,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for HoverCard; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/HoverCard--first-mounted-parity-hover-card.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Icon",
@@ -1999,15 +2067,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_list_card_counter"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2016,10 +2108,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ListCardCounter; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ListCardCounter--first-mounted-parity-list-card-counter.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ListGrid",
@@ -8410,18 +8502,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 105,
-    "fullyAdmittedRows": 82,
+    "admittedRows": 109,
+    "fullyAdmittedRows": 86,
     "missingTally": {
-      "semantic": 70,
-      "events": 60,
-      "pointer": 67,
-      "keyboard_focus": 63,
-      "accessibility": 76,
-      "visual": 89
+      "semantic": 66,
+      "events": 57,
+      "pointer": 63,
+      "keyboard_focus": 59,
+      "accessibility": 72,
+      "visual": 85
     },
     "holdCount": 175,
-    "refusalCount": 133
+    "refusalCount": 129
   },
   "groups": [
     {
@@ -8568,43 +8660,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "Field",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 11,
-        "events": 10,
-        "pointer": 11,
-        "keyboard_focus": 11,
-        "accessibility": 11,
-        "visual": 11
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -8666,6 +8721,35 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "HistoryCenter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 7,
+        "pointer": 7,
+        "keyboard_focus": 7,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
       ]
     },
     {

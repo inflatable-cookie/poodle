@@ -146,43 +146,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "Field",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 11,
-        "events": 10,
-        "pointer": 11,
-        "keyboard_focus": 11,
-        "accessibility": 11,
-        "visual": 11
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -244,6 +207,35 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "HistoryCenter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 7,
+        "pointer": 7,
+        "keyboard_focus": 7,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
       ]
     },
     {

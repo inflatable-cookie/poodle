@@ -4,7 +4,8 @@
 //! Ported from: `packages/jetstream/components/src/field.rs`.
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node,
 };
 use poodle_specs::{FieldSpec, ValidationState};
 
@@ -119,6 +120,25 @@ pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<SlotBuil
     }
     el = el.child(header);
 
+    if let Some(description_id) = spec.description_id() {
+        // Contract §6: the description is exposed as a visually-hidden
+        // element carrying {id}-description so aria-describedby resolves;
+        // the info-icon popover is the visual affordance for the same text.
+        if let Some(info) = spec.info_text() {
+            let mut clip = Node::container();
+            clip.id = Some(description_id);
+            {
+                let s = &mut clip.style;
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.width = LayoutSizing::Fixed(1.0);
+                s.descriptor.layout.height = LayoutSizing::Fixed(1.0);
+                s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+                s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+            }
+            el = el.child(clip.child(Node::text(info)));
+        }
+    }
+
     if let Some(mut control_el) = control {
         // The contract's anatomy calls the label the "accessible naming anchor
         // for the slotted control", which the web target spells `<label for>`.
@@ -131,6 +151,12 @@ pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<SlotBuil
         if control_el.a11y.label.is_none() && !spec.label.is_empty() {
             control_el.a11y.label = Some(spec.label.clone());
         }
+        // Contract §6: the field owns the description + message
+        // relationship; the Svelte child applies the `describedBy` slot prop
+        // over its own, so the field value wins here too.
+        if let Some(described_by) = spec.described_by() {
+            control_el.a11y.described_by = Some(described_by);
+        }
         el = el.child(control_el);
     }
 
@@ -139,6 +165,9 @@ pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<SlotBuil
             let mut e = Node::text(error);
             e.style.descriptor.text_color = Some(error_color);
             e.style.text_size = Some(supporting_size);
+            if let Some(error_id) = spec.error_id() {
+                e.id = Some(error_id);
+            }
             el = el.child(e);
         }
     }
@@ -147,6 +176,9 @@ pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<SlotBuil
             let mut p = Node::text(pending);
             p.style.descriptor.text_color = Some(desc_color);
             p.style.text_size = Some(supporting_size);
+            if let Some(pending_id) = spec.pending_id() {
+                p.id = Some(pending_id);
+            }
             el = el.child(p);
         }
     }
