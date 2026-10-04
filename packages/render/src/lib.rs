@@ -261,11 +261,16 @@ pub use context::{
 };
 pub use context_menu::context_menu;
 pub use data_table::{data_table, data_table_loading, DataTableHandlers};
-pub use date_picker::{date_picker, DatePickerHandlers};
-pub use date_range_picker::date_range_picker;
-pub use date_time_picker::date_time_picker;
-pub use date_time_range_picker::date_time_range_picker;
-pub use date_time_zone_picker::{date_time_zone_picker, DateTimeZonePickerHandlers};
+pub use date_picker::{
+    date_picker, date_picker_with_callbacks, DatePickerCallbacks, DatePickerHandlers,
+};
+pub use date_range_picker::{date_range_picker, date_range_picker_with_callbacks};
+pub use date_time_picker::{date_time_picker, date_time_picker_with_callbacks};
+pub use date_time_range_picker::{date_time_range_picker, date_time_range_picker_with_callbacks};
+pub use date_time_zone_picker::{
+    date_time_zone_picker, date_time_zone_picker_with_callbacks, DateTimeZonePickerCallbacks,
+    DateTimeZonePickerHandlers,
+};
 pub use debug_dialog::{debug_dialog, debug_dialog_with_state, DebugDialogHandlers};
 pub use detail_item::{detail_item, detail_item_with_slots, detail_item_with_slots_state};
 pub use detail_section::detail_section;

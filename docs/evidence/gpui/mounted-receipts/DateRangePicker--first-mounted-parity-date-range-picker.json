@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "ModelConnectionSetup",
-  "test": "model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window",
+  "component": "DateRangePicker",
+  "test": "first_mounted_parity_date_range_picker",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,29 +19,32 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            submits.lock().unwrap().as_slice(),\n            [\"codex-app\", \"codex-app\"],\n            \"Enter on the focused Add control delivers the same submit payload",
-      "assert!(\n            stages.lock().unwrap().is_empty(),\n            \"the keyboard route emits no stage-change callback",
-      "assert!(\n            stages.lock().unwrap().is_empty(),\n            \"a direct route emits no stage-change callback"
+      "assert_eq!(\n            payloads.len(),\n            1,\n            \"range change callback",
+      "assert_eq!(payload"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
-      "keyboard_"
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
+      "a11y\n            .",
+      "accessible",
       "NodeRole"
     ],
     "visual": [
-      "dimensions"
+      "resolve_space"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::model_connection_setup",
+    "renderer": "poodle_render::date_range_picker_with_callbacks",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -54,7 +57,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-090",
     "outcome": "passed",
-    "body_sha256": "8b8cf5d7288edb6094e8ee58e3ed5c247182ab136a82815df509d67b003358ca"
+    "body_sha256": "a427926aa518c25b865748d66db5f1a4cfd88c0c1a4f6b40a0d2c099c6af8683"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

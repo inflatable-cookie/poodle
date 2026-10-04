@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, DismissHandler, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole, StylePatch,
 };
 use poodle_specs::{ControlSize, SemanticControlSizeRole};
 
@@ -98,6 +98,49 @@ pub(crate) fn picker_trigger(ctx: &RenderContext<'_>, config: PickerTrigger<'_>)
     }
 
     trigger
+}
+
+/// Adds the stable trigger and dismissal semantics shared by the picker family.
+pub(crate) fn configure_picker_trigger(
+    trigger: &mut Node,
+    instance_id: &str,
+    accessible_name: &str,
+    open: bool,
+    on_dismiss: Option<DismissHandler>,
+) {
+    let surface_id = (!instance_id.is_empty()).then(|| format!("{instance_id}:surface"));
+    if surface_id.is_some() {
+        let trigger_id = format!("{instance_id}:trigger");
+        trigger.id = Some(trigger_id.clone());
+        trigger.runtime_id = Some(trigger_id);
+    }
+    trigger.a11y.role = Some(NodeRole::Button);
+    trigger.a11y.label = Some(accessible_name.to_owned());
+    trigger.a11y.expanded = Some(open);
+    trigger.a11y.controls = surface_id;
+    if open && !instance_id.is_empty() {
+        let layer_id = format!("{instance_id}:layer");
+        trigger.interaction.dismiss_layer = Some(layer_id);
+        trigger.interaction.on_dismiss = on_dismiss;
+    }
+}
+
+/// Adds the matching surface identity and registers it with the shared dismiss stack.
+pub(crate) fn configure_picker_surface(
+    surface: &mut Node,
+    instance_id: &str,
+    open: bool,
+    on_dismiss: Option<DismissHandler>,
+) {
+    if !instance_id.is_empty() {
+        let surface_id = format!("{instance_id}:surface");
+        surface.id = Some(surface_id.clone());
+        surface.runtime_id = Some(surface_id);
+    }
+    if open && !instance_id.is_empty() {
+        surface.interaction.dismiss_layer = Some(format!("{instance_id}:layer"));
+        surface.interaction.on_dismiss = on_dismiss;
+    }
 }
 
 #[cfg(test)]

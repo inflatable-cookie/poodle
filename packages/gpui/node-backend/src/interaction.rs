@@ -792,11 +792,13 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         return;
                     }
                 } else if key == "escape" {
-                    // Overlay members already register on the dismiss stack.
-                    // Invoking on_cancel here would Close the focused instance
-                    // and then let the window host dismiss_innermost — two
-                    // different layers on one keystroke.
+                    // Overlay Escape belongs to the shared layer stack. Route
+                    // it here because focused GPUI controls can prevent the
+                    // event from reaching the window host, and consuming it
+                    // here avoids dismissing a second parent layer.
                     if overlay_owns_escape {
+                        super::layers::dismiss_innermost(cx);
+                        cx.stop_propagation();
                         return;
                     }
                     if let Some(handler) = &cancel {

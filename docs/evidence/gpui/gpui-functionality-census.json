@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "1da9837a4ce9100be613534f8e2d1d49c602dcd4",
+  "source_commit": "eb38e296ee76fc2c85426539f090c659a061d6b9",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -1019,15 +1019,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_picker"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_picker"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1036,10 +1060,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DatePicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DatePicker--first-mounted-parity-date-picker.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DateRangePicker",
@@ -1054,15 +1078,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_range_picker"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_range_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_range_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_range_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_range_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_range_picker"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1071,10 +1119,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DateRangePicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DateRangePicker--first-mounted-parity-date-range-picker.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DateTimePicker",
@@ -1089,15 +1137,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_picker"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_picker"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1106,10 +1178,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DateTimePicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DateTimePicker--first-mounted-parity-date-time-picker.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DateTimeRangePicker",
@@ -1124,15 +1196,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_range_picker"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_range_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_range_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_range_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_range_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_range_picker"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1141,10 +1237,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DateTimeRangePicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DateTimeRangePicker--first-mounted-parity-date-time-range-picker.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Dialog",
@@ -4736,15 +4832,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_zone_picker"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_zone_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_zone_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_zone_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_zone_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_date_time_zone_picker"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4753,10 +4873,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DateTimeZonePicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DateTimeZonePicker--first-mounted-parity-date-time-zone-picker.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ActionDiscoveryPanel",
@@ -8028,18 +8148,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 88,
-    "fullyAdmittedRows": 65,
+    "admittedRows": 93,
+    "fullyAdmittedRows": 70,
     "missingTally": {
-      "semantic": 87,
-      "events": 75,
-      "pointer": 84,
-      "keyboard_focus": 80,
-      "accessibility": 93,
-      "visual": 106
+      "semantic": 82,
+      "events": 70,
+      "pointer": 79,
+      "keyboard_focus": 75,
+      "accessibility": 88,
+      "visual": 101
     },
     "holdCount": 175,
-    "refusalCount": 150
+    "refusalCount": 145
   },
   "groups": [
     {
@@ -8048,11 +8168,6 @@
         "ColorPicker",
         "ContextMenu",
         "DataTable",
-        "DatePicker",
-        "DateRangePicker",
-        "DateTimePicker",
-        "DateTimeRangePicker",
-        "DateTimeZonePicker",
         "Field",
         "FilterBuilder",
         "FilterToolbar",
@@ -8075,22 +8190,17 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 28,
-        "events": 25,
-        "pointer": 28,
-        "keyboard_focus": 28,
-        "accessibility": 28,
-        "visual": 28
+        "semantic": 23,
+        "events": 20,
+        "pointer": 23,
+        "keyboard_focus": 23,
+        "accessibility": 23,
+        "visual": 23
       },
       "contracts": [
         "docs/contracts/components/color-picker.md",
         "docs/contracts/components/context-menu.md",
         "docs/contracts/components/data-table.md",
-        "docs/contracts/components/date-picker.md",
-        "docs/contracts/components/date-range-picker.md",
-        "docs/contracts/components/date-time-picker.md",
-        "docs/contracts/components/date-time-range-picker.md",
-        "docs/contracts/components/date-time-zone-picker.md",
         "docs/contracts/components/field.md",
         "docs/contracts/components/filter-builder.md",
         "docs/contracts/components/filter-toolbar.md",
