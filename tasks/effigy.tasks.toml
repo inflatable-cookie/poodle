@@ -102,6 +102,8 @@
 # `{args}` forwards a test filter and harness flags, for example
 # `effigy regressions:native my_test -- --exact`; without the placeholder the
 # tokens are accepted and dropped, and the whole target runs.
+# Per-test timeout is the harness `TEST_BOUND` in headless_driver.rs (libtest
+# thread name). A stuck wait fails by name instead of wedging the run.
 "regressions:native" = { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions {args}", env = { POODLE_NUCLEUS_RECEIPT_DIR = "{repo}/target/nucleus-receipts" } }
 # Headless native specimen probe (g15.026): mounts the production GPUI
 # `PreviewRoot` on the in-memory test platform and constructs all 174 portable
@@ -157,7 +159,9 @@
 "gpui:preview" = [{ task = "gpui:run" }]
 
 # Jetstream native preview (game engine)
-"jetstream:build" = "cargo build -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+# Preflight names a missing or stale sibling checkout instead of cargo's
+# unresolved path error. Poodle does not vendor Jetstream.
+"jetstream:build" = "bun scripts/jetstream-build.ts"
 "jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
 "jetstream:test" = "cd packages/jetstream/adapter && cargo test"
 "jetstream:preview" = [{ task = "jetstream:run" }]

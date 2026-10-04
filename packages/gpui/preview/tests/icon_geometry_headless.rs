@@ -78,13 +78,18 @@ fn end_tick_allocation_probe() {
 }
 
 fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
+    let _deadline = headless_driver::arm_test_deadline();
     poodle_gpui_node_backend::reset_focus_registry();
     let mut cx = TestAppContext::single();
     body(&mut cx);
-    cx.dispatcher.run_until_parked();
+    headless_driver::run_until_parked_named("test teardown to park", || {
+        cx.dispatcher.run_until_parked();
+    });
     cx.background_executor.forbid_parking();
     cx.quit();
-    cx.dispatcher.run_until_parked();
+    headless_driver::run_until_parked_named("test shutdown to park", || {
+        cx.dispatcher.run_until_parked();
+    });
 }
 
 fn theme() -> GpuiThemeProvider {
