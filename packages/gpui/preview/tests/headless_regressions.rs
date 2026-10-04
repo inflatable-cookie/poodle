@@ -43029,10 +43029,10 @@ fn first_mounted_parity_drawer() {
     });
 }
 
-/// ThemeSelect exposes its dialog-opener trigger, listbox tiles, selection,
-/// focus entry and dismissal through mounted GPUI input.
 #[test]
 fn first_mounted_parity_theme_select() {
+    // ThemeSelect exposes its dialog-opener trigger, listbox tiles, selection,
+    // focus entry and dismissal through mounted GPUI input.
     use gpui::{AnyElement, IntoElement};
     use poodle_adapter::ThemeProvider;
     use poodle_node::DismissReason;
@@ -43214,10 +43214,10 @@ fn first_mounted_parity_theme_select() {
     });
 }
 
-/// RefSelect opens from its trigger, filters through the search field, roves
-/// with arrows, chooses a ref and dismisses with Escape on mounted GPUI.
 #[test]
 fn first_mounted_parity_ref_select() {
+    // RefSelect opens from its trigger, filters through the search field, roves
+    // with arrows, chooses a ref and dismisses with Escape on mounted GPUI.
     use gpui::{AnyElement, IntoElement};
     use poodle_adapter::ThemeProvider;
     use poodle_node::DismissReason;
@@ -43406,10 +43406,10 @@ fn first_mounted_parity_ref_select() {
     });
 }
 
-/// PickerShell is static chrome: its landmark, heading, status line and the
-/// slotted controls reach mounted GPUI, and slotted controls take real input.
 #[test]
 fn first_mounted_parity_picker_shell() {
+    // PickerShell is static chrome: its landmark, heading, status line and the
+    // slotted controls reach mounted GPUI, and slotted controls take real input.
     use gpui::{AnyElement, IntoElement};
     use poodle_adapter::ThemeProvider;
     use poodle_render::RenderContext;
@@ -43514,10 +43514,10 @@ fn first_mounted_parity_picker_shell() {
     });
 }
 
-/// RelationPicker names and presses candidates, roves between them, drills and
-/// navigates back, and confirms through mounted GPUI input.
 #[test]
 fn first_mounted_parity_relation_picker() {
+    // RelationPicker names and presses candidates, roves between them, drills and
+    // navigates back, and confirms through mounted GPUI input.
     use gpui::{AnyElement, IntoElement};
     use poodle_adapter::ThemeProvider;
     use poodle_specs::{PickerItemSpec, RelationPickerSpec, SelectionMode};
