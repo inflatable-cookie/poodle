@@ -12,7 +12,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, DismissReason, HasPopup, LayoutDirection, Node, NodeKey,
     NodeRole, StylePatch,
 };
-use poodle_specs::{MenuSpec, MenubarSpec};
+use poodle_specs::{MenuItemKind, MenuSpec, MenubarSpec};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -271,6 +271,26 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
                         }
                         _ => None,
                     }
+                }));
+            }
+            // Enter/Space (Svelte `openMenuAtIndex`): open idempotently. An
+            // already-open trigger stays open and focus goes to its first
+            // enabled row; a closed one opens through the trigger channel
+            // (the host applies its own open effect). Clicks still toggle.
+            if let Some(trigger) = handlers.on_trigger.clone() {
+                let value = entry.value.clone();
+                let first_row = entry
+                    .items
+                    .iter()
+                    .find(|item| item.kind != MenuItemKind::Separator && !item.is_disabled)
+                    .map(|item| format!("menu-item:{}", item.value));
+                let trigger_open = is_open;
+                btn.interaction.on_key_activate = Some(Arc::new(move || {
+                    if trigger_open {
+                        return first_row.clone();
+                    }
+                    trigger(&value);
+                    None
                 }));
             }
             if let Some(focused) = &handlers.on_focus {

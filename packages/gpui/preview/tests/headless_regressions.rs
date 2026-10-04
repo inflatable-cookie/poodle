@@ -43989,6 +43989,45 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         driver.dispatch_key("escape");
         sync(&mut driver);
 
+        // ── Enter/Space on triggers open idempotently ──
+        driver.pointer_activate_id("menubar-trigger:file");
+        sync(&mut driver);
+        let before = host.trigger_payloads.lock().expect("payloads").len();
+        for key in ["enter", "space"] {
+            driver.focus_element("menubar-trigger:file");
+            driver.dispatch_key_raw(key);
+            sync(&mut driver);
+            assert!(
+                poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_some(),
+                "{key} on an already-open trigger keeps its menu open"
+            );
+            assert_eq!(
+                poodle_gpui_node_backend::focus_state_for("menu-item:new"),
+                Some(true),
+                "{key} on an open trigger focuses the first row"
+            );
+            assert_eq!(
+                host.trigger_payloads.lock().expect("payloads").len(),
+                before,
+                "{key} on an open trigger never reaches the toggle"
+            );
+        }
+        driver.dispatch_key("escape");
+        sync(&mut driver);
+        driver.focus_element("menubar-trigger:edit");
+        driver.dispatch_key_raw("enter");
+        sync(&mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_some(),
+            "Enter on a closed trigger opens its menu"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:undo"),
+            Some(true)
+        );
+        driver.dispatch_key("escape");
+        sync(&mut driver);
+
         // ── Roving tab stop follows real focus ──
         driver.focus_element("menubar-trigger:edit");
         sync(&mut driver);
@@ -44017,7 +44056,7 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         );
         assert_eq!(
             host.dismissals.lock().expect("refused dismissals").as_slice(),
-            ["escape", "outside", "escape"],
+            ["escape", "outside", "escape", "escape", "escape"],
             "the refused outside press never reaches the host"
         );
         driver.dispatch_key("escape");
@@ -44430,6 +44469,23 @@ fn navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_back
             Some(true),
             "ArrowDown keeps focus on the trigger"
         );
+
+        // ── Enter/Space on the active trigger keep it open ──
+        let before = host.changes.lock().expect("change payloads").len();
+        for key in ["enter", "space"] {
+            driver.focus_element("navigation-menu-trigger:home");
+            driver.dispatch_key_raw(key);
+            sync(&mut driver);
+            assert!(
+                poodle_gpui_node_backend::bounds_for("navigation-menu-panel:home").is_some(),
+                "{key} on the active trigger keeps its viewport open"
+            );
+            assert_eq!(
+                host.changes.lock().expect("change payloads").len(),
+                before,
+                "{key} on the active trigger never reaches the toggle"
+            );
+        }
 
         // ── Escape from the focused trigger closes; focus stays on it ──
         driver.dispatch_key_raw("escape");

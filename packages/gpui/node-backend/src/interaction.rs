@@ -1186,6 +1186,22 @@ fn node_key(key: &str) -> Option<NodeKey> {
     })
 }
 
+thread_local! {
+    /// Enter/Space handled by `on_key_activate` on the way down, whose key-up
+    /// must suppress the click synthesis. Window-scoped state, not element
+    /// state: the handler's own transition usually rebuilds the tree or moves
+    /// focus, so the matching key-up reaches a different element. The window
+    /// host (`attach_overlay_host`) consumes it via [`suppress_key_activation_click`].
+    static KEY_ACTIVATED: std::cell::RefCell<std::collections::BTreeSet<String>> =
+        const { std::cell::RefCell::new(std::collections::BTreeSet::new()) };
+}
+
+/// Whether this key-up closes a keyboard activation already handled on the
+/// way down; the host then prevents GPUI's Enter/Space click synthesis.
+pub(crate) fn suppress_key_activation_click(key: &str) -> bool {
+    KEY_ACTIVATED.with(|keys| keys.borrow_mut().remove(key))
+}
+
 /// Modifier-aware activation, secondary activation, and navigation keys.
 fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
     if let Some(handler) = &node.interaction.on_activate_modified {
@@ -1205,6 +1221,27 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
             });
             cx.refresh_windows();
         });
+    }
+    if let Some(handler) = &node.interaction.on_key_activate {
+        let activate = handler.clone();
+        el = el
+            .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let key = event.keystroke.key.as_str();
+                let m = &event.keystroke.modifiers;
+                if matches!(key, "enter" | "space")
+                    && !event.is_held
+                    && !(m.platform || m.control || m.alt || m.shift)
+                {
+                    KEY_ACTIVATED.with(|keys| keys.borrow_mut().insert(key.to_owned()));
+                    if let Some(target) = activate() {
+                        if let Some(handle) = focus_handle_for(&target) {
+                            handle.focus(window);
+                        }
+                    }
+                    cx.stop_propagation();
+                    cx.refresh_windows();
+                }
+            });
     }
     if let Some(handler) = &node.interaction.on_key {
         let keys = handler.clone();

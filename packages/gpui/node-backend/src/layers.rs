@@ -358,6 +358,11 @@ where
                 dismiss_layers_at(event.position, cx);
             },
         )
+        .capture_key_up(move |event: &gpui::KeyUpEvent, window, _cx| {
+            if crate::interaction::suppress_key_activation_click(event.keystroke.key.as_str()) {
+                window.prevent_default();
+            }
+        })
         .on_key_down(
             move |event: &KeyDownEvent, window, cx| match event.keystroke.key.as_str() {
                 "escape" => {

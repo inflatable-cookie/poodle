@@ -801,6 +801,11 @@ pub struct Interaction {
     /// component chooses the semantic destination; the backend owns the
     /// actual platform focus operation.
     pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
+    /// Keyboard activation (Enter or Space) that differs from a click. When
+    /// present the backend runs it on key-down and suppresses the Enter/Space
+    /// click synthesis, so the component can open idempotently where a click
+    /// toggles. Returning an element id asks the backend to move focus there.
+    pub on_key_activate: Option<Arc<dyn Fn() -> Option<String> + Send + Sync>>,
     /// Registers this node as a semantic drag source with the runtime's drag
     /// controller. Identity, subject, allowed operations, accessible name, and
     /// the start/terminal callbacks live in the registration; the gesture that

@@ -308,6 +308,19 @@ pub fn navigation_menu(
                 let value = entry.value.clone();
                 btn.interaction.on_activate = Some(Arc::new(move || handler(&value)));
             }
+            // Enter/Space (Svelte `handleKeydown`): set the value, never
+            // toggle. An already-active entry stays open; a closed one opens
+            // through the change channel. Clicks still toggle.
+            if let Some(change) = handlers.on_change.clone() {
+                let value = entry.value.clone();
+                let entry_active = is_active;
+                btn.interaction.on_key_activate = Some(Arc::new(move || {
+                    if !entry_active {
+                        change(&value);
+                    }
+                    None
+                }));
+            }
             if let Some(focused) = &handlers.on_focus {
                 let focused = Arc::clone(focused);
                 let value = entry.value.clone();
