@@ -19,9 +19,9 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            action_payloads.lock().expect(\"keyboard payloads\").as_slice(),\n            [\"save-copy\", \"save-copy\"],\n            \"keyboard activation emits the focused item payload",
-      "assert_eq!(\n            action_payloads.lock().expect(\"action payloads\").as_slice(),\n            [\"save-copy\"],\n            \"item activation emits the exact committed payload"
+      "assert_eq!(\n            host.actions.lock().expect(\"keyboard payloads\").as_slice(),\n            [\"save-copy\", \"save-copy\"],\n            \"keyboard activation emits the focused item payload",
+      "assert_eq!(\n            host.actions.lock().expect(\"action payloads\").as_slice(),\n            [\"save-copy\"],\n            \"item activation emits the exact committed payload",
+      "assert_eq!(\n            host.dropdowns.lock().expect(\"dropdown payloads\").as_slice(),\n            [\"dropdown\"],\n            \"toggle activation emits the dropdown payload"
     ],
     "pointer": [
       "pointer_activate",
@@ -53,7 +53,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "9bdcadce91a51e9d5fc2d56cac15116f54cf498f",
+  "source_commit": "9f792718b981a4f10883ed7f0b53311affcc9bcd",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
@@ -61,7 +61,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-089-first-proofs",
     "outcome": "passed",
-    "body_sha256": "ae747520bedc25435d05311af68352984da17664e62a6dd9dfd88c1b1dac196f"
+    "body_sha256": "32e304603f40302a206026499d03c71ea71898ff71b3645ee95a0a4d5de232fb"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

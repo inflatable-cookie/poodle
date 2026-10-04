@@ -19,9 +19,9 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            change_payloads.lock().expect(\"keyboard payloads\").as_slice(),\n            [\"components\", \"tokens\"],\n            \"keyboard activation emit",
-      "assert_eq!(\n            change_payloads.lock().expect(\"change payloads\").as_slice(),\n            [\"components\"],\n            \"trigger activation emit"
+      "assert_eq!(\n            host.changes.lock().expect(\"keyboard payloads\").as_slice(),\n            [\"components\", \"tokens\"],\n            \"keyboard activation emit",
+      "assert_eq!(\n            host.changes.lock().expect(\"change payloads\").as_slice(),\n            [\"components\"],\n            \"trigger activation emit",
+      "assert_eq!(\n            host.changes.lock().expect(\"down payload"
     ],
     "pointer": [
       "pointer_activate",
@@ -33,9 +33,9 @@
       "dispatch_key"
     ],
     "accessibility": [
+      "a11y\n                .",
       "accessible",
-      "NodeRole",
-      "a11y."
+      "NodeRole"
     ],
     "visual": [
       "resolve_opacity",
@@ -53,7 +53,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "9bdcadce91a51e9d5fc2d56cac15116f54cf498f",
+  "source_commit": "9f792718b981a4f10883ed7f0b53311affcc9bcd",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
@@ -61,7 +61,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-089-first-proofs",
     "outcome": "passed",
-    "body_sha256": "400384f0f46df74f487c47635845fd6367fee8908ad8058199e5de6a6c716c72"
+    "body_sha256": "08706c628d5c184aed9114f1fbfbb326b661319ae4a08fd6d3f236205131c41a"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
