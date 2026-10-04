@@ -201,9 +201,14 @@ pub fn bulk_action_bar(
     }
 
     // Select-all: ghost `check-check` icon_button, chrome size-role.
+    // Svelte suffixes `(totalCount)` when the total is known.
     if spec.show_select_all && !spec.all_selected {
+        let select_label = match spec.total_count {
+            Some(total) => format!("{} ({total})", spec.select_all_label),
+            None => spec.select_all_label.clone(),
+        };
         let mut select_spec = IconButtonSpec::new()
-            .with_aria_label("Select all")
+            .with_aria_label(select_label)
             .with_icon("check-check")
             .with_size(base_size)
             .with_size_role(SemanticControlSizeRole::Chrome);
@@ -318,5 +323,38 @@ pub fn bulk_action_bar(
     }
 
     root.a11y.role = Some(NodeRole::Region);
+    root.a11y.label = Some("Bulk actions".to_string());
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_jetstream::JetstreamThemeProvider;
+    use poodle_tokens::themes::ECLIPSE;
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&ECLIPSE)
+    }
+
+    #[test]
+    fn region_carries_the_bulk_actions_name_and_select_all_total_suffix() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = BulkActionBarSpec::new()
+            .with_selection_count(5)
+            .with_total_count(42)
+            .with_show_select_all(true)
+            .with_select_all_label("Select everything")
+            .add_action(BulkAction::new("export", "Export").with_icon("download"));
+        let node = bulk_action_bar(&spec, &ctx, BulkActionBarHandlers::default());
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Bulk actions"));
+        let select_all = node
+            .find(&|child| child.a11y.label.as_deref() == Some("Select everything (42)"))
+            .expect("select-all uses the spec label plus total");
+        assert!(select_all.interaction.focusable);
+        assert!(node.has_text("5 selected"));
+        assert!(node.has_text("of 42"));
+    }
 }

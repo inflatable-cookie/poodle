@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "CollapseToggle",
-  "test": "collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard",
+  "component": "ListContainer",
+  "test": "gpui_mounted_list_container_state_pagination_and_accessible_name",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,24 +19,22 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(*payload"
+      "assert_eq!(\n            payloads\n                .lock()\n                .expect(\"list container page payload"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
       "focus_state_for",
-      "focus_element"
+      "keyboard_"
     ],
     "accessibility": [
+      "accessible",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_radius",
-      "resolve_color"
+      "resolve_space"
     ]
   },
   "production_path_observation": {
@@ -44,7 +42,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::button",
+    "renderer": "node_compat-import:ListContainer",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -57,7 +55,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-083-rebase-onto-084",
     "outcome": "passed",
-    "body_sha256": "393d7a1f2c92437cda92335b78b610f6427276cabd91f350e8ed897ea64453fe"
+    "body_sha256": "817a00296272137cda77dde866a727a8c3f4f79e460013cb671134eab629f287"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

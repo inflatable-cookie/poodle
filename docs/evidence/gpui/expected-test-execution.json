@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-10-04-poodle-084-native-review-3c7c8e5",
-  "source_commit": "3c7c8e5f428db0ea30b7a2019f8fa81c8c4a4178",
+  "run_id": "2026-10-04-poodle-083-rebase-onto-084",
+  "source_commit": "64be05b1c3c58704eb208284f7407edcec9b76c8",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -321,6 +321,18 @@
     "first_mounted_parity_time_zone_select": {
       "outcome": "passed",
       "body_sha256": "cab3bccd79582ab8f1a80c5f36a4770a823aed61acb86cf1e9c919ad2841e46a"
+    },
+    "gpui_mounted_bulk_action_bar_actions_clear_and_select_all": {
+      "outcome": "passed",
+      "body_sha256": "8c94f89a047b3908a79e7591fd36f4122370d19458fea5ad7482f281aed47190"
+    },
+    "gpui_mounted_list_container_state_pagination_and_accessible_name": {
+      "outcome": "passed",
+      "body_sha256": "817a00296272137cda77dde866a727a8c3f4f79e460013cb671134eab629f287"
+    },
+    "gpui_mounted_log_list_stream_audit_and_clear_filters": {
+      "outcome": "passed",
+      "body_sha256": "119eed17bffffeba10000ffc3ea21ce8172b53d2d48f716766d978ea0bb826e5"
     }
   }
 }

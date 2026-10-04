@@ -8,33 +8,83 @@
 //! - **audit**: filter toolbar, loading / error / empty status surfaces, and
 //!   pagination (page/page_size/total → composed `pagination`).
 //!
-//! `on_clear_filters` is the one pointer-reachable event: the refresh, export
-//! and paging affordances are not drawn by this component, and the filters
-//! themselves are typed or open Select panels.
+//! Pointer-reachable events are `on_clear_filters` (audit toolbar Clear) and
+//! `on_navigate` (audit actor/resource hrefs). Refresh, export and paging
+//! affordances are not drawn by this component, and the filters themselves
+//! are typed or open Select panels.
 
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole,
+    CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutOverflow,
+    LayoutSizing, MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{
-    CallOutSpec, LogFilterKind, LogLevel, LogListSpec, PaginationSpec, SpinnerSize, SpinnerSpec,
-    StatusTone,
+    ButtonSpec, ButtonVariant, CallOutSpec, ControlSize, LogFilterKind, LogLevel, LogListSpec,
+    PaginationSpec, SpinnerSize, SpinnerSpec, StatusTone, TextLinkSpec, TextLinkTone,
 };
 
+use crate::button::button;
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
 use crate::pagination::pagination;
 use crate::presentation::{control_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
 use crate::spinner::spinner;
+use crate::text_link::text_link;
+
+/// Host callbacks. `on_navigate` fires with the actor or resource href.
+#[derive(Default)]
+pub struct LogListHandlers {
+    pub on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+/// Svelte wraps actor/resource in `TextLink` only when an href exists. Native
+/// data already stores that href; this helper composes `text_link` and adds
+/// the Link chrome `tracks_focus` observes (role, tab stop, focus ring,
+/// activation). `href` is kept on `node.roles` so tests can read it — Node
+/// has no href field.
+fn audit_href_link(
+    label: impl Into<String>,
+    href: &str,
+    tone: TextLinkTone,
+    text_size: f32,
+    ctx: &RenderContext<'_>,
+    on_navigate: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Node {
+    let label = label.into();
+    let mut spec = TextLinkSpec::new(label.clone())
+        .with_href(href)
+        .with_tone(tone);
+    spec.aria_label = Some(label);
+    let mut el = text_link(&spec, ctx, None);
+    el.style.text_size = Some(text_size);
+    el.a11y.role = Some(NodeRole::Link);
+    el.a11y.tab_index = Some(0);
+    el.interaction.focusable = true;
+    el.style.descriptor.cursor = CursorHint::Pointer;
+    el.style.focus_ring = Some(FocusRing {
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.0625),
+    });
+    el.roles.insert("href".to_owned(), href.to_owned());
+    let href = href.to_owned();
+    let handler = on_navigate.cloned();
+    el.interaction.on_activate = Some(Arc::new(move || {
+        if let Some(handler) = &handler {
+            handler(&href);
+        }
+    }));
+    el
+}
 
 pub fn log_list(
     spec: &LogListSpec,
     ctx: &RenderContext<'_>,
     instance_id: impl Into<String>,
-    on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
+    handlers: LogListHandlers,
 ) -> Node {
     let instance_id = instance_id.into();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
@@ -59,10 +109,13 @@ pub fn log_list(
     let warn_color = ctx.theme().resolve_color("color.status.warning");
     let error_color = ctx.theme().resolve_color("color.status.danger");
 
-    // Audit mode is entered when the spec carries audit-only state, matching
-    // the GPUI/Svelte audit branch which owns those surfaces.
-    let is_audit =
-        spec.loading || spec.error.is_some() || spec.has_audit_toolbar() || spec.show_pagination();
+    // Svelte `auto` resolves from entry shape; loading/error/toolbar/pagination
+    // still own the empty-audit chrome when there are no rows yet.
+    let is_audit = spec.is_audit()
+        || spec.loading
+        || spec.error.is_some()
+        || spec.has_audit_toolbar()
+        || spec.show_pagination();
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;
@@ -93,7 +146,19 @@ pub fn log_list(
         pad.bottom = pad_y;
     }
     all_radius(&mut el, radius);
-    el.a11y.role = Some(NodeRole::Log);
+    // Stream uses `role="log"`; audit is a labelled region (Svelte `<section>`).
+    el.a11y.role = Some(if is_audit {
+        NodeRole::Region
+    } else {
+        NodeRole::Log
+    });
+    el.a11y.label = Some(
+        spec.aria_label
+            .as_deref()
+            .filter(|value| !value.is_empty())
+            .unwrap_or("Log output")
+            .to_string(),
+    );
     let mut el = el;
 
     if is_audit {
@@ -167,18 +232,19 @@ pub fn log_list(
                 toolbar = toolbar.child(field.child(control));
             }
 
-            // Clear affordance — only when a value is active.
+            // Clear affordance — Svelte renders a ghost sm Button with a
+            // leading x only when a filter is active *and* `onClearFilters`
+            // is supplied. Composing `button` mints the focus ring / tab
+            // stop that `tracks_focus` observes.
             if spec.has_active_filters() {
-                let mut clear = Node::button("Clear");
-                clear.style.descriptor.text_color = Some(text_secondary);
-                clear.style.text_size = Some(label_token_size);
-                clear.interaction.focusable = true;
-                if let Some(handler) = &on_clear_filters {
-                    let handler = Arc::clone(handler);
-                    clear.style.descriptor.cursor = CursorHint::Pointer;
-                    clear.interaction.on_activate = Some(Arc::new(move || handler()));
+                if let Some(handler) = &handlers.on_clear_filters {
+                    let clear_spec = ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(ControlSize::Sm)
+                        .with_leading_icon("x")
+                        .with_label("Clear");
+                    toolbar = toolbar.child(button(&clear_spec, ctx, Some(Arc::clone(handler))));
                 }
-                toolbar = toolbar.child(clear);
             }
 
             el = el.child(toolbar);
@@ -227,22 +293,81 @@ pub fn log_list(
             );
         }
 
-        // Empty audit surface (spec carries no entry payload yet).
-        let mut empty = Node::container();
-        {
-            let s = &mut empty.style;
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.top = rem_to_px(2.0);
-            pad.bottom = rem_to_px(2.0);
+        let audit_rows: Vec<_> = spec.audit_entries().collect();
+        if audit_rows.is_empty() {
+            let mut empty = Node::container();
+            {
+                let s = &mut empty.style;
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.top = rem_to_px(2.0);
+                pad.bottom = rem_to_px(2.0);
+            }
+            el = el.child(empty.child(text(
+                spec.empty_message.clone(),
+                text_secondary,
+                label_token_size,
+            )));
+        } else {
+            let mut list = Node::container();
+            {
+                let s = &mut list.style;
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                s.descriptor.layout.spacing.gap = rem_to_px(0.5);
+            }
+            for entry in audit_rows {
+                let mut row = Node::container();
+                {
+                    let s = &mut row.style;
+                    s.descriptor.layout.direction = LayoutDirection::Row;
+                    s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                    s.descriptor.layout.spacing.gap = rem_to_px(0.5);
+                    s.flex_wrap = true;
+                }
+                let actor_name = entry.actor_name();
+                row = row.child(
+                    if let Some(href) = entry.actor.as_ref().and_then(|actor| actor.href.as_deref())
+                    {
+                        audit_href_link(
+                            actor_name,
+                            href,
+                            TextLinkTone::Inherit,
+                            label_token_size,
+                            ctx,
+                            handlers.on_navigate.as_ref(),
+                        )
+                    } else {
+                        text(actor_name, text_primary, label_token_size)
+                    },
+                );
+                row = row.child(text(entry.action_label(), text_primary, label_token_size));
+                let resource = match &entry.resource_label {
+                    Some(label) => format!("{} \"{label}\"", entry.resource_type_label()),
+                    None => entry.resource_type_label(),
+                };
+                row = row.child(if let Some(href) = entry.resource_href.as_deref() {
+                    audit_href_link(
+                        resource,
+                        href,
+                        TextLinkTone::Secondary,
+                        label_token_size,
+                        ctx,
+                        handlers.on_navigate.as_ref(),
+                    )
+                } else {
+                    text(resource, text_secondary, label_token_size)
+                });
+                row = row.child(text(
+                    entry.occurred_at.clone(),
+                    text_secondary,
+                    caption_size,
+                ));
+                list = list.child(row);
+            }
+            el = el.child(list);
         }
-        el = el.child(empty.child(text(
-            spec.empty_message.clone(),
-            text_secondary,
-            label_token_size,
-        )));
 
         // ── Pagination ───────────────────────────────────────────
         if spec.show_pagination() {
@@ -429,10 +554,9 @@ pub fn log_list(
 
     el = el.child(entries_area);
 
-    // Scroll-to-latest hint.
-    if spec.auto_scroll {
-        el = el.child(text("New entries".to_string(), text_secondary, label_font));
-    }
+    // Svelte paints "New entries" only after the user has scrolled away from
+    // the latest row. This renderer has no scroll-offset channel, so it does
+    // not invent the affordance.
 
     el
 }
@@ -440,8 +564,23 @@ pub fn log_list(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_node::NodeKind;
-    use poodle_specs::{AuditLogEntry, LogEntry, StreamLogEntry};
+    use poodle_node::{NodeKind, NodeRole};
+    use poodle_specs::{AuditLogEntry, LogEntry, LogFilter, StreamLogEntry};
+
+    fn find<'a>(node: &'a Node, pred: impl Fn(&Node) -> bool) -> Option<&'a Node> {
+        fn walk<'a>(node: &'a Node, pred: &impl Fn(&Node) -> bool) -> Option<&'a Node> {
+            if pred(node) {
+                return Some(node);
+            }
+            for child in &node.children {
+                if let Some(found) = walk(child, pred) {
+                    return Some(found);
+                }
+            }
+            None
+        }
+        walk(node, &pred)
+    }
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -482,7 +621,7 @@ mod tests {
     fn stream_rows_render_timestamp_level_and_message() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec(), &ctx, "log-list", None);
+        let node = log_list(&stream_spec(), &ctx, "log-list", LogListHandlers::default());
         let runs = texts(&node);
         for expected in [
             "10:23:01",
@@ -510,7 +649,7 @@ mod tests {
             &stream_spec().with_filter_level("error"),
             &ctx,
             "log-list",
-            None,
+            LogListHandlers::default(),
         );
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Timeout"));
@@ -525,7 +664,7 @@ mod tests {
             &stream_spec().with_filter_text("CACHE"),
             &ctx,
             "log-list",
-            None,
+            LogListHandlers::default(),
         );
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Cache miss"));
@@ -536,7 +675,12 @@ mod tests {
     fn max_entries_caps_the_rendered_rows() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec().with_max_entries(1), &ctx, "log-list", None);
+        let node = log_list(
+            &stream_spec().with_max_entries(1),
+            &ctx,
+            "log-list",
+            LogListHandlers::default(),
+        );
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Server started"));
         assert!(!runs.iter().any(|run| run == "Cache miss"));
@@ -546,21 +690,178 @@ mod tests {
     fn an_empty_stream_renders_the_empty_surface() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&LogListSpec::new(), &ctx, "log-list", None);
+        let node = log_list(
+            &LogListSpec::new(),
+            &ctx,
+            "log-list",
+            LogListHandlers::default(),
+        );
         assert!(texts(&node).iter().any(|run| run == "No log entries"));
     }
 
     #[test]
     fn audit_entries_switch_the_list_into_audit_mode() {
-        let spec = LogListSpec::new().with_entries([LogEntry::Audit(AuditLogEntry::new(
-            "a1",
-            "2026-01-01T00:00:00Z",
-            "user_login",
-            "workspace",
-            "w-1",
-        ))]);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = LogListSpec::new().with_entries([LogEntry::Audit(
+            AuditLogEntry::new(
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "user_login",
+                "workspace",
+                "w-1",
+            )
+            .with_actor(poodle_specs::LogActor::new("u-1").with_name("Alice")),
+        )]);
         assert!(spec.is_audit());
-        // Audit rows are not stream rows, so the stream surface stays empty.
         assert!(spec.stream_entries().is_empty());
+        let node = log_list(&spec, &ctx, "log-list", LogListHandlers::default());
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Log output"));
+        let runs = texts(&node);
+        assert!(runs.iter().any(|run| run == "Alice"));
+        assert!(runs.iter().any(|run| run == "user login"));
+        assert!(runs.iter().any(|run| run == "workspace"));
+    }
+
+    #[test]
+    fn stream_mode_uses_the_log_role() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&stream_spec(), &ctx, "log-list", LogListHandlers::default());
+        assert_eq!(node.a11y.role, Some(NodeRole::Log));
+        assert_eq!(node.a11y.label.as_deref(), Some("Log output"));
+    }
+
+    #[test]
+    fn accessible_name_uses_aria_label_and_falls_back_to_log_output() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let custom = log_list(
+            &stream_spec().with_aria_label("Application logs"),
+            &ctx,
+            "log-list",
+            LogListHandlers::default(),
+        );
+        assert_eq!(custom.a11y.label.as_deref(), Some("Application logs"));
+        let mut empty_spec = stream_spec();
+        empty_spec.aria_label = Some(String::new());
+        let empty = log_list(&empty_spec, &ctx, "log-list", LogListHandlers::default());
+        assert_eq!(empty.a11y.label.as_deref(), Some("Log output"));
+    }
+
+    #[test]
+    fn clear_filters_composes_a_focusable_ghost_button() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = LogListSpec::new()
+            .with_entries([LogEntry::Audit(AuditLogEntry::new(
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "user_login",
+                "workspace",
+                "w-1",
+            ))])
+            .with_filter(LogFilter::select("action", "Action"))
+            .with_filter_value("action", "login");
+        assert!(spec.has_active_filters());
+        let node = log_list(
+            &spec,
+            &ctx,
+            "log-list",
+            LogListHandlers {
+                on_clear_filters: Some(Arc::new(|| {})),
+                ..Default::default()
+            },
+        );
+        let clear =
+            find(&node, |n| n.a11y.label.as_deref() == Some("Clear")).expect("Clear button");
+        assert_eq!(clear.a11y.role, Some(NodeRole::Button));
+        assert!(clear.style.focus_ring.is_some());
+        assert_eq!(clear.a11y.tab_index, Some(0));
+        assert!(clear.interaction.on_activate.is_some());
+        assert!(find(&node, |n| matches!(
+            &n.kind,
+            NodeKind::Icon { name, .. } if name == "x"
+        ))
+        .is_some());
+        let without_handler = log_list(&spec, &ctx, "log-list", LogListHandlers::default());
+        assert!(find(&without_handler, |n| n.a11y.label.as_deref()
+            == Some("Clear"))
+        .is_none());
+    }
+
+    #[test]
+    fn audit_actor_and_resource_hrefs_compose_focusable_links() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = LogListSpec::new().with_entries([LogEntry::Audit(
+            AuditLogEntry::new(
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "user_login",
+                "workspace",
+                "w-1",
+            )
+            .with_actor(
+                poodle_specs::LogActor::new("u-1")
+                    .with_name("Alice")
+                    .with_href("/users/alice"),
+            )
+            .with_resource_label("Acme")
+            .with_resource_href("/workspaces/w-1"),
+        )]);
+        let node = log_list(&spec, &ctx, "log-list", LogListHandlers::default());
+        let actor = find(&node, |n| {
+            matches!(&n.kind, NodeKind::Text { content } if content == "Alice")
+                && n.a11y.role == Some(NodeRole::Link)
+        })
+        .expect("actor link");
+        assert_eq!(
+            actor.roles.get("href").map(String::as_str),
+            Some("/users/alice")
+        );
+        assert!(actor.interaction.focusable);
+        assert!(actor.style.focus_ring.is_some());
+        assert_eq!(actor.a11y.tab_index, Some(0));
+        assert!(actor.interaction.on_activate.is_some());
+
+        let resource = find(&node, |n| {
+            matches!(&n.kind, NodeKind::Text { content } if content == "workspace \"Acme\"")
+                && n.a11y.role == Some(NodeRole::Link)
+        })
+        .expect("resource link");
+        assert_eq!(
+            resource.roles.get("href").map(String::as_str),
+            Some("/workspaces/w-1")
+        );
+        assert!(resource.interaction.focusable);
+        assert!(resource.style.focus_ring.is_some());
+        assert_eq!(resource.a11y.tab_index, Some(0));
+        assert!(resource.interaction.on_activate.is_some());
+
+        let plain = log_list(
+            &LogListSpec::new().with_entries([LogEntry::Audit(
+                AuditLogEntry::new(
+                    "a1",
+                    "2026-01-01T00:00:00Z",
+                    "user_login",
+                    "workspace",
+                    "w-1",
+                )
+                .with_actor(poodle_specs::LogActor::new("u-1").with_name("Alice")),
+            )]),
+            &ctx,
+            "log-list",
+            LogListHandlers::default(),
+        );
+        let alice = find(
+            &plain,
+            |n| matches!(&n.kind, NodeKind::Text { content } if content == "Alice"),
+        )
+        .expect("plain actor");
+        assert_ne!(alice.a11y.role, Some(NodeRole::Link));
+        assert!(!alice.interaction.focusable);
+        assert!(alice.interaction.on_activate.is_none());
     }
 }

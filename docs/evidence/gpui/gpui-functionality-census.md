@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `3c7c8e5f428db0ea30b7a2019f8fa81c8c4a4178`
+Evidence commit (execution identity from the execution record, not the checkout): `64be05b1c3c58704eb208284f7407edcec9b76c8`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **81**/175.
-Fully admitted rows: **46**/175.
-Missing by axis: semantic 94; events 89; pointer 99; keyboard_focus 89; accessibility 107; visual 123.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **194**.
+Rows with at least one admitted capability: **84**/175.
+Fully admitted rows: **49**/175.
+Missing by axis: semantic 91; events 86; pointer 96; keyboard_focus 86; accessibility 104; visual 120.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **191**.
 
 ## Rows
 
@@ -30,7 +30,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **194**.
 | Avatar | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Box | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Breadcrumbs | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | events; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Breadcrumbs--breadcrumbs-callback-navigation-through-mounted-pointer-and-keyboard.json` |
-| BulkActionBar | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| BulkActionBar | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/BulkActionBar--gpui-mounted-bulk-action-bar-actions-clear-and-select-all.json` |
 | Button | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (expected-test); pointer (nucleus-m1); keyboard_focus (expected-test); accessibility (nucleus-a1); visual (nucleus-v1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Button--a-mounted-button-carries-its-controls-target.json` |
 | Callout | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Callout--callout-dismiss-rebuilds-the-host-spec-through-mounted-input.json` |
 | RemediationBanner | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); keyboard_focus (expected-test) | events; pointer; accessibility; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/RemediationBanner--remediation-banner-action-and-dismiss-rebuild-the-host-spec.json` |
@@ -152,8 +152,8 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **194**.
 | LicenceActivation | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-key-entry-types-and-emits-through-the-real-tree.json`; `docs/evidence/gpui/mounted-receipts/LicenceActivation--licence-activation-machine-name-enter-and-escape-restore-display-focus.json` |
 | LicenceSeats | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test) | visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceSeats--licence-seats-release-flows-through-confirm-in-a-mounted-window.json`; `docs/evidence/gpui/mounted-receipts/LicenceSeats--licence-seats-seat-row-enter-and-escape-restore-display-focus.json` |
 | LicenceStatus | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); accessibility (expected-test) | events; pointer; keyboard_focus; visual | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LicenceStatus--licence-status-renders-state-and-authority-reads-in-a-mounted-window.json` |
-| LogList | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
-| ListContainer | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| LogList | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/LogList--gpui-mounted-log-list-stream-audit-and-clear-filters.json` |
+| ListContainer | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ListContainer--gpui-mounted-list-container-state-pagination-and-accessible-name.json` |
 | PageLoading | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | MediaPicker | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | MediaBrowsePanel | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -208,7 +208,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **194**.
 - Box: No validated receipt and no retained expected test for Box; every required capability stays missing.
 - Breadcrumbs: Expected test breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard proves no events claim; events stays missing.
 - Breadcrumbs: Expected test breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing.
-- BulkActionBar: No validated receipt and no retained expected test for BulkActionBar; every required capability stays missing.
 - RemediationBanner: Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no events claim; events stays missing.
 - RemediationBanner: Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no pointer claim; pointer stays missing.
 - RemediationBanner: Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.
@@ -331,8 +330,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **194**.
 - LicenceStatus: Expected test licence_status_renders_state_and_authority_reads_in_a_mounted_window proves no pointer claim; pointer stays missing.
 - LicenceStatus: Expected test licence_status_renders_state_and_authority_reads_in_a_mounted_window proves no keyboard_focus claim; keyboard_focus stays missing.
 - LicenceStatus: Expected test licence_status_renders_state_and_authority_reads_in_a_mounted_window proves no visual claim; visual stays missing.
-- LogList: No validated receipt and no retained expected test for LogList; every required capability stays missing.
-- ListContainer: No validated receipt and no retained expected test for ListContainer; every required capability stays missing.
 - PageLoading: No validated receipt and no retained expected test for PageLoading; every required capability stays missing.
 - MediaPicker: No validated receipt and no retained expected test for MediaPicker; every required capability stays missing.
 - MediaBrowsePanel: No validated receipt and no retained expected test for MediaBrowsePanel; every required capability stays missing.
@@ -410,6 +407,5 @@ Shared-substrate groupings for repair-tranche compilation. Grouping only; no tra
 - text-display: 8 components (Code, Eyebrow, Icon, IconProvider, MediaPreview, MetricTile, StateTile, TextLink); missing semantic 7; events 4; pointer 6; keyboard_focus 6; accessibility 7; visual 7
 - layout-primitive: 6 components (Box, Grid, ListGrid, Skeleton, TimeAgo, Tooltip); missing semantic 6; events 2; pointer 2; keyboard_focus 3; accessibility 6; visual 6
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
-- selection-navigation: 3 components (BulkActionBar, ListContainer, LogList); missing semantic 3; events 3; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - agent-composites: 2 components (AgentMessage, MotionPolicyProvider); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2

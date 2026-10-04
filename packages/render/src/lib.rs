@@ -320,7 +320,7 @@ pub use list_card::{list_card, ListCardSlots};
 pub use list_card_counter::list_card_counter;
 pub use list_container::{list_container, ListContainerSlots};
 pub use list_grid::list_grid;
-pub use log_list::log_list;
+pub use log_list::{log_list, LogListHandlers};
 pub use markdown_editor::{markdown_editor, markdown_editor_with_handlers, MarkdownEditorHandlers};
 pub use media_browse_panel::media_browse_panel;
 pub use media_picker::{media_picker, MediaPickerHandlers};
