@@ -198,6 +198,7 @@ pub fn model_connection_picker_with_slots(
         None,
         slots.footer,
     );
+    root.a11y.role = Some(NodeRole::Region);
     root.roles
         .insert("disabled".to_string(), spec.is_disabled.to_string());
     root

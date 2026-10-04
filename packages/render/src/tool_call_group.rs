@@ -53,6 +53,7 @@ pub fn tool_call_group(
     let pad_x = rem_to_px(spec.padding_inline_rem(density));
 
     let mut list = Node::container();
+    list.id = Some(format!("{}-calls", spec.id));
     list.style.descriptor.layout.direction = LayoutDirection::Column;
     list.style.fill_width = true;
     list.style.descriptor.layout.spacing.gap = row_gap;
@@ -78,14 +79,17 @@ pub fn tool_call_group(
             .instance_id
             .clone()
             .unwrap_or_else(|| spec.id.clone());
-        list = list.child(tool_call(
+        let call = tool_call(
             &call_spec,
             ctx,
             crate::tool_call::ToolCallHandlers {
                 on_toggle: handlers.on_call_toggle.as_ref().map(Arc::clone),
                 instance_id: Some(child_scope),
             },
-        ));
+        );
+        let mut item = Node::container().child(call);
+        item.a11y.role = Some(NodeRole::ListItem);
+        list = list.child(item);
     }
 
     // The container is on the run, not the row: a thirty-call run has to read as
@@ -134,6 +138,7 @@ pub fn tool_call_group(
         toggle.a11y.label = Some(spec.toggle_accessible_name());
         toggle.a11y.role = Some(NodeRole::Button);
         toggle.a11y.expanded = Some(spec.is_expanded);
+        toggle.a11y.controls = Some(format!("{}-calls", spec.id));
         {
             let s = &mut toggle.style;
             s.descriptor.layout.direction = LayoutDirection::Row;

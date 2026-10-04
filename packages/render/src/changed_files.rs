@@ -99,6 +99,7 @@ pub fn changed_files(
     header.a11y.label = Some(spec.accessible_name());
     header.a11y.role = Some(NodeRole::Button);
     header.a11y.expanded = Some(spec.is_expanded);
+    header.a11y.controls = Some(format!("{}-files", spec.id));
     {
         let s = &mut header.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -186,6 +187,7 @@ pub fn changed_files(
         flatten(&spec.tree(), 0, &mut flat);
 
         let mut tree = Node::container();
+        tree.id = Some(format!("{}-files", spec.id));
         tree.a11y.role = Some(NodeRole::Tree);
         {
             let s = &mut tree.style;
@@ -209,6 +211,9 @@ pub fn changed_files(
                 &format!("file:{}:{}", spec.id, path_token(&node.path)),
             );
             row.a11y.role = Some(NodeRole::TreeItem);
+            row.a11y.label = Some(node.label.clone());
+            row.a11y.level = Some(depth + 1);
+            row.a11y.expanded = node.is_directory.then_some(true);
             {
                 let s = &mut row.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -264,6 +269,7 @@ pub fn changed_files(
         root = root.child(tree);
     } else {
         let mut summary = Node::container();
+        summary.id = Some(format!("{}-files", spec.id));
         {
             let s = &mut summary.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -294,6 +300,8 @@ pub fn changed_files(
                 .unwrap_or(&file.path)
                 .to_string();
             let mut chip = Node::container();
+            chip.a11y.role = Some(NodeRole::Button);
+            chip.a11y.label = Some(file.path.clone());
             chip.id = Some(format!(
                 "changed-files-chip-{}-{}",
                 spec.id,
