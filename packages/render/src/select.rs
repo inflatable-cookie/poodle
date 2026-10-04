@@ -246,11 +246,6 @@ fn wire_open_keys(
                 SelectEvent::CommitHighlighted,
             );
         }));
-        let spec_cancel = spec.clone();
-        let handlers_cancel = handlers.clone();
-        node.interaction.on_cancel = Some(Arc::new(move || {
-            emit_select(&spec_cancel, &handlers_cancel, SelectEvent::Close);
-        }));
         if spec.searchable {
             let spec_blur = spec.clone();
             let handlers_blur = handlers.clone();
@@ -1400,7 +1395,7 @@ mod tests {
             .with_searchable(true)
             .with_search_query("ba")
             .with_open(true);
-        let (node, seen) = select_with_sink(spec, "search-edit");
+        let (node, _) = select_with_sink(spec, "search-edit");
         let search = node
             .find(&|n| n.runtime_id.as_deref() == Some("select:search-edit:search"))
             .expect("search editor");
@@ -1408,22 +1403,11 @@ mod tests {
         assert!(search.interaction.on_edit_key.is_some());
         assert!(search.interaction.on_edit_insert.is_some());
         assert!(search.interaction.on_submit.is_some());
-        let cancel = search
-            .interaction
-            .on_cancel
-            .as_ref()
-            .expect("Escape closes the searchable editor's own layer");
+        assert!(search.interaction.on_cancel.is_none());
         assert!(search.interaction.on_focus_change.is_some());
         assert!(search.caret.is_some());
         assert_eq!(search.id.as_deref(), Some("select:search-edit:search"));
         assert!(search.style.focus_ring.is_some());
-        cancel();
-        let captured = seen.lock().unwrap();
-        assert!(!captured[0].0.open);
-        assert_eq!(
-            captured[0].1,
-            vec![SelectEffect::OpenChanged { open: false }]
-        );
         let trigger = node
             .find(&|n| n.runtime_id.as_deref() == Some("select:search-edit:trigger"))
             .expect("trigger");
