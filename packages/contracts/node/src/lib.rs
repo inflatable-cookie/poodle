@@ -824,6 +824,8 @@ pub enum NodeRole {
     ColumnHeader,
     ComboBox,
     Dialog,
+    /// Figure with an accessible name (`<figure>` / `role="figure"`).
+    Figure,
     Grid,
     Group,
     /// Section title. Uses [`NodeA11y::level`] when the heading level is known.

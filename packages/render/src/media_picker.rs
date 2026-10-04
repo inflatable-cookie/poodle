@@ -14,12 +14,17 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch,
 };
-use poodle_specs::{ControlDensity, ControlSize, FileUploadSpec, MediaPickerItem, MediaPickerSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, DialogSpec, FileUploadSpec, MediaPickerItem, MediaPickerSpec,
+    TextInputSpec,
+};
 
 use crate::color::TRANSPARENT;
 use crate::context::RenderContext;
+use crate::dialog::dialog;
 use crate::file_upload::file_upload;
 use crate::presentation::{rem_to_px, size_font_rem};
+use crate::text_input::{text_input_with_handlers, TextInputHandlers};
 
 /// Thumbnail square size in rem per size (contract §8 size table).
 fn thumb_size_rem(size: ControlSize) -> f32 {
@@ -48,6 +53,12 @@ pub struct MediaPickerHandlers {
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the tab's value when one is pressed.
     pub on_tab_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Reports the internal search query so the host can rebuild the filtered picker.
+    pub on_search_change: Option<poodle_node::TextChangeHandler>,
+    /// Reports the search caret/selection so controlled edits keep their insertion point.
+    pub on_search_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    /// Reports dialog visibility changes (dismissal and selection request close).
+    pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 pub fn media_picker(
@@ -55,46 +66,28 @@ pub fn media_picker(
     ctx: &RenderContext<'_>,
     handlers: MediaPickerHandlers,
 ) -> Node {
+    if !spec.is_open {
+        return Node::container();
+    }
+
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let label_size = ctx.theme().resolve_space("typography.label.size");
 
-    let fill = ctx.theme().resolve_color(spec.fill_token());
-    let radius = ctx.theme().resolve_radius("radius.surface");
-    let text_primary = ctx.theme().resolve_color("color.text.primary");
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
     let accent = ctx.theme().resolve_color("color.accent.base");
-    let border = ctx.theme().resolve_color("color.border.default");
-    let ctrl_radius = ctx.theme().resolve_radius(spec.item_radius_token());
     let gap = ctx.theme().resolve_space("space.stack.sm");
-
-    let all_radius = |node: &mut Node, r: f32| {
-        let c = &mut node.style.descriptor.corner_radii;
-        c.top_left = r;
-        c.top_right = r;
-        c.bottom_right = r;
-        c.bottom_left = r;
-    };
 
     // ── Root: dialog body content ──
     let mut root = Node::container();
     {
         let s = &mut root.style;
-        s.descriptor.background = Some(fill);
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = gap;
         s.min_height = Some(rem_to_px(20.0));
     }
-    all_radius(&mut root, radius);
-
-    // ── Title ──
-    let mut title = Node::text(&spec.title);
-    title.style.descriptor.text_color = Some(text_primary);
-    title.style.text_size = Some(rem_to_px(1.0));
-    title.style.text_weight = Some(600);
-    let mut root = root.child(title);
 
     // ── Tabs: Browse | Upload (active reflects spec.active_tab) ──
     let browsing = spec.is_browsing();
@@ -133,23 +126,26 @@ pub fn media_picker(
 
     if browsing {
         // ── Search field (contract §2 search; a real input) ──
-        let mut search = Node::input("", "Search media...");
-        // A placeholder is not an accessible name.
-        search.a11y.label = Some("Search media".to_string());
-        {
-            let s = &mut search.style;
-            s.self_stretch = true;
-            s.descriptor.border.width = 1.0;
-            s.descriptor.border.color = border;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.left = rem_to_px(0.5);
-            pad.right = rem_to_px(0.5);
-            pad.top = rem_to_px(0.25);
-            pad.bottom = rem_to_px(0.25);
-            s.text_size = Some(font_size);
-            s.descriptor.text_color = Some(text_secondary);
-        }
-        all_radius(&mut search, ctrl_radius);
+        let mut search_spec = TextInputSpec::new()
+            .with_value(spec.search_query.clone())
+            .with_placeholder("Search media...")
+            .with_aria_label("Search media")
+            .with_id("media-picker-search")
+            .with_size(effective_size)
+            .with_size_role(spec.size_role)
+            .with_density(density)
+            .with_show_clear_button(false);
+        search_spec.selection_start = spec.search_selection.0;
+        search_spec.selection_end = spec.search_selection.1;
+        let search = text_input_with_handlers(
+            &search_spec,
+            ctx,
+            TextInputHandlers {
+                on_change: handlers.on_search_change.clone(),
+                on_selection_change: handlers.on_search_selection_change.clone(),
+                ..TextInputHandlers::default()
+            },
+        );
         let mut wrap = Node::container();
         // Explicit Row (see switch.rs).
         wrap.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -157,12 +153,21 @@ pub fn media_picker(
         root = root.child(wrap.child(search));
 
         // ── Grid OR empty state ──
-        if spec.has_items() {
+        let query = spec.search_query.to_lowercase();
+        let visible_items: Vec<_> = spec
+            .items
+            .iter()
+            .filter(|item| item.label.to_lowercase().contains(&query))
+            .collect();
+        if !visible_items.is_empty() {
             let (grid_gap, item_pad) = grid_gap_and_pad_rem(density);
             let thumb_size = rem_to_px(thumb_size_rem(effective_size));
             // Contract: the media grid is a `listbox` of selectable `option`s.
             let mut grid = Node::container();
+            grid.id = Some("media-picker-grid".to_string());
+            grid.runtime_id = grid.id.clone();
             grid.a11y.role = Some(NodeRole::ListBox);
+            grid.a11y.label = Some("Media items".to_string());
             {
                 let s = &mut grid.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -172,13 +177,19 @@ pub fn media_picker(
                 s.descriptor.layout.overflow_x = LayoutOverflow::Scroll;
                 s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
             }
-            for item in &spec.items {
+            for item in visible_items {
                 let mut cell = grid_item(item, spec, ctx, thumb_size, item_pad, label_size);
-                if let Some(handler) = &handlers.on_select {
-                    let handler = Arc::clone(handler);
-                    let id = item.id.clone();
-                    cell.interaction.on_activate = Some(Arc::new(move || handler(&id)));
-                }
+                let on_select = handlers.on_select.clone();
+                let on_open_change = handlers.on_open_change.clone();
+                let id = item.id.clone();
+                cell.interaction.on_activate = Some(Arc::new(move || {
+                    if let Some(handler) = &on_select {
+                        handler(&id);
+                    }
+                    if let Some(handler) = &on_open_change {
+                        handler(false);
+                    }
+                }));
                 grid = grid.child(cell);
             }
             root = root.child(grid);
@@ -222,7 +233,18 @@ pub fn media_picker(
         root = root.child(wrap.child(file_upload(&upload_spec, ctx, None)));
     }
 
-    root
+    let on_request_close = handlers
+        .on_open_change
+        .map(|handler| Arc::new(move || handler(false)) as Arc<dyn Fn() + Send + Sync>);
+    dialog(
+        &DialogSpec::new()
+            .with_open(true)
+            .with_title(spec.title.clone()),
+        ctx,
+        vec![root],
+        None,
+        on_request_close,
+    )
 }
 
 /// One selectable browse-grid item: thumbnail (image surface or placeholder)
@@ -254,8 +276,6 @@ fn grid_item(
     // centered placeholder image glyph.
     let thumb = if item.has_thumbnail {
         let mut t = Node::container();
-        // Each tile is a selectable `option` of the media listbox.
-        t.a11y.role = Some(NodeRole::ListBoxOption);
         {
             let s = &mut t.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(thumb_size);
@@ -293,6 +313,11 @@ fn grid_item(
     // The explicit label node below owns the tile caption. A non-empty
     // `Node::button` label would make the GPUI backend emit a second caption.
     let mut cell = Node::button("");
+    cell.id = Some(format!("media-picker-item:{}", item.id));
+    cell.runtime_id = cell.id.clone();
+    cell.a11y.role = Some(NodeRole::ListBoxOption);
+    cell.a11y.label = Some(item.label.clone());
+    cell.a11y.selected = Some(false);
     {
         let s = &mut cell.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -308,6 +333,12 @@ fn grid_item(
         s.descriptor.background = Some(TRANSPARENT);
         s.descriptor.cursor = CursorHint::Pointer;
         s.hover = Some(StylePatch {
+            background: Some(hover_fill),
+            border_color: Some(hover_border),
+            text_color: None,
+            opacity: None,
+        });
+        s.focus = Some(StylePatch {
             background: Some(hover_fill),
             border_color: Some(hover_border),
             text_color: None,

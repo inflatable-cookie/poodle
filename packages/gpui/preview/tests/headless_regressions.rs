@@ -626,6 +626,407 @@ fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend()
     });
 }
 
+/// MediaPicker's controlled dialog, live case-insensitive search, option
+/// activation and close requests all reach a mounted GPUI tree.
+#[test]
+fn media_picker_dialog_search_selection_and_dismissal_rebuild_the_host() {
+    use poodle_node::NodeRole;
+    use poodle_render::{MediaPickerHandlers, RenderContext};
+    use poodle_specs::{MediaKind, MediaPickerItem, MediaPickerSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let is_open = Arc::new(Mutex::new(true));
+        let query = Arc::new(Mutex::new(String::new()));
+        let search_selection = Arc::new(Mutex::new((0, 0)));
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let open_changes = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let items = vec![
+            MediaPickerItem::new("alpha", "Alpha footage", MediaKind::Video),
+            MediaPickerItem::new("beta", "Beta cut", MediaKind::Video),
+        ];
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let is_open = Arc::clone(&is_open);
+            let query = Arc::clone(&query);
+            let search_selection = Arc::clone(&search_selection);
+            let payloads = Arc::clone(&payloads);
+            let open_changes = Arc::clone(&open_changes);
+            Rc::new(move || {
+                let open_now = *is_open.lock().expect("picker open state");
+                let query_now = query.lock().expect("picker query").clone();
+                let selection_now = *search_selection.lock().expect("picker selection");
+                let handlers = MediaPickerHandlers {
+                    on_select: {
+                        let payloads = Arc::clone(&payloads);
+                        Some(Arc::new(move |id: &str| {
+                            payloads
+                                .lock()
+                                .expect("picker payloads")
+                                .push(id.to_owned());
+                        }))
+                    },
+                    on_tab_change: None,
+                    on_search_change: {
+                        let query = Arc::clone(&query);
+                        Some(Arc::new(move |value: &str| {
+                            *query.lock().expect("picker query") = value.to_owned();
+                        }))
+                    },
+                    on_search_selection_change: {
+                        let search_selection = Arc::clone(&search_selection);
+                        Some(Arc::new(move |start, end| {
+                            *search_selection.lock().expect("picker selection") = (start, end);
+                        }))
+                    },
+                    on_open_change: {
+                        let is_open = Arc::clone(&is_open);
+                        let open_changes = Arc::clone(&open_changes);
+                        Some(Arc::new(move |next| {
+                            *is_open.lock().expect("picker open state") = next;
+                            open_changes.lock().expect("picker open changes").push(next);
+                        }))
+                    },
+                };
+                let spec = MediaPickerSpec::new("Select media")
+                    .with_open(open_now)
+                    .with_search_query(query_now)
+                    .with_search_selection(selection_now)
+                    .with_items(items.clone());
+                poodle_gpui_node_backend::to_gpui(&poodle_render::media_picker(
+                    &spec,
+                    &RenderContext::new(&theme_provider),
+                    handlers,
+                ))
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 620.0);
+        let dialog = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("open picker dialog reached GPUI paint");
+        assert_eq!(dialog.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(
+            dialog.a11y_label.as_deref(),
+            Some("Select media"),
+            "the dialog title supplies its announced accessible name"
+        );
+        let search_id = "poodle-input-media-picker-search";
+        let search = poodle_gpui_node_backend::painted_node_for(search_id)
+            .expect("search input reached GPUI paint");
+        assert_eq!(search.a11y_label.as_deref(), Some("Search media"));
+        let listbox = poodle_gpui_node_backend::painted_node_for("media-picker-grid")
+            .expect("filtered browse grid reached GPUI paint");
+        assert_eq!(listbox.a11y_role, Some(NodeRole::ListBox));
+        assert_eq!(listbox.a11y_label.as_deref(), Some("Media items"));
+        let dialog_geometry = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("mounted dialog geometry");
+        assert!(f32::from(dialog_geometry.size.width) > 0.0);
+
+        driver.focus_element(search_id);
+        driver.dispatch_key_raw("b");
+        driver.dispatch_key_raw("e");
+        assert_eq!(*query.lock().expect("picker query"), "be");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("media-picker-item:alpha").is_none(),
+            "search removes nonmatching media from mounted geometry"
+        );
+        let beta = poodle_gpui_node_backend::painted_node_for("media-picker-item:beta")
+            .expect("case-insensitive search retained Beta");
+        assert_eq!(beta.a11y_role, Some(NodeRole::ListBoxOption));
+        assert_eq!(beta.a11y_label.as_deref(), Some("Beta cut"));
+        driver.wait_for_focus_handle("media-picker-item:beta");
+        driver.keyboard_activate("media-picker-item:beta");
+        assert_eq!(*payloads.lock().expect("picker payloads"), vec!["beta"]);
+        assert!(!*is_open.lock().expect("picker open state"));
+
+        *is_open.lock().expect("picker open state") = true;
+        *query.lock().expect("picker query") = String::new();
+        *search_selection.lock().expect("picker selection") = (0, 0);
+        driver.draw_frame();
+        driver.dispatch_key("escape");
+        assert!(!*is_open.lock().expect("picker escape close"));
+
+        *is_open.lock().expect("picker open state") = true;
+        driver.draw_frame();
+        driver.pointer_activate_id("media-picker-item:alpha");
+        assert_eq!(
+            *payloads.lock().expect("picker payloads"),
+            vec!["beta", "alpha"],
+            "option callbacks carry the selected item id"
+        );
+        assert_eq!(
+            *open_changes.lock().expect("picker open changes"),
+            vec![false, false, false],
+            "selection and Escape both request dialog dismissal"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MediaBrowsePanel forwards its thumbnail URL and accessible label through
+/// MediaThumbnail, and selection works by pointer and keyboard after mount.
+#[test]
+fn media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui() {
+    use poodle_node::{NodeKind, NodeRole};
+    use poodle_render::RenderContext;
+    use poodle_specs::{MediaBrowseItem, MediaBrowsePanelSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let item = MediaBrowseItem::new("clip", "Opening clip", "video")
+            .with_meta("2:14")
+            .with_thumbnail_url("fixture-media-preview.png");
+        let spec = MediaBrowsePanelSpec::new().with_items(vec![item]);
+        let node =
+            poodle_render::media_browse_panel(&spec, &RenderContext::new(&theme_provider), {
+                let payloads = Arc::clone(&payloads);
+                Some(Arc::new(move |id: &str| {
+                    payloads
+                        .lock()
+                        .expect("browse panel payloads")
+                        .push(id.to_owned());
+                }))
+            });
+        let image = node
+            .find(&|node| matches!(&node.kind, NodeKind::Image { source } if source == "fixture-media-preview.png"))
+            .expect("thumbnail URL becomes image content");
+        assert_eq!(image.a11y.role, Some(NodeRole::Image));
+        assert_eq!(image.a11y.label.as_deref(), Some("Opening clip"));
+        let thumbnail = node
+            .find(&|node| node.a11y.role == Some(NodeRole::Figure))
+            .expect("thumbnail keeps its figure semantics");
+        assert_eq!(thumbnail.a11y.label.as_deref(), Some("Opening clip"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let payloads = Arc::clone(&payloads);
+            Rc::new(move || {
+                poodle_gpui_node_backend::to_gpui(&poodle_render::media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(vec![MediaBrowseItem::new(
+                        "clip",
+                        "Opening clip",
+                        "video",
+                    )
+                    .with_meta("2:14")
+                    .with_thumbnail_url("fixture-media-preview.png")]),
+                    &RenderContext::new(&theme_provider),
+                    {
+                        let payloads = Arc::clone(&payloads);
+                        Some(Arc::new(move |id: &str| {
+                            payloads
+                                .lock()
+                                .expect("browse panel payloads")
+                                .push(id.to_owned());
+                        }))
+                    },
+                ))
+            })
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 480.0);
+        let card_id = "media-browse-panel:item:clip";
+        let card = poodle_gpui_node_backend::painted_node_for(card_id)
+            .expect("media card reached GPUI paint");
+        assert_eq!(card.a11y_role, Some(NodeRole::Button));
+        assert_eq!(card.a11y_label.as_deref(), Some("Opening clip"));
+        let thumbnail_id = "media-browse-panel:thumbnail:clip";
+        let painted_thumbnail = poodle_gpui_node_backend::painted_node_for(thumbnail_id)
+            .expect("media thumbnail reached GPUI paint");
+        assert_eq!(painted_thumbnail.a11y_role, Some(NodeRole::Figure));
+        assert_eq!(
+            painted_thumbnail.a11y_label.as_deref(),
+            Some("Opening clip")
+        );
+        let image = poodle_gpui_node_backend::painted_node_for("media-browse-panel:image:clip")
+            .expect("media image and alt name reached GPUI paint");
+        assert_eq!(image.a11y_role, Some(NodeRole::Image));
+        assert_eq!(
+            image.a11y_label.as_deref(),
+            Some("Opening clip"),
+            "the image alternative name is announced"
+        );
+        let card_geometry =
+            poodle_gpui_node_backend::bounds_for(card_id).expect("mounted media card geometry");
+        assert!(f32::from(card_geometry.size.width) > 0.0);
+
+        driver.wait_for_focus_handle(card_id);
+        driver.keyboard_activate(card_id);
+        assert_eq!(
+            *payloads.lock().expect("browse panel payloads"),
+            vec!["clip"],
+            "Enter selects the mounted item"
+        );
+        driver.pointer_activate_id(card_id);
+        assert_eq!(
+            *payloads.lock().expect("browse panel payloads"),
+            vec!["clip", "clip"],
+            "the selected media id is the callback payload"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MediaThumbnail exposes the contract figure name and loading state while
+/// its state frame keeps the requested size on mounted GPUI.
+#[test]
+fn media_thumbnail_states_name_and_size_reach_mounted_gpui() {
+    use poodle_node::NodeRole;
+    use poodle_render::RenderContext;
+    use poodle_specs::{AspectRatio, MediaKind, MediaState, MediaThumbnailSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = MediaThumbnailSpec::new(MediaKind::Image)
+            .with_state(MediaState::Loading)
+            .with_aspect_ratio(AspectRatio::Video)
+            .with_title("Launch preview")
+            .with_frame_min_height(240.0);
+        let mut node = poodle_render::media_thumbnail(&spec, &ctx);
+        node.id = Some("media-thumbnail-proof".to_owned());
+        node.runtime_id = node.id.clone();
+        node.children[0].id = Some("media-thumbnail-frame-proof".to_owned());
+        node.children[0].runtime_id = node.children[0].id.clone();
+        assert_eq!(node.a11y.role, Some(NodeRole::Figure));
+        assert_eq!(node.a11y.label.as_deref(), Some("Launch preview"));
+        assert_eq!(node.a11y.busy, Some(true));
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 320.0);
+        let figure = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == "media-thumbnail-proof")
+            .expect("mounted figure is in the GPUI accessibility projection");
+        assert_eq!(
+            figure.role,
+            NodeRole::Figure,
+            "the figure role is announced"
+        );
+        assert_eq!(figure.label.as_deref(), Some("Launch preview"));
+        assert_eq!(figure.busy, Some(true));
+        let frame_geometry = poodle_gpui_node_backend::bounds_for("media-thumbnail-frame-proof")
+            .expect("mounted state frame geometry");
+        let frame_height = f32::from(frame_geometry.size.height);
+        assert!(
+            frame_height + 2.0 >= 240.0,
+            "mounted frame content plus its 1px top and bottom borders was {frame_height}px"
+        );
+        assert!(
+            f32::from(
+                poodle_gpui_node_backend::bounds_for("media-thumbnail-proof")
+                    .expect("mounted thumbnail geometry")
+                    .size
+                    .width
+            ) > 0.0,
+            "mounted thumbnail geometry remains nonzero"
+        );
+        assert!(ctx.theme().resolve_color(spec.frame_panel_token()).3 > 0.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// VideoPlayer keeps its group semantics, lets canvas clicks toggle playback,
+/// and routes Space/Enter through the focusable Play/Pause button.
+#[test]
+fn video_player_canvas_and_play_button_rebuild_the_mounted_host() {
+    use poodle_node::NodeRole;
+    use poodle_render::{RenderContext, VideoPlayerHandlers};
+    use poodle_specs::VideoPlayerSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let is_playing = Arc::new(Mutex::new(false));
+        let payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let make_spec = |playing| {
+            VideoPlayerSpec::new("fixture-video.mp4")
+                .with_aria_label("Preview video")
+                .with_current_time(12.0)
+                .with_duration(90.0)
+                .with_playing(playing)
+        };
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let is_playing = Arc::clone(&is_playing);
+            let payloads = Arc::clone(&payloads);
+            Rc::new(move || {
+                let playing = *is_playing.lock().expect("video playing state");
+                let mut handlers = VideoPlayerHandlers::new("mounted-proof");
+                let next_state = Arc::clone(&is_playing);
+                let next_payloads = Arc::clone(&payloads);
+                handlers.on_playing_change = Some(Arc::new(move |next| {
+                    *next_state.lock().expect("video playing state") = next;
+                    next_payloads
+                        .lock()
+                        .expect("video callback payloads")
+                        .push(next);
+                }));
+                poodle_gpui_node_backend::to_gpui(&poodle_render::video_player_with_handlers(
+                    &make_spec(playing),
+                    &RenderContext::new(&theme_provider),
+                    &handlers,
+                ))
+            })
+        };
+
+        let witness_handlers = VideoPlayerHandlers::new("witness");
+        let witness_spec = make_spec(false);
+        let witness = poodle_render::video_player_with_handlers(
+            &witness_spec,
+            &RenderContext::new(&theme_provider),
+            &witness_handlers,
+        );
+        assert_eq!(witness.a11y.role, Some(NodeRole::Group));
+        assert_eq!(witness.a11y.label.as_deref(), Some("Preview video"));
+        let play = witness
+            .find(&|node| node.runtime_id.as_deref() == Some("video-player:witness:play"))
+            .expect("nested Play button");
+        assert_eq!(play.a11y.role, Some(NodeRole::Button));
+        assert_eq!(play.a11y.label.as_deref(), Some("Play"));
+        assert!(play.interaction.focusable);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 360.0);
+        let root_id = "video-player:mounted-proof:root";
+        let root = poodle_gpui_node_backend::painted_node_for(root_id)
+            .expect("VideoPlayer root reached GPUI paint");
+        assert_eq!(
+            root.a11y_role,
+            Some(NodeRole::Group),
+            "the root group is announced"
+        );
+        assert_eq!(root.a11y_label.as_deref(), Some("Preview video"));
+        let play_id = "video-player:mounted-proof:play";
+        let painted_play = poodle_gpui_node_backend::painted_node_for(play_id)
+            .expect("focusable Play button reached GPUI paint");
+        assert_eq!(painted_play.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_play.a11y_label.as_deref(), Some("Play"));
+        let canvas_geometry =
+            poodle_gpui_node_backend::bounds_for("video-player:mounted-proof:canvas")
+                .expect("mounted canvas geometry");
+        assert!(f32::from(canvas_geometry.size.width) > 0.0);
+
+        driver.pointer_activate_id("video-player:mounted-proof:canvas");
+        assert!(*is_playing.lock().expect("video playing state"));
+        driver.wait_for_focus_handle(play_id);
+        driver.keyboard_key(play_id, "space");
+        assert!(!*is_playing.lock().expect("video playing state"));
+        driver.keyboard_activate(play_id);
+        assert!(*is_playing.lock().expect("video playing state"));
+        assert_eq!(
+            *payloads.lock().expect("video callback payloads"),
+            vec![true, false, true],
+            "the mounted canvas and button report playback state changes"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// g16.068: Text and Surface mount through production poodle_render, Node,
 /// and GPUI backend paths. Text proof covers exact content, resolved tone,
 /// size, weight, line-height, compact spacing, and clamped overflow metadata.

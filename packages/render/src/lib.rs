@@ -447,4 +447,4 @@ pub use tri_state_switch::{tri_state_switch, TriStateSwitchHandlers};
 pub use update_center::{update_center, UpdateCenterHandlers};
 pub use update_status::{update_status, UpdateStatusHandlers};
 pub use validation_summary::validation_summary;
-pub use video_player::video_player;
+pub use video_player::{video_player, video_player_with_handlers, VideoPlayerHandlers};

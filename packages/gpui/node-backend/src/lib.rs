@@ -612,7 +612,11 @@ where
         || node.interaction.on_continuous_value.is_some()
         || node.interaction.on_wheel.is_some()
         || node.interaction.on_double_activate.is_some()
-        || !node.children.is_empty();
+        || !node.children.is_empty()
+        // Identified leaves need a wrapper so their semantic record and
+        // mounted bounds can be observed just like identified SVG leaves.
+        || node.id.is_some()
+        || node.runtime_id.is_some();
     if !needs_wrapper {
         return maybe_animated(el, node);
     }

@@ -20,6 +20,7 @@ pub fn record_role(role: NodeRole) -> &'static str {
         NodeRole::ColumnHeader => "columnheader",
         NodeRole::ComboBox => "combobox",
         NodeRole::Dialog => "dialog",
+        NodeRole::Figure => "figure",
         NodeRole::Grid => "grid",
         NodeRole::Group => "group",
         NodeRole::Heading => "heading",

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Breadcrumbs",
-  "test": "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
+  "component": "MediaPicker",
+  "test": "media_picker_dialog_search_selection_and_dismissal_rebuild_the_host",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -20,33 +20,33 @@
     ],
     "events": [
       "payloads.lock",
-      "assert_eq!(\n            *payloads.lock().expect(\"payload",
-      "assert_eq!(*payloads.lock().expect(\"payload"
+      "assert_eq!(\n            *payloads.lock().expect(\"picker payloads\"),\n            vec![\"beta\", \"alpha\"],\n            \"option callback",
+      "assert_eq!(\n            *open_changes.lock().expect(\"picker open change"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
-      "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "dispatch_key",
+      "keyboard_"
     ],
     "accessibility": [
+      "accessible",
       "NodeRole",
-      "a11y.",
-      "aria"
+      "assert_eq!(\n            dialog.a11y_label.as_deref(),\n            Some(\"Select media\"),\n            \"the dialog title supplies its announce"
     ],
     "visual": [
-      "resolve_color",
-      "rem_to_px"
+      "_geometry",
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_in_box",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::button",
+    "renderer": "poodle_render::media_picker",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -59,7 +59,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-092",
     "outcome": "passed",
-    "body_sha256": "561ce7da7d9337c83ed4d7f6514460fbbe5317847d771cc9147d00bc8b684abd"
+    "body_sha256": "88db483901be27f6a5e029275c8a301ad02022b2b107cf7986c29eb7ce85789f"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
