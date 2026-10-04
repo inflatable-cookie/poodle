@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-10-04-poodle-086-gpui-census-gaps",
-  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
+  "run_id": "2026-10-04-poodle-085-rebase-onto-086",
+  "source_commit": "f548373b78aeaae5286c15f2643f507b33a2c488",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -32,11 +32,11 @@
     },
     "a_scrub_reports_change_while_dragging_and_commits_once_at_release": {
       "outcome": "passed",
-      "body_sha256": "22741995c8536bc3954eda6177825c8125c177f4f6446b7b4ae17fdf4bf09c95"
+      "body_sha256": "f7028b124ae98df5e6d1a7a8eab470d0c2b04837276561608053382ccd2d474a"
     },
     "slider_axis_keyboard_and_disabled_rebuild_the_host_spec": {
       "outcome": "passed",
-      "body_sha256": "8da3e2f897fdbff3db8db354f7910d017d79a5a8f6b18c6521dd8d8e4e689446"
+      "body_sha256": "2771e5b32c0660f43d866917038deda71433b0fd9e7ee9244fcbedaf6c101d03"
     },
     "fader_mounted_parity_through_production_dispatch": {
       "outcome": "passed",
@@ -92,7 +92,7 @@
     },
     "order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec": {
       "outcome": "passed",
-      "body_sha256": "9c741485f9c00c39c2334621c2e229e0941ab893151fa5df40081e210ac26cb8"
+      "body_sha256": "56177bbd3f623b4ddc2957b0cb91c190873f75edb3add12be0f75eecac2a4b08"
     },
     "block_editor_grip_drag_and_move_controls_rebuild_the_host_spec": {
       "outcome": "passed",
@@ -128,7 +128,7 @@
     },
     "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard": {
       "outcome": "passed",
-      "body_sha256": "3a239cef0c510d560d69a6d217802a1e15d559bb208d05e390ce880513c32741"
+      "body_sha256": "561ce7da7d9337c83ed4d7f6514460fbbe5317847d771cc9147d00bc8b684abd"
     },
     "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard": {
       "outcome": "passed",
@@ -228,7 +228,7 @@
     },
     "a_focused_resize_handle_steps_the_pane_and_its_declared_value": {
       "outcome": "passed",
-      "body_sha256": "ca9fc5eac53d409f3719ee94185003b8d80f568a313eeaddc5b71e86b43d2dec"
+      "body_sha256": "61fa77aec2ba74ca62906bdf602066bc319a9bdd0f890fb03d765dd89636e8a6"
     },
     "a_disabled_resize_handle_takes_no_focus_and_answers_no_key": {
       "outcome": "passed",
