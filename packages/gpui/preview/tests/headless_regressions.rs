@@ -16611,6 +16611,11 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
             let tablist = mounted_node
                 .find(&|n| n.a11y.role == Some(NodeRole::TabList))
                 .expect("nested tab strip owns the tablist");
+            assert_eq!(
+                tablist.a11y.label.as_deref(),
+                Some("left dock panels"),
+                "the nested strip carries Svelte's panels name"
+            );
             assert!(
                 tablist
                     .find(&|n| n.id.as_deref() == Some("dock-tab-search"))

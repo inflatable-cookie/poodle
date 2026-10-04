@@ -745,8 +745,15 @@ pub fn dock_region(
 
         // Tab list grows; toggle pinned at the end. This is the tablist
         // Svelte's nested Tabs owns; the outer region node stays a region.
+        // Svelte names it `ariaLabel ?? "{edge} dock panels"`.
         let mut tab_list = Node::container();
         tab_list.a11y.role = Some(NodeRole::TabList);
+        tab_list.a11y.label = Some(
+            spec.aria_label
+                .clone()
+                .filter(|label| !label.is_empty())
+                .unwrap_or_else(|| format!("{edge_name} dock panels")),
+        );
         {
             let s = &mut tab_list.style;
             if is_tabs_on_edge {
@@ -1315,6 +1322,7 @@ mod tests {
         let strip = root
             .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::TabList))
             .expect("nested tab strip");
+        assert_eq!(strip.a11y.label.as_deref(), Some("left dock panels"));
         assert!(
             strip
                 .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
