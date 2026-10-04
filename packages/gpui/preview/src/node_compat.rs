@@ -1856,17 +1856,38 @@ impl BulkActionBar {
             handlers: poodle_render::BulkActionBarHandlers::default(),
         }
     }
+
+    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_action = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_clear(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_clear = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_select_all(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_select_all = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::bulk_action_bar(&self.spec, &RenderContext::new(&self.theme), self.handlers)
+    }
+}
+
+impl IntoCompatNode for BulkActionBar {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
 }
 
 impl IntoElement for BulkActionBar {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::bulk_action_bar(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -4361,6 +4382,7 @@ pub(crate) struct ListContainer {
     theme: GpuiThemeProvider,
     instance_id: String,
     content: Option<poodle_node::Node>,
+    on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 }
 
 impl ListContainer {
@@ -4374,6 +4396,7 @@ impl ListContainer {
             theme: theme.clone(),
             instance_id: instance_id.into(),
             content: None,
+            on_page_change: None,
         }
     }
 
@@ -4381,23 +4404,38 @@ impl ListContainer {
         self.content = Some(content.into_compat_node());
         self
     }
+
+    pub(crate) fn on_page_change(mut self, handler: Arc<dyn Fn(usize) + Send + Sync>) -> Self {
+        self.on_page_change = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let slots = poodle_render::ListContainerSlots {
+            content: self.content,
+            ..Default::default()
+        };
+        poodle_render::list_container(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            slots,
+            self.instance_id,
+            self.on_page_change,
+        )
+    }
+}
+
+impl IntoCompatNode for ListContainer {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
 }
 
 impl IntoElement for ListContainer {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let slots = poodle_render::ListContainerSlots {
-            content: self.content,
-            ..Default::default()
-        };
-        poodle_gpui_node_backend::to_gpui(&poodle_render::list_container(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            slots,
-            self.instance_id,
-            None,
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -8993,10 +9031,6 @@ impl LogList {
         }
     }
 
-    #[expect(
-        dead_code,
-        reason = "retained for hosts that wire the optional clear-filters event"
-    )]
     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.on_clear_filters = Some(handler);
         self

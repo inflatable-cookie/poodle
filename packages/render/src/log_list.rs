@@ -15,14 +15,15 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
+    CrossAxisAlignment, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{
-    CallOutSpec, LogFilterKind, LogLevel, LogListSpec, PaginationSpec, SpinnerSize, SpinnerSpec,
-    StatusTone,
+    ButtonSpec, ButtonVariant, CallOutSpec, ControlSize, LogFilterKind, LogLevel, LogListSpec,
+    PaginationSpec, SpinnerSize, SpinnerSpec, StatusTone,
 };
 
+use crate::button::button;
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
@@ -59,10 +60,13 @@ pub fn log_list(
     let warn_color = ctx.theme().resolve_color("color.status.warning");
     let error_color = ctx.theme().resolve_color("color.status.danger");
 
-    // Audit mode is entered when the spec carries audit-only state, matching
-    // the GPUI/Svelte audit branch which owns those surfaces.
-    let is_audit =
-        spec.loading || spec.error.is_some() || spec.has_audit_toolbar() || spec.show_pagination();
+    // Svelte `auto` resolves from entry shape; loading/error/toolbar/pagination
+    // still own the empty-audit chrome when there are no rows yet.
+    let is_audit = spec.is_audit()
+        || spec.loading
+        || spec.error.is_some()
+        || spec.has_audit_toolbar()
+        || spec.show_pagination();
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;
@@ -93,7 +97,13 @@ pub fn log_list(
         pad.bottom = pad_y;
     }
     all_radius(&mut el, radius);
-    el.a11y.role = Some(NodeRole::Log);
+    // Stream uses `role="log"`; audit is a labelled region (Svelte `<section>`).
+    el.a11y.role = Some(if is_audit {
+        NodeRole::Region
+    } else {
+        NodeRole::Log
+    });
+    el.a11y.label = Some(spec.aria_label.clone());
     let mut el = el;
 
     if is_audit {
@@ -167,18 +177,19 @@ pub fn log_list(
                 toolbar = toolbar.child(field.child(control));
             }
 
-            // Clear affordance — only when a value is active.
+            // Clear affordance — Svelte renders a ghost sm Button with a
+            // leading x only when a filter is active *and* `onClearFilters`
+            // is supplied. Composing `button` mints the focus ring / tab
+            // stop that `tracks_focus` observes.
             if spec.has_active_filters() {
-                let mut clear = Node::button("Clear");
-                clear.style.descriptor.text_color = Some(text_secondary);
-                clear.style.text_size = Some(label_token_size);
-                clear.interaction.focusable = true;
                 if let Some(handler) = &on_clear_filters {
-                    let handler = Arc::clone(handler);
-                    clear.style.descriptor.cursor = CursorHint::Pointer;
-                    clear.interaction.on_activate = Some(Arc::new(move || handler()));
+                    let clear_spec = ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(ControlSize::Sm)
+                        .with_leading_icon("x")
+                        .with_label("Clear");
+                    toolbar = toolbar.child(button(&clear_spec, ctx, Some(Arc::clone(handler))));
                 }
-                toolbar = toolbar.child(clear);
             }
 
             el = el.child(toolbar);
@@ -227,22 +238,68 @@ pub fn log_list(
             );
         }
 
-        // Empty audit surface (spec carries no entry payload yet).
-        let mut empty = Node::container();
-        {
-            let s = &mut empty.style;
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.top = rem_to_px(2.0);
-            pad.bottom = rem_to_px(2.0);
+        let audit_rows: Vec<_> = spec.audit_entries().collect();
+        if audit_rows.is_empty() {
+            let mut empty = Node::container();
+            {
+                let s = &mut empty.style;
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.top = rem_to_px(2.0);
+                pad.bottom = rem_to_px(2.0);
+            }
+            el = el.child(empty.child(text(
+                spec.empty_message.clone(),
+                text_secondary,
+                label_token_size,
+            )));
+        } else {
+            let mut list = Node::container();
+            {
+                let s = &mut list.style;
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                s.descriptor.layout.spacing.gap = rem_to_px(0.5);
+            }
+            for entry in audit_rows {
+                let mut row = Node::container();
+                {
+                    let s = &mut row.style;
+                    s.descriptor.layout.direction = LayoutDirection::Row;
+                    s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                    s.descriptor.layout.spacing.gap = rem_to_px(0.5);
+                    s.flex_wrap = true;
+                }
+                let mut actor = text(entry.actor_name(), text_primary, label_token_size);
+                if entry
+                    .actor
+                    .as_ref()
+                    .and_then(|actor| actor.href.as_ref())
+                    .is_some()
+                {
+                    actor.a11y.role = Some(NodeRole::Link);
+                }
+                row = row.child(actor);
+                row = row.child(text(entry.action_label(), text_primary, label_token_size));
+                let resource = match &entry.resource_label {
+                    Some(label) => format!("{} \"{label}\"", entry.resource_type_label()),
+                    None => entry.resource_type_label(),
+                };
+                let mut resource_node = text(resource, text_secondary, label_token_size);
+                if entry.resource_href.is_some() {
+                    resource_node.a11y.role = Some(NodeRole::Link);
+                }
+                row = row.child(resource_node);
+                row = row.child(text(
+                    entry.occurred_at.clone(),
+                    text_secondary,
+                    caption_size,
+                ));
+                list = list.child(row);
+            }
+            el = el.child(list);
         }
-        el = el.child(empty.child(text(
-            spec.empty_message.clone(),
-            text_secondary,
-            label_token_size,
-        )));
 
         // ── Pagination ───────────────────────────────────────────
         if spec.show_pagination() {
@@ -429,10 +486,9 @@ pub fn log_list(
 
     el = el.child(entries_area);
 
-    // Scroll-to-latest hint.
-    if spec.auto_scroll {
-        el = el.child(text("New entries".to_string(), text_secondary, label_font));
-    }
+    // Svelte paints "New entries" only after the user has scrolled away from
+    // the latest row. This renderer has no scroll-offset channel, so it does
+    // not invent the affordance.
 
     el
 }
@@ -440,8 +496,23 @@ pub fn log_list(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_node::NodeKind;
-    use poodle_specs::{AuditLogEntry, LogEntry, StreamLogEntry};
+    use poodle_node::{NodeKind, NodeRole};
+    use poodle_specs::{AuditLogEntry, LogEntry, LogFilter, StreamLogEntry};
+
+    fn find<'a>(node: &'a Node, pred: impl Fn(&Node) -> bool) -> Option<&'a Node> {
+        fn walk<'a>(node: &'a Node, pred: &impl Fn(&Node) -> bool) -> Option<&'a Node> {
+            if pred(node) {
+                return Some(node);
+            }
+            for child in &node.children {
+                if let Some(found) = walk(child, pred) {
+                    return Some(found);
+                }
+            }
+            None
+        }
+        walk(node, &pred)
+    }
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -552,15 +623,68 @@ mod tests {
 
     #[test]
     fn audit_entries_switch_the_list_into_audit_mode() {
-        let spec = LogListSpec::new().with_entries([LogEntry::Audit(AuditLogEntry::new(
-            "a1",
-            "2026-01-01T00:00:00Z",
-            "user_login",
-            "workspace",
-            "w-1",
-        ))]);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = LogListSpec::new().with_entries([LogEntry::Audit(
+            AuditLogEntry::new(
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "user_login",
+                "workspace",
+                "w-1",
+            )
+            .with_actor(poodle_specs::LogActor::new("u-1").with_name("Alice")),
+        )]);
         assert!(spec.is_audit());
-        // Audit rows are not stream rows, so the stream surface stays empty.
         assert!(spec.stream_entries().is_empty());
+        let node = log_list(&spec, &ctx, "log-list", None);
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Log output"));
+        let runs = texts(&node);
+        assert!(runs.iter().any(|run| run == "Alice"));
+        assert!(runs.iter().any(|run| run == "user login"));
+        assert!(runs.iter().any(|run| run == "workspace"));
+    }
+
+    #[test]
+    fn stream_mode_uses_the_log_role() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&stream_spec(), &ctx, "log-list", None);
+        assert_eq!(node.a11y.role, Some(NodeRole::Log));
+        assert_eq!(node.a11y.label.as_deref(), Some("Log output"));
+    }
+
+    #[test]
+    fn clear_filters_composes_a_focusable_ghost_button() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = LogListSpec::new()
+            .with_entries([LogEntry::Audit(AuditLogEntry::new(
+                "a1",
+                "2026-01-01T00:00:00Z",
+                "user_login",
+                "workspace",
+                "w-1",
+            ))])
+            .with_filter(LogFilter::select("action", "Action"))
+            .with_filter_value("action", "login");
+        assert!(spec.has_active_filters());
+        let node = log_list(&spec, &ctx, "log-list", Some(Arc::new(|| {})));
+        let clear =
+            find(&node, |n| n.a11y.label.as_deref() == Some("Clear")).expect("Clear button");
+        assert_eq!(clear.a11y.role, Some(NodeRole::Button));
+        assert!(clear.style.focus_ring.is_some());
+        assert_eq!(clear.a11y.tab_index, Some(0));
+        assert!(clear.interaction.on_activate.is_some());
+        assert!(find(&node, |n| matches!(
+            &n.kind,
+            NodeKind::Icon { name, .. } if name == "x"
+        ))
+        .is_some());
+        let without_handler = log_list(&spec, &ctx, "log-list", None);
+        assert!(find(&without_handler, |n| n.a11y.label.as_deref()
+            == Some("Clear"))
+        .is_none());
     }
 }

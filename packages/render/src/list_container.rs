@@ -10,10 +10,10 @@
 
 use std::sync::Arc;
 
-use poodle_node::{LayoutDirection, LayoutSizing, Node};
+use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
-    CallOutSpec, CalloutAnnounceMode, EmptyStateSpec, EmptyStateVariant, ListContainerSpec,
-    ListContainerState, PageHeaderSpec, PaginationSpec, PaginationSummarySpec, StatusTone,
+    CallOutSpec, CalloutAnnounceMode, EmptyStateSpec, ListContainerSpec, ListContainerState,
+    PageHeaderSpec, PaginationSpec, PaginationSummarySpec, StatusTone,
 };
 
 use crate::callout::{callout, CalloutHandlers};
@@ -197,14 +197,13 @@ pub fn list_container(
             ));
         }
         ListContainerState::Empty => {
-            // Contract: EmptyState title/message/variant. ListContainerSpec
-            // carries no explicit variant field, so neutral; the contract's
-            // `emptyVariant` prop is host-driven through the EmptyState slot.
+            // Contract: EmptyState title/message/variant from the spec
+            // (`emptyVariant`, default Neutral).
             let title = spec
                 .empty_title
                 .clone()
                 .unwrap_or_else(|| "Nothing here yet".to_string());
-            let mut empty = EmptyStateSpec::new(title).with_variant(EmptyStateVariant::Neutral);
+            let mut empty = EmptyStateSpec::new(title).with_variant(spec.empty_variant);
             if let Some(ref msg) = spec.empty_message {
                 empty = empty.with_message(msg.clone());
             }
@@ -212,11 +211,14 @@ pub fn list_container(
         }
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            container.a11y.label = Some(label.to_string());
-        }
-    }
+    container.a11y.role = Some(NodeRole::Region);
+    // Svelte: `aria-label={ariaLabel ?? title}`.
+    let label = spec
+        .aria_label
+        .as_deref()
+        .filter(|value| !value.is_empty())
+        .unwrap_or(spec.title.as_str());
+    container.a11y.label = Some(label.to_string());
     container
 }
 
@@ -224,6 +226,7 @@ pub fn list_container(
 mod tests {
     use super::*;
     use poodle_node::MainAxisAlignment;
+    use poodle_specs::EmptyStateVariant;
 
     #[test]
     fn ready_pager_preserves_full_width_summary_and_end_aligned_controls() {
@@ -262,5 +265,35 @@ mod tests {
             pager.children[1].style.descriptor.layout.alignment.main,
             MainAxisAlignment::End
         );
+        assert_eq!(node.a11y.role, Some(NodeRole::Region));
+        assert_eq!(node.a11y.label.as_deref(), Some("Items"));
+    }
+
+    #[test]
+    fn accessible_name_prefers_aria_label_and_empty_variant_reaches_empty_state() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let labelled = list_container(
+            &ListContainerSpec::new("Projects").with_aria_label("Project catalogue"),
+            &ctx,
+            ListContainerSlots::default(),
+            "list-container",
+            None,
+        );
+        assert_eq!(labelled.a11y.label.as_deref(), Some("Project catalogue"));
+
+        let empty = list_container(
+            &ListContainerSpec::new("Projects")
+                .with_state(ListContainerState::Empty)
+                .with_empty_variant(EmptyStateVariant::FirstRun),
+            &ctx,
+            ListContainerSlots::default(),
+            "list-container",
+            None,
+        );
+        assert!(empty
+            .find(&|node| matches!(&node.kind, poodle_node::NodeKind::Icon { name, .. } if name == "plus"))
+            .is_some());
     }
 }

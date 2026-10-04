@@ -96,6 +96,10 @@ impl ListContainerSpec {
         self.empty_message = Some(v.into());
         self
     }
+    pub fn with_empty_variant(mut self, v: EmptyStateVariant) -> Self {
+        self.empty_variant = v;
+        self
+    }
     pub fn with_current_page(mut self, v: usize) -> Self {
         self.current_page = v;
         self

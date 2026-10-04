@@ -173,6 +173,9 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
     "stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press",
     "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring",
   ],
+  BulkActionBar: "gpui_mounted_bulk_action_bar_actions_clear_and_select_all",
+  ListContainer: "gpui_mounted_list_container_state_pagination_and_accessible_name",
+  LogList: "gpui_mounted_log_list_stream_audit_and_clear_filters",
 };
 
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;

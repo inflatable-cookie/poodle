@@ -40309,3 +40309,311 @@ fn gpui_mounted_nav_card_link_button_actions_and_accessibility() {
         assert!(driver.mounted_observation().is_valid());
     });
 }
+
+fn stamp_labelled_id(node: &mut Node, label: &str, id: &str) {
+    if node.a11y.label.as_deref() == Some(label) {
+        node.id = Some(id.to_owned());
+    }
+    if let NodeKind::Button {
+        label: button_label,
+    } = &node.kind
+    {
+        if button_label == label && node.id.is_none() {
+            node.id = Some(id.to_owned());
+        }
+    }
+    for child in &mut node.children {
+        stamp_labelled_id(child, label, id);
+    }
+}
+
+/// BulkActionBar mounts the contract region, fires action/clear/select-all
+/// through pointer and keyboard, and uses the accent-mix fill plus size table.
+#[test]
+fn gpui_mounted_bulk_action_bar_actions_clear_and_select_all() {
+    use node_compat::{BulkActionBar, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::color::mix_srgb;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{BulkAction, BulkActionBarSpec, BulkActionTone};
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let action_events = Arc::clone(&payloads);
+        let clear_events = Arc::clone(&payloads);
+        let select_events = Arc::clone(&payloads);
+        let theme_provider = theme();
+        let spec = BulkActionBarSpec::new()
+            .with_selection_count(5)
+            .with_total_count(42)
+            .with_show_select_all(true)
+            .with_actions(vec![
+                BulkAction::new("export", "Export").with_icon("download"),
+                BulkAction::new("delete", "Delete")
+                    .with_tone(BulkActionTone::Danger)
+                    .with_icon("trash-2"),
+            ]);
+        let mut bar = BulkActionBar::from_spec(spec, &theme_provider)
+            .on_action(Arc::new(move |id: &str| {
+                action_events
+                    .lock()
+                    .expect("bulk callback payloads")
+                    .push(format!("action:{id}"));
+            }))
+            .on_clear(Arc::new(move || {
+                clear_events
+                    .lock()
+                    .expect("bulk callback payloads")
+                    .push("clear".to_owned());
+            }))
+            .on_select_all(Arc::new(move || {
+                select_events
+                    .lock()
+                    .expect("bulk callback payloads")
+                    .push("select-all".to_owned());
+            }))
+            .into_compat_node();
+
+        assert_eq!(bar.a11y.role, Some(NodeRole::Region));
+        assert_eq!(bar.a11y.label.as_deref(), Some("Bulk actions"));
+        assert!(bar.has_text("5 selected"));
+        assert!(bar.has_text("of 42"));
+        let panel = theme_provider.resolve_color("color.background.panel");
+        let text_primary = theme_provider.resolve_color("color.text.primary");
+        assert_eq!(
+            bar.style.descriptor.background,
+            Some(mix_srgb(panel, text_primary, 0.93))
+        );
+        assert_eq!(
+            bar.style.descriptor.layout.spacing.padding.top,
+            rem_to_px(0.5)
+        );
+        assert_eq!(
+            bar.style.descriptor.corner_radii.top_left,
+            theme_provider.resolve_radius("radius.surface")
+        );
+        let danger = bar
+            .find(&|node| node.a11y.label.as_deref() == Some("Delete"))
+            .expect("danger action");
+        assert_eq!(
+            danger
+                .children
+                .first()
+                .and_then(|child| child.style.descriptor.text_color),
+            Some(theme_provider.resolve_color("color.status.danger"))
+        );
+
+        stamp_labelled_id(&mut bar, "Export", "bulk-export");
+        stamp_labelled_id(&mut bar, "Clear selection", "bulk-clear");
+        stamp_labelled_id(&mut bar, "Select all (42)", "bulk-select-all");
+
+        let mounted = Arc::new(Mutex::new(bar));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 120.0);
+        assert!(poodle_gpui_node_backend::bounds_for("bulk-export").is_some());
+        assert!(poodle_gpui_node_backend::bounds_for("bulk-clear").is_some());
+        driver.wait_for_focus_handle("bulk-export");
+        driver.keyboard_activate("bulk-export");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("bulk-export"),
+            Some(true)
+        );
+        driver.pointer_activate_id("bulk-clear");
+        driver.pointer_activate_id("bulk-select-all");
+        assert_eq!(
+            payloads.lock().expect("bulk callback payloads").as_slice(),
+            ["action:export", "clear", "select-all"]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// ListContainer defaults its section name to the title, switches ready /
+/// error / empty treatments, and forwards pagination through mounted input.
+#[test]
+fn gpui_mounted_list_container_state_pagination_and_accessible_name() {
+    use node_compat::{IntoCompatNode, ListContainer};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{EmptyStateVariant, ListContainerSpec, ListContainerState};
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::<usize>::new()));
+        let page_events = Arc::clone(&payloads);
+        let theme_provider = theme();
+        let mut ready = ListContainer::from_spec(
+            ListContainerSpec::new("Projects")
+                .with_subtitle("Team catalogue")
+                .with_current_page(1)
+                .with_total_pages(3)
+                .with_total_items(24)
+                .with_page_size(10),
+            &theme_provider,
+            "list-container-proof",
+        )
+        .with_content({
+            let mut content = Node::text("Row one");
+            content.style.text_size = Some(theme_provider.resolve_space("typography.body.size"));
+            content
+        })
+        .on_page_change(Arc::new(move |page| {
+            page_events
+                .lock()
+                .expect("list container page payloads")
+                .push(page);
+        }))
+        .into_compat_node();
+
+        assert_eq!(ready.a11y.role, Some(NodeRole::Region));
+        assert_eq!(ready.a11y.label.as_deref(), Some("Projects"));
+        assert!(ready.has_text("Projects"));
+        assert!(ready.has_text("Row one"));
+        assert_eq!(
+            ready.style.descriptor.layout.spacing.gap,
+            theme_provider.resolve_space("space.stack.lg")
+        );
+        assert!(ready
+            .find(&|node| node.a11y.label.as_deref() == Some("Next page"))
+            .is_some());
+
+        let error = ListContainer::from_spec(
+            ListContainerSpec::new("Projects")
+                .with_state(ListContainerState::Error)
+                .with_error_message("A network error occurred."),
+            &theme_provider,
+            "list-container-error",
+        )
+        .into_compat_node();
+        assert_eq!(error.a11y.label.as_deref(), Some("Projects"));
+        assert!(error
+            .find(&|node| node.a11y.role == Some(NodeRole::Alert))
+            .is_some());
+        assert!(error.has_text("Unable to load list"));
+
+        let empty = ListContainer::from_spec(
+            ListContainerSpec::new("Projects")
+                .with_state(ListContainerState::Empty)
+                .with_empty_variant(EmptyStateVariant::FirstRun)
+                .with_empty_message("Create your first project."),
+            &theme_provider,
+            "list-container-empty",
+        )
+        .into_compat_node();
+        assert!(empty
+            .find(&|node| matches!(&node.kind, NodeKind::Icon { name, .. } if name == "plus"))
+            .is_some());
+
+        stamp_labelled_id(&mut ready, "Next page", "list-container-next");
+        let mounted = Arc::new(Mutex::new(ready));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 400.0);
+        assert!(poodle_gpui_node_backend::bounds_for("list-container-next").is_some());
+        driver.wait_for_focus_handle("list-container-next");
+        driver.keyboard_activate("list-container-next");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("list-container-next"),
+            Some(true)
+        );
+        driver.pointer_activate_id("list-container-next");
+        assert_eq!(
+            payloads
+                .lock()
+                .expect("list container page payloads")
+                .as_slice(),
+            [2, 2]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// LogList stream uses the log role; audit renders actor/action/resource and
+/// fires clear-filters through mounted pointer and keyboard.
+#[test]
+fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
+    use node_compat::{IntoCompatNode, LogList};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{
+        AuditLogEntry, LogActor, LogEntry, LogFilter, LogLevel, LogListSpec, StreamLogEntry,
+    };
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let stream = LogList::from_spec(
+            LogListSpec::new().with_entries([
+                LogEntry::Stream(StreamLogEntry::new(
+                    "10:23:01",
+                    LogLevel::Info,
+                    "Server started",
+                )),
+                LogEntry::Stream(StreamLogEntry::new("10:23:08", LogLevel::Error, "Timeout")),
+            ]),
+            &theme_provider,
+            "log-list-stream",
+        )
+        .into_compat_node();
+        assert_eq!(stream.a11y.role, Some(NodeRole::Log));
+        assert_eq!(stream.a11y.label.as_deref(), Some("Log output"));
+        assert!(stream.has_text("Server started"));
+        assert!(stream.has_text("Timeout"));
+        assert!(stream.has_text("ERROR"));
+        assert_eq!(
+            stream.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.surface"))
+        );
+        assert!(rem_to_px(0.5) > 0.0);
+
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let clear_events = Arc::clone(&payloads);
+        let mut audit = LogList::from_spec(
+            LogListSpec::new()
+                .with_entries([LogEntry::Audit(
+                    AuditLogEntry::new("a1", "09:14:22", "user_login", "workspace", "w-1")
+                        .with_actor(
+                            LogActor::new("u-alice")
+                                .with_name("Alice Chen")
+                                .with_href("/users/alice"),
+                        )
+                        .with_resource_label("Acme"),
+                )])
+                .with_filter(
+                    LogFilter::select("action", "Action")
+                        .with_option("login", "Login")
+                        .with_option("logout", "Logout"),
+                )
+                .with_filter_value("action", "login"),
+            &theme_provider,
+            "log-list-audit",
+        )
+        .on_clear_filters(Arc::new(move || {
+            clear_events
+                .lock()
+                .expect("log list clear payloads")
+                .push("clear".to_owned());
+        }))
+        .into_compat_node();
+        assert_eq!(audit.a11y.role, Some(NodeRole::Region));
+        assert_eq!(audit.a11y.label.as_deref(), Some("Log output"));
+        assert!(audit.has_text("Alice Chen"));
+        assert!(audit.has_text("user login"));
+        assert!(audit.has_text("workspace \"Acme\""));
+        let actor = audit
+            .find(&|node| node.has_text("Alice Chen") && node.a11y.role == Some(NodeRole::Link))
+            .expect("actor link");
+        assert_eq!(actor.a11y.role, Some(NodeRole::Link));
+
+        stamp_labelled_id(&mut audit, "Clear", "log-list-clear");
+        let mounted = Arc::new(Mutex::new(audit));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 320.0);
+        assert!(poodle_gpui_node_backend::bounds_for("log-list-clear").is_some());
+        driver.wait_for_focus_handle("log-list-clear");
+        driver.keyboard_activate("log-list-clear");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("log-list-clear"),
+            Some(true)
+        );
+        driver.pointer_activate_id("log-list-clear");
+        assert_eq!(
+            payloads.lock().expect("log list clear payloads").as_slice(),
+            ["clear", "clear"]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
