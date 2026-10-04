@@ -9,12 +9,16 @@
 
 use std::sync::Arc;
 
+use poodle_headless::motion_policy::{
+    motion_key, MotionPolicy, MOTION_DURATION_STANDARD_MS, MOTION_ROLE_TOAST_ENTER,
+    MOTION_ROLE_TOAST_EXIT,
+};
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node, NodePosition,
-    NodeRole, StylePatch,
+    AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, CrossAxisAlignment, CursorHint, FocusRing,
+    LayoutDirection, LayoutSizing, Node, NodeAnimation, NodePosition, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, ToastPosition,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, Toast, ToastPosition,
     ToastStackSpec, ToastTone,
 };
 
@@ -33,6 +37,188 @@ pub struct ToastStackHandlers {
     /// hosts may legitimately render the same id without sharing backend
     /// focus, hit-test, or element state.
     pub instance_id: Option<String>,
+}
+
+/// The animation phase of one toast row (contract §8a).
+///
+/// Renderer-owned: the renderer decides the phase from the semantic item list
+/// and the effective motion policy. The backend drives the phase's visual
+/// clock; it never decides what the phase is.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ToastVisualPhase {
+    /// A newly joined item: it owns live-region and accessibility semantics at
+    /// once, and may add a bounded enter treatment.
+    Enter,
+    /// The settled endpoint: no enter clock runs.
+    Settled,
+    /// The item left the semantic list; the row stays only as inert paint
+    /// until its leave treatment finishes or the host drops it.
+    Exit,
+}
+
+impl ToastVisualPhase {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Enter => "enter",
+            Self::Settled => "settled",
+            Self::Exit => "exit",
+        }
+    }
+}
+
+/// One row's presence phase, keyed by the semantic item id.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ToastVisual {
+    pub id: String,
+    pub phase: ToastVisualPhase,
+}
+
+/// The framework-free presence law (contract §8a), mirroring
+/// `packages/core/src/dom/motion-runtime.ts` so Svelte, React, and native
+/// share one decision.
+///
+/// Authored initial items are settled. A new id enters; a kept id keeps its
+/// phase; a removed id leaves an exit remnant at the tail. Reusing a key
+/// before its remnant is dropped retargets that row back to enter rather than
+/// queueing a second leave.
+pub fn next_toast_visuals(
+    previous: &[ToastVisual],
+    live_ids: &[String],
+    initial: bool,
+) -> Vec<ToastVisual> {
+    if initial {
+        return live_ids
+            .iter()
+            .map(|id| ToastVisual {
+                id: id.clone(),
+                phase: ToastVisualPhase::Settled,
+            })
+            .collect();
+    }
+    let live: std::collections::HashSet<&str> = live_ids.iter().map(String::as_str).collect();
+    let mut next: Vec<ToastVisual> = live_ids
+        .iter()
+        .map(|id| {
+            let phase = match previous.iter().find(|visual| &visual.id == id) {
+                Some(prior) if prior.phase != ToastVisualPhase::Exit => prior.phase,
+                _ => ToastVisualPhase::Enter,
+            };
+            ToastVisual {
+                id: id.clone(),
+                phase,
+            }
+        })
+        .collect();
+    for prior in previous {
+        if !live.contains(prior.id.as_str()) {
+            next.push(ToastVisual {
+                id: prior.id.clone(),
+                phase: ToastVisualPhase::Exit,
+            });
+        }
+    }
+    next
+}
+
+/// One stack's renderer-owned presence ledger.
+///
+/// The host owns one per stack and threads it through
+/// [`toast_stack_with_presence`]; the renderer reconciles phases, retains the
+/// removed item's copy for the inert remnant, and settles or drops a row on
+/// the host's completion report (the browser's `onComplete`). The host still
+/// owns the item list and timers: presence never owns expiry or dismissal.
+#[derive(Clone, Debug, Default)]
+pub struct ToastStackPresence {
+    visuals: Vec<ToastVisual>,
+    retained: Vec<Toast>,
+    initialised: bool,
+}
+
+impl ToastStackPresence {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Every row in render order, including exit remnants at the tail.
+    pub fn visuals(&self) -> &[ToastVisual] {
+        &self.visuals
+    }
+
+    pub fn phase(&self, id: &str) -> Option<ToastVisualPhase> {
+        self.visuals
+            .iter()
+            .find(|visual| visual.id == id)
+            .map(|visual| visual.phase)
+    }
+
+    /// The item copy backing a row, live or remnant.
+    pub fn retained(&self, id: &str) -> Option<&Toast> {
+        self.retained.iter().find(|toast| toast.id == id)
+    }
+
+    pub fn has_exiting(&self) -> bool {
+        self.visuals
+            .iter()
+            .any(|visual| visual.phase == ToastVisualPhase::Exit)
+    }
+
+    /// Reconcile the ledger against the live items under the effective motion
+    /// policy. Initial items settle; new ids enter; kept ids keep their phase;
+    /// removed ids leave an exit remnant. `frozen` has no clock: new rows
+    /// settle and removed rows drop immediately (contract §8a). Returns
+    /// whether the ledger changed.
+    pub fn reconcile(&mut self, toasts: &[Toast], policy: MotionPolicy) -> bool {
+        let live_ids: Vec<String> = toasts.iter().map(|toast| toast.id.clone()).collect();
+        let previous = self.visuals.clone();
+        let mut visuals = next_toast_visuals(&self.visuals, &live_ids, !self.initialised);
+        self.initialised = true;
+        if policy == MotionPolicy::Frozen {
+            visuals.retain(|visual| visual.phase != ToastVisualPhase::Exit);
+            for visual in &mut visuals {
+                if visual.phase == ToastVisualPhase::Enter {
+                    visual.phase = ToastVisualPhase::Settled;
+                }
+            }
+        }
+        // Live copy replaces the retained copy; a remnant keeps the copy its
+        // row was last rendered with, exactly like the web's retained map.
+        for toast in toasts {
+            match self
+                .retained
+                .iter_mut()
+                .find(|retained| retained.id == toast.id)
+            {
+                Some(retained) => *retained = toast.clone(),
+                None => self.retained.push(toast.clone()),
+            }
+        }
+        self.retained
+            .retain(|retained| visuals.iter().any(|visual| visual.id == retained.id));
+        let changed = visuals != previous;
+        self.visuals = visuals;
+        changed
+    }
+
+    /// Settle an entering row once its enter treatment finishes. Returns
+    /// whether the phase moved.
+    pub fn settle(&mut self, id: &str) -> bool {
+        match self.visuals.iter_mut().find(|visual| visual.id == id) {
+            Some(visual) if visual.phase == ToastVisualPhase::Enter => {
+                visual.phase = ToastVisualPhase::Settled;
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// Drop an exit remnant (after its leave treatment) or a stale row.
+    /// Returns whether anything was removed.
+    pub fn drop_visual(&mut self, id: &str) -> bool {
+        let before = self.visuals.len();
+        self.visuals.retain(|visual| visual.id != id);
+        self.retained.retain(|toast| toast.id != id);
+        self.visuals.len() != before
+    }
 }
 
 fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
@@ -177,11 +363,100 @@ fn all_corners(node: &mut Node, r: f32) {
     c.bottom_left = r;
 }
 
+/// The bounded enter/exit treatment for one row (contract §8a): opacity plus
+/// the web's 0.5rem translation in `full`, opacity only under `reduced`, and
+/// nothing under `frozen` (the endpoint paints immediately). Filtering goes
+/// through the shared motion policy, so the declaration names the properties
+/// the backend will actually run.
+fn toast_presence_animation(
+    instance_id: Option<&str>,
+    toast_id: &str,
+    phase: ToastVisualPhase,
+    policy: MotionPolicy,
+) -> Option<NodeAnimation> {
+    let (role, opacity, translate) = match phase {
+        ToastVisualPhase::Enter => (
+            MOTION_ROLE_TOAST_ENTER,
+            (0.0_f32, 1.0_f32),
+            (rem_to_px(0.5), 0.0),
+        ),
+        ToastVisualPhase::Exit => (
+            MOTION_ROLE_TOAST_EXIT,
+            (1.0_f32, 0.0_f32),
+            (0.0, rem_to_px(0.5)),
+        ),
+        ToastVisualPhase::Settled => return None,
+    };
+    let owner = scoped(instance_id, &format!("toast:{toast_id}"))
+        .unwrap_or_else(|| format!("poodle-toast-{toast_id}"));
+    let animation = NodeAnimation {
+        key: motion_key(&owner, role, "item"),
+        keyframes: vec![
+            AnimKeyframe {
+                at: 0.0,
+                values: vec![
+                    (AnimProperty::Opacity, opacity.0),
+                    (AnimProperty::TranslateY, translate.0),
+                ],
+            },
+            AnimKeyframe {
+                at: 1.0,
+                values: vec![
+                    (AnimProperty::Opacity, opacity.1),
+                    (AnimProperty::TranslateY, translate.1),
+                ],
+            },
+        ],
+        duration_secs: MOTION_DURATION_STANDARD_MS as f32 / 1000.0,
+        easing: AnimEasing::EaseOut,
+        loop_mode: AnimLoop::Once,
+    };
+    crate::motion::animation_for_policy(policy, animation, true)
+}
+
+/// Strip a control to inert paint: no focus, no traversal stop, no cursor,
+/// no hover/active restyle, no activation, and no semantic `id` (the runtime
+/// scope stays for observation). An exit remnant is unreachable.
+fn inert_control(node: &mut Node) {
+    node.id = None;
+    node.interaction.focusable = false;
+    node.interaction.on_activate = None;
+    node.interaction.on_activate_modified = None;
+    node.interaction.on_key = None;
+    node.interaction.on_key_activate = None;
+    node.a11y.tab_index = Some(-1);
+    node.style.focus_ring = None;
+    node.style.hover = None;
+    node.style.active = None;
+    node.style.descriptor.cursor = CursorHint::Default;
+}
+
+/// Render a toast stack from its semantic items. This is the authored /
+/// preloaded form: every row paints settled with no enter clock, and a removed
+/// row unmounts immediately. A host that draws presence holds a
+/// [`ToastStackPresence`] and calls [`toast_stack_with_presence`].
 pub fn toast_stack(
     spec: &ToastStackSpec,
     ctx: &RenderContext<'_>,
     handlers: ToastStackHandlers,
 ) -> Node {
+    let mut presence = ToastStackPresence::new();
+    toast_stack_with_presence(spec, ctx, &mut presence, handlers)
+}
+
+/// Render a toast stack under a host-held presence ledger. The renderer owns
+/// the decision: it reconciles the ledger against `spec.toasts` under the
+/// context's effective motion policy, composes every row at its phase — enter,
+/// settled, or the inert exit remnant — and leaves settling an enter and
+/// dropping a remnant to the host's completion report.
+pub fn toast_stack_with_presence(
+    spec: &ToastStackSpec,
+    ctx: &RenderContext<'_>,
+    presence: &mut ToastStackPresence,
+    handlers: ToastStackHandlers,
+) -> Node {
+    presence.reconcile(&spec.toasts, ctx.motion_policy());
+    let policy = ctx.motion_policy();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let title_px = rem_to_px(title_font_rem(effective_size));
@@ -269,7 +544,13 @@ pub fn toast_stack(
         },
     };
 
-    for toast in &spec.toasts {
+    let live_order: Vec<String> = spec.toasts.iter().map(|toast| toast.id.clone()).collect();
+    let visuals = presence.visuals().to_vec();
+    for visual in &visuals {
+        let Some(toast) = presence.retained(&visual.id).cloned() else {
+            continue;
+        };
+        let exiting = visual.phase == ToastVisualPhase::Exit;
         let tone_color = ctx.theme().resolve_color(spec.tone_color(&toast.tone));
 
         // Contract §8 tone treatments:
@@ -319,11 +600,15 @@ pub fn toast_stack(
         }
         // Optional action affordance — the contract-owned Button primitive.
         if let Some(action) = &toast.action_label {
-            let on_click = handlers.on_action.as_ref().map(|handler| {
-                let handler = Arc::clone(handler);
-                let id = toast.id.clone();
-                Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
-            });
+            let on_click = if exiting {
+                None
+            } else {
+                handlers.on_action.as_ref().map(|handler| {
+                    let handler = Arc::clone(handler);
+                    let id = toast.id.clone();
+                    Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
+                })
+            };
             let mut action_button = button(
                 &ButtonSpec::new()
                     .with_label(action.as_str())
@@ -338,6 +623,9 @@ pub fn toast_stack(
             action_button
                 .roles
                 .insert("dependency".to_owned(), "button".to_owned());
+            if exiting {
+                inert_control(&mut action_button);
+            }
 
             let mut actions = Node::container();
             actions.runtime_id = scoped(instance_id, &format!("toast:{}:actions", toast.id));
@@ -395,7 +683,9 @@ pub fn toast_stack(
             });
         }
         all_corners(&mut dismiss, ctx.theme().resolve_radius("radius.sm"));
-        if let Some(handler) = &handlers.on_dismiss {
+        if exiting {
+            inert_control(&mut dismiss);
+        } else if let Some(handler) = &handlers.on_dismiss {
             let handler = Arc::clone(handler);
             let id = toast.id.clone();
             // Contract §8a, renderer-owned: the component moves focus, the
@@ -408,7 +698,7 @@ pub fn toast_stack(
             // chained removals without re-entry can leave a dead inside id
             // as the transit source; the backend drop then clears focus,
             // which the contract reads as no connected entry existing.
-            let order: Vec<String> = spec.toasts.iter().map(|toast| toast.id.clone()).collect();
+            let order = live_order.clone();
             let instance = instance_id.map(str::to_owned);
             dismiss.interaction.on_activate = Some(Arc::new(move || {
                 let entered = poodle_node::previous_focused_id();
@@ -447,6 +737,19 @@ pub fn toast_stack(
             "tone".to_owned(),
             format!("{:?}", toast.tone).to_ascii_lowercase(),
         );
+        toast_el
+            .roles
+            .insert("phase".to_owned(), visual.phase.as_str().to_owned());
+        toast_el.style.animation =
+            toast_presence_animation(instance_id, &toast.id, visual.phase, policy);
+        if exiting {
+            // Contract §8a: the remnant leaves accessibility ownership at
+            // once, stays as inert paint only, and drops its semantic id so no
+            // activation path reaches it. Its runtime scope stays for
+            // observation.
+            toast_el.a11y.hidden = Some(true);
+            toast_el.id = None;
+        }
         {
             let s = &mut toast_el.style;
             s.descriptor.background = Some(bg_tinted);
@@ -848,6 +1151,268 @@ mod tests {
             toast_dismiss_focus_target(&order, Some("scope"), "b", Some("outside")),
             Some("toast-host:scope:toast:c:dismiss".to_owned()),
             "scoped stacks request the caller-scoped dismiss identity"
+        );
+    }
+
+    #[test]
+    fn presence_law_settles_initial_enters_new_and_remnants_removed() {
+        let initial = next_toast_visuals(&[], &["a".to_owned(), "b".to_owned()], true);
+        assert_eq!(
+            initial,
+            vec![
+                ToastVisual {
+                    id: "a".into(),
+                    phase: ToastVisualPhase::Settled,
+                },
+                ToastVisual {
+                    id: "b".into(),
+                    phase: ToastVisualPhase::Settled,
+                },
+            ]
+        );
+        let entered = next_toast_visuals(
+            &initial,
+            &["a".to_owned(), "b".to_owned(), "c".to_owned()],
+            false,
+        );
+        assert_eq!(entered[0].phase, ToastVisualPhase::Settled);
+        assert_eq!(entered[2].id, "c");
+        assert_eq!(entered[2].phase, ToastVisualPhase::Enter);
+
+        let removed = next_toast_visuals(&entered, &["a".to_owned(), "c".to_owned()], false);
+        assert_eq!(removed.len(), 3, "the removed row leaves a remnant");
+        assert_eq!(removed[1].id, "c");
+        assert_eq!(
+            removed[1].phase,
+            ToastVisualPhase::Enter,
+            "a kept id keeps its phase"
+        );
+        assert_eq!(removed[2].id, "b");
+        assert_eq!(
+            removed[2].phase,
+            ToastVisualPhase::Exit,
+            "the remnant sits at the tail"
+        );
+
+        // Reusing the key before cleanup retargets the same row back to enter.
+        let reused = next_toast_visuals(
+            &removed,
+            &["a".to_owned(), "c".to_owned(), "b".to_owned()],
+            false,
+        );
+        assert_eq!(reused.len(), 3);
+        assert_eq!(reused[2].id, "b");
+        assert_eq!(reused[2].phase, ToastVisualPhase::Enter);
+    }
+
+    #[test]
+    fn presence_ledger_keeps_phase_on_same_id_replacement_and_reports_completion() {
+        let mut presence = ToastStackPresence::new();
+        let first = vec![Toast::new("save", "Saved")];
+        assert!(presence.reconcile(&first, MotionPolicy::Full));
+        assert_eq!(presence.phase("save"), Some(ToastVisualPhase::Settled));
+
+        // Same-id replacement keeps the row and its phase: no fresh enter.
+        let replaced = vec![Toast::new("save", "Saved file")];
+        presence.reconcile(&replaced, MotionPolicy::Full);
+        assert_eq!(presence.phase("save"), Some(ToastVisualPhase::Settled));
+        assert_eq!(
+            presence.retained("save").map(|toast| toast.title.as_str()),
+            Some("Saved file")
+        );
+
+        // A new id enters; the host settles it once the enter treatment ends.
+        let grown = vec![
+            Toast::new("save", "Saved file"),
+            Toast::new("sync", "Syncing"),
+        ];
+        presence.reconcile(&grown, MotionPolicy::Full);
+        assert_eq!(presence.phase("sync"), Some(ToastVisualPhase::Enter));
+        assert!(presence.settle("sync"));
+        assert_eq!(presence.phase("sync"), Some(ToastVisualPhase::Settled));
+
+        // Removal keeps the last copy as an exit remnant until the host drops it.
+        let shrunk = vec![Toast::new("save", "Saved file")];
+        presence.reconcile(&shrunk, MotionPolicy::Full);
+        assert_eq!(presence.phase("sync"), Some(ToastVisualPhase::Exit));
+        assert!(presence.has_exiting());
+        assert_eq!(
+            presence.retained("sync").map(|toast| toast.title.as_str()),
+            Some("Syncing")
+        );
+        assert!(presence.drop_visual("sync"));
+        assert_eq!(presence.phase("sync"), None);
+        assert!(presence.retained("sync").is_none());
+    }
+
+    #[test]
+    fn frozen_presence_settles_new_rows_and_drops_remnants_immediately() {
+        let mut presence = ToastStackPresence::new();
+        presence.reconcile(&[Toast::new("a", "A")], MotionPolicy::Full);
+        // A new row under frozen has no clock: the endpoint settles at once.
+        presence.reconcile(
+            &[Toast::new("a", "A"), Toast::new("b", "B")],
+            MotionPolicy::Frozen,
+        );
+        assert_eq!(presence.phase("b"), Some(ToastVisualPhase::Settled));
+        // A removed row under frozen leaves no remnant.
+        presence.reconcile(&[Toast::new("b", "B")], MotionPolicy::Frozen);
+        assert_eq!(presence.phase("a"), None);
+        assert!(!presence.has_exiting());
+    }
+
+    fn presence_handlers() -> ToastStackHandlers {
+        ToastStackHandlers {
+            instance_id: Some("presence".to_owned()),
+            ..ToastStackHandlers::default()
+        }
+    }
+
+    fn presence_animation_has(animation: &NodeAnimation, property: AnimProperty) -> bool {
+        animation
+            .keyframes
+            .iter()
+            .any(|frame| frame.values.iter().any(|(value, _)| *value == property))
+    }
+
+    #[test]
+    fn renderer_paints_the_presence_phase_and_marks_the_exit_remnant_inert() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut presence = ToastStackPresence::new();
+        let row = |id: &str| Toast::new(id, id.to_uppercase());
+
+        // Preloaded items settle: no clock declaration at all.
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("a"), row("b")]),
+            &ctx,
+            &mut presence,
+            presence_handlers(),
+        );
+        let a = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-a"))
+            .expect("settled row a");
+        assert_eq!(a.roles.get("phase").map(String::as_str), Some("settled"));
+        assert!(a.style.animation.is_none(), "a settled row runs no clock");
+
+        // A late item enters under full with the bounded opacity/translation.
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("a"), row("b"), row("c")]),
+            &ctx,
+            &mut presence,
+            presence_handlers(),
+        );
+        let c = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-c"))
+            .expect("entering row c");
+        assert_eq!(c.roles.get("phase").map(String::as_str), Some("enter"));
+        let enter = c.style.animation.as_ref().expect("enter clock");
+        assert!(presence_animation_has(enter, AnimProperty::Opacity));
+        assert!(presence_animation_has(enter, AnimProperty::TranslateY));
+
+        // The host reports completion: the settled repaint runs no clock.
+        assert!(presence.settle("c"));
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("a"), row("b"), row("c")]),
+            &ctx,
+            &mut presence,
+            presence_handlers(),
+        );
+        let c = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-c"))
+            .expect("settled row c");
+        assert_eq!(c.roles.get("phase").map(String::as_str), Some("settled"));
+        assert!(c.style.animation.is_none());
+
+        // Removing b keeps it as an inert paint remnant: aria-hidden, no
+        // semantic id, no focus stop, no activation, exit clock attached.
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("a"), row("c")]),
+            &ctx,
+            &mut presence,
+            presence_handlers(),
+        );
+        let remnant = &node;
+        let b = remnant
+            .find(&|node| node.runtime_id.as_deref() == Some("toast-host:presence:toast:b"))
+            .expect("retained exit remnant");
+        assert_eq!(
+            b.a11y.hidden,
+            Some(true),
+            "the remnant leaves accessibility"
+        );
+        assert_eq!(b.id, None, "the remnant has no semantic activation id");
+        assert_eq!(b.roles.get("phase").map(String::as_str), Some("exit"));
+        assert!(b
+            .style
+            .animation
+            .as_ref()
+            .is_some_and(|animation| { presence_animation_has(animation, AnimProperty::Opacity) }));
+        let dismiss = remnant
+            .find(&|node| node.runtime_id.as_deref() == Some("toast-host:presence:toast:b:dismiss"))
+            .expect("remnant dismiss paint");
+        assert!(!dismiss.interaction.focusable, "the remnant is unfocusable");
+        assert_eq!(dismiss.a11y.tab_index, Some(-1));
+        assert_eq!(dismiss.id, None);
+        assert!(dismiss.interaction.on_activate.is_none());
+        assert!(dismiss.style.focus_ring.is_none());
+    }
+
+    #[test]
+    fn presence_treatment_follows_the_effective_motion_policy() {
+        let theme = theme();
+        let full = RenderContext::new(&theme);
+        let reduced = full.with_motion_policy(MotionPolicy::Reduced);
+        let frozen = full.with_motion_policy(MotionPolicy::Frozen);
+        let row = |id: &str| Toast::new(id, id.to_uppercase());
+
+        // Reduced removes translation and keeps the short opacity enter.
+        let mut presence = ToastStackPresence::new();
+        toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("a")]),
+            &full,
+            &mut presence,
+            presence_handlers(),
+        );
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("a"), row("b")]),
+            &reduced,
+            &mut presence,
+            presence_handlers(),
+        );
+        let b = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-b"))
+            .expect("reduced entering row");
+        let animation = b.style.animation.as_ref().expect("reduced enter clock");
+        assert!(presence_animation_has(animation, AnimProperty::Opacity));
+        assert!(
+            !presence_animation_has(animation, AnimProperty::TranslateY),
+            "reduced drops translation"
+        );
+
+        // Frozen paints the endpoint with no clock and drops the remnant.
+        let mut frozen_presence = ToastStackPresence::new();
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("x"), row("y")]),
+            &frozen,
+            &mut frozen_presence,
+            presence_handlers(),
+        );
+        let y = node
+            .find(&|node| node.id.as_deref() == Some("poodle-toast-y"))
+            .expect("frozen row y");
+        assert_eq!(y.roles.get("phase").map(String::as_str), Some("settled"));
+        assert!(y.style.animation.is_none());
+        let node = toast_stack_with_presence(
+            &ToastStackSpec::new().with_toasts(vec![row("y")]),
+            &frozen,
+            &mut frozen_presence,
+            presence_handlers(),
+        );
+        assert!(
+            node.find(&|node| node.runtime_id.as_deref() == Some("toast-host:presence:toast:x"))
+                .is_none(),
+            "frozen drops the removed row with no remnant"
         );
     }
 }

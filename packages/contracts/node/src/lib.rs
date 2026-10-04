@@ -980,6 +980,11 @@ pub struct NodeA11y {
     pub label: Option<String>,
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
+    /// Hidden from assistive technology (`aria-hidden`) while still painted.
+    /// An exit remnant keeps its visual, but leaves accessibility ownership
+    /// the moment its item leaves the semantic list; the backend keeps
+    /// drawing it and drops it from any accessibility projection.
+    pub hidden: Option<bool>,
     /// Requests focus when this node is first mounted as an overlay's initial
     /// focus target. Exactly one node in an open overlay may set this marker;
     /// the backend consumes it through the normal mount-time focus queue.
@@ -1286,6 +1291,15 @@ mod tests {
         assert_eq!(node.a11y.invalid, None);
         assert_eq!(node.a11y.busy, None);
         assert_eq!(node.a11y.described_by, None);
+    }
+
+    /// A painted node is visible to assistive technology until a component
+    /// says otherwise. Defaulting `hidden` on would hide every ordinary
+    /// subtree, and defaulting it off would let an inert remnant stay
+    /// announced: both are declarations a component must make explicitly.
+    #[test]
+    fn a_node_is_not_hidden_from_assistive_technology_by_default() {
+        assert_eq!(Node::container().a11y.hidden, None);
     }
 
     #[test]

@@ -25,6 +25,7 @@ use std::sync::{Arc, Mutex};
 use gpui::{point, px, InteractiveElement, Modifiers, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::audio::{AudioValueLaw, KnobDragMode, XYPadVisualState};
+use poodle_headless::motion_policy::MotionPolicy;
 use poodle_headless::time_input::{
     time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent,
 };
@@ -40,11 +41,12 @@ use poodle_render::{
     audio_entry_id, collapsible_trigger_focus_id, collapsible_with_handlers,
     fader_spec_from_context, fader_with_handlers, history_center, icon_button,
     knob_spec_from_context, knob_with_handlers, skeleton, spinner, tabs,
-    time_input_with_persistent_context, toast_stack, ui_presentation_provider,
-    xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id, xy_pad_y_id, CollapsibleHandlers,
-    FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView, KnobHandlers, KnobLive,
-    RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers, TabsHandlers,
-    ToastStackHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
+    time_input_with_persistent_context, toast_stack, toast_stack_with_presence,
+    ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
+    xy_pad_y_id, CollapsibleHandlers, FaderHandlers, FaderLive, HistoryCenterHandlers,
+    HistoryCenterView, KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext,
+    SliderHandlers, TabsHandlers, ToastStackHandlers, ToastStackPresence, ToggleGroupHandlers,
+    TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ChoiceOption, CodeSpec, CodeWrap,
@@ -48510,6 +48512,374 @@ fn first_mounted_parity_toast_stack() {
             poodle_gpui_node_backend::focus_state_for("outside-button"),
             Some(true),
             "the reused row's removal restores the entered-from control"
+        );
+        assert!(theme_provider.resolve_color("color.status.danger").3 > 0.0);
+        assert!(rem_to_px(1.25) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Renderer-owned presence on mounted GPUI (contract §8a). The production
+/// renderer reconciles a host-held `ToastStackPresence` against the semantic
+/// items under the effective motion policy: preloaded rows paint settled with
+/// no enter clock; a same-id replacement keeps its row and phase; a late row
+/// enters with bounded opacity and translation under `full`, opacity only
+/// under `reduced`, and the endpoint with no clock under `frozen`; and a
+/// removed row stays only as an inert exit remnant — `aria-hidden`,
+/// unfocusable, outside hit testing — until the host's completion report
+/// drops it. Svelte parity authority:
+/// `packages/svelte/components/src/ToastStack.svelte` with the shared law in
+/// `packages/core/src/dom/motion-runtime.ts`.
+#[test]
+fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+
+    let theme_provider = theme();
+    let presence = Arc::new(Mutex::new(ToastStackPresence::new()));
+    let policy = Rc::new(std::cell::Cell::new(MotionPolicy::Full));
+
+    #[derive(Default)]
+    struct PresenceHost {
+        toasts: Vec<Toast>,
+        dismisses: Vec<String>,
+        actions: Vec<String>,
+    }
+    let host = Arc::new(Mutex::new(PresenceHost {
+        toasts: vec![
+            Toast::new("save", "Saved").with_message("All changes are safe."),
+            Toast::new("mid", "Syncing").with_tone(ToastTone::Success),
+        ],
+        ..PresenceHost::default()
+    }));
+
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let presence = Arc::clone(&presence);
+        let policy = Rc::clone(&policy);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let toasts = host.lock().expect("presence host").toasts.clone();
+            let dismiss_host = Arc::clone(&host);
+            let action_host = Arc::clone(&host);
+            let mut outside = Node::button("Outside");
+            outside.id = Some("outside-button".to_owned());
+            outside.a11y.label = Some("Outside control".to_owned());
+            outside.a11y.tab_index = Some(0);
+            outside.interaction.focusable = true;
+            outside.style.focus_ring = Some(FocusRing {
+                color: theme_provider.resolve_color("color.accent.focusRing"),
+                width: theme_provider.resolve_border_width("border.width.focus"),
+                offset: rem_to_px(0.125),
+            });
+            outside.position = NodePosition::Absolute {
+                top: Some(8.0),
+                left: Some(8.0),
+                right: None,
+                bottom: None,
+            };
+            let base = RenderContext::new(&theme_provider);
+            let ctx = base.with_motion_policy(policy.get());
+            let mut ledger = presence.lock().expect("presence ledger");
+            let stack = toast_stack_with_presence(
+                &ToastStackSpec::new().with_toasts(toasts),
+                &ctx,
+                &mut ledger,
+                ToastStackHandlers {
+                    instance_id: Some("proof".to_owned()),
+                    on_dismiss: Some(Arc::new(move |id: &str| {
+                        let mut host = dismiss_host.lock().expect("presence host");
+                        host.dismisses.push(format!("dismiss:{id}"));
+                        if let Some(index) = host.toasts.iter().position(|toast| toast.id == id) {
+                            host.toasts.remove(index);
+                        }
+                    })),
+                    on_action: Some(Arc::new(move |id: &str| {
+                        action_host
+                            .lock()
+                            .expect("presence host")
+                            .actions
+                            .push(format!("action:{id}"));
+                    })),
+                },
+            );
+            div()
+                .relative()
+                .size_full()
+                .child(poodle_gpui_node_backend::to_gpui(&outside))
+                .child(poodle_gpui_node_backend::to_gpui(&stack))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+
+        // Preloaded rows settle with no enter clock.
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        for row in ["save", "mid"] {
+            let painted = poodle_gpui_node_backend::painted_node_for(&format!(
+                "toast-host:proof:toast:{row}"
+            ))
+            .unwrap_or_else(|| panic!("preloaded {row} row painted"));
+            assert_eq!(
+                painted.roles.get("phase").map(String::as_str),
+                Some("settled"),
+                "preloaded {row} paints the settled endpoint"
+            );
+            assert_eq!(painted.a11y_hidden, None);
+            assert!(
+                poodle_gpui_node_backend::bounds_for(&format!("toast-host:proof:toast:{row}"))
+                    .is_some_and(|bounds| f32::from(bounds.size.width) > 0.0)
+            );
+        }
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "preloaded items settle without an enter clock"
+        );
+
+        // Same-id replacement keeps the row and its settled phase.
+        {
+            let mut host = host.lock().expect("presence host");
+            let save = host
+                .toasts
+                .iter_mut()
+                .find(|toast| toast.id == "save")
+                .expect("save toast");
+            save.title = "Saved file".to_owned();
+        }
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let save = poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save")
+            .expect("settled save repaint");
+        assert_eq!(save.roles.get("phase").map(String::as_str), Some("settled"));
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save:dismiss")
+                .expect("same-id dismiss repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Dismiss Saved file"),
+            "same-id replacement updates the copy in place"
+        );
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "same-id replacement keeps the phase and starts no fresh enter"
+        );
+
+        // A late row enters under full with the bounded opacity/translation.
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .push(Toast::new("late", "Almost done").with_message("One more step."));
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        let late = poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:late")
+            .expect("late row painted");
+        assert_eq!(late.roles.get("phase").map(String::as_str), Some("enter"));
+        assert_eq!(late.a11y_role, Some(NodeRole::ListItem));
+        assert_eq!(
+            late.a11y_hidden, None,
+            "a live entering row keeps its semantics"
+        );
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            channels.contains(&"surface.animation.scheduled"),
+            "the entering row runs a bounded clock"
+        );
+        assert!(
+            channels.contains(&"surface.animation.approximation.opacity-stand-in"),
+            "full translation is named as the opacity stand-in"
+        );
+
+        // The host reports the enter finished: the settled repaint has no clock.
+        presence.lock().expect("presence ledger").settle("late");
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:late")
+                .expect("settled late repaint")
+                .roles
+                .get("phase")
+                .map(String::as_str),
+            Some("settled")
+        );
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "a settled row runs no clock"
+        );
+
+        // Reduced removes translation and keeps the short opacity enter.
+        policy.set(MotionPolicy::Reduced);
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .push(Toast::new("reduced", "Reduced").with_message("No translation."));
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:reduced")
+                .expect("reduced row painted")
+                .roles
+                .get("phase")
+                .map(String::as_str),
+            Some("enter")
+        );
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        assert!(channels.contains(&"surface.animation.scheduled"));
+        assert!(
+            !channels.contains(&"surface.animation.approximation.opacity-stand-in"),
+            "reduced drops translation"
+        );
+        presence.lock().expect("presence ledger").settle("reduced");
+        policy.set(MotionPolicy::Full);
+
+        // Frozen paints the endpoint with no clock and drops a removed row.
+        policy.set(MotionPolicy::Frozen);
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .push(Toast::new("frozen", "Frozen").with_message("Endpoint."));
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:frozen")
+                .expect("frozen row painted")
+                .roles
+                .get("phase")
+                .map(String::as_str),
+            Some("settled"),
+            "frozen settles a new row at the endpoint"
+        );
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "frozen schedules no clock"
+        );
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .retain(|toast| toast.id != "frozen");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:frozen").is_none(),
+            "frozen drops a removed row with no inert remnant"
+        );
+        policy.set(MotionPolicy::Full);
+
+        // Removal under full leaves an inert exit remnant until completion.
+        driver.wait_for_focus_handle("toast-host:proof:toast:late:dismiss");
+        driver.focus_element("toast-host:proof:toast:late:dismiss");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:late:dismiss"),
+            Some(true)
+        );
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.pointer_activate_id("toast-host:proof:toast:late:dismiss");
+        assert_eq!(
+            host.lock().expect("presence host").dismisses.as_slice(),
+            ["dismiss:late"],
+            "dismiss callback payload names the toast"
+        );
+        driver.draw_frame();
+        let remnant = poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:late")
+            .expect("exit remnant painted");
+        assert_eq!(remnant.roles.get("phase").map(String::as_str), Some("exit"));
+        assert_eq!(
+            remnant.a11y_hidden,
+            Some(true),
+            "the remnant leaves accessibility ownership at once"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_some(),
+            "the remnant keeps painting"
+        );
+        assert!(
+            poodle_gpui_node_backend::take_probe_capture().contains(&"surface.animation.scheduled"),
+            "the exit treatment runs a bounded clock"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:late:dismiss"),
+            None,
+            "the remnant control owns no focus handle"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:reduced:dismiss"),
+            Some(true),
+            "focus transferred to the previous surviving row's dismiss"
+        );
+        let before = host.lock().expect("presence host").dismisses.clone();
+        driver.pointer_activate_id("toast-host:proof:toast:late:dismiss");
+        assert_eq!(
+            host.lock().expect("presence host").dismisses,
+            before,
+            "the inert remnant is outside activation"
+        );
+
+        // Completion drops the remnant entirely.
+        presence
+            .lock()
+            .expect("presence ledger")
+            .drop_visual("late");
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_none(),
+            "the completed remnant unmounts"
+        );
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "the dropped row leaves no clock"
+        );
+
+        // Reusing a key before cleanup retargets the same row back to enter.
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .push(Toast::new("reuse", "First").with_message("Reuse."));
+        driver.draw_frame();
+        presence.lock().expect("presence ledger").settle("reuse");
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .retain(|toast| toast.id != "reuse");
+        driver.draw_frame();
+        assert_eq!(
+            presence.lock().expect("presence ledger").phase("reuse"),
+            Some(poodle_render::ToastVisualPhase::Exit),
+            "the removed row is an exit remnant"
+        );
+        host.lock()
+            .expect("presence host")
+            .toasts
+            .push(Toast::new("reuse", "Second").with_message("Reuse again."));
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:reuse")
+                .expect("reused row painted")
+                .roles
+                .get("phase")
+                .map(String::as_str),
+            Some("enter"),
+            "a reused key retargets its remnant back to enter"
+        );
+        assert!(
+            poodle_gpui_node_backend::take_probe_capture().contains(&"surface.animation.scheduled")
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:reuse:dismiss")
+                .expect("reused dismiss paint")
+                .a11y_label
+                .as_deref(),
+            Some("Dismiss Second"),
+            "the reused row paints its new semantic copy"
         );
         assert!(theme_provider.resolve_color("color.status.danger").3 > 0.0);
         assert!(rem_to_px(1.25) > 0.0);
