@@ -20,7 +20,6 @@
         "Menubar",
         "NavigationMenu",
         "PageLoading",
-        "PickerShell",
         "RefSelect",
         "RelationPicker",
         "SplitButton",
@@ -30,12 +29,12 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 23,
+        "semantic": 19,
         "events": 20,
-        "pointer": 23,
-        "keyboard_focus": 23,
-        "accessibility": 23,
-        "visual": 23
+        "pointer": 19,
+        "keyboard_focus": 19,
+        "accessibility": 19,
+        "visual": 19
       },
       "contracts": [
         "docs/contracts/components/color-picker.md",
@@ -53,7 +52,6 @@
         "docs/contracts/components/menubar.md",
         "docs/contracts/components/navigation-menu.md",
         "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/picker-shell.md",
         "docs/contracts/components/ref-select.md",
         "docs/contracts/components/relation-picker.md",
         "docs/contracts/components/split-button.md",

@@ -43516,8 +43516,8 @@ fn first_mounted_parity_picker_shell() {
 
 #[test]
 fn first_mounted_parity_relation_picker() {
-    // RelationPicker names and presses candidates, roves between them, drills and
-    // navigates back, and confirms through mounted GPUI input.
+    // RelationPicker names its candidates, shows the pressed one, roves between
+    // them and selects through mounted GPUI input.
     use gpui::{AnyElement, IntoElement};
     use poodle_adapter::ThemeProvider;
     use poodle_specs::{PickerItemSpec, RelationPickerSpec, SelectionMode};

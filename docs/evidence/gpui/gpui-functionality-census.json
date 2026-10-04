@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "eb38e296ee76fc2c85426539f090c659a061d6b9",
+  "source_commit": "10099684f8ab842f498b363ea4df640a707ecdbe",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2781,14 +2781,35 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
+        }
+      ],
       "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+        "events"
       ],
       "holds": [
         {
@@ -2798,9 +2819,11 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/RefSelect--first-mounted-parity-ref-select.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for RefSelect; every required capability stays missing."
+        "Expected test first_mounted_parity_ref_select proves no events claim; events stays missing."
       ]
     },
     {
@@ -4473,14 +4496,35 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
+        }
+      ],
       "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+        "events"
       ],
       "holds": [
         {
@@ -4490,9 +4534,11 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ThemeSelect--first-mounted-parity-theme-select.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for ThemeSelect; every required capability stays missing."
+        "Expected test first_mounted_parity_theme_select proves no events claim; events stays missing."
       ]
     },
     {
@@ -6347,14 +6393,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_picker_shell"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_picker_shell"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_picker_shell"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_picker_shell"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_picker_shell"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6363,10 +6429,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for PickerShell; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/PickerShell--first-mounted-parity-picker-shell.json"
+      ],
+      "refusals": []
     },
     {
       "component": "RelationPicker",
@@ -6381,14 +6447,35 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
+        }
+      ],
       "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+        "events"
       ],
       "holds": [
         {
@@ -6398,9 +6485,11 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/RelationPicker--first-mounted-parity-relation-picker.json"
+      ],
       "refusals": [
-        "No validated receipt and no retained expected test for RelationPicker; every required capability stays missing."
+        "Expected test first_mounted_parity_relation_picker proves no events claim; events stays missing."
       ]
     },
     {
@@ -8148,18 +8237,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 93,
-    "fullyAdmittedRows": 70,
+    "admittedRows": 97,
+    "fullyAdmittedRows": 71,
     "missingTally": {
-      "semantic": 82,
+      "semantic": 78,
       "events": 70,
-      "pointer": 79,
-      "keyboard_focus": 75,
-      "accessibility": 88,
-      "visual": 101
+      "pointer": 75,
+      "keyboard_focus": 71,
+      "accessibility": 84,
+      "visual": 97
     },
     "holdCount": 175,
-    "refusalCount": 145
+    "refusalCount": 144
   },
   "groups": [
     {
@@ -8180,7 +8269,6 @@
         "Menubar",
         "NavigationMenu",
         "PageLoading",
-        "PickerShell",
         "RefSelect",
         "RelationPicker",
         "SplitButton",
@@ -8190,12 +8278,12 @@
         "VideoPlayer"
       ],
       "missingTally": {
-        "semantic": 23,
+        "semantic": 19,
         "events": 20,
-        "pointer": 23,
-        "keyboard_focus": 23,
-        "accessibility": 23,
-        "visual": 23
+        "pointer": 19,
+        "keyboard_focus": 19,
+        "accessibility": 19,
+        "visual": 19
       },
       "contracts": [
         "docs/contracts/components/color-picker.md",
@@ -8213,7 +8301,6 @@
         "docs/contracts/components/menubar.md",
         "docs/contracts/components/navigation-menu.md",
         "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/picker-shell.md",
         "docs/contracts/components/ref-select.md",
         "docs/contracts/components/relation-picker.md",
         "docs/contracts/components/split-button.md",
