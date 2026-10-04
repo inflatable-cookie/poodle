@@ -9,11 +9,8 @@
 
 use std::sync::Arc;
 
-use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
-};
-use poodle_specs::FilterToolbarSpec;
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_specs::{CollapseToggleSpec, FilterToolbarSpec};
 
 use crate::context::{RenderContext, SlotBuilder};
 use crate::presentation::rem_to_px;
@@ -62,10 +59,6 @@ pub fn filter_toolbar(
     let border = ctx.theme().resolve_color(spec.border_token());
     let radius = ctx.theme().resolve_radius(spec.radius_token());
     let summary_color = ctx.theme().resolve_color(spec.summary_color_token());
-    let icon_muted = ctx.theme().resolve_color("color.icon.muted");
-    let toggle_size = ctx.theme().resolve_space(spec.toggle_size_token());
-    let toggle_radius = ctx.theme().resolve_radius(spec.toggle_radius_token());
-
     let is_expanded = spec.is_grid_visible();
     let had_children = !children.is_empty();
 
@@ -98,38 +91,43 @@ pub fn filter_toolbar(
     let needs_header = spec.collapsible || spec.summary_text.is_some() || actions.is_some();
     if needs_header {
         let mut header = Node::container();
+        header.a11y.role = Some(NodeRole::Group);
         header.style.descriptor.layout.direction = LayoutDirection::Row;
         header.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         header.style.descriptor.layout.spacing.gap = header_gap;
         let mut header = header;
 
-        // Collapse toggle chevron (chevron-down when expanded, -right when
-        // collapsed). Interaction is host-wired via `on_toggle`.
+        // The native CollapseToggle mirrors Svelte's named, keyboard control.
         if spec.collapsible {
-            let chevron_name = if is_expanded {
-                "chevron-down"
+            let aria_label = if spec.collapsed {
+                match spec.summary_text.as_deref() {
+                    Some(summary) => format!("Show filters. {summary}"),
+                    None => "Show filters".to_owned(),
+                }
             } else {
-                "chevron-right"
+                "Hide filters".to_owned()
             };
-            let mut toggle = Node::container();
-            {
-                let s = &mut toggle.style;
-                s.descriptor.layout.width = LayoutSizing::Fixed(toggle_size);
-                s.descriptor.layout.height = LayoutSizing::Fixed(toggle_size);
-                s.descriptor.layout.direction = LayoutDirection::Row;
-                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-            }
-            all_radius(&mut toggle, toggle_radius);
+            let toggle_spec = CollapseToggleSpec::new()
+                .with_collapsed(spec.collapsed)
+                .with_aria_label(aria_label);
+            let toggle = crate::collapse_toggle::collapse_toggle(
+                &toggle_spec,
+                &host_scope,
+                on_toggle.clone(),
+            );
+            header = header.child(toggle);
+        }
+
+        // Svelte also lets a click on the surrounding header toggle collapse.
+        // The nested toggle and actions slot stop activation before it reaches
+        // this pointer convenience handler.
+        if spec.collapsible {
             if let Some(handler) = &on_toggle {
                 let handler = Arc::clone(handler);
-                let next = !is_expanded;
-                toggle.style.descriptor.cursor = CursorHint::Pointer;
-                toggle.interaction.on_activate = Some(Arc::new(move || handler(next)));
+                let next_collapsed = !spec.collapsed;
+                header.style.descriptor.cursor = CursorHint::Pointer;
+                header.interaction.on_activate = Some(Arc::new(move || handler(next_collapsed)));
             }
-            let mut chevron = Node::icon(chevron_name, toggle_size);
-            chevron.style.descriptor.text_color = Some(icon_muted);
-            header = header.child(toggle.child(chevron));
         }
 
         // Summary text — grows so the actions slot anchors right (Svelte
@@ -154,6 +152,9 @@ pub fn filter_toolbar(
             slot.style.descriptor.layout.direction = LayoutDirection::Row;
             slot.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             slot.style.descriptor.layout.spacing.gap = actions_gap;
+            // Stop the header's pointer convenience handler for action clicks,
+            // including disabled child actions that have no handler of their own.
+            slot.interaction.on_activate = Some(Arc::new(|| {}));
             header = header.child(slot.child(actions_el));
         }
 

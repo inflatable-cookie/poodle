@@ -8609,6 +8609,316 @@ fn first_mounted_parity_table() {
     });
 }
 
+/// DataTable sorting and its table hierarchy reach the production mounted tree.
+#[test]
+fn first_mounted_parity_data_table() {
+    use poodle_render::{data_table, DataTableHandlers, RenderContext};
+    use poodle_specs::{DataTableSpec, TableColumnSpec, TableRowSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let columns = vec![
+            TableColumnSpec::new("name", "Name").with_sortable(true),
+            TableColumnSpec::new("team", "Team"),
+        ];
+        let rows = vec![TableRowSpec::new(
+            "row-ada",
+            vec![
+                ("name".to_owned(), "Ada Lovelace".to_owned()),
+                ("team".to_owned(), "Analytical Engine".to_owned()),
+            ],
+        )];
+        let spec = DataTableSpec::new(columns, rows)
+            .with_aria_label("Team directory")
+            .with_show_row_actions(false);
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = data_table(
+            &spec,
+            &ctx,
+            DataTableHandlers {
+                on_sort: Some(Arc::new(move |column| {
+                    sink.lock().expect("sort payloads").push(column.to_owned());
+                })),
+                ..DataTableHandlers::default()
+            },
+        );
+        node.id = Some("mounted-data-table".to_owned());
+        node.runtime_id = node.id.clone();
+        node.children[0].children[0].id = Some("mounted-data-table-sort-name".to_owned());
+        node.children[0].children[0].runtime_id = node.children[0].children[0].id.clone();
+        node.children[1].id = Some("mounted-data-table-row-ada".to_owned());
+        node.children[1].runtime_id = node.children[1].id.clone();
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Table));
+        assert_eq!(node.a11y.label.as_deref(), Some("Team directory"));
+        assert_eq!(node.children[0].a11y.role, Some(NodeRole::Row));
+        assert_eq!(
+            node.children[0].children[0].a11y.role,
+            Some(NodeRole::ColumnHeader)
+        );
+        assert_eq!(node.children[1].a11y.role, Some(NodeRole::Row));
+        assert_eq!(node.children[1].a11y.selected, Some(false));
+        assert_eq!(
+            node.children[1].children[0].a11y.role,
+            Some(NodeRole::RowHeader)
+        );
+        assert_eq!(node.children[1].children[1].a11y.role, Some(NodeRole::Cell));
+        assert!(node.children[0].children[0].interaction.focusable);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 180.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-data-table")
+            .expect("DataTable reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Table));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Team directory"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-data-table")
+            .expect("mounted DataTable geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.pointer_activate_id("mounted-data-table-sort-name");
+        assert_eq!(*payloads.lock().expect("sort payloads"), ["name"]);
+        driver.focus_element("mounted-data-table-sort-name");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*payloads.lock().expect("sort payloads"), ["name", "name"]);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FilterBuilder exposes a named, focusable trigger and labeled dialog while
+/// forwarding pointer and keyboard activation to its host.
+#[test]
+fn first_mounted_parity_filter_builder() {
+    use poodle_render::{filter_builder, FilterBuilderHandlers, RenderContext};
+    use poodle_specs::FilterBuilderSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let payloads = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = FilterBuilderSpec::new()
+            .with_aria_label("Filter")
+            .with_open(true);
+        let mut node = filter_builder(
+            &spec,
+            &ctx,
+            "mounted-filter-builder",
+            &FilterBuilderHandlers {
+                on_toggle: Some(Arc::new(move || {
+                    sink.lock().expect("filter payloads").push("toggle");
+                })),
+                ..FilterBuilderHandlers::default()
+            },
+        );
+        node.id = Some("mounted-filter-builder-root".to_owned());
+        node.runtime_id = node.id.clone();
+        let trigger = &node.children[0].children[0];
+        let trigger_id = trigger
+            .runtime_id
+            .as_deref()
+            .expect("stable FilterBuilder trigger identity")
+            .to_owned();
+        let dialog = node
+            .find(&|candidate| candidate.a11y.role == Some(NodeRole::Dialog))
+            .expect("FilterBuilder dialog");
+
+        assert_eq!(node.children[0].a11y.role, Some(NodeRole::Group));
+        assert_eq!(node.children[0].a11y.label.as_deref(), Some("Filter"));
+        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+        assert_eq!(trigger.a11y.label.as_deref(), Some("Filter"));
+        assert_eq!(trigger.a11y.expanded, Some(true));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some("filter-builder:mounted-filter-builder:dialog")
+        );
+        assert!(trigger.interaction.focusable);
+        assert_eq!(dialog.a11y.label.as_deref(), Some("Edit filters"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 320.0);
+        let painted_trigger = poodle_gpui_node_backend::painted_node_for(&trigger_id)
+            .expect("FilterBuilder trigger reached GPUI paint");
+        assert_eq!(painted_trigger.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_trigger.a11y_label.as_deref(), Some("Filter"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-filter-builder-root")
+            .expect("mounted FilterBuilder geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.pointer_activate_id(&trigger_id);
+        assert_eq!(*payloads.lock().expect("filter payloads"), ["toggle"]);
+        driver.focus_element(&trigger_id);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            *payloads.lock().expect("filter payloads"),
+            ["toggle", "toggle"]
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FilterToolbar preserves its toolbar and group semantics and makes collapse
+/// available from both the header row and its keyboard control.
+#[test]
+fn first_mounted_parity_filter_toolbar() {
+    use poodle_render::{filter_toolbar, RenderContext};
+    use poodle_specs::FilterToolbarSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = FilterToolbarSpec::new()
+            .with_aria_label("Library filters")
+            .with_summary_text("3 filters active")
+            .with_collapsed(true);
+        let mut node = filter_toolbar(
+            &spec,
+            &ctx,
+            vec![Box::new(|_| Node::text("Search library"))],
+            None,
+            None,
+            Some(Arc::new(move |collapsed| {
+                sink.lock().expect("collapse payloads").push(collapsed);
+            })),
+        );
+        node.id = Some("mounted-filter-toolbar".to_owned());
+        node.runtime_id = node.id.clone();
+        node.children[0].id = Some("mounted-filter-toolbar-header".to_owned());
+        node.children[0].runtime_id = node.children[0].id.clone();
+        node.children[0].children[0].id = Some("mounted-filter-toolbar-toggle".to_owned());
+        node.children[0].children[0].runtime_id = node.children[0].children[0].id.clone();
+        let toggle = &node.children[0].children[0];
+        let toggle_id = toggle
+            .runtime_id
+            .as_deref()
+            .expect("stable FilterToolbar collapse identity")
+            .to_owned();
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Toolbar));
+        assert_eq!(node.a11y.label.as_deref(), Some("Library filters"));
+        assert_eq!(node.children[0].a11y.role, Some(NodeRole::Group));
+        assert_eq!(toggle.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            toggle.a11y.label.as_deref(),
+            Some("Show filters. 3 filters active")
+        );
+        assert_eq!(toggle.a11y.expanded, Some(false));
+        assert!(toggle.interaction.focusable);
+        assert!(!node.has_text("Search library"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 160.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-filter-toolbar")
+            .expect("FilterToolbar reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Toolbar));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Library filters"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-filter-toolbar")
+            .expect("mounted FilterToolbar geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.pointer_activate_id("mounted-filter-toolbar-header");
+        assert_eq!(*payloads.lock().expect("collapse payloads"), [false]);
+        driver.focus_element(&toggle_id);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*payloads.lock().expect("collapse payloads"), [false, false]);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Toolbar keeps one labeled semantic root, supports pointer items, and moves
+/// focus among mounted controls with wrapping arrow navigation.
+#[test]
+fn first_mounted_parity_toolbar() {
+    use poodle_render::{button, toolbar, RenderContext};
+    use poodle_specs::{ButtonSpec, Orientation, ToolbarSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let hits = Arc::new(Mutex::new(0usize));
+        let hit_sink = Arc::clone(&hits);
+        let bold = button(
+            &ButtonSpec::new().with_label("Bold"),
+            &ctx,
+            Some(Arc::new(move || {
+                *hit_sink.lock().expect("button hits") += 1;
+            })),
+        );
+        let italic = button(&ButtonSpec::new().with_label("Italic"), &ctx, None);
+        let mut node = toolbar(
+            &ToolbarSpec::new()
+                .with_aria_label("Formatting")
+                .with_orientation(Orientation::Horizontal),
+            &ctx,
+            vec![bold, italic],
+        );
+        node.id = Some("mounted-toolbar-root".to_owned());
+        node.runtime_id = node.id.clone();
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Toolbar));
+        assert_eq!(node.a11y.label.as_deref(), Some("Formatting"));
+        assert!(node.interaction.focusable);
+        assert_eq!(node.a11y.tab_index, Some(0));
+        assert_eq!(node.a11y.orientation.as_deref(), Some("horizontal"));
+        let bold_id = node.children[0]
+            .runtime_id
+            .as_deref()
+            .expect("stable first toolbar item identity")
+            .to_owned();
+        let italic_id = node.children[1]
+            .runtime_id
+            .as_deref()
+            .expect("stable second toolbar item identity")
+            .to_owned();
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 120.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-toolbar-root")
+            .expect("Toolbar reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Toolbar));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Formatting"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-toolbar-root")
+            .expect("mounted Toolbar geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.focus_element("mounted-toolbar-root");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&bold_id),
+            Some(true)
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&italic_id),
+            Some(true)
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&bold_id),
+            Some(true),
+            "horizontal navigation wraps to the first item"
+        );
+        driver.pointer_activate_id(&bold_id);
+        assert_eq!(*hits.lock().expect("button hits"), 1);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// TimeZoneSelect forwards its searchable Select state through mounted GPUI
 /// pointer, keyboard, value, and query paths.
 #[test]

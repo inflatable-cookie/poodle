@@ -82,6 +82,10 @@ const AUDIO_RENDER_COMPONENTS = new Set([
 export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   AudioPlayer: "first_mounted_parity_audio_player",
   Table: "first_mounted_parity_table",
+  DataTable: "first_mounted_parity_data_table",
+  FilterBuilder: "first_mounted_parity_filter_builder",
+  FilterToolbar: "first_mounted_parity_filter_toolbar",
+  Toolbar: "first_mounted_parity_toolbar",
   TimeZoneSelect: "first_mounted_parity_time_zone_select",
   DatePicker: "first_mounted_parity_date_picker",
   DateRangePicker: "first_mounted_parity_date_range_picker",
