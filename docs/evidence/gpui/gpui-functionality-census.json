@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "dc5c680f41c8e605456eadc1cf1da44b12c0cd51",
+  "source_commit": "d84d1caf2d5d7a9c70cc34c982b6c832a003e63e",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -617,14 +617,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_card"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -633,10 +653,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Card; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Card--first-mounted-parity-card.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Code",
@@ -1670,13 +1690,24 @@
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam"
         }
       ],
-      "missing": [
-        "keyboard_focus",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1688,11 +1719,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/FileUpload--a-dropzone-browse-flows-fixture-bytes-through-the-generic-seam.json"
       ],
-      "refusals": [
-        "Expected test a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam proves no keyboard_focus claim; keyboard_focus stays missing.",
-        "Expected test a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam proves no accessibility claim; accessibility stays missing.",
-        "Expected test a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "FilterBuilder",
@@ -3426,13 +3453,29 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_separator"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_separator"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_separator"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_separator"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3441,10 +3484,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Separator; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Separator--first-mounted-parity-separator.json"
+      ],
+      "refusals": []
     },
     {
       "component": "SplitButton",
@@ -5773,16 +5816,27 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input"
         }
       ],
-      "missing": [
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5794,11 +5848,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/DockRegion--dock-region-tab-and-collapse-rebuild-the-host-spec-through-mounted-input.json"
       ],
-      "refusals": [
-        "Expected test dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.",
-        "Expected test dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.",
-        "Expected test dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "DetailShell",
@@ -8676,18 +8726,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 116,
-    "fullyAdmittedRows": 97,
+    "admittedRows": 118,
+    "fullyAdmittedRows": 101,
     "missingTally": {
-      "semantic": 59,
+      "semantic": 57,
       "events": 49,
-      "pointer": 54,
-      "keyboard_focus": 52,
-      "accessibility": 66,
-      "visual": 75
+      "pointer": 52,
+      "keyboard_focus": 49,
+      "accessibility": 62,
+      "visual": 71
     },
     "holdCount": 175,
-    "refusalCount": 119
+    "refusalCount": 111
   },
   "groups": [
     {
@@ -8789,41 +8839,6 @@
       ]
     },
     {
-      "substrate": "drag-resize-reorder",
-      "components": [
-        "Card",
-        "CardRadioGroup",
-        "CardToggleGroup",
-        "DockRegion",
-        "DragNumberField",
-        "FileUpload",
-        "ListCard",
-        "MarkdownEditor",
-        "Separator",
-        "TokenInput"
-      ],
-      "missingTally": {
-        "semantic": 8,
-        "events": 6,
-        "pointer": 8,
-        "keyboard_focus": 9,
-        "accessibility": 10,
-        "visual": 10
-      },
-      "contracts": [
-        "docs/contracts/components/card-radio-group.md",
-        "docs/contracts/components/card-toggle-group.md",
-        "docs/contracts/components/card.md",
-        "docs/contracts/components/dock-region.md",
-        "docs/contracts/components/drag-number-field.md",
-        "docs/contracts/components/file-upload.md",
-        "docs/contracts/components/list-card.md",
-        "docs/contracts/components/markdown-editor.md",
-        "docs/contracts/components/separator.md",
-        "docs/contracts/components/token-input.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -8912,6 +8927,33 @@
         "docs/contracts/components/skeleton.md",
         "docs/contracts/components/time-ago.md",
         "docs/contracts/components/tooltip.md"
+      ]
+    },
+    {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "CardRadioGroup",
+        "CardToggleGroup",
+        "DragNumberField",
+        "ListCard",
+        "MarkdownEditor",
+        "TokenInput"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 6,
+        "pointer": 6,
+        "keyboard_focus": 6,
+        "accessibility": 6,
+        "visual": 6
+      },
+      "contracts": [
+        "docs/contracts/components/card-radio-group.md",
+        "docs/contracts/components/card-toggle-group.md",
+        "docs/contracts/components/drag-number-field.md",
+        "docs/contracts/components/list-card.md",
+        "docs/contracts/components/markdown-editor.md",
+        "docs/contracts/components/token-input.md"
       ]
     },
     {

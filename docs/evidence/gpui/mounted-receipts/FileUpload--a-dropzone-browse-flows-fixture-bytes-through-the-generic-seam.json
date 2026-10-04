@@ -8,7 +8,10 @@
   "contract_claims": [
     "semantic",
     "events",
-    "pointer"
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -16,10 +19,24 @@
       "production-mount"
     ],
     "events": [
-      "assert_eq!(\n            selected.1,\n            poodle_headless::file_upload::base64_encode(b\"fixture payload\"),\n            \"the same bare-base64 payload"
+      "assert_eq!(\n                selected.1,\n                poodle_headless::file_upload::base64_encode(b\"fixture payload\"),\n                \"the same bare-base64 payload"
     ],
     "pointer": [
       "pointer_activate"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
+    ],
+    "accessibility": [
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "rem_to_px",
+      "geometry"
     ]
   },
   "production_path_observation": {
@@ -32,20 +49,23 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "dc5c680f41c8e605456eadc1cf1da44b12c0cd51",
+  "source_commit": "d84d1caf2d5d7a9c70cc34c982b6c832a003e63e",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-096-stale-completion",
+    "run_id": "afb6ae81-8f6b-4901-9cca-375c4dabb0e2",
     "outcome": "passed",
-    "body_sha256": "1e24c63f93df5fddf6e598d0f1ad8eb5767cbbdd26ae8ebc0f54aee798bfc1d5"
+    "body_sha256": "31998d540e5f5f0b0b4b90e39fc399d3bbb13ea47b627eace288968c45212f81"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
-    "drove real pointer activation through the mounted GPUI node backend"
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }
