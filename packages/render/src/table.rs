@@ -6,7 +6,9 @@
 //! All visual properties resolve from tokens; size scales typography +
 //! vertical padding, density scales horizontal padding.
 
-use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node};
+use poodle_node::{
+    LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+};
 use poodle_specs::{ColumnAlign, TableSpec};
 
 use crate::color::{mix_srgb, with_alpha};
@@ -79,6 +81,14 @@ pub fn table(spec: &TableSpec, ctx: &RenderContext<'_>) -> Node {
 
     // Shell
     let mut shell = Node::container();
+    shell.a11y.role = Some(NodeRole::Table);
+    if let Some(label) = spec.caption.as_deref().or(spec.aria_label.as_deref()) {
+        if !label.is_empty() {
+            // A visible caption names the table, matching native table
+            // semantics in Svelte. ariaLabel is only its fallback.
+            shell.a11y.label = Some(label.to_owned());
+        }
+    }
     {
         let s = &mut shell.style;
         s.min_width = Some(0.0);
@@ -116,6 +126,7 @@ pub fn table(spec: &TableSpec, ctx: &RenderContext<'_>) -> Node {
 
     // Header row
     let mut header_row = Node::container();
+    header_row.a11y.role = Some(NodeRole::Row);
     {
         let s = &mut header_row.style;
         s.descriptor.background = Some(header_fill);
@@ -134,6 +145,7 @@ pub fn table(spec: &TableSpec, ctx: &RenderContext<'_>) -> Node {
             Some(600),
             col.align == ColumnAlign::End,
         );
+        header_cell.a11y.role = Some(NodeRole::ColumnHeader);
         header_cell.style.letter_spacing_em = Some(0.04);
         header_row = header_row.child(header_cell);
     }
@@ -143,20 +155,24 @@ pub fn table(spec: &TableSpec, ctx: &RenderContext<'_>) -> Node {
     if spec.is_empty() {
         // Empty state — single message cell spanning the row.
         let mut empty_row = Node::container();
+        empty_row.a11y.role = Some(NodeRole::Row);
         empty_row.style.descriptor.layout.direction = LayoutDirection::Row;
-        shell = shell.child(empty_row.child(cell(
+        let mut empty_cell = cell(
             spec.empty_message.clone(),
             empty_text,
             table_font,
             None,
             false,
-        )));
+        );
+        empty_cell.a11y.role = Some(NodeRole::Cell);
+        shell = shell.child(empty_row.child(empty_cell));
     } else {
         let row_count = spec.rows.len();
         for (i, row) in spec.rows.iter().enumerate() {
             let is_last = i == row_count - 1;
 
             let mut row_el = Node::container();
+            row_el.a11y.role = Some(NodeRole::Row);
             row_el.style.descriptor.layout.direction = LayoutDirection::Row;
             // Contract §8: last-row cell border removed.
             if !is_last {
@@ -167,24 +183,25 @@ pub fn table(spec: &TableSpec, ctx: &RenderContext<'_>) -> Node {
 
             for col in &spec.columns {
                 let value = spec.cell_value(row, &col.id);
-                row_el = row_el.child(cell(
+                let mut data_cell = cell(
                     value.to_string(),
                     cell_text,
                     table_font,
                     // Row header gets bold weight (contract §8 row-header cell).
                     if col.is_row_header { Some(600) } else { None },
                     col.align == ColumnAlign::End,
-                ));
+                );
+                data_cell.a11y.role = Some(if col.is_row_header {
+                    NodeRole::RowHeader
+                } else {
+                    NodeRole::Cell
+                });
+                row_el = row_el.child(data_cell);
             }
 
             shell = shell.child(row_el);
         }
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            shell.a11y.label = Some(label.to_string());
-        }
-    }
     shell
 }

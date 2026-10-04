@@ -6484,6 +6484,8 @@ pub(crate) struct TimeZoneSelect {
     theme: GpuiThemeProvider,
     instance_id: String,
     on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_query: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
 impl TimeZoneSelect {
@@ -6497,6 +6499,8 @@ impl TimeZoneSelect {
             theme: theme.clone(),
             instance_id: instance_id.into(),
             on_toggle: None,
+            on_change: None,
+            on_query: None,
         }
     }
 
@@ -6515,12 +6519,24 @@ impl TimeZoneSelect {
         self
     }
 
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_query(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_query = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
         poodle_render::time_zone_select(
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::TimeZoneSelectHandlers {
                 on_toggle: self.on_toggle,
+                on_change: self.on_change,
+                on_query: self.on_query,
                 ..poodle_render::TimeZoneSelectHandlers::new(self.instance_id)
             },
         )
@@ -8622,18 +8638,28 @@ impl IntoElement for IconButton {
 
 // ── Media and relative-time leaves (g12.019 Wave 41) ────────────────────────
 //
-// All three are plain `Spec + Theme -> Node` recipes with no host events. The
-// native visual gate skips their slugs as non-deterministic (media playhead,
-// wall-clock copy), so their proof is the shared render recipe plus the
-// preview build, not a pixel capture.
+// AudioPlayer has an optional native media-action bridge; VideoPlayer and
+// TimeAgo stay plain `Spec + Theme -> Node` recipes. The native visual gate
+// skips these slugs as non-deterministic (media playhead, wall-clock copy), so
+// their proof is the shared render recipe plus the preview build, not a pixel
+// capture.
 
 pub(crate) struct AudioPlayer;
 
 impl AudioPlayer {
     pub(crate) fn from_spec(spec: AudioPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(
+        Self::from_spec_with_handlers(spec, theme, &poodle_render::AudioPlayerHandlers::default())
+    }
+
+    pub(crate) fn from_spec_with_handlers(
+        spec: AudioPlayerSpec,
+        theme: &GpuiThemeProvider,
+        handlers: &poodle_render::AudioPlayerHandlers,
+    ) -> AnyElement {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player_with_handlers(
             &spec,
             &RenderContext::new(theme),
+            handlers,
         ))
     }
 }

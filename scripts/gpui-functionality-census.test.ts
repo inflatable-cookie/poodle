@@ -196,6 +196,7 @@ describe("g18.001 census oracles", () => {
   it("manifest oracle: callbacks and static summaries follow their contract surfaces", () => {
     const manifest = deriveCapabilityManifest(repositoryRoot);
     const pill = manifest.find((entry) => entry.component === "Pill");
+    const audioPlayer = manifest.find((entry) => entry.component === "AudioPlayer");
     const paginationSummary = manifest.find((entry) => entry.component === "PaginationSummary");
     expect(pill?.required).toEqual(axes);
     expect(pill?.notApplicable).toEqual([]);
@@ -206,6 +207,17 @@ describe("g18.001 census oracles", () => {
       "keyboard_focus",
     ]);
     expect(paginationSummary?.notApplicable.every((item) => item.contractRef.includes("pagination-summary.md#"))).toBe(true);
+    expect(audioPlayer?.required).toEqual([
+      "semantic",
+      "pointer",
+      "keyboard_focus",
+      "accessibility",
+      "visual",
+    ]);
+    expect(audioPlayer?.notApplicable.map((item) => item.axis)).toEqual(["events"]);
+    expect(audioPlayer?.notApplicable[0]?.contractRef).toBe(
+      "docs/contracts/components/audio-player.md#5. Events",
+    );
   });
 
   it("widened-A2 oracle: platform language can never justify not-applicable", () => {

@@ -7715,6 +7715,479 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
 }
 
 #[test]
+/// AudioPlayer keeps its transport, range values, and optional speed control
+/// reachable and named through the production renderer and mounted backend.
+fn first_mounted_parity_audio_player() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::NodeRole;
+    use poodle_render::{audio_player_with_handlers, AudioPlayerHandlers, RenderContext};
+    use poodle_specs::AudioPlayerSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = AudioPlayerSpec::new("sample.mp3")
+            .with_aria_label("Interview audio")
+            .with_duration(100.0)
+            .with_current_time(30.0)
+            .with_volume(0.4)
+            .with_show_speed_control(true)
+            .with_rate(1.0);
+        let live_spec = Arc::new(Mutex::new(spec.clone()));
+        let actions = Arc::new(Mutex::new(Vec::<String>::new()));
+        let mut handlers = AudioPlayerHandlers::new("mounted-proof");
+
+        let play_spec = Arc::clone(&live_spec);
+        let play_actions = Arc::clone(&actions);
+        handlers.on_playing_change = Some(Arc::new(move |playing| {
+            play_spec.lock().expect("audio spec lock").is_playing = playing;
+            play_actions
+                .lock()
+                .expect("play state lock")
+                .push(format!("play:{playing}"));
+        }));
+        let seek_spec = Arc::clone(&live_spec);
+        let seek_actions = Arc::clone(&actions);
+        handlers.on_seek = Some(Arc::new(move |value| {
+            seek_spec.lock().expect("audio spec lock").current_time = value;
+            seek_actions
+                .lock()
+                .expect("seek state lock")
+                .push(format!("seek:{value:.1}"));
+        }));
+        let mute_spec = Arc::clone(&live_spec);
+        let mute_actions = Arc::clone(&actions);
+        handlers.on_muted_change = Some(Arc::new(move |muted| {
+            mute_spec.lock().expect("audio spec lock").is_muted = muted;
+            mute_actions
+                .lock()
+                .expect("mute state lock")
+                .push(format!("mute:{muted}"));
+        }));
+        let volume_spec = Arc::clone(&live_spec);
+        let volume_actions = Arc::clone(&actions);
+        handlers.on_volume_change = Some(Arc::new(move |value| {
+            volume_spec.lock().expect("audio spec lock").volume = value;
+            volume_actions
+                .lock()
+                .expect("volume state lock")
+                .push(format!("volume:{value:.2}"));
+        }));
+        let rate_spec = Arc::clone(&live_spec);
+        let rate_actions = Arc::clone(&actions);
+        handlers.on_rate_change = Some(Arc::new(move |rate| {
+            rate_spec.lock().expect("audio spec lock").rate = rate;
+            rate_actions
+                .lock()
+                .expect("rate state lock")
+                .push(format!("rate:{rate:.2}"));
+        }));
+
+        let node = audio_player_with_handlers(&spec, &ctx, &handlers);
+        let root_id = "audio-player:mounted-proof:root";
+        let play_id = "audio-player:mounted-proof:play";
+        let seek_id = "audio-player:mounted-proof:seek";
+        let mute_id = "audio-player:mounted-proof:mute";
+        let volume_id = "audio-player:mounted-proof:volume";
+        let speed_id = "audio-player:mounted-proof:speed";
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Group));
+        assert_eq!(node.a11y.label.as_deref(), Some("Interview audio"));
+        let play = node
+            .find(&|node| node.runtime_id.as_deref() == Some(play_id))
+            .expect("play control");
+        assert_eq!(play.a11y.role, Some(NodeRole::Button));
+        assert_eq!(play.a11y.label.as_deref(), Some("Play"));
+        let seek = node
+            .find(&|node| node.runtime_id.as_deref() == Some(seek_id))
+            .expect("seek control");
+        assert_eq!(seek.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(seek.a11y.label.as_deref(), Some("Seek"));
+        assert_eq!(seek.a11y.value, Some(30.0));
+        assert_eq!(seek.a11y.value_min, Some(0.0));
+        assert_eq!(seek.a11y.value_max, Some(100.0));
+        let volume = node
+            .find(&|node| node.runtime_id.as_deref() == Some(volume_id))
+            .expect("volume control");
+        assert_eq!(volume.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(volume.a11y.label.as_deref(), Some("Volume"));
+        assert_eq!(volume.a11y.value, Some(0.4));
+        assert_eq!(volume.a11y.value_max, Some(1.0));
+        let speed = node
+            .find(&|node| node.runtime_id.as_deref() == Some(speed_id))
+            .expect("speed control");
+        assert_eq!(speed.a11y.role, Some(NodeRole::ComboBox));
+        assert_eq!(speed.a11y.label.as_deref(), Some("Playback speed"));
+        assert_eq!(speed.intrinsic_text(), Some("1x"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let handlers = handlers.clone();
+            let live_spec = Arc::clone(&live_spec);
+            Rc::new(move || {
+                node_compat::AudioPlayer::from_spec_with_handlers(
+                    live_spec.lock().expect("audio spec lock").clone(),
+                    &theme_provider,
+                    &handlers,
+                )
+            })
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 600.0, 80.0);
+        let painted_root = poodle_gpui_node_backend::painted_node_for(root_id)
+            .expect("AudioPlayer root reached GPUI paint");
+        assert_eq!(painted_root.a11y_role, Some(NodeRole::Group));
+        assert_eq!(painted_root.a11y_label.as_deref(), Some("Interview audio"));
+        let painted_play = poodle_gpui_node_backend::painted_node_for(play_id)
+            .expect("play control reached GPUI paint");
+        assert_eq!(painted_play.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_play.a11y_label.as_deref(), Some("Play"));
+        let painted_seek = poodle_gpui_node_backend::painted_node_for(seek_id)
+            .expect("seek slider reached GPUI paint");
+        assert_eq!(painted_seek.a11y_role, Some(NodeRole::Slider));
+        assert_eq!(painted_seek.a11y_label.as_deref(), Some("Seek"));
+        let painted_volume = poodle_gpui_node_backend::painted_node_for(volume_id)
+            .expect("volume slider reached GPUI paint");
+        assert_eq!(painted_volume.a11y_role, Some(NodeRole::Slider));
+        assert_eq!(painted_volume.a11y_label.as_deref(), Some("Volume"));
+        let painted_speed = poodle_gpui_node_backend::painted_node_for(speed_id)
+            .expect("speed selector reached GPUI paint");
+        assert_eq!(painted_speed.a11y_role, Some(NodeRole::ComboBox));
+        assert_eq!(painted_speed.a11y_label.as_deref(), Some("Playback speed"));
+        let seek_geometry =
+            poodle_gpui_node_backend::bounds_for(seek_id).expect("mounted seek track geometry");
+        assert!(f32::from(seek_geometry.size.width) > 0.0);
+        assert!(ctx.theme().resolve_color("color.accent.base").3 > 0.0);
+
+        driver.wait_for_focus_handle(play_id);
+        driver.pointer_activate_id(play_id);
+        driver.keyboard_activate(play_id);
+        driver.wait_for_focus_handle(seek_id);
+        driver.pointer_activate_id(seek_id);
+        driver.keyboard_key(seek_id, "right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(seek_id),
+            Some(true)
+        );
+        driver.wait_for_focus_handle(mute_id);
+        driver.pointer_activate_id(mute_id);
+        driver.wait_for_focus_handle(volume_id);
+        driver.pointer_activate_id(volume_id);
+        driver.wait_for_focus_handle(speed_id);
+        driver.pointer_activate_id(speed_id);
+
+        let actions = actions.lock().expect("audio actions lock").clone();
+        assert!(actions.iter().any(|action| action == "play:true"));
+        assert!(actions.iter().any(|action| action == "seek:50.0"));
+        assert!(actions.iter().any(|action| action == "seek:50.1"));
+        assert!(actions.iter().any(|action| action == "mute:true"));
+        assert!(actions.iter().any(|action| action == "volume:0.50"));
+        assert!(actions.iter().any(|action| action == "rate:1.25"));
+        let state = live_spec.lock().expect("audio spec lock");
+        assert_eq!(state.current_time, 50.1);
+        assert!(state.is_muted);
+        assert_eq!(state.volume, 0.5);
+        assert_eq!(state.rate, 1.25);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Table exposes the structured read-only hierarchy, caption name precedence,
+/// empty state, and token geometry after a real GPUI paint.
+#[test]
+fn first_mounted_parity_table() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::NodeRole;
+    use poodle_render::{table, RenderContext};
+    use poodle_specs::{ColumnAlign, TableColumn, TableRow, TableSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let columns = vec![
+            TableColumn::new("name", "Name").with_row_header(true),
+            TableColumn::new("hours", "Hours").with_align(ColumnAlign::End),
+        ];
+        let rows = vec![
+            TableRow::new(
+                "ada",
+                vec![
+                    ("name".to_owned(), "Ada Lovelace".to_owned()),
+                    ("hours".to_owned(), "40".to_owned()),
+                ],
+            ),
+            TableRow::new(
+                "grace",
+                vec![
+                    ("name".to_owned(), "Grace Hopper".to_owned()),
+                    ("hours".to_owned(), "36".to_owned()),
+                ],
+            ),
+        ];
+        let spec = TableSpec::new()
+            .with_columns(columns.clone())
+            .with_rows(rows)
+            .with_caption("Team allocation")
+            .with_aria_label("This label is superseded by the caption");
+        let mut node = table(&spec, &ctx);
+        let root_id = "mounted-table-proof";
+        let header_row_id = "mounted-table-header-row-proof";
+        let header_name_id = "mounted-table-header-name-proof";
+        let header_hours_id = "mounted-table-header-hours-proof";
+        let row_id = "mounted-table-row-proof";
+        let row_header_id = "mounted-table-row-header-proof";
+        let cell_id = "mounted-table-cell-proof";
+        node.id = Some(root_id.to_owned());
+        node.runtime_id = Some(root_id.to_owned());
+        node.children[1].id = Some(header_row_id.to_owned());
+        node.children[1].runtime_id = Some(header_row_id.to_owned());
+        node.children[1].children[0].id = Some(header_name_id.to_owned());
+        node.children[1].children[0].runtime_id = Some(header_name_id.to_owned());
+        node.children[1].children[1].id = Some(header_hours_id.to_owned());
+        node.children[1].children[1].runtime_id = Some(header_hours_id.to_owned());
+        node.children[2].id = Some(row_id.to_owned());
+        node.children[2].runtime_id = Some(row_id.to_owned());
+        node.children[2].children[0].id = Some(row_header_id.to_owned());
+        node.children[2].children[0].runtime_id = Some(row_header_id.to_owned());
+        node.children[2].children[1].id = Some(cell_id.to_owned());
+        node.children[2].children[1].runtime_id = Some(cell_id.to_owned());
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Table));
+        assert_eq!(node.a11y.label.as_deref(), Some("Team allocation"));
+        assert_eq!(node.children[1].a11y.role, Some(NodeRole::Row));
+        assert_eq!(node.children[1].children.len(), 2);
+        assert!(node.children[1]
+            .children
+            .iter()
+            .all(|header| header.a11y.role == Some(NodeRole::ColumnHeader)));
+        assert_eq!(node.children[2].a11y.role, Some(NodeRole::Row));
+        assert_eq!(node.children[2].children.len(), 2);
+        assert_eq!(
+            node.children[2].children[0].a11y.role,
+            Some(NodeRole::RowHeader)
+        );
+        assert_eq!(node.children[2].children[1].a11y.role, Some(NodeRole::Cell));
+        assert_eq!(node.children[2].children[1].intrinsic_text(), Some("40"));
+        assert_eq!(
+            node.children[2].children[1]
+                .style
+                .descriptor
+                .layout
+                .alignment
+                .main,
+            poodle_node::MainAxisAlignment::End
+        );
+        assert!(!node.interaction.focusable);
+        assert!(node.children[2]
+            .children
+            .iter()
+            .all(|cell| !cell.interaction.focusable));
+
+        let empty = table(
+            &TableSpec::new()
+                .with_columns(columns)
+                .with_empty_message("No team members found.")
+                .with_aria_label("Empty team"),
+            &ctx,
+        );
+        assert_eq!(empty.a11y.role, Some(NodeRole::Table));
+        assert_eq!(empty.a11y.label.as_deref(), Some("Empty team"));
+        assert_eq!(empty.children[1].a11y.role, Some(NodeRole::Row));
+        assert_eq!(
+            empty.children[1].children[0].a11y.role,
+            Some(NodeRole::Cell)
+        );
+        assert_eq!(
+            empty.children[1].children[0].intrinsic_text(),
+            Some("No team members found.")
+        );
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 180.0);
+        let painted_table = poodle_gpui_node_backend::painted_node_for(root_id)
+            .expect("table root reached GPUI paint");
+        assert_eq!(painted_table.a11y_role, Some(NodeRole::Table));
+        assert_eq!(painted_table.a11y_label.as_deref(), Some("Team allocation"));
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(header_row_id)
+                .expect("mounted header row")
+                .a11y_role,
+            Some(NodeRole::Row)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(header_name_id)
+                .expect("mounted column header")
+                .a11y_role,
+            Some(NodeRole::ColumnHeader)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(row_header_id)
+                .expect("mounted row header")
+                .a11y_role,
+            Some(NodeRole::RowHeader)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(cell_id)
+                .expect("mounted data cell")
+                .a11y_role,
+            Some(NodeRole::Cell)
+        );
+        let table_geometry =
+            poodle_gpui_node_backend::bounds_for(root_id).expect("mounted table geometry");
+        assert!(f32::from(table_geometry.size.width) > 0.0);
+        assert!(f32::from(table_geometry.size.height) > 0.0);
+        assert!(ctx.theme().resolve_color("color.border.subtle").3 > 0.0);
+
+        driver.pointer_activate_id(row_id);
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(row_id),
+            None,
+            "the read-only string cells do not add a focus stop"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// TimeZoneSelect forwards its searchable Select state through mounted GPUI
+/// pointer, keyboard, value, and query paths.
+#[test]
+fn first_mounted_parity_time_zone_select() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::NodeRole;
+    use poodle_render::{RenderContext, TimeZoneSelectHandlers};
+    use poodle_specs::{TimeZoneOption, TimeZoneSelectSpec};
+
+    #[derive(Default)]
+    struct Host {
+        open: bool,
+        value: Option<String>,
+        query: String,
+        calls: Vec<String>,
+    }
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let options = vec![
+            TimeZoneOption::new("America/New_York", "New York"),
+            TimeZoneOption::new("Europe/London", "London"),
+        ];
+        let witness = poodle_render::time_zone_select(
+            &TimeZoneSelectSpec::new()
+                .with_options(options.clone())
+                .with_value("Europe/London")
+                .with_open(true)
+                .with_search_query("lon")
+                .with_aria_label("Time zone"),
+            &ctx,
+            TimeZoneSelectHandlers::new("timezone-witness"),
+        );
+        let witness_trigger = witness
+            .find(&|node| node.runtime_id.as_deref() == Some("select:timezone-witness:trigger"))
+            .expect("timezone trigger");
+        assert_eq!(witness_trigger.a11y.role, Some(NodeRole::ComboBox));
+        assert_eq!(witness_trigger.a11y.label.as_deref(), Some("Time zone"));
+        assert_eq!(witness_trigger.a11y.expanded, Some(true));
+        let witness_zone = witness
+            .find(&|node| {
+                node.runtime_id.as_deref() == Some("select:timezone-witness:option:Europe/London")
+            })
+            .expect("selected London option");
+        assert_eq!(witness_zone.a11y.role, Some(NodeRole::ListBoxOption));
+        assert_eq!(witness_zone.a11y.selected, Some(true));
+        assert!(ctx.theme().resolve_color("color.background.surface").3 > 0.0);
+
+        let host = Arc::new(Mutex::new(Host::default()));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let theme_provider = theme_provider.clone();
+            let options = options.clone();
+            Rc::new(move || {
+                let (open, value, query) = {
+                    let host = host.lock().expect("timezone host lock");
+                    (host.open, host.value.clone(), host.query.clone())
+                };
+                let mut spec = TimeZoneSelectSpec::new()
+                    .with_options(options.clone())
+                    .with_open(open)
+                    .with_search_query(query)
+                    .with_aria_label("Time zone");
+                if let Some(value) = value {
+                    spec = spec.with_value(value);
+                }
+
+                let toggle_host = Arc::clone(&host);
+                let toggle: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
+                    let mut host = toggle_host.lock().expect("timezone host lock");
+                    host.open = !host.open;
+                    let open = host.open;
+                    host.calls.push(format!("open:{open}"));
+                });
+                let change_host = Arc::clone(&host);
+                let change: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |value| {
+                    let mut host = change_host.lock().expect("timezone host lock");
+                    host.value = Some(value.to_owned());
+                    host.calls.push(format!("value:{value}"));
+                });
+                let query_host = Arc::clone(&host);
+                let query: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |query| {
+                    let mut host = query_host.lock().expect("timezone host lock");
+                    host.query = query.to_owned();
+                    host.calls.push(format!("query:{query}"));
+                });
+                node_compat::TimeZoneSelect::from_spec(spec, &theme_provider, "timezone-proof")
+                    .on_toggle(toggle)
+                    .on_change(change)
+                    .on_query(query)
+                    .into_any_element()
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 400.0, 420.0);
+        let trigger_id = "select:timezone-proof:trigger";
+        let search_id = "select:timezone-proof:search";
+        let london_id = "select:timezone-proof:option:Europe/London";
+        let new_york_id = "select:timezone-proof:option:America/New_York";
+        let mounted_trigger = poodle_gpui_node_backend::painted_node_for(trigger_id)
+            .expect("timezone trigger reached GPUI paint");
+        assert_eq!(mounted_trigger.a11y_role, Some(NodeRole::ComboBox));
+        assert_eq!(mounted_trigger.a11y_label.as_deref(), Some("Time zone"));
+        let trigger_geometry = poodle_gpui_node_backend::bounds_for(trigger_id)
+            .expect("mounted timezone trigger geometry");
+        assert!(f32::from(trigger_geometry.size.width) > 0.0);
+
+        driver.pointer_activate_id(trigger_id);
+        driver.wait_for_focus_handle(search_id);
+        driver.focus_element(search_id);
+        driver.dispatch_key_raw("l");
+        assert!(poodle_gpui_node_backend::bounds_for(london_id).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(new_york_id).is_none());
+        driver.pointer_activate_id(london_id);
+
+        let host = host.lock().expect("timezone host lock");
+        assert_eq!(host.value.as_deref(), Some("Europe/London"));
+        assert!(!host.open);
+        assert_eq!(host.query, "London");
+        assert!(host.calls.contains(&"open:true".to_owned()));
+        assert!(host.calls.contains(&"query:l".to_owned()));
+        assert!(host.calls.contains(&"query:London".to_owned()));
+        assert!(
+            host.calls.contains(&"value:Europe/London".to_owned()),
+            "the value callback carries the selected IANA identifier"
+        );
+        assert!(host.calls.contains(&"open:false".to_owned()));
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
 fn status_indicator_status_reason_tokens_and_identity_rebuild_through_mounted_backend() {
     use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
     use poodle_adapter::ThemeProvider;

@@ -80,6 +80,9 @@ const AUDIO_RENDER_COMPONENTS = new Set([
 // evidence by itself; GPUI mounted cells below are driven by validated M1
 // receipts only.
 export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
+  AudioPlayer: "first_mounted_parity_audio_player",
+  Table: "first_mounted_parity_table",
+  TimeZoneSelect: "first_mounted_parity_time_zone_select",
   Button: "a_mounted_button_carries_its_controls_target",
   Checkbox: "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec",
   Switch: "switch_toggle_readonly_and_disabled_rebuild_the_host_spec",
