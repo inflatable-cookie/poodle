@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "32466447367e00363d200dc09c6237e798f00bf6",
+  "source_commit": "c6fa7d4bb211bab7d37b57d7b9ba5620fda47451",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2510,17 +2510,14 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
         },
         {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        },
-        {
           "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
         }
       ],
-      "missing": [],
+      "missing": [
+        "accessibility"
+      ],
       "holds": [
         {
           "axis": "accessibility",
@@ -2532,7 +2529,10 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/NavigationMenu--navigation-menu-disclosure-viewport-roving-and-dismissal-through-mounted-backend.json"
       ],
-      "refusals": []
+      "refusals": [
+        "Expected test navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend shows accessibility signals, but accessibility is withheld: the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container.",
+        "Expected test navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend proves no accessibility claim; accessibility stays missing."
+      ]
     },
     {
       "component": "Pill",
@@ -8647,17 +8647,17 @@
   ],
   "summary": {
     "admittedRows": 115,
-    "fullyAdmittedRows": 92,
+    "fullyAdmittedRows": 91,
     "missingTally": {
       "semantic": 60,
       "events": 51,
       "pointer": 57,
       "keyboard_focus": 53,
-      "accessibility": 66,
+      "accessibility": 67,
       "visual": 79
     },
     "holdCount": 175,
-    "refusalCount": 123
+    "refusalCount": 125
   },
   "groups": [
     {
@@ -8941,6 +8941,25 @@
       ]
     },
     {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "NavigationMenu",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 1,
+        "events": 1,
+        "pointer": 1,
+        "keyboard_focus": 1,
+        "accessibility": 2,
+        "visual": 1
+      },
+      "contracts": [
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/toast-stack.md"
+      ]
+    },
+    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -8957,23 +8976,6 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
-      ]
-    },
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 1,
-        "events": 1,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 1,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/toast-stack.md"
       ]
     }
   ],
