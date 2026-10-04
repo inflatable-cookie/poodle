@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "64be05b1c3c58704eb208284f7407edcec9b76c8",
+  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -538,17 +538,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#remediation_banner_action_and_dismiss_rebuild_the_host_spec"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#remediation_banner_action_and_dismiss_rebuild_the_host_spec"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#remediation_banner_action_and_dismiss_rebuild_the_host_spec"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#remediation_banner_action_and_dismiss_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#remediation_banner_action_and_dismiss_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#remediation_banner_action_and_dismiss_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -560,12 +575,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/RemediationBanner--remediation-banner-action-and-dismiss-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no events claim; events stays missing.",
-        "Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no pointer claim; pointer stays missing.",
-        "Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.",
-        "Expected test remediation_banner_action_and_dismiss_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Card",
@@ -6241,16 +6251,27 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#settings_shell_navigates_and_refused_close_stays_open"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#settings_shell_navigates_and_refused_close_stays_open"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#settings_shell_navigates_and_refused_close_stays_open"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#settings_shell_navigates_and_refused_close_stays_open"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#settings_shell_navigates_and_refused_close_stays_open"
         }
       ],
-      "missing": [
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6262,11 +6283,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/SettingsShell--settings-shell-navigates-and-refused-close-stays-open.json"
       ],
-      "refusals": [
-        "Expected test settings_shell_navigates_and_refused_close_stays_open proves no pointer claim; pointer stays missing.",
-        "Expected test settings_shell_navigates_and_refused_close_stays_open proves no accessibility claim; accessibility stays missing.",
-        "Expected test settings_shell_navigates_and_refused_close_stays_open proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "SidebarNav",
@@ -6379,12 +6396,19 @@
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6396,10 +6420,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Tree--tree-selection-expand-and-substrate-reorder-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.",
-        "Expected test tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "SplitView",
@@ -6698,7 +6719,22 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
+        },
+        {
           "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
+        },
+        {
+          "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
         },
@@ -6708,11 +6744,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window"
         }
       ],
-      "missing": [
-        "events",
-        "keyboard_focus",
-        "accessibility"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6724,11 +6756,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ModelConnectionSetup--model-connection-setup-direct-add-submits-from-choose-in-a-mounted-window.json"
       ],
-      "refusals": [
-        "Expected test model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window proves no events claim; events stays missing.",
-        "Expected test model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window proves no keyboard_focus claim; keyboard_focus stays missing.",
-        "Expected test model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window proves no accessibility claim; accessibility stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ModelConnectionCard",
@@ -7858,17 +7886,17 @@
   ],
   "summary": {
     "admittedRows": 84,
-    "fullyAdmittedRows": 49,
+    "fullyAdmittedRows": 53,
     "missingTally": {
       "semantic": 91,
-      "events": 86,
-      "pointer": 96,
-      "keyboard_focus": 86,
-      "accessibility": 104,
-      "visual": 120
+      "events": 84,
+      "pointer": 94,
+      "keyboard_focus": 85,
+      "accessibility": 100,
+      "visual": 117
     },
     "holdCount": 175,
-    "refusalCount": 191
+    "refusalCount": 179
   },
   "groups": [
     {
@@ -7898,7 +7926,6 @@
         "MediaPicker",
         "MediaThumbnail",
         "Menubar",
-        "ModelConnectionSetup",
         "NavigationMenu",
         "OrderBy",
         "PageLoading",
@@ -7906,26 +7933,23 @@
         "RangeSlider",
         "RefSelect",
         "RelationPicker",
-        "RemediationBanner",
         "ResizeHandle",
-        "SettingsShell",
         "Slider",
         "SplitButton",
         "ThemeSelect",
         "ToastStack",
         "Toolbar",
-        "Tree",
         "UpdateCenter",
         "UpdateStatus",
         "VideoPlayer"
       ],
       "missingTally": {
         "semantic": 32,
-        "events": 36,
-        "pointer": 40,
-        "keyboard_focus": 34,
-        "accessibility": 39,
-        "visual": 42
+        "events": 34,
+        "pointer": 38,
+        "keyboard_focus": 33,
+        "accessibility": 35,
+        "visual": 39
       },
       "contracts": [
         "docs/contracts/components/agent-plan-record.md",
@@ -7952,7 +7976,6 @@
         "docs/contracts/components/media-picker.md",
         "docs/contracts/components/media-thumbnail.md",
         "docs/contracts/components/menubar.md",
-        "docs/contracts/components/model-connection-setup.md",
         "docs/contracts/components/navigation-menu.md",
         "docs/contracts/components/order-by.md",
         "docs/contracts/components/page-loading.md",
@@ -7960,15 +7983,12 @@
         "docs/contracts/components/range-slider.md",
         "docs/contracts/components/ref-select.md",
         "docs/contracts/components/relation-picker.md",
-        "docs/contracts/components/remediation-banner.md",
         "docs/contracts/components/resize-handle.md",
-        "docs/contracts/components/settings-shell.md",
         "docs/contracts/components/slider.md",
         "docs/contracts/components/split-button.md",
         "docs/contracts/components/theme-select.md",
         "docs/contracts/components/toast-stack.md",
         "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/tree.md",
         "docs/contracts/components/update-center.md",
         "docs/contracts/components/update-status.md",
         "docs/contracts/components/video-player.md"

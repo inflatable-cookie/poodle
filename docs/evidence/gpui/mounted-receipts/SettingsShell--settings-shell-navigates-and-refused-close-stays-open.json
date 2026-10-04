@@ -8,7 +8,10 @@
   "contract_claims": [
     "semantic",
     "events",
-    "keyboard_focus"
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -17,36 +20,52 @@
     ],
     "events": [
       "assert!(\n            node.lock()\n                .unwrap()\n                .texts()\n                .iter()\n                .any(|t| *t == \"Unsaved change",
+      "assert!(\n            notice\n                .text_content\n                .iter()\n                .any(|t| t == \"Unsaved change",
       "assert!(\n            opens.lock().unwrap().is_empty(),\n            \"refused close does not emit on_open_change"
     ],
+    "pointer": [
+      "pointer_activate"
+    ],
     "keyboard_focus": [
+      "dispatch_key",
       "keyboard_"
+    ],
+    "accessibility": [
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "rem_to_px",
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::settings_shell",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "64be05b1c3c58704eb208284f7407edcec9b76c8",
+  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-083-rebase-onto-084",
+    "run_id": "2026-10-04-poodle-086-gpui-census-gaps",
     "outcome": "passed",
-    "body_sha256": "47a182293fd7d41ff7e671f3e798b1aabf7f7c3353d7404add8ad46658a11d31"
+    "body_sha256": "298b21a18133eecf148bf89574bdb5d36860d66e44d58b921a047ea317681e23"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
-    "drove real keyboard input or backend focus through the mounted tree"
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

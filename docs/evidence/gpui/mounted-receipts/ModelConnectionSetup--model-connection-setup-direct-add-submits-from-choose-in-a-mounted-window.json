@@ -7,7 +7,10 @@
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
     "pointer",
+    "keyboard_focus",
+    "accessibility",
     "visual"
   ],
   "signals": {
@@ -15,8 +18,19 @@
       "assert",
       "production-mount"
     ],
+    "events": [
+      "assert_eq!(\n            submits.lock().unwrap().as_slice(),\n            [\"codex-app\", \"codex-app\"],\n            \"Enter on the focused Add control delivers the same submit payload",
+      "assert!(\n            stages.lock().unwrap().is_empty(),\n            \"the keyboard route emits no stage-change callback",
+      "assert!(\n            stages.lock().unwrap().is_empty(),\n            \"a direct route emits no stage-change callback"
+    ],
     "pointer": [
       "pointer_activate"
+    ],
+    "keyboard_focus": [
+      "keyboard_"
+    ],
+    "accessibility": [
+      "NodeRole"
     ],
     "visual": [
       "dimensions"
@@ -32,19 +46,22 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "64be05b1c3c58704eb208284f7407edcec9b76c8",
+  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-083-rebase-onto-084",
+    "run_id": "2026-10-04-poodle-086-gpui-census-gaps",
     "outcome": "passed",
-    "body_sha256": "ea0e85b18e091ff5acb14d1e5a2200091eb27aba782d592f7e51ba25303974a9"
+    "body_sha256": "8b8cf5d7288edb6094e8ee58e3ed5c247182ab136a82815df509d67b003358ca"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"

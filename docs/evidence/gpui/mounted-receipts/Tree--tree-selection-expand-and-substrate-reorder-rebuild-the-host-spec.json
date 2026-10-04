@@ -9,7 +9,9 @@
     "semantic",
     "events",
     "pointer",
-    "keyboard_focus"
+    "keyboard_focus",
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -26,6 +28,13 @@
     ],
     "keyboard_focus": [
       "dispatch_key"
+    ],
+    "accessibility": [
+      "NodeRole"
+    ],
+    "visual": [
+      "rem_to_px",
+      "geometry"
     ]
   },
   "production_path_observation": {
@@ -33,26 +42,28 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::TreeHandlers",
+    "renderer": "poodle_render::tree",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "64be05b1c3c58704eb208284f7407edcec9b76c8",
+  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-083-rebase-onto-084",
+    "run_id": "2026-10-04-poodle-086-gpui-census-gaps",
     "outcome": "passed",
-    "body_sha256": "2286f8ed0d4d21e733678617a05129b83c26d8952199a53c4145f332c651895a"
+    "body_sha256": "b2d97d7e7e92ed3c03617e7de2b107f13a108b24fc46a2bebb4557580a30f065"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
-    "drove real keyboard input or backend focus through the mounted tree"
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

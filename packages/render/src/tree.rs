@@ -282,10 +282,17 @@ fn render_row(
     let is_focused = m.focused.as_deref() == Some(node.value.as_str());
 
     let mut row = Node::container();
-    // Contract: rows are treeitems carrying their depth so a screen reader
-    // can announce "level 3".
+    // Contract §6: every row is a *named* treeitem carrying its depth, its
+    // selection, and — branches only — its expand state, so a screen reader
+    // can announce "Alpha, level 3, selected" instead of inferring depth from
+    // indentation nobody can see. Svelte's `TreeItem` emits the same set.
     row.a11y.role = Some(NodeRole::TreeItem);
     row.a11y.level = Some(depth + 1);
+    row.a11y.label = Some(node.label.clone());
+    row.a11y.selected = Some(is_selected);
+    if is_branch {
+        row.a11y.expanded = Some(is_expanded);
+    }
     row.id = Some(format!("tree:{}", node.value));
     {
         let s = &mut row.style;
@@ -627,6 +634,9 @@ fn render_row(
     }
 
     if node.is_disabled {
+        // Contract §6: a disabled item is `aria-disabled`, which the node
+        // record carries as the interaction flag the backend projects.
+        row.interaction.disabled = true;
         row.style.descriptor.opacity = m.disabled_opacity;
     } else {
         if node.is_muted && !is_selected && !is_focused {

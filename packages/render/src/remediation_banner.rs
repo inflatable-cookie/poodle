@@ -12,8 +12,8 @@ use poodle_node::{
     StylePatch,
 };
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, RemediationAction, RemediationBannerSpec, SpinnerSize, SpinnerSpec,
-    SpinnerTone, SpinnerVariant, StatusTone,
+    AnnouncementMode, ButtonSpec, ButtonVariant, RemediationAction, RemediationBannerSpec,
+    SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
 };
 
 use crate::button::button;
@@ -123,7 +123,14 @@ pub fn remediation_banner(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
         s.descriptor.layout.spacing.gap = gap;
     }
-    el.a11y.role = Some(NodeRole::Alert);
+    // Contract §4: the role is derived from `announceMode` — `polite` is a
+    // status region, `assertive` an alert, `none` no live region at all.
+    // Hardcoding `Alert` announced polite recovery copy as an interruption.
+    el.a11y.role = match spec.announce_mode {
+        AnnouncementMode::None => None,
+        AnnouncementMode::Polite => Some(NodeRole::Status),
+        AnnouncementMode::Assertive => Some(NodeRole::Alert),
+    };
 
     // ── Icon (contract §2: tone-based leading indicator) ──
     let glyph = if spec.tone == StatusTone::Pending {
@@ -411,5 +418,30 @@ mod tests {
             Some(expected.foreground)
         );
         assert!(action.style.hover.is_some());
+    }
+
+    #[test]
+    fn banner_role_follows_the_announce_mode() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let banner = |mode| {
+            remediation_banner(
+                &RemediationBannerSpec::new("Save failed", "Try again.").with_announce_mode(mode),
+                &ctx,
+                RemediationBannerHandlers::default(),
+            )
+        };
+
+        // Contract §4: polite is a status region, assertive an alert, none
+        // carries no live-region role. Svelte derives the same three.
+        assert_eq!(
+            banner(AnnouncementMode::Polite).a11y.role,
+            Some(NodeRole::Status)
+        );
+        assert_eq!(
+            banner(AnnouncementMode::Assertive).a11y.role,
+            Some(NodeRole::Alert)
+        );
+        assert_eq!(banner(AnnouncementMode::None).a11y.role, None);
     }
 }
