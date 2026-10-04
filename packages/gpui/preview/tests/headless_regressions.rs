@@ -40464,13 +40464,25 @@ fn gpui_mounted_list_container_state_pagination_and_accessible_name() {
 
         assert_eq!(ready.a11y.role, Some(NodeRole::Region));
         assert_eq!(ready.a11y.label.as_deref(), Some("Projects"));
-        let explicit_empty = ListContainer::from_spec(
-            ListContainerSpec::new("Projects").with_aria_label(""),
-            &theme_provider,
-            "list-container-empty-name",
-        )
-        .into_compat_node();
-        assert_eq!(explicit_empty.a11y.label.as_deref(), Some(""));
+        {
+            let mut explicit_empty = ListContainer::from_spec(
+                ListContainerSpec::new("Projects").with_aria_label(""),
+                &theme_provider,
+                "list-container-empty-name",
+            )
+            .into_compat_node();
+            explicit_empty.id = Some("list-container-empty-name".to_string());
+            let empty_label = Arc::new(Mutex::new(explicit_empty));
+            let mut empty_driver =
+                HeadlessDriver::new_in_box(cx, Arc::clone(&empty_label), 720.0, 400.0);
+            let mounted_empty = empty_driver.accessibility_nodes();
+            let empty_root = mounted_empty
+                .iter()
+                .find(|n| n.element_id == "list-container-empty-name")
+                .expect("mounted empty-label list container");
+            assert_eq!(empty_root.role, NodeRole::Region);
+            assert_eq!(empty_root.label.as_deref(), Some(""));
+        }
         assert!(ready.has_text("Projects"));
         assert!(ready.has_text("Row one"));
         assert_eq!(
