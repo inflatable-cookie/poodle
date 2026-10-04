@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "LogList",
-  "test": "gpui_mounted_log_list_stream_audit_and_clear_filters",
+  "component": "FormDialog",
+  "test": "first_mounted_parity_form_dialog",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,15 +19,16 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            hrefs.lock().expect(\"log list navigate payload",
-      "assert_eq!(\n            payloads.lock().expect(\"log list clear payload"
+      "assert_eq!(\n            host.lock().expect(\"FormDialog host\").events.as_slice(),\n            [\"submit\", \"cancel\", \"cancel\", \"cancel\"],\n            \"cancel button, backdrop, and Escape each emit the cancel callback",
+      "assert_eq!(\n            host.lock().expect(\"FormDialog host\").events.as_slice(),\n            [\"submit\"],\n            \"inside the form body does not emit a cancel callback",
+      "assert_eq!(\n            host.lock().expect(\"FormDialog host\").events.as_slice(),\n            [\"submit\"],\n            \"submit callback"
     ],
     "pointer": [
-      "pointer_activate"
+      "pointer_activate",
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "focus_state_for",
+      "dispatch_key",
       "keyboard_"
     ],
     "accessibility": [
@@ -42,7 +43,7 @@
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_in_box",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
     "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
@@ -57,7 +58,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-088-rebase-onto-087",
     "outcome": "passed",
-    "body_sha256": "119eed17bffffeba10000ffc3ea21ce8172b53d2d48f716766d978ea0bb826e5"
+    "body_sha256": "a847ceef70ccd00a175da3b27253e3b725ff9c1283fbc44b06839430a6b8d35b"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
