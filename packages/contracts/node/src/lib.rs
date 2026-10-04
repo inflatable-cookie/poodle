@@ -948,6 +948,14 @@ pub enum NodeToggled {
     Mixed,
 }
 
+/// The popup a control owns (`aria-haspopup`). Today only menus travel this
+/// channel; the backend records the relationship on the node like the other
+/// unprojected properties (expanded, controls) until a platform API exists.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum HasPopup {
+    Menu,
+}
+
 /// What the node declares about itself to assistive technology.
 #[derive(Clone, Default)]
 pub struct NodeA11y {
@@ -964,6 +972,8 @@ pub struct NodeA11y {
     pub tab_index: Option<i32>,
     /// Semantic part relationships, normalized before backend projection.
     pub controls: Option<String>,
+    /// The popup this control owns, when any (menu triggers, dropdowns).
+    pub has_popup: Option<HasPopup>,
     pub labelled_by: Option<String>,
     pub orientation: Option<String>,
     pub toggled: Option<NodeToggled>,

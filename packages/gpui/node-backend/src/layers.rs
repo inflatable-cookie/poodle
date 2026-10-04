@@ -183,7 +183,13 @@ pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
     if let Some(id) = node.interaction.dismiss_layer.as_deref() {
         LAYERS.with(|layers| {
             let mut layers = layers.borrow_mut();
-            if layers.iter().any(|record| record.id == id) {
+            // One layer can span nodes that only partly carry the handler
+            // (a menubar's triggers join the overlay's layer); the first
+            // node to bring one supplies it.
+            if let Some(record) = layers.iter_mut().find(|record| record.id == id) {
+                if record.handler.is_none() {
+                    record.handler = node.interaction.on_dismiss.clone();
+                }
                 return;
             }
             layers.push(LayerRecord {

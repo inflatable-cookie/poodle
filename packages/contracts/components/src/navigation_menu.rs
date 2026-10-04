@@ -19,6 +19,11 @@ pub struct NavigationMenuSpec {
     /// Refuses outside-interact dismissal when false. Matches Svelte
     /// `dismissOnOutsideInteract` (default `true`).
     pub dismiss_on_outside_interact: bool,
+    /// Host-tracked keyboard focus (Svelte `focusIndex`): which trigger the
+    /// tab stop sits on. `None` falls back to the active item, then the
+    /// first enabled trigger. The host updates it on focus and arrow-key
+    /// movement so the roving tab stop follows real focus.
+    pub focused_value: Option<String>,
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -34,6 +39,7 @@ impl Default for NavigationMenuSpec {
             active_edge: ActiveEdge::None,
             active_fill: ActiveFill::Tint,
             dismiss_on_outside_interact: true,
+            focused_value: None,
             size: None,
             size_role: SemanticControlSizeRole::Chrome,
             density: None,
@@ -66,6 +72,12 @@ impl NavigationMenuSpec {
 
     pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
         self.dismiss_on_outside_interact = dismiss_on_outside_interact;
+        self
+    }
+
+    /// Set the host-tracked focus value for roving-tab sync.
+    pub fn with_focused_value(mut self, focused_value: impl Into<String>) -> Self {
+        self.focused_value = Some(focused_value.into());
         self
     }
 

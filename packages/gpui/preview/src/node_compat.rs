@@ -6928,8 +6928,11 @@ impl IntoElement for Menubar {
         poodle_gpui_node_backend::to_gpui(&poodle_render::menubar(
             &self.spec,
             &RenderContext::new(&self.theme),
-            self.on_trigger,
-            self.on_select,
+            poodle_render::MenubarHandlers {
+                on_trigger: self.on_trigger,
+                on_select: self.on_select,
+                ..poodle_render::MenubarHandlers::default()
+            },
         ))
     }
 }
@@ -6976,7 +6979,10 @@ impl IntoElement for NavigationMenu {
         poodle_gpui_node_backend::to_gpui(&poodle_render::navigation_menu(
             &self.spec,
             &RenderContext::new(&self.theme),
-            self.on_change,
+            poodle_render::NavigationMenuHandlers {
+                on_change: self.on_change,
+                ..poodle_render::NavigationMenuHandlers::default()
+            },
         ))
     }
 }
@@ -7477,7 +7483,10 @@ impl IntoElement for ContextMenu {
             let node = poodle_render::context_menu(
                 &self.spec,
                 &RenderContext::new(&self.theme),
-                self.on_select,
+                poodle_render::ContextMenuHandlers {
+                    on_action: self.on_select,
+                    ..poodle_render::ContextMenuHandlers::default()
+                },
             );
             let menu = poodle_gpui_node_backend::to_gpui(&node);
             if let Some((x, y)) = self.spec.anchor_point {

@@ -294,7 +294,11 @@ pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvide
 }
 
 pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::context_menu(spec, &pr::RenderContext::new(theme), None))
+    El(pr::context_menu(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::ContextMenuHandlers::default(),
+    ))
 }
 
 pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> El {
@@ -824,8 +828,7 @@ pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::menubar(
         spec,
         &pr::RenderContext::new(theme),
-        None,
-        None,
+        pr::MenubarHandlers::default(),
     ))
 }
 
@@ -883,7 +886,7 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
     El(pr::navigation_menu(
         spec,
         &pr::RenderContext::new(theme),
-        None,
+        pr::NavigationMenuHandlers::default(),
     ))
 }
 

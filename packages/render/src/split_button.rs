@@ -13,8 +13,9 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
-    MainAxisAlignment, Node, NodeAnimation, NodeKey, NodeModifiers, NodeRole, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, DismissReason, FocusRing, HasPopup,
+    LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeAnimation, NodeKey, NodeModifiers,
+    NodeRole, StylePatch,
 };
 use poodle_specs::{ButtonVariant, SplitButtonSpec, SplitMenuItem};
 
@@ -53,12 +54,22 @@ fn menu_roving_key_handler(
     }))
 }
 
-/// Host callbacks: primary half, chevron half, and menu-item value.
+/// The layer id the open composition registers on the backend dismiss
+/// stack. Containment is the control row plus the menu, so presses on
+/// either half never dismiss. Single-flight like the item ids.
+pub const SPLIT_BUTTON_LAYER_ID: &str = "split-button-layer";
+
+/// Host callbacks: primary half, chevron half, menu-item value, and
+/// document-level dismissal.
 #[derive(Default)]
 pub struct SplitButtonHandlers {
     pub on_click: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_dropdown: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Document-level dismissal (escape / outside). Present registers the
+    /// open composition on the dismiss stack; absent keeps the previous
+    /// behavior (the host owns dismissal entirely).
+    pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
 }
 
 /// Resolved variant × tone color set for the split-button halves. The old
@@ -276,6 +287,7 @@ pub fn split_button(
     // Chevron-only: nothing in its subtree carries text. The toggle owns
     // the popup linkage (Svelte `aria-haspopup`/`aria-expanded`).
     toggle.a11y.role = Some(NodeRole::Button);
+    toggle.a11y.has_popup = Some(HasPopup::Menu);
     toggle.a11y.label = Some(spec.menu_aria_label.clone());
     toggle.a11y.expanded = Some(spec.is_open);
     {
@@ -298,6 +310,32 @@ pub fn split_button(
     chevron.style.descriptor.text_color = Some(colors.text);
     let mut toggle = toggle.child(chevron);
 
+    // Roving slot map for the menu items: separators are inert slots,
+    // disabled actions are skipped, matching the shared menu-list
+    // machinery.
+    let slot_disabled: Vec<bool> = spec
+        .items
+        .iter()
+        .map(|slot| match slot {
+            SplitMenuItem::Action { is_disabled, .. } => *is_disabled,
+            SplitMenuItem::Separator => true,
+        })
+        .collect();
+    let slot_ids: Vec<String> = spec
+        .items
+        .iter()
+        .enumerate()
+        .map(|(slot_idx, _)| format!("split-button-item:{slot_idx}"))
+        .collect();
+    // First enabled slot for ArrowDown into an open menu: the menu is
+    // already mounted there, so the key handler can name it directly and
+    // the backend moves focus synchronously.
+    let first_item_id: Option<String> = slot_disabled
+        .iter()
+        .enumerate()
+        .find(|(_, disabled)| !**disabled)
+        .map(|(slot_idx, _)| slot_ids[slot_idx].clone());
+
     if !is_unavailable {
         // The old tier wires only a fill hover on the toggle half — no
         // border shift, no active look. The focus ring matches the primary.
@@ -310,6 +348,32 @@ pub fn split_button(
         toggle.style.focus_ring = Some(focus_ring);
         toggle.style.descriptor.cursor = CursorHint::Pointer;
 
+        // Toggle keys (Svelte toggle keydown): ArrowDown opens through the
+        // dropdown channel when closed (focus stays on the toggle, like
+        // Svelte); on an open menu it moves into the first item, whose
+        // handle is already live. Escape is deliberately absent: the
+        // window dismisses the registered layer, so handling it here
+        // would fire twice.
+        {
+            let key_dropdown = handlers.on_dropdown.clone();
+            let was_open = spec.is_open;
+            let first_item = first_item_id.clone();
+            toggle.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
+                match key {
+                    NodeKey::ArrowDown => {
+                        if was_open {
+                            return first_item.clone();
+                        }
+                        if let Some(dropdown) = &key_dropdown {
+                            dropdown();
+                        }
+                        None
+                    }
+                    _ => None,
+                }
+            }));
+        }
+
         if let Some(handler) = &handlers.on_dropdown {
             let handler = Arc::clone(handler);
             toggle.interaction.on_activate = Some(Arc::new(move || handler()));
@@ -317,6 +381,13 @@ pub fn split_button(
     }
 
     root = root.child(toggle);
+
+    // The open composition (row plus menu) registers one containment unit,
+    // but only while a host actually owns dismissal.
+    let layered = handlers.on_dismiss.is_some() && spec.is_open && !spec.items.is_empty();
+    if layered {
+        root.interaction.dismiss_layer = Some(SPLIT_BUTTON_LAYER_ID.to_string());
+    }
 
     // ── Disabled / loading: dim the whole control, bar the cursor ──
     if is_unavailable {
@@ -371,21 +442,6 @@ pub fn split_button(
             c.bottom_right = menu_radius;
             c.bottom_left = menu_radius;
         }
-
-        let slot_disabled: Vec<bool> = spec
-            .items
-            .iter()
-            .map(|slot| match slot {
-                SplitMenuItem::Action { is_disabled, .. } => *is_disabled,
-                SplitMenuItem::Separator => true,
-            })
-            .collect();
-        let slot_ids: Vec<String> = spec
-            .items
-            .iter()
-            .enumerate()
-            .map(|(slot_idx, _)| format!("split-button-item:{slot_idx}"))
-            .collect();
 
         for (slot_idx, item) in spec.items.iter().enumerate() {
             match item {
@@ -475,6 +531,12 @@ pub fn split_button(
         // carrying this marker (see menu.rs for the full contract note).
         if !spec.dismiss_on_outside_interact {
             menu.interaction.on_activate = Some(Arc::new(|| {}));
+        }
+        // The open menu joins the dismiss stack under the composition
+        // layer when a host owns dismissal.
+        if let Some(on_dismiss) = handlers.on_dismiss.clone() {
+            menu.interaction.dismiss_layer = Some(SPLIT_BUTTON_LAYER_ID.to_string());
+            menu.interaction.on_dismiss = Some(on_dismiss);
         }
 
         // Wrap the row + menu in a column so the menu stacks beneath.
@@ -741,6 +803,7 @@ mod tests {
             on_action: Some(Arc::new(move |v: &str| {
                 action_sink.lock().unwrap().push(v.into())
             })),
+            on_dismiss: None,
         };
         let spec = spec().with_open(true);
         let theme = theme();

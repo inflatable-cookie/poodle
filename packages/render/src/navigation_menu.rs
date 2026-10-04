@@ -5,8 +5,9 @@
 
 use std::sync::Arc;
 
+use poodle_headless::menu::{menu_list_navigate, MenuListMove};
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeKey, NodeModifiers, NodeRole,
+    CrossAxisAlignment, CursorHint, DismissReason, LayoutDirection, Node, NodeKey, NodeRole,
     StylePatch,
 };
 use poodle_specs::{ActiveEdge, ActiveFill, ControlDensity, NavigationMenuSpec};
@@ -15,32 +16,37 @@ use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::context::RenderContext;
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
 
-/// Arrow-key focus roving across nav triggers (Svelte `handleKeydown`):
-/// Left/Right step with wrapping, Home/End jump to the enabled bounds.
-/// Opening (Down/Enter/Space) and closing (Escape) stay host-owned: they
-/// change the open value, which a focus-target id cannot express.
-fn trigger_roving_key_handler(
-    disabled_map: &[bool],
-    item_ids: &[String],
-    current_idx: usize,
-) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
-    use poodle_headless::menu::{menu_list_navigate, MenuListMove};
-    let disabled = disabled_map.to_vec();
-    let ids = item_ids.to_vec();
-    Some(Arc::new(move |key, _modifiers| {
-        let mv = match key {
-            NodeKey::ArrowRight => MenuListMove::Next,
-            NodeKey::ArrowLeft => MenuListMove::Prev,
-            NodeKey::Home => MenuListMove::First,
-            NodeKey::End => MenuListMove::Last,
-            _ => return None,
-        };
-        let next_idx = menu_list_navigate(&disabled, current_idx, mv);
-        if next_idx == current_idx {
-            return None;
-        }
-        Some(ids[next_idx].clone())
-    }))
+/// Focus target for one arrow step across triggers, or `None` when the
+/// step goes nowhere (single enabled trigger). Wrapping skip-disabled
+/// matches Svelte's `findNextEnabledIndex`/`firstEnabledIndex` pair.
+fn roving_target(disabled: &[bool], ids: &[String], idx: usize, mv: MenuListMove) -> Option<String> {
+    let next = menu_list_navigate(disabled, idx, mv);
+    if next == idx {
+        return None;
+    }
+    Some(ids[next].clone())
+}
+/// The layer id the open composition registers on the backend dismiss
+/// stack. Containment is the whole menu (Svelte registers the root), so
+/// presses on triggers or the viewport never dismiss. Single-flight like
+/// the trigger ids.
+pub const NAVIGATION_MENU_LAYER_ID: &str = "navigation-menu-layer";
+
+/// Host-owned interaction intent. The backend turns trigger keys and
+/// dismissal into real listeners; the host owns the active value and the
+/// tracked focus value.
+#[derive(Clone, Default)]
+pub struct NavigationMenuHandlers {
+    /// Trigger activation (click / Enter / Space). The host toggles.
+    pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Trigger focus movement (Svelte `onfocus` → `focusIndex`). The host
+    /// records the value into `focused_value` so the roving tab stop
+    /// follows real focus.
+    pub on_focus: Option<Arc<dyn Fn(&str, bool) + Send + Sync>>,
+    /// Document-level dismissal (escape / outside). Present registers the
+    /// open composition on the dismiss stack; absent keeps the previous
+    /// behavior (the host owns dismissal entirely).
+    pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
 }
 /// Trigger horizontal padding in rem per density (contract §8 Density table):
 /// compact 0.5, default/comfortable 0.75 — NOT the generic ladder.
@@ -63,7 +69,7 @@ fn all_corners(node: &mut Node, r: f32) {
 pub fn navigation_menu(
     spec: &NavigationMenuSpec,
     ctx: &RenderContext<'_>,
-    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: NavigationMenuHandlers,
 ) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
@@ -123,15 +129,23 @@ pub fn navigation_menu(
         s.descriptor.layout.spacing.gap = list_gap;
     }
 
-    // Roving-tab posture (Svelte `focusIndex`): the active trigger owns the
-    // tab stop; with nothing active the first enabled trigger does. The
-    // render is stateless, so focus position mirrors the open value.
+    // Roving-tab posture (Svelte `focusIndex`): the host-tracked focus
+    // value owns the tab stop when it names an enabled trigger; otherwise
+    // the active trigger does, then the first enabled trigger.
     let first_enabled_idx = spec.items.iter().position(|entry| !entry.is_disabled);
     let focus_idx = spec
-        .current_value()
+        .focused_value
+        .as_deref()
         .and_then(|value| {
-            spec.items.iter().position(|entry| {
-                entry.value == value && !entry.is_disabled
+            spec.items
+                .iter()
+                .position(|entry| entry.value == value && !entry.is_disabled)
+        })
+        .or_else(|| {
+            spec.current_value().and_then(|value| {
+                spec.items
+                    .iter()
+                    .position(|entry| entry.value == value && !entry.is_disabled)
             })
         })
         .or(first_enabled_idx);
@@ -141,6 +155,9 @@ pub fn navigation_menu(
         .iter()
         .map(|entry| format!("navigation-menu-trigger:{}", entry.value))
         .collect();
+    // The open composition registers one containment unit, but only while
+    // a host actually owns dismissal.
+    let layered = handlers.on_dismiss.is_some() && spec.current_value().is_some();
 
     for (idx, entry) in spec.items.iter().enumerate() {
         let is_active = current == Some(entry.value.as_str());
@@ -236,17 +253,67 @@ pub fn navigation_menu(
         }
         btn.a11y.tab_index = Some(if Some(idx) == focus_idx { 0 } else { -1 });
         btn.interaction.focusable = true;
+        if layered {
+            btn.interaction.dismiss_layer = Some(NAVIGATION_MENU_LAYER_ID.to_string());
+        }
 
         if entry.is_disabled {
             btn.style.descriptor.opacity = disabled_opacity;
             btn.interaction.disabled = true;
         } else {
-            btn.interaction.on_key =
-                trigger_roving_key_handler(&trigger_disabled, &trigger_ids, idx);
-            if let Some(handler) = &on_change {
+            // Trigger keys (Svelte `handleKeydown`): arrows rove focus with
+            // wrapping; ArrowDown opens through the change channel (the
+            // host sets the value, which opens from closed). Escape is
+            // deliberately absent: the window dismisses the registered
+            // layer, so handling it here would fire twice.
+            {
+                let key_change = handlers.on_change.clone();
+                let value = entry.value.clone();
+                let siblings = trigger_disabled.clone();
+                let ids = trigger_ids.clone();
+                btn.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
+                    match key {
+                        NodeKey::ArrowRight => {
+                            roving_target(&siblings, &ids, idx, MenuListMove::Next)
+                        }
+                        NodeKey::ArrowLeft => {
+                            roving_target(&siblings, &ids, idx, MenuListMove::Prev)
+                        }
+                        NodeKey::Home => {
+                            roving_target(&siblings, &ids, idx, MenuListMove::First)
+                        }
+                        NodeKey::End => {
+                            roving_target(&siblings, &ids, idx, MenuListMove::Last)
+                        }
+                        NodeKey::ArrowDown => {
+                            // Svelte opens the focused trigger's viewport:
+                            // a no-op when this entry is already active, an
+                            // open through the change channel otherwise
+                            // (the host toggles, which opens from closed
+                            // and switches from another entry).
+                            if is_active {
+                                return None;
+                            }
+                            if let Some(change) = &key_change {
+                                change(&value);
+                            }
+                            None
+                        }
+                        _ => None,
+                    }
+                }));
+            }
+            if let Some(handler) = &handlers.on_change {
                 let handler = Arc::clone(handler);
                 let value = entry.value.clone();
                 btn.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            }
+            if let Some(focused) = &handlers.on_focus {
+                let focused = Arc::clone(focused);
+                let value = entry.value.clone();
+                btn.interaction.on_focus_change = Some(Arc::new(move |is_focused| {
+                    focused(&value, is_focused);
+                }));
             }
 
             // Hover: accent-12% fill. A solid open trigger keeps its accent
@@ -338,6 +405,13 @@ pub fn navigation_menu(
             viewport.interaction.on_activate = Some(Arc::new(|| {}));
         }
 
+        // The open composition joins the dismiss stack under one layer id
+        // when a host owns dismissal.
+        if let Some(on_dismiss) = handlers.on_dismiss.clone() {
+            viewport.interaction.dismiss_layer = Some(NAVIGATION_MENU_LAYER_ID.to_string());
+            viewport.interaction.on_dismiss = Some(on_dismiss);
+        }
+
         root = root.child(viewport);
     }
 
@@ -386,7 +460,7 @@ mod tests {
         let spec = NavigationMenuSpec::new(items()).with_value("a");
         let accent = ctx.theme().resolve_color("color.accent.base");
 
-        let root = navigation_menu(&spec, &ctx, None);
+        let root = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.border.width, 0.0);
         assert_eq!(
@@ -415,7 +489,7 @@ mod tests {
         let accent = ctx.theme().resolve_color("color.accent.base");
         let border_default = ctx.theme().resolve_color("color.border.default");
 
-        let root = navigation_menu(&spec, &ctx, None);
+        let root = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.border.width, rem_to_px(0.0625));
         assert_eq!(
@@ -437,7 +511,7 @@ mod tests {
             .with_active_edge(ActiveEdge::Underline);
         let accent = ctx.theme().resolve_color("color.accent.base");
 
-        let root = navigation_menu(&spec, &ctx, None);
+        let root = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.border_bottom_width, Some(rem_to_px(0.125)));
         assert_eq!(open.style.border_color_bottom, Some(accent));
@@ -459,7 +533,7 @@ mod tests {
         let accent = ctx.theme().resolve_color("color.accent.base");
         let inverse = ctx.theme().resolve_color("color.text.inverse");
 
-        let root = navigation_menu(&spec, &ctx, None);
+        let root = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.background, Some(accent));
         assert_eq!(
@@ -490,7 +564,7 @@ mod tests {
             .with_active_fill(ActiveFill::Solid);
         let accent = ctx.theme().resolve_color("color.accent.base");
 
-        let root = navigation_menu(&spec, &ctx, None);
+        let root = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         let open_hover = trigger_of(&root, "A")
             .style
             .hover
@@ -521,7 +595,7 @@ mod tests {
         let surface = ctx.theme().resolve_color("color.background.surface");
         let idle = with_alpha(surface, surface.3 * 0.88);
 
-        let root = navigation_menu(&spec, &ctx, None);
+        let root = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         let open = trigger_of(&root, "A");
         // No selection fill: the open trigger keeps the idle trigger fill.
         assert_eq!(open.style.descriptor.background, Some(idle));
@@ -545,7 +619,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items()).with_value("a");
-        let node = navigation_menu(&spec, &ctx, None);
+        let node = navigation_menu(&spec, &ctx, NavigationMenuHandlers::default());
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_none());
@@ -553,7 +627,7 @@ mod tests {
         // Refusal: the open viewport carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = navigation_menu(&refusing, &ctx, None);
+        let node = navigation_menu(&refusing, &ctx, NavigationMenuHandlers::default());
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_some());
