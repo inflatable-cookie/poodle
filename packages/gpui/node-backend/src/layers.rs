@@ -101,6 +101,13 @@ fn overlay_frame_begin_common() {
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
     ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());
     LAYER_TAB_STOPS.with(|stops| stops.borrow_mut().clear());
+    super::snapshot_focus_frame();
+    // Renderer-queued focus intent joins the machine-effect queue so the
+    // frame's paint applies it once; ids with no mounted handle are dropped
+    // at application, never resolved here.
+    for id in poodle_node::take_queued_focus_requests() {
+        request_focus(&id);
+    }
     // The ring registry is frame observation with the same lifetime: a
     // focused node that vanished paints nothing this frame, and its entry
     // must not survive it.

@@ -35976,12 +35976,10 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
     });
 }
 
-/// g16.118. Non-danger toast rows are ListItems, matching the Svelte `<li>`
-/// per toast; a danger toast projects Alert, the native projection of the
-/// contract's assertive live region. Drawing the node tree does not claim
-/// GPUI assistive-technology parity.
+/// g16.118. Every toast row is a ListItem, matching the Svelte `<li>` per
+/// toast. Drawing the node tree does not claim GPUI assistive-technology parity.
 #[test]
-fn mounted_toast_rows_project_alert_for_danger_tone() {
+fn mounted_toast_rows_are_list_items_for_every_tone() {
     run_headless(|cx| {
         let node = toast_stack(
             &ToastStackSpec::new().with_toasts(vec![
@@ -36003,7 +36001,7 @@ fn mounted_toast_rows_project_alert_for_danger_tone() {
                 .expect("danger toast")
                 .a11y
                 .role,
-            Some(NodeRole::Alert)
+            Some(NodeRole::ListItem)
         );
 
         let tree = Arc::new(Mutex::new(node));
@@ -36027,7 +36025,7 @@ fn mounted_toast_rows_project_alert_for_danger_tone() {
                 .expect("mounted danger")
                 .a11y
                 .role,
-            Some(NodeRole::Alert)
+            Some(NodeRole::ListItem)
         );
     });
 }
@@ -45585,14 +45583,17 @@ fn first_mounted_parity_history_center() {
     });
 }
 
-/// ToastStack mounts its live stack and drives dismissal and actions through
-/// mounted GPUI input: a danger toast projects the native alert role, dismiss
-/// buttons carry per-toast labels and focus, the action button fires its
-/// callback, and same-id replacement settles the row without a fresh enter.
-/// Svelte parity authority:
+/// ToastStack mounts its live stack and drives actions, presence, and
+/// dismissal through mounted GPUI input: the action button fires its
+/// callback; same-id replacement settles the row without a fresh enter;
+/// host timers expire rows through the headless clock while danger stays
+/// sticky; manual dismissal transfers focus through renderer-owned order
+/// (next, previous, entered-from) while timer expiry drops it; and the last
+/// row's removal restores the entered-from control. Svelte parity authority:
 /// `packages/svelte/components/src/ToastStack.svelte` (list stack with polite
 /// posture; per-toast polite/assertive regions; dismiss `Dismiss {title}`;
-/// secondary action Button; keyed rows that settle in place).
+/// secondary action Button; keyed rows that settle in place; host timer
+/// policy with sticky danger; contract §8a focus order).
 #[test]
 fn first_mounted_parity_toast_stack() {
     use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
@@ -45634,11 +45635,10 @@ fn first_mounted_parity_toast_stack() {
     let fail = witness
         .find(&|node| node.id.as_deref() == Some("poodle-toast-fail"))
         .expect("danger toast row");
-    assert_eq!(
-        fail.a11y.role,
-        Some(NodeRole::Alert),
-        "danger escalates to the native alert projection of the assertive region"
-    );
+    // Svelte is the parity authority and renders every row as a list item;
+    // the contract's native Alert projection for danger awaits A1-framework
+    // adjudication (reported) and stays unasserted here.
+    assert_eq!(fail.a11y.role, Some(NodeRole::ListItem));
     assert_eq!(fail.roles.get("tone").map(String::as_str), Some("danger"));
     let info_accent = save
         .children
@@ -45683,18 +45683,26 @@ fn first_mounted_parity_toast_stack() {
     assert!(witness.has_text("All changes are safe."));
     assert!(witness.has_text("The connection dropped."));
 
-    // ── Mounted: action, settle, dismiss, keyboard ──────────────────────
+    // ── Mounted: action, settle, timed presence, transfer, entry ────
+    // The host owns items and timer policy (mirroring the Svelte host:
+    // six-second expiry for non-sticky tones, sticky danger); the renderer
+    // owns focus transfer. The host never touches focus.
     #[derive(Default)]
     struct ToastProofHost {
         toasts: Vec<Toast>,
         dismisses: Vec<String>,
         actions: Vec<String>,
+        timers: Vec<String>,
     }
+    const AUTO_DISMISS: std::time::Duration = std::time::Duration::from_secs(6);
     let host = Arc::new(Mutex::new(ToastProofHost {
         toasts: vec![
             Toast::new("save", "Saved")
                 .with_message("All changes are safe.")
                 .with_action_label("Retry"),
+            Toast::new("mid", "Syncing")
+                .with_message("Working through the queue.")
+                .with_tone(ToastTone::Success),
             Toast::new("fail", "Publishing failed")
                 .with_message("The connection dropped.")
                 .with_tone(ToastTone::Danger),
@@ -45708,9 +45716,28 @@ fn first_mounted_parity_toast_stack() {
             let toasts = host.lock().expect("toast host").toasts.clone();
             let dismiss_host = Arc::clone(&host);
             let action_host = Arc::clone(&host);
+            let mut outside = Node::button("Outside");
+            outside.id = Some("outside-button".to_owned());
+            outside.a11y.label = Some("Outside control".to_owned());
+            outside.a11y.tab_index = Some(0);
+            outside.interaction.focusable = true;
+            // A tracked focus handle needs a ring declaration, like any
+            // real button; bare focusability alone does not mint one.
+            outside.style.focus_ring = Some(FocusRing {
+                color: theme_provider.resolve_color("color.accent.focusRing"),
+                width: theme_provider.resolve_border_width("border.width.focus"),
+                offset: rem_to_px(0.125),
+            });
+            outside.position = NodePosition::Absolute {
+                top: Some(8.0),
+                left: Some(8.0),
+                right: None,
+                bottom: None,
+            };
             div()
                 .relative()
                 .size_full()
+                .child(poodle_gpui_node_backend::to_gpui(&outside))
                 .child(
                     node_compat::ToastStack::from_spec(
                         ToastStackSpec::new().with_toasts(toasts),
@@ -45718,26 +45745,12 @@ fn first_mounted_parity_toast_stack() {
                     )
                     .with_instance_id("proof")
                     .on_dismiss(Arc::new(move |id: &str| {
+                        // Host-owned removal only: focus transfer belongs to
+                        // the renderer, which wrapped this callback.
                         let mut host = dismiss_host.lock().expect("toast host");
                         host.dismisses.push(format!("dismiss:{id}"));
-                        // The host owns removal, then transfers focus in the
-                        // contract order: the equivalent dismiss control on
-                        // the next surviving toast, else the previous one.
-                        // No survivor means no request: focus simply clears.
                         if let Some(index) = host.toasts.iter().position(|toast| toast.id == id) {
                             host.toasts.remove(index);
-                            let target = host
-                                .toasts
-                                .get(index)
-                                .or_else(|| {
-                                    index.checked_sub(1).and_then(|prev| host.toasts.get(prev))
-                                })
-                                .map(|toast| {
-                                    format!("toast-host:proof:toast:{}:dismiss", toast.id)
-                                });
-                            if let Some(target) = target {
-                                poodle_gpui_node_backend::request_focus(&target);
-                            }
                         }
                     }))
                     .on_action(Arc::new(move |id: &str| {
@@ -45762,11 +45775,9 @@ fn first_mounted_parity_toast_stack() {
         let painted_fail =
             poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:fail")
                 .expect("danger row reached GPUI paint");
-        assert_eq!(
-            painted_fail.a11y_role,
-            Some(NodeRole::Alert),
-            "the mounted danger row keeps its alert projection"
-        );
+        // Svelte parity authority renders every row as a list item; see the
+        // witness note on the contract's Alert aspiration.
+        assert_eq!(painted_fail.a11y_role, Some(NodeRole::ListItem));
         assert_eq!(
             poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save")
                 .expect("info row reached GPUI paint")
@@ -45775,7 +45786,7 @@ fn first_mounted_parity_toast_stack() {
         );
         let stack_bounds =
             poodle_gpui_node_backend::bounds_for("toast-host:proof:stack").expect("stack geometry");
-        for row in ["save", "fail"] {
+        for row in ["save", "mid", "fail"] {
             let id = format!("toast-host:proof:toast:{row}");
             let row_bounds =
                 poodle_gpui_node_backend::bounds_for(&id).expect("mounted row geometry");
@@ -45828,27 +45839,46 @@ fn first_mounted_parity_toast_stack() {
             "the settled row keeps its mounted identity"
         );
 
-        // Timed presence: the clock advances with no host timer running —
-        // presence is host-driven and motion invents no clock, so the
-        // settled rows simply stay mounted with no enter/exit remnants.
-        driver.advance_clock(std::time::Duration::from_secs(5));
+        // Timed presence: the host schedules expiry for non-sticky tones on
+        // the headless clock (mirroring the Svelte host policy: six seconds,
+        // sticky danger never schedules). Pre-expiry rows stay mounted.
+        driver.with_window(|window, cx| {
+            for id in ["save", "mid"] {
+                let host = Arc::clone(&host);
+                let id = id.to_owned();
+                host.lock().expect("toast host").timers.push(id.clone());
+                window
+                    .spawn(cx, async move |cx| {
+                        cx.background_executor().timer(AUTO_DISMISS).await;
+                        let mut host = host.lock().expect("toast host");
+                        if let Some(index) = host.toasts.iter().position(|toast| toast.id == id) {
+                            host.toasts.remove(index);
+                        }
+                    })
+                    .detach();
+            }
+        });
+        assert_eq!(
+            host.lock().expect("toast host").timers.as_slice(),
+            ["save", "mid"],
+            "only non-sticky tones schedule expiry"
+        );
+        driver.advance_clock(std::time::Duration::from_millis(5999));
         driver.draw_frame();
         assert!(
             poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:save").is_some()
-                && poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:fail").is_some(),
-            "advancing the clock settles nothing: both rows stay mounted"
-        );
-        assert!(
-            !poodle_gpui_node_backend::take_probe_capture()
-                .contains(&"surface.animation.scheduled"),
-            "presence paints no animation clock"
+                && poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:mid").is_some(),
+            "pre-expiry rows stay mounted"
         );
 
-        // Focused dismissal: the focused toast's dismiss control owns focus
-        // when its row is removed, so focus transfers to the next surviving
-        // row's dismiss — the contract's focus order through the backend's
-        // paint-time focus request.
-        driver.wait_for_focus_handle("toast-host:proof:toast:save:dismiss");
+        // Renderer-owned transfer: focus owns save's dismiss, so manual
+        // removal lands it on mid's dismiss. The host only removed the row.
+        driver.wait_for_focus_handle("outside-button");
+        driver.focus_element("outside-button");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("outside-button"),
+            Some(true)
+        );
         driver.focus_element("toast-host:proof:toast:save:dismiss");
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:save:dismiss"),
@@ -45866,17 +45896,44 @@ fn first_mounted_parity_toast_stack() {
             "the dismissed row unmounts"
         );
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:fail:dismiss"),
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:mid:dismiss"),
             Some(true),
             "focus transfers to the next surviving row's dismiss control"
         );
+
+        // Timer expiry exits without transfer: the host-timer path bypasses
+        // the dismiss control exactly like the Svelte store timeout, so
+        // owned focus drops instead of moving.
+        driver.advance_clock(std::time::Duration::from_millis(1));
+        driver.draw_frame();
         assert!(
-            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:fail").is_some(),
-            "the surviving danger row stays mounted"
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:mid").is_none(),
+            "the expired row unmounts"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:mid:dismiss"),
+            None,
+            "timer expiry drops owned focus without transfer"
+        );
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "presence paints no animation clock"
         );
 
-        // Keyboard dismiss removes the last toast: with no survivor to take
-        // focus, the cleared row takes focus with it and nothing goes stale.
+        // Sticky danger survives the clock: a full minute past every expiry
+        // leaves it mounted.
+        driver.advance_clock(std::time::Duration::from_secs(60));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:fail").is_some(),
+            "the sticky danger row survives its timers"
+        );
+
+        // Entered-from restoration: focus re-enters the stack from the
+        // outside control, so removing the last row restores it.
+        driver.focus_element("outside-button");
+        driver.focus_element("toast-host:proof:toast:fail:dismiss");
         driver.keyboard_activate("toast-host:proof:toast:fail:dismiss");
         assert_eq!(
             host.lock().expect("toast host").dismisses.as_slice(),
@@ -45889,9 +45946,38 @@ fn first_mounted_parity_toast_stack() {
             "the keyboard-dismissed row unmounts"
         );
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:fail:dismiss"),
-            None,
-            "removed rows keep no stale focus state"
+            poodle_gpui_node_backend::focus_state_for("outside-button"),
+            Some(true),
+            "the last removal restores the entered-from control"
+        );
+
+        // Late enter: a toast added to the empty stack mounts its row, and
+        // its own dismissal restores the entered-from control by pointer too.
+        host.lock()
+            .expect("toast host")
+            .toasts
+            .push(Toast::new("late", "Almost done").with_message("One more step."));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_some(),
+            "the late toast enters the mounted stack"
+        );
+        driver.focus_element("toast-host:proof:toast:late:dismiss");
+        driver.pointer_activate_id("toast-host:proof:toast:late:dismiss");
+        assert_eq!(
+            host.lock().expect("toast host").dismisses.as_slice(),
+            ["dismiss:save", "dismiss:fail", "dismiss:late"],
+            "late dismiss callback payload names the toast"
+        );
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_none(),
+            "the late row unmounts"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("outside-button"),
+            Some(true),
+            "pointer removal restores the entered-from control as well"
         );
         assert!(theme_provider.resolve_color("color.status.danger").3 > 0.0);
         assert!(rem_to_px(1.25) > 0.0);

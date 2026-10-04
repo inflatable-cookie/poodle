@@ -21,6 +21,7 @@
 //! far. It grows component-by-component during the migration; it does not try
 //! to be complete ahead of the components that would prove it.
 
+use std::cell::RefCell;
 use std::fmt;
 use std::sync::Arc;
 
@@ -1152,9 +1153,95 @@ impl fmt::Debug for Node {
     }
 }
 
+// ── Focus-effect channel ─────────────────────────────────────────────────
+//
+// Renderer-neutral focus intent. Renderer-owned interaction code — a dismiss
+// that must land focus on its transfer target — cannot call a backend, so it
+// queues element-id focus requests here; backends drain the queue at the
+// next paint through their own focus application and drop ids with no
+// mounted handle. Backends also feed focus transit (the web `relatedTarget`
+// equivalent) on each real change, so renderer code can resolve entry points
+// like a stack's entered-from control. Traversal and application stay
+// backend-owned; this carries intent and transit memory only.
+thread_local! {
+    static QUEUED_FOCUS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    static PREVIOUS_FOCUS: RefCell<Option<String>> = RefCell::new(None);
+    static CURRENT_FOCUS: RefCell<Option<String>> = RefCell::new(None);
+}
+
+/// Queue element-id focus from renderer-owned interaction code. Duplicates
+/// collapse: one pending request per id is enough for the next paint.
+pub fn queue_focus_request(element_id: &str) {
+    QUEUED_FOCUS.with(|queued| {
+        let mut queued = queued.borrow_mut();
+        if !queued.iter().any(|queued| queued == element_id) {
+            queued.push(element_id.to_owned());
+        }
+    });
+}
+
+/// Drain queued focus requests. Backends call this at their paint boundary
+/// and apply each id through their own focus machinery.
+pub fn take_queued_focus_requests() -> Vec<String> {
+    QUEUED_FOCUS.with(|queued| std::mem::take(&mut *queued.borrow_mut()))
+}
+
+/// Record a focus transit: the element id focus just left, if any. Backends
+/// feed this on each real focus change; renderer code reads it to resolve
+/// where focus came from.
+pub fn note_focus_transit(previous_id: Option<String>) {
+    PREVIOUS_FOCUS.with(|previous| *previous.borrow_mut() = previous_id);
+}
+
+/// The element id focused before the current one, if the backend feeds
+/// transit. `None` means unknown, not unfocused.
+pub fn previous_focused_id() -> Option<String> {
+    PREVIOUS_FOCUS.with(|previous| previous.borrow().clone())
+}
+
+/// Record a focus landing: the element id holding focus now, if any.
+/// Backends feed this alongside transit on each real change and clear it
+/// when focus leaves to nowhere.
+pub fn note_focus_landed(current_id: Option<String>) {
+    CURRENT_FOCUS.with(|current| *current.borrow_mut() = current_id);
+}
+
+/// The element id holding focus now, if the backend feeds landings. Used by
+/// renderer-owned interaction code to test focus ownership (a dismiss moves
+/// focus only when the dismissed row owns it). `None` means unknown.
+pub fn current_focused_id() -> Option<String> {
+    CURRENT_FOCUS.with(|current| current.borrow().clone())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn focus_requests_dedupe_and_drain() {
+        assert!(take_queued_focus_requests().is_empty());
+        queue_focus_request("a");
+        queue_focus_request("b");
+        queue_focus_request("a");
+        assert_eq!(take_queued_focus_requests(), vec!["a", "b"]);
+        assert!(take_queued_focus_requests().is_empty());
+    }
+
+    #[test]
+    fn focus_transit_and_landing_roundtrip() {
+        note_focus_transit(None);
+        note_focus_landed(None);
+        assert_eq!(previous_focused_id(), None);
+        assert_eq!(current_focused_id(), None);
+        note_focus_transit(Some("outside".to_owned()));
+        note_focus_landed(Some("inside".to_owned()));
+        assert_eq!(previous_focused_id().as_deref(), Some("outside"));
+        assert_eq!(current_focused_id().as_deref(), Some("inside"));
+        note_focus_transit(None);
+        note_focus_landed(None);
+        assert_eq!(previous_focused_id(), None);
+        assert_eq!(current_focused_id(), None);
+    }
 
     #[test]
     fn texts_walk_the_tree_in_order() {

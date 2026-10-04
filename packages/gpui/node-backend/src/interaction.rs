@@ -337,9 +337,17 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         FOCUSED_FIELD.with(|f| {
                             let mut f = f.borrow_mut();
                             if now {
+                                // A real gain feeds transit and the landing
+                                // mirror so renderer-owned interaction code
+                                // can resolve where focus came from and who
+                                // owns it. Transit chains from the frame (see
+                                // `note_focus_gain`); losses never feed it.
                                 *f = Some(id.clone());
+                                crate::note_focus_gain(&id);
+                                poodle_node::note_focus_landed(Some(id.clone()));
                             } else if f.as_deref() == Some(id.as_str()) {
                                 *f = None;
+                                poodle_node::note_focus_landed(None);
                             }
                         });
                         if !now {
