@@ -1,0 +1,24 @@
+{
+  "schema": "poodle.web-candidate-evidence.v1",
+  "version": "0.4.8",
+  "source_commit": "100f0f542f1169f417364d357b8242791f0c727d",
+  "base_commit": "01d363d0dbb90dc42c6cb1b316dd9dd7fde774a4",
+  "payload_commits": [
+    "5d9453966f5a1b385d3fbbdfaab2154c3b098799",
+    "6a2b4bcdb8c7e6d4b8f2a081ada1d9bc61580e1a"
+  ],
+  "publication_set": [
+    "@inflatable-cookie/poodle-core",
+    "@inflatable-cookie/poodle-svelte"
+  ],
+  "native_train_changed": false,
+  "operator_acceptance": "Tom approved cutting and publishing 0.4.8 on 2026-10-04 (Queue decision b176ad07: \"Cut and publish 0.4.8 now\").",
+  "focused_evidence": {
+    "milestone_qa": "Queue project.qa.run 795b1470 (effigy ci:fresh) passed on aaa0344b4 and local check:gpui passed; no web package changed between aaa0344b4 and the base 01d363d0d; a confirming run 3481e7f2 targets the base.",
+    "tabs_fill_scroll_tokens": "PR #337 makes layout=fill work as a flex/grid child, adds panelScroll and four schema-backed Tabs chrome tokens; focused Svelte and React TabsFillLayout tests (10 each) and the Tabs parity check pass.",
+    "tabs_data_part": "PR #338 adds contracted data-part hooks to every Tabs part and data-measure on the measurement list; focused Svelte and React Tabs tests and parity pass.",
+    "frozen_lockfile": "effigy lock:workspaces-refresh updated the bun.lock workspace slice to 0.4.8 and core ranges >=0.4.8 <0.5; docs:lint lock:workspaces-check passes.",
+    "bun_toolchain": "packageManager bun@1.4.2; CI installs through bun-version-file from package.json",
+    "diff_check": "clean"
+  }
+}
