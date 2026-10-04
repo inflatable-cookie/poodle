@@ -310,20 +310,26 @@ describe("g18.001 census oracles", () => {
     }
   });
 
-  it("record-state oracle: evidence identity is pinned, current tree descends from it", () => {
-    const root = path.resolve(import.meta.dir, "..");
-    const record = loadExecutionRecord(root);
-    // The census's own generator embeds the record's commit; the checked-in
-    // census must carry exactly that identity so the record stays the single
-    // evidence source (state, never live HEAD).
-    const census = JSON.parse(readFileSync(path.join(root, CENSUS_JSON_PATH), "utf8")) as { source_commit?: string };
-    expect(record.source_commit).toMatch(/^[0-9a-f]{40}$/);
-    expect(census.source_commit).toBe(record.source_commit);
-    // Pin ancestry, lockfile identity, and every admitted test body hash are
-    // the record's own oracle; repinning the identity to a newer ancestor
-    // stays legal without touching this test.
-    validateExecutionRecord(record, root);
-  });
+  it(
+    "record-state oracle: evidence identity is pinned, current tree descends from it",
+    () => {
+      const root = path.resolve(import.meta.dir, "..");
+      const record = loadExecutionRecord(root);
+      // The census's own generator embeds the record's commit; the checked-in
+      // census must carry exactly that identity so the record stays the single
+      // evidence source (state, never live HEAD).
+      const census = JSON.parse(readFileSync(path.join(root, CENSUS_JSON_PATH), "utf8")) as { source_commit?: string };
+      expect(record.source_commit).toMatch(/^[0-9a-f]{40}$/);
+      expect(census.source_commit).toBe(record.source_commit);
+      // Pin ancestry, lockfile identity, and every admitted test body hash are
+      // the record's own oracle; repinning the identity to a newer ancestor
+      // stays legal without touching this test. It re-reads and hashes every
+      // expected body, so it grows with the expected-test set and needs more
+      // than the default 5s budget on a loaded machine.
+      validateExecutionRecord(record, root);
+    },
+    30_000,
+  );
 
   it("evidence-text oracle: receipts store matched body text, not patterns", () => {
     const body = [

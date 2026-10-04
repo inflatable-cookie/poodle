@@ -375,6 +375,21 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - tone-based accent bar may use platform-specific drawing
 - danger toasts set `NodeRole::Alert`; other toasts stay `ListItem`. This is
   renderer-role metadata, not GPUI assistive-technology proof.
+- presence is renderer-owned: the host owns the item list, timers, and the
+  completion report, while `poodle_render::ToastStackPresence` decides every
+  phase. The renderer reconciles the host-held ledger against the semantic
+  items under the effective motion policy, so preloaded rows paint settled, a
+  same-id replacement keeps its row and phase, a new row enters, and a removed
+  row leaves an exit remnant at the tail.
+- the enter and leave treatments are bounded opacity/translation clocks under
+  `full`; GPUI applies the translation as a relative-position inset, so the
+  row really moves. Under `reduced` the translation is dropped and only the
+  short opacity phase remains; under `frozen` nothing runs (the endpoint
+  paints immediately and a removed row drops with no remnant).
+- the exit remnant is inert paint: it declares `NodeA11y::hidden`, owns no
+  focus stop, cursor, hover/active restyle, or activation, and drops its
+  semantic id, so it leaves live-region, accessibility, focus, and hit-test
+  ownership the moment its item leaves the semantic list.
 
 ## 10a. Jetstream Notes
 

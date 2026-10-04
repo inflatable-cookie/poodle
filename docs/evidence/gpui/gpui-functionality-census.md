@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `c97c5f1302011d7dfa387d18d3703979e9c83ff1`
+Evidence commit (execution identity from the execution record, not the checkout): `dc5c680f41c8e605456eadc1cf1da44b12c0cd51`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **115**/175.
-Fully admitted rows: **96**/175.
-Missing by axis: semantic 60; events 50; pointer 55; keyboard_focus 53; accessibility 67; visual 76.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **120**.
+Rows with at least one admitted capability: **116**/175.
+Fully admitted rows: **97**/175.
+Missing by axis: semantic 59; events 49; pointer 54; keyboard_focus 52; accessibility 66; visual 75.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **119**.
 
 ## Rows
 
@@ -179,7 +179,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **120**.
 | HistoryCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/HistoryCenter--first-mounted-parity-history-center.json` |
 | UpdateStatus | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateStatus--update-status-confirm-then-install-through-the-real-tree.json` |
 | UpdateCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateCenter--update-center-hidden-presence-mounts-nothing-and-open-shows-status.json` |
-| ToastStack | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| ToastStack | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ToastStack--first-mounted-parity-toast-stack.json`; `docs/evidence/gpui/mounted-receipts/ToastStack--toast-stack-renderer-owned-presence-phases-and-inert-remnant.json`; `docs/evidence/gpui/mounted-receipts/ToastStack--toast-stack-action-removal-hands-focus-on-or-leaves-it-alone.json` |
 | ToastHost | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | AudioMeter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | MeterSurface | not-applicable (web-only) | — | — | — | — |
@@ -307,7 +307,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **120**.
 - ValidationSummary: No validated receipt and no retained expected test for ValidationSummary; every required capability stays missing.
 - ModelConnectionCard: Expected test model_connection_card_closes_and_returns_real_focus_to_the_disclosure proves no events claim; events stays missing.
 - ModelConnectionCard: Expected test model_connection_card_closes_and_returns_real_focus_to_the_disclosure proves no visual claim; visual stays missing.
-- ToastStack: No validated receipt and no retained expected test for ToastStack; every required capability stays missing.
 - AudioMeter: No validated receipt and no retained expected test for AudioMeter; every required capability stays missing.
 - AudioSwitch: No validated receipt and no retained expected test for AudioSwitch; every required capability stays missing.
 - DragNumberField: No validated receipt and no retained expected test for DragNumberField; every required capability stays missing.
@@ -336,5 +335,5 @@ Shared-substrate groupings for repair-tranche compilation. Grouping only; no tra
 - layout-primitive: 6 components (Box, Grid, ListGrid, Skeleton, TimeAgo, Tooltip); missing semantic 6; events 2; pointer 2; keyboard_focus 3; accessibility 6; visual 6
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
-- overlay-dismissal: 2 components (NavigationMenu, ToastStack); missing semantic 1; events 1; pointer 1; keyboard_focus 1; accessibility 2; visual 1
 - agent-composites: 2 components (AgentMessage, MotionPolicyProvider); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2
+- overlay-dismissal: 1 components (NavigationMenu); missing semantic 0; events 0; pointer 0; keyboard_focus 0; accessibility 1; visual 0

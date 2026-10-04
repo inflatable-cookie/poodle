@@ -139,6 +139,31 @@ mod tests {
         }));
         assert_eq!(
             named_gpui_approximation(&toast_enter()),
+            GpuiApproximation::None,
+            "translation is realized, so the toast enter needs no approximation"
+        );
+    }
+
+    #[test]
+    fn scale_keeps_the_named_opacity_stand_in() {
+        let scale = NodeAnimation {
+            key: "scale-in".into(),
+            keyframes: vec![
+                AnimKeyframe {
+                    at: 0.0,
+                    values: vec![(AnimProperty::Opacity, 0.0), (AnimProperty::ScaleX, 0.8)],
+                },
+                AnimKeyframe {
+                    at: 1.0,
+                    values: vec![(AnimProperty::Opacity, 1.0), (AnimProperty::ScaleX, 1.0)],
+                },
+            ],
+            duration_secs: 0.18,
+            easing: AnimEasing::EaseOut,
+            loop_mode: AnimLoop::Once,
+        };
+        assert_eq!(
+            named_gpui_approximation(&scale),
             GpuiApproximation::OpacityStandIn
         );
     }

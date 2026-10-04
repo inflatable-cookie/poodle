@@ -206,9 +206,14 @@ describe("motion policy laws", () => {
     const height = gpuiMotionPlan(["height"]);
     expect(height.approximation).toBe("static-endpoint");
     expect(height.applied).toEqual([]);
+    // Translation is realized, so a toast enter needs no approximation.
     const toast = gpuiMotionPlan(["opacity", "translateY"]);
-    expect(toast.approximation).toBe("opacity-stand-in");
-    expect(toast.applied).toEqual(["opacity"]);
+    expect(toast.approximation).toBe("none");
+    expect(toast.applied).toEqual(["opacity", "translateY"]);
+    // Scale still has no channel and keeps the named opacity stand-in.
+    const scale = gpuiMotionPlan(["opacity", "scaleX"]);
+    expect(scale.approximation).toBe("opacity-stand-in");
+    expect(scale.applied).toEqual(["opacity"]);
     const spin = gpuiMotionPlan(["rotate"]);
     expect(spin.approximation).toBe("none");
   });

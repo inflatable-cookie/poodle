@@ -95,6 +95,9 @@ pub struct PaintedNodeSnapshot {
     pub texts: Vec<String>,
     pub a11y_role: Option<NodeRole>,
     pub a11y_label: Option<String>,
+    /// `aria-hidden` declaration: the node paints but is out of accessibility
+    /// ownership (an exit remnant). `None` means the component said nothing.
+    pub a11y_hidden: Option<bool>,
     pub style: StyleDescriptor,
     pub shadow_layers: Vec<ShadowLayer>,
     pub border_dashed: bool,
@@ -116,6 +119,7 @@ impl PaintedNodeSnapshot {
             texts: node.texts().into_iter().map(str::to_owned).collect(),
             a11y_role: node.a11y.role,
             a11y_label: node.a11y.label.clone(),
+            a11y_hidden: node.a11y.hidden,
             style: node.style.descriptor.clone(),
             shadow_layers: node.style.shadow_layers.clone(),
             border_dashed: node.style.border_dashed,
@@ -1226,10 +1230,23 @@ where
         return el.into_any_element();
     };
     record_probe_channel("surface.animation.scheduled");
-    if sample_property(anim, AnimProperty::TranslateX, 0.0).is_some()
-        || sample_property(anim, AnimProperty::TranslateY, 0.0).is_some()
-        || sample_property(anim, AnimProperty::ScaleX, 0.0).is_some()
-        || sample_property(anim, AnimProperty::ScaleY, 0.0).is_some()
+    // Translation is realized as a relative-position inset. Taffy applies a
+    // relative inset as a visual offset that leaves sibling layout alone —
+    // the same displacement a paint transform would produce, with the hitbox
+    // following — so a translated row really moves. Scale still has no
+    // channel, so an opacity-bearing scale animation keeps the named opacity
+    // stand-in. An absolute node keeps its authored insets: its translation
+    // has nowhere safe to land without moving the anchor.
+    let translated = sample_property(anim, AnimProperty::TranslateX, 0.0).is_some()
+        || sample_property(anim, AnimProperty::TranslateY, 0.0).is_some();
+    let scaled = sample_property(anim, AnimProperty::ScaleX, 0.0).is_some()
+        || sample_property(anim, AnimProperty::ScaleY, 0.0).is_some();
+    let anchored = matches!(node.position, NodePosition::Absolute { .. });
+    if translated && !anchored {
+        record_probe_channel("surface.animation.applied.translation");
+    }
+    if (scaled || (translated && anchored))
+        && sample_property(anim, AnimProperty::Opacity, 0.0).is_some()
     {
         record_probe_channel("surface.animation.approximation.opacity-stand-in");
     }
@@ -1239,6 +1256,14 @@ where
         let mut el = el;
         if let Some(v) = sample_property(&anim, AnimProperty::Opacity, t) {
             el = el.opacity(v);
+        }
+        if !anchored {
+            if let Some(x) = sample_property(&anim, AnimProperty::TranslateX, t) {
+                el = el.left(px(x));
+            }
+            if let Some(y) = sample_property(&anim, AnimProperty::TranslateY, t) {
+                el = el.top(px(y));
+            }
         }
         el
     })

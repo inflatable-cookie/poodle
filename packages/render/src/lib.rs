@@ -435,7 +435,11 @@ pub use time_input::{
 };
 pub use time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 pub use toast_host::toast_host;
-pub use toast_stack::{toast_stack, ToastStackHandlers};
+pub use toast_stack::{
+    next_toast_visuals, toast_action_owns_focus, toast_action_removal_focus_target, toast_stack,
+    toast_stack_with_presence, RemovedToastAction, ToastPresenceChange, ToastRunToken,
+    ToastStackHandlers, ToastStackPresence, ToastVisual, ToastVisualPhase,
+};
 pub use toggle_group::{toggle_group, ToggleGroupHandlers};
 pub use token_input::token_input;
 pub use tool_call::{tool_call, tool_call_focus_id, ToolCallHandlers};

@@ -273,25 +273,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "NavigationMenu",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 1,
-        "events": 1,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 2,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -308,6 +289,23 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "NavigationMenu"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 1,
+        "visual": 0
+      },
+      "contracts": [
+        "docs/contracts/components/navigation-menu.md"
       ]
     }
   ]

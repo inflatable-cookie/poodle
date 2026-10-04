@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "c97c5f1302011d7dfa387d18d3703979e9c83ff1",
+  "source_commit": "dc5c680f41c8e605456eadc1cf1da44b12c0cd51",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -7829,15 +7829,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7846,10 +7870,12 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ToastStack; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ToastStack--first-mounted-parity-toast-stack.json",
+        "docs/evidence/gpui/mounted-receipts/ToastStack--toast-stack-renderer-owned-presence-phases-and-inert-remnant.json",
+        "docs/evidence/gpui/mounted-receipts/ToastStack--toast-stack-action-removal-hands-focus-on-or-leaves-it-alone.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ToastHost",
@@ -8650,18 +8676,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 115,
-    "fullyAdmittedRows": 96,
+    "admittedRows": 116,
+    "fullyAdmittedRows": 97,
     "missingTally": {
-      "semantic": 60,
-      "events": 50,
-      "pointer": 55,
-      "keyboard_focus": 53,
-      "accessibility": 67,
-      "visual": 76
+      "semantic": 59,
+      "events": 49,
+      "pointer": 54,
+      "keyboard_focus": 52,
+      "accessibility": 66,
+      "visual": 75
     },
     "holdCount": 175,
-    "refusalCount": 120
+    "refusalCount": 119
   },
   "groups": [
     {
@@ -8935,25 +8961,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "NavigationMenu",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 1,
-        "events": 1,
-        "pointer": 1,
-        "keyboard_focus": 1,
-        "accessibility": 2,
-        "visual": 1
-      },
-      "contracts": [
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "agent-composites",
       "components": [
         "AgentMessage",
@@ -8970,6 +8977,23 @@
       "contracts": [
         "docs/contracts/components/agent-message.md",
         "docs/contracts/components/motion-policy-provider.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "NavigationMenu"
+      ],
+      "missingTally": {
+        "semantic": 0,
+        "events": 0,
+        "pointer": 0,
+        "keyboard_focus": 0,
+        "accessibility": 1,
+        "visual": 0
+      },
+      "contracts": [
+        "docs/contracts/components/navigation-menu.md"
       ]
     }
   ],
