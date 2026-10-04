@@ -482,7 +482,16 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     if (!component.portable) continue;
     const contractPath = `docs/contracts/components/${component.slug}.md`;
     const contract = read(root, contractPath);
-    const events = headingBody(contract, /^## 5\. /);
+    // MediaThumbnail orders Events after Types, Anatomy, Props, and Snippets.
+    // Read that real section without changing how any other contract is parsed.
+    const staticFigureWithoutEvents =
+      component.name === "MediaThumbnail" &&
+      /\[Root\].*<figure>/.test(contract) &&
+      /No component-owned events\./.test(contract);
+    const events = headingBody(
+      contract,
+      staticFigureWithoutEvents ? /^## 6\. Events/ : /^## 5\. /,
+    );
     const keyboard = headingBody(contract, /^### Keyboard/);
     const focus = headingBody(contract, /^### Focus/);
     const eventTableKeys = events.body
@@ -496,7 +505,8 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
       (/^\|\s*none\s*\|/m.test(events.body) ||
         /^\s*None\.\s*$/m.test(events.body) ||
         /^No component-owned events are dispatched\./m.test(events.body) ||
-        /layout primitive only|no events/i.test(events.body));
+        /layout primitive only|no events/i.test(events.body) ||
+        staticFigureWithoutEvents);
     const keyboardRows = keyboard.body
       .split("\n")
       .filter((line) => /^\s*\|/.test(line))
@@ -512,8 +522,11 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     );
     const keyboardNone =
       !hasKeyboardBehavior &&
-      (keyboardRows.some(({ key }) => /^none$/i.test(key)) || tabNotFocusable || /no keyboard behavior/i.test(keyboard.body));
-    const focusNeutral = /not focusable/i.test(focus.body);
+      (keyboardRows.some(({ key }) => /^none$/i.test(key)) ||
+        tabNotFocusable ||
+        /no keyboard behavior/i.test(keyboard.body) ||
+        staticFigureWithoutEvents);
+    const focusNeutral = /not focusable/i.test(focus.body) || staticFigureWithoutEvents;
     const required: CensusAxis[] = ["semantic", "accessibility", "visual"];
     const notApplicable: ManifestNotApplicable[] = [];
     if (eventsNone) {
@@ -528,8 +541,12 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     if (eventsNone && keyboardNone) {
       notApplicable.push({
         axis: "pointer",
-        reason: "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
-        contractRef: `${contractPath}#${keyboard.heading || "Keyboard"}`,
+        reason: staticFigureWithoutEvents
+          ? "The contract defines a passive figure with no component-owned events, so it has no pointer interaction to prove."
+          : "Contract declares the non-interactive boundary: no events and not focusable, so no pointer interaction exists to prove.",
+        contractRef: staticFigureWithoutEvents
+          ? `${contractPath}#3. Anatomy`
+          : `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else {
       required.push("pointer");
@@ -537,8 +554,12 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     if (keyboardNone && focusNeutral) {
       notApplicable.push({
         axis: "keyboard_focus",
-        reason: "Contract declares the component not focusable with no keyboard behavior.",
-        contractRef: `${contractPath}#${keyboard.heading || "Keyboard"}`,
+        reason: staticFigureWithoutEvents
+          ? "The contract defines a passive figure that is not a focus stop and has no keyboard behavior."
+          : "Contract declares the component not focusable with no keyboard behavior.",
+        contractRef: staticFigureWithoutEvents
+          ? `${contractPath}#3. Anatomy`
+          : `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else if (keyboardNone && tabNotFocusable) {
       notApplicable.push({

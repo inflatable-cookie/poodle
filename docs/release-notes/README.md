@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.4.8](0.4.8.md) — 2026-10-04 — additive patch candidate with Tabs fill as
+  a flex/grid child, panelScroll, chrome tokens and data-part hooks; core and
+  Svelte publication set
 - [0.4.7](0.4.7.md) — 2026-09-30 — additive patch candidate with history and
   pin icons, a surface hover token, FormLayout alerts, unfiltered searchable
   Select, and the Svelte optional-parameter packaging fix; core and Svelte

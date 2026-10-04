@@ -3,77 +3,6 @@
   "task": "g18.001",
   "groups": [
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "AlertDialog",
-        "ColorPicker",
-        "DataTable",
-        "DatePicker",
-        "DateRangePicker",
-        "DateTimePicker",
-        "DateTimeRangePicker",
-        "DateTimeZonePicker",
-        "DebugDialog",
-        "Drawer",
-        "Field",
-        "FilterBuilder",
-        "FilterToolbar",
-        "FormDialog",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "MediaBrowsePanel",
-        "MediaPicker",
-        "MediaThumbnail",
-        "PageLoading",
-        "PickerShell",
-        "RefSelect",
-        "RelationPicker",
-        "ThemeSelect",
-        "ToastStack",
-        "Toolbar",
-        "VideoPlayer"
-      ],
-      "missingTally": {
-        "semantic": 28,
-        "events": 25,
-        "pointer": 28,
-        "keyboard_focus": 28,
-        "accessibility": 28,
-        "visual": 28
-      },
-      "contracts": [
-        "docs/contracts/components/alert-dialog.md",
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/data-table.md",
-        "docs/contracts/components/date-picker.md",
-        "docs/contracts/components/date-range-picker.md",
-        "docs/contracts/components/date-time-picker.md",
-        "docs/contracts/components/date-time-range-picker.md",
-        "docs/contracts/components/date-time-zone-picker.md",
-        "docs/contracts/components/debug-dialog.md",
-        "docs/contracts/components/drawer.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/filter-builder.md",
-        "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/form-dialog.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/media-browse-panel.md",
-        "docs/contracts/components/media-picker.md",
-        "docs/contracts/components/media-thumbnail.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/picker-shell.md",
-        "docs/contracts/components/ref-select.md",
-        "docs/contracts/components/relation-picker.md",
-        "docs/contracts/components/theme-select.md",
-        "docs/contracts/components/toast-stack.md",
-        "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/video-player.md"
-      ]
-    },
-    {
       "substrate": "feedback-status",
       "components": [
         "ActionDiscoveryPanel",
@@ -278,6 +207,35 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "HistoryCenter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 7,
+        "events": 7,
+        "pointer": 7,
+        "keyboard_focus": 7,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
       ]
     },
     {

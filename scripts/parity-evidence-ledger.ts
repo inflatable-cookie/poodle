@@ -82,7 +82,20 @@ const AUDIO_RENDER_COMPONENTS = new Set([
 export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   AudioPlayer: "first_mounted_parity_audio_player",
   Table: "first_mounted_parity_table",
+  DataTable: "first_mounted_parity_data_table",
+  FilterBuilder: "first_mounted_parity_filter_builder",
+  FilterToolbar: "first_mounted_parity_filter_toolbar",
+  Toolbar: "first_mounted_parity_toolbar",
   TimeZoneSelect: "first_mounted_parity_time_zone_select",
+  DatePicker: "first_mounted_parity_date_picker",
+  DateRangePicker: "first_mounted_parity_date_range_picker",
+  DateTimePicker: "first_mounted_parity_date_time_picker",
+  DateTimeRangePicker: "first_mounted_parity_date_time_range_picker",
+  DateTimeZonePicker: "first_mounted_parity_date_time_zone_picker",
+  MediaBrowsePanel: "media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui",
+  MediaPicker: "media_picker_dialog_search_selection_and_dismissal_rebuild_the_host",
+  MediaThumbnail: "media_thumbnail_states_name_and_size_reach_mounted_gpui",
+  VideoPlayer: "video_player_canvas_and_play_button_rebuild_the_mounted_host",
   Button: "a_mounted_button_carries_its_controls_target",
   Checkbox: "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec",
   Switch: "switch_toggle_readonly_and_disabled_rebuild_the_host_spec",
@@ -132,6 +145,9 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   Accordion: "accordion_result_disclosure_focus_identity_and_disabled_paths",
   TriStateSwitch: "tri_state_switch_value_focus_identity_and_disabled_paths",
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
+  ColorPicker: "first_mounted_parity_color_picker",
+  HoverCard: "first_mounted_parity_hover_card",
+  Field: "first_mounted_parity_field",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
   LicenceActivation: [
@@ -174,6 +190,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
     "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring",
   ],
   BulkActionBar: "gpui_mounted_bulk_action_bar_actions_clear_and_select_all",
+  ListCardCounter: "first_mounted_parity_list_card_counter",
   ListContainer: "gpui_mounted_list_container_state_pagination_and_accessible_name",
   LogList: "gpui_mounted_log_list_stream_audit_and_clear_filters",
   ContextMenu:
@@ -183,6 +200,14 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
     "navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend",
   SplitButton:
     "split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend",
+  AlertDialog: "first_mounted_parity_alert_dialog",
+  FormDialog: "first_mounted_parity_form_dialog",
+  DebugDialog: "first_mounted_parity_debug_dialog",
+  Drawer: "first_mounted_parity_drawer",
+  PickerShell: "first_mounted_parity_picker_shell",
+  RefSelect: "first_mounted_parity_ref_select",
+  RelationPicker: "first_mounted_parity_relation_picker",
+  ThemeSelect: "first_mounted_parity_theme_select",
 };
 
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;

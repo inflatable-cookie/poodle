@@ -1416,6 +1416,7 @@ fn role_name(role: NodeRole) -> Option<&'static str> {
         NodeRole::ComboBox => "combobox",
         NodeRole::MenuItem => "menuitem",
         NodeRole::Dialog => "dialog",
+        NodeRole::Figure => "figure",
         NodeRole::AlertDialog => "alertdialog",
         NodeRole::Status => "status",
         _ => return None,

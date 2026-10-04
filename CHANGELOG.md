@@ -7,6 +7,39 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+## [0.4.8] - 2026-10-04
+
+`0.4.8` is an additive patch candidate with no breaking API change.
+
+### Added
+
+- **Tabs fill as a flex or grid child.** `layout="fill"` now takes its size
+  from a flex or grid parent that has no definite block size, as well as from
+  a sized container.
+- **Tabs scroll owner.** Svelte and React `Tabs` accept
+  `panelScroll="panel" | "content"` (default `"panel"`): the panel scrolls, or
+  the consumer's own content owns scrolling.
+- **Tabs chrome tokens.** `--poodle-tabs-gap`, `--poodle-tabs-list-padding`,
+  `--poodle-tabs-list-background` and `--poodle-tabs-list-border` (schema keys
+  `tabs.gap`, `tabs.list.padding`, `tabs.list.background`, `tabs.list.border`)
+  set the root gap and the tab list's chrome. Defaults match the previous
+  rendering.
+- **Tabs part hooks.** Every Tabs part carries a contracted `data-part`
+  (`root`, `list`, `item`, `trigger`, `label`, `close`, `separator`,
+  `actions`, `indicator`, `panel`, `tooltip`), and the hidden measurement
+  list carries `data-measure="true"` with no `data-part`. Internal
+  `poodle-tabs__*` class names are unchanged but are not public API.
+
+### Changed
+
+- **Web package dependency ranges.** Svelte and React require core
+  `>=0.4.8 <0.5`. Svelte, React, React DOM and Marked peer ranges stay
+  unchanged.
+- **Release status.** Core and Svelte are the `0.4.8` npm publication set.
+  React follows the web version for paired validation and remains private.
+  GPUI parity work merged since `0.4.7` belongs to the native train, which has
+  no release procedure yet; Cargo packages do not move in this patch.
+
 ## [0.4.7] - 2026-09-30
 
 `0.4.7` is an additive patch candidate with no breaking API change.
@@ -655,6 +688,7 @@ supersedes `0.4.3`, which was never published.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.4.8]: docs/release-notes/0.4.8.md
 [0.4.7]: docs/release-notes/0.4.7.md
 [0.4.6]: docs/release-notes/0.4.6.md
 [0.4.5]: docs/release-notes/0.4.5.md

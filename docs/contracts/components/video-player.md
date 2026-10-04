@@ -13,14 +13,15 @@ Updated: 2026-07-10
   volume, fullscreen, and optional captions
 - In scope: play/pause, seek slider, time display, volume slider, mute toggle,
   fullscreen toggle, poster image, captions track, auto-hiding controls, big
-  play button overlay, size and density scaling, keyboard space/enter on wrapper
+  play button overlay, size and density scaling, keyboard playback through the
+  nested Play button, and pointer playback on the video canvas
 - Out of scope: playlist management, picture-in-picture, playback speed, quality
   selector, streaming protocol (HLS/DASH), download actions, theatre mode
 
 ## 2. Anatomy
 
 ```text
-[Root <div>]  role="button", tabindex=0, aspect-ratio from prop
+[Root <div>]  role="group", aria-label from prop, aspect-ratio from prop
   ├── [Video <video>]
   │     └── [CaptionsTrack <track>]  (optional, when showCaptions && captionsSrc)
   ├── [BigPlay <button>]  (only when paused at currentTime=0)
@@ -43,7 +44,7 @@ Updated: 2026-07-10
 
 | Part | Element | Notes |
 |------|---------|-------|
-| Root | `<div>` | Class `video-player`, `role="button"`, `tabindex="0"`, `aria-label` from prop, `aria-pressed` from play state, `data-size`, `data-density` |
+| Root | `<div>` | Class `video-player`, `role="group"`, `aria-label` from prop, `data-size`, `data-density`; pointer clicks on the video canvas toggle playback |
 | Video | `<video>` | Full-size, `object-fit: contain`, `preload="metadata"`, `playsinline` |
 | CaptionsTrack | `<track>` | `kind="captions"`, `default`, rendered when `showCaptions && captionsSrc` |
 | BigPlay | `<button>` | Centered overlay, `aria-label="Play video"`, uses `stopPropagation` |
@@ -124,8 +125,9 @@ volume/fullscreen).
 
 ## 6. Accessibility
 
-- Root carries `role="button"`, `tabindex="0"`, `aria-label` from prop, `aria-pressed` reflecting play state
-- Wrapper keydown handles Space and Enter to toggle play/pause (only when wrapper itself is focused)
+- Root carries `role="group"` and `aria-label` from the prop; it is not a keyboard focus stop
+- The nested Play/Pause button is focusable and Enter/Space activates it through native button behavior
+- Pointer clicks on the video canvas toggle play/pause; controls and the big play button stop propagation
 - Play/pause button: `aria-label` toggles between `"Pause"` and `"Play"`
 - Big play button: `aria-label="Play video"`
 - Mute button: `aria-label` toggles between `"Unmute"` and `"Mute"`
@@ -438,7 +440,7 @@ None (video player uses hardcoded dark-on-black colors).
 - `onDestroy` cleans up animation frame and timeout
 - Click on root toggles play; control bar uses `stopPropagation` to prevent double-toggle
 - Big play button stops click propagation to prevent the root click handler from firing too
-- Wrapper keydown handler only activates on Space/Enter when `event.target === wrapperEl`
+- Keyboard playback is provided by the nested native Play/Pause button; the group root has no keydown handler
 - `document.fullscreenchange` listener updates `isFullscreen` state
 - SVG icons are inline (not Icon primitive) -- play, pause, mute, unmute, fullscreen, exit-fullscreen
 
@@ -463,7 +465,8 @@ None (video player uses hardcoded dark-on-black colors).
 - [ ] mute/unmute toggle behavior matches
 - [ ] seek and volume slider behavior matches
 - [ ] fullscreen toggle behavior matches
-- [ ] keyboard Space/Enter toggle matches
+- [ ] pointer clicks on the video canvas toggle playback
+- [ ] Enter/Space on the nested Play/Pause button toggles playback
 
 ### Tier 2: Visual Parity
 

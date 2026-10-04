@@ -626,6 +626,407 @@ fn icon_resolves_named_glyph_token_size_tint_and_label_through_mounted_backend()
     });
 }
 
+/// MediaPicker's controlled dialog, live case-insensitive search, option
+/// activation and close requests all reach a mounted GPUI tree.
+#[test]
+fn media_picker_dialog_search_selection_and_dismissal_rebuild_the_host() {
+    use poodle_node::NodeRole;
+    use poodle_render::{MediaPickerHandlers, RenderContext};
+    use poodle_specs::{MediaKind, MediaPickerItem, MediaPickerSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let is_open = Arc::new(Mutex::new(true));
+        let query = Arc::new(Mutex::new(String::new()));
+        let search_selection = Arc::new(Mutex::new((0, 0)));
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let open_changes = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let items = vec![
+            MediaPickerItem::new("alpha", "Alpha footage", MediaKind::Video),
+            MediaPickerItem::new("beta", "Beta cut", MediaKind::Video),
+        ];
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let is_open = Arc::clone(&is_open);
+            let query = Arc::clone(&query);
+            let search_selection = Arc::clone(&search_selection);
+            let payloads = Arc::clone(&payloads);
+            let open_changes = Arc::clone(&open_changes);
+            Rc::new(move || {
+                let open_now = *is_open.lock().expect("picker open state");
+                let query_now = query.lock().expect("picker query").clone();
+                let selection_now = *search_selection.lock().expect("picker selection");
+                let handlers = MediaPickerHandlers {
+                    on_select: {
+                        let payloads = Arc::clone(&payloads);
+                        Some(Arc::new(move |id: &str| {
+                            payloads
+                                .lock()
+                                .expect("picker payloads")
+                                .push(id.to_owned());
+                        }))
+                    },
+                    on_tab_change: None,
+                    on_search_change: {
+                        let query = Arc::clone(&query);
+                        Some(Arc::new(move |value: &str| {
+                            *query.lock().expect("picker query") = value.to_owned();
+                        }))
+                    },
+                    on_search_selection_change: {
+                        let search_selection = Arc::clone(&search_selection);
+                        Some(Arc::new(move |start, end| {
+                            *search_selection.lock().expect("picker selection") = (start, end);
+                        }))
+                    },
+                    on_open_change: {
+                        let is_open = Arc::clone(&is_open);
+                        let open_changes = Arc::clone(&open_changes);
+                        Some(Arc::new(move |next| {
+                            *is_open.lock().expect("picker open state") = next;
+                            open_changes.lock().expect("picker open changes").push(next);
+                        }))
+                    },
+                };
+                let spec = MediaPickerSpec::new("Select media")
+                    .with_open(open_now)
+                    .with_search_query(query_now)
+                    .with_search_selection(selection_now)
+                    .with_items(items.clone());
+                poodle_gpui_node_backend::to_gpui(&poodle_render::media_picker(
+                    &spec,
+                    &RenderContext::new(&theme_provider),
+                    handlers,
+                ))
+            })
+        };
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 620.0);
+        let dialog = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("open picker dialog reached GPUI paint");
+        assert_eq!(dialog.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(
+            dialog.a11y_label.as_deref(),
+            Some("Select media"),
+            "the dialog title supplies its announced accessible name"
+        );
+        let search_id = "poodle-input-media-picker-search";
+        let search = poodle_gpui_node_backend::painted_node_for(search_id)
+            .expect("search input reached GPUI paint");
+        assert_eq!(search.a11y_label.as_deref(), Some("Search media"));
+        let listbox = poodle_gpui_node_backend::painted_node_for("media-picker-grid")
+            .expect("filtered browse grid reached GPUI paint");
+        assert_eq!(listbox.a11y_role, Some(NodeRole::ListBox));
+        assert_eq!(listbox.a11y_label.as_deref(), Some("Media items"));
+        let dialog_geometry = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("mounted dialog geometry");
+        assert!(f32::from(dialog_geometry.size.width) > 0.0);
+
+        driver.focus_element(search_id);
+        driver.dispatch_key_raw("b");
+        driver.dispatch_key_raw("e");
+        assert_eq!(*query.lock().expect("picker query"), "be");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("media-picker-item:alpha").is_none(),
+            "search removes nonmatching media from mounted geometry"
+        );
+        let beta = poodle_gpui_node_backend::painted_node_for("media-picker-item:beta")
+            .expect("case-insensitive search retained Beta");
+        assert_eq!(beta.a11y_role, Some(NodeRole::ListBoxOption));
+        assert_eq!(beta.a11y_label.as_deref(), Some("Beta cut"));
+        driver.wait_for_focus_handle("media-picker-item:beta");
+        driver.keyboard_activate("media-picker-item:beta");
+        assert_eq!(*payloads.lock().expect("picker payloads"), vec!["beta"]);
+        assert!(!*is_open.lock().expect("picker open state"));
+
+        *is_open.lock().expect("picker open state") = true;
+        *query.lock().expect("picker query") = String::new();
+        *search_selection.lock().expect("picker selection") = (0, 0);
+        driver.draw_frame();
+        driver.dispatch_key("escape");
+        assert!(!*is_open.lock().expect("picker escape close"));
+
+        *is_open.lock().expect("picker open state") = true;
+        driver.draw_frame();
+        driver.pointer_activate_id("media-picker-item:alpha");
+        assert_eq!(
+            *payloads.lock().expect("picker payloads"),
+            vec!["beta", "alpha"],
+            "option callbacks carry the selected item id"
+        );
+        assert_eq!(
+            *open_changes.lock().expect("picker open changes"),
+            vec![false, false, false],
+            "selection and Escape both request dialog dismissal"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MediaBrowsePanel forwards its thumbnail URL and accessible label through
+/// MediaThumbnail, and selection works by pointer and keyboard after mount.
+#[test]
+fn media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui() {
+    use poodle_node::{NodeKind, NodeRole};
+    use poodle_render::RenderContext;
+    use poodle_specs::{MediaBrowseItem, MediaBrowsePanelSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let item = MediaBrowseItem::new("clip", "Opening clip", "video")
+            .with_meta("2:14")
+            .with_thumbnail_url("fixture-media-preview.png");
+        let spec = MediaBrowsePanelSpec::new().with_items(vec![item]);
+        let node =
+            poodle_render::media_browse_panel(&spec, &RenderContext::new(&theme_provider), {
+                let payloads = Arc::clone(&payloads);
+                Some(Arc::new(move |id: &str| {
+                    payloads
+                        .lock()
+                        .expect("browse panel payloads")
+                        .push(id.to_owned());
+                }))
+            });
+        let image = node
+            .find(&|node| matches!(&node.kind, NodeKind::Image { source } if source == "fixture-media-preview.png"))
+            .expect("thumbnail URL becomes image content");
+        assert_eq!(image.a11y.role, Some(NodeRole::Image));
+        assert_eq!(image.a11y.label.as_deref(), Some("Opening clip"));
+        let thumbnail = node
+            .find(&|node| node.a11y.role == Some(NodeRole::Figure))
+            .expect("thumbnail keeps its figure semantics");
+        assert_eq!(thumbnail.a11y.label.as_deref(), Some("Opening clip"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let payloads = Arc::clone(&payloads);
+            Rc::new(move || {
+                poodle_gpui_node_backend::to_gpui(&poodle_render::media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(vec![MediaBrowseItem::new(
+                        "clip",
+                        "Opening clip",
+                        "video",
+                    )
+                    .with_meta("2:14")
+                    .with_thumbnail_url("fixture-media-preview.png")]),
+                    &RenderContext::new(&theme_provider),
+                    {
+                        let payloads = Arc::clone(&payloads);
+                        Some(Arc::new(move |id: &str| {
+                            payloads
+                                .lock()
+                                .expect("browse panel payloads")
+                                .push(id.to_owned());
+                        }))
+                    },
+                ))
+            })
+        };
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 480.0);
+        let card_id = "media-browse-panel:item:clip";
+        let card = poodle_gpui_node_backend::painted_node_for(card_id)
+            .expect("media card reached GPUI paint");
+        assert_eq!(card.a11y_role, Some(NodeRole::Button));
+        assert_eq!(card.a11y_label.as_deref(), Some("Opening clip"));
+        let thumbnail_id = "media-browse-panel:thumbnail:clip";
+        let painted_thumbnail = poodle_gpui_node_backend::painted_node_for(thumbnail_id)
+            .expect("media thumbnail reached GPUI paint");
+        assert_eq!(painted_thumbnail.a11y_role, Some(NodeRole::Figure));
+        assert_eq!(
+            painted_thumbnail.a11y_label.as_deref(),
+            Some("Opening clip")
+        );
+        let image = poodle_gpui_node_backend::painted_node_for("media-browse-panel:image:clip")
+            .expect("media image and alt name reached GPUI paint");
+        assert_eq!(image.a11y_role, Some(NodeRole::Image));
+        assert_eq!(
+            image.a11y_label.as_deref(),
+            Some("Opening clip"),
+            "the image alternative name is announced"
+        );
+        let card_geometry =
+            poodle_gpui_node_backend::bounds_for(card_id).expect("mounted media card geometry");
+        assert!(f32::from(card_geometry.size.width) > 0.0);
+
+        driver.wait_for_focus_handle(card_id);
+        driver.keyboard_activate(card_id);
+        assert_eq!(
+            *payloads.lock().expect("browse panel payloads"),
+            vec!["clip"],
+            "Enter selects the mounted item"
+        );
+        driver.pointer_activate_id(card_id);
+        assert_eq!(
+            *payloads.lock().expect("browse panel payloads"),
+            vec!["clip", "clip"],
+            "the selected media id is the callback payload"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// MediaThumbnail exposes the contract figure name and loading state while
+/// its state frame keeps the requested size on mounted GPUI.
+#[test]
+fn media_thumbnail_states_name_and_size_reach_mounted_gpui() {
+    use poodle_node::NodeRole;
+    use poodle_render::RenderContext;
+    use poodle_specs::{AspectRatio, MediaKind, MediaState, MediaThumbnailSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = MediaThumbnailSpec::new(MediaKind::Image)
+            .with_state(MediaState::Loading)
+            .with_aspect_ratio(AspectRatio::Video)
+            .with_title("Launch preview")
+            .with_frame_min_height(240.0);
+        let mut node = poodle_render::media_thumbnail(&spec, &ctx);
+        node.id = Some("media-thumbnail-proof".to_owned());
+        node.runtime_id = node.id.clone();
+        node.children[0].id = Some("media-thumbnail-frame-proof".to_owned());
+        node.children[0].runtime_id = node.children[0].id.clone();
+        assert_eq!(node.a11y.role, Some(NodeRole::Figure));
+        assert_eq!(node.a11y.label.as_deref(), Some("Launch preview"));
+        assert_eq!(node.a11y.busy, Some(true));
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 320.0);
+        let figure = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == "media-thumbnail-proof")
+            .expect("mounted figure is in the GPUI accessibility projection");
+        assert_eq!(
+            figure.role,
+            NodeRole::Figure,
+            "the figure role is announced"
+        );
+        assert_eq!(figure.label.as_deref(), Some("Launch preview"));
+        assert_eq!(figure.busy, Some(true));
+        let frame_geometry = poodle_gpui_node_backend::bounds_for("media-thumbnail-frame-proof")
+            .expect("mounted state frame geometry");
+        let frame_height = f32::from(frame_geometry.size.height);
+        assert!(
+            frame_height + 2.0 >= 240.0,
+            "mounted frame content plus its 1px top and bottom borders was {frame_height}px"
+        );
+        assert!(
+            f32::from(
+                poodle_gpui_node_backend::bounds_for("media-thumbnail-proof")
+                    .expect("mounted thumbnail geometry")
+                    .size
+                    .width
+            ) > 0.0,
+            "mounted thumbnail geometry remains nonzero"
+        );
+        assert!(ctx.theme().resolve_color(spec.frame_panel_token()).3 > 0.0);
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// VideoPlayer keeps its group semantics, lets canvas clicks toggle playback,
+/// and routes Space/Enter through the focusable Play/Pause button.
+#[test]
+fn video_player_canvas_and_play_button_rebuild_the_mounted_host() {
+    use poodle_node::NodeRole;
+    use poodle_render::{RenderContext, VideoPlayerHandlers};
+    use poodle_specs::VideoPlayerSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let is_playing = Arc::new(Mutex::new(false));
+        let payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let make_spec = |playing| {
+            VideoPlayerSpec::new("fixture-video.mp4")
+                .with_aria_label("Preview video")
+                .with_current_time(12.0)
+                .with_duration(90.0)
+                .with_playing(playing)
+        };
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = {
+            let theme_provider = theme_provider.clone();
+            let is_playing = Arc::clone(&is_playing);
+            let payloads = Arc::clone(&payloads);
+            Rc::new(move || {
+                let playing = *is_playing.lock().expect("video playing state");
+                let mut handlers = VideoPlayerHandlers::new("mounted-proof");
+                let next_state = Arc::clone(&is_playing);
+                let next_payloads = Arc::clone(&payloads);
+                handlers.on_playing_change = Some(Arc::new(move |next| {
+                    *next_state.lock().expect("video playing state") = next;
+                    next_payloads
+                        .lock()
+                        .expect("video callback payloads")
+                        .push(next);
+                }));
+                poodle_gpui_node_backend::to_gpui(&poodle_render::video_player_with_handlers(
+                    &make_spec(playing),
+                    &RenderContext::new(&theme_provider),
+                    &handlers,
+                ))
+            })
+        };
+
+        let witness_handlers = VideoPlayerHandlers::new("witness");
+        let witness_spec = make_spec(false);
+        let witness = poodle_render::video_player_with_handlers(
+            &witness_spec,
+            &RenderContext::new(&theme_provider),
+            &witness_handlers,
+        );
+        assert_eq!(witness.a11y.role, Some(NodeRole::Group));
+        assert_eq!(witness.a11y.label.as_deref(), Some("Preview video"));
+        let play = witness
+            .find(&|node| node.runtime_id.as_deref() == Some("video-player:witness:play"))
+            .expect("nested Play button");
+        assert_eq!(play.a11y.role, Some(NodeRole::Button));
+        assert_eq!(play.a11y.label.as_deref(), Some("Play"));
+        assert!(play.interaction.focusable);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 360.0);
+        let root_id = "video-player:mounted-proof:root";
+        let root = poodle_gpui_node_backend::painted_node_for(root_id)
+            .expect("VideoPlayer root reached GPUI paint");
+        assert_eq!(
+            root.a11y_role,
+            Some(NodeRole::Group),
+            "the root group is announced"
+        );
+        assert_eq!(root.a11y_label.as_deref(), Some("Preview video"));
+        let play_id = "video-player:mounted-proof:play";
+        let painted_play = poodle_gpui_node_backend::painted_node_for(play_id)
+            .expect("focusable Play button reached GPUI paint");
+        assert_eq!(painted_play.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_play.a11y_label.as_deref(), Some("Play"));
+        let canvas_geometry =
+            poodle_gpui_node_backend::bounds_for("video-player:mounted-proof:canvas")
+                .expect("mounted canvas geometry");
+        assert!(f32::from(canvas_geometry.size.width) > 0.0);
+
+        driver.pointer_activate_id("video-player:mounted-proof:canvas");
+        assert!(*is_playing.lock().expect("video playing state"));
+        driver.wait_for_focus_handle(play_id);
+        driver.keyboard_key(play_id, "space");
+        assert!(!*is_playing.lock().expect("video playing state"));
+        driver.keyboard_activate(play_id);
+        assert!(*is_playing.lock().expect("video playing state"));
+        assert_eq!(
+            *payloads.lock().expect("video callback payloads"),
+            vec![true, false, true],
+            "the mounted canvas and button report playback state changes"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// g16.068: Text and Surface mount through production poodle_render, Node,
 /// and GPUI backend paths. Text proof covers exact content, resolved tone,
 /// size, weight, line-height, compact spacing, and clamped overflow metadata.
@@ -8208,6 +8609,316 @@ fn first_mounted_parity_table() {
     });
 }
 
+/// DataTable sorting and its table hierarchy reach the production mounted tree.
+#[test]
+fn first_mounted_parity_data_table() {
+    use poodle_render::{data_table, DataTableHandlers, RenderContext};
+    use poodle_specs::{DataTableSpec, TableColumnSpec, TableRowSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let columns = vec![
+            TableColumnSpec::new("name", "Name").with_sortable(true),
+            TableColumnSpec::new("team", "Team"),
+        ];
+        let rows = vec![TableRowSpec::new(
+            "row-ada",
+            vec![
+                ("name".to_owned(), "Ada Lovelace".to_owned()),
+                ("team".to_owned(), "Analytical Engine".to_owned()),
+            ],
+        )];
+        let spec = DataTableSpec::new(columns, rows)
+            .with_aria_label("Team directory")
+            .with_show_row_actions(false);
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = data_table(
+            &spec,
+            &ctx,
+            DataTableHandlers {
+                on_sort: Some(Arc::new(move |column| {
+                    sink.lock().expect("sort payloads").push(column.to_owned());
+                })),
+                ..DataTableHandlers::default()
+            },
+        );
+        node.id = Some("mounted-data-table".to_owned());
+        node.runtime_id = node.id.clone();
+        node.children[0].children[0].id = Some("mounted-data-table-sort-name".to_owned());
+        node.children[0].children[0].runtime_id = node.children[0].children[0].id.clone();
+        node.children[1].id = Some("mounted-data-table-row-ada".to_owned());
+        node.children[1].runtime_id = node.children[1].id.clone();
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Table));
+        assert_eq!(node.a11y.label.as_deref(), Some("Team directory"));
+        assert_eq!(node.children[0].a11y.role, Some(NodeRole::Row));
+        assert_eq!(
+            node.children[0].children[0].a11y.role,
+            Some(NodeRole::ColumnHeader)
+        );
+        assert_eq!(node.children[1].a11y.role, Some(NodeRole::Row));
+        assert_eq!(node.children[1].a11y.selected, Some(false));
+        assert_eq!(
+            node.children[1].children[0].a11y.role,
+            Some(NodeRole::RowHeader)
+        );
+        assert_eq!(node.children[1].children[1].a11y.role, Some(NodeRole::Cell));
+        assert!(node.children[0].children[0].interaction.focusable);
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 180.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-data-table")
+            .expect("DataTable reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Table));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Team directory"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-data-table")
+            .expect("mounted DataTable geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.pointer_activate_id("mounted-data-table-sort-name");
+        assert_eq!(*payloads.lock().expect("sort payloads"), ["name"]);
+        driver.focus_element("mounted-data-table-sort-name");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*payloads.lock().expect("sort payloads"), ["name", "name"]);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FilterBuilder exposes a named, focusable trigger and labeled dialog while
+/// forwarding pointer and keyboard activation to its host.
+#[test]
+fn first_mounted_parity_filter_builder() {
+    use poodle_render::{filter_builder, FilterBuilderHandlers, RenderContext};
+    use poodle_specs::FilterBuilderSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let payloads = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = FilterBuilderSpec::new()
+            .with_aria_label("Filter")
+            .with_open(true);
+        let mut node = filter_builder(
+            &spec,
+            &ctx,
+            "mounted-filter-builder",
+            &FilterBuilderHandlers {
+                on_toggle: Some(Arc::new(move || {
+                    sink.lock().expect("filter payloads").push("toggle");
+                })),
+                ..FilterBuilderHandlers::default()
+            },
+        );
+        node.id = Some("mounted-filter-builder-root".to_owned());
+        node.runtime_id = node.id.clone();
+        let trigger = &node.children[0].children[0];
+        let trigger_id = trigger
+            .runtime_id
+            .as_deref()
+            .expect("stable FilterBuilder trigger identity")
+            .to_owned();
+        let dialog = node
+            .find(&|candidate| candidate.a11y.role == Some(NodeRole::Dialog))
+            .expect("FilterBuilder dialog");
+
+        assert_eq!(node.children[0].a11y.role, Some(NodeRole::Group));
+        assert_eq!(node.children[0].a11y.label.as_deref(), Some("Filter"));
+        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+        assert_eq!(trigger.a11y.label.as_deref(), Some("Filter"));
+        assert_eq!(trigger.a11y.expanded, Some(true));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some("filter-builder:mounted-filter-builder:dialog")
+        );
+        assert!(trigger.interaction.focusable);
+        assert_eq!(dialog.a11y.label.as_deref(), Some("Edit filters"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 320.0);
+        let painted_trigger = poodle_gpui_node_backend::painted_node_for(&trigger_id)
+            .expect("FilterBuilder trigger reached GPUI paint");
+        assert_eq!(painted_trigger.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_trigger.a11y_label.as_deref(), Some("Filter"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-filter-builder-root")
+            .expect("mounted FilterBuilder geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.pointer_activate_id(&trigger_id);
+        assert_eq!(*payloads.lock().expect("filter payloads"), ["toggle"]);
+        driver.focus_element(&trigger_id);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            *payloads.lock().expect("filter payloads"),
+            ["toggle", "toggle"]
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FilterToolbar preserves its toolbar and group semantics and makes collapse
+/// available from both the header row and its keyboard control.
+#[test]
+fn first_mounted_parity_filter_toolbar() {
+    use poodle_render::{filter_toolbar, RenderContext};
+    use poodle_specs::FilterToolbarSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let payloads = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = FilterToolbarSpec::new()
+            .with_aria_label("Library filters")
+            .with_summary_text("3 filters active")
+            .with_collapsed(true);
+        let mut node = filter_toolbar(
+            &spec,
+            &ctx,
+            vec![Box::new(|_| Node::text("Search library"))],
+            None,
+            None,
+            Some(Arc::new(move |collapsed| {
+                sink.lock().expect("collapse payloads").push(collapsed);
+            })),
+        );
+        node.id = Some("mounted-filter-toolbar".to_owned());
+        node.runtime_id = node.id.clone();
+        node.children[0].id = Some("mounted-filter-toolbar-header".to_owned());
+        node.children[0].runtime_id = node.children[0].id.clone();
+        node.children[0].children[0].id = Some("mounted-filter-toolbar-toggle".to_owned());
+        node.children[0].children[0].runtime_id = node.children[0].children[0].id.clone();
+        let toggle = &node.children[0].children[0];
+        let toggle_id = toggle
+            .runtime_id
+            .as_deref()
+            .expect("stable FilterToolbar collapse identity")
+            .to_owned();
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Toolbar));
+        assert_eq!(node.a11y.label.as_deref(), Some("Library filters"));
+        assert_eq!(node.children[0].a11y.role, Some(NodeRole::Group));
+        assert_eq!(toggle.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            toggle.a11y.label.as_deref(),
+            Some("Show filters. 3 filters active")
+        );
+        assert_eq!(toggle.a11y.expanded, Some(false));
+        assert!(toggle.interaction.focusable);
+        assert!(!node.has_text("Search library"));
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 160.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-filter-toolbar")
+            .expect("FilterToolbar reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Toolbar));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Library filters"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-filter-toolbar")
+            .expect("mounted FilterToolbar geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.pointer_activate_id("mounted-filter-toolbar-header");
+        assert_eq!(*payloads.lock().expect("collapse payloads"), [false]);
+        driver.focus_element(&toggle_id);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*payloads.lock().expect("collapse payloads"), [false, false]);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Toolbar keeps one labeled semantic root, supports pointer items, and moves
+/// focus among mounted controls with wrapping arrow navigation.
+#[test]
+fn first_mounted_parity_toolbar() {
+    use poodle_render::{button, toolbar, RenderContext};
+    use poodle_specs::{ButtonSpec, Orientation, ToolbarSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let hits = Arc::new(Mutex::new(0usize));
+        let hit_sink = Arc::clone(&hits);
+        let bold = button(
+            &ButtonSpec::new().with_label("Bold"),
+            &ctx,
+            Some(Arc::new(move || {
+                *hit_sink.lock().expect("button hits") += 1;
+            })),
+        );
+        let italic = button(&ButtonSpec::new().with_label("Italic"), &ctx, None);
+        let mut node = toolbar(
+            &ToolbarSpec::new()
+                .with_aria_label("Formatting")
+                .with_orientation(Orientation::Horizontal),
+            &ctx,
+            vec![bold, italic],
+        );
+        node.id = Some("mounted-toolbar-root".to_owned());
+        node.runtime_id = node.id.clone();
+
+        assert_eq!(node.a11y.role, Some(NodeRole::Toolbar));
+        assert_eq!(node.a11y.label.as_deref(), Some("Formatting"));
+        assert!(node.interaction.focusable);
+        assert_eq!(node.a11y.tab_index, Some(0));
+        assert_eq!(node.a11y.orientation.as_deref(), Some("horizontal"));
+        let bold_id = node.children[0]
+            .runtime_id
+            .as_deref()
+            .expect("stable first toolbar item identity")
+            .to_owned();
+        let italic_id = node.children[1]
+            .runtime_id
+            .as_deref()
+            .expect("stable second toolbar item identity")
+            .to_owned();
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 120.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("mounted-toolbar-root")
+            .expect("Toolbar reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Toolbar));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Formatting"));
+        let geometry = poodle_gpui_node_backend::bounds_for("mounted-toolbar-root")
+            .expect("mounted Toolbar geometry");
+        assert!(f32::from(geometry.size.width) > 0.0);
+        assert!(f32::from(geometry.size.height) > 0.0);
+
+        driver.focus_element("mounted-toolbar-root");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&bold_id),
+            Some(true)
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&italic_id),
+            Some(true)
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&bold_id),
+            Some(true),
+            "horizontal navigation wraps to the first item"
+        );
+        driver.pointer_activate_id(&bold_id);
+        assert_eq!(*hits.lock().expect("button hits"), 1);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// TimeZoneSelect forwards its searchable Select state through mounted GPUI
 /// pointer, keyboard, value, and query paths.
 #[test]
@@ -8340,6 +9051,708 @@ fn first_mounted_parity_time_zone_select() {
         assert!(host.calls.contains(&"open:false".to_owned()));
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_picker() {
+    // Prove mounted button/dialog semantics, events, and ISO day commit.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::DatePickerSpec;
+
+    const ID: &str = "date-picker-proof";
+    const TRIGGER: &str = "date-picker-proof:trigger";
+    const SURFACE: &str = "date-picker-proof:surface";
+    const DAY: &str = "date-picker-proof:calendar:day:2026-03-15";
+    let theme_provider = theme();
+    let mut witness_spec = DatePickerSpec::new()
+        .with_default_value("2026-03-14")
+        .with_default_open(true);
+    witness_spec.aria_label = Some("Choose a date".to_owned());
+    let witness = poodle_render::date_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .expect("rendered DatePicker trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a date"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    let surface = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+        .expect("rendered DatePicker surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let selected = Arc::new(Mutex::new(Vec::<String>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let selected = Arc::clone(&selected);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let mut spec = DatePickerSpec::new()
+                .with_default_value("2026-03-14")
+                .with_default_open(*open.lock().expect("open state"));
+            spec.aria_label = Some("Choose a date".to_owned());
+            let selection_sink = Arc::clone(&selected);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers {
+                    on_select: Some(Arc::new(move |date| {
+                        selection_sink
+                            .lock()
+                            .expect("selection events")
+                            .push(date.to_owned());
+                    })),
+                    ..DatePickerHandlers::default()
+                },
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-picker-proof:calendar:day:2026-03-14");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY),
+            Some(true),
+            "calendar keyboard navigation moves real focus to the next date"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(DAY).is_some());
+        driver.pointer_activate_id(DAY);
+        assert_eq!(
+            *selected.lock().expect("selection events"),
+            vec!["2026-03-15"]
+        );
+        assert!(
+            !*open.lock().expect("open state"),
+            "date commit closes the picker"
+        );
+
+        driver.pointer_activate_id(TRIGGER);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(!*open.lock().expect("open state"));
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_range_picker() {
+    // Prove mounted range selection commits normalized endpoints.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::{DateRangePickerSpec, DateRangeValue};
+
+    const ID: &str = "date-range-picker-proof";
+    const TRIGGER: &str = "date-range-picker-proof:trigger";
+    const SURFACE: &str = "date-range-picker-proof:surface";
+    const DAY: &str = "date-range-picker-proof:calendar:day:2026-03-08";
+    let theme_provider = theme();
+    let seed = DateRangeValue::new(Some("2026-03-10".into()), None);
+    let mut witness_spec = DateRangePickerSpec::new()
+        .with_default_value(seed.clone())
+        .with_open(true);
+    witness_spec.aria_label = Some("Choose dates".to_owned());
+    let witness = poodle_render::date_range_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose dates"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_space("space.panel.x") > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let changes = Arc::new(Mutex::new(Vec::<DateRangeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        let seed = seed.clone();
+        Rc::new(move || {
+            let spec = DateRangePickerSpec::new()
+                .with_default_value(seed.clone())
+                .with_open(*open.lock().expect("open state"));
+            let change_sink = Arc::clone(&changes);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_range_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers::default(),
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_range_change: Some(Arc::new(move |range| {
+                        change_sink
+                            .lock()
+                            .expect("range change payloads")
+                            .push(range.clone());
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-range-picker-proof:calendar:day:2026-03-10");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(
+                "date-range-picker-proof:calendar:day:2026-03-11"
+            ),
+            Some(true),
+            "range calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        let payloads = changes.lock().expect("range change payloads");
+        assert_eq!(
+            payloads.len(),
+            1,
+            "range change callback fires on selection"
+        );
+        assert_eq!(payloads[0].start.as_deref(), Some("2026-03-08"));
+        assert_eq!(payloads[0].end.as_deref(), Some("2026-03-10"));
+        drop(payloads);
+        assert!(
+            !*open.lock().expect("open state"),
+            "complete range closes the picker"
+        );
+        driver.pointer_activate_id(TRIGGER);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_time_picker() {
+    // Prove mounted date and time events compose into one value callback.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::{DateTimePickerSpec, DateTimeValue};
+
+    const ID: &str = "date-time-picker-proof";
+    const TRIGGER: &str = "date-time-picker-proof:trigger";
+    const SURFACE: &str = "date-time-picker-proof:surface";
+    const DAY: &str = "date-time-picker-proof:calendar:day:2026-03-15";
+    let theme_provider = theme();
+    let seed = DateTimeValue::new(Some("2026-03-14".into()), Some("09:00".into()));
+    let mut witness_spec = DateTimePickerSpec::new().with_default_value(seed.clone());
+    witness_spec.open = Some(true);
+    witness_spec.aria_label = Some("Choose a date and time".to_owned());
+    let witness = poodle_render::date_time_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a date and time"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let value = Arc::new(Mutex::new(seed.clone()));
+    let changes = Arc::new(Mutex::new(Vec::<DateTimeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let value = Arc::clone(&value);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let mut spec = DateTimePickerSpec::new()
+                .with_default_value(value.lock().expect("current date time value").clone());
+            spec.open = Some(*open.lock().expect("open state"));
+            spec.aria_label = Some("Choose a date and time".to_owned());
+            let change_sink = Arc::clone(&changes);
+            let value_sink = Arc::clone(&value);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_time_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers::default(),
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_date_time_change: Some(Arc::new(move |value| {
+                        change_sink
+                            .lock()
+                            .expect("date time change payloads")
+                            .push(value.clone());
+                        *value_sink.lock().expect("current date time value") = value.clone();
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-time-picker-proof:calendar:day:2026-03-14");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY),
+            Some(true),
+            "calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        driver.wait_for_focus_handle("date-time-picker-proof:time:hour");
+        driver.focus_element("date-time-picker-proof:time:hour");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("date-time-picker-proof:time:hour"),
+            Some(true),
+            "hour segment owns mounted backend focus"
+        );
+        driver.dispatch_key_raw("up");
+        let payloads = changes.lock().expect("date time change payloads");
+        assert!(payloads
+            .iter()
+            .any(|value| value.date.as_deref() == Some("2026-03-15")));
+        assert!(
+            payloads
+                .iter()
+                .any(|value| value.time.as_deref() == Some("09:01")),
+            "time change callback emits the committed time"
+        );
+        assert!(payloads.iter().any(|value| {
+            value.date.as_deref() == Some("2026-03-15") && value.time.as_deref() == Some("09:01")
+        }));
+        drop(payloads);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(!*open.lock().expect("open state"));
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_time_range_picker() {
+    // Prove range selection and both time fields reach the composite callback.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue};
+
+    const ID: &str = "date-time-range-picker-proof";
+    const TRIGGER: &str = "date-time-range-picker-proof:trigger";
+    const SURFACE: &str = "date-time-range-picker-proof:surface";
+    const DAY: &str = "date-time-range-picker-proof:calendar:day:2026-03-14";
+    let theme_provider = theme();
+    let seed = DateTimeRangeValue::new(
+        DateTimeValue::new(Some("2026-03-10".into()), Some("09:00".into())),
+        DateTimeValue::new(None, Some("17:00".into())),
+    );
+    let mut witness_spec = DateTimeRangePickerSpec::new().with_default_value(seed.clone());
+    witness_spec.open = Some(true);
+    witness_spec.aria_label = Some("Choose a date and time range".to_owned());
+    let witness = poodle_render::date_time_range_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a date and time range"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_space("space.panel.x") > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let value = Arc::new(Mutex::new(seed.clone()));
+    let changes = Arc::new(Mutex::new(Vec::<DateTimeRangeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let value = Arc::clone(&value);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let mut spec = DateTimeRangePickerSpec::new()
+                .with_default_value(value.lock().expect("current date time range").clone());
+            spec.open = Some(*open.lock().expect("open state"));
+            spec.aria_label = Some("Choose a date and time range".to_owned());
+            let change_sink = Arc::clone(&changes);
+            let value_sink = Arc::clone(&value);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_time_range_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers::default(),
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_date_time_range_change: Some(Arc::new(move |value| {
+                        change_sink
+                            .lock()
+                            .expect("date time range payloads")
+                            .push(value.clone());
+                        *value_sink.lock().expect("current date time range") = value.clone();
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-time-range-picker-proof:calendar:day:2026-03-10");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(
+                "date-time-range-picker-proof:calendar:day:2026-03-11"
+            ),
+            Some(true),
+            "range calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        driver.wait_for_focus_handle("date-time-range-picker-proof:start-time:hour");
+        driver.focus_element("date-time-range-picker-proof:start-time:hour");
+        driver.dispatch_key_raw("up");
+        let payloads = changes.lock().expect("date time range payloads");
+        assert!(payloads
+            .iter()
+            .any(|value| value.end.date.as_deref() == Some("2026-03-14")));
+        assert!(
+            payloads
+                .iter()
+                .any(|value| value.start.time.as_deref() == Some("09:01")),
+            "start-time change callback emits the committed time"
+        );
+        assert!(payloads.iter().any(|value| {
+            value.end.date.as_deref() == Some("2026-03-14")
+                && value.start.time.as_deref() == Some("09:01")
+        }));
+        drop(payloads);
+        assert!(
+            *open.lock().expect("open state"),
+            "date-time range stays open after range commit"
+        );
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_time_zone_picker() {
+    // Prove calendar, time, zone commits, and layered dismissal while mounted.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DateTimeZonePickerCallbacks, DateTimeZonePickerHandlers, RenderContext};
+    use poodle_specs::{DateTimeZonePickerSpec, TimeZoneOption, ZonedDateTimeValue};
+
+    const ID: &str = "date-time-zone-picker-proof";
+    const TRIGGER: &str = "date-time-zone-picker-proof:trigger";
+    const SURFACE: &str = "date-time-zone-picker-proof:surface";
+    const DAY: &str = "date-time-zone-picker-proof:calendar:day:2026-03-15";
+    const ZONE_TRIGGER: &str = "select:date-time-zone-picker-proof:trigger";
+    const ZONE_OPTION: &str = "select:date-time-zone-picker-proof:option:Asia/Tokyo";
+    let theme_provider = theme();
+    let options = vec![
+        TimeZoneOption::new("Europe/London", "London"),
+        TimeZoneOption::new("Asia/Tokyo", "Tokyo"),
+    ];
+    let seed = ZonedDateTimeValue::new(
+        Some("2026-03-14".into()),
+        Some("09:00".into()),
+        Some("Europe/London".into()),
+    );
+    let mut witness_spec = DateTimeZonePickerSpec::new().with_value(seed.clone());
+    witness_spec.open = Some(true);
+    witness_spec.time_zone_options = options.clone();
+    witness_spec.aria_label = Some("Choose a zoned date and time".to_owned());
+    let witness = poodle_render::date_time_zone_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DateTimeZonePickerHandlers::new(ID),
+        DateTimeZonePickerCallbacks::default(),
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a zoned date and time"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let zone_open = Arc::new(Mutex::new(false));
+    let zone_toggles = Arc::new(Mutex::new(Vec::<bool>::new()));
+    let value = Arc::new(Mutex::new(seed.clone()));
+    let changes = Arc::new(Mutex::new(Vec::<ZonedDateTimeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let zone_open = Arc::clone(&zone_open);
+        let zone_toggles = Arc::clone(&zone_toggles);
+        let value = Arc::clone(&value);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        let options = options.clone();
+        Rc::new(move || {
+            let mut spec = DateTimeZonePickerSpec::new()
+                .with_value(value.lock().expect("current zoned date time").clone())
+                .with_open(*open.lock().expect("open state"));
+            spec.zone_open = *zone_open.lock().expect("zone open state");
+            spec.time_zone_options = options.clone();
+            spec.aria_label = Some("Choose a zoned date and time".to_owned());
+            let open_sink = Arc::clone(&open);
+            let zone_sink = Arc::clone(&zone_open);
+            let toggle_sink = Arc::clone(&zone_toggles);
+            let change_sink = Arc::clone(&changes);
+            let value_sink = Arc::clone(&value);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let mut handlers = DateTimeZonePickerHandlers::new(ID);
+            handlers.on_zone_toggle = Some(Arc::new(move || {
+                let mut open = zone_sink.lock().expect("zone open state");
+                *open = !*open;
+                toggle_sink.lock().expect("zone toggle events").push(*open);
+            }));
+            let tree = poodle_render::date_time_zone_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                handlers,
+                DateTimeZonePickerCallbacks {
+                    on_value_change: Some(Arc::new(move |value| {
+                        change_sink
+                            .lock()
+                            .expect("zoned value change payloads")
+                            .push(value.clone());
+                        *value_sink.lock().expect("current zoned date time") = value.clone();
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 540.0, 640.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-time-zone-picker-proof:calendar:day:2026-03-14");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY),
+            Some(true),
+            "calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        driver.wait_for_focus_handle("date-time-zone-picker-proof:time:hour");
+        driver.focus_element("date-time-zone-picker-proof:time:hour");
+        driver.dispatch_key_raw("up");
+        driver.pointer_activate_id(ZONE_TRIGGER);
+        assert!(*zone_open.lock().expect("zone open state"));
+        assert!(poodle_gpui_node_backend::bounds_for(ZONE_OPTION).is_some());
+        driver.pointer_activate_id(ZONE_OPTION);
+        let payloads = changes.lock().expect("zoned value change payloads");
+        assert!(payloads
+            .iter()
+            .any(|value| value.date.as_deref() == Some("2026-03-15")));
+        assert!(payloads
+            .iter()
+            .any(|value| value.time.as_deref() == Some("09:01")));
+        assert!(
+            payloads
+                .iter()
+                .any(|value| value.time_zone.as_deref() == Some("Asia/Tokyo")),
+            "zone change callback emits the selected identifier"
+        );
+        assert!(payloads.iter().any(|value| {
+            value.date.as_deref() == Some("2026-03-15")
+                && value.time.as_deref() == Some("09:01")
+                && value.time_zone.as_deref() == Some("Asia/Tokyo")
+        }));
+        drop(payloads);
+        assert_eq!(
+            *zone_toggles.lock().expect("zone toggle events"),
+            vec![true, false],
+            "committing a zone closes the nested list"
+        );
+
+        driver.pointer_activate_id(ZONE_TRIGGER);
+        driver.wait_for_focus_handle("select:date-time-zone-picker-proof:search");
+        driver.focus_element("select:date-time-zone-picker-proof:search");
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            1,
+            "the nested Escape consumes the zone list layer"
+        );
+        assert!(
+            *open.lock().expect("open state"),
+            "Escape dismisses the nested zone list first"
+        );
+        assert!(!*zone_open.lock().expect("zone open state"));
+        driver.focus_element("date-time-zone-picker-proof:time:hour");
+        driver.dispatch_key_raw("escape");
+        assert!(
+            !*open.lock().expect("open state"),
+            "the second Escape dismisses the picker surface"
+        );
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(driver.mounted_observation().is_valid());
     });
 }
 
@@ -35687,7 +37100,6 @@ fn menu_items_semantics_activation_and_identity_rebuild_the_host_spec() {
 
         // 3c. Destructive action
         driver.pointer_activate_id("menu-item:delete");
-        eprintln!("DBG delete row clicked");
         assert_eq!(actions.lock().unwrap().as_slice(), ["new", "delete"]);
 
         // 3d. Shortcut action
@@ -43417,5 +44829,2154 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
                 .is_none());
         }
         assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+fn overlay_host(node: Node) -> gpui::AnyElement {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    div()
+        .relative()
+        .size_full()
+        .child(poodle_gpui_node_backend::to_gpui(&node))
+        .into_any_element()
+}
+
+/// AlertDialog mounts the composed alertdialog, fires confirm/cancel through
+/// pointer and Escape, and working rebuilds gate every dismissal route.
+#[test]
+fn first_mounted_parity_alert_dialog() {
+    use gpui::{div, point, px, AnyElement, IntoElement};
+    use node_compat::{AlertDialog, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{AlertDialogSpec, AlertDialogTone};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = AlertDialogSpec::new("Delete dataset?")
+            .with_description("This cannot be undone.")
+            .with_tone(AlertDialogTone::Danger)
+            .with_confirm_label("Delete")
+            .with_cancel_label("Keep")
+            .with_item_detail("Dataset", "telemetry.parquet");
+        let open = poodle_render::alert_dialog(
+            &spec,
+            &ctx,
+            false,
+            poodle_render::DEFAULT_WORKING_LABEL,
+            poodle_render::AlertDialogHandlers {
+                cancel: Some(Arc::new(|| {})),
+                confirm: None,
+            },
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("AlertDialog composes the Dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::AlertDialog));
+        assert_eq!(
+            surface.a11y.label.as_deref(),
+            Some("Delete dataset?"),
+            "alertdialog accessible name comes from the title"
+        );
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(24.0)),
+            "AlertDialog uses Dialog width Sm (24rem)"
+        );
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.overlay"))
+        );
+        assert!(open.style.overlay);
+        assert_eq!(
+            surface.interaction.dismiss_layer.as_deref(),
+            Some("poodle-dialog-layer")
+        );
+        assert!(open.has_text("Dataset:"));
+        assert!(open.has_text("telemetry.parquet"));
+        let cancel = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Keep"))
+            .expect("cancel Button");
+        let confirm = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Delete"))
+            .expect("confirm Button");
+        assert_eq!(
+            cancel.roles.get("variant").map(String::as_str),
+            Some("ghost")
+        );
+        assert_eq!(
+            confirm.roles.get("variant").map(String::as_str),
+            Some("primary")
+        );
+        assert_eq!(
+            confirm.roles.get("tone").map(String::as_str),
+            Some("danger")
+        );
+
+        let pending = poodle_render::alert_dialog(
+            &spec,
+            &ctx,
+            true,
+            poodle_render::DEFAULT_WORKING_LABEL,
+            poodle_render::AlertDialogHandlers {
+                cancel: Some(Arc::new(|| {})),
+                confirm: None,
+            },
+        );
+        assert!(pending
+            .find(&|node| matches!(
+                &node.kind,
+                NodeKind::Button { label } if label == poodle_render::DEFAULT_WORKING_LABEL
+            ))
+            .is_some());
+        assert!(pending
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-close"))
+            .is_none());
+        for label in ["Keep", poodle_render::DEFAULT_WORKING_LABEL] {
+            let button = pending
+                .find(&|node| {
+                    matches!(&node.kind, NodeKind::Button { label: current } if current == label)
+                })
+                .unwrap_or_else(|| panic!("pending action {label}"));
+            assert!(button.interaction.disabled);
+            assert!(button.interaction.on_activate.is_none());
+        }
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            working: bool,
+            accept_close: bool,
+            events: Vec<String>,
+        }
+
+        fn mount(host: &Arc<Mutex<Host>>, spec: &AlertDialogSpec) -> AnyElement {
+            let current = host.lock().expect("AlertDialog host").clone();
+            if !current.open {
+                return div().id("alert-dialog-closed").into_any_element();
+            }
+            let confirm_host = Arc::clone(host);
+            let cancel_host = Arc::clone(host);
+            let mut node = AlertDialog::from_spec(spec.clone(), &theme())
+                .working(current.working)
+                .on_confirm(Arc::new(move || {
+                    let mut host = confirm_host.lock().expect("AlertDialog host");
+                    host.events.push("confirm".to_owned());
+                    if host.accept_close {
+                        host.open = false;
+                    }
+                }))
+                .on_cancel(Arc::new(move || {
+                    let mut host = cancel_host.lock().expect("AlertDialog host");
+                    host.events.push("cancel".to_owned());
+                    if host.accept_close {
+                        host.open = false;
+                    }
+                }))
+                .into_compat_node();
+            stamp_labelled_id(&mut node, "Keep", "alert-cancel");
+            if current.working {
+                stamp_labelled_id(
+                    &mut node,
+                    poodle_render::DEFAULT_WORKING_LABEL,
+                    "alert-confirm",
+                );
+            } else {
+                stamp_labelled_id(&mut node, "Delete", "alert-confirm");
+            }
+            poodle_gpui_node_backend::to_gpui(&node)
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: true,
+            working: false,
+            accept_close: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            Rc::new(move || mount(&host, &spec))
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("AlertDialog surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::AlertDialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Delete dataset?"));
+        assert_eq!(
+            painted.style.background,
+            Some(theme_provider.resolve_color("color.background.elevated"))
+        );
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("AlertDialog backdrop bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("AlertDialog surface bounds");
+        let viewport_size = driver.with_window(|window, _| window.viewport_size());
+        assert!(backdrop_bounds.size.width > px(0.0) && backdrop_bounds.size.height > px(0.0));
+        assert!(
+            backdrop_bounds.size.width <= viewport_size.width
+                && backdrop_bounds.size.height <= viewport_size.height
+        );
+        assert!(bounds_contain(backdrop_bounds, surface_bounds));
+        assert!(surface_bounds.size.width > px(0.0) && surface_bounds.size.height > px(0.0));
+
+        driver.wait_for_focus_handle("alert-confirm");
+        driver.pointer_activate_id("alert-confirm");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events.as_slice(),
+            ["confirm"],
+            "confirm callback fires through the mounted backend"
+        );
+        driver.pointer_activate_id("alert-cancel");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events.as_slice(),
+            ["confirm", "cancel"],
+            "cancel callback fires through the mounted backend"
+        );
+        let outside = point(px(40.0), px(40.0));
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        driver.pointer_activate_id("poodle-dialog-close");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events.as_slice(),
+            ["confirm", "cancel", "cancel", "cancel", "cancel"],
+            "backdrop, Escape, and close each emit the cancel callback"
+        );
+        assert!(host.lock().expect("AlertDialog host").open);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_some());
+
+        host.lock().expect("AlertDialog host").working = true;
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-close").is_none());
+        let before_working = host.lock().expect("AlertDialog host").events.clone();
+        driver.pointer_activate_id("alert-cancel");
+        driver.pointer_activate_id("alert-confirm");
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events,
+            before_working,
+            "working cancel, confirm, backdrop, and Escape stay inert"
+        );
+
+        {
+            let mut host = host.lock().expect("AlertDialog host");
+            host.working = false;
+            host.accept_close = true;
+        }
+        driver.draw_frame();
+        driver.wait_for_focus_handle("alert-confirm");
+        driver.keyboard_activate("alert-confirm");
+        assert!(!host.lock().expect("AlertDialog host").open);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FormDialog mounts the form shell, fires submit/cancel, announces errors as
+/// assertive alerts, and submitting rebuilds gate Escape and backdrop.
+#[test]
+fn first_mounted_parity_form_dialog() {
+    use gpui::{div, point, px, AnyElement, IntoElement};
+    use node_compat::{FormDialog, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::FormDialogSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = FormDialogSpec::new("Save workspace")
+            .with_description("Name the workspace before saving.")
+            .with_submit_label("Save")
+            .with_cancel_label("Cancel")
+            .with_error("Save failed");
+        let mut body = Node::text("Workspace name");
+        body.id = Some("form-dialog-body".to_string());
+        let open = poodle_render::form_dialog(
+            &spec,
+            &ctx,
+            vec![body.clone()],
+            None,
+            poodle_render::FormDialogHandlers {
+                on_cancel: Some(Arc::new(|| {})),
+                on_submit: None,
+            },
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("FormDialog composes the Dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Save workspace"));
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(34.0)),
+            "FormDialog uses Dialog width Md (34rem)"
+        );
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.overlay"))
+        );
+        let error = open
+            .find(&|node| node.a11y.role == Some(NodeRole::Alert))
+            .expect("FormLayout error Callout is role=alert");
+        assert!(error.has_text("Save failed"));
+        let submit = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Save"))
+            .expect("submit Button");
+        let cancel = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Cancel"))
+            .expect("cancel Button");
+        assert_eq!(
+            submit.roles.get("variant").map(String::as_str),
+            Some("primary")
+        );
+        assert_eq!(
+            cancel.roles.get("variant").map(String::as_str),
+            Some("ghost")
+        );
+
+        let pending = poodle_render::form_dialog(
+            &spec.clone().with_submitting(true),
+            &ctx,
+            vec![body.clone()],
+            None,
+            poodle_render::FormDialogHandlers {
+                on_cancel: Some(Arc::new(|| {})),
+                on_submit: None,
+            },
+        );
+        let pending_submit = pending
+            .find(&|node| {
+                matches!(&node.kind, NodeKind::Button { label } if label == "Submitting...")
+            })
+            .expect("submitting label uses ASCII dots");
+        assert!(pending_submit.interaction.disabled);
+        let pending_cancel = pending
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Cancel"))
+            .expect("cancel Button while submitting");
+        assert!(pending_cancel.interaction.disabled);
+        let pending_surface = pending
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("submitting FormDialog keeps its surface");
+        assert!(pending_surface.interaction.on_dismiss.is_none());
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            submitting: bool,
+            accept_close: bool,
+            events: Vec<String>,
+        }
+
+        fn mount(host: &Arc<Mutex<Host>>, spec: &FormDialogSpec, body: &Node) -> AnyElement {
+            let current = host.lock().expect("FormDialog host").clone();
+            if !current.open {
+                return div().id("form-dialog-closed").into_any_element();
+            }
+            let submit_host = Arc::clone(host);
+            let cancel_host = Arc::clone(host);
+            let mut node =
+                FormDialog::from_spec(spec.clone().with_submitting(current.submitting), &theme())
+                    .with_child(body.clone())
+                    .on_submit(Arc::new(move || {
+                        submit_host
+                            .lock()
+                            .expect("FormDialog host")
+                            .events
+                            .push("submit".to_owned());
+                    }))
+                    .on_cancel(Arc::new(move || {
+                        let mut host = cancel_host.lock().expect("FormDialog host");
+                        host.events.push("cancel".to_owned());
+                        if host.accept_close {
+                            host.open = false;
+                        }
+                    }))
+                    .into_compat_node();
+            stamp_labelled_id(&mut node, "Cancel", "form-cancel");
+            if current.submitting {
+                stamp_labelled_id(&mut node, "Submitting...", "form-submit");
+            } else {
+                stamp_labelled_id(&mut node, "Save", "form-submit");
+            }
+            poodle_gpui_node_backend::to_gpui(&node)
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: true,
+            submitting: false,
+            accept_close: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            let body = body.clone();
+            Rc::new(move || mount(&host, &spec, &body))
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("FormDialog surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Save workspace"));
+        assert!(poodle_gpui_node_backend::bounds_for("form-dialog-body").is_some());
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("FormDialog backdrop bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("FormDialog surface bounds");
+        assert!(backdrop_bounds.size.width > px(0.0) && backdrop_bounds.size.height > px(0.0));
+        assert!(bounds_contain(backdrop_bounds, surface_bounds));
+
+        driver.wait_for_focus_handle("form-submit");
+        driver.pointer_activate_id("form-submit");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events.as_slice(),
+            ["submit"],
+            "submit callback fires through the mounted backend"
+        );
+        driver.pointer_activate_id("form-dialog-body");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events.as_slice(),
+            ["submit"],
+            "inside the form body does not emit a cancel callback"
+        );
+        driver.pointer_activate_id("form-cancel");
+        let outside = point(px(40.0), px(40.0));
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events.as_slice(),
+            ["submit", "cancel", "cancel", "cancel"],
+            "cancel button, backdrop, and Escape each emit the cancel callback"
+        );
+
+        host.lock().expect("FormDialog host").submitting = true;
+        driver.draw_frame();
+        let before_submit = host.lock().expect("FormDialog host").events.clone();
+        driver.pointer_activate_id("form-cancel");
+        driver.pointer_activate_id("form-submit");
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events,
+            before_submit,
+            "submitting cancel, submit, backdrop, and Escape stay inert"
+        );
+        assert!(host.lock().expect("FormDialog host").open);
+
+        {
+            let mut host = host.lock().expect("FormDialog host");
+            host.submitting = false;
+            host.accept_close = true;
+        }
+        driver.draw_frame();
+        driver.wait_for_focus_handle("form-cancel");
+        driver.keyboard_activate("form-cancel");
+        assert!(!host.lock().expect("FormDialog host").open);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// DebugDialog keeps its trigger mounted, opens the JSON dialog from it, and
+/// closes through the Dialog dismissal routes.
+#[test]
+fn first_mounted_parity_debug_dialog() {
+    use gpui::{point, px, AnyElement};
+    use node_compat::{DebugDialog, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::DebugDialogSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = DebugDialogSpec::new()
+            .with_title("Asset payload")
+            .with_trigger_label("Inspect payload")
+            .with_value("{\n  \"id\": \"asset_42\"\n}");
+        let closed = poodle_render::debug_dialog_with_state(
+            &spec,
+            &ctx,
+            false,
+            poodle_render::DebugDialogHandlers {
+                on_open_change: Some(Arc::new(|_| {})),
+            },
+        );
+        assert_eq!(
+            closed
+                .find(&|node| node.id.as_deref() == Some("poodle-debug-dialog-trigger"))
+                .and_then(|node| match &node.kind {
+                    NodeKind::Button { label } => Some(label.as_str()),
+                    _ => None,
+                }),
+            Some("Inspect payload")
+        );
+        assert!(closed
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .is_none());
+        let hidden = poodle_render::debug_dialog(&DebugDialogSpec::new(), &ctx);
+        assert!(hidden.children.is_empty());
+        assert!(hidden
+            .find(&|node| node.id.as_deref() == Some("poodle-debug-dialog-trigger"))
+            .is_none());
+
+        let open = poodle_render::debug_dialog_with_state(
+            &spec,
+            &ctx,
+            true,
+            poodle_render::DebugDialogHandlers {
+                on_open_change: Some(Arc::new(|_| {})),
+            },
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("open DebugDialog paints the Dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Asset payload"));
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(48.0)),
+            "DebugDialog uses Dialog width Lg (48rem)"
+        );
+        assert!(
+            open.texts().iter().any(|text| text.contains("asset_42")),
+            "open DebugDialog dumps the JSON value"
+        );
+        assert!(open
+            .find(&|node| node.id.as_deref() == Some("poodle-debug-dialog-trigger"))
+            .is_some());
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            events: Vec<String>,
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            Rc::new(move || {
+                let current = host.lock().expect("DebugDialog host").clone();
+                let node = DebugDialog::from_spec(spec.clone(), &theme())
+                    .open(current.open)
+                    .on_open_change({
+                        let host = Arc::clone(&host);
+                        Arc::new(move |next| {
+                            let mut host = host.lock().expect("DebugDialog host");
+                            host.events.push(format!("open:{next}"));
+                            host.open = next;
+                        })
+                    })
+                    .into_compat_node();
+                overlay_host(node)
+            })
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-debug-dialog-trigger").is_some());
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        driver.wait_for_focus_handle("poodle-debug-dialog-trigger");
+        driver.pointer_activate_id("poodle-debug-dialog-trigger");
+        assert!(host.lock().expect("DebugDialog host").open);
+        assert_eq!(
+            host.lock().expect("DebugDialog host").events.as_slice(),
+            ["open:true"],
+            "trigger callback opens the dialog"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("open DebugDialog surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert!(painted.texts.iter().any(|text| text.contains("asset_42")));
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-debug-dialog-trigger").is_some());
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("DebugDialog backdrop bounds");
+        let viewport_size = driver.with_window(|window, _| window.viewport_size());
+        assert_eq!(backdrop_bounds.origin, point(px(0.0), px(0.0)));
+        assert_eq!(backdrop_bounds.size, viewport_size);
+
+        driver.dispatch_key("escape");
+        assert!(!host.lock().expect("DebugDialog host").open);
+        assert_eq!(
+            host.lock().expect("DebugDialog host").events.as_slice(),
+            ["open:true", "open:false"],
+            "Escape callback closes the dialog"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-debug-dialog-trigger").is_some());
+
+        driver.wait_for_focus_handle("poodle-debug-dialog-trigger");
+        driver.keyboard_activate("poodle-debug-dialog-trigger");
+        assert!(host.lock().expect("DebugDialog host").open);
+        driver.wait_for_focus_handle("poodle-dialog-close");
+        driver.pointer_activate_id("poodle-dialog-close");
+        assert!(!host.lock().expect("DebugDialog host").open);
+        let outside = point(px(40.0), px(40.0));
+        driver.wait_for_focus_handle("poodle-debug-dialog-trigger");
+        driver.pointer_activate_id("poodle-debug-dialog-trigger");
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        assert!(!host.lock().expect("DebugDialog host").open);
+        assert_eq!(
+            host.lock().expect("DebugDialog host").events.as_slice(),
+            [
+                "open:true",
+                "open:false",
+                "open:true",
+                "open:false",
+                "open:true",
+                "open:false"
+            ],
+            "close button and backdrop each emit the open-change callback"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Drawer paints a window-hosted overlay, names the surface from its title,
+/// and dismisses through Escape and the backdrop button.
+#[test]
+fn first_mounted_parity_drawer() {
+    use gpui::{div, point, px, AnyElement, IntoElement};
+    use node_compat::{Drawer, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{DrawerEdge, DrawerSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = DrawerSpec::new()
+            .with_open(true)
+            .with_title("Inspector")
+            .with_description("Review the selected asset.")
+            .with_edge(DrawerEdge::Right)
+            .with_modal(true);
+        let mut body = Node::text("Asset details");
+        body.id = Some("drawer-body".to_string());
+        let open =
+            poodle_render::drawer(&spec, &ctx, Some(body.clone()), None, Some(Arc::new(|| {})));
+        assert_eq!(open.id.as_deref(), Some("poodle-drawer-backdrop"));
+        assert!(open.style.overlay);
+        assert_eq!(
+            open.position,
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            }
+        );
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.overlay"))
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-drawer-surface"))
+            .expect("Drawer surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Inspector"));
+        assert_eq!(
+            surface.a11y.labelled_by.as_deref(),
+            Some("poodle-drawer-title")
+        );
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(28.0)),
+            "right-edge Drawer surface is 28rem"
+        );
+        assert_eq!(
+            surface.interaction.dismiss_layer.as_deref(),
+            Some("poodle-drawer-layer")
+        );
+        assert!(surface.interaction.on_dismiss.is_some());
+        let backdrop = open
+            .find(&|node| node.id.as_deref() == Some("poodle-drawer-backdrop-dismiss"))
+            .expect("modal Drawer backdrop button");
+        assert_eq!(backdrop.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            backdrop.a11y.label.as_deref(),
+            Some("Dismiss drawer backdrop")
+        );
+        assert!(open.has_text("Review the selected asset."));
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            events: Vec<String>,
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: true,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            let body = body.clone();
+            Rc::new(move || {
+                let current = host.lock().expect("Drawer host").clone();
+                if !current.open {
+                    return div().id("drawer-closed").into_any_element();
+                }
+                let close_host = Arc::clone(&host);
+                let node = Drawer::from_spec(spec.clone(), &theme())
+                    .with_content(body.clone())
+                    .on_open_change(Arc::new(move |next| {
+                        let mut host = close_host.lock().expect("Drawer host");
+                        host.events.push(format!("open:{next}"));
+                        host.open = next;
+                    }))
+                    .into_compat_node();
+                poodle_gpui_node_backend::to_gpui(&node)
+            })
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-drawer-surface")
+            .expect("Drawer surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Inspector"));
+        let overlay_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-backdrop")
+            .expect("Drawer overlay bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-surface")
+            .expect("Drawer surface bounds");
+        assert!(overlay_bounds.size.width > px(0.0) && overlay_bounds.size.height > px(0.0));
+        assert!(bounds_contain(overlay_bounds, surface_bounds));
+        assert!(poodle_gpui_node_backend::bounds_for("drawer-body").is_some());
+
+        driver.pointer_activate_id("drawer-body");
+        assert!(
+            host.lock().expect("Drawer host").events.is_empty(),
+            "inside the drawer surface does not emit a close callback"
+        );
+        driver.wait_for_focus_handle("poodle-drawer-surface");
+        driver.dispatch_key("escape");
+        assert!(!host.lock().expect("Drawer host").open);
+        assert_eq!(
+            host.lock().expect("Drawer host").events.as_slice(),
+            ["open:false"],
+            "Escape callback closes the drawer"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-drawer-surface").is_none());
+
+        host.lock().expect("Drawer host").open = true;
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-drawer-surface").is_some());
+        // Full-bleed backdrop-dismiss center lands on the right-edge surface.
+        // Dialog's first-proof clicks the exposed overlay at (40, 40).
+        let outside = point(px(40.0), px(40.0));
+        let overlay_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-backdrop")
+            .expect("remounted Drawer overlay bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-surface")
+            .expect("remounted Drawer surface bounds");
+        assert!(overlay_bounds.contains(&outside));
+        assert!(!surface_bounds.contains(&outside));
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        assert!(!host.lock().expect("Drawer host").open);
+        assert_eq!(
+            host.lock().expect("Drawer host").events.as_slice(),
+            ["open:false", "open:false"],
+            "backdrop callback closes the drawer"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_theme_select() {
+    // ThemeSelect exposes its dialog-opener trigger, listbox tiles, selection,
+    // focus entry and dismissal through mounted GPUI input.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::DismissReason;
+    use poodle_render::{RenderContext, ThemeSelectHandlers};
+    use poodle_specs::{ThemeOption, ThemeSelectSpec, ThemeSwatch};
+
+    #[derive(Default)]
+    struct Host {
+        open: bool,
+        value: String,
+        calls: Vec<String>,
+        dismissed: Vec<DismissReason>,
+    }
+
+    let themes = vec![
+        ThemeOption::new(
+            "eclipse",
+            "Eclipse",
+            ThemeSwatch::new("#0e1012", "#15181b", "#f0b24d", "#eef2f6", "#333"),
+        ),
+        ThemeOption::new(
+            "iceberg",
+            "Iceberg",
+            ThemeSwatch::new("#e7eef5", "#dbe5ef", "#2d86f3", "#131a22", "#75869b"),
+        ),
+        ThemeOption::new(
+            "midnight",
+            "Midnight",
+            ThemeSwatch::new("#0b1020", "#121933", "#6d8cff", "#e6ecff", "#333"),
+        ),
+    ];
+    const ID: &str = "theme-proof";
+    const TRIGGER: &str = "theme-proof:trigger";
+    const SURFACE: &str = "theme-proof:surface";
+    const ICEBERG: &str = "theme-proof:tile:iceberg";
+    const MIDNIGHT: &str = "theme-proof:tile:midnight";
+
+    let theme_provider = theme();
+    let witness = poodle_render::theme_select_with_handlers(
+        &ThemeSelectSpec::new()
+            .with_themes(themes.clone())
+            .with_value("iceberg")
+            .with_open(true),
+        &RenderContext::new(&theme_provider),
+        ThemeSelectHandlers {
+            instance_id: ID.to_owned(),
+            ..ThemeSelectHandlers::default()
+        },
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Group));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Theme"));
+    let trigger = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(TRIGGER))
+        .expect("trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.label.as_deref(), Some("Theme: Iceberg"));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    let surface = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(SURFACE))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    let selected_tile = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(ICEBERG))
+        .expect("selected tile");
+    assert_eq!(selected_tile.a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(selected_tile.a11y.selected, Some(true));
+    assert!(
+        selected_tile.a11y.initial_focus,
+        "focus enters the selected tile"
+    );
+    let other_tile = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(MIDNIGHT))
+        .expect("other tile");
+    assert_eq!(other_tile.a11y.selected, Some(false));
+    assert!(!other_tile.a11y.initial_focus);
+
+    let host = Arc::new(Mutex::new(Host {
+        value: "iceberg".to_owned(),
+        ..Host::default()
+    }));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        let themes = themes.clone();
+        Rc::new(move || {
+            let (open, value) = {
+                let host = host.lock().expect("theme host");
+                (host.open, host.value.clone())
+            };
+            let spec = ThemeSelectSpec::new()
+                .with_themes(themes.clone())
+                .with_value(value)
+                .with_open(open);
+            let change_host = Arc::clone(&host);
+            let open_host = Arc::clone(&host);
+            let dismiss_host = Arc::clone(&host);
+            node_compat::ThemeSelect::from_spec(spec, &theme_provider)
+                .with_instance_id(ID)
+                .on_change(Arc::new(move |value| {
+                    let mut host = change_host.lock().expect("theme host");
+                    host.value = value.to_owned();
+                    host.calls.push(format!("value:{value}"));
+                }))
+                .on_open_change(Arc::new(move |next| {
+                    let mut host = open_host.lock().expect("theme host");
+                    host.open = next;
+                    host.calls.push(format!("open:{next}"));
+                }))
+                .on_dismiss(Arc::new(move |reason| {
+                    dismiss_host
+                        .lock()
+                        .expect("theme host")
+                        .dismissed
+                        .push(reason);
+                }))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 420.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(TRIGGER)
+            .expect("trigger reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Theme: Iceberg"));
+        let trigger_geometry =
+            poodle_gpui_node_backend::bounds_for(TRIGGER).expect("trigger geometry");
+        assert!(f32::from(trigger_geometry.size.width) > 0.0);
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_none());
+
+        driver.pointer_activate_id(TRIGGER);
+        assert!(host.lock().expect("theme host").open);
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_some());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ICEBERG),
+            Some(true),
+            "opening moves real focus to the selected tile"
+        );
+        let tile = poodle_gpui_node_backend::painted_node_for(ICEBERG).expect("tile paint");
+        assert_eq!(tile.a11y_role, Some(NodeRole::ListBoxOption));
+
+        driver.dispatch_key("escape");
+        {
+            let host = host.lock().expect("theme host");
+            assert!(!host.open, "Escape closes the popover");
+            assert_eq!(host.dismissed, vec![DismissReason::Escape]);
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_none());
+
+        driver.pointer_activate_id(TRIGGER);
+        driver.pointer_activate_id(MIDNIGHT);
+        {
+            let host = host.lock().expect("theme host");
+            assert_eq!(
+                host.value, "midnight",
+                "the change callback carries the chosen theme value"
+            );
+            assert!(!host.open, "choosing a theme closes the popover");
+            assert_eq!(
+                host.calls,
+                vec![
+                    "open:true".to_owned(),
+                    "open:false".to_owned(),
+                    "open:true".to_owned(),
+                    "value:midnight".to_owned(),
+                    "open:false".to_owned(),
+                ]
+            );
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(TRIGGER)
+                .expect("trigger repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Theme: Midnight")
+        );
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_ref_select() {
+    // RefSelect opens from its trigger, filters through the search field, roves
+    // with arrows, chooses a ref and dismisses with Escape on mounted GPUI.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::DismissReason;
+    use poodle_render::{RefSelectHandlers, RenderContext};
+    use poodle_specs::{RefKind, RefOption, RefSelectSpec};
+
+    #[derive(Default)]
+    struct Host {
+        open: bool,
+        value: String,
+        query: String,
+        calls: Vec<String>,
+        dismissed: Vec<DismissReason>,
+    }
+
+    const ID: &str = "ref-proof";
+    const TRIGGER: &str = "ref-proof:trigger";
+    const SURFACE: &str = "ref-proof:surface";
+    const SEARCH: &str = "poodle-input-ref-proof:search";
+    const MAIN: &str = "ref-proof:option:main";
+    const FEATURE: &str = "ref-proof:option:feature";
+    const TAG: &str = "ref-proof:option:v1";
+    let refs = vec![
+        RefOption::new("main", "main").with_kind(RefKind::Branch),
+        RefOption::new("feature", "feature").with_kind(RefKind::Branch),
+        RefOption::new("v1", "v1.0").with_kind(RefKind::Tag),
+    ];
+
+    let theme_provider = theme();
+    let witness = poodle_render::ref_select_with_handlers(
+        &RefSelectSpec::new()
+            .with_refs(refs.clone())
+            .with_value("feature")
+            .with_current_ref("main")
+            .with_open(true),
+        &RenderContext::new(&theme_provider),
+        RefSelectHandlers {
+            instance_id: ID.to_owned(),
+            ..RefSelectHandlers::default()
+        },
+    );
+    let trigger = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(TRIGGER))
+        .expect("trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.label.as_deref(), Some("Ref: feature"));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    let surface = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(SURFACE))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(surface.a11y.label.as_deref(), Some("Ref"));
+    let main = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(MAIN))
+        .expect("current option");
+    assert_eq!(main.a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(main.a11y.selected, Some(false));
+    assert_eq!(main.a11y.label.as_deref(), Some("main current"));
+    assert_eq!(
+        witness
+            .find(&|n| n.runtime_id.as_deref() == Some(FEATURE))
+            .expect("selected option")
+            .a11y
+            .selected,
+        Some(true)
+    );
+
+    let host = Arc::new(Mutex::new(Host {
+        value: "feature".to_owned(),
+        ..Host::default()
+    }));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        let refs = refs.clone();
+        Rc::new(move || {
+            let (open, value, query) = {
+                let host = host.lock().expect("ref host");
+                (host.open, host.value.clone(), host.query.clone())
+            };
+            let spec = RefSelectSpec::new()
+                .with_refs(refs.clone())
+                .with_value(value)
+                .with_current_ref("main")
+                .with_search_value(query)
+                .with_open(open);
+            let change_host = Arc::clone(&host);
+            let search_host = Arc::clone(&host);
+            let open_host = Arc::clone(&host);
+            let dismiss_host = Arc::clone(&host);
+            node_compat::RefSelect::from_spec(spec, &theme_provider)
+                .with_instance_id(ID)
+                .on_change(Arc::new(move |value| {
+                    let mut host = change_host.lock().expect("ref host");
+                    host.value = value.to_owned();
+                    host.calls.push(format!("value:{value}"));
+                }))
+                .on_search_change(Arc::new(move |query| {
+                    let mut host = search_host.lock().expect("ref host");
+                    host.query = query.to_owned();
+                    host.calls.push(format!("query:{query}"));
+                }))
+                .on_open_change(Arc::new(move |next| {
+                    let mut host = open_host.lock().expect("ref host");
+                    host.open = next;
+                    host.calls.push(format!("open:{next}"));
+                }))
+                .on_dismiss(Arc::new(move |reason| {
+                    dismiss_host
+                        .lock()
+                        .expect("ref host")
+                        .dismissed
+                        .push(reason);
+                }))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 520.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(TRIGGER)
+            .expect("trigger reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Ref: feature"));
+        assert!(
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(TRIGGER)
+                    .expect("trigger geometry")
+                    .size
+                    .width
+            ) > 0.0
+        );
+
+        driver.pointer_activate_id(TRIGGER);
+        assert!(host.lock().expect("ref host").open);
+        assert!(poodle_gpui_node_backend::bounds_for(SURFACE).is_some());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(SEARCH),
+            Some(true),
+            "opening moves real focus to the search field"
+        );
+        driver.dispatch_key_raw("v");
+        assert!(
+            host.lock()
+                .expect("ref host")
+                .calls
+                .contains(&"query:v".to_owned()),
+            "typing reports the query"
+        );
+
+        // Roving: ArrowDown from an option moves real focus to the next one.
+        driver.focus_element(MAIN);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FEATURE),
+            Some(true)
+        );
+
+        driver.dispatch_key("escape");
+        {
+            let host = host.lock().expect("ref host");
+            assert!(!host.open, "Escape closes the popover");
+            assert_eq!(host.dismissed, vec![DismissReason::Escape]);
+        }
+
+        driver.pointer_activate_id(TRIGGER);
+        driver.pointer_activate_id(TAG);
+        {
+            let host = host.lock().expect("ref host");
+            assert_eq!(
+                host.value, "v1",
+                "the change callback carries the chosen ref value"
+            );
+            assert!(!host.open, "choosing a ref closes the popover");
+            assert!(host.calls.contains(&"value:v1".to_owned()));
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for(TRIGGER)
+                .expect("trigger repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Ref: v1.0")
+        );
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_picker_shell() {
+    // PickerShell is static chrome: its landmark, heading, status line and the
+    // slotted controls reach mounted GPUI, and slotted controls take real input.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::RenderContext;
+    use poodle_specs::{ButtonSpec, PickerShellSpec};
+
+    let theme_provider = theme();
+    let spec = PickerShellSpec::new("Select assets")
+        .with_description("Pick the assets to attach.")
+        .with_aria_label("Asset picker")
+        .with_result_count(12)
+        .with_selected_count(2)
+        .with_status_text("12 results, 2 selected");
+    let slot_button = |label: &str, id: &str| {
+        let mut node = poodle_render::button(
+            &ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme_provider),
+            None,
+        );
+        node.id = Some(id.to_owned());
+        node
+    };
+    let witness = poodle_render::picker_shell(
+        &spec,
+        &RenderContext::new(&theme_provider),
+        Some(slot_button("Filter", "picker-shell-filter")),
+        None,
+        Some(Node::text("Results")),
+        None,
+        Some(slot_button("Done", "picker-shell-done")),
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Region));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Asset picker"));
+    let heading = witness
+        .find(&|n| n.a11y.role == Some(NodeRole::Heading))
+        .expect("title heading");
+    assert_eq!(heading.a11y.level, Some(3));
+    assert!(witness.has_text("Select assets"));
+    assert!(witness.has_text("12 results"));
+    assert!(witness.has_text("2 selected"));
+    let status = witness
+        .find(&|n| n.a11y.role == Some(NodeRole::Status))
+        .expect("status line");
+    assert!(status.has_text("12 results, 2 selected"));
+
+    let clicks = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let clicks = Arc::clone(&clicks);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let ctx = RenderContext::new(&theme_provider);
+            let filter_sink = Arc::clone(&clicks);
+            let done_sink = Arc::clone(&clicks);
+            let mut filter = poodle_render::button(
+                &ButtonSpec::new().with_label("Filter"),
+                &ctx,
+                Some(Arc::new(move || {
+                    filter_sink.lock().expect("clicks").push("filter")
+                })),
+            );
+            filter.id = Some("picker-shell-filter".to_owned());
+            let mut done = poodle_render::button(
+                &ButtonSpec::new().with_label("Done"),
+                &ctx,
+                Some(Arc::new(move || {
+                    done_sink.lock().expect("clicks").push("done")
+                })),
+            );
+            done.id = Some("picker-shell-done".to_owned());
+            let mut shell = node_compat::PickerShell::from_spec(spec.clone(), &theme_provider)
+                .with_toolbar(filter)
+                .with_footer(done);
+            shell = shell.with_body(Node::text("Results"));
+            shell.into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 480.0);
+        for id in ["picker-shell-filter", "picker-shell-done"] {
+            assert!(
+                f32::from(
+                    poodle_gpui_node_backend::bounds_for(id)
+                        .expect("slotted control geometry")
+                        .size
+                        .width
+                ) > 0.0
+            );
+        }
+        driver.focus_element("picker-shell-filter");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("picker-shell-filter"),
+            Some(true),
+            "focus enters the slotted toolbar control, not the shell"
+        );
+        driver.pointer_activate_id("picker-shell-filter");
+        driver.pointer_activate_id("picker-shell-done");
+        assert_eq!(*clicks.lock().expect("clicks"), vec!["filter", "done"]);
+        assert!(theme_provider.resolve_color("color.background.panel").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+#[test]
+fn first_mounted_parity_relation_picker() {
+    // RelationPicker names its candidates, shows the pressed one, roves between
+    // them and selects through mounted GPUI input.
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{PickerItemSpec, RelationPickerSpec, SelectionMode};
+
+    #[derive(Default)]
+    struct Host {
+        selected: Vec<String>,
+    }
+
+    const ID: &str = "relation-proof";
+    const ALPHA: &str = "relation-proof:candidate:alpha";
+    const BETA: &str = "relation-proof:candidate:beta";
+    let items = vec![
+        PickerItemSpec::new("alpha", "Alpha"),
+        PickerItemSpec::new("beta", "Beta"),
+    ];
+    let make_spec = |selected: Vec<String>| {
+        RelationPickerSpec::new(items.clone())
+            .with_aria_label("Related records")
+            .with_selection_mode(SelectionMode::Single)
+            .with_selected_ids(selected)
+    };
+
+    let theme_provider = theme();
+    let witness = poodle_render::relation_picker(
+        &make_spec(vec!["beta".to_owned()]),
+        &RenderContext::new(&theme_provider),
+        poodle_render::RelationPickerHandlers::new(ID),
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Region));
+    assert_eq!(witness.a11y.label.as_deref(), Some("Related records"));
+    let list = witness
+        .find(&|n| n.a11y.role == Some(NodeRole::List))
+        .expect("candidate list");
+    assert_eq!(list.a11y.label.as_deref(), Some("Available candidates"));
+    let alpha = witness
+        .find(&|n| n.runtime_id.as_deref() == Some(ALPHA))
+        .expect("alpha candidate");
+    assert_eq!(alpha.a11y.label.as_deref(), Some("Alpha"));
+    assert_eq!(alpha.a11y.toggled, Some(poodle_node::NodeToggled::False));
+    assert_eq!(
+        witness
+            .find(&|n| n.runtime_id.as_deref() == Some(BETA))
+            .expect("beta candidate")
+            .a11y
+            .toggled,
+        Some(poodle_node::NodeToggled::True)
+    );
+
+    let host = Arc::new(Mutex::new(Host::default()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        let items = items.clone();
+        Rc::new(move || {
+            let selected = host.lock().expect("relation host").selected.clone();
+            let spec = RelationPickerSpec::new(items.clone())
+                .with_aria_label("Related records")
+                .with_selection_mode(SelectionMode::Single)
+                .with_selected_ids(selected);
+            let select_host = Arc::clone(&host);
+            node_compat::RelationPicker::from_spec(spec, &theme_provider, ID)
+                .on_select(Arc::new(move |id| {
+                    select_host.lock().expect("relation host").selected = vec![id.to_owned()];
+                }))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 560.0);
+        let painted = poodle_gpui_node_backend::painted_node_for(ALPHA)
+            .expect("candidate reached GPUI paint");
+        assert_eq!(painted.a11y_label.as_deref(), Some("Alpha"));
+        assert!(
+            f32::from(
+                poodle_gpui_node_backend::bounds_for(ALPHA)
+                    .expect("candidate geometry")
+                    .size
+                    .height
+            ) > 0.0
+        );
+
+        driver.focus_element(ALPHA);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(BETA),
+            Some(true),
+            "ArrowDown moves real focus to the next candidate"
+        );
+        driver.pointer_activate_id(BETA);
+        assert_eq!(
+            host.lock().expect("relation host").selected,
+            vec!["beta".to_owned()],
+            "the select callback payload carries the candidate id"
+        );
+        let border_of = |id: &str| {
+            poodle_gpui_node_backend::painted_node_for(id)
+                .expect("candidate repaint")
+                .style
+                .border
+                .color
+        };
+        assert_ne!(
+            border_of(BETA),
+            border_of(ALPHA),
+            "the pressed candidate repaints with the accent border"
+        );
+        assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// ColorPicker mounts its trigger, opens its dialog surface, and commits
+/// swatch selection through mounted GPUI input: the trigger toggles open by
+/// pointer and by keyboard, a swatch press commits the preset hex, and the
+/// open surface paints the dialog/listbox/option/slider semantics with
+/// token-resolved chrome. Svelte parity authority:
+/// `packages/svelte/components/src/ColorPicker.svelte` (trigger button with
+/// aria-haspopup, aria-expanded and aria-controls; surface dialog; swatch
+/// option select; Escape and outside-click dismissal; gradient arrows).
+/// Escape dismissal and gradient drag stay host-owned; this proof covers
+/// trigger toggle, swatch commit, and surface semantics.
+#[test]
+fn first_mounted_parity_color_picker() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::ColorPickerSpec;
+
+    const SWATCHES: [&str; 4] = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"];
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let swatches = SWATCHES
+        .iter()
+        .map(|swatch| swatch.to_string())
+        .collect::<Vec<_>>();
+    let spec = ColorPickerSpec::new()
+        .with_value("#6366f1")
+        .with_open(true)
+        .with_swatches(swatches.clone())
+        .with_aria_label("Color picker");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = poodle_render::color_picker(
+        &spec,
+        &ctx,
+        "witness",
+        poodle_render::ColorPickerHandlers::default(),
+    );
+    assert_eq!(witness.a11y.label.as_deref(), Some("Color picker"));
+    let trigger = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-trigger"))
+        .expect("trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(
+        trigger.a11y.controls.as_deref(),
+        Some("color-picker-surface")
+    );
+    assert!(trigger.interaction.focusable);
+    assert_eq!(trigger.a11y.tab_index, Some(0));
+    assert!(trigger.style.focus_ring.is_some());
+    assert_eq!(
+        trigger.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(2.25)),
+        "trigger keeps the 2.25rem square"
+    );
+    let surface = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-surface"))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(surface.a11y.label.as_deref(), Some("Color picker"));
+    assert_eq!(
+        surface.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(24.0)),
+        "surface keeps the 24rem popover width"
+    );
+    let gradient = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-gradient"))
+        .expect("gradient pad");
+    assert_eq!(
+        gradient.children.len(),
+        3,
+        "gradient pad layers the white overlay, the black overlay, and the thumb"
+    );
+    let hue = witness
+        .find(&|node| node.a11y.role == Some(NodeRole::Slider))
+        .expect("hue channel slider");
+    assert_eq!(hue.a11y.label.as_deref(), Some("Hue"));
+    let grid = witness
+        .find(&|node| node.id.as_deref() == Some("color-picker-swatches"))
+        .expect("swatch grid");
+    assert_eq!(grid.a11y.role, Some(NodeRole::ListBox));
+    assert_eq!(grid.children.len(), SWATCHES.len());
+    for (index, hex) in SWATCHES.iter().enumerate() {
+        let want = format!("color-picker-swatch-{index}");
+        let swatch = witness
+            .find(&|node| node.id.as_deref() == Some(want.as_str()))
+            .unwrap_or_else(|| panic!("swatch {index}"));
+        assert_eq!(swatch.a11y.role, Some(NodeRole::ListBoxOption));
+        assert_eq!(swatch.a11y.label.as_deref(), Some(*hex));
+        assert!(swatch.interaction.focusable);
+        assert_eq!(swatch.a11y.tab_index, Some(0));
+        assert!(swatch.style.focus_ring.is_some());
+    }
+    assert!(witness.has_text("#6366f1"));
+
+    // A disabled picker keeps its chrome but takes no focus and wires no
+    // surface, matching the Svelte reduced-opacity, no-pointer-events state.
+    let disabled = poodle_render::color_picker(
+        &ColorPickerSpec::new()
+            .with_value("#22c55e")
+            .with_disabled(true),
+        &ctx,
+        "disabled",
+        poodle_render::ColorPickerHandlers::default(),
+    );
+    assert!(disabled.interaction.disabled);
+    let disabled_trigger = disabled
+        .find(&|node| node.id.as_deref() == Some("color-picker-trigger"))
+        .expect("disabled trigger");
+    assert!(!disabled_trigger.interaction.focusable);
+    assert_eq!(disabled_trigger.a11y.tab_index, None);
+    assert!(disabled_trigger.style.focus_ring.is_none());
+    assert!(disabled
+        .find(&|node| node.id.as_deref() == Some("color-picker-surface"))
+        .is_none());
+
+    // ── Mounted: toggle, select, focus, geometry ────────────────────────
+    #[derive(Default)]
+    struct ColorHost {
+        open: bool,
+        value: String,
+    }
+    let host = Arc::new(Mutex::new(ColorHost {
+        open: false,
+        value: "#6366f1".to_owned(),
+    }));
+    let toggles = Arc::new(Mutex::new(0_usize));
+    let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let toggles = Arc::clone(&toggles);
+        let payloads = Arc::clone(&payloads);
+        let theme_provider = theme_provider.clone();
+        let swatches = swatches.clone();
+        Rc::new(move || {
+            let (open, value) = {
+                let host = host.lock().expect("color host");
+                (host.open, host.value.clone())
+            };
+            let toggle_host = Arc::clone(&host);
+            let toggle_count = Arc::clone(&toggles);
+            let change_host = Arc::clone(&host);
+            let change_payloads = Arc::clone(&payloads);
+            node_compat::ColorPicker::from_spec(
+                ColorPickerSpec::new()
+                    .with_value(&value)
+                    .with_open(open)
+                    .with_swatches(swatches.clone())
+                    .with_aria_label("Color picker"),
+                &theme_provider,
+                "proof",
+            )
+            .with_id("proof")
+            .on_toggle(Arc::new(move || {
+                let mut host = toggle_host.lock().expect("color host");
+                *toggle_count.lock().expect("toggle count") += 1;
+                host.open = !host.open;
+            }))
+            .on_change(Arc::new(move |hex: &str| {
+                let mut host = change_host.lock().expect("color host");
+                change_payloads
+                    .lock()
+                    .expect("change payloads")
+                    .push(hex.to_owned());
+                host.value = hex.to_owned();
+            }))
+            .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 560.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("color-picker-trigger").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("color-picker-surface").is_none(),
+            "the surface stays unmounted while closed"
+        );
+
+        // Keyboard opens: the trigger is a real tab stop and Enter toggles it.
+        driver.wait_for_focus_handle("color-picker-trigger");
+        driver.focus_element("color-picker-trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("color-picker-trigger"),
+            Some(true),
+            "focus lands on the trigger, not the mount host"
+        );
+        driver.keyboard_activate("color-picker-trigger");
+        assert!(
+            host.lock().expect("color host").open,
+            "toggle callback opens the surface"
+        );
+        assert_eq!(*toggles.lock().expect("toggle count"), 1);
+        driver.draw_frame();
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("color-picker-surface")
+            .expect("open surface geometry");
+        assert!(
+            f32::from(surface_bounds.size.width) > 0.0
+                && f32::from(surface_bounds.size.height) > 0.0,
+            "the open surface paints positive dimensions"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("color-picker-surface")
+            .expect("surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Color picker"));
+        assert_eq!(
+            painted.style.background,
+            Some(theme_provider.resolve_color("color.background.elevated"))
+        );
+
+        // Pointer selects: the swatch press commits the preset hex.
+        driver.pointer_activate_id("color-picker-swatch-0");
+        assert_eq!(
+            payloads.lock().expect("change payloads").as_slice(),
+            ["#ef4444"],
+            "swatch select callback payload carries the preset hex"
+        );
+        let text_primary = theme_provider.resolve_color("color.text.primary");
+        let border_of = |id: &str| {
+            poodle_gpui_node_backend::painted_node_for(id)
+                .expect("swatch repaint")
+                .style
+                .border
+                .color
+        };
+        assert_eq!(
+            border_of("color-picker-swatch-0"),
+            text_primary,
+            "the chosen swatch repaints with the active border"
+        );
+        assert_ne!(
+            border_of("color-picker-swatch-0"),
+            border_of("color-picker-swatch-1"),
+            "only the chosen swatch carries the active border"
+        );
+
+        // Keyboard selects: Enter on a swatch commits, like Space/Enter in Svelte.
+        driver.wait_for_focus_handle("color-picker-swatch-1");
+        driver.focus_element("color-picker-swatch-1");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("color-picker-swatch-1"),
+            Some(true)
+        );
+        driver.keyboard_activate("color-picker-swatch-1");
+        assert_eq!(
+            payloads.lock().expect("change payloads").as_slice(),
+            ["#ef4444", "#f97316"],
+            "keyboard select callback payload carries the second preset hex"
+        );
+        assert_eq!(
+            border_of("color-picker-swatch-1"),
+            text_primary,
+            "the active border follows the latest selection"
+        );
+
+        assert!(theme_provider.resolve_color("color.accent.focusRing").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// HoverCard mounts its trigger, opens its dialog surface on hover intent,
+/// and dismisses on hover leave through mounted GPUI input: the trigger hover
+/// reaches the host open-change handler, the open surface paints the dialog
+/// semantics, and the trigger and preview controls take real focus, pointer
+/// presses, and keyboard activation. Svelte parity authority:
+/// `packages/svelte/components/src/HoverCard.svelte` (delayed open and close,
+/// surface continuity, dialog surface, Escape dismissal). The open/close
+/// delays stay host-owned per the hover-intent machine (the adapter owns the
+/// timer handle); surface-hover continuity (Svelte: entering the surface
+/// cancels the close timer) does not hold yet because the deferred overlay
+/// surface paints outside the trigger wrapper's hover containment, so this
+/// proof reaches the preview action by keyboard and reports that gap
+/// separately. This proof covers intent delivery, surface semantics, and
+/// dismissal.
+#[test]
+fn first_mounted_parity_hover_card() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{ButtonSpec, HoverCardSpec};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = HoverCardSpec::new().with_aria_label("User preview");
+    assert_eq!(spec.open_delay_ms, 180);
+    assert_eq!(spec.close_delay_ms, 120);
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let mut plain_content = Node::container();
+    plain_content = plain_content
+        .child(Node::text("Clay"))
+        .child(Node::text("Design systems engineer"));
+    let witness = poodle_render::hover_card(&spec, &ctx, Some(plain_content));
+    assert_eq!(witness.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(witness.a11y.label.as_deref(), Some("User preview"));
+    assert!(witness.has_text("Clay"));
+    assert!(witness.has_text("Design systems engineer"));
+    assert_eq!(
+        witness.style.min_width,
+        Some(ctx.theme().resolve_space("size.menu.minWidth"))
+    );
+    assert_eq!(
+        witness.style.max_width,
+        Some(ctx.theme().resolve_space("size.hoverCard.maxWidth"))
+    );
+
+    // ── Mounted: hover intent, continuity, focus, dismissal ─────────────
+    #[derive(Default)]
+    struct HoverHost {
+        open: bool,
+    }
+    let host = Arc::new(Mutex::new(HoverHost::default()));
+    let intents = Arc::new(Mutex::new(Vec::<bool>::new()));
+    let actions = Arc::new(Mutex::new(Vec::<String>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let intents = Arc::clone(&intents);
+        let actions = Arc::clone(&actions);
+        let theme_provider = theme_provider.clone();
+        let spec = spec.clone();
+        Rc::new(move || {
+            let open = host.lock().expect("hover host").open;
+            let intent_host = Arc::clone(&host);
+            let intent_sink = Arc::clone(&intents);
+            let action_sink = Arc::clone(&actions);
+            let mut trigger = poodle_render::button(
+                &ButtonSpec::new().with_label("@clay"),
+                &RenderContext::new(&theme_provider),
+                None,
+            );
+            trigger.id = Some("hover-proof-trigger".to_owned());
+            let mut action = poodle_render::button(
+                &ButtonSpec::new().with_label("Read more"),
+                &RenderContext::new(&theme_provider),
+                Some(Arc::new(move || {
+                    action_sink
+                        .lock()
+                        .expect("hover actions")
+                        .push("read-more".to_owned());
+                })),
+            );
+            action.id = Some("hover-proof-action".to_owned());
+            let mut content = Node::container();
+            content.id = Some("hover-proof-surface".to_owned());
+            content = content
+                .child(Node::text("Clay"))
+                .child(Node::text("Design systems engineer"))
+                .child(action);
+            node_compat::HoverCard::from_spec(spec.clone().with_open(open), &theme_provider)
+                .with_trigger(poodle_gpui_node_backend::to_gpui(&trigger))
+                .with_content(content)
+                .on_open_change(
+                    move |open: bool, _window: &mut gpui::Window, _cx: &mut gpui::App| {
+                        intent_sink.lock().expect("hover intents").push(open);
+                        intent_host.lock().expect("hover host").open = open;
+                    },
+                )
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 480.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("hover-proof-trigger").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("hover-card-surface").is_none(),
+            "the surface stays unmounted while closed"
+        );
+
+        // Hover intent opens: the trigger hover reaches the host handler.
+        driver.pointer_hover(payload_frac("hover-proof-trigger", 0.5, 0.5));
+        assert_eq!(
+            intents.lock().expect("hover intents").as_slice(),
+            [true],
+            "hover intent callback emits the open change"
+        );
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("hover-card-surface")
+            .expect("open surface geometry");
+        assert!(
+            f32::from(surface_bounds.size.width) > 0.0
+                && f32::from(surface_bounds.size.height) > 0.0,
+            "the open surface paints positive dimensions"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("hover-card-surface")
+            .expect("preview dialog reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("User preview"));
+        assert!(
+            painted
+                .texts
+                .iter()
+                .any(|text| text == "Design systems engineer"),
+            "the preview copy paints inside the dialog"
+        );
+
+        // Pointer reaches the trigger: a press focuses its control.
+        driver.pointer_activate_id("hover-proof-trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("hover-proof-trigger"),
+            Some(true),
+            "pointer press focuses the trigger control"
+        );
+
+        // Keyboard reaches the trigger and the preview action.
+        driver.wait_for_focus_handle("hover-proof-trigger");
+        driver.focus_element("hover-proof-trigger");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("hover-proof-trigger"),
+            Some(true),
+            "focus lands on the trigger control"
+        );
+        driver.wait_for_focus_handle("hover-proof-action");
+        driver.focus_element("hover-proof-action");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("hover-proof-action"),
+            Some(true),
+            "focus lands inside the preview surface"
+        );
+        driver.keyboard_activate("hover-proof-action");
+        assert_eq!(
+            actions.lock().expect("hover actions").as_slice(),
+            ["read-more"],
+            "preview action callback fires through mounted keyboard"
+        );
+
+        // Hover leave dismisses: the close intent unmounts the surface.
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        assert_eq!(
+            intents.lock().expect("hover intents").as_slice(),
+            [true, false],
+            "hover leave callback emits the close change"
+        );
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("hover-card-surface").is_none(),
+            "the surface unmounts after dismissal"
+        );
+
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Field mounts its label, control, and validation message as one wired unit:
+/// the slotted control takes the field label as its accessible name, the
+/// description and message ids join its described-by relationship, the info
+/// icon and the message paint with token-resolved chrome, and the control
+/// takes pointer focus and real keystrokes through the mounted tree. Svelte
+/// parity authority: `packages/svelte/components/src/Field.svelte` (label
+/// for-association, info popover for the description, error/pending
+/// precedence, required/optional markers). Field fires no events of its own
+/// (contract §5); the info popover open state stays host-owned.
+#[test]
+fn first_mounted_parity_field() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{FieldSpec, TextInputSpec, ValidationState};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = FieldSpec::new("proof-contact", "Display name")
+        .with_description("Shown on your public profile.")
+        .with_required(true)
+        .with_validation_state(ValidationState::Invalid)
+        .with_error("This username is already taken.");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = {
+        let input_spec = TextInputSpec::new().with_id("proof-contact").with_value("");
+        poodle_render::field(
+            &spec,
+            &ctx,
+            Some(Box::new(move |control_ctx: &RenderContext<'_>| {
+                poodle_render::text_input_with_handlers(
+                    &input_spec,
+                    control_ctx,
+                    poodle_render::TextInputHandlers::default(),
+                )
+            })),
+        )
+    };
+    assert!(witness.has_text("Display name"));
+    assert!(witness.has_text("*"));
+    assert!(witness.has_text("This username is already taken."));
+    assert!(witness.has_text("Shown on your public profile."));
+    assert!(
+        witness
+            .find(&|node| matches!(&node.kind, NodeKind::Icon { name, .. } if name == "info"))
+            .is_some(),
+        "the info icon affords the description popover"
+    );
+    let control = witness
+        .find(&|node| node.id.as_deref() == Some("poodle-input-proof-contact"))
+        .expect("slotted control");
+    assert_eq!(control.a11y.role, Some(NodeRole::TextInput));
+    assert_eq!(
+        control.a11y.label.as_deref(),
+        Some("Display name"),
+        "the field names an unnamed control from its label"
+    );
+    assert_eq!(
+        control.a11y.described_by.as_deref(),
+        Some("proof-contact-description proof-contact-error"),
+        "description and message ids join the control relationship"
+    );
+    let description = witness
+        .find(&|node| node.id.as_deref() == Some("proof-contact-description"))
+        .expect("description element");
+    assert!(description.has_text("Shown on your public profile."));
+    let error = witness
+        .find(&|node| node.id.as_deref() == Some("proof-contact-error"))
+        .expect("error message");
+    assert_eq!(
+        error.style.descriptor.text_color,
+        Some(theme_provider.resolve_color(spec.error_color_token()))
+    );
+
+    // ── Mounted: naming, relationship, focus, typing, geometry ──────────
+    const CONTROL: &str = "poodle-input-proof-contact";
+    #[derive(Default)]
+    struct FieldHost {
+        value: String,
+    }
+    let host = Arc::new(Mutex::new(FieldHost::default()));
+    let edits = Arc::new(Mutex::new(Vec::<String>::new()));
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        // The host rebuilds the field tree around the controlled draft after
+        // every keystroke, the same division the Svelte field keeps between
+        // chrome (field-owned) and editing (control-owned).
+        let build_node = || {
+            let value = host.lock().expect("field host").value.clone();
+            let edit_host = Arc::clone(&host);
+            let edit_sink = Arc::clone(&edits);
+            let input_spec = TextInputSpec::new()
+                .with_id("proof-contact")
+                .with_value(value);
+            let mut root = poodle_render::field(
+                &spec,
+                &ctx,
+                Some(Box::new(move |control_ctx: &RenderContext<'_>| {
+                    poodle_render::text_input_with_handlers(
+                        &input_spec,
+                        control_ctx,
+                        poodle_render::TextInputHandlers {
+                            on_change: Some(Arc::new(move |text: &str| {
+                                let mut host = edit_host.lock().expect("field host");
+                                edit_sink.lock().expect("field edits").push(text.to_owned());
+                                host.value = text.to_owned();
+                            })),
+                            ..poodle_render::TextInputHandlers::default()
+                        },
+                    )
+                })),
+            );
+            root.id = Some(FIXTURE_ID.to_owned());
+            root
+        };
+        let node = Arc::new(Mutex::new(build_node()));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        assert!(
+            poodle_gpui_node_backend::bounds_for(CONTROL).is_some(),
+            "pointer proof needs a real hit target"
+        );
+
+        // The label naming and the described-by relationship reach GPUI.
+        let mounted = driver
+            .accessibility_nodes()
+            .into_iter()
+            .find(|node| node.element_id == CONTROL)
+            .expect("control in the mounted accessibility tree");
+        assert_eq!(mounted.label.as_deref(), Some("Display name"));
+        assert_eq!(
+            mounted.described_by.as_deref(),
+            Some("proof-contact-description proof-contact-error")
+        );
+        let error_painted = poodle_gpui_node_backend::painted_node_for("proof-contact-error")
+            .expect("error message reached GPUI paint");
+        assert!(
+            error_painted
+                .texts
+                .iter()
+                .any(|text| text == "This username is already taken."),
+            "the error copy paints in the mounted tree"
+        );
+
+        // Pointer focuses the slotted control through the field.
+        driver.wait_for_focus_handle(CONTROL);
+        driver.pointer_activate_id(CONTROL);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(CONTROL),
+            Some(true),
+            "pointer press focuses the field control"
+        );
+
+        // Keyboard types into the control through the field.
+        driver.dispatch_key_raw("a");
+        assert_eq!(
+            edits.lock().expect("field edits").as_slice(),
+            ["a"],
+            "typed keystroke reaches the slotted control with the field value"
+        );
+        assert_eq!(host.lock().expect("field host").value, "a");
+        *node.lock().expect("field node") = build_node();
+        driver.draw_frame();
+        let control_bounds =
+            poodle_gpui_node_backend::bounds_for(CONTROL).expect("control geometry");
+        assert!(
+            f32::from(control_bounds.size.width) > 0.0
+                && f32::from(control_bounds.size.height) > 0.0,
+            "the control paints positive dimensions"
+        );
+
+        assert!(theme_provider.resolve_color("color.text.primary").3 > 0.0);
+        assert!(theme_provider.resolve_space("space.stack.sm") > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// ListCardCounter mounts its linked variant as a keyboard-reachable link:
+/// pointer activation fires the link handler, Enter fires it too, the row
+/// keeps the link role with the secondary tone and the primary hover tone,
+/// and the tooltip text paints on hover after the backend delay. The static
+/// variant stays an inert statistic. Svelte parity authority:
+/// `packages/svelte/components/src/ListCardCounter.svelte` (icon plus count,
+/// linked `<a>` rendering with hover tone and click stopPropagation, tooltip
+/// wrapping, tabular numerals, link focus ring).
+#[test]
+fn first_mounted_parity_list_card_counter() {
+    use gpui::{AnyElement, IntoElement};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::ListCardCounterSpec;
+
+    const ROW: &str = "poodle-lcc-file-text-24";
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let spec = ListCardCounterSpec::new("file-text", 24)
+        .with_tooltip("24 documents")
+        .with_href("#documents");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = poodle_render::list_card_counter(&spec, &ctx, None);
+    assert_eq!(witness.id.as_deref(), Some(ROW));
+    assert_eq!(witness.a11y.role, Some(NodeRole::Link));
+    assert!(witness.interaction.focusable);
+    assert_eq!(witness.a11y.tab_index, Some(0));
+    assert!(witness.style.focus_ring.is_some());
+    assert_eq!(witness.tooltip.as_deref(), Some("24 documents"));
+    assert!(witness.has_text("24"));
+    assert_eq!(
+        witness.style.descriptor.text_color,
+        Some(theme_provider.resolve_color("color.text.secondary"))
+    );
+    assert_eq!(
+        witness
+            .style
+            .hover
+            .as_ref()
+            .and_then(|patch| patch.text_color),
+        Some(theme_provider.resolve_color("color.text.primary"))
+    );
+    assert_eq!(witness.style.text_size, Some(rem_to_px(0.75)));
+
+    // The static variant stays an inert statistic: no identity, no focus,
+    // no activation, matching the Svelte plain `<span>`.
+    let plain = poodle_render::list_card_counter(&ListCardCounterSpec::new("image", 8), &ctx, None);
+    assert!(plain.id.is_none());
+    assert!(!plain.interaction.focusable);
+    assert!(plain.style.focus_ring.is_none());
+    assert!(plain.a11y.role.is_none());
+    assert!(plain.interaction.on_activate.is_none());
+    assert!(plain.has_text("8"));
+
+    // ── Mounted: link activation, keyboard, tooltip, geometry ───────────
+    let clicks = Arc::new(Mutex::new(0_usize));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let clicks = Arc::clone(&clicks);
+        let theme_provider = theme_provider.clone();
+        let spec = spec.clone();
+        Rc::new(move || {
+            let click_sink = Arc::clone(&clicks);
+            node_compat::ListCardCounter::from_spec(spec.clone(), &theme_provider)
+                .on_link_click(move || {
+                    *click_sink.lock().expect("counter clicks") += 1;
+                })
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 160.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(ROW).is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.wait_for_focus_handle(ROW);
+
+        // Pointer activates the linked counter.
+        driver.pointer_activate_id(ROW);
+        assert_eq!(
+            *clicks.lock().expect("counter clicks"),
+            1,
+            "linked counter click callback fires through mounted pointer"
+        );
+
+        // Keyboard activates it too, like Enter on the Svelte anchor.
+        driver.focus_element(ROW);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ROW),
+            Some(true),
+            "focus lands on the linked counter"
+        );
+        driver.keyboard_activate(ROW);
+        assert_eq!(
+            *clicks.lock().expect("counter clicks"),
+            2,
+            "linked counter click callback fires through mounted keyboard"
+        );
+        let painted =
+            poodle_gpui_node_backend::painted_node_for(ROW).expect("counter reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Link));
+
+        // Tooltip lifecycle: hover starts the timer, the text paints at the
+        // backend delay, and pointer leave hides it again.
+        driver.pointer_hover(payload_frac(ROW, 0.5, 0.5));
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_pending(ROW),
+            "hover must start a pending tooltip timer"
+        );
+        driver.advance_clock(poodle_gpui_node_backend::TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::is_tooltip_visible(ROW),
+            "tooltip must paint at the delay"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip()
+                .map(|tooltip| tooltip.text)
+                .as_deref(),
+            Some("24 documents")
+        );
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        driver.draw_frame();
+        assert!(
+            !poodle_gpui_node_backend::is_tooltip_visible(ROW),
+            "pointer leave must hide the tooltip"
+        );
+
+        let row_bounds = poodle_gpui_node_backend::bounds_for(ROW).expect("row geometry");
+        assert!(
+            f32::from(row_bounds.size.width) > 0.0 && f32::from(row_bounds.size.height) > 0.0,
+            "the counter paints positive dimensions"
+        );
+        assert!(theme_provider.resolve_color("color.text.secondary").3 > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }

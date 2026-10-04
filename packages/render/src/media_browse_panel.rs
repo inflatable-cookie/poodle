@@ -8,17 +8,20 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_node::{
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeKind, NodeRole,
+    StylePatch,
+};
 use poodle_specs::{
     AspectRatio, ButtonSpec, ButtonVariant, CallOutSpec, ControlDensity, ControlSize,
-    MediaBrowsePanelSpec, MediaKind, MediaThumbnailSpec, StatusTone,
+    MediaBrowsePanelSpec, MediaKind, MediaPresentation, MediaThumbnailSpec, StatusTone,
 };
 
 use crate::button::button;
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::with_alpha;
 use crate::context::RenderContext;
-use crate::media_thumbnail::media_thumbnail;
+use crate::media_thumbnail::media_thumbnail_with_content;
 use crate::presentation::{rem_to_px, size_font_rem};
 
 pub fn media_browse_panel(
@@ -52,8 +55,11 @@ pub fn media_browse_panel(
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
     let text_primary = ctx.theme().resolve_color("color.text.primary");
     let border_subtle = ctx.theme().resolve_color(spec.item_border_token());
+    let border_focus = ctx.theme().resolve_color(spec.item_focus_border_token());
     let radius = ctx.theme().resolve_radius(spec.item_radius_token());
     let panel_bg = ctx.theme().resolve_color(spec.item_bg_token());
+    let hover_bg = ctx.theme().resolve_color(spec.item_hover_bg_token());
+    let hover_fill = with_alpha(hover_bg, hover_bg.3 * 0.9);
 
     // Root
     let mut el = Node::container();
@@ -123,6 +129,10 @@ pub fn media_browse_panel(
     let panel_bg_tinted = with_alpha(panel_bg, panel_bg.3 * 0.92);
     for item in &spec.items {
         let mut card = Node::button("");
+        card.id = Some(format!("media-browse-panel:item:{}", item.id));
+        card.runtime_id = card.id.clone();
+        card.a11y.role = Some(NodeRole::Button);
+        card.a11y.label = Some(item.label.clone());
         {
             let s = &mut card.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
@@ -141,21 +151,49 @@ pub fn media_browse_panel(
             c.bottom_right = radius;
             c.bottom_left = radius;
             s.descriptor.background = Some(panel_bg_tinted);
+            s.hover = Some(StylePatch {
+                background: Some(hover_fill),
+                border_color: Some(border_focus),
+                text_color: None,
+                opacity: None,
+            });
+            s.focus = Some(StylePatch {
+                background: Some(hover_fill),
+                border_color: Some(border_focus),
+                text_color: None,
+                opacity: None,
+            });
         }
         card.interaction.focusable = true;
 
-        card = card.child(media_thumbnail(
-            &MediaThumbnailSpec::new(match item.kind.as_str() {
-                "image" => MediaKind::Image,
-                "audio" => MediaKind::Audio,
-                "video" => MediaKind::Video,
-                "document" => MediaKind::Document,
-                _ => MediaKind::Embed,
-            })
-            .with_aspect_ratio(AspectRatio::Square)
-            .with_show_caption(false),
-            ctx,
-        ));
+        let thumbnail_spec = MediaThumbnailSpec::new(match item.kind.as_str() {
+            "image" => MediaKind::Image,
+            "audio" => MediaKind::Audio,
+            "video" => MediaKind::Video,
+            "document" => MediaKind::Document,
+            _ => MediaKind::Embed,
+        })
+        .with_aspect_ratio(AspectRatio::Square)
+        .with_show_caption(false)
+        .with_presentation(MediaPresentation::Compact)
+        .with_aria_label(item.label.clone());
+        let thumbnail_content = item.thumbnail_url.as_ref().map(|url| {
+            let mut image = Node::container();
+            image.kind = NodeKind::Image {
+                source: url.clone(),
+            };
+            image.a11y.role = Some(NodeRole::Image);
+            image.a11y.label = Some(item.label.clone());
+            image.id = Some(format!("media-browse-panel:image:{}", item.id));
+            image.runtime_id = image.id.clone();
+            image.style.descriptor.layout.width = LayoutSizing::Grow;
+            image.style.descriptor.layout.height = LayoutSizing::Grow;
+            image
+        });
+        let mut thumbnail = media_thumbnail_with_content(&thumbnail_spec, ctx, thumbnail_content);
+        thumbnail.id = Some(format!("media-browse-panel:thumbnail:{}", item.id));
+        thumbnail.runtime_id = thumbnail.id.clone();
+        card = card.child(thumbnail);
 
         // Label
         let mut label = Node::text(&item.label);

@@ -11,7 +11,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, StylePatch,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node, NodeRole,
+    StylePatch,
 };
 use poodle_specs::{IconSpec, ListCardCounterSpec};
 
@@ -61,6 +62,22 @@ pub fn list_card_counter(
             spec.icon.replace(['/', '\\', ' '], "-"),
             spec.count
         ));
+        // Contract §6: a linked counter is a keyboard-reachable link with
+        // the specified focus ring; an unlinked counter stays a static
+        // statistic with no focus or activation behaviour.
+        row.a11y.role = Some(NodeRole::Link);
+        row.interaction.focusable = true;
+        row.a11y.tab_index = Some(0);
+        row.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
+        if let Some(tooltip) = spec.tooltip.as_deref() {
+            if !tooltip.is_empty() {
+                row.tooltip = Some(tooltip.to_string());
+            }
+        }
         row.style.descriptor.cursor = CursorHint::Pointer;
         row.style.hover = Some(StylePatch {
             background: None,

@@ -9,7 +9,7 @@
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    NodePosition,
+    NodePosition, NodeRole,
 };
 use poodle_specs::{MediaFrameWidth, MediaState, MediaThumbnailSpec};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
@@ -236,6 +236,9 @@ pub fn media_thumbnail_with_content(
             s.descriptor.layout.spacing.gap = rem_to_px(0.5);
         }
     }
+    root.a11y.role = Some(NodeRole::Figure);
+    root.a11y.label = spec.aria_label.clone().or_else(|| spec.title.clone());
+    root.a11y.busy = Some(spec.state == MediaState::Loading);
     root = root.child(frame);
 
     if spec.caption_visible() {

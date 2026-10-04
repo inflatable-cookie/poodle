@@ -1,0 +1,70 @@
+{
+  "schema": "poodle.g18-gpui-mounted-receipt.v1",
+  "component": "DatePicker",
+  "test": "first_mounted_parity_date_picker",
+  "selector": "effigy regressions:native",
+  "scenario_id": null,
+  "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
+  "contract_claims": [
+    "semantic",
+    "events",
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
+  ],
+  "signals": {
+    "semantic": [
+      "assert",
+      "production-mount"
+    ],
+    "events": [
+      "assert!(\n            !*open.lock().expect(\"open state\"),\n            \"date commit"
+    ],
+    "pointer": [
+      "pointer_activate"
+    ],
+    "keyboard_focus": [
+      "focus_state_for",
+      "focus_element",
+      "dispatch_key"
+    ],
+    "accessibility": [
+      "accessible",
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "resolve_color"
+    ]
+  },
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "driver": "HeadlessDriver::new_element_in_box",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "renderer": "poodle_render::date_picker_with_callbacks",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "package": "poodle-gpui-preview",
+  "package_version": "0.4.0",
+  "source_commit": "f762dc96ba6e0808f8e0cb28fb386a7b9c8c05e3",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
+  "distribution": "workspace",
+  "execution": {
+    "command": "effigy regressions:native",
+    "run_id": "2026-10-04-poodle-094-mounted-proofs",
+    "outcome": "passed",
+    "body_sha256": "e16f912d0da49fb4a9d5a1bed747db6bf8ddb9c8e5036346fdc4fbf317a76f2c"
+  },
+  "observed": [
+    "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
+  ],
+  "outcome": "passed"
+}

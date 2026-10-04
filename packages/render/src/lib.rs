@@ -261,12 +261,17 @@ pub use context::{
 };
 pub use context_menu::{context_menu, ContextMenuHandlers};
 pub use data_table::{data_table, data_table_loading, DataTableHandlers};
-pub use date_picker::{date_picker, DatePickerHandlers};
-pub use date_range_picker::date_range_picker;
-pub use date_time_picker::date_time_picker;
-pub use date_time_range_picker::date_time_range_picker;
-pub use date_time_zone_picker::{date_time_zone_picker, DateTimeZonePickerHandlers};
-pub use debug_dialog::debug_dialog;
+pub use date_picker::{
+    date_picker, date_picker_with_callbacks, DatePickerCallbacks, DatePickerHandlers,
+};
+pub use date_range_picker::{date_range_picker, date_range_picker_with_callbacks};
+pub use date_time_picker::{date_time_picker, date_time_picker_with_callbacks};
+pub use date_time_range_picker::{date_time_range_picker, date_time_range_picker_with_callbacks};
+pub use date_time_zone_picker::{
+    date_time_zone_picker, date_time_zone_picker_with_callbacks, DateTimeZonePickerCallbacks,
+    DateTimeZonePickerHandlers,
+};
+pub use debug_dialog::{debug_dialog, debug_dialog_with_state, DebugDialogHandlers};
 pub use detail_item::{detail_item, detail_item_with_slots, detail_item_with_slots_state};
 pub use detail_section::detail_section;
 pub use detail_section_group::detail_section_group;
@@ -373,7 +378,7 @@ pub use radio::radio;
 pub use radio_group::{radio_group, RadioGroupHandlers};
 pub use range_slider::{range_slider, RangeSliderHandlers};
 pub use rating::{rating, RatingHandlers};
-pub use ref_select::ref_select;
+pub use ref_select::{ref_select, ref_select_with_handlers, RefSelectHandlers};
 pub use region::region;
 pub use relation_picker::{relation_picker, RelationPickerHandlers};
 pub use remediation_banner::{
@@ -442,4 +447,4 @@ pub use tri_state_switch::{tri_state_switch, TriStateSwitchHandlers};
 pub use update_center::{update_center, UpdateCenterHandlers};
 pub use update_status::{update_status, UpdateStatusHandlers};
 pub use validation_summary::validation_summary;
-pub use video_player::video_player;
+pub use video_player::{video_player, video_player_with_handlers, VideoPlayerHandlers};

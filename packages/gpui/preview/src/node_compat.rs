@@ -688,8 +688,10 @@ pub(crate) struct FieldSet {
 pub(crate) struct ThemeSelect {
     spec: ThemeSelectSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    on_dismiss: Option<Arc<dyn Fn(poodle_node::DismissReason) + Send + Sync>>,
 }
 
 pub(crate) struct ModelPicker {
@@ -715,6 +717,7 @@ pub(crate) struct FormDialog {
     theme: GpuiThemeProvider,
     children: Vec<poodle_node::Node>,
     actions: Option<poodle_node::Node>,
+    handlers: poodle_render::FormDialogHandlers,
 }
 
 pub(crate) struct ScrollShell {
@@ -758,6 +761,7 @@ pub(crate) struct PageLoading {
 pub(crate) struct MediaPicker {
     spec: MediaPickerSpec,
     theme: GpuiThemeProvider,
+    handlers: poodle_render::MediaPickerHandlers,
 }
 
 pub(crate) struct DataTable {
@@ -877,6 +881,8 @@ pub(crate) struct MessageCenter {
 pub(crate) struct DebugDialog {
     spec: DebugDialogSpec,
     theme: GpuiThemeProvider,
+    open: bool,
+    handlers: poodle_render::DebugDialogHandlers,
 }
 
 pub(crate) struct ActionDiscoveryPanel {
@@ -1103,6 +1109,7 @@ impl MediaPicker {
         Self {
             spec,
             theme: theme.clone(),
+            handlers: poodle_render::MediaPickerHandlers::default(),
         }
     }
 
@@ -1111,12 +1118,13 @@ impl MediaPicker {
         self
     }
 
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::media_picker(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            poodle_render::MediaPickerHandlers::default(),
-        )
+        poodle_render::media_picker(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 
@@ -1801,7 +1809,34 @@ impl DebugDialog {
         Self {
             spec,
             theme: theme.clone(),
+            open: false,
+            handlers: poodle_render::DebugDialogHandlers::default(),
         }
+    }
+
+    pub(crate) fn open(mut self, open: bool) -> Self {
+        self.open = open;
+        self
+    }
+
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::debug_dialog_with_state(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.open,
+            self.handlers,
+        )
+    }
+}
+
+impl IntoCompatNode for DebugDialog {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
     }
 }
 
@@ -1809,10 +1844,7 @@ impl IntoElement for DebugDialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -2456,6 +2488,11 @@ impl RelationPicker {
         }
     }
 
+    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_select = Some(handler);
+        self
+    }
+
     pub(crate) fn on_drill_enter(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_drill_enter = Some(handler);
         self
@@ -2776,6 +2813,7 @@ impl FormDialog {
             theme: theme.clone(),
             children: Vec::new(),
             actions: None,
+            handlers: poodle_render::FormDialogHandlers::default(),
         }
     }
 
@@ -2834,13 +2872,23 @@ impl FormDialog {
         self
     }
 
+    pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_submit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_cancel = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
         poodle_render::form_dialog(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.children,
             self.actions,
-            poodle_render::FormDialogHandlers::default(),
+            self.handlers,
         )
     }
 }
@@ -3010,9 +3058,25 @@ impl ThemeSelect {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: String::new(),
             on_change: None,
             on_open_change: None,
+            on_dismiss: None,
         }
+    }
+
+    /// Lifetime-stable scope for the mounted trigger, surface and tiles.
+    pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+        self.instance_id = id.into();
+        self
+    }
+
+    pub(crate) fn on_dismiss(
+        mut self,
+        handler: Arc<dyn Fn(poodle_node::DismissReason) + Send + Sync>,
+    ) -> Self {
+        self.on_dismiss = Some(handler);
+        self
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
@@ -3042,8 +3106,10 @@ impl ThemeSelect {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::ThemeSelectHandlers {
+                instance_id: self.instance_id,
                 on_change: self.on_change,
                 on_open_change: self.on_open_change,
+                on_dismiss: self.on_dismiss,
             },
         )
     }
@@ -3390,7 +3456,7 @@ impl IntoElement for OrderBy {
 pub(crate) struct RefSelect {
     spec: RefSelectSpec,
     theme: GpuiThemeProvider,
-    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: poodle_render::RefSelectHandlers,
 }
 
 pub(crate) struct FormActions {
@@ -3449,7 +3515,7 @@ impl RefSelect {
         Self {
             spec,
             theme: theme.clone(),
-            on_change: None,
+            handlers: poodle_render::RefSelectHandlers::default(),
         }
     }
 
@@ -3463,8 +3529,43 @@ impl RefSelect {
         self
     }
 
+    /// Lifetime-stable scope for the mounted trigger, surface, search and rows.
+    pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+        self.handlers.instance_id = id.into();
+        self
+    }
+
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_search_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_search_change = Some(handler);
+        self
+    }
+
+    /// Fires with the open state the trigger is moving to; `is_open` is
+    /// controlled, so the host flips the spec.
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_dismiss(
+        mut self,
+        handler: Arc<dyn Fn(poodle_node::DismissReason) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::ref_select(&self.spec, &RenderContext::new(&self.theme), self.on_change)
+        poodle_render::ref_select_with_handlers(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        )
     }
 }
 
@@ -6992,6 +7093,7 @@ pub(crate) struct AlertDialog {
     theme: GpuiThemeProvider,
     working: bool,
     working_label: String,
+    handlers: poodle_render::AlertDialogHandlers,
 }
 
 impl AlertDialog {
@@ -7001,6 +7103,7 @@ impl AlertDialog {
             theme: theme.clone(),
             working: false,
             working_label: poodle_render::alert_dialog::DEFAULT_WORKING_LABEL.to_string(),
+            handlers: poodle_render::AlertDialogHandlers::default(),
         }
     }
 
@@ -7028,25 +7131,45 @@ impl AlertDialog {
         self.spec.item_value = Some(value.into());
         self
     }
-}
 
-impl IntoElement for AlertDialog {
-    type Element = AnyElement;
+    pub(crate) fn on_confirm(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.confirm = Some(handler);
+        self
+    }
 
-    fn into_element(self) -> Self::Element {
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.cancel = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::alert_dialog(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.working,
             &self.working_label,
-            poodle_render::AlertDialogHandlers::default(),
+            self.handlers,
         );
         native_alert_dialog_spacing(
             &mut node,
             self.spec.item_label.is_some(),
             self.theme.resolve_space("typography.body.size"),
         );
-        poodle_gpui_node_backend::to_gpui(&node)
+        node
+    }
+}
+
+impl IntoCompatNode for AlertDialog {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
+}
+
+impl IntoElement for AlertDialog {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 

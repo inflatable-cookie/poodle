@@ -34,8 +34,11 @@ pub fn hover_card(spec: &HoverCardSpec, ctx: &RenderContext<'_>, content: Option
     let max_w = ctx.theme().resolve_space("size.hoverCard.maxWidth");
 
     let mut el = Node::container();
-    // Contract: the hover card surface is a `dialog`.
+    // Contract: the hover card surface is a `dialog`. The fixed identity
+    // mirrors the color-picker surface: one proof-grade handle for paint
+    // observation; multi-instance scoping stays host-owned with placement.
     el.a11y.role = Some(NodeRole::Dialog);
+    el.id = Some("hover-card-surface".to_string());
     {
         let s = &mut el.style;
         // Explicit Row (see switch.rs).

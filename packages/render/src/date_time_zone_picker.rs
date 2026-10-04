@@ -9,17 +9,19 @@
 //! zone into one space-joined string; partial values display whichever fields
 //! are present.
 
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
-use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
+use poodle_node::{CrossAxisAlignment, DismissReason, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarSpec, DateTimeZonePickerSpec, TimeInputSpec, TimeZoneSelectSpec};
 
-use crate::calendar::{calendar, CalendarHandlers};
+use crate::calendar::{calendar_with_identity, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
 use crate::context::RenderContext;
-use crate::picker_trigger::{picker_trigger, PickerTrigger};
+use crate::picker_trigger::{
+    configure_picker_surface, configure_picker_trigger, picker_trigger, PickerTrigger,
+};
 use crate::presentation::rem_to_px;
-use crate::time_input::time_input;
+use crate::time_input::time_input_with_value_change;
 use crate::time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 
 /// Host callbacks: the shared picker trio plus zone toggle/change forwarded
@@ -33,6 +35,24 @@ pub struct DateTimeZonePickerHandlers {
     pub on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_zone_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_zone_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+#[derive(Default)]
+pub struct DateTimeZonePickerCallbacks {
+    pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
+    pub on_value_change: Option<Arc<dyn Fn(&poodle_specs::ZonedDateTimeValue) + Send + Sync>>,
+}
+
+impl fmt::Debug for DateTimeZonePickerCallbacks {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("DateTimeZonePickerCallbacks")
+            .field("on_open_change", &self.on_open_change.is_some())
+            .field("on_dismiss", &self.on_dismiss.is_some())
+            .field("on_value_change", &self.on_value_change.is_some())
+            .finish()
+    }
 }
 
 impl DateTimeZonePickerHandlers {
@@ -58,6 +78,20 @@ pub fn date_time_zone_picker(
     ctx: &RenderContext<'_>,
     handlers: DateTimeZonePickerHandlers,
 ) -> Node {
+    date_time_zone_picker_with_callbacks(
+        spec,
+        ctx,
+        handlers,
+        DateTimeZonePickerCallbacks::default(),
+    )
+}
+
+pub fn date_time_zone_picker_with_callbacks(
+    spec: &DateTimeZonePickerSpec,
+    ctx: &RenderContext<'_>,
+    handlers: DateTimeZonePickerHandlers,
+    callbacks: DateTimeZonePickerCallbacks,
+) -> Node {
     let base_size = ctx.base_size(spec.size);
     let theme = ctx.theme();
     let inline_gap = theme.resolve_space("space.inline.sm");
@@ -69,7 +103,7 @@ pub fn date_time_zone_picker(
     // Contract trigger anatomy is Value + Indicator only, so the committed
     // constituent fields (date / time / zone) are folded into one formatted
     // string. Partial values display whichever fields are present.
-    let value = spec.current_value();
+    let value = spec.current_value().clone();
     let has_value = !value.is_empty();
     let display = if has_value {
         let mut parts: Vec<&str> = Vec::new();
@@ -86,12 +120,41 @@ pub fn date_time_zone_picker(
     } else {
         spec.placeholder.clone()
     };
-    let trigger = picker_trigger(
+    let open = spec.current_open();
+    let toggle = {
+        let on_toggle = handlers.on_toggle.clone();
+        let on_open_change = callbacks.on_open_change.clone();
+        Arc::new(move || {
+            if let Some(on_toggle) = &on_toggle {
+                on_toggle();
+            }
+            if let Some(on_open_change) = &on_open_change {
+                on_open_change(!open);
+            }
+        }) as Arc<dyn Fn() + Send + Sync>
+    };
+    let dismiss = {
+        if callbacks.on_dismiss.is_none() && callbacks.on_open_change.is_none() {
+            None
+        } else {
+            let on_dismiss = callbacks.on_dismiss.clone();
+            let on_open_change = callbacks.on_open_change.clone();
+            Some(Arc::new(move |reason| {
+                if let Some(on_dismiss) = &on_dismiss {
+                    on_dismiss(reason);
+                }
+                if let Some(on_open_change) = &on_open_change {
+                    on_open_change(false);
+                }
+            }) as Arc<dyn Fn(DismissReason) + Send + Sync>)
+        }
+    };
+    let mut trigger = picker_trigger(
         ctx,
         PickerTrigger {
             display: &display,
             has_value,
-            open: spec.current_open(),
+            open,
             disabled: spec.is_disabled,
             size: base_size,
             size_role: spec.size_role,
@@ -99,8 +162,18 @@ pub fn date_time_zone_picker(
             indicator_size: None,
             elevated,
             border_color,
-            on_toggle: handlers.on_toggle.as_ref(),
+            on_toggle: Some(&toggle),
         },
+    );
+    configure_picker_trigger(
+        &mut trigger,
+        &handlers.instance_id,
+        spec.aria_label
+            .as_deref()
+            .filter(|label| !label.trim().is_empty())
+            .unwrap_or(&display),
+        open,
+        dismiss.clone(),
     );
 
     // ── Root wrapper: contract §7/§8 min-width 18rem ──
@@ -116,7 +189,7 @@ pub fn date_time_zone_picker(
 
     // ── Overlay surface when open (contract §2 Surface → Body → Calendar +
     //    Fields → Time field + Time-zone field). ──
-    if spec.current_open() {
+    if open {
         // Composed Calendar (single), seeded from the structured value's date.
         let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on);
         if let Some(ref date) = value.date {
@@ -161,7 +234,23 @@ pub fn date_time_zone_picker(
         };
 
         // Time field — contract Field: "TIME" label above composed TimeInput.
-        let time_input_group = field_group(field_label("Time", muted), time_input(&time_spec, ctx));
+        let time_change = callbacks.on_value_change.clone().map(|on_change| {
+            let base = value.clone();
+            Arc::new(move |time: Option<String>| {
+                let mut next = base.clone();
+                next.time = time;
+                on_change(&next);
+            }) as Arc<dyn Fn(Option<String>) + Send + Sync>
+        });
+        let time_input_group = field_group(
+            field_label("Time", muted),
+            time_input_with_value_change(
+                &time_spec,
+                ctx,
+                &format!("{}:time", handlers.instance_id),
+                time_change,
+            ),
+        );
 
         // Time zone field — "TIME ZONE" label above composed TimeZoneSelect.
         let tz_field_group = field_group(
@@ -171,7 +260,22 @@ pub fn date_time_zone_picker(
                 ctx,
                 TimeZoneSelectHandlers {
                     on_toggle: handlers.on_zone_toggle.clone(),
-                    on_change: handlers.on_zone_change.clone(),
+                    on_change: {
+                        let legacy = handlers.on_zone_change.clone();
+                        let on_value_change = callbacks.on_value_change.clone();
+                        let base = value.clone();
+                        Some(Arc::new(move |zone: &str| {
+                            if let Some(legacy) = &legacy {
+                                legacy(zone);
+                            }
+                            if let Some(on_value_change) = &on_value_change {
+                                let mut next = base.clone();
+                                next.time_zone = Some(zone.to_owned());
+                                on_value_change(&next);
+                            }
+                        })
+                            as Arc<dyn Fn(&str) + Send + Sync>)
+                    },
                     ..TimeZoneSelectHandlers::new(handlers.instance_id.clone())
                 },
             ),
@@ -188,10 +292,7 @@ pub fn date_time_zone_picker(
         let fields = fields.child(time_input_group).child(tz_field_group);
 
         // Body — vertical stack of Calendar + Fields; gap 0.875rem.
-        // Contract: the open picker surface is a `dialog` (stated on the body
-        // in the reference tier — matched exactly).
         let mut body = Node::container();
-        body.a11y.role = Some(NodeRole::Dialog);
         {
             let s = &mut body.style;
             s.fill_width = true;
@@ -199,15 +300,31 @@ pub fn date_time_zone_picker(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
             s.descriptor.layout.spacing.gap = rem_to_px(0.875);
         }
+        let date_change = {
+            let on_select = handlers.on_select.clone();
+            let on_value_change = callbacks.on_value_change.clone();
+            let base = value.clone();
+            Arc::new(move |date: &str| {
+                if let Some(on_select) = &on_select {
+                    on_select(date);
+                }
+                if let Some(on_value_change) = &on_value_change {
+                    let mut next = base.clone();
+                    next.date = Some(date.to_owned());
+                    on_value_change(&next);
+                }
+            }) as Arc<dyn Fn(&str) + Send + Sync>
+        };
         let body = body
-            .child(calendar(
+            .child(calendar_with_identity(
                 &cal_spec,
                 ctx,
                 CalendarHandlers {
-                    on_select: handlers.on_select.clone(),
+                    on_select: Some(date_change),
                     on_range_select: None,
                     on_navigate: handlers.on_navigate.clone(),
                 },
+                Some(format!("{}:calendar", handlers.instance_id)),
             ))
             .child(fields);
 
@@ -219,6 +336,7 @@ pub fn date_time_zone_picker(
         let surface_bg = mix_linear(elevated, panel_bg, 0.98);
 
         let mut surface = Node::container();
+        surface.a11y.role = Some(NodeRole::Dialog);
         {
             let s = &mut surface.style;
             // Explicit Row (see switch.rs): one body child.
@@ -237,6 +355,7 @@ pub fn date_time_zone_picker(
             pad.left = theme.resolve_space("space.panel.x");
             pad.right = theme.resolve_space("space.panel.x");
         }
+        configure_picker_surface(&mut surface, &handlers.instance_id, open, dismiss);
         let surface = surface.child(body);
 
         // Trigger + anchored-below surface stack (overlay anchoring is a

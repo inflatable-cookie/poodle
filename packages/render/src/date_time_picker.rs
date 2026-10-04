@@ -8,22 +8,39 @@
 //! Display text (contract §4): complete value → "date time"; partial → the
 //! prompt for the missing part; empty → placeholder.
 
+use std::sync::Arc;
+
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarSpec, DateTimePickerSpec, TimeInputSpec};
 
-use crate::calendar::{calendar, CalendarHandlers};
+use crate::calendar::{calendar_with_identity, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
 use crate::context::RenderContext;
-use crate::date_picker::DatePickerHandlers;
-use crate::picker_trigger::{picker_trigger, PickerTrigger};
+use crate::date_picker::{
+    compose_handlers, picker_child_scope, picker_dismiss_handler, picker_toggle_handler,
+    DatePickerCallbacks, DatePickerHandlers,
+};
+use crate::picker_trigger::{
+    configure_picker_surface, configure_picker_trigger, picker_trigger, PickerTrigger,
+};
 use crate::presentation::rem_to_px;
-use crate::time_input::time_input;
+use crate::time_input::time_input_with_value_change;
 
 pub fn date_time_picker(
     spec: &DateTimePickerSpec,
     ctx: &RenderContext<'_>,
     handlers: DatePickerHandlers,
 ) -> Node {
+    date_time_picker_with_callbacks(spec, ctx, handlers, DatePickerCallbacks::default())
+}
+
+pub fn date_time_picker_with_callbacks(
+    spec: &DateTimePickerSpec,
+    ctx: &RenderContext<'_>,
+    handlers: DatePickerHandlers,
+    callbacks: DatePickerCallbacks,
+) -> Node {
+    let handlers = compose_handlers(handlers, callbacks);
     let base_size = ctx.base_size(spec.size);
     let theme = ctx.theme();
     let inline_gap = theme.resolve_space("space.inline.sm");
@@ -32,7 +49,7 @@ pub fn date_time_picker(
     let muted = theme.resolve_color("color.text.secondary");
 
     // ── Display text (contract §4) ──
-    let val = spec.current_value();
+    let val = spec.current_value().clone();
     let has_value = val.date.is_some() || val.time.is_some();
     let display = match (val.date.as_deref(), val.time.as_deref()) {
         (Some(d), Some(t)) => format!("{} {}", d, t),
@@ -40,12 +57,15 @@ pub fn date_time_picker(
         (None, Some(t)) => format!("Select date {}", t),
         (None, None) => spec.placeholder.clone(),
     };
-    let trigger = picker_trigger(
+    let open = spec.current_open();
+    let toggle = picker_toggle_handler(&handlers, open);
+    let dismiss = picker_dismiss_handler(&handlers);
+    let mut trigger = picker_trigger(
         ctx,
         PickerTrigger {
             display: &display,
             has_value,
-            open: spec.current_open(),
+            open,
             disabled: spec.is_disabled,
             size: base_size,
             size_role: spec.size_role,
@@ -53,8 +73,18 @@ pub fn date_time_picker(
             indicator_size: None,
             elevated,
             border_color,
-            on_toggle: handlers.on_toggle.as_ref(),
+            on_toggle: Some(&toggle),
         },
+    );
+    configure_picker_trigger(
+        &mut trigger,
+        &handlers.instance_id,
+        spec.aria_label
+            .as_deref()
+            .filter(|label| !label.trim().is_empty())
+            .unwrap_or(&display),
+        open,
+        dismiss.clone(),
     );
 
     // ── Root wrapper: contract §7/§8 min-width 16rem ──
@@ -69,7 +99,7 @@ pub fn date_time_picker(
 
     // ── Overlay surface when open (contract §2 Surface → Body → Calendar +
     //    Time Section). Composes the real calendar + time_input primitives. ──
-    if spec.current_open() {
+    if open {
         // Composed Calendar (single), seeded from the picker's date.
         let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on);
         if let Some(ref date) = val.date {
@@ -99,9 +129,22 @@ pub fn date_time_picker(
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.spacing.gap = rem_to_px(0.375);
         }
+        let time_value = val.clone();
+        let time_change = handlers.on_date_time_change.clone().map(|on_change| {
+            Arc::new(move |time: Option<String>| {
+                let mut next = time_value.clone();
+                next.time = time;
+                on_change(&next);
+            }) as Arc<dyn Fn(Option<String>) + Send + Sync>
+        });
         let time_section = time_section
             .child(time_label)
-            .child(time_input(&time_spec, ctx));
+            .child(time_input_with_value_change(
+                &time_spec,
+                ctx,
+                &picker_child_scope(&handlers.instance_id, "time"),
+                time_change,
+            ));
 
         // Body — vertical stack of Calendar + Time Section; gap 0.875rem.
         let mut body = Node::container();
@@ -112,15 +155,32 @@ pub fn date_time_picker(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
             s.descriptor.layout.spacing.gap = rem_to_px(0.875);
         }
+        let date_change = {
+            let on_change = handlers.on_date_time_change.clone();
+            let on_select = handlers.on_select.clone();
+            let date_value = val.clone();
+            Arc::new(move |date: &str| {
+                if let Some(on_select) = &on_select {
+                    on_select(date);
+                }
+                if let Some(on_change) = &on_change {
+                    let mut next = date_value.clone();
+                    next.date = Some(date.to_owned());
+                    on_change(&next);
+                }
+            }) as Arc<dyn Fn(&str) + Send + Sync>
+        };
         let body = body
-            .child(calendar(
+            .child(calendar_with_identity(
                 &cal_spec,
                 ctx,
                 CalendarHandlers {
-                    on_select: handlers.on_select.clone(),
+                    on_select: Some(date_change),
                     on_range_select: None,
                     on_navigate: handlers.on_navigate.clone(),
                 },
+                (!handlers.instance_id.is_empty())
+                    .then(|| format!("{}:calendar", handlers.instance_id)),
             ))
             .child(time_section);
 
@@ -153,6 +213,7 @@ pub fn date_time_picker(
             pad.left = theme.resolve_space("space.panel.x");
             pad.right = theme.resolve_space("space.panel.x");
         }
+        configure_picker_surface(&mut surface, &handlers.instance_id, open, dismiss);
         let surface = surface.child(body);
 
         // Trigger + anchored-below surface stack (overlay anchoring is a
@@ -167,10 +228,5 @@ pub fn date_time_picker(
         root.interaction.disabled = true;
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            root.a11y.label = Some(label.to_string());
-        }
-    }
     root
 }

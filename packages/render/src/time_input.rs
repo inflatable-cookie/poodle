@@ -11,7 +11,9 @@ use poodle_headless::time_input::{
     format_time, parse_time, time_input_invalid, time_input_transition, time_seconds_visible,
     TimeInputContext, TimeInputEffect, TimeInputEvent, TimeSegment,
 };
-use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole, TextChangeHandler};
+use poodle_node::{
+    CrossAxisAlignment, FocusRing, LayoutDirection, Node, NodeRole, TextChangeHandler,
+};
 use poodle_specs::TimeInputSpec;
 
 use crate::context::RenderContext;
@@ -29,6 +31,45 @@ pub struct TimeInputHandlers {
 pub fn time_input(spec: &TimeInputSpec, ctx: &RenderContext<'_>) -> Node {
     let context = context_from_spec(spec);
     time_input_with_handlers(spec, ctx, &context, TimeInputHandlers::default())
+}
+
+/// Builds a time field for a date composite with a stable native identity and
+/// a value callback that preserves the optional empty value.
+pub(crate) fn time_input_with_value_change(
+    spec: &TimeInputSpec,
+    ctx: &RenderContext<'_>,
+    instance_id: &str,
+    on_value_change: Option<Arc<dyn Fn(Option<String>) + Send + Sync>>,
+) -> Node {
+    fn assign_segment_ids(node: &mut Node, instance_id: &str) {
+        if node.a11y.role == Some(poodle_node::NodeRole::SpinButton) {
+            if let Some(label) = node.a11y.label.as_deref() {
+                let part = label.to_ascii_lowercase().replace(' ', "-");
+                let id = format!("{instance_id}:{part}");
+                node.id = Some(id.clone());
+                node.runtime_id = Some(id);
+            }
+        }
+        for child in &mut node.children {
+            assign_segment_ids(child, instance_id);
+        }
+    }
+
+    let context = context_from_spec(spec);
+    let mut node = time_input_with_handlers(
+        spec,
+        ctx,
+        &context,
+        TimeInputHandlers {
+            live_context: Some(Arc::new(Mutex::new(context.clone()))),
+            on_value_change,
+            ..TimeInputHandlers::default()
+        },
+    );
+    if !instance_id.trim().is_empty() {
+        assign_segment_ids(&mut node, instance_id);
+    }
+    node
 }
 
 pub fn time_input_with_change(
@@ -178,6 +219,11 @@ pub fn time_input_with_handlers(
         seg.interaction.disabled = spec.is_disabled;
         if !spec.is_disabled {
             seg.interaction.focusable = true;
+            seg.style.focus_ring = Some(FocusRing {
+                color: ctx.theme().resolve_color("color.accent.focusRing"),
+                width: ctx.theme().resolve_border_width("border.width.focus"),
+                offset: rem_to_px(0.125),
+            });
             let dispatch_keys = Arc::clone(&dispatch);
             seg.interaction.on_edit_key = Some(Arc::new(move |key: &str, _mods| {
                 let event = match key {

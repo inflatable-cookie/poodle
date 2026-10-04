@@ -558,7 +558,10 @@ mod tests {
                 )
             });
             let host_button = toolbar
-                .find(&|n| matches!(n.a11y.role, Some(poodle_node::NodeRole::Button)))
+                .find(&|n| {
+                    matches!(n.a11y.role, Some(poodle_node::NodeRole::Button))
+                        && n.a11y.label.as_deref() == Some("Host filter")
+                })
                 .expect("host button inside the toolbar");
             assert_eq!(fixed_height(host_button), 52.0);
             assert_eq!(role(host_button, "size"), Some("xl"));

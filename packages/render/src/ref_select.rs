@@ -10,19 +10,73 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, DismissHandler, DismissReason, LayoutDirection, LayoutSizing,
+    Node, NodeRole, StylePatch,
+};
 use poodle_specs::{ControlDensity, ControlSize, RefSelectSpec, RefSelectVariant, TextInputSpec};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
+use crate::menu::roving_key_handler;
+use crate::picker_trigger::{configure_picker_surface, configure_picker_trigger};
 use crate::presentation::rem_to_px;
-use crate::text_input::text_input;
+use crate::text_input::{text_input_with_handlers, TextInputHandlers};
+
+/// Host callbacks for one RefSelect. `on_open_change` receives the state the
+/// trigger moves **to**, since `RefSelectSpec::is_open` is host-controlled.
+///
+/// A non-empty `instance_id` gives the trigger, surface, search field and rows
+/// stable runtime ids (`{id}:trigger`, `{id}:surface`, `{id}:search`,
+/// `{id}:option:{value}`) and puts the open surface on the shared dismiss
+/// stack, so Escape and outside dismissal reach `on_dismiss`, then
+/// `on_open_change(false)`.
+#[derive(Default)]
+pub struct RefSelectHandlers {
+    pub instance_id: String,
+    pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_search_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
+}
 
 pub fn ref_select(
     spec: &RefSelectSpec,
     ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
+    ref_select_with_handlers(
+        spec,
+        ctx,
+        RefSelectHandlers {
+            on_change,
+            ..RefSelectHandlers::default()
+        },
+    )
+}
+
+pub fn ref_select_with_handlers(
+    spec: &RefSelectSpec,
+    ctx: &RenderContext<'_>,
+    handlers: RefSelectHandlers,
+) -> Node {
+    let on_change = handlers.on_change.clone();
+    let instance_id = handlers.instance_id.clone();
+    let dismiss: Option<DismissHandler> =
+        if handlers.on_dismiss.is_some() || handlers.on_open_change.is_some() {
+            let on_dismiss = handlers.on_dismiss.clone();
+            let on_open_change = handlers.on_open_change.clone();
+            Some(Arc::new(move |reason| {
+                if let Some(on_dismiss) = &on_dismiss {
+                    on_dismiss(reason);
+                }
+                if let Some(on_open_change) = &on_open_change {
+                    on_open_change(false);
+                }
+            }))
+        } else {
+            None
+        };
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
 
@@ -112,7 +166,27 @@ pub fn ref_select(
     }
     let mut chevron = Node::icon("chevron-down", trigger_font);
     chevron.style.descriptor.text_color = Some(glyph_color);
-    let trigger = trigger.child(kind_glyph).child(label).child(chevron);
+    let mut trigger = trigger.child(kind_glyph).child(label).child(chevron);
+    // Contract §6: the trigger is a dialog opener named "{ariaLabel}: {label}".
+    if !instance_id.is_empty() {
+        configure_picker_trigger(
+            &mut trigger,
+            &instance_id,
+            &format!("{}: {}", spec.aria_label, spec.trigger_label()),
+            spec.is_open,
+            dismiss.clone(),
+        );
+    }
+    if !spec.is_disabled {
+        trigger.interaction.focusable = true;
+        trigger.style.descriptor.cursor = CursorHint::Pointer;
+        if let Some(on_open_change) = handlers.on_open_change.clone() {
+            let next = !spec.is_open;
+            trigger.interaction.on_activate = Some(Arc::new(move || on_open_change(next)));
+        }
+    } else {
+        trigger.interaction.disabled = true;
+    }
 
     let mut root = Node::container();
     root.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -139,13 +213,36 @@ pub fn ref_select(
             search.placeholder = Some(spec.search_placeholder.clone());
             // A search field inside a panel has no visible label of its own.
             search.aria_label = Some("Search references".to_string());
-            panel = panel.child(text_input(&search, ctx, None));
+            if !instance_id.is_empty() {
+                search = search.with_id(format!("{instance_id}:search"));
+            }
+            let on_search_change = handlers.on_search_change.clone();
+            let mut search_node = text_input_with_handlers(
+                &search,
+                ctx,
+                TextInputHandlers {
+                    on_change: on_search_change,
+                    ..TextInputHandlers::default()
+                },
+            );
+            // Contract §6: focus enters the search field on open.
+            search_node.a11y.initial_focus = !spec.is_disabled;
+            panel = panel.child(search_node);
         }
 
         let rows = spec.rows();
+        let row_ids: Vec<String> = rows
+            .iter()
+            .map(|option| format!("{instance_id}:option:{}", option.value))
+            .collect();
+        let row_disabled: Vec<bool> = rows
+            .iter()
+            .map(|option| option.is_disabled || spec.is_disabled)
+            .collect();
         // Contract: the results are a `listbox` of `option`s.
         let mut list = Node::container();
         list.a11y.role = Some(NodeRole::ListBox);
+        list.a11y.label = Some(spec.aria_label.clone());
         list.style.descriptor.layout.direction = LayoutDirection::Column;
         list.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
         for (index, option) in rows.iter().enumerate() {
@@ -170,6 +267,30 @@ pub fn ref_select(
             let mut row = Node::container();
             // Each result row is an `option` of the listbox above it.
             row.a11y.role = Some(NodeRole::ListBoxOption);
+            row.a11y.selected = Some(is_selected);
+            row.a11y.label = Some(if spec.is_current(option) {
+                format!("{} {}", option.label, spec.current_label)
+            } else {
+                option.label.clone()
+            });
+            if !instance_id.is_empty() {
+                row.id = Some(row_ids[index].clone());
+                row.runtime_id = Some(row_ids[index].clone());
+                if !row_disabled[index] {
+                    row.interaction.focusable = true;
+                    // Visible focus: the web option shows its hover fill on focus.
+                    row.style.focus = Some(StylePatch {
+                        background: Some(with_alpha(text_secondary, 0.12)),
+                        border_color: None,
+                        text_color: None,
+                        opacity: None,
+                    });
+                    // Contract §6: arrows move through the options.
+                    row.interaction.on_key = roving_key_handler(&row_disabled, &row_ids, index);
+                }
+                // Without a search field focus enters the selected option.
+                row.a11y.initial_focus = !spec.is_searchable && is_selected && !row_disabled[index];
+            }
             {
                 let s = &mut row.style;
                 s.flex_none = true;
@@ -227,13 +348,21 @@ pub fn ref_select(
             }
 
             if option.is_disabled {
+                row.interaction.disabled = true;
                 row.style.descriptor.opacity =
                     ctx.theme().resolve_opacity(spec.disabled_opacity_token());
             } else if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let id = option.value.clone();
+                // Contract §5: choosing a ref is terminal and closes the popover.
+                let on_open_change = handlers.on_open_change.clone();
                 row.style.descriptor.cursor = CursorHint::Pointer;
-                row.interaction.on_activate = Some(Arc::new(move || handler(&id)));
+                row.interaction.on_activate = Some(Arc::new(move || {
+                    handler(&id);
+                    if let Some(on_open_change) = &on_open_change {
+                        on_open_change(false);
+                    }
+                }));
             }
 
             list = list.child(row);
@@ -284,6 +413,8 @@ pub fn ref_select(
             dialog.interaction.on_activate = Some(Arc::new(|| {}));
         }
 
+        panel.a11y.label = Some(spec.aria_label.clone());
+        configure_picker_surface(&mut panel, &instance_id, spec.is_open, dismiss);
         root = root.child(dialog.child(panel));
     }
 
