@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "3f07f93a400db494be74a0496cace80e9af389c5",
+  "source_commit": "5f934ac1f06aa8884b6b8a8e300da7f537a5ba98",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -3482,17 +3482,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#changed_files_disclosure_and_selection_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3504,12 +3519,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ChangedFiles--changed-files-disclosure-and-selection-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test changed_files_disclosure_and_selection_rebuild_the_host_spec proves no events claim; events stays missing.",
-        "Expected test changed_files_disclosure_and_selection_rebuild_the_host_spec proves no pointer claim; pointer stays missing.",
-        "Expected test changed_files_disclosure_and_selection_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.",
-        "Expected test changed_files_disclosure_and_selection_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ToolCall",
@@ -3580,17 +3590,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3602,12 +3627,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ToolCallGroup--tool-call-group-disclosure-rebuilds-the-host-spec-through-mounted-input.json"
       ],
-      "refusals": [
-        "Expected test tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.",
-        "Expected test tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.",
-        "Expected test tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.",
-        "Expected test tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "StatusBar",
@@ -6485,17 +6505,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_picker_roving_focus_moves_real_backend_focus"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_picker_roving_focus_moves_real_backend_focus"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_picker_roving_focus_moves_real_backend_focus"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_picker_roving_focus_moves_real_backend_focus"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_picker_roving_focus_moves_real_backend_focus"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#model_connection_picker_roving_focus_moves_real_backend_focus"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6507,12 +6542,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ModelConnectionPicker--model-connection-picker-roving-focus-moves-real-backend-focus.json"
       ],
-      "refusals": [
-        "Expected test model_connection_picker_roving_focus_moves_real_backend_focus proves no events claim; events stays missing.",
-        "Expected test model_connection_picker_roving_focus_moves_real_backend_focus proves no pointer claim; pointer stays missing.",
-        "Expected test model_connection_picker_roving_focus_moves_real_backend_focus proves no accessibility claim; accessibility stays missing.",
-        "Expected test model_connection_picker_roving_focus_moves_real_backend_focus proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ModelConnectionSetup",
@@ -7694,17 +7724,17 @@
   ],
   "summary": {
     "admittedRows": 78,
-    "fullyAdmittedRows": 40,
+    "fullyAdmittedRows": 43,
     "missingTally": {
       "semantic": 97,
-      "events": 94,
-      "pointer": 105,
+      "events": 91,
+      "pointer": 102,
       "keyboard_focus": 92,
-      "accessibility": 113,
-      "visual": 129
+      "accessibility": 110,
+      "visual": 126
     },
     "holdCount": 175,
-    "refusalCount": 209
+    "refusalCount": 197
   },
   "groups": [
     {
@@ -7954,39 +7984,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "Table",
-        "TimeZoneSelect",
-        "ToolCallGroup"
-      ],
-      "missingTally": {
-        "semantic": 6,
-        "events": 8,
-        "pointer": 9,
-        "keyboard_focus": 6,
-        "accessibility": 9,
-        "visual": 9
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/tool-call-group.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -8048,6 +8045,33 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ListContainer",
+        "LogList",
+        "Table",
+        "TimeZoneSelect"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 5,
+        "pointer": 6,
+        "keyboard_focus": 6,
+        "accessibility": 6,
+        "visual": 6
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-zone-select.md"
       ]
     },
     {

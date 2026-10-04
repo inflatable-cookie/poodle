@@ -42,13 +42,13 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "3f07f93a400db494be74a0496cace80e9af389c5",
+  "source_commit": "5f934ac1f06aa8884b6b8a8e300da7f537a5ba98",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-081-rebase-340-3f07f93a",
+    "run_id": "2026-10-04-poodle-082-rustfmt-5f934ac1",
     "outcome": "passed",
     "body_sha256": "9716c4c119a459be548d56baa1dc66fdc5a030e9f4e07b3f8544f1e4d199dde7"
   },

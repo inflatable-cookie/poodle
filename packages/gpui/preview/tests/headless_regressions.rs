@@ -11295,18 +11295,34 @@ fn licence_seats_seat_row_enter_and_escape_restore_display_focus() {
 /// selects it, and the disabled routes in between are skipped.
 #[test]
 fn model_connection_picker_roving_focus_moves_real_backend_focus() {
-    use poodle_headless::model_connection::model_connection_picker_fixtures;
+    use poodle_headless::model_connection::{
+        model_connection_picker_fixtures, ModelConnectionOption,
+    };
     use poodle_render::model_connection_option_id;
     use poodle_specs::ModelConnectionPickerSpec;
 
     run_headless(|cx| {
+        fn options() -> Vec<ModelConnectionOption> {
+            model_connection_picker_fixtures()
+                .into_iter()
+                .filter(|option| {
+                    matches!(
+                        option.id.as_str(),
+                        "openai-responses" | "anthropic-messages" | "codex-app" | "ollama-local"
+                    )
+                })
+                .collect()
+        }
+
         let chosen = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&chosen);
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
         let mut node = poodle_render::model_connection_picker(
             &ModelConnectionPickerSpec::new()
-                .with_options(model_connection_picker_fixtures())
+                .with_options(options())
                 .with_value(Some("anthropic-messages".to_string())),
-            &RenderContext::new(&theme()),
+            &ctx,
             poodle_render::ModelConnectionPickerHandlers {
                 on_value_change: Some(Arc::new(move |id: &str| {
                     sink.lock().unwrap().push(id.to_string())
@@ -11314,9 +11330,41 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
                 ..poodle_render::ModelConnectionPickerHandlers::default()
             },
         );
-        node.id = Some(FIXTURE_ID.to_owned());
+        node.id = Some("model-connection-picker-roving-root".to_string());
         let node = Arc::new(Mutex::new(node));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 520.0, 420.0);
+
+        {
+            let root = node.lock().unwrap();
+            assert_eq!(root.a11y.role, Some(NodeRole::Region));
+            assert_eq!(root.a11y.label.as_deref(), Some("Choose a connection"));
+            let radio_group = root
+                .find(&|candidate| {
+                    candidate.a11y.role == Some(NodeRole::RadioGroup)
+                        && candidate.a11y.label.as_deref() == Some("Hosted")
+                })
+                .expect("labelled provider radio group");
+            assert_eq!(radio_group.a11y.role, Some(NodeRole::RadioGroup));
+            let selected = root
+                .find(&|candidate| {
+                    candidate.id.as_deref() == Some("model-connection-option:anthropic-messages")
+                })
+                .expect("selected connection route");
+            assert_eq!(selected.a11y.role, Some(NodeRole::RadioButton));
+            assert_eq!(selected.a11y.toggled, Some(poodle_node::NodeToggled::True));
+            assert!(selected.a11y.label.as_deref().is_some_and(|label| {
+                label.starts_with("Anthropic,") && label.contains("Available")
+            }));
+            let expected_accent = ctx.theme().resolve_color("color.accent.base");
+            assert_eq!(selected.style.descriptor.border.color, expected_accent);
+        }
+        let dimensions =
+            poodle_gpui_node_backend::bounds_for("model-connection-option:anthropic-messages")
+                .expect("mounted selected option dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "ModelConnectionPicker option must paint positive mounted dimensions"
+        );
 
         let from = model_connection_option_id("anthropic-messages");
         // `ollama-local` is the next *enabled* option: `codex-app` is checking
@@ -11328,13 +11376,59 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
         assert_eq!(
             chosen.lock().unwrap().as_slice(),
             ["ollama-local"],
-            "the move selects the option it moved to"
+            "the value-change callback payload is the exact enabled route id"
         );
         driver.draw_frame();
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&to),
             Some(true),
             "the backend moved real focus to the named destination"
+        );
+        let pointer_sink = Arc::clone(&chosen);
+        let mut pointer_node = poodle_render::model_connection_picker(
+            &ModelConnectionPickerSpec::new()
+                .with_options(options())
+                .with_value(Some("anthropic-messages".to_string())),
+            &ctx,
+            poodle_render::ModelConnectionPickerHandlers {
+                on_value_change: Some(Arc::new(move |id: &str| {
+                    pointer_sink.lock().unwrap().push(id.to_string())
+                })),
+                ..poodle_render::ModelConnectionPickerHandlers::default()
+            },
+        );
+        pointer_node.id = Some("model-connection-picker-pointer-root".to_string());
+        *node.lock().unwrap() = pointer_node;
+        driver.mount_node(Arc::clone(&node));
+        {
+            let root = node.lock().unwrap();
+            assert_eq!(root.a11y.role, Some(NodeRole::Region));
+            assert_eq!(root.a11y.label.as_deref(), Some("Choose a connection"));
+            let disabled = root
+                .find(&|candidate| {
+                    candidate.id.as_deref() == Some("model-connection-option:codex-app")
+                })
+                .expect("checking route");
+            assert_eq!(disabled.a11y.role, Some(NodeRole::RadioButton));
+            assert!(disabled.interaction.disabled);
+            assert_eq!(disabled.a11y.tab_index, Some(-1));
+            let selected = root
+                .find(&|candidate| {
+                    candidate.id.as_deref() == Some("model-connection-option:anthropic-messages")
+                })
+                .expect("selected route after pointer fixture rebuild");
+            assert_eq!(selected.a11y.toggled, Some(poodle_node::NodeToggled::True));
+        }
+        driver.pointer_activate_id("model-connection-option:codex-app");
+        assert!(
+            chosen.lock().unwrap().as_slice() == ["ollama-local"],
+            "pointer activation leaves disabled routes inert"
+        );
+        driver.pointer_activate_id("model-connection-option:openai-responses");
+        assert_eq!(
+            chosen.lock().unwrap().as_slice(),
+            ["ollama-local", "openai-responses"],
+            "the pointer callback payload is the exact selected route id"
         );
     });
 }
@@ -15398,7 +15492,12 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
     use poodle_specs::ChangedFilesSpec;
 
     run_headless(|cx| {
-        fn build(expanded: bool, selected: Option<String>, mounted: Arc<Mutex<Node>>) -> Node {
+        fn build(
+            expanded: bool,
+            selected: Option<String>,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
             let spec = ChangedFilesSpec::new(
                 "worked",
                 vec![
@@ -15419,26 +15518,38 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
             .with_expanded(expanded);
             let toggle_mount = Arc::clone(&mounted);
             let select_mount = Arc::clone(&mounted);
+            let toggle_events = Arc::clone(&events);
+            let select_events = Arc::clone(&events);
+            let toggle_rebuild_events = Arc::clone(&events);
+            let select_rebuild_events = Arc::clone(&events);
             let expanded_for_select = expanded;
             let selected_for_toggle = selected.clone();
-            let node = poodle_render::changed_files(
+            let mut node = poodle_render::changed_files(
                 &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::ChangedFilesHandlers {
-                    on_toggle: Some(Arc::new(move |_| {
+                    on_toggle: Some(Arc::new(move |id| {
+                        toggle_events.lock().unwrap().push(format!("toggle:{id}"));
                         *toggle_mount.lock().unwrap() = build(
                             !expanded_for_select,
                             selected_for_toggle.clone(),
                             Arc::clone(&toggle_mount),
+                            Arc::clone(&toggle_rebuild_events),
                         );
                     })),
                     on_file_select: Some(Arc::new(move |path| {
-                        *select_mount.lock().unwrap() =
-                            build(true, Some(path.to_string()), Arc::clone(&select_mount));
+                        select_events.lock().unwrap().push(format!("select:{path}"));
+                        *select_mount.lock().unwrap() = build(
+                            true,
+                            Some(path.to_string()),
+                            Arc::clone(&select_mount),
+                            Arc::clone(&select_rebuild_events),
+                        );
                     })),
                     instance_id: None,
                 },
             );
+            node.id = Some("changed-files-card-worked".to_string());
             let mut root = Node::container().child(node).child(Node::text(if expanded {
                 "Files: open"
             } else {
@@ -15451,10 +15562,53 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, None, Arc::clone(&mounted));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let events = Arc::new(Mutex::new(Vec::new()));
+        *mounted.lock().unwrap() = build(false, None, Arc::clone(&mounted), Arc::clone(&events));
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+
+        let expected_surface = ctx.theme().resolve_color("color.background.elevated");
+        let expected_border = ctx.theme().resolve_color("color.border.subtle");
+        {
+            let root = mounted.lock().unwrap();
+            let card = root
+                .find(&|node| node.id.as_deref() == Some("changed-files-card-worked"))
+                .expect("mounted ChangedFiles card");
+            let header = root
+                .find(&|node| node.id.as_deref() == Some("changed-files-toggle-worked"))
+                .expect("ChangedFiles header toggle");
+            assert_eq!(header.a11y.role, Some(NodeRole::Button));
+            assert_eq!(
+                header.a11y.label.as_deref(),
+                Some("2 changed files, 2 added, 0 removed")
+            );
+            assert_eq!(header.a11y.expanded, Some(false));
+            assert_eq!(header.a11y.controls.as_deref(), Some("worked-files"));
+            let chip = root
+                .find(&|node| {
+                    node.id.as_deref() == Some("changed-files-chip-worked-cp-api:Cargo.toml")
+                })
+                .expect("collapsed file chip");
+            assert_eq!(chip.a11y.role, Some(NodeRole::Button));
+            assert_eq!(chip.a11y.label.as_deref(), Some("cp-api/Cargo.toml"));
+            assert_eq!(card.style.descriptor.background, Some(expected_surface));
+            assert_eq!(card.style.descriptor.border.color, expected_border);
+        }
+        let dimensions = poodle_gpui_node_backend::bounds_for("changed-files-card-worked")
+            .expect("mounted ChangedFiles dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "ChangedFiles must paint positive mounted dimensions"
+        );
+
         driver.wait_for_focus_handle("changed-files-toggle-worked");
         driver.keyboard_activate("changed-files-toggle-worked");
+        assert_eq!(
+            events.lock().unwrap().as_slice(),
+            ["toggle:worked"],
+            "the mounted toggle callback carries the card id"
+        );
         assert!(
             mounted
                 .lock()
@@ -15465,6 +15619,33 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
             "disclosure reached the host and painted the next spec"
         );
 
+        {
+            let root = mounted.lock().unwrap();
+            let header = root
+                .find(&|node| node.id.as_deref() == Some("changed-files-toggle-worked"))
+                .expect("expanded ChangedFiles header toggle");
+            assert_eq!(header.a11y.expanded, Some(true));
+            let tree = root
+                .find(&|node| node.id.as_deref() == Some("worked-files"))
+                .expect("expanded file tree target");
+            assert_eq!(tree.a11y.role, Some(NodeRole::Tree));
+            let directory = root
+                .find(&|node| node.id.as_deref() == Some("changed-files-file-worked-cp-api"))
+                .expect("directory tree item");
+            assert_eq!(directory.a11y.role, Some(NodeRole::TreeItem));
+            assert_eq!(directory.a11y.label.as_deref(), Some("cp-api"));
+            assert_eq!(directory.a11y.level, Some(1));
+            assert_eq!(directory.a11y.expanded, Some(true));
+            let file = root
+                .find(&|node| {
+                    node.id.as_deref() == Some("changed-files-file-worked-cp-api:Cargo.toml")
+                })
+                .expect("file tree item");
+            assert_eq!(file.a11y.role, Some(NodeRole::TreeItem));
+            assert_eq!(file.a11y.label.as_deref(), Some("Cargo.toml"));
+            assert_eq!(file.a11y.level, Some(2));
+        }
+
         driver.wait_for_focus_handle("changed-files-file-worked-cp-api:Cargo.toml");
         driver.keyboard_activate("changed-files-file-worked-cp-api:Cargo.toml");
         assert!(
@@ -15474,7 +15655,26 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
                 .texts()
                 .iter()
                 .any(|t| *t == "selected: cp-api/Cargo.toml"),
-            "file selection reached the host and painted the next spec"
+            "keyboard file selection reached the host and painted the next spec"
+        );
+        driver.pointer_activate_id("changed-files-file-worked-cp-docs:notes.md");
+        assert_eq!(
+            events.lock().unwrap().as_slice(),
+            [
+                "toggle:worked",
+                "select:cp-api/Cargo.toml",
+                "select:cp-docs/notes.md"
+            ],
+            "mounted keyboard and pointer callbacks carry the selected file paths"
+        );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "selected: cp-docs/notes.md"),
+            "pointer file selection reached the host and painted the next spec"
         );
     });
 }
@@ -15543,24 +15743,33 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             }
         }
 
-        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+        fn build(
+            expanded: bool,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
             let spec = ToolCallGroupSpec::new(
                 "three",
                 vec![call("a", "one"), call("b", "two"), call("c", "three")],
             )
             .with_expanded(expanded);
             let mount = Arc::clone(&mounted);
-            let node = poodle_render::tool_call_group(
+            let event_sink = Arc::clone(&events);
+            let rebuild_events = Arc::clone(&events);
+            let mut node = poodle_render::tool_call_group(
                 &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::ToolCallGroupHandlers {
-                    on_toggle: Some(Arc::new(move |_| {
-                        *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                    on_toggle: Some(Arc::new(move |id| {
+                        event_sink.lock().unwrap().push(format!("toggle:{id}"));
+                        *mount.lock().unwrap() =
+                            build(!expanded, Arc::clone(&mount), Arc::clone(&rebuild_events));
                     })),
                     on_call_toggle: None,
                     instance_id: None,
                 },
             );
+            node.id = Some("tool-call-group-root".to_string());
             Node::container().child(node).child(Node::text(if expanded {
                 "Run: open"
             } else {
@@ -15569,10 +15778,50 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let events = Arc::new(Mutex::new(Vec::new()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&events));
+        let provider = theme();
+        let ctx = RenderContext::new(&provider);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+
+        let expected_surface = ctx.theme().resolve_color("color.background.surface");
+        {
+            let root = mounted.lock().unwrap();
+            let group = root
+                .find(&|node| node.id.as_deref() == Some("tool-call-group-root"))
+                .expect("mounted ToolCallGroup");
+            let list = root
+                .find(&|node| node.id.as_deref() == Some("three-calls"))
+                .expect("tool call list");
+            assert_eq!(list.a11y.role, Some(NodeRole::List));
+            assert_eq!(
+                list.children[0].a11y.role,
+                Some(NodeRole::ListItem),
+                "the group gives each call its list item semantics"
+            );
+            let toggle = root
+                .find(&|node| node.id.as_deref() == Some("tool-call-group-toggle-three"))
+                .expect("run disclosure toggle");
+            assert_eq!(toggle.a11y.role, Some(NodeRole::Button));
+            assert_eq!(toggle.a11y.label.as_deref(), Some("+2 previous tool calls"));
+            assert_eq!(toggle.a11y.expanded, Some(false));
+            assert_eq!(toggle.a11y.controls.as_deref(), Some("three-calls"));
+            assert_eq!(group.style.descriptor.background, Some(expected_surface));
+        }
+        let dimensions = poodle_gpui_node_backend::bounds_for("tool-call-group-root")
+            .expect("mounted ToolCallGroup dimensions");
+        assert!(
+            dimensions.size.width > px(0.0) && dimensions.size.height > px(0.0),
+            "ToolCallGroup must paint positive mounted dimensions"
+        );
+
         driver.wait_for_focus_handle("tool-call-group-toggle-three");
         driver.keyboard_activate("tool-call-group-toggle-three");
+        assert_eq!(
+            events.lock().unwrap().as_slice(),
+            ["toggle:three"],
+            "the mounted disclosure callback carries the run id"
+        );
         assert!(
             mounted
                 .lock()
@@ -15581,6 +15830,29 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                 .iter()
                 .any(|t| *t == "Run: open"),
             "run disclosure reached the host and painted the next spec"
+        );
+        {
+            let root = mounted.lock().unwrap();
+            let toggle = root
+                .find(&|node| node.id.as_deref() == Some("tool-call-group-toggle-three"))
+                .expect("expanded run disclosure toggle");
+            assert_eq!(toggle.a11y.expanded, Some(true));
+            assert_eq!(toggle.a11y.controls.as_deref(), Some("three-calls"));
+        }
+        driver.pointer_activate_id("tool-call-group-toggle-three");
+        assert_eq!(
+            events.lock().unwrap().as_slice(),
+            ["toggle:three", "toggle:three"],
+            "pointer activation also reaches the run callback"
+        );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Run: shut"),
+            "pointer disclosure reaches the host and paints the collapsed spec"
         );
     });
 }

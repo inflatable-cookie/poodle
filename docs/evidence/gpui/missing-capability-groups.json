@@ -249,39 +249,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "Table",
-        "TimeZoneSelect",
-        "ToolCallGroup"
-      ],
-      "missingTally": {
-        "semantic": 6,
-        "events": 8,
-        "pointer": 9,
-        "keyboard_focus": 6,
-        "accessibility": 9,
-        "visual": 9
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/tool-call-group.md"
-      ]
-    },
-    {
       "substrate": "general-composite",
       "components": [
         "Collapsible",
@@ -343,6 +310,33 @@
         "docs/contracts/components/metric-tile.md",
         "docs/contracts/components/state-tile.md",
         "docs/contracts/components/text-link.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ListContainer",
+        "LogList",
+        "Table",
+        "TimeZoneSelect"
+      ],
+      "missingTally": {
+        "semantic": 6,
+        "events": 5,
+        "pointer": 6,
+        "keyboard_focus": 6,
+        "accessibility": 6,
+        "visual": 6
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-zone-select.md"
       ]
     },
     {
