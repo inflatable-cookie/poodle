@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "9908100f7e181dd9a14f3d757478575a6ad9ac3d",
+  "source_commit": "71378c6bb1b54507b08296728ef5e798d433632c",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -7729,39 +7729,15 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [
-        {
-          "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
-        },
-        {
-          "axis": "events",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
-        },
-        {
-          "axis": "pointer",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
-        },
-        {
-          "axis": "keyboard_focus",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
-        },
-        {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
-        }
+      "admitted": [],
+      "missing": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
       ],
-      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7770,10 +7746,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [
-        "docs/evidence/gpui/mounted-receipts/ToastStack--first-mounted-parity-toast-stack.json"
-      ],
-      "refusals": []
+      "receipts": [],
+      "refusals": [
+        "No validated receipt and no retained expected test for ToastStack; every required capability stays missing."
+      ]
     },
     {
       "component": "ToastHost",
@@ -8574,18 +8550,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 112,
-    "fullyAdmittedRows": 89,
+    "admittedRows": 111,
+    "fullyAdmittedRows": 88,
     "missingTally": {
-      "semantic": 63,
-      "events": 54,
-      "pointer": 60,
-      "keyboard_focus": 56,
-      "accessibility": 69,
-      "visual": 82
+      "semantic": 64,
+      "events": 55,
+      "pointer": 61,
+      "keyboard_focus": 57,
+      "accessibility": 70,
+      "visual": 83
     },
     "holdCount": 175,
-    "refusalCount": 126
+    "refusalCount": 127
   },
   "groups": [
     {
@@ -8823,6 +8799,31 @@
       ]
     },
     {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "Menubar",
+        "NavigationMenu",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 5,
+        "events": 5,
+        "pointer": 5,
+        "keyboard_focus": 5,
+        "accessibility": 5,
+        "visual": 5
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
+      ]
+    },
+    {
       "substrate": "media-data",
       "components": [
         "AudioMeter",
@@ -8845,29 +8846,6 @@
         "docs/contracts/components/gain-reduction-meter.md",
         "docs/contracts/components/value-readout.md",
         "docs/contracts/components/xy-pad.md"
-      ]
-    },
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ContextMenu",
-        "Menubar",
-        "NavigationMenu",
-        "SplitButton"
-      ],
-      "missingTally": {
-        "semantic": 4,
-        "events": 4,
-        "pointer": 4,
-        "keyboard_focus": 4,
-        "accessibility": 4,
-        "visual": 4
-      },
-      "contracts": [
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/split-button.md"
       ]
     },
     {

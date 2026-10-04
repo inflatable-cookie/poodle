@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `9908100f7e181dd9a14f3d757478575a6ad9ac3d`
+Evidence commit (execution identity from the execution record, not the checkout): `71378c6bb1b54507b08296728ef5e798d433632c`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **112**/175.
-Fully admitted rows: **89**/175.
-Missing by axis: semantic 63; events 54; pointer 60; keyboard_focus 56; accessibility 69; visual 82.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **126**.
+Rows with at least one admitted capability: **111**/175.
+Fully admitted rows: **88**/175.
+Missing by axis: semantic 64; events 55; pointer 61; keyboard_focus 57; accessibility 70; visual 83.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **127**.
 
 ## Rows
 
@@ -179,7 +179,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **126**.
 | HistoryCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/HistoryCenter--first-mounted-parity-history-center.json` |
 | UpdateStatus | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateStatus--update-status-confirm-then-install-through-the-real-tree.json` |
 | UpdateCenter | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/UpdateCenter--update-center-hidden-presence-mounts-nothing-and-open-shows-status.json` |
-| ToastStack | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ToastStack--first-mounted-parity-toast-stack.json` |
+| ToastStack | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | ToastHost | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | AudioMeter | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | MeterSurface | not-applicable (web-only) | — | — | — | — |
@@ -314,6 +314,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **126**.
 - ModelConnectionCard: Expected test model_connection_card_closes_and_returns_real_focus_to_the_disclosure proves no visual claim; visual stays missing.
 - ModelCatalogueEditor: Expected test model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window proves no pointer claim; pointer stays missing.
 - ModelCatalogueEditor: Expected test model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window proves no visual claim; visual stays missing.
+- ToastStack: No validated receipt and no retained expected test for ToastStack; every required capability stays missing.
 - AudioMeter: No validated receipt and no retained expected test for AudioMeter; every required capability stays missing.
 - AudioSwitch: No validated receipt and no retained expected test for AudioSwitch; every required capability stays missing.
 - DragNumberField: No validated receipt and no retained expected test for DragNumberField; every required capability stays missing.
@@ -340,7 +341,7 @@ Shared-substrate groupings for repair-tranche compilation. Grouping only; no tra
 - general-composite: 9 components (Collapsible, EnvelopeEditor, FieldSet, LicenceStatus, ModMatrixGrid, ModelConnectionCard, Spacer, Stack, WaveformDisplay); missing semantic 6; events 7; pointer 5; keyboard_focus 6; accessibility 6; visual 9
 - text-display: 8 components (Code, Eyebrow, Icon, IconProvider, MediaPreview, MetricTile, StateTile, TextLink); missing semantic 7; events 4; pointer 6; keyboard_focus 6; accessibility 7; visual 7
 - layout-primitive: 6 components (Box, Grid, ListGrid, Skeleton, TimeAgo, Tooltip); missing semantic 6; events 2; pointer 2; keyboard_focus 3; accessibility 6; visual 6
+- overlay-dismissal: 5 components (ContextMenu, Menubar, NavigationMenu, SplitButton, ToastStack); missing semantic 5; events 5; pointer 5; keyboard_focus 5; accessibility 5; visual 5
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
-- overlay-dismissal: 4 components (ContextMenu, Menubar, NavigationMenu, SplitButton); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 4
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - agent-composites: 2 components (AgentMessage, MotionPolicyProvider); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2
