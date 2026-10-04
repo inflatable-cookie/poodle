@@ -210,35 +210,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ContextMenu",
-        "HistoryCenter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 7,
-        "pointer": 7,
-        "keyboard_focus": 7,
-        "accessibility": 7,
-        "visual": 7
-      },
-      "contracts": [
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
@@ -309,6 +280,27 @@
         "docs/contracts/components/detail-section.md",
         "docs/contracts/components/scroll-shell.md",
         "docs/contracts/components/ui-presentation-provider.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "HistoryCenter",
+        "PageLoading",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 3,
+        "events": 3,
+        "pointer": 3,
+        "keyboard_focus": 3,
+        "accessibility": 3,
+        "visual": 3
+      },
+      "contracts": [
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/toast-stack.md"
       ]
     },
     {
