@@ -41559,3 +41559,771 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
         assert!(driver.mounted_observation().is_valid());
     });
 }
+
+fn overlay_host(node: Node) -> gpui::AnyElement {
+    use gpui::{div, IntoElement, ParentElement, Styled};
+    div()
+        .relative()
+        .size_full()
+        .child(poodle_gpui_node_backend::to_gpui(&node))
+        .into_any_element()
+}
+
+/// AlertDialog mounts the composed alertdialog, fires confirm/cancel through
+/// pointer and Escape, and working rebuilds gate every dismissal route.
+#[test]
+fn first_mounted_parity_alert_dialog() {
+    use gpui::{div, point, px, AnyElement, IntoElement};
+    use node_compat::{AlertDialog, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{AlertDialogSpec, AlertDialogTone};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = AlertDialogSpec::new("Delete dataset?")
+            .with_description("This cannot be undone.")
+            .with_tone(AlertDialogTone::Danger)
+            .with_confirm_label("Delete")
+            .with_cancel_label("Keep")
+            .with_item_detail("Dataset", "telemetry.parquet");
+        let open = poodle_render::alert_dialog(
+            &spec,
+            &ctx,
+            false,
+            poodle_render::DEFAULT_WORKING_LABEL,
+            poodle_render::AlertDialogHandlers {
+                cancel: Some(Arc::new(|| {})),
+                confirm: None,
+            },
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("AlertDialog composes the Dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::AlertDialog));
+        assert_eq!(
+            surface.a11y.label.as_deref(),
+            Some("Delete dataset?"),
+            "alertdialog accessible name comes from the title"
+        );
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(24.0)),
+            "AlertDialog uses Dialog width Sm (24rem)"
+        );
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.overlay"))
+        );
+        assert!(open.style.overlay);
+        assert_eq!(
+            surface.interaction.dismiss_layer.as_deref(),
+            Some("poodle-dialog-layer")
+        );
+        assert!(open.has_text("Dataset:"));
+        assert!(open.has_text("telemetry.parquet"));
+        let cancel = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Keep"))
+            .expect("cancel Button");
+        let confirm = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Delete"))
+            .expect("confirm Button");
+        assert_eq!(
+            cancel.roles.get("variant").map(String::as_str),
+            Some("ghost")
+        );
+        assert_eq!(
+            confirm.roles.get("variant").map(String::as_str),
+            Some("primary")
+        );
+        assert_eq!(
+            confirm.roles.get("tone").map(String::as_str),
+            Some("danger")
+        );
+
+        let pending = poodle_render::alert_dialog(
+            &spec,
+            &ctx,
+            true,
+            poodle_render::DEFAULT_WORKING_LABEL,
+            poodle_render::AlertDialogHandlers {
+                cancel: Some(Arc::new(|| {})),
+                confirm: None,
+            },
+        );
+        assert!(pending
+            .find(&|node| matches!(
+                &node.kind,
+                NodeKind::Button { label } if label == poodle_render::DEFAULT_WORKING_LABEL
+            ))
+            .is_some());
+        assert!(pending
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-close"))
+            .is_none());
+        for label in ["Keep", poodle_render::DEFAULT_WORKING_LABEL] {
+            let button = pending
+                .find(&|node| {
+                    matches!(&node.kind, NodeKind::Button { label: current } if current == label)
+                })
+                .unwrap_or_else(|| panic!("pending action {label}"));
+            assert!(button.interaction.disabled);
+            assert!(button.interaction.on_activate.is_none());
+        }
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            working: bool,
+            accept_close: bool,
+            events: Vec<String>,
+        }
+
+        fn mount(host: &Arc<Mutex<Host>>, spec: &AlertDialogSpec) -> AnyElement {
+            let current = host.lock().expect("AlertDialog host").clone();
+            if !current.open {
+                return div().id("alert-dialog-closed").into_any_element();
+            }
+            let confirm_host = Arc::clone(host);
+            let cancel_host = Arc::clone(host);
+            let mut node = AlertDialog::from_spec(spec.clone(), &theme())
+                .working(current.working)
+                .on_confirm(Arc::new(move || {
+                    let mut host = confirm_host.lock().expect("AlertDialog host");
+                    host.events.push("confirm".to_owned());
+                    if host.accept_close {
+                        host.open = false;
+                    }
+                }))
+                .on_cancel(Arc::new(move || {
+                    let mut host = cancel_host.lock().expect("AlertDialog host");
+                    host.events.push("cancel".to_owned());
+                    if host.accept_close {
+                        host.open = false;
+                    }
+                }))
+                .into_compat_node();
+            stamp_labelled_id(&mut node, "Keep", "alert-cancel");
+            if current.working {
+                stamp_labelled_id(
+                    &mut node,
+                    poodle_render::DEFAULT_WORKING_LABEL,
+                    "alert-confirm",
+                );
+            } else {
+                stamp_labelled_id(&mut node, "Delete", "alert-confirm");
+            }
+            poodle_gpui_node_backend::to_gpui(&node)
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: true,
+            working: false,
+            accept_close: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            Rc::new(move || mount(&host, &spec))
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("AlertDialog surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::AlertDialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Delete dataset?"));
+        assert_eq!(
+            painted.style.background,
+            Some(theme_provider.resolve_color("color.background.elevated"))
+        );
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("AlertDialog backdrop bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("AlertDialog surface bounds");
+        let viewport_size = driver.with_window(|window, _| window.viewport_size());
+        assert!(backdrop_bounds.size.width > px(0.0) && backdrop_bounds.size.height > px(0.0));
+        assert!(
+            backdrop_bounds.size.width <= viewport_size.width
+                && backdrop_bounds.size.height <= viewport_size.height
+        );
+        assert!(bounds_contain(backdrop_bounds, surface_bounds));
+        assert!(surface_bounds.size.width > px(0.0) && surface_bounds.size.height > px(0.0));
+
+        driver.wait_for_focus_handle("alert-confirm");
+        driver.pointer_activate_id("alert-confirm");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events.as_slice(),
+            ["confirm"],
+            "confirm callback fires through the mounted backend"
+        );
+        driver.pointer_activate_id("alert-cancel");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events.as_slice(),
+            ["confirm", "cancel"],
+            "cancel callback fires through the mounted backend"
+        );
+        let outside = point(px(40.0), px(40.0));
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        driver.pointer_activate_id("poodle-dialog-close");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events.as_slice(),
+            ["confirm", "cancel", "cancel", "cancel", "cancel"],
+            "backdrop, Escape, and close each emit the cancel callback"
+        );
+        assert!(host.lock().expect("AlertDialog host").open);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_some());
+
+        host.lock().expect("AlertDialog host").working = true;
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-close").is_none());
+        let before_working = host.lock().expect("AlertDialog host").events.clone();
+        driver.pointer_activate_id("alert-cancel");
+        driver.pointer_activate_id("alert-confirm");
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("AlertDialog host").events,
+            before_working,
+            "working cancel, confirm, backdrop, and Escape stay inert"
+        );
+
+        {
+            let mut host = host.lock().expect("AlertDialog host");
+            host.working = false;
+            host.accept_close = true;
+        }
+        driver.draw_frame();
+        driver.wait_for_focus_handle("alert-confirm");
+        driver.keyboard_activate("alert-confirm");
+        assert!(!host.lock().expect("AlertDialog host").open);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// FormDialog mounts the form shell, fires submit/cancel, announces errors as
+/// assertive alerts, and submitting rebuilds gate Escape and backdrop.
+#[test]
+fn first_mounted_parity_form_dialog() {
+    use gpui::{div, point, px, AnyElement, IntoElement};
+    use node_compat::{FormDialog, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::FormDialogSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = FormDialogSpec::new("Save workspace")
+            .with_description("Name the workspace before saving.")
+            .with_submit_label("Save")
+            .with_cancel_label("Cancel")
+            .with_error("Save failed");
+        let mut body = Node::text("Workspace name");
+        body.id = Some("form-dialog-body".to_string());
+        let open = poodle_render::form_dialog(
+            &spec,
+            &ctx,
+            vec![body.clone()],
+            None,
+            poodle_render::FormDialogHandlers {
+                on_cancel: Some(Arc::new(|| {})),
+                on_submit: None,
+            },
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("FormDialog composes the Dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Save workspace"));
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(34.0)),
+            "FormDialog uses Dialog width Md (34rem)"
+        );
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.overlay"))
+        );
+        let error = open
+            .find(&|node| node.a11y.role == Some(NodeRole::Alert))
+            .expect("FormLayout error Callout is role=alert");
+        assert!(error.has_text("Save failed"));
+        let submit = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Save"))
+            .expect("submit Button");
+        let cancel = open
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Cancel"))
+            .expect("cancel Button");
+        assert_eq!(
+            submit.roles.get("variant").map(String::as_str),
+            Some("primary")
+        );
+        assert_eq!(
+            cancel.roles.get("variant").map(String::as_str),
+            Some("ghost")
+        );
+
+        let pending = poodle_render::form_dialog(
+            &spec.clone().with_submitting(true),
+            &ctx,
+            vec![body.clone()],
+            None,
+            poodle_render::FormDialogHandlers {
+                on_cancel: Some(Arc::new(|| {})),
+                on_submit: None,
+            },
+        );
+        let pending_submit = pending
+            .find(&|node| {
+                matches!(&node.kind, NodeKind::Button { label } if label == "Submitting...")
+            })
+            .expect("submitting label uses ASCII dots");
+        assert!(pending_submit.interaction.disabled);
+        let pending_cancel = pending
+            .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Cancel"))
+            .expect("cancel Button while submitting");
+        assert!(pending_cancel.interaction.disabled);
+        let pending_surface = pending
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("submitting FormDialog keeps its surface");
+        assert!(pending_surface.interaction.on_dismiss.is_none());
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            submitting: bool,
+            accept_close: bool,
+            events: Vec<String>,
+        }
+
+        fn mount(host: &Arc<Mutex<Host>>, spec: &FormDialogSpec, body: &Node) -> AnyElement {
+            let current = host.lock().expect("FormDialog host").clone();
+            if !current.open {
+                return div().id("form-dialog-closed").into_any_element();
+            }
+            let submit_host = Arc::clone(host);
+            let cancel_host = Arc::clone(host);
+            let mut node =
+                FormDialog::from_spec(spec.clone().with_submitting(current.submitting), &theme())
+                    .with_child(body.clone())
+                    .on_submit(Arc::new(move || {
+                        submit_host
+                            .lock()
+                            .expect("FormDialog host")
+                            .events
+                            .push("submit".to_owned());
+                    }))
+                    .on_cancel(Arc::new(move || {
+                        let mut host = cancel_host.lock().expect("FormDialog host");
+                        host.events.push("cancel".to_owned());
+                        if host.accept_close {
+                            host.open = false;
+                        }
+                    }))
+                    .into_compat_node();
+            stamp_labelled_id(&mut node, "Cancel", "form-cancel");
+            if current.submitting {
+                stamp_labelled_id(&mut node, "Submitting...", "form-submit");
+            } else {
+                stamp_labelled_id(&mut node, "Save", "form-submit");
+            }
+            poodle_gpui_node_backend::to_gpui(&node)
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: true,
+            submitting: false,
+            accept_close: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            let body = body.clone();
+            Rc::new(move || mount(&host, &spec, &body))
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("FormDialog surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Save workspace"));
+        assert!(poodle_gpui_node_backend::bounds_for("form-dialog-body").is_some());
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("FormDialog backdrop bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-surface")
+            .expect("FormDialog surface bounds");
+        assert!(backdrop_bounds.size.width > px(0.0) && backdrop_bounds.size.height > px(0.0));
+        assert!(bounds_contain(backdrop_bounds, surface_bounds));
+
+        driver.wait_for_focus_handle("form-submit");
+        driver.pointer_activate_id("form-submit");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events.as_slice(),
+            ["submit"],
+            "submit callback fires through the mounted backend"
+        );
+        driver.pointer_activate_id("form-dialog-body");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events.as_slice(),
+            ["submit"],
+            "inside the form body does not emit a cancel callback"
+        );
+        driver.pointer_activate_id("form-cancel");
+        let outside = point(px(40.0), px(40.0));
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events.as_slice(),
+            ["submit", "cancel", "cancel", "cancel"],
+            "cancel button, backdrop, and Escape each emit the cancel callback"
+        );
+
+        host.lock().expect("FormDialog host").submitting = true;
+        driver.draw_frame();
+        let before_submit = host.lock().expect("FormDialog host").events.clone();
+        driver.pointer_activate_id("form-cancel");
+        driver.pointer_activate_id("form-submit");
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("FormDialog host").events,
+            before_submit,
+            "submitting cancel, submit, backdrop, and Escape stay inert"
+        );
+        assert!(host.lock().expect("FormDialog host").open);
+
+        {
+            let mut host = host.lock().expect("FormDialog host");
+            host.submitting = false;
+            host.accept_close = true;
+        }
+        driver.draw_frame();
+        driver.wait_for_focus_handle("form-cancel");
+        driver.keyboard_activate("form-cancel");
+        assert!(!host.lock().expect("FormDialog host").open);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// DebugDialog keeps its trigger mounted, opens the JSON dialog from it, and
+/// closes through the Dialog dismissal routes.
+#[test]
+fn first_mounted_parity_debug_dialog() {
+    use gpui::{point, px, AnyElement};
+    use node_compat::{DebugDialog, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::DebugDialogSpec;
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = DebugDialogSpec::new()
+            .with_title("Asset payload")
+            .with_trigger_label("Inspect payload")
+            .with_value("{\n  \"id\": \"asset_42\"\n}");
+        let closed = poodle_render::debug_dialog_with_state(
+            &spec,
+            &ctx,
+            false,
+            poodle_render::DebugDialogHandlers {
+                on_open_change: Some(Arc::new(|_| {})),
+            },
+        );
+        assert_eq!(
+            closed
+                .find(&|node| node.id.as_deref() == Some("poodle-debug-dialog-trigger"))
+                .and_then(|node| match &node.kind {
+                    NodeKind::Button { label } => Some(label.as_str()),
+                    _ => None,
+                }),
+            Some("Inspect payload")
+        );
+        assert!(closed
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .is_none());
+        let hidden = poodle_render::debug_dialog(&DebugDialogSpec::new(), &ctx);
+        assert!(hidden.children.is_empty());
+        assert!(hidden
+            .find(&|node| node.id.as_deref() == Some("poodle-debug-dialog-trigger"))
+            .is_none());
+
+        let open = poodle_render::debug_dialog_with_state(
+            &spec,
+            &ctx,
+            true,
+            poodle_render::DebugDialogHandlers {
+                on_open_change: Some(Arc::new(|_| {})),
+            },
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-dialog-surface"))
+            .expect("open DebugDialog paints the Dialog surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Asset payload"));
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(48.0)),
+            "DebugDialog uses Dialog width Lg (48rem)"
+        );
+        assert!(
+            open.texts().iter().any(|text| text.contains("asset_42")),
+            "open DebugDialog dumps the JSON value"
+        );
+        assert!(open
+            .find(&|node| node.id.as_deref() == Some("poodle-debug-dialog-trigger"))
+            .is_some());
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            events: Vec<String>,
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: false,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            Rc::new(move || {
+                let current = host.lock().expect("DebugDialog host").clone();
+                let node = DebugDialog::from_spec(spec.clone(), &theme())
+                    .open(current.open)
+                    .on_open_change({
+                        let host = Arc::clone(&host);
+                        Arc::new(move |next| {
+                            let mut host = host.lock().expect("DebugDialog host");
+                            host.events.push(format!("open:{next}"));
+                            host.open = next;
+                        })
+                    })
+                    .into_compat_node();
+                overlay_host(node)
+            })
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-debug-dialog-trigger").is_some());
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        driver.wait_for_focus_handle("poodle-debug-dialog-trigger");
+        driver.pointer_activate_id("poodle-debug-dialog-trigger");
+        assert!(host.lock().expect("DebugDialog host").open);
+        assert_eq!(
+            host.lock().expect("DebugDialog host").events.as_slice(),
+            ["open:true"],
+            "trigger callback opens the dialog"
+        );
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-dialog-surface")
+            .expect("open DebugDialog surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert!(painted.texts.iter().any(|text| text.contains("asset_42")));
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-debug-dialog-trigger").is_some());
+        let backdrop_bounds = poodle_gpui_node_backend::bounds_for("poodle-dialog-backdrop")
+            .expect("DebugDialog backdrop bounds");
+        let viewport_size = driver.with_window(|window, _| window.viewport_size());
+        assert_eq!(backdrop_bounds.origin, point(px(0.0), px(0.0)));
+        assert_eq!(backdrop_bounds.size, viewport_size);
+
+        driver.dispatch_key("escape");
+        assert!(!host.lock().expect("DebugDialog host").open);
+        assert_eq!(
+            host.lock().expect("DebugDialog host").events.as_slice(),
+            ["open:true", "open:false"],
+            "Escape callback closes the dialog"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-dialog-surface").is_none());
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-debug-dialog-trigger").is_some());
+
+        driver.wait_for_focus_handle("poodle-debug-dialog-trigger");
+        driver.keyboard_activate("poodle-debug-dialog-trigger");
+        assert!(host.lock().expect("DebugDialog host").open);
+        driver.wait_for_focus_handle("poodle-dialog-close");
+        driver.pointer_activate_id("poodle-dialog-close");
+        assert!(!host.lock().expect("DebugDialog host").open);
+        let outside = point(px(40.0), px(40.0));
+        driver.wait_for_focus_handle("poodle-debug-dialog-trigger");
+        driver.pointer_activate_id("poodle-debug-dialog-trigger");
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        assert!(!host.lock().expect("DebugDialog host").open);
+        assert_eq!(
+            host.lock().expect("DebugDialog host").events.as_slice(),
+            [
+                "open:true",
+                "open:false",
+                "open:true",
+                "open:false",
+                "open:true",
+                "open:false"
+            ],
+            "close button and backdrop each emit the open-change callback"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// Drawer paints a window-hosted overlay, names the surface from its title,
+/// and dismisses through Escape and the backdrop button.
+#[test]
+fn first_mounted_parity_drawer() {
+    use gpui::{div, point, px, AnyElement, IntoElement};
+    use node_compat::{Drawer, IntoCompatNode};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{DrawerEdge, DrawerSpec};
+
+    run_headless(|cx| {
+        let theme_provider = theme();
+        let ctx = RenderContext::new(&theme_provider);
+        let spec = DrawerSpec::new()
+            .with_open(true)
+            .with_title("Inspector")
+            .with_description("Review the selected asset.")
+            .with_edge(DrawerEdge::Right)
+            .with_modal(true);
+        let mut body = Node::text("Asset details");
+        body.id = Some("drawer-body".to_string());
+        let open =
+            poodle_render::drawer(&spec, &ctx, Some(body.clone()), None, Some(Arc::new(|| {})));
+        assert_eq!(open.id.as_deref(), Some("poodle-drawer-backdrop"));
+        assert!(open.style.overlay);
+        assert_eq!(
+            open.position,
+            NodePosition::Absolute {
+                top: Some(0.0),
+                left: Some(0.0),
+                right: Some(0.0),
+                bottom: Some(0.0),
+            }
+        );
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(theme_provider.resolve_color("color.background.overlay"))
+        );
+        let surface = open
+            .find(&|node| node.id.as_deref() == Some("poodle-drawer-surface"))
+            .expect("Drawer surface");
+        assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+        assert_eq!(surface.a11y.label.as_deref(), Some("Inspector"));
+        assert_eq!(
+            surface.a11y.labelled_by.as_deref(),
+            Some("poodle-drawer-title")
+        );
+        assert_eq!(
+            surface.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(28.0)),
+            "right-edge Drawer surface is 28rem"
+        );
+        assert_eq!(
+            surface.interaction.dismiss_layer.as_deref(),
+            Some("poodle-drawer-layer")
+        );
+        assert!(surface.interaction.on_dismiss.is_some());
+        let backdrop = open
+            .find(&|node| node.id.as_deref() == Some("poodle-drawer-backdrop-dismiss"))
+            .expect("modal Drawer backdrop button");
+        assert_eq!(backdrop.a11y.role, Some(NodeRole::Button));
+        assert_eq!(
+            backdrop.a11y.label.as_deref(),
+            Some("Dismiss drawer backdrop")
+        );
+        assert!(open.has_text("Review the selected asset."));
+
+        #[derive(Clone)]
+        struct Host {
+            open: bool,
+            events: Vec<String>,
+        }
+
+        let host = Arc::new(Mutex::new(Host {
+            open: true,
+            events: Vec::new(),
+        }));
+        let build: Rc<dyn Fn() -> AnyElement> = {
+            let host = Arc::clone(&host);
+            let spec = spec.clone();
+            let body = body.clone();
+            Rc::new(move || {
+                let current = host.lock().expect("Drawer host").clone();
+                if !current.open {
+                    return div().id("drawer-closed").into_any_element();
+                }
+                let close_host = Arc::clone(&host);
+                let node = Drawer::from_spec(spec.clone(), &theme())
+                    .with_content(body.clone())
+                    .on_open_change(Arc::new(move |next| {
+                        let mut host = close_host.lock().expect("Drawer host");
+                        host.events.push(format!("open:{next}"));
+                        host.open = next;
+                    }))
+                    .into_compat_node();
+                poodle_gpui_node_backend::to_gpui(&node)
+            })
+        };
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted = poodle_gpui_node_backend::painted_node_for("poodle-drawer-surface")
+            .expect("Drawer surface reached GPUI paint");
+        assert_eq!(painted.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted.a11y_label.as_deref(), Some("Inspector"));
+        let overlay_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-backdrop")
+            .expect("Drawer overlay bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-surface")
+            .expect("Drawer surface bounds");
+        assert!(overlay_bounds.size.width > px(0.0) && overlay_bounds.size.height > px(0.0));
+        assert!(bounds_contain(overlay_bounds, surface_bounds));
+        assert!(poodle_gpui_node_backend::bounds_for("drawer-body").is_some());
+
+        driver.pointer_activate_id("drawer-body");
+        assert!(
+            host.lock().expect("Drawer host").events.is_empty(),
+            "inside the drawer surface does not emit a close callback"
+        );
+        driver.wait_for_focus_handle("poodle-drawer-surface");
+        driver.dispatch_key("escape");
+        assert!(!host.lock().expect("Drawer host").open);
+        assert_eq!(
+            host.lock().expect("Drawer host").events.as_slice(),
+            ["open:false"],
+            "Escape callback closes the drawer"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-drawer-surface").is_none());
+
+        host.lock().expect("Drawer host").open = true;
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("poodle-drawer-surface").is_some());
+        // Full-bleed backdrop-dismiss center lands on the right-edge surface.
+        // Dialog's first-proof clicks the exposed overlay at (40, 40).
+        let outside = point(px(40.0), px(40.0));
+        let overlay_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-backdrop")
+            .expect("remounted Drawer overlay bounds");
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("poodle-drawer-surface")
+            .expect("remounted Drawer surface bounds");
+        assert!(overlay_bounds.contains(&outside));
+        assert!(!surface_bounds.contains(&outside));
+        driver.pointer_press(outside);
+        driver.pointer_release(outside);
+        assert!(!host.lock().expect("Drawer host").open);
+        assert_eq!(
+            host.lock().expect("Drawer host").events.as_slice(),
+            ["open:false", "open:false"],
+            "backdrop callback closes the drawer"
+        );
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}

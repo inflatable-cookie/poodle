@@ -5,7 +5,7 @@
 //! Ported from: `packages/jetstream/components/src/form_layout.rs`.
 
 use poodle_node::{ColorValue, LayoutDirection, Node};
-use poodle_specs::{CallOutSpec, FormActionsSpec, FormLayoutSpec, StatusTone};
+use poodle_specs::{CallOutSpec, CalloutAnnounceMode, FormActionsSpec, FormLayoutSpec, StatusTone};
 
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::mix_srgb;
@@ -123,7 +123,8 @@ pub fn form_layout(
         el = el.child(callout(
             &CallOutSpec::new()
                 .with_tone(StatusTone::Danger)
-                .with_content(error),
+                .with_content(error)
+                .with_announce_mode(CalloutAnnounceMode::Assertive),
             ctx,
             CalloutHandlers::default(),
         ));

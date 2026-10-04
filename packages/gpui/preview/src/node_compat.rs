@@ -715,6 +715,7 @@ pub(crate) struct FormDialog {
     theme: GpuiThemeProvider,
     children: Vec<poodle_node::Node>,
     actions: Option<poodle_node::Node>,
+    handlers: poodle_render::FormDialogHandlers,
 }
 
 pub(crate) struct ScrollShell {
@@ -877,6 +878,8 @@ pub(crate) struct MessageCenter {
 pub(crate) struct DebugDialog {
     spec: DebugDialogSpec,
     theme: GpuiThemeProvider,
+    open: bool,
+    handlers: poodle_render::DebugDialogHandlers,
 }
 
 pub(crate) struct ActionDiscoveryPanel {
@@ -1801,7 +1804,34 @@ impl DebugDialog {
         Self {
             spec,
             theme: theme.clone(),
+            open: false,
+            handlers: poodle_render::DebugDialogHandlers::default(),
         }
+    }
+
+    pub(crate) fn open(mut self, open: bool) -> Self {
+        self.open = open;
+        self
+    }
+
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::debug_dialog_with_state(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.open,
+            self.handlers,
+        )
+    }
+}
+
+impl IntoCompatNode for DebugDialog {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
     }
 }
 
@@ -1809,10 +1839,7 @@ impl IntoElement for DebugDialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -2776,6 +2803,7 @@ impl FormDialog {
             theme: theme.clone(),
             children: Vec::new(),
             actions: None,
+            handlers: poodle_render::FormDialogHandlers::default(),
         }
     }
 
@@ -2834,13 +2862,23 @@ impl FormDialog {
         self
     }
 
+    pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_submit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_cancel = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
         poodle_render::form_dialog(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.children,
             self.actions,
-            poodle_render::FormDialogHandlers::default(),
+            self.handlers,
         )
     }
 }
@@ -6986,6 +7024,7 @@ pub(crate) struct AlertDialog {
     theme: GpuiThemeProvider,
     working: bool,
     working_label: String,
+    handlers: poodle_render::AlertDialogHandlers,
 }
 
 impl AlertDialog {
@@ -6995,6 +7034,7 @@ impl AlertDialog {
             theme: theme.clone(),
             working: false,
             working_label: poodle_render::alert_dialog::DEFAULT_WORKING_LABEL.to_string(),
+            handlers: poodle_render::AlertDialogHandlers::default(),
         }
     }
 
@@ -7022,25 +7062,45 @@ impl AlertDialog {
         self.spec.item_value = Some(value.into());
         self
     }
-}
 
-impl IntoElement for AlertDialog {
-    type Element = AnyElement;
+    pub(crate) fn on_confirm(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.confirm = Some(handler);
+        self
+    }
 
-    fn into_element(self) -> Self::Element {
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.cancel = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::alert_dialog(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.working,
             &self.working_label,
-            poodle_render::AlertDialogHandlers::default(),
+            self.handlers,
         );
         native_alert_dialog_spacing(
             &mut node,
             self.spec.item_label.is_some(),
             self.theme.resolve_space("typography.body.size"),
         );
-        poodle_gpui_node_backend::to_gpui(&node)
+        node
+    }
+}
+
+impl IntoCompatNode for AlertDialog {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
+}
+
+impl IntoElement for AlertDialog {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
