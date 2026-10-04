@@ -784,7 +784,7 @@ pub fn js_log_list(
         spec,
         &pr::RenderContext::new(theme),
         instance_id,
-        None,
+        pr::LogListHandlers::default(),
     ))
 }
 

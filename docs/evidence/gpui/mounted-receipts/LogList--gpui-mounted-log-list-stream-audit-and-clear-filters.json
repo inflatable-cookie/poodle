@@ -20,6 +20,7 @@
     ],
     "events": [
       "payloads.lock",
+      "assert_eq!(\n            hrefs.lock().expect(\"log list navigate payload",
       "assert_eq!(\n            payloads.lock().expect(\"log list clear payload"
     ],
     "pointer": [
@@ -48,7 +49,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "632d00adac3888dd78446d7f54fa9560f0dd886b",
+  "source_commit": "d6b03636143ae016be3b191f65e3030f03303fa1",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
@@ -56,7 +57,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-083",
     "outcome": "passed",
-    "body_sha256": "56de17a7831f961db1ec4880329731797ff88dd3739a69069063aee63d9a9840"
+    "body_sha256": "8ab35eb8b0a39f752dac5753117899da9647b89eb8ec5b55f10ade2b4ce58dbc"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

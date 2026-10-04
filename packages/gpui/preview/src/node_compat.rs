@@ -9014,7 +9014,7 @@ pub(crate) struct LogList {
     spec: LogListSpec,
     theme: GpuiThemeProvider,
     instance_id: String,
-    on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
+    handlers: poodle_render::LogListHandlers,
 }
 
 impl LogList {
@@ -9027,12 +9027,17 @@ impl LogList {
             spec,
             theme: theme.clone(),
             instance_id: instance_id.into(),
-            on_clear_filters: None,
+            handlers: poodle_render::LogListHandlers::default(),
         }
     }
 
     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_clear_filters = Some(handler);
+        self.handlers.on_clear_filters = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_navigate = Some(handler);
         self
     }
 
@@ -9041,7 +9046,7 @@ impl LogList {
             &self.spec,
             &RenderContext::new(&self.theme),
             self.instance_id,
-            self.on_clear_filters,
+            self.handlers,
         )
     }
 }

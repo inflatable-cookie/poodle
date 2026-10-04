@@ -40523,8 +40523,8 @@ fn gpui_mounted_list_container_state_pagination_and_accessible_name() {
     });
 }
 
-/// LogList stream uses the log role; audit renders actor/action/resource and
-/// fires clear-filters through mounted pointer and keyboard.
+/// LogList stream uses the log role; audit actor/resource hrefs are real
+/// focusable links; clear-filters fires through mounted pointer and keyboard.
 #[test]
 fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
     use node_compat::{IntoCompatNode, LogList};
@@ -40562,6 +40562,8 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
 
         let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
         let clear_events = Arc::clone(&payloads);
+        let hrefs = Arc::new(Mutex::new(Vec::<String>::new()));
+        let navigate_events = Arc::clone(&hrefs);
         let mut audit = LogList::from_spec(
             LogListSpec::new()
                 .with_entries([LogEntry::Audit(
@@ -40571,7 +40573,8 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
                                 .with_name("Alice Chen")
                                 .with_href("/users/alice"),
                         )
-                        .with_resource_label("Acme"),
+                        .with_resource_label("Acme")
+                        .with_resource_href("/workspaces/w-1"),
                 )])
                 .with_filter(
                     LogFilter::select("action", "Action")
@@ -40588,6 +40591,12 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
                 .expect("log list clear payloads")
                 .push("clear".to_owned());
         }))
+        .on_navigate(Arc::new(move |href| {
+            navigate_events
+                .lock()
+                .expect("log list navigate payloads")
+                .push(href.to_owned());
+        }))
         .into_compat_node();
         assert_eq!(audit.a11y.role, Some(NodeRole::Region));
         assert_eq!(audit.a11y.label.as_deref(), Some("Log output"));
@@ -40598,10 +40607,54 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
             .find(&|node| node.has_text("Alice Chen") && node.a11y.role == Some(NodeRole::Link))
             .expect("actor link");
         assert_eq!(actor.a11y.role, Some(NodeRole::Link));
+        assert_eq!(
+            actor.roles.get("href").map(String::as_str),
+            Some("/users/alice")
+        );
+        assert!(actor.interaction.focusable);
+        assert!(actor.style.focus_ring.is_some());
+        assert_eq!(actor.a11y.tab_index, Some(0));
+        assert!(actor.interaction.on_activate.is_some());
+        let resource = audit
+            .find(&|node| {
+                node.has_text("workspace \"Acme\"") && node.a11y.role == Some(NodeRole::Link)
+            })
+            .expect("resource link");
+        assert_eq!(
+            resource.roles.get("href").map(String::as_str),
+            Some("/workspaces/w-1")
+        );
+        assert!(resource.interaction.focusable);
+        assert!(resource.style.focus_ring.is_some());
+        assert_eq!(resource.a11y.tab_index, Some(0));
+        assert!(resource.interaction.on_activate.is_some());
 
+        stamp_labelled_id(&mut audit, "Alice Chen", "log-list-actor");
+        stamp_labelled_id(&mut audit, "workspace \"Acme\"", "log-list-resource");
         stamp_labelled_id(&mut audit, "Clear", "log-list-clear");
         let mounted = Arc::new(Mutex::new(audit));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 320.0);
+        assert!(poodle_gpui_node_backend::bounds_for("log-list-actor").is_some());
+        driver.wait_for_focus_handle("log-list-actor");
+        driver.keyboard_activate("log-list-actor");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("log-list-actor"),
+            Some(true)
+        );
+        driver.pointer_activate_id("log-list-actor");
+        assert!(poodle_gpui_node_backend::bounds_for("log-list-resource").is_some());
+        driver.wait_for_focus_handle("log-list-resource");
+        driver.keyboard_activate("log-list-resource");
+        driver.pointer_activate_id("log-list-resource");
+        assert_eq!(
+            hrefs.lock().expect("log list navigate payloads").as_slice(),
+            [
+                "/users/alice",
+                "/users/alice",
+                "/workspaces/w-1",
+                "/workspaces/w-1"
+            ]
+        );
         assert!(poodle_gpui_node_backend::bounds_for("log-list-clear").is_some());
         driver.wait_for_focus_handle("log-list-clear");
         driver.keyboard_activate("log-list-clear");
