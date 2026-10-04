@@ -52,7 +52,7 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "d8fb1e4f04ed0670948a18cc6ed4ab1cffcbdc0c",
+  "source_commit": "7713548c3b42d322a6ef4d416e62488e858b04b0",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
@@ -60,7 +60,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-101-card-mounted-proofs",
     "outcome": "passed",
-    "body_sha256": "30aae54601d12195167efd0ddf6a9c9e4632d3fddf439087bcabdee3c0a7dfe6"
+    "body_sha256": "ec4c45b5efad3f05b63766eaeba381f71303b043178e3b7c8424d0405cd840e3"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
