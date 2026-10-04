@@ -830,6 +830,7 @@ pub enum NodeRole {
     /// Search field (`searchbox` / `type="search"`).
     SearchBox,
     Label,
+    Link,
     List,
     ListItem,
     ListBox,

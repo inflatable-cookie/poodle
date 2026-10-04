@@ -1,12 +1,13 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "AgentPlan",
-  "test": "agent_plan_decisions_rebuild_the_host_spec_through_mounted_input",
+  "component": "Pill",
+  "test": "gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
     "pointer",
     "keyboard_focus",
     "accessibility",
@@ -17,21 +18,25 @@
       "assert",
       "production-mount"
     ],
+    "events": [
+      "assert_eq!(\n            *right_dismisses.lock().expect(\"right dismiss count\"),\n            1,\n            \"pointer activation fires the dismiss callback",
+      "assert_eq!(\n            *left_dismisses.lock().expect(\"left dismiss count\"),\n            1,\n            \"keyboard activation fires the dismiss callback"
+    ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
+      "focus_handle_for",
       "focus_state_for",
-      "focus_element",
-      "keyboard_"
+      "focus_element"
     ],
     "accessibility": [
+      "accessible",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_radius",
-      "resolve_color"
+      "resolve_radius"
     ]
   },
   "production_path_observation": {
@@ -52,10 +57,11 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-081-86f292405",
     "outcome": "passed",
-    "body_sha256": "5a3abeeb97951d38540a955a385765c0890b57780e861774693d0d6d62d70654"
+    "body_sha256": "eabe14195bce9cfcea742f279b82808b6f0f44967f2feaa40d746a4a18b573e9"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",

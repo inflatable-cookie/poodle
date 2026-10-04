@@ -290,14 +290,29 @@ export function rendererImportNames(source: string): string[] {
   return [...names].sort();
 }
 
+/** Node-compat component types imported directly by mounted regressions. */
+export function nodeCompatImportNames(source: string): string[] {
+  const names = new Set<string>();
+  for (const match of source.matchAll(/use node_compat::\{([^}]*)\}/gs)) {
+    for (const part of match[1].split(",")) {
+      const alias = part.trim().split(/\s+as\s+/);
+      const name = (alias.length > 1 ? alias[1] : alias[0]).trim();
+      if (/^\w+$/.test(name)) names.add(name);
+    }
+  }
+  return [...names].sort();
+}
+
 /** Non-test helpers that resolve to the production renderer, closed transitively:
  * direct poodle_render/node_compat users plus helpers that only call those. */
 export function rendererHelperNames(source: string): string[] {
   const helpers = topLevelFns(source).filter((fn) => !fn.test);
   const imported = rendererImportNames(source);
+  const importedCompat = nodeCompatImportNames(source);
   const callsRenderer = (body: string, known: Set<string>): boolean => {
     if (PRODUCTION_RENDER_RE.test(body)) return true;
     if (imported.some((name) => new RegExp(`\\b${name}\\s*\\(`).test(body))) return true;
+    if (importedCompat.some((name) => new RegExp(`\\b${name}::\\w+`).test(body))) return true;
     return [...known].some((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
   };
   const known = new Set<string>();
@@ -331,9 +346,11 @@ export function productionMount(body: string, source = "", selfName = ""): boole
   const mountHelpers = mountHelperNames(source).filter((name) => name !== selfName);
   const calls = (name: string): boolean => new RegExp(`\\b${name}\\s*\\(`).test(body);
   const imported = rendererImportNames(source);
+  const importedCompat = nodeCompatImportNames(source);
   const renderer =
     rendererDirect ||
     imported.some((name) => calls(name)) ||
+    importedCompat.some((name) => new RegExp(`\\b${name}::\\w+`).test(body)) ||
     rendererHelpers.some((name) => calls(name));
   const mount = driverDirect || mountHelpers.some((name) => calls(name));
   return renderer && mount;
@@ -362,6 +379,8 @@ export function observedRenderer(body: string, source: string, selfName: string)
   if (direct !== null) return direct[0];
   const imported = rendererImportNames(source).find((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
   if (imported !== undefined) return `poodle_render-import:${imported}`;
+  const importedCompat = nodeCompatImportNames(source).find((name) => new RegExp(`\\b${name}::\\w+`).test(body));
+  if (importedCompat !== undefined) return `node_compat-import:${importedCompat}`;
   const helper = rendererHelperNames(source).filter((name) => name !== selfName).find((name) => new RegExp(`\\b${name}\\s*\\(`).test(body));
   return helper === undefined ? "unknown" : `fixture-helper:${helper}`;
 }
@@ -466,15 +485,38 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     const events = headingBody(contract, /^## 5\. /);
     const keyboard = headingBody(contract, /^### Keyboard/);
     const focus = headingBody(contract, /^### Focus/);
-    const eventsNone = /^\|\s*none\s*\|/m.test(events.body) || /layout primitive only|no events/i.test(events.body);
-    const keyboardNone = /^\|\s*none\s*\|/m.test(keyboard.body);
+    const eventTableKeys = events.body
+      .split("\n")
+      .filter((line) => /^\s*\|/.test(line))
+      .map((line) => line.split("|")[1]?.trim() ?? "")
+      .filter((key) => key.length > 0 && !/^:?-{2,}:?$/.test(key));
+    const hasDeclaredEvents = eventTableKeys.some((key) => !/^(event|callback|none|[-—–])$/i.test(key));
+    const eventsNone =
+      !hasDeclaredEvents &&
+      (/^\|\s*none\s*\|/m.test(events.body) || /^\s*None\.\s*$/m.test(events.body) || /layout primitive only|no events/i.test(events.body));
+    const keyboardRows = keyboard.body
+      .split("\n")
+      .filter((line) => /^\s*\|/.test(line))
+      .map((line) => {
+        const cells = line.split("|").slice(1);
+        return { key: cells[0]?.trim() ?? "", behavior: cells[1]?.trim() ?? "" };
+      })
+      .filter(({ key }) => key.length > 0 && !/^:?-{2,}:?$/.test(key) && !/^(key|keys)$/i.test(key));
+    const tabBehavior = keyboardRows.find(({ key }) => /^`?Tab`?$/i.test(key))?.behavior ?? "";
+    const tabNotFocusable = /not focusable/i.test(tabBehavior);
+    const hasKeyboardBehavior = keyboardRows.some(
+      ({ key, behavior }) => !/^none$/i.test(key) && !/not focusable|host focus behavior is unaffected/i.test(behavior),
+    );
+    const keyboardNone =
+      !hasKeyboardBehavior &&
+      (keyboardRows.some(({ key }) => /^none$/i.test(key)) || tabNotFocusable || /no keyboard behavior/i.test(keyboard.body));
     const focusNeutral = /not focusable/i.test(focus.body);
     const required: CensusAxis[] = ["semantic", "accessibility", "visual"];
     const notApplicable: ManifestNotApplicable[] = [];
     if (eventsNone) {
       notApplicable.push({
         axis: "events",
-        reason: "Contract declares no events; layout or display primitive only.",
+        reason: "Contract declares no component callbacks or events.",
         contractRef: `${contractPath}#${events.heading || "5. Events"}`,
       });
     } else {
@@ -492,7 +534,13 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     if (keyboardNone && focusNeutral) {
       notApplicable.push({
         axis: "keyboard_focus",
-        reason: "Contract declares the control not focusable with no keyboard behavior.",
+        reason: "Contract declares the component not focusable with no keyboard behavior.",
+        contractRef: `${contractPath}#${keyboard.heading || "Keyboard"}`,
+      });
+    } else if (keyboardNone && tabNotFocusable) {
+      notApplicable.push({
+        axis: "keyboard_focus",
+        reason: "Contract states the component is not focusable and Tab leaves host focus behavior unaffected.",
         contractRef: `${contractPath}#${keyboard.heading || "Keyboard"}`,
       });
     } else {
