@@ -1,4 +1,4 @@
-import { fireEvent, render, within } from "@testing-library/svelte";
+import { fireEvent, render, waitFor, within } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import SidebarNav from "../src/SidebarNav.svelte";
@@ -187,19 +187,25 @@ describe("SidebarNav (svelte)", () => {
 
       await fireEvent.mouseDown(document.body);
       expect(surfaceOf()).toBeNull();
+      await waitFor(() => expect(document.activeElement).toBe(link));
 
       const button = view.getByRole("button", { name: "Cash flow" });
       await fireEvent.contextMenu(button);
       expect(surfaceOf()?.getAttribute("aria-label")).toBe("Cash flow actions");
+      await fireEvent.keyDown(document, { key: "Escape" });
+      await waitFor(() => expect(document.activeElement).toBe(button));
     });
 
     it("opens from Shift+F10 on the focused item", async () => {
       const { container } = render(SidebarNav, { props: { groups: menuGroups } });
       const button = within(container).getByRole("button", { name: "Cash flow" });
+      button.focus();
       await fireEvent.keyDown(button, { key: "F10", shiftKey: true });
       const surface = surfaceOf();
       expect(surface).not.toBeNull();
       expect(surface?.getAttribute("aria-label")).toBe("Cash flow actions");
+      await fireEvent.keyDown(document, { key: "Escape" });
+      await waitFor(() => expect(document.activeElement).toBe(button));
     });
 
     it("fires onContextAction with the nav item value then the menu value, and does not activate the item", async () => {
@@ -215,6 +221,7 @@ describe("SidebarNav (svelte)", () => {
       expect(onContextAction).toHaveBeenCalledWith("cash", "delete");
       expect(onValueChange).not.toHaveBeenCalled();
       expect(surfaceOf()).toBeNull();
+      await waitFor(() => expect(document.activeElement).toBe(button));
     });
 
     it("does not intercept contextmenu when contextMenuItems is unset", async () => {

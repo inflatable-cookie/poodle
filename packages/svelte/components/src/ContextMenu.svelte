@@ -26,7 +26,8 @@
     /**
      * When false, the consumer owns invocation (tree row, canvas, etc.) and
      * supplies controlled `open` + `anchorPoint`. No tab-stop button is
-     * rendered; `menuTransition` still owns open/close/dismiss/action.
+     * rendered; `menuTransition` still owns open/close/dismiss/action, and
+     * the consumer owns focus restoration.
      */
     trigger?: boolean;
     onOpenChange?: ((open: boolean) => void) | undefined;
@@ -55,6 +56,8 @@
   let rootElement = $state<HTMLDivElement | null>(null);
   let overlayElement = $state<HTMLDivElement | null>(null);
   let surface = $state<{ focusFirstItem: () => void } | null>(null);
+  let focusRestoreCandidates: HTMLElement[] = [];
+  let wasOpen = false;
   let uncontrolledOpen = $state(false);
   let uncontrolledAnchorPoint = $state<{ x: number; y: number } | null>(null);
   let seededDefaults = $state(false);
@@ -81,13 +84,58 @@
 
   $effect(() => {
     if (!isOpen) {
+      if (!wasOpen) {
+        return;
+      }
+
+      wasOpen = false;
+      const candidates = focusRestoreCandidates;
+      focusRestoreCandidates = [];
+      tick().then(() => setTimeout(() => restoreFocus(candidates), 0));
       return;
     }
 
+    wasOpen = true;
     tick().then(() => {
       surface?.focusFirstItem();
     });
   });
+
+  function rememberInvoker(target: EventTarget | null): void {
+    const element = target instanceof HTMLElement
+      ? target
+      : target instanceof Element
+        ? target.parentElement
+        : null;
+    const candidates: HTMLElement[] = [];
+    let current = element && rootElement?.contains(element) ? element : rootElement;
+
+    while (current) {
+      candidates.push(current);
+      if (current === rootElement) {
+        break;
+      }
+      current = current.parentElement;
+    }
+
+    if (rootElement && !candidates.includes(rootElement)) {
+      candidates.push(rootElement);
+    }
+    focusRestoreCandidates = candidates;
+  }
+
+  function restoreFocus(candidates: HTMLElement[]): void {
+    for (const candidate of candidates) {
+      if (!candidate.isConnected) {
+        continue;
+      }
+
+      candidate.focus();
+      if (candidate.ownerDocument.activeElement === candidate) {
+        return;
+      }
+    }
+  }
 
   function send(event: MenuMachineEvent): void {
     const result = menuTransition(isOpen ? "open" : "closed", {}, event);
@@ -115,6 +163,7 @@
 
   function handleContextMenu(event: MouseEvent): void {
     event.preventDefault();
+    rememberInvoker(event.target);
     uncontrolledAnchorPoint = { x: event.clientX, y: event.clientY };
     send({ type: "OPEN" });
   }
@@ -130,6 +179,12 @@
       return;
     }
 
+    const activeElement = target.ownerDocument.activeElement;
+    rememberInvoker(
+      activeElement instanceof HTMLElement && rootElement?.contains(activeElement)
+        ? activeElement
+        : event.target,
+    );
     const rect = target.getBoundingClientRect();
     uncontrolledAnchorPoint = { x: rect.left + 16, y: rect.top + 16 };
     send({ type: "OPEN" });

@@ -1,7 +1,7 @@
 # ContextMenu
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-10-04
 
 ## 1. Purpose
 
@@ -88,8 +88,9 @@ MenuItem: {
 
 ### Component States
 
-Open/closed state, invocation anchor position, and current highlighted item
-index are required.
+Open/closed state, invocation anchor position, the invoking element, its
+surviving focusable fallback chain, and current highlighted item index are
+required.
 
 ### Behavior Machine
 
@@ -111,13 +112,17 @@ behavior (the Svelte implementation is the parity authority).
 - Transitions: `ACTION` emits `emitAction(value)` then closes with
   `emitOpenChange(false)`; escape/outside close via the layer stack
   (innermost-first); the outside-interaction path is guarded by
-  `dismissOnOutsideInteract` (default `true`). Closing does not restore
-  trigger focus (matches pre-machine behavior).
+  `dismissOnOutsideInteract` (default `true`). Every close restores focus to
+  the invocation target. If it was removed or cannot take focus, restore to
+  its nearest surviving focusable target from the recorded fallback chain,
+  ending at the ContextMenu root when that root is available.
 - Effects: `emitOpenChange`, `emitAction`, `focusFirstItem` (executed after
   the surface renders and is positioned)
 - Machinery dependencies: dismissable-layer stack; pointer-anchored
   placement stays adapter-side (virtual-anchor adoption of the core
-  resolver is possible later).
+  resolver is possible later). The shared Menu machine has no invocation
+  element context, so ContextMenu adapters perform focus restoration after the
+  close transition.
 
 ContextMenu deltas: outside containment tests only the overlay (clicking
 the trigger zone closes). Re-invoking contextmenu while already open
@@ -157,7 +162,7 @@ pre-machine component re-fired the callback; recorded delta).
 | `Home` | moves to first enabled item |
 | `End` | moves to last enabled item |
 | `Enter` or `Space` | activates the focused item |
-| `Escape` | closes the menu; focus is not restored and stays where it is (Svelte) |
+| `Escape` | closes the menu and restores focus to the invocation target, or its nearest surviving focusable fallback |
 | `Arrow Right` | on a submenu parent: opens the flyout and focuses its first enabled item |
 | `Arrow Left` | inside a flyout: closes it and restores focus to the parent item |
 | Outside click | any mousedown outside the overlay closes the menu |
@@ -170,11 +175,14 @@ leaf-only activation.
 
 ### Focus And Announcement
 
-- focus entry: keyboard invocation keeps the invocation target knowable and
-  moves active item focus into the menu
-- focus restoration: none. Escape and outside close leave focus where it is
-  (Svelte); only item activation and flyout `Arrow Left` move focus, as
-  contracted above
+- focus entry: keyboard invocation records the focused target and moves active
+  item focus into the menu; pointer invocation records the right-clicked target
+- focus restoration: Escape, outside interaction, and item activation return
+  focus to the recorded target. If it is gone or cannot take focus, use its
+  nearest surviving focusable fallback, with the ContextMenu root as the final
+  fallback. Flyout `Arrow Left` still returns focus to its parent item.
+- `trigger={false}` consumers own invocation and must restore focus using the
+  same target and their nearest surviving focusable host fallback.
 - live-region behavior: none; item roles and states must be exposed through
   native menu semantics
 - GPUI-native accessibility mapping notes: GPUI must support both pointer-based
@@ -312,6 +320,9 @@ leaf-only activation.
   against the overlay element (not the root), since the root wraps the
   invocation target and clicks on the target area should dismiss the menu
 - Document-level keydown listener closes menu on Escape from any focus context
+- Closing restores focus to the recorded invocation target after the overlay
+  is removed; a removed or unfocusable target falls back through its recorded
+  focusable chain to the root
 - After render, the overlay position is clamped to the viewport (8px padding) so
   menus opened near edges shift inward rather than clipping; the initial render
   uses `visibility: hidden` to prevent a flash at the unclamped position
@@ -319,9 +330,11 @@ leaf-only activation.
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::context_menu`
-- GPUI implementation must explicitly track invocation origin, anchor position,
-  and restoration target; desktop-native context menus do not remove the need
-  for parity review
+- GPUI host must explicitly track invocation origin, anchor position, and
+  restoration target, then restore focus on Escape, outside interaction, and
+  item activation. If that target is gone or cannot take focus, use its nearest
+  surviving focusable fallback. Desktop-native context menus do not remove the
+  need for parity review.
 - The fixed positioning model translates to screen-coordinate placement in GPUI
 
 ## 10a. Jetstream Notes
@@ -341,7 +354,8 @@ leaf-only activation.
 - [ ] aria-checked on checkbox/radio items matches
 - [ ] item navigation, activation, and dismissal behavior match
 - [ ] outside click (mousedown outside overlay) closes the menu
-- [ ] close leaves focus where it is (no restoration) matches
+- [ ] Escape, outside interaction, and item activation restore focus to the
+  invoking target or its nearest surviving fallback
 - [ ] openChange and action event semantics match
 
 ### Tier 2: Visual Parity
@@ -363,6 +377,10 @@ leaf-only activation.
 - [ ] keyboard anchor offset calculation stays internal
 
 ## 12. Known Deltas
+
+History: PR #348 aligned this contract to the previous Svelte behavior, which
+left focus in place on close. Queue decision b92d0aff (2026-10-04) reverses
+that behavior; focus restoration is now required across runtimes.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|

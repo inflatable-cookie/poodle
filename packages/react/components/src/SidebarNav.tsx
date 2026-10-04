@@ -1,6 +1,6 @@
 import "@inflatable-cookie/poodle-core/styles/sidebar-nav.css";
 
-import { useId, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 
 import { ContextMenu } from "./ContextMenu";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem } from "./types";
@@ -33,11 +33,33 @@ export function SidebarNav({
   const value = isControlled ? controlledValue : uncontrolledValue;
 
   const sidebarNavId = useId();
+  const navRef = useRef<HTMLElement | null>(null);
   const visibleGroups = groups.filter((group) => group.items.length > 0);
 
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuAnchor, setContextMenuAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contextMenuItemValue, setContextMenuItemValue] = useState<string | null>(null);
+  const contextMenuFocusCandidates = useRef<HTMLElement[]>([]);
+  const contextMenuWasOpen = useRef(false);
+
+  useEffect(() => {
+    if (contextMenuOpen) {
+      contextMenuWasOpen.current = true;
+      return;
+    }
+
+    if (!contextMenuWasOpen.current) return;
+    contextMenuWasOpen.current = false;
+    const candidates = contextMenuFocusCandidates.current;
+    contextMenuFocusCandidates.current = [];
+    setTimeout(() => {
+      for (const candidate of candidates) {
+        if (!candidate.isConnected) continue;
+        candidate.focus();
+        if (candidate.ownerDocument.activeElement === candidate) return;
+      }
+    }, 0);
+  }, [contextMenuOpen]);
 
   const contextMenuHost =
     visibleGroups.flatMap((group) => group.items).find((item) => item.value === contextMenuItemValue) ?? null;
@@ -57,8 +79,18 @@ export function SidebarNav({
     return !item.disabled && (item.contextMenuItems?.length ?? 0) > 0;
   }
 
-  function openContextMenu(item: SidebarNavItem, x: number, y: number): void {
+  function openContextMenu(item: SidebarNavItem, x: number, y: number, invoker: HTMLElement): void {
     if (!itemHasContextMenu(item)) return;
+    const navItems = Array.from(navRef.current?.querySelectorAll<HTMLElement>(".poodle-sidebar-nav__item") ?? []);
+    const invokerIndex = navItems.indexOf(invoker);
+    const peers = navItems
+      .filter((candidate) => candidate !== invoker && !candidate.hasAttribute("disabled"))
+      .sort((left, right) => {
+        const leftDistance = Math.abs(navItems.indexOf(left) - invokerIndex);
+        const rightDistance = Math.abs(navItems.indexOf(right) - invokerIndex);
+        return leftDistance - rightDistance || navItems.indexOf(left) - navItems.indexOf(right);
+      });
+    contextMenuFocusCandidates.current = [invoker, ...peers, ...(navRef.current ? [navRef.current] : [])];
     setContextMenuItemValue(item.value);
     setContextMenuAnchor({ x, y });
     setContextMenuOpen(true);
@@ -66,9 +98,11 @@ export function SidebarNav({
 
   function handleItemContextMenu(item: SidebarNavItem, event: ReactMouseEvent): void {
     if (!itemHasContextMenu(item)) return;
+    const invoker = event.currentTarget;
+    if (!(invoker instanceof HTMLElement)) return;
     event.preventDefault();
     event.stopPropagation();
-    openContextMenu(item, event.clientX, event.clientY);
+    openContextMenu(item, event.clientX, event.clientY, invoker);
   }
 
   function handleItemKeydown(item: SidebarNavItem, event: ReactKeyboardEvent): void {
@@ -82,7 +116,7 @@ export function SidebarNav({
     const target = event.currentTarget;
     if (!(target instanceof HTMLElement)) return;
     const rect = target.getBoundingClientRect();
-    openContextMenu(item, rect.left + 16, rect.top + 16);
+    openContextMenu(item, rect.left + 16, rect.top + 16, target);
   }
 
   function handleContextAction(actionValue: string): void {
@@ -113,7 +147,9 @@ export function SidebarNav({
 
   return (
     <nav
+      ref={navRef}
       className="poodle-sidebar-nav"
+      tabIndex={-1}
       data-size={size ?? undefined}
       data-density={density ?? undefined}
       data-size-role={sizeRole}

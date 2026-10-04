@@ -43018,6 +43018,7 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
 
     const FIRST_ITEM: &str = "menu-item:cut";
     const TRIGGER: &str = "context-target";
+    const ROOT_FALLBACK: &str = "context-root-fallback";
     const PANEL: &str = "context-menu-panel";
 
     // Closed by default: Svelte starts with no open state, so an unset spec
@@ -43033,6 +43034,7 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
         theme: GpuiThemeProvider,
         mounted: Arc<Mutex<Node>>,
         open: Mutex<bool>,
+        trigger_present: Mutex<bool>,
         dark_mode: Mutex<bool>,
         payloads: Mutex<Vec<String>>,
         anchors: Mutex<Vec<(f32, f32)>>,
@@ -43056,6 +43058,15 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             poodle_gpui_node_backend::request_focus(FIRST_ITEM);
         }
 
+        fn restore_invoker_focus(self: &Arc<Self>) {
+            let target = if *self.trigger_present.lock().expect("trigger presence") {
+                TRIGGER
+            } else {
+                ROOT_FALLBACK
+            };
+            poodle_gpui_node_backend::request_focus(target);
+        }
+
         fn record_action(self: &Arc<Self>, value: &str) {
             self.payloads
                 .lock()
@@ -43065,10 +43076,11 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
                 let mut flag = self.dark_mode.lock().expect("dark lock");
                 *flag = !*flag;
             }
-            // Contract §4 / Svelte Menu ACTION: the selection emits, then
-            // the menu closes.
+            // Contract §4: the selection emits, the menu closes, and the
+            // host restores focus to the invoking target.
             *self.open.lock().expect("open lock") = false;
             self.rebuild();
+            self.restore_invoker_focus();
         }
 
         /// Reopen after an action closed the menu: no new invocation anchor,
@@ -43079,8 +43091,8 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             poodle_gpui_node_backend::request_focus(FIRST_ITEM);
         }
 
-        /// Svelte document listeners: close on the dismiss-stack reason and
-        /// return focus to the invoking target.
+        /// Dismiss the mounted menu and return focus to its invoking target,
+        /// or the nearest surviving host fallback if the target was removed.
         fn dismiss(self: &Arc<Self>, reason: poodle_node::DismissReason) {
             self.dismissals.lock().expect("dismiss lock").push(format!(
                 "{}",
@@ -43089,9 +43101,9 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
                     poodle_node::DismissReason::Outside => "outside",
                 }
             ));
-            // Contract: closing does not restore trigger focus.
             *self.open.lock().expect("open lock") = false;
             self.rebuild();
+            self.restore_invoker_focus();
         }
     }
 
@@ -43140,7 +43152,22 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
                 None
             })
         });
-        let mut root = Node::container().children([trigger]);
+        let mut root = Node::container();
+        root.id = Some(ROOT_FALLBACK.to_string());
+        root.interaction.focusable = true;
+        root.a11y.tab_index = Some(-1);
+        root.style.focus = Some(StylePatch {
+            background: Some(poodle_render::color::with_alpha(
+                host.theme.resolve_color("color.accent.base"),
+                host.theme.resolve_color("color.accent.base").3 * 0.12,
+            )),
+            border_color: None,
+            text_color: None,
+            opacity: None,
+        });
+        if *host.trigger_present.lock().expect("trigger presence") {
+            root = root.child(trigger);
+        }
         // Host-owned invocation gate (the node_compat rule): the panel
         // mounts only while the host holds the menu open.
         if spec.current_open() {
@@ -43169,6 +43196,7 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             theme: theme(),
             mounted: Arc::new(Mutex::new(Node::container())),
             open: Mutex::new(false),
+            trigger_present: Mutex::new(true),
             dark_mode: Mutex::new(true),
             payloads: Mutex::new(Vec::new()),
             anchors: Mutex::new(Vec::new()),
@@ -43327,6 +43355,11 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
             "item activation closes the menu"
         );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(TRIGGER),
+            Some(true),
+            "item activation restores focus to the invocation target"
+        );
         host.reopen();
         sync(&mut driver);
         driver.pointer_activate_id("menu-item:delete");
@@ -43413,17 +43446,17 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
         host.reopen();
         sync(&mut driver);
 
-        // ── Escape dismissal closes through the event; focus is not restored ──
+        // ── Escape dismissal closes through the event and restores focus ──
         driver.dispatch_key("escape");
         sync(&mut driver);
         assert!(
             poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
             "the Escape event itself unmounts the panel"
         );
-        assert_ne!(
+        assert_eq!(
             poodle_gpui_node_backend::focus_state_for(TRIGGER),
             Some(true),
-            "closing does not restore trigger focus (contract)"
+            "Escape restores real focus to the invocation target"
         );
         assert_eq!(
             host.dismissals
@@ -43475,20 +43508,15 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
             "the outside press itself unmounts the panel"
         );
-        assert_ne!(
+        assert_eq!(
             poodle_gpui_node_backend::focus_state_for(TRIGGER),
             Some(true),
-            "an outside press never restores trigger focus"
+            "outside dismissal restores focus to the invocation target"
         );
-        assert_eq!(
+        assert_ne!(
             poodle_gpui_node_backend::focus_state_for("outside-target"),
             Some(true),
-            "the outside press leaves focus on the target the user clicked"
-        );
-        assert_ne!(
-            poodle_gpui_node_backend::focus_state_for(TRIGGER),
-            Some(true),
-            "an outside press never returns focus to the trigger"
+            "restoration takes focus back from the outside press target"
         );
         assert_eq!(
             host.dismissals
@@ -43496,6 +43524,21 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
                 .expect("outside dismissals")
                 .as_slice(),
             ["escape", "outside"]
+        );
+
+        // ── A removed invocation target falls back to its surviving root ──
+        host.reopen();
+        sync(&mut driver);
+        *host.trigger_present.lock().expect("trigger presence") = false;
+        host.rebuild();
+        driver.draw_frame();
+        driver.dispatch_key("escape");
+        sync(&mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for(PANEL).is_none());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(ROOT_FALLBACK),
+            Some(true),
+            "a removed invocation target restores focus to its surviving root"
         );
         assert!(driver.mounted_observation().is_valid());
     });

@@ -1,4 +1,4 @@
-import { fireEvent, render, within } from "@testing-library/react";
+import { fireEvent, render, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { SidebarNav } from "../src/SidebarNav";
@@ -168,7 +168,7 @@ describe("SidebarNav (react)", () => {
 
     const surfaceOf = () => document.querySelector(".poodle-menu-surface") as HTMLElement | null;
 
-    it("opens the shared ContextMenu from right-click on link and button items", () => {
+    it("opens the shared ContextMenu from right-click and restores focus after outside dismissal", async () => {
       const { container } = render(<SidebarNav groups={menuGroups} />);
       const view = within(container);
       const link = view.getByRole("link", { name: "Q4 close" });
@@ -181,22 +181,28 @@ describe("SidebarNav (react)", () => {
 
       fireEvent.mouseDown(document.body);
       expect(surfaceOf()).toBeNull();
+      await waitFor(() => expect(document.activeElement).toBe(link));
 
       const button = view.getByRole("button", { name: "Cash flow" });
       fireEvent.contextMenu(button);
       expect(surfaceOf()?.getAttribute("aria-label")).toBe("Cash flow actions");
+      fireEvent.keyDown(document, { key: "Escape" });
+      await waitFor(() => expect(document.activeElement).toBe(button));
     });
 
-    it("opens from Shift+F10 on the focused item", () => {
+    it("opens from Shift+F10 and restores focus on Escape", async () => {
       const { container } = render(<SidebarNav groups={menuGroups} />);
       const button = within(container).getByRole("button", { name: "Cash flow" });
+      button.focus();
       fireEvent.keyDown(button, { key: "F10", shiftKey: true });
       const surface = surfaceOf();
       expect(surface).not.toBeNull();
       expect(surface?.getAttribute("aria-label")).toBe("Cash flow actions");
+      fireEvent.keyDown(document, { key: "Escape" });
+      await waitFor(() => expect(document.activeElement).toBe(button));
     });
 
-    it("fires onContextAction with the nav item value then the menu value, and does not activate the item", () => {
+    it("fires onContextAction with the nav item value then the menu value, and does not activate the item", async () => {
       const onContextAction = vi.fn();
       const onValueChange = vi.fn();
       const { container } = render(
@@ -209,6 +215,7 @@ describe("SidebarNav (react)", () => {
       expect(onContextAction).toHaveBeenCalledWith("cash", "delete");
       expect(onValueChange).not.toHaveBeenCalled();
       expect(surfaceOf()).toBeNull();
+      await waitFor(() => expect(document.activeElement).toBe(button));
     });
 
     it("does not intercept contextmenu when contextMenuItems is unset", () => {

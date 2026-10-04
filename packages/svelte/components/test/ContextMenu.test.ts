@@ -1,7 +1,8 @@
-import { fireEvent, render } from "@testing-library/svelte";
+import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
 import ContextMenu from "../src/ContextMenu.svelte";
+import FocusHarness from "./ContextMenuFocusHarness.svelte";
 import type { MenuItem } from "../src/types";
 
 const items: MenuItem[] = [
@@ -23,11 +24,14 @@ describe("ContextMenu (svelte) dismissOnOutsideInteract", () => {
 
   it("dismisses the menu on outside mousedown by default", async () => {
     const { container } = render(ContextMenu, { props: { items } });
-    await fireEvent.contextMenu(triggerOf(container));
+    const trigger = triggerOf(container);
+    trigger.focus();
+    await fireEvent.contextMenu(trigger);
     expect(surfaceOf()).not.toBeNull();
 
     await fireEvent.mouseDown(document.body);
     expect(surfaceOf()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
   it("keeps the menu open on outside mousedown when dismissOnOutsideInteract=false", async () => {
@@ -104,5 +108,49 @@ describe("ContextMenu (svelte) triggerless overlay", () => {
     expect(surfaceOf()).not.toBeNull();
     expect(surfaceOf().getAttribute("role")).toBe("menu");
     expect(surfaceOf().getAttribute("aria-label")).toBe("Row actions");
+  });
+});
+
+describe("ContextMenu (svelte) focus restoration", () => {
+  const surfaceOf = () => document.querySelector(".poodle-menu-surface") as HTMLElement;
+
+  it("returns focus to the keyboard invoker on Escape", async () => {
+    const { getByTestId } = render(FocusHarness);
+    const invoker = getByTestId("invoker") as HTMLButtonElement;
+    invoker.focus();
+
+    await fireEvent.keyDown(invoker, { key: "ContextMenu" });
+    expect(surfaceOf()).not.toBeNull();
+    await fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(surfaceOf()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(invoker));
+  });
+
+  it("returns focus to the right-clicked invoker after item activation", async () => {
+    const { getByTestId } = render(FocusHarness);
+    const invoker = getByTestId("invoker") as HTMLButtonElement;
+
+    await fireEvent.contextMenu(invoker);
+    const rename = surfaceOf().querySelector<HTMLElement>("[role='menuitem']");
+    expect(rename).not.toBeNull();
+    await fireEvent.click(rename!);
+
+    expect(surfaceOf()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(invoker));
+  });
+
+  it("falls back to the surviving root when the invoking target is removed", async () => {
+    const { container, getByTestId } = render(FocusHarness);
+    const invoker = getByTestId("invoker") as HTMLButtonElement;
+    const root = container.querySelector<HTMLElement>(".poodle-context-menu")!;
+
+    await fireEvent.contextMenu(invoker);
+    await fireEvent.click(getByTestId("remove-invoker"));
+    expect(invoker.isConnected).toBe(false);
+    await fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(surfaceOf()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(root));
   });
 });
