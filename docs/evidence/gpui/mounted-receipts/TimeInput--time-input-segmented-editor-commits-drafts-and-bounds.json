@@ -8,7 +8,10 @@
   "contract_claims": [
     "semantic",
     "events",
-    "keyboard_focus"
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -20,10 +23,21 @@
       "assert_eq!(\n            host.last_emit.lock().expect(\"emit",
       "assert_eq!(host.last_emit.lock().expect(\"emit"
     ],
+    "pointer": [
+      "pointer_activate"
+    ],
     "keyboard_focus": [
       "focus_state_for",
       "focus_element",
       "dispatch_key"
+    ],
+    "accessibility": [
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "resolve_space"
     ]
   },
   "production_path_observation": {
@@ -36,20 +50,23 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "117667491406b116b1ea9a230ddfe61262861713",
+  "source_commit": "c01b5010f5c41f64107641c92a30e9a3e28b031b",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-077-merge-main-5403339529",
+    "run_id": "2026-10-04-poodle-080-c01b5010",
     "outcome": "passed",
-    "body_sha256": "cb209bc7faba88c65cfec88215a3f010d7212cae18ed093837bc4fc43487b008"
+    "body_sha256": "757a050efdaecdc14e248740b94d16abaf704639891a95a95193916420e507d2"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
-    "drove real keyboard input or backend focus through the mounted tree"
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

@@ -8,7 +8,10 @@
   "contract_claims": [
     "semantic",
     "events",
-    "keyboard_focus"
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
@@ -18,10 +21,22 @@
     "events": [
       "assert_eq!(\n            take_events(&host.log),\n            vec![\n                \"duration-before/focus:false\",\n                \"duration/change:1:59:59:7199\",\n                \"duration/change:2:0:59:7259\",\n                \"duration/change"
     ],
+    "pointer": [
+      "pointer_activate"
+    ],
     "keyboard_focus": [
       "focus_state_for",
       "focus_element",
       "dispatch_key"
+    ],
+    "accessibility": [
+      "accessible",
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
@@ -29,25 +44,28 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "fixture-helper:duration_routing_tree",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "117667491406b116b1ea9a230ddfe61262861713",
+  "source_commit": "c01b5010f5c41f64107641c92a30e9a3e28b031b",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-077-merge-main-5403339529",
+    "run_id": "2026-10-04-poodle-080-c01b5010",
     "outcome": "passed",
-    "body_sha256": "fbf2f93d095ed10a3dfb375f30883f35999ee873d67893a3445ba5c079ed3ece"
+    "body_sha256": "2a95d8645cc73e2c3eee2998c2652402edd3a15cfcb83224f31f89f596b2ebf4"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
-    "drove real keyboard input or backend focus through the mounted tree"
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }
