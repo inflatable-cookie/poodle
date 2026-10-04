@@ -237,6 +237,31 @@
       ]
     },
     {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "Menubar",
+        "NavigationMenu",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 5,
+        "events": 5,
+        "pointer": 5,
+        "keyboard_focus": 5,
+        "accessibility": 5,
+        "visual": 5
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
+      ]
+    },
+    {
       "substrate": "media-data",
       "components": [
         "AudioMeter",

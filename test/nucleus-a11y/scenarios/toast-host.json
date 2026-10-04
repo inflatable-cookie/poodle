@@ -24,6 +24,18 @@
   },
   "actions": [],
   "declared_states": [],
-  "capture": { "width": 720, "height": 520 },
-  "web_only_exclusions": []
+  "capture": {
+    "width": 720,
+    "height": 520
+  },
+  "web_only_exclusions": [],
+  "roleRemaps": [
+    {
+      "index": 3,
+      "field": "role",
+      "gpui": "alert",
+      "svelte": "listitem",
+      "reason": "Contract toast-stack.md native mapping: danger rows project NodeRole::Alert while Svelte renders li with an assertive live region. Sanctioned cross-runtime role projection, not an assistive-technology parity claim."
+    }
+  ]
 }

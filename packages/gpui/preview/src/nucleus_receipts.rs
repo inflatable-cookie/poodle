@@ -425,6 +425,20 @@ pub(crate) struct A1Exclusion {
     pub reason: String,
 }
 
+/// A contract-sanctioned cross-runtime projection that strict node equality
+/// must not report: the GPUI node at `index` carries `gpui` where Svelte
+/// carries `svelte` for `field`, with the justification recorded. Snapshots
+/// keep both truthful values; only the comparison consults the sanction.
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct A1RoleRemap {
+    pub index: usize,
+    pub field: String,
+    pub gpui: Value,
+    pub svelte: Value,
+    pub reason: String,
+}
+
 #[derive(Clone, Copy, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct A1Capture {
@@ -449,6 +463,10 @@ pub(crate) struct A1Scenario {
     pub declared_states: Vec<String>,
     #[serde(default)]
     pub web_only_exclusions: Vec<A1Exclusion>,
+    /// Sanctioned cross-runtime projections (see [`A1RoleRemap`]). Empty for
+    /// every row that compares strictly.
+    #[serde(default, rename = "roleRemaps")]
+    pub role_remaps: Vec<A1RoleRemap>,
     /// Fixed logical capture viewport for the cohort fixture kind. The A1
     /// extractors carry this field but do not use it for DOM layout.
     pub capture: A1Capture,
@@ -768,7 +786,30 @@ pub(crate) fn load_svelte_snapshot(loaded: &LoadedA1Scenario) -> (String, String
 /// Positional, field-by-field comparison of two normalised node lists. An
 /// extra node on either side is reported against `role` with `null` on the
 /// side that lacks it.
-pub(crate) fn diff_a1_nodes(gpui: &[Value], svelte: &[Value]) -> Vec<Value> {
+/// Whether a sanctioned cross-runtime projection covers one diff entry:
+/// same node, same field, and both runtimes' exact declared values. Anything
+/// else stays a divergence.
+pub(crate) fn remap_covers(
+    remaps: &[A1RoleRemap],
+    index: usize,
+    field: &str,
+    gpui: &Value,
+    svelte: &Value,
+) -> bool {
+    remaps.iter().any(|remap| {
+        remap.index == index
+            && remap.field == field
+            && remap.gpui == *gpui
+            && remap.svelte == *svelte
+            && !remap.reason.trim().is_empty()
+    })
+}
+
+pub(crate) fn diff_a1_nodes_with_remaps(
+    gpui: &[Value],
+    svelte: &[Value],
+    remaps: &[A1RoleRemap],
+) -> Vec<Value> {
     let mut diff = Vec::new();
     let length = gpui.len().max(svelte.len());
     for index in 0..length {
@@ -782,7 +823,9 @@ pub(crate) fn diff_a1_nodes(gpui: &[Value], svelte: &[Value]) -> Vec<Value> {
                 for key in keys {
                     let left_value = left.get(key).cloned().unwrap_or(Value::Null);
                     let right_value = right.get(key).cloned().unwrap_or(Value::Null);
-                    if !a1_values_equal(&left_value, &right_value) {
+                    if !a1_values_equal(&left_value, &right_value)
+                        && !remap_covers(remaps, index, key, &left_value, &right_value)
+                    {
                         diff.push(json!({
                             "index": index,
                             "field": key,
@@ -1254,5 +1297,54 @@ mod receipt_lock_tests {
         );
         let error = rejection(&mutated);
         assert!(error.contains("invalid checksum"), "{error}");
+    }
+}
+
+#[cfg(test)]
+mod role_remap_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn remap() -> A1RoleRemap {
+        A1RoleRemap {
+            index: 3,
+            field: "role".to_owned(),
+            gpui: json!("alert"),
+            svelte: json!("listitem"),
+            reason: "contract-sanctioned danger projection".to_owned(),
+        }
+    }
+
+    fn nodes() -> (Vec<Value>, Vec<Value>) {
+        let gpui = ["list", "listitem", "button", "alert", "button", "button"]
+            .iter()
+            .map(|role| json!({ "role": role }))
+            .collect();
+        let svelte = ["list", "listitem", "button", "listitem", "button", "button"]
+            .iter()
+            .map(|role| json!({ "role": role }))
+            .collect();
+        (gpui, svelte)
+    }
+
+    #[test]
+    fn sanctioned_remap_clears_only_its_exact_entry() {
+        let (gpui, svelte) = nodes();
+        let remaps = vec![remap()];
+        assert!(diff_a1_nodes_with_remaps(&gpui, &svelte, &remaps).is_empty());
+        assert_eq!(diff_a1_nodes_with_remaps(&gpui, &svelte, &[]).len(), 1);
+        // Wrong index, field, value, or an empty reason never sanctions.
+        let mut shifted = remap();
+        shifted.index = 2;
+        assert_eq!(
+            diff_a1_nodes_with_remaps(&gpui, &svelte, &[shifted]).len(),
+            1
+        );
+        let mut unreasoned = remap();
+        unreasoned.reason = "  ".to_owned();
+        assert_eq!(
+            diff_a1_nodes_with_remaps(&gpui, &svelte, &[unreasoned]).len(),
+            1
+        );
     }
 }

@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "d3200eea444299f9c6f522d71a13184ac9d8176e",
+  "source_commit": "80aa132e154ac9b2f328ec904016514b6cf94faf",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -837,39 +837,15 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [
-        {
-          "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "events",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "pointer",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "keyboard_focus",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend"
-        }
+      "admitted": [],
+      "missing": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
       ],
-      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -878,10 +854,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [
-        "docs/evidence/gpui/mounted-receipts/ContextMenu--context-menu-open-panel-semantics-activation-and-dismissal-through-mounted-backend.json"
-      ],
-      "refusals": []
+      "receipts": [],
+      "refusals": [
+        "No validated receipt and no retained expected test for ContextMenu; every required capability stays missing."
+      ]
     },
     {
       "component": "CollapseToggle",
@@ -2488,39 +2464,15 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [
-        {
-          "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "events",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "pointer",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "keyboard_focus",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend"
-        }
+      "admitted": [],
+      "missing": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
       ],
-      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2529,10 +2481,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [
-        "docs/evidence/gpui/mounted-receipts/NavigationMenu--navigation-menu-disclosure-viewport-roving-and-dismissal-through-mounted-backend.json"
-      ],
-      "refusals": []
+      "receipts": [],
+      "refusals": [
+        "No validated receipt and no retained expected test for NavigationMenu; every required capability stays missing."
+      ]
     },
     {
       "component": "Pill",
@@ -3459,39 +3411,15 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [
-        {
-          "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "events",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "pointer",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "keyboard_focus",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend"
-        }
+      "admitted": [],
+      "missing": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
       ],
-      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3500,10 +3428,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [
-        "docs/evidence/gpui/mounted-receipts/SplitButton--split-button-halves-menu-keyboard-and-dismissal-through-mounted-backend.json"
-      ],
-      "refusals": []
+      "receipts": [],
+      "refusals": [
+        "No validated receipt and no retained expected test for SplitButton; every required capability stays missing."
+      ]
     },
     {
       "component": "Skeleton",
@@ -4950,39 +4878,15 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [
-        {
-          "axis": "semantic",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#menubar_trigger_open_select_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "events",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#menubar_trigger_open_select_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "pointer",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#menubar_trigger_open_select_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "keyboard_focus",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#menubar_trigger_open_select_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "accessibility",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#menubar_trigger_open_select_and_dismissal_through_mounted_backend"
-        },
-        {
-          "axis": "visual",
-          "via": "expected-test",
-          "ref": "packages/gpui/preview/tests/headless_regressions.rs#menubar_trigger_open_select_and_dismissal_through_mounted_backend"
-        }
+      "admitted": [],
+      "missing": [
+        "semantic",
+        "events",
+        "pointer",
+        "keyboard_focus",
+        "accessibility",
+        "visual"
       ],
-      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4991,10 +4895,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [
-        "docs/evidence/gpui/mounted-receipts/Menubar--menubar-trigger-open-select-and-dismissal-through-mounted-backend.json"
-      ],
-      "refusals": []
+      "receipts": [],
+      "refusals": [
+        "No validated receipt and no retained expected test for Menubar; every required capability stays missing."
+      ]
     },
     {
       "component": "UiPresentationProvider",
@@ -6490,15 +6394,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6507,10 +6435,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for PageLoading; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/PageLoading--first-mounted-parity-page-loading.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MediaPicker",
@@ -7624,15 +7552,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7641,10 +7593,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for HistoryCenter; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/HistoryCenter--first-mounted-parity-history-center.json"
+      ],
+      "refusals": []
     },
     {
       "component": "UpdateStatus",
@@ -8598,18 +8550,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 113,
-    "fullyAdmittedRows": 90,
+    "admittedRows": 111,
+    "fullyAdmittedRows": 88,
     "missingTally": {
-      "semantic": 62,
-      "events": 53,
-      "pointer": 59,
-      "keyboard_focus": 55,
-      "accessibility": 68,
-      "visual": 81
+      "semantic": 64,
+      "events": 55,
+      "pointer": 61,
+      "keyboard_focus": 57,
+      "accessibility": 70,
+      "visual": 83
     },
     "holdCount": 175,
-    "refusalCount": 125
+    "refusalCount": 127
   },
   "groups": [
     {
@@ -8847,6 +8799,31 @@
       ]
     },
     {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "Menubar",
+        "NavigationMenu",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 5,
+        "events": 5,
+        "pointer": 5,
+        "keyboard_focus": 5,
+        "accessibility": 5,
+        "visual": 5
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
+      ]
+    },
+    {
       "substrate": "media-data",
       "components": [
         "AudioMeter",
@@ -8890,27 +8867,6 @@
         "docs/contracts/components/detail-section.md",
         "docs/contracts/components/scroll-shell.md",
         "docs/contracts/components/ui-presentation-provider.md"
-      ]
-    },
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "HistoryCenter",
-        "PageLoading",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 3,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/toast-stack.md"
       ]
     },
     {

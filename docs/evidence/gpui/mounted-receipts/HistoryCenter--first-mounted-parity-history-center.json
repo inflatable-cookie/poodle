@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "ToggleGroup",
-  "test": "toggle_group_result_focus_identity_and_disabled_paths",
+  "component": "HistoryCenter",
+  "test": "first_mounted_parity_history_center",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,9 +19,9 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            payloads.lock().unwrap().as_slice(),\n            [\n                ToggleGroupValue::Single(Some(\"board\".into())),\n                ToggleGroupValue::Single(Some(\"board\".into())),\n            ],\n            \"same-value selection still emit",
-      "assert_eq!(\n            payload"
+      "assert_eq!(\n            host.lock().expect(\"history host\").activates.as_slice(),\n            [\"Entry:e1\"],\n            \"entry activation callback payload",
+      "assert_eq!(\n            host.lock().expect(\"history host\").open_changes.as_slice(),\n            [true],\n            \"trigger toggle callback payload",
+      "assert_eq!(\n            host.lock().expect(\"history host\").dismissed,\n            vec![DismissReason::Escape],\n            \"dismiss callback payload"
     ],
     "pointer": [
       "pointer_activate"
@@ -32,22 +32,22 @@
       "dispatch_key"
     ],
     "accessibility": [
-      "NodeToggled",
+      "a11y\n            .",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_radius",
       "resolve_color",
-      "resolve_space"
+      "dimensions",
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::toggle_group",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -60,7 +60,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-095-mounted-proofs",
     "outcome": "passed",
-    "body_sha256": "56ac2c57b2256e1f569f173ace64a5e9da8805ff630e8721e98ea0c4d7d90c7c"
+    "body_sha256": "1858c2976ce4808f6089aa0bb435af986bebbb315d9ce6ee698a055c268cd573"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

@@ -230,6 +230,8 @@ pub fn reset_focus_registry() {
     PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow_mut().clear());
     FOCUS_IDENTITY_WINDOWS.with(|windows| windows.borrow_mut().clear());
     FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
+    poodle_node::note_focus_landed(None);
+    poodle_node::note_focus_transit(None);
     interaction::reset_continuous_value_session();
     tooltip::reset_tooltip_registry();
 }
@@ -819,6 +821,12 @@ thread_local! {
     /// another live window's handles and state.
     static FOCUS_IDENTITY_WINDOWS: RefCell<std::collections::HashMap<String, AnyWindowHandle>> =
         RefCell::new(std::collections::HashMap::new());
+    /// Who held focus when the current frame began, and the last gain this
+    /// frame. Transit feeds from these, never from the live field: a blur
+    /// processed earlier in the same paint must not erase the relatedTarget
+    /// a later gain reports.
+    static FRAME_START_FOCUS: RefCell<Option<String>> = RefCell::new(None);
+    static FRAME_LAST_GAIN: RefCell<Option<String>> = RefCell::new(None);
     // What the ring paint pass last painted per element id. Written only from
     // the real paint pass; absent means no ring is on screen.
     static PAINTED_RINGS: RefCell<std::collections::HashMap<String, PaintedRing>> =
@@ -951,6 +959,7 @@ pub(crate) fn sweep_unpainted_focus_identities() {
         let mut focused = focused.borrow_mut();
         if focused.as_deref().is_some_and(|id| !painted.contains(id)) {
             *focused = None;
+            poodle_node::note_focus_landed(None);
         }
     });
 }
@@ -976,8 +985,31 @@ pub(crate) fn sweep_unpainted_focus_identities_for(handle: AnyWindowHandle) {
         let mut focused = focused.borrow_mut();
         if focused.as_deref().is_some_and(|id| stale.contains(id)) {
             *focused = None;
+            poodle_node::note_focus_landed(None);
         }
     });
+}
+
+/// Snapshot the frame's focus entry point for transit reporting. The overlay
+/// frame boundary calls this before building; gains during the frame then
+/// chain from it (see [`note_focus_gain`]).
+pub(crate) fn snapshot_focus_frame() {
+    let start = FOCUSED_FIELD.with(|focused| focused.borrow().clone());
+    FRAME_START_FOCUS.with(|start_field| *start_field.borrow_mut() = start);
+    FRAME_LAST_GAIN.with(|last| *last.borrow_mut() = None);
+}
+
+/// Record a real focus gain for transit reporting (the web `relatedTarget`
+/// equivalent). The source is the last gain this frame, else whoever held
+/// focus when the frame began — never the live field, which a same-frame
+/// blur may already have cleared.
+pub(crate) fn note_focus_gain(id: &str) {
+    let source = FRAME_LAST_GAIN
+        .with(|last| last.borrow_mut().replace(id.to_owned()))
+        .or_else(|| FRAME_START_FOCUS.with(|start| start.borrow().clone()));
+    if source.as_deref() != Some(id) {
+        poodle_node::note_focus_transit(source);
+    }
 }
 
 /// The focus handle of whatever holds focus right now.
@@ -998,6 +1030,12 @@ pub fn focus_handle_for(id: &str) -> Option<gpui::FocusHandle> {
 /// re-fire after the user tabs or blurs away from the overlay.
 pub(crate) fn claim_initial_focus(id: &str) -> bool {
     INITIAL_FOCUS_REQUESTED.with(|ids| ids.borrow_mut().insert(id.to_owned()))
+}
+
+/// The element id holding backend-tracked focus right now, if any. The
+/// overlay Tab trap reads this to step within the open layer.
+pub(crate) fn focused_element_id() -> Option<String> {
+    FOCUSED_FIELD.with(|f| f.borrow().clone())
 }
 
 /// Whether the node with this element id held focus as of the last frame.

@@ -6,8 +6,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeRole,
 };
 use poodle_specs::{
     PageLoadingSpec, ProgressSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
@@ -108,9 +108,19 @@ pub fn page_loading(
         card = card.child(m);
     }
 
-    // Cancel action — bordered control (contract §8 `.page-loading__cancel`).
+    // Cancel action — a real button (contract §2, §6): keyboard-focusable,
+    // labelled, and ringed on focus, matching Svelte's native `<button>`.
     if spec.can_cancel {
-        let mut cancel = Node::text("Cancel");
+        let mut cancel = Node::button("Cancel");
+        cancel.a11y.role = Some(NodeRole::Button);
+        cancel.a11y.label = Some("Cancel".to_owned());
+        cancel.a11y.tab_index = Some(0);
+        cancel.interaction.focusable = true;
+        cancel.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
         {
             let s = &mut cancel.style;
             s.descriptor.text_color = Some(text_secondary);
@@ -156,11 +166,14 @@ pub fn page_loading(
         }
     }
     let mut root = root.child(card);
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            root.a11y.label = Some(label.to_string());
-        }
-    }
+    // Contract §6: the status name defaults to "Loading", matching Svelte's
+    // `aria-label={ariaLabel ?? "Loading"}`.
+    let label = spec
+        .aria_label
+        .as_deref()
+        .filter(|label| !label.is_empty())
+        .unwrap_or("Loading");
+    root.a11y.label = Some(label.to_string());
     root.a11y.role = Some(NodeRole::Status);
     root
 }
