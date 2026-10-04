@@ -1,13 +1,12 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "DateTimeZonePicker",
-  "test": "first_mounted_parity_date_time_zone_picker",
+  "component": "Toolbar",
+  "test": "first_mounted_parity_toolbar",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
-    "events",
     "pointer",
     "keyboard_focus",
     "accessibility",
@@ -18,11 +17,6 @@
       "assert",
       "production-mount"
     ],
-    "events": [
-      "assert!(\n            payloads\n                .iter()\n                .any(|value| value.time_zone.as_deref() == Some(\"Asia/Tokyo\")),\n            \"zone change callback emit",
-      "assert_eq!(\n            *zone_toggles.lock().expect(\"zone toggle events\"),\n            vec![true, false],\n            \"commit",
-      "assert!(payload"
-    ],
     "pointer": [
       "pointer_activate"
     ],
@@ -32,20 +26,19 @@
       "dispatch_key"
     ],
     "accessibility": [
-      "a11y\n            .",
-      "accessible",
-      "NodeRole"
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
-      "resolve_color"
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_element_in_box",
+    "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::date_time_zone_picker_with_callbacks",
+    "renderer": "poodle_render-import:button",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -58,11 +51,10 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-093",
     "outcome": "passed",
-    "body_sha256": "a6a56c6ae92d903a3d6cc7b27a15a140f5ef3004d3ca7050c760b690f0737f61"
+    "body_sha256": "a257f4d85f41a6acbd2104cdba98214a6f6ec9ffa7e8635419b83a7a255088c9"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",

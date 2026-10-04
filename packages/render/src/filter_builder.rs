@@ -12,8 +12,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeRole,
 };
 use poodle_specs::{
     ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlDensity, ControlSize,
@@ -259,6 +259,7 @@ pub fn filter_builder(
     instance_id: &str,
     handlers: &FilterBuilderHandlers,
 ) -> Node {
+    let instance_id = instance_id.to_owned();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
 
@@ -333,6 +334,8 @@ pub fn filter_builder(
         s.descriptor.background = Some(surface);
     }
     all_corners(&mut field_el, radius);
+    field_el.a11y.role = Some(NodeRole::Group);
+    field_el.a11y.label = Some(spec.aria_label.clone());
 
     // Opener (borderless): label + optional summary + chevron.
     let mut opener = row(trigger_gap);
@@ -361,6 +364,30 @@ pub fn filter_builder(
     let mut chevron = Node::icon("chevron-down", summary_font);
     chevron.style.descriptor.text_color = Some(text_secondary);
     let mut opener = opener.child(chevron);
+    let trigger_id = format!("filter-builder:{instance_id}:trigger");
+    let dialog_id = format!("filter-builder:{instance_id}:dialog");
+    opener.runtime_id = Some(trigger_id);
+    opener.a11y.role = Some(NodeRole::Button);
+    opener.a11y.label = Some(format!(
+        "{}{}",
+        spec.aria_label,
+        if spec.active_count() > 0 {
+            format!(", {} active", spec.active_count())
+        } else {
+            String::new()
+        }
+    ));
+    opener.a11y.expanded = Some(spec.is_open);
+    opener.a11y.controls = spec.is_open.then_some(dialog_id.clone());
+    if !spec.is_disabled {
+        opener.interaction.focusable = true;
+        opener.a11y.tab_index = Some(0);
+        opener.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
+    }
     if let (false, Some(handler)) = (spec.is_disabled, &handlers.on_toggle) {
         let handler = Arc::clone(handler);
         opener.style.descriptor.cursor = CursorHint::Pointer;
@@ -462,7 +489,6 @@ pub fn filter_builder(
     if spec.is_open {
         // Contract: the open overlay panel is a `dialog`.
         let mut panel = Node::container();
-        panel.a11y.role = Some(NodeRole::Dialog);
         {
             let s = &mut panel.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
@@ -561,7 +587,7 @@ pub fn filter_builder(
             if let Some(op) = field.find_operator(&draft.operator) {
                 editor = editor.child(operand_editor(
                     ctx,
-                    instance_id,
+                    &instance_id,
                     field,
                     op.operand_kind,
                     &draft.operand,
@@ -635,6 +661,13 @@ pub fn filter_builder(
         }
 
         let mut surface_el = Node::container();
+        surface_el.runtime_id = Some(dialog_id);
+        surface_el.a11y.role = Some(NodeRole::Dialog);
+        surface_el.a11y.label = Some(format!(
+            "Edit {}s",
+            spec.aria_label.to_lowercase()
+        ));
+        surface_el.a11y.tab_index = Some(-1);
         {
             let s = &mut surface_el.style;
             // Explicit Row (see switch.rs): one panel child.
@@ -668,9 +701,6 @@ pub fn filter_builder(
         root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
-    if !spec.aria_label.is_empty() {
-        root.a11y.label = Some(spec.aria_label.clone());
-    }
     root
 }
 

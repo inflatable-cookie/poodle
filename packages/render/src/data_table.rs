@@ -17,8 +17,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, StylePatch, TextAlign,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutOverflow,
+    LayoutSizing, MainAxisAlignment, Node, NodeRole, StylePatch, TextAlign,
 };
 use poodle_specs::{CheckState, CheckboxSpec, DataTableSpec, StatusTone, TableSortDirection};
 
@@ -186,6 +186,7 @@ pub fn data_table(
 
     // ── Header row ────────────────────────────────────────────────
     let mut header = row_shell(LayoutDirection::Row);
+    header.a11y.role = Some(NodeRole::Row);
     {
         let s = &mut header.style;
         s.descriptor.background = Some(header_fill);
@@ -204,6 +205,7 @@ pub fn data_table(
         // Header checkbox: selects every row, and has no caption of its own.
         .with_aria_label("Select all rows");
         let mut cell = row_shell(LayoutDirection::Row);
+        cell.a11y.role = Some(NodeRole::ColumnHeader);
         {
             let s = &mut cell.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(selection_width);
@@ -222,6 +224,8 @@ pub fn data_table(
         let is_sorted = spec.sort_column_id.as_deref() == Some(&*col.id);
 
         let mut col_cell = row_shell(LayoutDirection::Row);
+        col_cell.a11y.role = Some(NodeRole::ColumnHeader);
+        col_cell.a11y.label = Some(col.label.clone());
         {
             let s = &mut col_cell.style;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
@@ -255,6 +259,11 @@ pub fn data_table(
             // Sortable columns show a pointer cursor and accent tint on hover.
             col_cell.style.descriptor.cursor = CursorHint::Pointer;
             col_cell.interaction.focusable = true;
+            col_cell.style.focus_ring = Some(FocusRing {
+                color: theme.resolve_color("color.accent.focusRing"),
+                width: theme.resolve_border_width("border.width.focus"),
+                offset: rem_to_px(0.125),
+            });
             col_cell.style.hover = Some(StylePatch {
                 background: Some(header_hover),
                 border_color: None,
@@ -296,6 +305,7 @@ pub fn data_table(
     // per-column filter inputs are host-owned.
     if spec.has_filters() {
         let mut filter_row = row_shell(LayoutDirection::Row);
+        filter_row.a11y.role = Some(NodeRole::Row);
         {
             let s = &mut filter_row.style;
             s.descriptor.background = Some(header_fill);
@@ -311,6 +321,7 @@ pub fn data_table(
         }
         for filter in &spec.filters {
             let mut chip = Node::text(format!("{}: {}", filter.column_id, filter.value));
+            chip.a11y.role = Some(NodeRole::Cell);
             {
                 let s = &mut chip.style;
                 s.descriptor.text_color = Some(accent);
@@ -333,6 +344,7 @@ pub fn data_table(
         // Empty state
         let empty_msg = spec.empty_message.as_deref().unwrap_or("No results");
         let mut empty = row_shell(LayoutDirection::Row);
+        empty.a11y.role = Some(NodeRole::Row);
         {
             let s = &mut empty.style;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
@@ -344,6 +356,7 @@ pub fn data_table(
             pad.bottom = cell_py;
         }
         let mut msg = Node::text(empty_msg);
+        msg.a11y.role = Some(NodeRole::Cell);
         msg.style.descriptor.text_color = Some(text_secondary);
         msg.style.text_size = Some(body_font);
         el = el.child(empty.child(msg));
@@ -364,6 +377,8 @@ pub fn data_table(
             };
 
             let mut row_el = row_shell(LayoutDirection::Row);
+            row_el.a11y.role = Some(NodeRole::Row);
+            row_el.a11y.selected = Some(is_selected);
             {
                 let s = &mut row_el.style;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
@@ -383,6 +398,7 @@ pub fn data_table(
                     .with_checked(is_selected)
                     .with_aria_label("Select row");
                 let mut cell = row_shell(LayoutDirection::Row);
+                cell.a11y.role = Some(NodeRole::Cell);
                 {
                     let s = &mut cell.style;
                     s.descriptor.layout.width = LayoutSizing::Fixed(selection_width);
@@ -405,7 +421,7 @@ pub fn data_table(
                 row_el = row_el.child(cell);
             }
 
-            for col in &visible_cols {
+            for (column_index, col) in visible_cols.iter().enumerate() {
                 let value = row
                     .cells
                     .iter()
@@ -424,6 +440,11 @@ pub fn data_table(
                     };
                     let pill_bg = mix_srgb(base, surface, 0.14);
                     let mut cell = row_shell(LayoutDirection::Row);
+                    cell.a11y.role = Some(if column_index == 0 {
+                        NodeRole::RowHeader
+                    } else {
+                        NodeRole::Cell
+                    });
                     {
                         let s = &mut cell.style;
                         s.descriptor.layout.width = LayoutSizing::Grow;
@@ -450,6 +471,11 @@ pub fn data_table(
                     row_el = row_el.child(cell.child(pill));
                 } else {
                     let mut cell = Node::text(value);
+                    cell.a11y.role = Some(if column_index == 0 {
+                        NodeRole::RowHeader
+                    } else {
+                        NodeRole::Cell
+                    });
                     cell.style.descriptor.text_color = Some(text_primary);
                     cell.style.text_size = Some(body_font);
                     cell.style.descriptor.layout.width = LayoutSizing::Grow;
@@ -465,6 +491,7 @@ pub fn data_table(
             // Row-actions cell (fixed 3.5rem) — legacy single action label.
             if spec.show_row_actions {
                 let mut cell = row_shell(LayoutDirection::Row);
+                cell.a11y.role = Some(NodeRole::Cell);
                 {
                     let s = &mut cell.style;
                     s.descriptor.layout.width = LayoutSizing::Fixed(actions_width);
@@ -493,6 +520,7 @@ pub fn data_table(
             if spec.is_row_expanded(&row.id) {
                 if let Some(ref summary) = row.summary {
                     let mut expand = row_shell(LayoutDirection::Row);
+                    expand.a11y.role = Some(NodeRole::Row);
                     {
                         let s = &mut expand.style;
                         let pad = &mut s.descriptor.layout.spacing.padding;
@@ -504,6 +532,7 @@ pub fn data_table(
                         s.descriptor.border.color = border;
                     }
                     let mut text = Node::text(summary);
+                    text.a11y.role = Some(NodeRole::Cell);
                     text.style.descriptor.text_color = Some(text_secondary);
                     text.style.text_size = Some(body_font);
                     el = el.child(expand.child(text));
@@ -589,6 +618,7 @@ pub fn data_table(
     if !spec.aria_label.is_empty() {
         el.a11y.label = Some(spec.aria_label.clone());
     }
+    el.a11y.role = Some(NodeRole::Table);
     el
 }
 

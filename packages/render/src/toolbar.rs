@@ -3,8 +3,11 @@
 //! Contract: `docs/contracts/components/toolbar.md`
 //! Ported from: `packages/jetstream/components/src/toolbar.rs`.
 
+use std::sync::{Arc, Mutex};
+
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+    CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
+    NodeKey, NodeRole,
 };
 use poodle_specs::{Alignment, Orientation, ToolbarSpec};
 
@@ -14,6 +17,41 @@ use crate::presentation::{
     rem_to_px, toolbar_density_gap_rem, toolbar_density_pad_inline_rem, toolbar_gap_rem,
     toolbar_pad_block_rem, toolbar_pad_inline_rem,
 };
+
+fn collect_focus_targets(
+    node: &mut Node,
+    scope: &str,
+    targets: &mut Vec<String>,
+    current: &Arc<Mutex<Option<usize>>>,
+) {
+    if node.interaction.focusable && !node.interaction.disabled {
+        let index = targets.len();
+        let id = node
+            .runtime_id
+            .as_ref()
+            .or(node.id.as_ref())
+            .cloned()
+            .unwrap_or_else(|| format!("{scope}:item:{index}"));
+        if node.runtime_id.is_none() && node.id.is_none() {
+            node.runtime_id = Some(id.clone());
+        }
+        let previous = node.interaction.on_focus_change.take();
+        let current = Arc::clone(current);
+        node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+            if focused {
+                *current.lock().expect("toolbar focus state") = Some(index);
+            }
+            if let Some(previous) = &previous {
+                previous(focused);
+            }
+        }));
+        targets.push(id);
+    }
+
+    for child in &mut node.children {
+        collect_focus_targets(child, scope, targets, current);
+    }
+}
 
 pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let panel_raw = ctx.theme().resolve_color(spec.bg_token());
@@ -34,8 +72,17 @@ pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>)
     );
 
     let is_vertical = spec.orientation == Orientation::Vertical;
+    let label = spec.aria_label.as_deref().unwrap_or("Toolbar");
+    let scope = format!("toolbar:{}", label.to_ascii_lowercase().replace(' ', "-"));
+    let focus_state = Arc::new(Mutex::new(None));
+    let mut children = children;
+    let mut focus_targets = Vec::new();
+    for child in &mut children {
+        collect_focus_targets(child, &scope, &mut focus_targets, &focus_state);
+    }
 
     let mut el = Node::container();
+    el.runtime_id = Some(format!("{scope}:root"));
     {
         let s = &mut el.style;
         if is_vertical {
@@ -57,6 +104,11 @@ pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>)
         s.descriptor.corner_radii.bottom_left = radius;
         s.descriptor.border.width = 1.0;
         s.descriptor.border.color = border;
+        s.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
         match spec.alignment {
             Alignment::Start => {}
             Alignment::Center => s.descriptor.layout.alignment.main = MainAxisAlignment::Center,
@@ -73,5 +125,42 @@ pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>)
         el.a11y.label = Some(label.to_string());
     }
     el.a11y.role = Some(NodeRole::Toolbar);
+    el.a11y.orientation = Some(if is_vertical {
+        "vertical".to_owned()
+    } else {
+        "horizontal".to_owned()
+    });
+    el.a11y.tab_index = Some(0);
+    el.interaction.focusable = true;
+    let focus_state_on_entry = Arc::clone(&focus_state);
+    el.interaction.on_focus_change = Some(Arc::new(move |focused| {
+        if focused {
+            *focus_state_on_entry
+                .lock()
+                .expect("toolbar focus state") = None;
+        }
+    }));
+    let targets = focus_targets;
+    let current = Arc::clone(&focus_state);
+    let orientation = spec.orientation;
+    el.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
+        let direction = match (orientation, key) {
+            (Orientation::Horizontal, NodeKey::ArrowRight)
+            | (Orientation::Vertical, NodeKey::ArrowDown) => 1isize,
+            (Orientation::Horizontal, NodeKey::ArrowLeft)
+            | (Orientation::Vertical, NodeKey::ArrowUp) => -1isize,
+            _ => return None,
+        };
+        if targets.is_empty() {
+            return None;
+        }
+        let next = match *current.lock().expect("toolbar focus state") {
+            None => 0,
+            Some(index) => {
+                (index as isize + direction).rem_euclid(targets.len() as isize) as usize
+            }
+        };
+        Some(targets[next].clone())
+    }));
     el
 }

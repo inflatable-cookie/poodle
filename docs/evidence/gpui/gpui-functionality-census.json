@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "56ac3abae918f453abc997e4b5b15c06dfe06a7d",
+  "source_commit": "4f89143a1d2865e3236a425fb6d8ab88be7d91ad",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -1639,15 +1639,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_builder"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_builder"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_builder"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_builder"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_builder"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_builder"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1656,10 +1680,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for FilterBuilder; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/FilterBuilder--first-mounted-parity-filter-builder.json"
+      ],
+      "refusals": []
     },
     {
       "component": "FormActions",
@@ -4614,14 +4638,34 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toolbar"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toolbar"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toolbar"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toolbar"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toolbar"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4630,10 +4674,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for Toolbar; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/Toolbar--first-mounted-parity-toolbar.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Tooltip",
@@ -5401,15 +5445,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_data_table"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_data_table"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_data_table"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_data_table"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_data_table"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_data_table"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5418,10 +5486,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for DataTable; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/DataTable--first-mounted-parity-data-table.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DetailSectionGroup",
@@ -5698,15 +5766,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_toolbar"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_toolbar"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_toolbar"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_toolbar"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_toolbar"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_filter_toolbar"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5715,10 +5807,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for FilterToolbar; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/FilterToolbar--first-mounted-parity-filter-toolbar.json"
+      ],
+      "refusals": []
     },
     {
       "component": "FormDialog",
@@ -8318,18 +8410,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 101,
-    "fullyAdmittedRows": 78,
+    "admittedRows": 105,
+    "fullyAdmittedRows": 82,
     "missingTally": {
-      "semantic": 74,
-      "events": 63,
-      "pointer": 71,
-      "keyboard_focus": 67,
-      "accessibility": 80,
-      "visual": 93
+      "semantic": 70,
+      "events": 60,
+      "pointer": 67,
+      "keyboard_focus": 63,
+      "accessibility": 76,
+      "visual": 89
     },
     "holdCount": 175,
-    "refusalCount": 137
+    "refusalCount": 133
   },
   "groups": [
     {
@@ -8435,51 +8527,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "DataTable",
-        "Field",
-        "FilterBuilder",
-        "FilterToolbar",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack",
-        "Toolbar"
-      ],
-      "missingTally": {
-        "semantic": 15,
-        "events": 13,
-        "pointer": 15,
-        "keyboard_focus": 15,
-        "accessibility": 15,
-        "visual": 15
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/data-table.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/filter-builder.md",
-        "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md",
-        "docs/contracts/components/toolbar.md"
-      ]
-    },
-    {
       "substrate": "form-editing",
       "components": [
         "AgentQuestionRecord",
@@ -8518,6 +8565,43 @@
         "docs/contracts/components/rating.md",
         "docs/contracts/components/stepper.md",
         "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ColorPicker",
+        "ContextMenu",
+        "Field",
+        "HistoryCenter",
+        "HoverCard",
+        "ListCardCounter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 11,
+        "events": 10,
+        "pointer": 11,
+        "keyboard_focus": 11,
+        "accessibility": 11,
+        "visual": 11
+      },
+      "contracts": [
+        "docs/contracts/components/color-picker.md",
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/field.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/hover-card.md",
+        "docs/contracts/components/list-card-counter.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
       ]
     },
     {

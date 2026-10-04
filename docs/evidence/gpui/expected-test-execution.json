@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-10-04-poodle-092",
-  "source_commit": "56ac3abae918f453abc997e4b5b15c06dfe06a7d",
+  "run_id": "2026-10-04-poodle-093",
+  "source_commit": "4f89143a1d2865e3236a425fb6d8ab88be7d91ad",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -316,7 +316,7 @@
     },
     "first_mounted_parity_table": {
       "outcome": "passed",
-      "body_sha256": "7857180280fc6d843c31f1e300c8cff9d38e53874757002a85e4a5c4b0b4ea23"
+      "body_sha256": "6ceb1f8a4ba37cea230c7831e2591cb99af4a14df97a6e3ee2c2697d096cf470"
     },
     "first_mounted_parity_time_zone_select": {
       "outcome": "passed",
@@ -401,6 +401,22 @@
     "video_player_canvas_and_play_button_rebuild_the_mounted_host": {
       "outcome": "passed",
       "body_sha256": "3ca1c74f2a91ed5f78614d0f46f6d849c4e6988b1d7eeaa24e520c7b0800e241"
+    },
+    "first_mounted_parity_data_table": {
+      "outcome": "passed",
+      "body_sha256": "5610ed8e13607861176164c8346a3d6a48e055cc6c6858395d76264b31436c2c"
+    },
+    "first_mounted_parity_filter_builder": {
+      "outcome": "passed",
+      "body_sha256": "9dedb4e04db3700262b090490b71520876ccfc94f9f63ce1d9859406762cc707"
+    },
+    "first_mounted_parity_filter_toolbar": {
+      "outcome": "passed",
+      "body_sha256": "406e4991260d3c3c5c2edd88a6fd9a6e8f1519906aadd979050a4e78acc1eefe"
+    },
+    "first_mounted_parity_toolbar": {
+      "outcome": "passed",
+      "body_sha256": "a257f4d85f41a6acbd2104cdba98214a6f6ec9ffa7e8635419b83a7a255088c9"
     }
   }
 }

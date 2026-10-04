@@ -105,51 +105,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "DataTable",
-        "Field",
-        "FilterBuilder",
-        "FilterToolbar",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack",
-        "Toolbar"
-      ],
-      "missingTally": {
-        "semantic": 15,
-        "events": 13,
-        "pointer": 15,
-        "keyboard_focus": 15,
-        "accessibility": 15,
-        "visual": 15
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/data-table.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/filter-builder.md",
-        "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md",
-        "docs/contracts/components/toolbar.md"
-      ]
-    },
-    {
       "substrate": "form-editing",
       "components": [
         "AgentQuestionRecord",
@@ -188,6 +143,43 @@
         "docs/contracts/components/rating.md",
         "docs/contracts/components/stepper.md",
         "docs/contracts/components/validation-summary.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ColorPicker",
+        "ContextMenu",
+        "Field",
+        "HistoryCenter",
+        "HoverCard",
+        "ListCardCounter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack"
+      ],
+      "missingTally": {
+        "semantic": 11,
+        "events": 10,
+        "pointer": 11,
+        "keyboard_focus": 11,
+        "accessibility": 11,
+        "visual": 11
+      },
+      "contracts": [
+        "docs/contracts/components/color-picker.md",
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/field.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/hover-card.md",
+        "docs/contracts/components/list-card-counter.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md"
       ]
     },
     {
