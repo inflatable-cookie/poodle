@@ -16600,13 +16600,23 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
         );
 
         // Accessibility: the region keeps Svelte's edge-default name with no
-        // ariaLabel passed, and tabs stay labelled focus targets.
+        // ariaLabel passed — the outer node is the region, and the nested
+        // tab strip owns the tablist — while tabs stay focus targets.
         {
             let mounted_node = mounted.lock().unwrap();
             let region = mounted_node
                 .find(&|n| n.a11y.label.as_deref() == Some("left dock"))
                 .expect("region keeps its accessible name");
-            assert_eq!(region.a11y.role, Some(NodeRole::TabList));
+            assert_eq!(region.a11y.role, Some(NodeRole::Region));
+            let tablist = mounted_node
+                .find(&|n| n.a11y.role == Some(NodeRole::TabList))
+                .expect("nested tab strip owns the tablist");
+            assert!(
+                tablist
+                    .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                    .is_some(),
+                "the tablist owns the tab buttons"
+            );
             let tab = mounted_node
                 .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
                 .expect("search tab");
@@ -49640,6 +49650,11 @@ fn first_mounted_parity_card() {
         interactive.style.hover.is_some(),
         "interactive cards keep the hover treatment"
     );
+    assert_eq!(
+        interactive.style.descriptor.cursor,
+        poodle_node::CursorHint::Pointer,
+        "interactive cards take the pointer cursor"
+    );
 
     // Selected keeps the accent ring; tokens resolve real values.
     let selected = poodle_render::card(&CardSpec::new().interactive().selected(), &ctx, vec![]);
@@ -49697,11 +49712,17 @@ fn first_mounted_parity_card() {
         );
 
         // Painted: the spoken name reaches mounted GPUI with real geometry;
-        // the card carries no role, matching Svelte's article.
+        // the card carries no role, matching Svelte's article, and paints
+        // the pointer cursor its interactive treatment declares.
         let painted = poodle_gpui_node_backend::painted_node_for("mounted-card")
             .expect("card reached GPUI paint");
         assert_eq!(painted.a11y_role, None);
         assert_eq!(painted.a11y_label.as_deref(), Some("Learn more"));
+        assert_eq!(
+            painted.style.cursor,
+            poodle_node::CursorHint::Pointer,
+            "the mounted card paints the pointer cursor"
+        );
         let geometry =
             poodle_gpui_node_backend::bounds_for("mounted-card").expect("mounted card geometry");
         assert!(f32::from(geometry.size.width) > 0.0);

@@ -586,6 +586,7 @@ pub fn dock_region(
         if spec.can_accept_panel {
             stack = stack.child(drop_zone());
         }
+        stack.a11y.role = Some(NodeRole::Region);
         stack.a11y.label = Some(region_label.clone());
         return stack;
     }
@@ -604,9 +605,11 @@ pub fn dock_region(
             toggle.style.descriptor.layout.spacing.padding.top = space_y;
             toggle.style.descriptor.layout.spacing.padding.bottom = space_y;
             let mut region = region.child(toggle);
+            region.a11y.role = Some(NodeRole::Region);
             region.a11y.label = Some(region_label.clone());
             return region;
         }
+        region.a11y.role = Some(NodeRole::Region);
         region.a11y.label = Some(region_label.clone());
         return region;
     }
@@ -642,6 +645,7 @@ pub fn dock_region(
                     ));
                 }
             }
+            strip.a11y.role = Some(NodeRole::Region);
             strip.a11y.label = Some(region_label.clone());
             return strip;
         } else {
@@ -676,6 +680,7 @@ pub fn dock_region(
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(false));
             }
+            strip.a11y.role = Some(NodeRole::Region);
             strip.a11y.label = Some(region_label.clone());
             return strip;
         }
@@ -698,10 +703,9 @@ pub fn dock_region(
         }
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
-    // A region without tabs is not a tablist.
-    if spec.show_tabs {
-        el.a11y.role = Some(NodeRole::TabList);
-    }
+    // The outer node is the region itself (Svelte's `<section>`): the
+    // nested tab strip owns the tablist, set on the tab_list node below.
+    el.a11y.role = Some(NodeRole::Region);
 
     // The strip: tabs plus (when collapsible) the collapse toggle. With
     // `show_tabs=false` the host owns the tab strip — the region emits no tab
@@ -739,8 +743,10 @@ pub fn dock_region(
             }
         }
 
-        // Tab list grows; toggle pinned at the end.
+        // Tab list grows; toggle pinned at the end. This is the tablist
+        // Svelte's nested Tabs owns; the outer region node stays a region.
         let mut tab_list = Node::container();
+        tab_list.a11y.role = Some(NodeRole::TabList);
         {
             let s = &mut tab_list.style;
             if is_tabs_on_edge {
@@ -1295,6 +1301,26 @@ mod tests {
             .find(&|n| n.runtime_id.as_deref()
                 == Some(dock_collapse_focus_id(Some("second")).as_str()))
             .is_some());
+    }
+
+    /// The outer node is the region (Svelte's `<section>` with its edge
+    /// name); the nested tab strip owns the tablist — never the outer node.
+    #[test]
+    fn outer_node_is_a_named_region_and_the_strip_owns_the_tablist() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let root = dock_region(&spec(), &ctx, None, DockRegionHandlers::default());
+        assert_eq!(root.a11y.role, Some(poodle_node::NodeRole::Region));
+        assert_eq!(root.a11y.label.as_deref(), Some("left dock"));
+        let strip = root
+            .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::TabList))
+            .expect("nested tab strip");
+        assert!(
+            strip
+                .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+                .is_some(),
+            "the tablist owns the tab buttons"
+        );
     }
 
     /// g16.100. `show_tabs` is a portable field: every mode that draws a
