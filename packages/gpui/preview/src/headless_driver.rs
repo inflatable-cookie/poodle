@@ -14,11 +14,114 @@
 //! `g14.008` ruled worth keeping. It is not a parity architecture: it mounts a
 //! `poodle-node` tree and drives real input at it.
 
+use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use gpui::*;
 use poodle_node::Node;
+
+/// Wall-clock bound for one named `HeadlessDriver` wait (idle, element,
+/// settle, open/close). Idle mounted regressions finish in about a tenth of
+/// a second; `check:gpui`'s preview bin tests recorded 1.6s of test time /
+/// 8s wall on 2026-09-30. 5s is ~50× idle and several times a slow draw
+/// loop under load.
+pub const WAIT_BOUND: Duration = Duration::from_millis(5_000);
+
+/// Per-test bound armed by [`arm_test_deadline`]. A passing mounted test is
+/// ~0.1–2s; a menubar regression that never parked sat at 0% CPU for 3.5h.
+/// 120s is ~60–1000× a passing test and still fails the hang by name.
+pub const TEST_BOUND: Duration = Duration::from_secs(120);
+
+thread_local! {
+    static CURRENT_WAIT: RefCell<String> = RefCell::new("run until idle".to_owned());
+}
+
+fn current_wait() -> String {
+    CURRENT_WAIT.with(|label| label.borrow().clone())
+}
+
+struct WaitScope {
+    previous: String,
+}
+
+impl WaitScope {
+    fn push(what: impl Into<String>) -> Self {
+        let what = what.into();
+        let previous = CURRENT_WAIT.with(|label| {
+            let mut label = label.borrow_mut();
+            let previous = label.clone();
+            *label = what;
+            previous
+        });
+        Self { previous }
+    }
+}
+
+impl Drop for WaitScope {
+    fn drop(&mut self) {
+        CURRENT_WAIT.with(|label| *label.borrow_mut() = self.previous.clone());
+    }
+}
+
+/// Watchdog that exits the process if a named wait never returns.
+///
+/// A panic on this thread would not fail the libtest case that is parked
+/// inside `run_until_parked`; exit 101 is the cargo-test failure code.
+pub struct DeadlineGuard {
+    done: Arc<AtomicBool>,
+}
+
+impl DeadlineGuard {
+    fn arm(what: impl Into<String>, bound: Duration) -> Self {
+        let done = Arc::new(AtomicBool::new(false));
+        let flag = Arc::clone(&done);
+        let what = what.into();
+        std::thread::Builder::new()
+            .name("poodle-headless-deadline".into())
+            .spawn(move || {
+                let start = Instant::now();
+                while !flag.load(Ordering::Relaxed) {
+                    let remaining = bound.saturating_sub(start.elapsed());
+                    if remaining.is_zero() {
+                        eprintln!(
+                            "headless wait timed out after {}ms: {what}",
+                            bound.as_millis()
+                        );
+                        std::process::exit(101);
+                    }
+                    std::thread::sleep(remaining.min(Duration::from_millis(50)));
+                }
+            })
+            .expect("headless deadline thread");
+        Self { done }
+    }
+}
+
+impl Drop for DeadlineGuard {
+    fn drop(&mut self) {
+        self.done.store(true, Ordering::Relaxed);
+    }
+}
+
+/// Arm the per-test deadline from the libtest thread name so a stuck
+/// `regressions:native` case fails rather than wedging the run.
+pub fn arm_test_deadline() -> DeadlineGuard {
+    let name = std::thread::current()
+        .name()
+        .unwrap_or("unnamed-headless-test")
+        .to_string();
+    DeadlineGuard::arm(format!("test `{name}` to finish"), TEST_BOUND)
+}
+
+/// Drain a dispatcher/executor until parked, with the wait named.
+pub fn run_until_parked_named(what: &str, body: impl FnOnce()) {
+    let _wait = WaitScope::push(what);
+    let _deadline = DeadlineGuard::arm(current_wait(), WAIT_BOUND);
+    body();
+}
 
 /// Content coordinates of the fixed-size box mounted nodes are centered in.
 pub const MOUNT_BOX_LEFT: f32 = 32.0;
@@ -321,17 +424,18 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.update(|window, cx| {
             let _ = window.draw(cx);
         });
-        self.cx.run_until_parked();
+        self.run_until_idle();
     }
 
     /// Close this window through GPUI's production removal path. Fires the
     /// backend's window-closed tooltip teardown; does not call
     /// `reset_focus_registry`.
     pub fn close_window(&mut self) {
+        let _wait = WaitScope::push("window close to park");
         self.cx.update(|window, _cx| {
             window.remove_window();
         });
-        self.cx.run_until_parked();
+        self.run_until_idle();
     }
 
     /// Same production frame lifetime as the preview root: `overlay_frame_begin_for`
@@ -347,26 +451,66 @@ impl<'a> HeadlessDriver<'a> {
             window.refresh();
             let _ = window.draw(cx);
         });
-        self.cx.run_until_parked();
+        self.run_until_idle();
     }
 
     /// Drain the executor until every task is parked.
     pub fn drain(&mut self) {
+        let _wait = WaitScope::push("run until idle");
+        self.run_until_idle();
+    }
+
+    /// Paint one frame and drain. Overlay hosts call this after a rebuild so
+    /// the next observation is from a settled tree.
+    pub fn settle(&mut self) {
+        let _wait = WaitScope::push("executor to settle");
+        self.draw_frame();
+    }
+
+    fn run_until_idle(&mut self) {
+        let _deadline = DeadlineGuard::arm(current_wait(), WAIT_BOUND);
         self.cx.run_until_parked();
+    }
+
+    fn wait_named(&mut self, what: &str, ready: impl Fn(&mut Self) -> bool) {
+        let _wait = WaitScope::push(what);
+        let deadline = Instant::now() + WAIT_BOUND;
+        loop {
+            if ready(self) {
+                return;
+            }
+            if Instant::now() >= deadline {
+                panic!(
+                    "headless wait timed out after {}ms: {what}",
+                    WAIT_BOUND.as_millis()
+                );
+            }
+            self.draw_frame();
+        }
+    }
+
+    /// Keep painting until the last frame owns bounds for `element_id`.
+    pub fn wait_for_element(&mut self, element_id: &str) {
+        self.wait_named(&format!("element `{element_id}` to paint"), |_| {
+            poodle_gpui_node_backend::bounds_for(element_id).is_some()
+        });
+    }
+
+    /// Keep painting until `element_id` is gone from the last frame.
+    pub fn wait_until_element_gone(&mut self, element_id: &str) {
+        self.wait_named(
+            &format!("element `{element_id}` to leave the frame"),
+            |_| poodle_gpui_node_backend::bounds_for(element_id).is_none(),
+        );
     }
 
     /// Keep painting until the backend owns a focus handle for the element.
     /// The handle is created lazily in the paint pass and attached on the
     /// next build, so two frames are the minimum.
     pub fn wait_for_focus_handle(&mut self, element_id: &str) {
-        for _ in 0..16 {
-            let ready = poodle_gpui_node_backend::focus_handle_for(element_id).is_some();
-            if ready {
-                return;
-            }
-            self.draw_frame();
-        }
-        panic!("focus handle for `{element_id}` never appeared");
+        self.wait_named(&format!("focus handle for `{element_id}`"), |_| {
+            poodle_gpui_node_backend::focus_handle_for(element_id).is_some()
+        });
     }
 
     /// Focus the element through the real backend focus registry.
@@ -391,16 +535,15 @@ impl<'a> HeadlessDriver<'a> {
     /// Move focus to the mount root and keep painting until the backend
     /// reports the element as blurred.
     pub fn blur_element_focus(&mut self, element_id: &str) {
-        for _ in 0..16 {
-            self.cx.update(|window, _cx| {
-                window.blur();
-            });
-            self.draw_frame();
-            if poodle_gpui_node_backend::focus_state_for(element_id) == Some(false) {
-                return;
-            }
-        }
-        eprintln!("WARN: element `{element_id}` never reported blurred");
+        self.wait_named(
+            &format!("element `{element_id}` to report blurred"),
+            |driver| {
+                driver.cx.update(|window, _cx| {
+                    window.blur();
+                });
+                poodle_gpui_node_backend::focus_state_for(element_id) == Some(false)
+            },
+        );
     }
 
     /// Send one platform input through `TestWindow`'s real dispatch callback
@@ -413,7 +556,7 @@ impl<'a> HeadlessDriver<'a> {
             PlatformInput::MouseMove(move_ev) => self.cx.simulate_event(move_ev),
             _ => panic!("pointer_event only takes mouse input"),
         }
-        self.cx.run_until_parked();
+        self.run_until_idle();
         self.draw_frame();
     }
 
@@ -598,7 +741,7 @@ impl<'a> HeadlessDriver<'a> {
             delta: ScrollDelta::Pixels(point(px(0.0), px(delta_y))),
             ..Default::default()
         });
-        self.cx.run_until_parked();
+        self.run_until_idle();
         self.draw_frame();
     }
 
@@ -670,7 +813,7 @@ impl<'a> HeadlessDriver<'a> {
             keystroke,
             is_held: false,
         });
-        self.cx.run_until_parked();
+        self.run_until_idle();
         self.draw_frame();
     }
 
@@ -679,7 +822,7 @@ impl<'a> HeadlessDriver<'a> {
         self.input_dispatches += 1;
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyUpEvent { keystroke });
-        self.cx.run_until_parked();
+        self.run_until_idle();
         self.draw_frame();
     }
 
@@ -694,7 +837,7 @@ impl<'a> HeadlessDriver<'a> {
             is_held: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
-        self.cx.run_until_parked();
+        self.run_until_idle();
         self.draw_frame();
     }
 
@@ -709,7 +852,7 @@ impl<'a> HeadlessDriver<'a> {
             is_held: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
-        self.cx.run_until_parked();
+        self.run_until_idle();
     }
 
     /// Return the private observation token used by the receipt emitter. A

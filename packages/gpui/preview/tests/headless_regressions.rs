@@ -111,13 +111,18 @@ const FIXTURE_ID: &str = "headless-fixture";
 /// gpui-macros 0.2.2 crashes on current rustc, so this mirrors its teardown
 /// (parked queue, forbidden parking, app shutdown) in a plain `#[test]`.
 fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
+    let _deadline = headless_driver::arm_test_deadline();
     poodle_gpui_node_backend::reset_focus_registry();
     let mut cx = TestAppContext::single();
     body(&mut cx);
-    cx.dispatcher.run_until_parked();
+    headless_driver::run_until_parked_named("test teardown to park", || {
+        cx.dispatcher.run_until_parked();
+    });
     cx.background_executor.forbid_parking();
     cx.quit();
-    cx.dispatcher.run_until_parked();
+    headless_driver::run_until_parked_named("test shutdown to park", || {
+        cx.dispatcher.run_until_parked();
+    });
 }
 
 fn theme() -> GpuiThemeProvider {
@@ -186,6 +191,18 @@ fn counting_handler() -> (Arc<dyn Fn() + Send + Sync>, Arc<Mutex<usize>>) {
     let handler: Arc<dyn Fn() + Send + Sync> =
         Arc::new(move || *sink.lock().expect("count lock") += 1);
     (handler, count)
+}
+
+/// A wait for an element that never paints must fail within `WAIT_BOUND`
+/// naming that element, rather than hanging the `regressions:native` run.
+#[test]
+#[should_panic(expected = "element `never-appears` to paint")]
+fn planted_wait_for_missing_element_fails_by_name() {
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let mut driver = HeadlessDriver::new(cx, mounted);
+        driver.wait_for_element("never-appears");
+    });
 }
 
 // ── Driver infrastructure ──────────────────────────────────────────────────

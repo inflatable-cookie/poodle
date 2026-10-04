@@ -118,7 +118,10 @@ composition into the backend and creates cross-runtime drift.
 ## Run the Preview
 
 The preview needs the sibling Jetstream repository configured as expected by
-the local workspace. From the Poodle repository root:
+the local workspace (`../jetstream` from the Poodle root, or the Paseo
+worktree sibling link). `effigy jetstream:build` fails at once if that
+checkout is missing or stale; Poodle does not vendor Jetstream. From the
+Poodle repository root:
 
 ```sh
 bun install

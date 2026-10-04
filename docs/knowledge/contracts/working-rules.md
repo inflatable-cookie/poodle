@@ -1,7 +1,7 @@
 # Working Rules
 
 Status: active
-Updated: 2026-09-29
+Updated: 2026-10-04
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -294,7 +294,12 @@ where the repository already provides the workaround, the trap links to it:
   viewport, not at the driver's 160x60 mount box (a press below the box but on
   screen still dispatches), so `HeadlessDriver::pointer_activate_id` fails with
   the element named when its center is off screen instead of pressing the
-  mount-box guess.
+  mount-box guess. `TestAppContext::run_until_parked` can park the test
+  thread forever; every `HeadlessDriver` wait (idle, element, settle,
+  open/close) takes a wall-clock deadline and panics naming what it waited
+  for. `run_headless` arms a per-test deadline from the libtest thread name.
+  Bounds and headroom live beside the constants in
+  [`packages/gpui/preview/src/headless_driver.rs`](../../../packages/gpui/preview/src/headless_driver.rs).
 
 ## Validation
 
