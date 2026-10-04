@@ -5,13 +5,43 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeKey, NodeModifiers, NodeRole,
+    StylePatch,
+};
 use poodle_specs::{ActiveEdge, ActiveFill, ControlDensity, NavigationMenuSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::context::RenderContext;
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
 
+/// Arrow-key focus roving across nav triggers (Svelte `handleKeydown`):
+/// Left/Right step with wrapping, Home/End jump to the enabled bounds.
+/// Opening (Down/Enter/Space) and closing (Escape) stay host-owned: they
+/// change the open value, which a focus-target id cannot express.
+fn trigger_roving_key_handler(
+    disabled_map: &[bool],
+    item_ids: &[String],
+    current_idx: usize,
+) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
+    use poodle_headless::menu::{menu_list_navigate, MenuListMove};
+    let disabled = disabled_map.to_vec();
+    let ids = item_ids.to_vec();
+    Some(Arc::new(move |key, _modifiers| {
+        let mv = match key {
+            NodeKey::ArrowRight => MenuListMove::Next,
+            NodeKey::ArrowLeft => MenuListMove::Prev,
+            NodeKey::Home => MenuListMove::First,
+            NodeKey::End => MenuListMove::Last,
+            _ => return None,
+        };
+        let next_idx = menu_list_navigate(&disabled, current_idx, mv);
+        if next_idx == current_idx {
+            return None;
+        }
+        Some(ids[next_idx].clone())
+    }))
+}
 /// Trigger horizontal padding in rem per density (contract §8 Density table):
 /// compact 0.5, default/comfortable 0.75 — NOT the generic ladder.
 fn nav_trigger_pad_x_rem(density: ControlDensity) -> f32 {
@@ -93,8 +123,28 @@ pub fn navigation_menu(
         s.descriptor.layout.spacing.gap = list_gap;
     }
 
-    for entry in &spec.items {
+    // Roving-tab posture (Svelte `focusIndex`): the active trigger owns the
+    // tab stop; with nothing active the first enabled trigger does. The
+    // render is stateless, so focus position mirrors the open value.
+    let first_enabled_idx = spec.items.iter().position(|entry| !entry.is_disabled);
+    let focus_idx = spec
+        .current_value()
+        .and_then(|value| {
+            spec.items.iter().position(|entry| {
+                entry.value == value && !entry.is_disabled
+            })
+        })
+        .or(first_enabled_idx);
+    let trigger_disabled: Vec<bool> = spec.items.iter().map(|entry| entry.is_disabled).collect();
+    let trigger_ids: Vec<String> = spec
+        .items
+        .iter()
+        .map(|entry| format!("navigation-menu-trigger:{}", entry.value))
+        .collect();
+
+    for (idx, entry) in spec.items.iter().enumerate() {
         let is_active = current == Some(entry.value.as_str());
+        let trigger_id = trigger_ids[idx].clone();
 
         // Solid fill: fully accent-filled open trigger with an inverse
         // foreground (the same token the primary Button uses on accent-base).
@@ -174,12 +224,25 @@ pub fn navigation_menu(
             s.descriptor.cursor = CursorHint::Pointer;
         }
         all_corners(&mut btn, radius);
+        // Svelte trigger identity: stable id, expanded state, and the
+        // viewport it controls when active.
+        btn.id = Some(trigger_id.clone());
+        btn.a11y.expanded = Some(is_active);
+        if is_active {
+            btn.a11y.controls = Some(format!(
+                "navigation-menu-panel:{}",
+                entry.value
+            ));
+        }
+        btn.a11y.tab_index = Some(if Some(idx) == focus_idx { 0 } else { -1 });
         btn.interaction.focusable = true;
 
         if entry.is_disabled {
             btn.style.descriptor.opacity = disabled_opacity;
             btn.interaction.disabled = true;
         } else {
+            btn.interaction.on_key =
+                trigger_roving_key_handler(&trigger_disabled, &trigger_ids, idx);
             if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let value = entry.value.clone();
@@ -190,8 +253,17 @@ pub fn navigation_menu(
             // fill on hover — without this the fill reverts to the tint while
             // the foreground stays text-inverse, leaving inverse text on a
             // light tint (mirrors the web CSS hover-survival rule).
+            // Keyboard focus paints the same treatment Svelte does, and mints
+            // the backend focus handle roving proofs drive.
+            let state_fill = if solid { accent } else { hover_bg };
             btn.style.hover = Some(StylePatch {
-                background: Some(if solid { accent } else { hover_bg }),
+                background: Some(state_fill),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            });
+            btn.style.focus = Some(StylePatch {
+                background: Some(state_fill),
                 border_color: None,
                 text_color: None,
                 opacity: None,
@@ -224,6 +296,13 @@ pub fn navigation_menu(
         let viewport_border = with_alpha(border_subtle, border_subtle.3 * 0.74);
 
         let mut viewport = Node::container();
+        // Svelte viewport identity: the active trigger labels it via
+        // `aria-labelledby`, and the trigger's `aria-controls` targets it.
+        viewport.id = Some(format!("navigation-menu-panel:{}", active_item.value));
+        viewport.a11y.labelled_by = Some(format!(
+            "navigation-menu-trigger:{}",
+            active_item.value
+        ));
         {
             let s = &mut viewport.style;
             s.descriptor.layout.direction = LayoutDirection::Column;

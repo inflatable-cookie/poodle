@@ -176,6 +176,13 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   BulkActionBar: "gpui_mounted_bulk_action_bar_actions_clear_and_select_all",
   ListContainer: "gpui_mounted_list_container_state_pagination_and_accessible_name",
   LogList: "gpui_mounted_log_list_stream_audit_and_clear_filters",
+  ContextMenu:
+    "context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend",
+  Menubar: "menubar_trigger_open_select_and_dismissal_through_mounted_backend",
+  NavigationMenu:
+    "navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend",
+  SplitButton:
+    "split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend",
 };
 
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;

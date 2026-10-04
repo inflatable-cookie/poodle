@@ -41559,3 +41559,1347 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
         assert!(driver.mounted_observation().is_valid());
     });
 }
+
+/// ContextMenu mounts the shared menu surface at the host anchor: item roles,
+/// checked state and exact accessible names match Svelte, pointer and keyboard
+/// activation emit through the backend, and host dismissal unmounts the panel
+/// with focus back on the invoking target.
+#[test]
+fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_backend() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{NodeToggled, StylePatch};
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{ContextMenuSpec, MenuEntry, MenuItemKind};
+
+    fn menu_items(dark_mode: bool) -> Vec<MenuEntry> {
+        vec![
+            MenuEntry::new("cut", "Cut").with_shortcut_label("⌘X"),
+            MenuEntry::new("copy", "Copy").with_shortcut_label("⌘C"),
+            MenuEntry::new("paste", "Paste").with_shortcut_label("⌘V"),
+            MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
+            MenuEntry::new("select-all", "Select all").with_shortcut_label("⌘A"),
+            MenuEntry::new("sep2", "").with_kind(MenuItemKind::Separator),
+            MenuEntry::new("delete", "Delete").with_disabled(true),
+            MenuEntry::new("dark-mode", "Dark mode")
+                .with_kind(MenuItemKind::Checkbox)
+                .with_checked(dark_mode),
+        ]
+    }
+
+    // Closed by default: Svelte starts with no open state, so an unset spec
+    // holds no open menu for the host to mount.
+    assert!(!ContextMenuSpec::new(menu_items(true)).current_open());
+
+    run_headless(|cx| {
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let dark_mode = Arc::new(Mutex::new(true));
+        let open = Arc::new(Mutex::new(false));
+
+        let build_tree = || {
+            let action_payloads = Arc::clone(&payloads);
+            let dark_flag = Arc::clone(&dark_mode);
+            let on_action = Some(Arc::new(move |value: &str| {
+                action_payloads
+                    .lock()
+                    .expect("action payloads")
+                    .push(value.to_string());
+                if value == "dark-mode" {
+                    let mut flag = dark_flag.lock().expect("dark lock");
+                    *flag = !*flag;
+                }
+            }) as Arc<dyn Fn(&str) + Send + Sync>);
+            let spec = ContextMenuSpec::new(menu_items(*dark_mode.lock().expect("dark read")))
+                .with_open(*open.lock().expect("open read"))
+                .with_aria_label("Edit actions");
+            let mut trigger = Node::button("Document target");
+            trigger.id = Some("context-target".to_string());
+            trigger.a11y.label = Some("Document target".to_string());
+            trigger.interaction.focusable = true;
+            // Host chrome owns visible focus like any web target; the patch
+            // also mints the backend focus handle dismissal proofs drive.
+            trigger.style.focus = Some(StylePatch {
+                background: Some(poodle_render::color::with_alpha(
+                    theme_inst.resolve_color("color.accent.base"),
+                    theme_inst.resolve_color("color.accent.base").3 * 0.12,
+                )),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            });
+            let mut root = Node::container().children([trigger]);
+            // Host-owned invocation gate (the node_compat rule): the panel
+            // mounts only while the host holds the menu open.
+            if spec.current_open() {
+                let mut panel = poodle_render::context_menu(&spec, &ctx, on_action);
+                panel.id = Some("context-menu-panel".to_string());
+                root = root.child(panel);
+            }
+            root
+        };
+
+        let mounted = Arc::new(Mutex::new(build_tree()));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 560.0, 420.0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("context-menu-panel").is_none(),
+            "a closed context menu mounts no panel"
+        );
+        // The invoking target owns real backend focus before invocation.
+        driver.wait_for_focus_handle("context-target");
+        driver.focus_element("context-target");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("context-target"),
+            Some(true)
+        );
+
+        // Pointer invocation: right-press on the target opens at the host.
+        let target_center = driver.activation_target("context-target").expect("target bounds");
+        driver.pointer_press_right(target_center);
+        *open.lock().expect("open lock") = true;
+        *mounted.lock().expect("mount lock") = build_tree();
+        driver.draw_frame();
+        driver.wait_for_focus_handle("menu-item:cut");
+        poodle_gpui_node_backend::request_focus("menu-item:cut");
+        driver.draw_frame();
+
+        // ── Semantic + accessibility surface ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let panel = tree
+                .find(&|n| n.id.as_deref() == Some("context-menu-panel"))
+                .expect("open panel");
+            assert_eq!(panel.a11y.role, Some(NodeRole::Menu));
+            assert_eq!(panel.a11y.label.as_deref(), Some("Edit actions"));
+            assert!(panel.style.overlay);
+            // Every non-separator item carries its exact label as its name.
+            for (value, label) in [
+                ("cut", "Cut"),
+                ("copy", "Copy"),
+                ("paste", "Paste"),
+                ("select-all", "Select all"),
+                ("delete", "Delete"),
+                ("dark-mode", "Dark mode"),
+            ] {
+                let item = tree
+                    .find(&|n| n.id.as_deref() == Some(&format!("menu-item:{value}")))
+                    .unwrap_or_else(|| panic!("item {value}"));
+                assert_eq!(
+                    item.a11y.label.as_deref(),
+                    Some(label),
+                    "item {value} keeps its exact accessible name"
+                );
+            }
+            let check = tree
+                .find(&|n| n.id.as_deref() == Some("menu-item:dark-mode"))
+                .expect("checkbox item");
+            assert_eq!(check.a11y.role, Some(NodeRole::MenuItemCheckBox));
+            assert_eq!(check.a11y.toggled, Some(NodeToggled::True));
+            let disabled = tree
+                .find(&|n| n.id.as_deref() == Some("menu-item:delete"))
+                .expect("disabled item");
+            assert_eq!(disabled.a11y.role, Some(NodeRole::MenuItem));
+            assert!(disabled.interaction.disabled);
+            assert!(!disabled.interaction.focusable);
+            assert_eq!(disabled.a11y.tab_index, Some(-1));
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for("menu-item:delete").is_none(),
+                "disabled rows register no backend focus handle"
+            );
+        }
+
+        // ── Visual tokens + mounted geometry ──
+        let min_width = theme_inst.resolve_space("size.menu.minWidth");
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let panel = tree
+                .find(&|n| n.id.as_deref() == Some("context-menu-panel"))
+                .expect("open panel");
+            let elevated = theme_inst.resolve_color("color.background.elevated");
+            let border_base = theme_inst.resolve_color("color.border.default");
+            assert_eq!(
+                panel.style.descriptor.background,
+                Some(poodle_render::color::mix_srgb(
+                    elevated,
+                    theme_inst.resolve_color("color.background.panel"),
+                    0.98
+                ))
+            );
+            assert_eq!(
+                panel.style.descriptor.border.color,
+                poodle_render::color::with_alpha(border_base, border_base.3 * 0.72)
+            );
+            assert_eq!(
+                panel.style.descriptor.corner_radii.top_left,
+                theme_inst.resolve_radius("radius.surface")
+            );
+            assert_eq!(
+                panel.style.descriptor.layout.spacing.padding.top,
+                rem_to_px(0.25)
+            );
+            assert_eq!(panel.style.min_width, Some(min_width));
+        }
+        let panel_bounds =
+            poodle_gpui_node_backend::bounds_for("context-menu-panel").expect("panel bounds");
+        let dimensions = panel_bounds.size;
+        assert!(dimensions.width >= px(min_width - 2.0));
+        assert!(dimensions.height > px(0.0));
+        for row in ["cut", "copy", "paste", "select-all", "dark-mode"] {
+            let bounds = poodle_gpui_node_backend::bounds_for(&format!("menu-item:{row}"))
+                .unwrap_or_else(|| panic!("bounds for {row}"));
+            assert!(bounds.size.width > px(0.0) && bounds.size.height > px(0.0));
+            assert!(
+                bounds.left() >= panel_bounds.left() && bounds.right() <= panel_bounds.right(),
+                "{row} stays inside the panel"
+            );
+        }
+
+        // The mounted landmark carries the menu name for assistive tech.
+        let live = driver.accessibility_nodes();
+        assert!(
+            live.iter().any(|n| n.role == NodeRole::Menu
+                && n.label.as_deref() == Some("Edit actions")),
+            "the open panel projects its accessible name"
+        );
+
+        // ── Pointer activation, disabled inertness, checkbox rebuild ──
+        driver.pointer_activate_id("menu-item:copy");
+        assert_eq!(
+            payloads.lock().expect("copy payloads").as_slice(),
+            ["copy"],
+            "pointer activation emits the exact committed payload"
+        );
+        driver.pointer_activate_id("menu-item:delete");
+        assert_eq!(
+            payloads.lock().expect("delete payloads").as_slice(),
+            ["copy"],
+            "disabled rows stay inert under pointer input"
+        );
+        driver.pointer_activate_id("menu-item:dark-mode");
+        *mounted.lock().expect("mount lock") = build_tree();
+        driver.draw_frame();
+        assert_eq!(
+            payloads.lock().expect("toggle payloads").as_slice(),
+            ["copy", "dark-mode"]
+        );
+        assert_eq!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .find(&|n| n.id.as_deref() == Some("menu-item:dark-mode"))
+                .expect("checkbox item")
+                .a11y
+                .toggled,
+            Some(NodeToggled::False),
+            "the committed toggle rebuilds the mounted checked state"
+        );
+
+        // ── Keyboard roving + activation through the backend ──
+        driver.focus_element("menu-item:cut");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:cut"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:copy"),
+            Some(true),
+            "ArrowDown steps to the next enabled row"
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:dark-mode"),
+            Some(true),
+            "End lands on the last enabled row, past the disabled one"
+        );
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:cut"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:dark-mode"),
+            Some(true),
+            "ArrowUp wraps past the disabled row"
+        );
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            payloads.lock().expect("keyboard payloads").as_slice(),
+            ["copy", "dark-mode", "dark-mode"],
+            "keyboard activation emits the focused row payload"
+        );
+        driver.focus_element("menu-item:select-all");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            payloads.lock().expect("enter payloads").as_slice(),
+            ["copy", "dark-mode", "dark-mode", "select-all"]
+        );
+
+        // ── Escape dismissal restores the invoking target ──
+        driver.dispatch_key("escape");
+        *open.lock().expect("open lock") = false;
+        *mounted.lock().expect("mount lock") = build_tree();
+        poodle_gpui_node_backend::request_focus("context-target");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("context-menu-panel").is_none(),
+            "host dismissal unmounts the panel"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("context-target"),
+            Some(true),
+            "Escape returns real focus to the invoking target"
+        );
+        assert_eq!(
+            payloads.lock().expect("escape payloads").len(),
+            4,
+            "Escape never activates a row"
+        );
+
+        // ── Outside-press dismissal ──
+        *open.lock().expect("open lock") = true;
+        *mounted.lock().expect("mount lock") = build_tree();
+        driver.draw_frame();
+        let panel_bounds =
+            poodle_gpui_node_backend::bounds_for("context-menu-panel").expect("reopened panel");
+        let outside = gpui::point(
+            px((f32::from(panel_bounds.origin.x) - 40.0).max(8.0)),
+            px((f32::from(panel_bounds.origin.y) - 40.0).max(8.0)),
+        );
+        driver.pointer_press(outside);
+        *open.lock().expect("open lock") = false;
+        *mounted.lock().expect("mount lock") = build_tree();
+        poodle_gpui_node_backend::request_focus("context-target");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("context-menu-panel").is_none(),
+            "outside-press dismissal unmounts the panel"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("context-target"),
+            Some(true)
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// Menubar mounts a trigger strip with no open menu until the host opens one:
+/// trigger popup linkage matches Svelte, pointer and keyboard activation flow
+/// through the backend with exact payloads, and host dismissal unmounts the
+/// overlay with focus back on the owning trigger.
+#[test]
+fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::{rem_to_px, size_font_rem, size_height_offset_rem};
+    use poodle_specs::{ControlSize, MenubarEntry, MenubarSpec, MenuEntry, MenuItemKind};
+
+    fn menubar_entries() -> Vec<MenubarEntry> {
+        vec![
+            MenubarEntry::new(
+                "file",
+                "File",
+                vec![
+                    MenuEntry::new("new", "New").with_shortcut_label("⌘N"),
+                    MenuEntry::new("open", "Open…").with_shortcut_label("⌘O"),
+                    MenuEntry::new("save", "Save").with_shortcut_label("⌘S"),
+                    MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
+                    MenuEntry::new("quit", "Quit").with_shortcut_label("⌘Q"),
+                ],
+            ),
+            MenubarEntry::new(
+                "edit",
+                "Edit",
+                vec![
+                    MenuEntry::new("undo", "Undo").with_shortcut_label("⌘Z"),
+                    MenuEntry::new("cut", "Cut")
+                        .with_shortcut_label("⌘X")
+                        .with_disabled(true),
+                    MenuEntry::new("copy", "Copy").with_shortcut_label("⌘C"),
+                ],
+            ),
+            MenubarEntry::new(
+                "window",
+                "Window",
+                vec![MenuEntry::new("minimize", "Minimize")],
+            )
+            .with_disabled(true),
+        ]
+    }
+
+    // All closed by default: Svelte holds no open value until a trigger runs,
+    // so an unset spec opens no menu.
+    assert!(MenubarSpec::new(menubar_entries()).current_value().is_none());
+
+    run_headless(|cx| {
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+        let trigger_payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let select_payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let open = Arc::new(Mutex::new(None::<String>));
+
+        let build_tree = || {
+            let trigger_sink = Arc::clone(&trigger_payloads);
+            let select_sink = Arc::clone(&select_payloads);
+            let open_state = Arc::clone(&open);
+            let open_state_select = Arc::clone(&open);
+            let mut spec =
+                MenubarSpec::new(menubar_entries()).with_aria_label("Application menu");
+            if let Some(value) = open_state.lock().expect("open read").clone() {
+                spec = spec.with_value(value);
+            }
+            let mut node = poodle_render::menubar(
+                &spec,
+                &ctx,
+                Some(Arc::new(move |value: &str| {
+                    trigger_sink
+                        .lock()
+                        .expect("trigger payloads")
+                        .push(value.to_string());
+                    // Host toggle policy (Svelte `setValue`): the active
+                    // trigger closes, any other trigger opens.
+                    let mut current = open_state.lock().expect("open lock");
+                    if current.as_deref() == Some(value) {
+                        *current = None;
+                    } else {
+                        *current = Some(value.to_string());
+                    }
+                }) as Arc<dyn Fn(&str) + Send + Sync>),
+                Some(Arc::new(move |value: &str| {
+                    select_sink
+                        .lock()
+                        .expect("select payloads")
+                        .push(value.to_string());
+                    *open_state_select.lock().expect("open lock") = None;
+                }) as Arc<dyn Fn(&str) + Send + Sync>),
+            );
+            // The triggers carry no spec ids; stamp the strip by button label.
+            // Button-kind only: the open overlay shares the trigger's label
+            // as its accessible name and must keep its own overlay id.
+            fn stamp_trigger(node: &mut Node, label: &str, id: &str) {
+                if matches!(&node.kind, NodeKind::Button { label: button_label } if button_label == label)
+                    && node.id.is_none()
+                {
+                    node.id = Some(id.to_owned());
+                }
+                for child in &mut node.children {
+                    stamp_trigger(child, label, id);
+                }
+            }
+            stamp_trigger(&mut node, "File", "menubar-trigger:file");
+            stamp_trigger(&mut node, "Edit", "menubar-trigger:edit");
+            stamp_trigger(&mut node, "Window", "menubar-trigger:window");
+            node
+        };
+        let remount = |mounted: &Arc<Mutex<Node>>, driver: &mut HeadlessDriver<'_>| {
+            *mounted.lock().expect("mount lock") = build_tree();
+            driver.draw_frame();
+        };
+
+        let mounted = Arc::new(Mutex::new(build_tree()));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 440.0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_none(),
+            "a default menubar mounts no open overlay"
+        );
+
+        // ── Trigger strip semantics ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert_eq!(tree.a11y.role, Some(NodeRole::MenuBar));
+            assert_eq!(tree.a11y.label.as_deref(), Some("Application menu"));
+            for (label, id) in [
+                ("File", "menubar-trigger:file"),
+                ("Edit", "menubar-trigger:edit"),
+                ("Window", "menubar-trigger:window"),
+            ] {
+                let trigger = tree
+                    .find(&|n| n.id.as_deref() == Some(id))
+                    .unwrap_or_else(|| panic!("trigger {label}"));
+                assert_eq!(
+                    trigger.a11y.role,
+                    Some(NodeRole::MenuItem),
+                    "trigger {label} carries the menuitem role"
+                );
+                assert_eq!(trigger.a11y.expanded, Some(false));
+                assert_eq!(trigger.a11y.controls, None);
+            }
+            let disabled = tree
+                .find(&|n| n.id.as_deref() == Some("menubar-trigger:window"))
+                .expect("disabled trigger");
+            assert!(disabled.interaction.disabled);
+            assert_eq!(
+                disabled.style.descriptor.opacity,
+                theme_inst.resolve_opacity("state.opacity.disabled")
+            );
+            assert!(disabled.interaction.on_activate.is_none());
+        }
+
+        // ── List chrome tokens ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let panel = theme_inst.resolve_color("color.background.panel");
+            let subtle = theme_inst.resolve_color("color.border.subtle");
+            let list = tree.children.first().expect("list chrome");
+            assert_eq!(
+                list.style.descriptor.background,
+                Some(poodle_render::color::with_alpha(panel, panel.3 * 0.96))
+            );
+            assert_eq!(
+                list.style.descriptor.border.color,
+                poodle_render::color::with_alpha(subtle, subtle.3 * 0.72)
+            );
+            assert_eq!(
+                list.style.descriptor.corner_radii.top_left,
+                theme_inst.resolve_radius("radius.surface")
+            );
+            assert_eq!(
+                list.style.descriptor.layout.spacing.gap,
+                rem_to_px(0.125)
+            );
+            assert_eq!(
+                list.style.descriptor.layout.spacing.padding.top,
+                rem_to_px(0.1875)
+            );
+            let file = tree
+                .find(&|n| n.id.as_deref() == Some("menubar-trigger:file"))
+                .expect("file trigger");
+            // Effective size resolves from the presentation context (the
+            // spec leaves size unset); probe it the way the renderer does.
+            let probe = MenubarSpec::new(vec![]);
+            let effective = ctx.resolve_size(probe.size, probe.size_role);
+            assert_eq!(
+                file.style.text_size,
+                Some(rem_to_px(size_font_rem(effective)))
+            );
+            assert_eq!(
+                file.style.min_height,
+                Some(
+                    theme_inst.resolve_space("size.control.height")
+                        + rem_to_px(size_height_offset_rem(effective))
+                )
+            );
+        }
+
+        // ── Pointer opens through the host toggle ──
+        assert!(poodle_gpui_node_backend::bounds_for("menubar-trigger:file").is_some());
+        driver.pointer_activate_id("menubar-trigger:file");
+        assert_eq!(
+            trigger_payloads.lock().expect("trigger payloads").as_slice(),
+            ["file"],
+            "trigger activation emits the exact menu value"
+        );
+        remount(&mounted, &mut driver);
+        let overlay_bounds =
+            poodle_gpui_node_backend::bounds_for("menubar-menu:file").expect("file overlay");
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let overlay = tree
+                .find(&|n| n.id.as_deref() == Some("menubar-menu:file"))
+                .expect("file overlay");
+            assert_eq!(overlay.a11y.role, Some(NodeRole::Menu));
+            assert_eq!(overlay.a11y.label.as_deref(), Some("File"));
+            let file = tree
+                .find(&|n| n.id.as_deref() == Some("menubar-trigger:file"))
+                .expect("file trigger");
+            assert_eq!(file.a11y.expanded, Some(true));
+            assert_eq!(
+                file.a11y.controls.as_deref(),
+                Some("menubar-menu:file"),
+                "the open trigger controls its overlay"
+            );
+        }
+        let dimensions = overlay_bounds.size;
+        assert!(dimensions.width > px(0.0) && dimensions.height > px(0.0));
+        for row in ["new", "open", "save", "quit"] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(&format!("menu-item:{row}")).is_some(),
+                "overlay row {row} paints"
+            );
+        }
+        let live = driver.accessibility_nodes();
+        assert!(
+            live.iter().any(|n| n.role == NodeRole::MenuBar
+                && n.label.as_deref() == Some("Application menu")),
+            "the strip projects the menubar landmark"
+        );
+        assert!(
+            live.iter()
+                .any(|n| n.role == NodeRole::Menu && n.label.as_deref() == Some("File")),
+            "the open overlay projects its menu name"
+        );
+
+        // ── Item commit closes through the host ──
+        driver.pointer_activate_id("menu-item:new");
+        assert_eq!(
+            select_payloads.lock().expect("select payloads").as_slice(),
+            ["new"],
+            "item activation emits the exact committed payload"
+        );
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_none(),
+            "item commit unmounts the overlay"
+        );
+
+        // ── Disabled paths stay inert ──
+        driver.pointer_activate_id("menubar-trigger:window");
+        assert!(
+            trigger_payloads.lock().expect("window payloads").as_slice() == ["file"],
+            "disabled triggers never fire"
+        );
+        driver.pointer_activate_id("menubar-trigger:edit");
+        remount(&mounted, &mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("menu-item:cut").is_some());
+        driver.pointer_activate_id("menu-item:cut");
+        assert_eq!(
+            select_payloads.lock().expect("cut payloads").as_slice(),
+            ["new"],
+            "disabled rows stay inert under pointer input"
+        );
+
+        // ── Keyboard through the mounted tree ──
+        driver.focus_element("menu-item:undo");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:undo"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:copy"),
+            Some(true),
+            "ArrowDown skips the disabled row"
+        );
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:undo"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:copy"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            select_payloads.lock().expect("keyboard payloads").as_slice(),
+            ["new", "copy"],
+            "keyboard activation emits the focused row payload"
+        );
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_none(),
+            "keyboard commit unmounts the overlay"
+        );
+
+        // Keyboard toggle on the trigger reopens through the host.
+        driver.focus_element("menubar-trigger:file");
+        driver.keyboard_activate("menubar-trigger:file");
+        assert_eq!(
+            trigger_payloads.lock().expect("reopen payloads").as_slice(),
+            ["file", "edit", "file"],
+            "keyboard activation toggles through the same host policy"
+        );
+        remount(&mounted, &mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_some());
+
+        // ── Escape dismissal restores the owning trigger ──
+        driver.focus_element("menu-item:save");
+        driver.dispatch_key("escape");
+        *open.lock().expect("open lock") = None;
+        remount(&mounted, &mut driver);
+        poodle_gpui_node_backend::request_focus("menubar-trigger:file");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_none(),
+            "host dismissal unmounts the overlay"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menubar-trigger:file"),
+            Some(true),
+            "Escape returns real focus to the owning trigger"
+        );
+        assert_eq!(
+            select_payloads.lock().expect("escape payloads").as_slice(),
+            ["new", "copy"],
+            "Escape never commits a row"
+        );
+
+        // ── Outside-press dismissal ──
+        driver.pointer_activate_id("menubar-trigger:edit");
+        remount(&mounted, &mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_some());
+        let overlay_bounds =
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").expect("edit overlay");
+        let outside = gpui::point(
+            px((f32::from(overlay_bounds.origin.x) - 40.0).max(8.0)),
+            px((f32::from(overlay_bounds.origin.y) + f32::from(overlay_bounds.size.height)
+                + 40.0)
+            .min(420.0)),
+        );
+        driver.pointer_press(outside);
+        *open.lock().expect("open lock") = None;
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_none(),
+            "outside-press dismissal unmounts the overlay"
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// NavigationMenu discloses a viewport for the active trigger: nothing mounts
+/// until the host activates a trigger, trigger-to-viewport linkage matches
+/// Svelte, arrow keys rove real backend focus, and host dismissal unmounts
+/// the viewport with focus back on the owning trigger.
+#[test]
+fn navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_backend() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{NavigationMenuEntry, NavigationMenuSpec};
+
+    fn navigation_entries() -> Vec<NavigationMenuEntry> {
+        vec![
+            NavigationMenuEntry::new("home", "Home")
+                .with_description("Start here and see what is new."),
+            NavigationMenuEntry::new("components", "Components")
+                .with_description("Buttons, inputs, overlays, and the full catalog."),
+            NavigationMenuEntry::new("tokens", "Tokens")
+                .with_description("Color, spacing, typography, and radius tokens."),
+            NavigationMenuEntry::new("changelog", "Changelog").with_disabled(true),
+        ]
+    }
+
+    // No viewport by default: Svelte holds no active item until a trigger
+    // runs, so an unset spec discloses nothing.
+    assert!(
+        NavigationMenuSpec::new(navigation_entries()).current_value().is_none()
+    );
+
+    run_headless(|cx| {
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+        let change_payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let active = Arc::new(Mutex::new(None::<String>));
+
+        let build_tree = || {
+            let change_sink = Arc::clone(&change_payloads);
+            let active_state = Arc::clone(&active);
+            let mut spec = NavigationMenuSpec::new(navigation_entries())
+                .with_aria_label("Main navigation");
+            if let Some(value) = active_state.lock().expect("active read").clone() {
+                spec = spec.with_value(value);
+            }
+            poodle_render::navigation_menu(
+                &spec,
+                &ctx,
+                Some(Arc::new(move |value: &str| {
+                    change_sink
+                        .lock()
+                        .expect("change payloads")
+                        .push(value.to_string());
+                    // Host toggle policy (Svelte `toggleValue`): the active
+                    // trigger closes, any other trigger opens.
+                    let mut current = active_state.lock().expect("active lock");
+                    if current.as_deref() == Some(value) {
+                        *current = None;
+                    } else {
+                        *current = Some(value.to_string());
+                    }
+                }) as Arc<dyn Fn(&str) + Send + Sync>),
+            )
+        };
+        let remount = |mounted: &Arc<Mutex<Node>>, driver: &mut HeadlessDriver<'_>| {
+            *mounted.lock().expect("mount lock") = build_tree();
+            driver.draw_frame();
+        };
+
+        let mounted = Arc::new(Mutex::new(build_tree()));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 400.0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:components").is_none(),
+            "a default navigation menu discloses no viewport"
+        );
+
+        // ── Trigger linkage and roving-tab posture ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert_eq!(tree.a11y.label.as_deref(), Some("Main navigation"));
+            for (value, tab) in [
+                ("home", 0),
+                ("components", -1),
+                ("tokens", -1),
+                ("changelog", -1),
+            ] {
+                let trigger = tree
+                    .find(&|n| {
+                        n.id.as_deref() == Some(&format!("navigation-menu-trigger:{value}"))
+                    })
+                    .unwrap_or_else(|| panic!("trigger {value}"));
+                assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+                assert_eq!(trigger.a11y.expanded, Some(false));
+                assert_eq!(trigger.a11y.controls, None);
+                assert_eq!(
+                    trigger.a11y.tab_index,
+                    Some(tab),
+                    "trigger {value} roving posture"
+                );
+            }
+            let disabled = tree
+                .find(&|n| n.id.as_deref() == Some("navigation-menu-trigger:changelog"))
+                .expect("disabled trigger");
+            assert!(disabled.interaction.disabled);
+            assert_eq!(
+                disabled.style.descriptor.opacity,
+                theme_inst.resolve_opacity("state.opacity.disabled")
+            );
+            assert!(disabled.interaction.on_activate.is_none());
+            assert!(disabled.interaction.on_key.is_none());
+            let home = tree
+                .find(&|n| n.id.as_deref() == Some("navigation-menu-trigger:home"))
+                .expect("home trigger");
+            assert!(
+                home.interaction.on_key.is_some(),
+                "enabled triggers carry arrow-key roving"
+            );
+        }
+
+        // ── Trigger and viewport token treatments ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let surface = theme_inst.resolve_color("color.background.surface");
+            let accent = theme_inst.resolve_color("color.accent.base");
+            let home = tree
+                .find(&|n| n.id.as_deref() == Some("navigation-menu-trigger:home"))
+                .expect("home trigger");
+            assert_eq!(
+                home.style.descriptor.background,
+                Some(poodle_render::color::with_alpha(surface, surface.3 * 0.88))
+            );
+            let hover = home.style.hover.as_ref().expect("trigger hover");
+            assert_eq!(
+                hover.background,
+                Some(poodle_render::color::with_alpha(accent, accent.3 * 0.12))
+            );
+            let label = home
+                .find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "Home"))
+                .expect("home label text");
+            assert_eq!(label.style.text_size, Some(rem_to_px(0.75)));
+        }
+
+        // ── Pointer disclosure through the host toggle ──
+        driver.pointer_activate_id("navigation-menu-trigger:components");
+        assert_eq!(
+            change_payloads.lock().expect("change payloads").as_slice(),
+            ["components"],
+            "trigger activation emits the exact entry value"
+        );
+        remount(&mounted, &mut driver);
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let viewport = tree
+                .find(&|n| {
+                    n.id.as_deref() == Some("navigation-menu-panel:components")
+                })
+                .expect("components viewport");
+            assert_eq!(
+                viewport.a11y.labelled_by.as_deref(),
+                Some("navigation-menu-trigger:components"),
+                "the viewport is labelled by its owning trigger"
+            );
+            assert!(viewport.has_text("Buttons, inputs, overlays, and the full catalog."));
+            let trigger = tree
+                .find(&|n| {
+                    n.id.as_deref() == Some("navigation-menu-trigger:components")
+                })
+                .expect("components trigger");
+            assert_eq!(trigger.a11y.expanded, Some(true));
+            assert_eq!(
+                trigger.a11y.controls.as_deref(),
+                Some("navigation-menu-panel:components")
+            );
+            assert_eq!(trigger.a11y.tab_index, Some(0));
+            let accent = theme_inst.resolve_color("color.accent.base");
+            assert_eq!(
+                trigger.style.descriptor.background,
+                Some(poodle_render::color::with_alpha(accent, accent.3 * 0.16))
+            );
+            let panel = theme_inst.resolve_color("color.background.panel");
+            let subtle = theme_inst.resolve_color("color.border.subtle");
+            assert_eq!(
+                viewport.style.descriptor.background,
+                Some(poodle_render::color::with_alpha(panel, panel.3 * 0.96))
+            );
+            assert_eq!(
+                viewport.style.descriptor.border.color,
+                poodle_render::color::with_alpha(subtle, subtle.3 * 0.74)
+            );
+            assert_eq!(
+                viewport.style.descriptor.corner_radii.top_left,
+                theme_inst.resolve_radius("radius.surface")
+            );
+        }
+        let viewport_bounds =
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:components")
+                .expect("viewport bounds");
+        let dimensions = viewport_bounds.size;
+        assert!(dimensions.width > px(0.0) && dimensions.height > px(0.0));
+        let home_bounds =
+            poodle_gpui_node_backend::bounds_for("navigation-menu-trigger:home")
+                .expect("trigger bounds");
+        assert!(
+            viewport_bounds.top() >= home_bounds.bottom() - px(1.0),
+            "the disclosed viewport stacks below the trigger strip"
+        );
+        // The active trigger projects its expanded linkage to AT.
+        let live = driver.accessibility_nodes();
+        let projected = live
+            .iter()
+            .find(|n| {
+                n.semantic_id.as_deref() == Some("navigation-menu-trigger:components")
+            })
+            .expect("projected active trigger");
+        assert_eq!(projected.role, NodeRole::Button);
+        assert_eq!(projected.expanded, Some(true));
+        assert_eq!(
+            projected.controls.as_deref(),
+            Some("navigation-menu-panel:components")
+        );
+        assert!(projected.text_content.iter().any(|t| t == "Components"));
+
+        // ── Arrow-key roving moves real backend focus ──
+        driver.focus_element("navigation-menu-trigger:home");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:components"),
+            Some(true),
+            "ArrowRight steps to the next trigger"
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:tokens"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:home"),
+            Some(true),
+            "ArrowRight wraps past the disabled trigger"
+        );
+        driver.dispatch_key_raw("left");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:tokens"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:home"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:tokens"),
+            Some(true)
+        );
+        assert!(
+            change_payloads.lock().expect("roving payloads").as_slice() == ["components"],
+            "roving moves focus without changing the value"
+        );
+
+        // ── Keyboard activation switches the viewport ──
+        driver.keyboard_activate("navigation-menu-trigger:tokens");
+        assert_eq!(
+            change_payloads.lock().expect("keyboard payloads").as_slice(),
+            ["components", "tokens"],
+            "keyboard activation emits the exact entry value"
+        );
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:tokens").is_some(),
+            "keyboard activation discloses the new viewport"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:components").is_none(),
+            "the previous viewport unmounts"
+        );
+
+        // ── Escape dismissal restores the owning trigger ──
+        driver.dispatch_key("escape");
+        *active.lock().expect("active lock") = None;
+        remount(&mounted, &mut driver);
+        poodle_gpui_node_backend::request_focus("navigation-menu-trigger:tokens");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:tokens").is_none(),
+            "host dismissal unmounts the viewport"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("navigation-menu-trigger:tokens"),
+            Some(true),
+            "Escape returns real focus to the owning trigger"
+        );
+
+        // ── Outside-press dismissal ──
+        driver.pointer_activate_id("navigation-menu-trigger:home");
+        remount(&mounted, &mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("navigation-menu-panel:home").is_some());
+        let viewport_bounds =
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:home")
+                .expect("home viewport");
+        let outside = gpui::point(
+            px((f32::from(viewport_bounds.origin.x) - 40.0).max(8.0)),
+            px((f32::from(viewport_bounds.origin.y) + f32::from(viewport_bounds.size.height)
+                + 40.0)
+            .min(380.0)),
+        );
+        driver.pointer_press(outside);
+        *active.lock().expect("active lock") = None;
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("navigation-menu-panel:home").is_none(),
+            "outside-press dismissal unmounts the viewport"
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+/// SplitButton pairs a primary action with a toggle-owned menu: both halves
+/// keep their accessible names and popup linkage, pointer and keyboard input
+/// reach each target through the backend with exact payloads, and host
+/// dismissal unmounts the menu with focus back on the toggle.
+#[test]
+fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_render::SplitButtonHandlers;
+    use poodle_specs::{SplitButtonSpec, SplitMenuItem};
+
+    fn split_items() -> Vec<SplitMenuItem> {
+        vec![
+            SplitMenuItem::action("save-as", "Save as…"),
+            SplitMenuItem::action("save-copy", "Save a copy"),
+            SplitMenuItem::separator(),
+            SplitMenuItem::action("export", "Export").with_disabled(true),
+        ]
+    }
+
+    run_headless(|cx| {
+        let theme_inst = theme();
+        let ctx = RenderContext::new(&theme_inst);
+        let click_payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let dropdown_payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let action_payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let open = Arc::new(Mutex::new(false));
+
+        let build_tree = || {
+            let click_sink = Arc::clone(&click_payloads);
+            let dropdown_sink = Arc::clone(&dropdown_payloads);
+            let action_sink = Arc::clone(&action_payloads);
+            let open_state = Arc::clone(&open);
+            let open_state_action = Arc::clone(&open);
+            let spec = SplitButtonSpec::new()
+                .with_label("Save")
+                .with_items(split_items())
+                .with_open(*open_state.lock().expect("open read"));
+            let mut node = poodle_render::split_button(
+                &spec,
+                &ctx,
+                SplitButtonHandlers {
+                    on_click: Some(Arc::new(move || {
+                        click_sink
+                            .lock()
+                            .expect("click payloads")
+                            .push("click".to_string())
+                    })),
+                    on_dropdown: Some(Arc::new(move || {
+                        dropdown_sink
+                            .lock()
+                            .expect("dropdown payloads")
+                            .push("dropdown".to_string());
+                        let mut current = open_state.lock().expect("open lock");
+                        *current = !*current;
+                    })),
+                    on_action: Some(Arc::new(move |value: &str| {
+                        action_sink
+                            .lock()
+                            .expect("action payloads")
+                            .push(value.to_string());
+                        *open_state_action.lock().expect("open lock") = false;
+                    })),
+                },
+            );
+            // The halves carry names but no spec ids; stamp by structure.
+            // Closed the root is the row itself; open it wraps row + menu.
+            if node.children.len() == 3 {
+                node.children[0].id = Some("split-primary".to_string());
+                node.children[2].id = Some("split-toggle".to_string());
+            } else {
+                node.children[0].children[0].id = Some("split-primary".to_string());
+                node.children[0].children[2].id = Some("split-toggle".to_string());
+            }
+            node
+        };
+        let remount = |mounted: &Arc<Mutex<Node>>, driver: &mut HeadlessDriver<'_>| {
+            *mounted.lock().expect("mount lock") = build_tree();
+            driver.draw_frame();
+        };
+
+        let mounted = Arc::new(Mutex::new(build_tree()));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 560.0, 440.0);
+        driver.draw_frame();
+
+        // ── Halves semantics while closed ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert!(
+                tree.find(&|n| n.a11y.role == Some(NodeRole::Menu)).is_none(),
+                "a closed split button mounts no menu"
+            );
+            let primary = tree
+                .find(&|n| n.id.as_deref() == Some("split-primary"))
+                .expect("primary half");
+            assert_eq!(primary.a11y.role, Some(NodeRole::Button));
+            assert_eq!(primary.a11y.label.as_deref(), Some("Save"));
+            assert!(primary.interaction.focusable);
+            let toggle = tree
+                .find(&|n| n.id.as_deref() == Some("split-toggle"))
+                .expect("toggle half");
+            assert_eq!(toggle.a11y.label.as_deref(), Some("More actions"));
+            assert_eq!(toggle.a11y.expanded, Some(false));
+            assert!(toggle
+                .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "chevron-down"))
+                .is_some());
+        }
+
+        // ── Half metrics follow the contract size table ──
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let primary = tree
+                .find(&|n| n.id.as_deref() == Some("split-primary"))
+                .expect("primary half");
+            assert_eq!(
+                primary.style.descriptor.layout.height,
+                poodle_node::LayoutSizing::Fixed(36.0)
+            );
+            let toggle = tree
+                .find(&|n| n.id.as_deref() == Some("split-toggle"))
+                .expect("toggle half");
+            assert_eq!(
+                toggle.style.descriptor.layout.height,
+                poodle_node::LayoutSizing::Fixed(36.0)
+            );
+            assert_eq!(
+                toggle.style.descriptor.layout.width,
+                poodle_node::LayoutSizing::Fixed(32.0)
+            );
+            let chevron = toggle
+                .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "chevron-down"))
+                .expect("chevron");
+            assert!(matches!(&chevron.kind, NodeKind::Icon { size, .. } if *size == rem_to_px(0.75)));
+            let divider = tree
+                .find(&|n| {
+                    matches!(n.style.descriptor.layout.width, poodle_node::LayoutSizing::Fixed(w) if w == 1.0)
+                })
+                .expect("divider");
+            assert_eq!(
+                divider.style.descriptor.layout.height,
+                poodle_node::LayoutSizing::Fixed(36.0 * 0.6)
+            );
+            let subtle = theme_inst.resolve_color("color.border.subtle");
+            assert_eq!(divider.style.descriptor.background, Some(subtle));
+        }
+
+        // ── Pointer: primary fires, toggle opens through the host ──
+        driver.pointer_activate_id("split-primary");
+        assert_eq!(
+            click_payloads.lock().expect("click payloads").as_slice(),
+            ["click"],
+            "primary activation emits the click payload"
+        );
+        driver.pointer_activate_id("split-toggle");
+        assert_eq!(
+            dropdown_payloads.lock().expect("dropdown payloads").as_slice(),
+            ["dropdown"],
+            "toggle activation emits the dropdown payload"
+        );
+        remount(&mounted, &mut driver);
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let menu = tree
+                .find(&|n| n.a11y.role == Some(NodeRole::Menu))
+                .expect("open menu");
+            assert_eq!(
+                menu.a11y.label.as_deref(),
+                Some("More actions"),
+                "the menu carries the toggle name"
+            );
+            assert_eq!(menu.style.min_width, Some(rem_to_px(12.0)));
+            let toggle = tree
+                .find(&|n| n.id.as_deref() == Some("split-toggle"))
+                .expect("toggle half");
+            assert_eq!(toggle.a11y.expanded, Some(true));
+            let enabled = tree
+                .find(&|n| n.id.as_deref() == Some("split-button-item:0"))
+                .expect("first item");
+            assert_eq!(enabled.a11y.role, Some(NodeRole::MenuItem));
+            assert!(enabled.interaction.focusable);
+            assert!(enabled.interaction.on_key.is_some());
+            let disabled = tree
+                .find(&|n| n.a11y.role == Some(NodeRole::MenuItem) && n.interaction.disabled)
+                .expect("disabled item");
+            assert_eq!(
+                disabled.style.descriptor.opacity,
+                theme_inst.resolve_opacity("state.opacity.disabled")
+            );
+            assert!(disabled.interaction.on_activate.is_none());
+            let accent = theme_inst.resolve_color("color.accent.base");
+            assert_eq!(
+                enabled.style.hover.expect("item hover").background,
+                Some(poodle_render::color::with_alpha(accent, 0.08))
+            );
+        }
+        let menu_bounds = poodle_gpui_node_backend::bounds_for("split-button-item:0")
+            .expect("first item bounds");
+        let dimensions = menu_bounds.size;
+        assert!(dimensions.width > px(0.0) && dimensions.height > px(0.0));
+        let live = driver.accessibility_nodes();
+        assert!(
+            live.iter()
+                .any(|n| n.role == NodeRole::Menu && n.label.as_deref() == Some("More actions")),
+            "the open menu projects its accessible name"
+        );
+
+        // ── Item commit closes through the host; disabled stays inert ──
+        driver.pointer_activate_id("split-button-item:1");
+        assert_eq!(
+            action_payloads.lock().expect("action payloads").as_slice(),
+            ["save-copy"],
+            "item activation emits the exact committed payload"
+        );
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("split-button-item:0").is_none(),
+            "item commit unmounts the menu"
+        );
+
+        // ── Keyboard roving + activation through the mounted menu ──
+        driver.pointer_activate_id("split-toggle");
+        remount(&mounted, &mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("split-button-item:1").is_some());
+        driver.focus_element("split-button-item:0");
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("split-button-item:1"),
+            Some(true),
+            "ArrowDown steps to the next enabled item"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("split-button-item:0"),
+            Some(true),
+            "ArrowDown wraps past the separator and disabled item"
+        );
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("split-button-item:1"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("split-button-item:0"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("split-button-item:1"),
+            Some(true),
+            "End lands on the last enabled item"
+        );
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            action_payloads.lock().expect("keyboard payloads").as_slice(),
+            ["save-copy", "save-copy"],
+            "keyboard activation emits the focused item payload"
+        );
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("split-button-item:0").is_none(),
+            "keyboard commit unmounts the menu"
+        );
+
+        // Keyboard activation reaches the primary half too.
+        driver.keyboard_activate("split-primary");
+        assert_eq!(
+            click_payloads.lock().expect("primary keyboard payloads").as_slice(),
+            ["click", "click"]
+        );
+
+        // ── Escape dismissal restores the toggle ──
+        driver.pointer_activate_id("split-toggle");
+        remount(&mounted, &mut driver);
+        driver.focus_element("split-button-item:0");
+        driver.dispatch_key("escape");
+        *open.lock().expect("open lock") = false;
+        remount(&mounted, &mut driver);
+        poodle_gpui_node_backend::request_focus("split-toggle");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("split-button-item:0").is_none(),
+            "host dismissal unmounts the menu"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("split-toggle"),
+            Some(true),
+            "Escape returns real focus to the toggle"
+        );
+        assert_eq!(
+            action_payloads.lock().expect("escape payloads").as_slice(),
+            ["save-copy", "save-copy"],
+            "Escape never commits an item"
+        );
+
+        // ── Outside-press dismissal ──
+        driver.pointer_activate_id("split-toggle");
+        remount(&mounted, &mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("split-button-item:0").is_some());
+        let item_bounds =
+            poodle_gpui_node_backend::bounds_for("split-button-item:0").expect("item bounds");
+        let outside = gpui::point(
+            px((f32::from(item_bounds.origin.x) - 40.0).max(8.0)),
+            px((f32::from(item_bounds.origin.y) + f32::from(item_bounds.size.height) + 40.0)
+                .min(420.0)),
+        );
+        driver.pointer_press(outside);
+        *open.lock().expect("open lock") = false;
+        remount(&mounted, &mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("split-button-item:0").is_none(),
+            "outside-press dismissal unmounts the menu"
+        );
+
+        // ── Unavailable halves stay inert ──
+        {
+            let theme_provider = theme();
+            let unavailable_ctx = RenderContext::new(&theme_provider);
+            let locked = poodle_render::split_button(
+                &SplitButtonSpec::new()
+                    .with_label("Save")
+                    .with_items(split_items())
+                    .with_disabled(true),
+                &unavailable_ctx,
+                SplitButtonHandlers::default(),
+            );
+            assert_eq!(
+                locked.style.descriptor.opacity,
+                theme_provider.resolve_opacity("state.opacity.disabled")
+            );
+            assert!(locked
+                .find(&|n| n.interaction.on_activate.is_some())
+                .is_none());
+        }
+        assert!(driver.mounted_observation().is_valid());
+    });
+}

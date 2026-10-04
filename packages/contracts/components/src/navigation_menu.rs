@@ -82,15 +82,10 @@ impl NavigationMenuSpec {
     }
 
     pub fn current_value(&self) -> Option<&str> {
-        self.value
-            .as_deref()
-            .or(self.default_value.as_deref())
-            .or_else(|| {
-                self.items
-                    .iter()
-                    .find(|item| !item.is_disabled)
-                    .map(|item| item.value.as_str())
-            })
+        // No first-enabled fallback: Svelte defaults to no active item
+        // (uncontrolled null), so an unset spec mounts no viewport. Only
+        // keyboard focus starts at the first enabled trigger.
+        self.value.as_deref().or(self.default_value.as_deref())
     }
 
     pub fn current_item(&self) -> Option<&NavigationMenuEntry> {

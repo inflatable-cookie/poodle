@@ -13,8 +13,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeAnimation, NodeRole, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeAnimation, NodeKey, NodeModifiers, NodeRole, StylePatch,
 };
 use poodle_specs::{ButtonVariant, SplitButtonSpec, SplitMenuItem};
 
@@ -24,6 +24,34 @@ use crate::presentation::{
     rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
     split_button_chevron_size_rem, split_button_toggle_width_rem,
 };
+
+/// Arrow-key focus roving across open menu items (Svelte item
+/// `onkeydown`): Down/Up step with wrapping, Home/End jump to the enabled
+/// bounds. Opening from the toggle and closing stay host-owned: they flip
+/// `is_open`, which a focus-target id cannot express.
+fn menu_roving_key_handler(
+    disabled_map: &[bool],
+    item_ids: &[String],
+    current_idx: usize,
+) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
+    use poodle_headless::menu::{menu_list_navigate, MenuListMove};
+    let disabled = disabled_map.to_vec();
+    let ids = item_ids.to_vec();
+    Some(Arc::new(move |key, _modifiers| {
+        let mv = match key {
+            NodeKey::ArrowDown => MenuListMove::Next,
+            NodeKey::ArrowUp => MenuListMove::Prev,
+            NodeKey::Home => MenuListMove::First,
+            NodeKey::End => MenuListMove::Last,
+            _ => return None,
+        };
+        let next_idx = menu_list_navigate(&disabled, current_idx, mv);
+        if next_idx == current_idx {
+            return None;
+        }
+        Some(ids[next_idx].clone())
+    }))
+}
 
 /// Host callbacks: primary half, chevron half, and menu-item value.
 #[derive(Default)]
@@ -122,6 +150,16 @@ pub fn split_button(
     // strength).
     let divider_color = ctx.theme().resolve_color(spec.separator_token());
     let radius = ctx.theme().resolve_radius(spec.radius_token());
+    // Contract §Focus: the halves draw the standard focus ring
+    // (accent-focusRing, focus width, 0.125rem offset). The ring also mints
+    // the backend focus handle keyboard proofs drive.
+    let focus_ring = FocusRing {
+        color: ctx
+            .theme()
+            .resolve_color(poodle_tokens::semantic::COLOR_ACCENT_FOCUS_RING),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    };
 
     let is_unavailable = spec.is_unavailable();
     let label = spec.label.as_deref().unwrap_or("");
@@ -141,6 +179,8 @@ pub fn split_button(
 
     // ── Primary half ──
     let mut primary = Node::button("");
+    // Native button semantics (Svelte renders real `<button>` halves).
+    primary.a11y.role = Some(NodeRole::Button);
     // The caption is a child so layout places it beside the spinner; name
     // the button from the spec.
     primary.a11y.label = Some(spec.label.clone().unwrap_or_default());
@@ -183,6 +223,7 @@ pub fn split_button(
             text_color: None,
             opacity: None,
         });
+        primary.style.focus_ring = Some(focus_ring);
         primary.style.descriptor.cursor = CursorHint::Pointer;
 
         if let Some(handler) = &handlers.on_click {
@@ -232,8 +273,11 @@ pub fn split_button(
 
     // ── Toggle half (fixed per-size width, zero padding) ──
     let mut toggle = Node::button("");
-    // Chevron-only: nothing in its subtree carries text.
-    toggle.a11y.label = Some("More actions".to_string());
+    // Chevron-only: nothing in its subtree carries text. The toggle owns
+    // the popup linkage (Svelte `aria-haspopup`/`aria-expanded`).
+    toggle.a11y.role = Some(NodeRole::Button);
+    toggle.a11y.label = Some(spec.menu_aria_label.clone());
+    toggle.a11y.expanded = Some(spec.is_open);
     {
         let s = &mut toggle.style;
         s.descriptor.layout.height = LayoutSizing::Fixed(height);
@@ -256,13 +300,14 @@ pub fn split_button(
 
     if !is_unavailable {
         // The old tier wires only a fill hover on the toggle half — no
-        // border shift, no active look.
+        // border shift, no active look. The focus ring matches the primary.
         toggle.style.hover = Some(StylePatch {
             background: Some(hover_fill),
             border_color: None,
             text_color: None,
             opacity: None,
         });
+        toggle.style.focus_ring = Some(focus_ring);
         toggle.style.descriptor.cursor = CursorHint::Pointer;
 
         if let Some(handler) = &handlers.on_dropdown {
@@ -299,9 +344,13 @@ pub fn split_button(
         // Item hover: accent at absolute 8% alpha.
         let item_hover = with_alpha(accent, 0.08);
 
-        // Contract: the dropdown is a `menu` of `menuitem`s.
+        // Contract: the dropdown is a `menu` of `menuitem`s, named for the
+        // toggle that owns it (Svelte `aria-label={menuAriaLabel}`).
         let mut menu = Node::container();
         menu.a11y.role = Some(NodeRole::Menu);
+        menu.a11y.label = Some(spec.menu_aria_label.clone());
+        // Roving slot map: separators are inert slots, disabled actions
+        // are skipped, matching the shared menu-list machinery.
         {
             let s = &mut menu.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
@@ -323,7 +372,22 @@ pub fn split_button(
             c.bottom_left = menu_radius;
         }
 
-        for item in &spec.items {
+        let slot_disabled: Vec<bool> = spec
+            .items
+            .iter()
+            .map(|slot| match slot {
+                SplitMenuItem::Action { is_disabled, .. } => *is_disabled,
+                SplitMenuItem::Separator => true,
+            })
+            .collect();
+        let slot_ids: Vec<String> = spec
+            .items
+            .iter()
+            .enumerate()
+            .map(|(slot_idx, _)| format!("split-button-item:{slot_idx}"))
+            .collect();
+
+        for (slot_idx, item) in spec.items.iter().enumerate() {
             match item {
                 SplitMenuItem::Action {
                     value,
@@ -332,6 +396,7 @@ pub fn split_button(
                 } => {
                     let mut item_el = Node::button(label);
                     item_el.a11y.role = Some(NodeRole::MenuItem);
+                    item_el.id = Some(slot_ids[slot_idx].clone());
                     {
                         let s = &mut item_el.style;
                         let pad = &mut s.descriptor.layout.spacing.padding;
@@ -355,13 +420,20 @@ pub fn split_button(
                             ctx.theme().resolve_opacity(spec.disabled_opacity_token());
                         item_el.interaction.disabled = true;
                     } else {
-                        item_el.style.hover = Some(StylePatch {
+                        // The hover tint doubles as the keyboard focus treatment
+                        // (the shared menu-surface rule); it also mints the
+                        // backend focus handle roving proofs drive.
+                        let state_patch = StylePatch {
                             background: Some(item_hover),
                             border_color: None,
                             text_color: None,
                             opacity: None,
-                        });
+                        };
+                        item_el.style.hover = Some(state_patch);
+                        item_el.style.focus = Some(state_patch);
                         item_el.style.descriptor.cursor = CursorHint::Pointer;
+                        item_el.interaction.on_key =
+                            menu_roving_key_handler(&slot_disabled, &slot_ids, slot_idx);
 
                         if let Some(handler) = &handlers.on_action {
                             let handler = Arc::clone(handler);

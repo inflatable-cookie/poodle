@@ -76,6 +76,9 @@ pub fn menubar(
 
     for entry in &spec.items {
         let is_open = open_value == Some(entry.value.as_str());
+        // Svelte trigger identity: role=menuitem with popup linkage. The
+        // overlay id below must match `aria-controls` exactly.
+        let overlay_id = format!("menubar-menu:{}", entry.value);
 
         let mut btn = Node::button(&entry.label);
         {
@@ -95,6 +98,9 @@ pub fn menubar(
             if entry.is_disabled {
                 s.descriptor.opacity = disabled_opacity;
             } else {
+                // Svelte paints the same accent tint for hover, keyboard
+                // focus, and the open trigger; the focus patch also mints
+                // the backend focus handle keyboard proofs drive.
                 s.hover = Some(StylePatch {
                     background: Some(open_bg),
                     border_color: None,
@@ -104,14 +110,26 @@ pub fn menubar(
             }
         }
         rounded_all(&mut btn, control_radius);
-        btn.a11y.role = Some(NodeRole::Button);
+        btn.a11y.role = Some(NodeRole::MenuItem);
+        btn.a11y.expanded = Some(is_open);
+        if is_open {
+            btn.a11y.controls = Some(overlay_id.clone());
+        }
         btn.interaction.focusable = true;
         if entry.is_disabled {
             btn.interaction.disabled = true;
-        } else if let Some(handler) = &on_trigger {
-            let handler = Arc::clone(handler);
-            let value = entry.value.clone();
-            btn.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+        } else {
+            btn.style.focus = Some(StylePatch {
+                background: Some(open_bg),
+                border_color: None,
+                text_color: None,
+                opacity: None,
+            });
+            if let Some(handler) = &on_trigger {
+                let handler = Arc::clone(handler);
+                let value = entry.value.clone();
+                btn.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            }
         }
 
         list = list.child(btn);
@@ -130,8 +148,12 @@ pub fn menubar(
             // menu's (the alert_dialog pattern: the renderer resolves the
             // composed spec's dismissal from its own spec state).
             let menu_spec = MenuSpec::new(open_menu.items.clone())
+                .with_aria_label(open_menu.label.clone())
                 .with_dismiss_on_outside_interact(spec.dismiss_on_outside_interact);
-            root = root.child(render_menu(&menu_spec, ctx, on_select));
+            let mut overlay = render_menu(&menu_spec, ctx, on_select);
+            // The trigger's `aria-controls` target: `menubar-menu:{value}`.
+            overlay.id = Some(format!("menubar-menu:{}", open_menu.value));
+            root = root.child(overlay);
         }
     }
 

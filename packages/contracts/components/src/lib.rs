@@ -1053,8 +1053,24 @@ mod tests {
 
         assert_eq!(tabs.current_value(), Some("activity"));
         assert!(tabs.uses_manual_activation());
-        assert_eq!(navigation.current_value(), Some("docs"));
-        assert_eq!(menubar.current_value(), Some("file"));
+        // Menus disclose nothing until the host opens one: Svelte defaults
+        // both to no value (unlike tabs, which select the first enabled).
+        assert_eq!(navigation.current_value(), None);
+        assert_eq!(menubar.current_value(), None);
+        assert!(navigation.current_item().is_none());
+        assert!(menubar.current_menu().is_none());
+        let navigation_open =
+            NavigationMenuSpec::new(vec![NavigationMenuEntry::new("docs", "Docs")])
+                .with_value("docs");
+        assert_eq!(navigation_open.current_value(), Some("docs"));
+        let menubar_open = MenubarSpec::new(vec![MenubarEntry::new(
+            "file",
+            "File",
+            vec![MenuEntry::new("new", "New")],
+        )])
+        .with_value("file");
+        assert_eq!(menubar_open.current_value(), Some("file"));
+        assert!(menubar_open.current_menu().is_some());
         assert_eq!(tab_strip.current_value(), Some("review"));
         assert_eq!(tab_strip.closable_item_count(), 1);
     }
