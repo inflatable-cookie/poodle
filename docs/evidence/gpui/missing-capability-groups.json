@@ -313,33 +313,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ListContainer",
-        "LogList",
-        "Table",
-        "TimeZoneSelect"
-      ],
-      "missingTally": {
-        "semantic": 6,
-        "events": 5,
-        "pointer": 6,
-        "keyboard_focus": 6,
-        "accessibility": 6,
-        "visual": 6
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-zone-select.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
@@ -389,6 +362,27 @@
         "docs/contracts/components/gain-reduction-meter.md",
         "docs/contracts/components/value-readout.md",
         "docs/contracts/components/xy-pad.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "BulkActionBar",
+        "ListContainer",
+        "LogList"
+      ],
+      "missingTally": {
+        "semantic": 3,
+        "events": 3,
+        "pointer": 3,
+        "keyboard_focus": 3,
+        "accessibility": 3,
+        "visual": 3
+      },
+      "contracts": [
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md"
       ]
     },
     {

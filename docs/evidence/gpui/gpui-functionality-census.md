@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `5f934ac1f06aa8884b6b8a8e300da7f537a5ba98`
+Evidence commit (execution identity from the execution record, not the checkout): `3c7c8e5f428db0ea30b7a2019f8fa81c8c4a4178`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
@@ -14,10 +14,10 @@ Construction is not functional completion. A passing route, a test name, or one 
 <!-- g18-census-summary -->
 ## Summary
 
-Rows with at least one admitted capability: **78**/175.
-Fully admitted rows: **43**/175.
-Missing by axis: semantic 97; events 91; pointer 102; keyboard_focus 92; accessibility 110; visual 126.
-Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **197**.
+Rows with at least one admitted capability: **81**/175.
+Fully admitted rows: **46**/175.
+Missing by axis: semantic 94; events 89; pointer 99; keyboard_focus 89; accessibility 107; visual 123.
+Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **194**.
 
 ## Rows
 
@@ -25,7 +25,7 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **197**.
 | --- | --- | --- | --- | --- | --- |
 | Accordion | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Accordion--accordion-result-disclosure-focus-identity-and-disabled-paths.json` |
 | AgentChatInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
-| AudioPlayer | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| AudioPlayer | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/AudioPlayer--first-mounted-parity-audio-player.json` |
 | AlertDialog | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Avatar | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Box | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -111,12 +111,12 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **197**.
 | Text | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-a1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | — |
 | TextLink | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | Tabs | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Tabs--tabs-drag-keyboard-and-identity-rebuild-the-host-spec.json` |
-| Table | semantic; pointer; keyboard_focus; accessibility; visual | — | semantic; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| Table | semantic; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/Table--first-mounted-parity-table.json` |
 | TimeAgo | semantic; accessibility; visual | — | semantic; accessibility; visual | accessibility (A2-platform-hold) | — |
 | TextInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (nucleus-m1); events (nucleus-m1); pointer (nucleus-m1); keyboard_focus (nucleus-m1); accessibility (nucleus-m1); visual (nucleus-m1) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TextInput--text-input-controlled-editing-and-identity-rebuild-the-host-spec.json` |
 | TokenInput | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | TimeInput | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TimeInput--time-input-segmented-editor-commits-drafts-and-bounds.json` |
-| TimeZoneSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
+| TimeZoneSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/TimeZoneSelect--first-mounted-parity-time-zone-select.json` |
 | ThemeSelect | semantic; events; pointer; keyboard_focus; accessibility; visual | — | semantic; events; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
 | ToggleGroup | semantic; events; pointer; keyboard_focus; accessibility; visual | semantic (expected-test); events (expected-test); pointer (expected-test); keyboard_focus (expected-test); accessibility (expected-test); visual (expected-test) | — | accessibility (A2-platform-hold) | `docs/evidence/gpui/mounted-receipts/ToggleGroup--toggle-group-result-focus-identity-and-disabled-paths.json` |
 | Toolbar | semantic; pointer; keyboard_focus; accessibility; visual | — | semantic; pointer; keyboard_focus; accessibility; visual | accessibility (A2-platform-hold) | — |
@@ -203,7 +203,6 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **197**.
 <!-- g18-census-refusals -->
 ## Refusals
 
-- AudioPlayer: No validated receipt and no retained expected test for AudioPlayer; every required capability stays missing.
 - AlertDialog: No validated receipt and no retained expected test for AlertDialog; every required capability stays missing.
 - Avatar: No validated receipt and no retained expected test for Avatar; every required capability stays missing.
 - Box: No validated receipt and no retained expected test for Box; every required capability stays missing.
@@ -288,10 +287,8 @@ Accessibility platform holds (A2, narrow): **175**. Refusals recorded: **197**.
 - ToolCall: Expected test tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing.
 - StatusBar: No validated receipt and no retained expected test for StatusBar; every required capability stays missing.
 - TextLink: No validated receipt and no retained expected test for TextLink; every required capability stays missing.
-- Table: No validated receipt and no retained expected test for Table; every required capability stays missing.
 - TimeAgo: No validated receipt and no retained expected test for TimeAgo; every required capability stays missing.
 - TokenInput: No validated receipt and no retained expected test for TokenInput; every required capability stays missing.
-- TimeZoneSelect: No validated receipt and no retained expected test for TimeZoneSelect; every required capability stays missing.
 - ThemeSelect: No validated receipt and no retained expected test for ThemeSelect; every required capability stays missing.
 - Toolbar: No validated receipt and no retained expected test for Toolbar; every required capability stays missing.
 - Tooltip: No validated receipt and no retained expected test for Tooltip; every required capability stays missing.
@@ -411,8 +408,8 @@ Shared-substrate groupings for repair-tranche compilation. Grouping only; no tra
 - form-editing: 13 components (AgentQuestionRecord, Calendar, EmbedInput, Fader, FormActions, FormLayout, Keyboard, Knob, LicenceActivation, NumberInput, Rating, Stepper, ValidationSummary); missing semantic 7; events 6; pointer 8; keyboard_focus 7; accessibility 8; visual 13
 - general-composite: 9 components (Collapsible, EnvelopeEditor, FieldSet, LicenceStatus, ModMatrixGrid, ModelConnectionCard, Spacer, Stack, WaveformDisplay); missing semantic 6; events 7; pointer 5; keyboard_focus 6; accessibility 6; visual 9
 - text-display: 8 components (Code, Eyebrow, Icon, IconProvider, MediaPreview, MetricTile, StateTile, TextLink); missing semantic 7; events 4; pointer 6; keyboard_focus 6; accessibility 7; visual 7
-- selection-navigation: 6 components (AudioPlayer, BulkActionBar, ListContainer, LogList, Table, TimeZoneSelect); missing semantic 6; events 5; pointer 6; keyboard_focus 6; accessibility 6; visual 6
 - layout-primitive: 6 components (Box, Grid, ListGrid, Skeleton, TimeAgo, Tooltip); missing semantic 6; events 2; pointer 2; keyboard_focus 3; accessibility 6; visual 6
 - media-data: 5 components (AudioMeter, AudioSwitch, GainReductionMeter, ValueReadout, XYPad); missing semantic 4; events 4; pointer 4; keyboard_focus 4; accessibility 4; visual 5
+- selection-navigation: 3 components (BulkActionBar, ListContainer, LogList); missing semantic 3; events 3; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - workstation-shell: 3 components (DetailSection, ScrollShell, UiPresentationProvider); missing semantic 3; events 2; pointer 3; keyboard_focus 3; accessibility 3; visual 3
 - agent-composites: 2 components (AgentMessage, MotionPolicyProvider); missing semantic 2; events 2; pointer 2; keyboard_focus 2; accessibility 2; visual 2

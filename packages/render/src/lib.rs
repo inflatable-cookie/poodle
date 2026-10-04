@@ -228,7 +228,7 @@ pub use audio_handlers::{
     xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, FaderHandlers, FaderLive, KnobHandlers,
     KnobLive, XYPadHandlers, XYPadLive,
 };
-pub use audio_player::audio_player;
+pub use audio_player::{audio_player, audio_player_with_handlers, AudioPlayerHandlers};
 pub use avatar::avatar;
 pub use badge::badge;
 pub use banner::banner;

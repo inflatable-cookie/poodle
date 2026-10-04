@@ -25,6 +25,7 @@ pub struct TimeZoneSelectHandlers {
     pub instance_id: String,
     pub on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_query: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
 impl TimeZoneSelectHandlers {
@@ -38,6 +39,7 @@ impl TimeZoneSelectHandlers {
             instance_id,
             on_toggle: None,
             on_change: None,
+            on_query: None,
         }
     }
 }
@@ -53,8 +55,9 @@ pub fn time_zone_select(
     let select_spec = spec.to_select_spec();
     let toggle = handlers.on_toggle;
     let change = handlers.on_change;
+    let query_handler = handlers.on_query;
     let mut select_handlers = SelectHandlers::new(&handlers.instance_id);
-    if toggle.is_some() || change.is_some() {
+    if toggle.is_some() || change.is_some() || query_handler.is_some() {
         select_handlers = select_handlers.on_transition(Arc::new(move |result| {
             for effect in &result.effects {
                 match effect {
@@ -68,7 +71,11 @@ pub fn time_zone_select(
                             handler(value);
                         }
                     }
-                    crate::SelectEffect::QueryChanged { .. } => {}
+                    crate::SelectEffect::QueryChanged { query } => {
+                        if let Some(handler) = &query_handler {
+                            handler(query);
+                        }
+                    }
                 }
             }
         }));

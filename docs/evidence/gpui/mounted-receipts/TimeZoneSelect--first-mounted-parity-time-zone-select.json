@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Switch",
-  "test": "switch_toggle_readonly_and_disabled_rebuild_the_host_spec",
+  "component": "TimeZoneSelect",
+  "test": "first_mounted_parity_time_zone_select",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,27 +19,23 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            subject_payloads.lock().unwrap().as_slice(),\n            [true],\n            \"subject must stay unchange",
-      "assert!(\n            !host.lock().unwrap().disabled_checked,\n            \"disabled host state must stay unchange"
+      "assert!(\n            host.calls.contains(&\"value:Europe/London\".to_owned()),\n            \"the value callback"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
-      "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
-      "NodeToggled",
-      "accessible",
-      "NodeRole"
+      "NodeRole",
+      "a11y."
     ],
     "visual": [
-      "resolve_opacity",
       "resolve_color",
-      "resolve_space"
+      "_geometry",
+      "geometry"
     ]
   },
   "production_path_observation": {
@@ -47,7 +43,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::presentation",
+    "renderer": "poodle_render::time_zone_select",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -60,7 +56,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-084-native-review-3c7c8e5",
     "outcome": "passed",
-    "body_sha256": "531b7539fa9ac6f4fdfcb098957a92a525b1c0a4d158e1467f0440df35537b0d"
+    "body_sha256": "cab3bccd79582ab8f1a80c5f36a4770a823aed61acb86cf1e9c919ad2841e46a"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

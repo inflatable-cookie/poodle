@@ -493,7 +493,10 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     const hasDeclaredEvents = eventTableKeys.some((key) => !/^(event|callback|none|[-—–])$/i.test(key));
     const eventsNone =
       !hasDeclaredEvents &&
-      (/^\|\s*none\s*\|/m.test(events.body) || /^\s*None\.\s*$/m.test(events.body) || /layout primitive only|no events/i.test(events.body));
+      (/^\|\s*none\s*\|/m.test(events.body) ||
+        /^\s*None\.\s*$/m.test(events.body) ||
+        /^No component-owned events are dispatched\./m.test(events.body) ||
+        /layout primitive only|no events/i.test(events.body));
     const keyboardRows = keyboard.body
       .split("\n")
       .filter((line) => /^\s*\|/.test(line))
