@@ -11347,8 +11347,7 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
             assert_eq!(radio_group.a11y.role, Some(NodeRole::RadioGroup));
             let selected = root
                 .find(&|candidate| {
-                    candidate.id.as_deref()
-                        == Some("model-connection-option:anthropic-messages")
+                    candidate.id.as_deref() == Some("model-connection-option:anthropic-messages")
                 })
                 .expect("selected connection route");
             assert_eq!(selected.a11y.role, Some(NodeRole::RadioButton));
@@ -11407,8 +11406,7 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
             assert_eq!(root.a11y.label.as_deref(), Some("Choose a connection"));
             let disabled = root
                 .find(&|candidate| {
-                    candidate.id.as_deref()
-                        == Some("model-connection-option:codex-app")
+                    candidate.id.as_deref() == Some("model-connection-option:codex-app")
                 })
                 .expect("checking route");
             assert_eq!(disabled.a11y.role, Some(NodeRole::RadioButton));
@@ -11416,8 +11414,7 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
             assert_eq!(disabled.a11y.tab_index, Some(-1));
             let selected = root
                 .find(&|candidate| {
-                    candidate.id.as_deref()
-                        == Some("model-connection-option:anthropic-messages")
+                    candidate.id.as_deref() == Some("model-connection-option:anthropic-messages")
                 })
                 .expect("selected route after pointer fixture rebuild");
             assert_eq!(selected.a11y.toggled, Some(poodle_node::NodeToggled::True));
@@ -15541,17 +15538,13 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
                         );
                     })),
                     on_file_select: Some(Arc::new(move |path| {
-                        select_events
-                            .lock()
-                            .unwrap()
-                            .push(format!("select:{path}"));
-                        *select_mount.lock().unwrap() =
-                            build(
-                                true,
-                                Some(path.to_string()),
-                                Arc::clone(&select_mount),
-                                Arc::clone(&select_rebuild_events),
-                            );
+                        select_events.lock().unwrap().push(format!("select:{path}"));
+                        *select_mount.lock().unwrap() = build(
+                            true,
+                            Some(path.to_string()),
+                            Arc::clone(&select_mount),
+                            Arc::clone(&select_rebuild_events),
+                        );
                     })),
                     instance_id: None,
                 },
@@ -15570,12 +15563,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
 
         let mounted = Arc::new(Mutex::new(Node::container()));
         let events = Arc::new(Mutex::new(Vec::new()));
-        *mounted.lock().unwrap() = build(
-            false,
-            None,
-            Arc::clone(&mounted),
-            Arc::clone(&events),
-        );
+        *mounted.lock().unwrap() = build(false, None, Arc::clone(&mounted), Arc::clone(&events));
         let provider = theme();
         let ctx = RenderContext::new(&provider);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
@@ -15599,8 +15587,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
             assert_eq!(header.a11y.controls.as_deref(), Some("worked-files"));
             let chip = root
                 .find(&|node| {
-                    node.id.as_deref()
-                        == Some("changed-files-chip-worked-cp-api:Cargo.toml")
+                    node.id.as_deref() == Some("changed-files-chip-worked-cp-api:Cargo.toml")
                 })
                 .expect("collapsed file chip");
             assert_eq!(chip.a11y.role, Some(NodeRole::Button));
@@ -15643,9 +15630,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
                 .expect("expanded file tree target");
             assert_eq!(tree.a11y.role, Some(NodeRole::Tree));
             let directory = root
-                .find(&|node| {
-                    node.id.as_deref() == Some("changed-files-file-worked-cp-api")
-                })
+                .find(&|node| node.id.as_deref() == Some("changed-files-file-worked-cp-api"))
                 .expect("directory tree item");
             assert_eq!(directory.a11y.role, Some(NodeRole::TreeItem));
             assert_eq!(directory.a11y.label.as_deref(), Some("cp-api"));
@@ -15653,8 +15638,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
             assert_eq!(directory.a11y.expanded, Some(true));
             let file = root
                 .find(&|node| {
-                    node.id.as_deref()
-                        == Some("changed-files-file-worked-cp-api:Cargo.toml")
+                    node.id.as_deref() == Some("changed-files-file-worked-cp-api:Cargo.toml")
                 })
                 .expect("file tree item");
             assert_eq!(file.a11y.role, Some(NodeRole::TreeItem));
