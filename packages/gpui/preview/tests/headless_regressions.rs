@@ -40464,6 +40464,13 @@ fn gpui_mounted_list_container_state_pagination_and_accessible_name() {
 
         assert_eq!(ready.a11y.role, Some(NodeRole::Region));
         assert_eq!(ready.a11y.label.as_deref(), Some("Projects"));
+        let explicit_empty = ListContainer::from_spec(
+            ListContainerSpec::new("Projects").with_aria_label(""),
+            &theme_provider,
+            "list-container-empty-name",
+        )
+        .into_compat_node();
+        assert_eq!(explicit_empty.a11y.label.as_deref(), Some(""));
         assert!(ready.has_text("Projects"));
         assert!(ready.has_text("Row one"));
         assert_eq!(

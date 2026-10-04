@@ -212,13 +212,14 @@ pub fn list_container(
     }
 
     container.a11y.role = Some(NodeRole::Region);
-    // Svelte: `aria-label={ariaLabel ?? title}`.
-    let label = spec
-        .aria_label
-        .as_deref()
-        .filter(|value| !value.is_empty())
-        .unwrap_or(spec.title.as_str());
-    container.a11y.label = Some(label.to_string());
+    // Svelte: `aria-label={ariaLabel ?? title}`. `None` falls back to title;
+    // `Some("")` is the explicit empty label.
+    container.a11y.label = Some(
+        spec.aria_label
+            .as_deref()
+            .unwrap_or(spec.title.as_str())
+            .to_string(),
+    );
     container
 }
 
@@ -282,6 +283,15 @@ mod tests {
             None,
         );
         assert_eq!(labelled.a11y.label.as_deref(), Some("Project catalogue"));
+
+        let explicit_empty = list_container(
+            &ListContainerSpec::new("Projects").with_aria_label(""),
+            &ctx,
+            ListContainerSlots::default(),
+            "list-container",
+            None,
+        );
+        assert_eq!(explicit_empty.a11y.label.as_deref(), Some(""));
 
         let empty = list_container(
             &ListContainerSpec::new("Projects")

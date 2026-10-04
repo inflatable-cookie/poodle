@@ -40,7 +40,8 @@ pub struct ListContainerSpec {
     /// Accessible label for the pagination nav region. When None,
     /// renderers should use a sensible default (e.g. "Pagination").
     pub pagination_aria_label: Option<String>,
-    /// Accessible name (contract §7). `None` falls back to the visible label.
+    /// Accessible name (Svelte `ariaLabel ?? title`). `None` falls back to
+    /// `title`; `Some` including empty is the explicit root label.
     pub aria_label: Option<String>,
     /// Posture of the empty state this container falls back to.
     pub empty_variant: EmptyStateVariant,
