@@ -295,8 +295,8 @@ receipt does not claim publication.
 
 ## Historical mounted expectation map
 
-Before g16.062, the generator promoted **65
-component entries across 79 named tests** to
+Before g16.062, the generator promoted **68
+component entries across 82 named tests** to
 `mounted`. The map remains planning input and is shown for traceability only;
 the current component ledger consumes validated receipts, so expected-without-
 receipt remains `missing`.

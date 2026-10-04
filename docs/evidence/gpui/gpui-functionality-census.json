@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "3c7c8e5f428db0ea30b7a2019f8fa81c8c4a4178",
+  "source_commit": "64be05b1c3c58704eb208284f7407edcec9b76c8",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -354,15 +354,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_bulk_action_bar_actions_clear_and_select_all"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -371,10 +395,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for BulkActionBar; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/BulkActionBar--gpui-mounted-bulk-action-bar-actions-clear-and-select-all.json"
+      ],
+      "refusals": []
     },
     {
       "component": "Button",
@@ -5750,15 +5774,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_log_list_stream_audit_and_clear_filters"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_log_list_stream_audit_and_clear_filters"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_log_list_stream_audit_and_clear_filters"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_log_list_stream_audit_and_clear_filters"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_log_list_stream_audit_and_clear_filters"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_log_list_stream_audit_and_clear_filters"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5767,10 +5815,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for LogList; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/LogList--gpui-mounted-log-list-stream-audit-and-clear-filters.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ListContainer",
@@ -5785,15 +5833,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_list_container_state_pagination_and_accessible_name"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_list_container_state_pagination_and_accessible_name"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_list_container_state_pagination_and_accessible_name"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_list_container_state_pagination_and_accessible_name"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_list_container_state_pagination_and_accessible_name"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#gpui_mounted_list_container_state_pagination_and_accessible_name"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -5802,10 +5874,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ListContainer; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ListContainer--gpui-mounted-list-container-state-pagination-and-accessible-name.json"
+      ],
+      "refusals": []
     },
     {
       "component": "PageLoading",
@@ -7785,18 +7857,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 81,
-    "fullyAdmittedRows": 46,
+    "admittedRows": 84,
+    "fullyAdmittedRows": 49,
     "missingTally": {
-      "semantic": 94,
-      "events": 89,
-      "pointer": 99,
-      "keyboard_focus": 89,
-      "accessibility": 107,
-      "visual": 123
+      "semantic": 91,
+      "events": 86,
+      "pointer": 96,
+      "keyboard_focus": 86,
+      "accessibility": 104,
+      "visual": 120
     },
     "holdCount": 175,
-    "refusalCount": 194
+    "refusalCount": 191
   },
   "groups": [
     {
@@ -8159,27 +8231,6 @@
         "docs/contracts/components/gain-reduction-meter.md",
         "docs/contracts/components/value-readout.md",
         "docs/contracts/components/xy-pad.md"
-      ]
-    },
-    {
-      "substrate": "selection-navigation",
-      "components": [
-        "BulkActionBar",
-        "ListContainer",
-        "LogList"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 3,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md"
       ]
     },
     {

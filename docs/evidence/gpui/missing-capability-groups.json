@@ -365,27 +365,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "BulkActionBar",
-        "ListContainer",
-        "LogList"
-      ],
-      "missingTally": {
-        "semantic": 3,
-        "events": 3,
-        "pointer": 3,
-        "keyboard_focus": 3,
-        "accessibility": 3,
-        "visual": 3
-      },
-      "contracts": [
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md"
-      ]
-    },
-    {
       "substrate": "workstation-shell",
       "components": [
         "DetailSection",
