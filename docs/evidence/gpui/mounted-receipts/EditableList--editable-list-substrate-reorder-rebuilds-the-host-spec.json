@@ -44,13 +44,13 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
+  "source_commit": "f548373b78aeaae5286c15f2643f507b33a2c488",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-086-gpui-census-gaps",
+    "run_id": "2026-10-04-poodle-085-rebase-onto-086",
     "outcome": "passed",
     "body_sha256": "e99e25ce83f83e0034a69fcaa0c48c1a3987d98dd0397c301795087ded92bd15"
   },

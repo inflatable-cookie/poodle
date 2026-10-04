@@ -1953,6 +1953,121 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
         );
         assert_eq!(*value.lock().expect("value lock"), (20.0, 95.0));
     });
+
+    // The embedded pair: each thumb is its own named slider, the tokens are
+    // the resolved size-table values, a right arrow steps the focused thumb,
+    // and a plain click on the track chooses the nearer thumb and commits.
+    run_headless(|cx| {
+        use poodle_adapter::ThemeProvider;
+
+        let mut spec =
+            RangeSliderSpec::default().with_variant(poodle_specs::SliderVariant::Embedded);
+        spec.low = 20.0;
+        spec.high = 80.0;
+        spec.aria_label = Some("Price".into());
+
+        let live = Arc::new(Mutex::new((20.0f64, 80.0f64)));
+        let sink = Arc::clone(&live);
+        let commits = Arc::new(Mutex::new(Vec::<(f64, f64)>::new()));
+        let commit_sink = Arc::clone(&commits);
+        let mut node = poodle_render::range_slider(
+            &spec,
+            &RenderContext::new(&theme()),
+            poodle_render::RangeSliderHandlers {
+                on_change: Some(Arc::new(move |low, high| {
+                    *sink.lock().expect("value lock") = (low, high);
+                })),
+                on_value_commit: Some(Arc::new(move |low, high| {
+                    commit_sink.lock().expect("commit lock").push((low, high));
+                })),
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 200.0, 48.0);
+        driver.wait_for_focus_handle("range-slider-lower");
+
+        // Accessibility and visual: role, name, value, axis, focusability,
+        // and the contract's thumb/track geometry resolve on the mounted tree.
+        {
+            let theme = theme();
+            let tree = mounted.lock().expect("mount lock");
+            let lower = tree
+                .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
+                .expect("mounted lower thumb");
+            let upper = tree
+                .find(&|n| n.id.as_deref() == Some("range-slider-upper"))
+                .expect("mounted upper thumb");
+            assert_eq!(lower.a11y.role, Some(NodeRole::Slider));
+            assert_eq!(lower.a11y.label.as_deref(), Some("Price minimum"));
+            assert_eq!(lower.a11y.value, Some(20.0));
+            assert_eq!(lower.a11y.orientation.as_deref(), Some("horizontal"));
+            assert_eq!(upper.a11y.role, Some(NodeRole::Slider));
+            assert_eq!(upper.a11y.label.as_deref(), Some("Price maximum"));
+            assert_eq!(upper.a11y.value, Some(80.0));
+            assert!(lower.interaction.focusable && upper.interaction.focusable);
+
+            let thumb_px = poodle_render::presentation::rem_to_px(1.0);
+            assert!(
+                matches!(lower.style.descriptor.layout.width, LayoutSizing::Fixed(w) if (w - thumb_px).abs() < 1e-6)
+            );
+            assert!(
+                matches!(lower.style.descriptor.layout.height, LayoutSizing::Fixed(h) if (h - thumb_px).abs() < 1e-6)
+            );
+            assert!((lower.style.descriptor.corner_radii.top_left - thumb_px * 0.5).abs() < 1e-6);
+            assert_eq!(
+                lower.style.descriptor.background,
+                Some(theme.resolve_color("color.background.elevated"))
+            );
+            assert_eq!(
+                lower.style.descriptor.border.color,
+                theme.resolve_color("color.border.default")
+            );
+            assert_eq!(
+                lower.style.focus.expect("thumb focus patch").border_color,
+                Some(theme.resolve_color(spec.focus_ring_color_token()))
+            );
+
+            let track = &tree.children[0];
+            let track_px = poodle_render::presentation::rem_to_px(0.375);
+            assert!(
+                matches!(track.style.descriptor.layout.height, LayoutSizing::Fixed(h) if (h - track_px).abs() < 1e-6)
+            );
+            assert_eq!(
+                track.style.descriptor.corner_radii.top_left,
+                theme.resolve_radius("radius.pill")
+            );
+        }
+
+        // Keyboard focus: a right arrow on the focused lower thumb steps it and
+        // commits the pair once, straight through the backend focus chain.
+        driver.focus_element("range-slider-lower");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("range-slider-lower"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(*live.lock().expect("value lock"), (21.0, 80.0));
+        assert_eq!(
+            commits.lock().expect("commit lock").last().copied(),
+            Some((21.0, 80.0))
+        );
+
+        // Pointer: both thumbs paint real hit targets, and a click at the
+        // track centre picks the nearer thumb and commits once at release.
+        let lower_bounds = poodle_gpui_node_backend::bounds_for("range-slider-lower")
+            .expect("mounted lower thumb geometry");
+        let upper_bounds = poodle_gpui_node_backend::bounds_for("range-slider-upper")
+            .expect("mounted upper thumb geometry");
+        assert!(f32::from(lower_bounds.size.width) > 0.0);
+        assert!(f32::from(upper_bounds.size.height) > 0.0);
+        driver.pointer_activate_at(0.5);
+        assert_eq!(*live.lock().expect("value lock"), (50.0, 80.0));
+        assert_eq!(
+            commits.lock().expect("commit lock").last().copied(),
+            Some((50.0, 80.0))
+        );
+    });
 }
 
 /// g16.032. One renderer-neutral continuous-value gesture: press, moves,
@@ -6652,6 +6767,47 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         assert!(disabled
             .find(&|n| n.interaction.on_scrub.is_some())
             .is_none());
+    });
+
+    // A plain click on the track (press + release, no drag) is the pointer
+    // vocabulary's simplest gesture: the value lands where the pointer did and
+    // commits exactly once at release.
+    run_headless(|cx| {
+        let mut spec = SliderSpec::new(20.0)
+            .with_bounds(0.0, 100.0)
+            .with_variant(poodle_specs::SliderVariant::Embedded);
+        spec.step = 1.0;
+        spec.aria_label = Some("Volume".into());
+        let live = Arc::new(Mutex::new(20.0f64));
+        let sink = Arc::clone(&live);
+        let commits = Arc::new(Mutex::new(Vec::<f64>::new()));
+        let commit_sink = Arc::clone(&commits);
+        let mut node = poodle_render::slider(
+            &spec,
+            &RenderContext::new(&theme()),
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: Some(Arc::new(move |next| {
+                    commit_sink.lock().expect("commit lock").push(next);
+                })),
+            },
+        );
+        stamp_slider_id(&mut node, FIXTURE_ID);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 200.0, 40.0);
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        let bounds = poodle_gpui_node_backend::bounds_for(FIXTURE_ID)
+            .expect("the mounted slider paints a pointer target");
+        assert!(f32::from(bounds.size.width) > 0.0);
+        driver.pointer_activate_id(FIXTURE_ID);
+        assert_eq!(*live.lock().expect("value lock"), 50.0);
+        assert_eq!(commits.lock().expect("commit lock").as_slice(), [50.0]);
+        let mounted = mounted.lock().unwrap();
+        let control = slider_control(&mounted);
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(control.a11y.label.as_deref(), Some("Volume"));
     });
 }
 
@@ -12975,9 +13131,15 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
     run_headless(|cx| {
         // The host owns the pane, exactly as the specimen does: it applies the
         // delta, clamps to its own bounds, and supplies the next spec.
-        fn build(width: f32, mounted: Arc<Mutex<Node>>, pane: Arc<Mutex<f32>>) -> Node {
+        fn build(
+            width: f32,
+            mounted: Arc<Mutex<Node>>,
+            pane: Arc<Mutex<f32>>,
+            payloads: Arc<Mutex<Vec<(ResizePhase, f32)>>>,
+        ) -> Node {
             let mount = Arc::clone(&mounted);
             let state = Arc::clone(&pane);
+            let delivered = Arc::clone(&payloads);
             let gesture = Arc::new(Mutex::new(width));
             poodle_render::resize_handle(
                 &ResizeHandleSpec::new("editor:sidebar")
@@ -12987,25 +13149,39 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
                     .with_aria_value_min(MIN_PX)
                     .with_aria_value_max(MAX_PX),
                 &RenderContext::new(&theme()),
-                Some(Arc::new(move |phase, delta| match phase {
-                    ResizePhase::Start => {
-                        *gesture.lock().expect("gesture lock") = *state.lock().expect("pane lock");
+                Some(Arc::new(move |phase, delta| {
+                    delivered.lock().expect("payload lock").push((phase, delta));
+                    match phase {
+                        ResizePhase::Start => {
+                            *gesture.lock().expect("gesture lock") =
+                                *state.lock().expect("pane lock");
+                        }
+                        ResizePhase::Move => {
+                            let mut at = gesture.lock().expect("gesture lock");
+                            *at = (*at + delta).clamp(MIN_PX, MAX_PX);
+                            *state.lock().expect("pane lock") = *at;
+                            *mount.lock().expect("mount lock") = build(
+                                *at,
+                                Arc::clone(&mount),
+                                Arc::clone(&state),
+                                Arc::clone(&delivered),
+                            );
+                        }
+                        ResizePhase::End => {}
                     }
-                    ResizePhase::Move => {
-                        let mut at = gesture.lock().expect("gesture lock");
-                        *at = (*at + delta).clamp(MIN_PX, MAX_PX);
-                        *state.lock().expect("pane lock") = *at;
-                        *mount.lock().expect("mount lock") =
-                            build(*at, Arc::clone(&mount), Arc::clone(&state));
-                    }
-                    ResizePhase::End => {}
                 })),
             )
         }
 
         let pane = Arc::new(Mutex::new(120.0f32));
+        let payloads: Arc<Mutex<Vec<(ResizePhase, f32)>>> = Arc::new(Mutex::new(Vec::new()));
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(120.0, Arc::clone(&mounted), Arc::clone(&pane));
+        *mounted.lock().unwrap() = build(
+            120.0,
+            Arc::clone(&mounted),
+            Arc::clone(&pane),
+            Arc::clone(&payloads),
+        );
 
         // The host derives the key from the scope it supplied — no orientation,
         // name, or value in it, so a relabelled handle keeps its focus handle.
@@ -13052,6 +13228,98 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
             declared_range(),
             (Some(48.0), Some(280.0)),
             "the range survives every rebuild",
+        );
+
+        // Events: every axis key is one whole gesture, delivered as the
+        // contract's Start / Move / End payloads; the cross-axis Up added none.
+        let delivered = payloads.lock().unwrap().clone();
+        assert_eq!(
+            delivered.len(),
+            12,
+            "right, left, home, end — three phases each: {delivered:?}",
+        );
+        assert_eq!(delivered[0], (ResizePhase::Start, 0.0));
+        assert_eq!(delivered[1], (ResizePhase::Move, 8.0));
+        assert_eq!(delivered[2], (ResizePhase::End, 0.0));
+        assert_eq!(delivered[9], (ResizePhase::Start, 0.0));
+        assert_eq!(delivered[10], (ResizePhase::Move, 9999.0));
+        assert_eq!(delivered[11], (ResizePhase::End, 0.0));
+
+        // Visual: the hairline, its hover/focus recolor, and the grab overlay
+        // resolve the contract's tokens and rem geometry on the mounted tree.
+        {
+            use poodle_adapter::ThemeProvider;
+            let theme = theme();
+            let spec =
+                ResizeHandleSpec::new("editor:sidebar").with_orientation(Orientation::Horizontal);
+            let tree = mounted.lock().unwrap();
+            assert!(
+                matches!(tree.style.descriptor.layout.width, LayoutSizing::Fixed(w)
+                    if (w - poodle_render::presentation::rem_to_px(0.125)).abs() < 1e-6)
+            );
+            assert!((tree.style.descriptor.corner_radii.top_left - 999.0).abs() < 1e-6);
+            assert_eq!(
+                tree.style.descriptor.background,
+                Some(theme.resolve_color(spec.border_color_token()))
+            );
+            assert_eq!(
+                tree.style.hover.expect("hover patch").background,
+                Some(theme.resolve_color(spec.hover_color_token()))
+            );
+            assert_eq!(
+                tree.style.focus.expect("focus patch").background,
+                Some(theme.resolve_color(spec.focus_ring_color_token()))
+            );
+            let overlay = &tree.children[0];
+            assert!(
+                matches!(overlay.style.descriptor.layout.width, LayoutSizing::Fixed(w)
+                    if (w - poodle_render::presentation::rem_to_px(0.5)).abs() < 1e-6)
+            );
+        }
+    });
+
+    // Pointer: the hairline's grab overlay starts a real drag in the mounted
+    // window and reports the axis delta as the pointer moves right.
+    run_headless(|cx| {
+        use poodle_render::ResizePhase;
+        use poodle_specs::{Orientation, ResizeHandleSpec};
+
+        let payloads: Arc<Mutex<Vec<(ResizePhase, f32)>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let node = poodle_render::resize_handle(
+            &ResizeHandleSpec::new("editor:sidebar")
+                .with_orientation(Orientation::Horizontal)
+                .with_aria_label("Resize horizontal"),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |phase, delta| {
+                sink.lock().expect("payload lock").push((phase, delta));
+            })),
+        );
+        let handle_id =
+            poodle_render::resize_handle_focus_id(&ResizeHandleSpec::new("editor:sidebar"));
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(&handle_id);
+        let center = headless_driver::mount_box_center();
+        driver.pointer_press(center);
+        driver.pointer_drag(point(center.x + px(12.0), center.y));
+        driver.pointer_drag(point(center.x + px(24.0), center.y));
+        driver.pointer_drag(point(center.x + px(40.0), center.y));
+        driver.pointer_release(point(center.x + px(40.0), center.y));
+        let delivered = payloads.lock().expect("payload lock").clone();
+        assert_eq!(
+            delivered.first().copied(),
+            Some((ResizePhase::Start, 0.0)),
+            "the first captured move opens the drag: {delivered:?}",
+        );
+        let moved: f32 = delivered
+            .iter()
+            .filter(|(phase, _)| *phase == ResizePhase::Move)
+            .map(|(_, delta)| *delta)
+            .sum();
+        assert!(
+            moved > 0.0,
+            "a rightward drag reports a positive axis delta: {delivered:?}",
         );
     });
 }
@@ -25452,6 +25720,8 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
 /// coverage, visual comparison, or Jetstream admission.
 #[test]
 fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
+    use poodle_adapter::ThemeProvider;
+
     fn crumb_name(node: &Node) -> Option<String> {
         if let Some(label) = node.a11y.label.clone() {
             return Some(label);
@@ -25500,8 +25770,8 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
     }
 
     run_headless(|cx| {
-        let nav = Arc::new(Mutex::new(Vec::<String>::new()));
-        let sink = Arc::clone(&nav);
+        let payloads = Arc::new(Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&payloads);
         let trail = poodle_render::breadcrumbs(
             &poodle_specs::BreadcrumbsSpec::new(vec![
                 poodle_specs::BreadcrumbItem::new("home", "Home"),
@@ -25546,6 +25816,41 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
                 assert!(!node.interaction.focusable, "{id}");
                 assert!(node.style.focus_ring.is_none(), "{id}");
             }
+
+            // Visual: separator dimming, tier colors, and the callback ring
+            // are the live resolved tokens, not a second literal palette.
+            let theme = theme();
+            let trail = root
+                .children
+                .iter()
+                .find(|node| node.a11y.label.as_deref() == Some("Trail"))
+                .expect("the breadcrumbs root keeps its aria label");
+            let separator = &trail.children[1];
+            assert_eq!(
+                separator.style.descriptor.opacity, 0.4,
+                "the separator paints the contract's 0.4 dim",
+            );
+            assert_eq!(
+                separator.style.descriptor.text_color,
+                Some(theme.resolve_color("color.text.secondary"))
+            );
+            assert_eq!(
+                crumb(&root, "breadcrumbs-poodle")
+                    .style
+                    .descriptor
+                    .text_color,
+                Some(theme.resolve_color("color.text.primary")),
+                "the current page reads as primary text",
+            );
+            assert_eq!(
+                home.children[0].style.descriptor.text_color,
+                Some(theme.resolve_color("color.text.secondary")),
+                "an intermediate text crumb reads as secondary",
+            );
+            let ring = home.style.focus_ring.expect("callback crumb ring");
+            assert_eq!(ring.color, theme.resolve_color("color.accent.focusRing"));
+            assert_eq!(ring.width, theme.resolve_border_width("border.width.focus"));
+            assert!((ring.offset - poodle_render::presentation::rem_to_px(0.125)).abs() < 1e-6);
         }
 
         let mounted = Arc::new(Mutex::new(root));
@@ -25560,7 +25865,7 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
             "pointer proof needs a real hit target"
         );
         driver.pointer_activate_id("breadcrumbs-home");
-        assert_eq!(*nav.lock().expect("nav lock"), ["home"]);
+        assert_eq!(*payloads.lock().expect("payload lock"), ["home"]);
 
         driver.focus_element("breadcrumbs-projects");
         assert_eq!(
@@ -25568,10 +25873,13 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
             Some(true)
         );
         driver.dispatch_key_raw("enter");
-        assert_eq!(*nav.lock().expect("nav lock"), ["home", "projects"]);
+        assert_eq!(
+            *payloads.lock().expect("payload lock"),
+            ["home", "projects"]
+        );
         driver.dispatch_key_raw("space");
         assert_eq!(
-            *nav.lock().expect("nav lock"),
+            *payloads.lock().expect("payload lock"),
             ["home", "projects", "projects"]
         );
 
@@ -25589,7 +25897,7 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
             );
         }
         assert_eq!(
-            *nav.lock().expect("nav lock"),
+            *payloads.lock().expect("payload lock"),
             ["home", "projects", "projects"]
         );
 
@@ -31806,6 +32114,41 @@ fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
         *mounted.lock().expect("mount lock") = build(&host, &mounted);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 400.0);
         driver.draw_frame();
+
+        // Visual: the clause chrome and drag handle resolve the contract's
+        // tokens and rem geometry on the mounted tree.
+        {
+            use poodle_adapter::ThemeProvider;
+            let theme = theme();
+            let spec = OrderBySpec::new();
+            let tree = mounted.lock().expect("mount lock");
+            let row = tree
+                .find(&|n| n.runtime_id.as_deref() == Some("order-by:sort:name:row"))
+                .expect("mounted Name clause row");
+            assert_eq!(
+                row.style.descriptor.corner_radii.top_left,
+                theme.resolve_radius(spec.radius_token())
+            );
+            assert_eq!(
+                row.style.descriptor.background,
+                Some(poodle_render::color::mix_srgb(
+                    theme.resolve_color(spec.field_fill_token()),
+                    theme.resolve_color(spec.field_hover_fill_token()),
+                    0.90,
+                ))
+            );
+            assert_eq!(
+                row.style.descriptor.border.color,
+                theme.resolve_color(spec.item_border_token())
+            );
+            let handle = tree
+                .find(&|n| n.runtime_id.as_deref() == Some("order-by:sort:name:handle"))
+                .expect("mounted Name drag handle");
+            let grip_px = poodle_render::presentation::rem_to_px(1.5);
+            assert!(matches!(handle.style.min_width, Some(w) if (w - grip_px).abs() < 1e-6));
+            assert!(matches!(handle.style.min_height, Some(h) if (h - grip_px).abs() < 1e-6));
+        }
+
         let controller = driver.drag();
 
         // ── A drop lands the clause *at* the row it was dropped on ──

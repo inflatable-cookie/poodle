@@ -14,6 +14,21 @@ thread_local! {
     static CONTINUOUS_VALUE: RefCell<Option<ContinuousValueSession>> = const { RefCell::new(None) };
 }
 
+/// The in-flight `on_drag` gesture's last pointer position, kept across
+/// renders. A drag delta is a difference between frames, so per-render `Rc`
+/// state would reset on the frame the host redraws and every frame would
+/// restart the gesture with a zero delta. The gesture id scopes the entry so
+/// a stale position from a previous gesture cannot seed the next one; the
+/// drag-start builder clears it. Only one pointer drag exists at a time.
+struct DragSession {
+    gesture_id: String,
+    last: (f32, f32),
+}
+
+thread_local! {
+    static DRAG_SESSION: RefCell<Option<DragSession>> = const { RefCell::new(None) };
+}
+
 pub(crate) fn reset_continuous_value_session() {
     CONTINUOUS_VALUE.with(|slot| *slot.borrow_mut() = None);
 }
@@ -810,26 +825,49 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         //
         // gpui 0.2.2 has no mouse-up listener on this surface, so
         // NodeDragPhase::End is still never emitted. Deltas remain per-frame
-        // from the last reported position — the vocabulary's contract.
+        // from the last reported position — the vocabulary's contract. That
+        // baseline lives in a thread-local keyed by the gesture id, because the
+        // listener is rebuilt on every render: per-render state reset the
+        // baseline each frame and every move restarted the gesture at delta 0,
+        // so the host saw no movement at all.
         // Registering `on_drag` makes gpui swallow this element's mouse-down, so
         // Start cannot come from a down listener: the first move of a gesture
         // emits it, then reports deltas.
-        let last: Rc<RefCell<Option<(f32, f32)>>> = Rc::new(RefCell::new(None));
-        let last_move = last.clone();
         let mv = handler.clone();
         let gesture_id = next_gesture_id();
+        let started = gesture_id.clone();
         el = el
-            .on_drag(NodeGestureDrag(gesture_id.clone()), |_, _, _window, cx| {
-                cx.new(|_| EmptyDragPreview)
-            })
+            .on_drag(
+                NodeGestureDrag(gesture_id.clone()),
+                move |_, _, _window, cx| {
+                    // A new gesture starts from the pointer's own position, never
+                    // the stale tail of the last one.
+                    DRAG_SESSION.with(|session| {
+                        let mut session = session.borrow_mut();
+                        if session
+                            .as_ref()
+                            .is_some_and(|state| state.gesture_id == started)
+                        {
+                            *session = None;
+                        }
+                    });
+                    cx.new(|_| EmptyDragPreview)
+                },
+            )
             .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
                 if event.drag(cx).0 != gesture_id {
                     return;
                 }
                 let pos: (f32, f32) =
                     (event.event.position.x.into(), event.event.position.y.into());
-                let mut last = last_move.borrow_mut();
-                match *last {
+                let previous = DRAG_SESSION.with(|session| {
+                    let mut session = session.borrow_mut();
+                    match session.as_ref() {
+                        Some(state) if state.gesture_id == gesture_id => Some(state.last),
+                        _ => None,
+                    }
+                });
+                match previous {
                     None => mv(&NodeDragEvent {
                         phase: NodeDragPhase::Start,
                         delta_x: 0.0,
@@ -841,8 +879,13 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         delta_y: pos.1 - prev.1,
                     }),
                 }
+                DRAG_SESSION.with(|session| {
+                    *session.borrow_mut() = Some(DragSession {
+                        gesture_id: gesture_id.clone(),
+                        last: pos,
+                    });
+                });
                 cx.refresh_windows();
-                *last = Some(pos);
             });
     }
 

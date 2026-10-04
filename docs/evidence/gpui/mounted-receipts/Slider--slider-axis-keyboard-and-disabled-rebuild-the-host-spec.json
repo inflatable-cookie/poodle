@@ -8,6 +8,7 @@
   "contract_claims": [
     "semantic",
     "events",
+    "pointer",
     "keyboard_focus",
     "accessibility",
     "visual"
@@ -21,6 +22,9 @@
       "assert_eq!(\n            &keys[keys.len() - 6..],\n            [\n                \"valueChange\",\n                \"valueCommit\",\n                \"valueChange\",\n                \"valueCommit\",\n                \"valueChange\",\n                \"valueCommit",
       "assert_eq!(\n            slider_control(&mounted.lock().unwrap()).a11y.value,\n            Some(100.0),\n            \"the rebuilt node carries the commit",
       "assert_eq!(\n            trace.lock().expect(\"trace lock\").as_slice(),\n            [\"valueChange\", \"valueChange\", \"valueCommit"
+    ],
+    "pointer": [
+      "pointer_activate"
     ],
     "keyboard_focus": [
       "focus_state_for",
@@ -45,19 +49,20 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
+  "source_commit": "f548373b78aeaae5286c15f2643f507b33a2c488",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-086-gpui-census-gaps",
+    "run_id": "2026-10-04-poodle-085-rebase-onto-086",
     "outcome": "passed",
-    "body_sha256": "8da3e2f897fdbff3db8db354f7910d017d79a5a8f6b18c6521dd8d8e4e689446"
+    "body_sha256": "2771e5b32c0660f43d866917038deda71433b0fd9e7ee9244fcbedaf6c101d03"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
     "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
     "asserted node-level role, label, state, or focusability in the mounted tree",
     "asserted resolved token values or mounted geometry"

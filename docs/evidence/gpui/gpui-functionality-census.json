@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "aaa0344b4c0a6fefd9be357b0fe04618770cc744",
+  "source_commit": "f548373b78aeaae5286c15f2643f507b33a2c488",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -306,6 +306,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard"
+        },
+        {
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard"
@@ -319,12 +324,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard"
         }
       ],
-      "missing": [
-        "events",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -336,10 +343,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Breadcrumbs--breadcrumbs-callback-navigation-through-mounted-pointer-and-keyboard.json"
       ],
-      "refusals": [
-        "Expected test breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard proves no events claim; events stays missing.",
-        "Expected test breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "BulkActionBar",
@@ -2107,11 +2111,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2123,9 +2130,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/OrderBy--order-by-substrate-reorder-and-alt-arrow-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "NavCard",
@@ -2826,6 +2831,16 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_focused_resize_handle_steps_the_pane_and_its_declared_value"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_focused_resize_handle_steps_the_pane_and_its_declared_value"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_focused_resize_handle_steps_the_pane_and_its_declared_value"
+        },
+        {
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_focused_resize_handle_steps_the_pane_and_its_declared_value"
@@ -2834,13 +2849,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_focused_resize_handle_steps_the_pane_and_its_declared_value"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_focused_resize_handle_steps_the_pane_and_its_declared_value"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2853,14 +2869,7 @@
         "docs/evidence/gpui/mounted-receipts/ResizeHandle--a-focused-resize-handle-steps-the-pane-and-its-declared-value.json",
         "docs/evidence/gpui/mounted-receipts/ResizeHandle--a-disabled-resize-handle-takes-no-focus-and-answers-no-key.json"
       ],
-      "refusals": [
-        "Expected test a_focused_resize_handle_steps_the_pane_and_its_declared_value proves no events claim; events stays missing.",
-        "Expected test a_focused_resize_handle_steps_the_pane_and_its_declared_value proves no pointer claim; pointer stays missing.",
-        "Expected test a_focused_resize_handle_steps_the_pane_and_its_declared_value proves no visual claim; visual stays missing.",
-        "Expected test a_disabled_resize_handle_takes_no_focus_and_answers_no_key proves no events claim; events stays missing.",
-        "Expected test a_disabled_resize_handle_takes_no_focus_and_answers_no_key proves no pointer claim; pointer stays missing.",
-        "Expected test a_disabled_resize_handle_takes_no_focus_and_answers_no_key proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "RangeSlider",
@@ -2885,14 +2894,29 @@
           "axis": "events",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_scrub_reports_change_while_dragging_and_commits_once_at_release"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_scrub_reports_change_while_dragging_and_commits_once_at_release"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_scrub_reports_change_while_dragging_and_commits_once_at_release"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_scrub_reports_change_while_dragging_and_commits_once_at_release"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_scrub_reports_change_while_dragging_and_commits_once_at_release"
         }
       ],
-      "missing": [
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2904,12 +2928,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/RangeSlider--a-scrub-reports-change-while-dragging-and-commits-once-at-release.json"
       ],
-      "refusals": [
-        "Expected test a_scrub_reports_change_while_dragging_and_commits_once_at_release proves no pointer claim; pointer stays missing.",
-        "Expected test a_scrub_reports_change_while_dragging_and_commits_once_at_release proves no keyboard_focus claim; keyboard_focus stays missing.",
-        "Expected test a_scrub_reports_change_while_dragging_and_commits_once_at_release proves no accessibility claim; accessibility stays missing.",
-        "Expected test a_scrub_reports_change_while_dragging_and_commits_once_at_release proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "SegmentedControl",
@@ -3186,6 +3205,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#slider_axis_keyboard_and_disabled_rebuild_the_host_spec"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#slider_axis_keyboard_and_disabled_rebuild_the_host_spec"
+        },
+        {
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#slider_axis_keyboard_and_disabled_rebuild_the_host_spec"
@@ -3201,9 +3225,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#slider_axis_keyboard_and_disabled_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "pointer"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -3215,9 +3237,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Slider--slider-axis-keyboard-and-disabled-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test slider_axis_keyboard_and_disabled_rebuild_the_host_spec proves no pointer claim; pointer stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Spinner",
@@ -7886,17 +7906,17 @@
   ],
   "summary": {
     "admittedRows": 84,
-    "fullyAdmittedRows": 53,
+    "fullyAdmittedRows": 58,
     "missingTally": {
       "semantic": 91,
-      "events": 84,
-      "pointer": 94,
-      "keyboard_focus": 85,
-      "accessibility": 100,
-      "visual": 117
+      "events": 82,
+      "pointer": 91,
+      "keyboard_focus": 84,
+      "accessibility": 99,
+      "visual": 113
     },
     "holdCount": 175,
-    "refusalCount": 179
+    "refusalCount": 165
   },
   "groups": [
     {
@@ -7904,7 +7924,6 @@
       "components": [
         "AgentPlanRecord",
         "AlertDialog",
-        "Breadcrumbs",
         "ColorPicker",
         "ContextMenu",
         "DataTable",
@@ -7927,14 +7946,10 @@
         "MediaThumbnail",
         "Menubar",
         "NavigationMenu",
-        "OrderBy",
         "PageLoading",
         "PickerShell",
-        "RangeSlider",
         "RefSelect",
         "RelationPicker",
-        "ResizeHandle",
-        "Slider",
         "SplitButton",
         "ThemeSelect",
         "ToastStack",
@@ -7945,16 +7960,15 @@
       ],
       "missingTally": {
         "semantic": 32,
-        "events": 34,
-        "pointer": 38,
-        "keyboard_focus": 33,
-        "accessibility": 35,
-        "visual": 39
+        "events": 32,
+        "pointer": 35,
+        "keyboard_focus": 32,
+        "accessibility": 34,
+        "visual": 35
       },
       "contracts": [
         "docs/contracts/components/agent-plan-record.md",
         "docs/contracts/components/alert-dialog.md",
-        "docs/contracts/components/breadcrumbs.md",
         "docs/contracts/components/color-picker.md",
         "docs/contracts/components/context-menu.md",
         "docs/contracts/components/data-table.md",
@@ -7977,14 +7991,10 @@
         "docs/contracts/components/media-thumbnail.md",
         "docs/contracts/components/menubar.md",
         "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/order-by.md",
         "docs/contracts/components/page-loading.md",
         "docs/contracts/components/picker-shell.md",
-        "docs/contracts/components/range-slider.md",
         "docs/contracts/components/ref-select.md",
         "docs/contracts/components/relation-picker.md",
-        "docs/contracts/components/resize-handle.md",
-        "docs/contracts/components/slider.md",
         "docs/contracts/components/split-button.md",
         "docs/contracts/components/theme-select.md",
         "docs/contracts/components/toast-stack.md",
