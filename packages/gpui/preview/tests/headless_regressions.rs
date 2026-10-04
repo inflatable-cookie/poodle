@@ -13701,6 +13701,7 @@ fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
 /// complete shown order, and Escape cancels the grab.
 #[test]
 fn model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window() {
+    use poodle_adapter::ThemeProvider;
     use poodle_headless::model_connection::model_catalogue_fixtures;
     use poodle_specs::ModelCatalogueEditorSpec;
 
@@ -13742,7 +13743,54 @@ fn model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window() {
             Arc::clone(&grabs),
             Arc::clone(&announcements),
         );
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 420.0, 420.0);
+        driver.draw_frame();
+
+        // The shown row matches Svelte's space-backed padding and inline gap,
+        // control radius, subtle border, and surface fill on the mounted tree.
+        let editor_theme = theme();
+        {
+            let tree = node.lock().expect("mounted node lock");
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.gap,
+                editor_theme.resolve_space("space.stack.md")
+            );
+            let row = tree
+                .find(&|node| {
+                    node.a11y.role == Some(NodeRole::ListItem) && node.a11y.level == Some(1)
+                })
+                .expect("first shown model row");
+            let padding = &row.style.descriptor.layout.spacing.padding;
+            assert_eq!(padding.top, editor_theme.resolve_space("space.stack.sm"));
+            assert_eq!(padding.left, editor_theme.resolve_space("space.inline.md"));
+            assert_eq!(
+                row.style.descriptor.layout.spacing.gap,
+                editor_theme.resolve_space("space.inline.sm")
+            );
+            assert_eq!(
+                row.style.descriptor.border.width,
+                poodle_render::presentation::rem_to_px(0.0625)
+            );
+            assert_eq!(
+                row.style.descriptor.border.color,
+                editor_theme.resolve_color("color.border.subtle")
+            );
+            assert_eq!(
+                row.style.descriptor.background,
+                Some(editor_theme.resolve_color("color.background.surface"))
+            );
+            assert_eq!(
+                row.style.descriptor.corner_radii.top_left,
+                editor_theme.resolve_radius("radius.control")
+            );
+        }
+        let handle_geometry =
+            poodle_gpui_node_backend::bounds_for("model-catalogue-editor:model-alpha:handle")
+                .expect("mounted model reorder handle geometry");
+        assert!(
+            handle_geometry.size.width > px(0.0) && handle_geometry.size.height > px(0.0),
+            "the styled row's mounted reorder handle paints: {handle_geometry:?}"
+        );
 
         // Enter on the handle grabs the row through the backend's own
         // activation path.
@@ -13795,6 +13843,35 @@ fn model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window() {
                 "model-dup-a".to_string(),
             ],
             "Escape ends the grab and leaves the last emitted order intact"
+        );
+
+        // The same production tree also accepts a pointer drag from the first
+        // handle to the last shown row and emits the complete order once.
+        driver.mount_node(Arc::clone(&node));
+        driver.draw_frame();
+        let source = payload_frac("model-catalogue-editor:model-alpha:handle", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        let target = payload_frac("model-catalogue-editor:model-dup-a:handle", 0.5, 0.5);
+        driver.pointer_drag(target);
+        driver.pointer_release(target);
+        assert_eq!(
+            orders.lock().unwrap().as_slice(),
+            [
+                vec![
+                    "model-alpha".to_string(),
+                    "model-gamma".to_string(),
+                    "model-beta".to_string(),
+                    "model-dup-a".to_string(),
+                ],
+                vec![
+                    "model-beta".to_string(),
+                    "model-gamma".to_string(),
+                    "model-dup-a".to_string(),
+                    "model-alpha".to_string(),
+                ],
+            ],
+            "keyboard movement and pointer drop each emit their complete order"
         );
     });
 }
@@ -15319,6 +15396,7 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
 
         let mut driver =
             HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root_container)), 640.0, 320.0);
+        driver.draw_frame();
         driver.wait_for_focus_handle(&left_id);
         driver.wait_for_focus_handle(&right_id);
 
@@ -15394,6 +15472,49 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
             subject_resizes.lock().unwrap().len(),
             12,
             "Subject split handler count must remain unchanged when witness divider is resized"
+        );
+
+        // A pointer drag through the split's mounted resize handle reports
+        // real axis deltas to its own handler and leaves the witness alone.
+        let subject_event_start = subject_resizes.lock().unwrap().len();
+        let pointer_start = payload_frac(&left_id, 0.5, 0.5);
+        driver.pointer_press(pointer_start);
+        driver.pointer_drag(point(pointer_start.x + px(12.0), pointer_start.y));
+        driver.pointer_drag(point(pointer_start.x + px(24.0), pointer_start.y));
+        driver.pointer_drag(point(pointer_start.x + px(40.0), pointer_start.y));
+        driver.pointer_release(point(pointer_start.x + px(40.0), pointer_start.y));
+        let pointer_events = subject_resizes.lock().unwrap()[subject_event_start..].to_vec();
+        assert_eq!(
+            pointer_events.first().copied(),
+            Some((ResizePhase::Start, 0.0)),
+            "the first captured pointer move starts the resize: {pointer_events:?}"
+        );
+        let pointer_delta: f32 = pointer_events
+            .iter()
+            .filter(|(phase, _)| *phase == ResizePhase::Move)
+            .map(|(_, delta)| *delta)
+            .sum();
+        assert!(
+            pointer_delta > 0.0,
+            "a rightward pointer drag reports a positive axis delta: {pointer_events:?}"
+        );
+        assert_eq!(
+            pointer_events.last().copied(),
+            Some((ResizePhase::End, 0.0)),
+            "pointer resize ends once"
+        );
+        assert_eq!(
+            pointer_events
+                .iter()
+                .filter(|(phase, _)| *phase == ResizePhase::End)
+                .count(),
+            1,
+            "pointer release emits one terminal resize phase: {pointer_events:?}"
+        );
+        assert_eq!(
+            witness_resizes.lock().unwrap().len(),
+            3,
+            "pointer resizing the subject does not notify the witness"
         );
 
         // ── 5. Mounted CollapseToggle Keyboard Activation Proof ───────────
@@ -33560,6 +33681,7 @@ fn the_first_answered_gpui_batch_id_stays_inert_after_thousands_of_later_ones() 
 /// commits nothing.
 #[test]
 fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
     use poodle_render::{editable_list, EditableListHandlers};
     use poodle_specs::{EditableListItem, EditableListSpec};
 
@@ -33616,6 +33738,8 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
             editable_list(
                 &EditableListSpec::new()
                     .with_items(items)
+                    .with_size(ControlSize::Md)
+                    .with_density(ControlDensity::Default)
                     .with_aria_label("Rows"),
                 &ctx,
                 handlers,
@@ -33639,6 +33763,52 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 560.0);
         driver.draw_frame();
         let controller = driver.drag();
+
+        // The rendered row keeps the Svelte size/density recipe: the 0.625rem
+        // horizontal and 0.5rem vertical padding, control radius, transparent
+        // fill, and 1px transparent border all reach the mounted GPUI node.
+        let expected_pad_x = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::editable_list_item_x_rem(ControlSize::Md),
+        );
+        let expected_pad_y = poodle_render::presentation::rem_to_px(
+            poodle_render::presentation::editable_list_item_y_rem(ControlSize::Md),
+        );
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let row = tree
+                .find(&|node| {
+                    node.runtime_id.as_deref() == Some("editable-list:list-a:row-1:row")
+                })
+                .expect("mounted editable-list row");
+            assert_eq!(
+                row.style.descriptor.layout.spacing.padding.left,
+                expected_pad_x
+            );
+            assert_eq!(
+                row.style.descriptor.layout.spacing.padding.top,
+                expected_pad_y
+            );
+            assert_eq!(
+                row.style.descriptor.corner_radii.top_left,
+                theme().resolve_radius("radius.control")
+            );
+            assert_eq!(
+                row.style.descriptor.border.width,
+                poodle_render::presentation::rem_to_px(0.0625)
+            );
+            assert_eq!(row.style.descriptor.border.color.3, 0.0);
+            assert_eq!(
+                row.style.descriptor.background.map(|color| color.3),
+                Some(0.0)
+            );
+        }
+        let row_geometry = poodle_gpui_node_backend::bounds_for("editable-list:list-a:row-1:row")
+            .expect("mounted editable-list row geometry");
+        assert!(
+            f32::from(row_geometry.size.width) > 2.0 * expected_pad_x
+                && f32::from(row_geometry.size.height) > 2.0 * expected_pad_y,
+            "mounted row geometry includes the contract padding: {row_geometry:?}"
+        );
 
         // ── The same item ids in two lists never cross ──
         let handle = payload_frac("editable-list:list-a:row-1:handle", 0.5, 0.5);
@@ -33965,6 +34135,7 @@ fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
 /// content area is not a drag handle.
 #[test]
 fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
     use poodle_render::{block_editor, BlockEditorHandlers};
     use poodle_specs::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 
@@ -34012,6 +34183,8 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
         block_editor(
             &BlockEditorSpec::new()
                 .with_blocks(current)
+                .with_size(ControlSize::Md)
+                .with_density(ControlDensity::Default)
                 .with_block_types(vec![BlockTypeDefinition::new(
                     "paragraph",
                     "Paragraph",
@@ -34032,6 +34205,35 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 560.0);
         driver.draw_frame();
         let controller = driver.drag();
+
+        // Svelte's default editor uses the surface fill and 0.5rem stack gap;
+        // each block uses the control radius and a 42% elevated-color mix.
+        let editor_theme = theme();
+        let elevated = editor_theme.resolve_color("color.background.elevated");
+        let block_fill = poodle_render::color::with_alpha(elevated, elevated.3 * 0.42);
+        {
+            let tree = mounted.lock().expect("mount lock");
+            assert_eq!(
+                tree.style.descriptor.layout.spacing.gap,
+                poodle_render::presentation::rem_to_px(0.5)
+            );
+            let block = tree
+                .find(&|node| {
+                    node.runtime_id.as_deref() == Some("block-editor:editor:b1:block")
+                })
+                .expect("mounted editor block");
+            assert_eq!(block.style.descriptor.background, Some(block_fill));
+            assert_eq!(
+                block.style.descriptor.corner_radii.top_left,
+                editor_theme.resolve_radius("radius.control")
+            );
+        }
+        let block_geometry = poodle_gpui_node_backend::bounds_for("block-editor:editor:b1:block")
+            .expect("mounted block geometry");
+        assert!(
+            block_geometry.size.width > px(0.0) && block_geometry.size.height > px(0.0),
+            "the token-styled block paints with positive dimensions: {block_geometry:?}"
+        );
 
         // ── The block body is an editing surface, not a grip ──
         let body = payload_frac("block-editor:editor:b1:block", 0.5, 0.85);

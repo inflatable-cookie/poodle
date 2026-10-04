@@ -180,7 +180,13 @@
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component-owned events; child action behavior is host-owned.",
+          "contractRef": "docs/contracts/components/app-header.md#6. Events"
+        }
+      ]
     },
     {
       "component": "AudioMeter",
