@@ -55,6 +55,42 @@ fn roving_target(disabled: &[bool], ids: &[String], idx: usize, mv: MenuListMove
     Some(ids[next].clone())
 }
 
+/// Svelte item keydown: ArrowLeft/ArrowRight on a focused menu row switch to
+/// the adjacent enabled trigger's menu through the trigger channel (the host
+/// switches the open value and applies its open effect). A lone enabled
+/// trigger has nowhere to go.
+fn wrap_item_switch_keys(
+    node: &mut Node,
+    disabled: &[bool],
+    values: &[String],
+    idx: usize,
+    trigger: &Arc<dyn Fn(&str) + Send + Sync>,
+) {
+    if let Some(inner) = node.interaction.on_key.clone() {
+        let disabled = disabled.to_vec();
+        let values = values.to_vec();
+        let trigger = Arc::clone(trigger);
+        node.interaction.on_key = Some(Arc::new(move |key, modifiers| {
+            let mv = match key {
+                NodeKey::ArrowRight => Some(MenuListMove::Next),
+                NodeKey::ArrowLeft => Some(MenuListMove::Prev),
+                _ => None,
+            };
+            if let Some(mv) = mv {
+                let next = menu_list_navigate(&disabled, idx, mv);
+                if next != idx {
+                    trigger(&values[next]);
+                }
+                return None;
+            }
+            inner(key, modifiers)
+        }));
+    }
+    for child in &mut node.children {
+        wrap_item_switch_keys(child, disabled, values, idx, trigger);
+    }
+}
+
 fn rounded_all(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
     c.top_left = r;
@@ -272,6 +308,23 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
             let mut overlay = render_menu(&menu_spec, ctx, handlers.on_select.clone());
             // The trigger's `aria-controls` target: `menubar-menu:{value}`.
             overlay.id = Some(format!("menubar-menu:{}", open_menu.value));
+            if let Some(trigger) = &handlers.on_trigger {
+                if let Some(open_idx) = spec
+                    .items
+                    .iter()
+                    .position(|entry| entry.value == open_menu.value)
+                {
+                    let values: Vec<String> =
+                        spec.items.iter().map(|entry| entry.value.clone()).collect();
+                    wrap_item_switch_keys(
+                        &mut overlay,
+                        &trigger_disabled,
+                        &values,
+                        open_idx,
+                        trigger,
+                    );
+                }
+            }
             if let Some(on_dismiss) = handlers.on_dismiss.clone() {
                 overlay.interaction.dismiss_layer = Some(MENUBAR_LAYER_ID.to_string());
                 overlay.interaction.on_dismiss = Some(on_dismiss);

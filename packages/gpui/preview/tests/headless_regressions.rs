@@ -43064,9 +43064,9 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
                     poodle_node::DismissReason::Outside => "outside",
                 }
             ));
+            // Contract: closing does not restore trigger focus.
             *self.open.lock().expect("open lock") = false;
             self.rebuild();
-            poodle_gpui_node_backend::request_focus(TRIGGER);
         }
     }
 
@@ -43364,17 +43364,17 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             ["copy", "dark-mode", "dark-mode", "select-all"]
         );
 
-        // ── Escape dismissal closes and restores focus through the event ──
+        // ── Escape dismissal closes through the event; focus is not restored ──
         driver.dispatch_key("escape");
         sync(&mut driver);
         assert!(
             poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
             "the Escape event itself unmounts the panel"
         );
-        assert_eq!(
+        assert_ne!(
             poodle_gpui_node_backend::focus_state_for(TRIGGER),
             Some(true),
-            "Escape returns real focus to the invoking target"
+            "closing does not restore trigger focus (contract)"
         );
         assert_eq!(
             host.dismissals.lock().expect("escape dismissals").as_slice(),
@@ -43420,9 +43420,10 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
             "the outside press itself unmounts the panel"
         );
-        assert_eq!(
+        assert_ne!(
             poodle_gpui_node_backend::focus_state_for(TRIGGER),
-            Some(true)
+            Some(true),
+            "an outside press never restores trigger focus"
         );
         assert_eq!(
             host.dismissals.lock().expect("outside dismissals").as_slice(),
@@ -43566,7 +43567,9 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
             ));
             let owner = self.open.lock().expect("open lock").take();
             self.rebuild();
-            if let Some(menu) = owner {
+            // Svelte: Escape on a row returns focus to its trigger; an
+            // outside press leaves focus where the user clicked.
+            if let (Some(menu), poodle_node::DismissReason::Escape) = (owner, reason) {
                 poodle_gpui_node_backend::request_focus(&trigger_id(&menu));
             }
         }
@@ -43924,7 +43927,7 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for("menubar-trigger:file"),
             Some(true),
-            "Escape returns real focus to the owning trigger"
+            "Escape leaves real focus on the owning trigger"
         );
         assert_eq!(
             host.dismissals.lock().expect("escape dismissals").as_slice(),
@@ -43954,10 +43957,37 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
             poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_none(),
             "the outside press itself unmounts the overlay"
         );
+
         assert_eq!(
             host.dismissals.lock().expect("outside dismissals").as_slice(),
             ["escape", "outside"]
         );
+
+        // ── ArrowRight/ArrowLeft on a focused row switch the open menu ──
+        driver.pointer_activate_id("menubar-trigger:file");
+        sync(&mut driver);
+        driver.focus_element("menu-item:new");
+        driver.dispatch_key_raw("right");
+        sync(&mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_some()
+                && poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_none(),
+            "ArrowRight on a row opens the next enabled trigger's menu"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("menu-item:undo"),
+            Some(true),
+            "the switched menu focuses its first row"
+        );
+        driver.dispatch_key_raw("left");
+        sync(&mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:file").is_some()
+                && poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_none(),
+            "ArrowLeft on a row returns to the previous menu (wrapping past the disabled trigger)"
+        );
+        driver.dispatch_key("escape");
+        sync(&mut driver);
 
         // ── Roving tab stop follows real focus ──
         driver.focus_element("menubar-trigger:edit");
@@ -43987,7 +44017,7 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         );
         assert_eq!(
             host.dismissals.lock().expect("refused dismissals").as_slice(),
-            ["escape", "outside"],
+            ["escape", "outside", "escape"],
             "the refused outside press never reaches the host"
         );
         driver.dispatch_key("escape");
@@ -44086,11 +44116,9 @@ fn navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_back
                     poodle_node::DismissReason::Outside => "outside",
                 }
             ));
-            let owner = self.active.lock().expect("active lock").take();
+            // Svelte restores no focus: the trigger already holds it.
+            self.active.lock().expect("active lock").take();
             self.rebuild();
-            if let Some(entry) = owner {
-                poodle_gpui_node_backend::request_focus(&trigger_id(&entry));
-            }
         }
     }
 
@@ -44403,8 +44431,8 @@ fn navigation_menu_disclosure_viewport_roving_and_dismissal_through_mounted_back
             "ArrowDown keeps focus on the trigger"
         );
 
-        // ── Escape dismissal restores the owning trigger ──
-        driver.dispatch_key("escape");
+        // ── Escape from the focused trigger closes; focus stays on it ──
+        driver.dispatch_key_raw("escape");
         sync(&mut driver);
         assert!(
             poodle_gpui_node_backend::bounds_for("navigation-menu-panel:home").is_none(),
@@ -44529,7 +44557,9 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
             ));
             *self.open.lock().expect("open lock") = false;
             self.rebuild();
-            poodle_gpui_node_backend::request_focus("split-toggle");
+            if reason == poodle_node::DismissReason::Escape {
+                poodle_gpui_node_backend::request_focus("split-toggle");
+            }
         }
     }
 
@@ -44871,6 +44901,11 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
         assert!(
             poodle_gpui_node_backend::bounds_for("split-button-item:0").is_none(),
             "the outside press itself unmounts the menu"
+        );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for("split-toggle"),
+            Some(true),
+            "an outside press never returns focus to the toggle"
         );
         assert_eq!(
             host.dismissals.lock().expect("outside dismissals").as_slice(),
