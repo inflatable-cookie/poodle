@@ -48924,6 +48924,131 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
     });
 }
 
+/// Contract §6/§8a action removal on mounted GPUI. A focused toast action that
+/// disappears hands focus to its row's dismiss control before the control
+/// unmounts; when focus has already left the action, the removal moves
+/// nothing. Svelte parity authority:
+/// `packages/svelte/components/src/ToastStack.svelte`
+/// (`moveToastFocusFromRemovedAction`).
+#[test]
+fn toast_stack_action_removal_hands_focus_on_or_leaves_it_alone() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+
+    let theme_provider = theme();
+    let presence = Arc::new(Mutex::new(ToastStackPresence::new()));
+
+    #[derive(Default)]
+    struct ActionHost {
+        toasts: Vec<Toast>,
+    }
+    let host = Arc::new(Mutex::new(ActionHost {
+        toasts: vec![
+            Toast::new("job", "Publishing")
+                .with_message("In flight.")
+                .with_action_label("Retry"),
+            Toast::new("other", "Syncing").with_message("Working."),
+        ],
+    }));
+
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let presence = Arc::clone(&presence);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let toasts = host.lock().expect("action host").toasts.clone();
+            let mut outside = Node::button("Outside");
+            outside.id = Some("outside-button".to_owned());
+            outside.a11y.label = Some("Outside control".to_owned());
+            outside.a11y.tab_index = Some(0);
+            outside.interaction.focusable = true;
+            outside.style.focus_ring = Some(FocusRing {
+                color: theme_provider.resolve_color("color.accent.focusRing"),
+                width: theme_provider.resolve_border_width("border.width.focus"),
+                offset: rem_to_px(0.125),
+            });
+            outside.position = NodePosition::Absolute {
+                top: Some(8.0),
+                left: Some(8.0),
+                right: None,
+                bottom: None,
+            };
+            let ctx = RenderContext::new(&theme_provider);
+            let mut ledger = presence.lock().expect("presence ledger");
+            let stack = toast_stack_with_presence(
+                &ToastStackSpec::new().with_toasts(toasts),
+                &ctx,
+                &mut ledger,
+                ToastStackHandlers {
+                    instance_id: Some("action".to_owned()),
+                    ..ToastStackHandlers::default()
+                },
+            );
+            div()
+                .relative()
+                .size_full()
+                .child(poodle_gpui_node_backend::to_gpui(&outside))
+                .child(poodle_gpui_node_backend::to_gpui(&stack))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+
+        // While the action owns focus, its removal hands focus to the row's
+        // dismiss control. One frame reconciles and queues the transfer; the
+        // next drains and applies it.
+        driver.wait_for_focus_handle("toast-host:action:toast:job:action");
+        driver.focus_element("toast-host:action:toast:job:action");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:action:toast:job:action"),
+            Some(true)
+        );
+        host.lock().expect("action host").toasts[0].action_label = None;
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:action:toast:job:action").is_none(),
+            "the removed action unmounts"
+        );
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:action:toast:job:dismiss"),
+            Some(true),
+            "the removed action hands focus to its row's dismiss control"
+        );
+
+        // Once focus has left the action, removing it moves nothing.
+        host.lock().expect("action host").toasts[1].action_label = Some("Retry".to_owned());
+        driver.draw_frame();
+        driver.wait_for_focus_handle("toast-host:action:toast:other:action");
+        driver.focus_element("toast-host:action:toast:other:action");
+        driver.focus_element("outside-button");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("outside-button"),
+            Some(true)
+        );
+        host.lock().expect("action host").toasts[1].action_label = None;
+        driver.draw_frame();
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:action:toast:other:action").is_none(),
+            "the second action unmounts"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("outside-button"),
+            Some(true),
+            "removal after focus left the action moves nothing"
+        );
+        // Exercise real pointer dispatch too, then prove the harness observed
+        // both paint and input.
+        driver.pointer_activate();
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
 /// PageLoading mounts its loading surface and drives cancellation through
 /// mounted GPUI input: the overlay paints the status semantics with token
 /// chrome, the cancel button is a real focusable button by pointer and by

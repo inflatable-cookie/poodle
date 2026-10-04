@@ -213,6 +213,7 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   ToastStack: [
     "first_mounted_parity_toast_stack",
     "toast_stack_renderer_owned_presence_phases_and_inert_remnant",
+    "toast_stack_action_removal_hands_focus_on_or_leaves_it_alone",
   ],
 };
 

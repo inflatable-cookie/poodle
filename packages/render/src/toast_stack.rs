@@ -120,6 +120,28 @@ pub fn next_toast_visuals(
     next
 }
 
+/// An action affordance that disappeared during one reconcile. The renderer
+/// resolves focus for each before its control unmounts (contract §6).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RemovedToastAction {
+    /// The row id whose action affordance left.
+    pub id: String,
+    /// Whether the row survives. A surviving row's dismiss control is the
+    /// first transfer stop; a removed row's focus falls through the surviving
+    /// order to the entered-from control.
+    pub row_survives: bool,
+}
+
+/// What one reconcile changed, including the follow-up effects presence does
+/// not itself carry.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct ToastPresenceChange {
+    /// The visual list or its phases changed.
+    pub visuals_changed: bool,
+    /// Action affordances that disappeared this reconcile.
+    pub removed_actions: Vec<RemovedToastAction>,
+}
+
 /// One stack's renderer-owned presence ledger.
 ///
 /// The host owns one per stack and threads it through
@@ -131,6 +153,10 @@ pub fn next_toast_visuals(
 pub struct ToastStackPresence {
     visuals: Vec<ToastVisual>,
     retained: Vec<Toast>,
+    /// Ids whose last reconcile still carried an action affordance. A
+    /// disappearing id is detected against this set once, not against the
+    /// retained copy every frame (a remnant would re-trigger forever).
+    action_ids: Vec<String>,
     initialised: bool,
 }
 
@@ -165,9 +191,10 @@ impl ToastStackPresence {
     /// Reconcile the ledger against the live items under the effective motion
     /// policy. Initial items settle; new ids enter; kept ids keep their phase;
     /// removed ids leave an exit remnant. `frozen` has no clock: new rows
-    /// settle and removed rows drop immediately (contract §8a). Returns
-    /// whether the ledger changed.
-    pub fn reconcile(&mut self, toasts: &[Toast], policy: MotionPolicy) -> bool {
+    /// settle and removed rows drop immediately (contract §8a). The returned
+    /// change also names every action affordance that disappeared, so the
+    /// renderer can hand focus on before the control unmounts (contract §6).
+    pub fn reconcile(&mut self, toasts: &[Toast], policy: MotionPolicy) -> ToastPresenceChange {
         let live_ids: Vec<String> = toasts.iter().map(|toast| toast.id.clone()).collect();
         let previous = self.visuals.clone();
         let mut visuals = next_toast_visuals(&self.visuals, &live_ids, !self.initialised);
@@ -180,6 +207,30 @@ impl ToastStackPresence {
                 }
             }
         }
+        // Contract §6: an action affordance that disappears must hand focus
+        // on before its control unmounts. Compare against the last
+        // reconcile's action set so a remnant never re-triggers the move.
+        let mut removed_actions = Vec::new();
+        for id in &self.action_ids {
+            match toasts.iter().find(|toast| &toast.id == id) {
+                Some(toast) if toast.action_label.is_none() => {
+                    removed_actions.push(RemovedToastAction {
+                        id: id.clone(),
+                        row_survives: true,
+                    });
+                }
+                Some(_) => {}
+                None => removed_actions.push(RemovedToastAction {
+                    id: id.clone(),
+                    row_survives: false,
+                }),
+            }
+        }
+        self.action_ids = toasts
+            .iter()
+            .filter(|toast| toast.action_label.is_some())
+            .map(|toast| toast.id.clone())
+            .collect();
         // Live copy replaces the retained copy; a remnant keeps the copy its
         // row was last rendered with, exactly like the web's retained map.
         for toast in toasts {
@@ -194,9 +245,12 @@ impl ToastStackPresence {
         }
         self.retained
             .retain(|retained| visuals.iter().any(|visual| visual.id == retained.id));
-        let changed = visuals != previous;
+        let visuals_changed = visuals != previous;
         self.visuals = visuals;
-        changed
+        ToastPresenceChange {
+            visuals_changed,
+            removed_actions,
+        }
     }
 
     /// Settle an entering row once its enter treatment finishes. Returns
@@ -319,6 +373,45 @@ fn toast_owns_element_id(instance_id: Option<&str>, toast_id: &str, element_id: 
     toast_element_ids(instance_id, toast_id)
         .iter()
         .any(|id| id == element_id)
+}
+
+/// Every element id a toast's action affordance can own, plain and scoped.
+fn action_element_ids(instance_id: Option<&str>, toast_id: &str) -> Vec<String> {
+    let mut ids = vec![format!("poodle-toast-action-{toast_id}")];
+    if let Some(scoped) = scoped(instance_id, &format!("toast:{toast_id}:action")) {
+        ids.push(scoped);
+    }
+    ids
+}
+
+/// Whether the focused element is this row's action affordance. Contract §6:
+/// only an action that still owns focus moves focus when it leaves; once
+/// focus has moved on, the removal is silent.
+pub fn toast_action_owns_focus(instance_id: Option<&str>, toast_id: &str) -> bool {
+    let Some(focused) = poodle_node::current_focused_id() else {
+        return false;
+    };
+    action_element_ids(instance_id, toast_id)
+        .iter()
+        .any(|id| id == &focused)
+}
+
+/// Contract §6 action-removal transfer target as a backend element id: the
+/// same row's dismiss control while the row survives, else the surviving
+/// order's next row, then previous row, then the entered-from control. Pure
+/// over the rendered order so every backend shares one decision; the backend
+/// drops targets with no mounted handle.
+pub fn toast_action_removal_focus_target(
+    order: &[String],
+    instance_id: Option<&str>,
+    row_id: &str,
+    row_survives: bool,
+    entered_from: Option<&str>,
+) -> Option<String> {
+    if row_survives {
+        return Some(dismiss_element_id(instance_id, row_id));
+    }
+    toast_dismiss_focus_target(order, instance_id, row_id, entered_from)
 }
 
 /// Contract §8a transfer target for a dismissed toast, as a backend element
@@ -455,7 +548,7 @@ pub fn toast_stack_with_presence(
     presence: &mut ToastStackPresence,
     handlers: ToastStackHandlers,
 ) -> Node {
-    presence.reconcile(&spec.toasts, ctx.motion_policy());
+    let change = presence.reconcile(&spec.toasts, ctx.motion_policy());
     let policy = ctx.motion_policy();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
@@ -545,6 +638,25 @@ pub fn toast_stack_with_presence(
     };
 
     let live_order: Vec<String> = spec.toasts.iter().map(|toast| toast.id.clone()).collect();
+    // Contract §6/§8a: a removed action hands focus on before its control
+    // unmounts — the row's dismiss while the row survives, else the surviving
+    // order's next, then previous, then the entered-from control. Only an
+    // action that still owns focus moves; a removal after focus has left is
+    // silent. The backend drops targets with no mounted handle.
+    for removed in &change.removed_actions {
+        if !toast_action_owns_focus(instance_id, &removed.id) {
+            continue;
+        }
+        if let Some(target) = toast_action_removal_focus_target(
+            &live_order,
+            instance_id,
+            &removed.id,
+            removed.row_survives,
+            poodle_node::previous_focused_id().as_deref(),
+        ) {
+            poodle_node::queue_focus_request(&target);
+        }
+    }
     let visuals = presence.visuals().to_vec();
     for visual in &visuals {
         let Some(toast) = presence.retained(&visual.id).cloned() else {
@@ -1209,7 +1321,11 @@ mod tests {
     fn presence_ledger_keeps_phase_on_same_id_replacement_and_reports_completion() {
         let mut presence = ToastStackPresence::new();
         let first = vec![Toast::new("save", "Saved")];
-        assert!(presence.reconcile(&first, MotionPolicy::Full));
+        assert!(
+            presence
+                .reconcile(&first, MotionPolicy::Full)
+                .visuals_changed
+        );
         assert_eq!(presence.phase("save"), Some(ToastVisualPhase::Settled));
 
         // Same-id replacement keeps the row and its phase: no fresh enter.
@@ -1413,6 +1529,73 @@ mod tests {
             node.find(&|node| node.runtime_id.as_deref() == Some("toast-host:presence:toast:x"))
                 .is_none(),
             "frozen drops the removed row with no remnant"
+        );
+    }
+
+    #[test]
+    fn reconcile_reports_removed_actions_once_with_row_survival() {
+        let mut presence = ToastStackPresence::new();
+        let with_action = vec![
+            Toast::new("a", "A").with_action_label("Retry"),
+            Toast::new("b", "B"),
+        ];
+        assert!(presence
+            .reconcile(&with_action, MotionPolicy::Full)
+            .removed_actions
+            .is_empty());
+
+        // A surviving row whose action label is dropped reports the live case.
+        let without = vec![Toast::new("a", "A"), Toast::new("b", "B")];
+        let change = presence.reconcile(&without, MotionPolicy::Full);
+        assert_eq!(
+            change.removed_actions,
+            vec![RemovedToastAction {
+                id: "a".into(),
+                row_survives: true,
+            }]
+        );
+        // It is the transition, not the state: the next reconcile is quiet,
+        // so an exit remnant never re-triggers the move.
+        assert!(presence
+            .reconcile(&without, MotionPolicy::Full)
+            .removed_actions
+            .is_empty());
+
+        // A row that leaves while still carrying an action reports the fallback.
+        let mut presence = ToastStackPresence::new();
+        presence.reconcile(&with_action, MotionPolicy::Full);
+        let only_b = vec![Toast::new("b", "B")];
+        let change = presence.reconcile(&only_b, MotionPolicy::Full);
+        assert_eq!(
+            change.removed_actions,
+            vec![RemovedToastAction {
+                id: "a".into(),
+                row_survives: false,
+            }]
+        );
+        assert!(presence
+            .reconcile(&only_b, MotionPolicy::Full)
+            .removed_actions
+            .is_empty());
+    }
+
+    #[test]
+    fn action_removal_target_prefers_row_dismiss_then_surviving_order() {
+        let order = vec!["a".to_owned(), "b".to_owned()];
+        assert_eq!(
+            toast_action_removal_focus_target(&order, Some("scope"), "a", true, Some("outside")),
+            Some("toast-host:scope:toast:a:dismiss".to_owned()),
+            "a surviving row hands its own dismiss control"
+        );
+        assert_eq!(
+            toast_action_removal_focus_target(&order, None, "a", false, Some("outside")),
+            Some("poodle-toast-dismiss-b".to_owned()),
+            "a removed row falls through to the next surviving row"
+        );
+        assert_eq!(
+            toast_action_removal_focus_target(&["a".to_owned()], None, "a", false, Some("outside")),
+            Some("outside".to_owned()),
+            "the last removed row restores the entered-from control"
         );
     }
 }
