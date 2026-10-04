@@ -1,33 +1,46 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Collapsible",
-  "test": "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",
+  "component": "SplitButton",
+  "test": "split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
+    "events",
     "pointer",
     "keyboard_focus",
-    "accessibility"
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
     ],
+    "events": [
+      "payloads.lock",
+      "assert_eq!(\n            action_payloads.lock().expect(\"keyboard payloads\").as_slice(),\n            [\"save-copy\", \"save-copy\"],\n            \"keyboard activation emits the focused item payload",
+      "assert_eq!(\n            action_payloads.lock().expect(\"action payloads\").as_slice(),\n            [\"save-copy\"],\n            \"item activation emits the exact committed payload"
+    ],
     "pointer": [
-      "pointer_activate"
+      "pointer_activate",
+      "pointer_press"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
       "focus_state_for",
-      "focus_element"
+      "focus_element",
+      "dispatch_key"
     ],
     "accessibility": [
-      "a11y\n                .",
+      "accessible",
       "NodeRole",
       "a11y."
+    ],
+    "visual": [
+      "resolve_opacity",
+      "resolve_color",
+      "dimensions"
     ]
   },
   "production_path_observation": {
@@ -35,7 +48,7 @@
     "mount": "HeadlessDriver",
     "driver": "HeadlessDriver::new_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::button",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -48,13 +61,15 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-089-first-proofs",
     "outcome": "passed",
-    "body_sha256": "9ac911e1a333e921adba597daac91cb4c294dc8490fec637b84e6e5cfc3cb56d"
+    "body_sha256": "ae747520bedc25435d05311af68352984da17664e62a6dd9dfd88c1b1dac196f"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
+    "asserted emitted payloads or handler delivery through mounted input",
     "drove real pointer activation through the mounted GPUI node backend",
     "drove real keyboard input or backend focus through the mounted tree",
-    "asserted node-level role, label, state, or focusability in the mounted tree"
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }
