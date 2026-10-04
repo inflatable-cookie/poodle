@@ -295,6 +295,9 @@ pub struct LogListSpec {
     /// Total row count; enables pagination when greater than `page_size`
     /// (Svelte `total`). `None` disables pagination.
     pub total: Option<usize>,
+    /// Accessible name (Svelte `ariaLabel`). `None` or empty falls back to
+    /// `"Log output"`.
+    pub aria_label: Option<String>,
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -322,10 +325,16 @@ impl LogListSpec {
             page: 1,
             page_size: 50,
             total: None,
+            aria_label: None,
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
         }
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
     }
 
     pub fn with_entries(mut self, entries: impl IntoIterator<Item = LogEntry>) -> Self {

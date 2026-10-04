@@ -40581,7 +40581,8 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
                         .with_option("login", "Login")
                         .with_option("logout", "Logout"),
                 )
-                .with_filter_value("action", "login"),
+                .with_filter_value("action", "login")
+                .with_aria_label("Application logs"),
             &theme_provider,
             "log-list-audit",
         )
@@ -40599,7 +40600,7 @@ fn gpui_mounted_log_list_stream_audit_and_clear_filters() {
         }))
         .into_compat_node();
         assert_eq!(audit.a11y.role, Some(NodeRole::Region));
-        assert_eq!(audit.a11y.label.as_deref(), Some("Log output"));
+        assert_eq!(audit.a11y.label.as_deref(), Some("Application logs"));
         assert!(audit.has_text("Alice Chen"));
         assert!(audit.has_text("user login"));
         assert!(audit.has_text("workspace \"Acme\""));

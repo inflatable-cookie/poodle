@@ -152,7 +152,13 @@ pub fn log_list(
     } else {
         NodeRole::Log
     });
-    el.a11y.label = Some("Log output".into());
+    el.a11y.label = Some(
+        spec.aria_label
+            .as_deref()
+            .filter(|value| !value.is_empty())
+            .unwrap_or("Log output")
+            .to_string(),
+    );
     let mut el = el;
 
     if is_audit {
@@ -725,6 +731,23 @@ mod tests {
         let node = log_list(&stream_spec(), &ctx, "log-list", LogListHandlers::default());
         assert_eq!(node.a11y.role, Some(NodeRole::Log));
         assert_eq!(node.a11y.label.as_deref(), Some("Log output"));
+    }
+
+    #[test]
+    fn accessible_name_uses_aria_label_and_falls_back_to_log_output() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let custom = log_list(
+            &stream_spec().with_aria_label("Application logs"),
+            &ctx,
+            "log-list",
+            LogListHandlers::default(),
+        );
+        assert_eq!(custom.a11y.label.as_deref(), Some("Application logs"));
+        let mut empty_spec = stream_spec();
+        empty_spec.aria_label = Some(String::new());
+        let empty = log_list(&empty_spec, &ctx, "log-list", LogListHandlers::default());
+        assert_eq!(empty.a11y.label.as_deref(), Some("Log output"));
     }
 
     #[test]
