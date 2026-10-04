@@ -12,11 +12,18 @@ pub struct CardRadioGroupSpec {
     pub density: Option<ControlDensity>,
     /// Grid column count for the card layout.
     pub columns: u8,
+    /// Accessible label for the `radiogroup` root (contract §3 `ariaLabel`).
+    pub aria_label: Option<String>,
 }
 
 impl CardRadioGroupSpec {
     pub fn with_columns(mut self, value: u8) -> Self {
         self.columns = value;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
         self
     }
 
@@ -30,6 +37,7 @@ impl CardRadioGroupSpec {
             size_role: SemanticControlSizeRole::Control,
             density: None,
             columns: 2,
+            aria_label: None,
         }
     }
 

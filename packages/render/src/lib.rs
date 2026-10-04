@@ -241,8 +241,12 @@ pub use bx::bx;
 pub use calendar::{calendar, CalendarHandlers};
 pub use callout::{callout, callout_dismiss_focus_id, CalloutHandlers, CALLOUT_DISMISS_ID};
 pub use card::card;
-pub use card_radio_group::card_radio_group;
-pub use card_toggle_group::card_toggle_group;
+pub use card_radio_group::{
+    card_radio_group, card_radio_group_with_handlers, CardRadioGroupHandlers,
+};
+pub use card_toggle_group::{
+    card_toggle_group, card_toggle_group_with_handlers, CardToggleGroupHandlers,
+};
 pub use changed_files::{changed_files, ChangedFilesHandlers};
 pub use checkbox::checkbox;
 pub use code::code;

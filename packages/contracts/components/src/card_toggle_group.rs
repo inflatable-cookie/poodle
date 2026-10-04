@@ -41,6 +41,10 @@ pub struct CardToggleGroupSpec {
     /// is a responsive auto-fit grid capped at this; the Rust targets render the options
     /// in rows of `column_count()` cards.
     pub columns: u32,
+    /// Selecting the active card clears the value to `null` (contract §3 default `false`).
+    pub allow_deactivation: bool,
+    /// Accessible label for the `group` root (contract §3 `ariaLabel`).
+    pub aria_label: Option<String>,
 }
 
 impl Default for CardToggleGroupSpec {
@@ -53,6 +57,8 @@ impl Default for CardToggleGroupSpec {
             size_role: SemanticControlSizeRole::Control,
             density: None,
             columns: 2,
+            allow_deactivation: false,
+            aria_label: None,
         }
     }
 }
@@ -96,6 +102,16 @@ impl CardToggleGroupSpec {
 
     pub fn with_columns(mut self, columns: u32) -> Self {
         self.columns = columns;
+        self
+    }
+
+    pub fn with_allow_deactivation(mut self, allow_deactivation: bool) -> Self {
+        self.allow_deactivation = allow_deactivation;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
         self
     }
 
