@@ -43065,7 +43065,18 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
                 let mut flag = self.dark_mode.lock().expect("dark lock");
                 *flag = !*flag;
             }
+            // Contract §4 / Svelte Menu ACTION: the selection emits, then
+            // the menu closes.
+            *self.open.lock().expect("open lock") = false;
             self.rebuild();
+        }
+
+        /// Reopen after an action closed the menu: no new invocation anchor,
+        /// the first enabled row takes focus like any open.
+        fn reopen(self: &Arc<Self>) {
+            *self.open.lock().expect("open lock") = true;
+            self.rebuild();
+            poodle_gpui_node_backend::request_focus(FIRST_ITEM);
         }
 
         /// Svelte document listeners: close on the dismiss-stack reason and
@@ -43311,11 +43322,22 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             ["copy"],
             "pointer activation emits the exact committed payload"
         );
+        sync(&mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
+            "item activation closes the menu"
+        );
+        host.reopen();
+        sync(&mut driver);
         driver.pointer_activate_id("menu-item:delete");
         assert_eq!(
             host.payloads.lock().expect("delete payloads").as_slice(),
             ["copy"],
             "disabled rows stay inert under pointer input"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(PANEL).is_some(),
+            "a disabled row never closes the menu"
         );
         driver.pointer_activate_id("menu-item:dark-mode");
         sync(&mut driver);
@@ -43323,6 +43345,12 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             host.payloads.lock().expect("toggle payloads").as_slice(),
             ["copy", "dark-mode"]
         );
+        assert!(
+            poodle_gpui_node_backend::bounds_for(PANEL).is_none(),
+            "a checkbox row closes the menu too"
+        );
+        host.reopen();
+        sync(&mut driver);
         assert_eq!(
             host.mounted
                 .lock()
@@ -43370,12 +43398,20 @@ fn context_menu_open_panel_semantics_activation_and_dismissal_through_mounted_ba
             ["copy", "dark-mode", "dark-mode"],
             "keyboard activation emits the focused row payload"
         );
+        sync(&mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for(PANEL).is_none());
+        host.reopen();
+        sync(&mut driver);
         driver.focus_element("menu-item:select-all");
         driver.dispatch_key_raw("enter");
         assert_eq!(
             host.payloads.lock().expect("enter payloads").as_slice(),
             ["copy", "dark-mode", "dark-mode", "select-all"]
         );
+        sync(&mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for(PANEL).is_none());
+        host.reopen();
+        sync(&mut driver);
 
         // ── Escape dismissal closes through the event; focus is not restored ──
         driver.dispatch_key("escape");

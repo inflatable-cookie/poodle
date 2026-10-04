@@ -77,6 +77,16 @@ export const AXIS_TEST_SIGNALS: Record<CensusAxis, RegExp[]> = {
   visual: [/rem_to_px|resolve_color|resolve_space|resolve_opacity|resolve_radius|_geometry|Geometry|computed_rect|dimensions/i],
 };
 
+/** Axes whose test signals are present but whose claim the live component does
+ * not yet earn. Each entry is a recorded refusal with its reason, never a
+ * silent skip; remove the entry when the gap closes. */
+export const WITHHELD_AXES: Record<string, Partial<Record<CensusAxis, string>>> = {
+  NavigationMenu: {
+    accessibility:
+      "the contract requires a named <nav> landmark, and the node vocabulary has no navigation NodeRole yet; the mounted tree exposes only a roleless labelled container",
+  },
+};
+
 const RECEIPT_TEXT_SIGNALS: Record<Exclude<CensusAxis, "semantic">, RegExp> = {
   events: /emit|callback|payload|change|commit|toggle|dismiss|select/i,
   pointer: /pointer|mouse|click|press/i,
@@ -842,8 +852,15 @@ export function generateCensus(root = ROOT): { doc: CensusDoc; receipts: Array<{
         refusals.push(`Expected test ${test} bypasses the mounted GPUI node backend; it admits nothing.`);
         continue;
       }
-      const axes = admission.axes.filter((axis) => entry.required.includes(axis));
+      const withheld = WITHHELD_AXES[component.name] ?? {};
+      const axes = admission.axes.filter((axis) => entry.required.includes(axis) && withheld[axis] === undefined);
       const skipped = admission.axes.filter((axis) => !entry.required.includes(axis));
+      for (const axis of admission.axes) {
+        const reason = withheld[axis];
+        if (reason !== undefined && entry.required.includes(axis)) {
+          refusals.push(`Expected test ${test} shows ${axis} signals, but ${axis} is withheld: ${reason}.`);
+        }
+      }
       for (const axis of skipped) {
         refusals.push(`Expected test ${test} shows ${axis} signals the contract does not require; not admitted.`);
       }
