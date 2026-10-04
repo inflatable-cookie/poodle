@@ -174,11 +174,7 @@
         "ListContainer",
         "LogList",
         "ModelConnectionPicker",
-        "NavCard",
         "Pagination",
-        "PaginationSummary",
-        "Pill",
-        "SelectionSummary",
         "Table",
         "TimeInput",
         "TimeZoneSelect",
@@ -186,12 +182,12 @@
         "TriStateSwitch"
       ],
       "missingTally": {
-        "semantic": 10,
-        "events": 12,
-        "pointer": 14,
-        "keyboard_focus": 9,
-        "accessibility": 16,
-        "visual": 19
+        "semantic": 6,
+        "events": 9,
+        "pointer": 11,
+        "keyboard_focus": 6,
+        "accessibility": 12,
+        "visual": 15
       },
       "contracts": [
         "docs/contracts/components/audio-player.md",
@@ -203,11 +199,7 @@
         "docs/contracts/components/list-container.md",
         "docs/contracts/components/log-list.md",
         "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/nav-card.md",
-        "docs/contracts/components/pagination-summary.md",
         "docs/contracts/components/pagination.md",
-        "docs/contracts/components/pill.md",
-        "docs/contracts/components/selection-summary.md",
         "docs/contracts/components/table.md",
         "docs/contracts/components/time-input.md",
         "docs/contracts/components/time-zone-select.md",

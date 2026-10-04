@@ -1,8 +1,8 @@
 {
   "schema": "poodle.g18-expected-test-execution.v1",
   "command": "effigy regressions:native",
-  "run_id": "2026-10-04-poodle-077-merge-main-5403339529",
-  "source_commit": "117667491406b116b1ea9a230ddfe61262861713",
+  "run_id": "2026-10-04-poodle-081-86f292405",
+  "source_commit": "86f29240524c2cf1ab636725e28780e779c8f10c",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "results": {
@@ -84,7 +84,7 @@
     },
     "sidebar_nav_item_context_menu_opens_by_pointer_and_keyboard_and_restores_focus": {
       "outcome": "passed",
-      "body_sha256": "32e7e4f95d45c22cdd0421801ea287a1db245a50e5bfb3ebe3e143adc9a7226e"
+      "body_sha256": "a8e2a45dbc37196db78efa27397ba4dde7afb86c49aa209227b04343f5909f58"
     },
     "editable_list_substrate_reorder_rebuilds_the_host_spec": {
       "outcome": "passed",
@@ -293,6 +293,22 @@
     "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring": {
       "outcome": "passed",
       "body_sha256": "0ad74cd9b88f6082c557ab6cde35741f44a63bc5380eb462a3f6335005690878"
+    },
+    "gpui_mounted_pill_dismiss_actions_are_instance_scoped_and_retain_focus_after_rebuild": {
+      "outcome": "passed",
+      "body_sha256": "eabe14195bce9cfcea742f279b82808b6f0f44967f2feaa40d746a4a18b573e9"
+    },
+    "gpui_mounted_pagination_summary_range_live_name_and_geometry": {
+      "outcome": "passed",
+      "body_sha256": "308fed12ac49d9f8ad8248aa079ace7b95b65d91702cf04ccbc68263c3a48ac4"
+    },
+    "gpui_mounted_selection_summary_split_actions_and_accessible_names": {
+      "outcome": "passed",
+      "body_sha256": "82767173c100c0f9cc91a7e646136254985a4ad82559c8419ae7456b620330b1"
+    },
+    "gpui_mounted_nav_card_link_button_actions_and_accessibility": {
+      "outcome": "passed",
+      "body_sha256": "9c52da22e013cc56f2c3ceb1848afede073c716e20f766eafe85bd6d4b31849e"
     }
   }
 }
