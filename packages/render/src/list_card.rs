@@ -496,8 +496,12 @@ pub fn list_card(
         el.style.descriptor.cursor = CursorHint::NotAllowed;
     }
 
-    // Interactive: hover background + border, pointer + focusable.
-    let interactive = (spec.is_interactive || spec.href.is_some()) && !spec.is_disabled;
+    // Interactive: hover background + border, pointer + focusable. A
+    // selectable card is interactive even without `is_interactive` (the web
+    // `isInteractive` is `href || interactive || selectable`), because
+    // selection toggles through the root interaction contract.
+    let interactive =
+        (spec.is_interactive || spec.href.is_some() || spec.is_selectable) && !spec.is_disabled;
     if interactive {
         let s = &mut el.style;
         s.descriptor.cursor = CursorHint::Pointer;

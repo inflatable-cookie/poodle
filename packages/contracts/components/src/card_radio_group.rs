@@ -60,6 +60,11 @@ impl CardRadioGroupSpec {
         self.value.as_deref().or(self.default_value.as_deref())
     }
 
+    /// Column count clamped to the contract's 1–4 range (default 2).
+    pub fn column_count(&self) -> usize {
+        self.columns.clamp(1, 4) as usize
+    }
+
     pub fn selected_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_ELEVATED
     }

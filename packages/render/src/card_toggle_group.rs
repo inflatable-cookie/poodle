@@ -268,7 +268,13 @@ pub fn card_toggle_group_with_handlers(
         let mut body_slot = Node::container();
         body_slot.style.descriptor.layout.direction = LayoutDirection::Row;
         body_slot.style.flex_grow = Some(1.0);
-        let option_card = card(&card_spec, ctx, vec![body_slot.child(body)]);
+        // The option cell owns the button semantics. The composed Card is a
+        // surface child (Svelte's interactive Card is a plain div), so clear
+        // the inner button role and label: the option exposes exactly one
+        // Button, named by the option title.
+        let mut option_card = card(&card_spec, ctx, vec![body_slot.child(body)]);
+        option_card.a11y.role = None;
+        option_card.a11y.label = None;
 
         // Wrap each Card so it can grow within the grid. The cell is the
         // focusable activation target; a disabled option dims and shows the
@@ -278,7 +284,9 @@ pub fn card_toggle_group_with_handlers(
         option_el.runtime_id = Some(option_focus_id(instance_scope, &option.value));
         option_el.a11y.role = Some(NodeRole::Button);
         option_el.a11y.label = Some(option.title.clone());
-        option_el.a11y.selected = Some(is_selected);
+        // aria-pressed, not aria-selected: the option is a toggle button, the
+        // same projection ToggleGroup and SegmentedControl use.
+        option_el.a11y.selected = None;
         option_el.a11y.toggled = Some(if is_selected {
             NodeToggled::True
         } else {
@@ -350,10 +358,10 @@ pub fn card_toggle_group_with_handlers(
         remaining -= take;
     }
 
-    if spec.disabled {
-        root.style.descriptor.opacity = disabled_opacity;
-    }
-
+    // Group-level disabled reaches every option through `is_option_disabled`;
+    // each option dims once there. The root itself never dims (the web
+    // contract has no group opacity rule), so a disabled group is not dimmed
+    // twice.
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
             root.a11y.label = Some(label.to_string());
@@ -484,18 +492,15 @@ mod tests {
         let spec = CardToggleGroupSpec::new(options()).with_values(vec!["alpha".to_string()]);
         let node = card_toggle_group(&spec, &ctx, None);
 
-        // Each card is labelled with its option title; selection owns the
-        // border through the composed Card primitive.
+        // Selection owns the border through the composed Card primitive; the
+        // option cell (not the card) carries the accessible name.
         let alpha_card = node
-            .find(&|n| {
-                n.a11y.label.as_deref() == Some("Alpha") && n.style.descriptor.border.width > 0.0
-            })
+            .find(&|n| n.has_text("Alpha") && n.style.descriptor.border.width > 0.0)
             .expect("alpha card");
         assert_eq!(alpha_card.style.descriptor.border.color, accent);
+        assert_eq!(alpha_card.a11y.label, None);
         let beta_card = node
-            .find(&|n| {
-                n.a11y.label.as_deref() == Some("Beta") && n.style.descriptor.border.width > 0.0
-            })
+            .find(&|n| n.has_text("Beta") && n.style.descriptor.border.width > 0.0)
             .expect("beta card");
         assert_ne!(beta_card.style.descriptor.border.color, accent);
     }
@@ -517,7 +522,7 @@ mod tests {
             .expect("alpha cell");
         assert_eq!(alpha.a11y.role, Some(NodeRole::Button));
         assert_eq!(alpha.a11y.label.as_deref(), Some("Alpha"));
-        assert_eq!(alpha.a11y.selected, Some(true));
+        assert_eq!(alpha.a11y.selected, None);
         assert_eq!(alpha.a11y.toggled, Some(NodeToggled::True));
         assert_eq!(
             alpha.runtime_id.as_deref(),
@@ -627,16 +632,21 @@ mod tests {
     }
 
     #[test]
-    fn a_disabled_group_dims_the_root_and_wires_nothing() {
+    fn a_disabled_group_dims_each_option_once_and_wires_nothing() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
         let spec = CardToggleGroupSpec::new(options()).with_disabled(true);
         let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: Option<&str>| {})));
-        assert_eq!(node.style.descriptor.opacity, disabled_opacity);
-        assert!(cells(&node)
+        // The web contract dims the option, never the root; a root that dimmed
+        // too would double-dim the group.
+        assert_eq!(node.style.descriptor.opacity, 1.0);
+        let cells = cells(&node);
+        assert_eq!(cells.len(), 3);
+        assert!(cells
             .iter()
-            .all(|c| c.interaction.on_activate.is_none()));
+            .all(|c| c.style.descriptor.opacity == disabled_opacity));
+        assert!(cells.iter().all(|c| c.interaction.on_activate.is_none()));
     }
 
     #[test]

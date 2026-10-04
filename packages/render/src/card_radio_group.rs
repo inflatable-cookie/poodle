@@ -60,6 +60,20 @@ fn option_focus_id(instance_scope: &str, value: &str) -> String {
     format!("card-radio:{instance_scope}:option:{value}")
 }
 
+/// A flex-growing grid cell. The card shares the row equally before intrinsic
+/// labels can claim width (the web grid's `1fr`), and the zero minimum permits
+/// descriptions to wrap.
+fn flex1_cell() -> Node {
+    let mut n = Node::container();
+    let s = &mut n.style;
+    // Explicit Row (see switch.rs).
+    s.descriptor.layout.direction = LayoutDirection::Row;
+    s.flex_grow = Some(1.0);
+    s.flex_basis = Some(0.0);
+    s.min_width = Some(0.0);
+    n
+}
+
 /// Enabled option values in authored order — the roving order.
 fn roving_values(spec: &CardRadioGroupSpec) -> Vec<String> {
     spec.options
@@ -187,16 +201,11 @@ pub fn card_radio_group_with_handlers(
     let roving = roving_values(spec);
     let tab_stop = tab_stop_value(spec, &roving);
 
-    // Root: wrapping grid container.
-    let mut root = Node::container();
-    {
-        let s = &mut root.style;
-        s.descriptor.layout.direction = LayoutDirection::Row;
-        s.descriptor.layout.width = LayoutSizing::Grow;
-        s.fill_width = true;
-        s.flex_wrap = true;
-        s.descriptor.layout.spacing.gap = grid_gap;
-    }
+    // Root grid: options lay out in rows of `column_count()` cells (contract
+    // §7 `repeat(var(--columns), 1fr)`); a short final row is padded with flex
+    // spacers so card widths stay aligned across rows.
+    let cols = spec.column_count();
+    let mut cells: Vec<Node> = Vec::new();
 
     for option in &spec.options {
         let is_selected = current_value == Some(option.value.as_str());
@@ -304,13 +313,12 @@ pub fn card_radio_group_with_handlers(
                 .unwrap_or_else(|| option.label.clone()),
         );
         option_card.style.descriptor.layout.width = LayoutSizing::Grow;
-        // Match the old GPUI option wrapper's `flex_1().min_w(0)`: a zero
-        // basis makes every radio cell share the row before intrinsic labels
-        // can claim width, and the zero minimum permits descriptions to wrap.
-        option_card.style.flex_basis = Some(0.0);
-        option_card.style.min_width = Some(0.0);
 
         if is_item_disabled {
+            // Group-level disabled reaches every option through
+            // `is_item_disabled`; the option dims once here. The root itself
+            // never dims (the web contract has no group opacity rule), so a
+            // disabled group is not dimmed twice.
             option_card.style.descriptor.opacity = disabled_opacity;
             option_card.interaction.disabled = true;
             option_card.interaction.focusable = false;
@@ -337,11 +345,38 @@ pub fn card_radio_group_with_handlers(
             );
         }
 
-        root = root.child(option_card);
+        cells.push(flex1_cell().child(option_card));
     }
 
-    if spec.is_disabled {
-        root.style.descriptor.opacity = disabled_opacity;
+    // Assemble rows; pad a short final row with flex spacers.
+    let mut root = Node::container();
+    {
+        let s = &mut root.style;
+        s.descriptor.layout.direction = LayoutDirection::Column;
+        s.descriptor.layout.width = LayoutSizing::Grow;
+        s.fill_width = true;
+        s.descriptor.layout.spacing.gap = grid_gap;
+    }
+    let mut iter = cells.into_iter();
+    let mut remaining = spec.options.len();
+    while remaining > 0 {
+        let take = cols.min(remaining);
+        let mut row = Node::container();
+        {
+            let s = &mut row.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.spacing.gap = grid_gap;
+        }
+        for _ in 0..take {
+            if let Some(cell) = iter.next() {
+                row = row.child(cell);
+            }
+        }
+        for _ in take..cols {
+            row = row.child(flex1_cell());
+        }
+        root = root.child(row);
+        remaining -= take;
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
