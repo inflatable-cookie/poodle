@@ -116,7 +116,7 @@
   ],
   "$defs": {
     "accessibility": {
-      "description": "g16.111 A1: the paired GPUI node-tree / Svelte DOM accessibility snapshot record. Both snapshots are committed artifacts (also listed in artifact_paths); the diff is empty for a pass after applying scenario-declared role remaps; every web-only exclusion is named with its reason.",
+      "description": "g16.111 A1: the paired GPUI node-tree / Svelte DOM accessibility snapshot record. Both snapshots are committed artifacts (also listed in artifact_paths); the diff is empty for a pass; every web-only exclusion is named with its reason.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -144,21 +144,6 @@
             "required": ["attribute", "reason"],
             "properties": {
               "attribute": { "type": "string", "minLength": 1 },
-              "reason": { "type": "string", "minLength": 1 }
-            }
-          }
-        },
-        "roleRemaps": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["index", "field", "gpui", "svelte", "reason"],
-            "properties": {
-              "index": { "type": "integer", "minimum": 0 },
-              "field": { "type": "string", "minLength": 1 },
-              "gpui": true,
-              "svelte": true,
               "reason": { "type": "string", "minLength": 1 }
             }
           }
