@@ -127,6 +127,14 @@ pub fn dock_region(
     let is_side_edge = matches!(spec.edge, DockEdge::Left | DockEdge::Right);
     let is_tabs_on_edge = spec.tabs_placement == DockTabsPlacement::Edge && is_side_edge;
     let active = spec.current_value().map(|s| s.to_string());
+    // Svelte names the region `ariaLabel ?? "{edge} dock"`; an unnamed
+    // region keeps the edge default so collapsed postures never lose their
+    // accessible name either.
+    let region_label = spec
+        .aria_label
+        .clone()
+        .filter(|label| !label.is_empty())
+        .unwrap_or_else(|| format!("{edge_name} dock"));
 
     // ── Root emphasis treatment ────────────────────────────────
     // Standard: panel fill + subtle border. Quiet: transparent. Strong: accent
@@ -578,6 +586,7 @@ pub fn dock_region(
         if spec.can_accept_panel {
             stack = stack.child(drop_zone());
         }
+        stack.a11y.label = Some(region_label.clone());
         return stack;
     }
 
@@ -594,8 +603,11 @@ pub fn dock_region(
             let mut toggle = build_toggle(false);
             toggle.style.descriptor.layout.spacing.padding.top = space_y;
             toggle.style.descriptor.layout.spacing.padding.bottom = space_y;
-            return region.child(toggle);
+            let mut region = region.child(toggle);
+            region.a11y.label = Some(region_label.clone());
+            return region;
         }
+        region.a11y.label = Some(region_label.clone());
         return region;
     }
 
@@ -630,6 +642,7 @@ pub fn dock_region(
                     ));
                 }
             }
+            strip.a11y.label = Some(region_label.clone());
             return strip;
         } else {
             // Horizontal compact icon strip: icon-only tabs + toggle, no body.
@@ -663,6 +676,7 @@ pub fn dock_region(
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(false));
             }
+            strip.a11y.label = Some(region_label.clone());
             return strip;
         }
     }
@@ -875,11 +889,7 @@ pub fn dock_region(
         el.interaction.drop_target = Some(target);
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
+    el.a11y.label = Some(region_label.clone());
     el
 }
 
