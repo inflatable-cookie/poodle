@@ -403,7 +403,10 @@ pub fn toast_stack(
             // previous row's, else the still-connected entered-from control
             // (the backend drops targets with no mounted handle). Only when
             // the dismissed row owns focus — activation arrives through its
-            // own control, and anything else keeps its focus.
+            // own control, and anything else keeps its focus. Known edge:
+            // chained removals without re-entry can leave a dead inside id
+            // as the transit source; the backend drop then clears focus,
+            // which the contract reads as no connected entry existing.
             let order: Vec<String> = spec.toasts.iter().map(|toast| toast.id.clone()).collect();
             let instance = instance_id.map(str::to_owned);
             dismiss.interaction.on_activate = Some(Arc::new(move || {

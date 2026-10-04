@@ -45588,8 +45588,9 @@ fn first_mounted_parity_history_center() {
 /// callback; same-id replacement settles the row without a fresh enter;
 /// host timers expire rows through the headless clock while danger stays
 /// sticky; manual dismissal transfers focus through renderer-owned order
-/// (next, previous, entered-from) while timer expiry drops it; and the last
-/// row's removal restores the entered-from control. Svelte parity authority:
+/// (next, previous-mounted, entered-from) while timer expiry drops it; and
+/// late rows enter with settled semantics, leave hit testing on removal, and
+/// remount clean under a reused key. Svelte parity authority:
 /// `packages/svelte/components/src/ToastStack.svelte` (list stack with polite
 /// posture; per-toast polite/assertive regions; dismiss `Dismiss {title}`;
 /// secondary action Button; keyed rows that settle in place; host timer
@@ -45635,9 +45636,10 @@ fn first_mounted_parity_toast_stack() {
     let fail = witness
         .find(&|node| node.id.as_deref() == Some("poodle-toast-fail"))
         .expect("danger toast row");
-    // Svelte is the parity authority and renders every row as a list item;
-    // the contract's native Alert projection for danger awaits A1-framework
-    // adjudication (reported) and stays unasserted here.
+    // Svelte is the parity authority and renders every row as a list item,
+    // matching the aligned contract: danger included, all rows project
+    // ListItem and assertiveness travels through reachability, not a
+    // remapped role.
     assert_eq!(fail.a11y.role, Some(NodeRole::ListItem));
     assert_eq!(fail.roles.get("tone").map(String::as_str), Some("danger"));
     let info_accent = save
@@ -45775,8 +45777,8 @@ fn first_mounted_parity_toast_stack() {
         let painted_fail =
             poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:fail")
                 .expect("danger row reached GPUI paint");
-        // Svelte parity authority renders every row as a list item; see the
-        // witness note on the contract's Alert aspiration.
+        // Svelte parity authority renders every row as a list item, matching
+        // the aligned contract (see the witness note).
         assert_eq!(painted_fail.a11y_role, Some(NodeRole::ListItem));
         assert_eq!(
             poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save")
@@ -45951,22 +45953,76 @@ fn first_mounted_parity_toast_stack() {
             "the last removal restores the entered-from control"
         );
 
-        // Late enter: a toast added to the empty stack mounts its row, and
-        // its own dismissal restores the entered-from control by pointer too.
+        // Late enter: a toast added to the empty stack mounts its row
+        // immediately with full semantics and no enter motion — presence
+        // joins ownership at once.
         host.lock()
             .expect("toast host")
             .toasts
             .push(Toast::new("late", "Almost done").with_message("One more step."));
+        poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
         assert!(
             poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_some(),
             "the late toast enters the mounted stack"
         );
+        let painted_late =
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:late:dismiss")
+                .expect("late dismiss reached GPUI paint");
+        assert_eq!(painted_late.a11y_role, Some(NodeRole::Button));
+        assert_eq!(
+            painted_late.a11y_label.as_deref(),
+            Some("Dismiss Almost done")
+        );
+        assert!(
+            !poodle_gpui_node_backend::take_probe_capture()
+                .contains(&"surface.animation.scheduled"),
+            "entering rows paint settled with no enter motion"
+        );
+
+        // Previous-row fallback through mounted dismissal: with two rows up,
+        // removing the focused last row lands focus on the previous row's
+        // dismiss — the transfer's middle branch, not just next and entry.
+        host.lock()
+            .expect("toast host")
+            .toasts
+            .push(Toast::new("later", "One more").with_message("Still going."));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:later").is_some(),
+            "the second late toast enters behind the first"
+        );
+        driver.focus_element("toast-host:proof:toast:later:dismiss");
+        driver.pointer_activate_id("toast-host:proof:toast:later:dismiss");
+        assert_eq!(
+            host.lock().expect("toast host").dismisses.as_slice(),
+            ["dismiss:save", "dismiss:fail", "dismiss:later"],
+            "later dismiss callback payload names the toast"
+        );
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:later").is_none(),
+            "the later row unmounts"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:late:dismiss"),
+            Some(true),
+            "focus falls back to the previous surviving row's dismiss control"
+        );
+
+        // Single-row pointer removal restores the entered-from control:
+        // re-enter from outside first so the transit is exact.
+        driver.focus_element("outside-button");
         driver.focus_element("toast-host:proof:toast:late:dismiss");
         driver.pointer_activate_id("toast-host:proof:toast:late:dismiss");
         assert_eq!(
             host.lock().expect("toast host").dismisses.as_slice(),
-            ["dismiss:save", "dismiss:fail", "dismiss:late"],
+            [
+                "dismiss:save",
+                "dismiss:fail",
+                "dismiss:later",
+                "dismiss:late"
+            ],
             "late dismiss callback payload names the toast"
         );
         driver.draw_frame();
@@ -45978,6 +46034,46 @@ fn first_mounted_parity_toast_stack() {
             poodle_gpui_node_backend::focus_state_for("outside-button"),
             Some(true),
             "pointer removal restores the entered-from control as well"
+        );
+
+        // Exit cleanup: the removed row leaves hit testing entirely, and a
+        // reused key mounts the new semantic item fresh with its new copy.
+        assert!(
+            driver
+                .activation_target("toast-host:proof:toast:late")
+                .is_err(),
+            "the removed row is excluded from hit testing"
+        );
+        host.lock()
+            .expect("toast host")
+            .toasts
+            .push(Toast::new("late", "Almost done v2").with_message("Again."));
+        // Restart the probe window the enter-motion take closed.
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_some(),
+            "the reused key remounts its row"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:late:dismiss")
+                .expect("reused-key dismiss repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Dismiss Almost done v2"),
+            "a reused key mounts the new semantic item with its new copy"
+        );
+        driver.focus_element("toast-host:proof:toast:late:dismiss");
+        driver.pointer_activate_id("toast-host:proof:toast:late:dismiss");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:late").is_none(),
+            "the reused row unmounts"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("outside-button"),
+            Some(true),
+            "the reused row's removal restores the entered-from control"
         );
         assert!(theme_provider.resolve_color("color.status.danger").3 > 0.0);
         assert!(rem_to_px(1.25) > 0.0);

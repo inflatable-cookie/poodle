@@ -143,11 +143,13 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
   surviving row, then the previous row, then the still-connected element from
   which focus entered the stack. If focus has already left that action,
   removing it must not move focus.
-- GPUI-native accessibility mapping notes: native danger rows project
-  `NodeRole::Alert`; other native rows stay `ListItem`. That metadata is not a
-  GPUI assistive-technology parity claim. GPUI must still preserve transient
-  notification meaning and dismiss/action reachability even where there is no
-  web-style live region.
+- GPUI-native accessibility mapping notes: every toast row, danger included,
+  projects `NodeRole::ListItem`, matching Svelte's `<li>` per toast — Svelte
+  is the parity authority. An `Alert` projection for danger was considered
+  and rejected: the cross-runtime A1 comparison requires strict role
+  equality with Svelte, and GPUI must still preserve transient notification
+  meaning and dismiss/action reachability even where there is no web-style
+  live region.
 
 ## 7. Layout
 
@@ -373,8 +375,8 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - expected crate/module surface: `poodle_gpui::composites::toast_stack`
 - spec struct: `ToastStackSpec` with items, size, density
 - tone-based accent bar may use platform-specific drawing
-- danger toasts set `NodeRole::Alert`; other toasts stay `ListItem`. This is
-  renderer-role metadata, not GPUI assistive-technology proof.
+- every toast row, danger included, stays `ListItem`, matching Svelte.
+  This is renderer-role metadata, not GPUI assistive-technology proof.
 
 ## 10a. Jetstream Notes
 
@@ -392,7 +394,7 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - [ ] aria-live escalation for danger tone matches
 - [ ] dismiss button aria-label includes toast title
 - [ ] same-id field replacement keeps row and phase
-- [ ] native danger role is `Alert`; non-danger stays `ListItem`
+- [ ] every row projects `ListItem` like Svelte's `li`, danger included
 
 ### Tier 2: Visual Parity
 
