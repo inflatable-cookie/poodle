@@ -175,6 +175,7 @@ pub fn time_input_with_handlers(
             }
         }
 
+        seg.interaction.disabled = spec.is_disabled;
         if !spec.is_disabled {
             seg.interaction.focusable = true;
             let dispatch_keys = Arc::clone(&dispatch);

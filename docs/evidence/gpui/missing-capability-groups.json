@@ -163,59 +163,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "CodeInput",
-        "CollapseToggle",
-        "DurationInput",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "NavCard",
-        "Pagination",
-        "PaginationSummary",
-        "Pill",
-        "SelectionSummary",
-        "Table",
-        "TimeInput",
-        "TimeZoneSelect",
-        "ToolCallGroup",
-        "TriStateSwitch"
-      ],
-      "missingTally": {
-        "semantic": 10,
-        "events": 12,
-        "pointer": 14,
-        "keyboard_focus": 9,
-        "accessibility": 16,
-        "visual": 19
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/code-input.md",
-        "docs/contracts/components/collapse-toggle.md",
-        "docs/contracts/components/duration-input.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/nav-card.md",
-        "docs/contracts/components/pagination-summary.md",
-        "docs/contracts/components/pagination.md",
-        "docs/contracts/components/pill.md",
-        "docs/contracts/components/selection-summary.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-input.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/tool-call-group.md",
-        "docs/contracts/components/tri-state-switch.md"
-      ]
-    },
-    {
       "substrate": "drag-resize-reorder",
       "components": [
         "AppHeader",
@@ -258,6 +205,47 @@
         "docs/contracts/components/separator.md",
         "docs/contracts/components/split-view.md",
         "docs/contracts/components/token-input.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ChangedFiles",
+        "ListContainer",
+        "LogList",
+        "ModelConnectionPicker",
+        "NavCard",
+        "PaginationSummary",
+        "Pill",
+        "SelectionSummary",
+        "Table",
+        "TimeZoneSelect",
+        "ToolCallGroup"
+      ],
+      "missingTally": {
+        "semantic": 10,
+        "events": 11,
+        "pointer": 12,
+        "keyboard_focus": 9,
+        "accessibility": 13,
+        "visual": 13
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/model-connection-picker.md",
+        "docs/contracts/components/nav-card.md",
+        "docs/contracts/components/pagination-summary.md",
+        "docs/contracts/components/pill.md",
+        "docs/contracts/components/selection-summary.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/tool-call-group.md"
       ]
     },
     {

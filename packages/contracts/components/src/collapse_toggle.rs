@@ -189,9 +189,9 @@ impl CollapseToggleSpec {
         self.effective_icon_size(size).size_token()
     }
 
-    /// Radius for the toggle button (small, like the Svelte radius-sm).
+    /// Small primitive radius used by the Svelte toggle button.
     pub fn radius_token(&self) -> &'static str {
-        semantic::RADIUS_CONTROL
+        poodle_tokens::primitives::RADIUS_SM
     }
 
     /// Icon/text color (muted when idle).

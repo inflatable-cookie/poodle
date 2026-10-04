@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "117667491406b116b1ea9a230ddfe61262861713",
+  "source_commit": "c01b5010f5c41f64107641c92a30e9a3e28b031b",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -775,6 +775,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard"
+        },
+        {
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard"
@@ -788,12 +793,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard"
         }
       ],
-      "missing": [
-        "events",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -805,10 +812,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/CollapseToggle--collapse-toggle-disclosure-focus-and-disabled-through-mounted-pointer-and-keyboard.json"
       ],
-      "refusals": [
-        "Expected test collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard proves no events claim; events stays missing.",
-        "Expected test collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Collapsible",
@@ -1179,16 +1183,27 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#duration_input_segments_edit_and_rebuild_the_host_spec"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#duration_input_segments_edit_and_rebuild_the_host_spec"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#duration_input_segments_edit_and_rebuild_the_host_spec"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#duration_input_segments_edit_and_rebuild_the_host_spec"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#duration_input_segments_edit_and_rebuild_the_host_spec"
         }
       ],
-      "missing": [
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -1200,11 +1215,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/DurationInput--duration-input-segments-edit-and-rebuild-the-host-spec.json"
       ],
-      "refusals": [
-        "Expected test duration_input_segments_edit_and_rebuild_the_host_spec proves no pointer claim; pointer stays missing.",
-        "Expected test duration_input_segments_edit_and_rebuild_the_host_spec proves no accessibility claim; accessibility stays missing.",
-        "Expected test duration_input_segments_edit_and_rebuild_the_host_spec proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "EditableLabel",
@@ -2196,12 +2207,19 @@
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_grouped_code_input_types_and_completes_through_the_real_tree"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_grouped_code_input_types_and_completes_through_the_real_tree"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#a_grouped_code_input_types_and_completes_through_the_real_tree"
         }
       ],
-      "missing": [
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2213,10 +2231,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/CodeInput--a-grouped-code-input-types-and-completes-through-the-real-tree.json"
       ],
-      "refusals": [
-        "Expected test a_grouped_code_input_types_and_completes_through_the_real_tree proves no accessibility claim; accessibility stays missing.",
-        "Expected test a_grouped_code_input_types_and_completes_through_the_real_tree proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Popover",
@@ -2315,11 +2330,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2331,9 +2349,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/Pagination--pagination-navigation-limit-and-loading-through-mounted-pointer-and-keyboard.json"
       ],
-      "refusals": [
-        "Expected test pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "PaginationSummary",
@@ -4035,16 +4051,27 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#time_input_segmented_editor_commits_drafts_and_bounds"
         },
         {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#time_input_segmented_editor_commits_drafts_and_bounds"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#time_input_segmented_editor_commits_drafts_and_bounds"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#time_input_segmented_editor_commits_drafts_and_bounds"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#time_input_segmented_editor_commits_drafts_and_bounds"
         }
       ],
-      "missing": [
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4056,11 +4083,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/TimeInput--time-input-segmented-editor-commits-drafts-and-bounds.json"
       ],
-      "refusals": [
-        "Expected test time_input_segmented_editor_commits_drafts_and_bounds proves no pointer claim; pointer stays missing.",
-        "Expected test time_input_segmented_editor_commits_drafts_and_bounds proves no accessibility claim; accessibility stays missing.",
-        "Expected test time_input_segmented_editor_commits_drafts_and_bounds proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "TimeZoneSelect",
@@ -4297,11 +4320,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#tri_state_switch_value_focus_identity_and_disabled_paths"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#tri_state_switch_value_focus_identity_and_disabled_paths"
         }
       ],
-      "missing": [
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4313,9 +4339,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/TriStateSwitch--tri-state-switch-value-focus-identity-and-disabled-paths.json"
       ],
-      "refusals": [
-        "Expected test tri_state_switch_value_focus_identity_and_disabled_paths proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "Menubar",
@@ -7586,17 +7610,17 @@
   ],
   "summary": {
     "admittedRows": 74,
-    "fullyAdmittedRows": 30,
+    "fullyAdmittedRows": 36,
     "missingTally": {
       "semantic": 101,
-      "events": 98,
-      "pointer": 110,
+      "events": 97,
+      "pointer": 108,
       "keyboard_focus": 95,
-      "accessibility": 120,
-      "visual": 139
+      "accessibility": 117,
+      "visual": 133
     },
     "holdCount": 175,
-    "refusalCount": 225
+    "refusalCount": 213
   },
   "groups": [
     {
@@ -7760,59 +7784,6 @@
       ]
     },
     {
-      "substrate": "selection-navigation",
-      "components": [
-        "AudioPlayer",
-        "BulkActionBar",
-        "ChangedFiles",
-        "CodeInput",
-        "CollapseToggle",
-        "DurationInput",
-        "ListContainer",
-        "LogList",
-        "ModelConnectionPicker",
-        "NavCard",
-        "Pagination",
-        "PaginationSummary",
-        "Pill",
-        "SelectionSummary",
-        "Table",
-        "TimeInput",
-        "TimeZoneSelect",
-        "ToolCallGroup",
-        "TriStateSwitch"
-      ],
-      "missingTally": {
-        "semantic": 10,
-        "events": 12,
-        "pointer": 14,
-        "keyboard_focus": 9,
-        "accessibility": 16,
-        "visual": 19
-      },
-      "contracts": [
-        "docs/contracts/components/audio-player.md",
-        "docs/contracts/components/bulk-action-bar.md",
-        "docs/contracts/components/changed-files.md",
-        "docs/contracts/components/code-input.md",
-        "docs/contracts/components/collapse-toggle.md",
-        "docs/contracts/components/duration-input.md",
-        "docs/contracts/components/list-container.md",
-        "docs/contracts/components/log-list.md",
-        "docs/contracts/components/model-connection-picker.md",
-        "docs/contracts/components/nav-card.md",
-        "docs/contracts/components/pagination-summary.md",
-        "docs/contracts/components/pagination.md",
-        "docs/contracts/components/pill.md",
-        "docs/contracts/components/selection-summary.md",
-        "docs/contracts/components/table.md",
-        "docs/contracts/components/time-input.md",
-        "docs/contracts/components/time-zone-select.md",
-        "docs/contracts/components/tool-call-group.md",
-        "docs/contracts/components/tri-state-switch.md"
-      ]
-    },
-    {
       "substrate": "drag-resize-reorder",
       "components": [
         "AppHeader",
@@ -7855,6 +7826,47 @@
         "docs/contracts/components/separator.md",
         "docs/contracts/components/split-view.md",
         "docs/contracts/components/token-input.md"
+      ]
+    },
+    {
+      "substrate": "selection-navigation",
+      "components": [
+        "AudioPlayer",
+        "BulkActionBar",
+        "ChangedFiles",
+        "ListContainer",
+        "LogList",
+        "ModelConnectionPicker",
+        "NavCard",
+        "PaginationSummary",
+        "Pill",
+        "SelectionSummary",
+        "Table",
+        "TimeZoneSelect",
+        "ToolCallGroup"
+      ],
+      "missingTally": {
+        "semantic": 10,
+        "events": 11,
+        "pointer": 12,
+        "keyboard_focus": 9,
+        "accessibility": 13,
+        "visual": 13
+      },
+      "contracts": [
+        "docs/contracts/components/audio-player.md",
+        "docs/contracts/components/bulk-action-bar.md",
+        "docs/contracts/components/changed-files.md",
+        "docs/contracts/components/list-container.md",
+        "docs/contracts/components/log-list.md",
+        "docs/contracts/components/model-connection-picker.md",
+        "docs/contracts/components/nav-card.md",
+        "docs/contracts/components/pagination-summary.md",
+        "docs/contracts/components/pill.md",
+        "docs/contracts/components/selection-summary.md",
+        "docs/contracts/components/table.md",
+        "docs/contracts/components/time-zone-select.md",
+        "docs/contracts/components/tool-call-group.md"
       ]
     },
     {

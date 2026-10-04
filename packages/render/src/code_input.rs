@@ -9,8 +9,8 @@
 //! active-slot highlight, and the error label.
 
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, ShadowLayer,
-    TextAlign,
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+    ShadowLayer, TextAlign,
 };
 use poodle_specs::{CodeInputCompletion, CodeInputSpec, ControlDensity, ValidationState};
 
@@ -52,6 +52,12 @@ pub fn code_input_with_handlers(
     let density = ctx.resolve_density(spec.density);
     let validation = spec.effective_validation_state();
     let is_invalid = validation == ValidationState::Invalid;
+    let accessible_name = spec
+        .aria_label
+        .as_deref()
+        .filter(|label| !label.is_empty())
+        .unwrap_or(&spec.label)
+        .to_string();
 
     // ── Token resolution ──
     let surface = theme.resolve_color("color.background.surface");
@@ -97,7 +103,13 @@ pub fn code_input_with_handlers(
     row.style.descriptor.layout.direction = LayoutDirection::Row;
     row.style.descriptor.layout.spacing.gap = gap;
     row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    row.interaction.focusable = true;
+    row.a11y.role = Some(NodeRole::TextInput);
+    row.a11y.label = Some(accessible_name.clone());
+    if !spec.current_value().is_empty() {
+        row.a11y.value_text = Some(spec.current_value().to_owned());
+    }
+    row.interaction.disabled = spec.is_disabled;
+    row.interaction.focusable = !spec.is_disabled;
 
     // The old tier keeps the component label, slot row, and supporting copy
     // in one column. Keeping that wrapper is part of the visual contract.
@@ -315,11 +327,8 @@ pub fn code_input_with_handlers(
         outer.interaction.disabled = true;
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            outer.a11y.label = Some(label.to_string());
-        }
-    }
+    outer.a11y.role = Some(NodeRole::Group);
+    outer.a11y.label = Some(accessible_name);
     outer
 }
 
