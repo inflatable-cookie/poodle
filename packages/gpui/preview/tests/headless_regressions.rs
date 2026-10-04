@@ -12007,11 +12007,34 @@ fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
 
+        // ── Contract §8 semantics on the mounted projection ──
+        {
+            let nodes = driver.accessibility_nodes();
+            let root = nodes
+                .iter()
+                .find(|n| n.role == NodeRole::Region)
+                .expect("the setup mounts as a named region");
+            assert_eq!(root.label.as_deref(), Some("Add model connection"));
+        }
+
+        // Pointer activation submits the direct route, and so does the
+        // keyboard route through the Add control's own focus handle.
         driver.pointer_activate_id("setup-add");
         assert_eq!(submits.lock().unwrap().as_slice(), ["codex-app"]);
         assert!(
             stages.lock().unwrap().is_empty(),
-            "a direct route skips the configure stage entirely"
+            "a direct route emits no stage-change callback"
+        );
+        driver.wait_for_focus_handle("setup-add");
+        driver.keyboard_activate("setup-add");
+        assert_eq!(
+            submits.lock().unwrap().as_slice(),
+            ["codex-app", "codex-app"],
+            "Enter on the focused Add control delivers the same submit payload"
+        );
+        assert!(
+            stages.lock().unwrap().is_empty(),
+            "the keyboard route emits no stage-change callback either"
         );
     });
 }
@@ -12783,6 +12806,7 @@ fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
 /// close keeps the dialog open.
 #[test]
 fn settings_shell_navigates_and_refused_close_stays_open() {
+    use poodle_render::presentation::rem_to_px;
     use poodle_specs::{SettingsShellSpec, SidebarNavGroup, SidebarNavItem};
 
     fn groups() -> Vec<SidebarNavGroup> {
@@ -12815,11 +12839,60 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
         );
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
-        let mut driver = HeadlessDriver::new(cx, node);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 1100.0, 900.0);
 
+        // ── Contract §8 semantics on the mounted projection ──
+        {
+            let nodes = driver.accessibility_nodes();
+            let dialog = nodes
+                .iter()
+                .find(|n| n.role == NodeRole::Dialog)
+                .expect("the shell mounts as a dialog");
+            assert_eq!(dialog.label.as_deref(), Some("Settings"));
+            assert!(
+                nodes.iter().any(|n| {
+                    n.role == NodeRole::Region && n.label.as_deref() == Some("Settings pages")
+                }),
+                "the nav rail names its region"
+            );
+        }
+
+        // ── Contract §10 resolved geometry ──
+        {
+            let mounted = node.lock().expect("mount lock");
+            let surface = mounted
+                .find(&|n| n.id.as_deref() == Some("poodle-dialog-surface"))
+                .expect("dialog surface");
+            assert_eq!(
+                surface.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(64.0)),
+                "the shell's xl dialog posture resolves 64rem"
+            );
+            let rail = mounted
+                .find(&|n| {
+                    n.a11y.role == Some(NodeRole::Region)
+                        && n.a11y.label.as_deref() == Some("Settings pages")
+                })
+                .expect("nav rail");
+            assert_eq!(
+                rail.style.descriptor.layout.width,
+                LayoutSizing::Fixed(rem_to_px(14.0)),
+                "the nav rail keeps its fixed 14rem column"
+            );
+            assert_eq!(rail.style.min_width, Some(rem_to_px(14.0)));
+        }
+
+        // Navigation works through real mounted pointer input, and the
+        // keyboard route is not the only one that reaches the host.
         driver.wait_for_focus_handle("sidebar-nav-appearance");
-        driver.keyboard_activate("sidebar-nav-appearance");
+        driver.pointer_activate_id("sidebar-nav-appearance");
         assert_eq!(pages.lock().unwrap().as_slice(), ["appearance".to_string()]);
+        driver.wait_for_focus_handle("sidebar-nav-general");
+        driver.keyboard_activate("sidebar-nav-general");
+        assert_eq!(
+            pages.lock().unwrap().as_slice(),
+            ["appearance".to_string(), "general".to_string()]
+        );
     });
 
     run_headless(|cx| {
@@ -12855,6 +12928,24 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
         assert!(
             opens.lock().unwrap().is_empty(),
             "refused close does not emit on_open_change(false)"
+        );
+        // Escape is the other dismissal route the contract names, and a
+        // refused close refuses it too.
+        driver.dispatch_key("escape");
+        assert_eq!(*closes.lock().unwrap(), 2, "Escape attempts a close");
+        assert!(opens.lock().unwrap().is_empty());
+        // The reason announces as a polite status region, not an error.
+        let nodes = driver.accessibility_nodes();
+        let notice = nodes
+            .iter()
+            .find(|n| n.role == NodeRole::Status)
+            .expect("the refused reason mounts as a status region");
+        assert!(
+            notice
+                .text_content
+                .iter()
+                .any(|t| t == "Unsaved changes on this page."),
+            "the status region carries the host's verbatim reason"
         );
         assert!(
             node.lock()
@@ -14142,6 +14233,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
 /// the banner from the next spec.
 #[test]
 fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::{ButtonVariant, RemediationAction, RemediationBannerSpec, StatusTone};
 
     run_headless(|cx| {
@@ -14222,11 +14314,53 @@ fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
             Arc::clone(&actions),
             Arc::clone(&dismissed),
         );
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 200.0);
 
+        // ── Contract §5 semantics and §10 resolved geometry ──
+        {
+            let nodes = driver.accessibility_nodes();
+            let banner = nodes
+                .iter()
+                .find(|n| n.role == NodeRole::Status)
+                .expect("a polite banner announces as a status region, not an alert");
+            assert!(
+                banner
+                    .text_content
+                    .iter()
+                    .any(|t| t == "We could not save your changes"),
+                "the announcing region carries the banner copy"
+            );
+            assert!(
+                nodes.iter().any(|n| {
+                    n.role == NodeRole::Button && n.label.as_deref() == Some("Dismiss")
+                }),
+                "the dismiss control carries its accessible name"
+            );
+        }
+        {
+            let provider = theme();
+            let banner = mounted.lock().expect("mount lock");
+            assert_eq!(
+                banner.style.descriptor.layout.spacing.padding.left,
+                provider.resolve_space("space.panel.x"),
+                "the root padding is the resolved panel token"
+            );
+            assert_eq!(
+                banner.style.descriptor.border.color,
+                provider.resolve_color(StatusTone::Danger.color_token()),
+                "the danger border is the resolved danger tone"
+            );
+        }
+
+        // Pointer activation is the primary route; the keyboard route still
+        // reaches the dismiss control.
         driver.wait_for_focus_handle("remediation-action-retry");
-        driver.keyboard_activate("remediation-action-retry");
-        assert_eq!(actions.lock().unwrap().as_slice(), ["retry".to_string()]);
+        driver.pointer_activate_id("remediation-action-retry");
+        assert_eq!(
+            actions.lock().unwrap().as_slice(),
+            ["retry".to_string()],
+            "the action callback payload reaches the host"
+        );
         assert!(
             mounted
                 .lock()
@@ -28754,7 +28888,7 @@ fn a_long_select_menu_clips_overflowing_option_rows() {
 /// component rebuilt from.
 #[test]
 fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
-    use poodle_render::TreeHandlers;
+    use poodle_render::{presentation::rem_to_px, TreeHandlers};
     use poodle_specs::{DropPosition as TreeDropPosition, TreeNode, TreeSpec};
 
     #[derive(Clone)]
@@ -28772,8 +28906,10 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
     fn nodes() -> Vec<TreeNode> {
         vec![
             TreeNode::new("alpha", "Alpha"),
-            TreeNode::new("bravo", "Bravo")
-                .with_children(vec![TreeNode::new("bravo-1", "Bravo 1")]),
+            TreeNode::new("bravo", "Bravo").with_children(vec![
+                TreeNode::new("bravo-1", "Bravo 1"),
+                TreeNode::new("bravo-2", "Bravo 2").with_disabled(true),
+            ]),
             TreeNode::new("charlie", "Charlie"),
         ]
     }
@@ -28906,9 +29042,58 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 260.0, 180.0);
         driver.draw_frame();
 
+        // ── Contract §6 node semantics on the mounted projection ──
+        //
+        // Read from the tree the backend actually painted: the root names the
+        // region, every row is a named treeitem at its depth, and state lives
+        // on the row rather than only in indentation nobody can see.
+        {
+            let nodes = driver.accessibility_nodes();
+            let root = nodes
+                .iter()
+                .find(|n| n.role == NodeRole::Tree)
+                .expect("the mounted tree carries the tree role");
+            assert_eq!(root.label.as_deref(), Some("Files"));
+            let alpha = nodes
+                .iter()
+                .find(|n| n.semantic_id.as_deref() == Some("tree:alpha"))
+                .expect("the alpha row is in the mounted accessibility tree");
+            assert_eq!(alpha.role, NodeRole::TreeItem);
+            assert_eq!(alpha.level, Some(1));
+            assert_eq!(
+                alpha.label.as_deref(),
+                Some("Alpha"),
+                "a treeitem names itself with its node label"
+            );
+            assert_eq!(alpha.selected, Some(false));
+            assert_eq!(alpha.expanded, None, "a leaf states no expand state");
+            let bravo = nodes
+                .iter()
+                .find(|n| n.semantic_id.as_deref() == Some("tree:bravo"))
+                .expect("the bravo branch is in the mounted accessibility tree");
+            assert_eq!(bravo.label.as_deref(), Some("Bravo"));
+            assert_eq!(bravo.expanded, Some(false));
+        }
+
         // ── Selection through the real row listener ──
         driver.pointer_activate_id("tree:charlie");
         assert_eq!(host.lock().expect("host lock").selected, ["charlie"]);
+        {
+            let nodes = driver.accessibility_nodes();
+            let selected = |id: &str| {
+                nodes
+                    .iter()
+                    .find(|n| n.semantic_id.as_deref() == Some(id))
+                    .expect("row")
+                    .selected
+            };
+            assert_eq!(
+                selected("tree:charlie"),
+                Some(true),
+                "the selected row states its selection"
+            );
+            assert_eq!(selected("tree:alpha"), Some(false));
+        }
 
         // ── Twisty expands, and the revealed child is a real row ──
         driver.pointer_activate_id("tree-twisty:bravo");
@@ -28916,6 +29101,51 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
         assert!(
             poodle_gpui_node_backend::bounds_for("tree:bravo-1").is_some(),
             "the expanded branch's child paints as its own row"
+        );
+        {
+            let nodes = driver.accessibility_nodes();
+            let child = nodes
+                .iter()
+                .find(|n| n.semantic_id.as_deref() == Some("tree:bravo-1"))
+                .expect("the revealed child is in the mounted accessibility tree");
+            assert_eq!(child.level, Some(2), "the child reports its depth");
+            assert_eq!(child.expanded, None, "a leaf states no expand state");
+            let disabled = nodes
+                .iter()
+                .find(|n| n.semantic_id.as_deref() == Some("tree:bravo-2"))
+                .expect("the disabled child is in the mounted accessibility tree");
+            assert!(
+                disabled.disabled,
+                "a disabled row is exposed as disabled, not only dimmed"
+            );
+        }
+
+        // ── Resolved geometry and the selected row's resolved fill ──
+        {
+            let node = mounted.lock().expect("mount lock");
+            let alpha = node
+                .find(&|n| n.id.as_deref() == Some("tree:alpha"))
+                .expect("alpha row");
+            assert_eq!(
+                alpha.style.min_height,
+                Some(rem_to_px(1.5)),
+                "chrome-scoped md resolves the sm 1.5rem row height"
+            );
+            let charlie = node
+                .find(&|n| n.id.as_deref() == Some("tree:charlie"))
+                .expect("charlie row");
+            assert!(
+                charlie.style.descriptor.background.is_some(),
+                "the selected row paints its resolved selection fill"
+            );
+        }
+        assert_eq!(
+            poodle_gpui_node_backend::bounds_for("tree:alpha")
+                .expect("alpha bounds")
+                .size
+                .height,
+            px(rem_to_px(1.5)),
+            "the resolved row height is what the mounted tree actually paints"
         );
 
         // ── A keyboard command reaches the host with the row it landed on ──
