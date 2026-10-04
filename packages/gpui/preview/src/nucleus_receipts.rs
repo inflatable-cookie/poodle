@@ -955,13 +955,6 @@ pub(crate) fn emit_a1_if_configured(
                 "attribute": exclusion.attribute,
                 "reason": exclusion.reason,
             })).collect::<Vec<_>>(),
-            "roleRemaps": loaded.scenario.role_remaps.iter().map(|remap| json!({
-                "index": remap.index,
-                "field": remap.field,
-                "gpui": remap.gpui,
-                "svelte": remap.svelte,
-                "reason": remap.reason,
-            })).collect::<Vec<_>>(),
             "diff": diff,
         },
     });
