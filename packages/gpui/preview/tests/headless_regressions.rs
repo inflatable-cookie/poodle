@@ -45120,3 +45120,918 @@ fn first_mounted_parity_list_card_counter() {
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
 }
+
+/// HistoryCenter mounts its trigger cluster, opens its popover surface, and
+/// drives entry navigation, fork disclosure, picker selection and dismissal
+/// through mounted GPUI input: the list trigger toggles open by pointer, an
+/// entry activates by keyboard, the fork disclosure opens the level by
+/// pointer, the nested select commits a pick by pointer, and Escape dismisses.
+/// Svelte parity authority:
+/// `packages/svelte/components/src/HistoryCenter.svelte` (undo/list/redo
+/// cluster; popover surface dialog; flat depth-levelled rows; disclosure with
+/// Show/Hide N continuations; the persistent picker select; rejection and
+/// status live regions; roving tabindex).
+#[test]
+fn first_mounted_parity_history_center() {
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::history_center::{
+        history_center_visible_rows, HistoryCenterOpenFork, HistoryCenterRowId, HistoryContinuation,
+        HistoryEntry, HistoryPathPage,
+    };
+    use poodle_node::DismissReason;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::HistoryCenterStatus;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+    let pages = vec![HistoryPathPage::new(vec![
+        HistoryEntry::new("e3", "Raise gain").with_continuation_count(0),
+        HistoryEntry::new("e2", "Trim tail").with_continuation_count(3),
+        HistoryEntry::new("e1", "Import stems").with_continuation_count(1),
+    ])];
+    let fork_a = HistoryContinuation::new("f1", "Alt take", "b1").with_branch_name("alt-take");
+    let fork_b =
+        HistoryContinuation::new("f2", "Second idea", "b2").with_branch_name("second-idea");
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness_level = HistoryCenterOpenFork {
+        anchor_entry_id: "e2".to_owned(),
+        continuations: Some(vec![fork_a.clone(), fork_b.clone()]),
+        pick: Some(fork_a.clone()),
+        chosen: None,
+        run_pages: Vec::new(),
+        inner: Vec::new(),
+    };
+    let witness_open = vec![witness_level];
+    let witness = history_center(
+        &HistoryCenterSpec::new().with_can_undo(true),
+        &ctx,
+        &HistoryCenterView {
+            is_open: true,
+            rows: history_center_visible_rows(Some(&pages), &witness_open),
+            open_anchors: vec!["e2".to_owned()],
+            open_select_anchor: Some("e2".to_owned()),
+            ..HistoryCenterView::default()
+        },
+        &HistoryCenterHandlers {
+            on_dismiss: Some(Arc::new(|_| {})),
+            ..HistoryCenterHandlers::default()
+        },
+    );
+    let undo = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:undo"))
+        .expect("undo trigger");
+    assert_eq!(undo.a11y.role, Some(NodeRole::Button));
+    assert_eq!(undo.a11y.label.as_deref(), Some("Undo"));
+    assert!(!undo.interaction.disabled);
+    let redo = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:redo"))
+        .expect("redo trigger");
+    assert!(redo.interaction.disabled, "redo stays inert without canRedo");
+    let trigger = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:list-trigger"))
+        .expect("list trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(trigger.a11y.label.as_deref(), Some("History"));
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(
+        trigger.a11y.controls.as_deref(),
+        Some("history-center:surface")
+    );
+    assert_eq!(trigger.a11y.tab_index, Some(0));
+    assert!(trigger.interaction.focusable);
+    assert!(trigger.style.focus.is_some());
+    let surface = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:surface"))
+        .expect("surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert_eq!(surface.a11y.label.as_deref(), Some("History"));
+    assert_eq!(
+        surface.style.descriptor.background,
+        Some(theme_provider.resolve_color("color.background.elevated"))
+    );
+    assert!(surface.interaction.dismiss_layer.is_some());
+    assert!(surface.interaction.on_dismiss.is_some());
+    let list = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:list"))
+        .expect("list");
+    assert_eq!(list.a11y.role, Some(NodeRole::List));
+    assert_eq!(list.a11y.label.as_deref(), Some("History"));
+    assert_eq!(
+        list.style.max_height,
+        Some(rem_to_px(28.0)),
+        "the list scrolls inside its 28rem cap"
+    );
+    for id in ["e1", "e2", "e3"] {
+        let row = witness
+            .find(&|node| node.id.as_deref() == Some(format!("history-center:row:{id}").as_str()))
+            .unwrap_or_else(|| panic!("row {id} renders"));
+        assert_eq!(row.a11y.role, Some(NodeRole::ListItem));
+        assert_eq!(row.a11y.level, Some(1), "depth reaches assistive tech as a level");
+    }
+    let entry = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:entry:e1"))
+        .expect("entry button renders");
+    assert_eq!(entry.a11y.role, Some(NodeRole::Button));
+    assert_eq!(entry.a11y.label.as_deref(), Some("Import stems"));
+    let disclosure = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:disclosure:e2"))
+        .expect("fork disclosure renders");
+    assert_eq!(disclosure.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        disclosure.a11y.label.as_deref(),
+        Some("Hide 2 continuations")
+    );
+    assert_eq!(disclosure.a11y.expanded, Some(true));
+    assert_eq!(
+        disclosure.children.len(),
+        3,
+        "open disclosure carries the fork icon, the counter badge and the chevron"
+    );
+    let select = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:picker-select:e2"))
+        .expect("picker select renders");
+    assert_eq!(select.a11y.role, Some(NodeRole::ComboBox));
+    assert_eq!(select.a11y.expanded, Some(true));
+    assert!(!select.interaction.disabled);
+    assert_eq!(select.a11y.tab_index, Some(0));
+    let picked = witness
+        .find(&|node| node.id.as_deref() == Some("history-center:picker-option:f1"))
+        .expect("picked option renders");
+    assert_eq!(picked.a11y.role, Some(NodeRole::ListBoxOption));
+    assert_eq!(picked.a11y.selected, Some(true));
+    assert_eq!(
+        witness
+            .find(&|node| node.id.as_deref() == Some("history-center:picker-option:f2"))
+            .expect("second option renders")
+            .a11y
+            .selected,
+        Some(false)
+    );
+    assert!(
+        witness
+            .find(&|node| node.id.as_deref() == Some("history-center:not-yet-loaded:e2"))
+            .is_some(),
+        "the shown fork without run pages renders its loading row, never a gap"
+    );
+    assert!(witness.has_text("Loading…"));
+
+    let rejected = history_center(
+        &HistoryCenterSpec::new(),
+        &ctx,
+        &HistoryCenterView {
+            is_open: true,
+            rows: history_center_visible_rows(Some(&pages), &[]),
+            rejection: Some("Entry does not exist".to_owned()),
+            ..HistoryCenterView::default()
+        },
+        &HistoryCenterHandlers::default(),
+    );
+    let notice = rejected
+        .find(&|node| node.id.as_deref() == Some("history-center:rejection"))
+        .expect("rejection notice renders");
+    assert_eq!(notice.a11y.role, Some(NodeRole::Status));
+    assert!(rejected.has_text("Entry does not exist"));
+
+    let loading = history_center(
+        &HistoryCenterSpec::new().with_status(HistoryCenterStatus::Loading),
+        &ctx,
+        &HistoryCenterView {
+            is_open: true,
+            rows: history_center_visible_rows(Some(&pages), &[]),
+            ..HistoryCenterView::default()
+        },
+        &HistoryCenterHandlers::default(),
+    );
+    let status = loading
+        .find(&|node| node.id.as_deref() == Some("history-center:status"))
+        .expect("status row renders");
+    assert_eq!(status.a11y.role, Some(NodeRole::Status));
+    assert!(loading.has_text("Loading history…"));
+
+    // ── Mounted: toggle, navigate, disclose, pick, dismiss ──────────────
+    #[derive(Default)]
+    struct CenterHost {
+        open: bool,
+        levels: Vec<HistoryCenterOpenFork>,
+        select_anchor: Option<String>,
+        open_changes: Vec<bool>,
+        activates: Vec<String>,
+        discloses: Vec<String>,
+        picks: Vec<String>,
+        selects: Vec<String>,
+        dismissed: Vec<DismissReason>,
+    }
+    let host = Arc::new(Mutex::new(CenterHost::default()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let pages = pages.clone();
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let (open, levels, select_anchor) = {
+                let host = host.lock().expect("history host");
+                (host.open, host.levels.clone(), host.select_anchor.clone())
+            };
+            let rows = history_center_visible_rows(Some(&pages), &levels);
+            let view = HistoryCenterView {
+                is_open: open,
+                rows,
+                open_anchors: levels
+                    .iter()
+                    .map(|level| level.anchor_entry_id.clone())
+                    .collect(),
+                open_select_anchor: select_anchor,
+                ..HistoryCenterView::default()
+            };
+            let open_host = Arc::clone(&host);
+            let activate_host = Arc::clone(&host);
+            let disclose_host = Arc::clone(&host);
+            let pick_host = Arc::clone(&host);
+            let select_host = Arc::clone(&host);
+            let dismiss_host = Arc::clone(&host);
+            let handlers = HistoryCenterHandlers {
+                on_open_change: Some(Arc::new(move |next| {
+                    open_host
+                        .lock()
+                        .expect("history host")
+                        .open_changes
+                        .push(next);
+                })),
+                on_activate_row: Some(Arc::new(move |row: &HistoryCenterRowId| {
+                    activate_host
+                        .lock()
+                        .expect("history host")
+                        .activates
+                        .push(format!("{:?}:{}", row.kind, row.entry_id));
+                })),
+                on_disclose: Some(Arc::new(move |entry_id: &str| {
+                    disclose_host
+                        .lock()
+                        .expect("history host")
+                        .discloses
+                        .push(entry_id.to_owned());
+                })),
+                on_pick: Some(Arc::new(move |entry_id: &str| {
+                    pick_host
+                        .lock()
+                        .expect("history host")
+                        .picks
+                        .push(entry_id.to_owned());
+                })),
+                on_select_toggle: Some(Arc::new(move |anchor: &str| {
+                    select_host
+                        .lock()
+                        .expect("history host")
+                        .selects
+                        .push(anchor.to_owned());
+                })),
+                on_dismiss: Some(Arc::new(move |reason| {
+                    dismiss_host
+                        .lock()
+                        .expect("history host")
+                        .dismissed
+                        .push(reason);
+                })),
+                ..HistoryCenterHandlers::default()
+            };
+            poodle_gpui_node_backend::to_gpui(&history_center(
+                &HistoryCenterSpec::new().with_can_undo(true),
+                &RenderContext::new(&theme_provider),
+                &view,
+                &handlers,
+            ))
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 640.0, 560.0);
+        let painted_trigger =
+            poodle_gpui_node_backend::painted_node_for("history-center:list-trigger")
+                .expect("trigger reached GPUI paint");
+        assert_eq!(painted_trigger.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_trigger.a11y_label.as_deref(), Some("History"));
+        assert!(
+            poodle_gpui_node_backend::bounds_for("history-center:surface").is_none(),
+            "the surface stays unmounted while closed"
+        );
+
+        // Pointer opens: the trigger toggle carries the open request.
+        driver.pointer_activate_id("history-center:list-trigger");
+        assert_eq!(
+            host.lock().expect("history host").open_changes.as_slice(),
+            [true],
+            "trigger toggle callback payload requests open"
+        );
+        host.lock().expect("history host").open = true;
+        driver.draw_frame();
+        let surface_bounds = poodle_gpui_node_backend::bounds_for("history-center:surface")
+            .expect("open surface geometry");
+        assert!(
+            f32::from(surface_bounds.size.width) > 0.0
+                && f32::from(surface_bounds.size.height) > 0.0,
+            "the open surface paints positive dimensions"
+        );
+        let painted_surface =
+            poodle_gpui_node_backend::painted_node_for("history-center:surface")
+                .expect("surface reached GPUI paint");
+        assert_eq!(painted_surface.a11y_role, Some(NodeRole::Dialog));
+        assert_eq!(painted_surface.a11y_label.as_deref(), Some("History"));
+        assert_eq!(
+            painted_surface.style.background,
+            Some(theme_provider.resolve_color("color.background.elevated"))
+        );
+        let list_bounds = poodle_gpui_node_backend::bounds_for("history-center:list")
+            .expect("mounted list geometry");
+        assert!(bounds_contain(surface_bounds, list_bounds));
+
+        // Keyboard navigates: focus lands on the entry and Enter activates it.
+        driver.focus_element("history-center:entry:e1");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("history-center:entry:e1"),
+            Some(true),
+            "focus lands on the entry, not the mount host"
+        );
+        driver.keyboard_activate("history-center:entry:e1");
+        assert_eq!(
+            host.lock().expect("history host").activates.as_slice(),
+            ["Entry:e1"],
+            "entry activation callback payload names the clicked row"
+        );
+
+        // Pointer discloses: the fork disclosure opens the anchor's level.
+        driver.pointer_activate_id("history-center:disclosure:e2");
+        assert_eq!(
+            host.lock().expect("history host").discloses.as_slice(),
+            ["e2"],
+            "disclosure callback payload names the anchor entry"
+        );
+        host.lock().expect("history host").levels =
+            vec![HistoryCenterOpenFork::opening("e2")];
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("history-center:picker:e2").is_some(),
+            "the disclosed level mounts its picker row"
+        );
+
+        // The select opens: the trigger toggle carries the anchor, and the
+        // host operation lands the continuations plus the pick.
+        driver.pointer_activate_id("history-center:picker-select:e2");
+        assert_eq!(
+            host.lock().expect("history host").selects.as_slice(),
+            ["e2"],
+            "select toggle callback payload names the anchor"
+        );
+        {
+            let mut host = host.lock().expect("history host");
+            host.select_anchor = Some("e2".to_owned());
+            let level = host.levels.first_mut().expect("open level");
+            level.continuations = Some(vec![fork_a.clone(), fork_b.clone()]);
+            level.pick = Some(fork_a.clone());
+        }
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("history-center:picker-option:f2").is_some(),
+            "the picker mounts one option per offered fork"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("history-center:not-yet-loaded:e2").is_some(),
+            "the shown fork without run pages keeps its loading row"
+        );
+        let painted_select =
+            poodle_gpui_node_backend::painted_node_for("history-center:picker-select:e2")
+                .expect("select reached GPUI paint");
+        assert_eq!(painted_select.a11y_role, Some(NodeRole::ComboBox));
+        assert!(
+            painted_select.texts.iter().any(|text| text.contains("Alt take")),
+            "the select trigger carries the picked fork, got {:?}",
+            painted_select.texts
+        );
+
+        // Pointer picks: the option press previews the second fork.
+        driver.pointer_activate_id("history-center:picker-option:f2");
+        assert_eq!(
+            host.lock().expect("history host").picks.as_slice(),
+            ["f2"],
+            "pick callback payload names the chosen fork"
+        );
+
+        // Escape dismisses through the surface layer.
+        driver.dispatch_key("escape");
+        assert_eq!(
+            host.lock().expect("history host").dismissed,
+            vec![DismissReason::Escape],
+            "dismiss callback payload names the Escape reason"
+        );
+        {
+            let mut host = host.lock().expect("history host");
+            host.open = false;
+            host.levels.clear();
+        }
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("history-center:surface").is_none(),
+            "dismissal unmounts the surface"
+        );
+        assert!(theme_provider.resolve_color("color.accent.base").3 > 0.0);
+        assert!(rem_to_px(0.875) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// ToastStack mounts its live stack and drives dismissal and actions through
+/// mounted GPUI input: a danger toast projects the native alert role, dismiss
+/// buttons carry per-toast labels and focus, the action button fires its
+/// callback, and same-id replacement settles the row without a fresh enter.
+/// Svelte parity authority:
+/// `packages/svelte/components/src/ToastStack.svelte` (list stack with polite
+/// posture; per-toast polite/assertive regions; dismiss `Dismiss {title}`;
+/// secondary action Button; keyed rows that settle in place).
+#[test]
+fn first_mounted_parity_toast_stack() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = toast_stack(
+        &ToastStackSpec::new().with_toasts(vec![
+            Toast::new("save", "Saved")
+                .with_message("All changes are safe.")
+                .with_action_label("Inspect"),
+            Toast::new("fail", "Publishing failed")
+                .with_message("The connection dropped.")
+                .with_tone(ToastTone::Danger),
+        ]),
+        &ctx,
+        ToastStackHandlers::default(),
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::List));
+    assert_eq!(
+        witness.a11y.label.as_deref(),
+        Some("Notifications"),
+        "the stack keeps its default accessible name"
+    );
+    assert_eq!(
+        witness.style.descriptor.layout.spacing.gap,
+        theme_provider.resolve_space("space.stack.sm")
+    );
+    let save = witness
+        .find(&|node| node.id.as_deref() == Some("poodle-toast-save"))
+        .expect("info toast row");
+    assert_eq!(save.a11y.role, Some(NodeRole::ListItem));
+    assert_eq!(save.roles.get("tone").map(String::as_str), Some("info"));
+    assert_eq!(save.style.descriptor.border.width, 1.0);
+    let fail = witness
+        .find(&|node| node.id.as_deref() == Some("poodle-toast-fail"))
+        .expect("danger toast row");
+    assert_eq!(
+        fail.a11y.role,
+        Some(NodeRole::Alert),
+        "danger escalates to the native alert projection of the assertive region"
+    );
+    assert_eq!(fail.roles.get("tone").map(String::as_str), Some("danger"));
+    let info_accent = save
+        .children
+        .iter()
+        .find(|child| {
+            child.style.descriptor.layout.width == LayoutSizing::Fixed(rem_to_px(0.1875))
+        })
+        .expect("info accent bar");
+    let danger_accent = fail
+        .children
+        .iter()
+        .find(|child| {
+            child.style.descriptor.layout.width == LayoutSizing::Fixed(rem_to_px(0.1875))
+        })
+        .expect("danger accent bar");
+    assert!(
+        info_accent.style.descriptor.background.is_some()
+            && danger_accent.style.descriptor.background.is_some(),
+        "both tones paint the 3px accent bar"
+    );
+    assert_ne!(
+        info_accent.style.descriptor.background,
+        danger_accent.style.descriptor.background,
+        "the accent bar differentiates tones"
+    );
+    let dismiss = witness
+        .find(&|node| node.id.as_deref() == Some("poodle-toast-dismiss-save"))
+        .expect("dismiss control");
+    assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
+    assert_eq!(dismiss.a11y.label.as_deref(), Some("Dismiss Saved"));
+    assert_eq!(dismiss.a11y.tab_index, Some(0));
+    assert!(dismiss.interaction.focusable);
+    assert!(dismiss.style.focus_ring.is_some());
+    assert_eq!(
+        dismiss.style.descriptor.layout.width,
+        LayoutSizing::Fixed(rem_to_px(1.25)),
+        "the dismiss square keeps its md size"
+    );
+    let action = witness
+        .find(&|node| node.id.as_deref() == Some("poodle-toast-action-save"))
+        .expect("action button");
+    assert!(matches!(action.kind, NodeKind::Button { .. }));
+    assert_eq!(
+        action.roles.get("variant").map(String::as_str),
+        Some("secondary")
+    );
+    assert!(witness.has_text("All changes are safe."));
+    assert!(witness.has_text("The connection dropped."));
+
+    // ── Mounted: action, settle, dismiss, keyboard ──────────────────────
+    #[derive(Default)]
+    struct ToastProofHost {
+        toasts: Vec<Toast>,
+        dismisses: Vec<String>,
+        actions: Vec<String>,
+    }
+    let host = Arc::new(Mutex::new(ToastProofHost {
+        toasts: vec![
+            Toast::new("save", "Saved")
+                .with_message("All changes are safe.")
+                .with_action_label("Retry"),
+            Toast::new("fail", "Publishing failed")
+                .with_message("The connection dropped.")
+                .with_tone(ToastTone::Danger),
+        ],
+        ..ToastProofHost::default()
+    }));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let toasts = host.lock().expect("toast host").toasts.clone();
+            let dismiss_host = Arc::clone(&host);
+            let action_host = Arc::clone(&host);
+            div()
+                .relative()
+                .size_full()
+                .child(
+                    node_compat::ToastStack::from_spec(
+                        ToastStackSpec::new().with_toasts(toasts),
+                        &theme_provider,
+                    )
+                    .with_instance_id("proof")
+                    .on_dismiss(Arc::new(move |id: &str| {
+                        dismiss_host
+                            .lock()
+                            .expect("toast host")
+                            .dismisses
+                            .push(format!("dismiss:{id}"));
+                    }))
+                    .on_action(Arc::new(move |id: &str| {
+                        action_host
+                            .lock()
+                            .expect("toast host")
+                            .actions
+                            .push(format!("action:{id}"));
+                    })),
+                )
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted_stack =
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:stack")
+                .expect("stack reached GPUI paint");
+        assert_eq!(painted_stack.a11y_role, Some(NodeRole::List));
+        assert_eq!(
+            painted_stack.a11y_label.as_deref(),
+            Some("Notifications")
+        );
+        let painted_fail =
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:fail")
+                .expect("danger row reached GPUI paint");
+        assert_eq!(
+            painted_fail.a11y_role,
+            Some(NodeRole::Alert),
+            "the mounted danger row keeps its alert projection"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save")
+                .expect("info row reached GPUI paint")
+                .a11y_role,
+            Some(NodeRole::ListItem)
+        );
+        let stack_bounds = poodle_gpui_node_backend::bounds_for("toast-host:proof:stack")
+            .expect("stack geometry");
+        for row in ["save", "fail"] {
+            let id = format!("toast-host:proof:toast:{row}");
+            let row_bounds =
+                poodle_gpui_node_backend::bounds_for(&id).expect("mounted row geometry");
+            assert!(
+                f32::from(row_bounds.size.width) > 0.0
+                    && f32::from(row_bounds.size.height) > 0.0,
+                "row {row} paints positive dimensions"
+            );
+            assert!(
+                bounds_contain(stack_bounds, row_bounds),
+                "row {row} escapes the stack"
+            );
+            let dismiss_bounds =
+                poodle_gpui_node_backend::bounds_for(&format!("{id}:dismiss"))
+                    .expect("mounted dismiss geometry");
+            assert!(
+                bounds_contain(row_bounds, dismiss_bounds),
+                "row {row} dismiss escapes its row"
+            );
+        }
+
+        // Pointer action: the action button fires with its toast's id.
+        driver.pointer_activate_id("toast-host:proof:toast:save:action");
+        assert_eq!(
+            host.lock().expect("toast host").actions.as_slice(),
+            ["action:save"],
+            "action callback payload names the toast"
+        );
+
+        // Same-id replacement settles the row: the copy updates, the row and
+        // its dismiss control stay mounted — no fresh enter.
+        {
+            let mut host = host.lock().expect("toast host");
+            let save = host
+                .toasts
+                .iter_mut()
+                .find(|toast| toast.id == "save")
+                .expect("save toast");
+            save.title = "Saved file".to_owned();
+        }
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save:dismiss")
+                .expect("settled dismiss repaint")
+                .a11y_label
+                .as_deref(),
+            Some("Dismiss Saved file"),
+            "same-id copy replacement updates the dismiss label in place"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:save").is_some(),
+            "the settled row keeps its mounted identity"
+        );
+
+        // Pointer dismiss: the host removes the toast and the row unmounts.
+        driver.pointer_activate_id("toast-host:proof:toast:save:dismiss");
+        assert_eq!(
+            host.lock().expect("toast host").dismisses.as_slice(),
+            ["dismiss:save"],
+            "dismiss callback payload names the toast"
+        );
+        host.lock()
+            .expect("toast host")
+            .toasts
+            .retain(|toast| toast.id != "save");
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:save").is_none(),
+            "the dismissed row unmounts"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:fail").is_some(),
+            "the surviving danger row stays mounted"
+        );
+
+        // Keyboard dismiss: the danger dismiss is a real tab stop and Enter
+        // activates it.
+        driver.wait_for_focus_handle("toast-host:proof:toast:fail:dismiss");
+        driver.focus_element("toast-host:proof:toast:fail:dismiss");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("toast-host:proof:toast:fail:dismiss"),
+            Some(true),
+            "focus lands on the danger dismiss, not the mount host"
+        );
+        driver.keyboard_activate("toast-host:proof:toast:fail:dismiss");
+        assert_eq!(
+            host.lock().expect("toast host").dismisses.as_slice(),
+            ["dismiss:save", "dismiss:fail"],
+            "keyboard dismiss callback payload names the toast"
+        );
+        assert!(theme_provider.resolve_color("color.status.danger").3 > 0.0);
+        assert!(rem_to_px(1.25) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
+
+/// PageLoading mounts its loading surface and drives cancellation through
+/// mounted GPUI input: the overlay paints the status semantics with token
+/// chrome, the cancel button is a real focusable button by pointer and by
+/// keyboard, and hiding the surface unmounts it. Svelte parity authority:
+/// `packages/svelte/components/src/PageLoading.svelte` (status live region
+/// with `Loading` default name; ring spinner plus determinate Progress;
+/// overlay backdrop versus chromeless inline; native cancel button).
+#[test]
+fn first_mounted_parity_page_loading() {
+    use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
+    use poodle_adapter::ThemeProvider;
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::{PageLoadingPresentation, PageLoadingSpec};
+
+    let theme_provider = theme();
+    let ctx = RenderContext::new(&theme_provider);
+
+    // ── Witness: production renderer structure, no mount ───────────────
+    let witness = poodle_render::page_loading(
+        &PageLoadingSpec::new()
+            .with_message("Loading data...")
+            .with_can_cancel(true),
+        &ctx,
+        Some(Arc::new(|| {})),
+    );
+    assert_eq!(witness.a11y.role, Some(NodeRole::Status));
+    assert_eq!(
+        witness.a11y.label.as_deref(),
+        Some("Loading"),
+        "the status keeps its default accessible name"
+    );
+    assert_eq!(
+        witness.style.descriptor.background,
+        Some(
+            theme_provider.resolve_color(
+                PageLoadingSpec::new().backdrop_fill_token()
+            )
+        ),
+        "the overlay paints the token backdrop"
+    );
+    assert!(witness.has_text("Loading data..."));
+    let cancel = witness
+        .find(&|node| matches!(&node.kind, NodeKind::Button { label } if label == "Cancel"))
+        .expect("cancel button");
+    assert_eq!(cancel.a11y.role, Some(NodeRole::Button));
+    assert_eq!(cancel.a11y.label.as_deref(), Some("Cancel"));
+    assert_eq!(cancel.a11y.tab_index, Some(0));
+    assert!(cancel.interaction.focusable);
+    assert!(cancel.interaction.on_activate.is_some());
+    assert_eq!(
+        cancel.style.focus_ring.as_ref().map(|ring| ring.offset),
+        Some(rem_to_px(0.125))
+    );
+    assert_eq!(
+        cancel.style.descriptor.layout.spacing.padding.top,
+        rem_to_px(0.375)
+    );
+    assert!(
+        witness
+            .find(&|node| node.a11y.role == Some(NodeRole::ProgressIndicator))
+            .is_none(),
+        "indeterminate paints the spinner with no progress bar"
+    );
+
+    let determinate = poodle_render::page_loading(
+        &PageLoadingSpec::new()
+            .with_value(42.0)
+            .with_message("Uploading files... 42%")
+            .with_can_cancel(true),
+        &ctx,
+        Some(Arc::new(|| {})),
+    );
+    assert!(
+        determinate
+            .find(&|node| node.a11y.role == Some(NodeRole::ProgressIndicator))
+            .is_some(),
+        "a numeric value adds the determinate progress bar"
+    );
+    let inline = poodle_render::page_loading(
+        &PageLoadingSpec::new()
+            .with_presentation(PageLoadingPresentation::Inline)
+            .with_message("Loading data..."),
+        &ctx,
+        None,
+    );
+    assert_eq!(inline.a11y.role, Some(NodeRole::Status));
+    assert_eq!(
+        inline.style.descriptor.background, None,
+        "inline drops the overlay backdrop"
+    );
+    let named = poodle_render::page_loading(
+        &PageLoadingSpec::new().with_aria_label("Uploading"),
+        &ctx,
+        None,
+    );
+    assert_eq!(named.a11y.label.as_deref(), Some("Uploading"));
+    let hidden = poodle_render::page_loading(
+        &PageLoadingSpec::new().with_visible(false),
+        &ctx,
+        None,
+    );
+    assert_eq!(hidden.a11y.role, None, "hidden renders no status");
+    assert!(hidden.texts().is_empty(), "hidden renders no copy");
+
+    // ── Mounted: cancel by pointer and keyboard, hide unmounts ─────────
+    #[derive(Default)]
+    struct LoadHost {
+        visible: bool,
+        cancels: usize,
+    }
+    let host = Arc::new(Mutex::new(LoadHost { visible: true, cancels: 0 }));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let host = Arc::clone(&host);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let visible = host.lock().expect("loading host").visible;
+            let cancel_host = Arc::clone(&host);
+            let mut node = poodle_render::page_loading(
+                &PageLoadingSpec::new()
+                    .with_visible(visible)
+                    .with_message("Uploading files...")
+                    .with_can_cancel(true),
+                &RenderContext::new(&theme_provider),
+                Some(Arc::new(move || {
+                    cancel_host.lock().expect("loading host").cancels += 1;
+                })),
+            );
+            stamp_labelled_id(&mut node, "Cancel", "page-loading-cancel");
+            stamp_labelled_id(&mut node, "Loading", "page-loading-root");
+            div()
+                .relative()
+                .size_full()
+                .child(poodle_gpui_node_backend::to_gpui(&node))
+                .into_any_element()
+        })
+    };
+
+    run_headless(|cx| {
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 800.0, 600.0);
+        let painted_root = poodle_gpui_node_backend::painted_node_for("page-loading-root")
+            .expect("overlay reached GPUI paint");
+        assert_eq!(painted_root.a11y_role, Some(NodeRole::Status));
+        assert_eq!(painted_root.a11y_label.as_deref(), Some("Loading"));
+        assert_eq!(
+            painted_root.style.background,
+            Some(
+                theme_provider.resolve_color(
+                    PageLoadingSpec::new().backdrop_fill_token()
+                )
+            )
+        );
+        let mount = driver.mount_box_bounds();
+        let root_bounds =
+            poodle_gpui_node_backend::bounds_for("page-loading-root").expect("overlay geometry");
+        assert!(
+            f32::from(root_bounds.size.width) > 0.0
+                && f32::from(root_bounds.size.height) > 0.0,
+            "the overlay paints positive dimensions"
+        );
+        assert!(
+            bounds_contain(mount, root_bounds),
+            "the overlay stays inside the mount box"
+        );
+        let cancel_bounds = poodle_gpui_node_backend::bounds_for("page-loading-cancel")
+            .expect("cancel geometry");
+        assert!(bounds_contain(root_bounds, cancel_bounds));
+        let painted_cancel =
+            poodle_gpui_node_backend::painted_node_for("page-loading-cancel")
+                .expect("cancel reached GPUI paint");
+        assert_eq!(painted_cancel.a11y_role, Some(NodeRole::Button));
+        assert_eq!(painted_cancel.a11y_label.as_deref(), Some("Cancel"));
+
+        // Pointer cancels through the mounted button.
+        driver.pointer_activate_id("page-loading-cancel");
+        assert_eq!(
+            host.lock().expect("loading host").cancels,
+            1,
+            "pointer cancel callback payload reaches the host"
+        );
+
+        // Keyboard cancels: the button is a real tab stop and Enter fires it.
+        driver.wait_for_focus_handle("page-loading-cancel");
+        driver.focus_element("page-loading-cancel");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("page-loading-cancel"),
+            Some(true),
+            "focus lands on the cancel button, not the mount host"
+        );
+        driver.keyboard_activate("page-loading-cancel");
+        assert_eq!(
+            host.lock().expect("loading host").cancels,
+            2,
+            "keyboard cancel callback payload reaches the host"
+        );
+
+        // Hiding the surface unmounts it.
+        host.lock().expect("loading host").visible = false;
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("page-loading-root").is_none(),
+            "hidden renders no overlay"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("page-loading-cancel").is_none(),
+            "hidden renders no cancel control"
+        );
+        assert!(theme_provider.resolve_color("color.background.elevated").3 > 0.0);
+        assert!(rem_to_px(0.375) > 0.0);
+        assert!(driver.mounted_observation().is_valid());
+        let _ = poodle_gpui_node_backend::take_probe_capture();
+    });
+}
