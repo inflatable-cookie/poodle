@@ -60,6 +60,11 @@ fn option_focus_id(instance_scope: &str, value: &str) -> String {
     format!("card-radio:{instance_scope}:option:{value}")
 }
 
+/// Stable identity for an observable option slot (the radio indicator).
+fn option_part_id(instance_scope: &str, value: &str, part: &str) -> String {
+    format!("card-radio:{instance_scope}:option:{value}:{part}")
+}
+
 /// A flex-growing grid cell. The card shares the row equally before intrinsic
 /// labels can claim width (the web grid's `1fr`), and the zero minimum permits
 /// descriptions to wrap.
@@ -213,6 +218,8 @@ pub fn card_radio_group_with_handlers(
 
         // Radio indicator: border-only unchecked; accent fill + dot checked.
         let mut indicator = Node::container();
+        indicator.id = Some(option_part_id(instance_scope, &option.value, "indicator"));
+        indicator.style.flex_none = true;
         {
             let s = &mut indicator.style;
             // Explicit Row (see switch.rs).

@@ -5,6 +5,8 @@ pub struct CardToggleOption {
     pub value: String,
     pub title: String,
     pub description: Option<String>,
+    /// Optional count pill shown at the end of the header row (contract §2/§7).
+    pub count: Option<String>,
     pub disabled: bool,
 }
 
@@ -14,12 +16,18 @@ impl CardToggleOption {
             value: value.into(),
             title: title.into(),
             description: None,
+            count: None,
             disabled: false,
         }
     }
 
     pub fn with_description(mut self, description: impl Into<String>) -> Self {
         self.description = Some(description.into());
+        self
+    }
+
+    pub fn with_count(mut self, count: impl Into<String>) -> Self {
+        self.count = Some(count.into());
         self
     }
 
@@ -141,6 +149,30 @@ impl CardToggleGroupSpec {
             ControlSize::Md => 0.75,
             ControlSize::Lg => 0.875,
             ControlSize::Xl => 0.9375,
+        }
+    }
+
+    /// Count-pill padding in rem `(block, inline)` for the given effective size.
+    /// Contract §7 Size Adjustments.
+    pub fn count_padding_rem(size: ControlSize) -> (f32, f32) {
+        match size {
+            ControlSize::Xs => (0.03125, 0.3125),
+            ControlSize::Sm => (0.03125, 0.375),
+            ControlSize::Md => (0.03125, 0.4375),
+            ControlSize::Lg => (0.09375, 0.5625),
+            ControlSize::Xl => (0.125, 0.625),
+        }
+    }
+
+    /// Count-pill font-size in rem for the given effective size.
+    /// Contract §7 Size Adjustments.
+    pub fn count_font_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.625,
+            ControlSize::Sm => 0.6875,
+            ControlSize::Md => 0.71875,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
         }
     }
 }

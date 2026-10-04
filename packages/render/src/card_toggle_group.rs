@@ -11,10 +11,10 @@
 //! treatment, and focusable option cells carrying the toggle handler.
 //!
 //! Selection runs through the shared ToggleGroup machine in single mode with
-//! the spec's `allow_deactivation`, so the callback receives the resulting
-//! `string | null`, not the pressed option. Arrow navigation walks the enabled
-//! options, wraps at the ends, selects the target, and moves real backend
-//! focus — the Svelte `menuListNavigate` behaviour.
+//! the spec's `allow_deactivation`, so the handlers entry point receives the
+//! resulting `string | null`, not the pressed option. Arrow navigation walks
+//! the enabled options, wraps at the ends, selects the target, and moves real
+//! backend focus — the Svelte `menuListNavigate` behaviour.
 
 use std::sync::Arc;
 
@@ -24,7 +24,8 @@ use poodle_headless::toggle_group::{
     ToggleGroupEvent, ToggleGroupValue,
 };
 use poodle_node::{
-    CursorHint, FocusRing, LayoutDirection, Node, NodeKey, NodeModifiers, NodeRole, NodeToggled,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, MainAxisAlignment, Node, NodeKey,
+    NodeModifiers, NodeRole, NodeToggled,
 };
 use poodle_specs::{CardSpec, CardToggleGroupSpec};
 
@@ -64,6 +65,12 @@ fn option_id(value: &str) -> String {
 
 fn option_focus_id(instance_scope: &str, value: &str) -> String {
     format!("card-toggle:{instance_scope}:option:{value}")
+}
+
+/// Stable identity for an observable option slot (title, count). Distinct per
+/// caller scope, so duplicate instances keep distinguishable slot bounds.
+fn option_part_id(instance_scope: &str, value: &str, part: &str) -> String {
+    format!("card-toggle:{instance_scope}:option:{value}:{part}")
 }
 
 fn flex1_cell() -> Node {
@@ -112,30 +119,39 @@ fn tab_stop_value<'a>(spec: &'a CardToggleGroupSpec, roving: &'a [String]) -> Op
     }
 }
 
-fn emit_toggle(
-    context: &ToggleGroupContext,
-    option_value: &str,
-    on_value_change: &Option<Arc<dyn Fn(Option<&str>) + Send + Sync>>,
-) {
-    let Some(handler) = on_value_change else {
-        return;
-    };
-    let (_, effects) = toggle_group_transition(
-        context.clone(),
-        ToggleGroupEvent::Toggle {
-            value: option_value.to_string(),
-        },
-    );
-    for effect in effects {
-        let ToggleGroupEffect::EmitValueChange { value } = effect;
-        if let ToggleGroupValue::Single(single) = value {
-            handler(single.as_deref());
+/// How an activation reports. The original entry point kept its pressed-value
+/// payload; the contract entry point runs the shared machine and reports the
+/// resulting value (including `null`).
+#[derive(Clone)]
+enum ToggleEmit {
+    Pressed(Arc<dyn Fn(&str) + Send + Sync>),
+    Result(Arc<dyn Fn(Option<&str>) + Send + Sync>),
+}
+
+impl ToggleEmit {
+    fn emit(&self, context: &ToggleGroupContext, option_value: &str) {
+        match self {
+            ToggleEmit::Pressed(handler) => handler(option_value),
+            ToggleEmit::Result(handler) => {
+                let (_, effects) = toggle_group_transition(
+                    context.clone(),
+                    ToggleGroupEvent::Toggle {
+                        value: option_value.to_string(),
+                    },
+                );
+                for effect in effects {
+                    let ToggleGroupEffect::EmitValueChange { value } = effect;
+                    if let ToggleGroupValue::Single(single) = value {
+                        handler(single.as_deref());
+                    }
+                }
+            }
         }
     }
 }
 
 /// Arrow navigation over the enabled options, wrapping at both ends. The
-/// target is selected (emitting through the toggle machine) and returned as
+/// target is selected (emitting through the active emitter) and returned as
 /// the focus identity the backend moves to. Both axes are live, matching
 /// Svelte's `menuListNavigate` over the enabled list.
 fn roving_key_handler(
@@ -143,7 +159,7 @@ fn roving_key_handler(
     roving: &[String],
     instance_scope: String,
     context: ToggleGroupContext,
-    on_value_change: Option<Arc<dyn Fn(Option<&str>) + Send + Sync>>,
+    emit: Option<ToggleEmit>,
 ) -> Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> {
     let index = roving.iter().position(|candidate| candidate == value)?;
     let ids = roving.to_vec();
@@ -174,27 +190,27 @@ fn roving_key_handler(
         if target == current {
             return None;
         }
-        emit_toggle(&context, &target, &on_value_change);
+        if let Some(emit) = &emit {
+            emit.emit(&context, &target);
+        }
         Some(option_focus_id(&instance_scope, &target))
     }))
 }
 
-/// Render a group without a caller-provided identity. Prefer
-/// [`card_toggle_group_with_handlers`] so duplicate instances keep distinct
-/// focus handles; this entry point exists for static and single-instance
-/// compositions.
+/// Render a group without a caller-provided identity, keeping the original
+/// callback contract: the handler receives the pressed option value. Prefer
+/// [`card_toggle_group_with_handlers`] for the contract's resulting-value
+/// payload (including `null` deactivation) and caller-scoped focus identity.
 pub fn card_toggle_group(
     spec: &CardToggleGroupSpec,
     ctx: &RenderContext<'_>,
-    on_value_change: Option<Arc<dyn Fn(Option<&str>) + Send + Sync>>,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    card_toggle_group_with_handlers(
+    render_card_toggle_group(
         spec,
         ctx,
-        CardToggleGroupHandlers {
-            instance_id: "card-toggle-group".to_string(),
-            on_value_change,
-        },
+        "card-toggle-group",
+        on_change.map(ToggleEmit::Pressed),
     )
 }
 
@@ -203,9 +219,21 @@ pub fn card_toggle_group_with_handlers(
     ctx: &RenderContext<'_>,
     handlers: CardToggleGroupHandlers,
 ) -> Node {
+    render_card_toggle_group(
+        spec,
+        ctx,
+        &handlers.instance_id,
+        handlers.on_value_change.map(ToggleEmit::Result),
+    )
+}
+
+fn render_card_toggle_group(
+    spec: &CardToggleGroupSpec,
+    ctx: &RenderContext<'_>,
+    instance_scope: &str,
+    emit: Option<ToggleEmit>,
+) -> Node {
     let theme = ctx.theme();
-    let instance_scope = handlers.instance_id.as_str();
-    let on_value_change = handlers.on_value_change;
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
 
@@ -216,9 +244,13 @@ pub fn card_toggle_group_with_handlers(
     // Density-driven grid gap (contract §7 density table) + Card body rhythm.
     let grid_gap = rem_to_px(control_space_x_rem(density));
     let body_gap = rem_to_px(0.25);
+    // Contract §7 header: gap 0.75rem, align-items center.
+    let header_gap = rem_to_px(0.75);
 
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
+    let border_subtle = theme.resolve_color("color.border.subtle");
+    let pill_radius = theme.resolve_radius("radius.pill");
     let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
     let focus_ring = FocusRing {
         color: theme.resolve_color("color.accent.focusRing"),
@@ -239,18 +271,61 @@ pub fn card_toggle_group_with_handlers(
         let is_selected = spec.is_selected(&option.value);
         let is_option_disabled = spec.disabled || option.disabled;
 
-        // Card body: title + optional description.
+        // Header row: title + optional count pill (contract §2/§7).
+        let mut header = Node::container();
+        {
+            let s = &mut header.style;
+            s.descriptor.layout.direction = LayoutDirection::Row;
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            s.descriptor.layout.spacing.gap = header_gap;
+            if option.count.is_some() {
+                // The web pins the count to the end of the row with
+                // `margin-left: auto`; the node vocabulary has no auto margin,
+                // so the two ends distribute instead.
+                s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
+            }
+        }
+        let mut title = Node::text(option.title.clone());
+        title.id = Some(option_part_id(instance_scope, &option.value, "title"));
+        title.style.text_size = Some(title_font);
+        title.style.text_weight = Some(600);
+        title.style.descriptor.text_color = Some(text_primary);
+        title.style.min_width = Some(0.0);
+        let mut header = header.child(title);
+        if let Some(count) = &option.count {
+            let (pad_y, pad_x) = CardToggleGroupSpec::count_padding_rem(effective_size);
+            let mut count_el = Node::text(count.clone());
+            count_el.id = Some(option_part_id(instance_scope, &option.value, "count"));
+            count_el.style.text_size = Some(rem_to_px(CardToggleGroupSpec::count_font_rem(
+                effective_size,
+            )));
+            count_el.style.text_weight = Some(700);
+            count_el.style.line_height = Some(1.25);
+            count_el.style.descriptor.text_color = Some(text_secondary);
+            count_el.style.descriptor.border.width = rem_to_px(0.0625);
+            count_el.style.descriptor.border.color = border_subtle;
+            let c = &mut count_el.style.descriptor.corner_radii;
+            c.top_left = pill_radius;
+            c.top_right = pill_radius;
+            c.bottom_right = pill_radius;
+            c.bottom_left = pill_radius;
+            let pad = &mut count_el.style.descriptor.layout.spacing.padding;
+            pad.top = rem_to_px(pad_y);
+            pad.bottom = rem_to_px(pad_y);
+            pad.left = rem_to_px(pad_x);
+            pad.right = rem_to_px(pad_x);
+            count_el.style.flex_none = true;
+            header = header.child(count_el);
+        }
+
+        // Card body: header row + optional description.
         let mut body = Node::container();
         {
             let s = &mut body.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.spacing.gap = body_gap;
         }
-        let mut title = Node::text(option.title.clone());
-        title.style.text_size = Some(title_font);
-        title.style.text_weight = Some(600);
-        title.style.descriptor.text_color = Some(text_primary);
-        let mut body = body.child(title);
+        let mut body = body.child(header);
         if let Some(description) = &option.description {
             let mut d = Node::text(description.clone());
             d.style.text_size = Some(description_font);
@@ -309,12 +384,12 @@ pub fn card_toggle_group_with_handlers(
                 -1
             });
             option_el.style.focus_ring = Some(focus_ring);
-            if let Some(handler) = &on_value_change {
-                let handler = Arc::clone(handler);
+            if let Some(emit) = &emit {
+                let emit = emit.clone();
                 let context = context.clone();
                 let value = option.value.clone();
                 option_el.interaction.on_activate = Some(Arc::new(move || {
-                    emit_toggle(&context, &value, &Some(Arc::clone(&handler)));
+                    emit.emit(&context, &value);
                 }));
             }
             option_el.interaction.on_key = roving_key_handler(
@@ -322,7 +397,7 @@ pub fn card_toggle_group_with_handlers(
                 &roving,
                 instance_scope.to_string(),
                 context.clone(),
-                on_value_change.clone(),
+                emit.clone(),
             );
         }
 
@@ -485,6 +560,59 @@ mod tests {
     }
 
     #[test]
+    fn count_pill_follows_the_size_ladder() {
+        // Contract §7 count column: padding and font per size, pill radius,
+        // subtle border, secondary tone and no flex shrink.
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let subtle = theme.resolve_color("color.border.subtle");
+        let secondary = theme.resolve_color("color.text.secondary");
+        let pill = theme.resolve_radius("radius.pill");
+        let cases = [
+            (poodle_specs::ControlSize::Xs, 10.0, 5.0, 0.5),
+            (poodle_specs::ControlSize::Sm, 11.0, 6.0, 0.5),
+            (poodle_specs::ControlSize::Md, 11.5, 7.0, 0.5),
+            (poodle_specs::ControlSize::Lg, 13.0, 9.0, 1.5),
+            (poodle_specs::ControlSize::Xl, 14.0, 10.0, 2.0),
+        ];
+        for (size, expected_font, expected_pad_x, expected_pad_y) in cases {
+            let spec = CardToggleGroupSpec::new(vec![
+                CardToggleOption::new("alpha", "Alpha").with_count("24")
+            ])
+            .with_size(size);
+            let node = card_toggle_group(&spec, &ctx, None);
+            let count = node
+                .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "24"))
+                .expect("count text");
+            assert_eq!(
+                count.style.text_size,
+                Some(expected_font),
+                "font for {size:?}"
+            );
+            assert_eq!(count.style.text_weight, Some(700));
+            assert_eq!(count.style.line_height, Some(1.25));
+            assert_eq!(count.style.descriptor.text_color, Some(secondary));
+            assert_eq!(count.style.descriptor.border.width, 1.0);
+            assert_eq!(count.style.descriptor.border.color, subtle);
+            assert_eq!(count.style.descriptor.corner_radii.top_left, pill);
+            assert_eq!(
+                count.style.descriptor.layout.spacing.padding.left, expected_pad_x,
+                "inline padding for {size:?}"
+            );
+            assert_eq!(
+                count.style.descriptor.layout.spacing.padding.top, expected_pad_y,
+                "block padding for {size:?}"
+            );
+            assert!(count.style.flex_none);
+            // No count, no node.
+            let without = card_toggle_group(&CardToggleGroupSpec::new(options()), &ctx, None);
+            assert!(without
+                .find(&|n| n.id.as_deref().is_some_and(|id| id.ends_with(":count")))
+                .is_none());
+        }
+    }
+
+    #[test]
     fn selected_card_carries_the_accent_border_and_option_label() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
@@ -539,7 +667,7 @@ mod tests {
     }
 
     #[test]
-    fn toggling_an_option_reports_the_resulting_value_through_the_node_handler() {
+    fn toggling_an_option_reports_the_resulting_value_through_the_handlers() {
         use std::sync::Mutex;
         let seen: Arc<Mutex<Vec<Option<String>>>> = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&seen);
@@ -548,7 +676,11 @@ mod tests {
         let spec = CardToggleGroupSpec::new(options());
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = card_toggle_group(&spec, &ctx, Some(on_change));
+        let node = card_toggle_group_with_handlers(
+            &spec,
+            &ctx,
+            CardToggleGroupHandlers::new("toggling").on_value_change(on_change),
+        );
 
         let cells = cells(&node);
         assert_eq!(cells.len(), 3, "one focusable cell per option");
@@ -576,7 +708,11 @@ mod tests {
             .with_allow_deactivation(true);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = card_toggle_group(&spec, &ctx, Some(on_change));
+        let node = card_toggle_group_with_handlers(
+            &spec,
+            &ctx,
+            CardToggleGroupHandlers::new("deactivate").on_value_change(on_change),
+        );
 
         let cells = cells(&node);
         let alpha = cells
@@ -589,6 +725,30 @@ mod tests {
             .as_ref()
             .expect("alpha is activatable"))();
         assert_eq!(seen.lock().unwrap().as_slice(), [None]);
+    }
+
+    #[test]
+    fn the_legacy_entry_point_keeps_the_pressed_value_payload() {
+        use std::sync::Mutex;
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let on_change: Arc<dyn Fn(&str) + Send + Sync> =
+            Arc::new(move |v: &str| sink.lock().unwrap().push(v.to_owned()));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = card_toggle_group(&CardToggleGroupSpec::new(options()), &ctx, Some(on_change));
+
+        let cells = cells(&node);
+        let beta = cells
+            .iter()
+            .find(|c| c.has_text("Beta"))
+            .expect("beta cell");
+        (beta
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("beta is activatable"))();
+        assert_eq!(seen.lock().unwrap().as_slice(), ["beta"]);
     }
 
     #[test]
@@ -609,7 +769,7 @@ mod tests {
         let mut opts = options();
         opts[2] = opts[2].clone().with_disabled(true);
         let spec = CardToggleGroupSpec::new(opts);
-        let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: Option<&str>| {})));
+        let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: &str| {})));
 
         let cells = cells(&node);
         let gamma = cells
@@ -637,7 +797,7 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
         let spec = CardToggleGroupSpec::new(options()).with_disabled(true);
-        let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: Option<&str>| {})));
+        let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: &str| {})));
         // The web contract dims the option, never the root; a root that dimmed
         // too would double-dim the group.
         assert_eq!(node.style.descriptor.opacity, 1.0);
