@@ -663,10 +663,7 @@ pub fn filter_builder(
         let mut surface_el = Node::container();
         surface_el.runtime_id = Some(dialog_id);
         surface_el.a11y.role = Some(NodeRole::Dialog);
-        surface_el.a11y.label = Some(format!(
-            "Edit {}s",
-            spec.aria_label.to_lowercase()
-        ));
+        surface_el.a11y.label = Some(format!("Edit {}s", spec.aria_label.to_lowercase()));
         surface_el.a11y.tab_index = Some(-1);
         {
             let s = &mut surface_el.style;

@@ -6,8 +6,8 @@
 use std::sync::{Arc, Mutex};
 
 use poodle_node::{
-    CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeKey, NodeRole,
+    CrossAxisAlignment, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeKey,
+    NodeRole,
 };
 use poodle_specs::{Alignment, Orientation, ToolbarSpec};
 
@@ -135,9 +135,7 @@ pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>)
     let focus_state_on_entry = Arc::clone(&focus_state);
     el.interaction.on_focus_change = Some(Arc::new(move |focused| {
         if focused {
-            *focus_state_on_entry
-                .lock()
-                .expect("toolbar focus state") = None;
+            *focus_state_on_entry.lock().expect("toolbar focus state") = None;
         }
     }));
     let targets = focus_targets;
@@ -156,9 +154,7 @@ pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>)
         }
         let next = match *current.lock().expect("toolbar focus state") {
             None => 0,
-            Some(index) => {
-                (index as isize + direction).rem_euclid(targets.len() as isize) as usize
-            }
+            Some(index) => (index as isize + direction).rem_euclid(targets.len() as isize) as usize,
         };
         Some(targets[next].clone())
     }));

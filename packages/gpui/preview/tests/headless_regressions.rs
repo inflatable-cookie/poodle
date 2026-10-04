@@ -8647,8 +8647,7 @@ fn first_mounted_parity_data_table() {
         node.id = Some("mounted-data-table".to_owned());
         node.runtime_id = node.id.clone();
         node.children[0].children[0].id = Some("mounted-data-table-sort-name".to_owned());
-        node.children[0].children[0].runtime_id =
-            node.children[0].children[0].id.clone();
+        node.children[0].children[0].runtime_id = node.children[0].children[0].id.clone();
         node.children[1].id = Some("mounted-data-table-row-ada".to_owned());
         node.children[1].runtime_id = node.children[1].id.clone();
 
@@ -8756,7 +8755,10 @@ fn first_mounted_parity_filter_builder() {
         assert_eq!(*payloads.lock().expect("filter payloads"), ["toggle"]);
         driver.focus_element(&trigger_id);
         driver.dispatch_key_raw("enter");
-        assert_eq!(*payloads.lock().expect("filter payloads"), ["toggle", "toggle"]);
+        assert_eq!(
+            *payloads.lock().expect("filter payloads"),
+            ["toggle", "toggle"]
+        );
         assert!(driver.mounted_observation().is_valid());
         let _ = poodle_gpui_node_backend::take_probe_capture();
     });
@@ -8793,8 +8795,7 @@ fn first_mounted_parity_filter_toolbar() {
         node.children[0].id = Some("mounted-filter-toolbar-header".to_owned());
         node.children[0].runtime_id = node.children[0].id.clone();
         node.children[0].children[0].id = Some("mounted-filter-toolbar-toggle".to_owned());
-        node.children[0].children[0].runtime_id =
-            node.children[0].children[0].id.clone();
+        node.children[0].children[0].runtime_id = node.children[0].children[0].id.clone();
         let toggle = &node.children[0].children[0];
         let toggle_id = toggle
             .runtime_id
