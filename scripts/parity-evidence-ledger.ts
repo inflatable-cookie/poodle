@@ -201,6 +201,8 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   RefSelect: "first_mounted_parity_ref_select",
   RelationPicker: "first_mounted_parity_relation_picker",
   ThemeSelect: "first_mounted_parity_theme_select",
+  HistoryCenter: "first_mounted_parity_history_center",
+  PageLoading: "first_mounted_parity_page_loading",
 };
 
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;

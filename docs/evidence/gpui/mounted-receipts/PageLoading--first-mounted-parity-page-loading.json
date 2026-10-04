@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "ToggleGroup",
-  "test": "toggle_group_result_focus_identity_and_disabled_paths",
+  "component": "PageLoading",
+  "test": "first_mounted_parity_page_loading",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -19,9 +19,8 @@
       "production-mount"
     ],
     "events": [
-      "payloads.lock",
-      "assert_eq!(\n            payloads.lock().unwrap().as_slice(),\n            [\n                ToggleGroupValue::Single(Some(\"board\".into())),\n                ToggleGroupValue::Single(Some(\"board\".into())),\n            ],\n            \"same-value selection still emit",
-      "assert_eq!(\n            payload"
+      "assert_eq!(\n            host.lock().expect(\"loading host\").cancels,\n            2,\n            \"keyboard cancel callback payload",
+      "assert_eq!(\n            host.lock().expect(\"loading host\").cancels,\n            1,\n            \"pointer cancel callback payload"
     ],
     "pointer": [
       "pointer_activate"
@@ -29,25 +28,25 @@
     "keyboard_focus": [
       "focus_state_for",
       "focus_element",
-      "dispatch_key"
+      "keyboard_"
     ],
     "accessibility": [
-      "NodeToggled",
+      "accessible",
       "NodeRole",
       "a11y."
     ],
     "visual": [
-      "resolve_radius",
       "resolve_color",
-      "resolve_space"
+      "dimensions",
+      "rem_to_px"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::toggle_group",
+    "renderer": "poodle_render::presentation",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -60,7 +59,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-095-mounted-proofs",
     "outcome": "passed",
-    "body_sha256": "56ac2c57b2256e1f569f173ace64a5e9da8805ff630e8721e98ea0c4d7d90c7c"
+    "body_sha256": "6a723728e38dc0d5aa3b33539565059261d2088a811ad123f71fe67d4c0cc35a"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

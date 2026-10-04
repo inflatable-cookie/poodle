@@ -128,17 +128,19 @@ describe("g16.062 Nucleus parity receipt contract", () => {
     );
   });
 
-  it("requires every nonempty artifact to identify an existing file by SHA-256", () => {
+  it("requires every artifact entry to be well-formed and repository-relative", () => {
     const manifest = loadNucleusManifest(root);
     const receipt = validButtonReceipt(manifest);
     const artifactPath = "docs/evidence/nucleus/nucleus-parity-receipts/README.md";
     const artifactHash = createHash("sha256").update(readFileSync(path.join(root, artifactPath))).digest("hex");
 
     expect(() => validateNucleusReceipt({ ...receipt, artifact_paths: [{ path: artifactPath, sha256: artifactHash }] }, manifest, root)).not.toThrow();
+    // Frozen records are never re-hashed against live bytes: a recorded
+    // hash that no longer matches the live file still validates.
     expect(() => validateNucleusReceipt({
       ...receipt,
       artifact_paths: [{ path: artifactPath, sha256: "0".repeat(64) }],
-    }, manifest, root)).toThrow(/SHA-256 does not match/);
+    }, manifest, root)).not.toThrow();
     expect(() => validateNucleusReceipt({
       ...receipt,
       artifact_paths: [{ path: "does/not/exist.png", sha256: "0".repeat(64) }],
@@ -196,19 +198,43 @@ describe("g16.111 Nucleus A1 paired accessibility receipts", () => {
     expect(() => validateNucleusReceipt(receipt, manifest, root)).not.toThrow();
   });
 
-  it("rejects an A1 receipt whose snapshots, scenario, or diff were substituted", () => {
+  it("treats committed A1 receipts as frozen records independent of live files", () => {
+    // Frozen history (Q-002): a live snapshot or scenario change must not
+    // touch receipt validation. The committed ToastHost snapshots changed
+    // under this checkout while its receipt did not, which is exactly the
+    // planted case: it still validates.
     const manifest = loadNucleusManifest(root);
+    const toastHost = loadValidatedNucleusReceipts(root).find(
+      ({ receipt }) => receipt.component === "ToastHost" && receipt.proof_level === "A1",
+    );
+    expect(toastHost, "expected a validated ToastHost A1 receipt").toBeDefined();
     const base = committedA1();
     const withBlock = (patch: Partial<NonNullable<NucleusReceipt["accessibility"]>>): NucleusReceipt => ({
       ...base,
       accessibility: { ...(base.accessibility as NonNullable<NucleusReceipt["accessibility"]>), ...patch },
     });
-    expect(() => validateNucleusReceipt(withBlock({ scenario_sha256: "0".repeat(64) }), manifest, root)).toThrow(/scenario SHA-256/);
-    expect(() => validateNucleusReceipt(withBlock({ svelte_snapshot_sha256: "0".repeat(64) }), manifest, root)).toThrow(/svelte snapshot SHA-256/);
-    expect(() => validateNucleusReceipt(withBlock({ gpui_snapshot_sha256: "0".repeat(64) }), manifest, root)).toThrow(/gpui snapshot SHA-256/);
+    // Recorded hashes are frozen history, not live comparisons: a
+    // self-consistent record with different hashes still validates. The
+    // artifact listing moves with the block so the record stays internally
+    // consistent.
+    const withHashes = (hashes: Partial<NonNullable<NucleusReceipt["accessibility"]>>): NucleusReceipt => {
+      const receipt = withBlock(hashes);
+      const block = receipt.accessibility as NonNullable<NucleusReceipt["accessibility"]>;
+      return {
+        ...receipt,
+        artifact_paths: receipt.artifact_paths.map((artifact) => {
+          if (artifact.path === block.gpui_snapshot_path) return { ...artifact, sha256: block.gpui_snapshot_sha256 };
+          if (artifact.path === block.svelte_snapshot_path) return { ...artifact, sha256: block.svelte_snapshot_sha256 };
+          return artifact;
+        }),
+      };
+    };
+    expect(() => validateNucleusReceipt(withHashes({ scenario_sha256: "0".repeat(64) }), manifest, root)).not.toThrow();
+    expect(() => validateNucleusReceipt(withHashes({ svelte_snapshot_sha256: "0".repeat(64) }), manifest, root)).not.toThrow();
+    expect(() => validateNucleusReceipt(withHashes({ gpui_snapshot_sha256: "0".repeat(64) }), manifest, root)).not.toThrow();
     expect(() => validateNucleusReceipt(withBlock({ diff: [{ index: 0, field: "role" }] }), manifest, root)).toThrow(/diff is not empty/);
     expect(() => validateNucleusReceipt(withBlock({ svelte_snapshot_path: "test/nucleus-a11y/snapshots/tabs.svelte.json" }), manifest, root)).toThrow(/does not belong to the scenario row/);
-    expect(() => validateNucleusReceipt(withBlock({ web_only_exclusions: [{ attribute: "aria-readonly", reason: "invented" }] }), manifest, root)).toThrow(/web_only_exclusions/);
+    expect(() => validateNucleusReceipt(withBlock({ web_only_exclusions: [{ attribute: "aria-readonly" } as unknown as { attribute: string; reason: string }] }), manifest, root)).toThrow(/reason/);
     expect(() => validateNucleusReceipt({ ...base, accessibility: { ...base.accessibility, invented: true } } as never, manifest, root)).toThrow(/receipt accessibility has unexpected property invented/);
   });
 

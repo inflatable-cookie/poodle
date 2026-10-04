@@ -14,7 +14,8 @@ use poodle_node::{
     NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, ToastPosition, ToastStackSpec,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, ToastPosition,
+    ToastStackSpec, ToastTone,
 };
 
 use crate::button::button;
@@ -97,6 +98,77 @@ fn density_pad_scale(density: ControlDensity) -> f32 {
     }
 }
 
+/// The backend element id of a toast's dismiss control: the caller-scoped
+/// runtime id when set, else the semantic id. Mirrors the conversion's
+/// identity so transfer requests name handles that exist.
+fn dismiss_element_id(instance_id: Option<&str>, toast_id: &str) -> String {
+    scoped(instance_id, &format!("toast:{toast_id}:dismiss"))
+        .unwrap_or_else(|| format!("poodle-toast-dismiss-{toast_id}"))
+}
+
+/// Every element id one toast's row can own: the row, dismiss, and action
+/// ids, plain and caller-scoped. The transfer tests focus ownership and the
+/// entered-from boundary against exactly this set.
+fn toast_element_ids(instance_id: Option<&str>, toast_id: &str) -> Vec<String> {
+    let mut ids = vec![
+        format!("poodle-toast-{toast_id}"),
+        format!("poodle-toast-dismiss-{toast_id}"),
+        format!("poodle-toast-action-{toast_id}"),
+    ];
+    for part in ["dismiss", "action"] {
+        if let Some(scoped) = scoped(instance_id, &format!("toast:{toast_id}:{part}")) {
+            ids.push(scoped);
+        }
+    }
+    if let Some(scoped) = scoped(instance_id, &format!("toast:{toast_id}")) {
+        ids.push(scoped);
+    }
+    ids
+}
+
+/// Whether the element id names a part of one toast's row. The transfer uses
+/// it to test focus ownership and to keep the entered-from control outside
+/// this stack.
+fn toast_owns_element_id(instance_id: Option<&str>, toast_id: &str, element_id: &str) -> bool {
+    toast_element_ids(instance_id, toast_id)
+        .iter()
+        .any(|id| id == element_id)
+}
+
+/// Contract §8a transfer target for a dismissed toast, as a backend element
+/// id: the dismiss control on the next surviving toast, else the previous
+/// surviving toast's, else the entered-from control when it names nothing in
+/// this stack's own parts. Pure over the rendered order so every backend
+/// shares one decision; the backend drops targets with no mounted handle.
+pub fn toast_dismiss_focus_target(
+    toast_ids: &[String],
+    instance_id: Option<&str>,
+    removed_id: &str,
+    entered_from: Option<&str>,
+) -> Option<String> {
+    let position = toast_ids.iter().position(|id| id == removed_id)?;
+    let next = toast_ids
+        .iter()
+        .skip(position + 1)
+        .find(|id| id.as_str() != removed_id);
+    let previous = toast_ids[..position]
+        .iter()
+        .rev()
+        .find(|id| id.as_str() != removed_id);
+    if let Some(survivor) = next.or(previous) {
+        return Some(dismiss_element_id(instance_id, survivor));
+    }
+    match entered_from {
+        Some(from)
+            if !toast_ids
+                .iter()
+                .any(|id| toast_owns_element_id(instance_id, id, from)) =>
+        {
+            Some(from.to_owned())
+        }
+        _ => None,
+    }
+}
 fn all_corners(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
     c.top_left = r;
@@ -326,14 +398,48 @@ pub fn toast_stack(
         if let Some(handler) = &handlers.on_dismiss {
             let handler = Arc::clone(handler);
             let id = toast.id.clone();
-            dismiss.interaction.on_activate = Some(Arc::new(move || handler(&id)));
+            // Contract §8a, renderer-owned: the component moves focus, the
+            // host only removes the row. The dismiss control's own activation
+            // carries the transfer: next surviving row's dismiss, else the
+            // previous row's, else the still-connected entered-from control
+            // (the backend drops targets with no mounted handle). Only when
+            // the dismissed row owns focus — activation arrives through its
+            // own control, and anything else keeps its focus. Known edge:
+            // chained removals without re-entry can leave a dead inside id
+            // as the transit source; the backend drop then clears focus,
+            // which the contract reads as no connected entry existing.
+            let order: Vec<String> = spec.toasts.iter().map(|toast| toast.id.clone()).collect();
+            let instance = instance_id.map(str::to_owned);
+            dismiss.interaction.on_activate = Some(Arc::new(move || {
+                let entered = poodle_node::previous_focused_id();
+                let owned = poodle_node::current_focused_id()
+                    .as_deref()
+                    .is_some_and(|focused| {
+                        toast_owns_element_id(instance.as_deref(), &id, focused)
+                    });
+                handler(&id);
+                if !owned {
+                    return;
+                }
+                if let Some(target) =
+                    toast_dismiss_focus_target(&order, instance.as_deref(), &id, entered.as_deref())
+                {
+                    poodle_node::queue_focus_request(&target);
+                }
+            }));
         }
         let dismiss = dismiss.child(dismiss_icon);
 
         // Toast box: tinted fill + fade gradient, tone border,
-        // elevation-overlay shadow, clipped. Each toast is a list item.
+        // elevation-overlay shadow, clipped. Each toast is a list item, and a
+        // danger toast escalates to an alert — the native projection of the
+        // contract's assertive live region (contract §6).
         let mut toast_el = Node::container();
-        toast_el.a11y.role = Some(NodeRole::ListItem);
+        toast_el.a11y.role = Some(if toast.tone == ToastTone::Danger {
+            NodeRole::Alert
+        } else {
+            NodeRole::ListItem
+        });
         toast_el.position = NodePosition::Relative;
         toast_el.id = Some(format!("poodle-toast-{}", toast.id));
         toast_el.runtime_id = scoped(instance_id, &format!("toast:{}", toast.id));
@@ -373,11 +479,13 @@ pub fn toast_stack(
         el = el.child(toast_el.child(dismiss).child(accent_bar).child(content));
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
+    // Contract §3: the stack name defaults to "Notifications", matching Svelte.
+    let label = spec
+        .aria_label
+        .as_deref()
+        .filter(|label| !label.is_empty())
+        .unwrap_or("Notifications");
+    el.a11y.label = Some(label.to_string());
     // Contract: the stack is a list of toasts.
     el.a11y.role = Some(NodeRole::List);
     el
@@ -411,7 +519,7 @@ mod tests {
     }
 
     #[test]
-    fn every_tone_projects_as_a_list_item() {
+    fn danger_projects_as_alert_while_other_tones_stay_list_items() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = ToastStackSpec::new().with_toasts(vec![
@@ -426,7 +534,8 @@ mod tests {
             .find(&|n| n.id.as_deref() == Some("poodle-toast-fail"))
             .expect("danger toast");
         assert_eq!(success.a11y.role, Some(NodeRole::ListItem));
-        assert_eq!(danger.a11y.role, Some(NodeRole::ListItem));
+        // Contract §6: danger escalates to the native alert projection.
+        assert_eq!(danger.a11y.role, Some(NodeRole::Alert));
     }
 
     #[test]
@@ -695,5 +804,50 @@ mod tests {
         assert!(action.interaction.focusable);
         assert_eq!(action.a11y.tab_index, Some(0));
         assert!(action.interaction.on_activate.is_none());
+    }
+
+    #[test]
+    fn dismiss_transfer_prefers_next_then_previous_then_outside_entry() {
+        let order = vec!["a".to_owned(), "b".to_owned(), "c".to_owned()];
+        assert_eq!(
+            toast_dismiss_focus_target(&order, None, "a", Some("outside")),
+            Some("poodle-toast-dismiss-b".to_owned())
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(&order, None, "c", Some("outside")),
+            Some("poodle-toast-dismiss-b".to_owned())
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(&order, None, "b", Some("outside")),
+            Some("poodle-toast-dismiss-c".to_owned()),
+            "the next surviving row wins over the previous one"
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(&["only".to_owned()], None, "only", Some("outside")),
+            Some("outside".to_owned())
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(
+                &["only".to_owned()],
+                None,
+                "only",
+                Some("poodle-toast-dismiss-only")
+            ),
+            None,
+            "an entered-from control inside the stack never counts"
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(&["only".to_owned()], None, "only", None),
+            None
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(&["only".to_owned()], None, "missing", Some("outside")),
+            None
+        );
+        assert_eq!(
+            toast_dismiss_focus_target(&order, Some("scope"), "b", Some("outside")),
+            Some("toast-host:scope:toast:c:dismiss".to_owned()),
+            "scoped stacks request the caller-scoped dismiss identity"
+        );
     }
 }

@@ -36,7 +36,7 @@
 use std::cell::RefCell;
 
 use gpui::{
-    AnyWindowHandle, App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point,
+    AnyWindowHandle, App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point, Window,
 };
 use poodle_node::{DismissHandler, DismissReason};
 
@@ -51,6 +51,9 @@ pub struct LayerRecord {
     pub bounds: Vec<Bounds<Pixels>>,
     /// The innermost layer this one sits inside, when any (tree ancestry).
     pub parent: Option<String>,
+    /// Whether Tab/Shift+Tab traps inside this layer while it is innermost.
+    /// Opt-in per surface through `Interaction::trap_focus`.
+    pub trap_focus: bool,
 }
 
 thread_local! {
@@ -68,6 +71,12 @@ thread_local! {
     /// applied by the target element's paint-time focus canvas, once.
     static FOCUS_REQUESTS: RefCell<std::collections::HashSet<String>> =
         RefCell::new(std::collections::HashSet::new());
+    /// Ordered tab stops per open layer, rebuilt each frame in tree order.
+    /// The window Tab/Shift+Tab trap walks this instead of the window-wide
+    /// traversal while its layer is open (the web surface's
+    /// `trapFocusKeydown`).
+    static LAYER_TAB_STOPS: RefCell<std::collections::HashMap<String, Vec<String>>> =
+        RefCell::new(std::collections::HashMap::new());
 }
 
 /// Begin a rendered frame: the layer registry and bounds are rebuilt per
@@ -91,6 +100,14 @@ fn overlay_frame_begin_common() {
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
     ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());
+    LAYER_TAB_STOPS.with(|stops| stops.borrow_mut().clear());
+    super::snapshot_focus_frame();
+    // Renderer-queued focus intent joins the machine-effect queue so the
+    // frame's paint applies it once; ids with no mounted handle are dropped
+    // at application, never resolved here.
+    for id in poodle_node::take_queued_focus_requests() {
+        request_focus(&id);
+    }
     // The ring registry is frame observation with the same lifetime: a
     // focused node that vanished paints nothing this frame, and its entry
     // must not survive it.
@@ -178,7 +195,8 @@ pub fn open_layer_count() -> usize {
 
 /// Rebuild the layer stack from the converted tree, in tree order. Runs for
 /// every independently converted root within the frame; the registry
-/// dedupes by layer id.
+/// dedupes by layer id. Tab stops join the per-layer walk in the same pass,
+/// so the window trap and the window traversal read one order.
 pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
     if let Some(id) = node.interaction.dismiss_layer.as_deref() {
         LAYERS.with(|layers| {
@@ -191,13 +209,50 @@ pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
                 handler: node.interaction.on_dismiss.clone(),
                 bounds: Vec::new(),
                 parent: innermost.filter(|parent| *parent != id).map(str::to_owned),
+                trap_focus: node.interaction.trap_focus,
             });
         });
     }
     let next = node.interaction.dismiss_layer.as_deref().or(innermost);
+    if let Some(layer_id) = next {
+        if is_layer_tab_stop(node) {
+            if let Some(key) = layer_element_key(node) {
+                LAYER_TAB_STOPS.with(|stops| {
+                    let mut stops = stops.borrow_mut();
+                    let entry = stops.entry(layer_id.to_owned()).or_default();
+                    if !entry.contains(&key) {
+                        entry.push(key);
+                    }
+                });
+            }
+        }
+    }
     for child in &node.children {
         collect_layers(child, next);
     }
+}
+
+/// The stable element identity the focus registries key on: the caller's
+/// runtime scope when set, else the semantic id. Mirrors the conversion's
+/// element identity so the trap names handles that exist.
+fn layer_element_key(node: &poodle_node::Node) -> Option<String> {
+    node.runtime_id.clone().or_else(|| node.id.clone())
+}
+
+/// Whether the node is a Tab stop of its layer: the same flags the handle
+/// carries (an explicit non-negative index wins; otherwise focusable means a
+/// stop), minus disabled and id-less nodes, whose generated identities the
+/// trap cannot name across frames.
+fn is_layer_tab_stop(node: &poodle_node::Node) -> bool {
+    if node.interaction.disabled {
+        return false;
+    }
+    if node.runtime_id.is_none() && node.id.is_none() {
+        return false;
+    }
+    node.a11y
+        .tab_index
+        .map_or(node.interaction.focusable, |index| index >= 0)
 }
 
 /// Paint-time bounds record for one element of a layer.
@@ -354,10 +409,12 @@ where
                     dismiss_innermost(cx);
                 }
                 "tab" => {
-                    if event.keystroke.modifiers.shift {
-                        window.focus_prev();
-                    } else {
-                        window.focus_next();
+                    if !trap_tab_in_innermost_layer(window, event.keystroke.modifiers.shift) {
+                        if event.keystroke.modifiers.shift {
+                            window.focus_prev();
+                        } else {
+                            window.focus_next();
+                        }
                     }
                     cx.refresh_windows();
                 }
@@ -370,4 +427,59 @@ where
     }
 
     el
+}
+
+/// Tab/Shift+Tab while a trapping overlay layer is innermost: keep traversal
+/// inside that layer's tab stops with first-last wrap (the web surface's
+/// `trapFocusKeydown`). Returns true when the trap consumed the key.
+/// Without an innermost trapping layer, or with no live stops in it, the
+/// window-wide traversal still runs — an untrapped surface lets Tab blur out.
+fn trap_tab_in_innermost_layer(window: &mut Window, reverse: bool) -> bool {
+    let trapped = LAYERS.with(|layers| {
+        layers
+            .borrow()
+            .last()
+            .map(|record| (record.id.clone(), record.trap_focus))
+    });
+    let Some((layer_id, trap_focus)) = trapped else {
+        return false;
+    };
+    if !trap_focus {
+        return false;
+    }
+    let stops =
+        LAYER_TAB_STOPS.with(|stops| stops.borrow().get(&layer_id).cloned().unwrap_or_default());
+    let live: Vec<String> = stops
+        .into_iter()
+        .filter(|id| super::focus_handle_for(id).is_some())
+        .collect();
+    if live.is_empty() {
+        return false;
+    }
+    let current = super::focused_element_id();
+    let target = match current
+        .as_deref()
+        .and_then(|id| live.iter().position(|stop| stop == id))
+    {
+        Some(index) => {
+            let next = if reverse {
+                (index + live.len() - 1) % live.len()
+            } else {
+                (index + 1) % live.len()
+            };
+            live[next].clone()
+        }
+        None => {
+            if reverse {
+                live.last().cloned().unwrap_or_default()
+            } else {
+                live.first().cloned().unwrap_or_default()
+            }
+        }
+    };
+    let Some(handle) = super::focus_handle_for(&target) else {
+        return false;
+    };
+    handle.focus(window);
+    true
 }
