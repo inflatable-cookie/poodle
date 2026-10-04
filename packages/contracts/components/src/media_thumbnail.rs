@@ -39,6 +39,8 @@ pub struct MediaThumbnailSpec {
     pub state: MediaState,
     pub aspect_ratio: AspectRatio,
     pub title: Option<String>,
+    /// Accessible name for the figure; falls back to `title` like Svelte.
+    pub aria_label: Option<String>,
     pub meta: Option<String>,
     pub badge_label: Option<String>,
     pub state_title: Option<String>,
@@ -60,6 +62,7 @@ impl MediaThumbnailSpec {
             state: MediaState::Ready,
             aspect_ratio: AspectRatio::Landscape,
             title: None,
+            aria_label: None,
             meta: None,
             badge_label: None,
             state_title: None,
@@ -85,6 +88,11 @@ impl MediaThumbnailSpec {
 
     pub fn with_title(mut self, title: impl Into<String>) -> Self {
         self.title = Some(title.into());
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
         self
     }
 

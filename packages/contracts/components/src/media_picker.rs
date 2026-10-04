@@ -45,6 +45,11 @@ pub struct MediaPickerSpec {
     pub title: String,
     pub is_open: bool,
     pub active_tab: MediaPickerTab,
+    /// Current browse filter. This mirrors the Svelte component's internal
+    /// `searchQuery` state so a native host can rebuild the pure renderer.
+    pub search_query: String,
+    /// Caret/selection for the controlled native search field.
+    pub search_selection: (usize, usize),
     /// Media items shown in the browse grid (contract `items` prop).
     pub items: Vec<MediaPickerItem>,
     /// File-type filter forwarded to the upload-tab FileUpload (`accept`).
@@ -65,6 +70,8 @@ impl MediaPickerSpec {
             title: title.into(),
             is_open: false,
             active_tab: MediaPickerTab::Browse,
+            search_query: String::new(),
+            search_selection: (0, 0),
             items: Vec::new(),
             accept: None,
             max_file_size: None,
@@ -82,6 +89,16 @@ impl MediaPickerSpec {
 
     pub fn with_active_tab(mut self, tab: MediaPickerTab) -> Self {
         self.active_tab = tab;
+        self
+    }
+
+    pub fn with_search_query(mut self, query: impl Into<String>) -> Self {
+        self.search_query = query.into();
+        self
+    }
+
+    pub fn with_search_selection(mut self, selection: (usize, usize)) -> Self {
+        self.search_selection = selection;
         self
     }
 

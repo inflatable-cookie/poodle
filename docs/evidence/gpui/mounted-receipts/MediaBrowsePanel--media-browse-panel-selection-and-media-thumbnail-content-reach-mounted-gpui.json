@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-mounted-receipt.v1",
-  "component": "Breadcrumbs",
-  "test": "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
+  "component": "MediaBrowsePanel",
+  "test": "media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui",
   "selector": "effigy regressions:native",
   "scenario_id": null,
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
@@ -20,33 +20,31 @@
     ],
     "events": [
       "payloads.lock",
-      "assert_eq!(\n            *payloads.lock().expect(\"payload",
-      "assert_eq!(*payloads.lock().expect(\"payload"
+      "assert_eq!(\n            *payloads.lock().expect(\"browse panel payloads\"),\n            vec![\"clip\", \"clip\"],\n            \"the selected media id is the callback payload",
+      "assert_eq!(\n            *payloads.lock().expect(\"browse panel payload"
     ],
     "pointer": [
       "pointer_activate"
     ],
     "keyboard_focus": [
-      "focus_handle_for",
-      "focus_state_for",
-      "focus_element"
+      "keyboard_"
     ],
     "accessibility": [
       "NodeRole",
       "a11y.",
-      "aria"
+      "assert_eq!(\n            image.a11y_label.as_deref(),\n            Some(\"Opening clip\"),\n            \"the image alternative name is announce"
     ],
     "visual": [
-      "resolve_color",
-      "rem_to_px"
+      "_geometry",
+      "geometry"
     ]
   },
   "production_path_observation": {
     "observed": true,
     "mount": "HeadlessDriver",
-    "driver": "HeadlessDriver::new_in_box",
+    "driver": "HeadlessDriver::new_element_in_box",
     "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
-    "renderer": "poodle_render::button",
+    "renderer": "poodle_render::RenderContext",
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "package": "poodle-gpui-preview",
@@ -59,7 +57,7 @@
     "command": "effigy regressions:native",
     "run_id": "2026-10-04-poodle-092",
     "outcome": "passed",
-    "body_sha256": "561ce7da7d9337c83ed4d7f6514460fbbe5317847d771cc9147d00bc8b684abd"
+    "body_sha256": "6652ca2d435a9298cd7e6059f95f431b9b7f9db8ba85646d9f5cf76cf39691f8"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

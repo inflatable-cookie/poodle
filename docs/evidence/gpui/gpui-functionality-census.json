@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "25a189e4c97286ee9ab4eca2415a08bd02749a29",
+  "source_commit": "56ac3abae918f453abc997e4b5b15c06dfe06a7d",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -4845,15 +4845,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#video_player_canvas_and_play_button_rebuild_the_mounted_host"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#video_player_canvas_and_play_button_rebuild_the_mounted_host"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#video_player_canvas_and_play_button_rebuild_the_mounted_host"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#video_player_canvas_and_play_button_rebuild_the_mounted_host"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#video_player_canvas_and_play_button_rebuild_the_mounted_host"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#video_player_canvas_and_play_button_rebuild_the_mounted_host"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4862,10 +4886,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for VideoPlayer; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/VideoPlayer--video-player-canvas-and-play-button-rebuild-the-mounted-host.json"
+      ],
+      "refusals": []
     },
     {
       "component": "DateTimeZonePicker",
@@ -6221,15 +6245,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_picker_dialog_search_selection_and_dismissal_rebuild_the_host"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_picker_dialog_search_selection_and_dismissal_rebuild_the_host"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_picker_dialog_search_selection_and_dismissal_rebuild_the_host"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_picker_dialog_search_selection_and_dismissal_rebuild_the_host"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_picker_dialog_search_selection_and_dismissal_rebuild_the_host"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_picker_dialog_search_selection_and_dismissal_rebuild_the_host"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6238,10 +6286,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MediaPicker; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MediaPicker--media-picker-dialog-search-selection-and-dismissal-rebuild-the-host.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MediaBrowsePanel",
@@ -6256,15 +6304,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_browse_panel_selection_and_media_thumbnail_content_reach_mounted_gpui"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6273,10 +6345,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MediaBrowsePanel; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MediaBrowsePanel--media-browse-panel-selection-and-media-thumbnail-content-reach-mounted-gpui.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MediaPreview",
@@ -6320,21 +6392,27 @@
       "substrate": "overlay-dismissal",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_thumbnail_states_name_and_size_reach_mounted_gpui"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_thumbnail_states_name_and_size_reach_mounted_gpui"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#media_thumbnail_states_name_and_size_reach_mounted_gpui"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6343,10 +6421,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for MediaThumbnail; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/MediaThumbnail--media-thumbnail-states-name-and-size-reach-mounted-gpui.json"
+      ],
+      "refusals": []
     },
     {
       "component": "PageHeader",
@@ -8240,18 +8318,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 97,
-    "fullyAdmittedRows": 74,
+    "admittedRows": 101,
+    "fullyAdmittedRows": 78,
     "missingTally": {
-      "semantic": 78,
-      "events": 67,
-      "pointer": 75,
-      "keyboard_focus": 71,
-      "accessibility": 84,
-      "visual": 97
+      "semantic": 74,
+      "events": 63,
+      "pointer": 71,
+      "keyboard_focus": 67,
+      "accessibility": 80,
+      "visual": 93
     },
     "holdCount": 175,
-    "refusalCount": 141
+    "refusalCount": 137
   },
   "groups": [
     {
@@ -8312,59 +8390,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "DataTable",
-        "Field",
-        "FilterBuilder",
-        "FilterToolbar",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "MediaBrowsePanel",
-        "MediaPicker",
-        "MediaThumbnail",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack",
-        "Toolbar",
-        "VideoPlayer"
-      ],
-      "missingTally": {
-        "semantic": 19,
-        "events": 17,
-        "pointer": 19,
-        "keyboard_focus": 19,
-        "accessibility": 19,
-        "visual": 19
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/data-table.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/filter-builder.md",
-        "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/media-browse-panel.md",
-        "docs/contracts/components/media-picker.md",
-        "docs/contracts/components/media-thumbnail.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md",
-        "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/video-player.md"
-      ]
-    },
-    {
       "substrate": "drag-resize-reorder",
       "components": [
         "AppHeader",
@@ -8407,6 +8432,51 @@
         "docs/contracts/components/separator.md",
         "docs/contracts/components/split-view.md",
         "docs/contracts/components/token-input.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ColorPicker",
+        "ContextMenu",
+        "DataTable",
+        "Field",
+        "FilterBuilder",
+        "FilterToolbar",
+        "HistoryCenter",
+        "HoverCard",
+        "ListCardCounter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack",
+        "Toolbar"
+      ],
+      "missingTally": {
+        "semantic": 15,
+        "events": 13,
+        "pointer": 15,
+        "keyboard_focus": 15,
+        "accessibility": 15,
+        "visual": 15
+      },
+      "contracts": [
+        "docs/contracts/components/color-picker.md",
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/data-table.md",
+        "docs/contracts/components/field.md",
+        "docs/contracts/components/filter-builder.md",
+        "docs/contracts/components/filter-toolbar.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/hover-card.md",
+        "docs/contracts/components/list-card-counter.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md",
+        "docs/contracts/components/toolbar.md"
       ]
     },
     {

@@ -761,6 +761,7 @@ pub(crate) struct PageLoading {
 pub(crate) struct MediaPicker {
     spec: MediaPickerSpec,
     theme: GpuiThemeProvider,
+    handlers: poodle_render::MediaPickerHandlers,
 }
 
 pub(crate) struct DataTable {
@@ -1108,6 +1109,7 @@ impl MediaPicker {
         Self {
             spec,
             theme: theme.clone(),
+            handlers: poodle_render::MediaPickerHandlers::default(),
         }
     }
 
@@ -1116,12 +1118,13 @@ impl MediaPicker {
         self
     }
 
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::media_picker(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            poodle_render::MediaPickerHandlers::default(),
-        )
+        poodle_render::media_picker(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 

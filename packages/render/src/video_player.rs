@@ -6,14 +6,46 @@
 //! Fixed white-on-black chrome regardless of theme (contract §8); the seek
 //! bar is a Progress node relying on the widget's default accent fill.
 
+use std::sync::Arc;
+
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow,
-    LayoutSizing, MainAxisAlignment, Node, NodeKind,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, FontFamily, LayoutDirection,
+    LayoutOverflow, LayoutSizing, MainAxisAlignment, Node, NodeKind, NodeRole,
 };
 use poodle_specs::VideoPlayerSpec;
 
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
+
+/// Host-owned playback transition for the native VideoPlayer's canvas and
+/// keyboard-accessible Play/Pause controls.
+#[derive(Clone, Default)]
+pub struct VideoPlayerHandlers {
+    instance_id: Option<String>,
+    pub on_playing_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+}
+
+impl VideoPlayerHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "VideoPlayerHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id: Some(instance_id),
+            ..Self::default()
+        }
+    }
+}
+
+fn stamp(node: &mut Node, handlers: &VideoPlayerHandlers, part: &str) {
+    if let Some(instance_id) = &handlers.instance_id {
+        let id = format!("video-player:{instance_id}:{part}");
+        node.id = Some(id.clone());
+        node.runtime_id = Some(id);
+    }
+}
 
 /// Format seconds as m:ss (contract `.video-player__time`).
 fn format_time(seconds: f64) -> String {
@@ -22,6 +54,14 @@ fn format_time(seconds: f64) -> String {
 }
 
 pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
+    video_player_with_handlers(spec, ctx, &VideoPlayerHandlers::default())
+}
+
+pub fn video_player_with_handlers(
+    spec: &VideoPlayerSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &VideoPlayerHandlers,
+) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let radius = ctx.theme().resolve_radius("radius.surface");
@@ -64,11 +104,12 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
             "skip-forward" => "Skip forward",
             "volume-2" => "Mute",
             "volume-x" => "Unmute",
-            "maximize" => "Full screen",
-            "minimize" => "Exit full screen",
+            "maximize" | "maximize-2" => "Fullscreen",
+            "minimize" | "minimize-2" => "Exit fullscreen",
             other => other,
         };
         let mut b = Node::button("");
+        b.a11y.role = Some(NodeRole::Button);
         b.a11y.label = Some(action.to_string());
         {
             let s = &mut b.style;
@@ -80,6 +121,11 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
             s.descriptor.cursor = CursorHint::Pointer;
         }
         b.interaction.focusable = true;
+        b.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
         let mut glyph = Node::icon(name, icon_size);
         glyph.style.descriptor.text_color = Some(white_90);
         b.child(glyph)
@@ -91,6 +137,19 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
     // controls to the bottom edge; without both, the viewport collapses to zero
     // and the controls ride up out of the black surface.
     let mut el = Node::container();
+    stamp(&mut el, handlers, "root");
+    el.a11y.role = Some(NodeRole::Group);
+    el.a11y.label = Some(
+        spec.aria_label
+            .as_deref()
+            .filter(|label| !label.is_empty())
+            .unwrap_or("Video player")
+            .to_string(),
+    );
+    if let Some(handler) = handlers.on_playing_change.clone() {
+        let next = !spec.is_playing;
+        el.interaction.on_activate = Some(Arc::new(move || handler(next)));
+    }
     {
         let s = &mut el.style;
         s.descriptor.background = Some(black);
@@ -106,6 +165,7 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
 
     // ── Video area (placeholder — no native video) ─────────────────────────
     let mut video_area = Node::container();
+    stamp(&mut video_area, handlers, "canvas");
     {
         let s = &mut video_area.style;
         s.descriptor.background = Some(black);
@@ -121,7 +181,9 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
     // Big play button — only when paused at currentTime=0.
     let video_area = if !spec.is_playing && spec.current_time <= 0.0 {
         let mut big = Node::button("");
-        big.a11y.label = Some("Play".to_string());
+        stamp(&mut big, handlers, "big-play");
+        big.a11y.role = Some(NodeRole::Button);
+        big.a11y.label = Some("Play video".to_string());
         {
             let s = &mut big.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(big_play_size);
@@ -136,7 +198,15 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
         // inside it.
         big.style.descriptor.border.width = rem_to_px(0.125);
         big.style.descriptor.border.color = white_90;
+        big.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
+        });
         big.interaction.focusable = true;
+        if let Some(handler) = handlers.on_playing_change.clone() {
+            big.interaction.on_activate = Some(Arc::new(move || handler(true)));
+        }
         let mut glyph = Node::icon("play", big_play_size * 0.5);
         glyph.style.descriptor.text_color = Some(white_90);
         video_area.child(big.child(glyph))
@@ -148,6 +218,9 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
 
     // ── Controls overlay ───────────────────────────────────────────────────
     let mut controls = Node::container();
+    // Svelte stops clicks in the controls region from reaching the canvas
+    // playback handler. GPUI models that boundary with its normal click path.
+    controls.interaction.on_activate = Some(Arc::new(|| {}));
     {
         let s = &mut controls.style;
         s.descriptor.background = Some(overlay);
@@ -191,8 +264,15 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
     }
 
     // Play/pause + mute (icon swaps).
+    let mut play_control = transport(if spec.is_playing { "pause" } else { "play" });
+    stamp(&mut play_control, handlers, "play");
+    play_control.a11y.role = Some(NodeRole::Button);
+    if let Some(handler) = handlers.on_playing_change.clone() {
+        let next = !spec.is_playing;
+        play_control.interaction.on_activate = Some(Arc::new(move || handler(next)));
+    }
     let mut bar = bar
-        .child(transport(if spec.is_playing { "pause" } else { "play" }))
+        .child(play_control)
         .child(transport(if spec.volume <= 0.0 {
             "volume-x"
         } else {
@@ -275,10 +355,5 @@ pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
     controls = controls.child(bar);
     el = el.child(controls);
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
     el
 }

@@ -60,59 +60,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "DataTable",
-        "Field",
-        "FilterBuilder",
-        "FilterToolbar",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "MediaBrowsePanel",
-        "MediaPicker",
-        "MediaThumbnail",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack",
-        "Toolbar",
-        "VideoPlayer"
-      ],
-      "missingTally": {
-        "semantic": 19,
-        "events": 17,
-        "pointer": 19,
-        "keyboard_focus": 19,
-        "accessibility": 19,
-        "visual": 19
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/data-table.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/filter-builder.md",
-        "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/media-browse-panel.md",
-        "docs/contracts/components/media-picker.md",
-        "docs/contracts/components/media-thumbnail.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md",
-        "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/video-player.md"
-      ]
-    },
-    {
       "substrate": "drag-resize-reorder",
       "components": [
         "AppHeader",
@@ -155,6 +102,51 @@
         "docs/contracts/components/separator.md",
         "docs/contracts/components/split-view.md",
         "docs/contracts/components/token-input.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ColorPicker",
+        "ContextMenu",
+        "DataTable",
+        "Field",
+        "FilterBuilder",
+        "FilterToolbar",
+        "HistoryCenter",
+        "HoverCard",
+        "ListCardCounter",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack",
+        "Toolbar"
+      ],
+      "missingTally": {
+        "semantic": 15,
+        "events": 13,
+        "pointer": 15,
+        "keyboard_focus": 15,
+        "accessibility": 15,
+        "visual": 15
+      },
+      "contracts": [
+        "docs/contracts/components/color-picker.md",
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/data-table.md",
+        "docs/contracts/components/field.md",
+        "docs/contracts/components/filter-builder.md",
+        "docs/contracts/components/filter-toolbar.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/hover-card.md",
+        "docs/contracts/components/list-card-counter.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md",
+        "docs/contracts/components/toolbar.md"
       ]
     },
     {

@@ -1448,13 +1448,26 @@
       "substrate": "overlay-dismissal",
       "required": [
         "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
         "accessibility",
         "visual"
       ],
-      "notApplicable": []
+      "notApplicable": [
+        {
+          "axis": "events",
+          "reason": "Contract declares no component callbacks or events.",
+          "contractRef": "docs/contracts/components/media-thumbnail.md#6. Events"
+        },
+        {
+          "axis": "pointer",
+          "reason": "The contract defines a passive figure with no component-owned events, so it has no pointer interaction to prove.",
+          "contractRef": "docs/contracts/components/media-thumbnail.md#3. Anatomy"
+        },
+        {
+          "axis": "keyboard_focus",
+          "reason": "The contract defines a passive figure that is not a focus stop and has no keyboard behavior.",
+          "contractRef": "docs/contracts/components/media-thumbnail.md#3. Anatomy"
+        }
+      ]
     },
     {
       "component": "Menu",
