@@ -165,6 +165,35 @@
       ]
     },
     {
+      "substrate": "drag-resize-reorder",
+      "components": [
+        "Card",
+        "DockRegion",
+        "DragNumberField",
+        "FileUpload",
+        "MarkdownEditor",
+        "Separator",
+        "TokenInput"
+      ],
+      "missingTally": {
+        "semantic": 5,
+        "events": 3,
+        "pointer": 5,
+        "keyboard_focus": 6,
+        "accessibility": 7,
+        "visual": 7
+      },
+      "contracts": [
+        "docs/contracts/components/card.md",
+        "docs/contracts/components/dock-region.md",
+        "docs/contracts/components/drag-number-field.md",
+        "docs/contracts/components/file-upload.md",
+        "docs/contracts/components/markdown-editor.md",
+        "docs/contracts/components/separator.md",
+        "docs/contracts/components/token-input.md"
+      ]
+    },
+    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
