@@ -492,15 +492,15 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
     if (!component.portable) continue;
     const contractPath = `docs/contracts/components/${component.slug}.md`;
     const contract = read(root, contractPath);
-    // MediaThumbnail orders Events after Types, Anatomy, Props, and Snippets.
-    // Read that real section without changing how any other contract is parsed.
+    // AppHeader and MediaThumbnail order Events after the usual §5 position.
+    // Read those real sections without changing how any other contract is parsed.
     const staticFigureWithoutEvents =
       component.name === "MediaThumbnail" &&
       /\[Root\].*<figure>/.test(contract) &&
       /No component-owned events\./.test(contract);
     const events = headingBody(
       contract,
-      staticFigureWithoutEvents ? /^## 6\. Events/ : /^## 5\. /,
+      staticFigureWithoutEvents || component.name === "AppHeader" ? /^## 6\. Events/ : /^## 5\. /,
     );
     const keyboard = headingBody(contract, /^### Keyboard/);
     const focus = headingBody(contract, /^### Focus/);
@@ -515,6 +515,7 @@ export function deriveCapabilityManifest(root = ROOT): ManifestEntry[] {
       (/^\|\s*none\s*\|/m.test(events.body) ||
         /^\s*None\.\s*$/m.test(events.body) ||
         /^No component-owned events are dispatched\./m.test(events.body) ||
+        (component.name === "AppHeader" && /^No component-owned events\./m.test(events.body)) ||
         /layout primitive only|no events/i.test(events.body) ||
         staticFigureWithoutEvents);
     const keyboardRows = keyboard.body
