@@ -7,15 +7,36 @@
   "scenario_note": "Expected-test rows carry no Nucleus scenario; the named mounted test is the scenario identity.",
   "contract_claims": [
     "semantic",
-    "keyboard_focus"
+    "events",
+    "pointer",
+    "keyboard_focus",
+    "accessibility",
+    "visual"
   ],
   "signals": {
     "semantic": [
       "assert",
       "production-mount"
     ],
+    "events": [
+      "assert_eq!(\n            checks.lock().unwrap().as_slice(),\n            [\"check\".to_string()],\n            \"the retry dispatches the check callback payload",
+      "assert_eq!(\n            installs.lock().unwrap().as_slice(),\n            [\"install\".to_string()],\n            \"the install callback payload",
+      "assert_eq!(\n            defers.lock().unwrap().as_slice(),\n            [\"defer\".to_string()],\n            \"the defer callback payload"
+    ],
+    "pointer": [
+      "pointer_activate"
+    ],
     "keyboard_focus": [
       "keyboard_"
+    ],
+    "accessibility": [
+      "accessible",
+      "NodeRole",
+      "a11y."
+    ],
+    "visual": [
+      "resolve_color",
+      "resolve_space"
     ]
   },
   "production_path_observation": {
@@ -28,19 +49,23 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "f548373b78aeaae5286c15f2643f507b33a2c488",
+  "source_commit": "b0ce71cc7a597137953177b6ada51d56dc51d821",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-085-rebase-onto-086",
+    "run_id": "2026-10-04-poodle-087-rebase-onto-085",
     "outcome": "passed",
-    "body_sha256": "c6a78779c87a548d3e7c9196bad0d882cfe0b5e45d29bdf294b17abd08d8b495"
+    "body_sha256": "c4598e81879dd27a99f81dbf78af0fb84fcf3aaa296d702c0adad9a3d46a1e18"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",
-    "drove real keyboard input or backend focus through the mounted tree"
+    "asserted emitted payloads or handler delivery through mounted input",
+    "drove real pointer activation through the mounted GPUI node backend",
+    "drove real keyboard input or backend focus through the mounted tree",
+    "asserted node-level role, label, state, or focusability in the mounted tree",
+    "asserted resolved token values or mounted geometry"
   ],
   "outcome": "passed"
 }

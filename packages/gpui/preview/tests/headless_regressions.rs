@@ -12790,7 +12790,7 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
 #[test]
 fn update_status_confirm_then_install_through_the_real_tree() {
     use poodle_headless::update::{
-        OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus,
+        OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus, UpdateRejectionCode,
     };
     use poodle_specs::UpdateStatusSpec;
 
@@ -12871,6 +12871,147 @@ fn update_status_confirm_then_install_through_the_real_tree() {
         driver.keyboard_activate("update-status-confirm");
         assert_eq!(confirms.lock().unwrap().as_slice(), [true, false]);
         assert_eq!(*installs.lock().unwrap(), 1);
+    });
+
+    // ── The offer route: real pointer input, callback payloads, and the
+    //    accessible names the contract names for the trailing actions ──
+    run_headless(|cx| {
+        fn offer() -> UpdateAvailabilityProjection {
+            UpdateAvailabilityProjection::Offer {
+                version: "1.4.0".to_string(),
+                reason: OfferReason::Staged,
+                notes: None,
+            }
+        }
+
+        let installs = Arc::new(Mutex::new(Vec::new()));
+        let defers = Arc::new(Mutex::new(Vec::new()));
+        let install_sink = Arc::clone(&installs);
+        let defer_sink = Arc::clone(&defers);
+        let mut node = poodle_render::update_status(
+            &UpdateStatusSpec::new()
+                .with_status(UpdateControllerStatus::Ready)
+                .with_availability(offer())
+                .with_confirm_install(false),
+            &RenderContext::new(&theme()),
+            poodle_render::UpdateStatusHandlers {
+                instance_id: Some("offer".to_string()),
+                on_install: Some(Arc::new(move || {
+                    install_sink.lock().unwrap().push("install".to_string())
+                })),
+                on_defer: Some(Arc::new(move || {
+                    defer_sink.lock().unwrap().push("defer".to_string())
+                })),
+                ..poodle_render::UpdateStatusHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 420.0, 240.0);
+
+        // Contract §7: the state is text and the actions are named controls.
+        {
+            let nodes = driver.accessibility_nodes();
+            assert!(
+                nodes.iter().any(|n| {
+                    n.role == NodeRole::Button && n.label.as_deref() == Some("Install and restart")
+                }),
+                "the install action carries its accessible name"
+            );
+            assert!(
+                nodes
+                    .iter()
+                    .any(|n| { n.role == NodeRole::Button && n.label.as_deref() == Some("Later") }),
+                "the defer action carries its accessible name"
+            );
+        }
+
+        driver.wait_for_focus_handle("offer-install");
+        driver.pointer_activate_id("offer-install");
+        assert_eq!(
+            installs.lock().unwrap().as_slice(),
+            ["install".to_string()],
+            "the install callback payload reaches the host"
+        );
+        driver.wait_for_focus_handle("offer-defer");
+        driver.pointer_activate_id("offer-defer");
+        assert_eq!(
+            defers.lock().unwrap().as_slice(),
+            ["defer".to_string()],
+            "the defer callback payload reaches the host"
+        );
+    });
+
+    // ── The rejection notice: the danger recipe tokens the contract names,
+    //    the polite status role, and the retry route through the real tree ──
+    run_headless(|cx| {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::color::with_alpha;
+
+        let checks = Arc::new(Mutex::new(Vec::new()));
+        let check_sink = Arc::clone(&checks);
+        let mut node = poodle_render::update_status(
+            &UpdateStatusSpec::new()
+                .with_status(UpdateControllerStatus::Ready)
+                .with_last_rejection(UpdateRejectionCode::Unreachable),
+            &RenderContext::new(&theme()),
+            poodle_render::UpdateStatusHandlers {
+                instance_id: Some("rejected".to_string()),
+                on_check: Some(Arc::new(move || {
+                    check_sink.lock().unwrap().push("check".to_string())
+                })),
+                ..poodle_render::UpdateStatusHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 420.0, 240.0);
+
+        // Contract §7: a rejection is a polite status, never an alert.
+        // Contract §8: the rejection recipe resolves the danger mix tokens.
+        {
+            let provider = theme();
+            let status_danger = provider.resolve_color("color.status.danger");
+            let mounted = node.lock().expect("mount lock");
+            let notice = mounted
+                .find(&|n| {
+                    n.a11y.role == Some(NodeRole::Status)
+                        && n.roles.get("tone").map(String::as_str) == Some("danger")
+                })
+                .expect("the rejection mounts as a danger status region");
+            assert_eq!(
+                notice.style.descriptor.border.color,
+                with_alpha(status_danger, status_danger.3 * 0.45),
+                "the rejection border resolves the 45% danger recipe"
+            );
+            assert_eq!(
+                notice.style.descriptor.background,
+                Some(with_alpha(status_danger, status_danger.3 * 0.10)),
+                "the rejection fill resolves the 10% danger recipe"
+            );
+            assert_eq!(
+                notice.style.descriptor.layout.spacing.padding.left,
+                provider.resolve_space("space.stack.sm"),
+                "the notice keeps its resolved stack inset"
+            );
+        }
+        {
+            let nodes = driver.accessibility_nodes();
+            assert!(
+                nodes
+                    .iter()
+                    .any(|n| n.role == NodeRole::Button && n.label.as_deref() == Some("Try again")),
+                "a rejection that permits retry mounts a named retry control"
+            );
+        }
+
+        driver.wait_for_focus_handle("rejected-retry");
+        driver.pointer_activate_id("rejected-retry");
+        assert_eq!(
+            checks.lock().unwrap().as_slice(),
+            ["check".to_string()],
+            "the retry dispatches the check callback payload"
+        );
     });
 }
 
@@ -12954,6 +13095,72 @@ fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
         assert!(
             texts.iter().any(|t| *t == "Version 1.4.0 is available"),
             "attention plus open hosts UpdateStatus; got {texts:?}"
+        );
+    });
+
+    // ── The trigger's pointer route, the open-change payload, and the
+    //    resolved attention indicator the contract's token table names ──
+    run_headless(|cx| {
+        use poodle_adapter::ThemeProvider;
+        use poodle_render::presentation::rem_to_px;
+
+        fn offer() -> UpdateAvailabilityProjection {
+            UpdateAvailabilityProjection::Offer {
+                version: "1.4.0".to_string(),
+                reason: OfferReason::Staged,
+                notes: None,
+            }
+        }
+
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&opens);
+        let mut node = poodle_render::update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Attention)
+                .with_status(UpdateControllerStatus::Ready)
+                .with_availability(offer())
+                .with_open(false),
+            &RenderContext::new(&theme()),
+            poodle_render::UpdateCenterHandlers {
+                instance_id: Some("center".to_string()),
+                on_open_change: Some(Arc::new(move |open| sink.lock().unwrap().push(open))),
+                ..poodle_render::UpdateCenterHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 420.0, 240.0);
+
+        // Contract §7: the trigger is a named control and the indicator is
+        // decorative. Contract §8: attention paints the resolved indicator
+        // fill at the authored dot size.
+        {
+            let provider = theme();
+            let nodes = driver.accessibility_nodes();
+            let trigger = nodes
+                .iter()
+                .find(|n| n.role == NodeRole::Button && n.label.as_deref() == Some("Updates"))
+                .expect("the trigger carries its accessible name");
+            assert_eq!(trigger.expanded, Some(false));
+            let mounted = node.lock().expect("mount lock");
+            let dot = mounted
+                .find(&|n| {
+                    matches!(n.position, NodePosition::Absolute { .. })
+                        && n.style.descriptor.layout.width == LayoutSizing::Fixed(rem_to_px(0.5))
+                })
+                .expect("attention paints the indicator");
+            assert_eq!(
+                dot.style.descriptor.background,
+                Some(provider.resolve_color("color.accent.base")),
+                "the indicator paints the resolved accent fill"
+            );
+        }
+
+        driver.wait_for_focus_handle("center-trigger");
+        driver.pointer_activate_id("center-trigger");
+        assert_eq!(
+            opens.lock().unwrap().as_slice(),
+            [true],
+            "the trigger click delivers the open-change callback payload"
         );
     });
 }
@@ -16164,19 +16371,27 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
     use poodle_specs::AgentPlanRecordSpec;
 
     run_headless(|cx| {
-        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+        use poodle_adapter::ThemeProvider;
+
+        fn build(
+            expanded: bool,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
             let spec = AgentPlanRecordSpec::new(
                 "## Proposed plan\n\n1. Wire the host.",
                 AgentPlanStatus::Accepted,
             )
             .with_expanded(expanded);
             let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
             let record = poodle_render::agent_plan_record(
                 &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::AgentPlanRecordHandlers {
                     on_toggle: Some(Arc::new(move |next| {
-                        *mount.lock().unwrap() = build(next, Arc::clone(&mount));
+                        sink.lock().unwrap().push(next);
+                        *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
                     })),
                     instance_id: Some("mounted".to_string()),
                 },
@@ -16190,12 +16405,54 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                 }))
         }
 
+        let payloads = Arc::new(Mutex::new(Vec::new()));
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&payloads));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
         let toggle = poodle_render::agent_plan_record_toggle_focus_id(Some("mounted"));
+
+        // Contract §6: the disclosure is the only focusable part, and it
+        // announces itself and its state rather than leaving them to be
+        // inferred from what appears.
+        {
+            let nodes = driver.accessibility_nodes();
+            let control = nodes
+                .iter()
+                .find(|n| n.semantic_id.as_deref() == Some("agent-plan-record-toggle"))
+                .expect("the disclosure is in the mounted accessibility tree");
+            assert_eq!(control.role, NodeRole::Button);
+            assert_eq!(control.label.as_deref(), Some("Show plan"));
+            assert_eq!(control.expanded, Some(false));
+        }
+        // Contract §8 resolved tokens and §7 card posture.
+        {
+            let provider = theme();
+            let record = mounted.lock().expect("mount lock");
+            let root = record.children.first().expect("record root");
+            assert_eq!(
+                root.style.descriptor.background,
+                Some(provider.resolve_color("color.background.surface")),
+                "the record paints the resolved surface fill"
+            );
+            assert_eq!(
+                root.style.descriptor.border.color,
+                provider.resolve_color("color.border.subtle"),
+                "the record paints the resolved subtle border"
+            );
+            assert_eq!(
+                root.style.descriptor.corner_radii.top_left,
+                provider.resolve_radius("radius.control"),
+                "the record paints the resolved control radius"
+            );
+        }
+
         driver.wait_for_focus_handle(&toggle);
         driver.keyboard_activate(&toggle);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [true],
+            "the disclosure callback payload reaches the host"
+        );
         assert!(
             mounted
                 .lock()
@@ -16209,6 +16466,45 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             poodle_gpui_node_backend::focus_state_for(&toggle),
             Some(true),
             "disclosure keeps the same backend focus handle across the rebuild"
+        );
+
+        // The pointer route drives the same disclosure and reports the next
+        // collapsed state back to the host.
+        driver.pointer_activate_id(&toggle);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [true, false],
+            "the pointer route delivers the next disclosure payload"
+        );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Record: shut"),
+            "the pointer route painted the collapsed spec"
+        );
+    });
+
+    // A dismissed plan is a non-event: the badge drops from accent strength to
+    // meta strength, matching Svelte's `[data-status="dismissed"]` rule.
+    run_headless(|_cx| {
+        use poodle_adapter::ThemeProvider;
+
+        let dismissed = poodle_render::agent_plan_record(
+            &AgentPlanRecordSpec::new("## Proposed plan\n", AgentPlanStatus::Dismissed),
+            &RenderContext::new(&theme()),
+            poodle_render::AgentPlanRecordHandlers::default(),
+        );
+        let provider = theme();
+        let badge = dismissed
+            .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "Dismissed"))
+            .expect("the dismissed badge paints its status label");
+        assert_eq!(
+            badge.style.descriptor.text_color,
+            Some(provider.resolve_color("color.text.tertiary")),
+            "a dismissed badge drops to meta strength, not accent"
         );
     });
 }

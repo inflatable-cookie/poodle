@@ -100,8 +100,14 @@ impl AgentPlanRecordSpec {
     pub fn radius_token(&self) -> &'static str {
         semantic::RADIUS_CONTROL
     }
+    /// A dismissed plan is a non-event: its badge drops from accent to meta
+    /// strength, matching Svelte's `[data-status="dismissed"]` rule
+    /// (contract §8 and the Tier 2 visual checklist).
     pub fn badge_token(&self) -> &'static str {
-        semantic::COLOR_ACCENT_BASE
+        match self.status {
+            AgentPlanStatus::Dismissed => semantic::COLOR_TEXT_TERTIARY,
+            _ => semantic::COLOR_ACCENT_BASE,
+        }
     }
     /// One step down from live prose: this is history, not the current subject.
     pub fn summary_token(&self) -> &'static str {
@@ -150,6 +156,21 @@ mod tests {
 
         let labelled = spec.with_decision_label("Accepted with changes");
         assert_eq!(labelled.badge_label(), "Accepted with changes");
+    }
+
+    #[test]
+    fn a_dismissed_badge_drops_to_meta_strength() {
+        assert_eq!(
+            AgentPlanRecordSpec::new("Ship it.", AgentPlanStatus::Dismissed).badge_token(),
+            semantic::COLOR_TEXT_TERTIARY,
+        );
+        for status in [AgentPlanStatus::Accepted, AgentPlanStatus::Revised] {
+            assert_eq!(
+                AgentPlanRecordSpec::new("Ship it.", status).badge_token(),
+                semantic::COLOR_ACCENT_BASE,
+                "{status:?} keeps the accent badge"
+            );
+        }
     }
 
     #[test]

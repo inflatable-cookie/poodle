@@ -5,7 +5,6 @@
     {
       "substrate": "overlay-dismissal",
       "components": [
-        "AgentPlanRecord",
         "AlertDialog",
         "ColorPicker",
         "ContextMenu",
@@ -37,20 +36,17 @@
         "ThemeSelect",
         "ToastStack",
         "Toolbar",
-        "UpdateCenter",
-        "UpdateStatus",
         "VideoPlayer"
       ],
       "missingTally": {
         "semantic": 32,
-        "events": 32,
-        "pointer": 35,
+        "events": 29,
+        "pointer": 32,
         "keyboard_focus": 32,
-        "accessibility": 34,
-        "visual": 35
+        "accessibility": 32,
+        "visual": 32
       },
       "contracts": [
-        "docs/contracts/components/agent-plan-record.md",
         "docs/contracts/components/alert-dialog.md",
         "docs/contracts/components/color-picker.md",
         "docs/contracts/components/context-menu.md",
@@ -82,8 +78,6 @@
         "docs/contracts/components/theme-select.md",
         "docs/contracts/components/toast-stack.md",
         "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/update-center.md",
-        "docs/contracts/components/update-status.md",
         "docs/contracts/components/video-player.md"
       ]
     },

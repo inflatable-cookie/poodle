@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "f548373b78aeaae5286c15f2643f507b33a2c488",
+  "source_commit": "b0ce71cc7a597137953177b6ada51d56dc51d821",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -7000,17 +7000,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_status_confirm_then_install_through_the_real_tree"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_status_confirm_then_install_through_the_real_tree"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_status_confirm_then_install_through_the_real_tree"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_status_confirm_then_install_through_the_real_tree"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_status_confirm_then_install_through_the_real_tree"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_status_confirm_then_install_through_the_real_tree"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7022,12 +7037,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/UpdateStatus--update-status-confirm-then-install-through-the-real-tree.json"
       ],
-      "refusals": [
-        "Expected test update_status_confirm_then_install_through_the_real_tree proves no events claim; events stays missing.",
-        "Expected test update_status_confirm_then_install_through_the_real_tree proves no pointer claim; pointer stays missing.",
-        "Expected test update_status_confirm_then_install_through_the_real_tree proves no accessibility claim; accessibility stays missing.",
-        "Expected test update_status_confirm_then_install_through_the_real_tree proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "UpdateCenter",
@@ -7049,6 +7059,16 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_center_hidden_presence_mounts_nothing_and_open_shows_status"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_center_hidden_presence_mounts_nothing_and_open_shows_status"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_center_hidden_presence_mounts_nothing_and_open_shows_status"
+        },
+        {
           "axis": "keyboard_focus",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_center_hidden_presence_mounts_nothing_and_open_shows_status"
@@ -7057,13 +7077,14 @@
           "axis": "accessibility",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_center_hidden_presence_mounts_nothing_and_open_shows_status"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#update_center_hidden_presence_mounts_nothing_and_open_shows_status"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7075,11 +7096,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/UpdateCenter--update-center-hidden-presence-mounts-nothing-and-open-shows-status.json"
       ],
-      "refusals": [
-        "Expected test update_center_hidden_presence_mounts_nothing_and_open_shows_status proves no events claim; events stays missing.",
-        "Expected test update_center_hidden_presence_mounts_nothing_and_open_shows_status proves no pointer claim; pointer stays missing.",
-        "Expected test update_center_hidden_presence_mounts_nothing_and_open_shows_status proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ToastStack",
@@ -7785,17 +7802,32 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
           "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input"
+        },
+        {
+          "axis": "visual",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input"
         }
       ],
-      "missing": [
-        "events",
-        "pointer",
-        "accessibility",
-        "visual"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7807,12 +7839,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/AgentPlanRecord--agent-plan-record-disclosure-rebuilds-the-host-spec-through-mounted-input.json"
       ],
-      "refusals": [
-        "Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no events claim; events stays missing.",
-        "Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no pointer claim; pointer stays missing.",
-        "Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no accessibility claim; accessibility stays missing.",
-        "Expected test agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input proves no visual claim; visual stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "AgentTranscript",
@@ -7906,23 +7933,22 @@
   ],
   "summary": {
     "admittedRows": 84,
-    "fullyAdmittedRows": 58,
+    "fullyAdmittedRows": 61,
     "missingTally": {
       "semantic": 91,
-      "events": 82,
-      "pointer": 91,
+      "events": 79,
+      "pointer": 88,
       "keyboard_focus": 84,
-      "accessibility": 99,
-      "visual": 113
+      "accessibility": 97,
+      "visual": 110
     },
     "holdCount": 175,
-    "refusalCount": 165
+    "refusalCount": 154
   },
   "groups": [
     {
       "substrate": "overlay-dismissal",
       "components": [
-        "AgentPlanRecord",
         "AlertDialog",
         "ColorPicker",
         "ContextMenu",
@@ -7954,20 +7980,17 @@
         "ThemeSelect",
         "ToastStack",
         "Toolbar",
-        "UpdateCenter",
-        "UpdateStatus",
         "VideoPlayer"
       ],
       "missingTally": {
         "semantic": 32,
-        "events": 32,
-        "pointer": 35,
+        "events": 29,
+        "pointer": 32,
         "keyboard_focus": 32,
-        "accessibility": 34,
-        "visual": 35
+        "accessibility": 32,
+        "visual": 32
       },
       "contracts": [
-        "docs/contracts/components/agent-plan-record.md",
         "docs/contracts/components/alert-dialog.md",
         "docs/contracts/components/color-picker.md",
         "docs/contracts/components/context-menu.md",
@@ -7999,8 +8022,6 @@
         "docs/contracts/components/theme-select.md",
         "docs/contracts/components/toast-stack.md",
         "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/update-center.md",
-        "docs/contracts/components/update-status.md",
         "docs/contracts/components/video-player.md"
       ]
     },

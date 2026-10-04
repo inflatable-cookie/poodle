@@ -20,6 +20,7 @@ use poodle_specs::{
 
 use crate::alert_dialog::{alert_dialog, AlertDialogHandlers};
 use crate::button::button;
+use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::progress::progress;
@@ -107,6 +108,9 @@ pub fn update_status(
     let text_primary = ctx.theme().resolve_color("color.text.primary");
     let text_secondary = ctx.theme().resolve_color("color.text.secondary");
     let danger = ctx.theme().resolve_color("color.text.danger");
+    // The rejection recipe mixes the status danger, not the danger text token
+    // (contract §8: `color-mix(in srgb, var(--poodle-color-status-danger) …)`).
+    let status_danger = ctx.theme().resolve_color("color.status.danger");
     let title_color = if matches!(view.tone, poodle_headless::update::UpdateStatusTone::Danger) {
         danger
     } else {
@@ -175,6 +179,26 @@ pub fn update_status(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
+            let radius = ctx.theme().resolve_radius("radius.control");
+            let c = &mut s.descriptor.corner_radii;
+            c.top_left = radius;
+            c.top_right = radius;
+            c.bottom_right = radius;
+            c.bottom_left = radius;
+            let pad = &mut s.descriptor.layout.spacing.padding;
+            pad.top = ctx.theme().resolve_space("space.panel.y");
+            pad.bottom = ctx.theme().resolve_space("space.panel.y");
+            pad.left = ctx.theme().resolve_space("space.stack.sm");
+            pad.right = ctx.theme().resolve_space("space.stack.sm");
+            // Contract §8: only the rejection notice has named hooks, and it is
+            // the one fault tone. `color-mix(in srgb, status-danger 45%, transparent)`
+            // is the status danger at 45% alpha (fill: 10%). A deferral stays a
+            // plain text row; it is a postponed command that succeeded.
+            if matches!(notice.tone, UpdateStatusNoticeTone::Danger) {
+                s.descriptor.border.width = rem_to_px(0.0625);
+                s.descriptor.border.color = with_alpha(status_danger, status_danger.3 * 0.45);
+                s.descriptor.background = Some(with_alpha(status_danger, status_danger.3 * 0.10));
+            }
         }
         notice_row.a11y.role = Some(NodeRole::Status);
         notice_row.roles.insert(
@@ -186,9 +210,11 @@ pub fn update_status(
         );
         let mut message = Node::text(&notice.message);
         message.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
+        // The rejection recipe text falls back to text-primary: the fill and
+        // border carry the fault, not the copy. A deferral is secondary.
         message.style.descriptor.text_color = Some(match notice.tone {
-            UpdateStatusNoticeTone::Danger => danger,
-            UpdateStatusNoticeTone::Neutral => text_primary,
+            UpdateStatusNoticeTone::Danger => text_primary,
+            UpdateStatusNoticeTone::Neutral => text_secondary,
         });
         notice_row = notice_row.child(message);
         if let Some(retry) = notice.retry {
