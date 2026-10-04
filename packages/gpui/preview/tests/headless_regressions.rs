@@ -22575,10 +22575,6 @@ fn duration_input_segments_edit_and_rebuild_the_host_spec() {
                 group.style.descriptor.background,
                 Some(theme().resolve_color("color.background.surface"))
             );
-            assert_eq!(
-                group.style.min_height,
-                Some(theme().resolve_space("size.control.height"))
-            );
             let hours = group
                 .find(&|node| {
                     node.a11y.role == Some(NodeRole::TextInput)

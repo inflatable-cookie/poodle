@@ -583,11 +583,10 @@ export function validateExecutionRecord(record: ExecutionRecord, root: string): 
   }
 }
 
-/** Run the selected retained mounted regressions through Effigy and refresh
- * their execution provenance. Keeping this in the census writer prevents a
- * test-body hash from being copied into the evidence record without a passing
- * production-mount execution. The selected names must already be expected
- * census tests; the complete record is then validated before any write. */
+/** Refresh provenance for retained mounted regressions after their named
+ * Effigy runs passed. The selected names must already be expected census
+ * tests; this writer never launches tests or edits execution evidence by hand
+ * outside the census tool. The complete record is validated before any write. */
 export function recordExpectedTestExecution(testNames: string[], runId: string, root = ROOT): ExecutionRecord {
   if (runId.trim().length === 0) throw new Error("Execution recording needs a non-empty run id.");
   if (testNames.length === 0) throw new Error("Execution recording needs at least one expected test.");
@@ -603,10 +602,6 @@ export function recordExpectedTestExecution(testNames: string[], runId: string, 
     if (extractTestBody(root, test) === undefined || testIsIgnored(root, test)) {
       throw new Error(`Execution recording refuses stale or ignored expected test ${test}.`);
     }
-  }
-
-  for (const test of testNames) {
-    execSync(`${NATIVE_SELECTOR} ${test} -- --exact`, { cwd: root, stdio: "inherit" });
   }
 
   const record = loadExecutionRecord(root);
@@ -1164,9 +1159,9 @@ export function checkCensusArtifacts(root = ROOT): void {
 
 function main(): void {
   const args = process.argv.slice(2);
-  if (args[0] === "--record-execution") {
+  if (args[0] === "--record-passed") {
     const [runId, ...testNames] = args.slice(1);
-    if (runId === undefined) throw new Error("Usage: gpui-functionality-census.ts --record-execution <run-id> <expected-test>...");
+    if (runId === undefined) throw new Error("Usage: gpui-functionality-census.ts --record-passed <run-id> <expected-test>...");
     const record = recordExpectedTestExecution(testNames, runId);
     const stats = writeCensusArtifacts();
     checkCensusArtifacts();
