@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ContextMenu } from "../src/ContextMenu";
@@ -28,6 +28,7 @@ describe("ContextMenu (react) dismissOnOutsideInteract", () => {
 
     await fireEvent.mouseDown(document.body);
     expect(surfaceOf()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(triggerOf(container)));
   });
 
   it("keeps the menu open on outside mousedown when dismissOnOutsideInteract=false", async () => {
@@ -97,5 +98,63 @@ describe("ContextMenu (react) triggerless overlay", () => {
     expect(surfaceOf()).not.toBeNull();
     expect(surfaceOf().getAttribute("role")).toBe("menu");
     expect(surfaceOf().getAttribute("aria-label")).toBe("Row actions");
+  });
+});
+
+describe("ContextMenu (react) focus restoration", () => {
+  it("returns focus to the keyboard invoker on Escape", async () => {
+    const { getByTestId } = render(
+      <ContextMenu items={items}>
+        <button type="button" data-testid="invoker">Invoker</button>
+      </ContextMenu>,
+    );
+    const invoker = getByTestId("invoker") as HTMLButtonElement;
+    invoker.focus();
+
+    fireEvent.keyDown(invoker, { key: "F10", shiftKey: true });
+    expect(document.querySelector(".poodle-menu-surface")).not.toBeNull();
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(document.querySelector(".poodle-menu-surface")).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(invoker));
+  });
+
+  it("returns focus to the right-clicked invoker after item activation", async () => {
+    const { getByTestId } = render(
+      <ContextMenu items={items}>
+        <button type="button" data-testid="invoker">Invoker</button>
+      </ContextMenu>,
+    );
+    const invoker = getByTestId("invoker") as HTMLButtonElement;
+
+    fireEvent.contextMenu(invoker);
+    const rename = document.querySelector<HTMLElement>(".poodle-menu-surface [role='menuitem']");
+    expect(rename).not.toBeNull();
+    fireEvent.click(rename!);
+
+    expect(document.querySelector(".poodle-menu-surface")).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(invoker));
+  });
+
+  it("falls back to the surviving root when the invoking target is removed", async () => {
+    const { container, getByTestId, rerender } = render(
+      <ContextMenu items={items}>
+        <button type="button" data-testid="invoker">Invoker</button>
+      </ContextMenu>,
+    );
+    const invoker = getByTestId("invoker") as HTMLButtonElement;
+    const root = container.querySelector<HTMLElement>(".poodle-context-menu")!;
+
+    fireEvent.contextMenu(invoker);
+    rerender(
+      <ContextMenu items={items}>
+        <span>Invoker removed</span>
+      </ContextMenu>,
+    );
+    expect(invoker.isConnected).toBe(false);
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(document.querySelector(".poodle-menu-surface")).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(root));
   });
 });

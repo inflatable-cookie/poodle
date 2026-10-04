@@ -3,6 +3,8 @@
 </script>
 
 <script lang="ts">
+  import { tick } from "svelte";
+
   import "@inflatable-cookie/poodle-core/styles/sidebar-nav.css";
   import type {
     ControlDensity,
@@ -36,12 +38,14 @@
   }: Props = $props();
 
   const sidebarNavId = ++nextSidebarNavId;
+  let navElement = $state<HTMLElement | null>(null);
 
   const visibleGroups = $derived(groups.filter((group) => group.items.length > 0));
 
   let contextMenuOpen = $state(false);
   let contextMenuAnchor = $state<{ x: number; y: number } | null>(null);
   let contextMenuItemValue = $state<string | null>(null);
+  let contextMenuFocusCandidates: HTMLElement[] = [];
 
   const contextMenuHost = $derived(
     visibleGroups
@@ -64,18 +68,53 @@
     return !item.disabled && (item.contextMenuItems?.length ?? 0) > 0;
   }
 
-  function openContextMenu(item: SidebarNavItem, x: number, y: number): void {
+  function openContextMenu(item: SidebarNavItem, x: number, y: number, invoker: HTMLElement): void {
     if (!itemHasContextMenu(item)) return;
+    contextMenuFocusCandidates = focusCandidatesFor(invoker);
     contextMenuItemValue = item.value;
     contextMenuAnchor = { x, y };
     contextMenuOpen = true;
   }
 
+  function focusCandidatesFor(invoker: HTMLElement): HTMLElement[] {
+    const items = Array.from(navElement?.querySelectorAll<HTMLElement>(".poodle-sidebar-nav__item") ?? []);
+    const invokerIndex = items.indexOf(invoker);
+    const peers = items
+      .filter((item) => item !== invoker && !item.hasAttribute("disabled"))
+      .sort((left, right) => {
+        const leftDistance = Math.abs(items.indexOf(left) - invokerIndex);
+        const rightDistance = Math.abs(items.indexOf(right) - invokerIndex);
+        return leftDistance - rightDistance || items.indexOf(left) - items.indexOf(right);
+      });
+    return [invoker, ...peers, ...(navElement ? [navElement] : [])];
+  }
+
+  function restoreContextMenuFocus(): void {
+    const candidates = contextMenuFocusCandidates;
+    contextMenuFocusCandidates = [];
+    tick().then(() => {
+      setTimeout(() => {
+        for (const candidate of candidates) {
+          if (!candidate.isConnected) continue;
+          candidate.focus();
+          if (candidate.ownerDocument.activeElement === candidate) return;
+        }
+      }, 0);
+    });
+  }
+
+  function handleContextMenuOpenChange(open: boolean): void {
+    contextMenuOpen = open;
+    if (!open) restoreContextMenuFocus();
+  }
+
   function handleItemContextMenu(item: SidebarNavItem, event: MouseEvent): void {
     if (!itemHasContextMenu(item)) return;
+    const invoker = event.currentTarget;
+    if (!(invoker instanceof HTMLElement)) return;
     event.preventDefault();
     event.stopPropagation();
-    openContextMenu(item, event.clientX, event.clientY);
+    openContextMenu(item, event.clientX, event.clientY, invoker);
   }
 
   function handleItemKeydown(item: SidebarNavItem, event: KeyboardEvent): void {
@@ -89,7 +128,7 @@
     const target = event.currentTarget;
     if (!(target instanceof HTMLElement)) return;
     const rect = target.getBoundingClientRect();
-    openContextMenu(item, rect.left + 16, rect.top + 16);
+    openContextMenu(item, rect.left + 16, rect.top + 16, target);
   }
 
   function handleContextAction(actionValue: string): void {
@@ -99,7 +138,9 @@
 </script>
 
 <nav
+  bind:this={navElement}
   class="poodle-sidebar-nav"
+  tabindex="-1"
   data-size={size ?? undefined}
   data-density={density ?? undefined}
   data-size-role={sizeRole}
@@ -175,5 +216,6 @@
     sizeRole={sizeRole}
     density={density}
     onAction={handleContextAction}
+    onOpenChange={handleContextMenuOpenChange}
   />
 </nav>

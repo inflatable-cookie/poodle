@@ -23,11 +23,13 @@ pub const CONTEXT_MENU_LAYER_ID: &str = "context-menu-layer";
 /// Escape and outside-pointer listeners; the host closes on the reason.
 #[derive(Clone, Default)]
 pub struct ContextMenuHandlers {
-    /// Item activation with the committed value.
+    /// Item activation with the committed value. The host closes the panel
+    /// and restores focus to the invocation target after handling it.
     pub on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Document-level dismissal (escape / outside). Present registers the
-    /// surface on the dismiss stack; absent keeps the previous behavior
-    /// (the host owns dismissal entirely).
+    /// surface on the dismiss stack; absent leaves dismissal with the host.
+    /// The host owns invocation and restores focus to that target, or its
+    /// nearest surviving fallback, after closing the panel.
     pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
 }
 

@@ -32,7 +32,8 @@ export interface ContextMenuProps {
   /**
    * When false, the consumer owns invocation (tree row, canvas, etc.) and
    * supplies controlled `open` + `anchorPoint`. No tab-stop button is
-   * rendered; `menuTransition` still owns open/close/dismiss/action.
+   * rendered; `menuTransition` still owns open/close/dismiss/action, and the
+   * consumer owns focus restoration.
    */
   trigger?: boolean;
   onOpenChange?: ((open: boolean) => void) | undefined;
@@ -59,7 +60,8 @@ export function ContextMenu({
 
   const surfaceRef = useRef<MenuSurfaceHandle | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const pendingFocus = useRef(false);
+  const focusRestoreCandidates = useRef<HTMLElement[]>([]);
+  const wasOpen = useRef(false);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [uncontrolledAnchorPoint, setUncontrolledAnchorPoint] = useState<{ x: number; y: number } | null>(anchorPoint);
 
@@ -80,10 +82,49 @@ export function ContextMenu({
   );
 
   useEffect(() => {
-    if (!isOpen) return;
-    pendingFocus.current = false;
-    surfaceRef.current?.focusFirstItem();
+    if (isOpen) {
+      wasOpen.current = true;
+      surfaceRef.current?.focusFirstItem();
+      return;
+    }
+
+    if (!wasOpen.current) return;
+    wasOpen.current = false;
+    const candidates = focusRestoreCandidates.current;
+    focusRestoreCandidates.current = [];
+    setTimeout(() => restoreFocus(candidates), 0);
   }, [isOpen]);
+
+  function rememberInvoker(target: EventTarget | null): void {
+    const element = target instanceof HTMLElement
+      ? target
+      : target instanceof Element
+        ? target.parentElement
+        : null;
+    const candidates: HTMLElement[] = [];
+    let current = element && rootRef.current?.contains(element) ? element : rootRef.current;
+
+    while (current) {
+      candidates.push(current);
+      if (current === rootRef.current) {
+        break;
+      }
+      current = current.parentElement;
+    }
+
+    if (rootRef.current && !candidates.includes(rootRef.current)) {
+      candidates.push(rootRef.current);
+    }
+    focusRestoreCandidates.current = candidates;
+  }
+
+  function restoreFocus(candidates: HTMLElement[]): void {
+    for (const candidate of candidates) {
+      if (!candidate.isConnected) continue;
+      candidate.focus();
+      if (candidate.ownerDocument.activeElement === candidate) return;
+    }
+  }
 
   function send(event: MenuMachineEvent): void {
     const result = menuTransition(isOpen ? "open" : "closed", {}, event);
@@ -92,9 +133,6 @@ export function ContextMenu({
       if (effect.type === "emitOpenChange") {
         if (!isControlled) {
           setUncontrolledOpen(effect.open);
-        }
-        if (effect.open) {
-          pendingFocus.current = true;
         }
 
         onOpenChange?.(effect.open);
@@ -106,8 +144,8 @@ export function ContextMenu({
 
   function handleContextMenu(event: ReactMouseEvent): void {
     event.preventDefault();
+    rememberInvoker(event.target);
     setUncontrolledAnchorPoint({ x: event.clientX, y: event.clientY });
-    pendingFocus.current = true;
     send({ type: "OPEN" });
   }
 
@@ -122,9 +160,14 @@ export function ContextMenu({
       return;
     }
 
+    const activeElement = target.ownerDocument.activeElement;
+    rememberInvoker(
+      activeElement instanceof HTMLElement && rootRef.current?.contains(activeElement)
+        ? activeElement
+        : event.target,
+    );
     const rect = target.getBoundingClientRect();
     setUncontrolledAnchorPoint({ x: rect.left + 16, y: rect.top + 16 });
-    pendingFocus.current = true;
     send({ type: "OPEN" });
   }
 
