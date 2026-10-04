@@ -71,12 +71,13 @@ prefer the narrower current authority and repair the stale document.
 - Capability absence is declared with a reason, never inferred from a runtime
   being silent. A declared absence records debt; it does not count as parity
   or component completion.
-- Adding a public field to a native spec struct (for example `aria_label:
-  Option<String>` with a `with_*` builder, following `ListContainerSpec`) is
-  not a breaking migration while the native crates have no release and no
-  external consumer: build specs through `new()` and `with_*`, update any
-  in-repo callers in the same change, and don't hide the field behind
-  handlers or renderer-only arguments (planner ruling 2026-10-04, #83).
+- While the native crates have no release and no external consumer, changing
+  their public Rust API (adding a spec field such as `aria_label:
+  Option<String>` with a `with_*` builder, or giving a renderer a handlers
+  argument such as `LogListHandlers`) is not a breaking migration. Update
+  every in-repo caller in the same change, build specs through `new()` and
+  `with_*`, and don't hide a contract input behind handlers or renderer-only
+  arguments (planner ruling 2026-10-04, #83).
 
 ## Runtime Parity Authority
 
