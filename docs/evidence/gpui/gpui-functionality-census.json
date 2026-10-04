@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "10099684f8ab842f498b363ea4df640a707ecdbe",
+  "source_commit": "25a189e4c97286ee9ab4eca2415a08bd02749a29",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -2788,6 +2788,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
+        },
+        {
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
@@ -2808,9 +2813,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_ref_select"
         }
       ],
-      "missing": [
-        "events"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -2822,9 +2825,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/RefSelect--first-mounted-parity-ref-select.json"
       ],
-      "refusals": [
-        "Expected test first_mounted_parity_ref_select proves no events claim; events stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "RadioGroup",
@@ -4503,6 +4504,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
+        },
+        {
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
@@ -4523,9 +4529,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_theme_select"
         }
       ],
-      "missing": [
-        "events"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -4537,9 +4541,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/ThemeSelect--first-mounted-parity-theme-select.json"
       ],
-      "refusals": [
-        "Expected test first_mounted_parity_theme_select proves no events claim; events stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "ToggleGroup",
@@ -6454,6 +6456,11 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
         },
         {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
+        },
+        {
           "axis": "pointer",
           "via": "expected-test",
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
@@ -6474,9 +6481,7 @@
           "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_relation_picker"
         }
       ],
-      "missing": [
-        "events"
-      ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6488,9 +6493,7 @@
       "receipts": [
         "docs/evidence/gpui/mounted-receipts/RelationPicker--first-mounted-parity-relation-picker.json"
       ],
-      "refusals": [
-        "Expected test first_mounted_parity_relation_picker proves no events claim; events stays missing."
-      ]
+      "refusals": []
     },
     {
       "component": "SelectionSummary",
@@ -8238,78 +8241,19 @@
   ],
   "summary": {
     "admittedRows": 97,
-    "fullyAdmittedRows": 71,
+    "fullyAdmittedRows": 74,
     "missingTally": {
       "semantic": 78,
-      "events": 70,
+      "events": 67,
       "pointer": 75,
       "keyboard_focus": 71,
       "accessibility": 84,
       "visual": 97
     },
     "holdCount": 175,
-    "refusalCount": 144
+    "refusalCount": 141
   },
   "groups": [
-    {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ColorPicker",
-        "ContextMenu",
-        "DataTable",
-        "Field",
-        "FilterBuilder",
-        "FilterToolbar",
-        "HistoryCenter",
-        "HoverCard",
-        "ListCardCounter",
-        "MediaBrowsePanel",
-        "MediaPicker",
-        "MediaThumbnail",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "RefSelect",
-        "RelationPicker",
-        "SplitButton",
-        "ThemeSelect",
-        "ToastStack",
-        "Toolbar",
-        "VideoPlayer"
-      ],
-      "missingTally": {
-        "semantic": 19,
-        "events": 20,
-        "pointer": 19,
-        "keyboard_focus": 19,
-        "accessibility": 19,
-        "visual": 19
-      },
-      "contracts": [
-        "docs/contracts/components/color-picker.md",
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/data-table.md",
-        "docs/contracts/components/field.md",
-        "docs/contracts/components/filter-builder.md",
-        "docs/contracts/components/filter-toolbar.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/hover-card.md",
-        "docs/contracts/components/list-card-counter.md",
-        "docs/contracts/components/media-browse-panel.md",
-        "docs/contracts/components/media-picker.md",
-        "docs/contracts/components/media-thumbnail.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/ref-select.md",
-        "docs/contracts/components/relation-picker.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/theme-select.md",
-        "docs/contracts/components/toast-stack.md",
-        "docs/contracts/components/toolbar.md",
-        "docs/contracts/components/video-player.md"
-      ]
-    },
     {
       "substrate": "feedback-status",
       "components": [
@@ -8365,6 +8309,59 @@
         "docs/contracts/components/spinner.md",
         "docs/contracts/components/status-bar.md",
         "docs/contracts/components/tool-call.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ColorPicker",
+        "ContextMenu",
+        "DataTable",
+        "Field",
+        "FilterBuilder",
+        "FilterToolbar",
+        "HistoryCenter",
+        "HoverCard",
+        "ListCardCounter",
+        "MediaBrowsePanel",
+        "MediaPicker",
+        "MediaThumbnail",
+        "Menubar",
+        "NavigationMenu",
+        "PageLoading",
+        "SplitButton",
+        "ToastStack",
+        "Toolbar",
+        "VideoPlayer"
+      ],
+      "missingTally": {
+        "semantic": 19,
+        "events": 17,
+        "pointer": 19,
+        "keyboard_focus": 19,
+        "accessibility": 19,
+        "visual": 19
+      },
+      "contracts": [
+        "docs/contracts/components/color-picker.md",
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/data-table.md",
+        "docs/contracts/components/field.md",
+        "docs/contracts/components/filter-builder.md",
+        "docs/contracts/components/filter-toolbar.md",
+        "docs/contracts/components/history-center.md",
+        "docs/contracts/components/hover-card.md",
+        "docs/contracts/components/list-card-counter.md",
+        "docs/contracts/components/media-browse-panel.md",
+        "docs/contracts/components/media-picker.md",
+        "docs/contracts/components/media-thumbnail.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/page-loading.md",
+        "docs/contracts/components/split-button.md",
+        "docs/contracts/components/toast-stack.md",
+        "docs/contracts/components/toolbar.md",
+        "docs/contracts/components/video-player.md"
       ]
     },
     {
