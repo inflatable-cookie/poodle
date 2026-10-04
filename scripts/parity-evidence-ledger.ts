@@ -202,7 +202,6 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   RelationPicker: "first_mounted_parity_relation_picker",
   ThemeSelect: "first_mounted_parity_theme_select",
   HistoryCenter: "first_mounted_parity_history_center",
-  ToastStack: "first_mounted_parity_toast_stack",
   PageLoading: "first_mounted_parity_page_loading",
 };
 

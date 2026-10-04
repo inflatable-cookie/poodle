@@ -35976,10 +35976,12 @@ fn message_center_composition_open_progress_and_identity_through_mounted_backend
     });
 }
 
-/// g16.118. Every toast row is a ListItem, matching the Svelte `<li>` per
-/// toast. Drawing the node tree does not claim GPUI assistive-technology parity.
+/// g16.118. Non-danger toast rows are ListItems, matching the Svelte `<li>`
+/// per toast; a danger toast projects Alert, the native projection of the
+/// contract's assertive live region. Drawing the node tree does not claim
+/// GPUI assistive-technology parity.
 #[test]
-fn mounted_toast_rows_are_list_items_for_every_tone() {
+fn mounted_toast_rows_project_alert_for_danger_tone() {
     run_headless(|cx| {
         let node = toast_stack(
             &ToastStackSpec::new().with_toasts(vec![
@@ -36001,7 +36003,7 @@ fn mounted_toast_rows_are_list_items_for_every_tone() {
                 .expect("danger toast")
                 .a11y
                 .role,
-            Some(NodeRole::ListItem)
+            Some(NodeRole::Alert)
         );
 
         let tree = Arc::new(Mutex::new(node));
@@ -36025,7 +36027,7 @@ fn mounted_toast_rows_are_list_items_for_every_tone() {
                 .expect("mounted danger")
                 .a11y
                 .role,
-            Some(NodeRole::ListItem)
+            Some(NodeRole::Alert)
         );
     });
 }
@@ -45636,11 +45638,9 @@ fn first_mounted_parity_toast_stack() {
     let fail = witness
         .find(&|node| node.id.as_deref() == Some("poodle-toast-fail"))
         .expect("danger toast row");
-    // Svelte is the parity authority and renders every row as a list item,
-    // matching the aligned contract: danger included, all rows project
-    // ListItem and assertiveness travels through reachability, not a
-    // remapped role.
-    assert_eq!(fail.a11y.role, Some(NodeRole::ListItem));
+    // Contract §6: danger escalates to the native alert projection of the
+    // assertive live region; every other tone stays a list item.
+    assert_eq!(fail.a11y.role, Some(NodeRole::Alert));
     assert_eq!(fail.roles.get("tone").map(String::as_str), Some("danger"));
     let info_accent = save
         .children
@@ -45777,9 +45777,8 @@ fn first_mounted_parity_toast_stack() {
         let painted_fail =
             poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:fail")
                 .expect("danger row reached GPUI paint");
-        // Svelte parity authority renders every row as a list item, matching
-        // the aligned contract (see the witness note).
-        assert_eq!(painted_fail.a11y_role, Some(NodeRole::ListItem));
+        // Contract §6: the mounted danger row keeps its alert projection.
+        assert_eq!(painted_fail.a11y_role, Some(NodeRole::Alert));
         assert_eq!(
             poodle_gpui_node_backend::painted_node_for("toast-host:proof:toast:save")
                 .expect("info row reached GPUI paint")

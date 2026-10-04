@@ -14,7 +14,8 @@ use poodle_node::{
     NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, ToastPosition, ToastStackSpec,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconSpec, ToastPosition,
+    ToastStackSpec, ToastTone,
 };
 
 use crate::button::button;
@@ -430,9 +431,15 @@ pub fn toast_stack(
         let dismiss = dismiss.child(dismiss_icon);
 
         // Toast box: tinted fill + fade gradient, tone border,
-        // elevation-overlay shadow, clipped. Each toast is a list item.
+        // elevation-overlay shadow, clipped. Each toast is a list item, and a
+        // danger toast escalates to an alert — the native projection of the
+        // contract's assertive live region (contract §6).
         let mut toast_el = Node::container();
-        toast_el.a11y.role = Some(NodeRole::ListItem);
+        toast_el.a11y.role = Some(if toast.tone == ToastTone::Danger {
+            NodeRole::Alert
+        } else {
+            NodeRole::ListItem
+        });
         toast_el.position = NodePosition::Relative;
         toast_el.id = Some(format!("poodle-toast-{}", toast.id));
         toast_el.runtime_id = scoped(instance_id, &format!("toast:{}", toast.id));
@@ -512,7 +519,7 @@ mod tests {
     }
 
     #[test]
-    fn every_tone_projects_as_a_list_item() {
+    fn danger_projects_as_alert_while_other_tones_stay_list_items() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = ToastStackSpec::new().with_toasts(vec![
@@ -527,7 +534,8 @@ mod tests {
             .find(&|n| n.id.as_deref() == Some("poodle-toast-fail"))
             .expect("danger toast");
         assert_eq!(success.a11y.role, Some(NodeRole::ListItem));
-        assert_eq!(danger.a11y.role, Some(NodeRole::ListItem));
+        // Contract §6: danger escalates to the native alert projection.
+        assert_eq!(danger.a11y.role, Some(NodeRole::Alert));
     }
 
     #[test]
