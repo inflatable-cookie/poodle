@@ -688,8 +688,10 @@ pub(crate) struct FieldSet {
 pub(crate) struct ThemeSelect {
     spec: ThemeSelectSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    on_dismiss: Option<Arc<dyn Fn(poodle_node::DismissReason) + Send + Sync>>,
 }
 
 pub(crate) struct ModelPicker {
@@ -2483,6 +2485,11 @@ impl RelationPicker {
         }
     }
 
+    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_select = Some(handler);
+        self
+    }
+
     pub(crate) fn on_drill_enter(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_drill_enter = Some(handler);
         self
@@ -3048,9 +3055,25 @@ impl ThemeSelect {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: String::new(),
             on_change: None,
             on_open_change: None,
+            on_dismiss: None,
         }
+    }
+
+    /// Lifetime-stable scope for the mounted trigger, surface and tiles.
+    pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+        self.instance_id = id.into();
+        self
+    }
+
+    pub(crate) fn on_dismiss(
+        mut self,
+        handler: Arc<dyn Fn(poodle_node::DismissReason) + Send + Sync>,
+    ) -> Self {
+        self.on_dismiss = Some(handler);
+        self
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
@@ -3080,8 +3103,10 @@ impl ThemeSelect {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::ThemeSelectHandlers {
+                instance_id: self.instance_id,
                 on_change: self.on_change,
                 on_open_change: self.on_open_change,
+                on_dismiss: self.on_dismiss,
             },
         )
     }
@@ -3428,7 +3453,7 @@ impl IntoElement for OrderBy {
 pub(crate) struct RefSelect {
     spec: RefSelectSpec,
     theme: GpuiThemeProvider,
-    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: poodle_render::RefSelectHandlers,
 }
 
 pub(crate) struct FormActions {
@@ -3487,7 +3512,7 @@ impl RefSelect {
         Self {
             spec,
             theme: theme.clone(),
-            on_change: None,
+            handlers: poodle_render::RefSelectHandlers::default(),
         }
     }
 
@@ -3501,8 +3526,43 @@ impl RefSelect {
         self
     }
 
+    /// Lifetime-stable scope for the mounted trigger, surface, search and rows.
+    pub(crate) fn with_instance_id(mut self, id: impl Into<String>) -> Self {
+        self.handlers.instance_id = id.into();
+        self
+    }
+
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_search_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_search_change = Some(handler);
+        self
+    }
+
+    /// Fires with the open state the trigger is moving to; `is_open` is
+    /// controlled, so the host flips the spec.
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_dismiss(
+        mut self,
+        handler: Arc<dyn Fn(poodle_node::DismissReason) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::ref_select(&self.spec, &RenderContext::new(&self.theme), self.on_change)
+        poodle_render::ref_select_with_handlers(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        )
     }
 }
 

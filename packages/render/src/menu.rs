@@ -19,7 +19,7 @@ use crate::context::RenderContext;
 use crate::icon::icon;
 use crate::presentation::{control_height_rem, rem_to_px};
 
-fn roving_key_handler(
+pub(crate) fn roving_key_handler(
     disabled_map: &[bool],
     item_ids: &[String],
     current_idx: usize,

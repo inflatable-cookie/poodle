@@ -185,6 +185,10 @@ export const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]>
   FormDialog: "first_mounted_parity_form_dialog",
   DebugDialog: "first_mounted_parity_debug_dialog",
   Drawer: "first_mounted_parity_drawer",
+  PickerShell: "first_mounted_parity_picker_shell",
+  RefSelect: "first_mounted_parity_ref_select",
+  RelationPicker: "first_mounted_parity_relation_picker",
+  ThemeSelect: "first_mounted_parity_theme_select",
 };
 
 const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;

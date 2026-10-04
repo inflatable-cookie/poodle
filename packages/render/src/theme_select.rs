@@ -9,12 +9,14 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition,
+    ColorValue, CrossAxisAlignment, CursorHint, DismissHandler, DismissReason, LayoutDirection,
+    LayoutSizing, Node, NodePosition, NodeRole, StylePatch,
 };
 use poodle_specs::{ControlSize, ThemeOption, ThemeSelectSpec};
 
 use crate::color::hex_color;
 use crate::context::RenderContext;
+use crate::picker_trigger::{configure_picker_surface, configure_picker_trigger};
 use crate::presentation::rem_to_px;
 
 fn all_corners(node: &mut Node, r: f32) {
@@ -102,10 +104,17 @@ fn swatch(option: &ThemeOption, ctx: &RenderContext<'_>, w: f32, h: f32, selecte
 /// Host callbacks. `on_change` fires with the chosen theme's value;
 /// `on_open_change` fires with the open state the trigger is moving **to**,
 /// since `ThemeSelectSpec::is_open` is controlled by the host.
+///
+/// A non-empty `instance_id` gives the trigger and surface stable runtime ids
+/// (`{id}:trigger`, `{id}:surface`, `{id}:tile:{value}`) and registers the
+/// open surface on the shared dismiss stack, so Escape and outside dismissal
+/// reach `on_dismiss` and then `on_open_change(false)`.
 #[derive(Default)]
 pub struct ThemeSelectHandlers {
+    pub instance_id: String,
     pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
 }
 
 pub fn theme_select(
@@ -129,6 +138,22 @@ pub fn theme_select_with_handlers(
     handlers: ThemeSelectHandlers,
 ) -> Node {
     let on_change = handlers.on_change;
+    let instance_id = handlers.instance_id.clone();
+    let dismiss: Option<DismissHandler> =
+        if handlers.on_dismiss.is_some() || handlers.on_open_change.is_some() {
+            let on_dismiss = handlers.on_dismiss.clone();
+            let on_open_change = handlers.on_open_change.clone();
+            Some(Arc::new(move |reason| {
+                if let Some(on_dismiss) = &on_dismiss {
+                    on_dismiss(reason);
+                }
+                if let Some(on_open_change) = &on_open_change {
+                    on_open_change(false);
+                }
+            }))
+        } else {
+            None
+        };
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let trigger_h = rem_to_px(match effective_size {
         ControlSize::Xs => 1.5,
@@ -179,6 +204,17 @@ pub fn theme_select_with_handlers(
     }
 
     let mut trigger = trigger;
+    // Contract §6: the trigger is a dialog opener named "{ariaLabel}: {label}".
+    // Without an instance id the legacy trigger id stays (Jetstream routes on it).
+    if !instance_id.is_empty() {
+        configure_picker_trigger(
+            &mut trigger,
+            &instance_id,
+            &format!("{}: {}", spec.aria_label, spec.trigger_label()),
+            spec.is_open,
+            dismiss.clone(),
+        );
+    }
     if let Some(current) = spec.current_option() {
         trigger = trigger.child(swatch(current, ctx, 1.25, 1.25, false));
     }
@@ -214,14 +250,32 @@ pub fn theme_select_with_handlers(
             s.descriptor.layout.spacing.gap = rem_to_px(0.5);
             s.max_width = Some(rem_to_px(22.0));
         }
-        for option in spec.themes.iter() {
+        for (index, option) in spec.themes.iter().enumerate() {
             let selected = spec.is_selected(option);
             let mut tile = Node::container();
+            tile.a11y.role = Some(NodeRole::ListBoxOption);
+            tile.a11y.selected = Some(selected);
+            tile.interaction.focusable = true;
+            tile.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(accent),
+                text_color: None,
+                opacity: None,
+            });
+            if selected || (index == 0 && !spec.themes.iter().any(|o| spec.is_selected(o))) {
+                // Contract §6: focus moves to the selected tile, else the first.
+                tile.a11y.initial_focus = true;
+            }
             // Stable per-option id. Backends that dispatch by id (Jetstream
             // routes on `token_key`) need it to reach the tile at all, and
             // GPUI needs identity that survives a rebuild between a click's
             // press and release.
             tile.id = Some(format!("theme-select-tile-{}", option.value));
+            if !instance_id.is_empty() {
+                let tile_id = format!("{instance_id}:tile:{}", option.value);
+                tile.id = Some(tile_id.clone());
+                tile.runtime_id = Some(tile_id);
+            }
             {
                 let s = &mut tile.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
@@ -251,8 +305,15 @@ pub fn theme_select_with_handlers(
             if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let id = option.value.clone();
+                // Contract: choosing a theme is terminal and closes the popover.
+                let on_open_change = handlers.on_open_change.clone();
                 tile.style.descriptor.cursor = CursorHint::Pointer;
-                tile.interaction.on_activate = Some(Arc::new(move || handler(&id)));
+                tile.interaction.on_activate = Some(Arc::new(move || {
+                    handler(&id);
+                    if let Some(on_open_change) = &on_open_change {
+                        on_open_change(false);
+                    }
+                }));
             }
 
             grid = grid.child(tile);
@@ -294,6 +355,11 @@ pub fn theme_select_with_handlers(
             panel.interaction.on_activate = Some(Arc::new(|| {}));
         }
 
+        panel.a11y.role = Some(NodeRole::Dialog);
+        panel.a11y.label = Some(spec.aria_label.clone());
+        configure_picker_surface(&mut panel, &instance_id, spec.is_open, dismiss);
+        grid.a11y.role = Some(NodeRole::ListBox);
+        grid.a11y.label = Some(spec.aria_label.clone());
         root = root.child(panel.child(grid));
     }
 
@@ -301,6 +367,7 @@ pub fn theme_select_with_handlers(
         root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
+    root.a11y.role = Some(NodeRole::Group);
     if !spec.aria_label.is_empty() {
         root.a11y.label = Some(spec.aria_label.clone());
     }
