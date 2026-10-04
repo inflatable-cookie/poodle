@@ -403,6 +403,7 @@ pub fn navigation_menu(
         // carrying this marker (see menu.rs for the full contract note).
         if !spec.dismiss_on_outside_interact {
             viewport.interaction.on_activate = Some(Arc::new(|| {}));
+            viewport.interaction.refuses_outside_dismiss = true;
         }
 
         // The open composition joins the dismiss stack under one layer id

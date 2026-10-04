@@ -47,7 +47,7 @@ pub struct LayerRecord {
     pub id: String,
     /// The layer's reason handler (the first node with the id carries it).
     pub handler: Option<DismissHandler>,
-    /// The handler-carrying node bears the inert-activation refusal marker
+    /// The handler-carrying node refuses outside dismissal
     /// (`dismissOnOutsideInteract: false`): outside presses never dismiss it.
     pub refuses_outside: bool,
     /// Rendered bounds of every node sharing this id (the containment set).
@@ -192,16 +192,14 @@ pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
             if let Some(record) = layers.iter_mut().find(|record| record.id == id) {
                 if record.handler.is_none() {
                     record.handler = node.interaction.on_dismiss.clone();
-                    record.refuses_outside = node.interaction.on_dismiss.is_some()
-                        && node.interaction.on_activate.is_some();
+                    record.refuses_outside = node.interaction.refuses_outside_dismiss;
                 }
                 return;
             }
             layers.push(LayerRecord {
                 id: id.to_owned(),
                 handler: node.interaction.on_dismiss.clone(),
-                refuses_outside: node.interaction.on_dismiss.is_some()
-                    && node.interaction.on_activate.is_some(),
+                refuses_outside: node.interaction.refuses_outside_dismiss,
                 bounds: Vec::new(),
                 parent: innermost.filter(|parent| *parent != id).map(str::to_owned),
             });

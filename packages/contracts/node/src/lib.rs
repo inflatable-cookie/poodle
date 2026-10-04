@@ -792,6 +792,9 @@ pub struct Interaction {
     /// the backend records their rendered bounds for outside-interaction
     /// checks and orders layers by tree position.
     pub dismiss_layer: Option<String>,
+    /// The layer's own `dismissOnOutsideInteract: false`: an outside pointer
+    /// press never dismisses it (Escape still does).
+    pub refuses_outside_dismiss: bool,
     /// Navigation and command keys, while this node holds focus.
     ///
     /// Returning an element id asks the backend to move focus there. The

@@ -531,6 +531,7 @@ pub fn split_button(
         // carrying this marker (see menu.rs for the full contract note).
         if !spec.dismiss_on_outside_interact {
             menu.interaction.on_activate = Some(Arc::new(|| {}));
+            menu.interaction.refuses_outside_dismiss = true;
         }
         // The open menu joins the dismiss stack under the composition
         // layer when a host owns dismissal.
