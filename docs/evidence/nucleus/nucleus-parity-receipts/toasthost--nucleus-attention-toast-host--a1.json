@@ -1,0 +1,84 @@
+{
+  "schema": "poodle.g16-nucleus-parity-receipt.v1",
+  "component": "ToastHost",
+  "scenario_id": "nucleus.attention.toast-host",
+  "proof_level": "A1",
+  "runtime": "gpui-headless",
+  "command": "effigy regressions:native",
+  "package": "poodle-gpui-preview",
+  "package_version": "0.4.0",
+  "source_commit": "734921f1433b6eea1c69e4ed052f15f1b3f99eb9",
+  "lockfile": "packages/gpui/preview/Cargo.lock",
+  "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
+  "lock_resolution": [
+    {
+      "name": "gpui",
+      "version": "0.2.2",
+      "source": "crates.io",
+      "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+    },
+    {
+      "name": "poodle-gpui",
+      "version": "0.4.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-gpui-preview",
+      "version": "0.4.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-node",
+      "version": "0.4.0",
+      "source": "workspace"
+    },
+    {
+      "name": "poodle-render",
+      "version": "0.4.0",
+      "source": "workspace"
+    }
+  ],
+  "distribution": "workspace",
+  "production_path_observation": {
+    "observed": true,
+    "mount": "HeadlessDriver",
+    "render_path": "poodle_render -> poodle_gpui_node_backend::to_gpui",
+    "input_dispatch": "gpui-test-platform-dispatch"
+  },
+  "actions": [
+    "mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"
+  ],
+  "assertions": [
+    "stack label, listitem rows with the sanctioned danger-alert remap, dismiss and retry names match the Svelte ARIA projection"
+  ],
+  "outcome": "passed",
+  "artifact_paths": [
+    {
+      "path": "test/nucleus-a11y/snapshots/toast-host.gpui.json",
+      "sha256": "adedfcd8fbd898fc0fa68350b0954f0d40f0391a1d1cb466266cb9bcdd02f097"
+    },
+    {
+      "path": "test/nucleus-a11y/snapshots/toast-host.svelte.json",
+      "sha256": "1b6b97805c8e6d9307d9101c227d3438f748f27b99875eeea8752b941ce6bee0"
+    }
+  ],
+  "accessibility": {
+    "scenario_path": "test/nucleus-a11y/scenarios/toast-host.json",
+    "scenario_sha256": "ff9546beba08b8976e9b332c6adcbdf6c047568ab76dee3933e49ff8c5031324",
+    "gpui_snapshot_path": "test/nucleus-a11y/snapshots/toast-host.gpui.json",
+    "gpui_snapshot_sha256": "adedfcd8fbd898fc0fa68350b0954f0d40f0391a1d1cb466266cb9bcdd02f097",
+    "svelte_snapshot_path": "test/nucleus-a11y/snapshots/toast-host.svelte.json",
+    "svelte_snapshot_sha256": "1b6b97805c8e6d9307d9101c227d3438f748f27b99875eeea8752b941ce6bee0",
+    "web_only_exclusions": [],
+    "roleRemaps": [
+      {
+        "index": 3,
+        "field": "role",
+        "gpui": "alert",
+        "svelte": "listitem",
+        "reason": "Contract toast-stack.md native mapping: danger rows project NodeRole::Alert while Svelte renders li with an assertive live region. Sanctioned cross-runtime role projection, not an assistive-technology parity claim."
+      }
+    ],
+    "diff": []
+  }
+}

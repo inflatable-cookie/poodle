@@ -128,7 +128,7 @@ describe("g16.111 Nucleus A1 Svelte accessibility snapshots", () => {
       if (existsSync(gpuiPath)) {
         const gpui = JSON.parse(readFileSync(gpuiPath, "utf8")) as SnapshotFile;
         expect(gpui.scenario_sha256, `${snapshotPath(row, "gpui")} ran against a different scenario file`).toBe(loaded.sha256);
-        expect(diffSnapshotNodes(gpui.nodes, file.nodes)).toEqual([]);
+        expect(diffSnapshotNodes(gpui.nodes, file.nodes, loaded.scenario.roleRemaps ?? [])).toEqual([]);
       }
     });
   }

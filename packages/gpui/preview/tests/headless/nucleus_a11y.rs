@@ -129,7 +129,11 @@ fn prove(
     let gpui_file = nucleus_receipts::gpui_snapshot_file(loaded, observation, nodes.clone());
     nucleus_receipts::check_committed_gpui_snapshot(loaded.row, &gpui_file);
     let svelte_nodes = svelte_file["nodes"].as_array().cloned().unwrap_or_default();
-    let diff = nucleus_receipts::diff_a1_nodes(&nodes, &svelte_nodes);
+    let diff = nucleus_receipts::diff_a1_nodes_with_remaps(
+        &nodes,
+        &svelte_nodes,
+        &loaded.scenario.role_remaps,
+    );
     if !diff.is_empty() {
         nucleus_receipts::publish_a1_divergence_if_configured(loaded, &gpui_file, &diff);
         return;
@@ -1719,7 +1723,7 @@ fn toast_host_a1_accessibility_projection_matches_svelte() {
             &mut driver,
             &loaded,
             &["mount the production ToastHost node tree through HeadlessDriver with the shared scenario props"],
-            &["stack label, listitem toasts, dismiss and retry names match the Svelte ARIA projection"],
+            &["stack label, listitem rows with the sanctioned danger-alert remap, dismiss and retry names match the Svelte ARIA projection"],
         );
     });
 }

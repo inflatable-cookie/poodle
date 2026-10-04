@@ -206,6 +206,7 @@ const ACCESSIBILITY_REQUIRED_KEYS = [
   "diff",
 ];
 const EXCLUSION_REQUIRED_KEYS = ["attribute", "reason"];
+const REMAP_REQUIRED_KEYS = ["index", "field", "gpui", "svelte", "reason"];
 
 function manifestShapeErrors(manifest: unknown): string[] {
   const errors: string[] = [];
@@ -245,11 +246,18 @@ function receiptShapeErrors(receipt: unknown): string[] {
     );
   }
   if (Object.hasOwn(receipt, "accessibility")) {
-    if (assertExactObject(receipt.accessibility, "receipt accessibility", ACCESSIBILITY_REQUIRED_KEYS, [], errors)) {
+    if (assertExactObject(receipt.accessibility, "receipt accessibility", ACCESSIBILITY_REQUIRED_KEYS, ["roleRemaps"], errors)) {
       if (assertArray(receipt.accessibility.web_only_exclusions, "receipt accessibility web_only_exclusions", errors)) {
         receipt.accessibility.web_only_exclusions.forEach((exclusion, index) =>
           assertExactObject(exclusion, `receipt accessibility web_only_exclusions[${index}]`, EXCLUSION_REQUIRED_KEYS, [], errors),
         );
+      }
+      if (Object.hasOwn(receipt.accessibility, "roleRemaps")) {
+        if (assertArray(receipt.accessibility.roleRemaps, "receipt accessibility roleRemaps", errors)) {
+          receipt.accessibility.roleRemaps.forEach((remap, index) =>
+            assertExactObject(remap, `receipt accessibility roleRemaps[${index}]`, REMAP_REQUIRED_KEYS, [], errors),
+          );
+        }
       }
       assertArray(receipt.accessibility.diff, "receipt accessibility diff", errors);
     }
@@ -481,9 +489,14 @@ function validateAccessibilityBlock(receipt: NucleusReceipt, root: string, error
     );
   }
   if (!Array.isArray(gpui.nodes) || !Array.isArray(svelte.nodes)) return;
-  const diff = diffSnapshotNodes(gpui.nodes, svelte.nodes);
+  const diff = diffSnapshotNodes(gpui.nodes, svelte.nodes, loaded.scenario.roleRemaps ?? []);
   assert(diff.length === 0, `receipt accessibility snapshots diverge: ${JSON.stringify(diff)}`, errors);
   assert(block.diff.length === 0, "receipt accessibility diff is not empty", errors);
+  assert(
+    JSON.stringify(loaded.scenario.roleRemaps ?? []) === JSON.stringify((block as { roleRemaps?: unknown }).roleRemaps ?? []),
+    "receipt accessibility roleRemaps do not match the scenario file",
+    errors,
+  );
 }
 
 export function receiptFileStem(receipt: { component: string; scenario_id: string; proof_level: NucleusProofLevel }): string {

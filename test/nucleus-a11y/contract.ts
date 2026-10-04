@@ -49,6 +49,14 @@ export type A1Action =
 export type A1Exclusion = { attribute: string; reason: string };
 export type A1Capture = { width: number; height: number };
 
+export type A1RoleRemap = {
+  index: number;
+  field: string;
+  gpui: unknown;
+  svelte: unknown;
+  reason: string;
+};
+
 export type A1Scenario = {
   schema: typeof A1_SCENARIO_SCHEMA;
   component: string;
@@ -58,6 +66,7 @@ export type A1Scenario = {
   actions: A1Action[];
   declared_states: A1StateName[];
   web_only_exclusions: A1Exclusion[];
+  roleRemaps?: A1RoleRemap[];
   capture: A1Capture;
 };
 
@@ -138,7 +147,11 @@ function canonical(value: unknown): string {
 
 /// Positional, field-by-field comparison. An extra node on either side is
 /// reported against `role` with `null` on the side that lacks it.
-export function diffSnapshotNodes(gpui: SnapshotNode[], svelte: SnapshotNode[]): A1DiffEntry[] {
+export function diffSnapshotNodes(
+  gpui: SnapshotNode[],
+  svelte: SnapshotNode[],
+  remaps: A1RoleRemap[] = [],
+): A1DiffEntry[] {
   const diff: A1DiffEntry[] = [];
   const length = Math.max(gpui.length, svelte.length);
   for (let index = 0; index < length; index += 1) {
@@ -152,8 +165,30 @@ export function diffSnapshotNodes(gpui: SnapshotNode[], svelte: SnapshotNode[]):
     for (const key of keys) {
       const leftValue = (left as Record<string, unknown>)[key] ?? null;
       const rightValue = (right as Record<string, unknown>)[key] ?? null;
-      if (canonical(leftValue) !== canonical(rightValue)) diff.push({ index, field: key, gpui: leftValue, svelte: rightValue });
+      if (canonical(leftValue) !== canonical(rightValue) && !remapCovers(remaps, index, key, leftValue, rightValue)) {
+        diff.push({ index, field: key, gpui: leftValue, svelte: rightValue });
+      }
     }
   }
   return diff;
+}
+
+/** Whether a scenario-declared sanctioned projection covers one diff entry:
+ * same node, same field, and both runtimes' exact declared values with a
+ * recorded reason. Anything else stays a divergence. */
+export function remapCovers(
+  remaps: A1RoleRemap[],
+  index: number,
+  field: string,
+  gpui: unknown,
+  svelte: unknown,
+): boolean {
+  return remaps.some(
+    (remap) =>
+      remap.index === index &&
+      remap.field === field &&
+      canonical(remap.gpui) === canonical(gpui) &&
+      canonical(remap.svelte) === canonical(svelte) &&
+      remap.reason.trim().length > 0,
+  );
 }
