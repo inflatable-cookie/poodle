@@ -89,6 +89,10 @@ Targeted checks per task, full QA at milestones (Tom, 2026-09-30).
 - Briefs name the targeted checks as acceptance. Required PR CI still runs on
   GitHub; workers don't wait or poll for it.
 
+Queue carries this rule into every worker and reviewer prompt as the
+repository's `validationPolicy` (Queue Settings → Repositories); keep the two
+in step.
+
 Run validation through Effigy selectors, not raw `cargo`, `bun` or `vitest`.
 Kill only processes you started, by PID; never `pkill -f` or `killall`. Run
 `git diff --check` before opening a PR. The full rules are in
