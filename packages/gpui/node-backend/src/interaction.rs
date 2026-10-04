@@ -709,6 +709,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         let value_id = input_text::painted_key(node, id);
         let text_change = node.interaction.on_text_change.clone();
         let select_range = node.interaction.on_select_range.clone();
+        let owns_dismiss_layer = node.interaction.dismiss_layer.is_some();
         let selection_text = node.caret.map(|c| c.selection).and_then(|(a, b)| {
             let NodeKind::Input { value, .. } = &node.kind else {
                 return None;
@@ -792,16 +793,22 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         return;
                     }
                 } else if key == "escape" {
-                    // Overlay members already register on the dismiss stack.
-                    // Invoking on_cancel here would Close the focused instance
-                    // and then let the window host dismiss_innermost — two
-                    // different layers on one keystroke.
-                    if overlay_owns_escape {
+                    // A control that declares its own dismiss layer can close
+                    // that layer locally. Consume Escape here so the window
+                    // host does not also dismiss its parent layer. Other
+                    // overlay members leave Escape to the host's stack order.
+                    if overlay_owns_escape && !owns_dismiss_layer {
                         return;
                     }
                     if let Some(handler) = &cancel {
                         handler();
+                        if overlay_owns_escape {
+                            cx.stop_propagation();
+                        }
                         cx.refresh_windows();
+                        return;
+                    }
+                    if overlay_owns_escape {
                         return;
                     }
                 }

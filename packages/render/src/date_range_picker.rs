@@ -8,14 +8,21 @@
 //! complete range joins with an en-dash, a partial range renders
 //! `"<start> – End date"`, and a missing start falls back to the placeholder.
 
-use poodle_node::{LayoutDirection, Node, NodeRole};
-use poodle_specs::{CalendarMode, CalendarSpec, DateRangePickerSpec};
+use std::sync::Arc;
 
-use crate::calendar::{calendar, CalendarHandlers};
+use poodle_node::{LayoutDirection, Node, NodeRole};
+use poodle_specs::{CalendarMode, CalendarSpec, DateRangePickerSpec, DateRangeValue};
+
+use crate::calendar::{calendar_with_identity, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
 use crate::context::RenderContext;
-use crate::date_picker::DatePickerHandlers;
-use crate::picker_trigger::{picker_trigger, PickerTrigger};
+use crate::date_picker::{
+    compose_handlers, picker_dismiss_handler, picker_toggle_handler, DatePickerCallbacks,
+    DatePickerHandlers,
+};
+use crate::picker_trigger::{
+    configure_picker_surface, configure_picker_trigger, picker_trigger, PickerTrigger,
+};
 use crate::presentation::{date_picker_indicator_font_rem, rem_to_px};
 
 pub fn date_range_picker(
@@ -23,6 +30,16 @@ pub fn date_range_picker(
     ctx: &RenderContext<'_>,
     handlers: DatePickerHandlers,
 ) -> Node {
+    date_range_picker_with_callbacks(spec, ctx, handlers, DatePickerCallbacks::default())
+}
+
+pub fn date_range_picker_with_callbacks(
+    spec: &DateRangePickerSpec,
+    ctx: &RenderContext<'_>,
+    handlers: DatePickerHandlers,
+    callbacks: DatePickerCallbacks,
+) -> Node {
+    let handlers = compose_handlers(handlers, callbacks);
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let base_size = ctx.base_size(spec.size);
     let theme = ctx.theme();
@@ -46,12 +63,15 @@ pub fn date_range_picker(
         None => spec.placeholder.clone(),
     };
     let has_start = range.start.is_some();
-    let trigger = picker_trigger(
+    let open = spec.current_open();
+    let toggle = picker_toggle_handler(&handlers, open);
+    let dismiss = picker_dismiss_handler(&handlers);
+    let mut trigger = picker_trigger(
         ctx,
         PickerTrigger {
             display: &display,
             has_value: has_start,
-            open: spec.current_open(),
+            open,
             disabled: spec.is_disabled,
             size: base_size,
             size_role: spec.size_role,
@@ -59,8 +79,18 @@ pub fn date_range_picker(
             indicator_size: Some(indicator_size),
             elevated,
             border_color,
-            on_toggle: handlers.on_toggle.as_ref(),
+            on_toggle: Some(&toggle),
         },
+    );
+    configure_picker_trigger(
+        &mut trigger,
+        &handlers.instance_id,
+        spec.aria_label
+            .as_deref()
+            .filter(|label| !label.trim().is_empty())
+            .unwrap_or(&display),
+        open,
+        dismiss.clone(),
     );
 
     // ── Root wrapper: contract §7/§8 min-width 16rem ──
@@ -75,7 +105,7 @@ pub fn date_range_picker(
 
     // ── Range-calendar surface when open (contract §2 Surface + composed
     //    Calendar mode="range"). The surface is the REAL calendar primitive. ──
-    if spec.current_open() {
+    if open {
         let mut cal_spec = CalendarSpec::new()
             .with_mode(CalendarMode::Range)
             .with_week_start(spec.week_starts_on)
@@ -109,14 +139,31 @@ pub fn date_range_picker(
             // Token-accurate elevation.overlay.
             s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
         }
-        let surface = surface.child(calendar(
+        configure_picker_surface(&mut surface, &handlers.instance_id, open, dismiss);
+        let on_range_select = {
+            let on_range_change = handlers.on_range_change.clone();
+            let on_open_change = handlers.on_open_change.clone();
+            Arc::new(move |range: &DateRangeValue| {
+                if let Some(on_range_change) = &on_range_change {
+                    on_range_change(range);
+                }
+                if range.end.is_some() {
+                    if let Some(on_open_change) = &on_open_change {
+                        on_open_change(false);
+                    }
+                }
+            }) as Arc<dyn Fn(&DateRangeValue) + Send + Sync>
+        };
+        let surface = surface.child(calendar_with_identity(
             &cal_spec,
             ctx,
             CalendarHandlers {
-                on_select: handlers.on_select.clone(),
-                on_range_select: None,
+                on_select: None,
+                on_range_select: Some(on_range_select),
                 on_navigate: handlers.on_navigate.clone(),
             },
+            (!handlers.instance_id.is_empty())
+                .then(|| format!("{}:calendar", handlers.instance_id)),
         ));
 
         // Trigger + anchored-below surface stack (overlay anchoring is a
@@ -131,10 +178,5 @@ pub fn date_range_picker(
         root.interaction.disabled = true;
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            root.a11y.label = Some(label.to_string());
-        }
-    }
     root
 }

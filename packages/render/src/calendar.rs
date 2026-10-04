@@ -11,10 +11,10 @@
 //!   └── [Day Grid]    — exact week count × 7 columns (a11y grid/row/cell)
 //! ```
 //!
-//! Keyboard / roving-tabindex / month-change editors are host-owned; the
-//! component renders at the current spec state and exposes interaction ids.
-//! `on_select` fires with the pressed day as an ISO date (`2026-07-31`);
-//! `on_navigate` with the resulting `"YYYY-MM"` month.
+//! Day-grid keyboard navigation moves focus through stable date identities;
+//! the host still owns the value and visible-month state. `on_select` fires
+//! with the pressed day as an ISO date (`2026-07-31`); `on_navigate` receives
+//! the resulting `"YYYY-MM"` month when navigation crosses its boundary.
 //!
 //! Colour recipes here are the old tier's *linear-space* lerp
 //! (`jetstream_ui::color_mix`), so they go through [`mix_linear`], not
@@ -25,7 +25,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole, StylePatch,
+    Node, NodeKey, NodeModifiers, NodeRole, StylePatch,
 };
 use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart, DateRangeValue};
 
@@ -115,12 +115,61 @@ fn parse_day(s: &str) -> Option<u32> {
     }
 }
 
+fn add_months_preserving_day(
+    date: poodle_headless::date::IsoDate,
+    amount: i32,
+) -> poodle_headless::date::IsoDate {
+    let month = poodle_headless::date::add_months(date, amount);
+    poodle_headless::date::IsoDate {
+        day: date.day.min(days_in_month(month.year, month.month)),
+        ..month
+    }
+}
+
 fn all_corners(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
     c.top_left = r;
     c.top_right = r;
     c.bottom_right = r;
     c.bottom_left = r;
+}
+
+fn calendar_day_keyboard_handler(
+    current_date: String,
+    scope: String,
+    week_start_offset: i64,
+    on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync> {
+    Arc::new(move |key, _mods| {
+        let date = poodle_headless::date::parse_iso_date(&current_date)?;
+        let next = match key {
+            NodeKey::ArrowLeft => poodle_headless::date::add_days(date, -1),
+            NodeKey::ArrowRight => poodle_headless::date::add_days(date, 1),
+            NodeKey::ArrowUp => poodle_headless::date::add_days(date, -7),
+            NodeKey::ArrowDown => poodle_headless::date::add_days(date, 7),
+            NodeKey::Home => {
+                let weekday = poodle_headless::date::weekday(date) as i64;
+                poodle_headless::date::add_days(date, -(weekday - week_start_offset).rem_euclid(7))
+            }
+            NodeKey::End => {
+                let weekday = poodle_headless::date::weekday(date) as i64;
+                poodle_headless::date::add_days(
+                    date,
+                    6 - (weekday - week_start_offset).rem_euclid(7),
+                )
+            }
+            NodeKey::PageUp => add_months_preserving_day(date, -1),
+            NodeKey::PageDown => add_months_preserving_day(date, 1),
+            _ => return None,
+        };
+        let next_iso = poodle_headless::date::format_iso_date(next);
+        if next.year != date.year || next.month != date.month {
+            if let Some(on_navigate) = &on_navigate {
+                on_navigate(&format!("{:04}-{:02}", next.year, next.month));
+            }
+        }
+        Some(format!("{scope}:day:{next_iso}"))
+    })
 }
 
 /// Build an outside-month (adjacent-month) day cell. Contract §8
@@ -132,10 +181,35 @@ fn outside_cell(
     day_font_px: f32,
     text_secondary: ColorValue,
     outside_opacity: f32,
+    hover_bg: ColorValue,
+    hover_border: ColorValue,
     day: u32,
+    date_iso: String,
+    day_scope: &str,
+    focus_iso: &str,
+    week_start_offset: i64,
+    disabled: bool,
+    is_range_mode: bool,
+    range_start_iso: Option<&str>,
+    range_end_iso: Option<&str>,
+    handlers: &CalendarHandlers,
 ) -> Node {
     let mut cell = Node::text(day.to_string());
     cell.a11y.role = Some(NodeRole::Cell);
+    let (year, month) = parse_year_month(&date_iso).expect("calendar date has a year and month");
+    cell.a11y.label = Some(format!("{} {}, {}", MONTH_NAMES[month as usize], day, year));
+    let in_range = is_range_mode
+        && match (range_start_iso, range_end_iso) {
+            (Some(start), Some(end)) => date_iso.as_str() >= start && date_iso.as_str() <= end,
+            _ => false,
+        };
+    cell.a11y.selected = Some(in_range);
+    let day_id = format!("{day_scope}:day:{date_iso}");
+    cell.id = Some(day_id.clone());
+    cell.runtime_id = Some(day_id);
+    cell.a11y.tab_index = Some(if date_iso == focus_iso { 0 } else { -1 });
+    cell.a11y.initial_focus = date_iso == focus_iso;
+    cell.interaction.focusable = !disabled;
     {
         let s = &mut cell.style;
         // Explicit Row (see switch.rs).
@@ -149,6 +223,38 @@ fn outside_cell(
         s.descriptor.opacity = outside_opacity;
     }
     all_corners(&mut cell, control_radius);
+    if !disabled {
+        cell.style.descriptor.cursor = CursorHint::Pointer;
+        cell.style.focus = Some(StylePatch {
+            background: Some(hover_bg),
+            border_color: Some(hover_border),
+            text_color: None,
+            opacity: None,
+        });
+        cell.interaction.on_key = Some(calendar_day_keyboard_handler(
+            date_iso.clone(),
+            day_scope.to_owned(),
+            week_start_offset,
+            handlers.on_navigate.clone(),
+        ));
+        if is_range_mode {
+            if let Some(handler) = &handlers.on_range_select {
+                let handler = Arc::clone(handler);
+                let start = range_start_iso.map(str::to_owned);
+                let end = range_end_iso.map(str::to_owned);
+                cell.interaction.on_activate = Some(Arc::new(move || {
+                    handler(&compute_next_range(
+                        start.as_deref(),
+                        end.as_deref(),
+                        &date_iso,
+                    ));
+                }));
+            }
+        } else if let Some(handler) = &handlers.on_select {
+            let handler = Arc::clone(handler);
+            cell.interaction.on_activate = Some(Arc::new(move || handler(&date_iso)));
+        }
+    }
     cell
 }
 
@@ -179,6 +285,15 @@ fn compute_next_range(
 }
 
 pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: CalendarHandlers) -> Node {
+    calendar_with_identity(spec, ctx, handlers, None)
+}
+
+pub(crate) fn calendar_with_identity(
+    spec: &CalendarSpec,
+    ctx: &RenderContext<'_>,
+    handlers: CalendarHandlers,
+    instance_id: Option<String>,
+) -> Node {
     let theme = ctx.theme();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
@@ -232,33 +347,35 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
 
     // ── Determine visible month ───────────────────────────────────────────────
 
+    let now_date = || {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        days_to_ymd((now / 86400) as i64)
+    };
     let (year, month) = spec
         .effective_visible_month()
         .and_then(parse_year_month)
-        .unwrap_or((2026, 1));
+        .unwrap_or_else(|| {
+            let (year, month, _) = now_date();
+            (year, month)
+        });
 
     // ── Today ─────────────────────────────────────────────────────────────────
 
-    let today_day: Option<u32> = {
+    let (today_year, today_month, today_date) = {
         // `spec.today` pins the date. Without it the clock decides, and a
         // component that reads the clock renders differently at midnight —
         // which is invisible until a pixel baseline expires overnight.
         let (ty, tm, td) = match spec.today_ymd() {
             Some(pinned) => pinned,
-            None => {
-                let now = std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap_or_default()
-                    .as_secs();
-                days_to_ymd((now / 86400) as i64)
-            }
+            None => now_date(),
         };
-        if ty == year && tm == month {
-            Some(td)
-        } else {
-            None
-        }
+        (ty, tm, td)
     };
+    let today_day = (today_year == year && today_month == month).then_some(today_date);
+    let today_iso = format!("{today_year:04}-{today_month:02}-{today_date:02}");
 
     // ── Selection state ───────────────────────────────────────────────────────
 
@@ -296,12 +413,17 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
     let rows = total_cells.div_ceil(7);
 
     // Previous month (for leading outside-month cells)
-    let (prev_year, prev_month) = if month == 1 {
+    let (prev_year, prev_month_num) = if month == 1 {
         (year - 1, 12)
     } else {
         (year, month - 1)
     };
-    let prev_month_days = days_in_month(prev_year, prev_month);
+    let prev_month_days = days_in_month(prev_year, prev_month_num);
+    let (following_year, following_month) = if month == 12 {
+        (year + 1, 1)
+    } else {
+        (year, month + 1)
+    };
 
     let month_name = MONTH_NAMES.get(month as usize).copied().unwrap_or("");
     let year_label = format!("{year}");
@@ -309,7 +431,12 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
     // ── Root container ────────────────────────────────────────────────────────
 
     let mut root = Node::container();
-    root.id = Some("poodle-calendar".to_string());
+    let calendar_id = instance_id
+        .as_deref()
+        .filter(|id| !id.is_empty())
+        .unwrap_or("poodle-calendar");
+    root.id = Some(calendar_id.to_string());
+    root.runtime_id = Some(calendar_id.to_string());
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
@@ -327,8 +454,6 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
         s.descriptor.border.color = border;
     }
     all_corners(&mut root, surface_radius);
-    root.interaction.focusable = true;
-
     if spec.is_disabled {
         root.style.descriptor.opacity = disabled_opacity;
         root.interaction.disabled = true;
@@ -336,7 +461,7 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
 
     // ── Nav header ────────────────────────────────────────────────────────────
 
-    let prev_month = if month == 1 {
+    let previous_month_label = if month == 1 {
         format!("{:04}-12", year - 1)
     } else {
         format!("{year:04}-{:02}", month - 1)
@@ -382,7 +507,7 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
         "chevron-left",
         "poodle-cal-prev",
         "Previous month",
-        prev_month,
+        previous_month_label,
     );
     let next_btn = nav_button("chevron-right", "poodle-cal-next", "Next month", next_month);
 
@@ -496,6 +621,27 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
         s.descriptor.layout.spacing.gap = root_gap_px;
     }
 
+    let selected_iso = if is_range_mode {
+        range_end_iso.as_deref().or(range_start_iso.as_deref())
+    } else {
+        spec.current_value()
+    };
+    let focus_iso = selected_iso
+        .filter(|date| parse_year_month(date) == Some((year, month)))
+        .map(str::to_owned)
+        .unwrap_or_else(|| {
+            if today_day.is_some() {
+                today_iso.clone()
+            } else {
+                format!("{year:04}-{month:02}-01")
+            }
+        });
+    let day_scope = instance_id
+        .as_deref()
+        .filter(|id| !id.is_empty())
+        .unwrap_or("poodle-cal")
+        .to_owned();
+
     for row in 0..rows {
         let mut day_row = Node::container();
         day_row.a11y.role = Some(NodeRole::Row);
@@ -517,7 +663,18 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
                     day_font_px,
                     text_secondary,
                     outside_opacity,
+                    hover_bg,
+                    hover_border,
                     outside_day,
+                    format!("{prev_year:04}-{prev_month_num:02}-{outside_day:02}"),
+                    &day_scope,
+                    &focus_iso,
+                    week_start_offset as i64,
+                    spec.is_disabled,
+                    is_range_mode,
+                    range_start_iso.as_deref(),
+                    range_end_iso.as_deref(),
+                    &handlers,
                 )
             } else if cell_idx >= start_offset + days_count {
                 // Trailing outside-month cell (next month)
@@ -528,7 +685,18 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
                     day_font_px,
                     text_secondary,
                     outside_opacity,
+                    hover_bg,
+                    hover_border,
                     outside_day,
+                    format!("{following_year:04}-{following_month:02}-{outside_day:02}"),
+                    &day_scope,
+                    &focus_iso,
+                    week_start_offset as i64,
+                    spec.is_disabled,
+                    is_range_mode,
+                    range_start_iso.as_deref(),
+                    range_end_iso.as_deref(),
+                    &handlers,
                 )
             } else {
                 // Current-month day cell
@@ -550,7 +718,17 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
                 let is_range_edge = is_range_start || is_range_end;
 
                 let mut cell = Node::text(day_num.to_string());
-                cell.id = Some(format!("poodle-cal-day-{day_num}"));
+                let scope = &day_scope;
+                let day_id = format!("{scope}:day:{date_iso}");
+                cell.id = Some(day_id.clone());
+                cell.runtime_id = Some(day_id.clone());
+                cell.a11y.role = Some(NodeRole::Cell);
+                cell.a11y.label = Some(format!("{month_name} {day_num}, {year}"));
+                let is_focus_day = focus_iso == date_iso;
+                cell.a11y.selected = Some(is_selected || is_range_edge || is_in_range);
+                cell.a11y.tab_index = Some(if is_focus_day { 0 } else { -1 });
+                cell.a11y.initial_focus = is_focus_day;
+                cell.interaction.focusable = !spec.is_disabled;
                 {
                     let s = &mut cell.style;
                     // Explicit Row (see switch.rs).
@@ -608,6 +786,18 @@ pub fn calendar(spec: &CalendarSpec, ctx: &RenderContext<'_>, handlers: Calendar
 
                 if !spec.is_disabled {
                     cell.style.descriptor.cursor = CursorHint::Pointer;
+                    cell.style.focus = Some(StylePatch {
+                        background: Some(hover_bg),
+                        border_color: Some(hover_border),
+                        text_color: None,
+                        opacity: None,
+                    });
+                    cell.interaction.on_key = Some(calendar_day_keyboard_handler(
+                        date_iso.clone(),
+                        scope.to_owned(),
+                        week_start_offset as i64,
+                        handlers.on_navigate.clone(),
+                    ));
                 }
 
                 if !spec.is_disabled {

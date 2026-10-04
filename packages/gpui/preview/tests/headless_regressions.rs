@@ -8344,6 +8344,708 @@ fn first_mounted_parity_time_zone_select() {
 }
 
 #[test]
+fn first_mounted_parity_date_picker() {
+    // Prove mounted button/dialog semantics, events, and ISO day commit.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::DatePickerSpec;
+
+    const ID: &str = "date-picker-proof";
+    const TRIGGER: &str = "date-picker-proof:trigger";
+    const SURFACE: &str = "date-picker-proof:surface";
+    const DAY: &str = "date-picker-proof:calendar:day:2026-03-15";
+    let theme_provider = theme();
+    let mut witness_spec = DatePickerSpec::new()
+        .with_default_value("2026-03-14")
+        .with_default_open(true);
+    witness_spec.aria_label = Some("Choose a date".to_owned());
+    let witness = poodle_render::date_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .expect("rendered DatePicker trigger");
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a date"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    let surface = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+        .expect("rendered DatePicker surface");
+    assert_eq!(surface.a11y.role, Some(NodeRole::Dialog));
+    assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let selected = Arc::new(Mutex::new(Vec::<String>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let selected = Arc::clone(&selected);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let mut spec = DatePickerSpec::new()
+                .with_default_value("2026-03-14")
+                .with_default_open(*open.lock().expect("open state"));
+            spec.aria_label = Some("Choose a date".to_owned());
+            let selection_sink = Arc::clone(&selected);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers {
+                    on_select: Some(Arc::new(move |date| {
+                        selection_sink
+                            .lock()
+                            .expect("selection events")
+                            .push(date.to_owned());
+                    })),
+                    ..DatePickerHandlers::default()
+                },
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-picker-proof:calendar:day:2026-03-14");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY),
+            Some(true),
+            "calendar keyboard navigation moves real focus to the next date"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for(DAY).is_some());
+        driver.pointer_activate_id(DAY);
+        assert_eq!(
+            *selected.lock().expect("selection events"),
+            vec!["2026-03-15"]
+        );
+        assert!(
+            !*open.lock().expect("open state"),
+            "date commit closes the picker"
+        );
+
+        driver.pointer_activate_id(TRIGGER);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(!*open.lock().expect("open state"));
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_range_picker() {
+    // Prove mounted range selection commits normalized endpoints.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::{DateRangePickerSpec, DateRangeValue};
+
+    const ID: &str = "date-range-picker-proof";
+    const TRIGGER: &str = "date-range-picker-proof:trigger";
+    const SURFACE: &str = "date-range-picker-proof:surface";
+    const DAY: &str = "date-range-picker-proof:calendar:day:2026-03-08";
+    let theme_provider = theme();
+    let seed = DateRangeValue::new(Some("2026-03-10".into()), None);
+    let mut witness_spec = DateRangePickerSpec::new()
+        .with_default_value(seed.clone())
+        .with_open(true);
+    witness_spec.aria_label = Some("Choose dates".to_owned());
+    let witness = poodle_render::date_range_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose dates"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_space("space.panel.x") > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let changes = Arc::new(Mutex::new(Vec::<DateRangeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        let seed = seed.clone();
+        Rc::new(move || {
+            let spec = DateRangePickerSpec::new()
+                .with_default_value(seed.clone())
+                .with_open(*open.lock().expect("open state"));
+            let change_sink = Arc::clone(&changes);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_range_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers::default(),
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_range_change: Some(Arc::new(move |range| {
+                        change_sink
+                            .lock()
+                            .expect("range change payloads")
+                            .push(range.clone());
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 500.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-range-picker-proof:calendar:day:2026-03-10");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(
+                "date-range-picker-proof:calendar:day:2026-03-11"
+            ),
+            Some(true),
+            "range calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        let payloads = changes.lock().expect("range change payloads");
+        assert_eq!(
+            payloads.len(),
+            1,
+            "range change callback fires on selection"
+        );
+        assert_eq!(payloads[0].start.as_deref(), Some("2026-03-08"));
+        assert_eq!(payloads[0].end.as_deref(), Some("2026-03-10"));
+        drop(payloads);
+        assert!(
+            !*open.lock().expect("open state"),
+            "complete range closes the picker"
+        );
+        driver.pointer_activate_id(TRIGGER);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_time_picker() {
+    // Prove mounted date and time events compose into one value callback.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::{DateTimePickerSpec, DateTimeValue};
+
+    const ID: &str = "date-time-picker-proof";
+    const TRIGGER: &str = "date-time-picker-proof:trigger";
+    const SURFACE: &str = "date-time-picker-proof:surface";
+    const DAY: &str = "date-time-picker-proof:calendar:day:2026-03-15";
+    let theme_provider = theme();
+    let seed = DateTimeValue::new(Some("2026-03-14".into()), Some("09:00".into()));
+    let mut witness_spec = DateTimePickerSpec::new().with_default_value(seed.clone());
+    witness_spec.open = Some(true);
+    witness_spec.aria_label = Some("Choose a date and time".to_owned());
+    let witness = poodle_render::date_time_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a date and time"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let value = Arc::new(Mutex::new(seed.clone()));
+    let changes = Arc::new(Mutex::new(Vec::<DateTimeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let value = Arc::clone(&value);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let mut spec = DateTimePickerSpec::new()
+                .with_default_value(value.lock().expect("current date time value").clone());
+            spec.open = Some(*open.lock().expect("open state"));
+            spec.aria_label = Some("Choose a date and time".to_owned());
+            let change_sink = Arc::clone(&changes);
+            let value_sink = Arc::clone(&value);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_time_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers::default(),
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_date_time_change: Some(Arc::new(move |value| {
+                        change_sink
+                            .lock()
+                            .expect("date time change payloads")
+                            .push(value.clone());
+                        *value_sink.lock().expect("current date time value") = value.clone();
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-time-picker-proof:calendar:day:2026-03-14");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY),
+            Some(true),
+            "calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        driver.wait_for_focus_handle("date-time-picker-proof:time:hour");
+        driver.focus_element("date-time-picker-proof:time:hour");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("date-time-picker-proof:time:hour"),
+            Some(true),
+            "hour segment owns mounted backend focus"
+        );
+        driver.dispatch_key_raw("up");
+        let payloads = changes.lock().expect("date time change payloads");
+        assert!(payloads
+            .iter()
+            .any(|value| value.date.as_deref() == Some("2026-03-15")));
+        assert!(
+            payloads
+                .iter()
+                .any(|value| value.time.as_deref() == Some("09:01")),
+            "time change callback emits the committed time"
+        );
+        assert!(payloads.iter().any(|value| {
+            value.date.as_deref() == Some("2026-03-15") && value.time.as_deref() == Some("09:01")
+        }));
+        drop(payloads);
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(!*open.lock().expect("open state"));
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_time_range_picker() {
+    // Prove range selection and both time fields reach the composite callback.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DatePickerCallbacks, DatePickerHandlers, RenderContext};
+    use poodle_specs::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue};
+
+    const ID: &str = "date-time-range-picker-proof";
+    const TRIGGER: &str = "date-time-range-picker-proof:trigger";
+    const SURFACE: &str = "date-time-range-picker-proof:surface";
+    const DAY: &str = "date-time-range-picker-proof:calendar:day:2026-03-14";
+    let theme_provider = theme();
+    let seed = DateTimeRangeValue::new(
+        DateTimeValue::new(Some("2026-03-10".into()), Some("09:00".into())),
+        DateTimeValue::new(None, Some("17:00".into())),
+    );
+    let mut witness_spec = DateTimeRangePickerSpec::new().with_default_value(seed.clone());
+    witness_spec.open = Some(true);
+    witness_spec.aria_label = Some("Choose a date and time range".to_owned());
+    let witness = poodle_render::date_time_range_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DatePickerHandlers::default(),
+        DatePickerCallbacks {
+            instance_id: ID.to_owned(),
+            ..DatePickerCallbacks::default()
+        },
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a date and time range"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_space("space.panel.x") > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let value = Arc::new(Mutex::new(seed.clone()));
+    let changes = Arc::new(Mutex::new(Vec::<DateTimeRangeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let value = Arc::clone(&value);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        Rc::new(move || {
+            let mut spec = DateTimeRangePickerSpec::new()
+                .with_default_value(value.lock().expect("current date time range").clone());
+            spec.open = Some(*open.lock().expect("open state"));
+            spec.aria_label = Some("Choose a date and time range".to_owned());
+            let change_sink = Arc::clone(&changes);
+            let value_sink = Arc::clone(&value);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let open_sink = Arc::clone(&open);
+            let tree = poodle_render::date_time_range_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                DatePickerHandlers::default(),
+                DatePickerCallbacks {
+                    instance_id: ID.to_owned(),
+                    on_date_time_range_change: Some(Arc::new(move |value| {
+                        change_sink
+                            .lock()
+                            .expect("date time range payloads")
+                            .push(value.clone());
+                        *value_sink.lock().expect("current date time range") = value.clone();
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                    ..DatePickerCallbacks::default()
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 520.0, 620.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-time-range-picker-proof:calendar:day:2026-03-10");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(
+                "date-time-range-picker-proof:calendar:day:2026-03-11"
+            ),
+            Some(true),
+            "range calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        driver.wait_for_focus_handle("date-time-range-picker-proof:start-time:hour");
+        driver.focus_element("date-time-range-picker-proof:start-time:hour");
+        driver.dispatch_key_raw("up");
+        let payloads = changes.lock().expect("date time range payloads");
+        assert!(payloads
+            .iter()
+            .any(|value| value.end.date.as_deref() == Some("2026-03-14")));
+        assert!(
+            payloads
+                .iter()
+                .any(|value| value.start.time.as_deref() == Some("09:01")),
+            "start-time change callback emits the committed time"
+        );
+        assert!(payloads.iter().any(|value| {
+            value.end.date.as_deref() == Some("2026-03-14")
+                && value.start.time.as_deref() == Some("09:01")
+        }));
+        drop(payloads);
+        assert!(
+            *open.lock().expect("open state"),
+            "date-time range stays open after range commit"
+        );
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
+fn first_mounted_parity_date_time_zone_picker() {
+    // Prove calendar, time, zone commits, and layered dismissal while mounted.
+    use gpui::AnyElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_node::{DismissReason, NodeRole};
+    use poodle_render::{DateTimeZonePickerCallbacks, DateTimeZonePickerHandlers, RenderContext};
+    use poodle_specs::{DateTimeZonePickerSpec, TimeZoneOption, ZonedDateTimeValue};
+
+    const ID: &str = "date-time-zone-picker-proof";
+    const TRIGGER: &str = "date-time-zone-picker-proof:trigger";
+    const SURFACE: &str = "date-time-zone-picker-proof:surface";
+    const DAY: &str = "date-time-zone-picker-proof:calendar:day:2026-03-15";
+    const ZONE_TRIGGER: &str = "select:date-time-zone-picker-proof:trigger";
+    const ZONE_OPTION: &str = "select:date-time-zone-picker-proof:option:Asia/Tokyo";
+    let theme_provider = theme();
+    let options = vec![
+        TimeZoneOption::new("Europe/London", "London"),
+        TimeZoneOption::new("Asia/Tokyo", "Tokyo"),
+    ];
+    let seed = ZonedDateTimeValue::new(
+        Some("2026-03-14".into()),
+        Some("09:00".into()),
+        Some("Europe/London".into()),
+    );
+    let mut witness_spec = DateTimeZonePickerSpec::new().with_value(seed.clone());
+    witness_spec.open = Some(true);
+    witness_spec.time_zone_options = options.clone();
+    witness_spec.aria_label = Some("Choose a zoned date and time".to_owned());
+    let witness = poodle_render::date_time_zone_picker_with_callbacks(
+        &witness_spec,
+        &RenderContext::new(&theme_provider),
+        DateTimeZonePickerHandlers::new(ID),
+        DateTimeZonePickerCallbacks::default(),
+    );
+    let trigger = witness
+        .find(&|node| node.runtime_id.as_deref() == Some(TRIGGER))
+        .unwrap();
+    assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+    assert_eq!(
+        trigger.a11y.label.as_deref(),
+        Some("Choose a zoned date and time"),
+        "the trigger announces its accessible name"
+    );
+    assert_eq!(trigger.a11y.expanded, Some(true));
+    assert_eq!(trigger.a11y.controls.as_deref(), Some(SURFACE));
+    assert_eq!(
+        witness
+            .find(&|node| node.runtime_id.as_deref() == Some(SURFACE))
+            .unwrap()
+            .a11y
+            .role,
+        Some(NodeRole::Dialog)
+    );
+    assert!(theme_provider.resolve_color("color.background.surface").3 > 0.0);
+
+    let open = Arc::new(Mutex::new(false));
+    let zone_open = Arc::new(Mutex::new(false));
+    let zone_toggles = Arc::new(Mutex::new(Vec::<bool>::new()));
+    let value = Arc::new(Mutex::new(seed.clone()));
+    let changes = Arc::new(Mutex::new(Vec::<ZonedDateTimeValue>::new()));
+    let dismissed = Arc::new(Mutex::new(Vec::<DismissReason>::new()));
+    let build: Rc<dyn Fn() -> AnyElement> = {
+        let open = Arc::clone(&open);
+        let zone_open = Arc::clone(&zone_open);
+        let zone_toggles = Arc::clone(&zone_toggles);
+        let value = Arc::clone(&value);
+        let changes = Arc::clone(&changes);
+        let dismissed = Arc::clone(&dismissed);
+        let theme_provider = theme_provider.clone();
+        let options = options.clone();
+        Rc::new(move || {
+            let mut spec = DateTimeZonePickerSpec::new()
+                .with_value(value.lock().expect("current zoned date time").clone())
+                .with_open(*open.lock().expect("open state"));
+            spec.zone_open = *zone_open.lock().expect("zone open state");
+            spec.time_zone_options = options.clone();
+            spec.aria_label = Some("Choose a zoned date and time".to_owned());
+            let open_sink = Arc::clone(&open);
+            let zone_sink = Arc::clone(&zone_open);
+            let toggle_sink = Arc::clone(&zone_toggles);
+            let change_sink = Arc::clone(&changes);
+            let value_sink = Arc::clone(&value);
+            let dismissal_sink = Arc::clone(&dismissed);
+            let mut handlers = DateTimeZonePickerHandlers::new(ID);
+            handlers.on_zone_toggle = Some(Arc::new(move || {
+                let mut open = zone_sink.lock().expect("zone open state");
+                *open = !*open;
+                toggle_sink.lock().expect("zone toggle events").push(*open);
+            }));
+            let tree = poodle_render::date_time_zone_picker_with_callbacks(
+                &spec,
+                &RenderContext::new(&theme_provider),
+                handlers,
+                DateTimeZonePickerCallbacks {
+                    on_value_change: Some(Arc::new(move |value| {
+                        change_sink
+                            .lock()
+                            .expect("zoned value change payloads")
+                            .push(value.clone());
+                        *value_sink.lock().expect("current zoned date time") = value.clone();
+                    })),
+                    on_open_change: Some(Arc::new(move |value| {
+                        *open_sink.lock().expect("open state") = value;
+                    })),
+                    on_dismiss: Some(Arc::new(move |reason| {
+                        dismissal_sink.lock().expect("dismiss events").push(reason);
+                    })),
+                },
+            );
+            poodle_gpui_node_backend::to_gpui(&tree)
+        })
+    };
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 540.0, 640.0);
+        driver.pointer_activate_id(TRIGGER);
+        driver.focus_element("date-time-zone-picker-proof:calendar:day:2026-03-14");
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(DAY),
+            Some(true),
+            "calendar keyboard navigation moves real focus"
+        );
+        driver.pointer_activate_id(DAY);
+        driver.wait_for_focus_handle("date-time-zone-picker-proof:time:hour");
+        driver.focus_element("date-time-zone-picker-proof:time:hour");
+        driver.dispatch_key_raw("up");
+        driver.pointer_activate_id(ZONE_TRIGGER);
+        assert!(*zone_open.lock().expect("zone open state"));
+        assert!(poodle_gpui_node_backend::bounds_for(ZONE_OPTION).is_some());
+        driver.pointer_activate_id(ZONE_OPTION);
+        let payloads = changes.lock().expect("zoned value change payloads");
+        assert!(payloads
+            .iter()
+            .any(|value| value.date.as_deref() == Some("2026-03-15")));
+        assert!(payloads
+            .iter()
+            .any(|value| value.time.as_deref() == Some("09:01")));
+        assert!(
+            payloads
+                .iter()
+                .any(|value| value.time_zone.as_deref() == Some("Asia/Tokyo")),
+            "zone change callback emits the selected identifier"
+        );
+        assert!(payloads.iter().any(|value| {
+            value.date.as_deref() == Some("2026-03-15")
+                && value.time.as_deref() == Some("09:01")
+                && value.time_zone.as_deref() == Some("Asia/Tokyo")
+        }));
+        drop(payloads);
+        assert_eq!(
+            *zone_toggles.lock().expect("zone toggle events"),
+            vec![true, false],
+            "committing a zone closes the nested list"
+        );
+
+        driver.pointer_activate_id(ZONE_TRIGGER);
+        driver.wait_for_focus_handle("select:date-time-zone-picker-proof:search");
+        driver.focus_element("select:date-time-zone-picker-proof:search");
+        driver.dispatch_key_raw("escape");
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            1,
+            "the nested Escape consumes the zone list layer"
+        );
+        assert!(
+            *open.lock().expect("open state"),
+            "Escape dismisses the nested zone list first"
+        );
+        assert!(!*zone_open.lock().expect("zone open state"));
+        driver.focus_element("date-time-zone-picker-proof:time:hour");
+        driver.dispatch_key_raw("escape");
+        assert!(
+            !*open.lock().expect("open state"),
+            "the second Escape dismisses the picker surface"
+        );
+        assert_eq!(
+            *dismissed.lock().expect("dismiss events"),
+            vec![DismissReason::Escape]
+        );
+        assert!(driver.mounted_observation().is_valid());
+    });
+}
+
+#[test]
 fn status_indicator_status_reason_tokens_and_identity_rebuild_through_mounted_backend() {
     use gpui::{div, AnyElement, IntoElement, ParentElement, Styled};
     use poodle_adapter::ThemeProvider;
