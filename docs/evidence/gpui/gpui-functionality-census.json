@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g18-gpui-functionality-census.v1",
   "task": "g18.001",
-  "source_commit": "f762dc96ba6e0808f8e0cb28fb386a7b9c8c05e3",
+  "source_commit": "bbfd494d9a4732e16147150e4d371b5476d56f49",
   "denominator": {
     "public": 176,
     "portable": 175,
@@ -6394,15 +6394,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_page_loading"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -6411,10 +6435,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for PageLoading; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/PageLoading--first-mounted-parity-page-loading.json"
+      ],
+      "refusals": []
     },
     {
       "component": "MediaPicker",
@@ -7528,15 +7552,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_history_center"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7545,10 +7593,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for HistoryCenter; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/HistoryCenter--first-mounted-parity-history-center.json"
+      ],
+      "refusals": []
     },
     {
       "component": "UpdateStatus",
@@ -7681,15 +7729,39 @@
         "accessibility",
         "visual"
       ],
-      "admitted": [],
-      "missing": [
-        "semantic",
-        "events",
-        "pointer",
-        "keyboard_focus",
-        "accessibility",
-        "visual"
+      "admitted": [
+        {
+          "axis": "semantic",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "events",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "pointer",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "keyboard_focus",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "accessibility",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        },
+        {
+          "axis": "visual",
+          "via": "expected-test",
+          "ref": "packages/gpui/preview/tests/headless_regressions.rs#first_mounted_parity_toast_stack"
+        }
       ],
+      "missing": [],
       "holds": [
         {
           "axis": "accessibility",
@@ -7698,10 +7770,10 @@
           "ref": "docs/contracts/003-native-accessibility.md"
         }
       ],
-      "receipts": [],
-      "refusals": [
-        "No validated receipt and no retained expected test for ToastStack; every required capability stays missing."
-      ]
+      "receipts": [
+        "docs/evidence/gpui/mounted-receipts/ToastStack--first-mounted-parity-toast-stack.json"
+      ],
+      "refusals": []
     },
     {
       "component": "ToastHost",
@@ -8502,18 +8574,18 @@
     }
   ],
   "summary": {
-    "admittedRows": 109,
-    "fullyAdmittedRows": 86,
+    "admittedRows": 112,
+    "fullyAdmittedRows": 89,
     "missingTally": {
-      "semantic": 66,
-      "events": 57,
-      "pointer": 63,
-      "keyboard_focus": 59,
-      "accessibility": 72,
-      "visual": 85
+      "semantic": 63,
+      "events": 54,
+      "pointer": 60,
+      "keyboard_focus": 56,
+      "accessibility": 69,
+      "visual": 82
     },
     "holdCount": 175,
-    "refusalCount": 129
+    "refusalCount": 126
   },
   "groups": [
     {
@@ -8724,35 +8796,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ContextMenu",
-        "HistoryCenter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 7,
-        "pointer": 7,
-        "keyboard_focus": 7,
-        "accessibility": 7,
-        "visual": 7
-      },
-      "contracts": [
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
@@ -8802,6 +8845,29 @@
         "docs/contracts/components/gain-reduction-meter.md",
         "docs/contracts/components/value-readout.md",
         "docs/contracts/components/xy-pad.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "Menubar",
+        "NavigationMenu",
+        "SplitButton"
+      ],
+      "missingTally": {
+        "semantic": 4,
+        "events": 4,
+        "pointer": 4,
+        "keyboard_focus": 4,
+        "accessibility": 4,
+        "visual": 4
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/split-button.md"
       ]
     },
     {

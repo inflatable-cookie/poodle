@@ -210,35 +210,6 @@
       ]
     },
     {
-      "substrate": "overlay-dismissal",
-      "components": [
-        "ContextMenu",
-        "HistoryCenter",
-        "Menubar",
-        "NavigationMenu",
-        "PageLoading",
-        "SplitButton",
-        "ToastStack"
-      ],
-      "missingTally": {
-        "semantic": 7,
-        "events": 7,
-        "pointer": 7,
-        "keyboard_focus": 7,
-        "accessibility": 7,
-        "visual": 7
-      },
-      "contracts": [
-        "docs/contracts/components/context-menu.md",
-        "docs/contracts/components/history-center.md",
-        "docs/contracts/components/menubar.md",
-        "docs/contracts/components/navigation-menu.md",
-        "docs/contracts/components/page-loading.md",
-        "docs/contracts/components/split-button.md",
-        "docs/contracts/components/toast-stack.md"
-      ]
-    },
-    {
       "substrate": "layout-primitive",
       "components": [
         "Box",
@@ -288,6 +259,29 @@
         "docs/contracts/components/gain-reduction-meter.md",
         "docs/contracts/components/value-readout.md",
         "docs/contracts/components/xy-pad.md"
+      ]
+    },
+    {
+      "substrate": "overlay-dismissal",
+      "components": [
+        "ContextMenu",
+        "Menubar",
+        "NavigationMenu",
+        "SplitButton"
+      ],
+      "missingTally": {
+        "semantic": 4,
+        "events": 4,
+        "pointer": 4,
+        "keyboard_focus": 4,
+        "accessibility": 4,
+        "visual": 4
+      },
+      "contracts": [
+        "docs/contracts/components/context-menu.md",
+        "docs/contracts/components/menubar.md",
+        "docs/contracts/components/navigation-menu.md",
+        "docs/contracts/components/split-button.md"
       ]
     },
     {
