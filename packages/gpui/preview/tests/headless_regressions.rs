@@ -33776,9 +33776,7 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
         {
             let tree = mounted.lock().expect("mount lock");
             let row = tree
-                .find(&|node| {
-                    node.runtime_id.as_deref() == Some("editable-list:list-a:row-1:row")
-                })
+                .find(&|node| node.runtime_id.as_deref() == Some("editable-list:list-a:row-1:row"))
                 .expect("mounted editable-list row");
             assert_eq!(
                 row.style.descriptor.layout.spacing.padding.left,
@@ -34218,9 +34216,7 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
                 poodle_render::presentation::rem_to_px(0.5)
             );
             let block = tree
-                .find(&|node| {
-                    node.runtime_id.as_deref() == Some("block-editor:editor:b1:block")
-                })
+                .find(&|node| node.runtime_id.as_deref() == Some("block-editor:editor:b1:block"))
                 .expect("mounted editor block");
             assert_eq!(block.style.descriptor.background, Some(block_fill));
             assert_eq!(
