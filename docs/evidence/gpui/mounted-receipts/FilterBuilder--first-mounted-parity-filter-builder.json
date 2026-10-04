@@ -20,6 +20,7 @@
     ],
     "events": [
       "payloads.lock",
+      "assert_eq!(\n            *payloads.lock().expect(\"filter payload",
       "assert_eq!(*payloads.lock().expect(\"filter payload"
     ],
     "pointer": [
@@ -47,15 +48,15 @@
   },
   "package": "poodle-gpui-preview",
   "package_version": "0.4.0",
-  "source_commit": "4f89143a1d2865e3236a425fb6d8ab88be7d91ad",
+  "source_commit": "42f7e3dc909558cf2f7446b61668d1977870a7ce",
   "lockfile": "packages/gpui/preview/Cargo.lock",
   "lockfile_sha256": "8a3251b5f7b74de12831abb434d1188fb102e109f7531b22b57016a1fdc79843",
   "distribution": "workspace",
   "execution": {
     "command": "effigy regressions:native",
-    "run_id": "2026-10-04-poodle-093",
+    "run_id": "2026-10-04-poodle-093-rustfmt-revalidated",
     "outcome": "passed",
-    "body_sha256": "9dedb4e04db3700262b090490b71520876ccfc94f9f63ce1d9859406762cc707"
+    "body_sha256": "8cb888b1be130b6765ace496bead842e062783f1de4fd3cd0b668f25308937af"
   },
   "observed": [
     "mounted the production renderer through HeadlessDriver and asserted spec/state meaning",

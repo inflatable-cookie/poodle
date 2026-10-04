@@ -1,6 +1,6 @@
 # g18.001 — Contract-bound GPUI functionality census
 
-Evidence commit (execution identity from the execution record, not the checkout): `4f89143a1d2865e3236a425fb6d8ab88be7d91ad`
+Evidence commit (execution identity from the execution record, not the checkout): `42f7e3dc909558cf2f7446b61668d1977870a7ce`
 Denominator: **176** public / **175** portable; `MeterSurface` is the single contract-approved non-portable row.
 
 <!-- g18-census-method -->
