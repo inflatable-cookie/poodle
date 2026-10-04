@@ -39,6 +39,9 @@ pub struct MenubarHandlers {
     /// open composition on the dismiss stack; absent keeps the previous
     /// behavior (the host owns dismissal entirely).
     pub on_dismiss: Option<Arc<dyn Fn(DismissReason) + Send + Sync>>,
+    /// Trigger focus change `(value, is_focused)`; the host records it into
+    /// the spec's `focused_value` so the roving tab stop follows real focus.
+    pub on_focus: Option<Arc<dyn Fn(&str, bool) + Send + Sync>>,
 }
 
 /// Focus target for one arrow step across triggers, or `None` when the
@@ -117,6 +120,20 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
     // The open composition (strip plus overlay) registers one containment
     // unit, but only while a host actually owns dismissal.
     let layered = handlers.on_dismiss.is_some() && open_value.is_some();
+    // Roving-tab posture (Svelte `focusIndex`): the host-tracked focus value
+    // owns the tab stop when it names an enabled trigger; otherwise the open
+    // trigger does, then the first enabled trigger.
+    let enabled_at = |value: &str| {
+        spec.items
+            .iter()
+            .position(|entry| entry.value == value && !entry.is_disabled)
+    };
+    let focus_idx = spec
+        .focused_value
+        .as_deref()
+        .and_then(enabled_at)
+        .or_else(|| open_value.and_then(enabled_at))
+        .or_else(|| spec.items.iter().position(|entry| !entry.is_disabled));
 
     for (idx, entry) in spec.items.iter().enumerate() {
         let is_open = open_value == Some(entry.value.as_str());
@@ -163,6 +180,7 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
             btn.a11y.controls = Some(overlay_id.clone());
         }
         btn.interaction.focusable = true;
+        btn.a11y.tab_index = Some(if Some(idx) == focus_idx { 0 } else { -1 });
         if layered {
             btn.interaction.dismiss_layer = Some(MENUBAR_LAYER_ID.to_string());
         }
@@ -217,6 +235,13 @@ pub fn menubar(spec: &MenubarSpec, ctx: &RenderContext<'_>, handlers: MenubarHan
                         }
                         _ => None,
                     }
+                }));
+            }
+            if let Some(focused) = &handlers.on_focus {
+                let focused = Arc::clone(focused);
+                let value = entry.value.clone();
+                btn.interaction.on_focus_change = Some(Arc::new(move |is_focused| {
+                    focused(&value, is_focused);
                 }));
             }
             if let Some(handler) = &handlers.on_trigger {

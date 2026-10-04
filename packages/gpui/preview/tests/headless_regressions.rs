@@ -43507,6 +43507,8 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         trigger_payloads: Mutex<Vec<String>>,
         select_payloads: Mutex<Vec<String>>,
         dismissals: Mutex<Vec<String>>,
+        focused: Mutex<Option<String>>,
+        refuse_outside: Mutex<bool>,
     }
 
     impl BarHost {
@@ -43575,6 +43577,12 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         if let Some(value) = host.open.lock().expect("open read").clone() {
             spec = spec.with_value(value);
         }
+        if let Some(value) = host.focused.lock().expect("focus read").clone() {
+            spec = spec.with_focused_value(value);
+        }
+        if *host.refuse_outside.lock().expect("refuse read") {
+            spec = spec.with_dismiss_on_outside_interact(false);
+        }
         poodle_render::menubar(
             &spec,
             &RenderContext::new(&host.theme),
@@ -43591,6 +43599,14 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
                     let host = Arc::clone(host);
                     Arc::new(move |reason| host.dismiss(reason))
                 }),
+                on_focus: Some({
+                    let host = Arc::clone(host);
+                    Arc::new(move |value: &str, is_focused: bool| {
+                        if is_focused {
+                            *host.focused.lock().expect("focus lock") = Some(value.to_string());
+                        }
+                    })
+                }),
             },
         )
     }
@@ -43603,6 +43619,8 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
             trigger_payloads: Mutex::new(Vec::new()),
             select_payloads: Mutex::new(Vec::new()),
             dismissals: Mutex::new(Vec::new()),
+            focused: Mutex::new(None),
+            refuse_outside: Mutex::new(false),
         });
         // View sync after input: re-render from host state and paint. This
         // mutates no host state and requests no focus; every transition
@@ -43645,6 +43663,11 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
                     "trigger {label} owns a menu popup"
                 );
                 assert_eq!(trigger.a11y.expanded, Some(false));
+                assert_eq!(
+                    trigger.a11y.tab_index,
+                    Some(if label == "File" { 0 } else { -1 }),
+                    "trigger {label}: one roving tab stop, on the first enabled trigger"
+                );
                 assert_eq!(trigger.a11y.controls, None);
                 if label == "Window" {
                     assert!(trigger.interaction.on_key.is_none());
@@ -43934,6 +43957,44 @@ fn menubar_trigger_open_select_and_dismissal_through_mounted_backend() {
         assert_eq!(
             host.dismissals.lock().expect("outside dismissals").as_slice(),
             ["escape", "outside"]
+        );
+
+        // ── Roving tab stop follows real focus ──
+        driver.focus_element("menubar-trigger:edit");
+        sync(&mut driver);
+        {
+            let tree = host.mounted.lock().expect("mount lock");
+            let tab = |id: &str| {
+                tree.find(&|n| n.id.as_deref() == Some(id))
+                    .expect("trigger")
+                    .a11y
+                    .tab_index
+            };
+            assert_eq!(tab("menubar-trigger:edit"), Some(0));
+            assert_eq!(tab("menubar-trigger:file"), Some(-1));
+        }
+
+        // ── dismissOnOutsideInteract=false refuses the outside press only ──
+        *host.refuse_outside.lock().expect("refuse") = true;
+        driver.pointer_activate_id("menubar-trigger:edit");
+        sync(&mut driver);
+        assert!(poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_some());
+        driver.pointer_press(outside);
+        sync(&mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_some(),
+            "a refusing menubar survives the outside press"
+        );
+        assert_eq!(
+            host.dismissals.lock().expect("refused dismissals").as_slice(),
+            ["escape", "outside"],
+            "the refused outside press never reaches the host"
+        );
+        driver.dispatch_key("escape");
+        sync(&mut driver);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("menubar-menu:edit").is_none(),
+            "Escape still dismisses a refusing menubar"
         );
         assert!(driver.mounted_observation().is_valid());
     });
@@ -44431,11 +44492,17 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
                 .lock()
                 .expect("dropdown payloads")
                 .push("dropdown".to_string());
-            {
+            let opening = {
                 let mut current = self.open.lock().expect("open lock");
                 *current = !*current;
-            }
+                *current
+            };
             self.rebuild();
+            // Svelte's open effect focuses the highlighted (first enabled)
+            // item however the menu opened.
+            if opening {
+                poodle_gpui_node_backend::request_focus("split-button-item:0");
+            }
         }
 
         /// Svelte item activation: the selection emits, the menu closes,
@@ -44497,8 +44564,9 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
                     })
                 }),
                 // Host toggle policy (Svelte toggle click): flip the menu.
-                // Opening keeps toggle focus; ArrowDown into an open menu
-                // moves through the item roving the renderer wires.
+                // Opening focuses the first item (the host's open effect);
+                // ArrowDown into an open menu moves through the item roving
+                // the renderer wires.
                 on_dropdown: Some({
                     let host = Arc::clone(host);
                     Arc::new(move || host.toggle())
@@ -44740,7 +44808,7 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
             ["click", "click"]
         );
 
-        // ── ArrowDown on the closed toggle opens without moving focus ──
+        // ── ArrowDown on the closed toggle opens and focuses the first item ──
         driver.focus_element("split-toggle");
         driver.dispatch_key_raw("down");
         sync(&mut driver);
@@ -44751,12 +44819,13 @@ fn split_button_halves_menu_keyboard_and_dismissal_through_mounted_backend() {
         );
         assert!(poodle_gpui_node_backend::bounds_for("split-button-item:0").is_some());
         assert_eq!(
-            poodle_gpui_node_backend::focus_state_for("split-toggle"),
+            poodle_gpui_node_backend::focus_state_for("split-button-item:0"),
             Some(true),
-            "opening from the toggle keeps toggle focus"
+            "opening from the toggle focuses the first item like Svelte"
         );
 
         // ── ArrowDown on the open toggle moves into the items ──
+        driver.focus_element("split-toggle");
         driver.dispatch_key_raw("down");
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for("split-button-item:0"),

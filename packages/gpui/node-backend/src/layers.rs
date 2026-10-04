@@ -47,6 +47,9 @@ pub struct LayerRecord {
     pub id: String,
     /// The layer's reason handler (the first node with the id carries it).
     pub handler: Option<DismissHandler>,
+    /// The handler-carrying node bears the inert-activation refusal marker
+    /// (`dismissOnOutsideInteract: false`): outside presses never dismiss it.
+    pub refuses_outside: bool,
     /// Rendered bounds of every node sharing this id (the containment set).
     pub bounds: Vec<Bounds<Pixels>>,
     /// The innermost layer this one sits inside, when any (tree ancestry).
@@ -189,12 +192,16 @@ pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
             if let Some(record) = layers.iter_mut().find(|record| record.id == id) {
                 if record.handler.is_none() {
                     record.handler = node.interaction.on_dismiss.clone();
+                    record.refuses_outside = node.interaction.on_dismiss.is_some()
+                        && node.interaction.on_activate.is_some();
                 }
                 return;
             }
             layers.push(LayerRecord {
                 id: id.to_owned(),
                 handler: node.interaction.on_dismiss.clone(),
+                refuses_outside: node.interaction.on_dismiss.is_some()
+                    && node.interaction.on_activate.is_some(),
                 bounds: Vec::new(),
                 parent: innermost.filter(|parent| *parent != id).map(str::to_owned),
             });
@@ -313,7 +320,7 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
         let mut index = layers.len();
         while index > 0 {
             index -= 1;
-            if !spared.contains(&layers[index].id) {
+            if !spared.contains(&layers[index].id) && !layers[index].refuses_outside {
                 handlers.push(layers.remove(index).handler);
             }
         }
