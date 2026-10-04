@@ -48726,7 +48726,15 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
 
         // The host reports the enter finished: the settled repaint has no clock,
         // and the translated paint has moved to the settled endpoint.
-        presence.lock().expect("presence ledger").settle("late");
+        let late_enter = presence
+            .lock()
+            .expect("presence ledger")
+            .run_token("late")
+            .expect("late enter run");
+        presence
+            .lock()
+            .expect("presence ledger")
+            .settle("late", late_enter);
         poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
         assert_eq!(
@@ -48772,7 +48780,15 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
             !channels.contains(&"surface.animation.applied.translation"),
             "reduced drops translation"
         );
-        presence.lock().expect("presence ledger").settle("reduced");
+        let reduced_enter = presence
+            .lock()
+            .expect("presence ledger")
+            .run_token("reduced")
+            .expect("reduced enter run");
+        presence
+            .lock()
+            .expect("presence ledger")
+            .settle("reduced", reduced_enter);
         policy.set(MotionPolicy::Full);
 
         // Frozen paints the endpoint with no clock and drops a removed row.
@@ -48858,10 +48874,15 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
         );
 
         // Completion drops the remnant entirely.
+        let late_exit = presence
+            .lock()
+            .expect("presence ledger")
+            .run_token("late")
+            .expect("late exit run");
         presence
             .lock()
             .expect("presence ledger")
-            .drop_visual("late");
+            .drop_visual("late", late_exit);
         poodle_gpui_node_backend::begin_probe_capture();
         driver.draw_frame();
         assert!(
@@ -48874,18 +48895,29 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
             "the dropped row leaves no clock"
         );
 
-        // Reusing a key before cleanup retargets the same row back to enter.
+        // Reusing a key before cleanup retargets the same row back to enter,
+        // and a completion report from the superseded run must not settle or
+        // drop the run that replaced it (contract §8a).
         host.lock()
             .expect("presence host")
             .toasts
             .push(Toast::new("reuse", "First").with_message("Reuse."));
         driver.draw_frame();
-        presence.lock().expect("presence ledger").settle("reuse");
+        let first_enter = presence
+            .lock()
+            .expect("presence ledger")
+            .run_token("reuse")
+            .expect("first enter run");
         host.lock()
             .expect("presence host")
             .toasts
             .retain(|toast| toast.id != "reuse");
         driver.draw_frame();
+        let exit_run = presence
+            .lock()
+            .expect("presence ledger")
+            .run_token("reuse")
+            .expect("exit run");
         assert_eq!(
             presence.lock().expect("presence ledger").phase("reuse"),
             Some(poodle_render::ToastVisualPhase::Exit),
@@ -48916,6 +48948,54 @@ fn toast_stack_renderer_owned_presence_phases_and_inert_remnant() {
                 .as_deref(),
             Some("Dismiss Second"),
             "the reused row paints its new semantic copy"
+        );
+        // The superseded enter and exit completions are ignored: the reused
+        // run keeps its phase and its row.
+        assert!(
+            !presence
+                .lock()
+                .expect("presence ledger")
+                .settle("reuse", first_enter),
+            "a stale enter completion cannot settle the reused row"
+        );
+        assert!(
+            !presence
+                .lock()
+                .expect("presence ledger")
+                .drop_visual("reuse", exit_run),
+            "a stale exit completion cannot drop the reused row"
+        );
+        assert_eq!(
+            presence.lock().expect("presence ledger").phase("reuse"),
+            Some(poodle_render::ToastVisualPhase::Enter),
+            "the reused run survives its superseded reports"
+        );
+        assert!(
+            presence
+                .lock()
+                .expect("presence ledger")
+                .retained("reuse")
+                .is_some(),
+            "the reused row keeps its copy"
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("toast-host:proof:toast:reuse").is_some(),
+            "the reused row stays mounted"
+        );
+        // The live run still completes. It has settled, so a second report is
+        // inert too.
+        let reuse_live = presence
+            .lock()
+            .expect("presence ledger")
+            .run_token("reuse")
+            .expect("re-entry run");
+        assert!(presence
+            .lock()
+            .expect("presence ledger")
+            .settle("reuse", reuse_live));
+        assert_eq!(
+            presence.lock().expect("presence ledger").phase("reuse"),
+            Some(poodle_render::ToastVisualPhase::Settled)
         );
         assert!(theme_provider.resolve_color("color.status.danger").3 > 0.0);
         assert!(rem_to_px(1.25) > 0.0);

@@ -149,6 +149,13 @@ pub struct ToastPresenceChange {
     pub surviving_order: Vec<String>,
 }
 
+/// Identity of one presence treatment run (contract §8a). A token is minted
+/// whenever a row begins a fresh enter or exit treatment, so a completion
+/// report from a superseded run can never settle or drop the run that replaced
+/// it when a key is reused before cleanup.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ToastRunToken(u64);
+
 /// One stack's renderer-owned presence ledger.
 ///
 /// The host owns one per stack and threads it through
@@ -164,6 +171,10 @@ pub struct ToastStackPresence {
     /// disappearing id is detected against this set once, not against the
     /// retained copy every frame (a remnant would re-trigger forever).
     action_ids: Vec<String>,
+    /// The live treatment-run token per row id, minted on every fresh enter
+    /// or exit so a superseded completion report is ignored.
+    runs: std::collections::BTreeMap<String, ToastRunToken>,
+    next_run: u64,
     initialised: bool,
 }
 
@@ -220,6 +231,32 @@ impl ToastStackPresence {
             .filter(|visual| visual.phase != ToastVisualPhase::Exit)
             .map(|visual| visual.id.clone())
             .collect();
+        // Mint a token for every fresh treatment. Repeated phases are the same
+        // run, and Enter -> Settled is the enter run's own completion; every
+        // other phase change (a reused key's Exit -> Enter, a row that leaves
+        // mid-enter) starts a run whose completion must not be confused with
+        // the one it replaced.
+        let mut runs = self.runs.clone();
+        for visual in &visuals {
+            let prior = previous
+                .iter()
+                .find(|prior| prior.id == visual.id)
+                .map(|prior| prior.phase);
+            let fresh = match prior {
+                None => true,
+                Some(prior) => {
+                    prior != visual.phase
+                        && !(prior == ToastVisualPhase::Enter
+                            && visual.phase == ToastVisualPhase::Settled)
+                }
+            };
+            if fresh || !runs.contains_key(&visual.id) {
+                self.next_run += 1;
+                runs.insert(visual.id.clone(), ToastRunToken(self.next_run));
+            }
+        }
+        runs.retain(|id, _| visuals.iter().any(|visual| &visual.id == id));
+        self.runs = runs;
         // Contract §6: an action affordance that disappears must hand focus
         // on before its control unmounts. Compare against the last
         // reconcile's action set so a remnant never re-triggers the move.
@@ -268,9 +305,21 @@ impl ToastStackPresence {
         }
     }
 
-    /// Settle an entering row once its enter treatment finishes. Returns
-    /// whether the phase moved.
-    pub fn settle(&mut self, id: &str) -> bool {
+    /// The live treatment-run token for a row. A host that starts the row's
+    /// enter or exit clock captures it and hands it back to [`Self::settle`]
+    /// or [`Self::drop_visual`] when that clock finishes.
+    pub fn run_token(&self, id: &str) -> Option<ToastRunToken> {
+        self.runs.get(id).copied()
+    }
+
+    /// Settle an entering row once its enter treatment finishes. The report
+    /// must name the row's live run, so a completion from a superseded run
+    /// (its key was reused or its row left mid-enter) changes nothing.
+    /// Returns whether the phase moved.
+    pub fn settle(&mut self, id: &str, token: ToastRunToken) -> bool {
+        if self.runs.get(id).copied() != Some(token) {
+            return false;
+        }
         match self.visuals.iter_mut().find(|visual| visual.id == id) {
             Some(visual) if visual.phase == ToastVisualPhase::Enter => {
                 visual.phase = ToastVisualPhase::Settled;
@@ -280,13 +329,23 @@ impl ToastStackPresence {
         }
     }
 
-    /// Drop an exit remnant (after its leave treatment) or a stale row.
-    /// Returns whether anything was removed.
-    pub fn drop_visual(&mut self, id: &str) -> bool {
-        let before = self.visuals.len();
+    /// Drop an exit remnant once its leave treatment finishes. The report must
+    /// name the row's live run, so a stale leave completion cannot remove a
+    /// row that has since been reused. Returns whether anything was removed.
+    pub fn drop_visual(&mut self, id: &str, token: ToastRunToken) -> bool {
+        if self.runs.get(id).copied() != Some(token) {
+            return false;
+        }
+        let Some(visual) = self.visuals.iter().find(|visual| visual.id == id) else {
+            return false;
+        };
+        if visual.phase != ToastVisualPhase::Exit {
+            return false;
+        }
         self.visuals.retain(|visual| visual.id != id);
         self.retained.retain(|toast| toast.id != id);
-        self.visuals.len() != before
+        self.runs.remove(id);
+        true
     }
 }
 
@@ -1386,19 +1445,21 @@ mod tests {
         ];
         presence.reconcile(&grown, MotionPolicy::Full);
         assert_eq!(presence.phase("sync"), Some(ToastVisualPhase::Enter));
-        assert!(presence.settle("sync"));
+        let sync_enter = presence.run_token("sync").expect("sync enter run");
+        assert!(presence.settle("sync", sync_enter));
         assert_eq!(presence.phase("sync"), Some(ToastVisualPhase::Settled));
 
         // Removal keeps the last copy as an exit remnant until the host drops it.
         let shrunk = vec![Toast::new("save", "Saved file")];
         presence.reconcile(&shrunk, MotionPolicy::Full);
         assert_eq!(presence.phase("sync"), Some(ToastVisualPhase::Exit));
+        let sync_exit = presence.run_token("sync").expect("sync exit run");
         assert!(presence.has_exiting());
         assert_eq!(
             presence.retained("sync").map(|toast| toast.title.as_str()),
             Some("Syncing")
         );
-        assert!(presence.drop_visual("sync"));
+        assert!(presence.drop_visual("sync", sync_exit));
         assert_eq!(presence.phase("sync"), None);
         assert!(presence.retained("sync").is_none());
     }
@@ -1469,7 +1530,8 @@ mod tests {
         assert!(presence_animation_has(enter, AnimProperty::TranslateY));
 
         // The host reports completion: the settled repaint runs no clock.
-        assert!(presence.settle("c"));
+        let c_enter = presence.run_token("c").expect("c enter run");
+        assert!(presence.settle("c", c_enter));
         let node = toast_stack_with_presence(
             &ToastStackSpec::new().with_toasts(vec![row("a"), row("b"), row("c")]),
             &ctx,
@@ -1689,5 +1751,45 @@ mod tests {
             Some("outside".to_owned()),
             "the last removed row restores the entered-from control"
         );
+    }
+
+    #[test]
+    fn stale_run_completions_cannot_mutate_a_reused_id() {
+        let mut presence = ToastStackPresence::new();
+        // Initialise with an empty stack so the first added row enters rather
+        // than preloading settled.
+        presence.reconcile(&[], MotionPolicy::Full);
+        presence.reconcile(&[Toast::new("a", "A")], MotionPolicy::Full);
+        let enter = presence.run_token("a").expect("enter run");
+        assert_eq!(presence.phase("a"), Some(ToastVisualPhase::Enter));
+
+        // The row leaves mid-enter: an exit run replaces the enter run.
+        presence.reconcile(&[], MotionPolicy::Full);
+        let exit = presence.run_token("a").expect("exit run");
+        assert_ne!(enter, exit);
+        assert_eq!(presence.phase("a"), Some(ToastVisualPhase::Exit));
+
+        // The key is reused before cleanup: a fresh enter run replaces the
+        // exit run, exactly like the web's retarget of the same remnant.
+        presence.reconcile(&[Toast::new("a", "A v2")], MotionPolicy::Full);
+        let reused = presence.run_token("a").expect("reused enter run");
+        assert_ne!(reused, exit);
+        assert_ne!(reused, enter);
+        assert_eq!(presence.phase("a"), Some(ToastVisualPhase::Enter));
+
+        // Both stale reports are ignored; the live run still completes.
+        assert!(
+            !presence.settle("a", enter),
+            "a stale enter report cannot settle the reused row"
+        );
+        assert!(
+            !presence.drop_visual("a", exit),
+            "a stale exit report cannot drop the reused row"
+        );
+        assert_eq!(presence.phase("a"), Some(ToastVisualPhase::Enter));
+        assert!(presence.retained("a").is_some());
+        assert!(presence.settle("a", reused));
+        assert_eq!(presence.phase("a"), Some(ToastVisualPhase::Settled));
+        assert!(!presence.settle("a", reused), "a run settles exactly once");
     }
 }
